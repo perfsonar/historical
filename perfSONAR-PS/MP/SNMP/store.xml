@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+            xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+
+  <!-- External Connect, 100Mbit only -->
+
+  <nmwg:metadata id="128.4.133.165-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">128.4.133.165</nmwgt:ifAddress>
+        <nmwgt:hostName>ale</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="128.4.133.165-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">128.4.133.165</nmwgt:ifAddress>
+        <nmwgt:hostName>ale</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Cluster Interconnect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.0.1-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.1</nmwgt:ifAddress>
+        <nmwgt:hostName>ale</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.1-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.1</nmwgt:ifAddress>
+        <nmwgt:hostName>ale</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+
+
+
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.2-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="b1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.2</nmwgt:ifAddress>
+        <nmwgt:hostName>beer</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.2-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="b2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.2</nmwgt:ifAddress>
+        <nmwgt:hostName>beer</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.2-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="b3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.2</nmwgt:ifAddress>
+        <nmwgt:hostName>beer</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.2-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="b4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.2</nmwgt:ifAddress>
+        <nmwgt:hostName>beer</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+
+
+
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.3-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="c1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.3</nmwgt:ifAddress>
+        <nmwgt:hostName>cognac</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.3-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="c2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.3</nmwgt:ifAddress>
+        <nmwgt:hostName>cognac</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.3-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="c3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.3</nmwgt:ifAddress>
+        <nmwgt:hostName>cognac</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.3-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="c4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.3</nmwgt:ifAddress>
+        <nmwgt:hostName>cognac</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.4-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="d1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.4</nmwgt:ifAddress>
+        <nmwgt:hostName>darkandstormy</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.4-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="d2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.4</nmwgt:ifAddress>
+        <nmwgt:hostName>darkandstormy</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.4-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="d3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.4</nmwgt:ifAddress>
+        <nmwgt:hostName>darkandstormy</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.4-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="d4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.4</nmwgt:ifAddress>
+        <nmwgt:hostName>darkandstormy</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.5-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="e1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.5</nmwgt:ifAddress>
+        <nmwgt:hostName>eggnog</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.5-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="e2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.5</nmwgt:ifAddress>
+        <nmwgt:hostName>eggnog</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.5-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="e3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.5</nmwgt:ifAddress>
+        <nmwgt:hostName>eggnog</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.5-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="e4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.5</nmwgt:ifAddress>
+        <nmwgt:hostName>eggnog</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.6-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="f1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.6</nmwgt:ifAddress>
+        <nmwgt:hostName>fireball</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.6-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="f2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.6</nmwgt:ifAddress>
+        <nmwgt:hostName>fireball</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.6-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="f3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.6</nmwgt:ifAddress>
+        <nmwgt:hostName>fireball</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.6-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="f4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.6</nmwgt:ifAddress>
+        <nmwgt:hostName>fireball</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.7-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="g1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.7</nmwgt:ifAddress>
+        <nmwgt:hostName>gin</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.7-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="g2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.7</nmwgt:ifAddress>
+        <nmwgt:hostName>gin</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.7-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="g3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.7</nmwgt:ifAddress>
+        <nmwgt:hostName>gin</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.7-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="g4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.7</nmwgt:ifAddress>
+        <nmwgt:hostName>gin</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.8-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="h1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.8</nmwgt:ifAddress>
+        <nmwgt:hostName>highball</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.8-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="h2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.8</nmwgt:ifAddress>
+        <nmwgt:hostName>highball</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.8-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="h3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.8</nmwgt:ifAddress>
+        <nmwgt:hostName>highball</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.8-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="h4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.8</nmwgt:ifAddress>
+        <nmwgt:hostName>highball</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  
+  
+  
+  <!-- Cluster Connect, 100Mbit only -->
+
+  <nmwg:metadata id="192.168.99.9-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="i1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.9</nmwgt:ifAddress>
+        <nmwgt:hostName>irishcoffee</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.99.9-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="i2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.99.9</nmwgt:ifAddress>
+        <nmwgt:hostName>irishcoffee</nmwgt:hostName>                
+	<nmwgt:ifName>eth0</nmwgt:ifName>
+	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <!-- Backplane, Gig Connection -->
+
+  <nmwg:metadata id="192.168.0.9-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="i3">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.9</nmwgt:ifAddress>
+        <nmwgt:hostName>irishcoffee</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="192.168.0.9-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="i4">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.0.9</nmwgt:ifAddress>
+        <nmwgt:hostName>irishcoffee</nmwgt:hostName>                
+	<nmwgt:ifName>eth1</nmwgt:ifName>
+	<nmwgt:ifIndex>3</nmwgt:ifIndex>		
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="2">
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+</nmwg:store>
