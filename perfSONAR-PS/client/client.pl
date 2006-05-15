@@ -83,25 +83,23 @@ else {
 # ################################################### #
 
 sub readConf {
-  my ($FILE)  = @_;
-  open(CLIENT, $FILE);
-  my @conf = <CLIENT>;
-  close(CLIENT);
-
-  foreach my $c (@conf) {
-    if(!($c =~ m/^#.*$/)) {
-      $c =~ s/\n//;
-      if($c =~ m/^PORT=.*$/) {
-        $c =~ s/PORT=//;
-        $PORT = $c;
+  my ($file)  = @_;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  while (<$CONF>) {
+    if(!($_ =~ m/^#.*$/)) {
+      $_ =~ s/\n//;
+      if($_ =~ m/^PORT=.*$/) {
+        $_ =~ s/PORT=//;
+        $PORT = $_;
       }
-      elsif($c =~ m/^HOST=.*$/) {
-        $c =~ s/HOST=//;
-        $HOST = $c;
+      elsif($_ =~ m/^HOST=.*$/) {
+        $_ =~ s/HOST=//;
+        $HOST = $_;
       }
     }
-  }
-  return;
+  }          
+  $CONF->close();
+  return; 
 }
 
 

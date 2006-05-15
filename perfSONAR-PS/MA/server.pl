@@ -175,29 +175,26 @@ else {
 # ################################################ #
 sub readConf {
   my ($file)  = @_;
-  
-  open(READ, $file);
-  @conf = <READ>;
-  close(READ);
-
-  foreach $c (@conf) {
-    if(!($c =~ m/^#.*$/)) {
-      $c =~ s/\n//;
-      if($c =~ m/^PORT=.*$/) {
-        $c =~ s/PORT=//;
-        $PORT = $c;	
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  while (<$CONF>) {
+    if(!($_ =~ m/^#.*$/)) {
+      $_ =~ s/\n//;
+      if($_ =~ m/^PORT=.*$/) {
+        $_ =~ s/PORT=//;
+        $PORT = $_;	
       }
-      elsif($c =~ m/^XMLDBENV=.*$/) {
-        $c =~ s/XMLDBENV=//;
-        $XMLDBENV = $c;
+      elsif($_ =~ m/^XMLDBENV=.*$/) {
+        $_ =~ s/XMLDBENV=//;
+        $XMLDBENV = $_;
       }  
-      elsif($c =~ m/^XMLDBCONT=.*$/) {
-        $c =~ s/XMLDBCONT=//;
-        $XMLDBCONT = $c;
-      }                 
+      elsif($_ =~ m/^XMLDBCONT=.*$/) {
+        $_ =~ s/XMLDBCONT=//;
+        $XMLDBCONT = $_;
+      }
     }
-  }
-  return;
+  }          
+  $CONF->close();
+  return; 
 }
 
 # ################################################ #
