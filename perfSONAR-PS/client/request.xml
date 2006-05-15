@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="request"
+	      id="msg1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+	      xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+
+  <!-- I just grabed this info from the store, but i am
+       splitting it up to illustrate chaining -->
+
+  <nmwg:metadata id="1">
+    <netutil:subject id="1">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">128.4.133.165</nmwgt:ifAddress>
+        <nmwgt:hostName>ale</nmwgt:hostName>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="2" metadataIdRef="1">
+    <netutil:subject id="2">
+      <nmwgt:interface>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+  </nmwg:metadata>
+
+  <!-- Note the use of chaining in the subject, that will allow
+       us to filter the results -->
+
+  <nmwg:metadata id="3">
+    <netutil:subject id="3" metadataIdRef="2"/>
+    <nmwg:parameters id="3">
+      <select:parameter name="time" operator="gte">
+        1147712809
+      </select:parameter>
+      <select:parameter name="time" operator="lte">
+        1147712819
+      </select:parameter>      
+    </nmwg:parameters>
+  </nmwg:metadata>  
+  
+  <!-- this is the trigger, we want to see the data for md2 (the
+       filtering with chaining)  -->  
+  
+  <nmwg:data id="1" metadataIdRef="3" />
+
+</nmwg:message>
