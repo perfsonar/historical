@@ -12,7 +12,8 @@ Installation:
 		Time::HiRes
 		XML::XPath
 		IO::File
-
+		use POSIX qw(setsid)	[shouldn't need to install]
+		
 		I would suggest using CPAN:
 		
 		perl -MCPAN -e shell
@@ -60,9 +61,19 @@ Installation:
 		
 Usage:
 ------
-	./collect.pl (no redirect is needed, but send it to the
-	background)
-	
+	Collection:
+	-----------
+		./collect.pl (Functions as a daemon, will background automatically)
+	Watcher:
+	--------
+		Edit crontab to periodically run the watcher script:
+		
+		# watcher.pl, run it every 5 minutes
+		*/5 *  * * *   root    /usr/local/netradar/watcher.pl
+
+		It can of course be run manually:
+			./watcher.pl
+
 FAQ:
 ----
 	Q:

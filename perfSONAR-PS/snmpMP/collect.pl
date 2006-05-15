@@ -4,8 +4,7 @@
 # Name:		collect.pl                         #
 # Author:	Jason Zurawski                     #
 # Contact:	zurawski@eecis.udel.edu            #
-# Args:		N/A, 2>& /dev/null if you want     #
-#               quiet                              #
+# Args:		N/A                                #
 # Purpose:	Given some conf files, gather and  #
 #               store SNMP data in a database.     #
 #                                                  #
@@ -15,6 +14,7 @@ use DBI;
 use Time::HiRes qw( gettimeofday );
 use XML::XPath;
 use IO::File;
+use POSIX qw(setsid);
 
 		# Read/store database access info
 $DBNAME = "";
@@ -33,6 +33,11 @@ readDBConf("./db.conf");
 		# collect.conf is cool for us)
 %metadata = ();
 %metadata = readStore(\%metadata);
+		
+		# flush the buffer
+$| = 1;
+		# start the daemon
+&daemonize;
 
 		# Main loop, we need to do the following 
 		# things:
@@ -67,7 +72,7 @@ while(1) {
 	  	           ) || die "Couldn't open SNMP session to " , $metadata{$m}{"hostName"} , "\n";
 
       if (!defined($session)) {
-        open(LOG, "+>>error.log");
+        open(LOG, "+>>/var/log/netradar-error.log");
         ($sec, $micro) = Time::HiRes::gettimeofday;
         print LOG "ERROR: " , $error, "\tTIME: " , $sec , "." , $micro , "\n";
         close(LOG);
@@ -86,7 +91,7 @@ while(1) {
         );
   
         if (!defined($result)) {
-          open(LOG, "+>>error.log");
+          open(LOG, "+>>/var/log/netradar-error.log");
           ($sec, $micro) = Time::HiRes::gettimeofday;
           print LOG "ERROR: " , $session , " - " , $error , "\tTIME: " , $sec , "." , $micro , "\n";
           $session->close;
@@ -101,7 +106,7 @@ while(1) {
           || warn "Executing: ", $sth->errstr;  
       }
       else {
-        open(LOG, "+>>error.log");
+        open(LOG, "+>>/var/log/netradar-error.log");
         ($sec, $micro) = Time::HiRes::gettimeofday;
         print LOG "ERROR: The OID, " , $metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"};
 	print LOG ", cannot be found\tTIME: " , $sec , "." , $micro , "\n";
@@ -113,7 +118,7 @@ while(1) {
       $session->close;    
     }
     else {
-      open(LOG, "+>>error.log");
+      open(LOG, "+>>/var/log/netradar-error.log");
       ($sec, $micro) = Time::HiRes::gettimeofday;
       print LOG "ERROR: I am seeing a community of:\"";
       print LOG $snmp{$metadata{$m}{"hostName"}}[0] , "\" a version of:\"";
@@ -130,7 +135,6 @@ while(1) {
 }
 
 
-
 # ################################################ #
 # Sub:		readDBConf                         #
 # Args:		$file - Filename to read           #
@@ -138,30 +142,28 @@ while(1) {
 # ################################################ #
 sub readDBConf {
   my ($file)  = @_;
-  
-  open(READ, $file);
-  @conf = <READ>;
-  close(READ);
-
-  foreach $c (@conf) {
-    if(!($c =~ m/^#.*$/)) {
-      $c =~ s/\n//;
-      if($c =~ m/^DB=.*$/) {
-        $c =~ s/DB=//;
-        $DBNAME = $c;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  while (<$CONF>) {
+    if(!($_ =~ m/^#.*$/)) {
+      $_ =~ s/\n//;
+      if($_ =~ m/^DB=.*$/) {
+        $_ =~ s/DB=//;
+        $DBNAME = $_;
       }
-      elsif($c =~ m/^USER=.*$/) {
-        $c =~ s/USER=//;
-        $DBUSER = $c;
+      elsif($_ =~ m/^USER=.*$/) {
+        $_ =~ s/USER=//;
+        $DBUSER = $_;
       }
-      elsif($c =~ m/^PASS=.*$/) {
-        $c =~ s/PASS=//;
-        $DBPASS = $c;
+      elsif($_ =~ m/^PASS=.*$/) {
+        $_ =~ s/PASS=//;
+        $DBPASS = $_;
       }
     }
-  }
-  return;
+  }          
+  $CONF->close();
+  return; 
 }
+
 
 # ################################################ #
 # Sub:		readCollectConf                    #
@@ -171,28 +173,26 @@ sub readDBConf {
 sub readCollectConf {
   my ($file, $sent)  = @_;
   my %snmp = %{$sent};
-  open(READ, $file);
-  @conf = <READ>;
-  close(READ);
-  
-  foreach $line (@conf) {
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readCollectConf' $file: $!\n" ;
+  while (<$CONF>) {
     my $hostname = "";
-    @array = ();
-    if($line =~ m/^#.*/) {
-      #ignore
+    my @array = ();
+    if($_ =~ m/^#.*/) {
+      # ignore comments
     }
     else {
-      $line =~ s/\n//;
-      @item = split(/\t/,$line);
+      $_ =~ s/\n//;
+      @item = split(/\t/,$_);
             
       $hostname = $item[0];
       for($i = 1; $i <= 2; $i++) {
         $array[$i-1] = $item[$i];
       }
       $snmp{$hostname} = \@array;
-    }   
-  }
-  return %snmp;
+    } 
+  }          
+  $CONF->close();
+  return %snmp; 
 }
 
 # ################################################ #
@@ -309,4 +309,21 @@ sub goDeep {
     }
   }	  
   return %md;
+}
+
+
+# ################################################ #
+# Sub:		daemonize                          #
+# Args:		N/A                                #
+# Purpose:	Background process		   #
+# ################################################ #
+sub daemonize {
+  chdir '/' or die "Can't chdir to /: $!";
+  open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+  open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
+  open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
+  defined(my $pid = fork) or die "Can't fork: $!";
+  exit if $pid;
+  setsid or die "Can't start a new session: $!";
+  umask 0;
 }
