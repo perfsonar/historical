@@ -27,7 +27,7 @@ use Sleepycat::DbXml 'simple';
 use IO::File;
 use message;
 
-$DEBUG = 2;
+$DEBUG = 0;
 $PORT = "";
 $XMLDBENV = "";
 $XMLDBCONT = "";
@@ -54,8 +54,8 @@ else {
 		# only want to get snmp data for what is 
 		# in this file (not everything in the 
 		# collect.conf is cool for us)
-  %store_metadata = ();
-  %store_metadata = readStore(\%store_metadata);
+
+  readStore();
 
   $daemon = HTTP::Daemon->new(
     LocalPort => $PORT,
@@ -82,7 +82,7 @@ else {
 
       $response = HTTP::Response->new();
       $response->header('Content-Type' => 'text/xml');
-      $response->header('user-agent' => 'NMWG-Server/20060502');
+      $response->header('user-agent' => 'NMWG-Server/20060517');
       $response->code("200");
 
       if($DEBUG) {
@@ -127,7 +127,7 @@ else {
           }
           else {
             foreach my $node ($nodeset->get_nodelist) {
-              $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node), \%store_metadata);
+              $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node));
             }
           }
         }
@@ -208,9 +208,6 @@ sub readConf {
 #               store.                             #
 # ################################################ #
 sub readStore {
-  my($sent) = @_;
-  my %metadata = %{$sent};
-
   $xml = readXML("./store.xml");  
   
   $xp = XML::XPath->new( xml => $xml );
@@ -231,9 +228,9 @@ sub readStore {
       foreach my $attr2 ($node->getAttributes) {
         $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
       }      
-      %md = goDeep($node, \%md);
-      $metadata{$md{"nmwg:metadata-id"}} = \%md;	  
-	  
+      %md = goDeep($node, \%md, $node->getPrefix .":" . $node->getLocalName);
+	 	  
+	  	  
       eval {
         my $env = new DbEnv(0);
         $env->set_cachesize(0, 64 * 1024, 1);
@@ -275,7 +272,7 @@ sub readStore {
     } 
   }  
 
-  return %metadata;
+  return;
 }
 
 # ################################################ #
@@ -340,7 +337,7 @@ sub howMany($$$$) {
 #               attributes/values.                 #
 # ################################################ #
 sub goDeep {
-  my ($set, $sent) = @_;
+  my ($set, $sent, $path) = @_;
   my %b = %{$sent};  
   foreach my $element ($set->getChildNodes) {   
   
@@ -352,35 +349,35 @@ sub goDeep {
       if($element->getNodeType == 3) {
         if($element->getParentNode->getLocalName eq "parameter") {		  
 	  if($element->getParentNode->getAttribute("name") && $element->getParentNode->getAttribute("operator")) {	
-            $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName . "-" . $element->getParentNode->getAttribute("name") . "-" . $element->getParentNode->getAttribute("operator")} = $value;
-            %b = goDeep($element, \%b);	  
+            $b{$path . "-" . $element->getParentNode->getAttribute("name") . "-" . $element->getParentNode->getAttribute("operator")} = $value;
+            %b = goDeep($element, \%b, $path);	  
 	  }
 	  elsif($element->getParentNode->getAttribute("name") && !($element->getParentNode->getAttribute("value"))) {  
-            $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName . "-" . $element->getParentNode->getAttribute("name")} = $value;
-            %b = goDeep($element, \%b);
+            $b{$path . "-" . $element->getParentNode->getAttribute("name")} = $value;
+            %b = goDeep($element, \%b, $path);
 	  }	 	  
 	}
 	else {
-          $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName} = $element->getNodeValue;	
-	  %b = goDeep($element, \%b);	
+          $b{$path} = $element->getNodeValue;	
+	  %b = goDeep($element, \%b, $path);	
 	}
       }
       else {
         if($element->getLocalName eq "parameter") {	
 	  if($element->getAttribute("name") && $element->getAttribute("value")) {
-            $b{$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name")} = $element->getAttribute("value");
-            %b = goDeep($element, \%b);
+            $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name")} = $element->getAttribute("value");
+            %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);
 	  }
 	  elsif($element->getAttribute("name") && $element->getAttribute("operator")) {
-            $b{$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name") . "-" . $element->getAttribute("operator")} = $value;
-            %b = goDeep($element, \%b);	  
+            $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name") . "-" . $element->getAttribute("operator")} = $value;
+            %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);	  
 	  }
 	}
 	else {
           foreach my $attr2 ($element->getAttributes) {
-	   $b{$element->getPrefix .":" . $element->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
+	   $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
           }      
-          %b = goDeep($element, \%b);
+          %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);
 	}
       }      
     }

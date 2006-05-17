@@ -7,7 +7,6 @@ $XMLDBENV = "";
 $XMLDBCONT = "";
 
 %namespaces = ();
-%store_metadata = ();
 
 # ################################################ #
 # Sub:		new                                #
@@ -29,12 +28,10 @@ sub new {
 # Purpose:	process nmwg messages              #
 # ################################################ #
 sub message {
-  ($class, $writer, $rawxml, $sent) = @_;
+  ($class, $writer, $rawxml) = @_;
   
   					# reference the nmwg:store containing 
 					# info about what we know
-  %store_metadata = %{$sent};
-
   $xp2 = XML::XPath->new( xml => $rawxml );
   $xp2->clear_namespaces();
   $xp2->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
@@ -51,7 +48,7 @@ sub message {
       foreach my $attr2 ($node2->getAttributes) {
         $md{$node2->getPrefix .":" . $node2->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
       }      
-      %md = goDeep($node2, \%md);
+      %md = goDeep($node2, \%md, $node2->getPrefix .":" . $node2->getLocalName);
       $metadata{$md{"nmwg:metadata-id"}} = \%md;            
            
 					# We really only care about data (triggers)
@@ -68,14 +65,12 @@ sub message {
           foreach my $attr ($node3->getAttributes) {
             $d{$node3->getPrefix .":" . $node3->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
           }      
-          %d = goDeep($node3, \%d);
-          $data{$d{"nmwg:data-metadataIdRef"}} = \%d;    	  
+          %d = goDeep($node3, \%d, $node3->getPrefix .":" . $node3->getLocalName);
+          $data{$d{"nmwg:data-metadataIdRef"}} = \%d;
 	}
       }  
     }
   }
-	
-
 					# at this point we know all d's and the md's that
 					# match them.  We need to worry about both subject
 					# and md chaining though... so merge mds when the 
@@ -84,11 +79,11 @@ sub message {
   while($flag) {
     $flag = 0;
     foreach my $m (keys %metadata) {
-      if($metadata{$m}{"netutil:subject-metadataIdRef"}) {
-        foreach my $m2 (keys %{$metadata{$metadata{$m}{"netutil:subject-metadataIdRef"}}}) {	  
-          if($metadata{$m}{$m2} ne $metadata{$metadata{$m}{"netutil:subject-metadataIdRef"}}{$m2} && 
-	     $m2 ne "netutil:subject-metadataIdRef" && $m2 ne "metadata-metadataIdRef") {
-	    $metadata{$m}{$m2} = $metadata{$metadata{$m}{"netutil:subject-metadataIdRef"}}{$m2};
+      if($metadata{$m}{"nmwg:metadata/netutil:subject-metadataIdRef"}) {
+        foreach my $m2 (keys %{$metadata{$metadata{$m}{"nmwg:metadata/netutil:subject-metadataIdRef"}}}) {	  
+          if($metadata{$m}{$m2} ne $metadata{$metadata{$m}{"nmwg:metadata/netutil:subject-metadataIdRef"}}{$m2} && 
+	     $m2 ne "nmwg:metadata/netutil:subject-metadataIdRef" && $m2 ne "nmwg:metadata/metadata-metadataIdRef") {
+	    $metadata{$m}{$m2} = $metadata{$metadata{$m}{"nmwg:metadata/netutil:subject-metadataIdRef"}}{$m2};
 	    $flag = 1;
 	  }	
 	}          
@@ -104,7 +99,6 @@ sub message {
       }
     }  
   }
-  
 
 					# Now we only want to return results for data
 					# elements, look at each one, and match it's
@@ -112,176 +106,219 @@ sub message {
 					# partial match, we are good.
   foreach my $d (keys %data) {  
     @mdid = ();
-    foreach my $m (keys %metadata) {
+    foreach my $m (keys %metadata) {    
       if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) {
+      
 
-        foreach my $sm (keys %store_metadata) {
-          $flag = 1;             
-          foreach my $sm2 (keys %{$store_metadata{$sm}}) {  
-            if(!($sm2 =~ m/^.*parameter.*$/) && !($sm2 =~ m/^netutil:subject-id*$/) && 
-	       !($sm2 =~ m/^netutil:subject-metadataIdRef*$/) && !($sm2 =~ m/^nmwg:metadata-metadataIdRef*$/) && 
-	       !($sm2 =~ m/^nmwg:metadata-id*$/)) {          
-	      if($store_metadata{$sm}{$sm2} ne $metadata{$m}{$sm2}) {                
-		if(!($store_metadata{$sm}{$sm2} eq "" || $metadata{$m}{$sm2} eq "")) {	          
-		  $flag = 0;
-	          last;
-                }
+        $qs = "/nmwg:metadata[";
+        $qf = 0;
+        foreach my $m2 (keys %{$metadata{$m}}) { 
+
+          if(!($m2 =~ m/^.*parameter.*$/) && !($m2 =~ m/^.*netutil:subject-id$/) && 
+             !($m2 =~ m/^.*netutil:subject-metadataIdRef$/) && !($m2 =~ m/^nmwg:metadata-metadataIdRef$/) && 
+             !($m2 =~ m/^nmwg:metadata-id$/)) { 
+
+            $disp = $m2;
+            $disp =~ s/nmwg:metadata\///;
+            @attr = split(/-/, $m2);
+
+            if(!($qf)) {
+              if($#attr) {
+                $disp =~ s/-.*//;
+                $qs = $qs . $disp . "[\@" . $attr[1] . "=\"" . $metadata{$m}{$m2} . "\"]";
               }
-            }		    
-          }
-          if($flag) {	  
-            push @mdid, $sm;
-          }
-        }		
-	
-					# we were able to match to at least one md, start
-					# to prepare xml for the return trip  
-        if($#mdid != -1) {    
-          $cooked = genuid();
-
-          foreach $id (@mdid) {  
-            $writer->startTag("nmwg:metadata",
-#                             "id" => $m);  		
-                              "id" => $cooked);  
-            if($store_metadata{$id}{"netutil:subject-id"}) {
-              $writer->startTag("netutil:subject",
-                                "id" => $store_metadata{$id}{"netutil:subject-id"});  
+              else {
+                $qs = $qs . $disp . "[text()=\"" . $metadata{$m}{$m2} . "\"]";
+              }
+              $qf++;
             }
             else {
-              $writer->startTag("netutil:subject",
-                                "id" => genuid());  			
+              if($#attr) {
+                $disp =~ s/-.*//;
+                $qs = $qs . " and " . $disp . "[\@" . $attr[1] . "=\"" . $metadata{$m}{$m2} . "\"]";
+              }
+              else {
+               $qs = $qs . " and " . $disp . "[text()=\"" . $metadata{$m}{$m2} . "\"]";
+              }     
             }
-            $writer->startTag("nmwgt:interface");
-            foreach $sub (keys %{$store_metadata{$id}}) {  
-              if($sub =~ m/^nmwgt:ifAddress$/) {
-                $writer->startTag("nmwgt:" . $sub,
-                                  "type" => $store_metadata{$id}{"nmwgt:ifAddress-type"});
-	        $writer->characters($store_metadata{$id}{$sub});
-	        $writer->endTag("nmwgt:" . $sub);	  
- 	      }
-              elsif(!($sub =~ m/^.*parameter.*$/) && !($sub =~ m/^nmwg:eventType$/) && 
-	            !($sub =~ m/^nmwgt:ifAddress-type$/) && !($sub =~ m/^netutil:subject-id$/)) {
-                $writer->startTag("nmwgt:" . $sub);
-	        $writer->characters($store_metadata{$id}{$sub});
-	        $writer->endTag("nmwgt:" . $sub);
-	      }
-            }	
-            $writer->endTag("nmwgt:interface");
-            $writer->endTag("netutil:subject");			
-            if($store_metadata{$id}{"eventType"}) {
-              $writer->startTag("nmwgt:eventType");
-	      $writer->characters($store_metadata{$id}{"nmwg:eventType"});
-	      $writer->endTag("nmwgt:eventType");	  
-            }
-		
-	    if($metadata{$m}{"select:parameter-time-gte"} || $metadata{$m}{"select:parameter-time-lte"} ||
-	       $metadata{$m}{"select:parameter-time-gt"} || $metadata{$m}{"select:parameter-time-lt"} ||
-	       $metadata{$m}{"select:parameter-time-eq"} || $metadata{$m}{"select:parameter-time-ne"}) {
-              $writer->startTag("nmwg:parameters",
-	                        "id" => genuid());
-			    
-	      if($metadata{$m}{"select:parameter-time-gte"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-		    	          "operator" => "gte");
-	        $writer->characters($metadata{$m}{"select:parameter-time-gte"});
-                $writer->endTag("select:parameter");
-	      }
-	      if($metadata{$m}{"select:parameter-time-lte"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-			          "operator" => "lte");
-	        $writer->characters($metadata{$m}{"select:parameter-time-lte"});
-                $writer->endTag("select:parameter");
-	      }	
-	      if($metadata{$m}{"select:parameter-time-lt"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-			          "operator" => "lt");
-	        $writer->characters($metadata{$m}{"select:parameter-time-lt"});
-                $writer->endTag("select:parameter");
-	      }
-	      if($metadata{$m}{"select:parameter-time-gt"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-			          "operator" => "gt");
-	        $writer->characters($metadata{$m}{"select:parameter-time-gt"});
-                $writer->endTag("select:parameter");
- 	      }
-	      if($metadata{$m}{"select:parameter-time-eq"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-			          "operator" => "eq");
-	        $writer->characters($metadata{$m}{"select:parameter-time-eq"});
-                $writer->endTag("select:parameter");
-	      }
-	      if($metadata{$m}{"select:parameter-time-ne"}) {
-                $writer->startTag("select:parameter", 
-	                          "name" => "time",
-			          "operator" => "ne");
-	        $writer->characters($metadata{$m}{"select:parameter-time-ne"});
-                $writer->endTag("select:parameter");
-	      }	  
-	      $writer->endTag("nmwg:parameters");	 
-	    }
-            $writer->endTag("nmwg:metadata");   
           }
-					# connect to the db, form the query
-					# that should net us some data.
-					
-          $dbh = DBI->connect("$DBNAME","$DBUSER","$DBPASS")
-            || die "Database unavailable";
-          foreach $id (@mdid) {  
-            $writer->startTag("nmwg:data",
-#                             "metadataIdRef" => $id,
-                              "metadataIdRef" => $cooked,
-	  	              "id" => genuid());		 
-        
-	    $sel = "select * from data where id=\"" . $id . "\" and ";
-	    $sel = $sel . "eventtype=\"" . $store_metadata{$id}{"nmwg:parameter-eventType"} . "\"";
-        
-					# this is hacky, but we need to be able to filter
-					# somehow	
-	
-	    if($metadata{$m}{"select:parameter-time-gte"}) {
-	      $sel = $sel . " and time >= \"" . $metadata{$m}{"select:parameter-time-gte"} . "\"";
-	    }
-	    if($metadata{$m}{"select:parameter-time-lte"}) {
-	      $sel = $sel . " and time <= \"" . $metadata{$m}{"select:parameter-time-lte"} . "\"";
-	    }	
-	    if($metadata{$m}{"select:parameter-time-lt"}) {
-	      $sel = $sel . " and time < \"" . $metadata{$m}{"select:parameter-time-lt"} . "\"";	
-	    }
-	    if($metadata{$m}{"select:parameter-time-gt"}) {
-	      $sel = $sel . " and time > \"" . $metadata{$m}{"select:parameter-time-gt"} . "\"";	
-	    }
-	    if($metadata{$m}{"select:parameter-time-eq"}) {
-	      $sel = $sel . " and time == \"" . $metadata{$m}{"select:parameter-time-eq"} . "\"";	
-	    }
-	    if($metadata{$m}{"select:parameter-time-ne"}) {
-	      $sel = $sel . " and time != \"" . $metadata{$m}{"select:parameter-time-ne"} . "\"";
-	    }
-	    $sel = $sel . ";";
-					# we have the query string, execute and wrap the results
-					# in the datum elements...or error out
-		
-	    $array_ref = $dbh->selectall_arrayref($sel);
-            if($#{$array_ref} != -1) {
-              for($z = 0; $z <= $#{$array_ref}; $z++) {						 
-	        $writer->emptyTag("netutil:datum",
-	                          "timeValue" => $array_ref->[$z][1], 
-	    	 	          "value" => $array_ref->[$z][2]);	    
-	      }
-	    }
-	    else {
-              $writer->startTag("nmwgr:datum");        
-              $writer->characters("No datum elements found on this server.\n");
-              $writer->endTag("nmwgr:datum");	    
-	    }
-            $writer->endTag("nmwg:data");   
-          }
-          $dbh->disconnect(); 
+        }      
 
+        $qs = $qs . "]";      
+
+        my @resultsString = ();
+
+        eval {   
+          my $env = new DbEnv(0);
+          $env->set_cachesize(0, 64 * 1024, 1);
+          $env->open($XMLDBENV,
+                     Db::DB_INIT_MPOOL|Db::DB_CREATE|Db::DB_INIT_LOCK|Db::DB_INIT_LOG|Db::DB_INIT_TXN);
+          my $theMgr = new XmlManager($env);
+          my $containerTxn = $theMgr->createTransaction();
+          my $container = $theMgr->openContainer($containerTxn, $XMLDBCONT, Db::DB_CREATE);
+          $containerTxn->commit();
+          my $updateContext = $theMgr->createUpdateContext();
+  
+          my $query_txn = $theMgr->createTransaction();
+          my $context2 = $theMgr->createQueryContext();
+          $context2->setNamespace( "nmwg" => "http://ggf.org/ns/nmwg/base/2.0/");
+          $context2->setNamespace( "netutil" => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/");
+          $context2->setNamespace( "nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/");
+          $context2->setNamespace( "ping" => "http://ggf.org/ns/nmwg/tools/ping/2.0/");  
+
+          @resultsString = getContents($theMgr, $container->getName(), $qs, $context2);  
+        };
+        if (my $e = catch std::exception) {
+          warn "Error adding XML data to container $XMLDBCONT\n" ;
+          warn $e->what() . "\n";
+          exit(-1);
+        }
+        elsif ($@) {
+          warn "Error adding XML data to container $XMLDBCONT\n" ;
+          warn $@;
+          exit(-1);
+        }  
+
+
+
+
+
+        if($#resultsString != -1) {
+	
+	  for($x = 0; $x <= $#resultsString; $x++) {	
+            $xp = XML::XPath->new( xml => $resultsString[$x] );
+            $xp->clear_namespaces();
+
+            $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+            $xp->set_namespace('netutil', 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0/');
+            $xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');
+            $xp->set_namespace('ping', 'http://ggf.org/ns/nmwg/tools/ping/2.0/'); 	  
+	  	  	  
+            $nodeset = $xp->find('//nmwg:metadata');
+            if($nodeset->size() <= 0) {
+              $writer->characters("Metadata element not found or in wrong namespace.");
+            }
+            else {          
+	      foreach my $node ($nodeset->get_nodelist) {           
+
+                $writer->raw(XML::XPath::XMLParser::as_string($node));
+		
+		$cooked = genuid();		
+		$mdId = $node->getAttribute("id");
+                
+		my $eventType = "*";
+                $xp2 = XML::XPath->new( xml => XML::XPath::XMLParser::as_string($node) );
+                $xp2->clear_namespaces();
+                $xp2->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');	  	  	  
+                $nodeset = $xp2->find('//nmwg:parameter[@name="eventType"]');
+		if($nodeset->size() > 0) {
+	          foreach my $node2 ($nodeset->get_nodelist) {
+		    $eventType = $node2->getAttribute("value");
+                  }
+                }
+		
+                $writer->startTag("nmwg:metadata",		
+                                  "id" => $cooked);  
+		$writer->emptyTag("netutil:subject",
+                                  "id" => genuid(),
+				  "metadataIdRef" => $mdId);  			
+
+	        $sel = "select * from data where id=\"" . $mdId . "\" and ";
+	        $sel = $sel . "eventtype=\"" . $eventType . "\"";
+       
+		if($metadata{$m}{"nmwg:metadata/nmwg:parameters-id"}) {
+                  $writer->startTag("nmwg:parameters",		
+                                    "id" => genuid());		
+
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gte"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+		    	              "operator" => "gte");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gte"});
+                    $writer->endTag("select:parameter");
+
+	            $sel = $sel . " and time >= \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gte"} . "\"";		      
+	          }
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lte"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+			              "operator" => "lte");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lte"});
+                    $writer->endTag("select:parameter");
+		   
+	            $sel = $sel . " and time <= \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lte"} . "\"";		      
+	          }	
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lt"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+			              "operator" => "lt");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lt"});
+                    $writer->endTag("select:parameter");
+
+	            $sel = $sel . " and time < \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-lt"} . "\"";			      
+	          }
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gt"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+			              "operator" => "gt");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gt"});
+                    $writer->endTag("select:parameter");
+
+	            $sel = $sel . " and time > \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-gt"} . "\"";		      
+ 	          }
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-eq"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+			              "operator" => "eq");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-eq"});
+                    $writer->endTag("select:parameter");
+		      
+	            $sel = $sel . " and time == \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-eq"} . "\"";			      
+	          }
+	          if($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-ne"}) {
+                    $writer->startTag("select:parameter", 
+	                              "name" => "time",
+			              "operator" => "ne");
+	            $writer->characters($metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-ne"});
+                    $writer->endTag("select:parameter");
+		      
+	            $sel = $sel . " and time != \"" . $metadata{$m}{"nmwg:metadata/nmwg:parameters/select:parameter-time-ne"} . "\"";		      
+	          }	   
+	          
+                  $writer->endTag("nmwg:parameters");			
+		}
+                $writer->endTag("nmwg:metadata");
+		
+	        $sel = $sel . ";";
+					# we have the query string, execute and wrap the results
+					# in the datum elements...or error out		
+		
+                $dbh = DBI->connect("$DBNAME","$DBUSER","$DBPASS")
+                  || die "Database unavailable";		
+	  
+                $writer->startTag("nmwg:data",
+                                  "metadataIdRef" => $cooked,
+	  	                  "id" => genuid());		 
+		
+	        $array_ref = $dbh->selectall_arrayref($sel);
+                if($#{$array_ref} != -1) {
+                  for($z = 0; $z <= $#{$array_ref}; $z++) {						 
+	            $writer->emptyTag("netutil:datum",
+	                              "timeValue" => $array_ref->[$z][1], 
+	    	 	              "value" => $array_ref->[$z][2]);	    
+	          }
+	        }
+	        else {
+                  $writer->startTag("nmwgr:datum");        
+                  $writer->characters("No datum elements found on this server.\n");
+                  $writer->endTag("nmwgr:datum");	    
+	        }
+                $writer->endTag("nmwg:data");   
+              
+                $dbh->disconnect(); 
+	      }
+            }	  
+	  }	
         }
         else {
           				# error out on this particular md
@@ -290,7 +327,7 @@ sub message {
           $writer->startTag("nmwgr:datum");        
           $writer->characters("No matching metadata found on this server.\n");
           $writer->endTag("nmwgr:datum");
-          $writer->endTag("nmwg:data");			  
+          $writer->endTag("nmwg:data");	      
         }
       }
     }	     
@@ -346,7 +383,7 @@ sub readConf {
 #               attributes/values.                 #
 # ################################################ #
 sub goDeep {
-  my ($set, $sent) = @_;
+  my ($set, $sent, $path) = @_;
   my %b = %{$sent};  
   foreach my $element ($set->getChildNodes) {   
   
@@ -358,41 +395,42 @@ sub goDeep {
       if($element->getNodeType == 3) {
         if($element->getParentNode->getLocalName eq "parameter") {		  
 	  if($element->getParentNode->getAttribute("name") && $element->getParentNode->getAttribute("operator")) {	
-            $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName . "-" . $element->getParentNode->getAttribute("name") . "-" . $element->getParentNode->getAttribute("operator")} = $value;
-            %b = goDeep($element, \%b);	  
+            $b{$path . "-" . $element->getParentNode->getAttribute("name") . "-" . $element->getParentNode->getAttribute("operator")} = $value;
+            %b = goDeep($element, \%b, $path);	  
 	  }
 	  elsif($element->getParentNode->getAttribute("name") && !($element->getParentNode->getAttribute("value"))) {  
-            $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName . "-" . $element->getParentNode->getAttribute("name")} = $value;
-            %b = goDeep($element, \%b);
+            $b{$path . "-" . $element->getParentNode->getAttribute("name")} = $value;
+            %b = goDeep($element, \%b, $path);
 	  }	 	  
 	}
 	else {
-          $b{$element->getParentNode->getPrefix .":" . $element->getParentNode->getLocalName} = $element->getNodeValue;	
-	  %b = goDeep($element, \%b);	
+          $b{$path} = $element->getNodeValue;	
+	  %b = goDeep($element, \%b, $path);	
 	}
       }
       else {
         if($element->getLocalName eq "parameter") {	
 	  if($element->getAttribute("name") && $element->getAttribute("value")) {
-            $b{$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name")} = $element->getAttribute("value");
-            %b = goDeep($element, \%b);
+            $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name")} = $element->getAttribute("value");
+            %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);
 	  }
 	  elsif($element->getAttribute("name") && $element->getAttribute("operator")) {
-            $b{$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name") . "-" . $element->getAttribute("operator")} = $value;
-            %b = goDeep($element, \%b);	  
+            $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $element->getAttribute("name") . "-" . $element->getAttribute("operator")} = $value;
+            %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);	  
 	  }
 	}
 	else {
           foreach my $attr2 ($element->getAttributes) {
-	   $b{$element->getPrefix .":" . $element->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
+	   $b{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
           }      
-          %b = goDeep($element, \%b);
+          %b = goDeep($element, \%b, $path."/".$element->getPrefix .":" . $element->getLocalName);
 	}
       }      
     }
   }
   return %b;
 }
+
 
 # ################################################ #
 # Sub:		genuid                             #
@@ -402,6 +440,46 @@ sub goDeep {
 sub genuid {
   my($r) = int( rand( 16777216 ) );
   return ( $r + 1048576 );
+}
+
+
+# ################################################ #
+# Sub:		getContents                        #
+# Args:		$mgr - db connection manager       #
+#		$cname - collection name           #
+#		$query - What we are searching for #
+#		$context - query context           #
+# Purpose:	Given the input, perform a query   #
+#               and return the results             #
+# ################################################ #
+sub getContents($$$$) {
+  my $mgr = shift ;
+  my $cname = shift ;
+  my $query = shift ;
+  my $context = shift ;
+  my $results = "";
+  my $value = "";
+  
+  my @resString = ();
+  my $fullQuery = "collection('$cname')$query";
+  eval {
+    $results = $mgr->query($fullQuery, $context);
+    while( $results->next($value) ) {
+      push @resString, $value."\n";
+    }	
+    $value = "";
+  };
+  if (my $e = catch std::exception) {
+    warn "Query $fullQuery failed\n";
+    warn $e->what() . "\n";
+    exit( -1 );
+  }
+  elsif ($@) {
+    warn "Query $fullQuery failed\n";
+    warn $@;
+    exit( -1 );
+  }     
+  return @resString;
 }
 
 1;

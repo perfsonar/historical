@@ -16,7 +16,7 @@
         <nmwgt:hostName>ale</nmwgt:hostName>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <netutil:eventType>snmp.1.3.6.1.2.1.2.2.1.10</netutil:eventType>
   </nmwg:metadata>
 
   <nmwg:metadata id="2" metadataIdRef="1">
@@ -28,7 +28,7 @@
         <nmwgt:capacity>100000000</nmwgt:capacity>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <netutil:eventType>snmp.1.3.6.1.2.1.2.2.1.10</netutil:eventType>
   </nmwg:metadata>
 
   <!-- Note the use of chaining in the subject, that will allow
