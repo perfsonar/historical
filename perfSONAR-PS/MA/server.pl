@@ -38,17 +38,34 @@ $namespace = "http://ggf.org/ns/nmwg/base/2.0/";
 if($#ARGV == 0) {
   if($ARGV[0] eq "-h" || $ARGV[0] eq "--h" || $ARGV[0] eq "-help" || $ARGV[0] eq "--help") {
     print "Usage: ./server.pl (-h | --h | -help | --help): This message.\n";
-    print "       ./server.pl: Start NMWG Server.\n";
-    print "       ./server.pl 2>& /dev/null &: Start NMWG Server and Redirect STDOUT to NULL.\n";
-    print "       ./server.pl 2>& SOMEFILE &: Start NMWG Server and Redirect STDOUT to a File.\n";
+    print "       ./server.pl (-d | --d): Run In Daemon Mode\n";
+    print "       ./server.pl: Run In Non-Daemon Mode\n";
   }
+  elsif($ARGV[0] eq "-d" || $ARGV[0] eq "--d") {
+    init();
+		# flush the buffer
+    $| = 1;
+		# start the daemon
+    &daemonize;    
+    server();   
+  }  
   else {
     print "Try ./server.pl (-h | --h | -help | --help) for usage.\n";
     exit(1);
   }
 }
 else {
-  
+  init();
+  server();
+}
+
+
+# ################################################ #
+# Sub:		init                               #
+# Args:		N/A                                #
+# Purpose:	Prepare to run                     #
+# ################################################ #
+sub init {  
   readConf("./server.conf");
   
 		# Read in the store of metadata info, we 
@@ -57,7 +74,87 @@ else {
 		# collect.conf is cool for us)
 
   system("$LDSTORE $XMLDBENV $XMLDBCONT");
+  return;
+}
 
+
+# ################################################ #
+# Sub:		readConf                           #
+# Args:		$file - Filename to read           #
+# Purpose:	Read and store info.               #
+# ################################################ #
+sub readConf {
+  my ($file)  = @_;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  while (<$CONF>) {
+    if(!($_ =~ m/^#.*$/)) {
+      $_ =~ s/\n//;
+      if($_ =~ m/^PORT=.*$/) {
+        $_ =~ s/PORT=//;
+        $PORT = $_;	
+      }
+      elsif($_ =~ m/^XMLDBENV=.*$/) {
+        $_ =~ s/XMLDBENV=//;
+        $XMLDBENV = $_;
+      }  
+      elsif($_ =~ m/^XMLDBCONT=.*$/) {
+        $_ =~ s/XMLDBCONT=//;
+        $XMLDBCONT = $_;
+      }
+      elsif($_ =~ m/^LDSTORE=.*$/) {
+        $_ =~ s/LDSTORE=//;
+        $LDSTORE = $_;
+      }      
+    }
+  }          
+  $CONF->close();
+  return; 
+}
+
+
+# ################################################ #
+# Sub:		daemonize                          #
+# Args:		N/A                                #
+# Purpose:	Background process		   #
+# ################################################ #
+sub daemonize {
+  #chdir '/' or die "Can't chdir to /: $!";
+  open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+  open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
+  open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
+  defined(my $pid = fork) or die "Can't fork: $!";
+  exit if $pid;
+  setsid or die "Can't start a new session: $!";
+  umask 0;
+}
+
+
+# ################################################ #
+# Sub:		readXML                            #
+# Args:		$file - Filename to read           #
+# Purpose:	Read XML file, strip off leading   #
+#		XML entry.                         #
+# ################################################ #
+sub readXML {
+  my ($file)  = @_;
+  my $xmlstring = "";
+  my $XML = new IO::File("<$file") or die "Cannot open 'readXML' $file: $!\n" ;
+  while (<$XML>) {
+    if(!($_ =~ m/^<\?xml.*/)) {
+      $xmlstring .= $_;
+    }
+  }          
+  $XML->close();
+  return $xmlstring;  
+}
+
+
+# ################################################ #
+# Sub:		server                             #
+# Args:		N/A                                #
+# Purpose:	Run the SOAP Server                #
+# ################################################ #
+sub server {  
   $daemon = HTTP::Daemon->new(
     LocalPort => $PORT,
     Reuse => 1
@@ -167,56 +264,4 @@ else {
     undef($call);
     unlink $ofile;
   }
-}
-
-# ################################################ #
-# Sub:		readConf                           #
-# Args:		$file - Filename to read           #
-# Purpose:	Read and store info.               #
-# ################################################ #
-sub readConf {
-  my ($file)  = @_;
-  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
-  while (<$CONF>) {
-    if(!($_ =~ m/^#.*$/)) {
-      $_ =~ s/\n//;
-      if($_ =~ m/^PORT=.*$/) {
-        $_ =~ s/PORT=//;
-        $PORT = $_;	
-      }
-      elsif($_ =~ m/^XMLDBENV=.*$/) {
-        $_ =~ s/XMLDBENV=//;
-        $XMLDBENV = $_;
-      }  
-      elsif($_ =~ m/^XMLDBCONT=.*$/) {
-        $_ =~ s/XMLDBCONT=//;
-        $XMLDBCONT = $_;
-      }
-      elsif($_ =~ m/^LDSTORE=.*$/) {
-        $_ =~ s/LDSTORE=//;
-        $LDSTORE = $_;
-      }      
-    }
-  }          
-  $CONF->close();
-  return; 
-}
-
-# ################################################ #
-# Sub:		readXML                            #
-# Args:		$file - Filename to read           #
-# Purpose:	Read XML file, strip off leading   #
-#		XML entry.                         #
-# ################################################ #
-sub readXML {
-  my ($file)  = @_;
-  my $xmlstring = "";
-  my $XML = new IO::File("<$file") or die "Cannot open 'readXML' $file: $!\n" ;
-  while (<$XML>) {
-    if(!($_ =~ m/^<\?xml.*/)) {
-      $xmlstring .= $_;
-    }
-  }          
-  $XML->close();
-  return $xmlstring;  
 }

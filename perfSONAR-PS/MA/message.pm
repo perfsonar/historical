@@ -342,7 +342,7 @@ sub message {
 # ################################################ #
 sub readConf {
   my ($file)  = @_;
-  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readConf' $file: $!\n" ;
   while (<$CONF>) {
     if(!($_ =~ m/^#.*$/)) {
       $_ =~ s/\n//;
