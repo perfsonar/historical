@@ -4,8 +4,10 @@
 # Name:		loadStorage.pl                     #
 # Author:	Jason Zurawski                     #
 # Contact:	zurawski@eecis.udel.edu            #
-# Args:		N/A                                #
-# Purpose:	#
+# Args:		$XMLDBENV = XML DB environment     #
+#               $XMLDBCONT = XML DB Container      #
+# Purpose:	Load the XML DB with initial       #
+#               information                        #
 #                                                  #
 # ################################################ #
 use XML::Writer;
@@ -19,9 +21,8 @@ use IO::File;
 $XMLDBENV = shift;
 $XMLDBCONT = shift;
 
-
-#/home/jason/Desktop/perfSONAR/netradar/MA/xmldb store.dbxml
-
+				# get the contents of the store.xml file into
+				# string form.
 $xml = readXML("./store.xml");  
   
 $xp = XML::XPath->new( xml => $xml );
@@ -30,21 +31,29 @@ $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
 $xp->set_namespace('netutil', 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0/');
 $xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');
 	  
-$nodeset = $xp->find('//nmwg:metadata');
+	  			# find all of the metadata elements
+$nodeset = $xp->find('/nmwg:store/nmwg:metadata');
 
 if($nodeset->size() <= 0) {
   $writer->characters("Metadata elements not found or in wrong namespace.");
 }
 else {
+				# iterate over each found metadata element
+				
   foreach my $node ($nodeset->get_nodelist) {
 	     
+	     			# store the md into a temporary hash, we will
+				# unroll this when we need to query the XMLDB
     my %md = ();
     foreach my $attr2 ($node->getAttributes) {
       $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
     }      
     %md = goDeep($node, \%md, $node->getPrefix .":" . $node->getLocalName);
 	 	  
-	  	  
+	  			# Open a connection to the XMLDB, set up a transaction
+				# to query for the metadata values.  If we get a hit, 
+				# dont insert into the DB, if we get nothing, insert the
+				# md as new.	  		
     eval {
       my $env = new DbEnv(0);
       $env->set_cachesize(0, 64 * 1024, 1);

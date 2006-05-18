@@ -1,6 +1,6 @@
 Version:
 --------
-	20060517
+	20060518
 
 Installation:
 -------------
@@ -66,6 +66,13 @@ Installation:
 		the 2 interfaces (in two directions) for each of the
 		9 nodes in our cluster.  					
 
+	loadStorage.pl
+	--------------
+		Reads store.xml, and stores the contents into the XML
+		DB.  Will not insert duplicates.  This is called at
+		server startup, but really only matters whenever you
+		set up the initial environment for the XML DB
+		
 Usage:
 ------
 	./server.pl (output will arrive on the screen
