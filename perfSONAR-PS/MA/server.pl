@@ -27,7 +27,11 @@ use Sleepycat::DbXml 'simple';
 use IO::File;
 use message;
 
-$DEBUG = 0;
+# Add the pedantic variable to specify whether to
+# check the input soapaction or not.  If it is not
+# set, then a message will be accepted for any one.
+$PEDANTIC = 0;
+$DEBUG = 1;
 $PORT = "";
 $XMLDBENV = "";
 $XMLDBCONT = "";
@@ -43,12 +47,12 @@ if($#ARGV == 0) {
   }
   elsif($ARGV[0] eq "-d" || $ARGV[0] eq "--d") {
     init();
-		# flush the buffer
+	# flush the buffer
     $| = 1;
-		# start the daemon
-    &daemonize;    
-    server();   
-  }  
+	# start the daemon
+    &daemonize;
+    server();
+  }
   else {
     print "Try ./server.pl (-h | --h | -help | --help) for usage.\n";
     exit(1);
@@ -67,11 +71,11 @@ else {
 # ################################################ #
 sub init {  
   readConf("./server.conf");
-  
-		# Read in the store of metadata info, we 
-		# only want to get snmp data for what is 
-		# in this file (not everything in the 
-		# collect.conf is cool for us)
+
+  # Read in the store of metadata info, we 
+  # only want to get snmp data for what is 
+  # in this file (not everything in the 
+  # collect.conf is cool for us)
 
   system("$LDSTORE $XMLDBENV $XMLDBCONT");
   return;
@@ -91,7 +95,7 @@ sub readConf {
       $_ =~ s/\n//;
       if($_ =~ m/^PORT=.*$/) {
         $_ =~ s/PORT=//;
-        $PORT = $_;	
+        $PORT = $_;
       }
       elsif($_ =~ m/^XMLDBENV=.*$/) {
         $_ =~ s/XMLDBENV=//;
@@ -104,9 +108,9 @@ sub readConf {
       elsif($_ =~ m/^LDSTORE=.*$/) {
         $_ =~ s/LDSTORE=//;
         $LDSTORE = $_;
-      }      
+      }
     }
-  }          
+  }
   $CONF->close();
   return; 
 }
@@ -143,7 +147,7 @@ sub readXML {
     if(!($_ =~ m/^<\?xml.*/)) {
       $xmlstring .= $_;
     }
-  }          
+  }
   $XML->close();
   return $xmlstring;  
 }
@@ -206,39 +210,37 @@ sub server {
         $writer->startTag([$soap_env, "Body"]);
         $writer->startTag("nmwg:message", "type" => "response",
                           "xmlns:nmwg" => "http://ggf.org/ns/nmwg/base/2.0/",
-			  "xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
+						  "xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
                           "xmlns:nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/",
                           "xmlns:nmtm" => "http://ggf.org/ns/nmwg/time/2.0/",
                           "xmlns:netutil" => "http://ggf.org/ns/nmwg/characteristics/utilization/2.0/");
-        $action = $request->headers->{"soapaction"} ^ $namespace;
-	
-	
-        if ($action =~ m/^.*message\/$/) {
-	
-          $xp = XML::XPath->new( xml => $request->content );
-          $xp->clear_namespaces();
-          $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-          $nodeset = $xp->find('//nmwg:message');
+	if ($PEDANTIC > 0) {
+          $action = $request->headers->{"soapaction"} ^ $namespace;
+          if (!$action =~ m/^.*message\/$/) {
+            $writer->raw("<nmwg:data id=\"" . message::genuid() . "\">\n");
+            $writer->raw("<nmwgr:datum>\n");
+            $writer->raw("Unrecognized Soapaction\n");
+            $writer->raw("</nmwgr:datum>\n");
+            $writer->raw("</nmwg:data>\n");
+  	  }
+        }
 
-          if($nodeset->size() <= 0) {
-            $writer->characters("Message element not found or in wrong namespace.");
-          }
-          else {
-            foreach my $node ($nodeset->get_nodelist) {
-              $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node));
-            }
-          }
+        $xp = XML::XPath->new( xml => $request->content );
+        $xp->clear_namespaces();
+        $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+        $nodeset = $xp->find('//nmwg:message');
+
+        if($nodeset->size() <= 0) {
+          $writer->characters("Message element not found or in wrong namespace.");
         }
         else {
-          $writer->raw("<nmwg:data id=\"" . genuid() . "\">\n");
-          $writer->raw("<nmwgr:datum>\n");
-          $writer->raw("Unrecognized Soapaction\n");
-          $writer->raw("</nmwgr:datum>\n");
-          $writer->raw("</nmwg:data>\n");
+          foreach my $node ($nodeset->get_nodelist) {
+            $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node));
+          }
         }
       }
       else {
-        $writer->raw("<nmwg:data id=\"" . genuid() . "\">\n");
+        $writer->raw("<nmwg:data id=\"" . message::genuid() . "\">\n");
         $writer->raw("<nmwgr:datum>\n");
         $writer->raw("Unrecognized URI or Method\n");
         $writer->raw("</nmwgr:datum>\n");
@@ -251,11 +253,11 @@ sub server {
       $writer->end();
       $output->close();
       $xml = readXML($ofile);
-      
+
       if($DEBUG > 1) {
         print "The server said: \n" , $xml , "\n\n";	
       }
-      
+
       $response->content($xml);
       $call->send_response($response);
     }
