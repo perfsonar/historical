@@ -1,6 +1,6 @@
 Version:
 --------
-	20060515
+	20061013
 
 Installation:
 -------------
@@ -13,7 +13,7 @@ Installation:
 		XML::XPath
 		IO::File
 		use POSIX qw(setsid)	[shouldn't need to install]
-		
+			
 		I would suggest using CPAN:
 		
 		perl -MCPAN -e shell
@@ -26,8 +26,8 @@ Installation:
 		
 	store.xml
 	---------
-		Store your md info here, the supplied example shows
-		the 2 interfaces (in two directions) for each of the
+		Store your metadata info here, the supplied example shows
+		the 2 interfaces (in each direction direction) for each of the
 		9 nodes in our cluster. 		
 		
 	db.conf
@@ -64,12 +64,13 @@ Usage:
 	Collection:
 	-----------
 		./collect.pl (Functions as a daemon, will background automatically)
+		
 	Watcher:
 	--------
 		Edit crontab to periodically run the watcher script:
 		
 		# watcher.pl, run it every 5 minutes
-		*/5 *  * * *   root    /usr/local/netradar/watcher.pl
+		*/1 * * * * root       cd $NETRADAR_HOME && ./watcher.pl
 
 		It can of course be run manually:
 			./watcher.pl

@@ -32,7 +32,7 @@ readDBConf("./db.conf");
 		# in this file (not everything in the 
 		# collect.conf is cool for us)
 %metadata = ();
-%metadata = readStore(\%metadata);
+%metadata = readStore("./store.xml", \%metadata);
 		
 		# flush the buffer
 $| = 1;
@@ -206,10 +206,10 @@ sub readCollectConf {
 #               store.                             #
 # ################################################ #
 sub readStore {
-  my($sent) = @_;
+  my($file, $sent) = @_;
   my %metadata = %{$sent};
   
-  $xml = readXML("./store.xml");  
+  $xml = readXML($file);  
   
   $xp = XML::XPath->new( xml => $xml );
   $xp->clear_namespaces();
