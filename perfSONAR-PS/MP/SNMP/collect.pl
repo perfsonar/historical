@@ -15,11 +15,15 @@ use Time::HiRes qw( gettimeofday );
 use XML::XPath;
 use IO::File;
 use POSIX qw(setsid);
+use Sleepycat::DbXml 'simple';
 
 		# Read/store database access info
 $DBNAME = "";
 $DBUSER = "";
 $DBPASS = "";
+$XMLDBENV = "";
+$XMLDBCONT = "";
+$LDSTORE = "";
 readDBConf("./db.conf");
 
 		# Read/store snmp collection info, we will 
@@ -27,13 +31,18 @@ readDBConf("./db.conf");
 %snmp = ();
 %snmp = readCollectConf("./collect.conf", \%snmp);
 
-		# Read in the store of metadata info, we 
+		# start the 'loader' to get the XMLDB up to speed
+		# the loader will basically see if the xmldb has
+		# been populated yet.
+system("$LDSTORE $XMLDBENV $XMLDBCONT");
+
+		# Read in the XMLDB for metadata info, we 
 		# only want to get snmp data for what is 
-		# in this file (not everything in the 
+		# in the XMLDB (not everything in the 
 		# collect.conf is cool for us)
 %metadata = ();
-%metadata = readStore("./store.xml", \%metadata);
-		
+%metadata = readStore(\%metadata);
+
 		# flush the buffer
 $| = 1;
 		# start the daemon
@@ -72,10 +81,9 @@ while(1) {
 	  	           ) || die "Couldn't open SNMP session to " , $metadata{$m}{"hostName"} , "\n";
 
       if (!defined($session)) {
-        open(LOG, "+>>/var/log/netradar-error.log");
-        ($sec, $micro) = Time::HiRes::gettimeofday;
-        print LOG "ERROR: " , $error, "\tTIME: " , $sec , "." , $micro , "\n";
-        close(LOG);
+        my $msg = $error;
+        printError("./log/netradar-error.log", $msg);
+	
         $dbh->disconnect();
         exit(1);
       }
@@ -91,11 +99,9 @@ while(1) {
         );
   
         if (!defined($result)) {
-          open(LOG, "+>>/var/log/netradar-error.log");
-          ($sec, $micro) = Time::HiRes::gettimeofday;
-          print LOG "ERROR: " , $session , " - " , $error , "\tTIME: " , $sec , "." , $micro , "\n";
-          $session->close;
-          close(LOG);
+          my $msg = $session , " - " , $error;
+          printError("./log/netradar-error.log", $msg);
+	  
           $dbh->disconnect();
           exit(1);
         }
@@ -106,11 +112,9 @@ while(1) {
           || warn "Executing: ", $sth->errstr;  
       }
       else {
-        open(LOG, "+>>/var/log/netradar-error.log");
-        ($sec, $micro) = Time::HiRes::gettimeofday;
-        print LOG "ERROR: The OID, " , $metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"};
-	print LOG ", cannot be found\tTIME: " , $sec , "." , $micro , "\n";
-        close(LOG);	         
+        my $msg =  "The OID, " , $metadata{$m}{"eventType"} , "." , $metadata{$m}{"ifIndex"} , " cannot be found.";
+	printError("./log/netradar-error.log", $msg);
+		         
 	$session->close; 
         $dbh->disconnect();
 	exit(1);
@@ -118,14 +122,12 @@ while(1) {
       $session->close;    
     }
     else {
-      open(LOG, "+>>/var/log/netradar-error.log");
-      ($sec, $micro) = Time::HiRes::gettimeofday;
-      print LOG "ERROR: I am seeing a community of:\"";
-      print LOG $snmp{$metadata{$m}{"hostName"}}[0] , "\" a version of:\"";
-      print LOG $snmp{$metadata{$m}{"hostName"}}[1] , "\" and a hostname of:\""; 
-      print LOG $metadata{$m}{"hostName"} , "\" ... something is amiss";
-      print LOG "\tTIME: " , $sec , "." , $micro , "\n";
-      close(LOG);    
+      my $msg = "I am seeing a community of:\"";
+      $msg = $msg . $snmp{$metadata{$m}{"hostName"}}[0] , "\" a version of:\"";
+      $msg = $msg . $snmp{$metadata{$m}{"hostName"}}[1] , "\" and a hostname of:\""; 
+      $msg = $msg . $metadata{$m}{"hostName"} , "\" ... something is amiss.";
+      printError("./log/netradar-error.log", $msg);
+      
       $dbh->disconnect();
       exit(1);
     }
@@ -133,6 +135,26 @@ while(1) {
   $dbh->disconnect();
   sleep(1); 
 }
+
+
+
+# ################################################ #
+# Sub:		readStore                          #
+# Args:		$file - the file to write the error#
+#                       message to.                #
+#               $msg - the message to write.       #
+# Purpose:	Print out an error message.        #
+# ################################################ #
+sub printError {
+  my($file, $msg) = @_;
+  open(LOG, "+>>" . $file);
+  ($sec, $micro) = Time::HiRes::gettimeofday;
+  print LOG "TIME: " , $sec , "." , $micro , "\t\t";
+  print LOG $msg , "\n";
+  close(LOG);
+  return;
+}
+
 
 
 # ################################################ #
@@ -158,11 +180,24 @@ sub readDBConf {
         $_ =~ s/PASS=//;
         $DBPASS = $_;
       }
+      elsif($_ =~ m/^XMLDBENV=.*$/) {
+        $_ =~ s/XMLDBENV=//;
+        $XMLDBENV = $_;
+      }  
+      elsif($_ =~ m/^XMLDBCONT=.*$/) {
+        $_ =~ s/XMLDBCONT=//;
+        $XMLDBCONT = $_;
+      }
+      elsif($_ =~ m/^LDSTORE=.*$/) {
+        $_ =~ s/LDSTORE=//;
+        $LDSTORE = $_;
+      }      
     }
   }          
   $CONF->close();
   return; 
 }
+
 
 
 # ################################################ #
@@ -195,72 +230,139 @@ sub readCollectConf {
   return %snmp; 
 }
 
+
+
 # ################################################ #
 # Sub:		readStore                          #
-# Args:		$xml - contents of the store xml   #
-#                      file.                       #
-#               $sent - flattened hash of metadata #
+# Args:		$sent - flattened hash of metadata #
 #                       values passed through the  #
 #                       recursion.                 #
 # Purpose:	Process each metadata block in the #
-#               store.                             #
+#               xmldb store.                       #
 # ################################################ #
 sub readStore {
-  my($file, $sent) = @_;
+  my($sent) = @_;
   my %metadata = %{$sent};
   
-  $xml = readXML($file);  
-  
-  $xp = XML::XPath->new( xml => $xml );
-  $xp->clear_namespaces();
-  $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-  $xp->set_namespace('netutil', 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0/');
-  $xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');
-	  
-  $nodeset = $xp->find('//nmwg:metadata');
 
-  if($nodeset->size() <= 0) {
-    $writer->characters("Metadata elements not found or in wrong namespace.");
-  }
-  else {
-    foreach my $node ($nodeset->get_nodelist) {
-      my %md = ();
-      my $id = "";
-      my $mid = "";
-      foreach $attr ($node->getAttributes) {
-        if($attr->getLocalName eq "id") {
-          $id = $attr->getNodeValue;
+  eval {
+    my $env = new DbEnv(0);
+    $env->set_cachesize(0, 64 * 1024, 1);
+    $env->open($XMLDBENV,
+               Db::DB_INIT_MPOOL|Db::DB_CREATE|Db::DB_INIT_LOCK|Db::DB_INIT_LOG|Db::DB_INIT_TXN);
+    my $theMgr = new XmlManager($env);
+    my $containerTxn = $theMgr->createTransaction();
+    my $container = $theMgr->openContainer($containerTxn, $XMLDBCONT, Db::DB_CREATE);
+    $containerTxn->commit();
+    my $updateContext = $theMgr->createUpdateContext();
+            
+    my $query_txn = $theMgr->createTransaction();
+    my $context2 = $theMgr->createQueryContext();
+    $context2->setNamespace( "nmwg" => "http://ggf.org/ns/nmwg/base/2.0/");
+    $context2->setNamespace( "netutil" => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/");
+    $context2->setNamespace( "nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/");  
+
+    @resultsString = getContents($theMgr, $container->getName(), "//nmwg:metadata", $context2);   
+    if($#resultsString != -1) {    
+      for($x = 0; $x <= $#resultsString; $x++) {	
+        $xp = XML::XPath->new( xml => $resultsString[$x] );
+        $xp->clear_namespaces();
+        $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+        $xp->set_namespace('netutil', 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0/');
+        $xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');	  
+	  	  	  
+        $nodeset = $xp->find('//nmwg:metadata');
+        if($nodeset->size() <= 0) {
+          my $msg = "XMLDB has results, but either they are not nmwg:metadata, or the namespace is wrong.";
+          printError("./log/netradar-error.log", $msg); 	
+	  exit(1);  
         }
-        elsif($attr->getLocalName eq "metadataIdRef") {
-          $mid = $attr->getNodeValue;
+        else {          
+	  foreach my $node ($nodeset->get_nodelist) {           
+            my %md = ();
+            my $id = "";
+            my $mid = "";
+            foreach $attr ($node->getAttributes) {
+              if($attr->getLocalName eq "id") {
+                $id = $attr->getNodeValue;
+              }
+              elsif($attr->getLocalName eq "metadataIdRef") {
+                $mid = $attr->getNodeValue;
+              }
+            }
+            %md = goDeep($node, \%md);
+            $metadata{$id} = \%md;    
+          	    
+          }
         }
       }
-      %md = goDeep($node, \%md);
-      $metadata{$id} = \%md;    
-    } 
-  }  
+    }
+    else {
+      my $msg = "XMLDB returned 0 results.";
+      printError("./log/netradar-error.log", $msg);  
+      exit(1);
+    }  
+  
+  };
+  if (my $e = catch std::exception) {
+    my $msg =  "Error adding XML data to container $XMLDBCONT\t-\t" ;
+    $msg = $msg . $e->what();
+    printError("./log/netradar-error.log", $msg);
+    exit(-1);
+  }
+  elsif ($@) {
+    my $msg = "Error adding XML data to container $XMLDBCONT\t-\t" ;
+    $msg = $msg . $@;
+    printError("./log/netradar-error.log", $msg);
+    exit(-1);
+  } 
+  
   return %metadata;
 }
 
 
+
 # ################################################ #
-# Sub:		readXML                            #
-# Args:		$file - Filename to read           #
-# Purpose:	Read XML file, strip off leading   #
-#		XML entry.                         #
+# Sub:		getContents                        #
+# Args:		$mgr - db connection manager       #
+#		$cname - collection name           #
+#		$query - What we are searching for #
+#		$context - query context           #
+# Purpose:	Given the input, perform a query   #
+#               and return the results             #
 # ################################################ #
-sub readXML {
-  my ($file)  = @_;
-  my $xmlstring = "";
-  my $XML = new IO::File("<$file") or die "Cannot open 'readXML' $file: $!\n" ;
-  while (<$XML>) {
-    if(!($_ =~ m/^<\?xml.*/)) {
-      $xmlstring .= $_;
-    }
-  }          
-  $XML->close();
-  return $xmlstring;  
+sub getContents($$$$) {
+  my $mgr = shift ;
+  my $cname = shift ;
+  my $query = shift ;
+  my $context = shift ;
+  my $results = "";
+  my $value = "";
+  
+  my @resString = ();
+  my $fullQuery = "collection('$cname')$query";
+  eval {
+    $results = $mgr->query($fullQuery, $context);
+    while( $results->next($value) ) {
+      push @resString, $value."\n";
+    }	
+    $value = "";
+  };
+  if (my $e = catch std::exception) {
+    my $msg = "Query $fullQuery failed\t-\t";
+    $msg = $msg . $e->what();
+    printError("./log/netradar-error.log", $msg);
+    exit( -1 );
+  }
+  elsif ($@) {
+    my $msg = "Query $fullQuery failed\t-\t";
+    $msg = $msg . $@;
+    printError("./log/netradar-error.log", $msg);
+    exit( -1 );
+  }     
+  return @resString;
 }
+
 
 
 # ################################################ #
@@ -310,6 +412,7 @@ sub goDeep {
   }	  
   return %md;
 }
+
 
 
 # ################################################ #

@@ -14,10 +14,35 @@ Installation:
 		IO::File
 		use POSIX qw(setsid)	[shouldn't need to install]
 			
-		I would suggest using CPAN:
+			I would suggest using CPAN:
 		
-		perl -MCPAN -e shell
-			install MODULE_NAME
+			perl -MCPAN -e shell
+				install MODULE_NAME
+		
+		Sleepycat::DbXml 'simple'
+				
+                        Visit & Download:
+                                http://dev.sleepycat.com/downloads/optreg.html?fname=dbxml-2.2.13.tar.gz&prod=xml
+
+                        Install
+                                tar -zxf dbxml-2.2.13.tar.gz
+                                cd dbxml-2.2.13
+                                ./buildall.sh --enable-perl --enable-java
+                                        Builds into ./install, I moved this to /usr/local/dbxml-2.2.13
+                                        personally.
+                        Set Paths:
+                                In /etc/profile (or ~/.bashrc)
+                                        LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/dbxml-2.2.13/lib
+                                        export LD_LIBRARY_PATH
+
+                                        PATH=$PATH:/usr/local/dbxml-2.2/bin
+                                        export PATH
+
+                        You will need to create an XMLDB directory where the collections are stored,
+                        I created ~/netradar/MP/SNMP/xmldb personally, but as long as server.conf
+                        points to where it is located, it doesnt matter.
+				
+				
 			
 	collect.conf
 	-----------
@@ -27,8 +52,16 @@ Installation:
 	store.xml
 	---------
 		Store your metadata info here, the supplied example shows
-		the 2 interfaces (in each direction direction) for each of the
-		9 nodes in our cluster. 		
+		the 2 interfaces (in each direction direction) for a single
+		machine.  You can of course add more for different SNMP
+		variables. 		
+		
+	loadStorage.pl
+	--------------
+		Reads store.xml, and stores the contents into the XML
+		DB.  Will not insert duplicates.  This is called at
+		server startup, but really only matters whenever you
+		set up the initial environment for the XML DB		
 		
 	db.conf
 	-------
