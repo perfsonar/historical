@@ -210,9 +210,10 @@ sub server {
         $writer->startTag([$soap_env, "Body"]);
         $writer->startTag("nmwg:message", "type" => "response",
                           "xmlns:nmwg" => "http://ggf.org/ns/nmwg/base/2.0/",
-						  "xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
+													"xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
                           "xmlns:nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/",
                           "xmlns:nmtm" => "http://ggf.org/ns/nmwg/time/2.0/",
+													"xmlns:ifevt" => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
                           "xmlns:netutil" => "http://ggf.org/ns/nmwg/characteristics/utilization/2.0/");
 	if ($PEDANTIC > 0) {
           $action = $request->headers->{"soapaction"} ^ $namespace;
