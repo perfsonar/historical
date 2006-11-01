@@ -1,6 +1,6 @@
 Version:
 --------
-	20061013
+	20061101
 
 Installation:
 -------------
@@ -48,13 +48,23 @@ Installation:
 	-----------
 		Add the contact information for SNMP servers, 
 		follow the format at the top of the file.
+
+	conf-store.pl
+	-------------
+		Use this to automatically generate a store.xml file
+		based on the output of your ifconfig (tested only on
+		Fedora (RH) based systems).
+	
+	values.conf
+	-----------
+		SNMP Variables to consider when making the store.xml
 		
-	store.xml
-	---------
-		Store your metadata info here, the supplied example shows
-		the 2 interfaces (in each direction direction) for a single
-		machine.  You can of course add more for different SNMP
-		variables. 		
+		store.xml
+		---------
+			Store your metadata info here, the supplied example shows
+			the 2 interfaces (in each direction direction) for a single
+			machine.  You can of course add more for different SNMP
+			variables. 		
 		
 	loadStorage.pl
 	--------------

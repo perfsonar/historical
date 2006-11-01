@@ -13,8 +13,6 @@
 # watcher.pl, run it often...                      	   #
 # */1 * * * * root       cd $NETRADAR_HOME && ./watcher.pl #
 #                                                          #
-#                                                          #
-#                                                          #
 # ######################################################## #
 
 use IO::File;

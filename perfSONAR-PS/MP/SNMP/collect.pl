@@ -17,6 +17,8 @@ use IO::File;
 use POSIX qw(setsid);
 use Sleepycat::DbXml 'simple';
 
+$DEBUG = 0;
+
 		# Read/store database access info
 $DBNAME = "";
 $DBUSER = "";
@@ -43,10 +45,13 @@ system("$LDSTORE $XMLDBENV $XMLDBCONT");
 %metadata = ();
 %metadata = readStore(\%metadata);
 
+
+if(!$DEBUG) {
 		# flush the buffer
-$| = 1;
+  $| = 1;
 		# start the daemon
-&daemonize;
+  &daemonize;
+}
 
 		# Main loop, we need to do the following 
 		# things:
@@ -73,6 +78,12 @@ while(1) {
     if($snmp{$metadata{$m}{"hostName"}}[0] &&
        $snmp{$metadata{$m}{"hostName"}}[1] &&
        $metadata{$m}{"hostName"}) {
+
+      if($DEBUG) {
+        print $snmp{$metadata{$m}{"hostName"}}[0] , "\n";
+        print $snmp{$metadata{$m}{"hostName"}}[0] , "\n";
+        print $metadata{$m}{"hostName"} , "\n";	
+      }
   
       ($session, $error) = Net::SNMP->session(
                              -community     => $snmp{$metadata{$m}{"hostName"}}[0],
@@ -110,6 +121,17 @@ while(1) {
         $sth = $dbh->prepare($ins);
         $sth->execute($m, $time, $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}}, $metadata{$m}{"parameter-eventType"}, "") 
           || warn "Executing: ", $sth->errstr;  
+	  
+	  
+	if($DEBUG) {
+	  print "insert into data (id, time, value, eventtype, misc) values (";
+	  print $m , ", "; 
+	  print $time , ", "; 
+	  print $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} , ", "; 
+	  print $metadata{$m}{"parameter-eventType"} , ", "; 
+	  print "\"\"" , ")\n"; 	  
+	}  
+	  
       }
       else {
         my $msg =  "The OID, " , $metadata{$m}{"eventType"} , "." , $metadata{$m}{"ifIndex"} , " cannot be found.";

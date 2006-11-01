@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+            xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
 
-  <nmwg:metadata id="127.0.0.1-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a1">
+  <nmwg:metadata id="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">127.0.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>lager</nmwgt:hostName>                
-	<nmwgt:ifName>eth0</nmwgt:ifName>
-	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:ifAddress type="ipv4">192.168.2.2</nmwgt:ifAddress>
+        <nmwgt:hostName>lager</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>in</nmwgt:direction>
-        <nmwgt:capacity>10000000</nmwgt:capacity>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
@@ -18,15 +20,15 @@
     </nmwg:parameters>
   </nmwg:metadata>
 
-  <nmwg:metadata id="127.0.0.1-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a2">
+  <nmwg:metadata id="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager1">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">127.0.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>lager</nmwgt:hostName>                
-	<nmwgt:ifName>eth0</nmwgt:ifName>
-	<nmwgt:ifIndex>2</nmwgt:ifIndex>
+        <nmwgt:ifAddress type="ipv4">192.168.2.2</nmwgt:ifAddress>
+        <nmwgt:hostName>lager</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>out</nmwgt:direction>
-        <nmwgt:capacity>10000000</nmwgt:capacity>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
@@ -35,38 +37,4 @@
     </nmwg:parameters>
   </nmwg:metadata>
 
-  <nmwg:metadata id="127.0.0.1-snmp.1.3.6.1.2.1.2.2.1.10-5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a1">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">127.0.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>lager</nmwgt:hostName>                
-	<nmwgt:ifName>ath0</nmwgt:ifName>
-	<nmwgt:ifIndex>5</nmwgt:ifIndex>
-        <nmwgt:direction>in</nmwgt:direction>
-        <nmwgt:capacity>10000000</nmwgt:capacity>
-      </nmwgt:interface>
-    </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
-    <nmwg:parameters id="1">
-      <nmwg:parameter name="eventType" value="ifInOctets" />
-    </nmwg:parameters>
-  </nmwg:metadata>
-
-  <nmwg:metadata id="127.0.0.1-snmp.1.3.6.1.2.1.2.2.1.16-5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="a2">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">127.0.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>lager</nmwgt:hostName>                
-	<nmwgt:ifName>ath0</nmwgt:ifName>
-	<nmwgt:ifIndex>5</nmwgt:ifIndex>
-        <nmwgt:direction>out</nmwgt:direction>
-        <nmwgt:capacity>10000000</nmwgt:capacity>
-      </nmwgt:interface>
-    </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
-    <nmwg:parameters id="1">
-      <nmwg:parameter name="eventType" value="ifOutOctets" />
-    </nmwg:parameters>
-  </nmwg:metadata>
-  
 </nmwg:store>
