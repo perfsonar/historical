@@ -16,6 +16,8 @@
 # ################################################ #
 
 $DEBUG = 0;
+$SNMPVER = 1;
+$SNMPCOM = "public";
 
 		# Remove the old file, and start the
 		# new one.  
@@ -92,7 +94,7 @@ while(<IFCFG>) {
     }	
 		
     my $index = 0;
-    open(IFCFG, "snmpwalk -v 1 -c public " . $host . " ifDes |");
+    open(IFCFG, "snmpwalk -v " . $SNMPVER . " -c " . $SNMPCOM . " " . $host . " ifDes |");
     while(<IFCFG>) {
       $_ =~ s/\n//g;
       if($_ =~ m/^.*$if$/) {
@@ -107,7 +109,7 @@ while(<IFCFG>) {
       print "Index: " , $index , "\n";
     }
 
-    open(IFCFG, "snmpget -v 1 -c public " . $host . " ifSpeed." . $index . " |");
+    open(IFCFG, "snmpget -v " . $SNMPVER . " -c " . $SNMPCOM . " " . $host . " ifSpeed." . $index . " |");
     @ifcfg = <IFCFG>;
     $speed = $ifcfg[0];
     $speed =~ s/\n//g;
