@@ -80,4 +80,23 @@ sub query {
 }
 
 
+sub howMany {
+  my ($self, $query) = @_;
+  my $results;
+  my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
+  eval {
+    $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});		
+  };
+  if (my $e = catch std::exception) {
+    croak("Query $fullQuery failed\t-\t".$e->what());
+    exit( -1 );
+  }
+  elsif ($@) {
+    croak("Query $fullQuery failed\t-\t".$@);
+    exit( -1 );
+  }      
+  return $results->size();
+}
+
+
 1;
