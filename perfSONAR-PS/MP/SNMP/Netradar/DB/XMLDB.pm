@@ -3,6 +3,7 @@
 package Netradar::DB::XMLDB;
 use Carp;
 
+
 sub new {
   my ($package, $env, $cont, $namespaces) = @_;   
   croak("Missing argument to Netradar::DB::XMLDB constructor.\n") 
@@ -14,6 +15,7 @@ sub new {
   $hash{"NAMESPACES"} = \%ns;
   bless \%hash => $package;
 }
+
 
 sub openDB {
   my ($self) = @_;
@@ -51,6 +53,7 @@ sub openDB {
   } 
 }
 
+
 sub query {
   my ($self, $query) = @_;
   my $results = "";
@@ -75,5 +78,6 @@ sub query {
   }     
   return @resString;
 }
+
 
 1;
