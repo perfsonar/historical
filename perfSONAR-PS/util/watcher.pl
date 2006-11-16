@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 # ######################################################## #
 #                                                          #
 # Name:		watcher.pl                                 #
@@ -15,50 +15,57 @@
 #                                                          #
 # ######################################################## #
 
+use strict;
 use IO::File;
 
-$PROGRAM1 = "";
-$PROGRAM2 = "";
-readConf("./watcher.conf");
-
-my $foundit = 0;
+my %conf = ();
+%conf = readConfiguration("./watcher.conf", \%conf);
 
 open(IN, "ps axw |");
-while(<IN>) {
-  if (/$PROGRAM1/ || /$PROGRAM2/) {
-    $foundit = 1;
-    last;
-  }
-}
+my @ps = <IN>;
 close(IN);
 
-unless ($foundit) {
-  system("$PROGRAM2");
+my @keys = keys(%conf);
+
+for(my $x = 1; $x <= $#{@keys}; $x += 2) {
+  my $foundit = 0;
+  my $PROGRAM1 = "PROGRAM".$x;
+  my $PROGRAM2 = "PROGRAM".eval($x+1);
+
+  foreach my $process (@ps) {
+    $process =~ s/\n//g;
+    if ($process =~ m/$conf{$PROGRAM1}/ || $process =~ m/$conf{$PROGRAM2}/) {
+      $foundit = 1;
+      last;
+    }
+  }
+
+  unless ($foundit) {
+    system("$PROGRAM2");
+  }
 }
+
+
 
 # ################################################ #
 # Sub:		readConf                           #
 # Args:		$file - Filename to read           #
+#               $sent - flattened hash of conf     #
+#                       values                     #
 # Purpose:	Read and store info.               #
 # ################################################ #
-sub readConf {
-  my ($file)  = @_;
-  my $CONF = new IO::File("<$file") or die "Cannot open 'readConf' $file: $!\n" ;
+sub readConfiguration {
+  my ($file, $sent)  = @_;
+  my %hash = %{$sent};  
+  my $CONF = new IO::File("<$file") || 
+    die "Cannot open 'readConf' $file: $!\n" ;
   while (<$CONF>) {
     if(!($_ =~ m/^#.*$/)) {
       $_ =~ s/\n//;
-      if($_ =~ m/^PROGRAM1=.*$/) {
-        $_ =~ s/PROGRAM1=//;
-        $PROGRAM1 = $_;
-	$PROGRAM1 =~ s/\"//g;
-      }
-      elsif($_ =~ m/^PROGRAM2=.*$/) {
-        $_ =~ s/PROGRAM2=//;
-        $PROGRAM2 = $_;
-	$PROGRAM2 =~ s/\"//g;
-      }
+      my @values = split(/=/,$_);
+      $hash{$values[0]} = $values[1];
     }
   }          
   $CONF->close();
-  return; 
+  return %hash; 
 }
