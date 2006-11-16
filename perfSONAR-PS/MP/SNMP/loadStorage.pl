@@ -6,6 +6,8 @@
 # Contact:	zurawski@eecis.udel.edu            #
 # Args:		$XMLDBENV = XML DB environment     #
 #               $XMLDBCONT = XML DB Container      #
+#               $XMLFILE = XML File with store     #
+#                          information.            #
 # Purpose:	Load the XML DB with initial       #
 #               information                        #
 #                                                  #
@@ -16,6 +18,7 @@ use Sleepycat::DbXml 'simple';
 
 $XMLDBENV = shift;
 $XMLDBCONT = shift;
+$XMLFILE = shift;
 
 eval {
   my $env = new DbEnv(0);
@@ -33,18 +36,20 @@ eval {
   $context2->setNamespace( "nmwg" => "http://ggf.org/ns/nmwg/base/2.0/");
   $context2->setNamespace( "netutil" => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/");
   $context2->setNamespace( "nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/");  
-
+  $context2->setNamespace( "snmp" => "http://ggf.org/ns/nmwg/tools/snmp/2.0/");
+  
   if(howMany($theMgr, $container->getName(), "//nmwg:metadata", $context2 ) == 0) {      
 
-				# get the contents of the store.xml file into
+				# get the contents of the $XMLFILE into
 				# string form.
-    $xml = readXML("./store.xml");  
+    $xml = readXML($XMLFILE);  
   
     $xp = XML::XPath->new( xml => $xml );
     $xp->clear_namespaces();
     $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
     $xp->set_namespace('netutil', 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0/');
     $xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');
+    $xp->set_namespace('snmp', 'http://ggf.org/ns/nmwg/tools/snmp/2.0/');
 	  
 	  			# find all of the metadata elements
     $nodeset = $xp->find('/nmwg:store/nmwg:metadata');

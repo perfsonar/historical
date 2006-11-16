@@ -1,6 +1,6 @@
 Version:
 --------
-	20061101
+	20061115
 
 Installation:
 -------------
@@ -12,19 +12,19 @@ Installation:
 		Time::HiRes
 		XML::XPath
 		IO::File
-		use POSIX qw(setsid)	[shouldn't need to install]
+		use POSIX qw( setsid )	[shouldn't need to install]
 			
 			I would suggest using CPAN:
 		
-			perl -MCPAN -e shell
-				install MODULE_NAME
+				perl -MCPAN -e shell
+					install MODULE_NAME
 		
 		Sleepycat::DbXml 'simple'
 				
                         Visit & Download:
-                                http://dev.sleepycat.com/downloads/optreg.html?fname=dbxml-2.2.13.tar.gz&prod=xml
-
-                        Install
+                                http://www.oracle.com/technology/software/products/berkeley-db/htdocs/popup/xml/2.2.13/xml-targz.html
+                        
+			Install
                                 tar -zxf dbxml-2.2.13.tar.gz
                                 cd dbxml-2.2.13
                                 ./buildall.sh --enable-perl --enable-java
@@ -42,13 +42,6 @@ Installation:
                         I created ~/netradar/MP/SNMP/xmldb personally, but as long as server.conf
                         points to where it is located, it doesnt matter.
 				
-				
-			
-	collect.conf
-	-----------
-		Add the contact information for SNMP servers, 
-		follow the format at the top of the file.
-
 	conf-store.pl
 	-------------
 		Use this to automatically generate a store.xml file
@@ -100,30 +93,18 @@ Installation:
 		
 		sqlite3 netradar.db
 			select * from data;
-			.exit
-		
+			.exit		
 Usage:
 ------
 	Collection:
 	-----------
 		./collect.pl (Functions as a daemon, will background automatically)
-		
-	Watcher:
-	--------
-		Edit crontab to periodically run the watcher script:
-		
-		# watcher.pl, run it every 5 minutes
-		*/1 * * * * root       cd $NETRADAR_HOME && ./watcher.pl
-
-		It can of course be run manually:
-			./watcher.pl
 
 FAQ:
 ----
 	Q:
 	A:
-		
-	
+			
 Contact:
 --------
 	Jason Zurawski - zurawski at eecis dot udel dot edu
