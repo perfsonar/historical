@@ -2,6 +2,7 @@
 
 package Netradar::Common;
 use Exporter;
+use IO::File;
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata');
 

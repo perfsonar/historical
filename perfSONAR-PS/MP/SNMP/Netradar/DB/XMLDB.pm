@@ -2,12 +2,14 @@
 
 package Netradar::DB::XMLDB;
 use Carp;
+use Sleepycat::DbXml 'simple';
 
 
 sub new {
   my ($package, $env, $cont, $namespaces) = @_;   
-  croak("Missing argument to Netradar::DB::XMLDB constructor.\n") 
-  	if (defined $env && defined $conf && defined $namespaces);
+  if(!defined $env && !defined $conf && !defined $namespaces) {
+    croak("Missing argument to Netradar::DB::XMLDB constructor.\n");
+  }
   my %ns = %{$namespaces};  
   my %hash = ();
   $hash{"ENVIRONMENT"} = $env;
@@ -80,7 +82,7 @@ sub query {
 }
 
 
-sub howMany {
+sub count {
   my ($self, $query) = @_;
   my $results;
   my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
@@ -96,6 +98,47 @@ sub howMany {
     exit( -1 );
   }      
   return $results->size();
+}
+
+
+sub insert {
+  my ($self, $content, $name) = @_;
+  eval {
+    my $myXMLDoc = $self->{MANAGER}->createDocument();
+    $myXMLDoc->setContent($content);
+    $myXMLDoc->setName($name); 
+    $self->{CONTAINER}->putDocument($self->{TRANSACTION}, $myXMLDoc, $self->{UPDATECONTEXT}, 0);
+    $self->{TRANSACTION}->commit();
+  };
+  if (my $e = catch std::exception) {
+    croak("Query $fullQuery failed\t-\t".$e->what());
+    exit( -1 );
+  }
+  elsif ($@) {
+    croak("Query $fullQuery failed\t-\t".$@);
+    exit( -1 );
+  }      
+  return;
+}
+
+
+sub remove {
+  my ($self, $content, $name) = @_;
+  eval {
+    my $myXMLDoc = $self->{MANAGER}->createDocument();
+    $myXMLDoc->setContent($content); 
+    $self->{CONTAINER}->deleteDocument($self->{TRANSACTION}, $myXMLDoc, $self->{UPDATECONTEXT});
+    $self->{TRANSACTION}->commit();
+  };
+  if (my $e = catch std::exception) {
+    croak("Query $fullQuery failed\t-\t".$e->what());
+    exit( -1 );
+  }
+  elsif ($@) {
+    croak("Query $fullQuery failed\t-\t".$@);
+    exit( -1 );
+  }   
+  return;
 }
 
 

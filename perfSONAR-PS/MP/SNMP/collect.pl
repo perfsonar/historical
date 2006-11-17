@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -I ./Netradar
 # ################################################ #
 #                                                  #
 # Name:		collect.pl                         #
@@ -14,17 +14,13 @@ use Net::SNMP;
 use DBI;
 use Time::HiRes qw( gettimeofday );
 use XML::XPath;
-use IO::File;
 use POSIX qw( setsid );
-use Sleepycat::DbXml 'simple';
 
 use Netradar::Common;
 use Netradar::DB::XMLDB;
-#use Netradar::DB::File;
-#use Netradar::DB::MySQL;
-#use Netradar::DB::RRD;
+use Netradar::DB::SQL;
 
-my $DEBUG = 1;
+my $DEBUG = 0;
 my $LOGFILE ="./log/netradar-error.log";
 my $DBFILE = "./db.conf";
 
@@ -36,6 +32,29 @@ my %hash = ();
 		# in the DB configuration file.  
 my %metadata = ();
 %metadata = readMetadata(\%metadata);
+
+# setup 'data' database connection
+#if($hash{"DATA_DB_TYPE"} eq "mysql") {
+  my $datadb = new Netradar::DB::SQL(
+    $hash{"DATA_DB_NAME"}, 
+    $hash{"DATA_DB_USER"},
+    $hash{"DATA_DB_PASS"}
+  );
+  
+  my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+  my %dbSchemaValues = (
+    id => "", 
+    time => "", 
+    value => "", 
+    eventtype => "",  
+    misc => ""
+  );
+    
+#}
+#elsif($hash{"DATA_DB_TYPE"} eq "rrd") {
+#}
+#elsif($hash{"DATA_DB_TYPE"} eq "file") {
+#}
 
 if(!$DEBUG) {
 		# flush the buffer
@@ -57,8 +76,7 @@ if(!$DEBUG) {
 								
 while(1) {
  
-  my $dbh = DBI->connect($hash{"DATA_DB_NAME"},$hash{"DATA_DB_USER"},$hash{"DATA_DB_PASS"})
-    || die "Database unavailable";
+  $datadb->openDB;
 
   foreach my $m (keys %metadata) {
   
@@ -80,8 +98,7 @@ while(1) {
 
       if (!defined($session)) {
         printError($LOGFILE, $error);
-	
-        $dbh->disconnect();
+        $datadb->closeDB;
         exit(1);
       }
 
@@ -96,17 +113,21 @@ while(1) {
         );
   
         if (!defined($result)) {
-          printError($LOGFILE, $session." - ".$error);
-	  
-          $dbh->disconnect();
+          printError($LOGFILE, $session." - ".$error);	  
+          $datadb->closeDB;
           exit(1);
         }
     
-        my $ins = "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)";
-        my $sth = $dbh->prepare($ins);
-        $sth->execute($m, $time, $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}}, $metadata{$m}{"parameter-eventType"}, "") 
-          || warn "Executing: ", $sth->errstr;  
-	  
+    
+        %dbSchemaValues = (
+          id => $m, 
+          time => $time, 
+          value => $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}}, 
+          eventtype => $metadata{$m}{"parameter-eventType"},  
+          misc => ""
+        );	
+        $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
+	 
 	  
 	if($DEBUG) {
 	  print "insert into data (id, time, value, eventtype, misc) values (";
@@ -119,22 +140,20 @@ while(1) {
 	  
       }
       else {
-	printError($LOGFILE, "The OID, ".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}." cannot be found.");
-		         
+	printError($LOGFILE, "The OID, ".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}." cannot be found.");		         
 	$session->close; 
-        $dbh->disconnect();
+        $datadb->closeDB;
 	exit(1);
       }
       $session->close;    
     }
     else {
-      printError($LOGFILE, "I am seeing a community of:\"".$metadata{$m}{"parameter-SNMPVersion"}."\" a version of:\"".$metadata{$m}{"parameter-SNMPCommunity"}."\" and a hostname of:\"".$metadata{$m}{"hostName"}."\" ... something is amiss.");
-      
-      $dbh->disconnect();
+      printError($LOGFILE, "I am seeing a community of:\"".$metadata{$m}{"parameter-SNMPVersion"}."\" a version of:\"".$metadata{$m}{"parameter-SNMPCommunity"}."\" and a hostname of:\"".$metadata{$m}{"hostName"}."\" ... something is amiss."); 
+      $datadb->closeDB;
       exit(1);
     }
   }
-  $dbh->disconnect();
+  $datadb->closeDB;
   sleep(1); 
 }
 
