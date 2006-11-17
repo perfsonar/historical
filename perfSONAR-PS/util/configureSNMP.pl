@@ -16,7 +16,7 @@
 # ################################################ #
 use strict;
 
-my $CONF = "./test.conf";
+my $CONF = "./SNMP.conf";
 
 		# Remove the old file, and start the
 		# new one.  
