@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
             xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-	    xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
 
   <nmwg:metadata id="192.168.0.1-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout0">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">192.168.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>stout.pc.cis.udel.edu</nmwgt:hostName>
+        <nmwgt:hostName>stout</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
         <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>in</nmwgt:direction>
@@ -16,18 +15,56 @@
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
-    <snmp:parameters id="1" xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+    <nmwg:parameters id="1">
       <nmwg:parameter name="SNMPVersion" value="1" />
       <nmwg:parameter name="SNMPCommunity" value="public" />
       <nmwg:parameter name="eventType" value="ifInOctets" />
-    </snmp:parameters>
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="128.4.133.167-snmp.1.3.6.1.2.1.2.2.1.10-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
+        <nmwgt:hostName>stout</nmwgt:hostName>
+        <nmwgt:ifName>eth1</nmwgt:ifName>
+        <nmwgt:ifIndex>3</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>100000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="SNMPVersion" value="1" />
+      <nmwg:parameter name="SNMPCommunity" value="public" />
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="10.10.11.1-snmp.1.3.6.1.2.1.2.2.1.10-4" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout2">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">10.10.11.1</nmwgt:ifAddress>
+        <nmwgt:hostName>stout</nmwgt:hostName>
+        <nmwgt:ifName>eth2</nmwgt:ifName>
+        <nmwgt:ifIndex>4</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>0</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="SNMPVersion" value="1" />
+      <nmwg:parameter name="SNMPCommunity" value="public" />
+      <nmwg:parameter name="eventType" value="ifInOctets" />
+    </nmwg:parameters>
   </nmwg:metadata>
 
   <nmwg:metadata id="192.168.0.1-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout3">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">192.168.0.1</nmwgt:ifAddress>
-        <nmwgt:hostName>stout.pc.cis.udel.edu</nmwgt:hostName>
+        <nmwgt:hostName>stout</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
         <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>out</nmwgt:direction>
@@ -35,37 +72,18 @@
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
-    <snmp:parameters id="1" xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+    <nmwg:parameters id="1">
       <nmwg:parameter name="SNMPVersion" value="1" />
       <nmwg:parameter name="SNMPCommunity" value="public" />
       <nmwg:parameter name="eventType" value="ifOutOctets" />
-    </snmp:parameters>
+    </nmwg:parameters>
   </nmwg:metadata>
 
-  <nmwg:metadata id="128.4.133.167-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout2">
+  <nmwg:metadata id="128.4.133.167-snmp.1.3.6.1.2.1.2.2.1.16-3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout4">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
-        <nmwgt:hostName>stout.pc.cis.udel.edu</nmwgt:hostName>
-        <nmwgt:ifName>eth1</nmwgt:ifName>
-        <nmwgt:ifIndex>3</nmwgt:ifIndex>
-        <nmwgt:direction>in</nmwgt:direction>
-        <nmwgt:capacity>100000000</nmwgt:capacity>
-      </nmwgt:interface>
-    </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
-    <snmp:parameters id="1" xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
-      <nmwg:parameter name="SNMPVersion" value="1" />
-      <nmwg:parameter name="SNMPCommunity" value="public" />
-      <nmwg:parameter name="eventType" value="ifInOctets" />
-    </snmp:parameters>
-  </nmwg:metadata>
-
-  <nmwg:metadata id="128.4.133.167-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout3">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
-        <nmwgt:hostName>stout.pc.cis.udel.edu</nmwgt:hostName>
+        <nmwgt:hostName>stout</nmwgt:hostName>
         <nmwgt:ifName>eth1</nmwgt:ifName>
         <nmwgt:ifIndex>3</nmwgt:ifIndex>
         <nmwgt:direction>out</nmwgt:direction>
@@ -73,11 +91,30 @@
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
-    <snmp:parameters id="1" xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+    <nmwg:parameters id="1">
       <nmwg:parameter name="SNMPVersion" value="1" />
       <nmwg:parameter name="SNMPCommunity" value="public" />
       <nmwg:parameter name="eventType" value="ifOutOctets" />
-    </snmp:parameters>
+    </nmwg:parameters>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="10.10.11.1-snmp.1.3.6.1.2.1.2.2.1.16-4" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout5">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">10.10.11.1</nmwgt:ifAddress>
+        <nmwgt:hostName>stout</nmwgt:hostName>
+        <nmwgt:ifName>eth2</nmwgt:ifName>
+        <nmwgt:ifIndex>4</nmwgt:ifIndex>
+        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:capacity>0</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
+    <nmwg:parameters id="1">
+      <nmwg:parameter name="SNMPVersion" value="1" />
+      <nmwg:parameter name="SNMPCommunity" value="public" />
+      <nmwg:parameter name="eventType" value="ifOutOctets" />
+    </nmwg:parameters>
   </nmwg:metadata>
 
 </nmwg:store>
