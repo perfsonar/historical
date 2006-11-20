@@ -3,9 +3,11 @@
 package Netradar::Common;
 use Exporter;
 use IO::File;
+use XML::XPath;
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata');
 
+our $VERSION = '0.01';
 
 sub readXML {
   my ($file)  = @_;
@@ -128,3 +130,113 @@ sub loadMetadata {
 
 
 1;
+
+__END__
+=head1 NAME
+
+Netradar::Common - A module that provides common methods for performing actions within in the
+Netradar framework.  
+
+=head1 DESCRIPTION
+
+This module is a catch all for common methods (for now) in the Netradar framework.  As such there
+is no 'common thread' that each method shares.  This module IS NOT an object, and the methods
+can be invoked directly.  
+
+=head1 SYNOPSIS
+
+    use Netradar::Common;
+
+    my $xml = readXML("./store.xml");
+    if(!($xml)) {
+      printError("./error.log", "XML File is empty."); 
+      exit(1);
+    }
+
+    my %hash = readConfiguration("./db.conf", \%hash);
+
+    my %ns = (
+      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+    );
+
+    my %metadata = parseMetadata($xml, \%metadata, \%ns);
+       
+=head1 DETAILS
+
+The API for this module aims to be simple; note that this is not an object and each method does not
+have the 'self knowledge' of variables that may travel between functions.  
+
+=head1 API
+
+The API of Netradar::Common offers simple calls to common activities in the Netradar 
+framework.  
+
+=head2 readXML($file)
+
+Reads the file specified in '$file' and returns the XML contents in string form.
+
+=head2 readConfiguration($file, \%hash)
+
+Reads the file specified in '$file', and loads the hash reference '%hash' with the name/value
+paired items from a config file.  Note that the pairs use the '?' symbol as a separator.  For 
+example the config file:
+
+  METADATA_DB_TYPE?xmldb
+  METADATA_DB_NAME?/home/jason/Netradar/MP/SNMP/xmldb
+  METADATA_DB_FILE?snmpstore.dbxml
+
+Would return a hash such as:
+
+  %hash = 
+    {
+      METADATA_DB_TYPE => "xmldb",
+      METADATA_DB_NAME => "/home/jason/Netradar/MP/SNMP/xmldb",
+      METADATA_DB_FILE => "snmpstore.dbxml"      
+    }
+
+=head2 printError($file, $msg)
+
+Reads the file specified in '$file', and writes the contents of '$msg' (along with a 
+timestamp) to this designated log file.
+
+=head2 parseMetadata($xml, \%metadata, \%ns)
+
+The '$xml' argument is an XML string.  The first of the two hash arguments, '%metadata', is 
+an object that will contain the contents of each metadata XML tag.  The third argument is 
+a hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
+in the container should be mapped (there is no harm is sending mappings that will not 
+be used).  The metadata object is returned, populated with the appropriate values.  
+
+=head2 loadMetadata($set, $sentmetadata)
+
+This function is not exported, and is meant to be used by parseMetadata($xml, \%metadata, \%ns)
+to aide in the extraction of metadata values.
+
+=head1 SEE ALSO
+
+L<Netradar::Common>, L<Netradar::DB::XMLDB>, L<Netradar::DB::RRD>, L<Netradar::DB::File>
+
+To join the 'netradar' mailing list, please visit:
+
+  http://moonshine.pc.cis.udel.edu/mailman/listinfo/netradar
+
+The netradar subversion repository is located at:
+
+  https://damsl.cis.udel.edu/svn/netradar/
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 AUTHOR
+
+Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 by Jason Zurawski
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
