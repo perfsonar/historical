@@ -20,7 +20,7 @@ use Netradar::Common;
 use Netradar::DB::XMLDB;
 use Netradar::DB::SQL;
 
-my $DEBUG = 0;
+my $DEBUG = 1;
 my $LOGFILE ="./log/netradar-error.log";
 my $DBFILE = "./db.conf";
 

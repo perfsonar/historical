@@ -37,14 +37,24 @@ sub closeDB {
 
 
 sub query {
-  my ($self) = @_;   
-  return;
+  my ($self, $query) = @_;
+  my $results = (); 
+  my $sth = $self->{HANDLE}->prepare($query);
+  $sth->execute() || 
+    croak("Netradar::DB::SQL: Query error: ", $sth->errstr);    
+  $results  = $sth->fetchall_arrayref;
+  return $results;
 }
 
 
 sub count {
-  my ($self) = @_;   
-  return;
+  my ($self, $query) = @_;
+  my $results = (); 
+  my $sth = $self->{HANDLE}->prepare($query);
+  $sth->execute() || 
+    croak("Netradar::DB::SQL: Query error: ", $sth->errstr);    
+  $results  = $sth->fetchall_arrayref;
+  return $#{$results}+1;
 }
 
 
@@ -78,13 +88,17 @@ sub insert {
     $sth->bind_param($x+1, $values{$list[$x]});
   }
   $sth->execute() || 
-    croak("Netradar::DB::SQL: insert error: ", $sth->errstr);
+    croak("Netradar::DB::SQL: Insert error: ", $sth->errstr);
   return;
 }
 
 
 sub remove {
-  my ($self) = @_;   
+  my ($self, $delete) = @_;
+  my $results = (); 
+  my $sth = $self->{HANDLE}->prepare($delete);
+  $sth->execute() || 
+    croak("Netradar::DB::SQL: Delete error: ", $sth->errstr);    
   return;
 }
 
