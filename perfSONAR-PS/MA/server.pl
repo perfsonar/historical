@@ -218,11 +218,23 @@ sub server {
 	if ($PEDANTIC > 0) {
           $action = $request->headers->{"soapaction"} ^ $namespace;
           if (!$action =~ m/^.*message\/$/) {
-            $writer->raw("<nmwg:data id=\"" . message::genuid() . "\">\n");
-            $writer->raw("<nmwgr:datum>\n");
-            $writer->raw("Unrecognized Soapaction\n");
-            $writer->raw("</nmwgr:datum>\n");
-            $writer->raw("</nmwg:data>\n");
+        	my $resultMDId = "result-code".message::genuid();
+		my $resultDId = "result-code-description".message::genuid();
+										
+		$writer->startTag("nmwg:metadata",
+			  "id" => $resultMDId);												  
+		$writer->startTag("nmwg:eventType");
+		$writer->characters("error.transport.soap");
+		$writer->endTag("nmwg:eventType");		  									  
+		$writer->endTag("nmwg:metadata");
+									
+		$writer->startTag("nmwg:data",
+			 	  "metadataIdRef" => $resultMDId,
+			 	  "id" => $resultDId);     
+       		$writer->startTag("nmwgr:datum");
+        	$writer->characters("Unrecognized Soapaction\n");
+        	$writer->endTag("nmwgr:datum");
+       		$writer->endTag("nmwg:data");
   	  }
         }
 
@@ -241,11 +253,23 @@ sub server {
         }
       }
       else {
-        $writer->raw("<nmwg:data id=\"" . message::genuid() . "\">\n");
-        $writer->raw("<nmwgr:datum>\n");
-        $writer->raw("Unrecognized URI or Method\n");
-        $writer->raw("</nmwgr:datum>\n");
-        $writer->raw("</nmwg:data>\n");
+        my $resultMDId = "result-code".message::genuid();
+	my $resultDId = "result-code-description".message::genuid();
+										
+	$writer->startTag("nmwg:metadata",
+			  "id" => $resultMDId);												  
+	$writer->startTag("nmwg:eventType");
+	$writer->characters("error.transport.soap");
+	$writer->endTag("nmwg:eventType");		  									  
+	$writer->endTag("nmwg:metadata");
+									
+	$writer->startTag("nmwg:data",
+			  "metadataIdRef" => $resultMDId,
+			  "id" => $resultDId);     
+        $writer->startTag("nmwgr:datum");
+        $writer->characters("Unrecognized URI or Method\n");
+        $writer->endTag("nmwgr:datum");
+        $writer->endTag("nmwg:data");
       }
 
       $writer->endTag("nmwg:message");
