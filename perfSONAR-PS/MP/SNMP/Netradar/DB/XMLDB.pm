@@ -3,33 +3,77 @@
 package Netradar::DB::XMLDB;
 use Carp;
 use Sleepycat::DbXml 'simple';
+@ISA = ('Exporter');
+@EXPORT = ('new', 'setEnvironment', 'setContainer', 'setNamespaces', 
+           'openDB', 'query', 'count', 'insert', 'remove');
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub new {
-  my ($package, $env, $cont, $namespaces) = @_;   
-  if(!defined $env && !defined $conf && !defined $namespaces) {
-    croak("Missing argument to Netradar::DB::XMLDB constructor.\n");
-  }
-  my %ns = %{$namespaces};  
+  my ($package, $env, $cont, $namespaces) = @_; 
   my %hash = ();
-  $hash{"ENVIRONMENT"} = $env;
-  $hash{"CONTAINERFILE"} = $cont;
-  $hash{"NAMESPACES"} = \%ns;
+  $hash{"FILENAME"} = "Netradar::DB::XMLDB";
+  $hash{"FUNCTION"} = "\"new\"";
+  if(defined $env) {
+    $hash{"ENVIRONMENT"} = $env;
+  }
+  if(defined $cont) {
+    $hash{"CONTAINERFILE"} = $cont; 
+  }
+  if(defined $namespaces) {
+    my %ns = %{$namespaces};  
+    $hash{"NAMESPACES"} = \%ns;  
+  }    
   bless \%hash => $package;
 }
 
+sub setEnvironment {
+  my ($self, $env) = @_;  
+  $self->{FUNCTION} = "\"setEnvironment\"";  
+  if(defined $env) {
+    $self->{ENVIRONMENT} = $env;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+sub setContainer {
+  my ($self, $cont) = @_;
+  $self->{FUNCTION} = "\"setContainer\"";  
+  if(defined $cont) {
+    $self->{CONTAINERFILE} = $cont;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+sub setNamespaces {
+  my ($self, $namespaces) = @_;  
+  $self->{FUNCTION} = "\"setNamespaces\""; 
+  if(defined $namespaces) {   
+    my %ns = %{$namespaces};
+    $self->{NAMESPACES} = \%ns;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
 
 sub openDB {
   my ($self) = @_;
+  $self->{FUNCTION} = "\"openDB\"";   
   eval {
     my $env = new DbEnv(0);
     $env->set_cachesize(0, 64 * 1024, 1);
     $env->open(
       $self->{ENVIRONMENT},
       Db::DB_INIT_MPOOL|Db::DB_CREATE|Db::DB_INIT_LOCK|Db::DB_INIT_LOG|Db::DB_INIT_TXN
-    );
-  
+    );  
     $self->{MANAGER} = new XmlManager($env);
     $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
     $self->{CONTAINER} = $self->{MANAGER}->openContainer(
@@ -39,12 +83,12 @@ sub openDB {
     );
     $self->{TRANSACTION}->commit();
   };
-  if (my $e = catch std::exception) {
-    croak("Netradar::DB::XMLDB Error: ".$e->what());
+  if(my $e = catch std::exception) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
     exit(-1);
-  }
-  elsif ($@) {
-    croak("Netradar::DB::XMLDB Error: ".$@);  
+  }  
+  elsif($@) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
     exit(-1);
   } 
 }
@@ -52,6 +96,7 @@ sub openDB {
 
 sub setup {
   my ($self) = @_;
+  $self->{FUNCTION} = "\"setup\"";   
   eval {
     $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
     $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();            
@@ -60,108 +105,126 @@ sub setup {
       $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
     }
   };
-  if (my $e = catch std::exception) {
-    croak("Netradar::DB::XMLDB Error: ".$e->what());
+  if(my $e = catch std::exception) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
     exit(-1);
-  }
-  elsif ($@) {
-    croak("Netradar::DB::XMLDB Error: ".$@);  
+  }  
+  elsif($@) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
     exit(-1);
   }   
   return;
 }
 
 
-sub closeDB {
-  my ($self) = @_;
-  return;
-}
-
-
 sub query {
   my ($self, $query) = @_;
-  setup($self);
-  my $results = "";
-  my $value = "";
+  $self->{FUNCTION} = "\"query\"";   
   my @resString = ();
-  my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
-  eval {
-    $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});
-    while( $results->next($value) ) {
-      push @resString, $value."\n";
-    }	
-    $value = "";
-    $self->{TRANSACTION}->commit();
-  };
-  if (my $e = catch std::exception) {
-    croak("Query " . $fullQuery . " failed\t-\t".$e->what());
-    exit( -1 );
+  if(defined $query) {
+    setup($self);
+    my $results = "";
+    my $value = "";
+    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
+    eval {
+      $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});
+      while( $results->next($value) ) {
+        push @resString, $value."\n";
+      }	
+      $value = "";
+      $self->{TRANSACTION}->commit();
+    };
+    if(my $e = catch std::exception) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }  
+    elsif($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
+      exit( -1 );
+    }     
   }
-  elsif ($@) {
-    croak("Query " . $fullQuery . " failed\t-\t".$@);
-    exit( -1 );
-  }     
-  return @resString;
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  } 
+  return @resString; 
 }
 
 
 sub count {
   my ($self, $query) = @_;
-  setup($self);
+  $self->{FUNCTION} = "\"count\""; 
   my $results;
-  my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
-  eval {
-    $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});	
-    $self->{TRANSACTION}->commit();	
-  };
-  if (my $e = catch std::exception) {
-    croak("Query " . $fullQuery . " failed\t-\t".$e->what());
-    exit( -1 );
+  if(defined $query) {
+    setup($self);
+    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
+    eval {
+      $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});	
+      $self->{TRANSACTION}->commit();	
+    };
+    if(my $e = catch std::exception) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }  
+    elsif($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
+      exit( -1 );
+    }      
   }
-  elsif ($@) {
-    croak("Query " . $fullQuery . " failed\t-\t".$@);
-    exit( -1 );
-  }      
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  } 
   return $results->size();
 }
 
 
 sub insert {
   my ($self, $content, $name) = @_;
-  setup($self);  
-  eval {
-    my $myXMLDoc = $self->{MANAGER}->createDocument();
-    $myXMLDoc->setContent($content);
-    $myXMLDoc->setName($name); 
-    $self->{CONTAINER}->putDocument($self->{TRANSACTION}, $myXMLDoc, $self->{UPDATECONTEXT}, 0);
-    $self->{TRANSACTION}->commit();
-  };
-  if (my $e = catch std::exception) {
-    croak("Insert \"" . $content . "\" failed\t-\t".$e->what());
-    exit( -1 );
-  }
-  elsif ($@) {
-    croak("Insert \"" . $content . "\" failed\t-\t".$@);
-    exit( -1 );
-  }      
+  $self->{FUNCTION} = "\"insert\"";   
+  if(defined $content && defined $name) {    
+    setup($self);  
+    eval {
+      my $myXMLDoc = $self->{MANAGER}->createDocument();
+      $myXMLDoc->setContent($content);
+      $myXMLDoc->setName($name); 
+      $self->{CONTAINER}->putDocument($self->{TRANSACTION}, $myXMLDoc, $self->{UPDATECONTEXT}, 0);
+      $self->{TRANSACTION}->commit();
+    };
+    if(my $e = catch std::exception) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }  
+    elsif($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, insert \"".$content."\" failed: \"".$@."\"");
+      exit( -1 );
+    } 
+  }     
+  else {
+    croak($self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION});
+  }   
   return;
 }
 
 
 sub remove {
   my ($self, $name) = @_;
-  setup($self);  
-  eval {
-    $self->{CONTAINER}->deleteDocument($self->{TRANSACTION}, $name, $self->{UPDATECONTEXT});
-    $self->{TRANSACTION}->commit();    
-  };
-  if (my $e = catch std::exception) {
-    croak("Remove \"" . $content . "\" failed\t-\t".$e->what());
-    exit( -1 );
-  }
-  elsif ($@) {
-    croak("remove \"" . $content . "\" failed\t-\t".$@);
-    exit( -1 );
+  $self->{FUNCTION} = "\"remove\""; 
+  if(defined $name) {  
+    setup($self);  
+    eval {
+      $self->{CONTAINER}->deleteDocument($self->{TRANSACTION}, $name, $self->{UPDATECONTEXT});
+      $self->{TRANSACTION}->commit();    
+    };
+    if(my $e = catch std::exception) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }  
+    elsif($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, remove \"".$name."\" failed: \"".$@."\"");
+      exit( -1 );
+    }   
+  }     
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
   }   
   return;
 }
@@ -172,7 +235,8 @@ sub remove {
 __END__
 =head1 NAME
 
-Netradar::DB::XMLDB - A module that provides methods for dealing with the Sleepycat [Oracle] XML database.
+Netradar::DB::XMLDB - A module that provides methods for dealing with the Sleepycat [Oracle] 
+XML database.
 
 =head1 DESCRIPTION
 
@@ -198,6 +262,13 @@ collection.  Each method may then be invoked on the object for the specific data
       \%ns
     );
 
+    # or also:
+    # 
+    # my $db = new Netradar::DB::XMLDB;
+    # $db->setEnvironment("/home/jason/Netradar/MP/SNMP/xmldb");
+    # $db->setContainer("snmpstore.dbxml");
+    # $db->setNamespaces(\%ns);    
+
     $db->openDB;
 
     print "There are " , $db->count("//nmwg:metadata") , " elements in the XMLDB.\n\n";
@@ -217,8 +288,6 @@ collection.  Each method may then be invoked on the object for the specific data
 
     $db->remove("test");
 
-    $db->closeDB;    
-
 =head1 DETAILS
 
 The Sleepycat::DbXml API is simple, but does require a lot of helper code that creates many 
@@ -231,7 +300,7 @@ mirror the API of the other Netradar::DB::* modules.
 
 =head2 new($env, $cont, \%ns)
 
-The first 2 arguments are strings, the first representing the "environment" (the directory
+The first two arguments are strings, the first representing the "environment" (the directory
 where the xmldb was created, such as '/home/jason/Netradar/MP/SNMP/xmldb'; this should not
 be confused with the actual installation directory), the second representing the "container" 
 (a specific file that lives in the environment, such as 'snmpstore.dbxml'; many containers
@@ -239,19 +308,27 @@ can live in a single environment).  The third argument is a hash reference conta
 prefix to namespace mapping.  All namespaces that may appear in the container should be
 mapped (there is no harm is sending mappings that will not be used).  
 
+=head2 setEnvironment($env)
+
+(Re-)Sets the "environment" (the directory where the xmldb was created, such as 
+'/home/jason/Netradar/MP/SNMP/xmldb'; this should not be confused with the actual 
+installation directory).
+
+=head2 setContainer($cont)
+
+(Re-)Sets the "container" (a specific file that lives in the environment, such as 'snmpstore.dbxml'; 
+many containers can live in a single environment).
+
+=head2 setNamespaces(\%ns)
+  
+(Re-)Sets the hash reference containing a prefix to namespace mapping.  All namespaces that may 
+appear in the container should be mapped (there is no harm is sending mappings that will not be 
+used).
+
 =head2 openDB
 
 Opens and initializes objects for interacting with the database such as managers and 
 containers.
-
-=head2 setup
-
-Creates transactions and contexts for actions such as queries, inserts, and deletes.
-
-=head2 closeDB
-
-The XMLDB does not need to be closed, so this function does nothing.  It is kept to 
-match the API's of the other Netradar::DB::* modules. 
 
 =head2 query($query)
 

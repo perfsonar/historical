@@ -3,103 +3,221 @@
 package Netradar::DB::SQL;
 use Carp;
 use DBI;
-
-our $VERSION = '0.01';
+@ISA = ('Exporter');
+@EXPORT = ('new', 'setName', 'setUser', 'setPass', 'openDB', 
+           'closeDB', 'query', 'count', 'insert', 'remove');
+	   
+our $VERSION = '0.02';
 
 sub new {
   my ($package, $name, $user, $pass) = @_;   
-  if(!defined $name) {
-    croak("Netradar::DB::SQL: Missing argument to constructor.\n");
-  }
   my %hash = ();
-  $hash{NAME} = $name;
-  $hash{USER} = $user;
-  $hash{PASSWORD} = $pass;
+  $hash{"FILENAME"} = "Netradar::DB::SQL";
+  $hash{"FUNCTION"} = "\"new\"";
+  if(defined $name) {
+    $hash{"NAME"} = $name;
+  }  
+  if(defined $user) {
+    $hash{"USER"} = $user;
+  }  
+  if(defined $pass) {
+    $hash{"PASS"} = $pass;
+  }      
   bless \%hash => $package;
 }
 
 
+sub setName {
+  my ($self, $name) = @_;  
+  $self->{FUNCTION} = "\"setName\"";  
+  if(defined $name) {
+    $self->{NAME} = $name;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setUser {
+  my ($self, $user) = @_;  
+  $self->{FUNCTION} = "\"setUser\"";  
+  if(defined $user) {
+    $self->{USER} = $user;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setPass {
+  my ($self, $pass) = @_;  
+  $self->{FUNCTION} = "\"setPass\"";  
+  if(defined $pass) {
+    $self->{PASS} = $pass;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
 sub openDB {
-  my ($self) = @_;   
-  $self->{HANDLE} = DBI->connect(
-    $self->{NAME},
-    $self->{USER},
-    $self->{PASSWORD}
-  ) || croak("Netradar::DB::SQL: Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASSWORD});  
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"openDB\"";  
+  eval {
+    my %attr = (
+      RaiseError => 1,
+    );	   
+    $self->{HANDLE} = DBI->connect(
+      $self->{NAME},
+      $self->{USER},
+      $self->{PASSWORD}, 
+      \%attr
+    ) || croak($self->{FILENAME}.":\t Database ".$self->{NAME}." unavailable with user ".
+               $self->{NAME}." and password ".$self->{PASSWORD}." in function ".
+	       $self->{FUNCTION});
+  };
+  if($@) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+    exit(-1);
+  }   
   return;
 }
 
 
 sub closeDB {
-  my ($self) = @_;   
-  $self->{HANDLE}->disconnect();
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"closeDB\"";  
+  eval {   
+    $self->{HANDLE}->disconnect();
+  };
+  if($@) {
+    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+    exit(-1);
+  }   
   return;
 }
 
 
 sub query {
   my ($self, $query) = @_;
+  $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
-  my $sth = $self->{HANDLE}->prepare($query);
-  $sth->execute() || 
-    croak("Netradar::DB::SQL: Query error: ", $sth->errstr);    
-  $results  = $sth->fetchall_arrayref;
+  if(defined $query) {  
+    eval {
+      my $sth = $self->{HANDLE}->prepare($query);
+      $sth->execute() || 
+        croak($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
+	      ": ".$sth->errstr."\n");
+      $results  = $sth->fetchall_arrayref;
+    };
+    if($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      exit(-1);
+    } 
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  } 
   return $results;
 }
 
 
 sub count {
   my ($self, $query) = @_;
-  my $results = (); 
-  my $sth = $self->{HANDLE}->prepare($query);
-  $sth->execute() || 
-    croak("Netradar::DB::SQL: Query error: ", $sth->errstr);    
-  $results  = $sth->fetchall_arrayref;
+  $self->{FUNCTION} = "\"count\"";  
+  my $results = -2; 
+  if(defined $query) {    
+    eval {
+      my $sth = $self->{HANDLE}->prepare($query);
+      $sth->execute() || 
+        croak($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
+	      ": ".$sth->errstr."\n");   
+      $results  = $sth->fetchall_arrayref;  
+    };      
+    if($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      exit(-1);
+    } 
+  } 
+  else { 
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  } 
   return $#{$results}+1;
 }
 
 
 sub insert {
-  my ($self, $table, $arglist, $argvalues) = @_;   
-  my @list = @{$arglist};
-  my %values = %{$argvalues};
+  my ($self, $table, $arglist, $argvalues) = @_;
+  $self->{FUNCTION} = "\"insert\"";   
+  if(defined $table && defined $arglist && defined $argvalues) {
+    my @list = @{$arglist};
+    my %values = %{$argvalues};
 
-  my $insert = "insert into " . $table . " (";
-  for(my $x = 0; $x <= $#list; $x++) {
-    if($x == 0) {
-      $insert = $insert.$list[$x];
+    my $insert = "insert into " . $table . " (";
+    for(my $x = 0; $x <= $#list; $x++) {
+      if($x == 0) {
+        $insert = $insert.$list[$x];
+      }
+      else {
+        $insert = $insert.", ".$list[$x];
+      }
     }
-    else {
-      $insert = $insert.", ".$list[$x];
-    }
-  }
-  $insert = $insert.") values (";
-  for(my $x = 0; $x <= $#list; $x++) {
-    if($x == 0) {
-      $insert = $insert."?";
-    }
-    else {
-      $insert = $insert.", ?";
-    }
-  }  
-  $insert = $insert.")";
+    $insert = $insert.") values (";
+    for(my $x = 0; $x <= $#list; $x++) {
+      if($x == 0) {
+        $insert = $insert."?";
+      }
+      else {
+        $insert = $insert.", ?";
+      }
+    }  
+    $insert = $insert.")";
 
-  my $sth = $self->{HANDLE}->prepare($insert);
-  for(my $x = 0; $x <= $#list; $x++) {
-    $sth->bind_param($x+1, $values{$list[$x]});
+    eval {
+      my $sth = $self->{HANDLE}->prepare($insert);
+      for(my $x = 0; $x <= $#list; $x++) {
+        $sth->bind_param($x+1, $values{$list[$x]});
+      }
+      $sth->execute() || 
+        croak($self->{FILENAME}.":\t insert error in function ".$self->{FUNCTION}.
+	      ": ".$sth->errstr."\n"); 
+    };
+    if($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      exit(-1);
+    }     
   }
-  $sth->execute() || 
-    croak("Netradar::DB::SQL: Insert error: ", $sth->errstr);
-  return;
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  } 
+  return;  
 }
 
 
 sub remove {
   my ($self, $delete) = @_;
-  my $results = (); 
-  my $sth = $self->{HANDLE}->prepare($delete);
-  $sth->execute() || 
-    croak("Netradar::DB::SQL: Delete error: ", $sth->errstr);    
+  $self->{FUNCTION} = "\"remove\"";
+  if(defined $delete) {
+    eval {     
+      my $sth = $self->{HANDLE}->prepare($delete);
+      $sth->execute() || 
+        croak($self->{FILENAME}.":\t delete error in function ".$self->{FUNCTION}.
+	      ": ".$sth->errstr."\n"); 
+    };
+    if($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      exit(-1);
+    }     
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }    
   return;
 }
 
@@ -113,7 +231,7 @@ Netradar::DB::SQL - A module that provides methods for dealing with common SQL d
 
 =head1 DESCRIPTION
 
-This module creates common use cases through the use of the DBI module.  The module is to 
+This module creates common use cases with the helpf of the DBI module.  The module is to 
 be treated as an object, where each instance of the object represents a direct connection 
 to a single database and collection.  Each method may then be invoked on the object for 
 the specific database.  
@@ -127,7 +245,14 @@ the specific database.
       "",
       ""
     );
-  
+
+    # or also:
+    # 
+    # my $db = new Netradar::DB::SQL;
+    # $db->setName("DBI:SQLite:dbname=/home/jason/netradar/MP/SNMP/netradar.db");
+    # $db->setUser("");
+    # $db->setPass("");    
+
     my @dbSchema = ("id", "time", "value", "eventtype", "misc");
 
     $db->openDB;
@@ -179,6 +304,21 @@ database.  The '$name' must be of the DBI connection format which specifies a 't
 database (MySQL, SQLite, etc) as well as a path or other connection method.  It is important
 that you have the proper DBI modules installed for the specific database you will be 
 attempting to access. 
+
+=head2 setName($name)
+
+(Re-)Sets the 'name' of the database (written as an DBI connection string).  The name must 
+be of the DBI connection format which specifies a 'type' of database (MySQL, SQLite, etc) as 
+well as a path or other connection method.  It is important that you have the proper DBI 
+modules installed for the specific database you will be attempting to access. 
+
+=head2 setUser($user)
+
+(Re-)Sets the username and password (if any) used to connect to the database.
+
+=head2 setPass($pass)
+
+(Re-)Sets the password (if any) used to connect to the database.
 
 =head2 openDB
 
