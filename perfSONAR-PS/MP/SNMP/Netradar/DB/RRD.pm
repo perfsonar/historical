@@ -3,59 +3,152 @@
 package Netradar::DB::RRD;
 use Carp;
 use RRDp;
-
-our $VERSION = '0.01';
+@ISA = ('Exporter');
+@EXPORT = ('new', 'setFile', 'setPath', 'setError', 'getErrorMessage', 
+           'openDB', 'closeDB', 'query', 'insert', 'firstValue', 
+	   'lastValue');
+	   
+our $VERSION = '0.02';
 
 sub new {
-  my ($package, $path, $name) = @_;   
-  if(!defined $path) {
-    croak("Netradar::DB::RRD: Missing argument 'path' to constructor.\n");
-  }
+  my ($package, $path, $name, $error) = @_;   
   my %hash = ();
-  $hash{PATH} = $path;
-  RRDp::start $path;
-  if($name) {
-    $hash{NAME} = $name;
+  $hash{"FILENAME"} = "Netradar::DB::RRD";
+  $hash{"FUNCTION"} = "\"new\"";
+  if(defined $path) {
+    $hash{"PATH"} = $path;
+    RRDp::start $path;
+  }
+  if(defined $name) {
+    $hash{"NAME"} = $name;
+  }
+  if(defined $error) {
+    if($error == 1) {
+      $RRDp::error_mode = 'catch';
+    }
+    else {
+      undef $RRDp::error_mode;
+    }
   }
   bless \%hash => $package;
 }
 
 
+sub setFile {
+  my ($self, $file) = @_;  
+  $self->{FUNCTION} = "\"setFile\"";  
+  if(defined $file) {
+    $self->{NAME} = $file;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setPath {
+  my ($self, $path) = @_;  
+  $self->{FUNCTION} = "\"setPath\"";  
+  if($self->{PATH}) {
+    my $status = RRDp::end;
+    if($status) {
+      croak($self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status.
+            "\" on closing in function ".$self->{FUNCTION});
+    }
+  }
+  if(defined $path) {
+    $self->{PATH} = $path;
+    RRDp::start $path;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setError {
+  my ($self, $error) = @_;  
+  $self->{FUNCTION} = "\"setError\"";  
+  if(defined $error) {
+    if($error == 1) {
+      $RRDp::error_mode = 'catch';
+    }
+    else {
+      undef $RRDp::error_mode;
+    }
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub getErrorMessage {
+  my ($self) = @_;
+  if($RRDp::error) {
+    return $RRDp::error;
+  }
+  else {
+    return "";
+  }
+}
+
+
 sub openDB {
-  my ($self, $name) = @_;   
-  $hash{NAME} = $name;
-  if(!defined $name) {
-    croak("Netradar::DB::RRD: Missing argument 'name' to openDB.\n");
-  }  
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"openDB\"";     
+  if(!defined $self->{PATH} && !defined $self->{NAME}) {
+    croak($self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in function ".$self->{FUNCTION});
+  }
   return;
 }
 
 
 sub closeDB {
   my ($self) = @_;   
-  my $status = RRDp::end;
-  return $status;
+  $self->{FUNCTION} = "\"closeDB\"";   
+  if(defined $self->{PATH}) {
+    my $status = RRDp::end;  
+    if($status) {
+      croak($self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status.
+            "\" on closing in function ".$self->{FUNCTION});
+  
+    }
+  }
+  else {
+    croak($self->{FILENAME}.":\trrd tool is not open in function ".$self->{FUNCTION});
+  }
+  return;
 }
 
 
 sub query {
   my ($self, $cf, $resolution, $start, $end) = @_; 
+  $self->{FUNCTION} = "\"query\"";   
   my %rrd_result = ();
-  my @rrd_headings = ();
+  my @rrd_headings = ();  
 
-  $cmd = "fetch " . $self->{NAME} . " " . $cf;
+  if($cf) {  
+    $cmd = "fetch " . $self->{NAME} . " " . $cf;
+  }    
+  else {
+    croak($self->{FILENAME}.":\tMissing argument 'cf' to ".$self->{FUNCTION});
+  }
   if($resolution) {
     $cmd = $cmd . " -r " . $resolution;
-  }
+  }    
   if($start) {
     $cmd = $cmd . " -s " . $start;
   }
   if($end) {
     $cmd = $cmd . " -e " . $end;
-  }    
+  }
   RRDp::cmd $cmd;
-  $answer = RRDp::read;     
-  
+  my $answer = RRDp::read;     
+
   my @array = split(/\n/,$$answer);
   for(my $x = 0; $x <= $#{@array}; $x++) {
     if($x == 0) {
@@ -74,20 +167,19 @@ sub query {
       }   
     }
   }
-  
   if($RRDp::error) {
-    return $RRDp::error;
+    %rrd_result = ();
+    $rrd_result{ANSWER} = $$answer;
   }
-  else {
-    return %rrd_result;
-  }    
+  return %rrd_result; 
 }
 
 
 sub insert {
   my ($self, $time, $values, $names) = @_;
+  $self->{FUNCTION} = "\"insert\"";   
   my @v = @{$values};  
-  $cmd = "update " . $self->{NAME};
+  $cmd = "updatev " . $self->{NAME};
   if($names) {
     my @n = @{$names};
     $cmd = $cmd . " -t ";
@@ -110,21 +202,15 @@ sub insert {
     }
   }   
   RRDp::cmd $cmd;
-  $answer = RRDp::read; 
-
-  if($RRDp::error) {
-    return $RRDp::error;
-  }
-  else {
-    return $$answer;
-  }  
+  my $answer = RRDp::read; 
+  return $$answer;
 }
 
 
 sub firstValue {
   my ($self) = @_;   
-  $cmd = "first " . $self->{NAME};
-  RRDp::cmd $cmd;
+  $self->{FUNCTION} = "\"firstValue\"";   
+  RRDp::cmd "first " . $self->{NAME};
   $answer = RRDp::read;   
   return $$answer;
 }
@@ -132,8 +218,8 @@ sub firstValue {
 
 sub lastValue {
   my ($self) = @_;   
-  $cmd = "last " . $self->{NAME};
-  RRDp::cmd $cmd;
+  $self->{FUNCTION} = "\"lastValue\"";     
+  RRDp::cmd "last " . $self->{NAME};
   $answer = RRDp::read;   
   return $$answer;
 }
@@ -158,8 +244,16 @@ with rrd files) to offer some common functionality.
 
     my $rrd = new Netradar::DB::RRD(
       "/usr/local/rrdtool/bin/rrdtool" , 
-      "/home/jason/rrd/stout/stout.rrd"
+      "/home/jason/rrd/stout/stout.rrd",
+      1
     );
+
+    # or also:
+    # 
+    # my $rrd = new Netradar::DB::RRD;
+    # $rrd->setFile("/home/jason/rrd/stout/stout.rrd");
+    # $rrd->setPath("/usr/local/rrdtool/bin/rrdtool");  
+    # $rrd->setError(1);  
 
     # For reference, here is the create string for the rrd file:
     #
@@ -171,8 +265,8 @@ with rrd files) to offer some common functionality.
     # DS:eth1-out:COUNTER:1:U:U \
     # RRA:AVERAGE:0.5:10:60480
 
-    # will also open a connection to a file:
-    #$rrd->openDB("/home/jason/rrd/stout/stout.rrd");
+    # will also 'open' a connection to a file:
+    $rrd->openDB();
 
     my %rrd_result = $rrd->query(
       "AVERAGE", 
@@ -181,12 +275,17 @@ with rrd files) to offer some common functionality.
       "1163525373"
     );
 
-    my @keys = keys(%rrd_result);
-    foreach $a (sort(keys(%rrd_result))) {
-      foreach $b (sort(keys(%{$rrd_result{$a}}))) {
-        print $a , " - " , $b , "\t-->" , $rrd_result{$a}{$b} , "<--\n"; 
+    if($rrd->getErrorMessage()) {
+      print "Query Error: " , $rrd->getErrorMessage() , "; query returned: " , $rrd_result{ANSWER} , "\n";
+    }
+    else {
+      my @keys = keys(%rrd_result);
+      foreach $a (sort(keys(%rrd_result))) {
+        foreach $b (sort(keys(%{$rrd_result{$a}}))) {
+          print $a , " - " , $b , "\t-->" , $rrd_result{$a}{$b} , "<--\n"; 
+        }
+        print "\n";
       }
-      print "\n";
     }
   
     my @test = ("1", "2", "3", "4");
@@ -198,14 +297,20 @@ with rrd files) to offer some common functionality.
     );
     my $insert = $rrd->insert("N", \@test, \@test2);
 
-    if($insert) {
-      print $insert , "\n";
+    if($rrd->getErrorMessage()) {
+      print "Insert Error: " , $rrd->getErrorMessage() , "; insert returned: " , $insert , "\n";
     }
 
     print "last: " , $rrd->lastValue , "\n";
+    if($rrd->getErrorMessage()) {
+      print "last Error: " , $rrd->getErrorMessage() , "\n";
+    }
 
     print "first: " , $rrd->firstValue , "\n";
-
+    if($rrd->getErrorMessage()) {
+      print "first Error: " , $rrd->getErrorMessage() , "\n";
+    }
+    
     $rrd->closeDB;    
 
 =head1 DETAILS
@@ -223,13 +328,33 @@ other Netradar::DB::* modules.
 =head2 new($path, $file)
 
 The arguments are strings, the first representing the path to the rrdtool executable, 
-the second representing an actual rrd file.  The second argument is optional, and the
-openDB($name) function is capable of setting the file as well.  
+the second representing an actual rrd file.  Both arguments are optional, and the
+'set' functions (setFile($file), setPath($path)) are capable of setting the information 
+as well.  
 
-=head2 openDB($name)
+=head2 setPath($path)
 
-Opens sets the name of the rrd file, it technically does not need to be 'opened' but
-the method name is kept for API similarity.  
+(Re-)Sets the value of the 'path' to the rrdtool executable.
+
+=head2 setFile($file)
+
+(Re-)Sets the value of the name of the rrd 'file' we wish to read from.
+
+=head2 setError($error)
+
+(Re-)Sets the value of the error variable (only 1 or 0), which allows you to utilize the
+getErrorMessage() function.
+
+=head2 getErrorMessage()
+
+Returns the value of an internal error variable ($RRDp::error) if this value happened to 
+be set after executing an rrd command.  Note that this will always return nothing if
+the error level is set to 0.
+
+=head2 openDB()
+
+Opens is used to start the reading process from an rrd file, it technically does not need to 
+be 'opened' but the method name is kept for API similarity.  
 
 =head2 closeDB
 
