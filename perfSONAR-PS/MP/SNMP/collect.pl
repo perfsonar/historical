@@ -10,15 +10,13 @@
 #                                                  #
 # ################################################ #
 use strict;
-use Net::SNMP;
-use DBI;
 use Time::HiRes qw( gettimeofday );
-use XML::XPath;
 use POSIX qw( setsid );
 
 use Netradar::Common;
 use Netradar::DB::XMLDB;
 use Netradar::DB::SQL;
+use Netradar::MP::SNMP;
 
 my $DEBUG = 1;
 my $LOGFILE ="./log/netradar-error.log";
@@ -56,6 +54,23 @@ my %metadata = ();
 #elsif($hash{"DATA_DB_TYPE"} eq "file") {
 #}
 
+		# Prepare an SNMP object for each
+		# metadata block.  (We could also
+		# try to be fancy and combine multiple
+		# variables into each query, but not
+		# this time.)
+
+my %snmp = ();
+foreach my $m (keys %metadata) {
+  $metadata{$m}{"eventType"} =~ s/snmp\.//;	  
+  $snmp{$m} = new Netradar::MP::SNMP(
+    $metadata{$m}{"hostName"}, 
+    "" ,
+    $metadata{$m}{"parameter-SNMPVersion"},
+    $metadata{$m}{"parameter-SNMPCommunity"},
+    "");
+}
+
 if(!$DEBUG) {
 		# flush the buffer
   $| = 1;
@@ -69,94 +84,68 @@ if(!$DEBUG) {
 		# 1) Open up a DB connection
 		#
 		# 2) For each metadata in the storage, 
-		#    attempt to get make an SNMP query.
+		#    use it's snmp object to make a query.
 		#
-		# 3) If the query is cool, insert into 
-		#    the DB and move on.
-								
+		# 3) insert into the resulting data into
+		#    the database
+		#
+		# 4) sleep, then start again
+
+$datadb->openDB;
+foreach my $m (keys %metadata) {
+  $snmp{$m}->setSession;
+}	
+					
 while(1) {
- 
-  $datadb->openDB;
-
   foreach my $m (keys %metadata) {
-  
-    if($metadata{$m}{"parameter-SNMPVersion"} &&
-       $metadata{$m}{"parameter-SNMPCommunity"} &&
-       $metadata{$m}{"hostName"}) {
-
-      if($DEBUG) {
-        print $metadata{$m}{"parameter-SNMPVersion"} , "\n";
-        print $metadata{$m}{"parameter-SNMPCommunity"} , "\n";
-        print $metadata{$m}{"hostName"} , "\n";	
-      }
-
-      my ($session, $error) = Net::SNMP->session(
-                             -community     => $metadata{$m}{"parameter-SNMPCommunity"},
-                             -version       => $metadata{$m}{"parameter-SNMPVersion"},
-	    	             -hostname      => $metadata{$m}{"hostName"}
-	  	           ) || die "Couldn't open SNMP session to " , $metadata{$m}{"hostName"} , "\n";
-
-      if (!defined($session)) {
-        printError($LOGFILE, $error);
-        $datadb->closeDB;
-        exit(1);
-      }
-
-      if($metadata{$m}{"eventType"} && 
-         $metadata{$m}{"ifIndex"}) {
-        
-	$metadata{$m}{"eventType"} =~ s/snmp\.//;
-	
-	my $time = time();
-        my $result = $session->get_request(
-          -varbindlist => [$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}]
-        );
-  
-        if (!defined($result)) {
-          printError($LOGFILE, $session." - ".$error);	  
-          $datadb->closeDB;
-          exit(1);
-        }
     
+    		# Record the time, then get the data.
     
-        %dbSchemaValues = (
-          id => $m, 
-          time => $time, 
-          value => $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}}, 
-          eventtype => $metadata{$m}{"parameter-eventType"},  
-          misc => ""
-        );	
-        $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
-	 
-	  
-	if($DEBUG) {
-	  print "insert into data (id, time, value, eventtype, misc) values (";
-	  print $m , ", "; 
-	  print $time , ", "; 
-	  print $result->{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} , ", "; 
-	  print $metadata{$m}{"parameter-eventType"} , ", "; 
-	  print "\"\"" , ")\n"; 	  
-	}  
-	  
-      }
-      else {
-	printError($LOGFILE, "The OID, ".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}." cannot be found.");		         
-	$session->close; 
-        $datadb->closeDB;
-	exit(1);
-      }
-      $session->close;    
+    my $time = time();    
+    my $result = $snmp{$m}->collect($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+    		
+		# if there is some sort of problem with
+		# the target, see if you can re-establish
+		# the session
+    if($result == -1) {
+      $snmp{$m}->closeSession;  
+      $snmp{$m}->setSession;
     }
     else {
-      printError($LOGFILE, "I am seeing a community of:\"".$metadata{$m}{"parameter-SNMPVersion"}."\" a version of:\"".$metadata{$m}{"parameter-SNMPCommunity"}."\" and a hostname of:\"".$metadata{$m}{"hostName"}."\" ... something is amiss."); 
-      $datadb->closeDB;
-      exit(1);
-    }
+   		# Prepare and insert into the database.
+      %dbSchemaValues = (
+        id => $m, 
+        time => $time, 
+        value => $result, 
+        eventtype => $metadata{$m}{"parameter-eventType"},  
+        misc => ""
+      );	
+      my $status = $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
+      
+      		# If the database had some sort of failure, 
+		# see if the connection can be re-established 
+      if($status == -1) {
+        $datadb->closeDB;
+	$datadb->openDB;
+      }
+
+      if($DEBUG) {
+        print "insert into data (id, time, value, eventtype, misc) values (";
+        print $m , ", "; 
+        print $time , ", "; 
+        print $result , ", "; 
+        print $metadata{$m}{"parameter-eventType"} , ", "; 
+        print "\"\"" , ")\n";
+      }     
+    } 
   }
-  $datadb->closeDB;
   sleep(1); 
 }
 
+foreach my $m (keys %metadata) {
+  $snmp{$m}->closeSession;
+}	
+$datadb->closeDB;
 
 
 # ################################################ #
