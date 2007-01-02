@@ -7,19 +7,25 @@ Installation:
 
 	Perl Modules
 	------------
-		Net::SNMP
-		DBI
 		Time::HiRes
-		XML::XPath
-		IO::File
 		use POSIX qw( setsid )	[shouldn't need to install]
-			
-			I would suggest using CPAN:
+
 		
-				perl -MCPAN -e shell
-					install MODULE_NAME
+		The following are required through the Netradar Modules
+		-------------------------------------------------------	
+			Net::SNMP
+			DBI
+			XML::XPath
+			IO::File
+
+
+		I would suggest using CPAN to install:
 		
-		Sleepycat::DbXml 'simple'
+			perl -MCPAN -e shell
+				install MODULE_NAME
+							
+		
+		Sleepycat::DbXml (This requires special instructions)
 				
                         Visit & Download:
                                 http://www.oracle.com/technology/software/products/berkeley-db/htdocs/popup/xml/2.2.13/xml-targz.html
@@ -41,35 +47,10 @@ Installation:
                         You will need to create an XMLDB directory where the collections are stored,
                         I created ~/netradar/MP/SNMP/xmldb personally, but as long as server.conf
                         points to where it is located, it doesnt matter.
-				
-	conf-store.pl
-	-------------
-		Use this to automatically generate a store.xml file
-		based on the output of your ifconfig (tested only on
-		Fedora (RH) based systems).
-	
-	values.conf
-	-----------
-		SNMP Variables to consider when making the store.xml
-		
-		store.xml
-		---------
-			Store your metadata info here, the supplied example shows
-			the 2 interfaces (in each direction direction) for a single
-			machine.  You can of course add more for different SNMP
-			variables. 		
-		
-	loadStorage.pl
-	--------------
-		Reads store.xml, and stores the contents into the XML
-		DB.  Will not insert duplicates.  This is called at
-		server startup, but really only matters whenever you
-		set up the initial environment for the XML DB		
-		
-	db.conf
-	-------
-		Database info that should reflect your database
-		setup.
+						
+	collect.conf
+	------------
+		Database and other collection related info that should reflect your setup.
 		
 		
 	SQL Files

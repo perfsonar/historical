@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -I ./Netradar
+#!/usr/bin/perl -w -I ../../lib
 # ################################################ #
 #                                                  #
 # Name:		collect.pl                         #
@@ -20,7 +20,7 @@ use Netradar::MP::SNMP;
 
 my $DEBUG = 1;
 my $LOGFILE ="./log/netradar-error.log";
-my $DBFILE = "./db.conf";
+my $DBFILE = "./collect.conf";
 
 my %hash = ();
 %hash = readConfiguration($DBFILE, \%hash);
