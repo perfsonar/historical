@@ -112,13 +112,13 @@ sub query {
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() || 
-        croak($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
+        warn($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
 	      ": ".$sth->errstr."\n");
       $results  = $sth->fetchall_arrayref;
     };
     if($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-      exit(-1);
+      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      return -1;
     } 
   }
   else {
@@ -136,13 +136,13 @@ sub count {
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() || 
-        croak($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
+        warn($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
 	      ": ".$sth->errstr."\n");   
       $results  = $sth->fetchall_arrayref;  
     };      
     if($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-      exit(-1);
+      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      return -1;
     } 
   } 
   else { 
@@ -185,18 +185,18 @@ sub insert {
         $sth->bind_param($x+1, $values{$list[$x]});
       }
       $sth->execute() || 
-        croak($self->{FILENAME}.":\t insert error in function ".$self->{FUNCTION}.
+        warn($self->{FILENAME}.":\t insert error in function ".$self->{FUNCTION}.
 	      ": ".$sth->errstr."\n"); 
     };
     if($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-      exit(-1);
+      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      return -1;
     }     
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
   } 
-  return;  
+  return 1;  
 }
 
 
@@ -207,18 +207,18 @@ sub remove {
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
       $sth->execute() || 
-        croak($self->{FILENAME}.":\t delete error in function ".$self->{FUNCTION}.
+        warn($self->{FILENAME}.":\t delete error in function ".$self->{FUNCTION}.
 	      ": ".$sth->errstr."\n"); 
     };
     if($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-      exit(-1);
+      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      return -1;
     }     
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
   }    
-  return;
+  return 1;
 }
 
 
@@ -257,19 +257,33 @@ the specific database.
 
     $db->openDB;
 
-    print "There are " , $db->count("select * from data") , " rows in the database.\n";
+    my $count = $db->count("select * from data");
+    if($count == -1) {
+      print "Error executing count statement\n";
+    }
+    else {
+      print "There are " , $db->count("select * from data") , " rows in the database.\n";
+    }
 
     my $result = $db->query("select * from data where time < 1163968390 and time > 1163968360");
-    for(my $a = 0; $a <= $#{$result}; $a++) {
-      for(my $b = 0; $b <= $#{$result->[$a]}; $b++) {
-        print "-->" , $result->[$a][$b] , "\n";
+    if($result == -1) {
+      print "Error executing query statement\n";
+    }   
+    else { 
+      for(my $a = 0; $a <= $#{$result}; $a++) {
+        for(my $b = 0; $b <= $#{$result->[$a]}; $b++) {
+          print "-->" , $result->[$a][$b] , "\n";
+        }
+        print "\n";
       }
-      print "\n";
     }
 
     my $delete = "delete from data where id = '192.168.1.4-snmp.1.3.6.1.2.1.2.2.1.16-5'";
     $delete = $delete . " and time = '1163968370'";
-    $db->remove($delete);
+    my $status = $db->remove($delete);
+    if($status == -1) {
+      print "Error executing remove statement\n";
+    }
 
     my %dbSchemaValues = (
       id => "192.168.1.4-snmp.1.3.6.1.2.1.2.2.1.16-5", 
@@ -278,7 +292,10 @@ the specific database.
       eventtype => "ifOutOctets",  
       misc => ""
     );	
-    $db->insert("data", \@dbSchema, \%dbSchemaValues);
+    $status = $db->insert("data", \@dbSchema, \%dbSchemaValues);
+    if($status == -1) {
+      print "Error executing insert statement\n";
+    }
 
     $db->closeDB;
        
@@ -331,26 +348,30 @@ Closes the handle to the database.
 =head2 query($query)
 
 The '$query' string is an SQL statement to be sent to the database.  The statement must
-of course use the proper database schema elements and be properly formed.  
+of course use the proper database schema elements and be properly formed.  Will return
+-1 on error.
 
 The results of this command are an array of database 'rows'.  
 
 =head2 count($query)
 
 The '$query' string is an SQL statement to be sent to the database.  The statement must
-of course use the proper database schema elements and be properly formed.  
+of course use the proper database schema elements and be properly formed.  Will return
+-1 on error.
 
 The results of this command are the number of result rows that WOULD be returned. 
 
 =head2 insert($table, $arglist, $argvalues)
 
 The first argument is the specific table to operate on within the database, the second and
-third arguments deal with the column names, and the values to be inserted.  
+third arguments deal with the column names, and the values to be inserted.  Will return
+1 on success, -1 on failure.
 
 =head2 remove($delete)
 
 The '$delete' string is an SQL statement to be sent to the database.  The statement 
-must of course use the proper database schema elements and be properly formed.  
+must of course use the proper database schema elements and be properly formed.  Will 
+return 1 on success, -1 on failure.
 
 =head1 SEE ALSO
 
