@@ -188,7 +188,7 @@ sub collectVariables {
     );
     if(!defined($self->{RESULT})) {
       warn($self->{FILENAME}.":\tSNMP error in ".$self->{FUNCTION});
-      return -1;
+      return ('error' => -1);
     }    
     else {
       return %{$self->{RESULT}};
@@ -196,7 +196,7 @@ sub collectVariables {
   }
   else {
     warn($self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION});
-    return -1;
+      return ('error' => -1);
   }      
 }
 
