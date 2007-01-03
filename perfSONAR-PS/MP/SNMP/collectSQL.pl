@@ -16,7 +16,6 @@ use POSIX qw( setsid );
 use Netradar::Common;
 use Netradar::DB::XMLDB;
 use Netradar::DB::SQL;
-use Netradar::DB::RRD;
 use Netradar::MP::SNMP;
 
 my $DEBUG = 0;
@@ -27,7 +26,7 @@ if($#ARGV == 0) {
 }
 
 my $LOGFILE ="./log/netradar-error.log";
-my $DBFILE = "./collect.conf";
+my $DBFILE = "./collectSQL.conf";
 
 		# Read in configuration information
 my %hash = ();
@@ -40,39 +39,22 @@ my %metadata = ();
 %metadata = readMetadata(\%metadata);
 
 		# setup 'data' database connection
-my $datadb = "";
-my @dbSchema = ();
-my %dbSchemaValues = ();
-if($hash{"DATA_DB_TYPE"} eq "mysql") {
-  $datadb = new Netradar::DB::SQL(
-    $hash{"DATA_DB_NAME"}, 
-    $hash{"DATA_DB_USER"},
-    $hash{"DATA_DB_PASS"}
-  );
+my $datadb = new Netradar::DB::SQL(
+  $hash{"DATA_DB_NAME"}, 
+  $hash{"DATA_DB_USER"},
+  $hash{"DATA_DB_PASS"}
+);
   
-  @dbSchema = ("id", "time", "value", "eventtype", "misc");
-  %dbSchemaValues = (
-    id => "", 
-    time => "", 
-    value => "", 
-    eventtype => "",  
-    misc => ""
-  );  
-}
-elsif($hash{"DATA_DB_TYPE"} eq "rrd") {
-  $datadb = new Netradar::DB::RRD(
-    $hash{"DATA_DB_NAME"} , 
-    $hash{"DATA_DB_FILE"},
-    1
-  );
-}
-
+my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+my %dbSchemaValues = (
+  id => "", 
+  time => "", 
+  value => "", 
+  eventtype => "",  
+  misc => ""
+);  
 		# Prepare an SNMP object for each
-		# metadata block.  (We could also
-		# try to be fancy and combine multiple
-		# variables into each query, but not
-		# this time.)
-
+		# metadata block.
 my %snmp = ();
 foreach my $m (keys %metadata) {
   $metadata{$m}{"eventType"} =~ s/snmp\.//;	  
@@ -126,45 +108,29 @@ while(1) {
     }
     else {
    		# Prepare and insert into the database.
-      if($hash{"DATA_DB_TYPE"} eq "mysql") {
-        %dbSchemaValues = (
-          id => $m, 
-          time => $time, 
-          value => $result, 
-          eventtype => $metadata{$m}{"parameter-eventType"},  
-          misc => ""
-        );	
-        my $status = $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
+      %dbSchemaValues = (
+        id => $m, 
+        time => $time, 
+        value => $result, 
+        eventtype => $metadata{$m}{"parameter-eventType"},  
+        misc => ""
+      );	
+      my $status = $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
       
       		# If the database had some sort of failure, 
 		# see if the connection can be re-established 
-        if($status == -1) {
-          $datadb->closeDB;
-	  $datadb->openDB;
-        }
-
-        if($DEBUG) {
-          print "insert into data (id, time, value, eventtype, misc) values (";
-          print $m , ", "; 
-          print $time , ", "; 
-          print $result , ", "; 
-          print $metadata{$m}{"parameter-eventType"} , ", "; 
-          print "\"\"" , ")\n";
-        }
+      if($status == -1) {
+        $datadb->closeDB;
+	$datadb->openDB;
       }
-      elsif($hash{"DATA_DB_TYPE"} eq "rrd") {
-        
-	my @template = ($metadata{$m}{"ifName"}."-".$metadata{$m}{"direction"});
-	my @insert = ();
-	push @insert, $result;
-	
-	#my $insert = $datadb->insert($time, \@insert, \@template);
-        #if($datadb->getErrorMessage()) {
-        #  print "Insert Error: " , $datadb->getErrorMessage() , "; insert returned: " , $insert , "\n";
-        #}	
-        if($DEBUG) {
-          print "Insert " , $metadata{$m}{"ifName"}."-".$metadata{$m}{"direction"} , " with value " , $result , "\n";
-        }
+
+      if($DEBUG) {
+        print "insert into data (id, time, value, eventtype, misc) values (";
+        print $m , ", "; 
+        print $time , ", "; 
+        print $result , ", "; 
+        print $metadata{$m}{"parameter-eventType"} , ", "; 
+        print "\"\"" , ")\n";
       }
     } 
   }
@@ -214,12 +180,7 @@ sub readMetadata {
     snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
   );
   
-  if($hash{"METADATA_DB_TYPE"} eq "mysql") {
-    my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
-    printError($LOGFILE, $msg);
-    exit(1);  
-  }
-  elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
+  if($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
     my $metadatadb = new Netradar::DB::XMLDB(
       $hash{"METADATA_DB_NAME"}, 
       $hash{"METADATA_DB_FILE"},

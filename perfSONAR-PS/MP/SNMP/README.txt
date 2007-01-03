@@ -1,6 +1,6 @@
 Version:
 --------
-	20061115
+	20070103
 
 Installation:
 -------------
@@ -8,24 +8,19 @@ Installation:
 	Perl Modules
 	------------
 		Time::HiRes
-		use POSIX qw( setsid )	[shouldn't need to install]
-
-		
-		The following are required through the Netradar Modules
-		-------------------------------------------------------	
-			Net::SNMP
-			DBI
-			XML::XPath
-			IO::File
-
+		Net::SNMP
+		DBI
+		XML::XPath
+		IO::File
 
 		I would suggest using CPAN to install:
 		
 			perl -MCPAN -e shell
 				install MODULE_NAME
 							
+		RRDp (Installed with rrdtool)
 		
-		Sleepycat::DbXml (This requires special instructions)
+		Sleepycat::DbXml
 				
                         Visit & Download:
                                 http://www.oracle.com/technology/software/products/berkeley-db/htdocs/popup/xml/2.2.13/xml-targz.html
@@ -79,7 +74,7 @@ Usage:
 ------
 	Collection:
 	-----------
-		./collect.pl (Functions as a daemon, will background automatically)
+		./collect.pl (-v for debug [non background] mode)
 
 FAQ:
 ----

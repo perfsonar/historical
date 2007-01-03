@@ -15,7 +15,6 @@ use POSIX qw( setsid );
 
 use Netradar::Common;
 use Netradar::DB::XMLDB;
-use Netradar::DB::SQL;
 use Netradar::DB::RRD;
 use Netradar::MP::SNMP;
 
@@ -27,7 +26,7 @@ if($#ARGV == 0) {
 }
 
 my $LOGFILE ="./log/netradar-error.log";
-my $DBFILE = "./collect.conf";
+my $DBFILE = "./collectRRD.conf";
 
 		# Read in configuration information
 my %hash = ();
@@ -39,49 +38,39 @@ my %hash = ();
 my %metadata = ();
 %metadata = readMetadata(\%metadata);
 
-		# setup 'data' database connection
-my $datadb = "";
-my @dbSchema = ();
-my %dbSchemaValues = ();
-if($hash{"DATA_DB_TYPE"} eq "mysql") {
-  $datadb = new Netradar::DB::SQL(
-    $hash{"DATA_DB_NAME"}, 
-    $hash{"DATA_DB_USER"},
-    $hash{"DATA_DB_PASS"}
-  );
-  
-  @dbSchema = ("id", "time", "value", "eventtype", "misc");
-  %dbSchemaValues = (
-    id => "", 
-    time => "", 
-    value => "", 
-    eventtype => "",  
-    misc => ""
-  );  
-}
-elsif($hash{"DATA_DB_TYPE"} eq "rrd") {
-  $datadb = new Netradar::DB::RRD(
-    $hash{"DATA_DB_NAME"} , 
-    $hash{"DATA_DB_FILE"},
-    1
-  );
-}
+		# setup 'data' database connection to
+		# the rrd file, the values should be in
+		# the same order as when created (this
+		# designates a 'template')
+my @dbSchema = ("eth0-in", "eth0-out");
 
+		# Map the oid values to the DS names
+my %dbSchemaValues = (
+  'eth0-in' => "1.3.6.1.2.1.2.2.1.10.2", 
+  'eth0-out' => "1.3.6.1.2.1.2.2.1.16.2", 
+  'eth1-in' => "1.3.6.1.2.1.2.2.1.10.4", 
+  'eth1-out' => "1.3.6.1.2.1.2.2.1.16.4"
+); 
+
+my $datadb = new Netradar::DB::RRD(
+  $hash{"DATA_DB_NAME"} , 
+  $hash{"DATA_DB_FILE"},
+  1
+);
 		# Prepare an SNMP object for each
-		# metadata block.  (We could also
-		# try to be fancy and combine multiple
-		# variables into each query, but not
-		# this time.)
-
+		# metadata block.
 my %snmp = ();
 foreach my $m (keys %metadata) {
-  $metadata{$m}{"eventType"} =~ s/snmp\.//;	  
-  $snmp{$m} = new Netradar::MP::SNMP(
-    $metadata{$m}{"hostName"}, 
-    "" ,
-    $metadata{$m}{"parameter-SNMPVersion"},
-    $metadata{$m}{"parameter-SNMPCommunity"},
-    "");
+  $metadata{$m}{"eventType"} =~ s/snmp\.//;
+  if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
+    $snmp{$metadata{$m}{"hostName"}} = new Netradar::MP::SNMP(
+      $metadata{$m}{"hostName"}, 
+      "" ,
+      $metadata{$m}{"parameter-SNMPVersion"},
+      $metadata{$m}{"parameter-SNMPCommunity"},
+      "");
+  }
+  $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
 }
 
 if(!$DEBUG) {
@@ -96,83 +85,55 @@ if(!$DEBUG) {
 		#
 		# 1) Open up a DB connection
 		#
-		# 2) For each metadata in the storage, 
-		#    use it's snmp object to make a query.
+		# 2) For each SNMP object, collect the data
 		#
 		# 3) insert into the resulting data into
-		#    the database
+		#    the rrd file
 		#
 		# 4) sleep, then start again
 
 $datadb->openDB;
-foreach my $m (keys %metadata) {
-  $snmp{$m}->setSession;
+foreach my $s (keys %snmp) {
+  $snmp{$s}->setSession;
 }	
 					
 while(1) {
-  foreach my $m (keys %metadata) {
+  foreach my $s (keys %snmp) {
+    my $time = time();   
     
-    		# Record the time, then get the data.
-    
-    my $time = time();    
-    my $result = $snmp{$m}->collect($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-    		
+    my %results = ();
+    %results = $snmp{$s}->collectVariables;
+
 		# if there is some sort of problem with
 		# the target, see if you can re-establish
 		# the session
-    if($result == -1) {
-      $snmp{$m}->closeSession;  
-      $snmp{$m}->setSession;
+    if(defined $results{"error"} && $results{"error"} == -1) {  
+      $snmp{$s}->closeSession;  
+      $snmp{$s}->setSession;
     }
     else {
-   		# Prepare and insert into the database.
-      if($hash{"DATA_DB_TYPE"} eq "mysql") {
-        %dbSchemaValues = (
-          id => $m, 
-          time => $time, 
-          value => $result, 
-          eventtype => $metadata{$m}{"parameter-eventType"},  
-          misc => ""
-        );	
-        my $status = $datadb->insert("data", \@dbSchema, \%dbSchemaValues);
-      
-      		# If the database had some sort of failure, 
-		# see if the connection can be re-established 
-        if($status == -1) {
-          $datadb->closeDB;
-	  $datadb->openDB;
-        }
+      my @final = ();
+      foreach my $value (@dbSchema) {
+        push @final, "$results{$dbSchemaValues{$value}}";
+      }
+      my $insert = $datadb->insert($time, \@final, \@dbSchema);
 
-        if($DEBUG) {
-          print "insert into data (id, time, value, eventtype, misc) values (";
-          print $m , ", "; 
-          print $time , ", "; 
-          print $result , ", "; 
-          print $metadata{$m}{"parameter-eventType"} , ", "; 
-          print "\"\"" , ")\n";
+      if($DEBUG) {
+        for(my $x = 0; $x <= $#dbSchema; $x++) {
+          print $dbSchema[$x] , "-" , $final[$x] , "\n";
         }
+        print "\n";
+      }    
+      if($datadb->getErrorMessage()) {
+	printError($LOGFILE, "Insert Error: ".$datadb->getErrorMessage()."; insert returned: ".$insert);	
       }
-      elsif($hash{"DATA_DB_TYPE"} eq "rrd") {
-        
-	my @template = ($metadata{$m}{"ifName"}."-".$metadata{$m}{"direction"});
-	my @insert = ();
-	push @insert, $result;
-	
-	#my $insert = $datadb->insert($time, \@insert, \@template);
-        #if($datadb->getErrorMessage()) {
-        #  print "Insert Error: " , $datadb->getErrorMessage() , "; insert returned: " , $insert , "\n";
-        #}	
-        if($DEBUG) {
-          print "Insert " , $metadata{$m}{"ifName"}."-".$metadata{$m}{"direction"} , " with value " , $result , "\n";
-        }
-      }
-    } 
+    }
   }
   sleep(1); 
 }
 
-foreach my $m (keys %metadata) {
-  $snmp{$m}->closeSession;
+foreach my $s (keys %snmp) {
+  $snmp{$s}->closeSession;
 }	
 $datadb->closeDB;
 
