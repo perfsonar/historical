@@ -41,4 +41,8 @@
     </nmwg:parameters>
   </nmwg:metadata>
 
+  <nmwg:data id="data1" metadataIdRef="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
+
+  <nmwg:data id="data2" metadataIdRef="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
+
 </nmwg:store>

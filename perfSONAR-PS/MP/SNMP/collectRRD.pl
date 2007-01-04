@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w -I ../../lib
 # ################################################ #
 #                                                  #
-# Name:		collect.pl                         #
+# Name:		collectRRD.pl                      #
 # Author:	Jason Zurawski                     #
 # Contact:	zurawski@eecis.udel.edu            #
 # Args:		N/A                                #
@@ -14,6 +14,7 @@ use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 
 use Netradar::Common;
+use Netradar::DB::File;
 use Netradar::DB::XMLDB;
 use Netradar::DB::RRD;
 use Netradar::MP::SNMP;
