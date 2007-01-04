@@ -4,8 +4,7 @@ package Netradar::DB::XMLDB;
 use Carp;
 use Sleepycat::DbXml 'simple';
 @ISA = ('Exporter');
-@EXPORT = ('new', 'setEnvironment', 'setContainer', 'setNamespaces', 
-           'openDB', 'query', 'count', 'insert', 'remove');
+@EXPORT = ();
 
 our $VERSION = '0.02';
 
@@ -68,25 +67,29 @@ sub openDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"openDB\"";   
   eval {
-    my $env = new DbEnv(0);
-    $env->set_cachesize(0, 64 * 1024, 1);
-    $env->open(
+    $self->{ENV} = new DbEnv(0);
+    $self->{ENV}->set_cachesize(0, 64 * 1024, 1);
+    $self->{ENV}->open(
       $self->{ENVIRONMENT},
       Db::DB_INIT_MPOOL|Db::DB_CREATE|Db::DB_INIT_LOCK|Db::DB_INIT_LOG|Db::DB_INIT_TXN
-    );  
-    $self->{MANAGER} = new XmlManager($env);
+    );   
+    $self->{MANAGER} = new XmlManager($self->{ENV});
     $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
     $self->{CONTAINER} = $self->{MANAGER}->openContainer(
       $self->{TRANSACTION}, 
       $self->{CONTAINERFILE}, 
-      Db::DB_CREATE
+      Db::DB_CREATE|Db::DB_DIRTY_READ
     );
     $self->{TRANSACTION}->commit();
   };
   if(my $e = catch std::exception) {
     croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
     exit(-1);
-  }  
+  }
+  elsif($e = catch DbException) {
+    croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+    exit(-1);
+  }        
   elsif($@) {
     croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
     exit(-1);
@@ -94,40 +97,21 @@ sub openDB {
 }
 
 
-sub setup {
-  my ($self) = @_;
-  $self->{FUNCTION} = "\"setup\"";   
-  eval {
-    $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
-    $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();            
-    $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
-    foreach my $prefix (keys %{$self->{NAMESPACES}}) {
-      $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
-    }
-  };
-  if(my $e = catch std::exception) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-    exit(-1);
-  }  
-  elsif($@) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-    exit(-1);
-  }   
-  return;
-}
-
-
 sub query {
-  my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"query\"";   
+  my ($self, $query) = @_; 
+  $self->{FUNCTION} = "\"query\"";  
   my @resString = ();
   if(defined $query) {
-    setup($self);
     my $results = "";
     my $value = "";
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
     eval {
-      $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});
+      $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
+      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+        $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
+      }          
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();
+      $results = $self->{MANAGER}->query($self->{TRANSACTION}, $fullQuery, $self->{QUERYCONTEXT});
       while( $results->next($value) ) {
         push @resString, $value."\n";
       }	
@@ -137,7 +121,11 @@ sub query {
     if(my $e = catch std::exception) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
       exit(-1);
-    }  
+    } 
+    elsif($e = catch DbException) {
+      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }         
     elsif($@) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
       exit( -1 );
@@ -151,20 +139,28 @@ sub query {
 
 
 sub count {
-  my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"count\""; 
+  my ($self, $query) = @_; 
+  $self->{FUNCTION} = "\"count\"";
   my $results;
   if(defined $query) {
-    setup($self);
-    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
-    eval {
-      $results = $self->{MANAGER}->query($fullQuery, $self->{QUERYCONTEXT});	
+    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";    
+    eval {            
+      $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
+      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+        $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
+      }
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();            
+      $results = $self->{MANAGER}->query($self->{TRANSACTION}, $fullQuery, $self->{QUERYCONTEXT});	
       $self->{TRANSACTION}->commit();	
     };
     if(my $e = catch std::exception) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
       exit(-1);
     }  
+    elsif($e = catch DbException) {
+      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }        
     elsif($@) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
       exit( -1 );
@@ -177,15 +173,16 @@ sub count {
 }
 
 
-sub insert {
+sub insertIntoContainer {
   my ($self, $content, $name) = @_;
-  $self->{FUNCTION} = "\"insert\"";   
+  $self->{FUNCTION} = "\"insertIntoContainer\"";
   if(defined $content && defined $name) {    
-    setup($self);  
-    eval {
+    eval {        
       my $myXMLDoc = $self->{MANAGER}->createDocument();
       $myXMLDoc->setContent($content);
       $myXMLDoc->setName($name); 
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();     
+      $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();       
       $self->{CONTAINER}->putDocument($self->{TRANSACTION}, $myXMLDoc, $self->{UPDATECONTEXT}, 0);
       $self->{TRANSACTION}->commit();
     };
@@ -193,6 +190,10 @@ sub insert {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
       exit(-1);
     }  
+    elsif($e = catch DbException) {
+      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }        
     elsif($@) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, insert \"".$content."\" failed: \"".$@."\"");
       exit( -1 );
@@ -205,12 +206,52 @@ sub insert {
 }
 
 
+sub insertElement {
+  my ($self, $query, $content) = @_;     
+  $self->{FUNCTION} = "\"insertElement\""; 
+  if(defined $content) {          
+    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";     
+    eval {
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();             
+      $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
+      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+        $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
+      }
+      my $results = $self->{MANAGER}->query($self->{TRANSACTION}, $fullQuery, $self->{QUERYCONTEXT});
+      my $myXMLMod = $self->{MANAGER}->createModify();
+      my $myXMLQueryExpr = $self->{MANAGER}->prepare($self->{TRANSACTION}, $fullQuery, $self->{QUERYCONTEXT});
+      $myXMLMod->addAppendStep($myXMLQueryExpr, $myXMLMod->Element, "", $content, -1);
+      $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();       
+      $myXMLMod->execute($self->{TRANSACTION}, $results, $self->{QUERYCONTEXT}, $self->{UPDATECONTEXT});
+      $self->{TRANSACTION}->commit();
+    };
+    if(my $e = catch std::exception) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }  
+    elsif($e = catch DbException) {
+      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }    
+    elsif($@) {
+      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
+      exit( -1 );
+    }     
+  }     
+  else {
+    croak($self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION});
+  }   
+  return;
+}
+
+
 sub remove {
   my ($self, $name) = @_;
-  $self->{FUNCTION} = "\"remove\""; 
+  $self->{FUNCTION} = "\"remove\"";
   if(defined $name) {  
-    setup($self);  
     eval {
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
+      $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();     
       $self->{CONTAINER}->deleteDocument($self->{TRANSACTION}, $name, $self->{UPDATECONTEXT});
       $self->{TRANSACTION}->commit();    
     };
@@ -218,6 +259,10 @@ sub remove {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
       exit(-1);
     }  
+    elsif($e = catch DbException) {
+      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
+      exit(-1);
+    }    
     elsif($@) {
       croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, remove \"".$name."\" failed: \"".$@."\"");
       exit( -1 );
@@ -284,7 +329,22 @@ collection.  Each method may then be invoked on the object for the specific data
     }  
 
     my $xml = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"test\" />";
-    $db->insert($xml, "test");
+    $db->insertIntoContainer($xml, "test");
+
+    my $xml2 = "<nmwg:subject xmlns:nmwg='http://ggf.org/ns/nmwg/base/2.0/'/>";
+    $db->insertElement("/nmwg:metadata[\@id='test']", $xml2);
+
+    print "There are " , $db->count("//nmwg:metadata") , " elements in the XMLDB.\n\n";
+
+    my @resultsString = $db->query("//nmwg:metadata");   
+    if($#resultsString != -1) {    
+      for(my $x = 0; $x <= $#resultsString; $x++) {	
+        print $x , ": " , $resultsString[$x], "\n";
+      }
+    }
+    else {
+      print "Nothing Found.\n";
+    } 
 
     $db->remove("test");
 
@@ -338,7 +398,7 @@ The string $query must be an XPath expression to be sent to the database.  Examp
   
     or
     
-  //nmwg:parameter[@name="SNMPVersion" && @value="1"]
+  //nmwg:parameter[@name="SNMPVersion" and @value="1"]
   
 Results are returned as an array of strings.
 
@@ -348,12 +408,35 @@ The string $query must also be an XPath expression that is sent to the database.
 The result of this expression is simple the number of elements that match the 
 query.
 
-=head2 insert($content, $name)
+=head2 insertIntoContainer($content, $name)
 
 The first argument, '$content', is XML markup in string form.  It should of course be
 well formed.  The second argument, '$name', is the name to be used in the database
 for this content.  Think of this as the 'primary key'.  Most times the 'id' field of
-the XML element can be used for the name safely.  
+the XML element can be used for the name safely.  Note that this will insert the
+item in question DIRECTLY into the container, it will not be the child of any 
+elements.  
+
+=head insertElement($xquery, $content)
+
+The first argument represents an XQuery expression (the results of which should
+be where you wish to place the XML element), the second argument is the well formed
+chunk of XML that is to be inserted.  For example, here is a sample of the XML already
+in the container (store.dbxml):
+
+<a>
+  <b id='1' />
+  <b id='2' />
+</a>
+
+To insert a child "<c atr='1'/>" as a child of "<b id='2'>", we first need to construct the
+proper XQuery expression:
+
+/a/b[@id='2']
+
+The call would then look like:
+
+db->insertElement("/a/b[@id='2']", "<c atr='1'/>");
 
 =head2 remove($name)
 

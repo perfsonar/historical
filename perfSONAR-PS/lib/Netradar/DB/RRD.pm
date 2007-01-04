@@ -4,9 +4,7 @@ package Netradar::DB::RRD;
 use Carp;
 use RRDp;
 @ISA = ('Exporter');
-@EXPORT = ('new', 'setFile', 'setPath', 'setError', 'getErrorMessage', 
-           'openDB', 'closeDB', 'query', 'insert', 'firstValue', 
-	   'lastValue');
+@EXPORT = ();
 	   
 our $VERSION = '0.02';
 

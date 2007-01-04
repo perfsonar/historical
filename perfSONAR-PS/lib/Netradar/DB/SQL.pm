@@ -4,8 +4,7 @@ package Netradar::DB::SQL;
 use Carp;
 use DBI;
 @ISA = ('Exporter');
-@EXPORT = ('new', 'setName', 'setUser', 'setPass', 'openDB', 
-           'closeDB', 'query', 'count', 'insert', 'remove');
+@EXPORT = ();
 	   
 our $VERSION = '0.02';
 

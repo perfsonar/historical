@@ -4,9 +4,7 @@ package Netradar::MP::SNMP;
 use Carp;
 use Net::SNMP;
 @ISA = ('Exporter');
-@EXPORT = ('new', 'setHost', 'setPort' , 'setVersion', 'setCommunity', 'setSession', 
-           'setVariables', 'setVariable', 'removeVariables', 'removeVariable', 
-	   'collectVariables', 'collect', 'closeSession');
+@EXPORT = ();
 
 our $VERSION = '0.02';
 

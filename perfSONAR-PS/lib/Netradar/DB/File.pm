@@ -5,7 +5,7 @@ use Carp;
 use IO::File;
 use XML::XPath;
 @ISA = ('Exporter');
-@EXPORT = ('new', 'setFile', 'setNamespaces', 'openDB', 'closeDB', 'query', 'count');
+@EXPORT = ();
 
 our $VERSION = '0.02';
 
