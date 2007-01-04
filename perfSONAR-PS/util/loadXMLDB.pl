@@ -114,6 +114,47 @@ else {
         }
       }   
     } 	
+    
+    if(&howMany($theMgr, $container->getName(), "//nmwg:data", $context2 ) == 0) {      
+
+				# get the contents of the $XMLFILE into
+				# string form.
+      my $xml = &readXML($XMLFILE);  
+  
+      my $xp = XML::XPath->new( xml => $xml );
+      $xp->clear_namespaces();      
+      foreach my $prefix (keys %ns) {
+        $xp->set_namespace($prefix, $ns{$prefix});
+      }      
+	  
+	  			# find all of the metadata elements
+      my $nodeset = $xp->find('/nmwg:store/nmwg:data');
+
+      if($nodeset->size() <= 0) {
+        print "Data elements not found or in wrong namespace.\n";
+      }
+      else {
+				# iterate over each found metadata element			
+        foreach my $node ($nodeset->get_nodelist) {
+	  
+				# Grab the md id (and anything else that is an 
+				# attribute of the md, maybe we can use them 
+				# later...  
+          my %md = ();
+          foreach my $attr2 ($node->getAttributes) {
+            $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr2->getLocalName} = $attr2->getNodeValue;
+          }   
+	
+          my $txn = $theMgr->createTransaction();
+          my $myXMLDoc = $theMgr->createDocument();
+          $myXMLDoc->setContent(XML::XPath::XMLParser::as_string($node));
+          $myXMLDoc->setName($md{"nmwg:data-id"});
+          $container->putDocument($txn, $myXMLDoc, $updateContext, 0);
+          $txn->commit();
+        }
+      }   
+    }     
+    
   };
   if (my $e = catch std::exception) {
     warn "Error adding XML data to container $XMLDBCONT\n" ;
