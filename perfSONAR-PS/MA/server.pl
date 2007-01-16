@@ -194,7 +194,11 @@ sub server {
       my $xml = "";
       my $output = new IO::File(">$ofile");
 
-      if($request->uri eq '/' && $request->method eq "POST") {
+      #if($request->uri eq '/' && $request->method eq "POST") {
+      if($request->method eq "POST") {
+        $owner = $request->uri;
+        $owner =~ s|/||;
+
         $writer = new XML::Writer(NAMESPACES => 4,
                                   PREFIX_MAP => {$soap_env => "SOAP-ENV",
                                                  $soap_enc => "SOAP-ENC",
@@ -248,7 +252,7 @@ sub server {
         }
         else {
           foreach my $node ($nodeset->get_nodelist) {
-            $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node));
+            $writer = $message->message($writer, XML::XPath::XMLParser::as_string($node), $owner);
           }
         }
       }

@@ -30,7 +30,7 @@ sub new {
 # Purpose:	process nmwg messages
 # ################################################ #
 sub message {
-	($class, $writer, $rawxml) = @_;
+	($class, $writer, $rawxml, $owner) = @_;
 
 	# Identify specialized messages here
 	# (pronounced "giant hack")
@@ -223,9 +223,17 @@ sub message {
 						$xp->set_namespace('nmwgt', 'http://ggf.org/ns/nmwg/topology/2.0/');
 						$xp->set_namespace('ping', 'http://ggf.org/ns/nmwg/tools/ping/2.0/');
 
-						$nodeset = $xp->find('//nmwg:metadata');
+						#$nodeset = $xp->find('//nmwg:metadata');
+                                                # giant hack to support another domain until there is another way how to select from store
+                                                if ($owner eq 'USLHCNET') {
+                                                        $nodeset = $xp->find('//nmwg:metadata[contains(@id,"USLHCNET") or contains(@id, "CERN-FERMI") or contains(@id, "CERN-BNL")]');
+                                                } else {
+                                                        $nodeset = $xp->find('//nmwg:metadata[contains(@id,"CERN-T0") or contains(@id, "S513")]');
+                                                }
+
 						if($nodeset->size() <= 0) {
-							$writer->characters("Metadata element not found or in wrong namespace.");
+							#$writer->characters("Metadata element not found or in wrong namespace.");
+                                                        print STDERR "Metadata element not found or in wrong namespace.\n";
 						}
 						else {
 							foreach my $node ($nodeset->get_nodelist) {
@@ -273,7 +281,7 @@ sub message {
 								$cooked = genuid();
 
 								eval {								
-									$sel = "select service_name, to_char(ts,'yyyy-mm-dd\"T\"hh24:mi:ss')||SESSIONTIMEZONE, ifoperstatus from spectrum.mon where service_name=\'" . $mdId . "\'";
+									$sel = "select service_name, to_char(ts,'yyyy-mm-dd\"T\"hh24:mi:ss')||SESSIONTIMEZONE, ifoperstatus, ifadminstatus from spectrum.mon where service_name=\'" . $mdId . "\'";
 									#$sel = "select * from data where id=\"" . $mdId . "\" and ";
 									#$sel = $sel . "eventtype=\"" . $eventType . "\"";
 
@@ -414,11 +422,13 @@ sub message {
 											else {
 												$value_string = 'Down';
 											}
+                                                                                        if($array_ref->[$z][3] == 1) {
+                                                                                                $adminstatus_value_string = 'NormalOperation';
+                                                                                        }
+                                                                                        else {  
+                                                                                                $adminstatus_value_string = 'Maintenance';
+                                                                                        }
 											$isotime = $array_ref->[$z][1];
-											# the Oracle formatter wouldn't put the T in the
-											# ISO timestamp, so there is a comma.
-											#$isotime =~ s/\,/T/;
-											#$isotime = "$isotime+1:00";
 											$writer->startTag("ifevt:datum",
 													  "timeType" => "ISO",
 													  "timeValue" => $isotime);
@@ -426,7 +436,7 @@ sub message {
 											$writer->characters($value_string);
 											$writer->endTag("ifevt:stateOper");
 											$writer->startTag("ifevt:stateAdmin");
-											$writer->characters("Unknown");
+											$writer->characters($adminstatus_value_string);
 											$writer->endTag("ifevt:stateAdmin");
 											$writer->endTag("ifevt:datum");
 										}
