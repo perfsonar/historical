@@ -273,7 +273,7 @@ sub message {
 								$cooked = genuid();
 
 								eval {								
-									$sel = "select service_name, to_char(ts,'yyyy-mm-dd,hh24:mi:ss'), ifoperstatus from spectrum.mon where service_name=\'" . $mdId . "\'";
+									$sel = "select service_name, to_char(ts,'yyyy-mm-dd\"T\"hh24:mi:ss')||SESSIONTIMEZONE, ifoperstatus from spectrum.mon where service_name=\'" . $mdId . "\'";
 									#$sel = "select * from data where id=\"" . $mdId . "\" and ";
 									#$sel = $sel . "eventtype=\"" . $eventType . "\"";
 
@@ -417,8 +417,8 @@ sub message {
 											$isotime = $array_ref->[$z][1];
 											# the Oracle formatter wouldn't put the T in the
 											# ISO timestamp, so there is a comma.
-											$isotime =~ s/\,/T/;
-											$isotime = "$isotime+1:00";
+											#$isotime =~ s/\,/T/;
+											#$isotime = "$isotime+1:00";
 											$writer->startTag("ifevt:datum",
 													  "timeType" => "ISO",
 													  "timeValue" => $isotime);
