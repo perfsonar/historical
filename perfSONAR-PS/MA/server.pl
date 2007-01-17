@@ -194,31 +194,30 @@ sub server {
       my $xml = "";
       my $output = new IO::File(">$ofile");
 
-      #if($request->uri eq '/' && $request->method eq "POST") {
-      if($request->method eq "POST") {
-        $owner = $request->uri;
-        $owner =~ s|/||;
+      $owner = $request->uri;
+      $owner =~ s|/||;
 
-        $writer = new XML::Writer(NAMESPACES => 4,
-                                  PREFIX_MAP => {$soap_env => "SOAP-ENV",
-                                                 $soap_enc => "SOAP-ENC",
-                                                 $xsd => "xsd",
-                                                 $xsi => "xsi",
-                                                 $namespace => "message"},
-                                  UNSAFE => 1, OUTPUT => $output, DATA_MODE => 1, DATA_INDENT => 2);
-        $writer->startTag([$soap_env, "Envelope"],
-                          "xmlns:SOAP-ENC" => $soap_enc,
-                          "xmlns:xsd" => $xsd,
-                          "xmlns:xsi" => $xsi);
-        $writer->emptyTag([$soap_env, "Header"]);
-        $writer->startTag([$soap_env, "Body"]);
-        $writer->startTag("nmwg:message", "type" => "response",
-                          "xmlns:nmwg" => "http://ggf.org/ns/nmwg/base/2.0/",
-													"xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
-                          "xmlns:nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/",
-                          "xmlns:nmtm" => "http://ggf.org/ns/nmwg/time/2.0/",
-													"xmlns:ifevt" => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-                          "xmlns:netutil" => "http://ggf.org/ns/nmwg/characteristics/utilization/2.0/");
+      $writer = new XML::Writer(NAMESPACES => 4,
+                                PREFIX_MAP => {$soap_env => "SOAP-ENV",
+                                               $soap_enc => "SOAP-ENC",
+                                               $xsd => "xsd",
+                                               $xsi => "xsi",
+                                               $namespace => "message"},
+                                UNSAFE => 1, OUTPUT => $output, DATA_MODE => 1, DATA_INDENT => 2);
+      $writer->startTag([$soap_env, "Envelope"],
+                        "xmlns:SOAP-ENC" => $soap_enc,
+                        "xmlns:xsd" => $xsd,
+                        "xmlns:xsi" => $xsi);
+      $writer->emptyTag([$soap_env, "Header"]);
+      $writer->startTag([$soap_env, "Body"]);
+      $writer->startTag("nmwg:message", "type" => "response",
+                        "xmlns:nmwg" => "http://ggf.org/ns/nmwg/base/2.0/",
+                        "xmlns:nmwgr" => "http://ggf.org/ns/nmwg/result/2.0/",
+                        "xmlns:nmwgt" => "http://ggf.org/ns/nmwg/topology/2.0/",
+                        "xmlns:nmtm" => "http://ggf.org/ns/nmwg/time/2.0/",
+                        "xmlns:ifevt" => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+                        "xmlns:netutil" => "http://ggf.org/ns/nmwg/characteristics/utilization/2.0/");
+      if($request->method eq "POST") {
 	if ($PEDANTIC > 0) {
           $action = $request->headers->{"soapaction"} ^ $namespace;
           if (!$action =~ m/^.*message\/$/) {
@@ -274,6 +273,7 @@ sub server {
         $writer->characters("Unrecognized URI or Method\n");
         $writer->endTag("nmwgr:datum");
         $writer->endTag("nmwg:data");
+        $bye = 1;
       }
 
       $writer->endTag("nmwg:message");
@@ -289,6 +289,9 @@ sub server {
 
       $response->content($xml);
       $call->send_response($response);
+      if ($bye) {
+                last;
+      }
     }
     $call->close;
 
