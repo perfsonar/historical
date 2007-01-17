@@ -75,10 +75,10 @@ sub openDB {
     $self->{HANDLE} = DBI->connect(
       $self->{NAME},
       $self->{USER},
-      $self->{PASSWORD}, 
+      $self->{PASS}, 
       \%attr
     ) || croak($self->{FILENAME}.":\t Database ".$self->{NAME}." unavailable with user ".
-               $self->{NAME}." and password ".$self->{PASSWORD}." in function ".
+               $self->{NAME}." and password ".$self->{PASS}." in function ".
 	       $self->{FUNCTION});
   };
   if($@) {
