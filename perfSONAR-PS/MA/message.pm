@@ -416,11 +416,13 @@ sub message {
 										}																		
 									
 										for($z = 0; $z <= $#{$array_ref}; $z++) {
-											if($array_ref->[$z][2]) {
-												$value_string = 'Up';
+											if($array_ref->[$z][2] == 1) {
+												$operstatus_value_string = 'Up';
+											} elsif($array_ref->[$z][2] == 2) {
+												$operstatus_value_string = 'Down';
 											}
 											else {
-												$value_string = 'Down';
+												$operstatus_value_string = 'Unknown';
 											}
                                                                                         if($array_ref->[$z][3] == 1) {
                                                                                                 $adminstatus_value_string = 'NormalOperation';
@@ -433,7 +435,7 @@ sub message {
 													  "timeType" => "ISO",
 													  "timeValue" => $isotime);
 											$writer->startTag("ifevt:stateOper");
-											$writer->characters($value_string);
+											$writer->characters($operstatus_value_string);
 											$writer->endTag("ifevt:stateOper");
 											$writer->startTag("ifevt:stateAdmin");
 											$writer->characters($adminstatus_value_string);
