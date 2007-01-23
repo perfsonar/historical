@@ -13,11 +13,11 @@ use strict;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 
-use Netradar::Common;
-use Netradar::DB::File;
-use Netradar::DB::XMLDB;
-use Netradar::DB::SQL;
-use Netradar::MP::SNMP;
+use perfSONAR-PS::Common;
+use perfSONAR-PS::DB::File;
+use perfSONAR-PS::DB::XMLDB;
+use perfSONAR-PS::DB::SQL;
+use perfSONAR-PS::MP::SNMP;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -26,7 +26,7 @@ if($#ARGV == 0) {
   }
 }
 
-my $LOGFILE ="./log/netradar-error.log";
+my $LOGFILE ="./log/perfSONAR-PS-error.log";
 my $DBFILE = "./collectSQL.conf";
 
 		# Read in configuration information
@@ -40,7 +40,7 @@ my %metadata = ();
 %metadata = readMetadata(\%metadata);
 
 		# setup 'data' database connection
-my $datadb = new Netradar::DB::SQL(
+my $datadb = new perfSONAR-PS::DB::SQL(
   $hash{"DATA_DB_NAME"}, 
   $hash{"DATA_DB_USER"},
   $hash{"DATA_DB_PASS"}
@@ -59,7 +59,7 @@ my %dbSchemaValues = (
 my %snmp = ();
 foreach my $m (keys %metadata) {
   $metadata{$m}{"eventType"} =~ s/snmp\.//;	  
-  $snmp{$m} = new Netradar::MP::SNMP(
+  $snmp{$m} = new perfSONAR-PS::MP::SNMP(
     $metadata{$m}{"hostName"}, 
     "" ,
     $metadata{$m}{"parameter-SNMPVersion"},
@@ -182,7 +182,7 @@ sub readMetadata {
   );
   
   if($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
-    my $metadatadb = new Netradar::DB::XMLDB(
+    my $metadatadb = new perfSONAR-PS::DB::XMLDB(
       $hash{"METADATA_DB_NAME"}, 
       $hash{"METADATA_DB_FILE"},
       \%ns

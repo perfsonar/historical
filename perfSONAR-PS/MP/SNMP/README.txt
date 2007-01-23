@@ -40,7 +40,7 @@ Installation:
                                         export PATH
 
                         You will need to create an XMLDB directory where the collections are stored,
-                        I created ~/netradar/MP/SNMP/xmldb personally, but as long as server.conf
+                        I created ~/perfSONAR-PS/MP/SNMP/xmldb personally, but as long as server.conf
                         points to where it is located, it doesnt matter.
 						
 	collect.conf
@@ -67,7 +67,7 @@ Installation:
 			.read db-lite.sql
 			.exit		
 		
-		sqlite3 netradar.db
+		sqlite3 perfSONAR-PS.db
 			select * from data;
 			.exit		
 Usage:

@@ -1,8 +1,8 @@
-drop database netradar;
+drop database perfsonarps;
 
-create database netradar;
+create database perfsonarps;
 
-use netradar;
+use perfsonarps;
 
 create table data (
   id			int unsigned not null,  
