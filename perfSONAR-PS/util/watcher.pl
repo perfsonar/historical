@@ -11,7 +11,7 @@
 # In /etc/crontab:                                         #
 #                                                          #
 # watcher.pl, run it often...                      	   #
-# */1 * * * * root       cd $NETRADAR_HOME && ./watcher.pl #
+# */1 * * * * root   cd $PERFSONAR-PS_HOME && ./watcher.pl #
 #                                                          #
 # ######################################################## #
 
