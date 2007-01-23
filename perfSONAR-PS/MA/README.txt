@@ -45,7 +45,7 @@ Installation:
 					export PATH
 					
 			You will need to create an XMLDB directory where the collections are stored,
-			I created ~/netradar/MA/xmldb personally, but as long as server.conf
+			I created ~/perfSONAR-PS/MA/xmldb personally, but as long as server.conf
 			points to where it is located, it doesnt matter.
 	SQL Files
 	---------
