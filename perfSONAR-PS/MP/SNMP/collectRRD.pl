@@ -13,11 +13,11 @@ use strict;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 
-use perfSONAR-PS::Common;
-use perfSONAR-PS::DB::File;
-use perfSONAR-PS::DB::XMLDB;
-use perfSONAR-PS::DB::RRD;
-use perfSONAR-PS::MP::SNMP;
+use perfSONAR_PS::Common;
+use perfSONAR_PS::DB::File;
+use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::DB::RRD;
+use perfSONAR_PS::MP::SNMP;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -53,7 +53,7 @@ my %dbSchemaValues = (
   'eth1-out' => "1.3.6.1.2.1.2.2.1.16.4"
 ); 
 
-my $datadb = new perfSONAR-PS::DB::RRD(
+my $datadb = new perfSONAR_PS::DB::RRD(
   $hash{"DATA_DB_NAME"} , 
   $hash{"DATA_DB_FILE"},
   1
@@ -64,7 +64,7 @@ my %snmp = ();
 foreach my $m (keys %metadata) {
   $metadata{$m}{"eventType"} =~ s/snmp\.//;
   if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
-    $snmp{$metadata{$m}{"hostName"}} = new perfSONAR-PS::MP::SNMP(
+    $snmp{$metadata{$m}{"hostName"}} = new perfSONAR_PS::MP::SNMP(
       $metadata{$m}{"hostName"}, 
       "" ,
       $metadata{$m}{"parameter-SNMPVersion"},
@@ -182,7 +182,7 @@ sub readMetadata {
     exit(1);  
   }
   elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
-    my $metadatadb = new perfSONAR-PS::DB::XMLDB(
+    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
       $hash{"METADATA_DB_NAME"}, 
       $hash{"METADATA_DB_FILE"},
       \%ns

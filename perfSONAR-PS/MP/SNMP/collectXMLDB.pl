@@ -13,10 +13,10 @@ use strict;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 
-use perfSONAR-PS::Common;
-use perfSONAR-PS::DB::File;
-use perfSONAR-PS::DB::XMLDB;
-use perfSONAR-PS::MP::SNMP;
+use perfSONAR_PS::Common;
+use perfSONAR_PS::DB::File;
+use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::MP::SNMP;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -47,7 +47,7 @@ my %ns = (
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
 );
  
-my $datadb = new perfSONAR-PS::DB::XMLDB(
+my $datadb = new perfSONAR_PS::DB::XMLDB(
   $hash{"DATA_DB_NAME"}, 
   $hash{"DATA_DB_FILE"},
   \%ns
@@ -58,7 +58,7 @@ my $datadb = new perfSONAR-PS::DB::XMLDB(
 my %snmp = ();
 foreach my $m (keys %metadata) {
   $metadata{$m}{"eventType"} =~ s/snmp\.//;	  
-  $snmp{$m} = new perfSONAR-PS::MP::SNMP(
+  $snmp{$m} = new perfSONAR_PS::MP::SNMP(
     $metadata{$m}{"hostName"}, 
     "" ,
     $metadata{$m}{"parameter-SNMPVersion"},
@@ -164,7 +164,7 @@ sub readMetadata {
     exit(1);  
   }
   elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
-    my $metadatadb = new perfSONAR-PS::DB::XMLDB(
+    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
       $hash{"METADATA_DB_NAME"}, 
       $hash{"METADATA_DB_FILE"},
       \%ns
