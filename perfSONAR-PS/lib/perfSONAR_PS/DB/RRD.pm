@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::DB::RRD;
+package perfSONAR_PS::DB::RRD;
 use Carp;
 use RRDp;
 @ISA = ('Exporter');

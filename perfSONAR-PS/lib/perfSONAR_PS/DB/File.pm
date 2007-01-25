@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::DB::File;
+package perfSONAR_PS::DB::File;
 use Carp;
 use IO::File;
 use XML::XPath;

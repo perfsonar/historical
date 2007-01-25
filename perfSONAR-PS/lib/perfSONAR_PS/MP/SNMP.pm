@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::MP::SNMP;
+package perfSONAR_PS::MP::SNMP;
 use Carp;
 use Net::SNMP;
 @ISA = ('Exporter');

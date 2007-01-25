@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::Common;
+package perfSONAR_PS::Common;
 use Exporter;
 use IO::File;
 use XML::XPath;

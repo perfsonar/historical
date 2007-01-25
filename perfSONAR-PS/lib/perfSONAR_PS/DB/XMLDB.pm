@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::DB::XMLDB;
+package perfSONAR_PS::DB::XMLDB;
 use Carp;
 use Sleepycat::DbXml 'simple';
 @ISA = ('Exporter');

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR-PS::DB::SQL;
+package perfSONAR_PS::DB::SQL;
 use Carp;
 use DBI;
 @ISA = ('Exporter');
