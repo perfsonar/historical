@@ -5,105 +5,177 @@ use Exporter;
 use IO::File;
 use XML::XPath;
 @ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata');
+@EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata', 'parseData', 'genuid');
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub readXML {
   my ($file)  = @_;
-  my $xmlstring = "";
-  my $XML = new IO::File("<$file") || 
-    croak("Cannot open 'readXML' $file: $!\n");
-  while (<$XML>) {
-    if(!($_ =~ m/^<\?xml.*/)) {
-      $xmlstring .= $_;
-    }
-  }          
-  $XML->close();
-  return $xmlstring;  
+  if(defined $file && $file ne "") {
+    my $xmlstring = "";
+    my $XML = new IO::File("<$file") || 
+      croak("Cannot open 'readXML' $file: $!\n");
+    while (<$XML>) {
+      if(!($_ =~ m/^<\?xml.*/)) {
+        $xmlstring .= $_;
+      }
+    }          
+    $XML->close();
+    return $xmlstring;  
+  }
+  else {
+    croak("perfSONAR_PS::Common:\tMissing argument to \"readXML\"");
+  }
+  return;
 }
 
 
 sub readConfiguration {
   my ($file, $sent)  = @_;
-  my %hash = %{$sent};
-  my $CONF = new IO::File("<$file") or 
-    croak("Cannot open 'readDBConf' $file: $!\n");
-  while (<$CONF>) {
-    if(!($_ =~ m/^#.*$/)) {
-      $_ =~ s/\n//;
-      @values = split(/\?/,$_);
-      $hash{$values[0]} = $values[1];
-    }
-  }          
-  $CONF->close();
-  return %hash; 
+  if((defined $file && $file ne "") && (defined $sent && $sent ne "")) {
+    my %hash = %{$sent};
+    my $CONF = new IO::File("<$file") or 
+      croak("Cannot open 'readDBConf' $file: $!\n");
+    while (<$CONF>) {
+      if(!($_ =~ m/^#.*$/)) {
+        $_ =~ s/\n//;
+        @values = split(/\?/,$_);
+        $hash{$values[0]} = $values[1];
+      }
+    }          
+    $CONF->close();
+    return %hash; 
+  }
+  else {
+    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"readConfiguration\"");
+  }
+  return;
 }
 
 
 sub printError {
   my($file, $msg) = @_;
-  open(LOG, "+>>" . $file);
-  my ($sec, $micro) = Time::HiRes::gettimeofday;
-  print LOG "TIME: " , $sec , "." , $micro , "\t\t";
-  print LOG $msg , "\n";
-  close(LOG);
+  if((defined $file && $file ne "") && (defined $msg && $msg ne "")) {
+    open(LOG, "+>>" . $file);
+    my ($sec, $micro) = Time::HiRes::gettimeofday;
+    print LOG "TIME: " , $sec , "." , $micro , "\t\t";
+    print LOG $msg , "\n";
+    close(LOG);
+  }
+  else {
+    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"printError\"");
+  }
   return;
 }
 
 
 sub parseMetadata {
   my ($xml, $sentmetadata, $sentnamespaces) = @_;
-  my %metadata = %{$sentmetadata};
-  my %ns = %{$sentnamespaces};
+  if((defined $xml && $xml ne "") && 
+     (defined $sentmetadata && $sentmetadata ne "") && 
+     (defined $sentnamespaces && $sentnamespaces ne "")) {  
+    my %metadata = %{$sentmetadata};
+    my %ns = %{$sentnamespaces};
 
-  my $xp = XML::XPath->new( xml => $xml );
-  $xp->clear_namespaces();
+    my $xp = XML::XPath->new( xml => $xml );
+    $xp->clear_namespaces();
   
-  foreach my $prefix (keys %ns) {
-    $xp->set_namespace($prefix, $ns{$prefix});
-  }
+    foreach my $prefix (keys %ns) {
+      $xp->set_namespace($prefix, $ns{$prefix});
+    }
   	  	  	  
-  my $nodeset = $xp->find('//nmwg:metadata');
-  if($nodeset->size() <= 0) {
-    croak("XPath error: either they are not nmwg:metadata, or the namespace could be wrong."); 	
-    exit(1);  
+    my $nodeset = $xp->find('//nmwg:metadata');
+    if($nodeset->size() <= 0) {
+      croak("XPath error: either they are not nmwg:metadata, or the namespace could be wrong."); 	
+      exit(1);  
+    }
+    else {
+      foreach my $node ($nodeset->get_nodelist) {           
+        my %md = ();
+        my $id = "";
+        my $mid = "";
+        foreach my $attr ($node->getAttributes) {
+          if($attr->getLocalName eq "id") {
+            $id = $attr->getNodeValue;
+          }
+          elsif($attr->getLocalName eq "metadataIdRef") {
+            $mid = $attr->getNodeValue;
+            $md{"metadataIdRef"} = $mid;
+          }
+        }
+        %md = traverse($node, \%md);
+        $metadata{$id} = \%md;             	    
+      }
+    }  
+    return %metadata;
   }
   else {
-    foreach my $node ($nodeset->get_nodelist) {           
-      my %md = ();
-      my $id = "";
-      my $mid = "";
-      foreach my $attr ($node->getAttributes) {
-        if($attr->getLocalName eq "id") {
-          $id = $attr->getNodeValue;
-        }
-        elsif($attr->getLocalName eq "metadataIdRef") {
-          $mid = $attr->getNodeValue;
-        }
-      }
-      %md = loadMetadata($node, \%md);
-      $metadata{$id} = \%md;             	    
-    }
-  }  
-  return %metadata;
+    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parseMetadata\"");
+  }
+  return;
 }
 
 
-sub loadMetadata {
-  my ($set, $sentmetadata) = @_;
-  my %md = %{$sentmetadata};
+sub parseData {
+  my ($xml, $sentdata, $sentnamespaces) = @_;
+  if((defined $xml && $xml ne "") && 
+     (defined $sentdata && $sentdata ne "") && 
+     (defined $sentnamespaces && $sentnamespaces ne "")) {
+    my %data = %{$sentdata};
+    my %ns = %{$sentnamespaces};
+
+    my $xp = XML::XPath->new( xml => $xml );
+    $xp->clear_namespaces();
   
-  foreach my $element ($set->getChildNodes) {      
-     
+    foreach my $prefix (keys %ns) {
+      $xp->set_namespace($prefix, $ns{$prefix});
+    }
+  	  	  	  
+    my $nodeset = $xp->find('//nmwg:data');
+    if($nodeset->size() <= 0) {
+      croak("XPath error: either they are not nmwg:data, or the namespace could be wrong."); 	
+      exit(1);  
+    }
+    else {
+      foreach my $node ($nodeset->get_nodelist) {           
+        my %d = ();
+        my $id = "";
+        my $mid = "";
+        foreach my $attr ($node->getAttributes) {
+          if($attr->getLocalName eq "id") {
+            $id = $attr->getNodeValue;
+          }
+          elsif($attr->getLocalName eq "metadataIdRef") {
+            $mid = $attr->getNodeValue;
+            $d{"metadataIdRef"} = $mid;
+	  }
+        }     
+        %d = traverse($node, \%d);
+        $data{$id} = \%d;             	    
+      }
+    }  
+    return %data;
+  }
+  else {
+    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parseData\"");
+  }
+  return;
+}
+
+
+sub traverse {
+  my ($set, $sent) = @_;
+  my %struct = %{$sent};
+  
+  foreach my $element ($set->getChildNodes) {                
     if($element->getNodeType == 3) {
       my $value = $element->getValue;
       $value =~ s/\s+//g;
       if($value) {
-        $md{$element->getParentNode->getLocalName} = $value;
-      }
+        $struct{$element->getParentNode->getLocalName} = $value;
+      }    
     }
-    elsif($element->getLocalName eq "parameter") {
+    elsif($element->getLocalName eq "parameter") {    
       my $nm = "";
       my $vl = "";
       foreach my $attr2 ($element->getAttributes) {
@@ -113,28 +185,40 @@ sub loadMetadata {
 	elsif($attr2->getLocalName eq "value") {
 	  $vl = $attr2->getNodeValue;
 	}
+      }    
+      if($vl) {
+        $struct{$element->getLocalName."-".$nm} = $vl; 
       }
-      $md{$element->getLocalName."-".$nm} = $vl;   
+      else {
+        if($element->getChildNode(1)) {
+	  $struct{$element->getLocalName."-".$nm} = $element->getChildNode(1)->getValue;
+	}
+      }
     }
     else {
       foreach my $attr ($element->getAttributes) {
 	if($element->getLocalName eq "ifAddress") {
-	  $md{$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+	  $struct{$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
         }
       }
-      %md = loadMetadata($element, \%md);
+      %struct = traverse($element, \%struct);
     }
   }	  
-  return %md;
+  return %struct;
 }
 
+
+sub genuid {
+  my ($r) = int( rand( 16777216 ) );
+  return ( $r + 1048576 );
+}
 
 1;
 
 __END__
 =head1 NAME
 
-perfSONAR-PS::Common - A module that provides common methods for performing actions within in the
+perfSONAR_PS::Common - A module that provides common methods for performing actions within in the
 Netradar framework.  
 
 =head1 DESCRIPTION
@@ -145,7 +229,7 @@ can be invoked directly.
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::Common;
+    use perfSONAR_PS::Common;
 
     my $xml = readXML("./store.xml");
     if(!($xml)) {
@@ -163,6 +247,8 @@ can be invoked directly.
     );
 
     my %metadata = parseMetadata($xml, \%metadata, \%ns);
+
+    my %data = parseData($xml, \%data, \%ns);
        
 =head1 DETAILS
 
@@ -171,7 +257,7 @@ have the 'self knowledge' of variables that may travel between functions.
 
 =head1 API
 
-The API of perfSONAR-PS::Common offers simple calls to common activities in the Netradar 
+The API of perfSONAR_PS::Common offers simple calls to common activities in the Netradar 
 framework.  
 
 =head2 readXML($file)
@@ -210,14 +296,26 @@ a hash reference containing a prefix to namespace mapping.  All namespaces that 
 in the container should be mapped (there is no harm is sending mappings that will not 
 be used).  The metadata object is returned, populated with the appropriate values.  
 
-=head2 loadMetadata($set, $sentmetadata)
+=head2 parseData($xml, \%data, \%ns)
+
+The '$xml' argument is an XML string.  The first of the two hash arguments, '%data', is 
+an object that will contain the contents of each data XML tag.  The third argument is 
+a hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
+in the container should be mapped (there is no harm is sending mappings that will not 
+be used).  The data object is returned, populated with the appropriate values.
+
+=head2 traverse($set, $sentstructure)
 
 This function is not exported, and is meant to be used by parseMetadata($xml, \%metadata, \%ns)
-to aide in the extraction of metadata values.
+and parseData($xml, \%data, \%ns) to aide in the extraction of XML values.
+
+=head2 genuid()
+
+Generates a random number.
 
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::XMLDB>, L<perfSONAR-PS::DB::RRD>, L<perfSONAR-PS::DB::File>
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -235,7 +333,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

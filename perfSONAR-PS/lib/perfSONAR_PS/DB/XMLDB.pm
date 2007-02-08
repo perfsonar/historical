@@ -11,15 +11,15 @@ our $VERSION = '0.02';
 sub new {
   my ($package, $env, $cont, $namespaces) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR-PS::DB::XMLDB";
+  $hash{"FILENAME"} = "perfSONAR_PS::DB::XMLDB";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $env) {
+  if(defined $env && $env ne "") {
     $hash{"ENVIRONMENT"} = $env;
   }
-  if(defined $cont) {
+  if(defined $cont && $cont ne "") {
     $hash{"CONTAINERFILE"} = $cont; 
   }
-  if(defined $namespaces) {
+  if(defined $namespaces && $namespaces ne "") {
     my %ns = %{$namespaces};  
     $hash{"NAMESPACES"} = \%ns;  
   }    
@@ -29,7 +29,7 @@ sub new {
 sub setEnvironment {
   my ($self, $env) = @_;  
   $self->{FUNCTION} = "\"setEnvironment\"";  
-  if(defined $env) {
+  if(defined $env && $env ne "") {
     $self->{ENVIRONMENT} = $env;
   }
   else {
@@ -41,7 +41,7 @@ sub setEnvironment {
 sub setContainer {
   my ($self, $cont) = @_;
   $self->{FUNCTION} = "\"setContainer\"";  
-  if(defined $cont) {
+  if(defined $cont && $cont ne "") {
     $self->{CONTAINERFILE} = $cont;
   }
   else {
@@ -53,7 +53,7 @@ sub setContainer {
 sub setNamespaces {
   my ($self, $namespaces) = @_;  
   $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $namespaces) {   
+  if(defined $namespaces && $namespaces ne "") {   
     my %ns = %{$namespaces};
     $self->{NAMESPACES} = \%ns;
   }
@@ -101,7 +101,7 @@ sub query {
   my ($self, $query) = @_; 
   $self->{FUNCTION} = "\"query\"";  
   my @resString = ();
-  if(defined $query) {
+  if(defined $query && $query ne "") {
     my $results = "";
     my $value = "";
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
@@ -142,7 +142,7 @@ sub count {
   my ($self, $query) = @_; 
   $self->{FUNCTION} = "\"count\"";
   my $results;
-  if(defined $query) {
+  if(defined $query && $query ne "") {
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";    
     eval {            
       $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
@@ -176,7 +176,8 @@ sub count {
 sub insertIntoContainer {
   my ($self, $content, $name) = @_;
   $self->{FUNCTION} = "\"insertIntoContainer\"";
-  if(defined $content && defined $name) {    
+  if((defined $content && $content ne "") && 
+     (defined $name && $name ne "")) {    
     eval {        
       my $myXMLDoc = $self->{MANAGER}->createDocument();
       $myXMLDoc->setContent($content);
@@ -209,7 +210,7 @@ sub insertIntoContainer {
 sub insertElement {
   my ($self, $query, $content) = @_;     
   $self->{FUNCTION} = "\"insertElement\""; 
-  if(defined $content) {          
+  if((defined $content && $content ne "") && (defined $query  && $query ne "")) {          
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";     
     eval {
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();             
@@ -248,7 +249,7 @@ sub insertElement {
 sub remove {
   my ($self, $name) = @_;
   $self->{FUNCTION} = "\"remove\"";
-  if(defined $name) {  
+  if(defined $name && $name ne "") {  
     eval {
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
       $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();     
@@ -280,7 +281,7 @@ sub remove {
 __END__
 =head1 NAME
 
-perfSONAR-PS::DB::XMLDB - A module that provides methods for dealing with the Sleepycat [Oracle] 
+perfSONAR_PS::DB::XMLDB - A module that provides methods for dealing with the Sleepycat [Oracle] 
 XML database.
 
 =head1 DESCRIPTION
@@ -292,7 +293,7 @@ collection.  Each method may then be invoked on the object for the specific data
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::DB::XMLDB;
+    use perfSONAR_PS::DB::XMLDB;
 
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -301,7 +302,7 @@ collection.  Each method may then be invoked on the object for the specific data
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
   
-    my $db = new perfSONAR-PS::DB::XMLDB(
+    my $db = new perfSONAR_PS::DB::XMLDB(
       "/home/jason/Netradar/MP/SNMP/xmldb", 
       "snmpstore.dbxml",
       \%ns
@@ -309,7 +310,7 @@ collection.  Each method may then be invoked on the object for the specific data
 
     # or also:
     # 
-    # my $db = new perfSONAR-PS::DB::XMLDB;
+    # my $db = new perfSONAR_PS::DB::XMLDB;
     # $db->setEnvironment("/home/jason/Netradar/MP/SNMP/xmldb");
     # $db->setContainer("snmpstore.dbxml");
     # $db->setNamespaces(\%ns);    
@@ -355,8 +356,8 @@ objects and catches many errors.  The methods presented here are rather simple b
 
 =head1 API
 
-The API of perfSONAR-PS::DB::XMLDB is rather simple, and attempts to
-mirror the API of the other perfSONAR-PS::DB::* modules.  
+The API of perfSONAR_PS::DB::XMLDB is rather simple, and attempts to
+mirror the API of the other perfSONAR_PS::DB::* modules.  
 
 =head2 new($env, $cont, \%ns)
 
@@ -445,7 +446,7 @@ from the database.
 
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::SQL>, L<perfSONAR-PS::DB::RRD>, L<perfSONAR-PS::DB::File>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -463,7 +464,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

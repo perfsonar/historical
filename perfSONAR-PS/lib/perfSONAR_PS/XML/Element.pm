@@ -543,7 +543,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

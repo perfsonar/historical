@@ -11,15 +11,15 @@ our $VERSION = '0.02';
 sub new {
   my ($package, $name, $user, $pass) = @_;   
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR-PS::DB::SQL";
+  $hash{"FILENAME"} = "perfSONAR_PS::DB::SQL";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $name) {
+  if(defined $name && $name ne "") {
     $hash{"NAME"} = $name;
   }  
-  if(defined $user) {
+  if(defined $user && $user ne "") {
     $hash{"USER"} = $user;
   }  
-  if(defined $pass) {
+  if(defined $pass && $pass ne "") {
     $hash{"PASS"} = $pass;
   }      
   bless \%hash => $package;
@@ -29,7 +29,7 @@ sub new {
 sub setName {
   my ($self, $name) = @_;  
   $self->{FUNCTION} = "\"setName\"";  
-  if(defined $name) {
+  if(defined $name && $name ne "") {
     $self->{NAME} = $name;
   }
   else {
@@ -42,7 +42,7 @@ sub setName {
 sub setUser {
   my ($self, $user) = @_;  
   $self->{FUNCTION} = "\"setUser\"";  
-  if(defined $user) {
+  if(defined $user && $user ne "") {
     $self->{USER} = $user;
   }
   else {
@@ -55,7 +55,7 @@ sub setUser {
 sub setPass {
   my ($self, $pass) = @_;  
   $self->{FUNCTION} = "\"setPass\"";  
-  if(defined $pass) {
+  if(defined $pass && $pass ne "") {
     $self->{PASS} = $pass;
   }
   else {
@@ -107,7 +107,7 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
-  if(defined $query) {  
+  if(defined $query && $query ne "") {  
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() || 
@@ -131,7 +131,7 @@ sub count {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"count\"";  
   my $results = -2; 
-  if(defined $query) {    
+  if(defined $query && $query ne "") {    
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() || 
@@ -154,7 +154,9 @@ sub count {
 sub insert {
   my ($self, $table, $arglist, $argvalues) = @_;
   $self->{FUNCTION} = "\"insert\"";   
-  if(defined $table && defined $arglist && defined $argvalues) {
+  if((defined $table && $table ne "") && 
+     (defined $arglist && $arglist ne "") && 
+     (defined $argvalues && $argvalues ne "")) {
     my @list = @{$arglist};
     my %values = %{$argvalues};
 
@@ -202,7 +204,7 @@ sub insert {
 sub remove {
   my ($self, $delete) = @_;
   $self->{FUNCTION} = "\"remove\"";
-  if(defined $delete) {
+  if(defined $delete && $delete ne "") {
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
       $sth->execute() || 
@@ -226,7 +228,7 @@ sub remove {
 __END__
 =head1 NAME
 
-perfSONAR-PS::DB::SQL - A module that provides methods for dealing with common SQL databases.
+perfSONAR_PS::DB::SQL - A module that provides methods for dealing with common SQL databases.
 
 =head1 DESCRIPTION
 
@@ -237,9 +239,9 @@ the specific database.
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::DB::SQL;
+    use perfSONAR_PS::DB::SQL;
 
-    my $db = new perfSONAR-PS::DB::SQL(
+    my $db = new perfSONAR_PS::DB::SQL(
       "DBI:SQLite:dbname=/home/jason/Netradar/MP/SNMP/netradar.db", 
       "",
       ""
@@ -247,7 +249,7 @@ the specific database.
 
     # or also:
     # 
-    # my $db = new perfSONAR-PS::DB::SQL;
+    # my $db = new perfSONAR_PS::DB::SQL;
     # $db->setName("DBI:SQLite:dbname=/home/jason/netradar/MP/SNMP/netradar.db");
     # $db->setUser("");
     # $db->setPass("");    
@@ -309,8 +311,8 @@ specific database.
 
 =head1 API
 
-The API of perfSONAR-PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
-perfSONAR-PS::DB::* modules.  
+The API of perfSONAR_PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
+perfSONAR_PS::DB::* modules.  
 
 =head2 new($name, $user, $pass)
 
@@ -374,7 +376,7 @@ return 1 on success, -1 on failure.
 
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::XMLDB>, L<perfSONAR-PS::DB::RRD>, L<perfSONAR-PS::DB::File>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -392,7 +394,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

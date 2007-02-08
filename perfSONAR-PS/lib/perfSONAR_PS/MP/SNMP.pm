@@ -11,7 +11,7 @@ our $VERSION = '0.02';
 sub new {
   my ($package, $host, $port, $ver, $comm, $var) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR-PS::MP::SNMP";
+  $hash{"FILENAME"} = "perfSONAR_PS::MP::SNMP";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $host && $host ne "") {
     $hash{"HOST"} = $host;
@@ -39,7 +39,7 @@ sub new {
 sub setHost {
   my ($self, $host) = @_;  
   $self->{FUNCTION} = "\"setHost\"";  
-  if(defined $host) {
+  if(defined $host && $host ne "") {
     $self->{HOST} = $host;
   }
   else {
@@ -52,7 +52,7 @@ sub setHost {
 sub setPort {
   my ($self, $port) = @_;  
   $self->{FUNCTION} = "\"setPort\"";  
-  if(defined $port) {
+  if(defined $port && $port ne "") {
     $self->{PORT} = $port;
   }
   else {
@@ -65,7 +65,7 @@ sub setPort {
 sub setVersion {
   my ($self, $ver) = @_;  
   $self->{FUNCTION} = "\"setVersion\"";  
-  if(defined $ver) {
+  if(defined $ver && $ver ne "") {
     $self->{VERSION} = $ver;
   }
   else {
@@ -78,7 +78,7 @@ sub setVersion {
 sub setCommunity {
   my ($self, $comm) = @_;  
   $self->{FUNCTION} = "\"setCommunity\"";  
-  if(defined $comm) {
+  if(defined $comm && $comm ne "") {
     $self->{COMMUNITY} = $comm;
   }
   else {
@@ -91,7 +91,7 @@ sub setCommunity {
 sub setVariables {
   my ($self, $var) = @_;  
   $self->{FUNCTION} = "\"setVariables\""; 
-  if(defined $var) {
+  if(defined $var && $var ne "") {
     my %vars = %{$var};  
     $hash{"VARIABLES"} = \%vars;
   }
@@ -105,7 +105,7 @@ sub setVariables {
 sub setVariable {
   my ($self, $var) = @_;  
   $self->{FUNCTION} = "\"setVariable\""; 
-  if(defined $var) {
+  if(defined $var && $var ne "") {
     $self->{VARIABLES}->{$var} = "";
   }
   else {
@@ -120,7 +120,7 @@ sub removeVariables {
   $self->{FUNCTION} = "\"removeVariables\""; 
   undef $self->{VARIABLES};
   if(defined $self->{VARIABLES}) {
-    warn($self->{FILENAME}.":\tRemove failure in ".$self->{FUNCTION});
+    croak($self->{FILENAME}.":\tRemove failure in ".$self->{FUNCTION});
   }
   return;
 }
@@ -129,7 +129,7 @@ sub removeVariables {
 sub removeVariable {
   my ($self, $var) = @_;  
   $self->{FUNCTION} = "\"removeVariable\""; 
-  if(defined $var) {
+  if(defined $var && $var ne "") {
     delete $self->{VARIABLES}->{$var};
   }
   else {
@@ -150,10 +150,10 @@ sub setSession {
       -version       => $self->{VERSION},
       -hostname      => $self->{HOST},
       -port          => $self->{PORT}) || 
-      warn($self->{FILENAME}.":\tCouldn't open SNMP session to " . $self->{HOST} . " in ".$self->{FUNCTION});
+      croak($self->{FILENAME}.":\tCouldn't open SNMP session to " . $self->{HOST} . " in ".$self->{FUNCTION});
 
     if(!defined($self->{SESSION})) {
-      warn($self->{FILENAME}.":\tSNMP Error: " . $self->{ERROR} . " in ".$self->{FUNCTION});
+      croak($self->{FILENAME}.":\tSNMP Error: " . $self->{ERROR} . " in ".$self->{FUNCTION});
     }
   }
   else {
@@ -185,7 +185,7 @@ sub collectVariables {
       -varbindlist => \@oids
     );
     if(!defined($self->{RESULT})) {
-      warn($self->{FILENAME}.":\tSNMP error in ".$self->{FUNCTION});
+      croak($self->{FILENAME}.":\tSNMP error in ".$self->{FUNCTION});
       return ('error' => -1);
     }    
     else {
@@ -193,7 +193,7 @@ sub collectVariables {
     }
   }
   else {
-    warn($self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION});
+    croak($self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION});
       return ('error' => -1);
   }      
 }
@@ -201,24 +201,30 @@ sub collectVariables {
 
 sub collect {
   my ($self, $var) = @_;
-  $self->{FUNCTION} = "\"collect\"";    
-  undef $self->{RESULT};
-  if(defined $self->{SESSION}) {
-    $self->{RESULT} = $self->{SESSION}->get_request(
-      -varbindlist => [$var]
-    );
-    if(!defined($self->{RESULT})) {
-      warn($self->{FILENAME}.":\tSNMP error: " . $self->{ERROR} . " in ".$self->{FUNCTION});
-      return -1;
-    }    
+  $self->{FUNCTION} = "\"collect\""; 
+  if(defined $var && $var ne "") {   
+    undef $self->{RESULT};
+    if(defined $self->{SESSION}) {
+      $self->{RESULT} = $self->{SESSION}->get_request(
+        -varbindlist => [$var]
+      );
+      if(!defined($self->{RESULT})) {
+        croak($self->{FILENAME}.":\tSNMP error: " . $self->{ERROR} . " in ".$self->{FUNCTION});
+        return -1;
+      }    
+      else {
+        return $self->{RESULT}->{$var};
+      }
+    }
     else {
-      return $self->{RESULT}->{$var};
+      croak($self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION});
+      return -1;
     }
   }
   else {
-    warn($self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION});
-    return -1;
-  }      
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});  
+  }
+  return;
 }
 
 
@@ -228,7 +234,7 @@ sub collect {
 __END__
 =head1 NAME
 
-perfSONAR-PS::MP::SNMP - A module that provides methods for polling SNMP data from a resource.
+perfSONAR_PS::MP::SNMP - A module that provides methods for polling SNMP data from a resource.
 
 =head1 DESCRIPTION
 
@@ -238,20 +244,20 @@ effort.
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::MP::SNMP;
+    use perfSONAR_PS::MP::SNMP;
     
     my %vars = (
       '.1.3.6.1.2.1.2.2.1.10.2' => ""
     );
   
-    my $snmp = new perfSONAR-PS::MP::SNMP(
+    my $snmp = new perfSONAR_PS::MP::SNMP(
       "lager", 161, "1", "public",
       \%vars
     );
 
     # or also:
     # 
-    # my $snmp = new perfSONAR-PS::MP::SNMP;
+    # my $snmp = new perfSONAR_PS::MP::SNMP;
     # $snmp->setHost("lager");
     # $snmp->setPort(161);
     # $snmp->setVersion("1");
@@ -358,8 +364,8 @@ Closes the session to the target host.
 
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::SQL>, L<perfSONAR-PS::DB::RRD>, L<perfSONAR-PS::DB::File>, 
-L<perfSONAR-PS::DB::XMLDB>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, 
+L<perfSONAR_PS::DB::XMLDB>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -377,7 +383,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

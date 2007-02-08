@@ -12,12 +12,12 @@ our $VERSION = '0.02';
 sub new {
   my ($package, $file, $namespaces) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR-PS::DB::File";
+  $hash{"FILENAME"} = "perfSONAR_PS::DB::File";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $file) {
+  if(defined $file && $file ne "") {
     $hash{"FILE"} = $file;
   }
-  if(defined $namespaces) {
+  if(defined $namespaces && $namespaces ne "") {
     my %ns = %{$namespaces};  
     $hash{"NAMESPACES"} = \%ns;  
   }    
@@ -28,7 +28,7 @@ sub new {
 sub setFile {
   my ($self, $file) = @_;  
   $self->{FUNCTION} = "\"setFile\"";  
-  if(defined $file) {
+  if(defined $file && $file ne "") {
     $self->{FILE} = $file;
   }
   else {
@@ -41,7 +41,7 @@ sub setFile {
 sub setNamespaces {
   my ($self, $namespaces) = @_;  
   $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $namespaces) {   
+  if(defined $namespaces && $namespaces ne "") {   
     my %ns = %{$namespaces};
     $self->{NAMESPACES} = \%ns;
   }
@@ -57,7 +57,7 @@ sub openDB {
   $self->{FUNCTION} = "\"openDB\"";    
   if(defined $self->{FILE}) {    
     $self->{XML} = new IO::File("<".$self->{FILE}) || 
-      croak("perfSONAR-PS::DB::File: Cannot open file " . $self->{FILE} . "\n");
+      croak("perfSONAR_PS::DB::File: Cannot open file " . $self->{FILE} . "\n");
     $XML = $self->{XML};
     while (<$XML>) {
       if(!($_ =~ m/^<\?xml.*/)) {
@@ -99,11 +99,11 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";        
   my @results = ();
-  if(defined $query) {  
+  if(defined $query && $query ne "") {  
     if(defined $self->{XPATH}) {
       my $nodeset = $self->{XPATH}->find($query);
       if($nodeset->size() <= 0) {
-        $results[0] = "perfSONAR-PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
+        $results[0] = "perfSONAR_PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
       }
       else {
         foreach my $node ($nodeset->get_nodelist) {            	    
@@ -126,7 +126,7 @@ sub count {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"count\"";  
   my $nodeset = 0;
-  if(defined $query) {    
+  if(defined $query && $query ne "") {    
     if(defined $self->{XPATH}) {
       $nodeset = $self->{XPATH}->find($query);
     }
@@ -146,7 +146,7 @@ sub count {
 __END__
 =head1 NAME
 
-perfSONAR-PS::DB::File - A module that provides methods for adding 'database like' functions to files 
+perfSONAR_PS::DB::File - A module that provides methods for adding 'database like' functions to files 
 that contain XML markup.
 
 =head1 DESCRIPTION
@@ -159,7 +159,7 @@ may then be invoked on the object for the specific database.
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::DB::File;
+    use perfSONAR_PS::DB::File;
 
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -168,14 +168,14 @@ may then be invoked on the object for the specific database.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
   
-    my $file = new perfSONAR-PS::DB::File(
+    my $file = new perfSONAR_PS::DB::File(
       "./store.xml",
       \%ns
     );
 
     # or also:
     # 
-    # my $file = new perfSONAR-PS::DB::File;
+    # my $file = new perfSONAR_PS::DB::File;
     # $file->setFile("./store.xml");
     # $file->setNamespaces(\%ns);    
 
@@ -199,8 +199,8 @@ edit your XML file, do so out of band.
 
 =head1 API
 
-The API of perfSONAR-PS::DB::File is rather simple, and attempts to mirror the API of 
-the other perfSONAR-PS::DB::* modules.  
+The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
+the other perfSONAR_PS::DB::* modules.  
 
 =head2 new($file, \%ns)
 
@@ -239,7 +239,7 @@ this time are a count of the number of elements that match the XPath expression.
   
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::SQL>, L<perfSONAR-PS::DB::RRD>, L<perfSONAR-PS::DB::XMLDB>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -257,7 +257,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

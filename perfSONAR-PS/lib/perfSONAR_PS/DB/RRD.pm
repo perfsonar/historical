@@ -6,21 +6,24 @@ use RRDp;
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
-  my ($package, $path, $name, $error) = @_;   
+  my ($package, $path, $name, $dss, $error) = @_;   
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR-PS::DB::RRD";
+  $hash{"FILENAME"} = "perfSONAR_PS::DB::RRD";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $path) {
+  if(defined $path && $path ne "") {
     $hash{"PATH"} = $path;
-    RRDp::start $path;
   }
-  if(defined $name) {
+  if(defined $name && $name ne "") {
     $hash{"NAME"} = $name;
   }
-  if(defined $error) {
+  if(defined $dss && $dss ne "") {
+    my %vars = %{$dss};  
+    $hash{"DATASOURCES"} = \%vars;  
+  }  
+  if(defined $error && $error ne "") {
     if($error == 1) {
       $RRDp::error_mode = 'catch';
     }
@@ -35,7 +38,7 @@ sub new {
 sub setFile {
   my ($self, $file) = @_;  
   $self->{FUNCTION} = "\"setFile\"";  
-  if(defined $file) {
+  if(defined $file && $file ne "") {
     $self->{NAME} = $file;
   }
   else {
@@ -48,16 +51,35 @@ sub setFile {
 sub setPath {
   my ($self, $path) = @_;  
   $self->{FUNCTION} = "\"setPath\"";  
-  if($self->{PATH}) {
-    my $status = RRDp::end;
-    if($status) {
-      croak($self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status.
-            "\" on closing in function ".$self->{FUNCTION});
-    }
-  }
-  if(defined $path) {
+  if(defined $path && $path ne "") {
     $self->{PATH} = $path;
-    RRDp::start $path;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setVariables {
+  my ($self, $dss) = @_;  
+  $self->{FUNCTION} = "\"setVariables\""; 
+  if(defined $dss && $dss ne "") {
+    my %vars = %{$dss};  
+    $hash{"DATASOURCES"} = \%vars;
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+  }
+  return;
+}
+
+
+sub setVariable {
+  my ($self, $dss) = @_;  
+  $self->{FUNCTION} = "\"setVariable\""; 
+  if(defined $dss && $dss ne "") {
+    $self->{DATASOURCES}->{$dss} = "";
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
@@ -69,7 +91,7 @@ sub setPath {
 sub setError {
   my ($self, $error) = @_;  
   $self->{FUNCTION} = "\"setError\"";  
-  if(defined $error) {
+  if(defined $error && $error ne "") {
     if($error == 1) {
       $RRDp::error_mode = 'catch';
     }
@@ -97,9 +119,12 @@ sub getErrorMessage {
 
 sub openDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"openDB\"";     
-  if(!defined $self->{PATH} && !defined $self->{NAME}) {
-    croak($self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in function ".$self->{FUNCTION});
+  $self->{FUNCTION} = "\"openDB\""; 
+  if(defined $self->{PATH} && defined $self->{NAME}) {
+    RRDp::start $self->{PATH};
+  }
+  else {
+    croak($self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in function ".$self->{FUNCTION});      
   }
   return;
 }
@@ -108,7 +133,8 @@ sub openDB {
 sub closeDB {
   my ($self) = @_;   
   $self->{FUNCTION} = "\"closeDB\"";   
-  if(defined $self->{PATH}) {
+  if((defined $self->{PATH} && $self->{PATH} ne "") && 
+     (defined $self->{NAME} && $self->{NAME} ne "")){
     my $status = RRDp::end;  
     if($status) {
       croak($self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status.
@@ -129,21 +155,22 @@ sub query {
   my %rrd_result = ();
   my @rrd_headings = ();  
 
-  if($cf) {  
+  if(defined $cf && $cf ne "") {  
     $cmd = "fetch " . $self->{NAME} . " " . $cf;
   }    
   else {
     croak($self->{FILENAME}.":\tMissing argument 'cf' to ".$self->{FUNCTION});
   }
-  if($resolution) {
+  if(defined $resolution && $resolution ne "") {
     $cmd = $cmd . " -r " . $resolution;
   }    
-  if($start) {
+  if(defined $start && $start ne "") {
     $cmd = $cmd . " -s " . $start;
   }
-  if($end) {
+  if(defined $end && $end ne "") {
     $cmd = $cmd . " -e " . $end;
   }
+  
   RRDp::cmd $cmd;
   my $answer = RRDp::read;     
 
@@ -174,34 +201,67 @@ sub query {
 
 
 sub insert {
-  my ($self, $time, $values, $names) = @_;
+  my ($self, $time, $ds, $value) = @_;
   $self->{FUNCTION} = "\"insert\"";   
-  my @v = @{$values};  
-  $cmd = "updatev " . $self->{NAME};
-  if($names) {
-    my @n = @{$names};
-    $cmd = $cmd . " -t ";
-    for(my $x = 0; $x <= $#{@n}; $x++) {
-      if($x == 0) {
-        $cmd = $cmd . $n[$x];
-      }
-      else {
-        $cmd = $cmd . ":" . $n[$x];
+  if(defined $time && $time ne "") {
+    if(!defined $self->{TIME} || $self->{TIME} eq "") {
+      $self->{TIME} = $time;
+    }
+    else {
+      if($self->{TIME} ne $time) {
+        croak($self->{FILENAME}.":\tAttempting to insert data to a time value that has not been finalized in ".$self->{FUNCTION});
       }
     }
   }
-  $cmd = $cmd . " " . $time . ":";
-  for(my $y = 0; $y <= $#{@v}; $y++) {
-    if($y == 0) {
-      $cmd = $cmd . $v[$y];
+  else { 
+    croak($self->{FILENAME}.":\tMissing \"time\" argument to  ".$self->{FUNCTION});  
+  }
+  if((defined $ds && $ds ne "") && (defined $value && $value ne "")) {
+    $self->{DATASOURCES}->{$ds} = $value;
+  }
+  else { 
+    croak($self->{FILENAME}.":\tMissing \"DS\" or \"value\" argument to  ".$self->{FUNCTION});  
+  }
+}
+
+
+sub insertCommit {
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"insertCommit\""; 
+  if(defined $self->{TIME} && $self->{TIME} ne "") {
+    my $cmd = "updatev " . $self->{NAME} . " -t ";
+    my $template = "";
+    my $values = "";
+    my $counter = 0;
+    foreach my $ds (keys %{$self->{DATASOURCES}}) {
+      if($counter == 0) {
+        $template = $template . $ds;
+        $values = $values . $self->{TIME} . ":" . $self->{DATASOURCES}->{$ds};
+      }
+      else {
+        $template = $template . ":" . $ds;
+        $values = $values . ":" . $self->{DATASOURCES}->{$ds};
+      }
+      $counter++;
+    }     
+    if((!defined $template || $template eq "") || (!defined $values || $values eq "")){
+      croak($self->{FILENAME}.":\trrdtool cannot update when datasource values are not specified in  ".$self->{FUNCTION});
     }
     else {
-      $cmd = $cmd . ":" . $v[$y];
+      foreach my $ds (keys %{$self->{DATASOURCES}}) {
+        $self->{DATASOURCES}->{$ds} = "";
+      }    
+      undef $self->{TIME};
+      $cmd = $cmd . $template . " " . $values;
+      RRDp::cmd $cmd;
+      my $answer = RRDp::read; 
+      return $$answer;  
     }
-  }   
-  RRDp::cmd $cmd;
-  my $answer = RRDp::read; 
-  return $$answer;
+  }
+  else {
+    croak($self->{FILENAME}.":\tCannot finalize transaction; time value has not been stored in  ".$self->{FUNCTION});
+  }
+  return;
 }
 
 
@@ -228,7 +288,7 @@ sub lastValue {
 __END__
 =head1 NAME
 
-perfSONAR-PS::DB::RRD - A module that provides methods for dealing with rrd files through the RRDp
+perfSONAR_PS::DB::RRD - A module that provides methods for dealing with rrd files through the RRDp
 perl module.
 
 =head1 DESCRIPTION
@@ -238,19 +298,23 @@ with rrd files) to offer some common functionality.
 
 =head1 SYNOPSIS
 
-    use perfSONAR-PS::DB::RRD;
+    use perfSONAR_PS::DB::RRD;
 
-    my $rrd = new perfSONAR-PS::DB::RRD(
+    my $rrd = new perfSONAR_PS::DB::RRD(
       "/usr/local/rrdtool/bin/rrdtool" , 
       "/home/jason/rrd/stout/stout.rrd",
+      {'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""},
       1
     );
 
     # or also:
     # 
-    # my $rrd = new perfSONAR-PS::DB::RRD;
+    # my $rrd = new perfSONAR_PS::DB::RRD;
     # $rrd->setFile("/home/jason/rrd/stout/stout.rrd");
     # $rrd->setPath("/usr/local/rrdtool/bin/rrdtool");  
+    # $rrd->setVariables({'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""});  
+    # $rrd->setVariable("eth0-in");
+    # ...
     # $rrd->setError(1);  
 
     # For reference, here is the create string for the rrd file:
@@ -285,15 +349,13 @@ with rrd files) to offer some common functionality.
         print "\n";
       }
     }
-  
-    my @test = ("1", "2", "3", "4");
-    my @test2 = (
-      "eth0-in", 
-      "eth0-out", 
-      "eth1-in", 
-      "eth1-out"
-    );
-    my $insert = $rrd->insert("N", \@test, \@test2);
+
+    $rrd->insert("N", "eth0-in", "1");
+    $rrd->insert("N", "eth0-out", "2");
+    $rrd->insert("N", "eth1-in", "3");
+    $rrd->insert("N", "eth1-out", "4");
+                  
+    my $insert = $rrd->insertCommit();
 
     if($rrd->getErrorMessage()) {
       print "Insert Error: " , $rrd->getErrorMessage() , "; insert returned: " , $insert , "\n";
@@ -320,15 +382,17 @@ may then be invoked on the object for the specific database.
 
 =head1 API
 
-The API of perfSONAR-PS::DB::RRD is rather simple, and attempts to mirror the API of the 
-other perfSONAR-PS::DB::* modules.  
+The API of perfSONAR_PS::DB::RRD is rather simple, and attempts to mirror the API of the 
+other perfSONAR_PS::DB::* modules.  
 
-=head2 new($path, $file)
+=head2 new($path, $file, %datasources, $error)
 
 The arguments are strings, the first representing the path to the rrdtool executable, 
-the second representing an actual rrd file.  Both arguments are optional, and the
-'set' functions (setFile($file), setPath($path)) are capable of setting the information 
-as well.  
+the second representing an actual rrd file.  The third can be a hash containing the
+names of the datasources in the rrd file. The final argument is a boolean indicating if
+errors should be thrown.  All arguments are optional, and the 'set' functions 
+(setFile($file), setPath($path), setVariables(%datasources), setVariables($ds), 
+setError($error)) are capable of setting the information as well.  
 
 =head2 setPath($path)
 
@@ -337,6 +401,14 @@ as well.
 =head2 setFile($file)
 
 (Re-)Sets the value of the name of the rrd 'file' we wish to read from.
+
+=head2 setVariables(\%variables)
+
+Passes a hash of 'datasource' variables names to the object.
+
+=head2 setVariable($variable)
+
+Adds $variable to the hash of datasources in the rrd file.
 
 =head2 setError($error)
 
@@ -351,10 +423,10 @@ the error level is set to 0.
 
 =head2 openDB()
 
-Opens is used to start the reading process from an rrd file, it technically does not need to 
-be 'opened' but the method name is kept for API similarity.  
+Open is used to start the reading process from an rrd file, by preparing named pipes
+that will interact with the rrd file.
 
-=head2 closeDB
+=head2 closeDB()
 
 Closes the connection to the rrd file.  
 
@@ -373,16 +445,19 @@ The results (if any) are returned in a 'hash of hashes' of the form:
   
 The example use shows how to retrieve and order these values.  
 
-=head2 insert($time, \@values, \@template)
+=head2 insert($time, $ds, $value)
 
 The first value represents time in seconds since epoch (1970-01-01), or the
-value 'N' (or 'n').  The second argument is an array of values to insert.  Be sure
-to have the proper number of elements and a proper 'order' for this to work.  The
-third argument is optional, and represents a 'template' where you can specify
-which values map to the appropriate DS values in the rrd file. 
+value 'N' (or 'n').  The second argument is a datasource in the rrd file.  The 
+final argument is the value the datasource is measured to have at the particular 
+moment in time.  The insert function does not 'finalize' interaction with the rrd 
+file, but instead prepares the potential values.  Running insertCommit() will
+physically update the file.
 
-If an error occurs, it will be returned, otherwise the return value should be
-empty.  
+=head2 insertCommit()
+
+Takes the values that are stored in the datasource variables and the particular 
+instant in time, and sends the changes to the rrd file.
 
 =head2 firstValue
 
@@ -394,7 +469,7 @@ Returns the 'first' timestamp in the RRD file.
 
 =head1 SEE ALSO
 
-L<perfSONAR-PS::Common>, L<perfSONAR-PS::DB::SQL>, L<perfSONAR-PS::DB::XMLDB>, L<perfSONAR-PS::DB::File>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -412,7 +487,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
