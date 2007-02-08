@@ -3,10 +3,10 @@
             xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
 
-  <nmwg:metadata id="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+  <nmwg:metadata id="192.168.0.200-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager0">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">192.168.2.2</nmwgt:ifAddress>
+        <nmwgt:ifAddress type="ipv4">192.168.0.200</nmwgt:ifAddress>
         <nmwgt:hostName>lager</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
         <nmwgt:ifIndex>2</nmwgt:ifIndex>
@@ -22,10 +22,19 @@
     </nmwg:parameters>
   </nmwg:metadata>
 
-  <nmwg:metadata id="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+  <nmwg:data id="data1" metadataIdRef="192.168.0.200-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/SNMP/lager.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">eth0-in</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data>
+  
+  <nmwg:metadata id="192.168.0.200-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager1">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">192.168.2.2</nmwgt:ifAddress>
+        <nmwgt:ifAddress type="ipv4">192.168.0.200</nmwgt:ifAddress>
         <nmwgt:hostName>lager</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
         <nmwgt:ifIndex>2</nmwgt:ifIndex>
@@ -34,15 +43,20 @@
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.16</nmwg:eventType>
-    <nmwg:parameters id="1">
+    <nmwg:parameters id="3">
       <nmwg:parameter name="SNMPVersion" value="1" />
       <nmwg:parameter name="SNMPCommunity" value="public" />
       <nmwg:parameter name="eventType" value="ifOutOctets" />
-    </nmwg:parameters>
+    </nmwg:parameters> 
   </nmwg:metadata>
 
-  <nmwg:data id="data1" metadataIdRef="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-
-  <nmwg:data id="data2" metadataIdRef="192.168.2.2-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-
+  <nmwg:data id="data2" metadataIdRef="192.168.0.200-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="2">
+      <nmwg:parameters id="4">
+        <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/SNMP/lager.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">eth0-out</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key> 
+  </nmwg:data>
+  
 </nmwg:store>

@@ -12,6 +12,7 @@
 use strict;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
+use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
@@ -27,11 +28,13 @@ if($#ARGV == 0) {
 }
 
 my $LOGFILE ="./log/perfSONAR-PS-error.log";
-my $DBFILE = "./collectRRD.conf";
+my $CONFFILE = "./collectRRD.conf";
 
 		# Read in configuration information
 my %hash = ();
-%hash = readConfiguration($DBFILE, \%hash);
+%hash = readConfiguration($CONFFILE, \%hash);
+
+
 
 		# Read in the appropriate metadata to be
 		# polling for, this relates to the choices
@@ -39,30 +42,26 @@ my %hash = ();
 my %metadata = ();
 %metadata = readMetadata(\%metadata);
 
-		# setup 'data' database connection to
-		# the rrd file, the values should be in
-		# the same order as when created (this
-		# designates a 'template')
-my @dbSchema = ("eth0-in", "eth0-out");
+		# Read in the appropriate data to be
+		# polling for, this also relates to the 
+		# choices in the configuration file.  
+my %data = ();
+%data = readData(\%data);
 
-		# Map the oid values to the DS names
-my %dbSchemaValues = (
-  'eth0-in' => "1.3.6.1.2.1.2.2.1.10.2", 
-  'eth0-out' => "1.3.6.1.2.1.2.2.1.16.2", 
-  'eth1-in' => "1.3.6.1.2.1.2.2.1.10.4", 
-  'eth1-out' => "1.3.6.1.2.1.2.2.1.16.4"
-); 
+		# this is a shortcut hash that will map
+		# snmp variables(from the MD) to the proper
+		# rrdinformation (from the data)
+my %lookup = ();
 
-my $datadb = new perfSONAR_PS::DB::RRD(
-  $hash{"DATA_DB_NAME"} , 
-  $hash{"DATA_DB_FILE"},
-  1
-);
-		# Prepare an SNMP object for each
-		# metadata block.
+		# Prepare an SNMP object for each host, this
+		# could mean multiple metadata instances share
+		# the same snmp object.
 my %snmp = ();
 foreach my $m (keys %metadata) {
+  print Dumper($metadata{$m}) , "\n";
+
   $metadata{$m}{"eventType"} =~ s/snmp\.//;
+  
   if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
     $snmp{$metadata{$m}{"hostName"}} = new perfSONAR_PS::MP::SNMP(
       $metadata{$m}{"hostName"}, 
@@ -72,7 +71,35 @@ foreach my $m (keys %metadata) {
       "");
   }
   $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+
+		# map the lookup information
+  foreach my $d (keys %data) {
+    if($data{$d}{"metadataIdRef"} eq $m) {
+      $lookup{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
+      last;
+    }
+  }
 }
+		# Prepare an rrd object for each
+		# rrd file that was seen (we can map
+		# multiple data blocks to a single rrd 
+		# object
+my %datadb = ();
+foreach my $d (keys %data) {
+  print Dumper($data{$d}) , "\n";
+  
+  if(!defined $datadb{$data{$d}{"parameter-file"}}) { 
+    $datadb{$data{$d}{"parameter-file"}} = new perfSONAR_PS::DB::RRD(
+      $hash{"DATA_DB_NAME"} , 
+      $data{$d}{"parameter-file"},
+      "",
+      1
+    );
+  }
+  		# load in the data sources
+  $datadb{$data{$d}{"parameter-file"}}->setVariable($data{$d}{"parameter-dataSource"});
+}
+
 
 if(!$DEBUG) {
 		# flush the buffer
@@ -84,7 +111,7 @@ if(!$DEBUG) {
 		# Main loop, we need to do the following 
 		# things:
 		#
-		# 1) Open up a DB connection
+		# 1) Set up the SNMP connections
 		#
 		# 2) For each SNMP object, collect the data
 		#
@@ -93,7 +120,6 @@ if(!$DEBUG) {
 		#
 		# 4) sleep, then start again
 
-$datadb->openDB;
 foreach my $s (keys %snmp) {
   $snmp{$s}->setSession;
 }	
@@ -112,23 +138,33 @@ while(1) {
       $snmp{$s}->closeSession;  
       $snmp{$s}->setSession;
     }
-    else {
-      my @final = ();
-      foreach my $value (@dbSchema) {
-        push @final, "$results{$dbSchemaValues{$value}}";
-      }
-      my $insert = $datadb->insert($time, \@final, \@dbSchema);
-
-      if($DEBUG) {
-        for(my $x = 0; $x <= $#dbSchema; $x++) {
-          print $dbSchema[$x] , "-" , $final[$x] , "\n";
-        }
-        print "\n";
-      }    
-      if($datadb->getErrorMessage()) {
-	printError($LOGFILE, "Insert Error: ".$datadb->getErrorMessage()."; insert returned: ".$insert);	
+    else {      
+      foreach my $r (keys %results) {
+      		
+		# 'insert' the results as they come in to 
+		# the RRD object, note that this isn't final
+		# until after all SNMP objects have been 
+		# polled
+        $datadb{$data{$lookup{$r}}{"parameter-file"}}->insert($time, 
+	                                                      $data{$lookup{$r}}{"parameter-dataSource"},
+							      $results{$r});
+	if($DEBUG) {
+	  print "inserting: " , $time , "," , $data{$lookup{$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
+	} 
       }
     }
+  }
+
+		# No we commit, by doing this at the end
+		# we ensure that ALL possible DS values for
+		# the RRD files are updated at once for a 
+		# given time value (we can't update the same
+		# time value, even with different DS values
+		# more than once.
+  foreach my $db (keys %datadb) {
+    $datadb{$db}->openDB;
+    $datadb{$db}->insertCommit;
+    $datadb{$db}->closeDB;
   }
   sleep(1); 
 }
@@ -136,7 +172,7 @@ while(1) {
 foreach my $s (keys %snmp) {
   $snmp{$s}->closeSession;
 }	
-$datadb->closeDB;
+
 
 
 # ################################################ #
@@ -154,8 +190,6 @@ sub daemonize {
   setsid or die "Can't start a new session: $!";
   umask 0;
 }
-
-
 
 # ################################################ #
 # Sub:		readMetadata                       #
@@ -210,4 +244,57 @@ sub readMetadata {
   }
   
   return %metadata;
+}
+
+
+# ################################################ #
+# Sub:		readData                           #
+# Args:		$sent - flattened hash of data     #
+#                       values passed through the  #
+#                       recursion.                 #
+# Purpose:	Process each data block in the     #
+#               store.                             #
+# ################################################ #
+sub readData {
+  my($sent) = @_;
+  my %data = %{$sent};
+
+  my %ns = (
+    nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+  );
+  
+  if($hash{"METADATA_DB_TYPE"} eq "mysql") {
+    my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
+    printError($LOGFILE, $msg);
+    exit(1);  
+  }
+  elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
+    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+      $hash{"METADATA_DB_NAME"}, 
+      $hash{"METADATA_DB_FILE"},
+      \%ns
+    );
+
+    $metadatadb->openDB;
+    my @resultsString = $metadatadb->query("//nmwg:data");   
+    if($#resultsString != -1) {    
+      for(my $x = 0; $x <= $#resultsString; $x++) {	
+        %data = parseData($resultsString[$x], \%data, \%ns);
+      }
+    }
+    else {
+      printError($LOGFILE, "XMLDB returned 0 results.");  
+      exit(1);
+    }  
+  }
+  elsif($hash{"METADATA_DB_TYPE"} eq "file") {
+    my $xml = readXML($hash{"METADATA_DB_FILE"});
+    %data = parseData($xml, \%data, \%ns);
+  }
+  else {
+    printError($LOGFILE, "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is invalid.");
+    exit(1);     
+  }
+  
+  return %data;
 }

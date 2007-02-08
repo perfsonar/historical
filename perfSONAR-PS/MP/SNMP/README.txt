@@ -1,6 +1,6 @@
 Version:
 --------
-	20070103
+	20070208
 
 Installation:
 -------------
@@ -28,9 +28,8 @@ Installation:
 			Install
                                 tar -zxf dbxml-2.2.13.tar.gz
                                 cd dbxml-2.2.13
-                                ./buildall.sh --enable-perl --enable-java
-                                        Builds into ./install, I moved this to /usr/local/dbxml-2.2.13
-                                        personally.
+                                ./buildall.sh --enable-perl --enable-java --prefix=/usr/local/dbxml-2.2.13
+
                         Set Paths:
                                 In /etc/profile (or ~/.bashrc)
                                         LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/dbxml-2.2.13/lib
