@@ -149,9 +149,12 @@ sub setSession {
       -community     => $self->{COMMUNITY},
       -version       => $self->{VERSION},
       -hostname      => $self->{HOST},
-      -port          => $self->{PORT}) || 
+      -port          => $self->{PORT},
+      -translate     => [
+                         -timeticks => 0x0
+                        ]) || 
       croak($self->{FILENAME}.":\tCouldn't open SNMP session to " . $self->{HOST} . " in ".$self->{FUNCTION});
-
+      
     if(!defined($self->{SESSION})) {
       croak($self->{FILENAME}.":\tSNMP Error: " . $self->{ERROR} . " in ".$self->{FUNCTION});
     }
@@ -183,7 +186,7 @@ sub collectVariables {
     }
     $self->{RESULT} = $self->{SESSION}->get_request(
       -varbindlist => \@oids
-    );
+    );        
     if(!defined($self->{RESULT})) {
       croak($self->{FILENAME}.":\tSNMP error in ".$self->{FUNCTION});
       return ('error' => -1);

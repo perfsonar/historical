@@ -203,44 +203,35 @@ sub query {
 sub insert {
   my ($self, $time, $ds, $value) = @_;
   $self->{FUNCTION} = "\"insert\"";   
-  if(defined $time && $time ne "") {
-    if(!defined $self->{TIME} || $self->{TIME} eq "") {
-      $self->{TIME} = $time;
-    }
-    else {
-      if($self->{TIME} ne $time) {
-        croak($self->{FILENAME}.":\tAttempting to insert data to a time value that has not been finalized in ".$self->{FUNCTION});
-      }
-    }
+  if((defined $time && $time ne "") &&
+     (defined $ds && $ds ne "") && 
+     (defined $value && $value ne "")) {
+    $self->{COMMIT}->{$time}->{$ds} = $value;
   }
   else { 
-    croak($self->{FILENAME}.":\tMissing \"time\" argument to  ".$self->{FUNCTION});  
-  }
-  if((defined $ds && $ds ne "") && (defined $value && $value ne "")) {
-    $self->{DATASOURCES}->{$ds} = $value;
-  }
-  else { 
-    croak($self->{FILENAME}.":\tMissing \"DS\" or \"value\" argument to  ".$self->{FUNCTION});  
-  }
+    croak($self->{FILENAME}.":\tMissing \"time\", \"DS\", or \"value\" argument to  ".$self->{FUNCTION});  
+  }  
 }
 
 
 sub insertCommit {
   my ($self) = @_;
   $self->{FUNCTION} = "\"insertCommit\""; 
-  if(defined $self->{TIME} && $self->{TIME} ne "") {
+  my $answer = "";
+  my @result = ();
+  foreach my $time (keys %{$self->{COMMIT}}) {
     my $cmd = "updatev " . $self->{NAME} . " -t ";
     my $template = "";
     my $values = "";
     my $counter = 0;
-    foreach my $ds (keys %{$self->{DATASOURCES}}) {
+    foreach my $ds (keys %{$self->{COMMIT}->{$time}}) {
       if($counter == 0) {
         $template = $template . $ds;
-        $values = $values . $self->{TIME} . ":" . $self->{DATASOURCES}->{$ds};
+        $values = $values . $time . ":" . $self->{COMMIT}->{$time}->{$ds};
       }
       else {
         $template = $template . ":" . $ds;
-        $values = $values . ":" . $self->{DATASOURCES}->{$ds};
+        $values = $values . ":" . $self->{COMMIT}->{$time}->{$ds};
       }
       $counter++;
     }     
@@ -248,20 +239,14 @@ sub insertCommit {
       croak($self->{FILENAME}.":\trrdtool cannot update when datasource values are not specified in  ".$self->{FUNCTION});
     }
     else {
-      foreach my $ds (keys %{$self->{DATASOURCES}}) {
-        $self->{DATASOURCES}->{$ds} = "";
-      }    
-      undef $self->{TIME};
-      $cmd = $cmd . $template . " " . $values;
+      delete $self->{COMMIT}->{$time};
+      $cmd = $cmd . $template . " " . $values;     
       RRDp::cmd $cmd;
-      my $answer = RRDp::read; 
-      return $$answer;  
-    }
+      $answer = RRDp::read; 
+      push @result, $$answer; 
+    } 
   }
-  else {
-    croak($self->{FILENAME}.":\tCannot finalize transaction; time value has not been stored in  ".$self->{FUNCTION});
-  }
-  return;
+  return @result;
 }
 
 
