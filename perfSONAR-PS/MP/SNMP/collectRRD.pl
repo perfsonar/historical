@@ -34,8 +34,6 @@ my $CONFFILE = "./collectRRD.conf";
 my %hash = ();
 %hash = readConfiguration($CONFFILE, \%hash);
 
-
-
 		# Read in the appropriate metadata to be
 		# polling for, this relates to the choices
 		# in the configuration file.  
@@ -49,17 +47,23 @@ my %data = ();
 %data = readData(\%data);
 
 		# this is a shortcut hash that will map
-		# snmp variables(from the MD) to the proper
-		# rrdinformation (from the data)
+		# OIDs (from the MD) to the proper rrd 
+		# information (from the data).  We also
+		# will always be requesting the upTime
+		# so we can keep a synchronization with
+		# the remote clock.
 my %lookup = ();
+$lookup{"localhost-1.3.6.1.2.1.1.3.0"} = "timeticks";
 
 		# Prepare an SNMP object for each host, this
 		# could mean multiple metadata instances share
 		# the same snmp object.
 my %snmp = ();
 foreach my $m (keys %metadata) {
-  print Dumper($metadata{$m}) , "\n";
-
+  if($DEBUG) {
+    print $m , " - " , Dumper($metadata{$m}) , "\n";
+  }
+  
   $metadata{$m}{"eventType"} =~ s/snmp\.//;
   
   if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
@@ -70,12 +74,13 @@ foreach my $m (keys %metadata) {
       $metadata{$m}{"parameter-SNMPCommunity"},
       "");
   }
+  $snmp{$metadata{$m}{"hostName"}}->setVariable("1.3.6.1.2.1.1.3.0");  
   $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-
+  
 		# map the lookup information
   foreach my $d (keys %data) {
     if($data{$d}{"metadataIdRef"} eq $m) {
-      $lookup{$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
+      $lookup{$metadata{$m}{"hostName"}."-".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
       last;
     }
   }
@@ -86,7 +91,9 @@ foreach my $m (keys %metadata) {
 		# object
 my %datadb = ();
 foreach my $d (keys %data) {
-  print Dumper($data{$d}) , "\n";
+  if($DEBUG) {
+    print $d , " - " , Dumper($data{$d}) , "\n";
+  }
   
   if(!defined $datadb{$data{$d}{"parameter-file"}}) { 
     $datadb{$data{$d}{"parameter-file"}} = new perfSONAR_PS::DB::RRD(
@@ -108,26 +115,39 @@ if(!$DEBUG) {
   &daemonize;
 }
 
-		# Main loop, we need to do the following 
-		# things:
+		# Pre-Loop tasks include:
 		#
 		# 1) Set up the SNMP connections
 		#
-		# 2) For each SNMP object, collect the data
+		# 2) Set up the time keeping mechanism for 
+		#    each host
+
+my $time = time();
+my %hostTicks = ();
+my %refTime = ();
+foreach my $s (keys %snmp) {
+  $refTime{$s} = $time;
+  $hostTicks{$s} = 0;
+  $snmp{$s}->setSession;
+}
+
+		# Main loop, we need to do the following 
+		# things:
 		#
+		# 1) For each SNMP object, collect the data
+		#
+		# 2) Do some bookeeping on each time value
+		#    to ensure that we are keeping synch
+		#    with the time on the remote host (as 
+		#    best as we can)
+		# 
 		# 3) insert into the resulting data into
 		#    the rrd file
 		#
 		# 4) sleep, then start again
-
-foreach my $s (keys %snmp) {
-  $snmp{$s}->setSession;
-}	
 					
 while(1) {
   foreach my $s (keys %snmp) {
-    my $time = time();   
-    
     my %results = ();
     %results = $snmp{$s}->collectVariables;
 
@@ -138,34 +158,63 @@ while(1) {
       $snmp{$s}->closeSession;  
       $snmp{$s}->setSession;
     }
-    else {      
+    else {     
+    
+		# The first issue is to do bookeeping on 
+		# the time info for the particular host 
+		# we have just polled.  Update the 'remote'
+		# time based on the timeticks we get back
+		# in the SNMP packet.
+      my $diff = 0;
+      my $newHostTicks = 0;
       foreach my $r (keys %results) {
-      		
+        if($lookup{"localhost-".$r} && $lookup{"localhost-".$r} eq "timeticks") {
+	  if($hostTicks{$s} == 0) {
+	    $hostTicks{$s} = $results{$r}/100;
+	    $newHostTicks = $results{$r}/100;
+	  }
+	  else {	    
+	    $newHostTicks = $results{$r}/100;	    
+	  }
+	  last;
+	}
+      }    
+      		# Calculate the difference, update, and adjust
+		# this new time.
+      $diff = $newHostTicks - $hostTicks{$s};
+      $hostTicks{$s} = $newHostTicks;  
+      $refTime{$s} += $diff;
+
 		# 'insert' the results as they come in to 
 		# the RRD object, note that this isn't final
 		# until after all SNMP objects have been 
-		# polled
-        $datadb{$data{$lookup{$r}}{"parameter-file"}}->insert($time, 
-	                                                      $data{$lookup{$r}}{"parameter-dataSource"},
-							      $results{$r});
-	if($DEBUG) {
-	  print "inserting: " , $time , "," , $data{$lookup{$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
-	} 
+		# polled     
+      foreach my $r (keys %results) { 
+        if($lookup{$s."-".$r} && $lookup{$s."-".$r} ne "timeticks") {
+	  if($DEBUG) {
+	    print "inserting: " , int($refTime{$s})  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
+	  }		
+		
+          $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert(int($refTime{$s}), 
+	                                                               $data{$lookup{$s."-".$r}}{"parameter-dataSource"},
+			  				               $results{$r});
+	}
       }
     }
   }
-
 		# No we commit, by doing this at the end
 		# we ensure that ALL possible DS values for
 		# the RRD files are updated at once for a 
 		# given time value (we can't update the same
 		# time value, even with different DS values
 		# more than once.
+  my @result = ();
   foreach my $db (keys %datadb) {
     $datadb{$db}->openDB;
-    $datadb{$db}->insertCommit;
+    @result = $datadb{$db}->insertCommit;
     $datadb{$db}->closeDB;
   }
+  
   sleep(1); 
 }
 
