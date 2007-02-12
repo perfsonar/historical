@@ -61,18 +61,9 @@ my %metadata = ();
 my %data = ();
 %data = readData(\%data, \%ns);
 
-
-foreach my $m (keys %metadata) {
-  if($DEBUG) {
-    print $m , " - " , Dumper($metadata{$m}) , "\n";
-  }
-}
-foreach my $d (keys %data) {
-  if($DEBUG) {
-    print $d , " - " , Dumper($data{$d}) , "\n";
-  }
-}
-print "Getting ready to remove...\n";
+		# remove md that were used just for 
+		# chaining purposes (i.e. if a md has a 
+		# data trigger, we should keep it).
 foreach my $m (keys %metadata) {
   my $flag = 0;
   foreach my $d (keys %data) {
@@ -88,18 +79,7 @@ foreach my $m (keys %metadata) {
     delete $metadata{$m};  
   }
 }
-print "Done Removing...\n";
-foreach my $m (keys %metadata) {
-  if($DEBUG) {
-    print $m , " - " , Dumper($metadata{$m}) , "\n";
-  }
-}
-foreach my $d (keys %data) {
-  if($DEBUG) {
-    print $d , " - " , Dumper($data{$d}) , "\n";
-  }
-}
-exit(1);
+
 
 		# this is a shortcut hash that will map
 		# OIDs (from the MD) to the proper rrd 
