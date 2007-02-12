@@ -19,9 +19,11 @@ use POSIX qw( setsid );
 use Data::Dumper;
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Transport;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
+use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MP::SNMP;
 
 my $DEBUG = 0;
@@ -51,12 +53,53 @@ my %hash = ();
 		# in the configuration file.  
 my %metadata = ();
 %metadata = readMetadata(\%metadata, \%ns);
+%metadata = chainMetadata(\%metadata);
 
 		# Read in the appropriate data to be
 		# polling for, this also relates to the 
 		# choices in the configuration file.  
 my %data = ();
 %data = readData(\%data, \%ns);
+
+
+foreach my $m (keys %metadata) {
+  if($DEBUG) {
+    print $m , " - " , Dumper($metadata{$m}) , "\n";
+  }
+}
+foreach my $d (keys %data) {
+  if($DEBUG) {
+    print $d , " - " , Dumper($data{$d}) , "\n";
+  }
+}
+print "Getting ready to remove...\n";
+foreach my $m (keys %metadata) {
+  my $flag = 0;
+  foreach my $d (keys %data) {
+    if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
+      $flag = 1;
+      last;
+    }
+  }
+  if(!$flag) {
+    if($DEBUG) {
+      print "Removing '".$m."' from the Metadata list.\n";
+    }
+    delete $metadata{$m};  
+  }
+}
+print "Done Removing...\n";
+foreach my $m (keys %metadata) {
+  if($DEBUG) {
+    print $m , " - " , Dumper($metadata{$m}) , "\n";
+  }
+}
+foreach my $d (keys %data) {
+  if($DEBUG) {
+    print $d , " - " , Dumper($data{$d}) , "\n";
+  }
+}
+exit(1);
 
 		# this is a shortcut hash that will map
 		# OIDs (from the MD) to the proper rrd 
@@ -91,7 +134,7 @@ foreach my $m (keys %metadata) {
   
 		# map the lookup information
   foreach my $d (keys %data) {
-    if($data{$d}{"metadataIdRef"} eq $m) {
+    if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) {
       $lookup{$metadata{$m}{"hostName"}."-".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
       last;
     }
@@ -107,16 +150,93 @@ foreach my $d (keys %data) {
     print $d , " - " , Dumper($data{$d}) , "\n";
   }
   
-  if(!defined $datadb{$data{$d}{"parameter-file"}}) { 
-    $datadb{$data{$d}{"parameter-file"}} = new perfSONAR_PS::DB::RRD(
-      $hash{"DATA_DB_NAME"} , 
-      $data{$d}{"parameter-file"},
-      "",
-      1
-    );
-  }
+  if($data{$d}{"parameter-type"} eq "rrd") {
+    if(!defined $datadb{$data{$d}{"parameter-file"}}) { 
+      $datadb{$data{$d}{"parameter-file"}} = new perfSONAR_PS::DB::RRD(
+        $hash{"DATA_DB_NAME"} , 
+        $data{$d}{"parameter-file"},
+        "",
+        1
+      );
+    }
   		# load in the data sources
-  $datadb{$data{$d}{"parameter-file"}}->setVariable($data{$d}{"parameter-dataSource"});
+    $datadb{$data{$d}{"parameter-file"}}->setVariable($data{$d}{"parameter-dataSource"});
+  }
+  elsif($data{$d}{"parameter-type"} eq "sqlite") {
+    print "We do not support this data type right now, sorry.\n";
+    foreach my $m (keys %metadata) {
+      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
+      
+        	#remove snmp reference
+        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+      		#remove md totally
+        if($DEBUG) {
+	  print "Removing '".$m."' from the Metadata list.\n";
+        }
+	delete $metadata{$m};
+      }
+    }
+    		#remove SNMP if it has no variables?
+    foreach my $s (keys %snmp) {
+      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
+      if($snmp{$s}->getVariableCount == 1) {
+        if($DEBUG) {
+          print "Removing '".$s."' from the SNMP list.\n";
+	}
+	delete $snmp{$s};
+      }
+    }
+  }
+  elsif($data{$d}{"parameter-type"} eq "mysql") {
+    print "We do not support this data type right now, sorry.\n";
+    foreach my $m (keys %metadata) {
+      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
+      
+        	#remove snmp reference
+        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+      		#remove md totally
+        if($DEBUG) {
+	  print "Removing '".$m."' from the Metadata list.\n";
+        }
+	delete $metadata{$m};
+      }
+    }
+    		#remove SNMP if it has no variables?
+    foreach my $s (keys %snmp) {
+      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
+      if($snmp{$s}->getVariableCount == 1) {
+        if($DEBUG) {
+	  print "Removing '".$s."' from the SNMP list.\n";
+	}
+	delete $snmp{$s};
+      }
+    }
+  }
+  else {
+    print "We do not support this data type right now, sorry.\n";
+    foreach my $m (keys %metadata) {
+      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
+      
+        	#remove snmp reference
+        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+      		#remove md totally
+        if($DEBUG) {
+	  print "Removing '".$m."' from the Metadata list.\n";
+        }
+	delete $metadata{$m};
+      }
+    }
+    		#remove SNMP if it has no variables?
+    foreach my $s (keys %snmp) {
+      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
+      if($snmp{$s}->getVariableCount == 1) {
+        if($DEBUG) {
+	  print "Removing '".$s."' from the SNMP list.\n";
+	}
+	delete $snmp{$s};
+      }
+    }
+  }  
 }
 
 
