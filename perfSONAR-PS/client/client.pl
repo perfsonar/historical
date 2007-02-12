@@ -17,24 +17,32 @@ use XML::XPath;
 use LWP::UserAgent;
 use IO::File;
 
-$DEBUG = 2;
-$HOST = "";
-$PORT = "";
+use Getopt::Long;
 
 
-if($#ARGV == -1) {
-  print "Try ./client.pl (-h | --h | -help | --help) for usage.\n";
-  print "    ./client.pl FILENAME for transmitting FILENAME to a server. \n";
-  exit(1);
+our $DEBUG = 2;
+our $HOST = "localhost";
+our $PORT = "5000";
+our $ENDPOINT = '/axis/services/MP';
+
+our $help_needed;
+
+my $ok = GetOptions (
+                     'debug'    	=> \$DEBUG,
+                     'server=s'		=> \$HOST,
+					 'port=s'  		=> \$PORT,
+					 'endpoint=s'	=> \$ENDPOINT,
+                     'help'     	=> \$help_needed);
+
+
+if ( not $ok 
+		or $help_needed )
+{
+ 	print "$0: sends an xml file to the server on specified port.\n";
+  	print "    ./client.pl --server=xxx.yyy.zzz --port=n --endpoint=ENDPOINT  FILENAME \n";
+  	exit(1);	
 }
-elsif($#ARGV == 0) {
-  if($ARGV[0] eq "-h" || $ARGV[0] eq "--h" || $ARGV[0] eq "-help" || $ARGV[0] eq "--help") {
-    print "Usage: ./client.pl (-h | --h | -help | --help): This message.\n";
-    print "       ./client.pl FILENAME: for transmitting FILENAME to a server.\n";
-  }
-  else {
-					# Read in the conf file information
-    readConf("client.conf");
+
 
 					# Read the source XML file
     my $xml = readXML($ARGV[0]);
@@ -62,49 +70,7 @@ elsif($#ARGV == 0) {
     }
 
     exit(0);
-  }
-}
-else {
-  print "Try ./client.pl (-h | --h | -help | --help) for usage.\n";
-  print "    ./client.pl FILENAME for transmitting FILENAME to a server. \n";
-  exit(1);
-}
 
-
-
-# ################################################### #
-#                                                     #
-# Name:      readConf                                 #
-# Arguments: $FILE - the conf file name               #
-# Returns:   N/A                                      #
-# Purpose:   Read the configuration file, store conf  #
-#            values in global variables.              # 
-#                                                     #
-# ################################################### #
-
-sub readConf {
-  my ($file)  = @_;
-  my $CONF = new IO::File("<$file") or die "Cannot open 'readConf' $file: $!\n" ;
-  while (<$CONF>) {
-    if(!($_ =~ m/^#.*$/)) {
-      $_ =~ s/\n//;
-      if($_ =~ m/^PORT=.*$/) {
-        $_ =~ s/PORT=//;
-        $PORT = $_;
-      }
-      elsif($_ =~ m/^HOST=.*$/) {
-        $_ =~ s/HOST=//;
-        $HOST = $_;
-      }
-      elsif($_ =~ m/^ENDPOINT=.*$/) {
-        $_ =~ s/ENDPOINT=//;
-        $ENDPOINT = $_;
-      }      
-    }
-  }          
-  $CONF->close();
-  return; 
-}
 
 
 # ################################################ #
