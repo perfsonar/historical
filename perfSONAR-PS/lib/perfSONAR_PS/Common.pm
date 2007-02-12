@@ -78,12 +78,21 @@ sub parseMetadata {
     my %metadata = %{$sentmetadata};
     my %ns = %{$sentnamespaces};
 
-    my $xp = XML::XPath->new( xml => $xml );
-    $xp->clear_namespaces();
-  
-    foreach my $prefix (keys %ns) {
-      $xp->set_namespace($prefix, $ns{$prefix});
-    }
+    my $xp = undef;
+    
+	if ( $xml->isa("XML::XPath::Node::Element") )
+	{
+		$xp = $xml;
+	}
+	else
+	{
+		$xp = XML::XPath->new( xml => $xml );
+    	$xp->clear_namespaces();
+    	
+        foreach my $prefix (keys %ns) {
+    		$xp->set_namespace($prefix, $ns{$prefix});
+    	}
+	}
   	  	  	  
     my $nodeset = $xp->find('//nmwg:metadata');
     if($nodeset->size() <= 0) {
@@ -126,13 +135,22 @@ sub parseData {
     my %data = %{$sentdata};
     my %ns = %{$sentnamespaces};
 
-    my $xp = XML::XPath->new( xml => $xml );
-    $xp->clear_namespaces();
-  
-    foreach my $prefix (keys %ns) {
-      $xp->set_namespace($prefix, $ns{$prefix});
-    }
-  	  	  	  
+	my $xp = undef;
+	
+	if ( $xml->isa("XML::XPath::Node::Element") )
+	{
+		$xp = $xml;
+	}
+	else
+	{
+	    $xp = XML::XPath->new( xml => $xml );
+    	$xp->clear_namespaces();
+  	
+    	foreach my $prefix (keys %ns) {
+    	  $xp->set_namespace($prefix, $ns{$prefix});
+    	}
+	}
+	  	  
     my $nodeset = $xp->find('//nmwg:data');
     if($nodeset->size() <= 0) {
       croak("XPath error: either they are not nmwg:data, or the namespace could be wrong."); 	

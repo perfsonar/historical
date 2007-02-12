@@ -107,6 +107,7 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
+  print "QUERY: $query\n\n";
   if(defined $query && $query ne "") {  
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
