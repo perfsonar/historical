@@ -4,6 +4,7 @@ package perfSONAR_PS::Common;
 use Exporter;
 use IO::File;
 use XML::XPath;
+  
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata', 
            'parseData', 'chainMetadata', 'genuid');
@@ -77,22 +78,18 @@ sub parseMetadata {
      (defined $sentnamespaces && $sentnamespaces ne "")) {  
     my %metadata = %{$sentmetadata};
     my %ns = %{$sentnamespaces};
-
     my $xp = undef;
     
-	if ( $xml->isa("XML::XPath::Node::Element") )
-	{
-		$xp = $xml;
-	}
-	else
-	{
-		$xp = XML::XPath->new( xml => $xml );
-    	$xp->clear_namespaces();
-    	
-        foreach my $prefix (keys %ns) {
-    		$xp->set_namespace($prefix, $ns{$prefix});
-    	}
-	}
+    if(UNIVERSAL::can($xml, "XML::XPath::Node::Element") ? "1" : "0" == 1) {
+      $xp = $xml;
+    }
+    else {
+      $xp = XML::XPath->new( xml => $xml );
+      $xp->clear_namespaces();	
+      foreach my $prefix (keys %ns) {
+        $xp->set_namespace($prefix, $ns{$prefix});
+      }
+    }
   	  	  	  
     my $nodeset = $xp->find('//nmwg:metadata');
     if($nodeset->size() <= 0) {
@@ -134,22 +131,18 @@ sub parseData {
      (defined $sentnamespaces && $sentnamespaces ne "")) {
     my %data = %{$sentdata};
     my %ns = %{$sentnamespaces};
-
-	my $xp = undef;
+    my $xp = undef;
 	
-	if ( $xml->isa("XML::XPath::Node::Element") )
-	{
-		$xp = $xml;
-	}
-	else
-	{
-	    $xp = XML::XPath->new( xml => $xml );
-    	$xp->clear_namespaces();
-  	
-    	foreach my $prefix (keys %ns) {
-    	  $xp->set_namespace($prefix, $ns{$prefix});
-    	}
-	}
+    if(UNIVERSAL::can($xml, "XML::XPath::Node::Element") ? "1" : "0" == 1) {
+      $xp = $xml;
+    }
+    else {
+      $xp = XML::XPath->new( xml => $xml );
+      $xp->clear_namespaces();	
+      foreach my $prefix (keys %ns) {
+        $xp->set_namespace($prefix, $ns{$prefix});
+      }
+    }
 	  	  
     my $nodeset = $xp->find('//nmwg:data');
     if($nodeset->size() <= 0) {
