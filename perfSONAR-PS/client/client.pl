@@ -84,7 +84,7 @@ else {
 
 sub readConf {
   my ($file)  = @_;
-  my $CONF = new IO::File("<$file") or die "Cannot open 'readDBConf' $file: $!\n" ;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readConf' $file: $!\n" ;
   while (<$CONF>) {
     if(!($_ =~ m/^#.*$/)) {
       $_ =~ s/\n//;
@@ -96,6 +96,10 @@ sub readConf {
         $_ =~ s/HOST=//;
         $HOST = $_;
       }
+      elsif($_ =~ m/^ENDPOINT=.*$/) {
+        $_ =~ s/ENDPOINT=//;
+        $ENDPOINT = $_;
+      }      
     }
   }          
   $CONF->close();
@@ -185,11 +189,14 @@ sub makeEnvelope {
 sub sendReceive {
   ($envelope) = @_;
 
-  $endpoint = "/";
+  if(!$ENDPOINT) {
+    $ENDPOINT = "/";
+  }
+
   $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
   $method_name = "";
 
-  $httpEndpoint = qq[http://$HOST:$PORT$endpoint];
+  $httpEndpoint = qq[http://$HOST:$PORT$ENDPOINT];
   $userAgent = LWP::UserAgent->new('timeout'=>5000);
 
 
