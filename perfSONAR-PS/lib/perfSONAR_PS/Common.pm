@@ -80,7 +80,8 @@ sub parseMetadata {
     my %ns = %{$sentnamespaces};
     my $xp = undef;
     
-    if(UNIVERSAL::can($xml, "XML::XPath::Node::Element") ? "1" : "0" == 1) {
+    if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
+    	&& $xml->isa('XML::XPath::Node::Element')) {
       $xp = $xml;
     }
     else {
@@ -112,6 +113,7 @@ sub parseMetadata {
           }
         }
         %md = traverse($node, \%md);
+     
         $metadata{$id} = \%md;             	    
       }
     }  
@@ -133,7 +135,8 @@ sub parseData {
     my %ns = %{$sentnamespaces};
     my $xp = undef;
 	
-    if(UNIVERSAL::can($xml, "XML::XPath::Node::Element") ? "1" : "0" == 1) {
+    if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
+      	&& $xml->isa('XML::XPath::Node::Element')) {
       $xp = $xml;
     }
     else {
