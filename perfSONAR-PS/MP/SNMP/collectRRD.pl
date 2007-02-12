@@ -10,6 +10,10 @@
 #                                                  #
 # ################################################ #
 use strict;
+use threads;
+use threads::shared;
+use Thread::Semaphore; 
+
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 use Data::Dumper;
@@ -30,6 +34,14 @@ if($#ARGV == 0) {
 my $LOGFILE ="./log/perfSONAR-PS-error.log";
 my $CONFFILE = "./collectRRD.conf";
 
+my %ns = (
+  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+  netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+);
+
 		# Read in configuration information
 my %hash = ();
 %hash = readConfiguration($CONFFILE, \%hash);
@@ -38,13 +50,13 @@ my %hash = ();
 		# polling for, this relates to the choices
 		# in the configuration file.  
 my %metadata = ();
-%metadata = readMetadata(\%metadata);
+%metadata = readMetadata(\%metadata, \%ns);
 
 		# Read in the appropriate data to be
 		# polling for, this also relates to the 
 		# choices in the configuration file.  
 my %data = ();
-%data = readData(\%data);
+%data = readData(\%data, \%ns);
 
 		# this is a shortcut hash that will map
 		# OIDs (from the MD) to the proper rrd 
@@ -115,6 +127,41 @@ if(!$DEBUG) {
   &daemonize;
 }
 
+if($DEBUG) {
+  print "Starting '".threads->tid()."' as main\n";
+}
+
+my $reval:shared = 0;
+my $sem = Thread::Semaphore->new(1);
+my $mpThread = threads->new(\&measurementPoint, $DEBUG, $hash{"MP_SAMPLE_RATE"});
+my $maThread = threads->new(\&measurementArchive, $DEBUG);
+my $regThread = threads->new(\&registerLS, $DEBUG, $hash{"LS_REGISTRATION_INTERVAL"}, $hash{"LS_INSTANCE"});
+
+if(!defined $mpThread || !defined $maThread || !defined $regThread) {
+  print "Thread creation has failed...exiting...\n";
+  exit(1);
+}
+
+$mpThread->join();
+$maThread->join();
+$regThread->join();
+
+
+
+
+
+# ################################################ #
+# Sub:		measurementPoint                   #
+# Args:		N/A                                #
+# Purpose:	Performs measurements at a         #
+#               periodic rate as specified in the  #
+#               storage medium                     #
+# ################################################ #
+sub measurementPoint {
+  my($DEBUG, $sampleRate) = @_;
+  if($DEBUG) {
+    print "Starting '".threads->tid()."' as MP\n";
+  }
 		# Pre-Loop tasks include:
 		#
 		# 1) Set up the SNMP connections
@@ -122,14 +169,14 @@ if(!$DEBUG) {
 		# 2) Set up the time keeping mechanism for 
 		#    each host
 
-my $time = time();
-my %hostTicks = ();
-my %refTime = ();
-foreach my $s (keys %snmp) {
-  $refTime{$s} = $time;
-  $hostTicks{$s} = 0;
-  $snmp{$s}->setSession;
-}
+  my $time = time();
+  my %hostTicks = ();
+  my %refTime = ();
+  foreach my $s (keys %snmp) {
+    $refTime{$s} = $time;
+    $hostTicks{$s} = 0;
+    $snmp{$s}->setSession;
+  }
 
 		# Main loop, we need to do the following 
 		# things:
@@ -146,82 +193,115 @@ foreach my $s (keys %snmp) {
 		#
 		# 4) sleep, then start again
 					
-while(1) {
-  foreach my $s (keys %snmp) {
-    my %results = ();
-    %results = $snmp{$s}->collectVariables;
+  while(1) {
+  
+    foreach my $s (keys %snmp) {
+      my %results = ();
+      %results = $snmp{$s}->collectVariables;
 
 		# if there is some sort of problem with
 		# the target, see if you can re-establish
 		# the session
-    if(defined $results{"error"} && $results{"error"} == -1) {  
-      $snmp{$s}->closeSession;  
-      $snmp{$s}->setSession;
-    }
-    else {     
+      if(defined $results{"error"} && $results{"error"} == -1) {  
+        $snmp{$s}->closeSession;  
+        $snmp{$s}->setSession;
+      }
+      else {     
     
 		# The first issue is to do bookeeping on 
 		# the time info for the particular host 
 		# we have just polled.  Update the 'remote'
 		# time based on the timeticks we get back
 		# in the SNMP packet.
-      my $diff = 0;
-      my $newHostTicks = 0;
-      foreach my $r (keys %results) {
-        if($lookup{"localhost-".$r} && $lookup{"localhost-".$r} eq "timeticks") {
-	  if($hostTicks{$s} == 0) {
-	    $hostTicks{$s} = $results{$r}/100;
-	    $newHostTicks = $results{$r}/100;
+        my $diff = 0;
+        my $newHostTicks = 0;
+        foreach my $r (keys %results) {
+          if($lookup{"localhost-".$r} && $lookup{"localhost-".$r} eq "timeticks") {
+	    if($hostTicks{$s} == 0) {
+	      $hostTicks{$s} = $results{$r}/100;
+	      $newHostTicks = $results{$r}/100;
+	    }
+	    else {	    
+	      $newHostTicks = $results{$r}/100;	    
+	    }
+	    last;
 	  }
-	  else {	    
-	    $newHostTicks = $results{$r}/100;	    
-	  }
-	  last;
-	}
-      }    
+        }    
       		# Calculate the difference, update, and adjust
 		# this new time.
-      $diff = $newHostTicks - $hostTicks{$s};
-      $hostTicks{$s} = $newHostTicks;  
-      $refTime{$s} += $diff;
+        $diff = $newHostTicks - $hostTicks{$s};
+        $hostTicks{$s} = $newHostTicks;  
+        $refTime{$s} += $diff;
 
 		# 'insert' the results as they come in to 
 		# the RRD object, note that this isn't final
 		# until after all SNMP objects have been 
 		# polled     
-      foreach my $r (keys %results) { 
-        if($lookup{$s."-".$r} && $lookup{$s."-".$r} ne "timeticks") {
-	  if($DEBUG) {
-	    print "inserting: " , int($refTime{$s})  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
-	  }		
+        foreach my $r (keys %results) { 
+          if($lookup{$s."-".$r} && $lookup{$s."-".$r} ne "timeticks") {
+	    if($DEBUG) {
+	      print "inserting: " , int($refTime{$s})  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
+	    }		
 		
-          $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert(int($refTime{$s}), 
+            $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert(int($refTime{$s}), 
 	                                                               $data{$lookup{$s."-".$r}}{"parameter-dataSource"},
 			  				               $results{$r});
-	}
+	  }
+        }
       }
     }
-  }
 		# No we commit, by doing this at the end
 		# we ensure that ALL possible DS values for
 		# the RRD files are updated at once for a 
 		# given time value (we can't update the same
 		# time value, even with different DS values
 		# more than once.
-  my @result = ();
-  foreach my $db (keys %datadb) {
-    $datadb{$db}->openDB;
-    @result = $datadb{$db}->insertCommit;
-    $datadb{$db}->closeDB;
-  }
+    my @result = ();
+    foreach my $db (keys %datadb) {
+      $datadb{$db}->openDB;
+      @result = $datadb{$db}->insertCommit;
+      $datadb{$db}->closeDB;
+    }
   
-  sleep(1); 
+    sleep($sampleRate); 
+  }
+
+  foreach my $s (keys %snmp) {
+    $snmp{$s}->closeSession;
+  }
 }
 
-foreach my $s (keys %snmp) {
-  $snmp{$s}->closeSession;
-}	
 
+# ################################################ #
+# Sub:		measurementArchive                 #
+# Args:		N/A                                #
+# Purpose:	Implements the WS functionality of #
+#               an MA by listening on a port for   #
+#               messages and responding            #
+#               accordingly.                       #
+# ################################################ #
+sub measurementArchive {
+  my($DEBUG) = @_;
+  if($DEBUG) {
+    print "Starting '".threads->tid()."' as MA.\n";
+  }
+}
+
+
+
+# ################################################ #
+# Sub:		registerLS                         #
+# Args:		N/A                                #
+# Purpose:	Periodically registers with a      #
+#               specified LS instance.             #
+# ################################################ #
+sub registerLS {
+  my($DEBUG, $registerRate, $lsInstance) = @_;
+  if($DEBUG) {
+    print "Starting '".threads->tid()."' as to register with LS '".$lsInstance."'.\n";
+  }
+  return
+}
 
 
 # ################################################ #
@@ -240,6 +320,7 @@ sub daemonize {
   umask 0;
 }
 
+
 # ################################################ #
 # Sub:		readMetadata                       #
 # Args:		$sent - flattened hash of metadata #
@@ -249,15 +330,9 @@ sub daemonize {
 #               xmldb store.                       #
 # ################################################ #
 sub readMetadata {
-  my($sent) = @_;
+  my($sent, $sentns) = @_;
   my %metadata = %{$sent};
-
-  my %ns = (
-    nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-    netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-    nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-    snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
-  );
+  my %ns = %{$sentns};
   
   if($hash{"METADATA_DB_TYPE"} eq "mysql") {
     my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
@@ -305,12 +380,9 @@ sub readMetadata {
 #               store.                             #
 # ################################################ #
 sub readData {
-  my($sent) = @_;
+  my($sent, $sentns) = @_;
   my %data = %{$sent};
-
-  my %ns = (
-    nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  );
+  my %ns = %{$sentns};
   
   if($hash{"METADATA_DB_TYPE"} eq "mysql") {
     my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
@@ -347,3 +419,4 @@ sub readData {
   
   return %data;
 }
+
