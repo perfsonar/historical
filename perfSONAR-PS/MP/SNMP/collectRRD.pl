@@ -79,8 +79,6 @@ foreach my $m (keys %metadata) {
     delete $metadata{$m};  
   }
 }
-
-
 		# this is a shortcut hash that will map
 		# OIDs (from the MD) to the proper rrd 
 		# information (from the data).  We also
@@ -234,7 +232,7 @@ if($DEBUG) {
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
 my $mpThread = threads->new(\&measurementPoint, $DEBUG, $hash{"MP_SAMPLE_RATE"});
-my $maThread = threads->new(\&measurementArchive, $DEBUG);
+my $maThread = threads->new(\&measurementArchive, $DEBUG, $hash{"PORT"}, $hash{"ENDPOINT"});
 my $regThread = threads->new(\&registerLS, $DEBUG, $hash{"LS_REGISTRATION_INTERVAL"}, $hash{"LS_INSTANCE"});
 
 if(!defined $mpThread || !defined $maThread || !defined $regThread) {
@@ -381,10 +379,40 @@ sub measurementPoint {
 #               accordingly.                       #
 # ################################################ #
 sub measurementArchive {
-  my($DEBUG) = @_;
+  my($DEBUG, $port, $endPoint) = @_;
   if($DEBUG) {
-    print "Starting '".threads->tid()."' as MA.\n";
+    print "Starting '".threads->tid()."' as MA on port '".$port."' and endpoint '".$endPoint."'.\n";
   }
+
+  my $listener = new perfSONAR_PS::Transport($port, $endPoint, "", "", "");  
+  $listener->startDaemon;
+  while(1) {
+    if($listener->acceptCall == 1) {
+      $listener->setResponse("Everything OK");
+      
+      print "REQUEST:\n" , $listener->getRequest , "\n";
+
+      my %messagemd = ();
+      %messagemd = parseMetadata($listener->getRequest, \%messagemd, \%ns);            
+      print Dumper(%messagemd) , "\n";
+      %messagemd = chainMetadata(\%messagemd);
+      print "\n\n\n" , Dumper(%messagemd) , "\n";      
+
+      my %messaged = ();
+      %messaged = parseData($listener->getRequest, \%messaged, \%ns);      
+      print "\n\n\n" , Dumper(%messaged) , "\n";
+      
+    }
+    else {
+      $listener->setResponse("Bad Request");
+
+      printError($LOGFILE, "Sent Request has was not expected: ".
+                 $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
+		 $listener->{REQUEST}->headers->{"soapaction"}.".");  
+    }
+    $listener->closeCall;
+  }
+  return;
 }
 
 
