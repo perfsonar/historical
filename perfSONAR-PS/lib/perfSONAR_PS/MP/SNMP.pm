@@ -115,6 +115,17 @@ sub setVariable {
 }
 
 
+sub getVariableCount {
+  my ($self) = @_;  
+  $self->{FUNCTION} = "\"getVariableCount\""; 
+  my $num = 0;
+  foreach my $oid (keys %{$self->{VARIABLES}}) {
+    $num++;
+  }
+  return $num;
+}
+
+
 sub removeVariables {
   my ($self) = @_;  
   $self->{FUNCTION} = "\"removeVariables\""; 

@@ -5,7 +5,8 @@ use Exporter;
 use IO::File;
 use XML::XPath;
 @ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata', 'parseData', 'genuid');
+@EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata', 
+           'parseData', 'chainMetadata', 'genuid');
 
 our $VERSION = '0.02';
 
@@ -97,10 +98,11 @@ sub parseMetadata {
         foreach my $attr ($node->getAttributes) {
           if($attr->getLocalName eq "id") {
             $id = $attr->getNodeValue;
+	    $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
           }
           elsif($attr->getLocalName eq "metadataIdRef") {
             $mid = $attr->getNodeValue;
-            $md{"metadataIdRef"} = $mid;
+	    $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
           }
         }
         %md = traverse($node, \%md);
@@ -144,10 +146,11 @@ sub parseData {
         foreach my $attr ($node->getAttributes) {
           if($attr->getLocalName eq "id") {
             $id = $attr->getNodeValue;
+	    $d{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
           }
           elsif($attr->getLocalName eq "metadataIdRef") {
             $mid = $attr->getNodeValue;
-            $d{"metadataIdRef"} = $mid;
+	    $d{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
 	  }
         }     
         %d = traverse($node, \%d);
@@ -167,7 +170,14 @@ sub traverse {
   my ($set, $sent) = @_;
   my %struct = %{$sent};
   
-  foreach my $element ($set->getChildNodes) {                
+  foreach my $element ($set->getChildNodes) {          
+  
+    foreach my $attr ($element->getAttributes) {
+      if($attr->getLocalName eq "id" || $attr->getLocalName eq "metadataIdRef") {
+        $struct{$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
+      }
+    }    
+        
     if($element->getNodeType == 3) {
       my $value = $element->getValue;
       $value =~ s/\s+//g;
@@ -178,6 +188,7 @@ sub traverse {
     elsif($element->getLocalName eq "parameter") {    
       my $nm = "";
       my $vl = "";
+      my $op = "";      
       foreach my $attr2 ($element->getAttributes) {
         if($attr2->getLocalName eq "name") {
 	  $nm = $attr2->getNodeValue;
@@ -185,14 +196,22 @@ sub traverse {
 	elsif($attr2->getLocalName eq "value") {
 	  $vl = $attr2->getNodeValue;
 	}
+	elsif($attr2->getLocalName eq "operator") {
+	  $op = $attr2->getNodeValue;
+	}	
       }    
-      if($vl) {
-        $struct{$element->getLocalName."-".$nm} = $vl; 
+      if(!$vl) {
+        if($element->getChildNode(1)) {
+	  $vl = $element->getChildNode(1)->getValue;
+          $vl =~ s/\s+//g;
+          $vl =~ s/\n+//g;	  
+	}
+      }
+      if($op) {
+        $struct{$element->getLocalName."-".$nm."-".$op} = $vl;
       }
       else {
-        if($element->getChildNode(1)) {
-	  $struct{$element->getLocalName."-".$nm} = $element->getChildNode(1)->getValue;
-	}
+        $struct{$element->getLocalName."-".$nm} = $vl;      
       }
     }
     else {
@@ -207,6 +226,53 @@ sub traverse {
   return %struct;
 }
 
+sub chainMetadata {
+  my ($sentmetadata) = @_;
+  my %md = %{$sentmetadata};
+    
+  my $flag = 1;
+  while($flag) {
+    $flag = 0;
+    foreach my $m (keys %md) {
+      foreach $class (keys %{$md{$m}}) {
+        my @ns = split(/:/,$class);		
+        if($md{$m}{$ns[0].":subject-metadataIdRef"}) {
+          foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":subject-metadataIdRef"}}}) {
+	    my @mark = split(/-/,$m2);
+	    if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {
+	    
+              if((!$md{$m}{$m2} && $m2 ne $ns[0].":subject-metadataIdRef" && 
+                 $m2 ne $ns[0].":metadata-metadataIdRef") || 
+		 ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":subject-metadataIdRef"}}{$m2} && 
+                 $m2 ne $ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+		 
+	        $md{$m}{$m2} = $md{$md{$m}{$ns[0].":subject-metadataIdRef"}}{$m2};
+	        $flag = 1;
+	      }
+	    }	    
+          }
+        }
+        if($md{$m}{$ns[0].":metadata-metadataIdRef"}) {
+          foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
+	    my @mark = split(/-/,$m2);    
+	    if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {		         
+	    
+	      if((!$md{$m}{$m2} && $m2 ne $ns[0].":subject-metadataIdRef" && 
+	         $m2 ne $ns[0].":metadata-metadataIdRef") || 
+	         ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
+	         $m2 ne $ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+		 
+	        $md{$m}{$m2} = $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
+	        $flag = 1;
+	      }
+	    }
+          }
+        }
+      }
+    }
+  }
+  return %md;
+}
 
 sub genuid {
   my ($r) = int( rand( 16777216 ) );
@@ -308,6 +374,10 @@ be used).  The data object is returned, populated with the appropriate values.
 
 This function is not exported, and is meant to be used by parseMetadata($xml, \%metadata, \%ns)
 and parseData($xml, \%data, \%ns) to aide in the extraction of XML values.
+
+=head2 chainMetadata($sentmetadata)
+
+TBD
 
 =head2 genuid()
 
