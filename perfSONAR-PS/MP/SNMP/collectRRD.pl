@@ -267,7 +267,9 @@ sub measurementPoint {
 		# 2) Set up the time keeping mechanism for 
 		#    each host
 
-  my $time = time();
+  my($sec, $frac) = Time::HiRes::gettimeofday;
+  my $time = $sec.".".$frac;
+  
   my %hostTicks = ();
   my %refTime = ();
   foreach my $s (keys %snmp) {
@@ -293,6 +295,28 @@ sub measurementPoint {
 					
   while(1) {
   
+    if($reval) {
+      		# a change has been made to the MD 
+		# structure (by the MA thread) so we
+		# need to re-eval all of our objects 
+		# (md, d, and snmp) to respect this 
+		# change.
+
+
+      # do stuff...
+      
+
+      		# Make sure the flag variable is 
+		# not in use, then reset the flag 
+		# value.
+      $sem->down;
+      {
+        lock($reval);
+        $reval = 0;
+      }
+      $sem->up;
+    }  
+  
     foreach my $s (keys %snmp) {
       my %results = ();
       %results = $snmp{$s}->collectVariables;
@@ -305,7 +329,6 @@ sub measurementPoint {
         $snmp{$s}->setSession;
       }
       else {     
-    
 		# The first issue is to do bookeeping on 
 		# the time info for the particular host 
 		# we have just polled.  Update the 'remote'
@@ -338,12 +361,11 @@ sub measurementPoint {
         foreach my $r (keys %results) { 
           if($lookup{$s."-".$r} && $lookup{$s."-".$r} ne "timeticks") {
 	    if($DEBUG) {
-	      print "inserting: " , int($refTime{$s})  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
-	    }		
-		
-            $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert(int($refTime{$s}), 
-	                                                               $data{$lookup{$s."-".$r}}{"parameter-dataSource"},
-			  				               $results{$r});
+	      print "inserting: " , $refTime{$s}  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
+	    }				
+            $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert($refTime{$s}, 
+	                                                                 $data{$lookup{$s."-".$r}}{"parameter-dataSource"},
+			  				                 $results{$r});
 	  }
         }
       }
