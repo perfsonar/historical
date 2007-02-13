@@ -11,11 +11,9 @@
 #                                                     #
 # ################################################### #
 
-use XML::Writer;
-use XML::Writer::String;
-use XML::XPath;
-use LWP::UserAgent;
+
 use IO::File;
+use perfSONAR_PS::Transport;
 
 use Getopt::Long;
 
@@ -44,14 +42,17 @@ if ( not $ok
 }
 
 
+my $sender = new perfSONAR_PS::Transport("", "", $PORT, $HOST, $ENDPOINT);
+
+
 					# Read the source XML file
     my $xml = readXML($ARGV[0]);
 					# Make a SOAP envelope, use the XML file
 					# as the body.
-    my $envelope = makeEnvelope($xml);
+    my $envelope = $sender->makeEnvelope($xml);
 					# Send/receive to the server, store the 
 					# response for later processing
-    my $responseContent = sendReceive($envelope);
+    my $responseContent = $sender->sendReceive($envelope);
 
 					# Use XPath to extract just the message
 					# message element.
@@ -72,6 +73,7 @@ if ( not $ok
     exit(0);
 
 
+1;
 
 # ################################################ #
 # Sub:		readXML                            #
@@ -92,87 +94,3 @@ sub readXML {
   return $xmlstring;  
 }
 
-
-# ################################################### #
-#                                                     #
-# Name:      makeEnvelope                             #
-# Arguments: $nmwgxml - raw XML string to be included #
-#                       in SOAP envelope.             #
-# Returns:   XML string of SOAP envelope              #
-# Purpose:   Construct a SOAP envelope for transmiss- #
-#            -ion to a server.                        # 
-#                                                     #
-# ################################################### #
-
-sub makeEnvelope {
-  ($nmwgxml) = @_;
-
-  $soap_env = "http://schemas.xmlsoap.org/soap/envelope/";
-  $soap_enc = "http://schemas.xmlsoap.org/soap/encoding/";
-  $xsd = "http://www.w3.org/2001/XMLSchema";
-  $xsi = "http://www.w3.org/2001/XMLSchema-instance";
-  $namespace = "http://ggf.org/ns/nmwg/base/2.0/";
-
-  $s = XML::Writer::String->new();
-  $writer = new XML::Writer(NAMESPACES => 4,
-                            PREFIX_MAP => {$soap_env => "SOAP-ENV",
-                                           $soap_enc => "SOAP-ENC",
-                                           $xsd => "xsd",
-                                           $xsi => "xsi",
-                                           $namespace => "message"},
-                            UNSAFE => 1,
-                            OUTPUT => $s,
-                            DATA_MODE => 1,
-                            DATA_INDENT => 3);
-  $writer->startTag([$soap_env, "Envelope"],
-                    "xmlns:SOAP-ENC" => $soap_enc,
-                    "xmlns:xsd" => $xsd,
-                    "xmlns:xsi" => $xsi);
-  $writer->emptyTag([$soap_env, "Header"]);
-  $writer->startTag([$soap_env, "Body"]);
-  $writer->raw($nmwgxml);
-  $writer->endTag([$soap_env, "Body"]);
-  $writer->endTag([$soap_env, "Envelope"]);
-  $writer->end();
-
-  return $s->value;
-}
-
-
-# ################################################### #
-#                                                     #
-# Name:      sendReceive                              #
-# Arguments: $envelope - the XML string of the SOAP   #
-#            envelope                                 #
-# Returns:   Content from the server, should be anot- #
-#            -her SOAP envelope.                      #
-# Purpose:   Contact the server, and send the SOAP    #
-#            envelope over HTTP; a response should    #
-#            return.                                  # 
-#                                                     #
-# ################################################### #
-
-sub sendReceive {
-  ($envelope) = @_;
-
-  if(!$ENDPOINT) {
-    $ENDPOINT = "/";
-  }
-
-  $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
-  $method_name = "";
-
-  $httpEndpoint = qq[http://$HOST:$PORT$ENDPOINT];
-  $userAgent = LWP::UserAgent->new('timeout'=>5000);
-
-
-  $sendSoap = HTTP::Request->new('POST', $httpEndpoint, new HTTP::Headers, $envelope);
-  $sendSoap->header('SOAPAction' => $method_uri);
-  $sendSoap->content_type  ('text/xml');
-  $sendSoap->content_length(length($envelope));
-  $httpResponse = $userAgent->request($sendSoap);
-  $responseCode = $httpResponse->code();
-  $responseContent = $httpResponse->content();
-
-  return $responseContent;
-}
