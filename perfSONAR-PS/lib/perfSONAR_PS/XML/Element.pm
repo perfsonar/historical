@@ -8,6 +8,9 @@ use Carp;
            
 our $VERSION = '0.01';
 
+#use overload '""' => 'print';
+
+
 sub new {
   my ($package) = @_;   
   my %hash = ();
@@ -327,11 +330,54 @@ sub print {
   return;  
 }
 
+sub asString {
+  my $self = shift;
+  my $index = shift;
+	
+  $self->{FUNCTION} = "\"asString\"";   
+  
+  my $string = '';
+  
+  if(defined $indent) {
+    $string .=  indent($indent, 1);
+  }
+  else {
+    $indent = 0;
+  }
+
+  $string .= "<" . $self->{Prefix} . ":" . $self->{LocalName};
+  foreach $a (keys %{$self->{Atributes}}) {
+    $string .=  " " . $a . "=\"" . $self->{Atributes}{$a} . "\"";
+  }    
+  if(defined $self->{Children}) {
+    $string .=  ">\n"; 
+    foreach $c (@{$self->{Children}}) {
+      $string .= $c->asString($indent+2);
+    }
+    if(defined $indent) {
+      $string .= indent($indent, 1);
+    }
+    $string .=  "</" . $self->{Prefix} . ":" . $self->{LocalName} . ">\n";
+  }
+  elsif(defined $self->{Value}) {
+    $string .=  ">"; 
+    $string .=  $self->{Value};
+    $string .=  "</" . $self->{Prefix} . ":" . $self->{LocalName} . ">\n"; 
+  }
+  else {
+    $string .=  "/>\n";  
+  } 
+  return $string;  
+}
 
 sub indent {
-  my ($indent) = @_;
+  my ($indent, $string) = @_;
   for(my $x = 0; $x < $indent; $x++) {
-    print " ";
+    if ( defined $string ) {
+    	return " ";
+    } else {
+    	print " " ;
+    }
   }  
 }
 
@@ -516,7 +562,8 @@ Returns the value of an attribute that matches the supplied name.
 
 =head2 print($self, $indent)
 
-Prints the XML output for a element and all of it's children.
+Prints the XML output for a element and all of it's children. This module is overloaded
+to support the standard perl print. 
 
 =head2 indent($indent)
 
