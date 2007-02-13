@@ -3,6 +3,7 @@
 package perfSONAR_PS::DB::RRD;
 use Carp;
 use RRDp;
+use Data::Dumper;
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
