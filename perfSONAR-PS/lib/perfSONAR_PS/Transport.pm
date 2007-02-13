@@ -7,6 +7,10 @@ use HTTP::Response;
 use HTTP::Headers;
 use HTTP::Status;
 use XML::XPath;
+use XML::Writer;
+use XML::Writer::String;
+use LWP::UserAgent;
+
 @ISA = ('Exporter');
 @EXPORT = ();
 
