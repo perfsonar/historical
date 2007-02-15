@@ -25,6 +25,7 @@ sub new {
     $hash{"PORT"} = $port;
   }
   if(defined $listenEndPoint && $listenEndPoint ne "") {
+  	  	$listenEndPoint =~ s/^(\/)+//g;
     $hash{"LISTEN_ENDPOINT"} = $listenEndPoint;
   } 
   if(defined $contactHost && $contactHost ne "") {
@@ -36,6 +37,7 @@ sub new {
   if(defined $contactEndPoint && $contactEndPoint ne "") {
     $hash{"CONTACT_ENDPOINT"} = $contactEndPoint;
   }  
+  
   $hash{"SOAP_ENV"} = "http://schemas.xmlsoap.org/soap/envelope/";
   $hash{"SOAP_ENC"} = "http://schemas.xmlsoap.org/soap/encoding/";
   $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
@@ -63,6 +65,7 @@ sub setListenEndPoint {
   my ($self, $listenEndPoint) = @_;  
   $self->{FUNCTION} = "\"setListenEndPoint\"";  
   if(defined $listenEndPoint) {
+  	$listenEndPoint =~ s/^(\/)+//g;
     $self->{LISTEN_ENDPOINT} = $listenEndPoint;
   }
   else {
@@ -132,27 +135,41 @@ sub acceptCall {
   $self->{RESPONSE}->header('user-agent' => 'Netradar/'.$VERSION);
   $self->{RESPONSE}->code("200");
 
-  if($self->{REQUEST}->uri eq $self->{LISTEN_ENDPOINT} && $self->{REQUEST}->method eq "POST") {
+ 	# lets strip out the first '/' to enable less stringent check on the endpoint
+	my $requestEndpoint = $self->{REQUEST}->uri;
+	$requestEndpoint =~ s/^(\/)+//g;
+ 
+  if( $requestEndpoint eq $self->{LISTEN_ENDPOINT} 
+  		&& $self->{REQUEST}->method eq "POST") {
     $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};
+    
     if (!$action =~ m/^.*message\/$/) {
-      return -1;
+      return 'INVALID ACTION TYPE';
     }
     else {
       return 1;
     }   
   }
   else {
-    return -1;      
+    return 'INVALID ENDPOINT';      
   }
 }
 
 
-sub getRequest {
-  my ($self) = @_;
-  $self->{FUNCTION} = "\"getRequest\"";  
+sub getRequestAsXPath {
+	my $self = shift;
+	$self->{FUNCTION} = "\"getRequestAsXPath\"";
   $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
   $xp->clear_namespaces();
   $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+	return $xp;
+}
+
+sub getRequest {
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"getRequest\"";  
+
+  my $xp = $self->getRequestAsXPath();
   $nodeset = $xp->find('//nmwg:message');
 
   if($nodeset->size() <= 0) {
@@ -167,18 +184,33 @@ sub getRequest {
 }
 
 
+sub setResponseAsXPath {
+	my $self = shift;
+	my $xpath = shift;
+  $self->{FUNCTION} = "\"setResponseAsXPath\"";
+	
+	croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+		unless defined $xpath;
+	my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
+	
+	return $self->setResponse( $content );
+}
+
+
 sub setResponse {
-  my ($self, $content) = @_;  
+  my ($self, $content, $envelope ) = @_;  
   $self->{FUNCTION} = "\"setResponse\"";  
   if(defined $content) {
-    $self->{RESPONSE} = $content;
+  	if( defined $envelope ) {
+    	$content = $self->makeEnvelope( $content ) ;
+  	}
+    $self->{RESPONSE} = HTTP::Response->parse($content);
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
   }
   return;
 }
-
 
 sub closeCall {
   my ($self) = @_;
@@ -224,7 +256,7 @@ sub sendReceive {
   $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
   $method_name = "";
 
-  my $httpEndpoint = qq[http://$self->{CONTACT_PORT}:$self->{CONTACT_HOST}$self->{CONTACT_ENDPOINT}];
+  my $httpEndpoint = qq[http://$self->{CONTACT_HOST}:$self->{CONTACT_PORT}/$self->{CONTACT_ENDPOINT}];
 
   my $userAgent = "";
   if(defined $timeout && $timeout ne "") {
