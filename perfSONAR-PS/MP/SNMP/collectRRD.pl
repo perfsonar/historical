@@ -25,6 +25,7 @@ use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MP::SNMP;
+use perfSONAR_PS::MA::SNMP;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -52,33 +53,42 @@ my %hash = ();
 		# polling for, this relates to the choices
 		# in the configuration file.  
 my %metadata = ();
-%metadata = readMetadata(\%metadata, \%ns);
+my %markMetadata = ();
+%metadata = readValues(\%metadata, \%ns, "//nmwg:metadata");
 %metadata = chainMetadata(\%metadata);
 
 		# Read in the appropriate data to be
 		# polling for, this also relates to the 
 		# choices in the configuration file.  
 my %data = ();
-%data = readData(\%data, \%ns);
+%data = readValues(\%data, \%ns, "//nmwg:data");
 
 		# remove md that were used just for 
-		# chaining purposes (i.e. if a md has a 
-		# data trigger, we should keep it).
+		# chaining purposes (i.e. if a md has 
+		# at least 1 data trigger, we should 
+		# keep it).
 foreach my $m (keys %metadata) {
-  my $flag = 0;
   foreach my $d (keys %data) {
     if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
-      $flag = 1;
-      last;
+      if($markMetadata{$m}) {
+        $markMetadata{$m} = $markMetadata{$m} + 1;
+      }
+      else {
+        $markMetadata{$m} = 1;
+      }
+      if($DEBUG) {
+        print "Increasing mark count on '".$m."' to '".$markMetadata{$m}."'.\n";
+      }      
     }
   }
-  if(!$flag) {
+  if(!$markMetadata{$m}) {
     if($DEBUG) {
       print "Removing '".$m."' from the Metadata list.\n";
     }
     delete $metadata{$m};  
   }
 }
+
 		# this is a shortcut hash that will map
 		# OIDs (from the MD) to the proper rrd 
 		# information (from the data).  We also
@@ -86,42 +96,12 @@ foreach my $m (keys %metadata) {
 		# so we can keep a synchronization with
 		# the remote clock.
 my %lookup = ();
-$lookup{"localhost-1.3.6.1.2.1.1.3.0"} = "timeticks";
+$lookup{"1.3.6.1.2.1.1.3.0"} = "timeticks";
 
-		# Prepare an SNMP object for each host, this
-		# could mean multiple metadata instances share
-		# the same snmp object.
-my %snmp = ();
-foreach my $m (keys %metadata) {
-  if($DEBUG) {
-    print $m , " - " , Dumper($metadata{$m}) , "\n";
-  }
-  
-  $metadata{$m}{"eventType"} =~ s/snmp\.//;
-  
-  if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
-    $snmp{$metadata{$m}{"hostName"}} = new perfSONAR_PS::MP::SNMP(
-      $metadata{$m}{"hostName"}, 
-      "" ,
-      $metadata{$m}{"parameter-SNMPVersion"},
-      $metadata{$m}{"parameter-SNMPCommunity"},
-      "");
-  }
-  $snmp{$metadata{$m}{"hostName"}}->setVariable("1.3.6.1.2.1.1.3.0");  
-  $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-  
-		# map the lookup information
-  foreach my $d (keys %data) {
-    if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) {
-      $lookup{$metadata{$m}{"hostName"}."-".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
-      last;
-    }
-  }
-}
 		# Prepare an rrd object for each
-		# rrd file that was seen (we can map
-		# multiple data blocks to a single rrd 
-		# object
+		# rrd file that was seen (we have the 
+		# potential to map multiple data blocks 
+		# to a single rrd object
 my %datadb = ();
 foreach my $d (keys %data) {
   if($DEBUG) {
@@ -142,80 +122,85 @@ foreach my $d (keys %data) {
   }
   elsif($data{$d}{"parameter-type"} eq "sqlite") {
     print "We do not support this data type right now, sorry.\n";
-    foreach my $m (keys %metadata) {
-      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
-      
-        	#remove snmp reference
-        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-      		#remove md totally
+
+    my $mark = removeMetadata(\%metadata, $data{$d}{"nmwg:data-metadataIdRef"});
+    if($mark) {
+      $markMetadata{$mark} = $markMetadata{$mark} - 1;
+      if($markMetadata{$mark} == 0) {
+        delete $markMetadata{$mark};
+	delete $metadata{$mark};
         if($DEBUG) {
-	  print "Removing '".$m."' from the Metadata list.\n";
-        }
-	delete $metadata{$m};
+	  print "Removing '".$mark."' from the Metadata list.\n";
+        }	
       }
     }
-    		#remove SNMP if it has no variables?
-    foreach my $s (keys %snmp) {
-      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
-      if($snmp{$s}->getVariableCount == 1) {
-        if($DEBUG) {
-          print "Removing '".$s."' from the SNMP list.\n";
-	}
-	delete $snmp{$s};
-      }
-    }
+    
   }
   elsif($data{$d}{"parameter-type"} eq "mysql") {
     print "We do not support this data type right now, sorry.\n";
-    foreach my $m (keys %metadata) {
-      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
-      
-        	#remove snmp reference
-        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-      		#remove md totally
+
+    my $mark = removeMetadata(\%metadata, $data{$d}{"nmwg:data-metadataIdRef"});
+    if($mark) {
+      $markMetadata{$mark} = $markMetadata{$mark} - 1;
+      if($markMetadata{$mark} == 0) {
+        delete $markMetadata{$mark};
+	delete $metadata{$mark};
         if($DEBUG) {
-	  print "Removing '".$m."' from the Metadata list.\n";
-        }
-	delete $metadata{$m};
+	  print "Removing '".$mark."' from the Metadata list.\n";
+        }	
       }
     }
-    		#remove SNMP if it has no variables?
-    foreach my $s (keys %snmp) {
-      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
-      if($snmp{$s}->getVariableCount == 1) {
-        if($DEBUG) {
-	  print "Removing '".$s."' from the SNMP list.\n";
-	}
-	delete $snmp{$s};
-      }
-    }
+
   }
   else {
     print "We do not support this data type right now, sorry.\n";
-    foreach my $m (keys %metadata) {
-      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
-      
-        	#remove snmp reference
-        $snmp{$metadata{$m}{"hostName"}}->removeVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
-      		#remove md totally
+
+    my $mark = removeMetadata(\%metadata, $data{$d}{"nmwg:data-metadataIdRef"});
+    if($mark) {
+      $markMetadata{$mark} = $markMetadata{$mark} - 1;
+      if($markMetadata{$mark} == 0) {
+        delete $markMetadata{$mark};
+	delete $metadata{$mark};
         if($DEBUG) {
-	  print "Removing '".$m."' from the Metadata list.\n";
-        }
-	delete $metadata{$m};
+	  print "Removing '".$mark."' from the Metadata list.\n";
+        }	
       }
     }
-    		#remove SNMP if it has no variables?
-    foreach my $s (keys %snmp) {
-      print "SNMP: " , $s , " has count: " , $snmp{$s}->getVariableCount , "\n";
-      if($snmp{$s}->getVariableCount == 1) {
-        if($DEBUG) {
-	  print "Removing '".$s."' from the SNMP list.\n";
-	}
-	delete $snmp{$s};
-      }
-    }
+    
   }  
 }
+		# Prepare an SNMP object for each host, this
+		# could mean multiple metadata instances share
+		# the same snmp object.
+my %snmp = ();
+foreach my $m (keys %metadata) {
+  if($markMetadata{$m}) {
+    if($DEBUG) {
+      print $m , " - " , Dumper($metadata{$m}) , "\n";
+    }
+  
+    $metadata{$m}{"eventType"} =~ s/snmp\.//;
+  
+    if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
+      $snmp{$metadata{$m}{"hostName"}} = new perfSONAR_PS::MP::SNMP(
+        $metadata{$m}{"hostName"}, 
+        "" ,
+        $metadata{$m}{"parameter-SNMPVersion"},
+        $metadata{$m}{"parameter-SNMPCommunity"},
+        "");
+    }
+    $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+  
+		# map the lookup information
+    foreach my $d (keys %data) {
+      if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) {
+        $lookup{$metadata{$m}{"hostName"}."-".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
+        last;
+      }
+    }
+  }
+}
+
 
 
 if(!$DEBUG) {
@@ -224,6 +209,8 @@ if(!$DEBUG) {
 		# start the daemon
   &daemonize;
 }
+
+
 
 if($DEBUG) {
   print "Starting '".threads->tid()."' as main\n";
@@ -243,6 +230,8 @@ if(!defined $mpThread || !defined $maThread || !defined $regThread) {
 $mpThread->join();
 $maThread->join();
 $regThread->join();
+
+
 
 
 
@@ -276,6 +265,9 @@ sub measurementPoint {
     $refTime{$s} = $time;
     $hostTicks{$s} = 0;
     $snmp{$s}->setSession;
+    		# each host needs to grap the timeticks, 
+		# so we can set that here.
+    $snmp{$s}->setVariable("1.3.6.1.2.1.1.3.0");
   }
 
 		# Main loop, we need to do the following 
@@ -318,6 +310,10 @@ sub measurementPoint {
     }  
   
     foreach my $s (keys %snmp) {
+      if($DEBUG) {
+        print "Collecting for '" , $s , "'.\n";
+      }
+    
       my %results = ();
       %results = $snmp{$s}->collectVariables;
 
@@ -337,7 +333,7 @@ sub measurementPoint {
         my $diff = 0;
         my $newHostTicks = 0;
         foreach my $r (keys %results) {
-          if($lookup{"localhost-".$r} && $lookup{"localhost-".$r} eq "timeticks") {
+          if($lookup{$r} && $lookup{$r} eq "timeticks") {
 	    if($hostTicks{$s} == 0) {
 	      $hostTicks{$s} = $results{$r}/100;
 	      $newHostTicks = $results{$r}/100;
@@ -415,13 +411,13 @@ sub measurementArchive {
       print "REQUEST:\n" , $listener->getRequest , "\n";
 
       my %messagemd = ();
-      %messagemd = parseMetadata($listener->getRequest, \%messagemd, \%ns);            
+      %messagemd = parse($listener->getRequest, \%messagemd, \%ns, "//nmwg:metadata");            
       print Dumper(%messagemd) , "\n";
       %messagemd = chainMetadata(\%messagemd);
       print "\n\n\n" , Dumper(%messagemd) , "\n";      
 
       my %messaged = ();
-      %messaged = parseData($listener->getRequest, \%messaged, \%ns);      
+      %messaged = parse($listener->getRequest, \%messaged, \%ns, "//nmwg:data");      
       print "\n\n\n" , Dumper(%messaged) , "\n";
       
     }
@@ -454,6 +450,11 @@ sub registerLS {
 }
 
 
+
+
+
+
+
 # ################################################ #
 # Sub:		daemonize                          #
 # Args:		N/A                                #
@@ -471,17 +472,18 @@ sub daemonize {
 }
 
 
+
 # ################################################ #
-# Sub:		readMetadata                       #
-# Args:		$sent - flattened hash of metadata #
-#                       values passed through the  #
-#                       recursion.                 #
-# Purpose:	Process each metadata block in the #
+# Sub:		readValues                         #
+# Args:		$sent - flattened hash of          #
+#                       structure values passed    #
+#                       through the recursion.     #
+# Purpose:	Process each 'xpath' block in the  #
 #               xmldb store.                       #
 # ################################################ #
-sub readMetadata {
-  my($sent, $sentns) = @_;
-  my %metadata = %{$sent};
+sub readValues {
+  my($sent, $sentns, $xpath) = @_;
+  my %struct = %{$sent};
   my %ns = %{$sentns};
   
   if($hash{"METADATA_DB_TYPE"} eq "mysql") {
@@ -497,10 +499,10 @@ sub readMetadata {
     );
 
     $metadatadb->openDB;
-    my @resultsString = $metadatadb->query("//nmwg:metadata");   
+    my @resultsString = $metadatadb->query($xpath);   
     if($#resultsString != -1) {    
       for(my $x = 0; $x <= $#resultsString; $x++) {	
-        %metadata = parseMetadata($resultsString[$x], \%metadata, \%ns);
+        %struct = parse($resultsString[$x], \%struct, \%ns, $xpath);
       }
     }
     else {
@@ -510,63 +512,35 @@ sub readMetadata {
   }
   elsif($hash{"METADATA_DB_TYPE"} eq "file") {
     my $xml = readXML($hash{"METADATA_DB_FILE"});
-    %metadata = parseMetadata($xml, \%metadata, \%ns);
+    %struct = parse($xml, \%struct, \%ns, $xpath);
   }
   else {
     printError($LOGFILE, "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is invalid.");
     exit(1);     
   }
   
-  return %metadata;
+  return %struct;
 }
 
 
-# ################################################ #
-# Sub:		readData                           #
-# Args:		$sent - flattened hash of data     #
-#                       values passed through the  #
-#                       recursion.                 #
-# Purpose:	Process each data block in the     #
-#               store.                             #
-# ################################################ #
-sub readData {
-  my($sent, $sentns) = @_;
-  my %data = %{$sent};
-  my %ns = %{$sentns};
-  
-  if($hash{"METADATA_DB_TYPE"} eq "mysql") {
-    my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
-    printError($LOGFILE, $msg);
-    exit(1);  
-  }
-  elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-      $hash{"METADATA_DB_NAME"}, 
-      $hash{"METADATA_DB_FILE"},
-      \%ns
-    );
 
-    $metadatadb->openDB;
-    my @resultsString = $metadatadb->query("//nmwg:data");   
-    if($#resultsString != -1) {    
-      for(my $x = 0; $x <= $#resultsString; $x++) {	
-        %data = parseData($resultsString[$x], \%data, \%ns);
-      }
+# ################################################ #
+# Sub:		removeMetadata                     #
+# Args:		$sentmd - flattened hash of md     #
+#                       values.                    #
+#               $metadataIdRef - ref to a data     #
+#                                block             #
+# Purpose:	Find the metadata block for a      #
+#               given data block, and return the   #
+#               ID value.                          #
+# ################################################ #
+sub removeMetadata {
+  my($sentmd, $metadataIdRef) = @_;
+  my %metadata = %{$sentmd};
+  foreach my $m (keys %metadata) {
+    if($m eq $metadataIdRef) {
+      return $m;      
     }
-    else {
-      printError($LOGFILE, "XMLDB returned 0 results.");  
-      exit(1);
-    }  
   }
-  elsif($hash{"METADATA_DB_TYPE"} eq "file") {
-    my $xml = readXML($hash{"METADATA_DB_FILE"});
-    %data = parseData($xml, \%data, \%ns);
-  }
-  else {
-    printError($LOGFILE, "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is invalid.");
-    exit(1);     
-  }
-  
-  return %data;
+  return 0;
 }
-

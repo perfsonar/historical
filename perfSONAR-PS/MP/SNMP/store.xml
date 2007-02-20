@@ -263,6 +263,16 @@
     </nmwg:key>  
   </nmwg:data>
   
+  <nmwg:data id="data11" metadataIdRef="128.4.133.163-snmp.1.3.6.1.2.1.2.2.1.10-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="11">
+      <nmwg:parameters id="22">
+        <nmwg:parameter name="type">rrd</nmwg:parameter>      
+        <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">eth1-in</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data>  
+  
   <nmwg:metadata id="128.4.133.163-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="moonshine4">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
@@ -287,6 +297,16 @@
       <nmwg:parameters id="20">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>      
         <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key> 
+  </nmwg:data>    
+
+  <nmwg:data id="data12" metadataIdRef="128.4.133.163-snmp.1.3.6.1.2.1.2.2.1.16-2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="12">
+      <nmwg:parameters id="24">
+        <nmwg:parameter name="type">rrd</nmwg:parameter>      
+        <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">eth1-out</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
   </nmwg:data>    
