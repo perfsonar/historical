@@ -404,13 +404,13 @@ Sents a soap formated envelope, and a timeout value to the contact host/port/end
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, 
 L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>
 
-To join the 'netradar' mailing list, please visit:
+To join the 'perfSONAR-PS' mailing list, please visit:
 
-  http://moonshine.pc.cis.udel.edu/mailman/listinfo/netradar
+  https://mail.internet2.edu/wws/info/i2-perfsonar
 
-The netradar subversion repository is located at:
+The perfSONAR-PS subversion repository is located at:
 
-  https://damsl.cis.udel.edu/svn/netradar/
+  https://svn.internet2.edu/svn/perfSONAR-PS 
   
 Questions and comments can be directed to the author, or the mailing list. 
 
@@ -420,7 +420,7 @@ Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by Jason Zurawski
+Copyright (C) 2007 by Jason Zurawski
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
