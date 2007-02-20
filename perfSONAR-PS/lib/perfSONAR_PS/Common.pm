@@ -6,8 +6,8 @@ use IO::File;
 use XML::XPath;
   
 @ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'printError' , 'parseMetadata', 
-           'parseData', 'chainMetadata', 'genuid');
+@EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
+           'chainMetadata', 'genuid');
 
 our $VERSION = '0.02';
 
@@ -71,67 +71,12 @@ sub printError {
 }
 
 
-sub parseMetadata {
-  my ($xml, $sentmetadata, $sentnamespaces) = @_;
+sub parse {
+  my ($xml, $sentstruct, $sentnamespaces, $xpath) = @_;
   if((defined $xml && $xml ne "") && 
-     (defined $sentmetadata && $sentmetadata ne "") && 
-     (defined $sentnamespaces && $sentnamespaces ne "")) {  
-    my %metadata = %{$sentmetadata};
-    my %ns = %{$sentnamespaces};
-    my $xp = undef;
-    
-    if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
-    	&& $xml->isa('XML::XPath::Node::Element')) {
-      $xp = $xml;
-    }
-    else {
-      $xp = XML::XPath->new( xml => $xml );
-      $xp->clear_namespaces();	
-      foreach my $prefix (keys %ns) {
-        $xp->set_namespace($prefix, $ns{$prefix});
-      }
-    }
-  	  	  	  
-    my $nodeset = $xp->find('//nmwg:metadata');
-    if($nodeset->size() <= 0) {
-      croak("XPath error: either they are not nmwg:metadata, or the namespace could be wrong."); 	
-      exit(1);  
-    }
-    else {
-      foreach my $node ($nodeset->get_nodelist) {           
-        my %md = ();
-        my $id = "";
-        my $mid = "";
-        foreach my $attr ($node->getAttributes) {
-          if($attr->getLocalName eq "id") {
-            $id = $attr->getNodeValue;
-	    $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
-          }
-          elsif($attr->getLocalName eq "metadataIdRef") {
-            $mid = $attr->getNodeValue;
-	    $md{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
-          }
-        }
-        %md = traverse($node, \%md);
-     
-        $metadata{$id} = \%md;             	    
-      }
-    }  
-    return %metadata;
-  }
-  else {
-    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parseMetadata\"");
-  }
-  return;
-}
-
-
-sub parseData {
-  my ($xml, $sentdata, $sentnamespaces) = @_;
-  if((defined $xml && $xml ne "") && 
-     (defined $sentdata && $sentdata ne "") && 
+     (defined $sentstruct && $sentstruct ne "") && 
      (defined $sentnamespaces && $sentnamespaces ne "")) {
-    my %data = %{$sentdata};
+    my %struct = %{$sentstruct};
     my %ns = %{$sentnamespaces};
     my $xp = undef;
 	
@@ -147,34 +92,34 @@ sub parseData {
       }
     }
 	  	  
-    my $nodeset = $xp->find('//nmwg:data');
+    my $nodeset = $xp->find($xpath);
     if($nodeset->size() <= 0) {
-      croak("XPath error: either they are not nmwg:data, or the namespace could be wrong."); 	
+      croak("perfSONAR_PS::Common:\tXPath error in \"parse\"");	
       exit(1);  
     }
     else {
       foreach my $node ($nodeset->get_nodelist) {           
-        my %d = ();
+        my %s = ();
         my $id = "";
         my $mid = "";
         foreach my $attr ($node->getAttributes) {
           if($attr->getLocalName eq "id") {
             $id = $attr->getNodeValue;
-	    $d{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
+	    $s{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
           }
           elsif($attr->getLocalName eq "metadataIdRef") {
             $mid = $attr->getNodeValue;
-	    $d{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
+	    $s{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
 	  }
         }     
-        %d = traverse($node, \%d);
-        $data{$id} = \%d;             	    
+        %s = traverse($node, \%s);
+        $struct{$id} = \%s;
       }
     }  
-    return %data;
+    return %struct;
   }
   else {
-    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parseData\"");
+    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parse\"");
   }
   return;
 }
@@ -326,9 +271,9 @@ can be invoked directly.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
 
-    my %metadata = parseMetadata($xml, \%metadata, \%ns);
+    my %metadata = parse($xml, \%metadata, \%ns, "//nmwg:metadata");
 
-    my %data = parseData($xml, \%data, \%ns);
+    my %data = parse($xml, \%data, \%ns, "//nmwg:data");
        
 =head1 DETAILS
 
@@ -368,21 +313,15 @@ Would return a hash such as:
 Reads the file specified in '$file', and writes the contents of '$msg' (along with a 
 timestamp) to this designated log file.
 
-=head2 parseMetadata($xml, \%metadata, \%ns)
+=head2 parse($xml, \%struct, \%ns, $xpath)
 
-The '$xml' argument is an XML string.  The first of the two hash arguments, '%metadata', is 
-an object that will contain the contents of each metadata XML tag.  The third argument is 
-a hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
-in the container should be mapped (there is no harm is sending mappings that will not 
-be used).  The metadata object is returned, populated with the appropriate values.  
-
-=head2 parseData($xml, \%data, \%ns)
-
-The '$xml' argument is an XML string.  The first of the two hash arguments, '%data', is 
-an object that will contain the contents of each data XML tag.  The third argument is 
-a hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
-in the container should be mapped (there is no harm is sending mappings that will not 
-be used).  The data object is returned, populated with the appropriate values.
+The '$xml' argument is an XML string.  The first of the two hash arguments, '%struct', is 
+an object that will contain the contents of each XML tag (this could be something like 
+nmwg:metadata, or nmwg:data, etc.).  The third argument is a hash reference containing a 
+prefix to namespace mapping.  All namespaces that may appear in the container should be 
+mapped (there is no harm is sending mappings that will not be used).  The last argument 
+is an XPath expression (such as '//nmwg:metadata') that will be evaluated to return the 
+struct object, populated with the appropriate values.  
 
 =head2 traverse($set, $sentstructure)
 
