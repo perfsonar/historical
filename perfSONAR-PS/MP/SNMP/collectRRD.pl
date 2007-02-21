@@ -108,19 +108,19 @@ foreach my $d (keys %data) {
     print $d , " - " , Dumper($data{$d}) , "\n";
   }
   
-  if($data{$d}{"parameter-type"} eq "rrd") {
-    if(!defined $datadb{$data{$d}{"parameter-file"}}) { 
-      $datadb{$data{$d}{"parameter-file"}} = new perfSONAR_PS::DB::RRD(
+  if($data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
+    if(!defined $datadb{$data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) { 
+      $datadb{$data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = new perfSONAR_PS::DB::RRD(
         $hash{"DATA_DB_NAME"} , 
-        $data{$d}{"parameter-file"},
+        $data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
         "",
         1
       );
     }
   		# load in the data sources
-    $datadb{$data{$d}{"parameter-file"}}->setVariable($data{$d}{"parameter-dataSource"});
+    $datadb{$data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->setVariable($data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"});
   }
-  elsif($data{$d}{"parameter-type"} eq "sqlite") {
+  elsif($data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") {
     print "We do not support this data type right now, sorry.\n";
 
     my $mark = removeMetadata(\%metadata, $data{$d}{"nmwg:data-metadataIdRef"});
@@ -136,7 +136,7 @@ foreach my $d (keys %data) {
     }
     
   }
-  elsif($data{$d}{"parameter-type"} eq "mysql") {
+  elsif($data{$d}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") {
     print "We do not support this data type right now, sorry.\n";
 
     my $mark = removeMetadata(\%metadata, $data{$d}{"nmwg:data-metadataIdRef"});
@@ -178,23 +178,46 @@ foreach my $m (keys %metadata) {
     if($DEBUG) {
       print $m , " - " , Dumper($metadata{$m}) , "\n";
     }
+    
+    my $hostName = "";  
+    my $ifIndex = ""; 
+    my $snmpVersion = "";
+    my $snmpCommunity = "";
+    my $eventType = "";
+    foreach my $m2 (keys %{$metadata{$m}}) {
+      if($m2 =~ m/.*hostName$/) {
+        $hostName = $m2;
+      }
+      elsif($m2 =~ m/.*ifIndex$/) {
+        $ifIndex = $m2;
+      }
+      elsif($m2 =~ m/.*nmwg:eventType$/) {
+        $eventType = $m2;
+      }
+      elsif($m2 =~ m/.*nmwg:parameter-SNMPVersion$/) {
+        $snmpVersion = $m2;
+      }
+      elsif($m2 =~ m/.*nmwg:parameter-SNMPCommunity$/) {
+        $snmpCommunity = $m2;
+      }
+    }  
+
+    $metadata{$m}{$eventType} =~ s/snmp\.//;
   
-    $metadata{$m}{"eventType"} =~ s/snmp\.//;
-  
-    if(!defined $snmp{$metadata{$m}{"hostName"}}) {    	  
-      $snmp{$metadata{$m}{"hostName"}} = new perfSONAR_PS::MP::SNMP(
-        $metadata{$m}{"hostName"}, 
+    if(!defined $snmp{$metadata{$m}{$hostName}}) {    	  
+      $snmp{$metadata{$m}{$hostName}} = new perfSONAR_PS::MP::SNMP(
+        $metadata{$m}{$hostName}, 
         "" ,
-        $metadata{$m}{"parameter-SNMPVersion"},
-        $metadata{$m}{"parameter-SNMPCommunity"},
+        $metadata{$m}{$snmpVersion},
+        $metadata{$m}{$snmpCommunity},
         "");
     }
-    $snmp{$metadata{$m}{"hostName"}}->setVariable($metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"});
+    $snmp{$metadata{$m}{$hostName}}->setVariable($metadata{$m}{$eventType}.".".$metadata{$m}{$ifIndex});
   
 		# map the lookup information
     foreach my $d (keys %data) {
       if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) {
-        $lookup{$metadata{$m}{"hostName"}."-".$metadata{$m}{"eventType"}.".".$metadata{$m}{"ifIndex"}} = $d;
+        $lookup{$metadata{$m}{$hostName}."-".$metadata{$m}{$eventType}.".".$metadata{$m}{$ifIndex}} = $d;
         last;
       }
     }
@@ -218,7 +241,10 @@ if($DEBUG) {
 
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
-my $mpThread = threads->new(\&measurementPoint, $DEBUG, $hash{"MP_SAMPLE_RATE"});
+
+#my $mpThread = threads->new(\&measurementPoint, $DEBUG, $hash{"MP_SAMPLE_RATE"});
+my $mpThread = threads->new(\&registerLS, $DEBUG, $hash{"LS_REGISTRATION_INTERVAL"}, $hash{"LS_INSTANCE"});
+
 my $maThread = threads->new(\&measurementArchive, $DEBUG, $hash{"PORT"}, $hash{"ENDPOINT"});
 my $regThread = threads->new(\&registerLS, $DEBUG, $hash{"LS_REGISTRATION_INTERVAL"}, $hash{"LS_INSTANCE"});
 
@@ -357,11 +383,11 @@ sub measurementPoint {
         foreach my $r (keys %results) { 
           if($lookup{$s."-".$r} && $lookup{$s."-".$r} ne "timeticks") {
 	    if($DEBUG) {
-	      print "inserting: " , $refTime{$s}  , "," , $data{$lookup{$s."-".$r}}{"parameter-dataSource"} , "," , $results{$r} , "\n";
+	      print "inserting: " , $refTime{$s}  , "," , $data{$lookup{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"} , "," , $results{$r} , "\n";
 	    }				
-            $datadb{$data{$lookup{$s."-".$r}}{"parameter-file"}}->insert($refTime{$s}, 
-	                                                                 $data{$lookup{$s."-".$r}}{"parameter-dataSource"},
-			  				                 $results{$r});
+            $datadb{$data{$lookup{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert($refTime{$s}, 
+	                                                                                                         $data{$lookup{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},
+			  				                                                         $results{$r});
 	  }
         }
       }
@@ -404,29 +430,290 @@ sub measurementArchive {
 
   my $listener = new perfSONAR_PS::Transport($port, $endPoint, "", "", "");  
   $listener->startDaemon;
+  
+  my $responseHeader = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" type=\"response\">\n  ";
+  my $responseFooter = "</nmwg:message>\n";
+  
+  my $MDId = genuid();
+  my $DId = genuid();
+    
+  my $errorMDHeader = "<nmwg:metadata id=\"result-code-".$MDId."\">\n";
+  $errorMDHeader = $errorMDHeader . "<nmwg:eventType>\n";
+  my $errorMDFooter = "</nmwg:eventType>\n";
+  $errorMDFooter = $errorMDFooter . "</nmwg:metadata>\n";
+
+  my $errorDHeader = "<nmwg:data id=\"result-code-description-".$DId."\" metadataIdRef=\"result-code-".$MDId."\">\n";
+  $errorDHeader = $errorDHeader . "<nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">\n";
+  my $errorDFooter = "</nmwgr:datum>\n";  
+  $errorDFooter = $errorDFooter . "</nmwg:data>\n";  
+								
   while(1) {
     if($listener->acceptCall == 1) {
-      $listener->setResponse("Everything OK");
       
       print "REQUEST:\n" , $listener->getRequest , "\n";
 
       my %messagemd = ();
-      %messagemd = parse($listener->getRequest, \%messagemd, \%ns, "//nmwg:metadata");            
-      print Dumper(%messagemd) , "\n";
+      my %markMessagemd = ();
+      %messagemd = parse($listener->getRequest, \%messagemd, \%ns, "//nmwg:metadata");            ;
       %messagemd = chainMetadata(\%messagemd);
-      print "\n\n\n" , Dumper(%messagemd) , "\n";      
-
+     
       my %messaged = ();
       %messaged = parse($listener->getRequest, \%messaged, \%ns, "//nmwg:data");      
-      print "\n\n\n" , Dumper(%messaged) , "\n";
+
+		# remove md that were used just for 
+		# chaining purposes (i.e. if a md has 
+		# at least 1 data trigger, we should 
+		# keep it).
+      foreach my $m (keys %messagemd) {
+        foreach my $d (keys %messaged) {
+          if($m eq $messaged{$d}{"nmwg:data-metadataIdRef"}) {
+            if($markMessagemd{$m}) {
+              $markMessagemd{$m} = $markMessagemd{$m} + 1;
+            }
+            else {
+              $markMessagemd{$m} = 1;
+            }   
+          }
+        }
+        if(!$markMessagemd{$m}) {
+          delete $messagemd{$m};  
+        }
+      }
       
+      if($DEBUG) {
+        print "\n\n\n" , Dumper(%messagemd) , "\n"; 
+        print "\n\n\n" , Dumper(%messaged) , "\n";
+      }
+      
+      if($hash{"METADATA_DB_TYPE"} eq "mysql") {
+        my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
+    	printError($LOGFILE, $msg);
+
+	my $response = $listener->makeEnvelope($responseHeader.$errorMDHeader."error.mp.snmp".$errorMDFooter.$errorDHeader."Internal Database Error.".$errorDFooter.$responseFooter);
+	$listener->setResponse($response);  
+      }
+      elsif($hash{"METADATA_DB_TYPE"} eq "xmldb") {  
+
+        my $responseString = "";
+
+		# Now we only want to return results for data
+		# elements, look at each one, and match it's
+		# md reference to the store.	If we get a total/
+		# partial match, we are good.
+	my $qs = "/nmwg:metadata[";
+	my $qf = 0;
+        foreach my $d (keys %messaged) {
+          my @mdid = ();
+	  foreach my $m (keys %messagemd) {
+	    if($messaged{$d}{"nmwg:data-metadataIdRef"} eq $m) {
+	      
+	      	# handle the time parameters for the data section
+              my $start = "";
+	      my $end = "";
+	      foreach my $m2 (keys %{$messagemd{$m}}) {
+	        if($m2 =~ m/^.*select:parameter-time-gte$/) {
+                  $start = $messagemd{$m}{$m2};
+		}
+		elsif($m2 =~ m/^.*select:parameter-time-gt$/) {
+                  $start = $messagemd{$m}{$m2}+1;
+		}
+		elsif($m2 =~ m/^.*select:parameter-time-lte$/) {
+		  $end = $messagemd{$m}{$m2};
+		}
+		elsif($m2 =~ m/^.*select:parameter-time-lt$/) {
+		  $end = $messagemd{$m}{$m2}+1;
+		}
+		elsif($m2 =~ m/^.*select:parameter-time-eq$/) {
+                  $start = $messagemd{$m}{$m2};
+		  $end = $messagemd{$m}{$m2};
+		}				
+              }	      
+	      
+	      	# ifAddress/type are handled special for now
+		# this needs to change in the future ...
+	      my $ifAddressType = "";
+              my $ifAddress = "";
+	      my $disp = "";  
+	      foreach my $m2 (keys %{$messagemd{$m}}) {
+	        if($m2 =~ m/^.*ifAddress$/) {
+                  $ifAddress = $messagemd{$m}{$m2};	        
+	          $disp = $m2;
+	          $disp =~ s/nmwg:metadata\///;  
+		}
+	        elsif($m2 =~ m/^.*ifAddress-type$/) {
+                  $ifAddressType = $messagemd{$m}{$m2};
+	          $disp = $m2;
+	          $disp =~ s/nmwg:metadata\///; 
+	          $disp =~ s/-type//; 
+	        }
+	      }
+	    
+	      if($ifAddress) {
+	        $qs = $qs . $disp . "[text()='" . $ifAddress;
+	        if($ifAddressType) {
+	          $qs = $qs . "' and \@type='" . $ifAddressType . "']";
+		}
+	        else {
+	          $qs = $qs . "']";
+		}	 
+		$qf++;     
+	      }
+	      else {
+	        if($ifAddressType) {
+	          $qs = $qs . $disp . "[\@type='" . $ifAddressType . "']";
+		  $qf++;
+		}
+	      }
+	    
+		# everything else that is not an id, a parameter,
+		# or the ifAddress...
+	      foreach my $m2 (keys %{$messagemd{$m}}) {
+	        if(!($m2 =~ m/^.*parameter.*$/) &&
+	           !($m2 =~ m/^.*-id$/) &&
+	           !($m2 =~ m/^.*-metadataIdRef$/) &&
+		   !($m2 =~ m/^.*ifAddress.*$/)) {
+		 
+	          my $disp = $m2;
+	          $disp =~ s/nmwg:metadata\///;
+	          my @attr = split(/-/, $m2);
+
+	          if(!($qf)) {
+	            if($#attr) {
+	              $disp =~ s/-.*//;
+	              $qs = $qs . $disp . "[\@" . $attr[1] . "='" . $messagemd{$m}{$m2} . "']";
+	            }
+	            else {
+	              $qs = $qs . $disp . "[text()='" . $messagemd{$m}{$m2} . "']";
+	            }
+	            $qf++;
+	          }
+	          else {
+	            if($#attr) {
+	              $disp =~ s/-.*//;
+	              $qs = $qs . " and " . $disp . "[\@" . $attr[1] . "='" . $messagemd{$m}{$m2} . "']";
+	            }
+	            else {
+	              $qs = $qs . " and " . $disp . "[text()='" . $messagemd{$m}{$m2} . "']";
+	            }
+	          }
+	        }
+	      }
+	      $qs = $qs . "]/\@id";
+	      
+	      my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+                $hash{"METADATA_DB_NAME"}, 
+                $hash{"METADATA_DB_FILE"},
+                \%ns
+              );
+
+              $metadatadb->openDB;              
+	      my @resultsString = $metadatadb->query($qs);   
+	      if($#resultsString != -1) {    
+                for(my $x = 0; $x <= $#resultsString; $x++) {	
+                  $resultsString[$x] =~ s/\{\}id=//;
+                  $resultsString[$x] =~ s/\"//g;
+                  $resultsString[$x] =~ s/\n//;
+		  		  		  
+                  $qs = "/nmwg:data[\@metadataIdRef='".$resultsString[$x]."']";
+                  my @dataResultsString = $metadatadb->query($qs);
+	          if($#dataResultsString != -1) {    
+		  
+                    $qs = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
+                    my @metadataResultsString = $metadatadb->query($qs);		  
+		    if($DEBUG) {
+		      print $metadataResultsString[0] , "\n";
+                    }		  
+		    $responseString = $responseString . $metadataResultsString[0]; 		  
+		  
+                    my %dresults = ();
+		    for(my $y = 0; $y <= $#dataResultsString; $y++) {		  
+	              print $dataResultsString[$y] , "\n";
+		      %dresults = parse($dataResultsString[$x], \%dresults, \%ns, "//nmwg:data");  
+		      foreach my $r (keys %dresults) {
+
+                        my $datadb = new perfSONAR_PS::DB::RRD(
+                          $hash{"DATA_DB_NAME"} , 
+                          $dresults{$r}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
+                          "",
+                          1
+                        );
+		      
+                        $datadb->openDB();
+                        my %rrd_result = $datadb->query(
+                          "AVERAGE", 
+                          "", 
+                          $start, 
+                          $end
+                        );
+                        if($datadb->getErrorMessage()) {
+                          print "Query Error: " , $datadb->getErrorMessage() , "; query returned: " , $rrd_result{ANSWER} , "\n";
+                        }
+                        else {
+                          my @keys = keys(%rrd_result);
+			  $responseString = $responseString . "  <nmwg:data id=\"".$DId."\" metadataIdRef=\"".$resultsString[$x]."\">\n";
+                          foreach $a (sort(keys(%rrd_result))) {
+                            foreach $b (sort(keys(%{$rrd_result{$a}}))) {
+			      if($b eq $dresults{$r}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}) {
+                                if($DEBUG) {
+				  print $a , "\t-->" , $rrd_result{$a}{$b} , "<--\n"; 
+                                }
+				$responseString = $responseString . "    <nmwg:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\"/>\n";
+			      }
+			    }
+			    if($DEBUG) {
+                              print "\n";
+                            }
+			  }
+			  $responseString = $responseString . "  </nmwg:data>\n";
+                        }
+			$datadb->closeDB();	
+		      }
+		    }
+		  }
+                  else {
+                    printError($LOGFILE, "XMLDB returned 0 results for data search.");  
+                  }
+	        }
+              }
+              else {
+                printError($LOGFILE, "XMLDB returned 0 results for metadata search.");  
+              }
+	    }
+ 	  }
+        }
+
+
+	my $response = "";
+	if($responseString) {
+	  $response = $listener->makeEnvelope($responseHeader.$responseString.$responseFooter);
+	}
+	else {
+	  $response = $listener->makeEnvelope($responseHeader.$errorMDHeader."error.mp.snmp".$errorMDFooter.$errorDHeader."No Results Returned.".$errorDFooter.$responseFooter);
+	}
+	$listener->setResponse($response); 
+      }
+      elsif($hash{"METADATA_DB_TYPE"} eq "file") {      
+        my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
+    	printError($LOGFILE, $msg);
+
+	my $response = $listener->makeEnvelope($responseHeader.$errorMDHeader."error.mp.snmp".$errorMDFooter.$errorDHeader."Internal Database Error.".$errorDFooter.$responseFooter);
+	$listener->setResponse($response); 
+      }
+      else {
+        my $msg = "'METADATA_DB_TYPE' of '".$hash{"METADATA_DB_TYPE"}."' is not yet supported.";
+    	printError($LOGFILE, $msg);
+	
+	my $response = $listener->makeEnvelope($responseHeader.$errorMDHeader."error.mp.snmp".$errorMDFooter.$errorDHeader."Internal Database Error.".$errorDFooter.$responseFooter);
+	$listener->setResponse($response);     
+      }      
     }
     else {
-      $listener->setResponse("Bad Request");
-
-      printError($LOGFILE, "Sent Request has was not expected: ".
+      my $msg = "Sent Request has was not expected: ".
                  $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
-		 $listener->{REQUEST}->headers->{"soapaction"}.".");  
+		 $listener->{REQUEST}->headers->{"soapaction"}.".";
+      printError($LOGFILE, $msg); 
+      my $response = $listener->makeEnvelope($responseHeader.$errorMDHeader."error.transport.soap".$errorMDFooter.$errorDHeader.$msg.$errorDFooter.$responseFooter);
+      $listener->setResponse($response); 		 	  
     }
     $listener->closeCall;
   }
