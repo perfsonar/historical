@@ -104,7 +104,7 @@ sub query {
   if(defined $query && $query ne "") {
     my $results = "";
     my $value = "";
-    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";
+    my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";  
     eval {
       $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
       foreach my $prefix (keys %{$self->{NAMESPACES}}) {
@@ -274,6 +274,7 @@ sub remove {
   }   
   return;
 }
+
 
 
 1;

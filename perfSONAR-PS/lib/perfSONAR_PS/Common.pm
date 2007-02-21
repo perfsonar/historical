@@ -78,8 +78,7 @@ sub parse {
      (defined $sentnamespaces && $sentnamespaces ne "")) {
     my %struct = %{$sentstruct};
     my %ns = %{$sentnamespaces};
-    my $xp = undef;
-	
+    my $xp = undef;	
     if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
       	&& $xml->isa('XML::XPath::Node::Element')) {
       $xp = $xml;
@@ -112,7 +111,9 @@ sub parse {
 	    $s{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
 	  }
         }     
-        %s = traverse($node, \%s);
+	$path = $xpath;
+	$path =~ s/\/\///;
+        %s = traverse($node, \%s, $path);
         $struct{$id} = \%s;
       }
     }  
@@ -126,14 +127,13 @@ sub parse {
 
 
 sub traverse {
-  my ($set, $sent) = @_;
+  my ($set, $sent, $path) = @_;
   my %struct = %{$sent};
-  
   foreach my $element ($set->getChildNodes) {          
   
     foreach my $attr ($element->getAttributes) {
       if($attr->getLocalName eq "id" || $attr->getLocalName eq "metadataIdRef") {
-        $struct{$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
+        $struct{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
       }
     }    
         
@@ -141,7 +141,7 @@ sub traverse {
       my $value = $element->getValue;
       $value =~ s/\s+//g;
       if($value) {
-        $struct{$element->getParentNode->getLocalName} = $value;
+        $struct{$path} = $value;
       }    
     }
     elsif($element->getLocalName eq "parameter") {    
@@ -167,19 +167,19 @@ sub traverse {
 	}
       }
       if($op) {
-        $struct{$element->getLocalName."-".$nm."-".$op} = $vl;
+        $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm."-".$op} = $vl;
       }
       else {
-        $struct{$element->getLocalName."-".$nm} = $vl;      
+        $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm} = $vl;      
       }
     }
     else {
       foreach my $attr ($element->getAttributes) {
 	if($element->getLocalName eq "ifAddress") {
-	  $struct{$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+	  $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
         }
       }
-      %struct = traverse($element, \%struct);
+      %struct = traverse($element, \%struct, $path."/".$element->getPrefix .":" . $element->getLocalName);
     }
   }	  
   return %struct;
@@ -194,39 +194,48 @@ sub chainMetadata {
     $flag = 0;
     foreach my $m (keys %md) {
       foreach $class (keys %{$md{$m}}) {
-        my @ns = split(/:/,$class);		
-        if($md{$m}{$ns[0].":subject-metadataIdRef"}) {
-          foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":subject-metadataIdRef"}}}) {
-	    my @mark = split(/-/,$m2);
-	    if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {
+	$class =~ s/nmwg:metadata\///;
+        my @ns = split(/:/,$class);
+        if($#ns == 1) {
+
+          if($md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
+	
+            foreach my $m2 (keys %{$md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
+	      my @mark = split(/-/,$m2);
+	      if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {
 	    
-              if((!$md{$m}{$m2} && $m2 ne $ns[0].":subject-metadataIdRef" && 
-                 $m2 ne $ns[0].":metadata-metadataIdRef") || 
-		 ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":subject-metadataIdRef"}}{$m2} && 
-                 $m2 ne $ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+                if((!$md{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
+                   $m2 ne $ns[0].":metadata-metadataIdRef") || 
+		   ($md{$m}{$m2} ne $md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} && 
+                   $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
 		 
-	        $md{$m}{$m2} = $md{$md{$m}{$ns[0].":subject-metadataIdRef"}}{$m2};
-	        $flag = 1;
+	          $md{$m}{$m2} = $md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
+	          $flag = 1;
+	        }
+	      }	    
+            }
+          }
+          if($md{$m}{$ns[0].":metadata-metadataIdRef"}) {
+
+            foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
+	      my @mark = split(/-/,$m2);    
+	      if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {		         
+	    
+	        if((!$md{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
+	           $m2 ne $ns[0].":metadata-metadataIdRef") || 
+	           ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
+	           $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+		 
+	          $md{$m}{$m2} = $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
+	          $flag = 1;
+	        }
 	      }
-	    }	    
+            }
           }
         }
-        if($md{$m}{$ns[0].":metadata-metadataIdRef"}) {
-          foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
-	    my @mark = split(/-/,$m2);    
-	    if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {		         
-	    
-	      if((!$md{$m}{$m2} && $m2 ne $ns[0].":subject-metadataIdRef" && 
-	         $m2 ne $ns[0].":metadata-metadataIdRef") || 
-	         ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
-	         $m2 ne $ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
-		 
-	        $md{$m}{$m2} = $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
-	        $flag = 1;
-	      }
-	    }
-          }
-        }
+	
+	
+	
       }
     }
   }
@@ -323,10 +332,10 @@ mapped (there is no harm is sending mappings that will not be used).  The last a
 is an XPath expression (such as '//nmwg:metadata') that will be evaluated to return the 
 struct object, populated with the appropriate values.  
 
-=head2 traverse($set, $sentstructure)
+=head2 traverse($set, $sentstructure, $path)
 
-This function is not exported, and is meant to be used by parseMetadata($xml, \%metadata, \%ns)
-and parseData($xml, \%data, \%ns) to aide in the extraction of XML values.
+This function is not exported, and is meant to be used by parse($xml, \%metadata, \%ns, $xpath) 
+to aide in the extraction of XML values.
 
 =head2 chainMetadata($sentmetadata)
 
