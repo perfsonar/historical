@@ -7,7 +7,7 @@ use XML::XPath;
   
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
-           'chainMetadata', 'genuid');
+           'chainMetadata', 'eliminateMetadata', 'genuid');
 
 our $VERSION = '0.02';
 
@@ -241,6 +241,27 @@ sub chainMetadata {
   }
   return %md;
 }
+
+
+sub eliminateMetadata {
+  my($sentmd, $sentd) = @_;
+  my %metadata = %{$sentmd};
+  my %data = %{$sentd};
+  foreach my $m (keys %metadata) {
+    my $flag = 0;
+    foreach my $d (keys %data) {
+      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
+        $flag = 1;
+	last;
+      }
+    }
+    if(!$flag) {
+      delete $metadata{$m};  
+    }
+  }  
+  return %metadata;
+}
+
 
 sub genuid {
   my ($r) = int( rand( 16777216 ) );

@@ -132,7 +132,7 @@ sub acceptCall {
   $self->{REQUEST} = $self->{CALL}->get_request;
   $self->{RESPONSE} = HTTP::Response->new();
   $self->{RESPONSE}->header('Content-Type' => 'text/xml');
-  $self->{RESPONSE}->header('user-agent' => 'Netradar/'.$VERSION);
+  $self->{RESPONSE}->header('user-agent' => 'perfSONAR-PS/'.$VERSION);
   $self->{RESPONSE}->code("200");
 
  	# lets strip out the first '/' to enable less stringent check on the endpoint
@@ -157,13 +157,14 @@ sub acceptCall {
 
 
 sub getRequestAsXPath {
-	my $self = shift;
-	$self->{FUNCTION} = "\"getRequestAsXPath\"";
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"getRequestAsXPath\"";
   $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
   $xp->clear_namespaces();
   $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-	return $xp;
+  return $xp;
 }
+
 
 sub getRequest {
   my ($self) = @_;
@@ -185,25 +186,22 @@ sub getRequest {
 
 
 sub setResponseAsXPath {
-	my $self = shift;
-	my $xpath = shift;
+  my ($self, $xpath) = @_; 
   $self->{FUNCTION} = "\"setResponseAsXPath\"";
-	
-	croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-		unless defined $xpath;
-	my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
-	
-	return $self->setResponse( $content );
+  croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+    unless defined $xpath;
+  my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
+  return $self->setResponse( $content );
 }
 
 
 sub setResponse {
-  my ($self, $content, $envelope ) = @_;  
+  my ($self, $content, $envelope) = @_;  
   $self->{FUNCTION} = "\"setResponse\"";  
   if(defined $content) {
-  	if( defined $envelope ) {
-    	$content = $self->makeEnvelope( $content ) ;
-  	}
+    if(defined $envelope) {
+      $content = $self->makeEnvelope($content) ;
+    }
     $self->{RESPONSE} = HTTP::Response->parse($content);
   }
   else {
@@ -211,6 +209,7 @@ sub setResponse {
   }
   return;
 }
+
 
 sub closeCall {
   my ($self) = @_;
