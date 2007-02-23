@@ -4,7 +4,6 @@ package perfSONAR_PS::MA::SNMP;
 use Carp;
 
 use XML::XPath;
-use Data::Dumper;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
@@ -152,9 +151,8 @@ sub getLog {
 
 
 sub handleRequest {
-  my($self, $request, $sentns) = @_;
+  my($self, $request, $ns) = @_;
   my $response = "";
-  %ns = %{$sentns};  
 
   my $xp = XML::XPath->new( xml => $request );
   $xp->clear_namespaces();
@@ -184,11 +182,16 @@ sub handleRequest {
     
     my %metadata = ();
     my %data = ();      
-    %metadata = parse($request, \%metadata, \%ns, "//nmwg:metadata");;
-    %metadata = chainMetadata(\%metadata);
-    %data = parse($request, \%data, \%ns, "//nmwg:data");      
-    %metadata = eliminateMetadata(\%metadata, \%data);
-     
+    parse($request, \%metadata, \%{$ns}, "//nmwg:metadata");;
+    chainMetadata(\%metadata);
+    parse($request, \%data, \%{$ns}, "//nmwg:data");      
+    
+    foreach my $m (keys %metadata) {
+      if(countRefs($m, \%data) == 0) {
+        delete $metadata{$m};
+      }
+    }
+          
     if($self->{DBTYPE} eq "mysql" || $self->{DBTYPE} eq "sqlite" || $self->{DBTYPE} eq "file") {
       my $msg = "The metadata database '".$self->{DBTYPE}."' is not yet supported.";
       if(getLog($self)) {
@@ -208,7 +211,7 @@ sub handleRequest {
 	    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
               $self->{DBNAME}, 
               $self->{DBFILE},
-              \%ns
+              \%{$ns}
             );	  
             $metadatadb->openDB;              
 	    
@@ -229,7 +232,8 @@ sub handleRequest {
                   $localContent = $localContent . $metadataResultsString[0];
                   
 		  for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		    my %dresults = parse($dataResultsString[$x], \%dresults, \%ns, "//nmwg:data");		  
+		    my %dresults = ();
+		    parse($dataResultsString[$x], \%dresults, \%{$ns}, "//nmwg:data");		  
     
 		    @dataIds = keys(%dresults);
 		    if($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {

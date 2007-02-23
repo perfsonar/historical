@@ -3,7 +3,6 @@
 package perfSONAR_PS::DB::RRD;
 use Carp;
 use RRDp;
-use Data::Dumper;
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
@@ -65,9 +64,8 @@ sub setPath {
 sub setVariables {
   my ($self, $dss) = @_;  
   $self->{FUNCTION} = "\"setVariables\""; 
-  if(defined $dss && $dss ne "") {
-    my %vars = %{$dss};  
-    $hash{"DATASOURCES"} = \%vars;
+  if(defined $dss && $dss ne "") { 
+    $hash{"DATASOURCES"} = \%{$dss};
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});

@@ -9,7 +9,7 @@ use Sleepycat::DbXml 'simple';
 our $VERSION = '0.02';
 
 sub new {
-  my ($package, $env, $cont, $namespaces) = @_; 
+  my ($package, $env, $cont, $ns) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::XMLDB";
   $hash{"FUNCTION"} = "\"new\"";
@@ -19,9 +19,8 @@ sub new {
   if(defined $cont && $cont ne "") {
     $hash{"CONTAINERFILE"} = $cont; 
   }
-  if(defined $namespaces && $namespaces ne "") {
-    my %ns = %{$namespaces};  
-    $hash{"NAMESPACES"} = \%ns;  
+  if(defined $ns && $ns ne "") {  
+    $hash{"NAMESPACES"} = \%{$ns};     
   }    
   bless \%hash => $package;
 }
@@ -51,11 +50,10 @@ sub setContainer {
 }
 
 sub setNamespaces {
-  my ($self, $namespaces) = @_;  
+  my ($self, $ns) = @_;  
   $self->{FUNCTION} = "\"setNamespaces\""; 
   if(defined $namespaces && $namespaces ne "") {   
-    my %ns = %{$namespaces};
-    $self->{NAMESPACES} = \%ns;
+    $self->{NAMESPACES} = \%{$ns};
   }
   else {
     croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});

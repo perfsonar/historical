@@ -7,7 +7,7 @@ use XML::XPath;
   
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
-           'chainMetadata', 'eliminateMetadata', 'genuid');
+           'chainMetadata', 'countRefs', 'genuid');
 
 our $VERSION = '0.02';
 
@@ -33,20 +33,19 @@ sub readXML {
 
 
 sub readConfiguration {
-  my ($file, $sent)  = @_;
-  if((defined $file && $file ne "") && (defined $sent && $sent ne "")) {
-    my %hash = %{$sent};
+  my ($file, $hash)  = @_;
+  if((defined $file && $file ne "") && 
+     (defined $hash && $hash ne "")) {
     my $CONF = new IO::File("<$file") or 
       croak("Cannot open 'readDBConf' $file: $!\n");
     while (<$CONF>) {
       if(!($_ =~ m/^#.*$/)) {
         $_ =~ s/\n//;
         @values = split(/\?/,$_);
-        $hash{$values[0]} = $values[1];
+        $hash->{$values[0]} = $values[1];
       }
     }          
-    $CONF->close();
-    return %hash; 
+    $CONF->close(); 
   }
   else {
     croak("perfSONAR_PS::Common:\tMissing argument(s) to \"readConfiguration\"");
@@ -72,12 +71,11 @@ sub printError {
 
 
 sub parse {
-  my ($xml, $sentstruct, $sentnamespaces, $xpath) = @_;
+  my ($xml, $struct, $ns, $xpath) = @_;
   if((defined $xml && $xml ne "") && 
-     (defined $sentstruct && $sentstruct ne "") && 
-     (defined $sentnamespaces && $sentnamespaces ne "")) {
-    my %struct = %{$sentstruct};
-    my %ns = %{$sentnamespaces};
+     (defined $struct && $struct ne "") && 
+     (defined $ns && $ns ne "")) {
+    
     my $xp = undef;	
     if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
       	&& $xml->isa('XML::XPath::Node::Element')) {
@@ -86,8 +84,8 @@ sub parse {
     else {
       $xp = XML::XPath->new( xml => $xml );
       $xp->clear_namespaces();	
-      foreach my $prefix (keys %ns) {
-        $xp->set_namespace($prefix, $ns{$prefix});
+      foreach my $prefix (keys %{$ns}) {
+        $xp->set_namespace($prefix, $ns->{$prefix});
       }
     }
 	  	  
@@ -113,11 +111,11 @@ sub parse {
         }     
 	$path = $xpath;
 	$path =~ s/\/\///;
-        %s = traverse($node, \%s, $path);
-        $struct{$id} = \%s;
+        traverse($node, \%s, $path);
+        $struct->{$id} = \%s;
       }
     }  
-    return %struct;
+    return;
   }
   else {
     croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parse\"");
@@ -127,13 +125,12 @@ sub parse {
 
 
 sub traverse {
-  my ($set, $sent, $path) = @_;
-  my %struct = %{$sent};
+  my ($set, $struct, $path) = @_;
   foreach my $element ($set->getChildNodes) {          
   
     foreach my $attr ($element->getAttributes) {
       if($attr->getLocalName eq "id" || $attr->getLocalName eq "metadataIdRef") {
-        $struct{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
+        $struct->{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
       }
     }    
         
@@ -141,7 +138,7 @@ sub traverse {
       my $value = $element->getValue;
       $value =~ s/\s+//g;
       if($value) {
-        $struct{$path} = $value;
+        $struct->{$path} = $value;
       }    
     }
     elsif($element->getLocalName eq "parameter") {    
@@ -167,99 +164,89 @@ sub traverse {
 	}
       }
       if($op) {
-        $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm."-".$op} = $vl;
+        $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm."-".$op} = $vl;
       }
       else {
-        $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm} = $vl;      
+        $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm} = $vl;      
       }
     }
     else {
       foreach my $attr ($element->getAttributes) {
 	if($element->getLocalName eq "ifAddress") {
-	  $struct{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+	  $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
         }
       }
-      %struct = traverse($element, \%struct, $path."/".$element->getPrefix .":" . $element->getLocalName);
+      traverse($element, \%{$struct}, $path."/".$element->getPrefix .":" . $element->getLocalName);
     }
   }	  
-  return %struct;
+  return;
 }
 
 sub chainMetadata {
-  my ($sentmetadata) = @_;
-  my %md = %{$sentmetadata};
+  my ($md) = @_;
     
   my $flag = 1;
   while($flag) {
     $flag = 0;
-    foreach my $m (keys %md) {
-      foreach $class (keys %{$md{$m}}) {
+    foreach my $m (keys %{$md}) {
+      foreach $class (keys %{$md->{$m}}) {
 	$class =~ s/nmwg:metadata\///;
         my @ns = split(/:/,$class);
         if($#ns == 1) {
 
-          if($md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
+          if($md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
 	
-            foreach my $m2 (keys %{$md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
+            foreach my $m2 (keys %{$md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
 	      my @mark = split(/-/,$m2);
 	      if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {
 	    
-                if((!$md{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
+                if((!$md->{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
                    $m2 ne $ns[0].":metadata-metadataIdRef") || 
-		   ($md{$m}{$m2} ne $md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} && 
+		   ($md->{$m}{$m2} ne $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} && 
                    $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
 		 
-	          $md{$m}{$m2} = $md{$md{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
+	          $md->{$m}{$m2} = $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
 	          $flag = 1;
 	        }
 	      }	    
             }
           }
-          if($md{$m}{$ns[0].":metadata-metadataIdRef"}) {
+          if($md->{$m}{$ns[0].":metadata-metadataIdRef"}) {
 
-            foreach my $m2 (keys %{$md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
+            foreach my $m2 (keys %{$md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
 	      my @mark = split(/-/,$m2);    
 	      if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {		         
 	    
-	        if((!$md{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
+	        if((!$md->{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
 	           $m2 ne $ns[0].":metadata-metadataIdRef") || 
-	           ($md{$m}{$m2} ne $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
+	           ($md->{$m}{$m2} ne $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
 	           $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
 		 
-	          $md{$m}{$m2} = $md{$md{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
+	          $md->{$m}{$m2} = $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
 	          $flag = 1;
 	        }
 	      }
             }
           }
         }
-	
-	
+
 	
       }
     }
   }
-  return %md;
+  return;
 }
 
 
-sub eliminateMetadata {
-  my($sentmd, $sentd) = @_;
-  my %metadata = %{$sentmd};
-  my %data = %{$sentd};
-  foreach my $m (keys %metadata) {
-    my $flag = 0;
-    foreach my $d (keys %data) {
-      if($m eq $data{$d}{"nmwg:data-metadataIdRef"}) {
-        $flag = 1;
-	last;
-      }
+sub countRefs {
+  my($id, $data) = @_;
+  my $flag = 0;
+  foreach my $d (keys %{$data}) {
+    if($id eq $data->{$d}{"nmwg:data-metadataIdRef"}) {
+      $flag++;
     }
-    if(!$flag) {
-      delete $metadata{$m};  
-    }
-  }  
-  return %metadata;
+  }
+  return $flag;
 }
 
 
@@ -268,7 +255,9 @@ sub genuid {
   return ( $r + 1048576 );
 }
 
+
 1;
+
 
 __END__
 =head1 NAME
