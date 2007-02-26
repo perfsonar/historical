@@ -4,7 +4,7 @@ package perfSONAR_PS::MA::General;
 use Exporter;  
 use perfSONAR_PS::Common;
 @ISA = ('Exporter');
-@EXPORT = ('getResultMessage','getResultMetadata', 'getResultData');
+@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 'getResultCodeData');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   

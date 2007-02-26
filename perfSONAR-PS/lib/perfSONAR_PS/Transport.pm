@@ -25,7 +25,7 @@ sub new {
     $hash{"PORT"} = $port;
   }
   if(defined $listenEndPoint && $listenEndPoint ne "") {
-  	  	$listenEndPoint =~ s/^(\/)+//g;
+    $listenEndPoint =~ s/^(\/)+//g;
     $hash{"LISTEN_ENDPOINT"} = $listenEndPoint;
   } 
   if(defined $contactHost && $contactHost ne "") {
@@ -65,7 +65,7 @@ sub setListenEndPoint {
   my ($self, $listenEndPoint) = @_;  
   $self->{FUNCTION} = "\"setListenEndPoint\"";  
   if(defined $listenEndPoint) {
-  	$listenEndPoint =~ s/^(\/)+//g;
+    $listenEndPoint =~ s/^(\/)+//g;
     $self->{LISTEN_ENDPOINT} = $listenEndPoint;
   }
   else {
@@ -135,14 +135,13 @@ sub acceptCall {
   $self->{RESPONSE}->header('user-agent' => 'perfSONAR-PS/'.$VERSION);
   $self->{RESPONSE}->code("200");
 
- 	# lets strip out the first '/' to enable less stringent check on the endpoint
-	my $requestEndpoint = $self->{REQUEST}->uri;
-	$requestEndpoint =~ s/^(\/)+//g;
+  # lets strip out the first '/' to enable less stringent check on the endpoint
+  my $requestEndpoint = $self->{REQUEST}->uri;
+  $requestEndpoint =~ s/^(\/)+//g;
  
-  if( $requestEndpoint eq $self->{LISTEN_ENDPOINT} 
-  		&& $self->{REQUEST}->method eq "POST") {
-    $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};
-    
+  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} && 
+     $self->{REQUEST}->method eq "POST") {
+    $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
     if (!$action =~ m/^.*message\/$/) {
       return 'INVALID ACTION TYPE';
     }
@@ -172,7 +171,6 @@ sub getRequest {
 
   my $xp = $self->getRequestAsXPath();
   $nodeset = $xp->find('//nmwg:message');
-
   if($nodeset->size() <= 0) {
     croak($self->{FILENAME}.":\tMessage element not found or in wrong namespace in ".$self->{FUNCTION});
   }
