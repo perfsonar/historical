@@ -16,7 +16,6 @@ our $VERSION = '0.02';
 # ================ Internal Package perfSONAR_PS::MP::Ping::Agent ================
 
 package perfSONAR_PS::MP::Ping::Agent;
-use Net::SNMP;
 use perfSONAR_PS::Common;
 sub new {
   my ($package, $log) = @_; 
@@ -76,7 +75,7 @@ sub new {
   %{$hash{"METADATAMARKS"}} = ();
   %{$hash{"DATADB"}} = ();
   %{$hash{"LOOKUP"}} = ();
-  %{$hash{"SNMP"}} = ();
+  %{$hash{"AGENT"}} = ();
       
   bless \%hash => $package;
 }
@@ -142,6 +141,179 @@ sub setData {
 }
 
 
+sub parseMetadata {
+  my($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";    
+  $self->{FUNCTION} = "\"parseMetadata\"";
+
+  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {  
+    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+      $self->{CONF}->{"LOGFILE"},
+      $self->{CONF}->{"METADATA_DB_NAME"}, 
+      $self->{CONF}->{"METADATA_DB_FILE"},
+      \%{$self->{NAMESPACES}}
+    );
+
+    $metadatadb->openDB;
+    my $query = "//nmwg:metadata";
+    my @resultsStringMD = $metadatadb->query($query);   
+    if($#resultsStringMD != -1) {    
+      for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
+	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
+      }      
+print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
+    }
+    else {
+      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};      
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");          
+    }     
+
+    $query = "//nmwg:data";
+    my @resultsStringD = $metadatadb->query($query);   
+    if($#resultsStringD != -1) {    
+      for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
+        parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
+      }
+print "Data:\t" , Dumper($self->{DATA}) , "\n";
+    }
+    else {
+      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+    }          
+    cleanMetadata($self); 
+  }
+  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+    my $xml = readXML($conf{"METADATA_DB_FILE"});
+    parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
+    parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
+print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
+print "Data:\t" , Dumper($self->{DATA}) , "\n";
+    cleanMetadata($self);  
+  }
+  elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
+        ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
+    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+  }  
+  else {
+    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is invalid.";
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+  }
+  return;
+}
+
+
+sub cleanMetadata {
+  my($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FUNCTION} = "\"cleanMetadata\"";
+    
+  chainMetadata($self->{METADATA}); 
+
+  foreach my $m (keys %{$self->{METADATA}}) {
+    my $count = countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef");
+    if($count == 0) {
+      delete $self->{METADATA}->{$m};
+    } 
+    else {
+      $self->{METADATAMARKS}->{$m} = $count;
+    }
+  }  
+  return;
+}
+
+
+sub prepareData {
+  my($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FUNCTION} = "\"prepareData\"";
+      
+  foreach my $d (keys %{$self->{DATA}}) {
+    if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite"){
+      if(!defined $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) {
+        $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = 
+          new perfSONAR_PS::DB::SQL($self->{CONF}->{"LOGFILE"},
+	                               "DBI:SQLite:dbname=".$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}, 
+                                       "",
+                                       "");
+      }
+    }
+    elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
+          ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
+      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+    }
+    else {
+      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+    }  
+  }  
+       
+  return;
+}
+
+
+sub removeReferences {
+  my($self, $id) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FUNCTION} = "\"removeReferences\"";      
+  my $remove = countRefs($id, $self->{METADATA}, "nmwg:metadata-id");
+  if($remove > 0) {
+    $self->{METADATAMARKS}->{$id} = $self->{METADATAMARKS}->{$id} - $remove;
+    if($self->{METADATAMARKS}->{$id} == 0) {
+      delete $self->{METADATAMARKS}->{$id};
+      delete $self->{METADATA}->{$id};
+    }     
+  }
+  return;
+}
+
+
+sub prepareCollectors {
+  my($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FUNCTION} = "\"prepareCollectors\"";
+        
+  
+  foreach my $m (keys %{$self->{METADATA}}) {
+    if($self->{METADATAMARKS}->{$m}) {
+
+      my $commandString = "/bin/ping ";
+      my $host = "";
+      foreach my $m2 (keys %{$self->{METADATA}->{$m}}) {
+        if($m2 =~ m/.*dst-value$/) {
+          $host = $self->{METADATA}->{$m}->{$m2};
+        }
+        elsif($m2 =~ m/.*ping:parameters\/nmwg:parameter-count$/) {
+          $commandString = $commandString . "-c " . $self->{METADATA}->{$m}->{$m2} . " ";
+        }
+      }  
+      
+      if(!defined $host or $host eq "") {
+        my $msg = "Destination host not specified.";
+        printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+          if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      }
+      else {
+        $commandString = $commandString . $host;
+        print "CMD: " , $commandString , "\n";
+      }
+      
+    }
+  }
+
+  return;
+}
+
+
 1;
 
 
@@ -162,8 +334,8 @@ perfSONAR_PS::MP::Ping - A module starting point for MP functions...
 
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
-    $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-    $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
+    $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/Ping/xmldb";
+    $conf{"METADATA_DB_FILE"} = "Pingstore.dbxml";
     $conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
     $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
 
@@ -171,7 +343,7 @@ perfSONAR_PS::MP::Ping - A module starting point for MP functions...
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
       netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
       nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+      Ping => "http://ggf.org/ns/nmwg/tools/Ping/2.0/"    
     );
     
     my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
@@ -189,7 +361,7 @@ a specialized structure for use only in this module.  The functions include:
 
   setLog($log)
 
-    (Re-)Sets the log file for the SNMP object.
+    (Re-)Sets the log file for the Ping object.
 
 
 A brief description using the API:

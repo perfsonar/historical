@@ -183,6 +183,15 @@ sub traverse {
         if($element->getLocalName eq "ifAddress") {
           $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
         }
+        elsif($element->getLocalName eq "ipAddress") {
+          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+        }
+        elsif($element->getLocalName eq "src") {
+          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+        }
+        elsif($element->getLocalName eq "dst") {
+          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
+        }	
       }
       traverse($element, \%{$struct}, $path."/".$element->getPrefix .":" . $element->getLocalName);
     }
