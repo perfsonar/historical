@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <!-- 
+    
+    <subject />
+    <eventType />
+    <parameters />
+    
+    Information about where the measurement takes place, who it is between, etc.
+    
+    -->
+  </nmwg:metadata>
+
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <!-- 
+	
+	<parameter />
+	
+	Specifics for the backend data storage
+	
+	-->
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data>
+  
+</nmwg:store>
