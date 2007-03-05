@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -I ../../lib .
+#!/usr/bin/perl -w -I ../../lib
 use strict;
 use threads;
 use threads::shared;
@@ -10,8 +10,9 @@ use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
-use perfSONAR::MA::Ping;
-use perfSONAR::MP::Ping;
+use perfSONAR_PS::MA::Ping;
+use perfSONAR_PS::MA::General;
+use perfSONAR_PS::MP::Ping;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -22,7 +23,7 @@ if($#ARGV == 0) {
 
 my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
 );
@@ -77,6 +78,12 @@ sub measurementPoint {
   if($DEBUG) {
     print "Starting '".threads->tid()."' as MP2\n";
   }
+
+  my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
+  $mp->parseMetadata;
+  $mp->prepareData;
+  $mp->prepareCollectors;  
+ 
   
   # initialize measurement info, time, etc.
   
@@ -114,8 +121,13 @@ sub measurementArchive {
     my $response = "";
     if($listener->acceptCall == 1) {
 
+      if($DEBUG) {
+        print "Request:\t" , $listener->getRequest , "\n";
+      }
+
       # call the MA here...
-      $response = "";
+      
+      $response = getResultCodeMessage("", "", "response", "success", "sucess");
       
       $listener->setResponse($response, 1); 
     }
