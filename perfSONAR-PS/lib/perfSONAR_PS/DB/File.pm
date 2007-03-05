@@ -1,52 +1,69 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::File;
-use Carp;
 use IO::File;
 use XML::XPath;
+use perfSONAR_PS::Common;
 @ISA = ('Exporter');
 @EXPORT = ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
-  my ($package, $file, $namespaces) = @_; 
+  my ($package, $log, $file, $ns) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::File";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $file && $file ne "") {
+  if(defined $log and $log ne "") {
+    $hash{"LOGFILE"} = $log;
+  }    
+  if(defined $file and $file ne "") {
     $hash{"FILE"} = $file;
   }
-  if(defined $namespaces && $namespaces ne "") {
-    my %ns = %{$namespaces};  
-    $hash{"NAMESPACES"} = \%ns;  
+  if(defined $ns and $ns ne "") {
+    $hash{"NAMESPACES"} = \%{$ns};  
   }    
   bless \%hash => $package;
+}
+
+
+sub setLog {
+  my ($self, $log) = @_;  
+  $self->{FUNCTION} = "\"setLog\"";  
+  if(defined $log and $log ne "") {
+    $self->{LOGFILE} = $log;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
 }
 
 
 sub setFile {
   my ($self, $file) = @_;  
   $self->{FUNCTION} = "\"setFile\"";  
-  if(defined $file && $file ne "") {
+  if(defined $file and $file ne "") {
     $self->{FILE} = $file;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
 
 
 sub setNamespaces {
-  my ($self, $namespaces) = @_;  
+  my ($self, $ns) = @_;  
   $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $namespaces && $namespaces ne "") {   
-    my %ns = %{$namespaces};
-    $self->{NAMESPACES} = \%ns;
+  if(defined $ns and $ns ne "") { 
+    $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -56,27 +73,32 @@ sub openDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"openDB\"";    
   if(defined $self->{FILE}) {    
-    $self->{XML} = new IO::File("<".$self->{FILE}) || 
-      croak("perfSONAR_PS::DB::File: Cannot open file " . $self->{FILE} . "\n");
-    $XML = $self->{XML};
-    while (<$XML>) {
-      if(!($_ =~ m/^<\?xml.*/)) {
-        $self->{XMLCONTENT} .= $_;
+    $self->{XML} = new IO::File("<".$self->{FILE}) or 
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot open file in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    if($self->{XML}) {
+      $XML = $self->{XML};
+      while (<$XML>) {
+        if(!($_ =~ m/^<\?xml.*/)) {
+          $self->{XMLCONTENT} .= $_;
+        }
       }
-    }
-    if(defined $self->{NAMESPACES}) {
-      $self->{XPATH} = XML::XPath->new( xml => $self->{XMLCONTENT} );
-      $self->{XPATH}->clear_namespaces();
-      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
-        $self->{XPATH}->set_namespace($prefix, $self->{NAMESPACES}->{$prefix});
+      if(defined $self->{NAMESPACES}) {
+        $self->{XPATH} = XML::XPath->new( xml => $self->{XMLCONTENT} );
+        $self->{XPATH}->clear_namespaces();
+        foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+          $self->{XPATH}->set_namespace($prefix, $self->{NAMESPACES}->{$prefix});
+        }
       }
-    }
-    else {
-      croak($self->{FILENAME}.":\tMissing \"namespaces\" in object; used in function ".$self->{FUNCTION});
+      else {
+        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"namespaces\" in object; used in ".$self->{FUNCTION}) 
+          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+      }
     }
   }
   else {
-    croak($self->{FILENAME}.":\tMissing \"file\" in object; used in function ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"file\" in object; used in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
   }                  
   return;
 }
@@ -89,7 +111,8 @@ sub closeDB {
     $self->{XML}->close();
   }
   else {
-    croak($self->{FILENAME}.":\tfilehandle not open in function ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tFile handle not open in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
   }
   return;
 }
@@ -99,7 +122,7 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";        
   my @results = ();
-  if(defined $query && $query ne "") {  
+  if(defined $query and $query ne "") {  
     if(defined $self->{XPATH}) {
       my $nodeset = $self->{XPATH}->find($query);
       if($nodeset->size() <= 0) {
@@ -112,11 +135,13 @@ sub query {
       }
     }
     else {
-      croak($self->{FILENAME}.":\tXPath structures not defined in function ".$self->{FUNCTION});
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tXPath structures not defined in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
     }        
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }  
   return @results;
 }
@@ -126,16 +151,18 @@ sub count {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"count\"";  
   my $nodeset = 0;
-  if(defined $query && $query ne "") {    
+  if(defined $query and $query ne "") {    
     if(defined $self->{XPATH}) {
       $nodeset = $self->{XPATH}->find($query);
     }
     else {
-      croak($self->{FILENAME}.":\tXPath structures not defined in function ".$self->{FUNCTION});
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tXPath structures not defined in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
     }   
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   } 
   return $nodeset->size;   
 }
@@ -169,6 +196,7 @@ may then be invoked on the object for the specific database.
     );
   
     my $file = new perfSONAR_PS::DB::File(
+      "./error.log",
       "./store.xml",
       \%ns
     );
@@ -176,6 +204,7 @@ may then be invoked on the object for the specific database.
     # or also:
     # 
     # my $file = new perfSONAR_PS::DB::File;
+    # $file->setLog("./error.log");
     # $file->setFile("./store.xml");
     # $file->setNamespaces(\%ns);    
 
@@ -202,12 +231,17 @@ edit your XML file, do so out of band.
 The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
 the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($file, \%ns)
+=head2 new($log, $file, \%ns)
 
-The first argument is a strings representing the file to be opened.  The second argument is 
-a hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
-in the file should be mapped (there is no harm is sending mappings that will not be 
-used).  
+The 'log' argument is the name of the log file where error or warning information may be 
+recorded.  The second argument is a strings representing the file to be opened.  The third 
+argument is a hash reference containing a prefix to namespace mapping.  All namespaces that 
+may appear in the file should be mapped (there is no harm is sending mappings that will 
+not be used).  
+
+=head2 setLog($log)
+
+(Re-)Sets the name of the log file to be used.
 
 =head2 setFile($file)
 
@@ -239,7 +273,9 @@ this time are a count of the number of elements that match the XPath expression.
   
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>
+L<IO::File>, L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

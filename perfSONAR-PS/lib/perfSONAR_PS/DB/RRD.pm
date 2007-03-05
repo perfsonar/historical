@@ -1,29 +1,31 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::RRD;
-use Carp;
 use RRDp;
+use perfSONAR_PS::Common;
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $path, $name, $dss, $error) = @_;   
+  my ($package, $log, $path, $name, $dss, $error) = @_;   
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::RRD";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $path && $path ne "") {
+  if(defined $log and $log ne "") {
+    $hash{"LOGFILE"} = $log;
+  }    
+  if(defined $path and $path ne "") {
     $hash{"PATH"} = $path;
   }
-  if(defined $name && $name ne "") {
+  if(defined $name and $name ne "") {
     $hash{"NAME"} = $name;
   }
-  if(defined $dss && $dss ne "") {
-    my %vars = %{$dss};  
-    $hash{"DATASOURCES"} = \%vars;  
+  if(defined $dss and $dss ne "") {
+    $hash{"DATASOURCES"} = \%{$dss};  
   }  
-  if(defined $error && $error ne "") {
+  if(defined $error and $error ne "") {
     if($error == 1) {
       $RRDp::error_mode = 'catch';
     }
@@ -35,14 +37,29 @@ sub new {
 }
 
 
+sub setLog {
+  my ($self, $log) = @_;  
+  $self->{FUNCTION} = "\"setLog\"";  
+  if(defined $log and $log ne "") {
+    $self->{LOGFILE} = $log;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
 sub setFile {
   my ($self, $file) = @_;  
   $self->{FUNCTION} = "\"setFile\"";  
-  if(defined $file && $file ne "") {
+  if(defined $file and $file ne "") {
     $self->{NAME} = $file;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -51,11 +68,12 @@ sub setFile {
 sub setPath {
   my ($self, $path) = @_;  
   $self->{FUNCTION} = "\"setPath\"";  
-  if(defined $path && $path ne "") {
+  if(defined $path and $path ne "") {
     $self->{PATH} = $path;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -64,11 +82,12 @@ sub setPath {
 sub setVariables {
   my ($self, $dss) = @_;  
   $self->{FUNCTION} = "\"setVariables\""; 
-  if(defined $dss && $dss ne "") { 
+  if(defined $dss and $dss ne "") { 
     $hash{"DATASOURCES"} = \%{$dss};
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -77,11 +96,12 @@ sub setVariables {
 sub setVariable {
   my ($self, $dss) = @_;  
   $self->{FUNCTION} = "\"setVariable\""; 
-  if(defined $dss && $dss ne "") {
+  if(defined $dss and $dss ne "") {
     $self->{DATASOURCES}->{$dss} = "";
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -90,7 +110,7 @@ sub setVariable {
 sub setError {
   my ($self, $error) = @_;  
   $self->{FUNCTION} = "\"setError\"";  
-  if(defined $error && $error ne "") {
+  if(defined $error and $error ne "") {
     if($error == 1) {
       $RRDp::error_mode = 'catch';
     }
@@ -99,7 +119,8 @@ sub setError {
     }
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -119,11 +140,12 @@ sub getErrorMessage {
 sub openDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"openDB\""; 
-  if(defined $self->{PATH} && defined $self->{NAME}) {
+  if(defined $self->{PATH} and defined $self->{NAME}) {
     RRDp::start $self->{PATH};
   }
   else {
-    croak($self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in function ".$self->{FUNCTION});      
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
   }
   return;
 }
@@ -132,17 +154,17 @@ sub openDB {
 sub closeDB {
   my ($self) = @_;   
   $self->{FUNCTION} = "\"closeDB\"";   
-  if((defined $self->{PATH} && $self->{PATH} ne "") && 
-     (defined $self->{NAME} && $self->{NAME} ne "")){
+  if((defined $self->{PATH} and $self->{PATH} ne "") and 
+     (defined $self->{NAME} and $self->{NAME} ne "")){
     my $status = RRDp::end;  
     if($status) {
-      croak($self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status.
-            "\" on closing in function ".$self->{FUNCTION});
-  
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status."\" on closing in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
     }
   }
   else {
-    croak($self->{FILENAME}.":\trrd tool is not open in function ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\trrdtool is not open in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -154,46 +176,47 @@ sub query {
   my %rrd_result = ();
   my @rrd_headings = ();  
 
-  if(defined $cf && $cf ne "") {  
+  if(defined $cf and $cf ne "") {  
     $cmd = "fetch " . $self->{NAME} . " " . $cf;
+    if(defined $resolution and $resolution ne "") {
+      $cmd = $cmd . " -r " . $resolution;
+    }    
+    if(defined $start and $start ne "") {
+      $cmd = $cmd . " -s " . $start;
+    }
+    if(defined $end and $end ne "") {
+      $cmd = $cmd . " -e " . $end;
+    }
+  
+    RRDp::cmd $cmd;
+    my $answer = RRDp::read;     
+
+    my @array = split(/\n/,$$answer);
+    for(my $x = 0; $x <= $#{@array}; $x++) {
+      if($x == 0) {
+        @rrd_headings = split(/\s+/,$array[$x]);
+      }
+      elsif($x > 1) {
+        my @line = split(/\s+/,$array[$x]);
+        $line[0] =~ s/://;
+        for(my $z = 1; $z <= $#{@line}; $z++) {
+          if($line[$z] eq "nan") {
+            $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
+          }
+          else {
+            $rrd_result{$line[0]}{$rrd_headings[$z]} = eval($line[$z]);
+          }
+        }   
+      }
+    }
+    if($RRDp::error) {
+      %rrd_result = ();
+      $rrd_result{ANSWER} = $$answer;
+    }
   }    
   else {
-    croak($self->{FILENAME}.":\tMissing argument 'cf' to ".$self->{FUNCTION});
-  }
-  if(defined $resolution && $resolution ne "") {
-    $cmd = $cmd . " -r " . $resolution;
-  }    
-  if(defined $start && $start ne "") {
-    $cmd = $cmd . " -s " . $start;
-  }
-  if(defined $end && $end ne "") {
-    $cmd = $cmd . " -e " . $end;
-  }
-  
-  RRDp::cmd $cmd;
-  my $answer = RRDp::read;     
-
-  my @array = split(/\n/,$$answer);
-  for(my $x = 0; $x <= $#{@array}; $x++) {
-    if($x == 0) {
-      @rrd_headings = split(/\s+/,$array[$x]);
-    }
-    elsif($x > 1) {
-      my @line = split(/\s+/,$array[$x]);
-      $line[0] =~ s/://;
-      for(my $z = 1; $z <= $#{@line}; $z++) {
-        if($line[$z] eq "nan") {
-          $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
-        }
-        else {
-          $rrd_result{$line[0]}{$rrd_headings[$z]} = eval($line[$z]);
-        }
-      }   
-    }
-  }
-  if($RRDp::error) {
-    %rrd_result = ();
-    $rrd_result{ANSWER} = $$answer;
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument 'cf' to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return %rrd_result; 
 }
@@ -202,13 +225,14 @@ sub query {
 sub insert {
   my ($self, $time, $ds, $value) = @_;
   $self->{FUNCTION} = "\"insert\"";   
-  if((defined $time && $time ne "") &&
-     (defined $ds && $ds ne "") && 
-     (defined $value && $value ne "")) {
+  if((defined $time and $time ne "") and
+     (defined $ds and $ds ne "") and 
+     (defined $value and $value ne "")) {
     $self->{COMMIT}->{$time}->{$ds} = $value;
   }
   else { 
-    croak($self->{FILENAME}.":\tMissing \"time\", \"DS\", or \"value\" argument to  ".$self->{FUNCTION});  
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }  
 }
 
@@ -234,8 +258,9 @@ sub insertCommit {
       }
       $counter++;
     }     
-    if((!defined $template || $template eq "") || (!defined $values || $values eq "")){
-      croak($self->{FILENAME}.":\trrdtool cannot update when datasource values are not specified in  ".$self->{FUNCTION});
+    if((!defined $template or $template eq "") or (!defined $values or $values eq "")){
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\trrdtool cannot update when datasource values are not specified in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
     }
     else {
       delete $self->{COMMIT}->{$time};
@@ -269,6 +294,7 @@ sub lastValue {
 
 1;
 
+
 __END__
 =head1 NAME
 
@@ -285,6 +311,7 @@ with rrd files) to offer some common functionality.
     use perfSONAR_PS::DB::RRD;
 
     my $rrd = new perfSONAR_PS::DB::RRD(
+      "./error.log",
       "/usr/local/rrdtool/bin/rrdtool" , 
       "/home/jason/rrd/stout/stout.rrd",
       {'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""},
@@ -294,6 +321,7 @@ with rrd files) to offer some common functionality.
     # or also:
     # 
     # my $rrd = new perfSONAR_PS::DB::RRD;
+    # $rrd->setLog("./error.log");
     # $rrd->setFile("/home/jason/rrd/stout/stout.rrd");
     # $rrd->setPath("/usr/local/rrdtool/bin/rrdtool");  
     # $rrd->setVariables({'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""});  
@@ -369,14 +397,19 @@ may then be invoked on the object for the specific database.
 The API of perfSONAR_PS::DB::RRD is rather simple, and attempts to mirror the API of the 
 other perfSONAR_PS::DB::* modules.  
 
-=head2 new($path, $file, %datasources, $error)
+=head2 new($log, $path, $file, %datasources, $error)
 
-The arguments are strings, the first representing the path to the rrdtool executable, 
-the second representing an actual rrd file.  The third can be a hash containing the
-names of the datasources in the rrd file. The final argument is a boolean indicating if
-errors should be thrown.  All arguments are optional, and the 'set' functions 
-(setFile($file), setPath($path), setVariables(%datasources), setVariables($ds), 
-setError($error)) are capable of setting the information as well.  
+The 'log' argument is the name of the log file where error or warning information may be 
+recorded.  The second represents the path to the rrdtool executable, the third represents 
+an actual rrd file.  The fourth can be a hash containing the names of the datasources in 
+the rrd file. The final argument is a boolean indicating if errors should be thrown.  
+All arguments are optional, and the 'set' functions (setLog($log), setFile($file), 
+setPath($path), setVariables(%datasources), setVariables($ds), setError($error)) are 
+capable of setting the information as well.  
+
+=head2 setLog($log)
+
+(Re-)Sets the name of the log file to be used.
 
 =head2 setPath($path)
 
@@ -453,7 +486,9 @@ Returns the 'first' timestamp in the RRD file.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
+L<RRDp>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
+L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

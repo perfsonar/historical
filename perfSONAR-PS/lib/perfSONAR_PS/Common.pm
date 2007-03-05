@@ -1,9 +1,11 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::Common;
+use Carp qw( carp );
 use Exporter;
 use IO::File;
 use XML::XPath;
+use Time::HiRes qw( gettimeofday );
 
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
@@ -13,20 +15,22 @@ our $VERSION = '0.03';
 
 sub readXML {
   my ($file)  = @_;
-  if(defined $file && $file ne "") {
-    my $xmlstring = "";
-    my $XML = new IO::File("<$file") || 
-      croak("Cannot open 'readXML' $file: $!\n");
-    while (<$XML>) {
-      if(!($_ =~ m/^<\?xml.*/)) {
-        $xmlstring .= $_;
-      }
-    }          
-    $XML->close();
-    return $xmlstring;  
+  if(defined $file and $file ne "") {
+    my $XML = new IO::File("<".$file) or 
+      carp("perfSONAR_PS::Common:\tCan't open file \"".$file."\" in \"readXML\" at line ".__LINE__.".");
+    if(defined $XML) {
+      my $xmlstring = "";
+      while (<$XML>) {
+        if(!($_ =~ m/^<\?xml.*/)) {
+          $xmlstring .= $_;
+        }
+      }          
+      $XML->close();
+      return $xmlstring;
+    }
   }
   else {
-    croak("perfSONAR_PS::Common:\tMissing argument to \"readXML\"");
+    carp("perfSONAR_PS::Common:\tMissing argument to \"readXML\" at line ".__LINE__.".");
   }
   return "";
 }
@@ -34,21 +38,23 @@ sub readXML {
 
 sub readConfiguration {
   my ($file, $conf)  = @_;
-  if((defined $file && $file ne "") && 
-     (defined $conf && $conf ne "")) {
-    my $CONF = new IO::File("<$file") or 
-      croak("Cannot open 'readDBConf' $file: $!\n");
-    while (<$CONF>) {
-      if(!($_ =~ m/^#.*$/)) {
-        $_ =~ s/\n//;
-        @values = split(/\?/,$_);
-        $conf->{$values[0]} = $values[1];
-      }
-    }          
-    $CONF->close(); 
+  if((defined $file and $file ne "") and 
+     (defined $conf and $conf ne "")) {
+    my $CONF = new IO::File("<".$file) or 
+      carp("perfSONAR_PS::Common:\tCan't open configuration file \"".$file."\" in \"readConfiguration\" at line ".__LINE__.".");
+    if(defined $CONF) {
+      while (<$CONF>) {
+        if(!($_ =~ m/^#.*$/)) {
+          $_ =~ s/\n//;
+          @values = split(/\?/,$_);
+          $conf->{$values[0]} = $values[1];
+        }
+      }          
+      $CONF->close();
+    }
   }
   else {
-    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"readConfiguration\"");
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"readConfiguration\" at line ".__LINE__.".");
   }
   return;
 }
@@ -56,15 +62,19 @@ sub readConfiguration {
 
 sub printError {
   my($file, $msg) = @_;
-  if((defined $file && $file ne "") && (defined $msg && $msg ne "")) {
-    open(LOG, "+>>" . $file);
-    my ($sec, $micro) = Time::HiRes::gettimeofday;
-    print LOG "TIME: " , $sec , "." , $micro , "\t\t";
-    print LOG $msg , "\n";
-    close(LOG);
+  if((defined $file and $file ne "") and 
+     (defined $msg and $msg ne "")) {
+    my $LOG = new IO::File("+>>".$file) or 
+      carp("perfSONAR_PS::Common:\tCan't open log file \"".$file."\" in \"printError\" at line ".__LINE__.".");
+    if(defined $LOG) {
+      my ($sec, $micro) = Time::HiRes::gettimeofday;
+      print $LOG "TIME: " , $sec , "." , $micro , "\t\t";
+      print $LOG $msg , "\n";
+      $LOG->close();
+    }
   }
   else {
-    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"printError\"");
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"printError\" at line ".__LINE__.".");
   }
   return;
 }
@@ -72,13 +82,13 @@ sub printError {
 
 sub parse {
   my ($xml, $struct, $ns, $xpath) = @_;
-  if((defined $xml && $xml ne "") && 
-     (defined $struct && $struct ne "") && 
-     (defined $ns && $ns ne "")) {
+  if((defined $xml and $xml ne "") and 
+     (defined $struct and $struct ne "") and 
+     (defined $ns and $ns ne "")) {
     
     my $xp = undef;        
     if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
-       && $xml->isa('XML::XPath::Node::Element')) {
+       and $xml->isa('XML::XPath::Node::Element')) {
       $xp = $xml;
     }
     else {
@@ -91,8 +101,7 @@ sub parse {
                     
     my $nodeset = $xp->find($xpath);
     if($nodeset->size() <= 0) {
-      croak("perfSONAR_PS::Common:\tXPath error in \"parse\"");        
-      exit(1);  
+      carp("perfSONAR_PS::Common:\tXPath error in \"parse\" at line ".__LINE__.".");
     }
     else {
       foreach my $node ($nodeset->get_nodelist) {           
@@ -115,10 +124,9 @@ sub parse {
         $struct->{$id} = \%s;
       }
     }  
-    return;
   }
   else {
-    croak("perfSONAR_PS::Common:\tMissing argument(s) to \"parse\"");
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"parse\" at line ".__LINE__.".");
   }
   return;
 }
@@ -129,7 +137,7 @@ sub traverse {
   foreach my $element ($set->getChildNodes) {          
   
     foreach my $attr ($element->getAttributes) {
-      if($attr->getLocalName eq "id" || $attr->getLocalName eq "metadataIdRef") {
+      if($attr->getLocalName eq "id" or $attr->getLocalName eq "metadataIdRef") {
         $struct->{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
       }
     }    
@@ -184,40 +192,42 @@ sub traverse {
 
 sub chainMetadata {
   my ($md) = @_;    
-  my $flag = 1;
-  while($flag) {
-    $flag = 0;
-    foreach my $m (keys %{$md}) {
-      foreach $class (keys %{$md->{$m}}) {
-        $class =~ s/nmwg:metadata\///;
-        my @ns = split(/:/,$class);
-        if($#ns == 1) {
-          if($md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
-            foreach my $m2 (keys %{$md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
-              my @mark = split(/-/,$m2);
-              if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {
-                if((!$md->{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
-                   $m2 ne $ns[0].":metadata-metadataIdRef") || 
-                   ($md->{$m}{$m2} ne $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} && 
-                   $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+  if((defined $md and $md ne "")) {  
+    my $flag = 1;
+    while($flag) {
+      $flag = 0;
+      foreach my $m (keys %{$md}) {
+        foreach $class (keys %{$md->{$m}}) {
+          $class =~ s/nmwg:metadata\///;
+          my @ns = split(/:/,$class);
+          if($#ns == 1) {
+            if($md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
+              foreach my $m2 (keys %{$md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
+                my @mark = split(/-/,$m2);
+                if(!defined $mark[1] or ($mark[1] ne "id" and $mark[1] ne "metadataIdRef")) {
+                  if((!$md->{$m}{$m2} and $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and 
+                     $m2 ne $ns[0].":metadata-metadataIdRef") or 
+                     ($md->{$m}{$m2} ne $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} and 
+                     $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and $m2 ne $ns[0].":metadata-metadataIdRef")) {
                  
-                  $md->{$m}{$m2} = $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
-                  $flag = 1;
-                }
-              }            
+                    $md->{$m}{$m2} = $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
+                    $flag = 1;
+                  }
+                }            
+              }
             }
-          }
-          if($md->{$m}{$ns[0].":metadata-metadataIdRef"}) {
-            foreach my $m2 (keys %{$md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
-              my @mark = split(/-/,$m2);    
-              if(!defined $mark[1] || ($mark[1] ne "id" && $mark[1] ne "metadataIdRef")) {                         
-                if((!$md->{$m}{$m2} && $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && 
-                   $m2 ne $ns[0].":metadata-metadataIdRef") || 
-                   ($md->{$m}{$m2} ne $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} &&
-                   $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" && $m2 ne $ns[0].":metadata-metadataIdRef")) {
+            if($md->{$m}{$ns[0].":metadata-metadataIdRef"}) {
+              foreach my $m2 (keys %{$md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
+                my @mark = split(/-/,$m2);    
+                if(!defined $mark[1] or ($mark[1] ne "id" and $mark[1] ne "metadataIdRef")) {                         
+                  if((!$md->{$m}{$m2} and $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and 
+                     $m2 ne $ns[0].":metadata-metadataIdRef") or 
+                     ($md->{$m}{$m2} ne $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} and
+                     $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and $m2 ne $ns[0].":metadata-metadataIdRef")) {
                  
-                  $md->{$m}{$m2} = $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
-                  $flag = 1;
+                    $md->{$m}{$m2} = $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
+                    $flag = 1;
+                  }
                 }
               }
             }
@@ -226,19 +236,30 @@ sub chainMetadata {
       }
     }
   }
+  else {
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"chainMetadata\" at line ".__LINE__.".");
+  }  
   return;
 }
 
 
 sub countRefs {
-  my($id, $data) = @_;
-  my $flag = 0;
-  foreach my $d (keys %{$data}) {
-    if($id eq $data->{$d}{"nmwg:data-metadataIdRef"}) {
-      $flag++;
+  my($id, $struct, $value) = @_;
+  if((defined $id and $id ne "") and 
+     (defined $struct and $struct ne "") and 
+     (defined $value and $value ne "")) {  
+    my $flag = 0;
+    foreach my $s (keys %{$struct}) {
+      if($id eq $struct->{$s}->{$value}) {
+        $flag++;
+      }
     }
+    return $flag;
   }
-  return $flag;
+  else {
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"countRefs\" at line ".__LINE__.".");
+  }
+  return -1;  
 }
 
 
@@ -254,18 +275,22 @@ sub genuid {
 __END__
 =head1 NAME
 
-perfSONAR_PS::Common - A module that provides common methods for performing actions within in the
-perfSONAR-PS framework.  
+perfSONAR_PS::Common - A module that provides common methods for performing simple, necessary actions 
+within the perfSONAR-PS framework.  
 
 =head1 DESCRIPTION
 
 This module is a catch all for common methods (for now) in the perfSONAR-PS framework.  As such there
 is no 'common thread' that each method shares.  This module IS NOT an object, and the methods
-can be invoked directly.  
+can be invoked directly (and sparingly).  
 
 =head1 SYNOPSIS
 
     use perfSONAR_PS::Common;
+    
+    # NOTE: Individual methods can be extraced:
+    # 
+    # use perfSONAR_PS::Common qw( readXML readConfiguration )
 
     my $xml = readXML("./store.xml");
     if(!($xml)) {
@@ -276,6 +301,13 @@ can be invoked directly.
     my %conf = ();
     readConfiguration("./db.conf", \%conf);
 
+
+    # To see the structure of the conf hash:
+    # 
+    # use Data::Dumper;
+    # print Dumper(%conf) , "\n";
+
+
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
       netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
@@ -285,13 +317,27 @@ can be invoked directly.
 
     my %metadata = ();
     
-    # NOTE: $xml in the case may ALSO be an XPath expression
+    # NOTE: $xml in the case may ALSO be an already calculated XPath expression
     
     parse($xml, \%metadata, \%ns, "//nmwg:metadata");
     chainMetadata(\%metadata);
 
+
+    # To see the structure of the metadata hash:
+    # 
+    # use Data::Dumper;
+    # print Dumper(%metadata) , "\n";
+
+
     my %data = ();
     parse($xml, \%data, \%ns, "//nmwg:data");
+
+
+    # To see the structure of the data hash:
+    # 
+    # use Data::Dumper;
+    # print Dumper(%data) , "\n";
+
     
     foreach my $m (keys %metadata) {
       print "There are '" , countRefs($m, \%data) , "' references to data objects";
@@ -302,17 +348,20 @@ can be invoked directly.
        
 =head1 DETAILS
 
-The API for this module aims to be simple; note that this is not an object and each method does not
-have the 'self knowledge' of variables that may travel between functions.  
+The API for this module aims to be simple; note that this is not an object and 
+each method does not have the 'self knowledge' of variables that may travel 
+between functions.  
 
 =head1 API
 
-The API of perfSONAR_PS::Common offers simple calls to common activities in the perfSONAR-PS 
-framework.  
+The API of perfSONAR_PS::Common offers simple calls to common activities in the 
+perfSONAR-PS framework.  
 
 =head2 readXML($file)
 
-Reads the file specified in '$file' and returns the XML contents in string form.
+Reads the file specified in '$file' and returns the XML contents in string form.  
+The <xml> tag will be extracted from the final returned string.  Function will
+warn on error, and return an empty string.  
 
 =head2 readConfiguration($file, \%conf)
 
@@ -333,10 +382,12 @@ Would return a hash such as:
       METADATA_DB_FILE => "snmpstore.dbxml"      
     }
 
+Function will warn on error.  
+
 =head2 printError($file, $msg)
 
-Reads the file specified in '$file', and writes the contents of '$msg' (along with a 
-timestamp) to this designated log file.
+Writes the contents of '$msg' (along with a timestamp) to this designated log file 
+'$file'.  Function will warn on error.  
 
 =head2 parse($xml, \%struct, \%ns, $xpath)
 
@@ -347,6 +398,7 @@ hash reference containing a prefix to namespace mapping.  All namespaces that ma
 in the container should be mapped (there is no harm is sending mappings that will not 
 be used).  The last argument is an XPath expression (such as '//nmwg:metadata') that 
 will be evaluated to return the struct object, populated with the appropriate values.  
+Function will warn on error (when the XPath returns no results).
 
 =head2 traverse($set, $sentstructure, $path)
 
@@ -365,7 +417,7 @@ a 'cahining' operation to share values between metadata objects.  An example wou
         <nmwgt:hostName>stout</nmwgt:hostName>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
   </nmwg:metadata>  
 
   <nmwg:metadata id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="1">
@@ -376,7 +428,7 @@ a 'cahining' operation to share values between metadata objects.  An example wou
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
   </nmwg:metadata>
 
   <nmwg:metadata id="3">
@@ -399,11 +451,10 @@ Which would then become:
         <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
         <nmwgt:hostName>stout</nmwgt:hostName>
         <nmwgt:ifName>eth1</nmwgt:ifName>
-        <nmwgt:ifIndex>3</nmwgt:ifIndex>
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>snmp.1.3.6.1.2.1.2.2.1.10</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
     <nmwg:parameters id="3">
       <select:parameter name="time" operator="gte">
         1172173843
@@ -416,11 +467,12 @@ Which would then become:
 
 This chaining is useful for 'factoring out' large chunks of XML.
 
-=head2 countRefs($id, \%data)
+=head2 countRefs($id, \%struct, $value)
 
-Given a ID, and a series of data objects, this function will return a 'count' of the
-number of times the id was seen as a reference to the data objects.  This is useful for
-eliminating 'dead' metadata blocks that may not contain a data trigger.
+Given a ID, and a series of 'struct' objects and a key 'value' to search on, this function 
+will return a 'count' of the number of times the id was seen as a reference to the objects.  
+This is useful for eliminating 'dead' blocks that may not contain a trigger.  The function
+will return -1 on error.  
 
 =head2 genuid()
 
@@ -428,9 +480,10 @@ Generates a random number.
 
 =head1 SEE ALSO
 
-L<IO::File>, L<XML::XPath>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, 
-L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<Carp>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<perfSONAR_PS::Transport>, 
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, 
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, 
+L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

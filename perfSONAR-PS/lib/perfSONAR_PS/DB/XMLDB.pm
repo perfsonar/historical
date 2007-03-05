@@ -1,65 +1,89 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::XMLDB;
-use Carp;
 use Sleepycat::DbXml 'simple';
+use perfSONAR_PS::Common;
 @ISA = ('Exporter');
 @EXPORT = ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
-  my ($package, $env, $cont, $ns) = @_; 
+  my ($package, $log, $env, $cont, $ns) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::XMLDB";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $env && $env ne "") {
+  if(defined $log and $log ne "") {
+    $hash{"LOGFILE"} = $log;
+  }      
+  if(defined $env and $env ne "") {
     $hash{"ENVIRONMENT"} = $env;
   }
-  if(defined $cont && $cont ne "") {
+  if(defined $cont and $cont ne "") {
     $hash{"CONTAINERFILE"} = $cont; 
   }
-  if(defined $ns && $ns ne "") {  
+  if(defined $ns and $ns ne "") {  
     $hash{"NAMESPACES"} = \%{$ns};     
   }    
   bless \%hash => $package;
 }
 
-sub setEnvironment {
-  my ($self, $env) = @_;  
-  $self->{FUNCTION} = "\"setEnvironment\"";  
-  if(defined $env && $env ne "") {
-    $self->{ENVIRONMENT} = $env;
+
+sub setLog {
+  my ($self, $log) = @_;  
+  $self->{FUNCTION} = "\"setLog\"";  
+  if(defined $log and $log ne "") {
+    $self->{LOGFILE} = $log;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }
   return;
 }
+
+
+sub setEnvironment {
+  my ($self, $env) = @_;  
+  $self->{FUNCTION} = "\"setEnvironment\"";  
+  if(defined $env and $env ne "") {
+    $self->{ENVIRONMENT} = $env;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
 
 sub setContainer {
   my ($self, $cont) = @_;
   $self->{FUNCTION} = "\"setContainer\"";  
-  if(defined $cont && $cont ne "") {
+  if(defined $cont and $cont ne "") {
     $self->{CONTAINERFILE} = $cont;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }
   return;
 }
 
+
 sub setNamespaces {
   my ($self, $ns) = @_;  
   $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $namespaces && $namespaces ne "") {   
+  if(defined $namespaces and $namespaces ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }
   return;
 }
+
 
 sub openDB {
   my ($self) = @_;
@@ -81,16 +105,16 @@ sub openDB {
     $self->{TRANSACTION}->commit();
   };
   if(my $e = catch std::exception) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-    exit(-1);
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }
   elsif($e = catch DbException) {
-    croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-    exit(-1);
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
   }        
   elsif($@) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-    exit(-1);
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
   } 
 }
 
@@ -99,7 +123,7 @@ sub query {
   my ($self, $query) = @_; 
   $self->{FUNCTION} = "\"query\"";  
   my @resString = ();
-  if(defined $query && $query ne "") {
+  if(defined $query and $query ne "") {
     my $results = "";
     my $value = "";
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";  
@@ -117,20 +141,21 @@ sub query {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    } 
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    }
     elsif($e = catch DbException) {
-      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }         
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    }        
     elsif($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
-      exit( -1 );
-    }     
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    }   
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   } 
   return @resString; 
 }
@@ -140,7 +165,7 @@ sub count {
   my ($self, $query) = @_; 
   $self->{FUNCTION} = "\"count\"";
   my $results;
-  if(defined $query && $query ne "") {
+  if(defined $query and $query ne "") {
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";    
     eval {            
       $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
@@ -152,20 +177,21 @@ sub count {
       $self->{TRANSACTION}->commit();	
     };
     if(my $e = catch std::exception) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }  
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    }
     elsif($e = catch DbException) {
-      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
     }        
     elsif($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
-      exit( -1 );
-    }      
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    }       
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   } 
   return $results->size();
 }
@@ -174,8 +200,8 @@ sub count {
 sub insertIntoContainer {
   my ($self, $content, $name) = @_;
   $self->{FUNCTION} = "\"insertIntoContainer\"";
-  if((defined $content && $content ne "") && 
-     (defined $name && $name ne "")) {    
+  if((defined $content and $content ne "") and 
+     (defined $name and $name ne "")) {    
     eval {        
       my $myXMLDoc = $self->{MANAGER}->createDocument();
       $myXMLDoc->setContent($content);
@@ -186,20 +212,21 @@ sub insertIntoContainer {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }  
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    }
     elsif($e = catch DbException) {
-      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
     }        
     elsif($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, insert \"".$content."\" failed: \"".$@."\"");
-      exit( -1 );
-    } 
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    }  
   }     
   else {
-    croak($self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }   
   return;
 }
@@ -208,7 +235,7 @@ sub insertIntoContainer {
 sub insertElement {
   my ($self, $query, $content) = @_;     
   $self->{FUNCTION} = "\"insertElement\""; 
-  if((defined $content && $content ne "") && (defined $query  && $query ne "")) {          
+  if((defined $content and $content ne "") and (defined $query  and $query ne "")) {          
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";     
     eval {
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();             
@@ -225,20 +252,21 @@ sub insertElement {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }  
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    }
     elsif($e = catch DbException) {
-      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }    
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    }        
     elsif($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, \"".$fullQuery."\" failed: \"".$@."\"");
-      exit( -1 );
-    }     
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    }  
   }     
   else {
-    croak($self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }   
   return;
 }
@@ -247,7 +275,7 @@ sub insertElement {
 sub remove {
   my ($self, $name) = @_;
   $self->{FUNCTION} = "\"remove\"";
-  if(defined $name && $name ne "") {  
+  if(defined $name and $name ne "") {  
     eval {
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();  
       $self->{UPDATECONTEXT} = $self->{MANAGER}->createUpdateContext();     
@@ -255,27 +283,28 @@ sub remove {
       $self->{TRANSACTION}->commit();    
     };
     if(my $e = catch std::exception) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }  
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    }
     elsif($e = catch DbException) {
-      croak($self->{FILENAME}.":\tDbException Error in ".$self->{FUNCTION}." function: \"".$e->what()."\"");
-      exit(-1);
-    }    
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDbException Error \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    }        
     elsif($@) {
-      croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function, remove \"".$name."\" failed: \"".$@."\"");
-      exit( -1 );
-    }   
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$e->what()."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    }  
   }     
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   }   
   return;
 }
 
 
-
 1;
+
 
 __END__
 =head1 NAME
@@ -302,6 +331,7 @@ collection.  Each method may then be invoked on the object for the specific data
     );
   
     my $db = new perfSONAR_PS::DB::XMLDB(
+      "./error.log",
       "/home/jason/Netradar/MP/SNMP/xmldb", 
       "snmpstore.dbxml",
       \%ns
@@ -310,6 +340,7 @@ collection.  Each method may then be invoked on the object for the specific data
     # or also:
     # 
     # my $db = new perfSONAR_PS::DB::XMLDB;
+    # $db->setLog("./error.log");
     # $db->setEnvironment("/home/jason/Netradar/MP/SNMP/xmldb");
     # $db->setContainer("snmpstore.dbxml");
     # $db->setNamespaces(\%ns);    
@@ -358,15 +389,20 @@ objects and catches many errors.  The methods presented here are rather simple b
 The API of perfSONAR_PS::DB::XMLDB is rather simple, and attempts to
 mirror the API of the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($env, $cont, \%ns)
+=head2 new($log, $env, $cont, \%ns)
 
-The first two arguments are strings, the first representing the "environment" (the directory
-where the xmldb was created, such as '/home/jason/Netradar/MP/SNMP/xmldb'; this should not
-be confused with the actual installation directory), the second representing the "container" 
-(a specific file that lives in the environment, such as 'snmpstore.dbxml'; many containers
-can live in a single environment).  The third argument is a hash reference containing a 
-prefix to namespace mapping.  All namespaces that may appear in the container should be
-mapped (there is no harm is sending mappings that will not be used).  
+The 'log' argument is the name of the log file where error or warning information may be 
+recorded.  The second represents the "environment" (the directory where the xmldb was created, 
+such as '/home/jason/Netradar/MP/SNMP/xmldb'; this should not be confused with the actual 
+installation directory), the third represents the "container" (a specific file that lives 
+in the environment, such as 'snmpstore.dbxml'; many containers can live in a single 
+environment).  The fourth argument is a hash reference containing a prefix to namespace 
+mapping.  All namespaces that may appear in the container should be mapped (there is no 
+harm is sending mappings that will not be used).  
+
+=head2 setLog($log)
+
+(Re-)Sets the name of the log file to be used.
 
 =head2 setEnvironment($env)
 
@@ -445,7 +481,9 @@ from the database.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
+L<Sleepycat::DbXml>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, 
+L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

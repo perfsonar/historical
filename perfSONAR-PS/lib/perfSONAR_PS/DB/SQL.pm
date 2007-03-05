@@ -1,39 +1,57 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::SQL;
-use Carp;
 use DBI;
+use perfSONAR_PS::Common;
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
-  my ($package, $name, $user, $pass) = @_;   
+  my ($package, $log, $name, $user, $pass) = @_;   
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::SQL";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $name && $name ne "") {
+  if(defined $log and $log ne "") {
+    $hash{"LOGFILE"} = $log;
+  }      
+  if(defined $name and $name ne "") {
     $hash{"NAME"} = $name;
   }  
-  if(defined $user && $user ne "") {
+  if(defined $user and $user ne "") {
     $hash{"USER"} = $user;
   }  
-  if(defined $pass && $pass ne "") {
+  if(defined $pass and $pass ne "") {
     $hash{"PASS"} = $pass;
   }      
   bless \%hash => $package;
 }
 
 
+sub setLog {
+  my ($self, $log) = @_;  
+  $self->{FUNCTION} = "\"setLog\"";  
+  if(defined $log and $log ne "") {
+    $self->{LOGFILE} = $log;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
 sub setName {
   my ($self, $name) = @_;  
   $self->{FUNCTION} = "\"setName\"";  
-  if(defined $name && $name ne "") {
+  if(defined $name and $name ne "") {
     $self->{NAME} = $name;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }
   return;
 }
@@ -42,11 +60,12 @@ sub setName {
 sub setUser {
   my ($self, $user) = @_;  
   $self->{FUNCTION} = "\"setUser\"";  
-  if(defined $user && $user ne "") {
+  if(defined $user and $user ne "") {
     $self->{USER} = $user;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }
   return;
 }
@@ -55,11 +74,12 @@ sub setUser {
 sub setPass {
   my ($self, $pass) = @_;  
   $self->{FUNCTION} = "\"setPass\"";  
-  if(defined $pass && $pass ne "") {
+  if(defined $pass and $pass ne "") {
     $self->{PASS} = $pass;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }
   return;
 }
@@ -77,13 +97,13 @@ sub openDB {
       $self->{USER},
       $self->{PASS}, 
       \%attr
-    ) || croak($self->{FILENAME}.":\t Database ".$self->{NAME}." unavailable with user ".
-               $self->{NAME}." and password ".$self->{PASS}." in function ".
-	       $self->{FUNCTION});
+    ) or 
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDatabase ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}." in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	              
   };
   if($@) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-    exit(-1);
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }   
   return;
 }
@@ -96,8 +116,8 @@ sub closeDB {
     $self->{HANDLE}->disconnect();
   };
   if($@) {
-    croak($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
-    exit(-1);
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }   
   return;
 }
@@ -108,21 +128,23 @@ sub query {
   $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
   print "QUERY: $query\n\n";
-  if(defined $query && $query ne "") {  
+  if(defined $query and $query ne "") {  
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
-      $sth->execute() || 
-        warn($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
-	      ": ".$sth->errstr."\n");
+      $sth->execute() or 
+        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tQuery error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
+          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	      	      
       $results  = $sth->fetchall_arrayref;
     };
     if($@) {
-      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
       return -1;
     } 
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   } 
   return $results;
 }
@@ -132,21 +154,23 @@ sub count {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"count\"";  
   my $results = -2; 
-  if(defined $query && $query ne "") {    
+  if(defined $query and $query ne "") {    
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
-      $sth->execute() || 
-        warn($self->{FILENAME}.":\t query error in function ".$self->{FUNCTION}.
-	      ": ".$sth->errstr."\n");   
+      $sth->execute() or 
+        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tQuery error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
+          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	
       $results  = $sth->fetchall_arrayref;  
     };      
     if($@) {
-      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
       return -1;
     } 
   } 
   else { 
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   } 
   return $#{$results}+1;
 }
@@ -155,9 +179,9 @@ sub count {
 sub insert {
   my ($self, $table, $arglist, $argvalues) = @_;
   $self->{FUNCTION} = "\"insert\"";   
-  if((defined $table && $table ne "") && 
-     (defined $arglist && $arglist ne "") && 
-     (defined $argvalues && $argvalues ne "")) {
+  if((defined $table and $table ne "") and 
+     (defined $arglist and $arglist ne "") and 
+     (defined $argvalues and $argvalues ne "")) {
     my @list = @{$arglist};
     my %values = %{$argvalues};
 
@@ -186,17 +210,19 @@ sub insert {
       for(my $x = 0; $x <= $#list; $x++) {
         $sth->bind_param($x+1, $values{$list[$x]});
       }
-      $sth->execute() || 
-        warn($self->{FILENAME}.":\t insert error in function ".$self->{FUNCTION}.
-	      ": ".$sth->errstr."\n"); 
+      $sth->execute() or 
+        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tInsert error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
+          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");		      
     };
     if($@) {
-      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
       return -1;
     }     
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   } 
   return 1;  
 }
@@ -205,26 +231,29 @@ sub insert {
 sub remove {
   my ($self, $delete) = @_;
   $self->{FUNCTION} = "\"remove\"";
-  if(defined $delete && $delete ne "") {
+  if(defined $delete and $delete ne "") {
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
-      $sth->execute() || 
-        warn($self->{FILENAME}.":\t delete error in function ".$self->{FUNCTION}.
-	      ": ".$sth->errstr."\n"); 
+      $sth->execute() or 
+        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDelete error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
+          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");		      
     };
     if($@) {
-      warn($self->{FILENAME}.":\tError in ".$self->{FUNCTION}." function: \"".$@."\"");
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
       return -1;
     }     
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   }    
   return 1;
 }
 
 
 1;
+
 
 __END__
 =head1 NAME
@@ -243,6 +272,7 @@ the specific database.
     use perfSONAR_PS::DB::SQL;
 
     my $db = new perfSONAR_PS::DB::SQL(
+      "./error.log";
       "DBI:SQLite:dbname=/home/jason/Netradar/MP/SNMP/netradar.db", 
       "",
       ""
@@ -251,6 +281,7 @@ the specific database.
     # or also:
     # 
     # my $db = new perfSONAR_PS::DB::SQL;
+    # $db->setLog("./error.log");
     # $db->setName("DBI:SQLite:dbname=/home/jason/netradar/MP/SNMP/netradar.db");
     # $db->setUser("");
     # $db->setPass("");    
@@ -315,14 +346,19 @@ specific database.
 The API of perfSONAR_PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
 perfSONAR_PS::DB::* modules.  
 
-=head2 new($name, $user, $pass)
+=head2 new($log, $name, $user, $pass)
 
-The constructor requires 3 arguments, the first being the 'name' of the database (written as
-an DBI connection string), and the username and password (if any) used to connect to the 
-database.  The '$name' must be of the DBI connection format which specifies a 'type' of 
-database (MySQL, SQLite, etc) as well as a path or other connection method.  It is important
+The 'log' argument is the name of the log file where error or warning information may be 
+recorded.  The second argument is the 'name' of the database (written as a DBI connection 
+string), and the final arguments are the username and password (if any) used to connect to 
+the database.  The '$name' must be of the DBI connection format which specifies a 'type' of 
+database (MySQL, SQLite, etc) as well as a path or other connection method.  It is important 
 that you have the proper DBI modules installed for the specific database you will be 
 attempting to access. 
+
+=head2 setLog($log)
+
+(Re-)Sets the name of the log file to be used.
 
 =head2 setName($name)
 
@@ -377,7 +413,9 @@ return 1 on success, -1 on failure.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>
+L<DBI>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::XMLDB>, 
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

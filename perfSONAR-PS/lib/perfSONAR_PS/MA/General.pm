@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::MA::General;
+use Carp qw( carp );
 use Exporter;  
 use perfSONAR_PS::Common;
 @ISA = ('Exporter');
@@ -8,15 +9,15 @@ use perfSONAR_PS::Common;
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   
-  if(defined $content && $content ne "") {
+  if(defined $content and $content ne "") {
     my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-    if(defined $id && $id ne "") {
+    if(defined $id and $id ne "") {
       $m = $m . " id=\"".$id."\"";
     }
-    if(defined $messageIdRef && $messageIdRef ne "") {
+    if(defined $messageIdRef and $messageIdRef ne "") {
       $m = $m . " messageIdRef=\"".$messageIdRef."\"";
     }
-    if(defined $type && $type ne "") {
+    if(defined $type and $type ne "") {
       $m = $m . " type=\"".$type."\"";
     }        
     $m = $m . ">\n  ";
@@ -25,7 +26,7 @@ sub getResultMessage {
     return $m;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument \"content\" to \"getResultMessage\".");
+    carp("perfSONAR_PS::MA::General:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
   }
   return "";
 }
@@ -33,14 +34,14 @@ sub getResultMessage {
 
 sub getResultCodeMessage {
   my ($id, $messageIdRef, $type, $event, $description) = @_;   
-  if((defined $event && $event ne "") && 
-     (defined $description && $description ne "")) {
+  if((defined $event and $event ne "") and 
+     (defined $description and $description ne "")) {
     my $metadataId = genuid();
     my $dataId = genuid();
-    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $event), getResultCodeData($dataId, $metadataId, $description));
+    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $event).getResultCodeData($dataId, $metadataId, $description));
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument \"content\" to \"getResultMessage\".");
+    carp("perfSONAR_PS::MA::General:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
   }
   return "";
 }
@@ -48,8 +49,8 @@ sub getResultCodeMessage {
 
 sub getResultCodeMetadata {
   my ($id, $event) = @_;  
-  if((defined $id && $id ne "") && 
-     (defined $event && $event ne "")) {
+  if((defined $id and $id ne "") and 
+     (defined $event and $event ne "")) {
     my $md = "  <nmwg:metadata id=\"result-code-".$id."\">\n";
     $md = $md . "    <nmwg:eventType>";
     $md = $md . $event;
@@ -58,7 +59,7 @@ sub getResultCodeMetadata {
     return $md;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument(s) to \"getResultMetadata\".");
+    carp("perfSONAR_PS::MA::General:\tMissing argument(s) to \"getResultMetadata\" at line ".__LINE__.".");
   }
   return "";
 }
@@ -66,9 +67,9 @@ sub getResultCodeMetadata {
 
 sub getResultCodeData {
   my ($id, $metadataIdRef, $description) = @_;  
-  if((defined $id && $id ne "") && 
-     (defined $metadataIdRef && $metadataIdRef ne "") && 
-     (defined $description && $description ne "")) {
+  if((defined $id and $id ne "") and 
+     (defined $metadataIdRef and $metadataIdRef ne "") and 
+     (defined $description and $description ne "")) {
     my $d = "  <nmwg:data id=\"result-code-description-".$id."\" metadataIdRef=\"result-code-".$metadataIdRef."\">\n";
     $d = $d . "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
     $d = $d . $description;
@@ -77,7 +78,7 @@ sub getResultCodeData {
     return $d;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument(s) to \"getResultData\".");
+    carp("perfSONAR_PS::MA::General:\tMissing argument(s) to \"getResultData\" at line ".__LINE__.".");
   }
   return "";
 }
@@ -89,34 +90,67 @@ sub getResultCodeData {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::General - A module that provides methods for ...
+perfSONAR_PS::MA::General - A module that provides methods for general tasks that MAs need to 
+perform, such as creating messages or result code structures.  
 
 =head1 DESCRIPTION
 
-...
+This module is a catch all for common methods (for now) of MAs in the perfSONAR-PS framework.  
+As such there is no 'common thread' that each method shares.  This module IS NOT an object, 
+and the methods can be invoked directly (and sparingly).  
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::MA::;
-    
-    ...
+    use perfSONAR_PS::MA::General;
+    use perfSONAR_PS::Common;
+        
+    my $id = genuid();	
+    my $idRef = genuid();
 
+    my $content = "<nmwg:metadata />";
+	
+    my $msg = getResultMessage($id, $idRef, "response", $content);
+    
+    $msg = getResultCodeMessage($id, $idRef, "response", "error.ma.transport" , "something...");
+    
+    $msg = getResultCodeMetadata($id, "error.ma.transport);
+    
+    $msg = getResultCodeData($id, $idRef, "something...");
+    
 =head1 DETAILS
 
-...
+The API for this module aims to be simple; note that this is not an object and 
+each method does not have the 'self knowledge' of variables that may travel 
+between functions.  
 
 =head1 API
 
-...
+The offered API is basic for now, until more common features to MAs can be identified
+and utilized in this module.
 
-=head2 new()
+=head2 getResultMessage($id, $messageIdRef, $type, $content)
 
-...
+The arguments are a message id, a messageIdRef, a messate type, and finally the 'content'
+which is understood to be the xml content of the message.  
+
+=head2 getResultCodeMessage($id, $messageIdRef, $type, $event, $description)
+
+The arguments are a message id, a messageIdRef, a messate type, an 'eventType' for the result
+code metadata, and a message for the result code data.  
+
+=head2 getResultCodeMetadata($id, $event)
+
+The arguments are a metadata id, and an 'eventType' for the result code metadata.
+
+=head2 getResultCodeData($id, $metadataIdRef, $description)
+
+The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
+L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

@@ -1,8 +1,7 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::XML::Element;
-
-use Carp;
+use Carp qw( croak );
 @ISA = ('Exporter');
 @EXPORT = ();
            
@@ -266,7 +265,7 @@ sub getChildByIndex {
 sub addAttribute {
   my ($self, $name, $value) = @_;  
   $self->{FUNCTION} = "\"addAttribute\"";  
-  if(defined $name && defined $value) {
+  if(defined $name and defined $value) {
     $self->{Atributes}{$name} = $value;
   }
   else {

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::Transport;
-use Carp;
+use Carp qw( carp );
 use HTTP::Daemon;
 use HTTP::Response;
 use HTTP::Headers;
@@ -10,31 +10,35 @@ use XML::XPath;
 use XML::Writer;
 use XML::Writer::String;
 use LWP::UserAgent;
+use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ();
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub new {
-  my ($package, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_; 
+  my ($package, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::Transport";
   $hash{"FUNCTION"} = "\"new\"";
-  if(defined $port && $port ne "") {
+  if(defined $log and $log ne "") {
+    $hash{"LOGFILE"} = $log;
+  }    
+  if(defined $port and $port ne "") {
     $hash{"PORT"} = $port;
   }
-  if(defined $listenEndPoint && $listenEndPoint ne "") {
+  if(defined $listenEndPoint and $listenEndPoint ne "") {
     $listenEndPoint =~ s/^(\/)+//g;
     $hash{"LISTEN_ENDPOINT"} = $listenEndPoint;
   } 
-  if(defined $contactHost && $contactHost ne "") {
+  if(defined $contactHost and $contactHost ne "") {
     $hash{"CONTACT_HOST"} = $contactHost;
   }
-  if(defined $contactPort && $contactPort ne "") {
+  if(defined $contactPort and $contactPort ne "") {
     $hash{"CONTACT_PORT"} = $contactPort;
   }     
-  if(defined $contactEndPoint && $contactEndPoint ne "") {
+  if(defined $contactEndPoint and $contactEndPoint ne "") {
     $hash{"CONTACT_ENDPOINT"} = $contactEndPoint;
   }  
   
@@ -48,6 +52,20 @@ sub new {
 }
 
 
+sub setLog {
+  my ($self, $log) = @_;  
+  $self->{FUNCTION} = "\"setLog\"";  
+  if(defined $log and $log ne "") {
+    $self->{LOGFILE} = $log;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
 sub setPort {
   my ($self, $port) = @_;  
   $self->{FUNCTION} = "\"setPort\"";  
@@ -55,7 +73,8 @@ sub setPort {
     $self->{PORT} = $port;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -69,7 +88,8 @@ sub setListenEndPoint {
     $self->{LISTEN_ENDPOINT} = $listenEndPoint;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -82,7 +102,8 @@ sub setContactHost {
     $self->{HOST} = $contactHost;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -95,7 +116,8 @@ sub setContactPort {
     $self->{PORT} = $contactPort;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -108,7 +130,8 @@ sub setContactEndPoint {
     $self->{CONTACT_ENDPOINT} = $contactEndPoint;
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -120,7 +143,9 @@ sub startDaemon {
   $self->{DAEMON} = HTTP::Daemon->new(
     LocalPort => $self->{PORT},
     Reuse => 1
-  ) or croak($self->{FILENAME}.":\tCannot start daemon in ".$self->{FUNCTION});
+  ) or 
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot start daemon in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
   return;
 }
 
@@ -139,10 +164,12 @@ sub acceptCall {
   my $requestEndpoint = $self->{REQUEST}->uri;
   $requestEndpoint =~ s/^(\/)+//g;
  
-  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} && 
+  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} and 
      $self->{REQUEST}->method eq "POST") {
     $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
     if (!$action =~ m/^.*message\/$/) {
+      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tReceived 'INVALID ACTION TYPE':".$action." in ".$self->{FUNCTION}) 
+        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
       return 'INVALID ACTION TYPE';
     }
     else {
@@ -150,6 +177,8 @@ sub acceptCall {
     }   
   }
   else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tReveived 'INVALID ENDPOINT':".$requestEndpoint." in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
     return 'INVALID ENDPOINT';      
   }
 }
@@ -158,7 +187,7 @@ sub acceptCall {
 sub getRequestAsXPath {
   my ($self) = @_;
   $self->{FUNCTION} = "\"getRequestAsXPath\"";
-  $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
+  my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
   $xp->clear_namespaces();
   $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
   return $xp;
@@ -172,21 +201,24 @@ sub getRequest {
   my $xp = $self->getRequestAsXPath();
   $nodeset = $xp->find('//nmwg:message');
   if($nodeset->size() <= 0) {
-    croak($self->{FILENAME}.":\tMessage element not found or in wrong namespace in ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMessage element not found or in wrong namespace in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
   }
   elsif($nodeset->size() >= 2) {
-    croak($self->{FILENAME}.":\tToo many Message elements found in ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tToo many Message elements found in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
   }
   else {
     return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
   }
+  return "";
 }
 
 
 sub setResponseAsXPath {
   my ($self, $xpath) = @_; 
   $self->{FUNCTION} = "\"setResponseAsXPath\"";
-  croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+  carp($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}." at line ".__LINE__.".")
     unless defined $xpath;
   my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
   return $self->setResponse( $content );
@@ -196,14 +228,15 @@ sub setResponseAsXPath {
 sub setResponse {
   my ($self, $content, $envelope) = @_;  
   $self->{FUNCTION} = "\"setResponse\"";  
-  if(defined $content) {
-    if(defined $envelope) {
+  if(defined $content and $content ne "") {
+    if(defined $envelope and $envelope ne "") {
       $content = $self->makeEnvelope($content) ;
     }
     $self->{RESPONSE} = HTTP::Response->parse($content);
   }
   else {
-    croak($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION});
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
   }
   return;
 }
@@ -212,9 +245,15 @@ sub setResponse {
 sub closeCall {
   my ($self) = @_;
   $self->{FUNCTION} = "\"closeCall\"";    
-  $self->{CALL}->send_response($self->{RESPONSE});    
-  $self->{CALL}->close;
-  undef($self->{CALL});  
+  if(defined $self->{CALL} and $self->{CALL} ne "") {
+    $self->{CALL}->send_response($self->{RESPONSE});    
+    $self->{CALL}->close;
+    undef($self->{CALL});  
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCall not established in ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+  }
   return;
 }
 
@@ -224,15 +263,15 @@ sub makeEnvelope {
   $self->{FUNCTION} = "\"makeEnvelope\"";    
   my $envelope = XML::Writer::String->new();
   my $writer = new XML::Writer(NAMESPACES => 4,
-                            PREFIX_MAP => {$self->{SOAP_ENV} => "SOAP-ENV",
-                                           $self->{SOAP_ENC} => "SOAP-ENC",
-                                           $self->{XSD} => "xsd",
-                                           $self->{XSI} => "xsi",
-                                           $self->{NAMESPACE} => "message"},
-                            UNSAFE => 1,
-                            OUTPUT => $envelope,
-                            DATA_MODE => 1,
-                            DATA_INDENT => 3);
+                               PREFIX_MAP => {$self->{SOAP_ENV} => "SOAP-ENV",
+                                              $self->{SOAP_ENC} => "SOAP-ENC",
+                                              $self->{XSD} => "xsd",
+                                              $self->{XSI} => "xsi",
+                                              $self->{NAMESPACE} => "message"},
+                               UNSAFE => 1,
+                               OUTPUT => $envelope,
+                               DATA_MODE => 1,
+                               DATA_INDENT => 3);
   $writer->startTag([$self->{SOAP_ENV}, "Envelope"],
                     "xmlns:SOAP-ENC" => $self->{SOAP_ENC},
                     "xmlns:xsd" => $self->{XSD},
@@ -256,11 +295,11 @@ sub sendReceive {
   my $httpEndpoint = qq[http://$self->{CONTACT_HOST}:$self->{CONTACT_PORT}/$self->{CONTACT_ENDPOINT}];
 
   my $userAgent = "";
-  if(defined $timeout && $timeout ne "") {
-    $userAgent = LWP::UserAgent->new('timeout'=>$timeout);
+  if(defined $timeout and $timeout ne "") {
+    $userAgent = LWP::UserAgent->new('timeout' => $timeout);
   }
   else {
-    $userAgent = LWP::UserAgent->new('timeout'=>5000);
+    $userAgent = LWP::UserAgent->new('timeout' => 3000);
   }  
   
   my $sendSoap = HTTP::Request->new('POST', $httpEndpoint, new HTTP::Headers, $envelope);
@@ -282,56 +321,95 @@ sub sendReceive {
 __END__
 =head1 NAME
 
-perfSONAR_PS::Transport - A module that provides methods for listening and contacting SOAP endpoints.  
+perfSONAR_PS::Transport - A module that provides methods for listening and contacting 
+SOAP endpoints as well as performing other 'transportation' needs for communication in
+the perfSONAR-PS framework.
 
 =head1 DESCRIPTION
 
-...
+This module is to be treated a single object, capable of interacting with a given
+service (specified by information at creation time).  
 
 =head1 SYNOPSIS
 
     use perfSONAR_PS::Transport;
     
-    my $listener = new perfSONAR_PS::Transport("8080", "/service/MA", "", "", "");
+    my %conf = ();
+    %conf{"LOGFILE"} = "./error.log";
     
+    my $listener = new perfSONAR_PS::Transport("./error.log", "8080", "/service/MA", "", "", "");
+    
+    # or also:
+    # 
+    # my $listener = new perfSONAR_PS::Transport;
+    # $listener->setLog("./error.log");
+    # $listener->setPort("8080"); 
+    # $listener->setListenEndPoint("/service/MA");
+    # $listener->setContactHost("");
+    # $listener->setContactPort("");
+    # $listener->setContactEndPoint("");
+                        
     $listener->startDaemon;
     while(1) {
       my $responseContent = "";
       if($listener->acceptCall == 1) {
         print "Request Message Was:\n" , $listener->getRequest , "\n";  
+ 
+        # or
+	#
+        # print "Request Message Was:\n" , $listener->getRequestAsXPath , "\n"; 
       
         #...      
   
-        $listener->setResponse($responseContent);
+  	# we want to have an envelope made...
+        $listener->setResponse($responseContent, 1);
+
+        # or
+	#
+        # $listener->setResponseAsXPath($XPathResponse);	
       }
       else {
         print "Error\n";  
 
         #...
 
-        $listener->setResponse($responseContent);
+        # we will make our own envelope...
+        $listener->setResponse($listener->makeEnvelope($responseContent));
+
+        # or
+	#
+        # $listener->setResponseAsXPath($XPathResponse);
       }
       $listener->closeCall;
     }
     
-    my $sender = new perfSONAR_PS::Transport("", "", "localhost", "8080", "/service/MA");
+    my $sender = new perfSONAR_PS::Transport("./error.log", "", "", "localhost", "8080", "/service/MA");
+    
+    my $reply = $sender->sendReceive($listener->makeEnvelope($request), 2000);
     
 =head1 DETAILS
 
-...
+The API for this module aims to be simple and robust.  This module may be used in place
+of other SOAP implementations (SOAP::Lite for example) when it is necessary to use a 
+Document-Literal message structure.
 
 =head1 API
 
 The API of the transport class is meant to simplfy common information transportation issues in
 WS envirnments.  
 
-=head2 new($port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint)
+=head2 new(\%conf, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint)
 
-The 'port' and 'listenEndPoint' arguments set values that will be used if the object
-will be used to listen for and accept incomming calls.  The 'contactHost', 'contactPort', 
-and 'contactEndPoint' set the values that are used if the object is used to send 
-information to a remote host.  All values can be left blank and set via the various 
-set functions.
+The 'log' argument is the name of the log file where error or warning information may be 
+recorded.  The 'port' and 'listenEndPoint' arguments set values that will be used if the 
+object will be used to listen for and accept incomming calls.  The 'contactHost', 
+'contactPort', and 'contactEndPoint' set the values that are used if the object is used 
+to send information to a remote host.  All values can be left blank and set via the 
+various set functions.
+
+=head2 setLog($log)
+
+(Re-)Sets the name of the log file to be used.  
 
 =head2 setPort($port)
 
@@ -372,17 +450,33 @@ cause the program to halt if the port in question is not available.
 =head2 acceptCall()
 
 Listens on the 'host:port/endPoint' for any requests.  The requests are checked for validity
-and a -1 is returned on error, a 1 is returned on success.  On success the request message
-can be parsed via the getRequest() method. 
-
+and a message is returned on error, a 1 is returned on success.  On success the request message
+can be parsed via the getRequest() method. The possible messages that may be returned on error
+are:
+	
+	'INVALID ACTION TYPE'
+	'INVALID ENDPOINT'
+	
+These correspond to the obvious errors.
+	
 =head2 getRequest()
 
 Returns the nmwg:message from a given request.  If there is no message, or too many message 
 elements present, the object will halt.
 
-=head2 setResponse($content)
+=head2 getRequestAsXPath()
 
-Sets the content of a response messages.
+Returns the nmwg:message from a given request in the form of an XPath object.  If there is no 
+message, or too many message elements present, the object will halt.
+
+=head2 setResponse($content, $envelope)
+
+Sets the content of a response messages.  'envelope' is a boolean value indicating if we need
+an envelope to be constructed.  
+
+=head2 setResponseAsXPath($xpath)
+
+Sets the content of a response messages where the input is an XPath object.
 
 =head2 closeCall()
 
@@ -398,8 +492,11 @@ Sents a soap formated envelope, and a timeout value to the contact host/port/end
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, 
-L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>
+L<Carp>, L<HTTP::Daemon>, L<HTTP::Response>, L<HTTP::Headers>, L<HTTP::Status>, 
+L<XML::XPath>, L<XML::Writer>, L<XML::Writer::String>, L<LWP::UserAgent>, 
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, 
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
