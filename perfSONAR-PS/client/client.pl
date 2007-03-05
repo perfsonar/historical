@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w -I ../lib
 
 =head1 NAME
 
@@ -126,7 +126,7 @@ $filter = $FILTER unless defined $filter;
 print STDERR "HOST: $host, PORT: $port, ENDPOINT: $endpoint, FILE: $file\n" if $DEBUG;
 
 # start a transport agent
-my $sender = new perfSONAR_PS::Transport("", "", $host, $port, $endpoint);
+my $sender = new perfSONAR_PS::Transport("./error.log", "", "", $host, $port, $endpoint);
 
 # Read the source XML file
 my $xml = readXML($file);
