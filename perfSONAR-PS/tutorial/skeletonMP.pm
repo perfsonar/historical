@@ -16,7 +16,6 @@ our $VERSION = '0.02';
 # ================ Internal Package skeletonMP::Agent ================
 
 package skeletonMP::Agent;
-use Net::SNMP;
 use perfSONAR_PS::Common;
 sub new {
   my ($package, $log) = @_; 
@@ -76,7 +75,7 @@ sub new {
   %{$hash{"METADATAMARKS"}} = ();
   %{$hash{"DATADB"}} = ();
   %{$hash{"LOOKUP"}} = ();
-  %{$hash{"SNMP"}} = ();
+  %{$hash{"AGENT"}} = ();
       
   bless \%hash => $package;
 }

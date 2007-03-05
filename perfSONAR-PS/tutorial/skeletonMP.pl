@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -I ../../lib .
+#!/usr/bin/perl -w -I ../../lib
 use strict;
 use threads;
 use threads::shared;
@@ -10,6 +10,7 @@ use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
+use perfSONAR_PS::MA::General;
 use skeletonMA;
 use skeletonMP;
 
@@ -114,8 +115,13 @@ sub measurementArchive {
     my $response = "";
     if($listener->acceptCall == 1) {
 
+      if($DEBUG) {
+        print "Request:\t" , $listener->getRequest , "\n";
+      }
+
       # call the MA here...
-      $response = "";
+      
+      $response = getResultCodeMessage("", "", "response", "success", "sucess");
       
       $listener->setResponse($response, 1); 
     }
