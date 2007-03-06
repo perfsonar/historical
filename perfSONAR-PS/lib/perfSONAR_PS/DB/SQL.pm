@@ -9,7 +9,7 @@ use perfSONAR_PS::Common;
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $log, $name, $user, $pass) = @_;   
+  my ($package, $log, $name, $user, $pass, $schema) = @_;   
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::SQL";
   $hash{"FUNCTION"} = "\"new\"";
@@ -25,6 +25,9 @@ sub new {
   if(defined $pass and $pass ne "") {
     $hash{"PASS"} = $pass;
   }      
+  if(defined $schema and $schema ne "") {
+    @{$hash{"SCHEMA"}} = @{$schema};
+  } 
   bless \%hash => $package;
 }
 
@@ -85,6 +88,20 @@ sub setPass {
 }
 
 
+sub setSchema {
+  my ($self, $schema) = @_;  
+  $self->{FUNCTION} = "\"setSchema\"";  
+  if(defined $schema and $schema ne "") {
+    @{$self->{SCHEMA}} = @{$schema};
+  } 
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+  }
+  return;
+}
+
+
 sub openDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"openDB\"";  
@@ -127,7 +144,6 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
-  print "QUERY: $query\n\n";
   if(defined $query and $query ne "") {  
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
@@ -177,25 +193,23 @@ sub count {
 
 
 sub insert {
-  my ($self, $table, $arglist, $argvalues) = @_;
+  my ($self, $table, $argvalues) = @_;
   $self->{FUNCTION} = "\"insert\"";   
   if((defined $table and $table ne "") and 
-     (defined $arglist and $arglist ne "") and 
      (defined $argvalues and $argvalues ne "")) {
-    my @list = @{$arglist};
     my %values = %{$argvalues};
 
-    my $insert = "insert into " . $table . " (";
-    for(my $x = 0; $x <= $#list; $x++) {
+    my $insert = "insert into " . $table . " (";    
+    for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {
       if($x == 0) {
-        $insert = $insert.$list[$x];
+        $insert = $insert.$self->{SCHEMA}->[$x];
       }
       else {
-        $insert = $insert.", ".$list[$x];
+        $insert = $insert.", ".$self->{SCHEMA}->[$x];
       }
     }
     $insert = $insert.") values (";
-    for(my $x = 0; $x <= $#list; $x++) {
+    for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {
       if($x == 0) {
         $insert = $insert."?";
       }
@@ -204,11 +218,11 @@ sub insert {
       }
     }  
     $insert = $insert.")";
-
+    
     eval {
       my $sth = $self->{HANDLE}->prepare($insert);
-      for(my $x = 0; $x <= $#list; $x++) {
-        $sth->bind_param($x+1, $values{$list[$x]});
+      for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {   
+        $sth->bind_param($x+1, $values{$self->{SCHEMA}->[$x]});
       }
       $sth->execute() or 
         printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tInsert error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
@@ -271,11 +285,13 @@ the specific database.
 
     use perfSONAR_PS::DB::SQL;
 
+    my @dbSchema = ("id", "time", "value", "eventtype", "misc");
     my $db = new perfSONAR_PS::DB::SQL(
       "./error.log";
       "DBI:SQLite:dbname=/home/jason/Netradar/MP/SNMP/netradar.db", 
       "",
-      ""
+      "",
+      \@dbSchema
     );
 
     # or also:
@@ -285,8 +301,7 @@ the specific database.
     # $db->setName("DBI:SQLite:dbname=/home/jason/netradar/MP/SNMP/netradar.db");
     # $db->setUser("");
     # $db->setPass("");    
-
-    my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+    # $db->setSchema(\@dbSchema);
 
     $db->openDB;
 
@@ -325,7 +340,7 @@ the specific database.
       eventtype => "ifOutOctets",  
       misc => ""
     );	
-    $status = $db->insert("data", \@dbSchema, \%dbSchemaValues);
+    $status = $db->insert("data", \%dbSchemaValues);
     if($status == -1) {
       print "Error executing insert statement\n";
     }
@@ -346,15 +361,16 @@ specific database.
 The API of perfSONAR_PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
 perfSONAR_PS::DB::* modules.  
 
-=head2 new($log, $name, $user, $pass)
+=head2 new($log, $name, $user, $pass, $schema)
 
 The 'log' argument is the name of the log file where error or warning information may be 
 recorded.  The second argument is the 'name' of the database (written as a DBI connection 
-string), and the final arguments are the username and password (if any) used to connect to 
-the database.  The '$name' must be of the DBI connection format which specifies a 'type' of 
-database (MySQL, SQLite, etc) as well as a path or other connection method.  It is important 
-that you have the proper DBI modules installed for the specific database you will be 
-attempting to access. 
+string), and the forth arguments are the username and password (if any) used to connect to 
+the database.  The final argument is the table 'schema' for the database.  At current time 
+only a single table is supported.  The '$name' must be of the DBI connection format which 
+specifies a 'type' of database (MySQL, SQLite, etc) as well as a path or other connection 
+method.  It is important that you have the proper DBI modules installed for the specific 
+database you will be attempting to access. 
 
 =head2 setLog($log)
 
@@ -374,6 +390,10 @@ modules installed for the specific database you will be attempting to access.
 =head2 setPass($pass)
 
 (Re-)Sets the password (if any) used to connect to the database.
+
+=head2 setSchema($schema)
+
+(Re-)Sets the table schema for the database.
 
 =head2 openDB
 
@@ -399,11 +419,11 @@ of course use the proper database schema elements and be properly formed.  Will 
 
 The results of this command are the number of result rows that WOULD be returned. 
 
-=head2 insert($table, $arglist, $argvalues)
+=head2 insert($table, $argvalues)
 
-The first argument is the specific table to operate on within the database, the second and
-third arguments deal with the column names, and the values to be inserted.  Will return
-1 on success, -1 on failure.
+The first argument is the specific table to operate on within the database, the second 
+argument deals with the column names (related to the schema) and the values to be 
+inserted.  Will return 1 on success, -1 on failure.
 
 =head2 remove($delete)
 

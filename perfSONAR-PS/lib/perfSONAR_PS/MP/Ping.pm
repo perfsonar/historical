@@ -16,15 +16,22 @@ our $VERSION = '0.02';
 # ================ Internal Package perfSONAR_PS::MP::Ping::Agent ================
 
 package perfSONAR_PS::MP::Ping::Agent;
+use Carp qw( croak );
 use perfSONAR_PS::Common;
 sub new {
-  my ($package, $log) = @_; 
+  my ($package, $log, $cmd) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MP::Ping::Agent";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $log and $log ne "") {
     $hash{"LOGFILE"} = $log;
   }  
+  if(defined $cmd and $cmd ne "") {
+    $hash{"CMD"} = $cmd;
+  }  
+  
+  %{$hash{"RESULTS"}} = ();
+  
   bless \%hash => $package;
 }
 
@@ -35,6 +42,83 @@ sub setLog {
   $self->{FUNCTION} = "\"setLog\"";  
   if(defined $log and $log ne "") {
     $self->{LOGFILE} = $log;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setCommand {
+  my ($self, $cmd) = @_;  
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping::Agent";
+  $self->{FUNCTION} = "\"setCommand\"";  
+  if(defined $cmd and $cmd ne "") {
+    $self->{CMD} = $cmd;
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub collect {
+  my ($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping::Agent";  
+  $self->{FUNCTION} = "\"collect\""; 
+  if(defined $self->{CMD} and $self->{CMD} ne "") {   
+    undef $self->{RESULTS};
+     
+    my($sec, $frac) = Time::HiRes::gettimeofday;
+    my $time = eval($sec.".".$frac);
+        
+    open(CMD, $self->{CMD}." |") or 
+      croak($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot open \"".$self->{CMD}."\" in ".$self->{FUNCTION}." at line ".__LINE__.".");
+    my @results = <CMD>;    
+    close(CMD);
+    for(my $x = 1; $x <= ($#results-4); $x++) { 
+      $self->{RESULTS}->{$x}->{"timeValue"} = $time;  
+      
+      my @resultString = split(/:/,$results[$x]);        
+      ($self->{RESULTS}->{$x}->{"bytes"} = $resultString[0]) =~ s/\sbytes.*$//;
+      for ($resultString[1]) {
+        s/\n//;
+        s/^\s*//;
+      }
+    
+      my @tok = split(/ /, $resultString[1]);
+      foreach my $t (@tok) {
+        if($t =~ m/^.*=.*$/) {
+          (my $first = $t) =~ s/=.*$//;
+	  (my $second = $t) =~ s/^.*=//;
+	  $self->{RESULTS}->{$x}->{$first} = $second;  
+        }
+        else {
+          $self->{RESULTS}->{$x}->{"units"} = $t;
+        }
+      }
+      $self->{RESULTS}->{$x}->{"timeValue"} += eval($self->{RESULTS}->{$x}->{"time"}/1000);
+      $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
+    }
+  }
+  else {
+    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub getResults {
+  my ($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping::Agent";  
+  $self->{FUNCTION} = "\"getResults\""; 
+  if(defined $self->{RESULTS} and $self->{RESULTS} ne "") {   
+    return $self->{RESULTS};
   }
   else {
     printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
@@ -74,8 +158,7 @@ sub new {
 
   %{$hash{"METADATAMARKS"}} = ();
   %{$hash{"DATADB"}} = ();
-  %{$hash{"LOOKUP"}} = ();
-  %{$hash{"AGENT"}} = ();
+  %{$hash{"PING"}} = ();
       
   bless \%hash => $package;
 }
@@ -234,12 +317,14 @@ sub prepareData {
       
   foreach my $d (keys %{$self->{DATA}}) {
     if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite"){
-      if(!defined $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) {
-        $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = 
+      if(!defined $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) {        
+	my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+	$self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = 
           new perfSONAR_PS::DB::SQL($self->{CONF}->{"LOGFILE"},
 	                               "DBI:SQLite:dbname=".$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}, 
                                        "",
-                                       "");
+                                       "",
+				       \@dbSchema);
       }
     }
     elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
@@ -282,10 +367,8 @@ sub prepareCollectors {
   $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
   $self->{FUNCTION} = "\"prepareCollectors\"";
         
-  
   foreach my $m (keys %{$self->{METADATA}}) {
     if($self->{METADATAMARKS}->{$m}) {
-
       my $commandString = "/bin/ping ";
       my $host = "";
       foreach my $m2 (keys %{$self->{METADATA}->{$m}}) {
@@ -304,12 +387,58 @@ sub prepareCollectors {
       }
       else {
         $commandString = $commandString . $host;
-        print "CMD: " , $commandString , "\n";
+        $self->{PING}->{$m} = new perfSONAR_PS::MP::Ping::Agent(
+	  $self->{CONF}->{"LOGFILE"},
+          $commandString
+	);
       }
-      
     }
   }
+  return;
+}
 
+
+sub collectMeasurements {
+  my($self) = @_;
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FUNCTION} = "\"collectMeasurements\"";
+  
+  foreach my $p (keys %{$self->{PING}}) {
+    print "Collecting for '" , $p , "'.\n";
+    $self->{PING}->{$p}->collect;
+  }
+  
+  foreach my $d (keys %{$self->{DATA}}) {
+    $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->openDB;
+    my $results = $self->{PING}->{$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}}->getResults;
+    foreach my $r (keys %{$results}) {
+      
+      print "inserting \"".$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}.
+            "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
+	    "\", \"ping\", \""."numBytes=".$results->{$r}->{"bytes"}.",ttl=".
+	    $results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.
+	    ",units=".$results->{$r}->{"units"}."\" into table ".
+	    $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.
+	    ".\n";
+      
+      my %dbSchemaValues = (
+        id => $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}, 
+        time => $results->{$r}->{"timeValue"}, 
+        value => $results->{$r}->{"time"}, 
+        eventtype => "ping",  
+        misc => "numBytes=".$results->{$r}->{"bytes"}.",ttl=".$results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.",units=".$results->{$r}->{"units"}
+      );  
+      
+      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert(
+        $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"},
+	\%dbSchemaValues
+      );
+      
+    }
+    $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->closeDB;
+  }
+  print "\n";
+		
   return;
 }
 
