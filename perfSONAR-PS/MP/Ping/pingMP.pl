@@ -84,12 +84,11 @@ sub measurementPoint {
   $mp->prepareData;
   $mp->prepareCollectors;  
  
-  
   # initialize measurement info, time, etc.
   
   while(1) {
 
-    # collect measurement info
+    $mp->collectMeasurements;
     
     sleep($conf{"MP_SAMPLE_RATE"});
   }

@@ -10,8 +10,9 @@
         <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
       </nmwgt:endPointPair>
     </ping:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
     <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
-      <nmwg:parameter name="count">1</nmwg:parameter>      
+      <nmwg:parameter name="count">3</nmwg:parameter>      
     </ping:parameters>   
   </nmwg:metadata>
   
