@@ -7,8 +7,6 @@ use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
-use Data::Dumper;
-
 @ISA = ('Exporter');
 @EXPORT = ();
 our $VERSION = '0.02';
@@ -80,9 +78,8 @@ sub collect {
       croak($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot open \"".$self->{CMD}."\" in ".$self->{FUNCTION}." at line ".__LINE__.".");
     my @results = <CMD>;    
     close(CMD);
+    
     for(my $x = 1; $x <= ($#results-4); $x++) { 
-      $self->{RESULTS}->{$x}->{"timeValue"} = $time;  
-      
       my @resultString = split(/:/,$results[$x]);        
       ($self->{RESULTS}->{$x}->{"bytes"} = $resultString[0]) =~ s/\sbytes.*$//;
       for ($resultString[1]) {
@@ -101,9 +98,10 @@ sub collect {
           $self->{RESULTS}->{$x}->{"units"} = $t;
         }
       }
-      $self->{RESULTS}->{$x}->{"timeValue"} += eval($self->{RESULTS}->{$x}->{"time"}/1000);
+      $self->{RESULTS}->{$x}->{"timeValue"} = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
       $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
     }
+    
   }
   else {
     printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
@@ -244,7 +242,6 @@ sub parseMetadata {
       for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
 	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
       }      
-print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
     }
     else {
       my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};      
@@ -258,7 +255,6 @@ print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
       for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
         parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
       }
-print "Data:\t" , Dumper($self->{DATA}) , "\n";
     }
     else {
       my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};
@@ -271,8 +267,6 @@ print "Data:\t" , Dumper($self->{DATA}) , "\n";
     my $xml = readXML($conf{"METADATA_DB_FILE"});
     parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
     parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
-print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
-print "Data:\t" , Dumper($self->{DATA}) , "\n";
     cleanMetadata($self);  
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
@@ -369,7 +363,7 @@ sub prepareCollectors {
         
   foreach my $m (keys %{$self->{METADATA}}) {
     if($self->{METADATAMARKS}->{$m}) {
-      my $commandString = "/bin/ping ";
+      my $commandString = $self->{CONF}->{"PING"}." ";
       my $host = "";
       foreach my $m2 (keys %{$self->{METADATA}->{$m}}) {
         if($m2 =~ m/.*dst-value$/) {
@@ -408,10 +402,12 @@ sub collectMeasurements {
     $self->{PING}->{$p}->collect;
   }
   
+  my %dbSchemaValues = ();
+  
   foreach my $d (keys %{$self->{DATA}}) {
     $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->openDB;
     my $results = $self->{PING}->{$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}}->getResults;
-    foreach my $r (keys %{$results}) {
+    foreach my $r (sort keys %{$results}) {
       
       print "inserting \"".$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}.
             "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
@@ -421,7 +417,7 @@ sub collectMeasurements {
 	    $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.
 	    ".\n";
       
-      my %dbSchemaValues = (
+      %dbSchemaValues = (
         id => $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}, 
         time => $results->{$r}->{"timeValue"}, 
         value => $results->{$r}->{"time"}, 
