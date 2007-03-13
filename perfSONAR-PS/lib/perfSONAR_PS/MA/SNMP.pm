@@ -18,13 +18,32 @@ use Data::Dumper;
 our $VERSION = '0.02';
 
 sub new {
-  my ($package, $conf) = @_; 
+  my ($package, $conf, $ns, $metadata, $data) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MA::SNMP";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $conf and $conf ne "") {
     $hash{"CONF"} = \%{$conf};
   }
+  if(defined $ns and $ns ne "") {  
+    $hash{"NAMESPACES"} = \%{$ns};     
+  }     
+  if(defined $metadata and $metadata ne "") {
+    $hash{"METADATA"} = \%{$metadata};
+  }
+  else {
+    %{$hash{"METADATA"}} = ();
+  }  
+  if(defined $data and $data ne "") {
+    $hash{"DATA"} = \%{$data};
+  }
+  else {
+    %{$hash{"DATA"}} = ();
+  }  
+
+  %{$hash{"RESULTS"}} = ();  
+  %{$hash{"TIME"}} = ();
+    
   bless \%hash => $package;
 }
 
@@ -43,8 +62,50 @@ sub setConf {
 }
 
 
+sub setNamespaces {
+  my ($self, $ns) = @_;    
+  $self->{FUNCTION} = "\"setNamespaces\""; 
+  if(defined $namespaces and $namespaces ne "") {   
+    $self->{NAMESPACES} = \%{$ns};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setMetadata {
+  my ($self, $metadata) = @_;      
+  $self->{FUNCTION} = "\"setMetadata\"";  
+  if(defined $metadata and $metadata ne "") {
+    $self->{METADATA} = \%{$metadata};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setData {
+  my ($self, $data) = @_;      
+  $self->{FUNCTION} = "\"setData\"";  
+  if(defined $data and $data ne "") {
+    $self->{DATA} = \%{$data};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
 sub handleRequest {
-  my($self, $request, $ns) = @_;
+  my($self, $request) = @_;
   my $response = "";
 
 print "REQUEST: " , $request , "\n";
@@ -61,7 +122,7 @@ print "REQUEST: " , $request , "\n";
     $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);  
   }
   elsif($nodeset->size() == 1) {
-    @messages = $nodeset->get_nodelist;
+    my @messages = $nodeset->get_nodelist;
     my $messageId = "";
     my $messageType = "";    
     my $messageIdReturn = genuid();    
@@ -74,22 +135,22 @@ print "REQUEST: " , $request , "\n";
       }
     }
     
-    my %metadata = ();
-    my %data = ();      
-    parse($request, \%metadata, \%{$ns}, "//nmwg:metadata");;
-    chainMetadata(\%metadata);
-    parse($request, \%data, \%{$ns}, "//nmwg:data");      
-    
-print "Metadata: " , Dumper(%metadata) , "\n";    
-print "Data: " , Dumper(%data) , "\n";  
-    
-    foreach my $m (keys %metadata) {
-      if(countRefs($m, \%data, "nmwg:data-metadataIdRef") == 0) {
-        delete $metadata{$m};
+    parse($request, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
+    chainMetadata(\%{$self->{METADATA}});
+    parse($request, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");   
+            
+    foreach my $m (keys %{$self->{METADATA}}) {
+      if(countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef") == 0) {
+        delete $self->{METADATA}->{$m};
       }
     }
+
+print "Metadata: " , Dumper(%{$self->{METADATA}}) , "\n";    
+print "Data: " , Dumper(%{$self->{DATA}}) , "\n";  
           
-    if($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql" or $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+    if($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql" or 
+       $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or 
+       $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
       my $msg = "The metadata database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
@@ -97,23 +158,22 @@ print "Data: " , Dumper(%data) , "\n";
     }  
     elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
       my $localContent = "";
-      foreach my $d (keys %data) {
-        foreach my $m (keys %metadata) {  
-          if($data{$d}{"nmwg:data-metadataIdRef"} eq $m) { 
-            
-	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery($self, \%metadata, $m);	    
-	    my %time = getRange($self, \%metadata, $m);
+      foreach my $d (keys %{$self->{DATA}}) {
+        foreach my $m (keys %{$self->{METADATA}}) {  
+          if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) { 
+           
+	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";	  
 
 	    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
               $self->{CONF}->{"LOGFILE"},
               $self->{CONF}->{"METADATA_DB_NAME"}, 
               $self->{CONF}->{"METADATA_DB_FILE"},
-              \%{$ns}
+              \%{$self->{NAMESPACES}}
             );	  
             $metadatadb->openDB;              
 
 print "Query: " , $queryString , "\n";
-	    
+
 	    my @resultsString = $metadatadb->query($queryString);   
 	    if($#resultsString != -1) {    
               for(my $x = 0; $x <= $#resultsString; $x++) {	
@@ -124,37 +184,36 @@ print "Query: " , $queryString , "\n";
                 $queryString = "/nmwg:data[\@metadataIdRef='".$resultsString[$x]."']";
                 my @dataResultsString = $metadatadb->query($queryString);
 	        if($#dataResultsString != -1) {    
-		  
                   $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
+
                   my @metadataResultsString = $metadatadb->query($queryString);		  
 
                   $localContent = $localContent . $metadataResultsString[0];
                   
 		  for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		    my %dresults = ();
-		    parse($dataResultsString[$x], \%dresults, \%{$ns}, "//nmwg:data");		  
-    
-		    @dataIds = keys(%dresults);
-		    if($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-                      $localContent = $localContent . retrieveRRD($self, \%dresults, $dataIds[0], \%time); 
+		    undef $self->{RESULTS};		    
+		    parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
+		    @dataIds = keys(%{$self->{RESULTS}});
+		    if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
+		      $localContent = $localContent . retrieveRRD($self, $dataIds[0]); 
 		      $response = getResultMessage($messageIdReturn, $messageId, "response", $localContent);
 		    }
-		    elsif(($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") or 
-		          ($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
-			  ($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
-			  ($dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
-                      my $msg = "The data database '".$dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
+		    elsif(($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") or 
+		          ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
+			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
+			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
+                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
                       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
                         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
 		    else {
-                      my $msg = "The data database '".$dresults{$dataIds[0]}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
+                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
                       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
                         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
-		  }		  	  
+		  }
 		}
                 else {
                   my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the data search.";
@@ -162,7 +221,7 @@ print "Query: " , $queryString , "\n";
                     if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
                   $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
                 }		    
-	      }
+	      }	  
 	    }
             else {
               my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the metadata search.";
@@ -191,131 +250,38 @@ print "Query: " , $queryString , "\n";
 }
 
 
-sub getMetadatXQuery {
-  my($self, $sentmd, $id) = @_;
-  my %metadata = %{$sentmd};
-  my $queryString = "";
-
-  my $ifAddressType = "";
-  my $ifAddress = "";
-  my $disp = "";  
-  foreach my $m (keys %{$metadata{$id}}) {
-    if($m =~ m/^.*ifAddress$/) {
-      $ifAddress = $metadata{$id}{$m};        
-      $disp = $m;
-      $disp =~ s/nmwg:metadata\///;  
-    }
-    elsif($m =~ m/^.*ifAddress-type$/) {
-      $ifAddressType = $metadata{$id}{$m};
-      $disp = $m;
-      $disp =~ s/nmwg:metadata\///; 
-      $disp =~ s/-type//; 
-    }
-  }
-    
-  if($ifAddress) {
-    $queryString = $queryString . $disp . "[text()='" . $ifAddress;
-    if($ifAddressType) {
-      $queryString = $queryString . "' and \@type='" . $ifAddressType . "']";
-    }
-    else {
-      $queryString = $queryString . "']";
-    } 
-    $queryCount++;     
-  }
-  else {
-    if($ifAddressType) {
-      $queryString = $queryString . $disp . "[\@type='" . $ifAddressType . "']";
-      $queryCount++;
-    }
-  }
-    
-  foreach my $m (keys %{$metadata{$id}}) {
-    if(!($m =~ m/^.*parameter.*$/) and
-       !($m =~ m/^.*-id$/) and
-       !($m =~ m/^.*-metadataIdRef$/) and
-       !($m =~ m/^.*ifAddress.*$/)) {
-      $disp = $m;
-      $disp =~ s/nmwg:metadata\///;
-      if(!($queryCount)) {
-        $queryString = $queryString . $disp . "[text()='" . $metadata{$id}{$m} . "']";
-        $queryCount++;
-      }
-      else {
-        $queryString = $queryString . " and " . $disp . "[text()='" . $metadata{$id}{$m} . "']";
-      }
-    }
-  }
-  $queryString = $queryString . "]/\@id";
-  
-  return $queryString;  
-}
-
-
-sub getRange {
-  my($self, $sentmd, $id) = @_;
-  my %metadata = %{$sentmd};
-  my %time = ();
-
-  foreach my $m (keys %{$metadata{$id}}) {
-    if($m =~ m/^.*select:parameter-time-gte$/) {
-      $time{"START"} = $metadata{$id}{$m};
-    }
-    elsif($m =~ m/^.*select:parameter-time-gt$/) {
-      $time{"START"} = $metadata{$id}{$m}+1;
-    }
-    elsif($m =~ m/^.*select:parameter-time-lte$/) {
-      $time{"END"} = $metadata{$id}{$m};
-    }
-    elsif($m =~ m/^.*select:parameter-time-lt$/) {
-      $time{"END"} = $metadata{$id}{$m}+1;
-    }
-    elsif($m =~ m/^.*select:parameter-time-eq$/) {
-      $time{"START"} = $metadata{$id}{$m};
-      $time{"END"} = $metadata{$id}{$m};
-      last;
-    }				
-  }	   
-    
-  return %time;
-}
-
-
 sub retrieveRRD {
-  my($self, $sentd, $did, $sentt) = @_;
+  my($self, $did) = @_;
   my $responseString = "";
 
-  my %data = %{$sentd};
-  my %time = %{$sentt};
   my $id = genuid();
-
   my $datadb = new perfSONAR_PS::DB::RRD(
     $self->{CONF}->{"LOGFILE"},
     $self->{CONF}->{"RRDTOOL"}, 
-    $data{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
+    $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
     "",
     1
   );
 		      
   $datadb->openDB();
   my %rrd_result = $datadb->query(
-    "AVERAGE", 
-    "", 
-    $time{START}, 
-    $time{END}
+    $self->{TIME}->{"CF"}, 
+    $self->{TIME}->{"RESOLUTION"}, 
+    $self->{TIME}->{"START"}, 
+    $self->{TIME}->{"END"}
   );
   
   if($datadb->getErrorMessage()) {
     my $msg =  "Query Error: " . $datadb->getErrorMessage() . "; query returned: " . $rrd_result{ANSWER};
-    $responseString = $responseString . getResultCodeData($id, $data{$did}{"nmwg:data-metadataIdRef"}, $msg); 
+    $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
   }
   else {
     my @keys = keys(%rrd_result);
-    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$data{$did}{"nmwg:data-metadataIdRef"}."\">\n";
+    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}."\">\n";
     foreach $a (sort(keys(%rrd_result))) {
       foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
-	if($b eq $data{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}) {
-	  $responseString = $responseString . "    <nmwg:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$data{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-valueUnits"}."\"/>\n";
+	if($b eq $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}) {
+	  $responseString = $responseString . "    <nmwg:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$self->{RESULTS}->{$did}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-valueUnits"}."\"/>\n";
         }
       }
     }
@@ -360,6 +326,12 @@ related tasks of interacting with backend storage.
     );
     
     my $ma = perfSONAR_PS::MA::SNMP->new(\%conf);
+
+    # or
+    # $ma = perfSONAR_PS::MA::SNMP->new;
+    # $ma->setConf(\%conf);
+    # $ma->setNamespaces(\%ns);    
+    
     my $response = $ma->handleRequest($requestMessage, \%ns); 
 
 =head1 DETAILS
@@ -386,30 +358,17 @@ Given a request and a namespace hash, interact with the metadata and data databa
 and a response will be returned.  This response could be the correct data, or it could be
 a descriptive error message if something happened to go wrong. 
 
-  
-=head2 getMetadatXQuery($sentmd, $id)
-
-This function is meant to be used internally to form an XQuery statement from a 
-metadata object and a specific metadata id.
-
-
-=head2 getRange($sentmd, $id);
- 
-Given a metadata object and an id, construct a time hash that contains time related
-parameter info from the request.
-
-
 =head2 retrieveRRD($sentd, $did, $sentt)	
 
 Given a data and metadata hash, and the time information, the data is extracted from the
 backed storage (in this case RRD). 
 
-
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
 L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>
+L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::General>, 
+L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

@@ -5,7 +5,8 @@ use Carp qw( carp );
 use Exporter;  
 use perfSONAR_PS::Common;
 @ISA = ('Exporter');
-@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 'getResultCodeData');
+@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
+           'getResultCodeData', 'getMetadatXQuery');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   
@@ -51,7 +52,7 @@ sub getResultCodeMetadata {
   my ($id, $event) = @_;  
   if((defined $id and $id ne "") and 
      (defined $event and $event ne "")) {
-    my $md = "  <nmwg:metadata id=\"result-code-".$id."\">\n";
+    my $md = "  <nmwg:metadata id=\"".$id."\">\n";
     $md = $md . "    <nmwg:eventType>";
     $md = $md . $event;
     $md = $md . "</nmwg:eventType>\n";
@@ -70,7 +71,7 @@ sub getResultCodeData {
   if((defined $id and $id ne "") and 
      (defined $metadataIdRef and $metadataIdRef ne "") and 
      (defined $description and $description ne "")) {
-    my $d = "  <nmwg:data id=\"result-code-description-".$id."\" metadataIdRef=\"result-code-".$metadataIdRef."\">\n";
+    my $d = "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$metadataIdRef."\">\n";
     $d = $d . "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
     $d = $d . $description;
     $d = $d . "</nmwgr:datum>\n";  
@@ -81,6 +82,113 @@ sub getResultCodeData {
     carp("perfSONAR_PS::MA::General:\tMissing argument(s) to \"getResultData\" at line ".__LINE__.".");
   }
   return "";
+}
+
+
+sub getMetadatXQuery {
+  my($metadata, $time, $id) = @_;
+  my $queryString = "";
+  my $queryCount = 0;
+  
+  my %struct = ();
+  foreach my $m (keys %{$metadata->{$id}}) {
+    my $attribute = "";
+    my $element = "";
+    if(($m =~ m/^.*-id$/) or 
+       ($m =~ m/^.*IdRef$/)) {	  
+      # ignore for now
+    }
+    elsif(($m =~ m/^.*:parameter-time-.*$/) or 
+          ($m =~ m/^.*:parameter-consolidationFunction$/) or 
+	  ($m =~ m/^.*:parameter-resolution$/)) {
+      if($m =~ m/^.*select:parameter-time-gte$/) {
+        $time->{"START"} = $metadata->{$id}->{$m};
+      }
+      elsif($m =~ m/^.*select:parameter-time-gt$/) {
+        $time->{"START"} = $metadata->{$id}->{$m}+1;
+      }
+      elsif($m =~ m/^.*select:parameter-time-lte$/) {
+        $time->{"END"} = $metadata->{$id}->{$m};
+      }
+      elsif($m =~ m/^.*select:parameter-time-lt$/) {
+        $time->{"END"} = $metadata->{$id}->{$m}+1;
+      }
+      elsif($m =~ m/^.*select:parameter-time-eq$/) {
+        $time->{"START"} = $metadata->{$id}->{$m};
+        $time->{"END"} = $metadata->{$id}->{$m};
+      }				
+      elsif($m =~ m/^.*select:parameter-resolution$/) {
+        $time->{"RESOLUTION"} = $metadata->{$id}->{$m};
+      }	
+      elsif($m =~ m/^.*select:parameter-consolidationFunction$/) {
+        $time->{"CF"} = $metadata->{$id}->{$m};
+      }	          
+    }    
+    elsif(($m =~ m/^.*:dst$/) or ($m =~ m/^.*:src$/) or 
+       ($m =~ m/^.*:ifAddress$/) or ($m =~ m/^.*:ipAddress$/)){
+      $element = $m;
+      $element =~ s/^.*:metadata\///;      
+      $struct{$element}{"text"} = $metadata->{$id}->{$m};
+    }
+    elsif(($m =~ m/^.*:dst-.*$/) or ($m =~ m/^.*:src-.*$/) or 
+          ($m =~ m/^.*:ifAddress-.*$/) or ($m =~ m/^.*:ipAddress-.*$/)) {
+      $attribute = $m;
+      $attribute =~ s/^.*:metadata.*://; 
+      $attribute =~ s/^.*-//; 
+      $element = $m;
+      $element =~ s/^.*:metadata\///;
+      $element =~ s/-.*$//;
+      $struct{$element}{$attribute} = $metadata->{$id}->{$m};   
+    }
+    elsif(($m =~ m/^.*:parameter.*$/)) {
+      $attribute = $m;
+      $attribute =~ s/^.*:metadata.*://; 
+      $attribute =~ s/^.*-//; 
+      $element = $m;
+      $element =~ s/^.*:metadata\///;
+      $element =~ s/-.*$//;
+      $struct{$element}{$attribute} = $metadata->{$id}->{$m};   
+    }
+    else {
+      $element = $m;
+      $element =~ s/^.*:metadata\///;      
+      $struct{$element}{"text"} = $metadata->{$id}->{$m};
+    }            
+  } 
+
+  foreach my $s (sort keys %struct) {
+    if(!$queryCount) {
+      $queryString = $queryString.$s."[";
+      $queryCount++;
+    }
+    else {
+      $queryString = $queryString." and ".$s."[";
+    } 
+    my $queryCount2 = 0;
+    foreach my $s2 (sort keys %{$struct{$s}}) {
+      if($s2 eq "text") {
+        if(!$queryCount2) {
+          $queryString = $queryString."text()='".$struct{$s}{$s2}."'";
+          $queryCount2++;
+	}
+	else {
+          $queryString = $queryString." and text()='".$struct{$s}{$s2}."'";
+	}
+      }
+      else {
+        if(!$queryCount2) {
+          $queryString = $queryString."\@".$s2."='".$struct{$s}{$s2}."'";
+          $queryCount2++;
+	}
+	else {
+          $queryString = $queryString." and \@".$s2."='".$struct{$s}{$s2}."'";
+	}
+      }
+    }
+    $queryString = $queryString."]";
+  }
+  
+  return $queryString;  
 }
 
 
@@ -117,6 +225,41 @@ and the methods can be invoked directly (and sparingly).
     
     $msg = getResultCodeData($id, $idRef, "something...");
     
+    my %metadata = {
+      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
+      'nmwg:metadata/nmwg:parameters-id' => '3',
+      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+      'nmwg:metadata/nmwg:parameters/select:parameter-time-lte' => '1173723366',
+      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
+      'nmwg:metadata-id' => 'meta1',
+      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
+      'nmwg:metadata/nmwg:parameters/select:parameter-time-gte' => '1173723350',
+      'nmwg:metadata/ping:subject-id' => 'sub1'
+    };
+
+    my %time = ();
+    my $queryString = "/nmwg:metadata[".
+      getMetadatXQuery(\%metadata, 
+                       \%time, 
+		       $m).
+      "]/\@id";
+
+    # the query after should look like this:
+    #
+    # /nmwg:metadata[
+    #   ping:subject/nmwgt:endPointPair/nmwgt:dst[@type='hostname' and 
+    #     @value='ellis.internet2.edu'] and 
+    #   ping:subject/nmwgt:endPointPair/nmwgt:src[@type='hostname' and 
+    #     @value='lager']
+    # ]/@id
+
+    # the time structure should look like this:
+    #
+    #   {
+    #     'START' => '1173723350',
+    #     'END' => '1173723366'
+    #   };
+    
 =head1 DETAILS
 
 The API for this module aims to be simple; note that this is not an object and 
@@ -146,11 +289,18 @@ The arguments are a metadata id, and an 'eventType' for the result code metadata
 
 The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
+=head2 getMetadatXQuery($sentmd, $sentt, $id)
+
+This function is meant to be used to convert a metadata object into an 
+XQuery statement.  Additionally, time based values are stored in a time
+object to be used in the subsequent data retrieval steps.  
+
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
 L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::SNMP>
+L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::SNMP>, 
+L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

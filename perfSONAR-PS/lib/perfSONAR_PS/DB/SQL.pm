@@ -435,7 +435,8 @@ return 1 on success, -1 on failure.
 
 L<DBI>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::XMLDB>, 
 L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, 
-L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, 
+L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

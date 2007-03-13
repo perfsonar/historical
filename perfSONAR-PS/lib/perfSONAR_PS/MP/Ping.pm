@@ -6,6 +6,9 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::MP::General;
+
+use Data::Dumper;
 
 @ISA = ('Exporter');
 @EXPORT = ();
@@ -261,13 +264,17 @@ sub parseMetadata {
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
     }          
-    cleanMetadata($self); 
+    cleanMetadata(\%{$self}); 
+
+print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
+print "Data:\t" , Dumper($self->{DATA}) , "\n";
+
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
     my $xml = readXML($conf{"METADATA_DB_FILE"});
     parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
     parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
-    cleanMetadata($self);  
+    cleanMetadata(\%{$self});  
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
@@ -280,26 +287,6 @@ sub parseMetadata {
     printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
       if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
   }
-  return;
-}
-
-
-sub cleanMetadata {
-  my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
-  $self->{FUNCTION} = "\"cleanMetadata\"";
-    
-  chainMetadata($self->{METADATA}); 
-
-  foreach my $m (keys %{$self->{METADATA}}) {
-    my $count = countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef");
-    if($count == 0) {
-      delete $self->{METADATA}->{$m};
-    } 
-    else {
-      $self->{METADATAMARKS}->{$m} = $count;
-    }
-  }  
   return;
 }
 
@@ -326,32 +313,16 @@ sub prepareData {
       my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
-      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }
     else {
       my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
-      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }  
   }  
        
-  return;
-}
-
-
-sub removeReferences {
-  my($self, $id) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
-  $self->{FUNCTION} = "\"removeReferences\"";      
-  my $remove = countRefs($id, $self->{METADATA}, "nmwg:metadata-id");
-  if($remove > 0) {
-    $self->{METADATAMARKS}->{$id} = $self->{METADATAMARKS}->{$id} - $remove;
-    if($self->{METADATAMARKS}->{$id} == 0) {
-      delete $self->{METADATAMARKS}->{$id};
-      delete $self->{METADATA}->{$id};
-    }     
-  }
   return;
 }
 
@@ -447,11 +418,14 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MP::Ping - A module starting point for MP functions...
+perfSONAR_PS::MP::Ping - A module that performs the tasks of an MP designed for the 
+ping measurement.  
 
 =head1 DESCRIPTION
 
-...
+The purpose of this module is to create simple objects that contain all necessary information
+to make ping measurements to various hosts.  The objects can then be re-used with minimal 
+effort.
 
 =head1 SYNOPSIS
 
@@ -460,45 +434,87 @@ perfSONAR_PS::MP::Ping - A module starting point for MP functions...
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/Ping/xmldb";
-    $conf{"METADATA_DB_FILE"} = "Pingstore.dbxml";
-    $conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
+    $conf{"METADATA_DB_FILE"} = "pingstore.dbxml";
+    $conf{"PING"} = "/bin/ping";
     $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-
+    $conf{"MP_SAMPLE_RATE"} = 1;
+    
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
       netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
       nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      Ping => "http://ggf.org/ns/nmwg/tools/Ping/2.0/"    
+      ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/"    
     );
     
     my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
-
+    
+    # or:
+    #
+    # $mp = new perfSONAR_PS::MP::Ping;
+    # $mp->setConf(\%conf);
+    # $mp->setNamespaces(\%ns);
+    # $mp->setMetadata("");
+    # $mp->setData("");
+                
+    $mp->parseMetadata;
+    $mp->prepareData;
+    $mp->prepareCollectors;  
+ 
+    while(1) {
+      $mp->collectMeasurements; 
+      sleep($conf{"MP_SAMPLE_RATE"});
+    }
+    
+    
 =head1 DETAILS
 
-This module contains a submodule that is not meant to act as a standalone, but rather as
-a specialized structure for use only in this module.  The functions include:
+This module contains an 'Agent' submodule that is not meant to act as a standalone, but 
+rather as a specialized structure for use only in this module.  The functions include:
 
 
-  new($log)
+  new($log, $cmd)
 
-    The 'log' argument is the name of the log file where error or warning information may be 
-    recorded.
+    The 'log' argument is the name of the log file where error or warning information 
+    may be recorded.  The 'cmd' argument is the physical command to execute to gather 
+    measurement data.
 
   setLog($log)
 
-    (Re-)Sets the log file for the Ping object.
+    (Re-)Sets the log file for the ping agent object.
 
+  setCommand($cmd)
+
+    (Re-)Sets the command for the ping agent object.
+
+  collect()
+
+     Executes the command, parses, and stores the results into an object.
+
+  getResults()
+
+     Returns the results object so it may be parsed.  
+     
 
 A brief description using the API:
    
-    my $agent = new perfSONAR_PS::MP::Ping::Agent("./error.log");
+    my $agent = new perfSONAR_PS::MP::Ping::Agent("./error.log", "/bin/ping -c 1 localhost");
 
     # or also:
     # 
     # my $agent = new perfSONAR_PS::MP::Ping::Agent;
     # $agent->setLog("./error.log");
+    # $agent->setCommand("/bin/ping -c 1 localhost");
+    
+    $agent->collect();
 
-
+    my $results = $agent->getResults;
+    foreach my $r (sort keys %{$results}) {
+      foreach my $r2 (keys %{$results->{$r}}) {
+        print $r , " - " , $r2 , " - " , $results->{$r}->{$r2} , "\n"; 
+      }
+      print "\n";
+    }
+    
 =head1 API
 
 The offered API is simple, but offers the key functions we need in a measurement point. 
@@ -525,11 +541,31 @@ data information.
 
 (Re-)Sets the value for the 'data' object. 
 
+=head2 parseMetadata()
+
+Parses the metadata database (specified in the 'conf' hash) and loads the values for the
+data and metadata objects.  
+
+=head2 prepareData()
+
+Prepares data db objects that relate to each of the valid data values in the data object.  
+
+=head2 prepareCollectors()
+
+Prepares the 'perfSONAR_PS::MP::Ping::Agent' objects for each of the metadata values in
+the metadata object.
+
+=head2 collectMeasurements()
+
+Cycles through each of the 'perfSONAR_PS::MP::Ping::Agent' objects and gathers the 
+necessary values.  
+
 =head1 SEE ALSO
 
-L<Net::SNMP>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>, 
-L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
+L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, 
+L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

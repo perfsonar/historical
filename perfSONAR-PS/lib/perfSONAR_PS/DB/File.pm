@@ -273,9 +273,10 @@ this time are a count of the number of elements that match the XPath expression.
   
 =head1 SEE ALSO
 
-L<IO::File>, L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>, 
-L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<IO::File>, L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, 
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::XMLDB>, 
+L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::General>, 
+L<perfSONAR_PS::MA::SNMP>, L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

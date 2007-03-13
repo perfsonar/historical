@@ -6,6 +6,7 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::MP::General;
 
 use Data::Dumper;
 
@@ -448,13 +449,13 @@ sub parseMetadata {
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
     }          
-    cleanMetadata($self);       
+    cleanMetadata(\%{$self});       
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
     my $xml = readXML($conf{"METADATA_DB_FILE"});
     parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
     parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
-    cleanMetadata($self);    
+    cleanMetadata(\%{$self});    
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
@@ -466,41 +467,6 @@ sub parseMetadata {
     my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is invalid.";
     printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
       if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
-  }
-  return;
-}
-
-
-sub cleanMetadata {
-  my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"cleanMetadata\"";
-    
-  chainMetadata($self->{METADATA}); 
-
-  foreach my $m (keys %{$self->{METADATA}}) {
-    my $count = countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef");
-    if($count == 0) {
-      delete $self->{METADATA}->{$m};
-    } 
-    else {
-      $self->{METADATAMARKS}->{$m} = $count;
-    }
-  }  
-  return;
-}
-
-sub removeReferences {
-  my($self, $id) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"removeReferences\"";      
-  my $remove = countRefs($id, $self->{METADATA}, "nmwg:metadata-id");
-  if($remove > 0) {
-    $self->{METADATAMARKS}->{$id} = $self->{METADATAMARKS}->{$id} - $remove;
-    if($self->{METADATAMARKS}->{$id} == 0) {
-      delete $self->{METADATAMARKS}->{$id};
-      delete $self->{METADATA}->{$id};
-    }     
   }
   return;
 }
@@ -528,13 +494,13 @@ sub prepareData {
       my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
-      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }
     else {
       my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
       printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
         if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
-      removeReferences($self, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }  
   }  
        
@@ -903,15 +869,6 @@ data information.
 Parses the metadata database (specified in the 'conf' hash) and loads the values for the
 data and metadata objects.  
 
-=head2 cleanMetadata()
-
-Chains, and removes unused metadata values from the metadata object.
-
-=head2 removeReferences($id)
-
-Removes a value from the an object (data/metadata) if the value is equal to the supplied
-id. 
-
 =head2 prepareData()
 
 Prepares data db objects that relate to each of the valid data values in the data object.  
@@ -933,8 +890,8 @@ necessary values.
 =head1 SEE ALSO
 
 L<Net::SNMP>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::Ping>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

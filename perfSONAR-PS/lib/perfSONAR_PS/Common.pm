@@ -491,8 +491,8 @@ Generates a random number.
 
 L<Carp>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<perfSONAR_PS::Transport>, 
 L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, 
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, 
-L<perfSONAR_PS::MA::SNMP>
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, 
+L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, L<perfSONAR_PS::MA::Ping>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
