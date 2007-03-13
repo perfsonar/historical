@@ -7,7 +7,7 @@
     <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:src type="hostname" value="lager" />
-        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+        <nmwgt:dst type="hostname" value="lager" />
       </nmwgt:endPointPair>
     </ping:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>

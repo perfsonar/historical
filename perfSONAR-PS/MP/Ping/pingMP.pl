@@ -13,6 +13,7 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::MA::Ping;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::MP::Ping;
+use perfSONAR_PS::MP::General;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -76,7 +77,7 @@ $regThread->join();
 # ################################################ #
 sub measurementPoint {
   if($DEBUG) {
-    print "Starting '".threads->tid()."' as MP2\n";
+    print "Starting '".threads->tid()."' as MP\n";
   }
 
   my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
@@ -124,9 +125,8 @@ sub measurementArchive {
         print "Request:\t" , $listener->getRequest , "\n";
       }
 
-      # call the MA here...
-      
-      $response = getResultCodeMessage("", "", "response", "success", "sucess");
+      my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns, "", "");
+      $response = $ma->handleRequest($listener->getRequest); 
       
       $listener->setResponse($response, 1); 
     }
