@@ -1,4 +1,4 @@
-Howto					03/07/07
+Howto					03/12/07
 					Jason Zurawski
 					zurawski@eecis.udel.edu
 ---------------------------------------------------------------
@@ -65,7 +65,7 @@ Other directives such as:
   PORT?8080
   ENDPOINT?/axis/services/MP
   LS_REGISTRATION_INTERVAL?60
-  LS_INSTANCE?http://lager:8080/axis/services/LS
+  LS_INSTANCE?http://localhost:8080/axis/services/LS
   LOGFILE?./log/perfSONAR-PS-error.log
 
 Can be adjusted as well to suit your own personal setup.  If you find
@@ -89,7 +89,7 @@ README in this directory to get some 'expert' advice.
 
 Lets take a look at the ping tool:
 
-[jason@lager perfSONAR_PS]$ ping -h
+[jason@localhost perfSONAR_PS]$ ping -h
 Usage: ping [-LRUbdfnqrvVaA] [-c count] [-i interval] [-w deadline]
             [-p pattern] [-s packetsize] [-t ttl] [-I interface or address]
             [-M mtu discovery hint] [-S sndbuf]
@@ -97,7 +97,8 @@ Usage: ping [-LRUbdfnqrvVaA] [-c count] [-i interval] [-w deadline]
 	    
 The interested user can read the man page and see what each of the 
 switches is capable of doing, for this tutorial we are only concerned with
-the following options:
+one option, but the following list are useful to the ping command 
+in general:
 
        -c count
               Stop  after  sending  count  ECHO_REQUEST packets. With deadline
@@ -135,18 +136,21 @@ parameter, but most other parameters will be handled in the same way.
 
 An example of a ping would be:
 
-[jason@lager perfSONAR_PS]$ ping -c 1 ellis.internet2.edu
+[jason@localhost Ping]$ ping -c 3 ellis.internet2.edu
 PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
-64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=51 time=41.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=52 time=40.6 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=52 time=40.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=3 ttl=52 time=40.9 ms
 
 --- ellis.internet2.edu ping statistics ---
-1 packets transmitted, 1 received, 0% packet loss, time 0ms
-rtt min/avg/max/mdev = 41.559/41.559/41.559/0.000 ms
+3 packets transmitted, 3 received, 0% packet loss, time 1998ms
+rtt min/avg/max/mdev = 40.582/40.712/40.936/0.228 ms
+
 
 To model this measurement a little closer, consider the two actors:
 
 	Source Computer:
-		Hostname: 	lager (The machine that 'kicked off')
+		Hostname: 	localhost (The machine that 'kicked off')
 		IP Address:	192.168.0.200
 		
 	Destination Computer:
@@ -154,7 +158,7 @@ To model this measurement a little closer, consider the two actors:
 		IP Address:	207.75.164.31
 
 	Parameter(s)
-		Count = 1
+		Count = 3
 
 We can construct a metadata description (following known NMW-WG formatted 
 examples) using this information:
@@ -162,12 +166,12 @@ examples) using this information:
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:src type="hostname" value="localhost" />
         <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
       </nmwgt:endPointPair>
     </ping:subject>
     <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
-      <nmwg:parameter name="count">1</nmwg:parameter>      
+      <nmwg:parameter name="count">3</nmwg:parameter>      
     </ping:parameters>   
   </nmwg:metadata>
 
@@ -176,29 +180,33 @@ a ping relationship.  This is more than enough to get started with the MP.  The
 second step is to describe the backend storage that will house the results
 of this measurement.  Lets take a look at the output of the command once more:
 
-[jason@lager perfSONAR_PS]$ ping -c 1 ellis.internet2.edu
+[jason@localhost Ping]$ ping -c 3 ellis.internet2.edu
 PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
-64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=51 time=41.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=52 time=40.6 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=52 time=40.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=3 ttl=52 time=40.9 ms
 
 --- ellis.internet2.edu ping statistics ---
-1 packets transmitted, 1 received, 0% packet loss, time 0ms
-rtt min/avg/max/mdev = 41.559/41.559/41.559/0.000 ms
+3 packets transmitted, 3 received, 0% packet loss, time 1998ms
+rtt min/avg/max/mdev = 40.582/40.712/40.936/0.228 ms
+
 
 The necessary parts of this result can be described as:
 
 	Sent Data Bytes: 	56 (really 64 = 56 + 8 Bytes of ICMP Header)
 	Sequence Number:	1
-	TTL:			51
-	Measured Value:		41.5 ms
+	TTL:			52
+	Measured Value:		40.6 ms
 	
 	Statistical Information:
-		MIN RTT:	41.559 ms
-		MAX RTT:	41.559 ms
-		AVG RTT:	41.559 ms
-		MDEV RTT:	0 ms
-		Transmitted:	1
-		Received:	1
+		MIN RTT:	40.582 ms
+		MAX RTT:	40.712 ms
+		AVG RTT:	40.936 ms
+		MDEV RTT:	0.228 ms
+		Transmitted:	3
+		Received:	3
 		Packet Loss:	0%
+		Elapsed Time:	1998 ms
 
 The actual data we will want to save (for this example) will be the number of
 sent bytes (it doesn't matter which value, as long as you note somewhere that the
@@ -257,7 +265,7 @@ We will of course need to create the sqlite database for this to work
 properly, the above schema statement can be saved to a file called
 'db-lite.sql':
 
-[jason@lager Ping]$ sqlite3 perfSONAR_PS.db
+[jason@localhost Ping]$ sqlite3 perfSONAR_PS.db
 SQLite version 3.3.6
 Enter ".help" for instructions
 sqlite> .read db-lite.sql
@@ -282,12 +290,12 @@ The final version of the store.xml file should look something like this:
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:src type="hostname" value="localhost" />
         <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
       </nmwgt:endPointPair>
     </ping:subject>
     <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
-      <nmwg:parameter name="count">1</nmwg:parameter>      
+      <nmwg:parameter name="count">3</nmwg:parameter>      
     </ping:parameters>   
   </nmwg:metadata>
   
@@ -320,16 +328,16 @@ Step 3 (A Quick Test):
 
 Try to run the pingMP.pl program at this stage:
 
-[jason@lager Ping]$ $PSPSREPO/MP/Ping/./pingMP.pl -v
+[jason@localhost Ping]$ $PSPSREPO/MP/Ping/./pingMP.pl -v
 Starting '0' as main
-Starting '1' as MP2
+Starting '1' as MP
 Starting '2' as MA on port '8080' and endpoint '/axis/services/MP'.
-Starting '3' as to register with LS 'http://lager:8080/axis/services/LS'.
+Starting '3' as to register with LS 'http://localhost:8080/axis/services/LS'.
 
-Perhaps in a separate window, try to run the client:
+In a separate window, run the client:
 
-[jason@lager client]$ $PSPSREPO/client/./client.pl --server=lager \
---port=8080 --endpoint=/axis/services/MP request.xml 
+[jason@localhost client]$ $PSPSREPO/client/./client.pl --server=localhost \
+--port=8080 --endpoint=/axis/services/MP $PSPSREPO/MP/Ping/request.xml 
 
 <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" type="response">
     <nmwg:metadata id="result-code-17177452">
@@ -342,7 +350,7 @@ Perhaps in a separate window, try to run the client:
 
 The MP window should also display the received message:
 
-Request:        <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" type="request" id="msg1">
+Request:        <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" type="request" id="msg1">
 
 ...DATA...
 
@@ -500,7 +508,7 @@ The 'parse' function lives in perfSONAR_PS::Common, and will iterate over the XM
 result (each member of the resultsString) and store the resulting hash objects
 into the $self->{METADATA} object.  As it stands right now 'parse' is intelligent
 enough to handle interfaces and endPointPairs from the v2 of the nmwg schema.  Future
-additions will handle more subjects, so editing parse will normally not be the job
+additions will handle more subjects; editing parse will normally not be the job
 of the MP developer.
 
 For debugging purposes, we can insert something else after the for loop to show us
@@ -513,16 +521,16 @@ what we have just done:
 Now lets test it out, if we were to run the MP again we should see this:
 
 
-[jason@lager Ping]$ ./pingMP.pl -v
+[jason@localhost Ping]$ ./pingMP.pl -v
 Starting '0' as main
-Starting '1' as MP2
+Starting '1' as MP
 Starting '2' as MA on port '8080' and endpoint '/axis/services/MP'.
-Starting '3' as to register with LS 'http://lager:8080/axis/services/LS'.
+Starting '3' as to register with LS 'http://localhost:8080/axis/services/LS'.
 Metadata:       $VAR1 = {
           'meta1' => {
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
-                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '1',
-                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'localhost',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
                      'nmwg:metadata-id' => 'meta1',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
@@ -558,48 +566,20 @@ after the if/else clause for the metadata:
 
 
 Note that this code is basically the same, except for the search for 
-'data' elements and the additional step after the clause: 'cleanMetadata'.
-
-The 'cleanMetadata' function can be reused from the SNMP code base:
-
-
-sub cleanMetadata {
-  my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
-  $self->{FUNCTION} = "\"cleanMetadata\"";
-    
-  chainMetadata($self->{METADATA}); 
-
-  foreach my $m (keys %{$self->{METADATA}}) {
-    my $count = countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef");
-    if($count == 0) {
-      delete $self->{METADATA}->{$m};
-    } 
-    else {
-      $self->{METADATAMARKS}->{$m} = $count;
-    }
-  }  
-  return;
-}
-
-
-The purpose of this function is twofold: call the chain metadata function
-to resolve any chains that exist in the storage (see perfSONAR_PS::Common for
-a full explanation on chaining) and to 'eliminate' metadata blocks that
-do not have a corresponding data trigger.
+'data' elements and the additional step after the clause: 'cleanMetadata'.  This
+function is found in the perfSONAR::MP::General module.  
 
 The results after these additions should look like this:
 
-
-[jason@lager Ping]$ ./pingMP.pl -v
+[jason@localhost Ping]$ ./pingMP.pl -v
 Starting '0' as main
-Starting '1' as MP2
+Starting '1' as MP
 Starting '2' as MA on port '8080' and endpoint '/axis/services/MP'.
 Metadata:       $VAR1 = {
           'meta1' => {
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
-                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '1',
-                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'localhost',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
                      'nmwg:metadata-id' => 'meta1',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
@@ -620,7 +600,7 @@ Data:   $VAR1 = {
                    }
         };
 
-Starting '3' as to register with LS 'http://lager:8080/axis/services/LS'.
+Starting '3' as to register with LS 'http://localhost:8080/axis/services/LS'.
 
 
 We now can see that our data block has been read in as well (stored in the 
@@ -710,24 +690,7 @@ specified in the data object.  The basic idea is thus:
       be careful when doing this however, so we 'count' references on the metadata blocks, and
       only remove when we are positive NOTHING is using a particular block.
       
-Consider this for the 'removeReferences' function (also borrowed from the SNMP code base):
-
-
-sub removeReferences {
-  my($self, $id) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
-  $self->{FUNCTION} = "\"removeReferences\"";      
-  my $remove = countRefs($id, $self->{METADATA}, "nmwg:metadata-id");
-  if($remove > 0) {
-    $self->{METADATAMARKS}->{$id} = $self->{METADATAMARKS}->{$id} - $remove;
-    if($self->{METADATAMARKS}->{$id} == 0) {
-      delete $self->{METADATAMARKS}->{$id};
-      delete $self->{METADATA}->{$id};
-    }     
-  }
-  return;
-}
-
+The code for 'removeReferences' function also appears in perfSONAR_PS::MP::General.
 
 Using a function from perfSONAR_PS::Common, we aim to count the references that a 
 particular block pair has (based on id matching).  We can then delete the 
@@ -799,8 +762,8 @@ object a little closer:
 
           'meta1' => {
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
-                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '1',
-                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'localhost',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
                      'nmwg:metadata-id' => 'meta1',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
@@ -812,7 +775,7 @@ object a little closer:
 From this object we should extract the following for use in the (basic) ping command:
 
   'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
-  'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '1',
+  'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
 
 If there where more parameters specified, we could of course use them.  We now need to go 
 about constructing an agent that will translate these statements into a usable command.
@@ -863,7 +826,7 @@ Now we should go about running the program again, to see what we spit out (in
 addition to other things):      
 
 
-CMD: /usr/bin/ping -c 1 ellis.internet2.edu
+CMD: /usr/bin/ping -c 3 ellis.internet2.edu
 
 
 This code chunk will iterate through all of the keys of the metadata object, and
@@ -952,12 +915,13 @@ any further.  The next step is to acquire the time, and execute the command:
     
     # deal with the results array ...
     
+    
 Using a file handle trick, we can get the output of the command (logging
 errors in the event of a problem) and store the results in an array.  Lets take
 a look at the output of the command one more time (with some line numbering):
 
 
-[jason@lager perfSONAR_PS]$ ping -c 3 ellis.internet2.edu
+[jason@localhost perfSONAR_PS]$ ping -c 3 ellis.internet2.edu
 0:	PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
 1:	64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=51 time=41.0 ms
 2:	64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=51 time=40.7 ms
@@ -1052,7 +1016,7 @@ sub getResults {
 }
 
 
-This hash structure (when Dumped()'ed) looks like this:
+This hash structure (when Dumper()'ed) looks like this:
 
 
 $VAR1 = {
@@ -1096,7 +1060,7 @@ In pingMP.pl, recall the structure of the 'measurementPoint' function:
 
 sub measurementPoint {
   if($DEBUG) {
-    print "Starting '".threads->tid()."' as MP2\n";
+    print "Starting '".threads->tid()."' as MP\n";
   }
 
   my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
@@ -1197,17 +1161,17 @@ object.  After inserting all necessary values, we close the database.
 This concludes the basic framework of the MP, a final test of our work gives us this output:
 
 
-[jason@lager Ping]$ ./pingMP.pl -v
+[jason@localhost Ping]$ ./pingMP.pl -v
 Starting '0' as main
-Starting '1' as MP2
+Starting '1' as MP
 Starting '2' as MA on port '8080' and endpoint '/axis/services/MP'.
-Starting '3' as to register with LS 'http://lager:8080/axis/services/LS'.
+Starting '3' as to register with LS 'http://localhost:8080/axis/services/LS'.
 Metadata:       $VAR1 = {
           'meta1' => {
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
                      'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
                      'nmwg:metadata/nmwg:eventType' => 'http://ggf.org/ns/nmwg/tools/ping/2.0/',
-                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'localhost',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
                      'nmwg:metadata-id' => 'meta1',
                      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
@@ -1247,7 +1211,7 @@ inserting "meta1", "1173292212.30413", "41.2", "ping", "numBytes=64,ttl=51,seqNu
 We should also check SQLite to see if the data is actually being inserted:
 
 
-[jason@lager Ping]$ sqlite3 perfSONAR_PS.db 
+[jason@localhost Ping]$ sqlite3 perfSONAR_PS.db 
 SQLite version 3.3.6
 Enter ".help" for instructions
 sqlite> select * from data;
@@ -1270,8 +1234,663 @@ user queries and extract usable information from the archives.
 
 
 
-Step 5:
--------
+Step 5 (MA Construction):
+-------------------------
+
+If we were to make a checklist of things the MA should do, we could write
+it thus:
+
+
+  1). Establish a listening point.
+
+  2). When a call arrives, parse for the 'nmwg:element' in the
+      SOAP envelope.  Deliver this to the measurementArchive function.
+  
+  3). If the call is accepted, parse out the data and metadata elements, 
+      reject and reply with an error if none are found.
+
+  4). Chain the metadata and data elements (if necessary), construct 
+      queries based on the input.
+      
+  5). Return the results of the queries, or error messages if nothing is
+      found.
+  
+  6). Format the responses in XML, and reply to the original call.
+  
+  7). Continue listening.
+      
+
+The MA functionality of steps 1, 2, 6, and 7 are already included in 
+the skeleton code.  This tutorial will focus on steps 3 - 5.  Consider
+the skeleton code from pingMP.pl for the 'measurementArchive' function:
+
+
+sub measurementArchive {
+  if($DEBUG) {
+    print "Starting '".threads->tid()."' as MA on port '".$conf{"PORT"}."' and endpoint '".$conf{"ENDPOINT"}."'.\n";
+  }
+
+  my $listener = new perfSONAR_PS::Transport($conf{"LOGFILE"}, $conf{"PORT"}, $conf{"ENDPOINT"}, "", "", "");  
+  $listener->startDaemon;
+
+  my $MDId = genuid();
+  my $DId = genuid();
+    								
+  while(1) {
+    my $response = "";
+    if($listener->acceptCall == 1) {
+
+      if($DEBUG) {
+        print "Request:\t" , $listener->getRequest , "\n";
+      }
+
+      # call the MA here...
+      
+      $response = getResultCodeMessage("", "", "response", "success", "sucess");
+      
+      $listener->setResponse($response, 1); 
+    }
+    else {
+      my $msg = "Sent Request has was not expected: ".
+                 $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
+		 $listener->{REQUEST}->headers->{"soapaction"}.".";
+      printError($conf{"LOGFILE"}, $msg); 
+      $response = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
+      $listener->setResponse($response, 1); 		 	  
+    }
+    $listener->closeCall;
+  }
+  return;
+}
+
+
+We will make one simple change: replace this code:
+
+
+      # call the MA here...
+      
+      $response = getResultCodeMessage("", "", "response", "success", "sucess");
+
+
+With this code:
+
+
+      my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns, "", "");
+      $response = $ma->handleRequest($listener->getRequest); 
+
+
+This is the only change that is necessary in the pingMP.pl file; of course the
+real work will be in the MA/Ping.pm module.  The 'handleRequest' function will
+take a single argument, the request message.  Consider this shell:
+
+
+sub handleRequest {
+  my($self, $request) = @_;
+  my $response = "";
+
+  print "REQUEST: " , $request , "\n";
+
+  my $xp = XML::XPath->new( xml => $request );
+  $xp->clear_namespaces();
+  $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+  my $nodeset = $xp->find('//nmwg:message');
+
+  if($nodeset->size() < 1) {
+    my $msg = "Message elements not found in request; send only one (1) message element.";
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+    $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);  
+  }
+  elsif($nodeset->size() == 1) {
+    my @messages = $nodeset->get_nodelist;
+    my $messageId = "";
+    my $messageType = "";    
+    my $messageIdReturn = genuid();    
+    foreach my $attr ($messages[0]->getAttributes) {
+      if($attr->getLocalName eq "id") {
+        $messageId = $attr->getNodeValue;
+      }
+      elsif($attr->getLocalName eq "type") {
+        $messageType = $attr->getNodeValue;
+      }
+    }
+    
+    
+    # handle the single message case ... 
+
+
+  }
+  else {
+    my $msg = "Too many message elements found in request; send only one (1) message element.";    
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");        
+    $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+  }
+  return $response;
+}
+
+
+This gives us the basic ability to extract a single message from the SOAP envelope 
+(erroring out if we find more or less), and to pull out the various useful attributes
+of the message (type, and id for now).  These functions use the XPath module which 
+is included by default with the skeleton code.  The next step (as we have done 
+previously in the MP) is to create metadata and data objects from the message.  This
+is actually much simpler than in the MP because we only have to worry about a single
+case as a 'source' of this information: a string!  Consider this code (which should
+look familiar):
+
+
+    parse($request, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
+    chainMetadata(\%{$self->{METADATA}});
+    parse($request, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");   
+            
+    foreach my $m (keys %{$self->{METADATA}}) {
+      if(countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef") == 0) {
+        delete $self->{METADATA}->{$m};
+      }
+    }
+
+    print "Metadata: " , Dumper(%{$self->{METADATA}}) , "\n";    
+    print "Data: " , Dumper(%{$self->{DATA}}) , "\n";  
+    
+    
+We create the objects, parse and chain as necessary, and eliminate the objects
+we won't be using due to the chaining step.  The next order of business is to make
+sure we have the ability to access the metadata database on the backend as 
+specified in the pingMP.conf file:
+
+
+    if($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql" or 
+       $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or 
+       $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+      my $msg = "The metadata database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+      $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+    }  
+    elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+
+
+
+
+
+    } 
+    else {
+      my $msg = "The metadata database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
+      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+      $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+    } 
+
+
+For this example I am ONLY dealing with the XMLDB metadata database.  It will be 
+possible to accomplish the same goal with the file database, but the query structure
+will need to be different (XPath vs. XQuery).  Inside of the single if statement, we 
+will need to iterate over all data elements (triggers) and match them to their 
+corresponding metadata tags:
+
+
+      my $localContent = "";
+      foreach my $d (keys %{$self->{DATA}}) {
+        foreach my $m (keys %{$self->{METADATA}}) {  
+          if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) { 
+           
+
+	  }   
+        }
+      }
+      
+ 
+Once we establish a match between a metadata and data element, we need
+to construct (and execute) a query to see if our backend has any data for 
+the requested metadata:
+
+
+	    my $queryString = "/nmwg:metadata[" . 
+	      getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . 
+	      "]/\@id";
+            
+	    print "Query: " , $queryString , "\n";
+
+	    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+              $self->{CONF}->{"LOGFILE"},
+              $self->{CONF}->{"METADATA_DB_NAME"}, 
+              $self->{CONF}->{"METADATA_DB_FILE"},
+              \%{$self->{NAMESPACES}}
+            );	  
+            $metadatadb->openDB;     
+
+
+The first command starts to formulate the XQuery string that will be passed
+to the XMLDB.  We will be calling the 'getMetadatXQuery' function which is
+already in perfSONAR_PS::MA::Common.  This function takes a metadata object 
+and the time object, and constructs an XQuery statement.  For example:
+
+
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:parameters id="3">
+      <select:parameter name="time" operator="gte">
+        1173723350
+      </select:parameter>
+      <select:parameter name="time" operator="lte">
+        1173723366
+      </select:parameter>          
+    </nmwg:parameters>    
+  </nmwg:metadata>
+  
+  
+Makes these objects:  
+
+
+$VAR2 = {
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
+          'nmwg:metadata/nmwg:parameters-id' => '3',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+          'nmwg:metadata/nmwg:parameters/select:parameter-time-lte' => '1173723366',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
+          'nmwg:metadata-id' => 'meta1',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
+          'nmwg:metadata/nmwg:parameters/select:parameter-time-gte' => '1173723350',
+          'nmwg:metadata/ping:subject-id' => 'sub1'
+        };
+
+$VAR1 = {
+          'START' => '1173723350',
+          'END' => '1173723366'
+        };
+
+
+Which translates into this XQuery statement:
+
+
+/nmwg:metadata[
+  ping:subject/nmwgt:endPointPair/nmwgt:dst[
+    @type='hostname' and 
+    @value='ellis.internet2.edu'] and 
+  ping:subject/nmwgt:endPointPair/nmwgt:src[
+    @type='hostname' and 
+    @value='lager']
+]/@id
+
+
+The time object will be used later when we formulate the SQL select.  After this 
+series of statements we need to make the query:
+
+
+	    my @resultsString = $metadatadb->query($queryString);   
+	    if($#resultsString != -1) {
+	        
+              # act on the results...
+	    
+	    }
+            else {
+              my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the metadata search.";
+              printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+                if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+              $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+            }
+	    
+	 
+The results string can either be empty (triggering a message) or will contain, 
+possibly many, metadata id values.  The body of the if statement should proceed like
+this:
+
+
+              for(my $x = 0; $x <= $#resultsString; $x++) {	
+                $resultsString[$x] =~ s/\{\}id=//;
+                $resultsString[$x] =~ s/\"//g;
+                $resultsString[$x] =~ s/\n//;	    
+	        
+                $queryString = "/nmwg:data[\@metadataIdRef='".$resultsString[$x]."']";
+                my @dataResultsString = $metadatadb->query($queryString);
+	        if($#dataResultsString != -1) {    
+                
+		  # act on the new results...
+		
+		}
+                else {
+                  my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the data search.";
+                  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+                    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+                  $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+                }		    
+	      }	    
+
+
+We must break apart the 'structure' that is returned and extract ONLY the ID
+values.  Now that we have ID values, we can do a simple query to get the data
+blocks (so we could contact the underlying data storage).  After we query
+for data blocks, we should handle them as so:
+
+
+                  $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
+                  my @metadataResultsString = $metadatadb->query($queryString);		  
+                  $localContent = $localContent . $metadataResultsString[0];
+                  
+		  for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		    undef $self->{RESULTS};		    
+		    parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
+		    @dataIds = keys(%{$self->{RESULTS}});
+		    if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") {
+		    		    
+                      # extract info from SQL database
+
+		    }
+		    elsif(($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") or 
+		          ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
+			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
+			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
+                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
+                      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+                        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+                      $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+		    }
+		    else {
+                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
+                      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
+                        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+                      $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+		    }
+		  }
+
+
+The first step is to query the DB one last time to get the full metadata values.  This
+step is optional, it would be possible to simply parrot back the sent metadata
+values.  Secondly, we parse through each data block that was returned, and check to see
+the 'type'.  We will be still only querying the SQLite instances.  In the empty
+if we will do the following:
+
+
+		      $localContent = $localContent . retrieveSQL($self, $dataIds[0]); 
+		      $response = getResultMessage($messageIdReturn, $messageId, "response", $localContent);
+		      
+
+Which places a call to a function we will write called 'retrieveSQL'; the purpose of
+which is to query the underlying SQL database structure.  We will return the results
+of this call (which SHOULD look like a finished data block) as our response message.  The
+function should have a shell that starts like this:
+
+
+sub retrieveSQL {
+  my($self, $did) = @_;
+  my $responseString = "";
+
+  my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+
+  my $id = genuid();
+  my $datadb = new perfSONAR_PS::DB::SQL(
+    $self->{CONF}->{"LOGFILE"},
+    "DBI:SQLite:dbname=".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
+    "", 
+    "",
+    \@dbSchema
+  );
+		      
+  $datadb->openDB();
+
+  # formulate a query
+
+  # query the database
+  
+  $datadb->closeDB();	
+  return $responseString;
+}
+
+
+We know the database schema (which we will represent with a simple array here), and we
+know that we will be making a connection to an SQL database.  From the RESULTS variable
+we can extract which particular file we are interested in, and thus we can make
+a connection.  Opening and closing the database are also necessary here.  We will
+first turn our attention to constructing an SQL query.  Recall the time object:
+
+
+$VAR1 = {
+          'START' => '1173723350',
+          'END' => '1173723366'
+        };
+	
+Using this knowledge (or lack thereof) we can construct a simple query.  This
+query is VERY simple, we do not consider cases that may affect the values of
+other things such as TTL or numBytes.  These modifications can be added later, and
+will be a bit more complex but the idea remains the same.  
+
+
+The query starts as a blank string, and we use the starting point 'select * from'
+and then concatenate the table name (from the data key).  If we have time
+quantifiers we will add them as a 'where' clause.  
+
+
+  my $query = "";
+  if($self->{TIME}->{"START"} or $self->{TIME}->{"END"}) {
+    $query = "select * from ".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}." where";
+    my $queryCount = 0;
+    if($self->{TIME}->{"START"}) {
+      $query = $query." time > ".$self->{TIME}->{"START"};
+      $queryCount++;
+    }
+    if($self->{TIME}->{"END"}) {
+      if($queryCount) {
+        $query = $query." and time < ".$self->{TIME}->{"END"}.";";
+      }
+      else {
+        $query = $query." time < ".$self->{TIME}->{"END"}.";";
+      }
+    }
+  }
+  else {
+    $query = "select * from ".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.";"
+  }
+  print "Query: " , $query , "\n";
+
+
+Now that we have the query, we need to execute it, and parse the results:
+
+
+  my $result = $datadb->query($query);
+  if($#{$result} == -1) {
+    my $msg =  "Query Error; query returned 0 results.";
+    $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
+  }   
+  else { 
+    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}."\">\n";
+    for(my $a = 0; $a <= $#{$result}; $a++) {      
+      $responseString = $responseString . "    <nmwg:datum";
+      $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
+      $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
+      my @misc = split(/,/,$result->[$a][4]);
+      foreach my $m (@misc) {
+        my @pair = split(/=/,$m);
+	$responseString = $responseString." ".$pair[0]."=\"".$pair[1]."\""; 
+      }
+      $responseString = $responseString . " />\n";
+    }
+    $responseString = $responseString . "  </nmwg:data>\n";
+  }  
+  
+  
+The results come back as a scalar, and we can cast this into an array.  
+We essentially wish to create a data block (with the proper linking) and insert
+datum elements with the values from the SQLite database.  We will need to
+'unroll' the misc field as well.  When we are completed, we will return the data
+block back to the calling function, and back to the user.  
+
+A final test reveals this:
+
+[jason@lager Ping]$ ./pingMP.pl -v
+Starting '0' as main
+Starting '1' as MP
+Starting '2' as MA on port '8080' and endpoint '/axis/services/MP'.
+Starting '3' as to register with LS 'http://lager:8080/axis/services/LS'.
+Metadata:       $VAR1 = {
+          'meta1' => {
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
+                     'nmwg:metadata/ping:parameters/nmwg:parameter-count' => '3',
+                     'nmwg:metadata/nmwg:eventType' => 'http://ggf.org/ns/nmwg/tools/ping/2.0/',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
+                     'nmwg:metadata-id' => 'meta1',
+                     'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
+                     'nmwg:metadata/ping:parameters-id' => 'param1',
+                     'nmwg:metadata/ping:subject-id' => 'sub1'
+                   }
+        };
+
+Data:   $VAR1 = {
+          'data1' => {
+                     'nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type' => 'sqlite',
+                     'nmwg:data-metadataIdRef' => 'meta1',
+                     'nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table' => 'data',
+                     'nmwg:data/nmwg:key-id' => '1',
+                     'nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file' => '/home/jason/perfSONAR-PS/MP/Ping/perfSONAR_PS.db',
+                     'nmwg:data/nmwg:key/nmwg:parameters-id' => '2',
+                     'nmwg:data-id' => 'data1'
+                   }
+        };
+
+Collecting for 'meta1'.
+inserting "meta1", "1173753415.98494", "40.50", "ping", "numBytes=64,ttl=52,seqNum=1,units=ms" into table data.
+inserting "meta1", "1173753415.98499", "40.51", "ping", "numBytes=64,ttl=52,seqNum=2,units=ms" into table data.
+inserting "meta1", "1173753415.98505", "40.58", "ping", "numBytes=64,ttl=52,seqNum=3,units=ms" into table data.
+
+Collecting for 'meta1'.
+inserting "meta1", "1173753419.74306", "40.50", "ping", "numBytes=64,ttl=52,seqNum=1,units=ms" into table data.
+inserting "meta1", "1173753419.74311", "40.52", "ping", "numBytes=64,ttl=52,seqNum=2,units=ms" into table data.
+inserting "meta1", "1173753419.74317", "40.56", "ping", "numBytes=64,ttl=52,seqNum=3,units=ms" into table data.
+
+....
+
+Request:        <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" type="request" id="msg1">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <ping:subject xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="sub1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:parameters id="3">
+      <select:parameter name="time" operator="gte">
+        1173753410
+      </select:parameter>
+      <select:parameter name="time" operator="lte">
+        1173753440
+      </select:parameter>          
+    </nmwg:parameters>    
+  </nmwg:metadata>
+  
+  <nmwg:data id="1" metadataIdRef="meta1" />
+
+</nmwg:message>
+REQUEST: <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" type="request" id="msg1">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <ping:subject xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="sub1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:parameters id="3">
+      <select:parameter name="time" operator="gte">
+        1173753410
+      </select:parameter>
+      <select:parameter name="time" operator="lte">
+        1173753440
+      </select:parameter>          
+    </nmwg:parameters>    
+  </nmwg:metadata>
+  
+  <nmwg:data id="1" metadataIdRef="meta1" />
+
+</nmwg:message>
+Metadata: $VAR1 = 'meta1';
+$VAR2 = {
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
+          'nmwg:metadata/nmwg:parameters-id' => '3',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
+          'nmwg:metadata/nmwg:parameters/select:parameter-time-lte' => '1173753440',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
+          'nmwg:metadata-id' => 'meta1',
+          'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
+          'nmwg:metadata/nmwg:parameters/select:parameter-time-gte' => '1173753410',
+          'nmwg:metadata/ping:subject-id' => 'sub1'
+        };
+
+Data: $VAR1 = '1';
+$VAR2 = {
+          'nmwg:data-metadataIdRef' => 'meta1',
+          'nmwg:data-id' => '1'
+        };
+
+Query: /nmwg:metadata[ping:subject/nmwgt:endPointPair/nmwgt:dst[@type='hostname' and @value='ellis.internet2.edu'] and ping:subject/nmwgt:endPointPair/nmwgt:src[@type='hostname' and @value='lager']]/@id
+Query: select * from data where time > 1173753410 and time < 1173753440;
+inserting "meta1", "1173753452.26396", "40.50", "ping", "numBytes=64,ttl=52,seqNum=1,units=ms" into table data.
+inserting "meta1", "1173753452.26402", "40.57", "ping", "numBytes=64,ttl=52,seqNum=2,units=ms" into table data.
+inserting "meta1", "1173753452.26407", "40.52", "ping", "numBytes=64,ttl=52,seqNum=3,units=ms" into table data.
+
+Collecting for 'meta1'.
+inserting "meta1", "1173753455.28446", "40.51", "ping", "numBytes=64,ttl=52,seqNum=1,units=ms" into table data.
+inserting "meta1", "1173753455.28451", "40.55", "ping", "numBytes=64,ttl=52,seqNum=2,units=ms" into table data.
+inserting "meta1", "1173753455.28457", "40.54", "ping", "numBytes=64,ttl=52,seqNum=3,units=ms" into table data.
+
+
+And from the point of view of the client:
+
+
+[jason@lager client]$ ./client.pl --server=lager --port=8080 --endpoint=/axis/services/MP ../MP/Ping/request.xml
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="12481842" messageIdRef="msg1" type="response">
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <ping:subject xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="sub1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
+    <ping:parameters xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="param1">
+      <nmwg:parameter name="count">3</nmwg:parameter>      
+    </ping:parameters>   
+  </nmwg:metadata>
+  <nmwg:data id="10512679" metadataIdRef="meta1">
+    <nmwg:datum time="1173753415.98494" value="40.5" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753415.98499" value="40.51" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753415.98505" value="40.58" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753419.74306" value="40.5" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753419.74311" value="40.52" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753419.74317" value="40.56" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753422.90854" value="40.49" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753422.90859" value="40.53" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753422.90865" value="40.57" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753425.10864" value="40.53" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753425.10869" value="40.52" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753425.10875" value="40.55" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753428.12505" value="40.51" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753428.1251" value="40.55" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753428.12515" value="40.53" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753431.14264" value="40.5" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753431.1427" value="40.54" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753431.14275" value="40.56" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753434.15893" value="40.51" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753434.15898" value="40.55" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753434.15904" value="40.56" numBytes="64" ttl="52" seqNum="3" units="ms" />
+    <nmwg:datum time="1173753437.17743" value="40.5" numBytes="64" ttl="52" seqNum="1" units="ms" />
+    <nmwg:datum time="1173753437.17749" value="40.55" numBytes="64" ttl="52" seqNum="2" units="ms" />
+    <nmwg:datum time="1173753437.17754" value="40.55" numBytes="64" ttl="52" seqNum="3" units="ms" />
+  </nmwg:data>
+</nmwg:message>
+
+
+This concludes the basic development of the Ping MA.  There are still other things to do of 
+course such as uncovering errors, and strange behavior.  These will be addressed in the next 
+session.  Also be sure to document all functions.
+
 
 Step 6:
 -------

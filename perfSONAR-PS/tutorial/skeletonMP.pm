@@ -6,6 +6,7 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::MP::General;
 
 use Data::Dumper;
 
@@ -162,8 +163,7 @@ skeletonMP - A module starting point for MP functions...
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-    $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    $conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
+    $conf{"METADATA_DB_FILE"} = "store.dbxml";
     $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
 
     my %ns = (
@@ -175,6 +175,13 @@ skeletonMP - A module starting point for MP functions...
     
     my $mp = new skeletonMP(\%conf, \%ns, "", "");
 
+    # or
+    # $mp = skeletonMP->new;
+    # $mp->setConf(\%conf);
+    # $mp->setNamespaces(\%ns);
+    # $mp->setMetadata("");
+    # $mp->setData("");     
+    
 =head1 DETAILS
 
 This module contains a submodule that is not meant to act as a standalone, but rather as

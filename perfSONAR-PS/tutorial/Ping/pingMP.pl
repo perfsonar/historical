@@ -10,10 +10,10 @@ use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
+use perfSONAR_PS::MA::Ping;
 use perfSONAR_PS::MA::General;
+use perfSONAR_PS::MP::Ping;
 use perfSONAR_PS::MP::General;
-use skeletonMA;
-use skeletonMP;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -24,13 +24,14 @@ if($#ARGV == 0) {
 
 my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
 );
 
 		# Read in configuration information
 my %conf = ();
-readConfiguration("./skeletonMP.conf", \%conf);
+readConfiguration("./pingMP.conf", \%conf);
 
 
 if(!$DEBUG) {
@@ -78,12 +79,17 @@ sub measurementPoint {
   if($DEBUG) {
     print "Starting '".threads->tid()."' as MP\n";
   }
-  
+
+  my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
+  $mp->parseMetadata;
+  $mp->prepareData;
+  $mp->prepareCollectors;  
+ 
   # initialize measurement info, time, etc.
   
   while(1) {
 
-    # collect measurement info
+    $mp->collectMeasurements;
     
     sleep($conf{"MP_SAMPLE_RATE"});
   }
@@ -119,9 +125,8 @@ sub measurementArchive {
         print "Request:\t" , $listener->getRequest , "\n";
       }
 
-      # call the MA here...
-      
-      $response = getResultCodeMessage("", "", "response", "success", "sucess");
+      my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns, "", "");
+      $response = $ma->handleRequest($listener->getRequest); 
       
       $listener->setResponse($response, 1); 
     }

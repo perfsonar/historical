@@ -2,6 +2,7 @@
 
 package skeletonMA;
 use Carp qw( croak );
+use XML::XPath;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
@@ -15,15 +16,33 @@ use Data::Dumper;
 @EXPORT = ();
 
 our $VERSION = '0.02';
-
 sub new {
-  my ($package, $conf) = @_; 
+  my ($package, $conf, $ns, $metadata, $data) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "skeletonMA";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $conf and $conf ne "") {
     $hash{"CONF"} = \%{$conf};
   }
+  if(defined $ns and $ns ne "") {  
+    $hash{"NAMESPACES"} = \%{$ns};     
+  }     
+  if(defined $metadata and $metadata ne "") {
+    $hash{"METADATA"} = \%{$metadata};
+  }
+  else {
+    %{$hash{"METADATA"}} = ();
+  }  
+  if(defined $data and $data ne "") {
+    $hash{"DATA"} = \%{$data};
+  }
+  else {
+    %{$hash{"DATA"}} = ();
+  }  
+  
+  %{$hash{"RESULTS"}} = ();  
+  %{$hash{"TIME"}} = ();  
+  
   bless \%hash => $package;
 }
 
@@ -33,6 +52,48 @@ sub setConf {
   $self->{FUNCTION} = "\"setConf\"";  
   if(defined $conf and $conf ne "") {
     $self->{CONF} = \%{$conf};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setNamespaces {
+  my ($self, $ns) = @_;    
+  $self->{FUNCTION} = "\"setNamespaces\""; 
+  if(defined $namespaces and $namespaces ne "") {   
+    $self->{NAMESPACES} = \%{$ns};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setMetadata {
+  my ($self, $metadata) = @_;      
+  $self->{FUNCTION} = "\"setMetadata\"";  
+  if(defined $metadata and $metadata ne "") {
+    $self->{METADATA} = \%{$metadata};
+  }
+  else {
+    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
+      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  }
+  return;
+}
+
+
+sub setData {
+  my ($self, $data) = @_;      
+  $self->{FUNCTION} = "\"setData\"";  
+  if(defined $data and $data ne "") {
+    $self->{DATA} = \%{$data};
   }
   else {
     printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
@@ -61,12 +122,24 @@ skeletonMA - A module starting point for MA functions...
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-    $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    $conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
+    $conf{"METADATA_DB_FILE"} = "store.dbxml";
     $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
 
-    my $ma = skeletonMA->new(\%conf);
- 
+    my %ns = (
+      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+    );
+
+    my $ma = skeletonMA->new(\%conf, \%ns, "", "");
+    
+    # or
+    # $ma = skeletonMA->new;
+    # $ma->setConf(\%conf);
+    # $ma->setNamespaces(\%ns);
+    # $ma->setMetadata("");
+    # $ma->setData("");     
 
 =head1 DETAILS
 
@@ -84,6 +157,18 @@ The only argument represents the 'conf' hash from the calling MA.
 =head2 setConf(\%conf)
 
 (Re-)Sets the value for the 'conf' hash. 
+
+=head2 setNamespaces(\%ns)
+
+(Re-)Sets the value for the 'namespace' hash. 
+
+=head2 setMetadata(\%metadata) 
+
+(Re-)Sets the value for the 'metadata' object. 
+
+=head2 setData(\%data) 
+
+(Re-)Sets the value for the 'data' object. 
 
 =head1 SEE ALSO
 
