@@ -108,7 +108,8 @@ sub handleRequest {
   my $nodeset = $xp->find('//nmwg:message');
 
   if($nodeset->size() < 1) {
-    error("Message element not found within request", __LINE__);  
+    my $msg = "Message element not found within request";
+    error($msg, __LINE__);  
     $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);  
   }
   elsif($nodeset->size() == 1) {
@@ -138,7 +139,8 @@ sub handleRequest {
     if($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql" or 
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or 
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {      
-      error("Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported", __LINE__);  
+      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported";
+      error($msg, __LINE__);  
       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     }  
     elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
@@ -193,25 +195,29 @@ sub handleRequest {
 		          ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
 			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
 			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
-		      error("Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
-		            "\" is not yet supported", __LINE__);  
+		      my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
+		        "\" is not yet supported";
+		      error($msg, __LINE__);  
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
 		    else {
-		      error("Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
-		            "\" is not yet supported", __LINE__);  
+		      my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
+		        "\" is not yet supported";
+		      error($msg, __LINE__);  
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
 		  }
 		}
                 else {
-		  error("Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search", __LINE__);  
+		  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
+		  error($msg, __LINE__);  
                   $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
                 }		    
 	      }	  
 	    }
             else {
-              error("Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search", __LINE__);  
+	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
+              error($msg, __LINE__);  
               $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
             }
 	  }   
@@ -219,12 +225,14 @@ sub handleRequest {
       }
     } 
     else {
-      error("Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported", __LINE__);   
+      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported";
+      error($msg, __LINE__);   
       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     } 
   }
   else {
-    error("Too many message elements found within request", __LINE__); 
+    my $msg = "Too many message elements found within request";
+    error($msg, __LINE__); 
     $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
   }
   return $response;
@@ -254,7 +262,8 @@ sub retrieveRRD {
   );
   
   if($datadb->getErrorMessage()) {
-    error("Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"", __LINE__);
+    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
+    error($msg, __LINE__);
     $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
   }
   else {
