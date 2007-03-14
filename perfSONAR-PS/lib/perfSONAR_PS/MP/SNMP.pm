@@ -926,6 +926,10 @@ The perfSONAR-PS subversion repository is located at:
   
 Questions and comments can be directed to the author, or the mailing list. 
 
+=head1 VERSION
+
+$Id$
+
 =head1 AUTHOR
 
 Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
