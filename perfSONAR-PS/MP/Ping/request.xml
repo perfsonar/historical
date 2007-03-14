@@ -9,15 +9,15 @@
     <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:src type="hostname" value="lager" />
-        <nmwgt:dst type="hostname" value="lager" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
       </nmwgt:endPointPair>
     </ping:subject>
     <nmwg:parameters id="3">
       <select:parameter name="time" operator="gte">
-        1173753410
+        1173906841
       </select:parameter>
       <select:parameter name="time" operator="lte">
-        1173753440
+        1173906871
       </select:parameter>          
     </nmwg:parameters>    
   </nmwg:metadata>
