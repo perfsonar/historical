@@ -20,7 +20,7 @@ package perfSONAR_PS::MP::SNMP::Agent;
 use Net::SNMP;
 use perfSONAR_PS::Common;
 sub new {
-  my ($package, $log, $host, $port, $ver, $comm, $vars) = @_; 
+  my ($package, $log, $host, $port, $ver, $comm, $vars, $debug) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MP::SNMP::Agent";
   $hash{"FUNCTION"} = "\"new\"";
@@ -45,6 +45,10 @@ sub new {
   if(defined $var and $var ne "") {
     $hash{"VARIABLES"} = \%{$vars};  
   }
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  }      
+  
   bless \%hash => $package;
 }
 
@@ -57,8 +61,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -72,8 +75,7 @@ sub setHost {
     $self->{HOST} = $host;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);      
   }
   return;
 }
@@ -87,8 +89,7 @@ sub setPort {
     $self->{PORT} = $port;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -102,8 +103,7 @@ sub setVersion {
     $self->{VERSION} = $ver;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -117,8 +117,7 @@ sub setCommunity {
     $self->{COMMUNITY} = $comm;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -132,8 +131,7 @@ sub setVariables {
     $hash{"VARIABLES"} = \%{$vars};
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -147,8 +145,21 @@ sub setVariable {
     $self->{VARIABLES}->{$var} = "";
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);      
   }
   return;
 }
@@ -172,8 +183,7 @@ sub removeVariables {
   $self->{FUNCTION} = "\"removeVariables\""; 
   undef $self->{VARIABLES};
   if(defined $self->{VARIABLES}) {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tRemove failure in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    error("Remove failure", __LINE__);   
   }
   return;
 }
@@ -187,8 +197,7 @@ sub removeVariable {
     delete $self->{VARIABLES}->{$var};
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -211,17 +220,14 @@ sub setSession {
       -translate     => [
                          -timeticks => 0x0
                         ]) or 
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCouldn't open SNMP session to " . $self->{HOST} . " in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("Couldn't open SNMP session to \"".$self->{HOST}."\"", __LINE__);
 	      
     if(!defined($self->{SESSION})) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSNMP Error: " . $self->{ERROR} . " in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("SNMP error", __LINE__);
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSession needs 'host', 'version', and 'community' to be set in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    error("Session requires arguments 'host', 'version', and 'community'", __LINE__);      
   }  
   return;
 }
@@ -235,8 +241,7 @@ sub closeSession {
     $self->{SESSION}->close;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot close undefined session in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne ""); 
+    error("Cannont close undefined session", __LINE__);
   }
   return;
 }
@@ -256,12 +261,10 @@ sub collectVariables {
     $self->{RESULT} = $self->{SESSION}->get_request(
       -varbindlist => \@oids
     ) or 
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSNMP Error: in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("SNMP error", __LINE__);
     
     if(!defined($self->{RESULT})) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSNMP Error: in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("SNMP error", __LINE__);
       return ('error' => -1);
     }    
     else {
@@ -269,8 +272,7 @@ sub collectVariables {
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");          
+    error("Session to \"".$self->{HOST}."\" not found", __LINE__);     
     return ('error' => -1);
   }      
 }
@@ -287,31 +289,35 @@ sub collect {
       $self->{RESULT} = $self->{SESSION}->get_request(
         -varbindlist => [$var]
       ) or 
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSNMP error: " . $self->{ERROR} . " in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+        error("SNMP error: \"".$self->{ERROR}."\"", __LINE__); 
       
       if(!defined($self->{RESULT})) {
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSNMP error: " . $self->{ERROR} . " in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+        error("SNMP error: \"".$self->{ERROR}."\"", __LINE__);          
         return -1;
       }    
       else {
         return $self->{RESULT}->{$var};
       }
     }
-    else {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tSession to " . $self->{HOST} . " not found in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    else {    
+      error("Session to \"".$self->{HOST}."\" not found", __LINE__);   
       return -1;
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
 
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  return;
+}
 
 # ================ Main Package perfSONAR_PS::MP::SNMP ================
 
@@ -358,8 +364,7 @@ sub setConf {
     $self->{CONF} = \%{$conf};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -373,8 +378,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -388,8 +392,7 @@ sub setMetadata {
     $self->{METADATA} = \%{$metadata};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__); 
   }
   return;
 }
@@ -403,8 +406,7 @@ sub setData {
     $self->{DATA} = \%{$data};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -432,9 +434,7 @@ sub parseMetadata {
       }
     }
     else {
-      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};      
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");          
+      error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
     }  
 
     $query = "//nmwg:data";
@@ -445,9 +445,7 @@ sub parseMetadata {
       }
     }
     else {
-      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
     }          
     cleanMetadata(\%{$self});       
   }
@@ -459,14 +457,10 @@ sub parseMetadata {
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+    error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__); 
   }  
   else {
-    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is invalid.";
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+    error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
   }
   return;
 }
@@ -491,15 +485,11 @@ sub prepareData {
     }
     elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
           ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")){
-      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+      error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);    
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }
     else {
-      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }  
   }  
@@ -583,8 +573,7 @@ sub prepareTime {
     }  
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);      
   }  
   return;
 }
@@ -632,17 +621,16 @@ print "Collecting for '" , $s , "'.\n";
 print "inserting: " , $self->{REFTIME}->{$s}  , "," , $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"} , "," , $results{$r} , "\n";
 	      				
             $self->{DATADB}->{$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert($self->{REFTIME}->{$s}, 
-	                                                                                                                                         $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},
-			  				                                                                                         $results{$r});
+	                                                                                                                                         $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},			  				                                                                                         $results{$r});
 	  }
 	  elsif(($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
 	        ($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
-
-	    # do nothing for now
+	    error("Database \"".$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}
+	      ."\" is not yet supported", __LINE__);
 	  }
 	  else {
-
-	    # do nothing for now
+	    error("Database \"".$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}
+	      ."\" is not yet supported", __LINE__);
 	  }
 	}
       }
@@ -658,6 +646,16 @@ print "inserting: " , $self->{REFTIME}->{$s}  , "," , $self->{DATA}->{$self->{LO
     $self->{DATADB}->{$db}->closeDB;
   }
 
+  return;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
+  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -795,6 +793,11 @@ a specialized structure for use only in this module.  The functions include:
 
     Closes the session to the target host.
 
+  error($msg, $line)	
+
+    A 'message' argument is used to print error information to the screen and log files 
+    (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+    Meant to be used internally.
 
 A brief description using the API:
    
@@ -887,6 +890,12 @@ Starts the objects that will keep track of time (in relation to the remote sites
 Cycles through each of the 'perfSONAR_PS::MP::SNMP::Agent' objects and gathers the 
 necessary values.  
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<Net::SNMP>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
@@ -905,7 +914,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

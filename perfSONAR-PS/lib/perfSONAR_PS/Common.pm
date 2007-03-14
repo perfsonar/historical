@@ -9,7 +9,7 @@ use Time::HiRes qw( gettimeofday );
 
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
-           'chainMetadata', 'countRefs', 'genuid');
+           'chainMetadata', 'countRefs', 'genuid', 'getHostname');
 
 our $VERSION = '0.03';
 
@@ -278,6 +278,15 @@ sub genuid {
 }
 
 
+sub getHostname {
+  open(HN, "hostname |");
+  my @hostName = <HN>;
+  $hostName[0] =~ s/\n//g;
+  close(HN);
+  return $hostName[0];
+}
+
+
 1;
 
 
@@ -354,6 +363,8 @@ can be invoked directly (and sparingly).
     }
     
     print "A random id would look like this:\t'" , genuid() , "'\n";
+
+    print "The hostname of the system is:\t'" , getHostname() , "'\n";
        
 =head1 DETAILS
 
@@ -487,6 +498,10 @@ will return -1 on error.
 
 Generates a random number.
 
+=head2 getHostname()
+
+Returns the output of the 'hostname' function.
+
 =head1 SEE ALSO
 
 L<Carp>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<perfSONAR_PS::Transport>, 
@@ -506,7 +521,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

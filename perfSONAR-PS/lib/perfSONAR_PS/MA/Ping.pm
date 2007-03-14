@@ -10,8 +10,6 @@ use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MA::General;
 
-use Data::Dumper;
-
 @ISA = ('Exporter');
 @EXPORT = ();
 
@@ -55,8 +53,7 @@ sub setConf {
     $self->{CONF} = \%{$conf};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -69,8 +66,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -83,8 +79,7 @@ sub setMetadata {
     $self->{METADATA} = \%{$metadata};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);       
   }
   return;
 }
@@ -97,8 +92,7 @@ sub setData {
     $self->{DATA} = \%{$data};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -108,17 +102,13 @@ sub handleRequest {
   my($self, $request) = @_;
   my $response = "";
 
-print "REQUEST: " , $request , "\n";
-
   my $xp = XML::XPath->new( xml => $request );
   $xp->clear_namespaces();
   $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
   my $nodeset = $xp->find('//nmwg:message');
 
   if($nodeset->size() < 1) {
-    my $msg = "Message elements not found in request; send only one (1) message element.";
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+    error("Message element not found within request", __LINE__);  
     $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);  
   }
   elsif($nodeset->size() == 1) {
@@ -145,19 +135,13 @@ print "REQUEST: " , $request , "\n";
       }
     }
 
-print "Metadata: " , Dumper(%{$self->{METADATA}}) , "\n";    
-print "Data: " , Dumper(%{$self->{DATA}}) , "\n";  
-
     if($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql" or 
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or 
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-      my $msg = "The metadata database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+      error("Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported", __LINE__);  
       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     }  
     elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-      
       my $localContent = "";
       foreach my $d (keys %{$self->{DATA}}) {
         foreach my $m (keys %{$self->{METADATA}}) {  
@@ -173,7 +157,7 @@ print "Data: " , Dumper(%{$self->{DATA}}) , "\n";
             );	  
             $metadatadb->openDB;       
       
-print "Query: " , $queryString , "\n";
+            print $self->{FILENAME}.":\tquery \"".$queryString."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
 
 	    my @resultsString = $metadatadb->query($queryString);   
 	    if($#resultsString != -1) {    
@@ -196,40 +180,32 @@ print "Query: " , $queryString , "\n";
 		    parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
 		    @dataIds = keys(%{$self->{RESULTS}});
 		    if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") {
-		    		    
-		      $localContent = $localContent . retrieveSQL($self, $dataIds[0]); 
+		      $localContent = $localContent . retrieveSQL($self, $dataIds[0]);
 		      $response = getResultMessage($messageIdReturn, $messageId, "response", $localContent);
-
 		    }
 		    elsif(($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") or 
 		          ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
 			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
 			  ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
-                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
-                      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-                        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+		      error("Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
+		            "\" is not yet supported", __LINE__);  
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
 		    else {
-                      my $msg = "The data database '".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}."' is not yet supported.";
-                      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-                        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+		      error("Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
+		            "\" is not yet supported", __LINE__);
                       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
 		    }
 		  }
 		}
                 else {
-                  my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the data search.";
-                  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-                    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+                  error("Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search", __LINE__);
                   $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
                 }		    
 	      }	  
 	    }
             else {
-              my $msg = "The database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' returned 0 results for the metadata search.";
-              printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-                if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+              error("Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search", __LINE__);  
               $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
             }
 
@@ -239,16 +215,12 @@ print "Query: " , $queryString , "\n";
       
     } 
     else {
-      my $msg = "The metadata database '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");  
+      error("Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported", __LINE__); 
       $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     } 
   }
   else {
-    my $msg = "Too many message elements found in request; send only one (1) message element.";    
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");        
+    error("Too many message elements found within request", __LINE__); 
     $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
   }
   return $response;
@@ -293,11 +265,11 @@ sub retrieveSQL {
     $query = "select * from ".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.";"
   }
 
-print "Query: " , $query , "\n";
+  print $self->{FILENAME}.":\tquery \"".$query."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
 
   my $result = $datadb->query($query);
   if($#{$result} == -1) {
-    my $msg =  "Query Error; query returned 0 results.";
+    error("Query \"".$query."\" returned 0 results", __LINE__);
     $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
   }   
   else { 
@@ -320,6 +292,15 @@ print "Query: " , $query , "\n";
   return $responseString;
 }
 
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
+  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+  return;
+}
 
 
 1;
@@ -393,6 +374,12 @@ a descriptive error message if something happened to go wrong.
 Given a data and metadata hash, and the time information, the data is extracted from the
 backed storage (in this case SQL databases). 
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
@@ -412,7 +399,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

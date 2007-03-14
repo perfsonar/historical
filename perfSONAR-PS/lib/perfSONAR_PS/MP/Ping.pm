@@ -20,7 +20,7 @@ package perfSONAR_PS::MP::Ping::Agent;
 use Carp qw( croak );
 use perfSONAR_PS::Common;
 sub new {
-  my ($package, $log, $cmd) = @_; 
+  my ($package, $log, $cmd, $debug) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MP::Ping::Agent";
   $hash{"FUNCTION"} = "\"new\"";
@@ -30,6 +30,9 @@ sub new {
   if(defined $cmd and $cmd ne "") {
     $hash{"CMD"} = $cmd;
   }  
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  }    
   
   %{$hash{"RESULTS"}} = ();
   
@@ -44,9 +47,8 @@ sub setLog {
   if(defined $log and $log ne "") {
     $self->{LOGFILE} = $log;
   }
-  else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  else {    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -60,8 +62,21 @@ sub setCommand {
     $self->{CMD} = $cmd;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);       
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FILENAME} = "perfSONAR_PS::MP::Ping::Agent";
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);         
   }
   return;
 }
@@ -78,7 +93,7 @@ sub collect {
     my $time = eval($sec.".".$frac);
         
     open(CMD, $self->{CMD}." |") or 
-      croak($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot open \"".$self->{CMD}."\" in ".$self->{FUNCTION}." at line ".__LINE__.".");
+      error("Cannot open \"".$self->{CMD}."\"", __LINE__);
     my @results = <CMD>;    
     close(CMD);
     
@@ -107,8 +122,7 @@ sub collect {
     
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing command string", __LINE__);     
   }
   return;
 }
@@ -122,9 +136,18 @@ sub getResults {
     return $self->{RESULTS};
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Cannot return NULL results", __LINE__);    
   }
+  return;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -173,8 +196,7 @@ sub setConf {
     $self->{CONF} = \%{$conf};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -188,8 +210,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -203,8 +224,7 @@ sub setMetadata {
     $self->{METADATA} = \%{$metadata};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__); 
   }
   return;
 }
@@ -218,8 +238,7 @@ sub setData {
     $self->{DATA} = \%{$data};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -246,10 +265,8 @@ sub parseMetadata {
 	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
       }      
     }
-    else {
-      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};      
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");          
+    else {	
+      error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
     }     
 
     $query = "//nmwg:data";
@@ -260,15 +277,9 @@ sub parseMetadata {
       }
     }
     else {
-      my $msg = $self->{FILENAME} .":\tXMLDB returned 0 results for query '". $query ."' in function " . $self->{FUNCTION};
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);  
     }          
     cleanMetadata(\%{$self}); 
-
-print "Metadata:\t" , Dumper($self->{METADATA}) , "\n";
-print "Data:\t" , Dumper($self->{DATA}) , "\n";
-
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
     my $xml = readXML($conf{"METADATA_DB_FILE"});
@@ -278,14 +289,10 @@ print "Data:\t" , Dumper($self->{DATA}) , "\n";
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is not yet supported.";
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+    error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);     
   }  
   else {
-    my $msg = "'METADATA_DB_TYPE' of '".$self->{CONF}->{"METADATA_DB_TYPE"}."' is invalid.";
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+    error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
   }
   return;
 }
@@ -310,19 +317,14 @@ sub prepareData {
     }
     elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
           ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
-      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+      error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	  	    
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }
     else {
-      my $msg = "Data DB of type '". $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} ."' is not supported by this MP.";
-      printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-        if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+      error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }  
   }  
-       
   return;
 }
 
@@ -346,9 +348,7 @@ sub prepareCollectors {
       }  
       
       if(!defined $host or $host eq "") {
-        my $msg = "Destination host not specified.";
-        printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}) 
-          if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne ""); 
+	error("Destination host not specified", __LINE__);	  
       }
       else {
         $commandString = $commandString . $host;
@@ -406,6 +406,16 @@ sub collectMeasurements {
   }
   print "\n";
 		
+  return;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
+  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -485,6 +495,10 @@ rather as a specialized structure for use only in this module.  The functions in
   setCommand($cmd)
 
     (Re-)Sets the command for the ping agent object.
+    
+  setDebug($debug)
+
+    (Re-)Sets the debug flag for the ping agent object.  
 
   collect()
 
@@ -494,6 +508,11 @@ rather as a specialized structure for use only in this module.  The functions in
 
      Returns the results object so it may be parsed.  
      
+  error($msg, $line)	
+
+    A 'message' argument is used to print error information to the screen and log files 
+    (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+    Meant to be used internally.
 
 A brief description using the API:
    
@@ -504,7 +523,8 @@ A brief description using the API:
     # my $agent = new perfSONAR_PS::MP::Ping::Agent;
     # $agent->setLog("./error.log");
     # $agent->setCommand("/bin/ping -c 1 localhost");
-    
+    # $agent->setDebug(1);
+        
     $agent->collect();
 
     my $results = $agent->getResults;
@@ -560,6 +580,12 @@ the metadata object.
 Cycles through each of the 'perfSONAR_PS::MP::Ping::Agent' objects and gathers the 
 necessary values.  
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
@@ -579,7 +605,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -10,7 +10,7 @@ use perfSONAR_PS::Common;
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $log, $file, $ns) = @_; 
+  my ($package, $log, $file, $ns, $debug) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::File";
   $hash{"FUNCTION"} = "\"new\"";
@@ -23,6 +23,9 @@ sub new {
   if(defined $ns and $ns ne "") {
     $hash{"NAMESPACES"} = \%{$ns};  
   }    
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  }    
   bless \%hash => $package;
 }
 
@@ -34,8 +37,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -48,8 +50,7 @@ sub setFile {
     $self->{FILE} = $file;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -62,8 +63,20 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -74,8 +87,7 @@ sub openDB {
   $self->{FUNCTION} = "\"openDB\"";    
   if(defined $self->{FILE}) {    
     $self->{XML} = new IO::File("<".$self->{FILE}) or 
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot open file in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+      error("Cannot open file", __LINE__);         
     if($self->{XML}) {
       $XML = $self->{XML};
       while (<$XML>) {
@@ -89,16 +101,15 @@ sub openDB {
         foreach my $prefix (keys %{$self->{NAMESPACES}}) {
           $self->{XPATH}->set_namespace($prefix, $self->{NAMESPACES}->{$prefix});
         }
+	print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
       else {
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"namespaces\" in object; used in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+        error("Missing namespaces in object", __LINE__); 
       }
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"file\" in object; used in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    error("Missing file in object", __LINE__);      
   }                  
   return;
 }
@@ -109,10 +120,10 @@ sub closeDB {
   $self->{FUNCTION} = "\"closeDB\""; 
   if($self->{XML}) {
     $self->{XML}->close();
+    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tFile handle not open in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    error("File handle not open", __LINE__);   
   }
   return;
 }
@@ -122,26 +133,27 @@ sub query {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"query\"";        
   my @results = ();
-  if(defined $query and $query ne "") {  
+  if(defined $query and $query ne "") {
+    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG}); 
     if(defined $self->{XPATH}) {
       my $nodeset = $self->{XPATH}->find($query);
       if($nodeset->size() <= 0) {
         $results[0] = "perfSONAR_PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
+        print $self->{FILENAME}.":\t0 results returned in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
       else {
         foreach my $node ($nodeset->get_nodelist) {            	    
           push @results, XML::XPath::XMLParser::as_string($node);
         }
+	print $self->{FILENAME}.":\tresults found in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
     }
     else {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tXPath structures not defined in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+      error("XPath structures not defined", __LINE__);        
     }        
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);
   }  
   return @results;
 }
@@ -152,19 +164,28 @@ sub count {
   $self->{FUNCTION} = "\"count\"";  
   my $nodeset = 0;
   if(defined $query and $query ne "") {    
+    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     if(defined $self->{XPATH}) {
       $nodeset = $self->{XPATH}->find($query);
     }
     else {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tXPath structures not defined in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+      error("XPath structures not defined", __LINE__);      
     }   
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);
   } 
   return $nodeset->size;   
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  return;
 }
 
 
@@ -207,7 +228,8 @@ may then be invoked on the object for the specific database.
     # $file->setLog("./error.log");
     # $file->setFile("./store.xml");
     # $file->setNamespaces(\%ns);    
-
+    # $file->setDebug($debug);    
+    
     $file->openDB();
 
     print "There are " , $file->count("//nmwg:metadata") , " elements in the file.\n";
@@ -253,6 +275,10 @@ not be used).
 appear in the container should be mapped (there is no harm is sending mappings that will not be 
 used).
 
+=head2 setDebug($debug)
+
+(Re-)Sets the value of the $debug switch.
+
 =head2 openDB
 
 Opens the file, and creates the necessary objects to read and query the contents. 
@@ -270,6 +296,12 @@ are returned as an array of strings.
 
 The '$query' string is an XPath expression that will be performed on the open file.  The results
 this time are a count of the number of elements that match the XPath expression.
+  
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.  
   
 =head1 SEE ALSO
 
@@ -290,7 +322,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

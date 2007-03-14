@@ -18,7 +18,7 @@ use perfSONAR_PS::Common;
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_; 
+  my ($package, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint, $debug) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::Transport";
   $hash{"FUNCTION"} = "\"new\"";
@@ -41,7 +41,10 @@ sub new {
   if(defined $contactEndPoint and $contactEndPoint ne "") {
     $hash{"CONTACT_ENDPOINT"} = $contactEndPoint;
   }  
-  
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  } 
+    
   $hash{"SOAP_ENV"} = "http://schemas.xmlsoap.org/soap/envelope/";
   $hash{"SOAP_ENC"} = "http://schemas.xmlsoap.org/soap/encoding/";
   $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
@@ -59,8 +62,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -73,8 +75,7 @@ sub setPort {
     $self->{PORT} = $port;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -88,8 +89,7 @@ sub setListenEndPoint {
     $self->{LISTEN_ENDPOINT} = $listenEndPoint;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -102,8 +102,7 @@ sub setContactHost {
     $self->{HOST} = $contactHost;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -116,8 +115,7 @@ sub setContactPort {
     $self->{PORT} = $contactPort;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);   
   }
   return;
 }
@@ -130,8 +128,20 @@ sub setContactEndPoint {
     $self->{CONTACT_ENDPOINT} = $contactEndPoint;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -139,13 +149,13 @@ sub setContactEndPoint {
 
 sub startDaemon {
   my ($self) = @_;  
-  $self->{FUNCTION} = "\"startDaemon\"";  
+  $self->{FUNCTION} = "\"startDaemon\"";
+  print $self->{FILENAME}.":\tstarting daemon in ".$self->{FUNCTION}."\n" if($self->{DEBUG});  
   $self->{DAEMON} = HTTP::Daemon->new(
     LocalPort => $self->{PORT},
     Reuse => 1
   ) or 
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCannot start daemon in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Cannot start daemon", __LINE__);
   return;
 }
 
@@ -153,6 +163,7 @@ sub startDaemon {
 sub acceptCall {
   my ($self) = @_; 
   $self->{FUNCTION} = "\"acceptCall\"";    
+  print $self->{FILENAME}.":\taccepting calls in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   $self->{CALL} = $self->{DAEMON}->accept;
   $self->{REQUEST} = $self->{CALL}->get_request;
   $self->{RESPONSE} = HTTP::Response->new();
@@ -168,17 +179,16 @@ sub acceptCall {
      $self->{REQUEST}->method eq "POST") {
     $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
     if (!$action =~ m/^.*message\/$/) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tReceived 'INVALID ACTION TYPE':".$action." in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+      error("Received 'INVALID ACTION TYPE':".$action."\"", __LINE__);      
       return 'INVALID ACTION TYPE';
     }
     else {
+      print $self->{FILENAME}.":\tcall accepted in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       return 1;
     }   
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tReveived 'INVALID ENDPOINT':".$requestEndpoint." in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Reveived 'INVALID ENDPOINT':".$requestEndpoint."\"", __LINE__);  
     return 'INVALID ENDPOINT';      
   }
 }
@@ -201,12 +211,10 @@ sub getRequest {
   my $xp = $self->getRequestAsXPath();
   $nodeset = $xp->find('//nmwg:message');
   if($nodeset->size() <= 0) {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMessage element not found or in wrong namespace in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    error("Message element not found or in wrong namespace", __LINE__);      
   }
   elsif($nodeset->size() >= 2) {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tToo many Message elements found in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");      
+    error("Too many Message elements found", __LINE__);
   }
   else {
     return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
@@ -218,7 +226,7 @@ sub getRequest {
 sub setResponseAsXPath {
   my ($self, $xpath) = @_; 
   $self->{FUNCTION} = "\"setResponseAsXPath\"";
-  carp($self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}." at line ".__LINE__.".")
+  error("Missing argument", __LINE__)
     unless defined $xpath;
   my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
   return $self->setResponse( $content );
@@ -235,8 +243,7 @@ sub setResponse {
     $self->{RESPONSE} = HTTP::Response->parse($content);
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -249,10 +256,10 @@ sub closeCall {
     $self->{CALL}->send_response($self->{RESPONSE});    
     $self->{CALL}->close;
     undef($self->{CALL});  
+    print $self->{FILENAME}.":\tclosing call in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tCall not established in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Call not established", __LINE__);  
   }
   return;
 }
@@ -302,6 +309,8 @@ sub sendReceive {
     $userAgent = LWP::UserAgent->new('timeout' => 3000);
   }  
   
+  print $self->{FILENAME}.":\tsending info in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+  
   my $sendSoap = HTTP::Request->new('POST', $httpEndpoint, new HTTP::Headers, $envelope);
   $sendSoap->header('SOAPAction' => $method_uri);
   $sendSoap->content_type  ('text/xml');
@@ -310,8 +319,20 @@ sub sendReceive {
   my $httpResponse = $userAgent->request($sendSoap);
   my $responseCode = $httpResponse->code();
   my $responseContent = $httpResponse->content();
-
+  
+  print $self->{FILENAME}.":\tresponse seen in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+  
   return $responseContent;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  return;
 }
 
 
@@ -348,6 +369,7 @@ service (specified by information at creation time).
     # $listener->setContactHost("");
     # $listener->setContactPort("");
     # $listener->setContactEndPoint("");
+    # $listener->setDebug($debug);     
                         
     $listener->startDaemon;
     while(1) {
@@ -442,6 +464,10 @@ that is supplying a service.
 (Re-)Sets the contact endPoint argument.  The contact endPoint is the endPoint on a remote host
 that is supplying a service.  See 'setListenEndPoint' for a more detailed description.
   
+=head2 setDebug($debug)
+
+(Re-)Sets the value of the $debug switch.
+  
 =head2 startDaemon()
 
 Starts an HTTP daemon on the given host listening to the specified port.  This method will
@@ -490,6 +516,12 @@ Makes a SOAP formated envelope.
 
 Sents a soap formated envelope, and a timeout value to the contact host/port/endPoint.
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<Carp>, L<HTTP::Daemon>, L<HTTP::Response>, L<HTTP::Headers>, L<HTTP::Status>, 
@@ -511,7 +543,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

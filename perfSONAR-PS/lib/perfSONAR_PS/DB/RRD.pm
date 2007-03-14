@@ -9,7 +9,7 @@ use perfSONAR_PS::Common;
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $log, $path, $name, $dss, $error) = @_;   
+  my ($package, $log, $path, $name, $dss, $error, $debug) = @_;   
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::RRD";
   $hash{"FUNCTION"} = "\"new\"";
@@ -33,6 +33,9 @@ sub new {
       undef $RRDp::error_mode;
     }
   }
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  }   
   bless \%hash => $package;
 }
 
@@ -44,8 +47,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -58,8 +60,7 @@ sub setFile {
     $self->{NAME} = $file;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -72,8 +73,7 @@ sub setPath {
     $self->{PATH} = $path;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -86,8 +86,7 @@ sub setVariables {
     $hash{"DATASOURCES"} = \%{$dss};
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -100,8 +99,7 @@ sub setVariable {
     $self->{DATASOURCES}->{$dss} = "";
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -119,8 +117,20 @@ sub setError {
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__);
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -142,10 +152,10 @@ sub openDB {
   $self->{FUNCTION} = "\"openDB\""; 
   if(defined $self->{PATH} and defined $self->{NAME}) {
     RRDp::start $self->{PATH};
+    print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing \"path\" or \"name\" in object; used in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");        
+    error("Missing path or name in object", __LINE__);        
   }
   return;
 }
@@ -157,14 +167,13 @@ sub closeDB {
   if((defined $self->{PATH} and $self->{PATH} ne "") and 
      (defined $self->{NAME} and $self->{NAME} ne "")){
     my $status = RRDp::end;  
+    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     if($status) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$self->{PATH}." has returned status \"".$status."\" on closing in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+      error($self->{PATH}." has returned status \"".$status."\" on closing", __LINE__);    
     }
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\trrdtool is not open in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("rrdtool is not open", __LINE__);  
   }
   return;
 }
@@ -188,6 +197,8 @@ sub query {
       $cmd = $cmd . " -e " . $end;
     }
   
+    print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    
     RRDp::cmd $cmd;
     my $answer = RRDp::read;     
 
@@ -210,13 +221,13 @@ sub query {
       }
     }
     if($RRDp::error) {
+      print $self->{FILENAME}.":\tdatabase error in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       %rrd_result = ();
       $rrd_result{ANSWER} = $$answer;
     }
   }    
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument 'cf' to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__); 
   }
   return %rrd_result; 
 }
@@ -227,12 +238,11 @@ sub insert {
   $self->{FUNCTION} = "\"insert\"";   
   if((defined $time and $time ne "") and
      (defined $ds and $ds ne "") and 
-     (defined $value and $value ne "")) {
+     (defined $value and $value ne "")) { 
     $self->{COMMIT}->{$time}->{$ds} = $value;
   }
   else { 
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument(s) to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+    error("Missing argument", __LINE__); 
   }  
 }
 
@@ -259,12 +269,12 @@ sub insertCommit {
       $counter++;
     }     
     if((!defined $template or $template eq "") or (!defined $values or $values eq "")){
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\trrdtool cannot update when datasource values are not specified in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");  
+      error("rrdtool cannot update when datasource values are not specified", __LINE__);  
     }
     else {
       delete $self->{COMMIT}->{$time};
       $cmd = $cmd . $template . " " . $values;     
+      print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       RRDp::cmd $cmd;
       $answer = RRDp::read; 
       push @result, $$answer; 
@@ -289,6 +299,16 @@ sub lastValue {
   RRDp::cmd "last " . $self->{NAME};
   $answer = RRDp::read;   
   return $$answer;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  return;
 }
 
 
@@ -328,6 +348,7 @@ with rrd files) to offer some common functionality.
     # $rrd->setVariable("eth0-in");
     # ...
     # $rrd->setError(1);  
+    # $rrd->setDebug($debug);     
 
     # For reference, here is the create string for the rrd file:
     #
@@ -432,6 +453,10 @@ Adds $variable to the hash of datasources in the rrd file.
 (Re-)Sets the value of the error variable (only 1 or 0), which allows you to utilize the
 getErrorMessage() function.
 
+=head2 setDebug($debug)
+
+(Re-)Sets the value of the $debug switch.
+
 =head2 getErrorMessage()
 
 Returns the value of an internal error variable ($RRDp::error) if this value happened to 
@@ -484,6 +509,12 @@ Returns the 'last' timestamp in the RRD file.
 
 Returns the 'first' timestamp in the RRD file.  
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<RRDp>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
@@ -503,7 +534,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

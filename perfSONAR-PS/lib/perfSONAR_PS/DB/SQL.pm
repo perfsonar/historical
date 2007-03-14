@@ -9,7 +9,7 @@ use perfSONAR_PS::Common;
 our $VERSION = '0.03';
 
 sub new {
-  my ($package, $log, $name, $user, $pass, $schema) = @_;   
+  my ($package, $log, $name, $user, $pass, $schema, $debug) = @_;   
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::DB::SQL";
   $hash{"FUNCTION"} = "\"new\"";
@@ -28,6 +28,9 @@ sub new {
   if(defined $schema and $schema ne "") {
     @{$hash{"SCHEMA"}} = @{$schema};
   } 
+  if(defined $debug and $debug ne "") {
+    $hash{"DEBUG"} = $debug;  
+  }   
   bless \%hash => $package;
 }
 
@@ -39,8 +42,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -53,8 +55,7 @@ sub setName {
     $self->{NAME} = $name;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -67,8 +68,7 @@ sub setUser {
     $self->{USER} = $user;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -81,8 +81,7 @@ sub setPass {
     $self->{PASS} = $pass;
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   }
   return;
 }
@@ -95,8 +94,20 @@ sub setSchema {
     @{$self->{SCHEMA}} = @{$schema};
   } 
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
+  }
+  return;
+}
+
+
+sub setDebug {
+  my ($self, $debug) = @_;  
+  $self->{FUNCTION} = "\"setDebug\"";  
+  if(defined $debug and $debug ne "") {
+    $self->{DEBUG} = $debug;
+  }
+  else {
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -115,12 +126,11 @@ sub openDB {
       $self->{PASS}, 
       \%attr
     ) or 
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDatabase ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}." in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	              
+      error("Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__); 
+    print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});	              
   };
   if($@) {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Open error \"".$@."\"", __LINE__);
   }   
   return;
 }
@@ -131,10 +141,10 @@ sub closeDB {
   $self->{FUNCTION} = "\"closeDB\"";  
   eval {   
     $self->{HANDLE}->disconnect();
+    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   };
   if($@) {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Close error \"".$@."\"", __LINE__);
   }   
   return;
 }
@@ -145,22 +155,20 @@ sub query {
   $self->{FUNCTION} = "\"query\"";  
   my $results = (); 
   if(defined $query and $query ne "") {  
+    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() or 
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tQuery error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	      	      
+        error("Query error on statement \"".$query."\"", __LINE__);      	      
       $results  = $sth->fetchall_arrayref;
     };
     if($@) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("Query error \"".$@."\"", __LINE__);
       return -1;
     } 
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   } 
   return $results;
 }
@@ -170,23 +178,21 @@ sub count {
   my ($self, $query) = @_;
   $self->{FUNCTION} = "\"count\"";  
   my $results = -2; 
-  if(defined $query and $query ne "") {    
+  if(defined $query and $query ne "") { 
+    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});   
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() or 
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tQuery error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");	
+        error("Query error on statement \"".$query."\"", __LINE__);	
       $results  = $sth->fetchall_arrayref;  
     };      
     if($@) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("Query error \"".$@."\" on statement \"".$query."\"", __LINE__);
       return -1;
     } 
   } 
   else { 
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   } 
   return $#{$results}+1;
 }
@@ -219,24 +225,22 @@ sub insert {
     }  
     $insert = $insert.")";
     
+    print $self->{FILENAME}.":\tinsert \".$insert.\" prepared in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     eval {
       my $sth = $self->{HANDLE}->prepare($insert);
       for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {   
         $sth->bind_param($x+1, $values{$self->{SCHEMA}->[$x]});
       }
       $sth->execute() or 
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tInsert error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");		      
+        error("Insert error on statement \"".$insert."\"", __LINE__);		      
     };
     if($@) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+      error("Insert error \"".$@."\" on statement \"".$insert."\"", __LINE__);
       return -1;
     }     
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   } 
   return 1;  
 }
@@ -246,23 +250,31 @@ sub remove {
   my ($self, $delete) = @_;
   $self->{FUNCTION} = "\"remove\"";
   if(defined $delete and $delete ne "") {
+    print $self->{FILENAME}.":\tdelete \".$delete.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
       $sth->execute() or 
-        printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tDelete error \"".$sth->errstr."\" in ".$self->{FUNCTION}) 
-          if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");		      
+        error("Remove error on statement \"".$delete."\"", __LINE__);		      
     };
-    if($@) {
-      printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tError \"".$@."\" in ".$self->{FUNCTION}) 
-        if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    if($@) {	
+      error("Remove error \"".$@."\" on statement \"".$delete."\"", __LINE__);
       return -1;
     }     
   }
   else {
-    printError($self->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");
+    error("Missing argument", __LINE__);
   }    
   return 1;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
+  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
+  return;
 }
 
 
@@ -302,6 +314,7 @@ the specific database.
     # $db->setUser("");
     # $db->setPass("");    
     # $db->setSchema(\@dbSchema);
+    # $db->setDebug($debug);     
 
     $db->openDB;
 
@@ -395,6 +408,10 @@ modules installed for the specific database you will be attempting to access.
 
 (Re-)Sets the table schema for the database.
 
+=head2 setDebug($debug)
+
+(Re-)Sets the value of the $debug switch.
+
 =head2 openDB
 
 Prepares a handle to the database.
@@ -431,6 +448,12 @@ The '$delete' string is an SQL statement to be sent to the database.  The statem
 must of course use the proper database schema elements and be properly formed.  Will 
 return 1 on success, -1 on failure.
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
 L<DBI>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::XMLDB>, 
@@ -450,7 +473,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
