@@ -146,20 +146,20 @@ sub handleRequest {
       foreach my $d (keys %{$self->{DATA}}) {
         foreach my $m (keys %{$self->{METADATA}}) {  
           if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) { 
-           
-	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";	  
 
 	    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
               $self->{CONF}->{"LOGFILE"},
               $self->{CONF}->{"METADATA_DB_NAME"}, 
               $self->{CONF}->{"METADATA_DB_FILE"},
-              \%{$self->{NAMESPACES}}
+              \%{$self->{NAMESPACES}},
+	      $self->{CONF}->{"DEBUG"}
             );	  
             $metadatadb->openDB;              
 
-            print $self->{FILENAME}.":\tquery \"".$queryString."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
-
+	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";
+            print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
 	    my @resultsString = $metadatadb->query($queryString);   
+	    
 	    if($#resultsString != -1) {    
               for(my $x = 0; $x <= $#resultsString; $x++) {	
                 $resultsString[$x] =~ s/\{\}id=//;
@@ -167,18 +167,24 @@ sub handleRequest {
                 $resultsString[$x] =~ s/\n//;	    
 	        
                 $queryString = "/nmwg:data[\@metadataIdRef='".$resultsString[$x]."']";
-                my @dataResultsString = $metadatadb->query($queryString);
+                print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
+		my @dataResultsString = $metadatadb->query($queryString);
+		
 	        if($#dataResultsString != -1) {    
+		
                   $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
-
+                  print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
                   my @metadataResultsString = $metadatadb->query($queryString);		  
 
-                  $localContent = $localContent . $metadataResultsString[0];
-                  
+                  $localContent = $localContent . $metadataResultsString[0];  
 		  for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		    
+		    print "DEBUG:\tData \"".$dataResultsString[$x]."\" created.\n" if($self->{CONF}->{"DEBUG"});
+		    
 		    undef $self->{RESULTS};		    
 		    parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
 		    @dataIds = keys(%{$self->{RESULTS}});
+		    
 		    if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
 		      $localContent = $localContent . retrieveRRD($self, $dataIds[0]); 
 		      $response = getResultMessage($messageIdReturn, $messageId, "response", $localContent);
@@ -235,7 +241,8 @@ sub retrieveRRD {
     $self->{CONF}->{"RRDTOOL"}, 
     $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
     "",
-    1
+    1,
+    $self->{CONF}->{"DEBUG"}
   );
 		      
   $datadb->openDB();
@@ -256,7 +263,7 @@ sub retrieveRRD {
     foreach $a (sort(keys(%rrd_result))) {
       foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
 	if($b eq $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}) {
-	  $responseString = $responseString . "    <nmwg:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$self->{RESULTS}->{$did}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-valueUnits"}."\"/>\n";
+	  $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$self->{RESULTS}->{$did}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-valueUnits"}."\"/>\n";
         }
       }
     }

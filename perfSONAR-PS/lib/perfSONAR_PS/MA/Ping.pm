@@ -147,19 +147,19 @@ sub handleRequest {
         foreach my $m (keys %{$self->{METADATA}}) {  
           if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) { 
       
-	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";	    
-
 	    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
               $self->{CONF}->{"LOGFILE"},
               $self->{CONF}->{"METADATA_DB_NAME"}, 
               $self->{CONF}->{"METADATA_DB_FILE"},
-              \%{$self->{NAMESPACES}}
+              \%{$self->{NAMESPACES}},
+	      $self->{CONF}->{"DEBUG"}
             );	  
-            $metadatadb->openDB;       
+            $metadatadb->openDB;        
       
-            print $self->{FILENAME}.":\tquery \"".$queryString."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
-
+	    my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";	     
+            print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
 	    my @resultsString = $metadatadb->query($queryString);   
+	    
 	    if($#resultsString != -1) {    
               for(my $x = 0; $x <= $#resultsString; $x++) {	
                 $resultsString[$x] =~ s/\{\}id=//;
@@ -167,18 +167,24 @@ sub handleRequest {
                 $resultsString[$x] =~ s/\n//;	    
 	        
                 $queryString = "/nmwg:data[\@metadataIdRef='".$resultsString[$x]."']";
-                my @dataResultsString = $metadatadb->query($queryString);
+		print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
+		my @dataResultsString = $metadatadb->query($queryString);
+		
 	        if($#dataResultsString != -1) {    
-                  $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
-
+                
+		  $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
+		  print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
                   my @metadataResultsString = $metadatadb->query($queryString);		  
-
+		  
                   $localContent = $localContent . $metadataResultsString[0];
-                  
 		  for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		    
+		    print "DEBUG:\tData \"".$dataResultsString[$x]."\" created.\n" if($self->{CONF}->{"DEBUG"});
+		    
 		    undef $self->{RESULTS};		    
 		    parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
 		    @dataIds = keys(%{$self->{RESULTS}});
+		    
 		    if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") {
 		      $localContent = $localContent . retrieveSQL($self, $dataIds[0]);
 		      $response = getResultMessage($messageIdReturn, $messageId, "response", $localContent);
@@ -208,11 +214,9 @@ sub handleRequest {
               error("Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search", __LINE__);  
               $response = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
             }
-
 	  }   
         }
-      }
-      
+      }   
     } 
     else {
       error("Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported", __LINE__); 
@@ -239,7 +243,8 @@ sub retrieveSQL {
     "DBI:SQLite:dbname=".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
     "", 
     "",
-    \@dbSchema
+    \@dbSchema,
+    $self->{CONF}->{"DEBUG"}
   );
 		      
   $datadb->openDB();
@@ -265,7 +270,7 @@ sub retrieveSQL {
     $query = "select * from ".$self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.";"
   }
 
-  print $self->{FILENAME}.":\tquery \"".$query."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
+  print "DEBUG:\tQuery \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
 
   my $result = $datadb->query($query);
   if($#{$result} == -1) {
@@ -274,8 +279,8 @@ sub retrieveSQL {
   }   
   else { 
     $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}."\">\n";
-    for(my $a = 0; $a <= $#{$result}; $a++) {      
-      $responseString = $responseString . "    <nmwg:datum";
+    for(my $a = 0; $a <= $#{$result}; $a++) {    
+      $responseString = $responseString . "    <ping:datum";
       $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
       $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
       my @misc = split(/,/,$result->[$a][4]);

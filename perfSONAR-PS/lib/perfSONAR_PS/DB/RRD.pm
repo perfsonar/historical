@@ -152,7 +152,6 @@ sub openDB {
   $self->{FUNCTION} = "\"openDB\""; 
   if(defined $self->{PATH} and defined $self->{NAME}) {
     RRDp::start $self->{PATH};
-    print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
     error("Missing path or name in object", __LINE__);        
@@ -167,7 +166,6 @@ sub closeDB {
   if((defined $self->{PATH} and $self->{PATH} ne "") and 
      (defined $self->{NAME} and $self->{NAME} ne "")){
     my $status = RRDp::end;  
-    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
     if($status) {
       error($self->{PATH}." has returned status \"".$status."\" on closing", __LINE__);    
     }
@@ -221,7 +219,7 @@ sub query {
       }
     }
     if($RRDp::error) {
-      print $self->{FILENAME}.":\tdatabase error in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+      error("Database error \"".$$answer."\"", __LINE__); 
       %rrd_result = ();
       $rrd_result{ANSWER} = $$answer;
     }

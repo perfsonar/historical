@@ -101,7 +101,6 @@ sub openDB {
         foreach my $prefix (keys %{$self->{NAMESPACES}}) {
           $self->{XPATH}->set_namespace($prefix, $self->{NAMESPACES}->{$prefix});
         }
-	print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
       else {
         error("Missing namespaces in object", __LINE__); 
@@ -120,7 +119,6 @@ sub closeDB {
   $self->{FUNCTION} = "\"closeDB\""; 
   if($self->{XML}) {
     $self->{XML}->close();
-    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
     error("File handle not open", __LINE__);   
@@ -139,13 +137,11 @@ sub query {
       my $nodeset = $self->{XPATH}->find($query);
       if($nodeset->size() <= 0) {
         $results[0] = "perfSONAR_PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
-        print $self->{FILENAME}.":\t0 results returned in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
       else {
         foreach my $node ($nodeset->get_nodelist) {            	    
           push @results, XML::XPath::XMLParser::as_string($node);
         }
-	print $self->{FILENAME}.":\tresults found in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       }
     }
     else {

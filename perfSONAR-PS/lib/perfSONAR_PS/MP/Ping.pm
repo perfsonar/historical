@@ -254,12 +254,15 @@ sub parseMetadata {
       $self->{CONF}->{"LOGFILE"},
       $self->{CONF}->{"METADATA_DB_NAME"}, 
       $self->{CONF}->{"METADATA_DB_FILE"},
-      \%{$self->{NAMESPACES}}
+      \%{$self->{NAMESPACES}},
+      $self->{CONF}->{"DEBUG"}
     );
 
     $metadatadb->openDB;
     my $query = "//nmwg:metadata";
-    my @resultsStringMD = $metadatadb->query($query);   
+    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
+    my @resultsStringMD = $metadatadb->query($query); 
+    
     if($#resultsStringMD != -1) {    
       for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
 	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
@@ -270,7 +273,9 @@ sub parseMetadata {
     }     
 
     $query = "//nmwg:data";
+    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
     my @resultsStringD = $metadatadb->query($query);   
+    
     if($#resultsStringD != -1) {    
       for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
         parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
@@ -282,7 +287,8 @@ sub parseMetadata {
     cleanMetadata(\%{$self}); 
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-    my $xml = readXML($conf{"METADATA_DB_FILE"});
+    my $xml = readXML($self->{CONF}->{"METADATA_DB_FILE"});
+    print "DEBUG:\tParsing \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" file.\n" if($self->{CONF}->{"DEBUG"});
     parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
     parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
     cleanMetadata(\%{$self});  
@@ -312,7 +318,8 @@ sub prepareData {
 	                               "DBI:SQLite:dbname=".$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}, 
                                        "",
                                        "",
-				       \@dbSchema);
+				       \@dbSchema,
+				       $self->{CONF}->{"DEBUG"});
       }
     }
     elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
@@ -352,6 +359,8 @@ sub prepareCollectors {
       }
       else {
         $commandString = $commandString . $host;
+	print "DEBUG:\tCommand \"".$commandString."\".\n" if($self->{CONF}->{"DEBUG"});
+	
         $self->{PING}->{$m} = new perfSONAR_PS::MP::Ping::Agent(
 	  $self->{CONF}->{"LOGFILE"},
           $commandString
@@ -380,14 +389,14 @@ sub collectMeasurements {
     my $results = $self->{PING}->{$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}}->getResults;
     foreach my $r (sort keys %{$results}) {
       
-      print "inserting \"".$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}.
+      print "DEBUG:\tinserting \"".$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}.
             "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
 	    "\", \"ping\", \""."numBytes=".$results->{$r}->{"bytes"}.",ttl=".
 	    $results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.
 	    ",units=".$results->{$r}->{"units"}."\" into table ".
 	    $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.
-	    ".\n";
-      
+	    ".\n" if($self->{CONF}->{"DEBUG"});
+             
       %dbSchemaValues = (
         id => $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}, 
         time => $results->{$r}->{"timeValue"}, 
@@ -403,9 +412,7 @@ sub collectMeasurements {
       
     }
     $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->closeDB;
-  }
-  print "\n";
-		
+  }		
   return;
 }
 

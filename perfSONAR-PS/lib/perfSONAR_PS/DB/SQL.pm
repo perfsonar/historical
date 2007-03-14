@@ -126,8 +126,7 @@ sub openDB {
       $self->{PASS}, 
       \%attr
     ) or 
-      error("Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__); 
-    print $self->{FILENAME}.":\tdatabase open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});	              
+      error("Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__);               
   };
   if($@) {
     error("Open error \"".$@."\"", __LINE__);
@@ -141,7 +140,6 @@ sub closeDB {
   $self->{FUNCTION} = "\"closeDB\"";  
   eval {   
     $self->{HANDLE}->disconnect();
-    print $self->{FILENAME}.":\tdatabase close in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   };
   if($@) {
     error("Close error \"".$@."\"", __LINE__);

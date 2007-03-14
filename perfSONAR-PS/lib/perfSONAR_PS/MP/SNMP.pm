@@ -422,12 +422,15 @@ sub parseMetadata {
       $self->{CONF}->{"LOGFILE"},
       $self->{CONF}->{"METADATA_DB_NAME"}, 
       $self->{CONF}->{"METADATA_DB_FILE"},
-      \%{$self->{NAMESPACES}}
+      \%{$self->{NAMESPACES}},
+      $self->{CONF}->{"DEBUG"}
     );
 
     $metadatadb->openDB;
     my $query = "//nmwg:metadata";
+    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
     my @resultsStringMD = $metadatadb->query($query);   
+    
     if($#resultsStringMD != -1) {    
       for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
 	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
@@ -438,7 +441,9 @@ sub parseMetadata {
     }  
 
     $query = "//nmwg:data";
+    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
     my @resultsStringD = $metadatadb->query($query);   
+    
     if($#resultsStringD != -1) {    
       for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
         parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
@@ -450,7 +455,8 @@ sub parseMetadata {
     cleanMetadata(\%{$self});       
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-    my $xml = readXML($conf{"METADATA_DB_FILE"});
+    my $xml = readXML($self->{CONF}->{"METADATA_DB_FILE"});
+    print "DEBUG:\tParsing \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" file.\n" if($self->{CONF}->{"DEBUG"});
     parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
     parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
     cleanMetadata(\%{$self});    
@@ -478,7 +484,8 @@ sub prepareData {
           $self->{CONF}->{"RRDTOOL"}, 
           $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
           "",
-          1
+          1,
+	  $self->{CONF}->{"DEBUG"}
         );
       }
       $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->setVariable($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"});
@@ -532,6 +539,10 @@ sub prepareCollectors {
       }  
   
       if(!defined $self->{SNMP}->{$self->{METADATA}->{$m}->{$hostName}}) {    	  
+        print "DEBUG:\tPreparing collector for \"".$self->{METADATA}->{$m}->{$hostName}.
+	  "\", \"".$self->{METADATA}->{$m}->{$snmpVersion}."\", \"".
+	  $self->{METADATA}->{$m}->{$snmpCommunity}."\".\n" if($self->{CONF}->{"DEBUG"});
+      
         $self->{SNMP}->{$self->{METADATA}->{$m}->{$hostName}} = new perfSONAR_PS::MP::SNMP::Agent(
 	  $self->{CONF}->{"LOGFILE"},
           $self->{METADATA}->{$m}->{$hostName}, 
@@ -568,7 +579,6 @@ sub prepareTime {
       $self->{REFTIME}->{$s} = $time;
       $self->{HOSTTICKS}->{$s} = 0;
       $self->{SNMP}->{$s}->setSession;
-
       $self->{SNMP}->{$s}->setVariable("1.3.6.1.2.1.1.3.0");
     }  
   }
@@ -585,7 +595,8 @@ sub collectMeasurements {
   $self->{FUNCTION} = "\"collectMeasurements\"";
   
   foreach my $s (keys %{$self->{SNMP}}) {
-print "Collecting for '" , $s , "'.\n";
+
+    print "DEBUG:\tCollecting data for \"".$s."\".\n" if($self->{CONF}->{"DEBUG"});
     
     my %results = ();
     %results = $self->{SNMP}->{$s}->collectVariables;
@@ -618,10 +629,11 @@ print "Collecting for '" , $s , "'.\n";
         if($self->{LOOKUP}->{$s."-".$r} and $self->{LOOKUP}->{$s."-".$r} ne "timeticks") {
 	  
 	  if($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-print "inserting: " , $self->{REFTIME}->{$s}  , "," , $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"} , "," , $results{$r} , "\n";
-	      				
-            $self->{DATADB}->{$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert($self->{REFTIME}->{$s}, 
-	                                                                                                                                         $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},			  				                                                                                         $results{$r});
+            print "DEBUG:\tinserting: " , $self->{REFTIME}->{$s},",", 
+	      $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}, 
+	      ",",$results{$r},"\n" if($self->{CONF}->{"DEBUG"});
+	      								
+            $self->{DATADB}->{$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert($self->{REFTIME}->{$s}, 	                                                                                                                                         $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},			  				                                                                                         $results{$r});
 	  }
 	  elsif(($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
 	        ($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
@@ -636,16 +648,18 @@ print "inserting: " , $self->{REFTIME}->{$s}  , "," , $self->{DATA}->{$self->{LO
       }
     }
   }
-		
-# NOTE: need a way to make sure we only do this for RRD db's ...
-		
+			
   my @result = ();
-  foreach my $db (keys %{$self->{DATADB}}) {    
-    $self->{DATADB}->{$db}->openDB;
-    @result = $self->{DATADB}->{$db}->insertCommit;
-    $self->{DATADB}->{$db}->closeDB;
-  }
-
+  foreach my $d (keys %{$self->{DATA}}) {
+    if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
+      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->openDB;
+      @result = $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insertCommit;
+      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->closeDB;
+    }
+    else {
+      # do nothing
+    }  
+  }  
   return;
 }
 

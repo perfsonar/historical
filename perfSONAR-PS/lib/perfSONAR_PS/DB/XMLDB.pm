@@ -115,7 +115,6 @@ sub openDB {
       Db::DB_CREATE|Db::DB_DIRTY_READ
     );
     $self->{TRANSACTION}->commit();
-    print $self->{FILENAME}.":\tdatabaes open in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   };
   if(my $e = catch std::exception) {
     error("Error \"".$e->what()."\"", __LINE__);
