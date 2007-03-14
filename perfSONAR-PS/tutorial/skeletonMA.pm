@@ -54,8 +54,7 @@ sub setConf {
     $self->{CONF} = \%{$conf};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -68,8 +67,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -82,8 +80,7 @@ sub setMetadata {
     $self->{METADATA} = \%{$metadata};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);  
   }
   return;
 }
@@ -96,9 +93,18 @@ sub setData {
     $self->{DATA} = \%{$data};
   }
   else {
-    printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\tMissing argument to ".$self->{FUNCTION}) 
-      if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
+    error("Missing argument", __LINE__);   
   }
+  return;
+}
+
+
+sub error {
+  my($msg, $line) = @_;  
+  $line = "N/A" if(!defined $line or $line eq "");
+  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
+  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -170,11 +176,17 @@ The only argument represents the 'conf' hash from the calling MA.
 
 (Re-)Sets the value for the 'data' object. 
 
+=head2 error($msg, $line)	
+
+A 'message' argument is used to print error information to the screen and log files 
+(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
+Meant to be used internally.
+
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>
+L<Carp>, L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::File>, 
+L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>, 
+L<perfSONAR_PS::MA::General>, L<Data::Dumper>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -186,9 +198,13 @@ The perfSONAR-PS subversion repository is located at:
   
 Questions and comments can be directed to the author, or the mailing list. 
 
+=head1 VERSION
+
+$Id$
+
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@eecis.udel.eduE<gt>
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

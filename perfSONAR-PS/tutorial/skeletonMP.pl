@@ -1,5 +1,8 @@
 #!/usr/bin/perl -w -I ../../lib
+
 use strict;
+use Getopt::Long;
+
 use threads;
 use threads::shared;
 use Thread::Semaphore; 
@@ -10,16 +13,20 @@ use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
-use perfSONAR_PS::MA::General;
-use perfSONAR_PS::MP::General;
 use skeletonMA;
 use skeletonMP;
 
-my $DEBUG = 0;
-if($#ARGV == 0) {
-  if($ARGV[0] eq "-v" || $ARGV[0] eq "-V") {
-    $DEBUG = 1;
-  }
+my $fileName = "skeletonMP.pl";
+my $functionName = "main";
+my $DEBUG = '';
+my $HELP = '';
+my $status = GetOptions ('verbose' => \$DEBUG,
+                         'help' => \$HELP);
+
+if(!$status or $HELP) {
+  print "$0: starts the ping MP and MA.\n";
+  print "\t$0 [--verbose --help]\n";
+  exit(1);
 }
 
 my %ns = (
@@ -31,7 +38,7 @@ my %ns = (
 		# Read in configuration information
 my %conf = ();
 readConfiguration("./skeletonMP.conf", \%conf);
-
+$conf{"DEBUG"} = $DEBUG;
 
 if(!$DEBUG) {
 		# flush the buffer
@@ -40,10 +47,7 @@ if(!$DEBUG) {
   &daemonize;
 }
 
-
-if($DEBUG) {
-  print "Starting '".threads->tid()."' as main\n";
-}
+print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DEBUG);
 
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
@@ -67,22 +71,14 @@ $regThread->join();
 
 
 
-# ################################################ #
-# Sub:		measurementPoint                   #
-# Args:		N/A                                #
-# Purpose:	Performs measurements at a         #
-#               periodic rate as specified in the  #
-#               storage medium                     #
-# ################################################ #
 sub measurementPoint {
-  if($DEBUG) {
-    print "Starting '".threads->tid()."' as MP\n";
-  }
-  
-  # initialize measurement info, time, etc.
-  
-  while(1) {
+  my $functionName = "measurementPoint";
+  print $fileName.":\tStarting '".threads->tid()."' as the MP in ".$functionName."\n" if($DEBUG);
 
+  # initialize measurement info, time, etc.
+    
+  while(1) {
+    
     # collect measurement info
     
     sleep($conf{"MP_SAMPLE_RATE"});
@@ -91,20 +87,11 @@ sub measurementPoint {
 }
 
 
-
-# ################################################ #
-# Sub:		measurementArchive                 #
-# Args:		N/A                                #
-# Purpose:	Implements the WS functionality of #
-#               an MA by listening on a port for   #
-#               messages and responding            #
-#               accordingly.                       #
-# ################################################ #
 sub measurementArchive {
-  if($DEBUG) {
-    print "Starting '".threads->tid()."' as MA on port '".$conf{"PORT"}."' and endpoint '".$conf{"ENDPOINT"}."'.\n";
-  }
-
+  my $functionName = "measurementArchive";  
+  print $fileName.":\tStarting '".threads->tid()."' as the MA listening at \"http://".getHostname().":".
+        $conf{"PORT"}.$conf{"ENDPOINT"}."\" in ".$functionName."\n" if($DEBUG);
+	
   my $listener = new perfSONAR_PS::Transport($conf{"LOGFILE"}, $conf{"PORT"}, $conf{"ENDPOINT"}, "", "", "");  
   $listener->startDaemon;
 
@@ -115,13 +102,11 @@ sub measurementArchive {
     my $response = "";
     if($listener->acceptCall == 1) {
 
-      if($DEBUG) {
-        print "Request:\t" , $listener->getRequest , "\n";
-      }
+      # do the ma stuff here...
 
-      # call the MA here...
-      
+      print $fileName.":\tReceived request \"".$listener->getRequest."\" in ".$functionName."\n" if($DEBUG);
       $response = getResultCodeMessage("", "", "response", "success", "sucess");
+      print $fileName.":\tSending response \"".$response."\" in ".$functionName."\n" if($DEBUG);
       
       $listener->setResponse($response, 1); 
     }
@@ -139,27 +124,15 @@ sub measurementArchive {
 }
 
 
-
-# ################################################ #
-# Sub:		registerLS                         #
-# Args:		N/A                                #
-# Purpose:	Periodically registers with a      #
-#               specified LS instance.             #
-# ################################################ #
 sub registerLS {
-  if($DEBUG) {
-    print "Starting '".threads->tid()."' as to register with LS '".$conf{"LS_INSTANCE"}."'.\n";
-  }
+  my $functionName = "registerLS";  
+  print $fileName.":\tStarting '".threads->tid()."' as the LS registration to \"".
+        $conf{"LS_INSTANCE"}."\" in ".$functionName."\n" if($DEBUG);
+	
   return
 }
 
 
-
-# ################################################ #
-# Sub:		daemonize                          #
-# Args:		N/A                                #
-# Purpose:	Background process		   #
-# ################################################ #
 sub daemonize {
   chdir '/' or die "Can't chdir to /: $!";
   open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
@@ -170,3 +143,78 @@ sub daemonize {
   setsid or die "Can't start a new session: $!";
   umask 0;
 }
+
+
+=head1 NAME
+
+pingMP.pl - An Ping based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
+capabilities.
+
+=head1 DESCRIPTION
+
+This script creates an MP and MA for an Ping based collector.  The service is also capable
+of registering with an LS instance.  
+
+=head1 SYNOPSIS
+
+./pingMP.pl [--verbose | --help]
+
+The verbose flag allows lots of debug options to print to the screen.  If the option is
+omitted the service will run in daemon mode.
+
+=head1 FUNCTIONS
+
+The following functions are used within this script to execute the 3 major tasks of
+LS registration, MP operation, and MA listening and delivery.
+
+=head2 measurementPoint
+
+This function, meant to be used in the context of a thread, will continuously poll
+the 'store.xml' list of metadata to gather measurements, storing them in backend
+storage also specified by the 'store.xml' file.  
+
+=head2 measurementArchive
+
+This function, meant to be used in the context of a thread, will listen on an external
+port (specified in the conf file) and serve requests for data from outside entities.  The
+data and metadata are stored in various database structures.
+
+=head2 registerLS
+
+This function, meant to be used in the context of a thread, will continously register
+and update its information with the LS specified in the conf file.  
+
+=head2 daemonize
+
+Sends the program to the background by eliminating ties to the calling terminal.  
+
+=head1 REQUIRES
+
+Getopt::Long;
+threads
+threads::shared
+Thread::Semaphore
+Time::HiRes qw( gettimeofday );
+POSIX qw( setsid )
+perfSONAR_PS::Common
+perfSONAR_PS::Transport
+perfSONAR_PS::MP::Ping
+perfSONAR_PS::MA::Ping
+
+=head1 AUTHOR
+
+Jason Zurawski <zurawski@internet2.edu>
+
+=head1 VERSION
+
+$Id$
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Jason Zurawski
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut

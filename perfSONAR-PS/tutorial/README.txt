@@ -1,6 +1,6 @@
 Howto					03/12/07
 					Jason Zurawski
-					zurawski@eecis.udel.edu
+					zurawski@internet2.edu
 ---------------------------------------------------------------
 
 Purpose:
