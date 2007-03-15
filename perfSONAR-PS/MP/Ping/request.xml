@@ -14,10 +14,10 @@
     </ping:subject>
     <nmwg:parameters id="3">
       <select:parameter name="time" operator="gte">
-        1173906841
+        1173985120
       </select:parameter>
       <select:parameter name="time" operator="lte">
-        1173906871
+        1173985130
       </select:parameter>          
     </nmwg:parameters>    
   </nmwg:metadata>

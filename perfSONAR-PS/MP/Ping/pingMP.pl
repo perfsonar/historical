@@ -12,7 +12,6 @@ use POSIX qw( setsid );
 use Data::Dumper;
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Transport;
 use perfSONAR_PS::MA::Ping;
 use perfSONAR_PS::MP::Ping;
 
@@ -90,36 +89,14 @@ sub measurementPoint {
 
 sub measurementArchive {
   my $functionName = "measurementArchive";  
-  print $fileName.":\tStarting '".threads->tid()."' as the MA listening at \"http://".getHostname().":".
-        $conf{"PORT"}.$conf{"ENDPOINT"}."\" in ".$functionName."\n" if($DEBUG);
-	
-  my $listener = new perfSONAR_PS::Transport($conf{"LOGFILE"}, $conf{"PORT"}, $conf{"ENDPOINT"}, "", "", "");  
-  $listener->startDaemon;
+  print $fileName.":\tStarting '".threads->tid()."' as the MA in ".$functionName."\n" if($DEBUG);
 
-  my $MDId = genuid();
-  my $DId = genuid();
-    								
+  my $ma = new perfSONAR_PS::MA::Ping(\%conf, \%ns, "", "");
+  $ma->init;  
   while(1) {
-    my $response = "";
-    if($listener->acceptCall == 1) {
-      my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns, "", "");
-
-      print $fileName.":\tReceived request \"".$listener->getRequest."\" in ".$functionName."\n" if($DEBUG);
-      $response = $ma->handleRequest($listener->getRequest);
-      print $fileName.":\tSending response \"".$response."\" in ".$functionName."\n" if($DEBUG);
-      
-      $listener->setResponse($response, 1); 
-    }
-    else {
-      my $msg = "Sent Request has was not expected: ".
-                 $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
-		 $listener->{REQUEST}->headers->{"soapaction"}.".";
-      printError($conf{"LOGFILE"}, $msg); 
-      $response = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
-      $listener->setResponse($response, 1); 		 	  
-    }
-    $listener->closeCall;
-  }
+    $ma->receive;
+    $ma->respond;
+  }  
   return;
 }
 
@@ -207,7 +184,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 COPYRIGHT AND LICENSE
 
