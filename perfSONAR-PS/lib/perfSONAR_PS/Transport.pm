@@ -15,8 +15,6 @@ use perfSONAR_PS::Common;
 @ISA = ('Exporter');
 @EXPORT = ();
 
-our $VERSION = '0.03';
-
 sub new {
   my ($package, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint, $debug) = @_; 
   my %hash = ();
@@ -526,10 +524,7 @@ Meant to be used internally.
 
 L<Carp>, L<HTTP::Daemon>, L<HTTP::Response>, L<HTTP::Headers>, L<HTTP::Status>, 
 L<XML::XPath>, L<XML::Writer>, L<XML::Writer::String>, L<LWP::UserAgent>, 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>, 
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::MP::SNMP>, 
-L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, 
-L<perfSONAR_PS::MA::Ping>
+L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -543,7 +538,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 

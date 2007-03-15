@@ -4,6 +4,7 @@ package perfSONAR_PS::MA::General;
 use Carp qw( carp );
 use Exporter;  
 use perfSONAR_PS::Common;
+
 @ISA = ('Exporter');
 @EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
            'getResultCodeData', 'getMetadatXQuery');
@@ -303,10 +304,7 @@ Meant to be used internally.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::SNMP>, 
-L<perfSONAR_PS::MA::Ping>
+L<Carp>, L<Exporter>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -320,7 +318,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 

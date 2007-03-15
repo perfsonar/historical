@@ -11,8 +11,6 @@ use Time::HiRes qw( gettimeofday );
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
            'chainMetadata', 'countRefs', 'genuid', 'getHostname');
 
-our $VERSION = '0.03';
-
 sub readXML {
   my ($file)  = @_;
   if(defined $file and $file ne "") {
@@ -504,10 +502,7 @@ Returns the output of the 'hostname' function.
 
 =head1 SEE ALSO
 
-L<Carp>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<perfSONAR_PS::Transport>, 
-L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::RRD>, 
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, L<perfSONAR_PS::MP::Ping>, 
-L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, L<perfSONAR_PS::MA::Ping>
+L<Carp>, L<Exporter>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -521,7 +516,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 

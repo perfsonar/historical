@@ -3,11 +3,10 @@
 package perfSONAR_PS::DB::RRD;
 use RRDp;
 use perfSONAR_PS::Common;
+
 @ISA = ('Exporter');
 @EXPORT = ();
 	   
-our $VERSION = '0.03';
-
 sub new {
   my ($package, $log, $path, $name, $dss, $error, $debug) = @_;   
   my %hash = ();
@@ -515,10 +514,7 @@ Meant to be used internally.
 
 =head1 SEE ALSO
 
-L<RRDp>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::DB::SQL>, 
-L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::MP::SNMP>, 
-L<perfSONAR_PS::MP::Ping>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::MA::SNMP>, 
-L<perfSONAR_PS::MA::Ping>
+L<RRDp>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -532,7 +528,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 
