@@ -57,7 +57,7 @@ my $mpThread = threads->new(\&measurementPoint);
 my $maThread = threads->new(\&measurementArchive);
 my $regThread = threads->new(\&registerLS);
 
-if(!defined $maThread || !defined $mpThread || !defined $regThread) {
+if(!defined $maThread || !defined $maThread || !defined $regThread) {
   print "Thread creation has failed...exiting...\n";
   exit(1);
 }
