@@ -39,10 +39,9 @@ sub handleRequest {
   $self->{FUNCTION} = "\"handleRequest\"";   
   undef $self->{RESPONSE};
 
-  my $xp = XML::XPath->new( xml => $self->{REQUEST} );
-  $xp->clear_namespaces();
-  $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-  my $nodeset = $xp->find('//nmwg:message');
+  my $parser = XML::LibXML->new();
+  $self->{REQUESTDOM} = $parser->parse_string($self->{REQUEST});   
+  my $nodeset = $self->{REQUESTDOM}->find("/nmwg:message");
 
   if($nodeset->size() < 1) {
     my $msg = "Message element not found within request";
@@ -50,26 +49,21 @@ sub handleRequest {
     $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
   }
   elsif($nodeset->size() == 1) {
-    my @messages = $nodeset->get_nodelist;
-    my $messageId = "";
-    my $messageType = "";    
+
+    my $msg = $nodeset->get_node(1);
+    my $messageId = $msg->getAttribute("id");
+    my $messageType = $msg->getAttribute("type");    
     my $messageIdReturn = genuid();    
-    foreach my $attr ($messages[0]->getAttributes) {
-      if($attr->getLocalName eq "id") {
-        $messageId = $attr->getNodeValue;
-      }
-      elsif($attr->getLocalName eq "type") {
-        $messageType = $attr->getNodeValue;
-      }
-    }
-     
-    parse($self->{REQUEST}, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
-    chainMetadata(\%{$self->{METADATA}});
-    parse($self->{REQUEST}, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");   
+
+    print "messageId:\t" , $messageId , "\n";
+    print "messageType:\t" , $messageType , "\n";
+    print "messageIdReturn:\t" , $messageIdReturn , "\n";
+         
+    $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACES}->{"nmwg"});
             
-    foreach my $m (keys %{$self->{METADATA}}) {
-      if(countRefs($m, \%{$self->{DATA}}, "nmwg:data-metadataIdRef") == 0) {
-        delete $self->{METADATA}->{$m};
+    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+      if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACES}->{"nmwg"}, "data", "metadataIdRef") == 0) {
+        $self->{REQUESTDOM}->getDocumentElement->removeChild($m);
       }
     }
 
@@ -84,7 +78,7 @@ sub handleRequest {
       handleXMLDB($self, $messageIdReturn, $messageId);
     } 
     else {
-      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported";
+      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not supported";
       perfSONAR_PS::MA::Base::error($msg, __LINE__);   
       $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     } 
@@ -115,9 +109,9 @@ sub handleXMLDB {
   $self->{FUNCTION} = "\"handleXMLDB\"";   
 
   my $localContent = "";
-  foreach my $d (keys %{$self->{DATA}}) {
-    foreach my $m (keys %{$self->{METADATA}}) {  
-      if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) { 
+  foreach my $d ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
+    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
+      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
 
 	my $metadatadb = new perfSONAR_PS::DB::XMLDB(
           $self->{CONF}->{"LOGFILE"},
@@ -128,11 +122,11 @@ sub handleXMLDB {
         );	  
         $metadatadb->openDB;              
 
-	my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self->{METADATA}}, \%{$self->{TIME}}, $m) . "]/\@id";
+	my $queryString = "/nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id")) . "]/\@id";
         print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
 	my @resultsString = $metadatadb->query($queryString);   
-	    
-	if($#resultsString != -1) {    
+    
+	if($#resultsString != -1) {          
           for(my $x = 0; $x <= $#resultsString; $x++) {	
             $resultsString[$x] =~ s/\{\}id=//;
             $resultsString[$x] =~ s/\"//g;
@@ -142,41 +136,44 @@ sub handleXMLDB {
             print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
 	    my @dataResultsString = $metadatadb->query($queryString);
 		
-	    if($#dataResultsString != -1) {    
-		
+	    if($#dataResultsString != -1) {    	
               $queryString = "/nmwg:metadata[\@id='".$resultsString[$x]."']";
               print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
+
               my @metadataResultsString = $metadatadb->query($queryString);		  
 
               $localContent = $localContent . $metadataResultsString[0];  
               for(my $y = 0; $y <= $#dataResultsString; $y++) {
 		    
-		print "DEBUG:\tData \"".$dataResultsString[$x]."\" created.\n" if($self->{CONF}->{"DEBUG"});
-		    
+		print "DEBUG:\tData \"".$dataResultsString[$y]."\" created.\n" if($self->{CONF}->{"DEBUG"});		    
 		undef $self->{RESULTS};		    
-		parse($dataResultsString[$x], \%{$self->{RESULTS}}, \%{$self->{NAMESPACES}}, "//nmwg:data");		  
-		@dataIds = keys(%{$self->{RESULTS}});
-		    
-		if($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-		  $localContent = $localContent . retrieveRRD($self, $dataIds[0]);		       
+
+                my $parser = XML::LibXML->new();
+                $self->{RESULTS} = $parser->parse_string($dataResultsString[$y]);   
+                my $d = $self->{RESULTS}->find("//nmwg:data")->get_node(1);
+  		 		
+                my $type = extract(
+                  \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+                  
+		if($type eq "rrd") {
+		  $localContent = $localContent . retrieveRRD($self, $d);		       
 		  $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "response", $localContent);		    
 		}
-		elsif(($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql") or 
-		      ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
-	              ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "xmldb") or 
-		      ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
-		  my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
-		    "\" is not yet supported";
+		elsif($type eq "sqlite") {
+		  $localContent = $localContent . retrieveSQL($self, $d);		  		       
+		  $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "response", $localContent);	
+		}		
+		elsif(($type eq "mysql") or ($type eq "xmldb") or ($type eq "file")){
+		  my $msg = "Database \"".$type."\" is not yet supported";
 		  perfSONAR_PS::MA::Base::error($msg, __LINE__);  
                   $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
 		}
 		else {
-		  my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
-		    "\" is not yet supported";
+		  my $msg = "Database \"".$type."\" is not yet supported";
 		  perfSONAR_PS::MA::Base::error($msg, __LINE__);  
                   $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
 		}
-              }
+              }       
 	    }
             else {
 	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
@@ -193,34 +190,100 @@ sub handleXMLDB {
       }   
     }
   }
-
   return;
 }
 
 
 sub retrieveSQL {
-  my($self, $did) = @_;
+  my($self, $d) = @_;
   $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
   $self->{FUNCTION} = "\"retrieveSQL\""; 
   my $responseString = "";
+
+  my @dbSchema = ("id", "time", "value", "eventtype", "misc");
+
+  my $file = extract(
+    \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+  my $table = extract(
+    \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
     
-  # fill in later
+  my $id = genuid();
+  my $datadb = new perfSONAR_PS::DB::SQL(
+    $self->{CONF}->{"LOGFILE"},
+    "DBI:SQLite:dbname=".$file,
+    "", 
+    "",
+    \@dbSchema,
+    $self->{CONF}->{"DEBUG"}
+  );
+		      
+  $datadb->openDB();
   
+  my $query = "";
+  if($self->{TIME}->{"START"} or $self->{TIME}->{"END"}) {
+    $query = "select * from ".$table." where id=\"".$d->getAttribute("metadataIdRef")."\" and";
+    my $queryCount = 0;
+    if($self->{TIME}->{"START"}) {
+      $query = $query." time > ".$self->{TIME}->{"START"};
+      $queryCount++;
+    }
+    if($self->{TIME}->{"END"}) {
+      if($queryCount) {
+        $query = $query." and time < ".$self->{TIME}->{"END"}.";";
+      }
+      else {
+        $query = $query." time < ".$self->{TIME}->{"END"}.";";
+      }
+    }
+  }
+  else {
+    $query = "select * from ".$table.";"
+  }  
+
+  print "DEBUG:\tQuery \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});  
+  
+  my $result = $datadb->query($query);
+  if($#{$result} == -1) {
+    my $msg = "Query \"".$query."\" returned 0 results";
+    perfSONAR_PS::MA::Base::error($msg, __LINE__);
+    $responseString = $responseString . getResultCodeData($id, $d->getAttribute("metadataIdRef"), $msg); 
+  }   
+  else { 
+    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$d->getAttribute("metadataIdRef")."\">\n";
+    for(my $a = 0; $a <= $#{$result}; $a++) {    
+      $responseString = $responseString . "    <ping:datum";
+      $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
+      $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
+      my @misc = split(/,/,$result->[$a][4]);
+      foreach my $m (@misc) {
+        my @pair = split(/=/,$m);
+	$responseString = $responseString." ".$pair[0]."=\"".$pair[1]."\""; 
+      }
+      $responseString = $responseString . " />\n";
+    }
+    $responseString = $responseString . "  </nmwg:data>\n";
+  }  
+
+  $datadb->closeDB();	  
+   
   return $responseString;
 }
 
 
 sub retrieveRRD {
-  my($self, $did) = @_;
+  my($self, $d) = @_;
   $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
   $self->{FUNCTION} = "\"retrieveRRD\"";   
   my $responseString = "";
+
+  my $file = extract(
+    \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
 
   my $id = genuid();
   my $datadb = new perfSONAR_PS::DB::RRD(
     $self->{CONF}->{"LOGFILE"},
     $self->{CONF}->{"RRDTOOL"}, 
-    $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
+    $file,
     "",
     1,
     $self->{CONF}->{"DEBUG"}
@@ -238,15 +301,21 @@ sub retrieveRRD {
   if($datadb->getErrorMessage()) {
     my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
     perfSONAR_PS::MA::Base::error($msg, __LINE__);
-    $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
+    $responseString = $responseString . getResultCodeData($id, $d->getAttribute("metadataIdRef"), $msg); 
   }
   else {
     my @keys = keys(%rrd_result);
-    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}."\">\n";
+    $responseString = $responseString . "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$d->getAttribute("metadataIdRef")."\">\n";
+    
+    my $dataSource = extract(
+      \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
+    my $valueUnits = extract(
+      \%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"valueUnits\"]")->get_node(1));
+    
     foreach $a (sort(keys(%rrd_result))) {
       foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
-	if($b eq $self->{RESULTS}->{$did}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}) {
-	  $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$self->{RESULTS}->{$did}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-valueUnits"}."\"/>\n";
+	if($b eq $dataSource) {
+	  $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
         }
       }
     }
@@ -289,14 +358,13 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
     
-    my $ma = perfSONAR_PS::MA::SNMP->new(\%conf);
+    my $ma = perfSONAR_PS::MA::SNMP->new(\%conf, \%ns, "");
 
     # or
     # $ma = perfSONAR_PS::MA::SNMP->new;
     # $ma->setConf(\%conf);
     # $ma->setNamespaces(\%ns);    
-    # $ma->setMetadata(\%metadata);   
-    # $ma->setData(\%data); 
+    # $ma->setStore($store);   
         
     $ma->init;  
     while(1) {
@@ -314,21 +382,18 @@ Additional logic is needed to address issues such as different backend storage f
 
 The offered API is simple, but offers the key functions we need in a measurement archive. 
 
-=head2 new(\%conf)
+=head2 new(\%conf, \%ns, $store)
 
-The only argument represents the 'conf' hash from the calling MA.
+The arguments represent a 'conf' hash from the calling MA, a hash of namespaces, and a LibXML DOM
+object for the store file.
 
 =head2 setConf(\%conf)
 
 (Re-)Sets the value for the 'conf' hash. 
 
-=head2 setMetadata(\%metadata)
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' hash. 
-
-=head2 setData(\%data)
-
-(Re-)Sets the value for the 'data' hash. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
 
 =head2 init()
 
@@ -391,7 +456,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

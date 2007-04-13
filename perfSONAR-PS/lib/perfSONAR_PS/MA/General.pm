@@ -7,7 +7,7 @@ use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'getMetadatXQuery');
+           'getResultCodeData', 'getMetadatXQuery', 'extract');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   
@@ -87,109 +87,143 @@ sub getResultCodeData {
 
 
 sub getMetadatXQuery {
-  my($metadata, $time, $id) = @_;
-  my $queryString = "";
+  my($ma, $id) = @_;
+  $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
+  $ma->{FUNCTION} = "\"getMetadatXQuery\"";    
+  if((defined $ma and $ma ne "") and
+     (defined $id and $id ne "")) {
+     
+    my $m = $ma->{REQUESTDOM}->find("//nmwg:metadata[\@id=\"".$id."\"]")->get_node(1);
+  
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+      $ma->{TIME}->{"START"} = extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+      $ma->{TIME}->{"END"} = extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+      $ma->{TIME}->{"START"} = eval(extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+      $ma->{TIME}->{"END"} = eval(extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+      $ma->{TIME}->{"START"} = extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
+      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")) {
+      $ma->{TIME}->{"CF"} = extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")->get_node(1));
+    }
+    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")) {
+      $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
+        $m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")->get_node(1));
+    }
+  
+    foreach $t (keys %{$ma->{TIME}}) {
+      $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
+    }
+  
+    $queryString = subjectQuery($m, "");
+    return $queryString;  
+  }
+  else {
+    perfSONAR_PS::MA::Base::error("Missing argument", __LINE__);
+  }
+  return "";
+}
+
+
+sub subjectQuery {
+  my($node, $queryString) = @_;
   my $queryCount = 0;
   
-  my %struct = ();
-  foreach my $m (keys %{$metadata->{$id}}) {
-    my $attribute = "";
-    my $element = "";
-    if(($m =~ m/^.*-id$/) or 
-       ($m =~ m/^.*IdRef$/)) {	  
-      # ignore for now
-    }
-    elsif(($m =~ m/^.*:parameter-time-.*$/) or 
-          ($m =~ m/^.*:parameter-consolidationFunction$/) or 
-	  ($m =~ m/^.*:parameter-resolution$/)) {
-      if($m =~ m/^.*select:parameter-time-gte$/) {
-        $time->{"START"} = $metadata->{$id}->{$m};
+  if($node->nodeType != 3) {
+    if(!($node->nodePath() =~ m/nmwg:parameters\/select:parameter/)) {
+      (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+      $path =~ s/\[\d\]//g;
+      $path =~ s/^\///g;  
+    
+      foreach my $attr ($node->attributes) {
+        if($attr->isa('XML::LibXML::Attr')) {
+          if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
+            if($queryCount == 0) {
+              if($queryString) {
+                $queryString = $queryString . " and ";
+              }
+              $queryString = $queryString . $path . "[";
+              $queryString = $queryString . "\@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+              $queryCount++;
+            }
+            else {
+              $queryString = $queryString . " and \@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+            }
+          }
+        }
       }
-      elsif($m =~ m/^.*select:parameter-time-gt$/) {
-        $time->{"START"} = $metadata->{$id}->{$m}+1;
-      }
-      elsif($m =~ m/^.*select:parameter-time-lte$/) {
-        $time->{"END"} = $metadata->{$id}->{$m};
-      }
-      elsif($m =~ m/^.*select:parameter-time-lt$/) {
-        $time->{"END"} = $metadata->{$id}->{$m}+1;
-      }
-      elsif($m =~ m/^.*select:parameter-time-eq$/) {
-        $time->{"START"} = $metadata->{$id}->{$m};
-        $time->{"END"} = $metadata->{$id}->{$m};
-      }				
-      elsif($m =~ m/^.*select:parameter-resolution$/) {
-        $time->{"RESOLUTION"} = $metadata->{$id}->{$m};
-      }	
-      elsif($m =~ m/^.*select:parameter-consolidationFunction$/) {
-        $time->{"CF"} = $metadata->{$id}->{$m};
-      }	          
-    }    
-    elsif(($m =~ m/^.*:dst$/) or ($m =~ m/^.*:src$/) or 
-       ($m =~ m/^.*:ifAddress$/) or ($m =~ m/^.*:ipAddress$/)){
-      $element = $m;
-      $element =~ s/^.*:metadata\///;      
-      $struct{$element}{"text"} = $metadata->{$id}->{$m};
-    }
-    elsif(($m =~ m/^.*:dst-.*$/) or ($m =~ m/^.*:src-.*$/) or 
-          ($m =~ m/^.*:ifAddress-.*$/) or ($m =~ m/^.*:ipAddress-.*$/)) {
-      $attribute = $m;
-      $attribute =~ s/^.*:metadata.*://; 
-      $attribute =~ s/^.*-//; 
-      $element = $m;
-      $element =~ s/^.*:metadata\///;
-      $element =~ s/-.*$//;
-      $struct{$element}{$attribute} = $metadata->{$id}->{$m};   
-    }
-    elsif(($m =~ m/^.*:parameter.*$/)) {
-      $attribute = $m;
-      $attribute =~ s/^.*:metadata.*://; 
-      $attribute =~ s/^.*-//; 
-      $element = $m;
-      $element =~ s/^.*:metadata\///;
-      $element =~ s/-.*$//;
-      $struct{$element}{$attribute} = $metadata->{$id}->{$m};   
-    }
-    else {
-      $element = $m;
-      $element =~ s/^.*:metadata\///;      
-      $struct{$element}{"text"} = $metadata->{$id}->{$m};
-    }            
-  } 
-
-  foreach my $s (sort keys %struct) {
-    if(!$queryCount) {
-      $queryString = $queryString.$s."[";
-      $queryCount++;
-    }
-    else {
-      $queryString = $queryString." and ".$s."[";
-    } 
-    my $queryCount2 = 0;
-    foreach my $s2 (sort keys %{$struct{$s}}) {
-      if($s2 eq "text") {
-        if(!$queryCount2) {
-          $queryString = $queryString."text()='".$struct{$s}{$s2}."'";
-          $queryCount2++;
-	}
-	else {
-          $queryString = $queryString." and text()='".$struct{$s}{$s2}."'";
-	}
-      }
-      else {
-        if(!$queryCount2) {
-          $queryString = $queryString."\@".$s2."='".$struct{$s}{$s2}."'";
-          $queryCount2++;
-	}
-	else {
-          $queryString = $queryString." and \@".$s2."='".$struct{$s}{$s2}."'";
-	}
+   
+      if($node->hasChildNodes()) {
+        my @children = $node->childNodes;
+        if($#children == 0) {
+          if($node->firstChild->nodeType == 3) {        
+            (my $value = $node->firstChild->textContent) =~ s/\s*//g;
+            if($value) {
+              if($queryCount == 0) {
+                if($queryString) {
+                  $queryString = $queryString . " and ";
+                }
+                $queryString = $queryString . $path . "[";
+                $queryString = $queryString . "text()=\"" . $value . "\"";
+                $queryCount++;
+              }
+              else {
+                $queryString = $queryString . " and text()=\"" . $value . "\"";              
+              }
+              if($queryCount) {
+                $queryString = $queryString . "]"
+              }                   
+              return $queryString;
+            }        
+          }
+        }
+        if($queryCount) {
+          $queryString = $queryString . "]"
+        }
+        foreach my $c ($node->childNodes) {
+          $queryString = subjectQuery($c, $queryString);
+        }
       }
     }
-    $queryString = $queryString."]";
   }
-  
-  return $queryString;  
+  if($queryCount) {
+    $queryString = $queryString . "]"
+  }
+  return $queryString;
+}
+
+
+sub extract {
+  my($ma, $node) = @_;
+  $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
+  $ma->{FUNCTION} = "\"extract\"";    
+  if((defined $ma and $ma ne "") and
+     (defined $node and $node ne "")) {
+    if($node->getAttribute("value")) {
+      return $node->getAttribute("value");
+    }
+    else {
+      return $node->textContent;
+    }  
+  }
+  else {
+    perfSONAR_PS::MA::Base::error("Missing argument", __LINE__);
+  }
+  return "";
 }
 
 
@@ -225,33 +259,47 @@ and the methods can be invoked directly (and sparingly).
     $msg = getResultCodeMetadata($id, "error.ma.transport);
     
     $msg = getResultCodeData($id, $idRef, "something...");
-    
-    my %metadata = {
-      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-value' => 'ellis.internet2.edu',
-      'nmwg:metadata/nmwg:parameters-id' => '3',
-      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-value' => 'lager',
-      'nmwg:metadata/nmwg:parameters/select:parameter-time-lte' => '1173723366',
-      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:dst-type' => 'hostname',
-      'nmwg:metadata-id' => 'meta1',
-      'nmwg:metadata/ping:subject/nmwgt:endPointPair/nmwgt:src-type' => 'hostname',
-      'nmwg:metadata/nmwg:parameters/select:parameter-time-gte' => '1173723350',
-      'nmwg:metadata/ping:subject-id' => 'sub1'
-    };
 
-    my %time = ();
+
+    # Consider this metadata:
+    # 
+    # <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="1">
+    #   <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout">
+    #     <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+    #       <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
+    #       <nmwgt:hostName>stout</nmwgt:hostName>
+    #       <nmwgt:ifName>eth1</nmwgt:ifName>
+    #       <nmwgt:direction>in</nmwgt:direction>
+    #     </nmwgt:interface>
+    #   </netutil:subject>
+    #   <nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="2">
+    #     <select:parameter xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" name="time" operator="gte">
+    #       1176480310
+    #     </select:parameter>
+    #     <select:parameter xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" name="time" operator="lte">
+    #       1176480340
+    #     </select:parameter>      
+    #     <select:parameter xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" name="consolidationFunction">
+    #       AVERAGE
+    #     </select:parameter>     
+    #   </nmwg:parameters>
+    # </nmwg:metadata>
+
+    # note that $ma is an MA object.
+
     my $queryString = "/nmwg:metadata[".
-      getMetadatXQuery(\%metadata, 
-                       \%time, 
-		       $m).
+      getMetadatXQuery($ma, $id).
       "]/\@id";
 
     # the query after should look like this:
     #
     # /nmwg:metadata[
-    #   ping:subject/nmwgt:endPointPair/nmwgt:dst[@type='hostname' and 
-    #     @value='ellis.internet2.edu'] and 
-    #   ping:subject/nmwgt:endPointPair/nmwgt:src[@type='hostname' and 
-    #     @value='lager']
+    #   netutil:subject/nmwgt:interface/nmwgt:ifAddress[
+    #     @type="ipv4" and text()="128.4.133.167"
+    #   ] and 
+    #   netutil:subject/nmwgt:interface/nmwgt:hostName[text()="stout"] and 
+    #   netutil:subject/nmwgt:interface/nmwgt:ifName[text()="eth1"] and 
+    #   netutil:subject/nmwgt:interface/nmwgt:direction[text()="in"]
     # ]/@id
 
     # the time structure should look like this:
@@ -259,7 +307,19 @@ and the methods can be invoked directly (and sparingly).
     #   {
     #     'START' => '1173723350',
     #     'END' => '1173723366'
+    #     'CF' => 'AVERAGE'
+    #     'RESOLUTION' => ''    
     #   };
+    
+    # consider the elements that could be stored in '$node':
+    #
+    #  <nmwg:parameter name="something">value</nmwg:parameter>
+    #  <nmwg:parameter name="something" value="value" />
+    #  <nmwg:parameter name="something" value="value" />value2</nmwg:parameter>
+    #
+    # 'value' would be returned for each of them
+    #
+    my $value = extract($ma, $node);    
     
 =head1 DETAILS
 
@@ -290,11 +350,20 @@ The arguments are a metadata id, and an 'eventType' for the result code metadata
 
 The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
-=head2 getMetadatXQuery($sentmd, $sentt, $id)
+=head2 getMetadatXQuery($ma, $id)
 
 This function is meant to be used to convert a metadata object into an 
 XQuery statement.  Additionally, time based values are stored in a time
 object to be used in the subsequent data retrieval steps.  
+
+=head2 subjectQuery($node, $queryString)
+
+Helper function to create an xquery string from a metadata object.
+
+=head2 extract($ma, $node)
+
+Returns a 'value' from a xml element, either the 'value' attribute or the 
+text field.
 
 =head2 error($msg, $line)	
 
@@ -318,7 +387,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

@@ -12,7 +12,6 @@ use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 
-
 sub parseMetadata {
   my($self) = @_;
   $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";    
@@ -28,18 +27,25 @@ sub parseMetadata {
     );
 
     $metadatadb->openDB;
+    
     my $query = "//nmwg:metadata";
     print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
     my @resultsStringMD = $metadatadb->query($query);   
     
-    if($#resultsStringMD != -1) {    
+    my $storeString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store ";
+    foreach my $ns (keys %{$self->{NAMESPACES}}) {
+      $storeString = $storeString."xmlns:".$ns."=\"".$self->{NAMESPACES}->{$ns}."\" ";
+    }
+    $storeString = $storeString.">";
+    
+    if($#resultsStringMD != -1) {   
       for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
-	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
-      }
+	$storeString = $storeString . $resultsStringMD[$x];
+      }    
     }
     else {
       perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
-    }  
+    } 
 
     $query = "//nmwg:data";
     print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
@@ -47,61 +53,85 @@ sub parseMetadata {
     
     if($#resultsStringD != -1) {    
       for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
-        parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
+	$storeString = $storeString . $resultsStringD[$x];
       }
     }
     else {
       perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
-    }          
-    cleanMetadata(\%{$self});       
+    }                 
+    $storeString = $storeString."</nmwg:store>";
+
+    my $parser = XML::LibXML->new();
+    $self->{STORE} = $parser->parse_string($storeString); 
+    cleanMetadata(\%{$self});
   }
-  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-    my $xml = readXML($self->{CONF}->{"METADATA_DB_FILE"});
-    print "DEBUG:\tParsing \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" file.\n" if($self->{CONF}->{"DEBUG"});
-    parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
-    parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
-    cleanMetadata(\%{$self});    
+  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {   
+    my $filedb = new perfSONAR_PS::DB::File(
+      $self->{CONF}->{"LOGFILE"},
+      $self->{CONF}->{"METADATA_DB_FILE"},
+      $self->{CONF}->{"DEBUG"}
+    );  
+   
+    $filedb->openDB;   
+    $self->{STORE} = $filedb->getDOM(); 
+    cleanMetadata(\%{$self});
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
     perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__); 
   }  
   else {
-    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
+    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported", __LINE__);
   }
   return;
 }
+
 
 sub prepareData {
   my($self) = @_;
   $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
   $self->{FUNCTION} = "\"prepareData\"";
-      
-  foreach my $d (keys %{$self->{DATA}}) {
-    if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-      if(!defined $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) { 
-        $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = new perfSONAR_PS::DB::RRD(
+  cleanData(\%{$self});
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {    
+    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    if($type eq "rrd") {  
+      if(!defined $self->{DATADB}->{$file}) { 
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::RRD(
           $self->{CONF}->{"LOGFILE"}, 
           $self->{CONF}->{"RRDTOOL"}, 
-          $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"},
+          $file,
           "",
           1,
 	  $self->{CONF}->{"DEBUG"}
         );
       }
-      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->setVariable($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"});
+      $self->{DATADB}->{$file}->setVariable(
+        extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
+      );
     }
-    elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
-          ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")){
-      perfSONAR_PS::MP::Base::error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);    
-      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+    elsif($type eq "sqlite"){
+      if(!defined $self->{DATADB}->{$file}) {  
+        my @dbSchema = ("id", "time", "value", "eventtype", "misc");  
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::SQL(
+          $self->{CONF}->{"LOGFILE"}, 
+          "DBI:SQLite:dbname=".$file, 
+          "", 
+	  "", 
+	  \@dbSchema,
+	  $self->{CONF}->{"DEBUG"}
+        );
+      }
+    }
+    elsif($type eq "mysql") {
+      perfSONAR_PS::MP::Base::error($type." is not yet supported", __LINE__);    
+      removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id")); 
     }
     else {
-      perfSONAR_PS::MP::Base::error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);
-      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      perfSONAR_PS::MP::Base::error($type." is not supported", __LINE__);
+      removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id"));
     }  
   }  
-       
   return;
 }
 
@@ -113,57 +143,35 @@ sub prepareCollectors {
       
   $self->{LOOKUP}->{"1.3.6.1.2.1.1.3.0"} = "timeticks";
   
-  foreach my $m (keys %{$self->{METADATA}}) {
-    if($self->{METADATAMARKS}->{$m}) {
-    
-      my $hostName = "";  
-      my $ifIndex = ""; 
-      my $snmpVersion = "";
-      my $snmpCommunity = "";
-      my $OID = "";
-      foreach my $m2 (keys %{$self->{METADATA}->{$m}}) {
-        if($m2 =~ m/.*hostName$/) {
-          $hostName = $m2;
-        }
-        elsif($m2 =~ m/.*ifIndex$/) {
-          $ifIndex = $m2;
-        }
-        elsif($m2 =~ m/.*nmwg:parameter-OID$/) {
-          $OID = $m2;
-        }
-        elsif($m2 =~ m/.*nmwg:parameter-SNMPVersion$/) {
-          $snmpVersion = $m2;
-        }
-        elsif($m2 =~ m/.*nmwg:parameter-SNMPCommunity$/) {
-          $snmpCommunity = $m2;
-        }
-      }  
-  
-      if(!defined $self->{AGENT}->{$self->{METADATA}->{$m}->{$hostName}}) {    	  
-        print "DEBUG:\tPreparing collector for \"".$self->{METADATA}->{$m}->{$hostName}.
-	  "\", \"".$self->{METADATA}->{$m}->{$snmpVersion}."\", \"".
-	  $self->{METADATA}->{$m}->{$snmpCommunity}."\".\n" if($self->{CONF}->{"DEBUG"});
-      
-        $self->{AGENT}->{$self->{METADATA}->{$m}->{$hostName}} = new perfSONAR_PS::MP::SNMP::Agent(
+  foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+    if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
+      my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");
+      my $snmpPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/snmp/2.0/", "snmp");    
+      my $hostName = extract(\%{$self}, $m->find(".//".$topoPrefix.":hostName")->get_node(1));      
+      my $ifIndex = extract(\%{$self}, $m->find(".//".$topoPrefix.":ifIndex")->get_node(1));
+      my $snmpVersion = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPVersion\"]")->get_node(1));
+      my $snmpCommunity = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPCommunity\"]")->get_node(1));
+      my $OID = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"OID\"]")->get_node(1));    
+      if(!defined $self->{AGENT}->{$hostName}) {    	  
+        print "DEBUG:\tPreparing collector for \"".$hostName."\", \"".$snmpVersion."\", \"".$snmpCommunity."\".\n" if($self->{CONF}->{"DEBUG"});
+        $self->{AGENT}->{$hostName} = new perfSONAR_PS::MP::SNMP::Agent(
 	  $self->{CONF}->{"LOGFILE"},
-          $self->{METADATA}->{$m}->{$hostName}, 
+          $hostName, 
           "" ,
-          $self->{METADATA}->{$m}->{$snmpVersion},
-          $self->{METADATA}->{$m}->{$snmpCommunity},
-          "");
+          $snmpVersion,
+          $snmpCommunity,
+          ""
+        );
       }
-      $self->{AGENT}->{$self->{METADATA}->{$m}->{$hostName}}->setVariable($self->{METADATA}->{$m}->{$OID}.".".$self->{METADATA}->{$m}->{$ifIndex});
+      $self->{AGENT}->{$hostName}->setVariable($OID.".".$ifIndex);
   
-		# map the lookup information
-      foreach my $d (keys %{$self->{DATA}}) {
-        if($self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"} eq $m) {
-          $self->{LOOKUP}->{$self->{METADATA}->{$m}->{$hostName}."-".$self->{METADATA}->{$m}->{$OID}.".".$self->{METADATA}->{$m}->{$ifIndex}} = $d;
-          last;
+      foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+        if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+          push @{$self->{LOOKUP}->{$hostName."-".$OID.".".$ifIndex}}, $d->getAttribute("id");
         }
-      }
-    }
-  }
-
+      }       
+    }    
+  }  
   return;
 }
 
@@ -196,7 +204,6 @@ sub collectMeasurements {
   $self->{FUNCTION} = "\"collectMeasurements\"";
   
   foreach my $s (keys %{$self->{AGENT}}) {
-
     print "DEBUG:\tCollecting data for \"".$s."\".\n" if($self->{CONF}->{"DEBUG"});
     
     my %results = ();
@@ -225,37 +232,65 @@ sub collectMeasurements {
       $diff = $newHostTicks - $self->{HOSTTICKS}->{$s};
       $self->{HOSTTICKS}->{$s} = $newHostTicks;  
       $self->{REFTIME}->{$s} += $diff;
-
+            
       foreach my $r (keys %results) { 
         if($self->{LOOKUP}->{$s."-".$r} and $self->{LOOKUP}->{$s."-".$r} ne "timeticks") {
 	  
-	  if($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-            print "DEBUG:\tinserting: " , $self->{REFTIME}->{$s},",", 
-	      $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"}, 
-	      ",",$results{$r},"\n" if($self->{CONF}->{"DEBUG"});
-	      								
-            $self->{DATADB}->{$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert($self->{REFTIME}->{$s}, 	                                                                                                                                         $self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-dataSource"},			  				                                                                                         $results{$r});
-	  }
-	  elsif(($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite") or 
-	        ($self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
-	    perfSONAR_PS::MP::Base::error("Database \"".$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}
-	      ."\" is not yet supported", __LINE__);
-	  }
-	  else {
-	    perfSONAR_PS::MP::Base::error("Database \"".$self->{DATA}->{$self->{LOOKUP}->{$s."-".$r}}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}
-	      ."\" is not yet supported", __LINE__);
+	  foreach $did (@{$self->{LOOKUP}->{$s."-".$r}}) {	    
+	    my $d = $self->{STORE}->find("//nmwg:data[\@id=\"".$did."\"]")->get_node(1);
+            my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+	    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    
+            if($type eq "rrd") {
+              my $dataSource = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
+              print "DEBUG:\tinserting (RRD): " , $self->{REFTIME}->{$s},",", $dataSource, ",",
+                $results{$r},"\n" if($self->{CONF}->{"DEBUG"});
+              
+              $self->{DATADB}->{$file}->insert(
+                $self->{REFTIME}->{$s}, 
+                $dataSource, 
+                $results{$r}
+              );
+            }
+            elsif($type eq "sqlite") {
+              print "DEBUG:\tinserting (SQLite): " , $d->getAttribute("metadataIdRef"), ",", 
+                $self->{REFTIME}->{$s},",", $results{$r},",snmp,''\n" 
+                if($self->{CONF}->{"DEBUG"});
+              
+              %dbSchemaValues = (
+                id => $d->getAttribute("metadataIdRef"), 
+                time => $self->{REFTIME}->{$s}, 
+                value => $results{$r}, 
+                eventtype => "snmp",  
+                misc => ""
+              );  
+              $self->{DATADB}->{$file}->openDB;
+              $self->{DATADB}->{$file}->insert(
+                extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1)),
+	        \%dbSchemaValues
+	      );
+              $self->{DATADB}->{$file}->closeDB;
+            }
+            elsif($type eq "mysql") {
+              perfSONAR_PS::MP::Base::error("Database \"".$type."\" is not yet supported", __LINE__);
+            }
+            else {
+              perfSONAR_PS::MP::Base::error("Database \"".$type."\" is not supported", __LINE__);
+            }
 	  }
 	}
       }
     }
   }
-			
+		
   my @result = ();
-  foreach my $d (keys %{$self->{DATA}}) {
-    if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") {
-      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->openDB;
-      @result = $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insertCommit;
-      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->closeDB;
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    if($type eq "rrd") {
+      $self->{DATADB}->{$file}->openDB;
+      @result = $self->{DATADB}->{$file}->insertCommit;
+      $self->{DATADB}->{$file}->closeDB;
     }
     else {
       # do nothing
@@ -769,11 +804,11 @@ A brief description using the API:
 
 The offered API is simple, but offers the key functions we need in a measurement point. 
 
-=head2 new(\%conf, \%ns, \%metadata, \%data)
+=head2 new(\%conf, \%ns, $store)
 
 The first argument represents the 'conf' hash from the calling MP.  The second argument
-is a hash of namespace values.  The final 2 values are structures containing metadata or 
-data information.  
+is a hash of namespace values.  The final value is an LibXML DOM object representing
+a store.
 
 =head2 setConf(\%conf)
 
@@ -783,13 +818,9 @@ data information.
 
 (Re-)Sets the value for the 'namespace' hash. 
 
-=head2 setMetadata(\%metadata) 
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' object. 
-
-=head2 setData(\%data) 
-
-(Re-)Sets the value for the 'data' object. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
 
 =head2 parseMetadata()
 
@@ -824,7 +855,7 @@ Meant to be used internally.
 
 L<Net::SNMP>, L<perfSONAR_PS::MP::Base>,  L<perfSONAR_PS::MP::General>, 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>, L<XML::LibXML>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

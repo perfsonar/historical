@@ -8,9 +8,9 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
+use XML::LibXML;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
-
 
 sub parseMetadata {
   my($self) = @_;
@@ -525,7 +525,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

@@ -6,7 +6,7 @@ package perfSONAR_PS::MP::Base;
 @EXPORT = ();
 
 sub new {
-  my ($package, $conf, $ns, $metadata, $data) = @_; 
+  my ($package, $conf, $ns, $store) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MP::Base";
   $hash{"FUNCTION"} = "\"new\"";
@@ -16,20 +16,15 @@ sub new {
   if(defined $ns and $ns ne "") {  
     $hash{"NAMESPACES"} = \%{$ns};     
   }    
-  if(defined $metadata and $metadata ne "") {
-    $hash{"METADATA"} = \%{$metadata};
+  if(defined $store and $store ne "") {
+    $hash{"STORE"} = $store;
   }
   else {
-    %{$hash{"METADATA"}} = ();
+    $hash{"STORE"} = "";
   }  
-  if(defined $data and $data ne "") {
-    $hash{"DATA"} = \%{$data};
-  }
-  else {
-    %{$hash{"DATA"}} = ();
-  }
 
   %{$hash{"METADATAMARKS"}} = ();
+  %{$hash{"DATAMARKS"}} = ();
   %{$hash{"DATADB"}} = ();
   %{$hash{"LOOKUP"}} = ();
   %{$hash{"AGENT"}} = ();
@@ -66,29 +61,15 @@ sub setNamespaces {
 }
 
 
-sub setMetadata {
-  my ($self, $metadata) = @_;  
+sub setStore {
+  my ($self, $store) = @_;  
   $self->{FILENAME} = "perfSONAR_PS::MP::Base";    
-  $self->{FUNCTION} = "\"setMetadata\"";  
-  if(defined $metadata and $metadata ne "") {
-    $self->{METADATA} = \%{$metadata};
+  $self->{FUNCTION} = "\"setStore\"";  
+  if(defined $store and $store ne "") {
+    $self->{STORE} = $store;
   }
   else {
     error("Missing argument", __LINE__); 
-  }
-  return;
-}
-
-
-sub setData {
-  my ($self, $data) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::Base";    
-  $self->{FUNCTION} = "\"setData\"";  
-  if(defined $data and $data ne "") {
-    $self->{DATA} = \%{$data};
-  }
-  else {
-    error("Missing argument", __LINE__);    
   }
   return;
 }
@@ -143,8 +124,7 @@ to create other MP based objects.
     # my $mp = new perfSONAR_PS::MP::Base;
     # $mp->setConf(\%conf);
     # $mp->setNamespaces(\%ns);
-    # $mp->setMetadata(\%metadata);
-    # $mp->setData(\%data);
+    # $mp->setStore($store);
             
 =head1 DETAILS
 
@@ -168,13 +148,9 @@ data information.
 
 (Re-)Sets the value for the 'namespace' hash. 
 
-=head2 setMetadata(\%metadata) 
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' object. 
-
-=head2 setData(\%data) 
-
-(Re-)Sets the value for the 'data' object. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document. 
 
 =head2 error($msg, $line)	
 
@@ -184,7 +160,7 @@ Meant to be used internally.
 
 =head1 SEE ALSO
 
-N/A
+L<XML::LibXML::Document>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -198,7 +174,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

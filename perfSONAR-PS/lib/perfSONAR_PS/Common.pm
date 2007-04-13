@@ -78,166 +78,17 @@ sub printError {
 }
 
 
-sub parse {
-  my ($xml, $struct, $ns, $xpath) = @_;
-  if((defined $xml and $xml ne "") and 
-     (defined $struct and $struct ne "") and 
-     (defined $ns and $ns ne "")) {
-    
-    my $xp = undef;        
-    if(UNIVERSAL::can($xml, "isa") ? "1" : "0" == 1
-       and $xml->isa('XML::XPath::Node::Element')) {
-      $xp = $xml;
-    }
-    else {
-      $xp = XML::XPath->new( xml => $xml );
-      $xp->clear_namespaces();        
-      foreach my $prefix (keys %{$ns}) {
-        $xp->set_namespace($prefix, $ns->{$prefix});
-      }
-    }
-                    
-    my $nodeset = $xp->find($xpath);
-    if($nodeset->size() <= 0) {
-      carp("perfSONAR_PS::Common:\tXPath error in \"parse\" at line ".__LINE__.".");
-    }
-    else {
-      foreach my $node ($nodeset->get_nodelist) {           
-        my %s = ();
-        my $id = "";
-        my $mid = "";
-        foreach my $attr ($node->getAttributes) {
-          if($attr->getLocalName eq "id") {
-            $id = $attr->getNodeValue;
-            $s{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $id;
-          }
-          elsif($attr->getLocalName eq "metadataIdRef") {
-            $mid = $attr->getNodeValue;
-            $s{$node->getPrefix .":" . $node->getLocalName . "-" . $attr->getLocalName} = $mid;
-          }
-        }     
-        $path = $xpath;
-        $path =~ s/\/\///;
-        traverse($node, \%s, $path);
-        $struct->{$id} = \%s;
-      }
-    }  
-  }
-  else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"parse\" at line ".__LINE__.".");
-  }
-  return;
-}
-
-
-sub traverse {
-  my ($set, $struct, $path) = @_;
-  foreach my $element ($set->getChildNodes) {          
-  
-    foreach my $attr ($element->getAttributes) {
-      if($attr->getLocalName eq "id" or $attr->getLocalName eq "metadataIdRef") {
-        $struct->{$path."/".$element->getPrefix .":" . $element->getLocalName . "-" . $attr->getLocalName} = $attr->getNodeValue;
-      }
-    }    
-        
-    if($element->getNodeType == 3) {
-      my $value = $element->getValue;
-      $value =~ s/\s+//g;
-      if($value) {
-        $struct->{$path} = $value;
-      }    
-    }
-    elsif($element->getLocalName eq "parameter") {    
-      my $nm = "";
-      my $vl = "";
-      my $op = "";      
-      foreach my $attr2 ($element->getAttributes) {
-        if($attr2->getLocalName eq "name") {
-          $nm = $attr2->getNodeValue;
-        }
-        elsif($attr2->getLocalName eq "value") {
-          $vl = $attr2->getNodeValue;
-        }
-        elsif($attr2->getLocalName eq "operator") {
-          $op = $attr2->getNodeValue;
-        }        
-      }    
-      if(!$vl) {
-        if($element->getChildNode(1)) {
-          $vl = $element->getChildNode(1)->getValue;
-          $vl =~ s/\s+//g;
-          $vl =~ s/\n+//g;          
-        }
-      }
-      if($op) {
-        $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm."-".$op} = $vl;
-      }
-      else {
-        $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$nm} = $vl;      
-      }
-    }
-    else {
-      foreach my $attr ($element->getAttributes) {
-        if($element->getLocalName eq "ifAddress") {
-          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
-        }
-        elsif($element->getLocalName eq "ipAddress") {
-          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
-        }
-        elsif($element->getLocalName eq "src") {
-          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
-        }
-        elsif($element->getLocalName eq "dst") {
-          $struct->{$path."/".$element->getPrefix.":".$element->getLocalName."-".$attr->getLocalName} = $attr->getNodeValue;
-        }	
-      }
-      traverse($element, \%{$struct}, $path."/".$element->getPrefix .":" . $element->getLocalName);
-    }
-  }          
-  return;
-}
-
 sub chainMetadata {
-  my ($md) = @_;    
-  if((defined $md and $md ne "")) {  
-    my $flag = 1;
-    while($flag) {
-      $flag = 0;
-      foreach my $m (keys %{$md}) {
-        foreach $class (keys %{$md->{$m}}) {
-          $class =~ s/nmwg:metadata\///;
-          my @ns = split(/:/,$class);
-          if($#ns == 1) {
-            if($md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}) {
-              foreach my $m2 (keys %{$md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}}) {
-                my @mark = split(/-/,$m2);
-                if(!defined $mark[1] or ($mark[1] ne "id" and $mark[1] ne "metadataIdRef")) {
-                  if((!$md->{$m}{$m2} and $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and 
-                     $m2 ne $ns[0].":metadata-metadataIdRef") or 
-                     ($md->{$m}{$m2} ne $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2} and 
-                     $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and $m2 ne $ns[0].":metadata-metadataIdRef")) {
-                 
-                    $md->{$m}{$m2} = $md->{$md->{$m}{"nmwg:metadata/".$ns[0].":subject-metadataIdRef"}}{$m2};
-                    $flag = 1;
-                  }
-                }            
-              }
-            }
-            if($md->{$m}{$ns[0].":metadata-metadataIdRef"}) {
-              foreach my $m2 (keys %{$md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}}) {
-                my @mark = split(/-/,$m2);    
-                if(!defined $mark[1] or ($mark[1] ne "id" and $mark[1] ne "metadataIdRef")) {                         
-                  if((!$md->{$m}{$m2} and $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and 
-                     $m2 ne $ns[0].":metadata-metadataIdRef") or 
-                     ($md->{$m}{$m2} ne $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2} and
-                     $m2 ne "nmwg:metadata/".$ns[0].":subject-metadataIdRef" and $m2 ne $ns[0].":metadata-metadataIdRef")) {
-                 
-                    $md->{$m}{$m2} = $md->{$md->{$m}{$ns[0].":metadata-metadataIdRef"}}{$m2};
-                    $flag = 1;
-                  }
-                }
-              }
-            }
+  my($dom, $uri) = @_;
+  if(defined $dom and $dom ne "") {
+    foreach my $md ($dom->getElementsByTagNameNS($uri, "metadata")) {
+      my @subjects = $md->getElementsByLocalName("subject");
+      if($subjects[0]) {
+        if($subjects[0]->getAttribute("metadataIdRef")) {
+          foreach my $md2 ($dom->getElementsByTagNameNS($uri, "metadata")) {
+	    if($subjects[0]->getAttribute("metadataIdRef") eq $md2->getAttribute("id")) {
+              chain($md2, $md, $md2);
+	    }
           }
         }
       }
@@ -245,19 +96,91 @@ sub chainMetadata {
   }
   else {
     carp("perfSONAR_PS::Common:\tMissing argument(s) to \"chainMetadata\" at line ".__LINE__.".");
-  }  
+  }
+  return $dom;
+}
+
+sub chain {
+  my($node, $ref, $ref2) = @_;
+  if($node->nodeType != 3) {
+    
+    my $attrString = "";
+    my $counter = 0;
+    foreach my $attr ($node->attributes) {
+      if($attr->isa('XML::LibXML::Attr')) {
+        if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
+          if($counter == 0) {  
+            $attrString = $attrString . "@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+          }
+          else {
+            $attrString = $attrString . " and @" . $attr->getName . "=\"" . $attr->getValue . "\"";
+          }
+          $counter++;
+        }
+      }
+    }
+    
+    if($node->hasChildNodes()) {
+      my @children = $node->childNodes;
+      if($#children == 0) {
+        if($node->firstChild->nodeType == 3) {        
+          (my $value = $node->firstChild->textContent) =~ s/\s*//g;
+          if($value) {
+            if($counter == 0) {
+              $attrString = $attrString . "text()=\"" . $value . "\"";
+            }
+            else {
+              $attrString = $attrString . " and text()=\"" . $value . "\"";
+            }      
+          }        
+        }
+      }
+    }
+    
+    if($attrString) {
+      $attrString = "[".$attrString."]";      
+    }
+    
+    my $path = "";
+    if($node->nodePath() =~ m/nmwg:store/) {
+      ($path = $node->nodePath()) =~ s/\/nmwg:store\/nmwg:metadata//;
+      $path =~ s/\[\d\]//g;
+      $path =~ s/^\///g;  
+    }
+    else {
+      ($path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+      $path =~ s/\[\d\]//g;
+      $path =~ s/^\///g;  
+    }
+
+    if($path) {  
+      if(!($ref->find($path.$attrString))) {
+	my $name = $node->nodeName;
+	my $path2 = $path;
+	$path2 =~ s/\/$name$//;	  
+	$ref->find($path2)->get_node(1)->addChild($node->cloneNode(1));	  
+      }
+    }
+  
+    if($node->hasChildNodes()) {
+      foreach my $c ($node->childNodes) {
+        chain($c, $ref, $ref2);
+      }
+    }
+  }
   return;
 }
 
-
 sub countRefs {
-  my($id, $struct, $value) = @_;
+  my($id, $dom, $uri, $element, $attr) = @_;
   if((defined $id and $id ne "") and 
-     (defined $struct and $struct ne "") and 
-     (defined $value and $value ne "")) {  
+     (defined $dom and $dom ne "") and 
+     (defined $uri and $uri ne "") and 
+     (defined $element and $element ne "") and 
+     (defined $attr and $attr ne "")) {
     my $flag = 0;
-    foreach my $s (keys %{$struct}) {
-      if($id eq $struct->{$s}->{$value}) {
+    foreach my $d ($dom->getElementsByTagNameNS($uri, $element)) {
+      if($id eq $d->getAttribute($attr)) {
         $flag++;
       }
     }
@@ -268,7 +191,6 @@ sub countRefs {
   }
   return -1;  
 }
-
 
 sub genuid {
   my ($r) = int( rand( 16777216 ) );
@@ -303,6 +225,7 @@ can be invoked directly (and sparingly).
 =head1 SYNOPSIS
 
     use perfSONAR_PS::Common;
+    use XML::LibXML;
     
     # NOTE: Individual methods can be extraced:
     # 
@@ -331,35 +254,21 @@ can be invoked directly (and sparingly).
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
 
-    my %metadata = ();
+    my $parser = XML::LibXML->new();
+    $my $dom = $parser->parse_file($self->{CONF}->{"METADATA_DB_FILE"}); 
     
-    # NOTE: $xml in the case may ALSO be an already calculated XPath expression
-    
-    parse($xml, \%metadata, \%ns, "//nmwg:metadata");
-    chainMetadata(\%metadata);
+    $dom = chainMetadata($dom, $ns{"nmwg"});
+   
+    foreach my $md ($dom->getElementsByTagNameNS($ns{"nmwg"}, "metadata")) {
+      my $count = countRefs($md->getAttribute("id"), $dom, $ns{"nmwg"}, "data", "metadataIdRef");
+      if($count == 0) {
+        print $md->getAttribute("id") , " not found.\n";
+      } 
+      else {
+        print $md->getAttribute("id") , " found " , $count , " times.\n";
+      }
+    }        
 
-
-    # To see the structure of the metadata hash:
-    # 
-    # use Data::Dumper;
-    # print Dumper(%metadata) , "\n";
-
-
-    my %data = ();
-    parse($xml, \%data, \%ns, "//nmwg:data");
-
-
-    # To see the structure of the data hash:
-    # 
-    # use Data::Dumper;
-    # print Dumper(%data) , "\n";
-
-    
-    foreach my $m (keys %metadata) {
-      print "There are '" , countRefs($m, \%data) , "' references to data objects";
-      print " for metadata '" , $m , "'\n";
-    }
-    
     print "A random id would look like this:\t'" , genuid() , "'\n";
 
     print "The hostname of the system is:\t'" , getHostname() , "'\n";
@@ -407,26 +316,10 @@ Function will warn on error.
 Writes the contents of '$msg' (along with a timestamp) to this designated log file 
 '$file'.  Function will warn on error.  
 
-=head2 parse($xml, \%struct, \%ns, $xpath)
+=head2 chainMetadata($dom, $uri)
 
-The '$xml' argument is an XML string or XML::XPath expression.  The first of the two hash 
-arguments, '%struct', is an object that will contain the contents of each XML tag (this 
-could be something like nmwg:metadata, or nmwg:data, etc.).  The third argument is a 
-hash reference containing a prefix to namespace mapping.  All namespaces that may appear 
-in the container should be mapped (there is no harm is sending mappings that will not 
-be used).  The last argument is an XPath expression (such as '//nmwg:metadata') that 
-will be evaluated to return the struct object, populated with the appropriate values.  
-Function will warn on error (when the XPath returns no results).
-
-=head2 traverse($set, $sentstructure, $path)
-
-This function is not exported, and is meant to be used by parse($xml, \%metadata, \%ns, $xpath) 
-to aide in the extraction of XML values.
-
-=head2 chainMetadata(\%metadata)
-
-Given a hash of metadata objects, this function will continuously loop through performing
-a 'cahining' operation to share values between metadata objects.  An example would be:
+Given a dom of objects (and a uri), this function will continuously loop through performing
+a 'chaining' operation to share values between metadata objects.  An example would be:
 
   <nmwg:metadata id="1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="1">
@@ -484,6 +377,10 @@ Which would then become:
   </nmwg:metadata>  
 
 This chaining is useful for 'factoring out' large chunks of XML.
+
+=head2 chain($node, $ref, $ref2)
+
+Aux function of the chainMetadata command.  Not to be used externally.
 
 =head2 countRefs($id, \%struct, $value)
 

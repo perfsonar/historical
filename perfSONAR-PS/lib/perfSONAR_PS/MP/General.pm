@@ -4,41 +4,134 @@ package perfSONAR_PS::MP::General;
 use Carp qw( carp );
 use Exporter;  
 use perfSONAR_PS::Common;
+use perfSONAR_PS::MP::Base;
 
 @ISA = ('Exporter');
-@EXPORT = ( 'cleanMetadata', 'removeReferences' );
+@EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup', 'extract' );
+
 
 sub cleanMetadata {
-  my($mp) = @_;
+  my($mp) = @_;  
   $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
   $mp->{FUNCTION} = "\"cleanMetadata\"";
-    
-  chainMetadata($mp->{METADATA}); 
 
-  foreach my $m (keys %{$mp->{METADATA}}) {
-    my $count = countRefs($m, \%{$mp->{DATA}}, "nmwg:data-metadataIdRef");
-    if($count == 0) {
-      delete $mp->{METADATA}->{$m};
-    } 
-    else {
-      $mp->{METADATAMARKS}->{$m} = $count;
-    }
-  }  
+  if(defined $mp and $mp ne "") {
+    $mp->{STORE} = chainMetadata($mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"});
+   
+    foreach my $md ($mp->{STORE}->getElementsByTagNameNS($mp->{NAMESPACES}->{"nmwg"}, "metadata")) {
+      my $count = countRefs($md->getAttribute("id"), $mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"}, "data", "metadataIdRef");
+      if($count == 0) {
+        $mp->{STORE}->getDocumentElement->removeChild($md);
+      } 
+      else {
+        $mp->{METADATAMARKS}->{$md->getAttribute("id")} = $count;
+      }
+    }    
+  }
+  else {
+    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
+  }
   return;
 }
 
 
-sub removeReferences {
-  my($mp, $id) = @_;
+sub cleanData {
+  my($mp) = @_;
   $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"removeReferences\"";      
-  my $remove = countRefs($id, $mp->{METADATA}, "nmwg:metadata-id");
-  if($remove > 0) {
-    $mp->{METADATAMARKS}->{$id} = $mp->{METADATAMARKS}->{$id} - $remove;
-    if($mp->{METADATAMARKS}->{$id} == 0) {
-      delete $mp->{METADATAMARKS}->{$id};
-      delete $mp->{METADATA}->{$id};
-    }     
+  $mp->{FUNCTION} = "\"cleanData\"";
+  if(defined $mp and $mp ne "") {
+    foreach my $d ($mp->{STORE}->getElementsByTagNameNS($mp->{NAMESPACES}->{"nmwg"}, "data")) {
+      my $count = countRefs($d->getAttribute("metadataIdRef"), $mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"}, "metadata", "id");
+      if($count == 0) {
+        $mp->{STORE}->getDocumentElement->removeChild($d);
+      } 
+      else {
+        $mp->{DATAMARKS}->{$d->getAttribute("id")} = $count;
+      }         
+    }
+  }
+  else {
+    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);  
+  }
+  return;
+}
+
+
+sub lookup {
+  my($mp, $uri, $default) = @_;
+  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
+  $mp->{FUNCTION} = "\"lookup\"";
+  
+  if((defined $mp and $mp ne "") and 
+     (defined $uri and $uri ne "") and 
+     (defined $default and $default ne "")) {
+    my $prefix = "";
+    foreach my $n (keys %{$mp->{NAMESPACES}}) {
+      if($uri eq $mp->{NAMESPACES}->{$n}) {
+        $prefix = $n;
+        last;
+      }
+    }
+    $prefix = $default if($prefix eq "");
+    return $prefix;
+  }
+  else {
+    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);  
+  }
+  return "";
+}
+
+
+sub extract {
+  my($mp, $node) = @_;
+  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
+  $mp->{FUNCTION} = "\"extract\"";    
+  if((defined $mp and $mp ne "") and
+     (defined $node and $node ne "")) {
+    if($node->getAttribute("value")) {
+      return $node->getAttribute("value");
+    }
+    else {
+      return $node->textContent;
+    }  
+  }
+  else {
+    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
+  }
+  return "";
+}
+
+
+sub removeReferences {
+  my($mp, $id, $did) = @_;
+  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
+  $mp->{FUNCTION} = "\"removeReferences\"";    
+    
+  if((defined $mp and $mp ne "") and
+     (defined $id and $id ne "") and 
+     (defined $did and $did ne "")) {
+     
+    $mp->{DATAMARKS}->{$did}--;
+    $mp->{METADATAMARKS}->{$id}--;
+    
+    foreach my $dm (sort keys %{$mp->{DATAMARKS}}) {
+      if($mp->{DATAMARKS}->{$dm} == 0) {
+        delete $mp->{DATAMARKS}->{$dm};
+        my $rmD = $mp->{STORE}->find("//nmwg:data[\@id=\"".$dm."\"]")->get_node(1);
+        $mp->{STORE}->getDocumentElement->removeChild($rmD);   
+      }
+    }
+    
+    foreach my $mm (sort keys %{$mp->{METADATAMARKS}}) {
+      if($mp->{METADATAMARKS}->{$mm} == 0) {
+        delete $mp->{METADATAMARKS}->{$mm};
+        my $rmMD = $mp->{STORE}->find("//nmwg:metadata[\@id=\"".$mm."\"]")->get_node(1);
+        $mp->{STORE}->getDocumentElement->removeChild($rmMD);  
+      }
+    }  
+  }
+  else {
+    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
   }
   return;
 }
@@ -63,12 +156,33 @@ and the methods can be invoked directly (and sparingly).
 
 
     use perfSONAR_PS::MP::General;
+
+    my %ns = (
+      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+    );
     
     my $mp = perfSONAR_PS::MP::...;
     
     # do mp stuff ...
     
     cleanMetadata(\%{$mp}); 
+
+    cleanData(\%{$mp}); 
+    
+    my $prefix = lookup(\%{$mp}, "http://ggf.org/ns/nmwg/base/2.0/", "nmwg");
+    
+    # consider the elements that could be stored in '$node':
+    #
+    #  <nmwg:parameter name="something">value</nmwg:parameter>
+    #  <nmwg:parameter name="something" value="value" />
+    #  <nmwg:parameter name="something" value="value" />value2</nmwg:parameter>
+    #
+    # 'value' would be returned for each of them
+    #
+    my $value = extract(\%{$mp}, $node);
     
     removeReferences(\%{$mp}, $id_value);
     
@@ -89,10 +203,24 @@ and utilized in this module.
 Chains, and removes unused metadata values from the metadata object located in the 
 passed 'MP' object.
 
-=head2 removeReferences($mp, $id)
+=head2 cleanData($mp)
+
+Chains, and removes unused data values from the data object located in the 
+passed 'MP' object.
+
+=head2 lookup($mp, $uri, $default)
+
+Lookup the prefix value for a given URI in the NS hash.  If not found, supply a 
+simple deafult.
+
+=head2 extract($mp, $node)
+Returns a 'value' from a xml element, either the 'value' attribute or the 
+text field.
+
+=head2 removeReferences($mp, $id, $did)
 
 Removes a value from the an object (data/metadata) located in the passed 'MP' object 
-and only if the value is equal to the supplied id. 
+and only if the value is equal to the supplied id values. 
 
 =head1 SEE ALSO
 
@@ -110,7 +238,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

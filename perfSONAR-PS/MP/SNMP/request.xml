@@ -3,51 +3,36 @@
 	      id="msg1"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
               xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
 
-  <!-- I just grabed this info from the store, but i am
-       splitting it up to illustrate chaining -->
-  
-  <nmwg:metadata id="1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="1">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
         <nmwgt:hostName>stout</nmwgt:hostName>
-      </nmwgt:interface>
-    </netutil:subject>
-  </nmwg:metadata>  
-
-
-  <nmwg:metadata id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="1">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="2">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifName>eth1</nmwgt:ifName>
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
   </nmwg:metadata>
 
-  <!-- Note the use of chaining in the subject, that will allow
-       us to filter the results -->
-
-  <nmwg:metadata id="3">
-    <netutil:subject id="3" metadataIdRef="2"/>
-    <nmwg:parameters id="3">
-      <select:parameter name="time" operator="gte">
-        1173973220
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="2">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout2" metadataIdRef="1"/>  
+    <nmwg:parameters id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <select:parameter name="time" operator="gte" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+        1176480310
       </select:parameter>
-      <select:parameter name="time" operator="lte">
-        1173973267
+      <select:parameter name="time" operator="lte" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+        1176480340
       </select:parameter>      
-      <select:parameter name="consolidationFunction">
+      <select:parameter name="consolidationFunction" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
         AVERAGE
       </select:parameter>     
     </nmwg:parameters>
-  </nmwg:metadata>  
+  </nmwg:metadata> 
   
-  <!-- this is the trigger, we want to see the data for md2 (the
-       filtering with chaining)  -->  
-  
-  <nmwg:data id="1" metadataIdRef="3" />
+  <nmwg:data id="1" metadataIdRef="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
 
 </nmwg:message>

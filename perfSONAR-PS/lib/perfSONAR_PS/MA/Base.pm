@@ -2,12 +2,13 @@
 
 package perfSONAR_PS::MA::Base;
 use perfSONAR_PS::Transport;
+use XML::LibXML;
 
 @ISA = ('Exporter');
 @EXPORT = ();
 
 sub new {
-  my ($package, $conf, $ns, $metadata, $data) = @_; 
+  my ($package, $conf, $ns, $store) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MA::Base";
   $hash{"FUNCTION"} = "\"new\"";
@@ -17,21 +18,16 @@ sub new {
   if(defined $ns and $ns ne "") {  
     $hash{"NAMESPACES"} = \%{$ns};     
   }     
-  if(defined $metadata and $metadata ne "") {
-    $hash{"METADATA"} = \%{$metadata};
+  if(defined $store and $store ne "") {
+    $hash{"STORE"} = $store;
   }
   else {
-    %{$hash{"METADATA"}} = ();
-  }  
-  if(defined $data and $data ne "") {
-    $hash{"DATA"} = \%{$data};
+    $hash{"STORE"} = "";
   }
-  else {
-    %{$hash{"DATA"}} = ();
-  }  
-
+  
   $hash{"LISTENER"} = "";
   $hash{"REQUEST"} = "";
+  $hash{"REQUESTDOM"} = "";
   $hash{"RESPONSE"} = "";
     
   %{$hash{"RESULTS"}} = ();  
@@ -67,27 +63,14 @@ sub setNamespaces {
 }
 
 
-sub setMetadata {
-  my ($self, $metadata) = @_;      
-  $self->{FUNCTION} = "\"setMetadata\"";  
-  if(defined $metadata and $metadata ne "") {
-    $self->{METADATA} = \%{$metadata};
+sub setStore {
+  my ($self, $store) = @_;  
+  $self->{FUNCTION} = "\"setStore\"";  
+  if(defined $store and $store ne "") {
+    $self->{STORE} = $store;
   }
   else {
-    error("Missing argument", __LINE__);     
-  }
-  return;
-}
-
-
-sub setData {
-  my ($self, $data) = @_;      
-  $self->{FUNCTION} = "\"setData\"";  
-  if(defined $data and $data ne "") {
-    $self->{DATA} = \%{$data};
-  }
-  else {
-    error("Missing argument", __LINE__);  
+    error("Missing argument", __LINE__); 
   }
   return;
 }
@@ -166,14 +149,13 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
     
-    my $ma = perfSONAR_PS::MA::Base->new(\%conf);
+    my $ma = perfSONAR_PS::MA::Base->new(\%conf, \%ns, $store);
 
     # or
     # $ma = perfSONAR_PS::MA::Base->new;
     # $ma->setConf(\%conf);
     # $ma->setNamespaces(\%ns);    
-    # $ma->setMetadata(\%metadata);   
-    # $ma->setData(\%data);           
+    # $ma->setStore($store);            
 
     $ma->init;
     
@@ -196,13 +178,9 @@ The accepted arguments may also be ommited in favor of the 'set' functions.
 
 (Re-)Sets the value for the 'conf' hash. 
 
-=head2 setMetadata(\%metadata)
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' hash. 
-
-=head2 setData(\%data)
-
-(Re-)Sets the value for the 'data' hash. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
 
 =head2 init()
 
@@ -221,7 +199,7 @@ Meant to be used internally.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Transport>
+L<XML::LibXML::Document>, L<perfSONAR_PS::Transport>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -235,7 +213,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

@@ -14,6 +14,7 @@ use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ();
+$VERSION = "1";
 
 sub new {
   my ($package, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint, $debug) = @_; 
@@ -538,7 +539,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

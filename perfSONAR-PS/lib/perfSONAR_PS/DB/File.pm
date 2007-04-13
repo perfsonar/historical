@@ -1,9 +1,7 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::File;
-use IO::File;
-use XML::XPath;
-use perfSONAR_PS::Common;
+use XML::LibXML;
 
 @ISA = ('Exporter');
 @EXPORT = ();
@@ -18,10 +16,7 @@ sub new {
   }    
   if(defined $file and $file ne "") {
     $hash{"FILE"} = $file;
-  }
-  if(defined $ns and $ns ne "") {
-    $hash{"NAMESPACES"} = \%{$ns};  
-  }    
+  }  
   if(defined $debug and $debug ne "") {
     $hash{"DEBUG"} = $debug;  
   }    
@@ -55,19 +50,6 @@ sub setFile {
 }
 
 
-sub setNamespaces {
-  my ($self, $ns) = @_;  
-  $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $ns and $ns ne "") { 
-    $self->{NAMESPACES} = \%{$ns};
-  }
-  else {
-    error("Missing argument", __LINE__);
-  }
-  return;
-}
-
-
 sub setDebug {
   my ($self, $debug) = @_;  
   $self->{FUNCTION} = "\"setDebug\"";  
@@ -85,26 +67,8 @@ sub openDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"openDB\"";    
   if(defined $self->{FILE}) {    
-    $self->{XML} = new IO::File("<".$self->{FILE}) or 
-      error("Cannot open file", __LINE__);         
-    if($self->{XML}) {
-      $XML = $self->{XML};
-      while (<$XML>) {
-        if(!($_ =~ m/^<\?xml.*/)) {
-          $self->{XMLCONTENT} .= $_;
-        }
-      }
-      if(defined $self->{NAMESPACES}) {
-        $self->{XPATH} = XML::XPath->new( xml => $self->{XMLCONTENT} );
-        $self->{XPATH}->clear_namespaces();
-        foreach my $prefix (keys %{$self->{NAMESPACES}}) {
-          $self->{XPATH}->set_namespace($prefix, $self->{NAMESPACES}->{$prefix});
-        }
-      }
-      else {
-        error("Missing namespaces in object", __LINE__); 
-      }
-    }
+    my $parser = XML::LibXML->new();
+    $self->{XML} = $parser->parse_file($self->{FILE});  
   }
   else {
     error("Missing file in object", __LINE__);      
@@ -116,11 +80,13 @@ sub openDB {
 sub closeDB {
   my ($self) = @_;
   $self->{FUNCTION} = "\"closeDB\""; 
-  if($self->{XML}) {
-    $self->{XML}->close();
+  if(defined $self->{XML} and $self->{XML} ne "") {
+    open(FILE, ">".$self->{FILE});
+    print FILE $self->{XML}->toString;
+    close(FILE);
   }
   else {
-    error("File handle not open", __LINE__);   
+    error("LibXML DOM structure not defined", __LINE__);  
   }
   return;
 }
@@ -131,21 +97,21 @@ sub query {
   $self->{FUNCTION} = "\"query\"";        
   my @results = ();
   if(defined $query and $query ne "") {
-    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG}); 
-    if(defined $self->{XPATH}) {
-      my $nodeset = $self->{XPATH}->find($query);
+    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});   
+    if(defined $self->{XML} and $self->{XML} ne "") {
+      my $nodeset = $self->{XML}->find($query);
       if($nodeset->size() <= 0) {
         $results[0] = "perfSONAR_PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
       }
       else {
-        foreach my $node ($nodeset->get_nodelist) {            	    
-          push @results, XML::XPath::XMLParser::as_string($node);
+        foreach my $node (@{$nodeset}) {            	    
+          push @results, $node->toString;
         }
       }
     }
     else {
-      error("XPath structures not defined", __LINE__);        
-    }        
+      error("LibXML DOM structure not defined", __LINE__); 
+    }
   }
   else {
     error("Missing argument", __LINE__);
@@ -156,21 +122,46 @@ sub query {
 
 sub count {
   my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"count\"";  
-  my $nodeset = 0;
+  $self->{FUNCTION} = "\"count\"";  ;
   if(defined $query and $query ne "") {    
     print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
-    if(defined $self->{XPATH}) {
-      $nodeset = $self->{XPATH}->find($query);
+    if(defined $self->{XML} and $self->{XML} ne "") {
+      my $nodeset = $self->{XML}->find($query);
+      return $nodeset->size();  
     }
     else {
-      error("XPath structures not defined", __LINE__);      
-    }   
+      error("LibXML DOM structure not defined", __LINE__); 
+    }
   }
   else {
     error("Missing argument", __LINE__);
   } 
-  return $nodeset->size;   
+  return 0;   
+}
+
+
+sub getDOM {
+  my ($self) = @_;
+  if(defined $self->{XML} and $self->{XML} ne "") {
+    print $self->{XML} , "\n";
+    return $self->{XML};  
+  }
+  else {
+    error("LibXML DOM structure not defined", __LINE__); 
+  }
+  return ""; 
+}
+
+
+sub setDOM {
+  my($self, $dom) = @_;
+  if(defined $dom and $dom ne "") {    
+    $self->{XML} = $dom;
+  }
+  else {
+    error("Missing argument", __LINE__);
+  }   
+  return;
 }
 
 
@@ -203,26 +194,18 @@ may then be invoked on the object for the specific database.
 =head1 SYNOPSIS
 
     use perfSONAR_PS::DB::File;
-
-    my %ns = (
-      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
-    );
   
     my $file = new perfSONAR_PS::DB::File(
       "./error.log",
       "./store.xml",
-      \%ns
+      1
     );
 
     # or also:
     # 
     # my $file = new perfSONAR_PS::DB::File;
     # $file->setLog("./error.log");
-    # $file->setFile("./store.xml");
-    # $file->setNamespaces(\%ns);    
+    # $file->setFile("./store.xml");  
     # $file->setDebug($debug);    
     
     $file->openDB();
@@ -231,10 +214,19 @@ may then be invoked on the object for the specific database.
 
     my @results = $file->query("//nmwg:metadata");
     foreach my $r (@results) {
-      print $r , "\n";
+     print $r , "\n";
     }
 
     $file->closeDB();
+    
+    # If a DOM already exists...
+    
+    my $dom = XML::LibXML::Document->new("1.0", "UTF-8");
+    $file->setDOM($dom);
+    
+    # or getting back the DOM...
+    
+    my $dom2 = $file->getDOM();
     
 =head1 DETAILS
 
@@ -248,13 +240,11 @@ edit your XML file, do so out of band.
 The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
 the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($log, $file, \%ns)
+=head2 new($log, $file, $debug)
 
 The 'log' argument is the name of the log file where error or warning information may be 
 recorded.  The second argument is a strings representing the file to be opened.  The third 
-argument is a hash reference containing a prefix to namespace mapping.  All namespaces that 
-may appear in the file should be mapped (there is no harm is sending mappings that will 
-not be used).  
+argument is a flag to indicate debugging.
 
 =head2 setLog($log)
 
@@ -263,12 +253,6 @@ not be used).
 =head2 setFile($file)
 
 (Re-)Sets the name of the file to be used.
-
-=head2 setNamespaces(\%ns)
-  
-(Re-)Sets the hash reference containing a prefix to namespace mapping.  All namespaces that may 
-appear in the container should be mapped (there is no harm is sending mappings that will not be 
-used).
 
 =head2 setDebug($debug)
 
@@ -291,7 +275,15 @@ are returned as an array of strings.
 
 The '$query' string is an XPath expression that will be performed on the open file.  The results
 this time are a count of the number of elements that match the XPath expression.
-  
+
+=head2 getDOM()
+
+Returns the internal XML::LibXML DOM object.
+
+=head2 setDOM($dom)
+
+Sets the value of of the internal XML::LibXML DOM object.
+
 =head2 error($msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
@@ -300,7 +292,7 @@ Meant to be used internally.
   
 =head1 SEE ALSO
 
-L<IO::File>, L<XML::XPath>, L<perfSONAR_PS::Common>
+L<XML::LibXML>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
