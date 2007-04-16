@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>perfSONAR Google Maps Asynchronous XML Example</title>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ&amp;v=2.x"
+      type="text/javascript"></script>
+    <script type="text/javascript">
+
+    //<![CDATA[
+
+    var gmarkers = new Array();
+   
+    var side_bar_html = '';
+    
+    var map;
+    var mapDiv;
+    var mlat;
+    var mlng;
+    
+    
+    
+    function resize() {
+      var myWidth = 0, myHeight = 0;
+      if( typeof( window.innerWidth ) == 'number' ) {
+        //Non-IE
+        myWidth = window.innerWidth;
+        myHeight = window.innerHeight;
+      } else if ( document.documentElement 
+        && ( document.documentElement.clientWidth 
+              || document.documentElement.clientHeight ) ) {
+       //IE 6+ in 'standards compliant mode'
+       myWidth = document.documentElement.clientWidth;
+       myHeight = document.documentElement.clientHeight;
+      } else if ( document.body 
+        && ( document.body.clientWidth || document.body.clientHeight ) ) {
+        //IE 4 compatible
+        myWidth = document.body.clientWidth;
+        myHeight = document.body.clientHeight;
+      }
+
+      document.getElementById("map").style.width = myWidth - document.getElementById('side_bar').style.width;
+      document.getElementById("map").style.height = myHeight - 40;
+    }
+    
+    
+    function createMarker( lat, lng, dns, ip ) {        
+ 
+      if ( dns == '' ) {
+        dns = ip;
+      }
+              
+      if ( ! parseFloat(lat) && ! parseFloat(lng) ) {
+
+        side_bar_html += '<input type="checkbox" disabled>' + dns + '<br>';
+        
+      } else {
+
+        var point = new GLatLng( lat,lng );
+        var tooltip = dns + ' (' + ip + ')';
+        var marker = new GMarker(point, {title:tooltip});
+
+        // make single clicks openthe info box
+        GEvent.addListener( marker, "click", function() {
+          var tabs = getTabs( dns, ip );
+          marker.openInfoWindowTabsHtml( tabs );
+        });
+
+        // make double clicks center on the marker
+        GEvent.addListener( marker, "dblclick", function() {
+          map.setCenter( point );
+        });
+
+        side_bar_html += "<input type=\"checkbox\" onclick=\"javascript:toggle('" + ip + "');\" checked>" +
+        	"<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a><br>';
+
+        return marker;
+      
+      }
+    }
+    
+    function getTabs( dns, ip ) {
+      var req = GXmlHttp.create();
+      req.open( "GET", "[% cgi %]?mode=[% infoMode %]&ip=" + ip, false );
+      req.send( null );
+      var serializer = new XMLSerializer();
+      table = serializer.serializeToString( req.responseXML );
+      var header =  "<h3>" + dns + " (" + ip + ")</h3>";
+      
+      var graph = "[% cgi %]?mode=[% graphMode %]&ip=" + ip;
+      var tabs = [
+        new GInfoWindowTab( "Utilization", header + "<img id='utilGraph' height='168px' width='481px' src='" + graph + "'/>" ),
+        new GInfoWindowTab( "Info", header + table )
+      ];
+
+      setTimeout( "map.getInfoWindow().hide();map.getInfoWindow().show();", 3000 );
+      
+      return tabs;
+    }
+    
+    function toggle( ip ) {
+      var marker = gmarkers[ip];
+      if ( marker.isHidden() ) {
+        gmarkers[ip].show();
+      } else {
+        gmarkers[ip].hide();
+      }
+    }
+    
+    function focus( dns, ip ) {
+      var tabs = getTabs( dns, ip );
+      gmarkers[ip].openInfoWindowTabsHtml( tabs );
+      map.getInfoWindow().hide();
+      map.getInfoWindow().show();
+    }
+    
+
+    
+    function zoom(direction) {
+      var m = map.fromLatLngToDivPixel( new GLatLng( mlat, mlng ) );
+      var c = map.fromLatLngToDivPixel( map.getCenter() );
+      if ( direction == 'in' ) {
+        var x = c.x - ((m.x - c.x) * -.5);
+        var y = c.y - ((m.y - c.y) * -.5);
+        var n = map.fromDivPixelToLatLng( new GPoint(x,y) );
+        map.setCenter(n);
+        map.zoomIn();
+      } else {
+        var x = c.x - (m.x - c.x);
+        var y = c.y - (m.y - c.y );
+        var n = map.fromDivPixelToLatLng( new GPoint(x,y) );
+        map.setCenter(n);
+        map.zoomOut();
+      }
+    }
+    
+    GMap2.prototype.wheelZoom = function(event) {
+      if (window.event) {
+        var x = event.offsetX;
+        var y = event.offsetY;
+      } else {
+        var x = event.layerX;
+        var y = event.layerY;
+      }
+      if (window.event) {
+        event.returnValue = false; //IE
+      }
+      if (event.cancelable) {
+        event.preventDefault(); //dom
+      }
+      if ((event.detail || -event.wheelDelta) < 0) { 
+        zoom('in');
+      } else {
+        zoom('out');
+      }
+      return false;
+    }
+    
+    function bearing( from, to ) {
+      var lat1 = from.latRadians();
+      var lon1 = from.lngRadians();
+      var lat2 = to.latRadians();
+      var lon2 = to.lngRadians();
+
+      var angle = - Math.atan2( Math.sin( lon1 - lon2 ) * Math.cos( lat2 ), Math.cos( lat1 ) * Math.sin( lat2 ) - Math.sin( lat1 ) * Math.cos( lat2 ) * Math.cos( lon1 - lon2 ) );
+      if ( angle < 0.0 )
+	    angle  += Math.PI * 2.0;
+
+      angle = angle * (180.0 / Math.PI);
+      angle = angle.toFixed(1);
+
+      return angle;
+    }  
+    
+    function arrowHead(points) {
+      var p1 = points[points.length-1];
+      var p2 = points[points.length-2];
+      var dir = bearing( p2, p1 );
+      // == round it to a multiple of 3 and cast out 120s
+      var dir = Math.round(dir/3) * 3;
+      while (dir >= 120) {dir -= 120;}
+      // == use the corresponding triangle marker 
+      var arrowIcon = new GIcon();
+      arrowIcon.iconSize = new GSize( 16,16 );
+      arrowIcon.shadowSize = new GSize( 1,1 );
+      arrowIcon.iconAnchor = new GPoint( 10,10 );
+      arrowIcon.infoWindowAnchor = new GPoint( 0,0 );
+      arrowIcon.image = "http://www.google.com/intl/en_ALL/mapfiles/dir_"+dir+".png";
+      map.addOverlay( new GMarker( p1, arrowIcon ) );
+    }
+ 
+    function load() {
+    
+      if (GBrowserIsCompatible()) {
+
+        document.getElementById("side_bar").innerHTML 
+          = '<table valign="center"><tr><td><img src="[% cgi %]?mode=wait"/></td><td>Please wait.<br>Fetching information...</td></tr></table>';
+
+        map = new GMap2(document.getElementById("map"));
+        mapDiv = document.getElementById("map"); 
+       	map.addControl(new GLargeMapControl());
+        map.addControl(new GMapTypeControl());
+        map.addControl(new GOverviewMapControl());        
+        map.setCenter(new GLatLng(40,-93), 4);
+        
+        GEvent.addDomListener(mapDiv, "DOMMouseScroll", map.wheelZoom); // dom
+        GEvent.addDomListener(mapDiv, "mousewheel", map.wheelZoom); // ie
+        GEvent.addListener( map, "mousemove", function(point) {
+            mlat = point.y.toFixed(6);
+            mlng = point.x.toFixed(6);
+          }
+        );
+        
+        GDownloadUrl("[% cgi %]?mode=[% xmlMode %]&[% args %]", function (doc) {
+          var xmlDoc = GXml.parse(doc);
+          var markers = xmlDoc.documentElement.getElementsByTagName("marker");
+                    
+          for (var i = 0; i < markers.length; i++) {
+            // obtain the attribues of each marker
+            var lat = markers[i].getAttribute("lat");
+            var lng = markers[i].getAttribute("long");
+          
+            var dns = markers[i].getAttribute("dns");
+            var ip = markers[i].getAttribute("ip");
+            
+            // create the marker
+            gmarkers[ip] = createMarker( lat, lng, dns, ip );
+            
+            map.addOverlay( gmarkers[ip] );
+          }
+          document.getElementById("side_bar").innerHTML = side_bar_html;
+
+          var lines = xmlDoc.documentElement.getElementsByTagName("line");
+          for ( var i = 0; i < lines.length; i++ ) {
+
+            var descr = lines[i].getAttribute("descr");
+
+            var srclat = parseFloat( lines[i].getAttribute("srclat") );
+            var srclng = parseFloat( lines[i].getAttribute("srclng") );
+            var src = new GLatLng( srclat, srclng );
+            var dstlat = parseFloat( lines[i].getAttribute("dstlat") );
+            var dstlng = parseFloat( lines[i].getAttribute("dstlng") );
+            var dst = new GLatLng( dstlat, dstlng );
+            
+            var line = [ src, dst ];
+            map.addOverlay( new GPolyline( line ) );
+            arrowHead( line );
+          }
+
+        });
+        
+      }
+      else {
+        alert( "Sorry, your browser is not compatible with GoogleMaps." );
+      } 
+   
+    }
+  
+    //]]>
+    </script>
+  </head>
+  <h1>SLAC perfSONAR gmaps demonstration</h1>
+  <body onload="load()" onunload="GUnload()">
+    <table style="position:fixed; top:50px; left:2px; width="100%">
+      <tr>
+        <td>
+          <div id="map" style="width:750px; height:700px"></div>
+        </td>
+        <td>
+          <div id="side_bar" style="width:100%; height:700px; overflow:auto;"></div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

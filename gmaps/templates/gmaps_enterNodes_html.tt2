@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <title>SLAC perfSONAR gmaps Demonstration</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+</head>
+  <body>
+   <h1>SLAC perfSONAR gmaps demonstration</h1>
+   <h2>Please enter some routers<h2>
+    <form method="get" action="[% cgi %]" enctype="multipart/form-data">
+      <input type="hidden" name="mode" value="[% mapMode %]"/>
+      <textarea name="raw" rows="20" cols="72"></textarea>
+      <input type="submit" name="action" value="Go" />
+    </form>
+    
+    <h2>Or select a domain to gather routers from<h2>
+    <form method="get" action="[% cgi %]" enctype="multipart/form-data">
+      <input type="hidden" name="mode" value="[% mapMode %]"/>
+      <select name="domain">
+        [% FOREACH domain = domains %]
+        <option value="[% domain %]">[%domain %]</option>
+        [% END %]
+      </select>
+      <input type="submit" name="action" value="Go" />
+    </form>
+        
+    <h3>Info</h3>
+    Developed by Yee-Ting Li (ytl at slac.stanford.edu) at Stanford Linear Accelerator Center. Project Page at <a href="http://confluence.slac.stanford.edu/display/IEPM/Google+Maps+for+PerfSONAR">Googlemaps for perfSONAR</a>
+</body>
+</html>

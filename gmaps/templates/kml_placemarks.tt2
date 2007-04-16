@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<kml xmlns="http://earth.google.com/kml/2.0">
+<Document>
+    [% FOREACH mark = marks %]
+    <Placemark>
+      <name>[% mark.name %]</name>
+      <description>[% mark.desc %]</description>
+      <visibility>1</visibility>
+      <Point>
+        <extrude>0</extrude>
+        <altitudeMode>clampToGround</altitudeMode>
+        <coordinates>[% mark.long %],[% mark.lat %]</coordinates>
+      </Point>
+    </Placemark>
+    [% END %]
+</Document>
+</kml>

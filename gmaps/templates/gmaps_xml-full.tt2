@@ -1,0 +1,13 @@
+<markers>
+  [% FOREACH mark = marks %]
+  <marker 
+          ip="[% mark.ip %]"
+          dns="[% mark.dns %]"
+          lat="[% mark.lat %]"
+          long="[% mark.long %]"
+
+          utilTab="[% mark.utilTab %]"
+          infoTab="[% mark.infoTab %]"
+  />
+  [% END %]
+</markers>

@@ -1,0 +1,19 @@
+<markers>
+  [% FOREACH mark = marks %]
+  <marker 
+          ip="[% mark.ip %]"
+          dns="[% mark.dns %]"
+          lat="[% mark.lat %]"
+          long="[% mark.long %]"
+  />
+  [% END %]
+  [% FOREACH line = lines %]
+  <line
+         descr="[% line.descr %]"
+         srclat="[% line.srclat %]"
+         srclng="[% line.srclng %]"
+         dstlat="[% line.dstlat %]"
+         dstlng="[% line.dstlng %]"
+  />
+  [% END %]
+</markers>
