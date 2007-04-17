@@ -60,6 +60,9 @@ store.xml File (instead of XMLDB):
 
 	1) Edit the 'store.xml' file to reflect the metadata to rrd mapping
 	
+	NOTE: When defining namespaces, make sure all namespaces are
+	present in the TOP nmwg:store definition.  This is a limitation
+	of LibXML.
 
 XMLDB (optional step):
 ----------------------
