@@ -38,7 +38,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -51,7 +51,7 @@ sub setEnvironment {
     $self->{ENVIRONMENT} = $env;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -64,7 +64,7 @@ sub setContainer {
     $self->{CONTAINERFILE} = $cont;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -77,7 +77,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -90,7 +90,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -116,13 +116,13 @@ sub openDB {
     $self->{TRANSACTION}->commit();
   };
   if(my $e = catch std::exception) {
-    error("Error \"".$e->what()."\"", __LINE__);
+    error($self, "Error \"".$e->what()."\"", __LINE__);
   }
   elsif($e = catch DbException) {
-    error("Error \"".$e->what()."\"", __LINE__);       
+    error($self, "Error \"".$e->what()."\"", __LINE__);       
   }        
   elsif($@) {
-    error("Error \"".$@."\"", __LINE__);      
+    error($self, "Error \"".$@."\"", __LINE__);      
   } 
 }
 
@@ -150,13 +150,13 @@ sub query {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      error("Error \"".$e->what()."\"", __LINE__);
+      error($self, "Error \"".$e->what()."\"", __LINE__);
     }
     elsif($e = catch DbException) {
-      error("Error \"".$e->what()."\"", __LINE__);    
+      error($self, "Error \"".$e->what()."\"", __LINE__);    
     }        
     elsif($@) {
-      error("Error \"".$@."\"", __LINE__);      
+      error($self, "Error \"".$@."\"", __LINE__);      
     }   
   }
   else {
@@ -183,17 +183,17 @@ sub count {
       $self->{TRANSACTION}->commit();	
     };
     if(my $e = catch std::exception) {
-      error("Error \"".$e->what()."\"", __LINE__);
+      error($self, "Error \"".$e->what()."\"", __LINE__);
     }
     elsif($e = catch DbException) {
-      error("Error \"".$e->what()."\"", __LINE__);  
+      error($self, "Error \"".$e->what()."\"", __LINE__);  
     }        
     elsif($@) {
-      error("Error \"".$@."\"", __LINE__);    
+      error($self, "Error \"".$@."\"", __LINE__);    
     }       
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   } 
   return $results->size();
 }
@@ -215,17 +215,17 @@ sub insertIntoContainer {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      error("Error \"".$e->what()."\"", __LINE__);
+      error($self, "Error \"".$e->what()."\"", __LINE__);
     }
     elsif($e = catch DbException) {
-      error("Error \"".$e->what()."\"", __LINE__); 
+      error($self, "Error \"".$e->what()."\"", __LINE__); 
     }        
     elsif($@) {
-      error("Error \"".$@."\"", __LINE__); 
+      error($self, "Error \"".$@."\"", __LINE__); 
     }  
   }     
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }   
   return;
 }
@@ -252,17 +252,17 @@ sub insertElement {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      error("Error \"".$e->what()."\"", __LINE__);
+      error($self, "Error \"".$e->what()."\"", __LINE__);
     }
     elsif($e = catch DbException) {
-      error("Error \"".$e->what()."\"", __LINE__);    
+      error($self, "Error \"".$e->what()."\"", __LINE__);    
     }        
     elsif($@) {
-      error("Error \"".$@."\"", __LINE__);      
+      error($self, "Error \"".$@."\"", __LINE__);      
     }  
   }     
   else {
-    error("Missing argument", __LINE__); 
+    error($self, "Missing argument", __LINE__); 
   }   
   return;
 }
@@ -280,27 +280,27 @@ sub remove {
       $self->{TRANSACTION}->commit();    
     };
     if(my $e = catch std::exception) {
-      error("Error \"".$e->what()."\"", __LINE__);	
+      error($self, "Error \"".$e->what()."\"", __LINE__);	
     }
     elsif($e = catch DbException) {
-      error("Error \"".$e->what()."\"", __LINE__);      
+      error($self, "Error \"".$e->what()."\"", __LINE__);      
     }        
     elsif($@) {
-      error("Error \"".$@."\"", __LINE__);	
+      error($self, "Error \"".$@."\"", __LINE__);	
     }  
   }     
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }   
   return;
 }
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
@@ -487,7 +487,7 @@ db->insertElement("/a/b[@id='2']", "<c atr='1'/>");
 The only argument here, '$name', is the name (primary key) of the element to be removed
 from the database.   
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

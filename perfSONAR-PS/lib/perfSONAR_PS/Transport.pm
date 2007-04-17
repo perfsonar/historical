@@ -61,7 +61,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -74,7 +74,7 @@ sub setPort {
     $self->{PORT} = $port;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -88,7 +88,7 @@ sub setListenEndPoint {
     $self->{LISTEN_ENDPOINT} = $listenEndPoint;
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -101,7 +101,7 @@ sub setContactHost {
     $self->{HOST} = $contactHost;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -114,7 +114,7 @@ sub setContactPort {
     $self->{PORT} = $contactPort;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -127,7 +127,7 @@ sub setContactEndPoint {
     $self->{CONTACT_ENDPOINT} = $contactEndPoint;
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -140,7 +140,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -154,7 +154,7 @@ sub startDaemon {
     LocalPort => $self->{PORT},
     Reuse => 1
   ) or 
-    error("Cannot start daemon", __LINE__);
+    error($self, "Cannot start daemon", __LINE__);
   return;
 }
 
@@ -178,7 +178,7 @@ sub acceptCall {
      $self->{REQUEST}->method eq "POST") {
     $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
     if (!$action =~ m/^.*message\/$/) {
-      error("Received 'INVALID ACTION TYPE':".$action."\"", __LINE__);      
+      error($self, "Received 'INVALID ACTION TYPE':".$action."\"", __LINE__);      
       return 'INVALID ACTION TYPE';
     }
     else {
@@ -187,7 +187,7 @@ sub acceptCall {
     }   
   }
   else {
-    error("Reveived 'INVALID ENDPOINT':".$requestEndpoint."\"", __LINE__);  
+    error($self, "Reveived 'INVALID ENDPOINT':".$requestEndpoint."\"", __LINE__);  
     return 'INVALID ENDPOINT';      
   }
 }
@@ -210,10 +210,10 @@ sub getRequest {
   my $xp = $self->getRequestAsXPath();
   $nodeset = $xp->find('//nmwg:message');
   if($nodeset->size() <= 0) {
-    error("Message element not found or in wrong namespace", __LINE__);      
+    error($self, "Message element not found or in wrong namespace", __LINE__);      
   }
   elsif($nodeset->size() >= 2) {
-    error("Too many Message elements found", __LINE__);
+    error($self, "Too many Message elements found", __LINE__);
   }
   else {
     return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
@@ -225,7 +225,7 @@ sub getRequest {
 sub setResponseAsXPath {
   my ($self, $xpath) = @_; 
   $self->{FUNCTION} = "\"setResponseAsXPath\"";
-  error("Missing argument", __LINE__)
+  error($self, "Missing argument", __LINE__)
     unless defined $xpath;
   my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
   return $self->setResponse( $content );
@@ -242,7 +242,7 @@ sub setResponse {
     $self->{RESPONSE} = HTTP::Response->parse($content);
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -258,7 +258,7 @@ sub closeCall {
     print $self->{FILENAME}.":\tclosing call in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   }
   else {
-    error("Call not established", __LINE__);  
+    error($self, "Call not established", __LINE__);  
   }
   return;
 }
@@ -326,10 +326,10 @@ sub sendReceive {
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
@@ -515,7 +515,7 @@ Makes a SOAP formated envelope.
 
 Sents a soap formated envelope, and a timeout value to the contact host/port/endPoint.
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

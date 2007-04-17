@@ -41,7 +41,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -54,7 +54,7 @@ sub setName {
     $self->{NAME} = $name;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -67,7 +67,7 @@ sub setUser {
     $self->{USER} = $user;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -80,7 +80,7 @@ sub setPass {
     $self->{PASS} = $pass;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -93,7 +93,7 @@ sub setSchema {
     @{$self->{SCHEMA}} = @{$schema};
   } 
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -106,7 +106,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -125,10 +125,10 @@ sub openDB {
       $self->{PASS}, 
       \%attr
     ) or 
-      error("Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__);               
+      error($self, "Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__);               
   };
   if($@) {
-    error("Open error \"".$@."\"", __LINE__);
+    error($self, "Open error \"".$@."\"", __LINE__);
   }   
   return;
 }
@@ -141,7 +141,7 @@ sub closeDB {
     $self->{HANDLE}->disconnect();
   };
   if($@) {
-    error("Close error \"".$@."\"", __LINE__);
+    error($self, "Close error \"".$@."\"", __LINE__);
   }   
   return;
 }
@@ -156,16 +156,16 @@ sub query {
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() or 
-        error("Query error on statement \"".$query."\"", __LINE__);      	      
+        error($self, "Query error on statement \"".$query."\"", __LINE__);      	      
       $results  = $sth->fetchall_arrayref;
     };
     if($@) {
-      error("Query error \"".$@."\"", __LINE__);
+      error($self, "Query error \"".$@."\"", __LINE__);
       return -1;
     } 
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   } 
   return $results;
 }
@@ -180,16 +180,16 @@ sub count {
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
       $sth->execute() or 
-        error("Query error on statement \"".$query."\"", __LINE__);	
+        error($self, "Query error on statement \"".$query."\"", __LINE__);	
       $results  = $sth->fetchall_arrayref;  
     };      
     if($@) {
-      error("Query error \"".$@."\" on statement \"".$query."\"", __LINE__);
+      error($self, "Query error \"".$@."\" on statement \"".$query."\"", __LINE__);
       return -1;
     } 
   } 
   else { 
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   } 
   return $#{$results}+1;
 }
@@ -229,15 +229,15 @@ sub insert {
         $sth->bind_param($x+1, $values{$self->{SCHEMA}->[$x]});
       }
       $sth->execute() or 
-        error("Insert error on statement \"".$insert."\"", __LINE__);		      
+        error($self, "Insert error on statement \"".$insert."\"", __LINE__);		      
     };
     if($@) {
-      error("Insert error \"".$@."\" on statement \"".$insert."\"", __LINE__);
+      error($self, "Insert error \"".$@."\" on statement \"".$insert."\"", __LINE__);
       return -1;
     }     
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   } 
   return 1;  
 }
@@ -251,25 +251,25 @@ sub remove {
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
       $sth->execute() or 
-        error("Remove error on statement \"".$delete."\"", __LINE__);		      
+        error($self, "Remove error on statement \"".$delete."\"", __LINE__);		      
     };
     if($@) {	
-      error("Remove error \"".$@."\" on statement \"".$delete."\"", __LINE__);
+      error($self, "Remove error \"".$@."\" on statement \"".$delete."\"", __LINE__);
       return -1;
     }     
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }    
   return 1;
 }
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
@@ -445,7 +445,7 @@ The '$delete' string is an SQL statement to be sent to the database.  The statem
 must of course use the proper database schema elements and be properly formed.  Will 
 return 1 on success, -1 on failure.
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

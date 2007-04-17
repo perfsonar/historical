@@ -1,20 +1,6 @@
 #!/usr/bin/perl -w
-# ################################################ #
-#                                                  #
-# Name:		configureSNMP.pl                   #
-# Author:	Jason Zurawski                     #
-# Contact:	zurawski@eecis.udel.edu            #
-# Args:		N/A                                #
-# Purpose:	Generating the store.xml can be a  #
-#               pain, especially when using deter  #
-#               or emulab (where the machine       #
-#               config changes each experiment) so #
-#               this will automatically generate   #
-#               the store file given that the host #
-#               machine is running snmp.           #
-#                                                  #
-# ################################################ #
 use strict;
+
 
 my $CONF = "./SNMP.conf";
 
@@ -26,7 +12,22 @@ open(FILE, ">store.xml");
 print FILE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 print FILE "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
 print FILE "            xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\"\n";
-print FILE "            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n\n";
+print FILE "            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
+print FILE "            xmlns:snmp=\"http://ggf.org/ns/nmwg/tools/snmp/2.0/\">\n\n";
+
+
+open(STUFF, "/sbin/ifconfig |");
+my @results = <STUFF>;
+close(STUFF);
+
+my %allow = ();
+foreach my $r (@results) {
+  $r =~ s/\n//;
+  if($r =~ m/^eth/) {
+    (my $temp = $r) =~ s/\s*Link.*$//;
+    $allow{$temp} = 1; 
+  }
+}
 
 my $idCounter = 0;
 open(CONF, $CONF);
@@ -65,26 +66,40 @@ while(<CONF>) {
         }
 	close(IP);  
 
-        print FILE "  <nmwg:metadata id=\"" , $pair2[0] , "-" , $item[4] , "-" , $pair[0] , "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-        print FILE "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"" , $item[0] , $idCounter , "\">\n";
-        print FILE "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-        print FILE "        <nmwgt:ifAddress type=\"ipv4\">" , $pair2[0] , "</nmwgt:ifAddress>\n";
-        print FILE "        <nmwgt:hostName>" ,$item[0] , "</nmwgt:hostName>\n";
-        print FILE "        <nmwgt:ifName>" , $pair[1] , "</nmwgt:ifName>\n";
-        print FILE "        <nmwgt:ifIndex>" , $pair[0] , "</nmwgt:ifIndex>\n";
-        print FILE "        <nmwgt:direction>" , $item[3] , "</nmwgt:direction>\n";
-        print FILE "        <nmwgt:capacity>" , $speed[0] , "</nmwgt:capacity>\n";
-        print FILE "      </nmwgt:interface>\n";
-        print FILE "    </netutil:subject>\n";
-        print FILE "    <nmwg:eventType>" , $item[4] , "</nmwg:eventType>\n";
-        print FILE "    <nmwg:parameters id=\"1\">\n";
-        print FILE "      <nmwg:parameter name=\"SNMPVersion\" value=\"" , $item[1] , "\" />\n";
-        print FILE "      <nmwg:parameter name=\"SNMPCommunity\" value=\"" , $item[2] , "\" />\n";
-        print FILE "      <nmwg:parameter name=\"eventType\" value=\"" , $item[5] , "\" />\n";	
-        print FILE "    </nmwg:parameters>\n";
-        print FILE "  </nmwg:metadata>\n\n";
+        if($allow{$pair[1]}) {
+          print FILE "  <nmwg:metadata id=\"" , $pair2[0] , "-" , $item[4] , "-" , $pair[0] , "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+          print FILE "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"" , $item[0] , $idCounter , "\">\n";
+          print FILE "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+          print FILE "        <nmwgt:ifAddress type=\"ipv4\">" , $pair2[0] , "</nmwgt:ifAddress>\n";
+          print FILE "        <nmwgt:hostName>" ,$item[0] , "</nmwgt:hostName>\n";
+          print FILE "        <nmwgt:ifName>" , $pair[1] , "</nmwgt:ifName>\n";
+          print FILE "        <nmwgt:ifIndex>" , $pair[0] , "</nmwgt:ifIndex>\n";
+          print FILE "        <nmwgt:direction>" , $item[3] , "</nmwgt:direction>\n";
+          print FILE "        <nmwgt:capacity>" , $speed[0] , "</nmwgt:capacity>\n";
+          print FILE "      </nmwgt:interface>\n";
+          print FILE "    </netutil:subject>\n";
+          print FILE "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>\n";
+          print FILE "    <nmwg:parameters id=\"" , $idCounter , "\">\n";
+          print FILE "      <nmwg:parameter name=\"SNMPVersion\" value=\"" , $item[1] , "\" />\n";
+          print FILE "      <nmwg:parameter name=\"SNMPCommunity\" value=\"" , $item[2] , "\" />\n";
+          print FILE "      <nmwg:parameter name=\"OID\" value=\"" , $item[4] , "\" />\n";
+          print FILE "      <nmwg:parameter name=\"Alias\" value=\"" , $item[5] , "\" />\n";
+          print FILE "    </nmwg:parameters>\n";
+          print FILE "  </nmwg:metadata>\n\n";
 
-	$idCounter++;
+          print FILE "  <nmwg:data id=\"data" , $idCounter , "\" metadataIdRef=\"" , $pair2[0] , "-" , $item[4] , "-" , $pair[0] , "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+          print FILE "    <nmwg:key id=\"" , $idCounter , "\">\n";
+          print FILE "      <nmwg:parameters id=\"" , $idCounter , "\">\n";
+          print FILE "        <nmwg:parameter name=\"type\">rrd</nmwg:parameter>\n";
+          print FILE "        <nmwg:parameter name=\"valueUnits\">Bps</nmwg:parameter>\n";
+          print FILE "        <nmwg:parameter name=\"file\">/usr/local/perfSONAR-PS/MP/SNMP/packrat.rrd</nmwg:parameter>\n";
+          print FILE "        <nmwg:parameter name=\"dataSource\">eth0-".$item[3]."</nmwg:parameter>\n";
+          print FILE "      </nmwg:parameters>\n";
+          print FILE "    </nmwg:key>\n";
+          print FILE "  </nmwg:data>\n\n";
+      	  $idCounter++;
+        }
+
       }
     }
     close(SNMPWALK);

@@ -1,71 +1,44 @@
-#!/usr/bin/perl -w
-# ######################################################## #
-#                                                          #
-# Name:		watcher.pl                                 #
-# Author:	Jason Zurawski                             #
-# Contact:	zurawski@eecis.udel.edu                    #
-# Args:		N/A                                        #
-# Purpose:	Run this in cron to make sure the          #
-#               collection script doesnt die:              #
-#                                                          #
-# In /etc/crontab:                                         #
-#                                                          #
-# watcher.pl, run it often...                      	   #
-# */1 * * * * root   cd $PERFSONAR-PS_HOME && ./watcher.pl #
-#                                                          #
-# ######################################################## #
+#!/usr/bin/perl
 
-use strict;
 use IO::File;
+use Time::HiRes qw( gettimeofday );
 
-my %conf = ();
-%conf = readConfiguration("./watcher.conf", \%conf);
+$PROGRAM1 = "";
+readConf("./watcher.conf");
+
+my $foundit = 0;
 
 open(IN, "ps axw |");
-my @ps = <IN>;
-close(IN);
-
-my @keys = keys(%conf);
-
-for(my $x = 1; $x <= $#{@keys}; $x += 2) {
-  my $foundit = 0;
-  my $PROGRAM1 = "PROGRAM".$x;
-  my $PROGRAM2 = "PROGRAM".eval($x+1);
-
-  foreach my $process (@ps) {
-    $process =~ s/\n//g;
-    if ($process =~ m/$conf{$PROGRAM1}/ || $process =~ m/$conf{$PROGRAM2}/) {
-      $foundit = 1;
-      last;
-    }
-  }
-
-  unless ($foundit) {
-    system("$PROGRAM2");
+while(<IN>) {
+  if (/$PROGRAM1/) {
+    $foundit = 1;
+    last;
   }
 }
+close(IN);
 
+unless ($foundit) {
+  system("cd /usr/local/perfSONAR-PS/MP/SNMP && ./snmpMP.pl");
+}
 
-
-# ################################################ #
-# Sub:		readConf                           #
-# Args:		$file - Filename to read           #
-#               $sent - flattened hash of conf     #
-#                       values                     #
-# Purpose:	Read and store info.               #
-# ################################################ #
-sub readConfiguration {
-  my ($file, $sent)  = @_;
-  my %hash = %{$sent};  
-  my $CONF = new IO::File("<$file") || 
-    die "Cannot open 'readConf' $file: $!\n" ;
+sub readConf {
+  my ($file)  = @_;
+  my $CONF = new IO::File("<$file") or die "Cannot open 'readConf' $file: $!\n" ;
   while (<$CONF>) {
     if(!($_ =~ m/^#.*$/)) {
       $_ =~ s/\n//;
-      my @values = split(/=/,$_);
-      $hash{$values[0]} = $values[1];
+      if($_ =~ m/^PROGRAM1=.*$/) {
+        $_ =~ s/PROGRAM1=//;
+        $PROGRAM1 = $_;
+	$PROGRAM1 =~ s/\"//g;
+      }
+      elsif($_ =~ m/^PROGRAM2=.*$/) {
+        $_ =~ s/PROGRAM2=//;
+        $PROGRAM2 = $_;
+	$PROGRAM2 =~ s/\"//g;
+      }
     }
   }          
   $CONF->close();
-  return %hash; 
+  return; 
 }

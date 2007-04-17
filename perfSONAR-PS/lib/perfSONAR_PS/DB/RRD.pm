@@ -46,7 +46,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);    
+    error($self, "Missing argument", __LINE__);    
   }
   return;
 }
@@ -59,7 +59,7 @@ sub setFile {
     $self->{NAME} = $file;
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -72,7 +72,7 @@ sub setPath {
     $self->{PATH} = $path;
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -85,7 +85,7 @@ sub setVariables {
     $hash{"DATASOURCES"} = \%{$dss};
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -98,7 +98,7 @@ sub setVariable {
     $self->{DATASOURCES}->{$dss} = "";
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -116,7 +116,7 @@ sub setError {
     }
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -129,7 +129,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -137,7 +137,7 @@ sub setDebug {
 
 sub getErrorMessage {
   my ($self) = @_;
-  if($RRDp::error) {
+  if($RRDp::error) { 
     return $RRDp::error;
   }
   else {
@@ -153,7 +153,7 @@ sub openDB {
     RRDp::start $self->{PATH};
   }
   else {
-    error("Missing path or name in object", __LINE__);        
+    error($self, "Missing path or name in object", __LINE__);        
   }
   return;
 }
@@ -166,11 +166,11 @@ sub closeDB {
      (defined $self->{NAME} and $self->{NAME} ne "")){
     my $status = RRDp::end;  
     if($status) {
-      error($self->{PATH}." has returned status \"".$status."\" on closing", __LINE__);    
+      error($self, $self->{PATH}." has returned status \"".$status."\" on closing", __LINE__);    
     }
   }
   else {
-    error("rrdtool is not open", __LINE__);  
+    error($self, "rrdtool is not open", __LINE__);  
   }
   return;
 }
@@ -193,38 +193,40 @@ sub query {
     if(defined $end and $end ne "") {
       $cmd = $cmd . " -e " . $end;
     }
-  
+ 
     print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
-    
-    RRDp::cmd $cmd;
-    my $answer = RRDp::read;     
-
-    my @array = split(/\n/,$$answer);
-    for(my $x = 0; $x <= $#{@array}; $x++) {
-      if($x == 0) {
-        @rrd_headings = split(/\s+/,$array[$x]);
-      }
-      elsif($x > 1) {
-        my @line = split(/\s+/,$array[$x]);
-        $line[0] =~ s/://;
-        for(my $z = 1; $z <= $#{@line}; $z++) {
-          if($line[$z] eq "nan") {
-            $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
-          }
-          else {
-            $rrd_result{$line[0]}{$rrd_headings[$z]} = eval($line[$z]);
-          }
-        }   
-      }
-    }
-    if($RRDp::error) {
-      error("Database error \"".$$answer."\"", __LINE__); 
+ 
+    RRDp::cmd $cmd;    
+    my $answer = RRDp::read;      
+    if($RRDp::error) {   
+      error($self, "Database error \"".$RRDp::error."\"", __LINE__); 
       %rrd_result = ();
-      $rrd_result{ANSWER} = $$answer;
+      $rrd_result{ANSWER} = $RRDp::error;
+    }
+    else {   
+      my @array = split(/\n/,$$answer);
+
+      for(my $x = 0; $x <= $#{@array}; $x++) {
+        if($x == 0) {
+          @rrd_headings = split(/\s+/,$array[$x]);
+        }
+        elsif($x > 1) {
+          my @line = split(/\s+/,$array[$x]);
+          $line[0] =~ s/://;
+          for(my $z = 1; $z <= $#{@line}; $z++) {
+            if($line[$z] eq "nan") {
+              $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
+            }
+            else {
+              $rrd_result{$line[0]}{$rrd_headings[$z]} = eval($line[$z]);
+            }
+          }   
+        }
+      }
     }
   }    
   else {
-    error("Missing argument", __LINE__); 
+    error($self, "Missing argument", __LINE__); 
   }
   return %rrd_result; 
 }
@@ -239,7 +241,7 @@ sub insert {
     $self->{COMMIT}->{$time}->{$ds} = $value;
   }
   else { 
-    error("Missing argument", __LINE__); 
+    error($self, "Missing argument", __LINE__); 
   }  
 }
 
@@ -266,7 +268,7 @@ sub insertCommit {
       $counter++;
     }     
     if((!defined $template or $template eq "") or (!defined $values or $values eq "")){
-      error("rrdtool cannot update when datasource values are not specified", __LINE__);  
+      error($self, "rrdtool cannot update when datasource values are not specified", __LINE__);  
     }
     else {
       delete $self->{COMMIT}->{$time};
@@ -300,10 +302,10 @@ sub lastValue {
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
@@ -506,7 +508,7 @@ Returns the 'last' timestamp in the RRD file.
 
 Returns the 'first' timestamp in the RRD file.  
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

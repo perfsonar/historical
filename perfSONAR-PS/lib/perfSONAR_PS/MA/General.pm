@@ -134,7 +134,7 @@ sub getMetadatXQuery {
     return $queryString;  
   }
   else {
-    perfSONAR_PS::MA::Base::error("Missing argument", __LINE__);
+    perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
   }
   return "";
 }
@@ -222,7 +222,7 @@ sub extract {
     }  
   }
   else {
-    perfSONAR_PS::MA::Base::error("Missing argument", __LINE__);
+    perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
   }
   return "";
 }
@@ -366,7 +366,7 @@ Helper function to create an xquery string from a metadata object.
 Returns a 'value' from a xml element, either the 'value' attribute or the 
 text field.
 
-=head2 error($msg, $line)	
+=head2 error($ma, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

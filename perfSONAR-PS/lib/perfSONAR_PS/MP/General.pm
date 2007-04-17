@@ -29,7 +29,7 @@ sub cleanMetadata {
     }    
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
+    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
   }
   return;
 }
@@ -51,7 +51,7 @@ sub cleanData {
     }
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);  
+    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -76,7 +76,7 @@ sub lookup {
     return $prefix;
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);  
+    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);  
   }
   return "";
 }
@@ -96,7 +96,7 @@ sub extract {
     }  
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
+    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
   }
   return "";
 }
@@ -131,7 +131,7 @@ sub removeReferences {
     }  
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);
+    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
   }
   return;
 }

@@ -31,7 +31,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -44,7 +44,7 @@ sub setFile {
     $self->{FILE} = $file;
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
@@ -57,7 +57,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }
   return;
 }
@@ -71,7 +71,7 @@ sub openDB {
     $self->{XML} = $parser->parse_file($self->{FILE});  
   }
   else {
-    error("Missing file in object", __LINE__);      
+    error($self, "Missing file in object", __LINE__);      
   }                  
   return;
 }
@@ -86,7 +86,7 @@ sub closeDB {
     close(FILE);
   }
   else {
-    error("LibXML DOM structure not defined", __LINE__);  
+    error($self, "LibXML DOM structure not defined", __LINE__);  
   }
   return;
 }
@@ -100,21 +100,16 @@ sub query {
     print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});   
     if(defined $self->{XML} and $self->{XML} ne "") {
       my $nodeset = $self->{XML}->find($query);
-      if($nodeset->size() <= 0) {
-        $results[0] = "perfSONAR_PS::DB::File: Nothing matching query " . $query . " found.\n"; 	 
-      }
-      else {
-        foreach my $node (@{$nodeset}) {            	    
-          push @results, $node->toString;
-        }
+      foreach my $node (@{$nodeset}) {            	    
+        push @results, $node->toString;
       }
     }
     else {
-      error("LibXML DOM structure not defined", __LINE__); 
+      error($self, "LibXML DOM structure not defined", __LINE__); 
     }
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }  
   return @results;
 }
@@ -130,11 +125,11 @@ sub count {
       return $nodeset->size();  
     }
     else {
-      error("LibXML DOM structure not defined", __LINE__); 
+      error($self, "LibXML DOM structure not defined", __LINE__); 
     }
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   } 
   return 0;   
 }
@@ -147,7 +142,7 @@ sub getDOM {
     return $self->{XML};  
   }
   else {
-    error("LibXML DOM structure not defined", __LINE__); 
+    error($self, "LibXML DOM structure not defined", __LINE__); 
   }
   return ""; 
 }
@@ -159,17 +154,17 @@ sub setDOM {
     $self->{XML} = $dom;
   }
   else {
-    error("Missing argument", __LINE__);
+    error($self, "Missing argument", __LINE__);
   }   
   return;
 }
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
@@ -284,7 +279,7 @@ Returns the internal XML::LibXML DOM object.
 
 Sets the value of of the internal XML::LibXML DOM object.
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

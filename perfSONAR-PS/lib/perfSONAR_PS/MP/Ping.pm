@@ -37,7 +37,7 @@ sub parseMetadata {
       }      
     }
     else {	
-      perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
+      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
     }     
 
     $query = "//nmwg:data";
@@ -50,7 +50,7 @@ sub parseMetadata {
       }
     }
     else {
-      perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);  
+      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);  
     }          
     cleanMetadata(\%{$self}); 
   }
@@ -63,10 +63,10 @@ sub parseMetadata {
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);     
+    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);     
   }  
   else {
-    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
+    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
   }
   return;
 }
@@ -92,11 +92,11 @@ sub prepareData {
     }
     elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
           ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
-      perfSONAR_PS::MP::Base::error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	  	    
+      perfSONAR_PS::MP::Base::error($self, $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	  	    
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }
     else {
-      perfSONAR_PS::MP::Base::error($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	
+      perfSONAR_PS::MP::Base::error($self, $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	
       removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
     }  
   }  
@@ -123,7 +123,7 @@ sub prepareCollectors {
       }  
       
       if(!defined $host or $host eq "") {
-	error("Destination host not specified", __LINE__);	  
+	error($self, "Destination host not specified", __LINE__);	  
       }
       else {
         $commandString = $commandString . $host;
@@ -227,7 +227,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {    
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -241,7 +241,7 @@ sub setCommand {
     $self->{CMD} = $cmd;
   }
   else {
-    error("Missing argument", __LINE__);       
+    error($self, "Missing argument", __LINE__);       
   }
   return;
 }
@@ -255,7 +255,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);         
+    error($self, "Missing argument", __LINE__);         
   }
   return;
 }
@@ -272,7 +272,7 @@ sub collect {
     my $time = eval($sec.".".$frac);
         
     open(CMD, $self->{CMD}." |") or 
-      error("Cannot open \"".$self->{CMD}."\"", __LINE__);
+      error($self, "Cannot open \"".$self->{CMD}."\"", __LINE__);
     my @results = <CMD>;    
     close(CMD);
     
@@ -301,7 +301,7 @@ sub collect {
     
   }
   else {
-    error("Missing command string", __LINE__);     
+    error($self, "Missing command string", __LINE__);     
   }
   return;
 }
@@ -315,30 +315,20 @@ sub getResults {
     return $self->{RESULTS};
   }
   else {
-    error("Cannot return NULL results", __LINE__);    
+    error($self, "Cannot return NULL results", __LINE__);    
   }
   return;
 }
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -430,7 +420,7 @@ rather as a specialized structure for use only in this module.  The functions in
 
      Returns the results object so it may be parsed.  
      
-  error($msg, $line)	
+  error($self, $msg, $line)	
 
     A 'message' argument is used to print error information to the screen and log files 
     (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
@@ -502,7 +492,7 @@ the metadata object.
 Cycles through each of the 'perfSONAR_PS::MP::Ping::Agent' objects and gathers the 
 necessary values.  
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

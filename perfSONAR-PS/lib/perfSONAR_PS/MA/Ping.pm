@@ -24,7 +24,7 @@ sub receive {
   }
   else {
     my $msg = "Sent Request has was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
-    perfSONAR_PS::MA::Base::error($msg, __LINE__);
+    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
     $self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
   }
   undef $self->{REQUEST};
@@ -45,7 +45,7 @@ sub handleRequest {
 
   if($nodeset->size() < 1) {
     my $msg = "Message element not found within request";
-    perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
     $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
   }
   elsif($nodeset->size() == 1) {
@@ -76,7 +76,7 @@ sub handleRequest {
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite" or 
        $self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {      
       my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported";
-      perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+      perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
       $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     }  
     elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
@@ -84,13 +84,13 @@ sub handleRequest {
     } 
     else {
       my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not yet supported";
-      perfSONAR_PS::MA::Base::error($msg, __LINE__);   
+      perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);   
       $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
     } 
   }
   else {
     my $msg = "Too many message elements found within request";
-    perfSONAR_PS::MA::Base::error($msg, __LINE__); 
+    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__); 
     $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
   }
   return $self->{RESPONSE};
@@ -166,27 +166,27 @@ sub handleXMLDB {
 		      ($self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "file")){
 		  my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
 		    "\" is not yet supported";
-		  perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+		  perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
                   $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
 		}
 		else {
 		  my $msg = "Database \"".$self->{RESULTS}->{$dataIds[0]}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}.
 		    "\" is not yet supported";
-		  perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+		  perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
                   $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
 		}
               }
 	    }
             else {
 	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-              perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+              perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
               $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
             }		    
 	  }	  
 	}
         else {
 	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-          perfSONAR_PS::MA::Base::error($msg, __LINE__);  
+          perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
           $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "response", "error.mp.snmp", $msg);
         }
       }   
@@ -243,7 +243,7 @@ sub retrieveSQL {
   my $result = $datadb->query($query);
   if($#{$result} == -1) {
     my $msg = "Query \"".$query."\" returned 0 results";
-    perfSONAR_PS::MA::Base::error($msg, __LINE__);
+    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
     $responseString = $responseString . getResultCodeData($id, $self->{RESULTS}->{$did}->{"nmwg:data-metadataIdRef"}, $msg); 
   }   
   else { 
@@ -371,7 +371,7 @@ The data is extracted from the backed storage (in this case SQL).
 
 Send message stored in $self->{RESPONSE}.
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'message' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
@@ -394,7 +394,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

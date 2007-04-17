@@ -44,7 +44,7 @@ sub setConf {
     $self->{CONF} = \%{$conf};
   }
   else {
-    error("Missing argument", __LINE__); 
+    error($self, "Missing argument", __LINE__); 
   }
   return;
 }
@@ -57,7 +57,7 @@ sub setNamespaces {
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    error("Missing argument", __LINE__);      
+    error($self, "Missing argument", __LINE__);      
   }
   return;
 }
@@ -70,14 +70,14 @@ sub setStore {
     $self->{STORE} = $store;
   }
   else {
-    error("Missing argument", __LINE__); 
+    error($self, "Missing argument", __LINE__); 
   }
   return;
 }
 
 
 sub init {
-  my($self) = @_;
+  my($self) = @_;  
   $self->{FUNCTION} = "\"init\""; 
   if(defined $self->{CONF} and $self->{CONF} ne "") {
     $self->{LISTENER} = new perfSONAR_PS::Transport(
@@ -91,7 +91,7 @@ sub init {
     $self->{LISTENER}->startDaemon;
   }
   else {
-    error("Missing configuration", __LINE__); 
+    error($self, "Missing configuration", __LINE__); 
   }
   return;
 }
@@ -109,10 +109,10 @@ sub respond {
 
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;    
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
-  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
@@ -191,7 +191,7 @@ on certain conf file values.
 
 Send message stored in $self->{RESPONSE}.
 
-=head2 error($msg, $line)	
+=head2 error($self, $msg, $line)	
 
 A 'msg' argument is used to print error information to the screen and log files 
 (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  

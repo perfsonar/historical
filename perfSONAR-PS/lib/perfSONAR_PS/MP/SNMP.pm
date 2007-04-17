@@ -44,7 +44,7 @@ sub parseMetadata {
       }    
     }
     else {
-      perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
+      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
     } 
 
     $query = "//nmwg:data";
@@ -57,7 +57,7 @@ sub parseMetadata {
       }
     }
     else {
-      perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
+      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
     }                 
     $storeString = $storeString."</nmwg:store>";
 
@@ -78,10 +78,10 @@ sub parseMetadata {
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__); 
+    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__); 
   }  
   else {
-    perfSONAR_PS::MP::Base::error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported", __LINE__);
+    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not supported", __LINE__);
   }
   return;
 }
@@ -124,11 +124,11 @@ sub prepareData {
       }
     }
     elsif($type eq "mysql") {
-      perfSONAR_PS::MP::Base::error($type." is not yet supported", __LINE__);    
+      perfSONAR_PS::MP::Base::error($self, $type." is not yet supported", __LINE__);    
       removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id")); 
     }
     else {
-      perfSONAR_PS::MP::Base::error($type." is not supported", __LINE__);
+      perfSONAR_PS::MP::Base::error($self, $type." is not supported", __LINE__);
       removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id"));
     }  
   }  
@@ -192,7 +192,7 @@ sub prepareTime {
     }  
   }
   else {
-    perfSONAR_PS::MP::Base::error("Missing argument", __LINE__);      
+    perfSONAR_PS::MP::Base::error($self, "Missing argument", __LINE__);      
   }  
   return;
 }
@@ -272,10 +272,10 @@ sub collectMeasurements {
               $self->{DATADB}->{$file}->closeDB;
             }
             elsif($type eq "mysql") {
-              perfSONAR_PS::MP::Base::error("Database \"".$type."\" is not yet supported", __LINE__);
+              perfSONAR_PS::MP::Base::error($self, "Database \"".$type."\" is not yet supported", __LINE__);
             }
             else {
-              perfSONAR_PS::MP::Base::error("Database \"".$type."\" is not supported", __LINE__);
+              perfSONAR_PS::MP::Base::error($self, "Database \"".$type."\" is not supported", __LINE__);
             }
 	  }
 	}
@@ -352,7 +352,7 @@ sub setLog {
     $self->{LOGFILE} = $log;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -366,7 +366,7 @@ sub setHost {
     $self->{HOST} = $host;
   }
   else {
-    error("Missing argument", __LINE__);      
+    error($self, "Missing argument", __LINE__);      
   }
   return;
 }
@@ -380,7 +380,7 @@ sub setPort {
     $self->{PORT} = $port;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -394,7 +394,7 @@ sub setVersion {
     $self->{VERSION} = $ver;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -408,7 +408,7 @@ sub setCommunity {
     $self->{COMMUNITY} = $comm;
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -422,7 +422,7 @@ sub setVariables {
     $hash{"VARIABLES"} = \%{$vars};
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -436,7 +436,7 @@ sub setVariable {
     $self->{VARIABLES}->{$var} = "";
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -450,7 +450,7 @@ sub setDebug {
     $self->{DEBUG} = $debug;
   }
   else {
-    error("Missing argument", __LINE__);      
+    error($self, "Missing argument", __LINE__);      
   }
   return;
 }
@@ -474,7 +474,7 @@ sub removeVariables {
   $self->{FUNCTION} = "\"removeVariables\""; 
   undef $self->{VARIABLES};
   if(defined $self->{VARIABLES}) {
-    error("Remove failure", __LINE__);   
+    error($self, "Remove failure", __LINE__);   
   }
   return;
 }
@@ -488,7 +488,7 @@ sub removeVariable {
     delete $self->{VARIABLES}->{$var};
   }
   else {
-    error("Missing argument", __LINE__);   
+    error($self, "Missing argument", __LINE__);   
   }
   return;
 }
@@ -511,14 +511,14 @@ sub setSession {
       -translate     => [
                          -timeticks => 0x0
                         ]) or 
-      error("Couldn't open SNMP session to \"".$self->{HOST}."\"", __LINE__);
+      error($self, "Couldn't open SNMP session to \"".$self->{HOST}."\"", __LINE__);
 	      
     if(!defined($self->{SESSION})) {
-      error("SNMP error", __LINE__);
+      error($self, "SNMP error", __LINE__);
     }
   }
   else {
-    error("Session requires arguments 'host', 'version', and 'community'", __LINE__);      
+    error($self, "Session requires arguments 'host', 'version', and 'community'", __LINE__);      
   }  
   return;
 }
@@ -532,7 +532,7 @@ sub closeSession {
     $self->{SESSION}->close;
   }
   else {
-    error("Cannont close undefined session", __LINE__);
+    error($self, "Cannont close undefined session", __LINE__);
   }
   return;
 }
@@ -552,10 +552,10 @@ sub collectVariables {
     $self->{RESULT} = $self->{SESSION}->get_request(
       -varbindlist => \@oids
     ) or 
-      error("SNMP error", __LINE__);
+      error($self, "SNMP error", __LINE__);
     
     if(!defined($self->{RESULT})) {
-      error("SNMP error", __LINE__);
+      error($self, "SNMP error", __LINE__);
       return ('error' => -1);
     }    
     else {
@@ -563,7 +563,7 @@ sub collectVariables {
     }
   }
   else {
-    error("Session to \"".$self->{HOST}."\" not found", __LINE__);     
+    error($self, "Session to \"".$self->{HOST}."\" not found", __LINE__);     
     return ('error' => -1);
   }      
 }
@@ -580,10 +580,10 @@ sub collect {
       $self->{RESULT} = $self->{SESSION}->get_request(
         -varbindlist => [$var]
       ) or 
-        error("SNMP error: \"".$self->{ERROR}."\"", __LINE__); 
+        error($self, "SNMP error: \"".$self->{ERROR}."\"", __LINE__); 
       
       if(!defined($self->{RESULT})) {
-        error("SNMP error: \"".$self->{ERROR}."\"", __LINE__);          
+        error($self, "SNMP error: \"".$self->{ERROR}."\"", __LINE__);          
         return -1;
       }    
       else {
@@ -591,32 +591,24 @@ sub collect {
       }
     }
     else {    
-      error("Session to \"".$self->{HOST}."\" not found", __LINE__);   
+      error($self, "Session to \"".$self->{HOST}."\" not found", __LINE__);   
       return -1;
     }
   }
   else {
-    error("Missing argument", __LINE__);  
+    error($self, "Missing argument", __LINE__);  
   }
   return;
 }
 
 sub error {
-  my($msg, $line) = @_;  
+  my($self, $msg, $line) = @_;  
   $line = "N/A" if(!defined $line or $line eq "");
   print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
+  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
     if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
-
-
-
-
-
-
-
-
 
 
 1;

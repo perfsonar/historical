@@ -10,9 +10,8 @@
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="1">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
-        <nmwgt:hostName>stout</nmwgt:hostName>
-        <nmwgt:ifName>eth1</nmwgt:ifName>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth7</nmwgt:ifName>
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
@@ -22,10 +21,10 @@
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="stout2" metadataIdRef="1"/>  
     <nmwg:parameters id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
       <select:parameter name="time" operator="gte" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
-        1176480310
+        1176728770
       </select:parameter>
       <select:parameter name="time" operator="lte" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
-        1176480340
+        1176728800
       </select:parameter>      
       <select:parameter name="consolidationFunction" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
         AVERAGE
