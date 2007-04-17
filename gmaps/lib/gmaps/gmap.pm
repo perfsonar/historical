@@ -199,7 +199,7 @@ sub waitGraphic
 {
 	my $self = shift;
 	
-	$self->header_add( -type => "image/gif", -expires => '+3m' ); 
+	$self->header_add( -type => "image/gif", -expires => '+24h' ); 
 	return &catFile( $templatePath . '/spinner.gif' );
 }
 
@@ -444,9 +444,6 @@ sub rrdmaInfoXml
 	my $ip = gmaps::Topology::isIpAddress( $self->query()->param( 'ip' ) );
  	my ( $routerInfo, $meta, $ma, $eventType ) = &rrdmaFetch( $ip );
  
-# 	if( !defined $routerInfo && ! defined $meta ) {
-#	 	return undef;
-# 	}
 	if ( ! defined $meta ) {
 		$ma = 'unknown';
 		$eventType = 'unknown';
@@ -490,7 +487,7 @@ sub rrdmaUtilizationGraph
 	#warn "$ip :: info: $routerInfo, meta: $meta\n";
 
 	# output is always a graph/png	
-	$self->header_add( -type => "image/png", -expires => '+3m' ); 
+	$self->header_add( -type => "image/png", -expires => 'now' ); 
 
 	# error if no ma matched
 	unless( defined $routerInfo && defined $meta ) {

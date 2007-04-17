@@ -3,6 +3,42 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>perfSONAR Google Maps Asynchronous XML Example</title>
+    <style type="text/css">
+      html, body {
+        margin: 0px;
+        padding: 0px;
+        width: 100%;
+        height: 100%;
+      }
+      html {
+        overflow: hidden;
+      }
+      body {
+        margin: 0px;
+        padding: 0px;
+        background-color: #CCCCCC;
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+      }
+      #side_bar {
+        text-align: right;
+        background-color: #FFFFFF;
+        margin: 5px;
+        padding: 5px;
+        padding-left: 8px;
+        top: 28px;
+        right: 2px;
+        height: 72%;
+        position: absolute;
+        z-index: 99999; 
+        overflow: auto;
+        filter: alpha(opacity=80);
+        -moz-opacity: .80;
+        opacity: .80;
+      }
+    </style>
     <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ&amp;v=2.x"
       type="text/javascript"></script>
     <script type="text/javascript">
@@ -10,39 +46,16 @@
     //<![CDATA[
 
     var gmarkers = new Array();
-   
+    var glines = new Array();
+    var garrows = new Array();
+    
     var side_bar_html = '';
+    var showLines = true;  
     
     var map;
-    var mapDiv;
     var mlat;
     var mlng;
-    
-    
-    
-    function resize() {
-      var myWidth = 0, myHeight = 0;
-      if( typeof( window.innerWidth ) == 'number' ) {
-        //Non-IE
-        myWidth = window.innerWidth;
-        myHeight = window.innerHeight;
-      } else if ( document.documentElement 
-        && ( document.documentElement.clientWidth 
-              || document.documentElement.clientHeight ) ) {
-       //IE 6+ in 'standards compliant mode'
-       myWidth = document.documentElement.clientWidth;
-       myHeight = document.documentElement.clientHeight;
-      } else if ( document.body 
-        && ( document.body.clientWidth || document.body.clientHeight ) ) {
-        //IE 4 compatible
-        myWidth = document.body.clientWidth;
-        myHeight = document.body.clientHeight;
-      }
-
-      document.getElementById("map").style.width = myWidth - document.getElementById('side_bar').style.width;
-      document.getElementById("map").style.height = myHeight - 40;
-    }
-    
+    var activeMarker;
     
     function createMarker( lat, lng, dns, ip ) {        
  
@@ -52,7 +65,7 @@
               
       if ( ! parseFloat(lat) && ! parseFloat(lng) ) {
 
-        side_bar_html += '<input type="checkbox" disabled>' + dns + '<br>';
+        side_bar_html += dns + '<input type="checkbox" disabled>' + '<br>';
         
       } else {
 
@@ -60,10 +73,11 @@
         var tooltip = dns + ' (' + ip + ')';
         var marker = new GMarker(point, {title:tooltip});
 
-        // make single clicks openthe info box
+        // make single clicks the info box
         GEvent.addListener( marker, "click", function() {
           var tabs = getTabs( dns, ip );
           marker.openInfoWindowTabsHtml( tabs );
+          activeMarker = marker;
         });
 
         // make double clicks center on the marker
@@ -71,8 +85,8 @@
           map.setCenter( point );
         });
 
-        side_bar_html += "<input type=\"checkbox\" onclick=\"javascript:toggle('" + ip + "');\" checked>" +
-        	"<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a><br>';
+        side_bar_html += "<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a>'
+                + " <input type=\"checkbox\" onclick=\"javascript:toggleMarker('" + ip + "');\" checked>" + '<br>';
 
         return marker;
       
@@ -89,22 +103,45 @@
       
       var graph = "[% cgi %]?mode=[% graphMode %]&ip=" + ip;
       var tabs = [
-        new GInfoWindowTab( "Utilization", header + "<img id='utilGraph' height='168px' width='481px' src='" + graph + "'/>" ),
+        new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph' height='168px' width='481px' src='" + graph + "'/></p>" ),
         new GInfoWindowTab( "Info", header + table )
       ];
-
-      setTimeout( "map.getInfoWindow().hide();map.getInfoWindow().show();", 3000 );
-      
+     
       return tabs;
     }
     
-    function toggle( ip ) {
+    function refreshInfoWindow() {
+      var window = map.getInfoWindow();
+      if( ! window.isHidden() ) {
+        var point = activeMarker.getPoint();
+        var tabs = window.getTabs();
+        //window.reset( point, tabs, null );
+      }
+    }
+    
+    function toggleMarker( ip ) {
       var marker = gmarkers[ip];
       if ( marker.isHidden() ) {
         gmarkers[ip].show();
       } else {
         gmarkers[ip].hide();
       }
+    }
+    
+    function toggleLines() {
+      if ( showLines ) {
+        for( var descr in glines ) {
+          map.removeOverlay( glines[descr] );
+          map.removeOverlay( garrows[descr] );
+        }
+        showLines = false;
+      } else {
+        for( var descr in glines ) {
+          map.addOverlay( glines[descr] );
+          map.addOverlay( garrows[descr] );
+        }
+        showLines = true;
+      } 
     }
     
     function focus( dns, ip ) {
@@ -186,7 +223,8 @@
       arrowIcon.iconAnchor = new GPoint( 10,10 );
       arrowIcon.infoWindowAnchor = new GPoint( 0,0 );
       arrowIcon.image = "http://www.google.com/intl/en_ALL/mapfiles/dir_"+dir+".png";
-      map.addOverlay( new GMarker( p1, arrowIcon ) );
+      var arrow = new GMarker( p1, arrowIcon );
+      return arrow;
     }
  
     function load() {
@@ -194,15 +232,15 @@
       if (GBrowserIsCompatible()) {
 
         document.getElementById("side_bar").innerHTML 
-          = '<table valign="center"><tr><td><img src="[% cgi %]?mode=wait"/></td><td>Please wait.<br>Fetching information...</td></tr></table>';
+          = '<p align="center">Please wait.<br>Fetching perfSONAR information...<br><img src="[% cgi %]?mode=wait"/></p>';
 
         map = new GMap2(document.getElementById("map"));
-        mapDiv = document.getElementById("map"); 
+        var mapDiv = document.getElementById("map"); 
        	map.addControl(new GLargeMapControl());
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
         map.setCenter(new GLatLng(40,-93), 4);
-        
+
         GEvent.addDomListener(mapDiv, "DOMMouseScroll", map.wheelZoom); // dom
         GEvent.addDomListener(mapDiv, "mousewheel", map.wheelZoom); // ie
         GEvent.addListener( map, "mousemove", function(point) {
@@ -243,12 +281,34 @@
             var dst = new GLatLng( dstlat, dstlng );
             
             var line = [ src, dst ];
-            map.addOverlay( new GPolyline( line ) );
-            arrowHead( line );
+            glines[descr] = new GPolyline( line )
+            map.addOverlay( glines[descr] );
+            garrows[descr] = arrowHead( line );
+            map.addOverlay( garrows[descr] );
+            
           }
+
+          var checked;
+          if ( showLines ) {
+            checked = 'checked';
+          } else {
+            checked = '';
+          }
+          var lineToggle = "show links " + '<input type=\"checkbox\" onclick=\"javascript:toggleLines();\" ' + checked + '><br><hr>';
+        
+          document.getElementById("side_bar").innerHTML = lineToggle + side_bar_html;
 
         });
         
+        // Monitor the window resize event and let the map know when it occurs
+        if (window.attachEvent) { 
+          window.attachEvent("onresize", function() { map.onResize()} );
+        } else {
+          window.addEventListener("resize", function() { map.onResize()} , false);
+        }
+
+
+        setInterval( "refreshInfoWindow();", 10000 );
       }
       else {
         alert( "Sorry, your browser is not compatible with GoogleMaps." );
@@ -259,17 +319,8 @@
     //]]>
     </script>
   </head>
-  <h1>SLAC perfSONAR gmaps demonstration</h1>
   <body onload="load()" onunload="GUnload()">
-    <table style="position:fixed; top:50px; left:2px; width="100%">
-      <tr>
-        <td>
-          <div id="map" style="width:750px; height:700px"></div>
-        </td>
-        <td>
-          <div id="side_bar" style="width:100%; height:700px; overflow:auto;"></div>
-        </td>
-      </tr>
-    </table>
+    <div id="map"></div>
+    <div id="side_bar"></div>
   </body>
 </html>

@@ -156,7 +156,7 @@ sub createRRDGraph
 	my $graph = $rrd->getGraph( $pngFilename, $times[0], $times[$#times] );
 
 	# clean up
-	unlink $pngFilename or warn "Could not unlink $pngFilename.\n";;
+#	unlink $pngFilename or warn "Could not unlink $pngFilename.\n";;
 	undef $rrd;
 
 	return $graph;	
@@ -209,7 +209,11 @@ sub getUtilizationData
 	return ( \@tuples );
 }
 
-
+sub commify {
+    local($_) = shift;
+    1 while s/^(-?\d+)(\d{3})/$1,$2/;
+    return $_;
+} 
 
 # returns hash of metadata info for the utilisation provided
 sub getMetadata
@@ -234,8 +238,10 @@ sub getMetadata
     	{	    	
 			my $tag = $subnode->getLocalName();
 			my $info = $subnode->string_value();
-		
-			#print "TAG: $tag, DATA: $info\n";
+
+			if ( $tag eq 'capacity' ) {
+				$info = &commify( $info ) . ' bit/sec';
+			}
    
 	   		$meta{$id}{$tag} = $info;
     	}
