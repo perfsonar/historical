@@ -23,7 +23,7 @@ foreach my $int (sort { $a <=> $b } @intervals) {
     foreach my $index(@{$info{$host}}) {
 
       makeMessage($host, $index, ($sec-($sec%$int)), $int);
-      open(CLIENT, "cd /usr/local/perfSONAR-PS/client/ && ./client.pl --server=packrat.internet2.edu --port=8081 --endpoint=axis/services/snmpMP /tmp/test.xml |");
+      open(CLIENT, "/usr/local/perfSONAR-PS/client/client.pl --server=packrat.internet2.edu --port=8081 --endpoint=axis/services/snmpMP ./req.xml |");
       my @res = <CLIENT>;
       close(CLIENT);
     
@@ -33,22 +33,31 @@ foreach my $int (sort { $a <=> $b } @intervals) {
       }
   
       if($string) {
-        open(WRITE, ">./results/".$host."-".$index."-".$int.".txt");
+        open(WRITE, ">./results/".$host."-".$index."-".$int.".txt") ||
+            die "Unable to write results: $!";
         my $parser = XML::LibXML->new();
         my $dom = $parser->parse_string($string);      
+        print WRITE "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
+        my $first=1;
         foreach my $d ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/tools/snmp/2.0/", "datum")) {  
-          print WRITE $d->getAttribute("time") , "," , $d->getAttribute("value") , "\n"
+          if($first){
+              $first=0;
+          }else{
+              print WRITE ',';
+          }
+          print WRITE '[', $d->getAttribute("time") , "," , $d->getAttribute("value") , ']';
         }
+        print WRITE "\]\n    \}\n\}";
         close(WRITE);
       }
-      system("rm -frd test.xml");
+      system("rm -frd req.xml");
     }
   }
 }
 
 sub makeMessage {
   my($host, $index, $time, $int) = @_;
-  open(FILE, ">./test.xml"); 
+  open(FILE, ">./req.xml"); 
   
   print FILE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
   print FILE "<nmwg:message type=\"request\"\n";
