@@ -1,0 +1,2 @@
+PlotKit https://svn.internet2.edu/svn/perfSONAR-PS/trunk/vendor/plotkit/PlotKit
+MochiKit https://svn.internet2.edu/svn/perfSONAR-PS/trunk/vendor/MochiKit/lib/MochiKit/
