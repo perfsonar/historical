@@ -1,6 +1,6 @@
 Version:
 --------
-	20070226
+	20070417
 
 Installation:
 -------------
@@ -17,6 +17,7 @@ Installation:
 		XML::Writer::String;
 		LWP::UserAgent;
 		Time::HiRes
+		XML::LibXML
 
 			I would suggest using CPAN to install:
 		
@@ -25,7 +26,7 @@ Installation:
 							
 		RRDp (Installed with rrdtool)
 		
-		Sleepycat::DbXml
+		Sleepycat::DbXml (This is now optional)
 				
                         Visit & Download:
                                 http://www.oracle.com/technology/software/products/berkeley-db/htdocs/popup/xml/2.2.13/xml-targz.html
@@ -53,19 +54,23 @@ Installation:
 		
 		Comments at top of file tell you what you need.
 
-XMLDB:
-------
+
+store.xml File (instead of XMLDB):
+----------------------------------
+
+	1) Edit the 'store.xml' file to reflect the metadata to rrd mapping
+	
+
+XMLDB (optional step):
+----------------------
 
 To 'load' the XMLDB, there are two steps:
 
 	1) Edit the 'store.xml' file to reflect the metadata to rrd mapping
 
-	1.5) Note that in the future it will be possible to use ONLY the store.xml file, and that using
-	the xmldb will be an option.  For now you must use one to configure the other.
-
 	2) Use the 'loadXMLDB.pl' utility function to load the database:
 		
-		./loadXMLDB.pl ../MA/SNMP/xmldb snmpstore.dbxml ../MA/SNMP/store.xml
+		./loadXMLDB.pl --environment=/path/to/env/xmldb --container=container.dbxml --filename=/path/to/store.xml [--verbose]
 
 RRD Files:
 ----------
@@ -119,7 +124,7 @@ Usage:
 ------
 	The MA:
 	-------
-		./snmpMA.pl (-v for debug [non background] mode)
+		./snmpMA.pl (--verbose for debug [non background] mode)
 
 	The Client:
 	-----------
@@ -132,5 +137,4 @@ FAQ:
 			
 Contact:
 --------
-	Jason Zurawski - zurawski at eecis dot udel dot edu
-	Martin Swany - swany at udel dot edu	
+	Jason Zurawski - zurawski at internet2 dot edu

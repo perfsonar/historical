@@ -1,35 +1,31 @@
 #!/usr/bin/perl -w -I ../../lib
-# ################################################ #
-#                                                  #
-# Name:		snmpMA.pl                          #
-# Author:	Jason Zurawski                     #
-# Contact:	zurawski@eecis.udel.edu            #
-# Args:		N/A                                #
-# Purpose:	Functions as an MA for snmp        #
-#               measurements.                      #
-#                                                  #
-# ################################################ #
+
 use strict;
+use Getopt::Long;
+
 use threads;
 use threads::shared;
 use Thread::Semaphore; 
 
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
+use Data::Dumper;
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Transport;
-use perfSONAR_PS::DB::File;
-use perfSONAR_PS::DB::XMLDB;
-use perfSONAR_PS::DB::RRD;
-use perfSONAR_PS::MA::General;
+use perfSONAR_PS::MP::SNMP;
 use perfSONAR_PS::MA::SNMP;
 
-my $DEBUG = 0;
-if($#ARGV == 0) {
-  if($ARGV[0] eq "-v" || $ARGV[0] eq "-V") {
-    $DEBUG = 1;
-  }
+my $fileName = "snmpMA.pl";
+my $functionName = "main";
+my $DEBUG = '';
+my $HELP = '';
+my $status = GetOptions ('verbose' => \$DEBUG,
+                         'help' => \$HELP);
+
+if(!$status or $HELP) {
+  print "$0: starts the snmp MP and MA.\n";
+  print "\t$0 [--verbose --help]\n";
+  exit(1);
 }
 
 my %ns = (
@@ -43,7 +39,7 @@ my %ns = (
 		# Read in configuration information
 my %conf = ();
 readConfiguration("./snmpMA.conf", \%conf);
-
+$conf{"DEBUG"} = $DEBUG;
 
 if(!$DEBUG) {
 		# flush the buffer
@@ -52,93 +48,38 @@ if(!$DEBUG) {
   &daemonize;
 }
 
+print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DEBUG);
 
-if($DEBUG) {
-  print "Starting '".threads->tid()."' as main\n";
-}
+my $reval:shared = 0;
+my $sem = Thread::Semaphore->new(1);
 
 my $maThread = threads->new(\&measurementArchive);
-my $regThread = threads->new(\&registerLS);
 
-if(!defined $maThread || !defined $regThread) {
+if(!defined $maThread) {
   print "Thread creation has failed...exiting...\n";
   exit(1);
 }
 
 $maThread->join();
-$regThread->join();
 
 
 
 
 
-# ################################################ #
-# Sub:		measurementArchive                 #
-# Args:		N/A                                #
-# Purpose:	Implements the WS functionality of #
-#               an MA by listening on a port for   #
-#               messages and responding            #
-#               accordingly.                       #
-# ################################################ #
 sub measurementArchive {
-  if($DEBUG) {
-    print "Starting '".threads->tid()."' as MA on port '".$conf{"PORT"}."' and endpoint '".$conf{"ENDPOINT"}."'.\n";
-  }
+  my $functionName = "measurementArchive";  
+  print $fileName.":\tStarting '".threads->tid()."' as the MA in ".$functionName."\n" if($DEBUG);
 
-  my $listener = new perfSONAR_PS::Transport($conf{"PORT"}, $conf{"ENDPOINT"}, "", "", "");  
-  $listener->startDaemon;
-
-  my $MDId = genuid();
-  my $DId = genuid();
-    								
+  my $ma = new perfSONAR_PS::MA::SNMP(\%conf, \%ns, "");
+  $ma->init;  
   while(1) {
-    my $response = "";
-    if($listener->acceptCall == 1) {
-      my $ma = perfSONAR_PS::MA::SNMP->new(
-        $conf{"METADATA_DB_TYPE"},
-        $conf{"METADATA_DB_NAME"},
-        $conf{"METADATA_DB_FILE"},
-        $conf{"METADATA_DB_USER"},
-        $conf{"METADATA_DB_PASS"},
-	$conf{"LOGFILE"},
-	$conf{"RRDTOOL"},
-      );
-      $response = $ma->handleRequest($listener->getRequest, \%ns); 
-      $listener->setResponse($response, 1); 
-    }
-    else {
-      my $msg = "Sent Request has was not expected: ".
-                 $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
-		 $listener->{REQUEST}->headers->{"soapaction"}.".";
-      printError($conf{"LOGFILE"}, $msg); 
-      $response = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
-      $listener->setResponse($response, 1); 		 	  
-    }
-    $listener->closeCall;
-  }
+    $ma->receive;
+    $ma->respond;
+  }  
   return;
 }
 
 
-# ################################################ #
-# Sub:		registerLS                         #
-# Args:		N/A                                #
-# Purpose:	Periodically registers with a      #
-#               specified LS instance.             #
-# ################################################ #
-sub registerLS {
-  if($DEBUG) {
-    print "Starting '".threads->tid()."' as to register with LS '".$conf{"LS_INSTANCE"}."'.\n";
-  }
-  return
-}
-
-
-# ################################################ #
-# Sub:		daemonize                          #
-# Args:		N/A                                #
-# Purpose:	Background process		   #
-# ################################################ #
 sub daemonize {
   chdir '/' or die "Can't chdir to /: $!";
   open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
@@ -150,3 +91,67 @@ sub daemonize {
   umask 0;
 }
 
+
+=head1 NAME
+
+snmpMA.pl - An SNMP based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
+capabilities.
+
+=head1 DESCRIPTION
+
+This script creates an MP and MA for an SNMP based collector.  The service is also capable
+of registering with an LS instance.  
+
+=head1 SYNOPSIS
+
+./snmpMA.pl [--verbose | --help]
+
+The verbose flag allows lots of debug options to print to the screen.  If the option is
+omitted the service will run in daemon mode.
+
+=head1 FUNCTIONS
+
+The following functions are used within this script to execute the 3 major tasks of
+LS registration, MP operation, and MA listening and delivery.
+
+=head2 measurementArchive
+
+This function, meant to be used in the context of a thread, will listen on an external
+port (specified in the conf file) and serve requests for data from outside entities.  The
+data and metadata are stored in various database structures.
+
+=head2 daemonize
+
+Sends the program to the background by eliminating ties to the calling terminal.  
+
+=head1 REQUIRES
+
+Getopt::Long;
+threads
+threads::shared
+Thread::Semaphore
+Time::HiRes qw( gettimeofday );
+POSIX qw( setsid )
+perfSONAR_PS::Common
+perfSONAR_PS::Transport
+perfSONAR_PS::MP::SNMP
+perfSONAR_PS::MA::SNMP
+
+=head1 AUTHOR
+
+Jason Zurawski <zurawski@internet2.edu>
+
+=head1 VERSION
+
+$Id$
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Jason Zurawski
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+
+=cut
