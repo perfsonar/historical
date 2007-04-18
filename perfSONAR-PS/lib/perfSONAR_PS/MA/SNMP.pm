@@ -396,37 +396,61 @@ sub retrieveRRD {
 		      
   $datadb->openDB();
 
-  my %rrd_result = $datadb->query(
-    $self->{TIME}->{"CF"}, 
-    $self->{TIME}->{"RESOLUTION"}, 
-    $self->{TIME}->{"START"}, 
-    $self->{TIME}->{"END"}
-  );
- 
-  if($datadb->getErrorMessage()) {
-    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
+
+  my $oldStart = $self->{TIME}->{"START"};
+  my $oldEnd = $self->{TIME}->{"END"};
+  if($self->{TIME}->{"RESOLUTION"}) {
+    if($self->{TIME}->{"START"} % $self->{TIME}->{"RESOLUTION"}){
+      $self->{TIME}->{"START"} = 
+        int($self->{TIME}->{"START"}/$self->{TIME}->{"RESOLUTION"} + 1)*$self->{TIME}->{"RESOLUTION"};
+    }
+     
+    if($self->{TIME}->{"END"} % $self->{TIME}->{"RESOLUTION"}){
+      $self->{TIME}->{"END"} = 
+        int($self->{TIME}->{"END"}/$self->{TIME}->{"RESOLUTION"})*$self->{TIME}->{"RESOLUTION"};
+    }
+  }
+  
+  if($self->{TIME}->{"START"} > $self->{TIME}->{"END"}) {
+    my $msg = "Query error; There are no values for resolution \"".$self->{TIME}->{"RESOLUTION"}.
+      "\" in range \"".$oldStart."\" to \"".$oldEnd."\".";
     perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
-    $responseString = $responseString . getResultCodeData($id, $mid, $msg); 
+    $responseString = $responseString . getResultCodeData($id, $mid, $msg);
   }
   else {
-    my @keys = keys(%rrd_result);
-    $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
+    my %rrd_result = $datadb->query(
+      $self->{TIME}->{"CF"}, 
+      $self->{TIME}->{"RESOLUTION"}, 
+      $self->{TIME}->{"START"}, 
+      $self->{TIME}->{"END"}
+    );
+ 
+    if($datadb->getErrorMessage()) {
+      my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
+      perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
+      $responseString = $responseString . getResultCodeData($id, $mid, $msg); 
+    }
+    else {
+      my @keys = keys(%rrd_result);
+      $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
     
-    my $dataSource = extract(
-      \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
-    my $valueUnits = extract(
-      \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]")->get_node(1));
+      my $dataSource = extract(
+        \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
+      my $valueUnits = extract(
+        \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]")->get_node(1));
     
-    foreach $a (sort(keys(%rrd_result))) {
-      foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
-	if($b eq $dataSource) {
-	  $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
+      foreach $a (sort(keys(%rrd_result))) {
+        foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
+	  if($b eq $dataSource) {
+	    $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
+          }
         }
       }
+      $responseString = $responseString . "  </nmwg:data>\n";
     }
-    $responseString = $responseString . "  </nmwg:data>\n";
+    $datadb->closeDB();
   }
-  $datadb->closeDB();	
+  
   return $responseString;
 }
 
