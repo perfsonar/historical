@@ -53,18 +53,19 @@ print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DE
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
 
-my $mpThread = threads->new(\&measurementPoint);
+#my $mpThread = threads->new(\&measurementPoint);
 my $maThread = threads->new(\&measurementArchive);
-my $regThread = threads->new(\&registerLS);
+#my $regThread = threads->new(\&registerLS);
 
-if(!defined $mpThread || !defined $maThread || !defined $regThread) {
+if(!defined $maThread) {
+# || !defined $mpThread || !defined $regThread) {
   print "Thread creation has failed...exiting...\n";
   exit(1);
 }
 
-$mpThread->join();
+#$mpThread->join();
 $maThread->join();
-$regThread->join();
+#$regThread->join();
 
 
 
