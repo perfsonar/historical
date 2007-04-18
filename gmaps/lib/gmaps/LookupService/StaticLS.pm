@@ -23,6 +23,12 @@ our %maMap = (
 					endpoint => 'axis/services/MeasurementArchiveService',
 					eventType => 'utilization'
 				},
+				'ucaid.edu' => {
+					host => 'rrdma.abilene.ucaid.edu', 
+					port => '8080', 
+					endpoint => 'axis/services/snmpMA',
+					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+				},
 				'switch.ch' => { 
 					host => 'archive.sonar.net.switch.ch', 
 					port => '8180', 

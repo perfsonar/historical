@@ -38,6 +38,21 @@
         -moz-opacity: .80;
         opacity: .80;
       }
+      #slac_logo {
+        position: absolute;
+        left: 12px;
+        bottom: 56px;
+        z-index: 99998;
+      }
+      #perfsonar_logo {
+        position: absolute;
+        left: 26px;
+        bottom: 26px;
+        z-index: 99997;
+      }
+      #invert_markers, #select_all_markers, #select_none_markers {
+        font-size: 6pt;
+      }
     </style>
     <script src="http://maps.google.com/maps?file=api&amp;key=[% googlemapKey %]&amp;v=2.x"
       type="text/javascript"></script>
@@ -85,9 +100,9 @@
           map.setCenter( point );
         });
 
-        side_bar_html += "<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a>'
-                + " <input type=\"checkbox\" onclick=\"javascript:toggleMarker('" + ip + "');\" checked>" + '<br>';
-
+        side_bar_html +=  "<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a>'
+                + " <input id=\"toggle_marker_" + ip + "\" type=\"checkbox\" onclick=\"javascript:toggleMarker('" + ip + "');\" checked>" + '<br>';
+        
         return marker;
       
       }
@@ -128,19 +143,45 @@
       }
     }
     
+    function invertMarkers() {
+      for( var ip in gmarkers ) {
+        var checkbox = document.getElementById("toggle_marker_" + ip);
+        if( gmarkers[ip].isHidden() ) {
+          gmarkers[ip].show();
+          checkbox.checked = true;
+        } else {
+          gmarkers[ip].hide();
+          checkbox.checked = false;
+        }
+      }
+    }
+    
+    function selectAllMarkers() {
+      for( var ip in gmarkers ) {
+        gmarkers[ip].show();
+        document.getElementById("toggle_marker_" + ip).checked = true;
+      }
+    }
+
+    function selectNoneMarkers() {
+      for( var ip in gmarkers ) {
+        gmarkers[ip].hide();
+        document.getElementById("toggle_marker_" + ip).checked = false;
+      }
+    }
+
     function toggleLines() {
-      if ( showLines ) {
+      var show = document.getElementById("toggle_lines").checked;
+      if ( ! show ) {
         for( var descr in glines ) {
           map.removeOverlay( glines[descr] );
           map.removeOverlay( garrows[descr] );
         }
-        showLines = false;
       } else {
         for( var descr in glines ) {
           map.addOverlay( glines[descr] );
           map.addOverlay( garrows[descr] );
         }
-        showLines = true;
       } 
     }
     
@@ -227,12 +268,76 @@
       return arrow;
     }
  
+    function clearOverlay() {
+    
+    }
+ 
+    function getXml( uri ) {
+      
+      GDownloadUrl( uri, function (doc) {
+        var xmlDoc = GXml.parse(doc);
+        var markers = xmlDoc.documentElement.getElementsByTagName("marker");
+                    
+        for (var i = 0; i < markers.length; i++) {
+	        // obtain the attribues of each marker
+	        var lat = markers[i].getAttribute("lat");
+	        var lng = markers[i].getAttribute("long");
+	          
+	        var dns = markers[i].getAttribute("dns");
+	        var ip = markers[i].getAttribute("ip");
+	            
+	        // create the marker
+	        gmarkers[ip] = createMarker( lat, lng, dns, ip );
+	            
+	        map.addOverlay( gmarkers[ip] );
+	      }
+	      document.getElementById("side_bar").innerHTML = side_bar_html;
+	
+	      var lines = xmlDoc.documentElement.getElementsByTagName("line");
+	      for ( var i = 0; i < lines.length; i++ ) {
+	
+	        var descr = lines[i].getAttribute("descr");
+	        var srclat = parseFloat( lines[i].getAttribute("srclat") );
+	        var srclng = parseFloat( lines[i].getAttribute("srclng") );
+	        var src = new GLatLng( srclat, srclng );
+	        var dstlat = parseFloat( lines[i].getAttribute("dstlat") );
+	        var dstlng = parseFloat( lines[i].getAttribute("dstlng") );
+	        var dst = new GLatLng( dstlat, dstlng );
+	            
+	        var line = [ src, dst ];
+	        glines[descr] = new GPolyline( line )
+	        map.addOverlay( glines[descr] );
+	        garrows[descr] = arrowHead( line );
+	        map.addOverlay( garrows[descr] );
+	         
+        }
+
+        var checked;
+        if ( showLines ) {
+          checked = 'checked';
+        } else {
+          checked = '';
+        }
+        var lineToggle = "show links " + '<input id=\"toggle_lines" type=\"checkbox\" onclick=\"javascript:toggleLines();\" ' + checked + '><br>';
+        
+        var markerToggle = 'markers: ' +
+          '<input id=\"invert_markers\" type=\"button\" onclick=\"javascript:invertMarkers();\" value=\"Invert\">'
+          + '<input id=\"select_all_markers\" type=\"button\" onclick=\"javascript:selectAllMarkers();\" value=\"All\">'
+          + '<input id=\"select_none_markers\" type=\"button\" onclick=\"javascript:selectNoneMarkers();\" value=\"None\">';
+                  
+        document.getElementById("side_bar").innerHTML = lineToggle + markerToggle + '<hr>' + side_bar_html;   
+     
+      });
+        
+    }
+ 
+ 
     function load() {
     
       if (GBrowserIsCompatible()) {
 
         document.getElementById("side_bar").innerHTML 
-          = '<p align="center">Please wait.<br>Fetching perfSONAR information...<br><img src="[% cgi %]?mode=wait"/></p>';
+          = '<p align="center">Please wait.<br>Fetching perfSONAR information...<br>This could take some time...<br><img src="[% cgi %]?mode=spinner"/></p>';
 
         map = new GMap2(document.getElementById("map"));
         var mapDiv = document.getElementById("map"); 
@@ -241,72 +346,23 @@
         map.addControl(new GOverviewMapControl());        
         map.setCenter(new GLatLng(40,-93), 4);
 
+        // populate map 
+        getXml( "[% cgi %]?mode=[% xmlMode %]&[% args %]" );
+
         GEvent.addDomListener(mapDiv, "DOMMouseScroll", map.wheelZoom); // dom
         GEvent.addDomListener(mapDiv, "mousewheel", map.wheelZoom); // ie
         GEvent.addListener( map, "mousemove", function(point) {
-            mlat = point.y.toFixed(6);
-            mlng = point.x.toFixed(6);
-          }
-        );
-        
-        GDownloadUrl("[% cgi %]?mode=[% xmlMode %]&[% args %]", function (doc) {
-          var xmlDoc = GXml.parse(doc);
-          var markers = xmlDoc.documentElement.getElementsByTagName("marker");
-                    
-          for (var i = 0; i < markers.length; i++) {
-            // obtain the attribues of each marker
-            var lat = markers[i].getAttribute("lat");
-            var lng = markers[i].getAttribute("long");
-          
-            var dns = markers[i].getAttribute("dns");
-            var ip = markers[i].getAttribute("ip");
-            
-            // create the marker
-            gmarkers[ip] = createMarker( lat, lng, dns, ip );
-            
-            map.addOverlay( gmarkers[ip] );
-          }
-          document.getElementById("side_bar").innerHTML = side_bar_html;
-
-          var lines = xmlDoc.documentElement.getElementsByTagName("line");
-          for ( var i = 0; i < lines.length; i++ ) {
-
-            var descr = lines[i].getAttribute("descr");
-
-            var srclat = parseFloat( lines[i].getAttribute("srclat") );
-            var srclng = parseFloat( lines[i].getAttribute("srclng") );
-            var src = new GLatLng( srclat, srclng );
-            var dstlat = parseFloat( lines[i].getAttribute("dstlat") );
-            var dstlng = parseFloat( lines[i].getAttribute("dstlng") );
-            var dst = new GLatLng( dstlat, dstlng );
-            
-            var line = [ src, dst ];
-            glines[descr] = new GPolyline( line )
-            map.addOverlay( glines[descr] );
-            garrows[descr] = arrowHead( line );
-            map.addOverlay( garrows[descr] );
-            
-          }
-
-          var checked;
-          if ( showLines ) {
-            checked = 'checked';
-          } else {
-            checked = '';
-          }
-          var lineToggle = "show links " + '<input type=\"checkbox\" onclick=\"javascript:toggleLines();\" ' + checked + '><br><hr>';
-        
-          document.getElementById("side_bar").innerHTML = lineToggle + side_bar_html;
-
-        });
-        
+              mlat = point.y.toFixed(6);
+              mlng = point.x.toFixed(6);
+            }
+          );
+                 
         // Monitor the window resize event and let the map know when it occurs
         if (window.attachEvent) { 
           window.attachEvent("onresize", function() { map.onResize()} );
         } else {
           window.addEventListener("resize", function() { map.onResize()} , false);
         }
-
 
         setInterval( "refreshInfoWindow();", 10000 );
       }
@@ -322,5 +378,7 @@
   <body onload="load()" onunload="GUnload()">
     <div id="map"></div>
     <div id="side_bar"></div>
+    <div id="slac_logo"><img src="[% cgi %]?mode=slac_logo"/></div>
+    <div id="perfsonar_logo"><img src="[% cgi %]?mode=perfsonar_logo"/></div>
   </body>
 </html>

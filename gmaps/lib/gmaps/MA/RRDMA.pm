@@ -318,6 +318,7 @@ sub getAllRouters
 		next unless ( gmaps::Topology::isIpAddress( $r ) );
 		push @final, $r unless $seen{$r}++;
 	}
+	
 	return \@final;	
 }
 

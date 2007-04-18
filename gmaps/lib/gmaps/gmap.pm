@@ -17,7 +17,7 @@ use Template;
 
 package gmaps::gmap;
 
-our $templatePath = '/u/sf/ytl/Work/perfSONAR/gmaps/trunk/lib/gmaps/templates/';
+our $templatePath = '/u/sf/ytl/Work/perfSONAR/perfSONAR-PS/trunk/gmaps/templates/';
 our $server = 'http://134.79.24.133:8080/cgi-bin/gmaps.pl';
 our $googlemapKey = 'ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ';
 
@@ -43,8 +43,11 @@ sub setup {
 		     'mapInline'	=> 'mapWithInlineJavascript',	# returns googlemap with inline javascript of ndoes
 		     'kml'		=> 'createKml',				# returns a kml file of nodes
 		     'routers'		=> 'testRouters',		# returns the parsed output
-		     'wait'		=> 'waitGraphic',			# wait graphic
-		     'ma'		=> 'ma'						# info about ma
+		     'spinner'		=> 'spinnerGraphic',			# wait graphic
+		     'slac_logo'		=> 'slacGraphic',			# wait graphic
+		     'perfsonar_logo'	=> 'perfsonarGraphic',			# wait graphic
+		     'ma'			=> 'ma',						# info about ma
+		     'geo'		=> 'geoInfo'
 		   );
 
 	return undef;    
@@ -195,13 +198,33 @@ sub testRouters
 #######################################################################
 
 # returns the wait/loading graphic
-sub waitGraphic
+sub spinnerGraphic
 {
 	my $self = shift;
 	
 	$self->header_add( -type => "image/gif", -expires => '+24h' ); 
 	return &catFile( $templatePath . '/spinner.gif' );
 }
+
+# returns the wait/loading graphic
+sub slacGraphic
+{
+	my $self = shift;
+	
+	$self->header_add( -type => "image/png", -expires => '+24h' ); 
+	return &catFile( $templatePath . '/slac_logo_small.png' );
+}
+
+# returns the wait/loading graphic
+sub perfsonarGraphic
+{
+	my $self = shift;
+	
+	$self->header_add( -type => "image/png", -expires => '+24h' ); 
+	return &catFile( $templatePath . '/perfsonar_logo_small.png' );
+}
+
+
 
 # enter the nodes in a form
 sub enterNodes
