@@ -28,6 +28,7 @@ sub new {
   $hash{"LISTENER"} = "";
   $hash{"REQUEST"} = "";
   $hash{"REQUESTDOM"} = "";
+  $hash{"REQUESTNAMESPACES"} = "";
   $hash{"RESPONSE"} = "";
     
   %{$hash{"RESULTS"}} = ();  
@@ -87,7 +88,7 @@ sub init {
       "", 
       "", 
       "", 
-      $DEBUG);  
+      $self->{CONF}->{"DEBUG"});  
     $self->{LISTENER}->startDaemon;
   }
   else {

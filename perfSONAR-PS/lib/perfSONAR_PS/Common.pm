@@ -158,7 +158,12 @@ sub chain {
 	my $name = $node->nodeName;
 	my $path2 = $path;
 	$path2 =~ s/\/$name$//;	  
-	$ref->find($path2)->get_node(1)->addChild($node->cloneNode(1));	  
+        if($ref->find($path2)) {
+          $ref->find($path2)->get_node(1)->addChild($node->cloneNode(1));	 
+        }
+        else {
+          $ref->addChild($node->cloneNode(1));	 
+        } 
       }
     }
   

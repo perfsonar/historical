@@ -7,7 +7,7 @@ use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'getMetadatXQuery', 'extract');
+           'getResultCodeData', 'getMetadatXQuery', 'extract', 'getTime');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   
@@ -86,16 +86,15 @@ sub getResultCodeData {
 }
 
 
-
-sub getMetadatXQuery {
+sub getTime {
   my($ma, $id) = @_;
   $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
-  $ma->{FUNCTION} = "\"getMetadatXQuery\"";    
+  $ma->{FUNCTION} = "\"getTime\"";    
   if((defined $ma and $ma ne "") and
      (defined $id and $id ne "")) {
-     
+
     my $m = $ma->{REQUESTDOM}->find("//nmwg:metadata[\@id=\"".$id."\"]")->get_node(1);
-  
+
     if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
       $ma->{TIME}->{"START"} = extract($ma, 
         $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
@@ -125,11 +124,64 @@ sub getMetadatXQuery {
       $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
         $m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")->get_node(1));
     }
-  
+       
     foreach $t (keys %{$ma->{TIME}}) {
       $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
     }
-  
+    return;  
+  }
+  else {
+    perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
+  }
+  return "";
+}
+
+
+sub getMetadatXQuery {
+  my($ma, $id, $data) = @_;
+  $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
+  $ma->{FUNCTION} = "\"getMetadatXQuery\"";    
+  if((defined $ma and $ma ne "") and
+     (defined $id and $id ne "")) {
+
+    my $m = $ma->{REQUESTDOM}->find("//nmwg:metadata[\@id=\"".$id."\"]")->get_node(1);
+
+    if($data) {
+     
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+        $ma->{TIME}->{"START"} = extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+        $ma->{TIME}->{"END"} = extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+        $ma->{TIME}->{"START"} = eval(extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+        $ma->{TIME}->{"END"} = eval(extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+        $ma->{TIME}->{"START"} = extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
+        $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")) {
+        $ma->{TIME}->{"CF"} = extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")->get_node(1));
+      }
+      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")) {
+        $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
+          $m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")->get_node(1));
+      }
+       
+      foreach $t (keys %{$ma->{TIME}}) {
+        $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
+      }
+    }
     $queryString = subjectQuery($m, "");
     return $queryString;  
   }
@@ -351,11 +403,12 @@ The arguments are a metadata id, and an 'eventType' for the result code metadata
 
 The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
-=head2 getMetadatXQuery($ma, $id)
+=head2 getMetadatXQuery($ma, $id, $data)
 
 This function is meant to be used to convert a metadata object into an 
-XQuery statement.  Additionally, time based values are stored in a time
-object to be used in the subsequent data retrieval steps.  
+XQuery statement.  If the '$data' variable is set to 1, time based values 
+are stored in a time object to be used in the subsequent data retrieval 
+steps.  
 
 =head2 subjectQuery($node, $queryString)
 

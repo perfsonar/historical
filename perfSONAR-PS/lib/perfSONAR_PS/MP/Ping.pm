@@ -27,18 +27,25 @@ sub parseMetadata {
     );
 
     $metadatadb->openDB;
+    
     my $query = "//nmwg:metadata";
     print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
     my @resultsStringMD = $metadatadb->query($query); 
     
-    if($#resultsStringMD != -1) {    
-      for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
-	parse($resultsStringMD[$x], \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, $query);
-      }      
+    my $storeString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store ";
+    foreach my $ns (keys %{$self->{NAMESPACES}}) {
+      $storeString = $storeString."xmlns:".$ns."=\"".$self->{NAMESPACES}->{$ns}."\" ";
     }
-    else {	
+    $storeString = $storeString.">";
+    
+    if($#resultsStringMD != -1) {   
+      for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
+	$storeString = $storeString . $resultsStringMD[$x];
+      }    
+    }
+    else {
       perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
-    }     
+    } 
 
     $query = "//nmwg:data";
     print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
@@ -46,20 +53,28 @@ sub parseMetadata {
     
     if($#resultsStringD != -1) {    
       for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
-        parse($resultsStringD[$x], \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, $query);
+	$storeString = $storeString . $resultsStringD[$x];
       }
     }
     else {
-      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);  
-    }          
-    cleanMetadata(\%{$self}); 
+      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
+    }                 
+    $storeString = $storeString."</nmwg:store>";
+
+    my $parser = XML::LibXML->new();
+    $self->{STORE} = $parser->parse_string($storeString); 
+    cleanMetadata(\%{$self});
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-    my $xml = readXML($self->{CONF}->{"METADATA_DB_FILE"});
-    print "DEBUG:\tParsing \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" file.\n" if($self->{CONF}->{"DEBUG"});
-    parse($xml, \%{$self->{METADATA}}, \%{$self->{NAMESPACES}}, "//nmwg:metadata");
-    parse($xml, \%{$self->{DATA}}, \%{$self->{NAMESPACES}}, "//nmwg:data");	
-    cleanMetadata(\%{$self});  
+    my $filedb = new perfSONAR_PS::DB::File(
+      $self->{CONF}->{"LOGFILE"},
+      $self->{CONF}->{"METADATA_DB_FILE"},
+      $self->{CONF}->{"DEBUG"}
+    );  
+   
+    $filedb->openDB;   
+    $self->{STORE} = $filedb->getDOM(); 
+    cleanMetadata(\%{$self});
   }
   elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
         ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
