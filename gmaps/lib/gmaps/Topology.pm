@@ -77,13 +77,6 @@ sub getCoords
 
 		next if ! defined $ip;
 
-		# get the lat longs
-		# the timeout doesn' treally work due to the fact that the apache
-		# will overload the handlers.
-		$SIG{ALRM} = sub { die "timeout" };
-		eval {
-			alarm( 2 );
-
   			if ( $loc ne '' ) {
 				my $module = 'gmaps::Topology::' . $loc . '::getLatLong';		
 				( $lat, $long ) = &$module( $dns );
@@ -102,8 +95,6 @@ sub getCoords
 					$long = '-71.48186';
 				}
 			}
-			alarm( 0 );
-		};
 		
 		#print $routers->[$i] . "/$ip/$dns/$i = LAT: $lat, LONG: $long\n";
 		

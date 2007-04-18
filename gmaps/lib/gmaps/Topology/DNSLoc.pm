@@ -23,11 +23,17 @@ sub getLatLong
 	}
 	
 	return ( undef, undef ) unless ( defined $dns && $dns ne '' );
-	my $uri = "host -t LOC " . $dns;
+
+	# untaint the dns
+	my $host = undef;
+	if ( $dns =~ /\s*([\S\.]+)\s*/ ) {
+		$host = $1;
+	}
+	my $uri = '/usr/bin/host -t LOC ' . $host;
+	$ENV{PATH} = "";
 
 	# run
 	my $out = `$uri`;
-
 #aoacr1-oc192-chicr1.es.net location 40 43 12.000 N 74 0 18.000 W 0.00m 1m 1000m 10m
 
 	my $long = undef;

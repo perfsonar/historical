@@ -19,7 +19,7 @@ package gmaps::gmap;
 
 our $templatePath = '/u/sf/ytl/Work/perfSONAR/gmaps/trunk/lib/gmaps/templates/';
 our $server = 'http://134.79.24.133:8080/cgi-bin/gmaps.pl';
-
+our $googlemapKey = 'ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ';
 
 use CGI::Application;
 use base 'CGI::Application';
@@ -374,6 +374,7 @@ sub mapFromXml
 					'xmlMode' => 'xml',
 					'infoMode' => 'info',
 					'graphMode' => 'graph',
+					'googlemapKey' => $googlemapKey,
 				};
 	my $file = $templatePath . '/gmaps_html.tt2';
 	

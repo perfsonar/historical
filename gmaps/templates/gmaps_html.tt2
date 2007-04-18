@@ -39,7 +39,7 @@
         opacity: .80;
       }
     </style>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ&amp;v=2.x"
+    <script src="http://maps.google.com/maps?file=api&amp;key=[% googlemapKey %]&amp;v=2.x"
       type="text/javascript"></script>
     <script type="text/javascript">
 
