@@ -7,7 +7,7 @@ use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'getMetadatXQuery', 'extract', 'getTime');
+           'getResultCodeData', 'getMetadatXQuery', 'getTime', 'extract', 'reMap');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;   
@@ -86,49 +86,18 @@ sub getResultCodeData {
 }
 
 
-sub getTime {
-  my($ma, $id) = @_;
+sub getMetadatXQuery {
+  my($ma, $id, $data) = @_;
   $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
-  $ma->{FUNCTION} = "\"getTime\"";    
+  $ma->{FUNCTION} = "\"getMetadatXQuery\"";    
   if((defined $ma and $ma ne "") and
      (defined $id and $id ne "")) {
-
-    my $m = $ma->{REQUESTDOM}->find("//nmwg:metadata[\@id=\"".$id."\"]")->get_node(1);
-
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
-      $ma->{TIME}->{"START"} = extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+    my $m = $ma->{REQUESTDOM}->find("//".$ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"}.":metadata[\@id=\"".$id."\"]")->get_node(1);
+    if($data) {
+      getTime($ma, $id);
     }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
-      $ma->{TIME}->{"END"} = extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
-    }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
-      $ma->{TIME}->{"START"} = eval(extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
-    }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
-      $ma->{TIME}->{"END"} = eval(extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
-    }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
-      $ma->{TIME}->{"START"} = extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
-      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
-    }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")) {
-      $ma->{TIME}->{"CF"} = extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")->get_node(1));
-    }
-    if($m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")) {
-      $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
-        $m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")->get_node(1));
-    }
-       
-    foreach $t (keys %{$ma->{TIME}}) {
-      $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
-    }
-    return;  
+    $queryString = subjectQuery($m, "");
+    return $queryString;  
   }
   else {
     perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
@@ -137,53 +106,58 @@ sub getTime {
 }
 
 
-sub getMetadatXQuery {
-  my($ma, $id, $data) = @_;
+sub getTime {
+  my($ma, $id) = @_;
   $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
-  $ma->{FUNCTION} = "\"getMetadatXQuery\"";    
+  $ma->{FUNCTION} = "\"getTime\"";    
   if((defined $ma and $ma ne "") and
      (defined $id and $id ne "")) {
 
-    my $m = $ma->{REQUESTDOM}->find("//nmwg:metadata[\@id=\"".$id."\"]")->get_node(1);
+    my $m = $ma->{REQUESTDOM}->find("//".$ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"}.":metadata[\@id=\"".$id."\"]")->get_node(1);
 
-    if($data) {
-     
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
-        $ma->{TIME}->{"START"} = extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
-        $ma->{TIME}->{"END"} = extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
-        $ma->{TIME}->{"START"} = eval(extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
-        $ma->{TIME}->{"END"} = eval(extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
-        $ma->{TIME}->{"START"} = extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
-        $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")) {
-        $ma->{TIME}->{"CF"} = extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"consolidationFunction\"]")->get_node(1));
-      }
-      if($m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")) {
-        $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
-          $m->find(".//nmwg:parameters/select:parameter[\@name=\"resolution\"]")->get_node(1));
-      }
-       
-      foreach $t (keys %{$ma->{TIME}}) {
-        $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
-      }
+    my $prefix = "";
+    my $nmwg = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    if($ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
+      $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
     }
-    $queryString = subjectQuery($m, "");
-    return $queryString;  
+    else {
+      $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    }
+    
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+      $ma->{TIME}->{"START"} = extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+      $ma->{TIME}->{"END"} = extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+      $ma->{TIME}->{"START"} = eval(extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+      $ma->{TIME}->{"END"} = eval(extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+      $ma->{TIME}->{"START"} = extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
+      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")) {
+      $ma->{TIME}->{"CF"} = extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")->get_node(1));
+    }
+    if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")) {
+      $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
+        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")->get_node(1));
+    }
+       
+    foreach $t (keys %{$ma->{TIME}}) {
+      $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
+    }
+    return;  
   }
   else {
     perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
@@ -260,6 +234,32 @@ sub subjectQuery {
 }
 
 
+sub reMap {
+  my($ma, $node) = @_;
+  if($node->prefix and $node->namespaceURI()) {
+    if(!$ma->{REQUESTNAMESPACES}->{$node->namespaceURI()}) {
+      $ma->{REQUESTNAMESPACES}->{$node->namespaceURI()} = $node->prefix;
+    }
+    if(!($ma->{NAMESPACES}->{$node->prefix})) {
+      foreach my $ns (keys %{$ma->{NAMESPACES}}) {
+        if($ma->{NAMESPACES}->{$ns} eq $node->namespaceURI()) {
+          $node->setNamespace($ma->{NAMESPACES}->{$ns}, $ns, 1);
+          last;
+        }
+      }    
+    }
+  }
+  if($node->hasChildNodes()) {
+    foreach my $c ($node->childNodes) {
+      if($node->nodeType != 3) {
+        reMap($ma, $c);
+      }
+    }
+  }
+  return;
+}
+
+
 sub extract {
   my($ma, $node) = @_;
   $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
@@ -313,6 +313,7 @@ and the methods can be invoked directly (and sparingly).
     
     $msg = getResultCodeData($id, $idRef, "something...");
 
+    reMap($ma, $content);
 
     # Consider this metadata:
     # 
@@ -341,7 +342,7 @@ and the methods can be invoked directly (and sparingly).
     # note that $ma is an MA object.
 
     my $queryString = "/nmwg:metadata[".
-      getMetadatXQuery($ma, $id).
+      getMetadatXQuery($ma, $id, 1).
       "]/\@id";
 
     # the query after should look like this:
@@ -374,6 +375,9 @@ and the methods can be invoked directly (and sparingly).
     #
     my $value = extract($ma, $node);    
     
+    # or
+    getTime($ma, $id);
+    
 =head1 DETAILS
 
 The API for this module aims to be simple; note that this is not an object and 
@@ -403,6 +407,12 @@ The arguments are a metadata id, and an 'eventType' for the result code metadata
 
 The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
+=head2 reMap($ma, $node) 
+
+Given an MA instance, and a node (potentially a document) re-map the nodes namespace
+prefixes to known prefixes (to not screw with the XPath statements that will occur
+later).
+
 =head2 getMetadatXQuery($ma, $id, $data)
 
 This function is meant to be used to convert a metadata object into an 
@@ -413,6 +423,11 @@ steps.
 =head2 subjectQuery($node, $queryString)
 
 Helper function to create an xquery string from a metadata object.
+
+=head2 getTime($ma, $id)
+
+Performs the task of extracting time/cf/resolution information from the
+request message.  
 
 =head2 extract($ma, $node)
 

@@ -138,7 +138,6 @@ sub count {
 sub getDOM {
   my ($self) = @_;
   if(defined $self->{XML} and $self->{XML} ne "") {
-    print $self->{XML} , "\n";
     return $self->{XML};  
   }
   else {
