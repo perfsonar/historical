@@ -20,7 +20,8 @@
    <nmwg:parameters id="2">
      <select:parameter name="time" operator="gte">1176728770</select:parameter>
      <select:parameter name="time" operator="lte">1176728800</select:parameter>      
-     <select:parameter name="consolidationFunction">AVERAGE</select:parameter>     
+     <select:parameter name="consolidationFunction">AVERAGE</select:parameter>  
+     <select:parameter name="resolution">60</select:parameter>         
    </nmwg:parameters>
  </nmwg:metadata> 
   
