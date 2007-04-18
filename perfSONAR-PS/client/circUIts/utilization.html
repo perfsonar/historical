@@ -28,15 +28,56 @@
 
         <script type="text/javascript">
 
+            // TODO: Get some opts from cookies?
             var options = {
-                "xAxis": [1,4],
+//                "xAxis": [1,4],
                 "xOriginIsZero": false,
-                "yAxis":[1,6],
+                "yAxis":[0,1000],
                 "yOriginIsZero": false
             };
             var layout = null;
             var renderer = null;
             var go = true;
+
+            function loadData(req) {
+
+                if(!go) return;
+
+                log("JSON:",req.responseText);
+                log("PRE: evalJSON", Date());
+                var json = MochiKit.Async.evalJSONRequest(req);
+                log("POST: evalJSON", Date());
+
+                log("json got:", json);
+
+                layout.addDataset("sample",json.servdata.data);
+                layout.evaluate();
+                renderer.clear();
+                renderer.render();
+
+                MochiKit.Async.callLater(5,newData);
+            }
+
+            function newData(){
+                if(!go) return;
+                // TODO: Change to POST and specify args
+                var doreq = MochiKit.Async.doSimpleXMLHttpRequest("updateData.cgi");
+                doreq.addCallback(loadData);
+            }
+
+            function startStop(){
+                go = !go;
+
+                if(go){
+                    $('start-stop').value = "Stop";
+                    log("Starting data loop", Date());
+                    newData();
+                }
+                else{
+                    log("Stopping data loop", Date());
+                    $('start-stop').value = "Start";
+                }
+            }
 
             function initGraph(){
                 layout = new PlotKit.Layout("line",options);
@@ -48,44 +89,9 @@
                 MochiKit.Signal.connect("start-stop", 'onclick', startStop);
             }
 
-            function newData(){
-                if(!go) return;
-                var doreq = MochiKit.Async.doSimpleXMLHttpRequest("json.txt");
-                doreq.addCallback(loadData);
-            }
-
-            function loadData(req) {
-
-                if(!go) return;
-
-                var json = MochiKit.Async.evalJSONRequest(req);
-
-                var output = "";
-                for(name in json.servdata){
-                    output += name + "\n";
-                }
-
-                layout.addDataset("sample",json.servdata.data);
-                layout.evaluate();
-                renderer.clear();
-                renderer.render();
-
-                MochiKit.Async.callLater(1,newData);
-            }
-
-            function startStop(){
-                go = !go;
-
-                if(go){
-                    $('start-stop').value = "Stop";
-                    newData();
-                }
-                else{
-                    $('start-stop').value = "Start";
-                }
-            }
-
             addLoadEvent(initGraph);
+
+            createLoggingPane();
 
         </script>
     </div>
