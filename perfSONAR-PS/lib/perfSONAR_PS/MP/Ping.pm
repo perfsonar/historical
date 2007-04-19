@@ -30,7 +30,7 @@ sub parseMetadata {
     
     my $query = "//nmwg:metadata";
     print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
-    my @resultsStringMD = $metadatadb->query($query); 
+    my @resultsStringMD = $metadatadb->query($query);   
     
     my $storeString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store ";
     foreach my $ns (keys %{$self->{NAMESPACES}}) {
@@ -76,10 +76,6 @@ sub parseMetadata {
     $self->{STORE} = $filedb->getDOM(); 
     cleanMetadata(\%{$self});
   }
-  elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
-        ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);     
-  }  
   else {
     perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__);
   }
@@ -89,30 +85,29 @@ sub parseMetadata {
 
 sub prepareData {
   my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
+  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
   $self->{FUNCTION} = "\"prepareData\"";
-      
-  foreach my $d (keys %{$self->{DATA}}) {
-    if($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "sqlite"){
-      if(!defined $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}) {        
-	my @dbSchema = ("id", "time", "value", "eventtype", "misc");
-	$self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}} = 
-          new perfSONAR_PS::DB::SQL($self->{CONF}->{"LOGFILE"},
-	                               "DBI:SQLite:dbname=".$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}, 
-                                       "",
-                                       "",
-				       \@dbSchema,
-				       $self->{CONF}->{"DEBUG"});
+  cleanData(\%{$self});
+   
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {    
+    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    if($type eq "sqlite"){
+      if(!defined $self->{DATADB}->{$file}) {  
+        my @dbSchema = ("id", "time", "value", "eventtype", "misc");  
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::SQL(
+          $self->{CONF}->{"LOGFILE"}, 
+          "DBI:SQLite:dbname=".$file, 
+          "", 
+	  "", 
+	  \@dbSchema,
+	  $self->{CONF}->{"DEBUG"}
+        );
       }
     }
-    elsif(($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "rrd") or 
-          ($self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"} eq "mysql")) {
-      perfSONAR_PS::MP::Base::error($self, $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	  	    
-      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
-    }
     else {
-      perfSONAR_PS::MP::Base::error($self, $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-type"}." is not yet supported", __LINE__);	
-      removeReferences(\%{$self}, $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"});
+      perfSONAR_PS::MP::Base::error($self, $type." is not supported", __LINE__);
+      removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id"));
     }  
   }  
   return;
@@ -123,28 +118,24 @@ sub prepareCollectors {
   my($self) = @_;
   $self->{FILENAME} = "perfSONAR_PS::MP::Ping";  
   $self->{FUNCTION} = "\"prepareCollectors\"";
-        
-  foreach my $m (keys %{$self->{METADATA}}) {
-    if($self->{METADATAMARKS}->{$m}) {
+  foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+    if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
       my $commandString = $self->{CONF}->{"PING"}." ";
-      my $host = "";
-      foreach my $m2 (keys %{$self->{METADATA}->{$m}}) {
-        if($m2 =~ m/.*dst-value$/) {
-          $host = $self->{METADATA}->{$m}->{$m2};
-        }
-        elsif($m2 =~ m/.*ping:parameters\/nmwg:parameter-count$/) {
-          $commandString = $commandString . "-c " . $self->{METADATA}->{$m}->{$m2} . " ";
-        }
-      }  
-      
+      my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");      
+      my $pingPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/ping/2.0/", "ping");    
+      my $host = extract(\%{$self}, $m->find(".//".$topoPrefix.":dst")->get_node(1)); 
+      my $count = extract(\%{$self}, $m->find(".//".$pingPrefix.":parameters/nmwg:parameter[\@name=\"count\"]")->get_node(1));
+             
       if(!defined $host or $host eq "") {
-	error($self, "Destination host not specified", __LINE__);	  
+	perfSONAR_PS::MP::Base::error($self, "Destination host not specified", __LINE__);	  
       }
       else {
         $commandString = $commandString . $host;
+        if(defined $count) {
+          $commandString = $commandString . " -c " . $count;  
+        }
 	print "DEBUG:\tCommand \"".$commandString."\".\n" if($self->{CONF}->{"DEBUG"});
-	
-        $self->{AGENT}->{$m} = new perfSONAR_PS::MP::Ping::Agent(
+        $self->{AGENT}->{$m->getAttribute("id")} = new perfSONAR_PS::MP::Ping::Agent(
 	  $self->{CONF}->{"LOGFILE"},
           $commandString
 	);
@@ -166,44 +157,41 @@ sub collectMeasurements {
   }
   
   my %dbSchemaValues = ();
-  
-  foreach my $d (keys %{$self->{DATA}}) {
-    $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->openDB;
-    my $results = $self->{AGENT}->{$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}}->getResults;
-    foreach my $r (sort keys %{$results}) {
+
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    my $table = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
       
-      print "DEBUG:\tinserting \"".$self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}.
-            "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
-	    "\", \"ping\", \""."numBytes=".$results->{$r}->{"bytes"}.",ttl=".
-	    $results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.
-	    ",units=".$results->{$r}->{"units"}."\" into table ".
-	    $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"}.
-	    ".\n" if($self->{CONF}->{"DEBUG"});
+    if($type eq "sqlite") {
+      $self->{DATADB}->{$file}->openDB;
+      my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+      foreach my $r (sort keys %{$results}) {
+        print "DEBUG:\tinserting \"".$d->getAttribute("metadataIdRef").
+              "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
+	      "\", \"ping\", \""."numBytes=".$results->{$r}->{"bytes"}.",ttl=".
+	      $results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.
+	      ",units=".$results->{$r}->{"units"}."\" into table ".
+	      $table.".\n" if($self->{CONF}->{"DEBUG"});
              
-      %dbSchemaValues = (
-        id => $self->{DATA}->{$d}->{"nmwg:data-metadataIdRef"}, 
-        time => $results->{$r}->{"timeValue"}, 
-        value => $results->{$r}->{"time"}, 
-        eventtype => "ping",  
-        misc => "numBytes=".$results->{$r}->{"bytes"}.",ttl=".$results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.",units=".$results->{$r}->{"units"}
-      );  
+        %dbSchemaValues = (
+          id => $d->getAttribute("metadataIdRef"), 
+          time => $results->{$r}->{"timeValue"}, 
+          value => $results->{$r}->{"time"}, 
+          eventtype => "ping",  
+          misc => "numBytes=".$results->{$r}->{"bytes"}.",ttl=".$results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.",units=".$results->{$r}->{"units"}
+        );  
       
-      $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->insert(
-        $self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-table"},
-	\%dbSchemaValues
-      );
-      
+        $self->{DATADB}->{$file}->insert(
+          $table,
+	  \%dbSchemaValues
+        );
+      }
+      $self->{DATADB}->{$file}->closeDB;
     }
-    $self->{DATADB}->{$self->{DATA}->{$d}->{"nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter-file"}}->closeDB;
-  }		
+  }  		
   return;
 }
-
-
-
-
-
-
 
 
 
@@ -384,15 +372,14 @@ effort.
       ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/"    
     );
     
-    my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
+    my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "");
     
     # or:
     #
     # $mp = new perfSONAR_PS::MP::Ping;
     # $mp->setConf(\%conf);
     # $mp->setNamespaces(\%ns);
-    # $mp->setMetadata("");
-    # $mp->setData("");
+    # $mp->setStore();
                 
     $mp->parseMetadata;
     $mp->prepareData;
@@ -466,11 +453,11 @@ A brief description using the API:
 
 The offered API is simple, but offers the key functions we need in a measurement point. 
 
-=head2 new(\%conf, \%ns, \%metadata, \%data)
+=head2 new(\%conf, \%ns, $store)
 
 The first argument represents the 'conf' hash from the calling MP.  The second argument
-is a hash of namespace values.  The final 2 values are structures containing metadata or 
-data information.  
+is a hash of namespace values.  The final value is an LibXML DOM object representing
+a store.
 
 =head2 setConf(\%conf)
 
@@ -480,13 +467,9 @@ data information.
 
 (Re-)Sets the value for the 'namespace' hash. 
 
-=head2 setMetadata(\%metadata) 
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' object. 
-
-=head2 setData(\%data) 
-
-(Re-)Sets the value for the 'data' object. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
 
 =head2 parseMetadata()
 

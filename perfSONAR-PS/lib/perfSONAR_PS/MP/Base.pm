@@ -134,11 +134,11 @@ This API is a work in progress, but is starting to capture the basics of an MP.
 
 The offered API is simple, but offers the key functions we need in a measurement point. 
 
-=head2 new(\%conf, \%ns, \%metadata, \%data)
+=head2 new(\%conf, \%ns, $store)
 
 The first argument represents the 'conf' hash from the calling MP.  The second argument
-is a hash of namespace values.  The final 2 values are structures containing metadata or 
-data information.  
+is a hash of namespace values.  The final value is a XML::LibXML::Document that contains 
+the values of the store file.
 
 =head2 setConf(\%conf)
 

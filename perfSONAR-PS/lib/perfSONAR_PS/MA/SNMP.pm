@@ -356,7 +356,7 @@ sub retrieveSQL {
   else { 
     $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
     for(my $a = 0; $a <= $#{$result}; $a++) {    
-      $responseString = $responseString . "    <ping:datum";
+      $responseString = $responseString . "    <snmp:datum";
       $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
       $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
       my @misc = split(/,/,$result->[$a][4]);
