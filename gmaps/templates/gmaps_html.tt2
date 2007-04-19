@@ -46,8 +46,8 @@
       }
       #perfsonar_logo {
         position: absolute;
-        left: 26px;
-        bottom: 26px;
+        left: 25px;
+        bottom: 27px;
         z-index: 99997;
       }
       #invert_markers, #select_all_markers, #select_none_markers {
@@ -65,12 +65,12 @@
     var garrows = new Array();
     
     var side_bar_html = '';
-    var showLines = true;  
     
     var map;
     var mlat;
     var mlng;
-    var activeMarker;
+    var activeIP;
+    var activeDNS;
     
     function createMarker( lat, lng, dns, ip ) {        
  
@@ -87,13 +87,6 @@
         var point = new GLatLng( lat,lng );
         var tooltip = dns + ' (' + ip + ')';
         var marker = new GMarker(point, {title:tooltip});
-
-        // make single clicks the info box
-        GEvent.addListener( marker, "click", function() {
-          var tabs = getTabs( dns, ip );
-          marker.openInfoWindowTabsHtml( tabs );
-          activeMarker = marker;
-        });
 
         // make double clicks center on the marker
         GEvent.addListener( marker, "dblclick", function() {
@@ -114,24 +107,28 @@
       req.send( null );
       var serializer = new XMLSerializer();
       table = serializer.serializeToString( req.responseXML );
-      var header =  "<h3>" + dns + " (" + ip + ")</h3>";
       
-      var graph = "[% cgi %]?mode=[% graphMode %]&ip=" + ip;
+      var d = new Date();
+      var header =  "<h3>" + dns + " (" + ip + ")</h3>";
+      var graph = "[% cgi %]?mode=[% graphMode %]&ip=" + ip + "&bogus=" + d.getTime();
       var tabs = [
-        new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph' height='168px' width='481px' src='" + graph + "'/></p>" ),
+        new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph_'" + ip + " height='168px' width='481px' src='" + graph + "'/></p>" ),
         new GInfoWindowTab( "Info", header + table )
       ];
      
       return tabs;
     }
-    
+
     function refreshInfoWindow() {
-      var window = map.getInfoWindow();
-      if( ! window.isHidden() ) {
-        var point = activeMarker.getPoint();
-        var tabs = window.getTabs();
-        //window.reset( point, tabs, null );
-      }
+      if( ! map.getInfoWindow().isHidden() )
+        refreshInfoWindowTab( activeDNS, activeIP );
+    }
+    
+    function refreshInfoWindowTab( dns, ip ) {
+      activeIP = ip;
+      activeDNS = dns;
+      var tabs = getTabs( dns, ip );
+      gmarkers[ip].openInfoWindowTabsHtml( tabs );   
     }
     
     function toggleMarker( ip ) {
@@ -185,14 +182,13 @@
       } 
     }
     
+    
     function focus( dns, ip ) {
-      var tabs = getTabs( dns, ip );
-      gmarkers[ip].openInfoWindowTabsHtml( tabs );
+      refreshInfoWindowTab( dns, ip );
       map.getInfoWindow().hide();
       map.getInfoWindow().show();
     }
     
-
     
     function zoom(direction) {
       var m = map.fromLatLngToDivPixel( new GLatLng( mlat, mlng ) );
@@ -288,7 +284,11 @@
 	            
 	        // create the marker
 	        gmarkers[ip] = createMarker( lat, lng, dns, ip );
-	            
+	        // make single clicks the info box
+          GEvent.addListener( gmarkers[ip], "click", function() {
+            refreshInfoWindowTab( dns, ip );
+          });
+	          
 	        map.addOverlay( gmarkers[ip] );
 	      }
 	      document.getElementById("side_bar").innerHTML = side_bar_html;
@@ -312,13 +312,7 @@
 	         
         }
 
-        var checked;
-        if ( showLines ) {
-          checked = 'checked';
-        } else {
-          checked = '';
-        }
-        var lineToggle = "show links " + '<input id=\"toggle_lines" type=\"checkbox\" onclick=\"javascript:toggleLines();\" ' + checked + '><br>';
+        var lineToggle = "show links " + '<input id=\"toggle_lines" type=\"checkbox\" onclick=\"javascript:toggleLines();\" checked><br>';
         
         var markerToggle = 'markers: ' +
           '<input id=\"invert_markers\" type=\"button\" onclick=\"javascript:invertMarkers();\" value=\"Invert\">'
@@ -337,14 +331,14 @@
       if (GBrowserIsCompatible()) {
 
         document.getElementById("side_bar").innerHTML 
-          = '<p align="center">Please wait.<br>Fetching perfSONAR information...<br>This could take some time...<br><img src="[% cgi %]?mode=spinner"/></p>';
+          = '<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="[% cgi %]?mode=spinner"/></p>';
 
         map = new GMap2(document.getElementById("map"));
         var mapDiv = document.getElementById("map"); 
        	map.addControl(new GLargeMapControl());
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
-        map.setCenter(new GLatLng(40,-93), 4);
+        map.setCenter(new GLatLng(40,0), 2);
 
         // populate map 
         getXml( "[% cgi %]?mode=[% xmlMode %]&[% args %]" );
@@ -364,14 +358,15 @@
           window.addEventListener("resize", function() { map.onResize()} , false);
         }
 
-        setInterval( "refreshInfoWindow();", 10000 );
+        setInterval( "refreshInfoWindow();", [% refreshInterval %] * 1000 );
+        
       }
       else {
         alert( "Sorry, your browser is not compatible with GoogleMaps." );
       } 
    
     }
-  
+
     //]]>
     </script>
   </head>

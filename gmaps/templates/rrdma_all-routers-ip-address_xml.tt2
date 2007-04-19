@@ -8,7 +8,9 @@
   <nmwg:metadata id="#meta1">
 
     <netutil:subject id="#netutil1">
-      <topo:direction>in</topo:direction>
+      <topo:interface>
+        <topo:direction>in</topo:direction>
+      </topo:interface>
     </netutil:subject>
 
     <nmwg:eventType>[% eventType %]</nmwg:eventType>

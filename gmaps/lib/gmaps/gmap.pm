@@ -35,19 +35,27 @@ sub setup {
     $self->mode_param('mode');
     
     $self->run_modes(
-		     'graph'	=> 'rrdmaUtilizationGraph',	# returns the rrdma utilization graph
-		     'enter'	=> 'enterNodes',			# form to process router/domain info
-		     'info'		=> 'rrdmaInfoXml',			# returns info about a router
-		     'xml'		=> 'createXml',				# returns an xml of long lats and nodes
+    	     'enter'	=> 'enterNodes',			# form to process router/domain info
+
 		     'map'		=> 'mapFromXml',			# returns the googlemap with async. xml of nodes (createXml)
 		     'mapInline'	=> 'mapWithInlineJavascript',	# returns googlemap with inline javascript of ndoes
+	
+		     'graph'	=> 'rrdmaUtilizationGraph',	# returns the rrdma utilization graph
+		     'graphOnly' => 'rrdmaUtilizationGraphOnly',
+	
+		     'info'		=> 'rrdmaInfoXml',			# returns info about a router
+		     'ma'		=> 'ma',						# info about ma
+		     'geo'		=> 'geoInfo',
+
+		     'xml'		=> 'createXml',				# returns an xml of long lats and nodes
 		     'kml'		=> 'createKml',				# returns a kml file of nodes
+
 		     'routers'		=> 'testRouters',		# returns the parsed output
+
+			# logo
 		     'spinner'		=> 'spinnerGraphic',			# wait graphic
-		     'slac_logo'		=> 'slacGraphic',			# wait graphic
-		     'perfsonar_logo'	=> 'perfsonarGraphic',			# wait graphic
-		     'ma'			=> 'ma',						# info about ma
-		     'geo'		=> 'geoInfo'
+		     'slac_logo'		=> 'slacGraphic',			# slac logo
+		     'perfsonar_logo'	=> 'perfsonarGraphic',		# perfsonar logo
 		   );
 
 	return undef;    
@@ -196,6 +204,10 @@ sub testRouters
 #######################################################################
 # access functions
 #######################################################################
+
+###
+# spits out graphics for logos etc (not the best use of cgi...)
+###
 
 # returns the wait/loading graphic
 sub spinnerGraphic
@@ -389,15 +401,21 @@ sub mapFromXml
 
 	my $args = &passArgs( $self, @_ );
 
+    my $refresh = $self->query()->param('refresh');
+    if ( $refresh eq '' || $refresh !~ /\d+/ ) {
+    	$refresh = 60;
+    }
+
 	# write the output to return to the client
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 	my $vars = {
-					'cgi'	=> $server,
-					'args'	=> $args,
-					'xmlMode' => 'xml',
-					'infoMode' => 'info',
+					'cgi'		=> $server,
+					'args'		=> $args,
+					'xmlMode' 	=> 'xml',
+					'infoMode' 	=> 'info',
 					'graphMode' => 'graph',
-					'googlemapKey' => $googlemapKey,
+					'googlemapKey' 		=> $googlemapKey,
+					'refreshInterval' 	=> $refresh,
 				};
 	my $file = $templatePath . '/gmaps_html.tt2';
 	
@@ -526,6 +544,52 @@ sub rrdmaUtilizationGraph
 	}
 	
 	return $$png;
+}
+
+# returns a html of the util grpah, refresh automatically
+sub rrdmaUtilizationGraphOnly
+{
+	my $self = shift;
+	my $routers = &getRouters( $self, @_ );
+	
+	my $refresh = $self->query()->param('refresh');
+	if ( $refresh eq '' || $refresh !~ /\d+/ ) {
+		$refresh = 10;
+	}
+	
+	# get dns for each
+	my @hosts = ();
+	foreach my $r ( @$routers ) {
+		my ( $ip, $dns ) = &gmaps::Topology::getDNS( $r );
+		my $var = { dns => $dns, ip => $ip };
+		push @hosts, $var;
+	}
+	
+	# create template object
+	my $tt = Template->new( { 'ABSOLUTE' => 1 } );		
+	my $file = undef;
+	my $vars = {};
+		
+	my $out = '';
+	$vars = {
+      			'routers'  => \@hosts,
+      			'graphMode'  => 'graph',
+      			'cgi'		=> $server,
+      			'refreshInterval' => $refresh,
+			};	
+	$file = $templatePath . '/gmaps-graph_html.tt2';
+	
+	my $out = '';
+	$tt->process( $file, $vars, \$out )
+        || die $tt->error;
+	
+	# final xml
+	if ( defined $self ) {
+		$self->header_add(  -type => "text/html" ); 
+	}
+		
+	return $out;
+
 }
 
 
