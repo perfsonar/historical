@@ -52,18 +52,19 @@ print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DE
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
 
-my $mpThread = threads->new(\&measurementPoint);
+#my $mpThread = threads->new(\&measurementPoint);
 my $maThread = threads->new(\&measurementArchive);
-my $regThread = threads->new(\&registerLS);
+#my $regThread = threads->new(\&registerLS);
 
-if(!defined $mpThread || !defined $maThread || !defined $regThread) {
+if(!defined $maThread) {
+# || !defined $mpThread || !defined $regThread) {
   print "Thread creation has failed...exiting...\n";
   exit(1);
 }
 
-$mpThread->join();
+#$mpThread->join();
 $maThread->join();
-$regThread->join();
+#$regThread->join();
 
 
 
@@ -75,7 +76,7 @@ sub measurementPoint {
   my $functionName = "measurementPoint";
   print $fileName.":\tStarting '".threads->tid()."' as the MP in ".$functionName."\n" if($DEBUG);
 
-  my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "", "");
+  my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "");
   $mp->parseMetadata;
   $mp->prepareData;
   $mp->prepareCollectors;  
@@ -91,7 +92,7 @@ sub measurementArchive {
   my $functionName = "measurementArchive";  
   print $fileName.":\tStarting '".threads->tid()."' as the MA in ".$functionName."\n" if($DEBUG);
 
-  my $ma = new perfSONAR_PS::MA::Ping(\%conf, \%ns, "", "");
+  my $ma = new perfSONAR_PS::MA::Ping(\%conf, \%ns, "");
   $ma->init;  
   while(1) {
     $ma->receive;

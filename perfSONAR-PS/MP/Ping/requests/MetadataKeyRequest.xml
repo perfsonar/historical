@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<nmwg:message id="#message1"
+              type="MetadataKeyRequest"
+              xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/"
+              xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+  <nmwg:metadata id="#meta1">
+    <ping:subject id="#ping">
+      <topo:endPointPair>
+        <topo:src type="hostname" value="mead" />
+      </topo:endPointPair>
+    </ping:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="#meta1"/>
+
+</nmwg:message> 

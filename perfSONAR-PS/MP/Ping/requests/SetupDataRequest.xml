@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="SetupDataRequest"
+	      id="msg1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+	      
+  <nmwg:metadata id="meta1">
+    <ping:subject id="s1">
+      <nmwgt:endPointPair>
+        <nmwgt:src type="hostname" value="mead" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  
+  <nmwg:metadata id="meta2">
+    <ping:subject id="s2" metadataIdRef="meta1"/>  
+    <nmwg:parameters id="2">
+     <select:parameter name="time" operator="gte">1176998877</select:parameter>
+     <select:parameter name="time" operator="lte">1176998887</select:parameter>       
+    </nmwg:parameters>
+  </nmwg:metadata> 
+  
+  <nmwg:data id="data1" metadataIdRef="meta2" />
+
+</nmwg:message>
