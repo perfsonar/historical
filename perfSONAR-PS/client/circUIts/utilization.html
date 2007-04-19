@@ -32,8 +32,15 @@
             var options = {
 //                "xAxis": [1,4],
                 "xOriginIsZero": false,
-                "yAxis":[0,1000],
-                "yOriginIsZero": false
+//                "yAxis":[0,1000],
+//                "yTicks":[
+//                {label: "0", v: 0},
+//                {label: "200", v: 200},
+//                {label: "400", v: 400},
+//                {label: "600", v: 600},
+//                {label: "800", v: 800},
+//                {label: "1000", v: 1000},
+//                    ],
             };
             var layout = null;
             var renderer = null;
@@ -60,6 +67,8 @@
 
             function newData(){
                 if(!go) return;
+
+                log("Fetch Data: ", Date());
                 // TODO: Change to POST and specify args
                 var doreq = MochiKit.Async.doSimpleXMLHttpRequest("updateData.cgi");
                 doreq.addCallback(loadData);

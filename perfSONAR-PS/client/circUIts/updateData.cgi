@@ -19,9 +19,11 @@ my $filter = '//nmwg:message//snmp:datum';
 
 my $cgi = new CGI;
 
-my $int = $cgi->param('resolution') || 10;
+my $int = $cgi->param('resolution') || 2;
 my $host = $cgi->param('hostName') || "anna-raptor1.internet2.edu";
 my $index = $cgi->param('ifName') || "1020001";
+my $direction = $cgi->param('direction') || "in";
+my $npoints = $cgi->param('npoints') || 100;
 
 # TODO: Set time from parameters to allow 'replay'
 my($sec, $frac) = Time::HiRes::gettimeofday;  
@@ -32,12 +34,16 @@ if($sec%$int){
     $sec = int($sec/$int)*$int; # end time round-down
 }
 
+warn "Pre sender";
 my $sender = new perfSONAR_PS::Transport("/tmp/pSerror.log", "", "", $server, $port, $endpoint);
+warn "Post sender";
 
-my $mess = makeMessage($host, $index, $sec, $int);
+my $mess = makeMessage($host, $index, $sec, $int, $direction, $npoints);
 my $env = $sender->makeEnvelope($mess);
 
+warn "Pre send data";
 my $response = $sender->sendReceive($env);
+warn "Post send data";
 
 # Turn the response into an XPath object
 my $xp;
@@ -49,7 +55,9 @@ if( UNIVERSAL::can($response, "isa") ? "1" : "0" == 1
 }
 
 # pull all the snmp:datum from the response
+warn "Pre find";
 my $nodeset = $xp->find( $filter );
+warn "Post find";
 if($nodeset->size() <= 0) {
     die "Nothing found for xpath statement $filter.\n";
 }
@@ -61,8 +69,8 @@ print $cgi->header(-type => "text/javascript",
 
 print "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
 foreach my $d ($nodeset->get_nodelist) {
-    my $t = $d->getAttribute("time");
-    my $v = $d->getAttribute("value");
+    my $t = int($d->getAttribute("time"));
+    my $v = int($d->getAttribute("value")) * 8 / 1000000;
     next if($v eq 'nan');
     print '        [', $t, "," , $v, '],', "\n";
 }
@@ -72,9 +80,9 @@ exit 0;
 
 
 sub makeMessage {
-  my($host, $index, $time, $int) = @_;
+  my($host, $index, $time, $int, $direction, $npoints) = @_;
   my $ret;
-  my $stime = $time-($int*50);
+  my $stime = $time-($int*$npoints);
   my $etime = $time;
 
   $ret =<<"ENDMESS";
@@ -90,7 +98,7 @@ sub makeMessage {
       <nmwgt:interface>
         <nmwgt:hostName>$host</nmwgt:hostName>
         <nmwgt:ifName>$index</nmwgt:ifName>
-        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:direction>$direction</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:parameters id=\"p1\">
