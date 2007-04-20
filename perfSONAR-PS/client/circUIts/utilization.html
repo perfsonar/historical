@@ -1,12 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-   <title>PlotKit: Axis Test</title>
+   <title>Network: Utilization</title>
    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-   <link href="/css/page.css" media="screen" rel="Stylesheet"
-   type="text/css" />
-   <link href="tests.css" media="screen" rel="Stylesheet" type="text/css" />
-   <!--   <script src="./js/json.js" type="text/javascript"></script> -->
    <script src="./js/MochiKit/MochiKit.js" type="text/javascript"></script>
    <script src="./js/PlotKit/excanvas.js" type="text/javascript"></script>
    <script src="./js/PlotKit/PlotKit_Packed.js" type="text/javascript"></script>
@@ -17,9 +13,10 @@
     <div id="body">
         <h2>Network Utilization</h2>
     
+
         <div id="div-example"
             style="margin: 0 auto 0 auto;">
-            <canvas id="canvas-example"
+            <canvas id="plot"
             width="400" height="400"
             style="border: 1px solid #eee;">
             </canvas>
@@ -29,7 +26,7 @@
         <script type="text/javascript">
 
             // TODO: Get some opts from cookies?
-            var options = {
+            var defOptions = {
 //                "xAxis": [1,4],
                 "xOriginIsZero": false,
 //                "yAxis":[0,1000],
@@ -89,12 +86,12 @@
             }
 
             function initGraph(){
-                layout = new PlotKit.Layout("line",options);
+                layout = new PlotKit.Layout("line",defOptions);
 
                 newData();
 
-                renderer = new SweetCanvasRenderer($('canvas-example'),
-                        layout,options);
+                renderer = new SweetCanvasRenderer($('plot'),
+                        layout,defOptions);
                 MochiKit.Signal.connect("start-stop", 'onclick', startStop);
             }
 

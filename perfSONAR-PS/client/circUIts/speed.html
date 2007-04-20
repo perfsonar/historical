@@ -20,8 +20,8 @@
             "maxValue": 100,
             "numBars": 70,              // how many bars
             "percentBar": 0.6,          // how much of each 'bar' is lit
-            "emptyAlpha": 0.4,          // how much to obscure colors
-            "staleAlpha": 1.0,          // how much to obscure colors
+            "emptyAlpha": 0.3,          // how much to obscure colors
+            "staleAlpha": 0.55,          // how much to obscure colors
 
             "refreshPeriod": 0.030,// seconds
             "dataPeriod": 2,     // seconds
@@ -192,7 +192,15 @@ Speed.prototype.refresh = function(){
     ctx.save();
     ctx.beginPath();
     ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = (stale) ? this.options.staleAlpha : 1;
+    if(stale){
+        ctx.globalAlpha = this.options.staleAlpha;
+        ctx.drawImage(this.empty,
+                0,0,                        // source x,y
+                this.wc,this.hc);
+    }
+    else{
+        ctx.globalAlpha = 1;
+    }
     ctx.drawImage(this.empty,
             0,0,                        // source x,y
             this.wc,this.hc - yLevel,   // source w,h

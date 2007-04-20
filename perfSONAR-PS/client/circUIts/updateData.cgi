@@ -19,7 +19,7 @@ my $filter = '//nmwg:message//snmp:datum';
 
 my $cgi = new CGI;
 
-my $int = $cgi->param('resolution') || 2;
+my $int = $cgi->param('resolution') || 10;
 my $host = $cgi->param('hostName') || "anna-raptor1.internet2.edu";
 my $index = $cgi->param('ifName') || "1020001";
 my $direction = $cgi->param('direction') || "in";
@@ -70,6 +70,7 @@ print $cgi->header(-type => "text/javascript",
 print "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
 foreach my $d ($nodeset->get_nodelist) {
     my $t = int($d->getAttribute("time"));
+    # mbps
     my $v = int($d->getAttribute("value")) * 8 / 1000000;
     next if($v eq 'nan');
     print '        [', $t, "," , $v, '],', "\n";
