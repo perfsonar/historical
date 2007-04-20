@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+   <title>How fast you wanna go?</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <!--   <script src="./js/json.js" type="text/javascript"></script> -->
+   <script src="./js/MochiKit/MochiKit.js" type="text/javascript"></script>
+   <script src="./js/PlotKit/excanvas.js" type="text/javascript"></script>
+   <script src="./js/PlotKit/PlotKit_Packed.js" type="text/javascript"></script>
+</head>
+
+<script type="text/javascript">
+
+    function Speed(options){
+
+        // Provide defaults
+        this.options = {
+            // required args:
+            // "canvas"
+            "maxValue": 100,
+            "numBars": 70,              // how many bars
+            "percentBar": 0.6,          // how much of each 'bar' is lit
+            "emptyAlpha": 0.4,          // how much to obscure colors
+            "staleAlpha": 1.0,          // how much to obscure colors
+
+            "refreshPeriod": 0.030,// seconds
+            "dataPeriod": 2,     // seconds
+            "jitterPercent":    0.01,   // bounce a bit around value :)
+
+            "doIntro":  true,
+            "introRampDuration": .8,     // how long (seconds) to ramp
+            "introRamps": 3,            // how many ramps
+
+            "autoStart": true,
+        };
+
+        for(p in options){
+            this.options[p] = options[p];
+        }
+
+        if(!this.options.canvas){
+            throw new Error("Speed: \"canvas\" property required");
+        }
+        this.canvas = this.options.canvas;
+
+        if(this.options.maxValue <= 0){
+            throw new Error("Speed: \"maxValue\" must be > 0");
+        }
+
+        // convert periods to milliseconds
+        this.refreshPeriod = this.options.refreshPeriod * 1000;
+        this.dataPeriod = this.options.dataPeriod * 1000;
+
+        this.currentValue = this.options.maxValue;
+        var now = new Date();
+        this.nextDataUpdate = now.getTime() + this.dataPeriod;
+
+        /*
+           Create 2 canvas's - same size as one passed in.
+           divide height/24
+           draw grey boxes on one,
+           do gradient on the other
+           Setup scaling (maxValue)
+         */
+
+        this.empty = document.createElement('canvas');
+        this.full = document.createElement('canvas');
+        this.empty.style.background =
+            this.full.style.background =
+            this.canvas.style.background;
+        this.hc = this.empty.height = this.full.height = this.canvas.height;
+        this.wc = this.empty.width = this.full.width = this.canvas.width;
+
+        this.initCanvas();
+
+        this.refresh = setInterval(MochiKit.Base.bind(this.refresh,this),
+                this.refreshPeriod);
+
+//        MochiKit.Async.callLater(1,MochiKit.Base.bind(this.intro,this));
+
+        return this;
+    }
+
+Speed.prototype.initCanvas = function(options){
+
+        /* gradients */
+        var fctx = this.full.getContext("2d");
+        var ectx = this.empty.getContext("2d");
+        var ctx = this.canvas.getContext("2d");
+
+
+        // First draw scaled color 'led style' value indicator
+        var fullStyle = fctx.createLinearGradient(0,this.hc,0,0);
+
+        fullStyle.addColorStop(0.0,"rgba(0,255,0,1)");
+        fullStyle.addColorStop(0.1,"rgba(0,255,0,1)");
+
+        fullStyle.addColorStop(0.45,"rgba(255,255,0,1)");
+        fullStyle.addColorStop(0.55,"rgba(255,255,0,1)");
+
+        fullStyle.addColorStop(0.9,"rgba(255,0,0,1)");
+        fullStyle.addColorStop(1.0,"rgba(255,0,0,1)");
+
+        var hb = this.hc/this.options.numBars;
+        var hl = hb * this.options.percentBar;
+        var wb = this.wc;
+
+        fctx.save();
+        fctx.beginPath();
+        fctx.globalCompositeOperation = "source-over";
+        fctx.fillStyle = fullStyle;
+        fctx.clearRect(0,0,this.wc,this.hc);
+        for(var i = 0; i < this.options.numBars; i++){
+            fctx.rect(0,(hb*i)+(.5*hl),wb,hl);
+        }
+        fctx.closePath();
+        fctx.fill();
+        fctx.restore();
+
+        // Copy 'full' image to 'empty' one, but set alpha to
+        // reduce colors (make it look unlit)
+        ectx.save();
+        ectx.beginPath();
+        ectx.globalCompositeOperation = "source-over";
+        ectx.globalAlpha = this.options.emptyAlpha;
+        ectx.drawImage(this.full,0,0);
+        ectx.closePath();
+        ectx.restore();
+
+        return;
+}
+
+Speed.prototype.intro = function(){
+    if(!this.idata){
+        this.idata = {};
+        this.idata.i = 0;
+
+        this.idata.incmax = Math.floor(this.options.introRampDuration /
+            this.options.refreshPeriod);
+        this.idata.loopi = 0;
+        this.idata.loopmax = this.options.introRamps;
+    }
+
+    if(this.idata.i >= this.idata.incmax){
+        this.idata.i = 0;
+        this.displayData(0);
+
+        this.idata.loopi++;
+        if(this.idata.loopi >= this.idata.loopmax){
+            delete this.idata;
+            return;
+        }
+    }
+
+    var a = (this.idata.i+1) * this.options.refreshPeriod /
+        this.options.introRampDuration;
+
+    this.displayData(a * this.options.maxValue);
+
+    // next iteration
+    this.idata.i++;
+    MochiKit.Async.callLater(this.options.refreshPeriod,
+            MochiKit.Base.bind(this.intro,this));
+}
+
+Speed.prototype.refresh = function(){
+
+    // TODO: fetch data
+    var stale = false;
+    var now = new Date();
+    if(now.getTime() > this.nextDataUpdate){
+        if(!this.data || (this.data.length < 1)){
+            stale = true;
+        }
+        else{
+            var val = this.data.shift();
+            if(typeof(val) == "array"){
+                this.currentValue = val[val.length-1];
+            }
+            else{
+                this.currentValue = val;
+            }
+            this.nextDataUpdate = now.getTime() + this.dataPeriod;
+        }
+    }
+
+    var ctx = this.canvas.getContext("2d");
+
+    // TODO: random jitter
+    var yLevel = this.hc*(this.currentValue/this.options.maxValue);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = (stale) ? this.options.staleAlpha : 1;
+    ctx.drawImage(this.empty,
+            0,0,                        // source x,y
+            this.wc,this.hc - yLevel,   // source w,h
+            0,0,                        // dest x,y
+            this.wc,this.hc - yLevel);  // dest w,h
+    ctx.drawImage(this.full,
+            0,this.hc - yLevel,
+            this.wc,yLevel,
+            0,this.hc - yLevel,
+            this.wc,yLevel);
+    ctx.closePath();
+    ctx.restore();
+}
+</script>
+
+<body>
+    <div id="body" style="background: #fafafa">
+        <h2>Net-ometer</h2>
+    
+        <center>
+            <div id="div-example">
+                <canvas id="speedo" width="75" height="400"
+                style="border: 4px solid #aaa; background: #5a5a5a;">
+            </canvas>
+        </div>
+        <input id="start-stop" type="button" value="Stop">
+    </center>
+
+        <script type="text/javascript">
+
+
+            // TODO: Get some opts from cookies?
+            var go = true;
+
+            function loadData(req) {
+
+                if(!go) return;
+
+                log("JSON:",req.responseText);
+                log("PRE: evalJSON", Date());
+                var json = MochiKit.Async.evalJSONRequest(req);
+                log("POST: evalJSON", Date());
+
+                log("json got:", json);
+
+                Speed.updateValue(json.data);
+
+                MochiKit.Async.callLater(1,newData);
+            }
+
+            function newData(){
+                if(!go) return;
+
+                log("Fetch Data: ", Date());
+                // TODO: Change to POST and specify args
+                var doreq = MochiKit.Async.doSimpleXMLHttpRequest("updateData.cgi");
+                doreq.addCallback(loadData);
+            }
+
+            function startStop(){
+                go = !go;
+
+                if(go){
+                    $('start-stop').value = "Stop";
+                    log("Starting data loop", Date());
+                    newData();
+                }
+                else{
+                    log("Stopping data loop", Date());
+                    $('start-stop').value = "Start";
+                }
+            }
+
+            function initGraph(){
+
+                var speed = new Speed({"canvas": $('speedo')});
+
+//                newData();
+                MochiKit.Signal.connect("start-stop", 'onclick', startStop);
+            }
+
+            addLoadEvent(initGraph);
+
+            createLoggingPane();
+
+        </script>
+    </div>
+</body></html>
