@@ -31,7 +31,7 @@
                 "dataPeriod": 2,     // seconds
                 "jitterPercent":    0.005,   // bounce a bit around value :)
 
-                "doIntro":  false,
+                "doIntro":  true,
                 "autoStart": true,
             };
 
@@ -139,8 +139,6 @@ Speed.prototype.initCanvas = function(options){
 
 Speed.prototype.appendData = function(a){
 
-    log("appendData:");
-
     if(arguments.length != 1){
         throw new Error("Speed.appendData(): Only one arg allowed");
     }
@@ -165,35 +163,33 @@ Speed.prototype.appendData = function(a){
     // is the second element.) Array must already be sorted. This
     // is a very dumb algorithm...
     if(arr[0].length){
-        var lastkey;
 
-        log("appendData: removing duplicates");
 
-        if(this.data.length && (this.data[0].length > 1)){
-            lastkey = this.data[this.data.length-1][0];
-        }
-        else if(this.currentKey){
-            lastkey = this.currentKey;
-        }
-        else{
-            lastKey = 0;
-        }
+        if(!this.lastKey) this.lastKey = 0;
 
         // remove duplicate/old elements
-        while(arr.length && (arr[0][0] <= lastkey)){
+        while(arr.length && (arr[0][0] <= this.lastKey)){
             arr.shift();
+        }
+
+        if(arr.length){
+            this.lastKey = arr[arr.length-1][0];
         }
     }
 
     log("appendData: data has ",this.data.length);
     if(this.data.length > 0){
-        log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1],"]");
+        if(this.data[this.data.length-1].length){
+            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1],"]");
+        }
     }
 
     log("appendData: adding ",arr.length);
     if(!arr.length) return;
-    for(var i=0; i< arr.length; i++){
-        log("adding: [",arr[i][0],"][",arr[i][1],"]");
+    if(arr[0].length){
+        for(var i=0; i< arr.length; i++){
+            log("adding: [",arr[i][0],"][",arr[i][1],"]");
+        }
     }
     this.data = this.data.concat(arr);
     log("appendData: data updated to ",this.data.length);
@@ -209,12 +205,12 @@ Speed.prototype.appendData = function(a){
 
 Speed.prototype.intro = function(){
     var a = [0,
-        this.options.maxValue*.5,
+//        this.options.maxValue*.5,
         this.options.maxValue,
         0,
-        this.options.maxValue*.5,
+//        this.options.maxValue*.5,
         this.options.maxValue,
-        this.options.maxValue*.5,
+//        this.options.maxValue*.5,
         ];
 
     this.appendData(a);
@@ -235,7 +231,6 @@ Speed.prototype.refresh = function(){
             var currentValue = this.data.shift();
 
             if(currentValue.length > 1){
-                this.currentKey = currentValue[0];
                 this.currentValue = currentValue[1];
             }
             else{
