@@ -180,7 +180,7 @@ Speed.prototype.appendData = function(a){
     log("appendData: data has ",this.data.length);
     if(this.data.length > 0){
         if(this.data[this.data.length-1].length){
-            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1],"]");
+            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1].toPrecision(9),"]");
         }
     }
 
@@ -188,7 +188,7 @@ Speed.prototype.appendData = function(a){
     if(!arr.length) return;
     if(arr[0].length){
         for(var i=0; i< arr.length; i++){
-            log("adding: [",arr[i][0],"][",arr[i][1],"]");
+            log("adding: [",arr[i][0],"][",arr[i][1].toPrecision(9),"]");
         }
     }
     this.data = this.data.concat(arr);
@@ -332,7 +332,7 @@ Speed.prototype.refresh = function(){
 
 <body>
     <div id="body" style="background: #fafafa">
-        <h2>Net-ometer</h2>
+        <h2>Hot circUIts</h2>
 
         <center>
             <div id="div-example">
@@ -357,6 +357,8 @@ Speed.prototype.refresh = function(){
             log("loadData: Data received:", Date());
             // log("loadData: json:",req.responseText);
             var json = MochiKit.Async.evalJSONRequest(req);
+            //XXX: temporarily ignore last value
+            json.servdata.data.length -= 1;
 
             log("loadData: speed.appendData()", Date());
             speed.appendData(json.servdata.data);
