@@ -204,23 +204,23 @@ sub query {
       $rrd_result{ANSWER} = $RRDp::error;
     }
     else {   
-      my @array = split(/\n/,$$answer);
-
-      for(my $x = 0; $x <= $#{@array}; $x++) {
-        if($x == 0) {
-          @rrd_headings = split(/\s+/,$array[$x]);
-        }
-        elsif($x > 1) {
-          my @line = split(/\s+/,$array[$x]);
-          $line[0] =~ s/://;
-          for(my $z = 1; $z <= $#{@line}; $z++) {
-            if($line[$z] eq "nan") {
-              $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
-            }
-            else {
-              $rrd_result{$line[0]}{$rrd_headings[$z]} = eval($line[$z]);
-            }
-          }   
+      if(defined $$answer and $$answer ne "") {
+        my @array = split(/\n/,$$answer);
+        for(my $x = 0; $x <= $#{@array}; $x++) {
+          if($x == 0) {
+            @rrd_headings = split(/\s+/,$array[$x]);
+          }
+          elsif($x > 1) {
+            if(defined $array[$x] and $array[$x] ne "") {
+              my @line = split(/\s+/,$array[$x]);
+              $line[0] =~ s/://;
+              for(my $z = 1; $z <= $#{@rrd_headings}; $z++) {
+                if($line[$z]) {
+                  $rrd_result{$line[0]}{$rrd_headings[$z]} = $line[$z];
+                }
+              }
+            }   
+          }
         }
       }
     }
@@ -276,7 +276,12 @@ sub insertCommit {
       print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
       RRDp::cmd $cmd;
       $answer = RRDp::read; 
-      push @result, $$answer; 
+      if($RRDp::error) {   
+        # do nothing
+      }
+      else {
+        push @result, $$answer; 
+      }
     } 
   }
   return @result;
@@ -288,7 +293,13 @@ sub firstValue {
   $self->{FUNCTION} = "\"firstValue\"";   
   RRDp::cmd "first " . $self->{NAME};
   $answer = RRDp::read;   
-  return $$answer;
+  if($RRDp::error) {   
+    # do nothing
+  }
+  else {
+    return $$answer;
+  }
+  return "";
 }
 
 
@@ -297,7 +308,13 @@ sub lastValue {
   $self->{FUNCTION} = "\"lastValue\"";     
   RRDp::cmd "last " . $self->{NAME};
   $answer = RRDp::read;   
-  return $$answer;
+  if($RRDp::error) {   
+    # do nothing
+  }
+  else {
+    return $$answer;
+  }
+  return "";
 }
 
 

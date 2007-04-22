@@ -82,6 +82,9 @@ sub handleRequest {
         perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
         $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MeasurementArchiveStoreResponse", "error.ma.message.type", $msg);
       }
+      elsif($messageType eq "EchoRequest") {
+        handleEchoRequest($self, $messageIdReturn, $messageId); 
+      }
       else {
         my $msg = "Message type \"".$messageType."\" is not yet supported";
         perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
@@ -100,6 +103,32 @@ sub handleRequest {
     $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
   }
   return $self->{RESPONSE};
+}
+
+
+sub handleEchoRequest {
+  my($self, $messageId, $messageIdRef) = @_; 
+  $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
+  $self->{FUNCTION} = "\"handleEchoRequest\""; 
+  my $localContent = "";
+   
+  foreach my $d ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
+    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
+      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
+        my $eventType = extract(\%{$self}, $m->find("./nmwg:eventType")->get_node(1));
+        if($eventType eq "echo" or $eventType eq "echo.ma") {
+	  my $msg = "The echo request has passed.";
+          perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
+          $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "success.echo", $msg);		  	
+        }
+        else {
+	  my $msg = "The echo request has failed.";
+          perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
+          $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "failure.echo", $msg);		        
+        }
+      }   
+    }
+  }
 }
 
 
@@ -356,7 +385,7 @@ sub retrieveSQL {
   else { 
     $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
     for(my $a = 0; $a <= $#{$result}; $a++) {    
-      $responseString = $responseString . "    <snmp:datum";
+      $responseString = $responseString . "    <nmwg:datum";
       $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
       $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
       my @misc = split(/,/,$result->[$a][4]);
@@ -418,6 +447,11 @@ sub retrieveRRD {
     $responseString = $responseString . getResultCodeData($id, $mid, $msg);
   }
   else {
+
+    if(!$self->{TIME}->{"CF"}) {
+      $self->{TIME}->{"CF"} = "AVERAGE";
+    }
+  
     my %rrd_result = $datadb->query(
       $self->{TIME}->{"CF"}, 
       $self->{TIME}->{"RESOLUTION"}, 
@@ -442,7 +476,7 @@ sub retrieveRRD {
       foreach $a (sort(keys(%rrd_result))) {
         foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
 	  if($b eq $dataSource) {
-	    $responseString = $responseString . "    <snmp:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
+	    $responseString = $responseString . "    <nmwg:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
           }
         }
       }
