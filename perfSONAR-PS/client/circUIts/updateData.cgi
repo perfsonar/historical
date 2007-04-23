@@ -19,11 +19,11 @@ my $filter = '//nmwg:message//snmp:datum';
 
 my $cgi = new CGI;
 
-my $int = $cgi->param('resolution') || 10;
+my $int = $cgi->param('resolution') || 5;
 my $host = $cgi->param('hostName') || "anna-raptor1.internet2.edu";
-my $index = $cgi->param('ifName') || "1020001";
+my $index = $cgi->param('ifName') || "1010001";
 my $direction = $cgi->param('direction') || "in";
-my $npoints = $cgi->param('npoints') || 100;
+my $npoints = $cgi->param('npoints') || 5;
 
 # TODO: Set time from parameters to allow 'replay'
 my($sec, $frac) = Time::HiRes::gettimeofday;  
