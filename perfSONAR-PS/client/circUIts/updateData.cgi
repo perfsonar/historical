@@ -40,10 +40,12 @@ print $cgi->header(-type => "text/javascript",
 
 my $sec;
 if(!$fakeServiceMode){
+#    warn "real data";
     $sec = getReferenceTime($refTime,1);
     print fetchPerfsonarData($host, $index, $sec, $int, $direction, $npoints);
 }
 else{
+#    warn "fake data: $fakeServiceMode";
     $sec = getReferenceTime($refTime,0);
     print fetchFakeData($host, $index, $sec, $int, $direction, $npoints);
 }

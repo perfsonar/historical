@@ -1,6 +1,6 @@
 
 // TODO: Get some opts from cookies?
-var defOptions = {
+var defOptionsUtil = {
         "resolution":   10,
         "npoints":   100,
         "fakeServiceMode": 0,
@@ -84,15 +84,26 @@ function loadDataUtil(req) {
     renderer.clear();
     renderer.render();
 
-    MochiKit.Async.callLater(defOptions.resolution,newDataUtil);
+    MochiKit.Async.callLater(defOptionsUtil.resolution,newDataUtil);
 }
 
 function newDataUtil(){
     if(!goUtil) return;
 
+    var query = "updateData.cgi";
+    query +="?resolution="+defOptionsUtil.resolution+"&npoints="+defOptionsUtil.npoints+"&fakeServiceMode="+defOptionsUtil.fakeServiceMode+"&";
+    if(getHost){
+        query += "hostName="+getHost()+"&";
+    }
+    if(getInterface){
+        query += "ifName="+getInterface()+"&";
+    }
+    if(getDirection){
+        query += "direction="+getDirection()+"&";
+    }
     log("Fetch Data: ", Date());
     // TODO: Change to POST and specify args
-    var doreq = MochiKit.Async.doSimpleXMLHttpRequest("updateData.cgi?resolution="+defOptions.resolution+"&npoints="+defOptions.npoints+"&fakeServiceMode="+defOptions.fakeServiceMode);
+    var doreq = MochiKit.Async.doSimpleXMLHttpRequest(query);
     doreq.addCallback(loadDataUtil);
 }
 
@@ -111,11 +122,11 @@ function startStopUtil(){
 }
 
 function initGraph(){
-    layout = new PlotKit.Layout("line",defOptions);
+    layout = new PlotKit.Layout("line",defOptionsUtil);
 
     newDataUtil();
 
     renderer = new SweetCanvasRenderer($('plot'),
-            layout,defOptions);
+            layout,defOptionsUtil);
     MochiKit.Signal.connect("start-stop-util", 'onclick', startStopUtil);
 }

@@ -1,4 +1,11 @@
 
+// TODO: Get some opts from cookies?
+var defOptions = {
+        "resolution":   5,
+        "npoints":   5,
+        "fakeServiceMode": 0,
+    };
+
 function Speed(options){
 
     // Provide defaults
@@ -16,7 +23,7 @@ function Speed(options){
         "staleAlpha": 0.4,          // how much to obscure colors
         "staleWidth": 0.75,          // how much to obscure colors
 
-        "refreshPeriod": 0.030,// seconds
+        "refreshPeriod": 0.090,// seconds
         "dataPeriod": 5,     // seconds
         "jitterPercent":    0.005,   // bounce a bit around value :)
 
@@ -364,9 +371,21 @@ function loadDataSpeed(req) {
 function newDataSpeed(){
     if(!goSpeed) return;
 
+    var query = "updateData.cgi";
+    query +="?resolution="+defOptions.resolution+"&npoints="+defOptions.npoints+"&fakeServiceMode="+defOptions.fakeServiceMode+"&";
+    if(getHost){
+        query += "hostName="+getHost()+"&";
+    }
+    if(getInterface){
+        query += "ifName="+getInterface()+"&";
+    }
+    if(getDirection){
+        query += "direction="+getDirection()+"&";
+    }
+
     log("Fetch Data: ", Date());
     // TODO: Change to POST and specify args
-    var doreq = MochiKit.Async.doSimpleXMLHttpRequest("updateData.cgi");
+    var doreq = MochiKit.Async.doSimpleXMLHttpRequest(query);
     doreq.addCallback(loadDataSpeed);
 }
 

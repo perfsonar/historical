@@ -11,11 +11,80 @@
     </head>
 
 <script type="text/javascript">
+
+var hostInterfaces = {
+    "anna-raptor1.internet2.edu": {
+        "name": "Ann Arbor",
+        "data": ["1010001", "1020001"],
+    },
+    "206.196.176.229": {
+        "name": "McLean",
+        "data": [
+            "1000004",
+            "1020001",
+            "1000001",
+            "1000002",
+            "1010001",
+            "1010012",
+            "1020002",
+            ],
+    },
+    "chin-force10.hopi.internet2.edu": {
+        "name": "Chicago",
+        "data": [
+            "34144278",
+            ],
+    },
+};
+
+function updateHost(){
+    var hosti = document.forms["options"].hostName.selectedIndex;
+    var host = document.forms["options"].hostName[hosti].value;
+    var ifName = document.forms["options"].ifName;
+
+    // remove current ifNames
+    while(ifName.length > 0){
+        ifName.remove(0);
+    }
+
+    // add set for newly selected host
+    var i;
+    var data = hostInterfaces[host].data;
+    for(i=0;i<data.length;i++){
+        var o=document.createElement('option');
+        o.text=data[i];
+        try{
+            ifName.add(o,null);
+        }
+        catch(ex){
+            ifName.add(o);
+        }
+
+    }
+}
+
+
 addLoadEvent(initGraph);
 addLoadEvent(initSpeed);
+addLoadEvent(updateHost);
+
+var getHost = function(){
+
+    return document.forms["options"].hostName.value;
+}
+var getInterface = function(){
+    var ifName = document.forms["options"].ifName;
+
+    return ifName.value;
+}
+
+var getDirection = function(){
+    var direction = document.forms["options"].direction;
+
+    return direction.value;
+}
 
 createLoggingPane();
-
 </script>
 
 <body>
@@ -27,8 +96,25 @@ createLoggingPane();
                 <th><img src="i2-clear.png"></th>
             </tr>
         </table>
-        <table align="center">
+        <table align="center" cellpadding=10>
             <tr>
+                <td align="left" valign="top">
+                    <div id="form-fields">
+                        <form name="options">
+                            <select id="hostName" name="hostName" onChange="updateHost();">
+                                <option value="anna-raptor1.internet2.edu">Ann Arbor</option>
+                                <option value="206.196.176.229">McLean</option>
+                                <option value="chin-force10.hopi.internet2.edu">Chicago</option>
+                            </select>
+                            <select id="ifName" name="ifName">
+                            </select>
+                            <select id="direction" name="direction">
+                                <option value="in">in</option>
+                                <option value="out">out</option>
+                            </select>
+                        </form>
+                    </div>
+                </td>
                 <td valign="top">
                     <div id="div-example">
                         <canvas id="plot" width="400" height="420"
