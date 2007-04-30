@@ -1,0 +1,214 @@
+# ##############################################################
+# 
+# File:         nmtopo_ver3.rnc - Schema to describe network elements
+# Version:      $Id: nmtopo_ver3.rnc 189 2007-01-31 20:46:21Z boote $
+# Purpose:      This file lays out some major network topologies
+#               used in measurement.  
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmwgtopo3 = "http://ggf.org/ns/nmwg/topology/base/3.0/"
+namespace nmtl4 = "http://ggf.org/ns/nmwg/topology/l4/3.0/"
+namespace nmtl3 = "http://ggf.org/ns/nmwg/topology/l3/3.0/"
+namespace nmtl2 = "http://ggf.org/ns/nmwg/topology/l2/3.0/"
+
+
+# ##############################################################
+# Include additional functionality from other files
+# ##############################################################
+include "nmtopo-l4.rnc"
+include "nmtopo-l3.rnc"
+include "nmtopo-l2.rnc"
+
+
+## ########################
+## generic interface
+## ########################
+
+BaseInterface = 
+        element nmwgtopo3:interface {
+                BaseInterfaceContent
+        }
+
+BaseInterfaceContent = 
+        Identifier? &
+        BaseInterfaceIdRef? &
+        BaseNodeIdRef? &
+        BaseName? &        
+        element nmwgtopo3:type { xsd:string }? &        
+        element nmwgtopo3:hostName { xsd:string }? &  
+        element nmwgtopo3:ifName { xsd:string }? &
+        element nmwgtopo3:ifDescription { xsd:string }? &
+        element nmwgtopo3:ifIndex { xsd:string }? &
+        element nmwgtopo3:capacity { xsd:string }?      
+        
+        
+## ########################
+## generic link
+## ########################
+        
+BaseLink = 
+        element nmwgtopo3:link {
+                BaseLinkContent
+        }
+        
+BaseLinkContent =
+        Identifier? &
+        BaseLinkIdRef? &
+        BaseName? &        
+        element nmwgtopo3:index { xsd:string }? &        
+        element nmwgtopo3:type { xsd:string }? &        
+        element nmwgtopo3:globalName { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        (
+                BaseInterface |
+                L2Interface |
+                L3Interface
+        )* &
+        (
+                BaseLink |
+                L2Link |
+                L3Link
+        )* &
+        Node*        
+
+        
+## ########################
+## generic network
+## ########################        
+
+BaseNetwork =
+        element nmwgtopo3:network{
+                BaseNetworkContent
+        }
+
+BaseNetworkContent =
+        Identifier? &
+        BaseNetworkIdRef? &
+        BaseName? &
+        element nmwgtopo3:type { xsd:string }? &        
+        (
+                BaseInterface |
+                L2Interface |
+                L3Interface
+        )* &
+        (
+                BaseLink |
+                L2Link |
+                L3Link
+        )* &
+        Node*        
+        
+
+## ########################
+## generic node
+## ########################        
+                
+Node = 
+        element nmwgtopo3:node {
+                NodeContent
+        }
+
+NodeContent =
+        Identifier? &
+        BaseNodeIdRef? &
+        BaseRole? &
+        BaseName? &        
+        element nmwgtopo3:type { xsd:string }? &
+        element nmwgtopo3:hostName { xsd:string }? &
+        element nmwgtopo3:description { xsd:string }? &
+        element nmwgtopo3:cpu { xsd:string }? &
+        element nmwgtopo3:operSys { xsd:string }? &
+        element nmwgtopo3:location {
+                LocationContent
+        }? &
+        element nmwgtopo3:institution { xsd:string }? &        
+        element nmwgtopo3:country { xsd:string }? &
+        element nmwgtopo3:city { xsd:string }? &                
+        element nmwgtopo3:latitude { xsd:float }? &
+        element nmwgtopo3:longitude { xsd:float }? &                
+        (
+                BaseInterface |
+                L2Interface |
+                L3Interface
+        )*
+
+LocationContent = 
+        element nmwgtopo3:institution { xsd:string }? &        
+        element nmwgtopo3:country { xsd:string }? &
+        element nmwgtopo3:zipcode { xsd:integer }? &
+        element nmwgtopo3:state { xsd:string }? &
+        element nmwgtopo3:city { xsd:string }? &
+        element nmwgtopo3:streetAddress { xsd:string }? &
+        element nmwgtopo3:floor { xsd:string }? &
+        element nmwgtopo3:room { xsd:string }? &
+        element nmwgtopo3:cage { xsd:string }? &
+        element nmwgtopo3:rack { xsd:string }? &        
+        element nmwgtopo3:shelf { xsd:string }? &                        
+        element nmwgtopo3:latitude { xsd:float }? &
+        element nmwgtopo3:longitude { xsd:float }?
+
+
+## ########################
+## generic path
+## ########################
+
+BasePath = 
+        element nmwgtopo3:path {
+                BasePathContent
+        }
+
+BasePathContent = 
+        Identifier &
+        BasePathIdRef? &        
+        (
+                BaseLink |
+                L2Link |
+                L3Link
+        )*
+
+
+## ########################
+## misc
+## ########################
+
+BaseAddress = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string }
+
+BaseRole = 
+        (
+                attribute role { xsd:string } |
+                element nmwgtopo3:role { xsd:string }
+        )
+
+BaseName = 
+        element nmwgtopo3:name {
+                attribute type { xsd:string }? &
+                xsd:string 
+        }
+                                    
+BaseNodeIdRef =
+        attribute nodeIdRef { xsd:string }                
+                
+BaseInterfaceIdRef =
+        attribute interfaceIdRef { xsd:string }        
+
+BaseLinkIdRef =
+        attribute linkIdRef { xsd:string }                
+
+BasePathIdRef =
+        attribute pathIdRef { xsd:string }
+        
+BaseNetworkIdRef =
+        attribute networkIdRef { xsd:string }        

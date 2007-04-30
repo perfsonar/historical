@@ -1,0 +1,118 @@
+# ##############################################################
+# 
+# File:         nmtopo_l4.rnc - Layer 4 Network entities
+#                           
+# Version:      $Id: nmtopo-l4.rnc 209 2007-02-15 17:20:25Z zurawski $
+# Purpose:      The schema represents entities at the Layer 4 or
+#               Transport layer
+#           
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmtl4 = "http://ggf.org/ns/nmwg/topology/l4/3.0/"
+namespace nmtl3 = "http://ggf.org/ns/nmwg/topology/l3/3.0/"
+namespace nmwgtopo3 = "http://ggf.org/ns/nmwg/topology/base/3.0/"
+
+
+## ########################
+## endPoint pair stuff
+## ########################
+
+L4EndpointPair = 
+        element nmtl4:endPointPair {
+                L4EndpointPairContent
+        }
+
+L4EndpointPairContent =
+        (
+                element nmtl4:endPoint {
+                        attribute port { xsd:string }? &
+                        attribute protocol { xsd:string }? &
+                        (
+                                attribute role { "src" } |
+                                element nmwgtopo3:role { "src" }
+                        )? &
+                        (
+                                element nmtl4:address { L4Address } |
+                                element nmtl3:interface { anyThing }
+                        )?                
+                },
+                element nmtl4:endPoint {
+                        attribute port { xsd:string }? &
+                        attribute protocol { xsd:string }? &
+                        (
+                                attribute role { "dst" } |
+                                element nmwgtopo3:role { "dst" }
+                        )? &
+                        (
+                                element nmtl4:address { L4Address } |
+                                element nmtl3:interface { anyThing }
+                        )                
+                } 
+        )
+
+
+## ########################
+## endPoint stuff
+## ########################
+
+L4Endpoint = 
+        element nmtl4:endPoint {
+                L4EndpointContent
+        }
+
+L4EndpointContent = 
+        attribute port { xsd:string }? &
+        attribute protocol { xsd:string }? &
+        attribute index { xsd:string }? &
+        L4Role? &
+        (
+                element nmtl4:address {
+                        L4Address
+                } |
+                element nmtl3:interface {
+                        anyThing
+                }
+        )
+
+
+## ########################
+## generic path
+## ########################
+
+Path = 
+        element nmtl4:path {
+                PathContent
+        }
+
+PathContent = 
+        Identifier &
+        PathIdRef? &        
+        L4Endpoint*
+
+
+## ########################
+## misc stuff
+## ########################
+
+L4Address = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string }
+
+L4Role = 
+        (
+                attribute role { xsd:string } |
+                element nmwgtopo3:role { xsd:string }
+        )
+
+PathIdRef = 
+        attribute pathIdRef { xsd:string }
+

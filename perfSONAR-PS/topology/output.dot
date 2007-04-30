@@ -1,0 +1,99 @@
+
+      digraph g {	
+               
+      subgraph cluster_base_network_DAMSL {
+        DAMSL [shape=invhouse]
+        DAMSL [shape=invhouse,label="DAMSL"]
+	      
+        "DAMSL" -> "stout";
+       
+      subgraph cluster_base_node_stout {
+        stout [shape=ellipse]	
+        stout [shape=ellipse,label="stout"]	
+	      
+      subgraph cluster_l3_interface_stout_eth0 {
+        stout_eth0 [shape=hexagon]	
+        stout_eth0 [shape=hexagon,label="eth0"]	
+	              
+        "stout" -> "stout_eth0";
+      }
+    
+      subgraph cluster_l3_interface_stout_eth1 {
+        stout_eth1 [shape=hexagon]	
+        stout_eth1 [shape=hexagon,label="eth1"]	
+	              
+        "stout" -> "stout_eth1";
+      }
+    	
+      }
+    
+        "DAMSL" -> "moonshine";
+       
+      subgraph cluster_base_node_moonshine {
+        moonshine [shape=ellipse]	
+        moonshine [shape=ellipse,label="moonshine"]	
+	      
+      subgraph cluster_l3_interface_moonshine_eth0 {
+        moonshine_eth0 [shape=hexagon]	
+        moonshine_eth0 [shape=hexagon,label="eth0"]	
+	              
+        "moonshine" -> "moonshine_eth0";
+      }
+    
+      subgraph cluster_l3_interface_moonshine_eth1 {
+        moonshine_eth1 [shape=hexagon]	
+        moonshine_eth1 [shape=hexagon,label="eth1"]	
+	              
+        "moonshine" -> "moonshine_eth1";
+      }
+    	
+      }
+    
+        "DAMSL" -> "zima";
+       
+      subgraph cluster_base_node_zima {
+        zima [shape=ellipse]	
+        zima [shape=ellipse,label="zima"]	
+	      
+      subgraph cluster_l3_interface_zima_eth0 {
+        zima_eth0 [shape=hexagon]	
+        zima_eth0 [shape=hexagon,label="eth0"]	
+	              
+        "zima" -> "zima_eth0";
+      }
+    
+      subgraph cluster_l3_interface_zima_eth1 {
+        zima_eth1 [shape=hexagon]	
+        zima_eth1 [shape=hexagon,label="eth1"]	
+	              
+        "zima" -> "zima_eth1";
+      }
+    	
+      }
+    
+        "DAMSL" -> "blackseal";
+       
+      subgraph cluster_base_node_blackseal {
+        blackseal [shape=ellipse]	
+        blackseal [shape=ellipse,label="blackseal"]	
+	      
+      subgraph cluster_l3_interface_blackseal_eth0 {
+        blackseal_eth0 [shape=hexagon]	
+        blackseal_eth0 [shape=hexagon,label="eth0"]	
+	              
+        "blackseal" -> "blackseal_eth0";
+      }
+    
+      subgraph cluster_l3_interface_blackseal_eth1 {
+        blackseal_eth1 [shape=hexagon]	
+        blackseal_eth1 [shape=hexagon,label="eth1"]	
+	              
+        "blackseal" -> "blackseal_eth1";
+      }
+    	
+      }
+    
+      }
+              
+      }  
+    
