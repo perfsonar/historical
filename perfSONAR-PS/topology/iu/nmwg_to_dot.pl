@@ -18,14 +18,14 @@ my %links = ();
 foreach my $l ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/topology/base/3.0/", "link")) {
   my $ln = "";
   foreach my $n ($l->find("./nmtopo:node")->get_nodelist()) {  
-    if(!defined $nodes{$n->getAttribute("id")}) {
-      $nodes{$n->getAttribute("id")} = 1;
+    if(!defined $nodes{$n->getAttribute("nodeIdRef")}) {
+      $nodes{$n->getAttribute("nodeIdRef")} = 1;
     }
     if($ln eq "") {
-      $ln = $n->getAttribute("id");
+      $ln = $n->getAttribute("nodeIdRef");
     }
     else {
-      $ln = $ln . "?" . $n->getAttribute("id");
+      $ln = $ln . "?" . $n->getAttribute("nodeIdRef");
     }
   }
   if(!defined ) {

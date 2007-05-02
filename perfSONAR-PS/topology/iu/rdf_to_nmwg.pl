@@ -91,8 +91,8 @@ foreach my $name (keys %names) {
 
                   my $llid = $id."-".$lid;                 
                   $links{$llid} = "    <nmtopo:link id=\"".$llid."\">\n";
-                  $links{$llid} = $links{$llid}."      <nmtopo:node id=\"".$id."\" />\n";  
-                  $links{$llid} = $links{$llid}."      <nmtopo:node id=\"".$lid."\" />\n"; 
+                  $links{$llid} = $links{$llid}."      <nmtopo:node nodeIdRef=\"".$id."\" />\n";  
+                  $links{$llid} = $links{$llid}."      <nmtopo:node nodeIdRef=\"".$lid."\" />\n"; 
                   $links{$llid} = $links{$llid}."    </nmtopo:link>\n";                  
                 }
               }     

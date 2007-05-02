@@ -3181,976 +3181,976 @@
       <nmtopo:name>#unused</nmtopo:name>
     </nmtopo:node>
     <nmtopo:link id="#L3Bulk1-#unused">
-      <nmtopo:node id="#L3Bulk1" />
-      <nmtopo:node id="#unused" />
+      <nmtopo:node nodeIdRef="#L3Bulk1" />
+      <nmtopo:node nodeIdRef="#unused" />
     </nmtopo:link>
     <nmtopo:link id="#lan.BOST.net.internet2.edu-#BOST Racklan">
-      <nmtopo:node id="#lan.BOST.net.internet2.edu" />
-      <nmtopo:node id="#BOST Racklan" />
+      <nmtopo:node nodeIdRef="#lan.BOST.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BOST Racklan" />
     </nmtopo:link>
     <nmtopo:link id="#lan.BOST.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.BOST.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.BOST.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.BOST.net.internet2.edu-#Observatory">
-      <nmtopo:node id="#lan.BOST.net.internet2.edu" />
-      <nmtopo:node id="#Observatory" />
+      <nmtopo:node nodeIdRef="#lan.BOST.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#Observatory">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Observatory" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#Observatory 1 Gig uplink">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 1 Gig uplink" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 1 Gig uplink" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#RACKLAN">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#RACKLAN" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#RACKLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#T640-ge0/1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#T640-ge0/1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#T640-ge0/1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#Vlan data">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Vlan data" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Vlan data" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#Vlan mgmt">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Vlan mgmt" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Vlan mgmt" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-oexp-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-oexp-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-oexp-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-oexp-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-oexp-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-oexp-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-othr-10ge1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-othr-10ge1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-othr-10ge1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-othr-10ge2">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-othr-10ge2" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-othr-10ge2" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-othr-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-othr-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-othr-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-othr-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-othr-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-othr-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rexp-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rexp-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rexp-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rexp-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rexp-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rexp-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rlat-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rlat-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rlat-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rlat-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rlat-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rlat-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rpho-10ge1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpho-10ge1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpho-10ge1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rpho-eth3">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpho-eth3" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpho-eth3" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rpsv-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpsv-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpsv-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rpsv-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpsv-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpsv-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rthr-eth0">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr-eth0" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rthr1-eth1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1-eth1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CHIC.net.internet2.edu-#nms-rthr2-10ge1">
-      <nmtopo:node id="#lan.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2-10ge1" />
+      <nmtopo:node nodeIdRef="#lan.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2-10ge1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CLEV.net.internet2.edu-#CLEV Racklan">
-      <nmtopo:node id="#lan.CLEV.net.internet2.edu" />
-      <nmtopo:node id="#CLEV Racklan" />
+      <nmtopo:node nodeIdRef="#lan.CLEV.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CLEV Racklan" />
     </nmtopo:link>
     <nmtopo:link id="#lan.CLEV.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.CLEV.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.CLEV.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Alcatel/Ciena Interop">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Alcatel/Ciena Interop" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Alcatel/Ciena Interop" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Ciena A-CM module MAIN">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Ciena A-CM module MAIN" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Ciena A-CM module MAIN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Ciena C-CM module MAIN">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Ciena C-CM module MAIN" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Ciena C-CM module MAIN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Mgmt Racklan">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Mgmt Racklan" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Mgmt Racklan" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Observatory">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Observatory" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#Observatory 1Gig uplink">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 1Gig uplink" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 1Gig uplink" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#VINI data">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#VINI data" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#VINI data" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#VINI mgmt">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#VINI mgmt" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#VINI mgmt" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-octr-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-octr-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-octr-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-oexp-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-oexp-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-oexp-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rexp-eth0">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rexp-eth0" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rexp-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rexp-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rexp-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rexp-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rlat-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rlat-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rlat-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rpho-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpho-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpho-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rpsv-eth0">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpsv-eth0" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpsv-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rpsv-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rpsv-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rpsv-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rthr1-eth0">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1-eth0" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1-eth0" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rthr1-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rthr2-eth1">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2-eth1" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2-eth1" />
     </nmtopo:link>
     <nmtopo:link id="#lan.NEWY32AOA.net.internet2.edu-#nms-rthr2-eth3">
-      <nmtopo:node id="#lan.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2-eth3" />
+      <nmtopo:node nodeIdRef="#lan.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2-eth3" />
     </nmtopo:link>
     <nmtopo:link id="#lan.PHIL.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.PHIL.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.PHIL.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#lan.PHIL.net.internet2.edu-#PHIL Racklan">
-      <nmtopo:node id="#lan.PHIL.net.internet2.edu" />
-      <nmtopo:node id="#PHIL Racklan" />
+      <nmtopo:node nodeIdRef="#lan.PHIL.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PHIL Racklan" />
     </nmtopo:link>
     <nmtopo:link id="#lan.STAR.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#lan.STAR.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#lan.STAR.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#mss.CHIC.net.internet2.edu-#Ciena Dynamic OC-192 BB to CLEV">
-      <nmtopo:node id="#mss.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Ciena Dynamic OC-192 BB to CLEV" />
+      <nmtopo:node nodeIdRef="#mss.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Ciena Dynamic OC-192 BB to CLEV" />
     </nmtopo:link>
     <nmtopo:link id="#mss.CLEV.net.internet2.edu-#Ciena Dynamic OC-192 BB to CHIC">
-      <nmtopo:node id="#mss.CLEV.net.internet2.edu" />
-      <nmtopo:node id="#Ciena Dynamic OC-192 BB to CHIC" />
+      <nmtopo:node nodeIdRef="#mss.CLEV.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Ciena Dynamic OC-192 BB to CHIC" />
     </nmtopo:link>
     <nmtopo:link id="#oob.BOST.net.internet2.edu-#OOB Dialer">
-      <nmtopo:node id="#oob.BOST.net.internet2.edu" />
-      <nmtopo:node id="#OOB Dialer" />
+      <nmtopo:node nodeIdRef="#oob.BOST.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB Dialer" />
     </nmtopo:link>
     <nmtopo:link id="#oob.CHIC.net.internet2.edu-#CHIC-OOB (312) 494-1632">
-      <nmtopo:node id="#oob.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CHIC-OOB (312) 494-1632" />
+      <nmtopo:node nodeIdRef="#oob.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CHIC-OOB (312) 494-1632" />
     </nmtopo:link>
     <nmtopo:link id="#oob.CHIC.net.internet2.edu-#OOB Dialer">
-      <nmtopo:node id="#oob.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#OOB Dialer" />
+      <nmtopo:node nodeIdRef="#oob.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB Dialer" />
     </nmtopo:link>
     <nmtopo:link id="#oob.CLEV.net.internet2.edu-#CLEV-oob 216-361-0275">
-      <nmtopo:node id="#oob.CLEV.net.internet2.edu" />
-      <nmtopo:node id="#CLEV-oob 216-361-0275" />
+      <nmtopo:node nodeIdRef="#oob.CLEV.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CLEV-oob 216-361-0275" />
     </nmtopo:link>
     <nmtopo:link id="#oob.CLEV.net.internet2.edu-#OOB Dialer">
-      <nmtopo:node id="#oob.CLEV.net.internet2.edu" />
-      <nmtopo:node id="#OOB Dialer" />
+      <nmtopo:node nodeIdRef="#oob.CLEV.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB Dialer" />
     </nmtopo:link>
     <nmtopo:link id="#oob.NEWY1118TH.net.internet2.edu-#Internal private loopback for reverse telnet">
-      <nmtopo:node id="#oob.NEWY1118TH.net.internet2.edu" />
-      <nmtopo:node id="#Internal private loopback for reverse telnet" />
+      <nmtopo:node nodeIdRef="#oob.NEWY1118TH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Internal private loopback for reverse telnet" />
     </nmtopo:link>
     <nmtopo:link id="#oob.NEWY32AOA.net.internet2.edu-#NEWY32AOA-OOB (212) 966-4326">
-      <nmtopo:node id="#oob.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWY32AOA-OOB (212) 966-4326" />
+      <nmtopo:node nodeIdRef="#oob.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWY32AOA-OOB (212) 966-4326" />
     </nmtopo:link>
     <nmtopo:link id="#oob.NEWY32AOA.net.internet2.edu-#OOB Dialer">
-      <nmtopo:node id="#oob.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#OOB Dialer" />
+      <nmtopo:node nodeIdRef="#oob.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB Dialer" />
     </nmtopo:link>
     <nmtopo:link id="#oob.PHIL.net.internet2.edu-#OOB Dialer">
-      <nmtopo:node id="#oob.PHIL.net.internet2.edu" />
-      <nmtopo:node id="#OOB Dialer" />
+      <nmtopo:node nodeIdRef="#oob.PHIL.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB Dialer" />
     </nmtopo:link>
     <nmtopo:link id="#oob.PHIL.net.internet2.edu-#PHIL-OOB">
-      <nmtopo:node id="#oob.PHIL.net.internet2.edu" />
-      <nmtopo:node id="#PHIL-OOB" />
+      <nmtopo:node nodeIdRef="#oob.PHIL.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PHIL-OOB" />
     </nmtopo:link>
     <nmtopo:link id="#oob.paix.net.internet2.edu-#OOB ip Address">
-      <nmtopo:node id="#oob.paix.net.internet2.edu" />
-      <nmtopo:node id="#OOB ip Address" />
+      <nmtopo:node nodeIdRef="#oob.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OOB ip Address" />
     </nmtopo:link>
     <nmtopo:link id="#oob.paix.net.internet2.edu-#PALO-OOB 650-330-0408">
-      <nmtopo:node id="#oob.paix.net.internet2.edu" />
-      <nmtopo:node id="#PALO-OOB 650-330-0408" />
+      <nmtopo:node nodeIdRef="#oob.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PALO-OOB 650-330-0408" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#10GE to SOX and through it to FLR, AMPATH">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#10GE to SOX and through it to FLR, AMPATH" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#10GE to SOX and through it to FLR, AMPATH" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#AMPATH via SOX">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#AMPATH via SOX" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#AMPATH via SOX" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#ATLA Observatory vlan">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#ATLA Observatory vlan" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#ATLA Observatory vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#BACKBONE: ATLA-CHIC OC192 | I2-CHIC-ATLA-I2-00027">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: ATLA-CHIC OC192 | I2-CHIC-ATLA-I2-00027" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: ATLA-CHIC OC192 | I2-CHIC-ATLA-I2-00027" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#BACKBONE: ATLA-WASH OC192 | I2-ATLA-WASH-I2-00028">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: ATLA-WASH OC192 | I2-ATLA-WASH-I2-00028" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: ATLA-WASH OC192 | I2-ATLA-WASH-I2-00028" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#BACKBONE: GigE to M5 via Level3/SOX metro fiber">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: GigE to M5 via Level3/SOX metro fiber" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: GigE to M5 via Level3/SOX metro fiber" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#BB: OC-192 to HSTNng">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#BB: OC-192 to HSTNng" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BB: OC-192 to HSTNng" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Discard Interface">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Discard Interface" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Discard Interface" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Florida LambdaRail (TREAT AS A PARTICIPANT!!!)">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Florida LambdaRail (TREAT AS A PARTICIPANT!!!)" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Florida LambdaRail (TREAT AS A PARTICIPANT!!!)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Indiana Gigapop">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Indiana Gigapop" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Indiana Gigapop" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Indiana Gigapop 10GbE | I2-INDI-ATLA-INDYGIGAPOP-00035">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Indiana Gigapop 10GbE | I2-INDI-ATLA-INDYGIGAPOP-00035" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Indiana Gigapop 10GbE | I2-INDI-ATLA-INDYGIGAPOP-00035" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Internal Peering Point">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Internal Peering Point" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Internal Peering Point" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Loopback for CPS VRF;">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Loopback for CPS VRF;" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Loopback for CPS VRF;" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Management Ethernet - Unused">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Management Ethernet - Unused" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Ethernet - Unused" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Observatory 1 Gig (temp)">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 1 Gig (temp)" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 1 Gig (temp)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Observatory 1 Gig;">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 1 Gig;" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 1 Gig;" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Observatory HP5406">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Observatory HP5406" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory HP5406" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#Racklan #2">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#Racklan #2" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Racklan #2" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#SOX 10GE">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#SOX 10GE" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#SOX 10GE" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#TEMPORARY racklan interface for 4/26 POP work - DELETE afterwards">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#TEMPORARY racklan interface for 4/26 POP work - DELETE afterwards" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TEMPORARY racklan interface for 4/26 POP work - DELETE afterwards" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#University of Louisville">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#University of Louisville" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#University of Louisville" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#University of Louisville 10GbE | I2-LOUS-ATLA-ULOUISVILLE-00036">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#University of Louisville 10GbE | I2-LOUS-ATLA-ULOUISVILLE-00036" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#University of Louisville 10GbE | I2-LOUS-ATLA-ULOUISVILLE-00036" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#University of Memphis">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#University of Memphis" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#University of Memphis" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#University of South Florida">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#University of South Florida" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#University of South Florida" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#[CPS] Indiana Gigapop">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#[CPS] Indiana Gigapop" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#[CPS] Indiana Gigapop" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#[CPS] University of Louisville">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#[CPS] University of Louisville" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#[CPS] University of Louisville" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#test ISIS feed to nms-rpsv">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#test ISIS feed to nms-rpsv" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#test ISIS feed to nms-rpsv" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#to nms-rtr1">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#to nms-rtr1" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#to nms-rtr1" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.ATLA.net.internet2.edu-#to nms-rtr2">
-      <nmtopo:node id="#rtr.ATLA.net.internet2.edu" />
-      <nmtopo:node id="#to nms-rtr2" />
+      <nmtopo:node nodeIdRef="#rtr.ATLA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#to nms-rtr2" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#6Tap via Starlight | AS3425">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#6Tap via Starlight | AS3425" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#6Tap via Starlight | AS3425" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#APAN via JGN2 Hitachi via Starlight | AS7660">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#APAN via JGN2 Hitachi via Starlight | AS7660" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#APAN via JGN2 Hitachi via Starlight | AS7660" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#ASNet (Taiwan) via StarLight | AS:9264">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#ASNet (Taiwan) via StarLight | AS:9264" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#ASNet (Taiwan) via StarLight | AS:9264" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#BACKBONE: 10GIGE to Abilene CHINng via HOPI Force10">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: 10GIGE to Abilene CHINng via HOPI Force10" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: 10GIGE to Abilene CHINng via HOPI Force10" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#BACKBONE: CHIC-ATLA OC192 | I2-CHIC-ATLA-I2-00027">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: CHIC-ATLA OC192 | I2-CHIC-ATLA-I2-00027" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: CHIC-ATLA OC192 | I2-CHIC-ATLA-I2-00027" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#BACKBONE: CHIC-KSCYng OC192 | OC192-6492974">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: CHIC-KSCYng OC192 | OC192-6492974" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: CHIC-KSCYng OC192 | OC192-6492974" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#BACKBONE: CHIC-NEWY OC192 | I2-CHIC-NEWY-I2-00023">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: CHIC-NEWY OC192 | I2-CHIC-NEWY-I2-00023" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: CHIC-NEWY OC192 | I2-CHIC-NEWY-I2-00023" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#BACKBONE: CHIC-WASH OC192 | I2-CHIC-WASH-I2-00002">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: CHIC-WASH OC192 | I2-CHIC-WASH-I2-00002" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: CHIC-WASH OC192 | I2-CHIC-WASH-I2-00002" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CA*net-Toronto via Starlight | AS6509">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CA*net-Toronto via Starlight | AS6509" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CA*net-Toronto via Starlight | AS6509" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CA*net-Winnepeg via StarLight | AS6509">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CA*net-Winnepeg via StarLight | AS6509" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CA*net-Winnepeg via StarLight | AS6509" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CERN (1Gbs, primary v4 link) via Starlight | AS513">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CERN (1Gbs, primary v4 link) via Starlight | AS513" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CERN (1Gbs, primary v4 link) via Starlight | AS513" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CERN DataTAG (v6 only) | AS:513">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CERN DataTAG (v6 only) | AS:513" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CERN DataTAG (v6 only) | AS:513" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CERN production IPv6 via STARLIGHT | AS:513">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CERN production IPv6 via STARLIGHT | AS:513" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CERN production IPv6 via STARLIGHT | AS:513" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#CIC testpoint PC">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#CIC testpoint PC" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CIC testpoint PC" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#DREN ipv6 only | AS668">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#DREN ipv6 only | AS668" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DREN ipv6 only | AS668" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#DREN via StarLight | AS668">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#DREN via StarLight | AS668" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DREN via StarLight | AS668" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#DTF (James) via StarLight | AS75">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#DTF (James) via StarLight | AS75" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DTF (James) via StarLight | AS75" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#EQCH Management Subnet">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#EQCH Management Subnet" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#EQCH Management Subnet" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#ESNET via Starlight | AS293">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#ESNET via Starlight | AS293" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#ESNET via Starlight | AS293" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Equinix Chicago">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Equinix Chicago" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Equinix Chicago" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Equinix Chicago Public Switch">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Equinix Chicago Public Switch" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Equinix Chicago Public Switch" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#FERMI-HOPI">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#FERMI-HOPI" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#FERMI-HOPI" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#FranceTelecom, multicast-only | AS5511">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#FranceTelecom, multicast-only | AS5511" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#FranceTelecom, multicast-only | AS5511" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#GLORIAD-new | AS20388">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#GLORIAD-new | AS20388" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#GLORIAD-new | AS20388" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Global Crossing Private Peering">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Global Crossing Private Peering" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Global Crossing Private Peering" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#HARNET | AS3662">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#HARNET | AS3662" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HARNET | AS3662" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#HOPI Management VLAN (default gw)">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#HOPI Management VLAN (default gw)" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HOPI Management VLAN (default gw)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#HOPI PC1 to Abilene Vlan">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#HOPI PC1 to Abilene Vlan" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HOPI PC1 to Abilene Vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#HP 5406 10GigE">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#HP 5406 10GigE" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HP 5406 10GigE" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#HP mgmt 1G interface">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#HP mgmt 1G interface" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HP mgmt 1G interface" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Indiana Gigapop via CIC">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Indiana Gigapop via CIC" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Indiana Gigapop via CIC" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Indiana Gigapop via CIC - CPS">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Indiana Gigapop via CIC - CPS" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Indiana Gigapop via CIC - CPS" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Internal Peering Point">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Internal Peering Point" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Internal Peering Point" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#KREOnet2 via Starlight">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#KREOnet2 via Starlight" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#KREOnet2 via Starlight" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Loopback for CPS VRF">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Loopback for CPS VRF" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Loopback for CPS VRF" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#MERIT via CIC">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#MERIT via CIC" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MERIT via CIC" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#MREN Force10 E1200 10GigE">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#MREN Force10 E1200 10GigE" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MREN Force10 E1200 10GigE" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#MREN via StarLight | AS:22335">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#MREN via StarLight | AS:22335" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MREN via StarLight | AS:22335" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Management Ethernet - Unused">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Management Ethernet - Unused" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Ethernet - Unused" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#NISN via Starlight | AS:297">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#NISN via Starlight | AS:297" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NISN via Starlight | AS:297" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Northern Lights via CIC">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Northern Lights via CIC" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Northern Lights via CIC" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Nysernet 10GigE via Buffalo">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Nysernet 10GigE via Buffalo" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Nysernet 10GigE via Buffalo" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Observatory 1 gig uplink">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 1 gig uplink" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 1 gig uplink" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Observatory 10 gig uplink">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Observatory 10 gig uplink" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Observatory 10 gig uplink" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Portland State v6 Tunnel (behind PNW)">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Portland State v6 Tunnel (behind PNW)" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Portland State v6 Tunnel (behind PNW)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#SINET v6 Tunnel [NO-MONITOR]">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#SINET v6 Tunnel [NO-MONITOR]" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#SINET v6 Tunnel [NO-MONITOR]" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#SINET via Starlight | AS2907">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#SINET via Starlight | AS2907" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#SINET via Starlight | AS2907" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Singaren v6 Tunnel">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Singaren v6 Tunnel" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Singaren v6 Tunnel" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#StarLight M10 via StarLight | AS:10764">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#StarLight M10 via StarLight | AS:10764" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#StarLight M10 via StarLight | AS:10764" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Starlight Force10">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Starlight Force10" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Starlight Force10" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#TANET2 | AS:7539">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#TANET2 | AS:7539" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TANET2 | AS:7539" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#USGS M7i via Starlight | AS1842">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#USGS M7i via Starlight | AS1842" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#USGS M7i via Starlight | AS1842" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Ultralight Project via Starlight">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Ultralight Project via Starlight" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Ultralight Project via Starlight" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#V6 Tunnel to OARnet">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#V6 Tunnel to OARnet" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#V6 Tunnel to OARnet" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#V6 Tunnel to Workshop/Tradeshow [NO-MONITOR]">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#V6 Tunnel to Workshop/Tradeshow [NO-MONITOR]" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#V6 Tunnel to Workshop/Tradeshow [NO-MONITOR]" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#VINI Data">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#VINI Data" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#VINI Data" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#VINI Mgmt">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#VINI Mgmt" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#VINI Mgmt" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Wiscren via CIC">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Wiscren via CIC" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Wiscren via CIC" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#Wiscren/Merit temporary 10GigE">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#Wiscren/Merit temporary 10GigE" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Wiscren/Merit temporary 10GigE" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#nms-rthr1 p2p connection">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#nms-rthr2 p2p connection">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.CHIC.net.internet2.edu-#test int">
-      <nmtopo:node id="#rtr.CHIC.net.internet2.edu" />
-      <nmtopo:node id="#test int" />
+      <nmtopo:node nodeIdRef="#rtr.CHIC.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#test int" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.INDI.net.internet2.edu-#to CTC6590 gi2/13">
-      <nmtopo:node id="#rtr.INDI.net.internet2.edu" />
-      <nmtopo:node id="#to CTC6590 gi2/13" />
+      <nmtopo:node nodeIdRef="#rtr.INDI.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#to CTC6590 gi2/13" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#BACKBONE - OC-192 to CHINng">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE - OC-192 to CHINng" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE - OC-192 to CHINng" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#BACKBONE NEWY-WASH OC192 | I2-NEWY-WASH-I2-00001">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE NEWY-WASH OC192 | I2-NEWY-WASH-I2-00001" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE NEWY-WASH OC192 | I2-NEWY-WASH-I2-00001" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#BACKBONE: NEWY-CHIC OC192 | I2-CHIC-NEWY-I2-00023">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: NEWY-CHIC OC192 | I2-CHIC-NEWY-I2-00023" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: NEWY-CHIC OC192 | I2-CHIC-NEWY-I2-00023" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#BACKBONE: NEWY-WASHng OC192 | OC192-6462049">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: NEWY-WASHng OC192 | OC192-6462049" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: NEWY-WASHng OC192 | OC192-6462049" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#DRAC Project">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#DRAC Project" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DRAC Project" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Discard Interface">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Discard Interface" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Discard Interface" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#GEANT | AS:20965">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#GEANT | AS:20965" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#GEANT | AS:20965" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#HOPI 10GigE">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#HOPI 10GigE" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HOPI 10GigE" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#HOPI PC1">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#HOPI PC1" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HOPI PC1" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#HP 5406 Racklan Switch">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#HP 5406 Racklan Switch" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HP 5406 Racklan Switch" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Internal Peering Point">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Internal Peering Point" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Internal Peering Point" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#LHCnet (CERN)">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#LHCnet (CERN)" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#LHCnet (CERN)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Loopback for CPS VRF">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Loopback for CPS VRF" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Loopback for CPS VRF" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#MANLAN Rack Lan">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#MANLAN Rack Lan" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MANLAN Rack Lan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#MCIT/ENERGI (Egypt)">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#MCIT/ENERGI (Egypt)" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MCIT/ENERGI (Egypt)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Management Ethernet - Unused">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Management Ethernet - Unused" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Ethernet - Unused" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Manlan HDXc">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Manlan HDXc" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Manlan HDXc" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NEWT VINI Data">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWT VINI Data" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWT VINI Data" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NEWT VINI Mgmt">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWT VINI Mgmt" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWT VINI Mgmt" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NEWY Observatory 1G vlan">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWY Observatory 1G vlan" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWY Observatory 1G vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NEWY Observatory vlan">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWY Observatory vlan" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWY Observatory vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NEWY Racklan">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NEWY Racklan" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NEWY Racklan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#NOX - CPS">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#NOX - CPS" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NOX - CPS" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Reserved for Internet2 CPS">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Reserved for Internet2 CPS" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Reserved for Internet2 CPS" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#Surfnet OC48 via Global Crossing | AS1103">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#Surfnet OC48 via Global Crossing | AS1103" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Surfnet OC48 via Global Crossing | AS1103" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#TENET v4 tunnel">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#TENET v4 tunnel" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TENET v4 tunnel" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#TENET | AS:2018">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#TENET | AS:2018" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TENET | AS:2018" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#TENETv6 Tunnel">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#TENETv6 Tunnel" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TENETv6 Tunnel" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#TWAREN| AS:7539">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#TWAREN| AS:7539" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#TWAREN| AS:7539" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#nms-rthr1 p2p connection">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.NEWY32AOA.net.internet2.edu-#nms-rthr2 p2p connection">
-      <nmtopo:node id="#rtr.NEWY32AOA.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.NEWY32AOA.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#10GigE reserved for MAX">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#10GigE reserved for MAX" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#10GigE reserved for MAX" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#BACKBONE: ATLA-WASH I2-ATLA-WASH-I2-00028">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: ATLA-WASH I2-ATLA-WASH-I2-00028" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: ATLA-WASH I2-ATLA-WASH-I2-00028" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#BACKBONE: CHIC-WASH (Level3)">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: CHIC-WASH (Level3)" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: CHIC-WASH (Level3)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#BACKBONE: NEWY-WASH I2-NEWY-WASH-I2-00001">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#BACKBONE: NEWY-WASH I2-NEWY-WASH-I2-00001" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#BACKBONE: NEWY-WASH I2-NEWY-WASH-I2-00001" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#CHEETAH-HOPI interconnect for CUNY">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#CHEETAH-HOPI interconnect for CUNY" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CHEETAH-HOPI interconnect for CUNY" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#CHEETAH-HOPI interconnect for UVA">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#CHEETAH-HOPI interconnect for UVA" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CHEETAH-HOPI interconnect for UVA" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#CLARA via NGIX and AWave-FIU">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#CLARA via NGIX and AWave-FIU" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#CLARA via NGIX and AWave-FIU" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#DREN - Washington DC | AS:668">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#DREN - Washington DC | AS:668" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DREN - Washington DC | AS:668" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#DREN v6-only, AS668">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#DREN v6-only, AS668" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DREN v6-only, AS668" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Drexel University to Internet2 Network Peering">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Drexel University to Internet2 Network Peering" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Drexel University to Internet2 Network Peering" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#GEANT (Frankfurt OC-192)">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#GEANT (Frankfurt OC-192)" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#GEANT (Frankfurt OC-192)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#HOPI PC1 to Abilene connection">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#HOPI PC1 to Abilene connection" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#HOPI PC1 to Abilene connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Internal Peering Point">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Internal Peering Point" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Internal Peering Point" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Loopback for CPS VRF">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Loopback for CPS VRF" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Loopback for CPS VRF" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#MAX backup peering via NGIX-East">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#MAX backup peering via NGIX-East" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#MAX backup peering via NGIX-East" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Management Ethernet - Unused">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Management Ethernet - Unused" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Ethernet - Unused" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Mid-Atlantic Crossroads (MAX)">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Mid-Atlantic Crossroads (MAX)" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Mid-Atlantic Crossroads (MAX)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#NGIX-EAST via Movaz LVL3->CLPK">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#NGIX-EAST via Movaz LVL3->CLPK" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NGIX-EAST via Movaz LVL3->CLPK" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#NISN (via UMD NGIX) | AS:297">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#NISN (via UMD NGIX) | AS:297" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NISN (via UMD NGIX) | AS:297" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#NREN via UMD NGIX | AS24">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#NREN via UMD NGIX | AS24" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NREN via UMD NGIX | AS24" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#NSF DRAGON">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#NSF DRAGON" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#NSF DRAGON" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#OARNET [CPS]">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#OARNET [CPS]" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OARNET [CPS]" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#OARNET mcast-only peering vlan">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#OARNET mcast-only peering vlan" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OARNET mcast-only peering vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#OARnet via Cleveland">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#OARnet via Cleveland" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#OARnet via Cleveland" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#PSC to Internet2 Content Peering">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#PSC to Internet2 Content Peering" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PSC to Internet2 Content Peering" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#PSC to Internet2 Network Peering">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#PSC to Internet2 Network Peering" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PSC to Internet2 Network Peering" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Racklan HP 1Gig">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Racklan HP 1Gig" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Racklan HP 1Gig" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Reserved for OARNET 10G">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Reserved for OARNET 10G" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Reserved for OARNET 10G" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#US Geological Survey ( via UMD NGIX)) | AS:1842">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#US Geological Survey ( via UMD NGIX)) | AS:1842" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#US Geological Survey ( via UMD NGIX)) | AS:1842" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#WASH Obs 1Gig (temp)">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#WASH Obs 1Gig (temp)" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#WASH Obs 1Gig (temp)" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#WASH Observatory 1G vlan">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#WASH Observatory 1G vlan" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#WASH Observatory 1G vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#WASH Observatory vlan">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#WASH Observatory vlan" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#WASH Observatory vlan" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#Wright-Patterson AFB/Wright State Univ ctr in Dayton via DREN">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#Wright-Patterson AFB/Wright State Univ ctr in Dayton via DREN" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Wright-Patterson AFB/Wright State Univ ctr in Dayton via DREN" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#nms-rthr1 p2p connection">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr1 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr1 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#nms-rthr2 p2p connection">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#nms-rthr2 p2p connection" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#nms-rthr2 p2p connection" />
     </nmtopo:link>
     <nmtopo:link id="#rtr.WASH.net.internet2.edu-#to HP5406 B3 10GE">
-      <nmtopo:node id="#rtr.WASH.net.internet2.edu" />
-      <nmtopo:node id="#to HP5406 B3 10GE" />
+      <nmtopo:node nodeIdRef="#rtr.WASH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#to HP5406 B3 10GE" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#Equinix Peering Fabric">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#Equinix Peering Fabric" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Equinix Peering Fabric" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#Equinix Public Switch">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#Equinix Public Switch" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Equinix Public Switch" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#GBLX Private IX">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#GBLX Private IX" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#GBLX Private IX" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#GLBX Private IX">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#GLBX Private IX" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#GLBX Private IX" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#Management Subnet">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#Management Subnet" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Subnet" />
     </nmtopo:link>
     <nmtopo:link id="#sw.EQCH.net.internet2.edu-#Uplink to Chicago T640">
-      <nmtopo:node id="#sw.EQCH.net.internet2.edu" />
-      <nmtopo:node id="#Uplink to Chicago T640" />
+      <nmtopo:node nodeIdRef="#sw.EQCH.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Uplink to Chicago T640" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#DEFAULT_VLAN">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#DEFAULT_VLAN" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#DEFAULT_VLAN" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#Management Subnet">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#Management Subnet" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Management Subnet" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#PAIX Multicast">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#PAIX Multicast" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PAIX Multicast" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#PAIX Public Switch">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#PAIX Public Switch" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PAIX Public Switch" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#PAIX Unicast">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#PAIX Unicast" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PAIX Unicast" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#PAIX Unicast - 100Mbps">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#PAIX Unicast - 100Mbps" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#PAIX Unicast - 100Mbps" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#Uplink to SNVA T640 via IPNetworks">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#Uplink to SNVA T640 via IPNetworks" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#Uplink to SNVA T640 via IPNetworks" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#oob.paix - fa0/0">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#oob.paix - fa0/0" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#oob.paix - fa0/0" />
     </nmtopo:link>
     <nmtopo:link id="#sw.paix.net.internet2.edu-#pwr1.paix">
-      <nmtopo:node id="#sw.paix.net.internet2.edu" />
-      <nmtopo:node id="#pwr1.paix" />
+      <nmtopo:node nodeIdRef="#sw.paix.net.internet2.edu" />
+      <nmtopo:node nodeIdRef="#pwr1.paix" />
     </nmtopo:link>
   </nmwg:metadata>
 </nmwg:store>
