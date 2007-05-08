@@ -18,6 +18,11 @@ use Carp;
 my $NAME	= 'perfSONAR-PS';
 my $VERSION	= '0.0';
 
+print("\nThis Makefile.PL is currently a place-holder and is not useful.\n");
+print("Just run the code directly from the checked-out directory.");
+print("\nA real distribution build script will be written \"Real Soon Now\".\n\n");
+exit(1);
+
 my $DOETC = prompt("\nInstall example config files? :" => NO);
 $DOETC = 'NO' if(uc $DOETC ne 'YES');
 
