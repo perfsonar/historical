@@ -69,23 +69,23 @@
         <geo:long>-95.993431</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtrdcp.TULS.net.internet2.edu">
-	<ndl:name>rtrdcp.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.tuls.net.internet2.edu">
+	<ndl:name>rtrdcp.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp.TULS.net.internet2.edu">
-	<ndl:name>fdp.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp.tuls.net.internet2.edu">
+	<ndl:name>fdp.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.TULS.net.internet2.edu">
-	<ndl:name>fdp2.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.tuls.net.internet2.edu">
+	<ndl:name>fdp2.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.TULS.net.internet2.edu">
-	<ndl:name>fdp3.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.tuls.net.internet2.edu">
+	<ndl:name>fdp3.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
@@ -94,28 +94,28 @@
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.TULS.net.internet2.edu">
-	<ndl:name>rtracp.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.tuls.net.internet2.edu">
+	<ndl:name>rtracp.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.TULS.net.internet2.edu">
-	<ndl:name>mfp.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.tuls.net.internet2.edu">
+	<ndl:name>mfp.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.TULS.net.internet2.edu">
-	<ndl:name>lan.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.tuls.net.internet2.edu">
+	<ndl:name>lan.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.TULS.net.internet2.edu">
-	<ndl:name>oob.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.tuls.net.internet2.edu">
+	<ndl:name>oob.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.TULS.net.internet2.edu">
-	<ndl:name>nms-octr.TULS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.tuls.net.internet2.edu">
+	<ndl:name>nms-octr.tuls.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Tulsa--grooming"/>
 </ndl:Device>
 
@@ -130,133 +130,143 @@
         <geo:long>-94.582044</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtr.KANS.net.internet2.edu">
-	<ndl:name>rtr.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtr.kans.net.internet2.edu">
+	<ndl:name>rtr.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.KANS.net.internet2.edu">
-	<ndl:name>rtrdcp.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.kans.net.internet2.edu">
+	<ndl:name>rtrdcp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp2.KANS.net.internet2.edu">
-	<ndl:name>rtrdcp2.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp2.kans.net.internet2.edu">
+	<ndl:name>rtrdcp2.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#inverter.KANS.net.internet2.edu">
-	<ndl:name>inverter.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#inverter.kans.net.internet2.edu">
+	<ndl:name>inverter.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#inverter2.KANS.net.internet2.edu">
-	<ndl:name>inverter2.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp.kans.net.internet2.edu">
+	<ndl:name>obsacp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp.KANS.net.internet2.edu">
-	<ndl:name>obsacp.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.kans.net.internet2.edu">
+	<ndl:name>lan.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp2.KANS.net.internet2.edu">
-	<ndl:name>obsacp2.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.kans.net.internet2.edu">
+	<ndl:name>oob.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.KANS.net.internet2.edu">
-	<ndl:name>lan.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr.kans.net.internet2.edu">
+	<ndl:name>nms-rthr.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.KANS.net.internet2.edu">
-	<ndl:name>oob.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr2.kans.net.internet2.edu">
+	<ndl:name>nms-rthr2.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr.KANS.net.internet2.edu">
-	<ndl:name>nms-rthr.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rexp.kans.net.internet2.edu">
+	<ndl:name>nms-rexp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr2.KANS.net.internet2.edu">
-	<ndl:name>nms-rthr2.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpsv.kans.net.internet2.edu">
+	<ndl:name>nms-rpsv.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rexp.KANS.net.internet2.edu">
-	<ndl:name>nms-rexp.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rlat.kans.net.internet2.edu">
+	<ndl:name>nms-rlat.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpsv.KANS.net.internet2.edu">
-	<ndl:name>nms-rpsv.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.kans.net.internet2.edu">
+	<ndl:name>nms-octr.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rlat.KANS.net.internet2.edu">
-	<ndl:name>nms-rlat.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.kans.net.internet2.edu">
+	<ndl:name>mss.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.KANS.net.internet2.edu">
-	<ndl:name>nms-octr.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mssdcp.kans.net.internet2.edu">
+	<ndl:name>mssdcp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.KANS.net.internet2.edu">
-	<ndl:name>mss.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp.kans.net.internet2.edu">
+	<ndl:name>fdp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mssdcp.KANS.net.internet2.edu">
-	<ndl:name>mssdcp.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.kans.net.internet2.edu">
+	<ndl:name>fdp2.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp.KANS.net.internet2.edu">
-	<ndl:name>fdp.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.kans.net.internet2.edu">
+	<ndl:name>fdp3.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.KANS.net.internet2.edu">
-	<ndl:name>fdp2.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp4.kans.net.internet2.edu">
+	<ndl:name>fdp4.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.KANS.net.internet2.edu">
-	<ndl:name>fdp3.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp5.kans.net.internet2.edu">
+	<ndl:name>fdp5.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp4.KANS.net.internet2.edu">
-	<ndl:name>fdp4.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp6.kans.net.internet2.edu">
+	<ndl:name>fdp6.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp5.KANS.net.internet2.edu">
-	<ndl:name>fdp5.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.kans.net.internet2.edu">
+	<ndl:name>mfp.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp6.KANS.net.internet2.edu">
-	<ndl:name>fdp6.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#pdu.kans.net.internet2.edu">
+	<ndl:name>pdu.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.KANS.net.internet2.edu">
-	<ndl:name>mfp.KANS.net.internet2.edu</ndl:name>
-	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
-</ndl:Device>
-
-<ndl:Device rdf:about="#pdu.KANS.net.internet2.edu">
-	<ndl:name>pdu.KANS.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#tray.kans.net.internet2.edu">
+	<ndl:name>tray.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
 <ndl:Device rdf:about="#">
 	<ndl:name></ndl:name>
+	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#">
+	<ndl:name></ndl:name>
+	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#pl.kans.net.internet2.edu">
+	<ndl:name>pl.kans.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#pl2.kans.net.internet2.edu">
+	<ndl:name>pl2.kans.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Kansas City--router"/>
 </ndl:Device>
 
@@ -278,63 +288,63 @@
         <geo:long>-81.622518</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#mss.JACK.net.internet2.edu">
-	<ndl:name>mss.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.jack.net.internet2.edu">
+	<ndl:name>mss.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp.JACK.net.internet2.edu">
-	<ndl:name>fdp.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp.jack.net.internet2.edu">
+	<ndl:name>fdp.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.JACK.net.internet2.edu">
-	<ndl:name>fdp2.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.jack.net.internet2.edu">
+	<ndl:name>fdp2.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.JACK.net.internet2.edu">
-	<ndl:name>fdp3.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.jack.net.internet2.edu">
+	<ndl:name>fdp3.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp4.JACK.net.internet2.edu">
-	<ndl:name>fdp4.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp4.jack.net.internet2.edu">
+	<ndl:name>fdp4.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mssdcp.JACK.net.internet2.edu">
-	<ndl:name>mssdcp.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mssdcp.jack.net.internet2.edu">
+	<ndl:name>mssdcp.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp.JACK.net.internet2.edu">
-	<ndl:name>obsacp.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp.jack.net.internet2.edu">
+	<ndl:name>obsacp.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#ups.JACK.net.internet2.edu">
-	<ndl:name>ups.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#ups.jack.net.internet2.edu">
+	<ndl:name>ups.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.JACK.net.internet2.edu">
-	<ndl:name>nms-octr.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.jack.net.internet2.edu">
+	<ndl:name>nms-octr.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.JACK.net.internet2.edu">
-	<ndl:name>mfp.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.jack.net.internet2.edu">
+	<ndl:name>mfp.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.JACK.net.internet2.edu">
-	<ndl:name>oob.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.jack.net.internet2.edu">
+	<ndl:name>oob.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.JACK.net.internet2.edu">
-	<ndl:name>lan.JACK.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.jack.net.internet2.edu">
+	<ndl:name>lan.jack.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Jacksonville--grooming"/>
 </ndl:Device>
 
@@ -344,291 +354,303 @@
         <geo:long>-84.38759</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#mss.ATLA.net.internet2.edu">
-	<ndl:name>mss.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.atla.net.internet2.edu">
+	<ndl:name>mss.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.ATLA.net.internet2.edu">
-	<ndl:name>rtrdcp.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.atla.net.internet2.edu">
+	<ndl:name>rtrdcp.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.ATLA.net.internet2.edu">
-	<ndl:name>rtracp.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.atla.net.internet2.edu">
+	<ndl:name>rtracp.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp2.ATLA.net.internet2.edu">
-	<ndl:name>rtrdcp2.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp2.atla.net.internet2.edu">
+	<ndl:name>rtrdcp2.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp3.ATLA.net.internet2.edu">
-	<ndl:name>rtrdcp3.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp3.atla.net.internet2.edu">
+	<ndl:name>rtrdcp3.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp2.ATLA.net.internet2.edu">
-	<ndl:name>rtracp2.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp2.atla.net.internet2.edu">
+	<ndl:name>rtracp2.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.ATLA.net.internet2.edu">
-	<ndl:name>lan.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.atla.net.internet2.edu">
+	<ndl:name>lan.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rlat.ATLA.net.internet2.edu">
-	<ndl:name>nms-rlat.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rlat.atla.net.internet2.edu">
+	<ndl:name>nms-rlat.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr2.ATLA.net.internet2.edu">
-	<ndl:name>nms-rthr2.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr2.atla.net.internet2.edu">
+	<ndl:name>nms-rthr2.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpsv.ATLA.net.internet2.edu">
-	<ndl:name>nms-rpsv.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpsv.atla.net.internet2.edu">
+	<ndl:name>nms-rpsv.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr.ATLA.net.internet2.edu">
-	<ndl:name>nms-rthr.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr.atla.net.internet2.edu">
+	<ndl:name>nms-rthr.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rexp.ATLA.net.internet2.edu">
-	<ndl:name>nms-rexp.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rexp.atla.net.internet2.edu">
+	<ndl:name>nms-rexp.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.ATLA.net.internet2.edu">
-	<ndl:name>oob.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.atla.net.internet2.edu">
+	<ndl:name>oob.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtr.ATLA.net.internet2.edu">
-	<ndl:name>rtr.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtr.atla.net.internet2.edu">
+	<ndl:name>rtr.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:dsc.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:fxp0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:lo0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:lo0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:so-2/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:so-2/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-3/0/1"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-3/0/2"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-3/0/2.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/2/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:so-0/0/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:so-1/0/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0.13"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/1/0.110"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/1/0.111"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/1/0.501"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:so-1/2/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-2/3/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0.666"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/2/0.193"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/2/0.1800"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-0/2/0.1801"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/1/0.503"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:lo-0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:lo-0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:fxp-0"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-1/3/0.10"/>
-	<ndl:hasInterface rdf:resource="#rtr.ATLA.net.internet2.edu:ge-3/0/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:dsc.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:fxp0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:lo0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:lo0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:so-2/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:so-2/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-3/0/1"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-3/0/2"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-3/0/2.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-3/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/2/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:so-0/0/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:so-1/0/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0.13"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/1/0.110"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/1/0.111"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/1/0.501"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:so-1/2/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-2/3/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0.666"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/2/0.193"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/2/0.1800"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-0/2/0.1801"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/1/0.503"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:lo-0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:lo-0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:fxp-0"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-1/3/0.10"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-3/0/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.atla.net.internet2.edu:ge-2/3/1.0"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:dsc.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:dsc.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:dsc.0">
+	<ndl:name>rtr.atla.net.internet2.edu:dsc.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Discard Interface"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:fxp0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:fxp0</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:fxp0">
+	<ndl:name>rtr.atla.net.internet2.edu:fxp0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:lo0.1">
-	<ndl:name>rtr.ATLA.net.internet2.edu:lo0.1</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:lo0.1">
+	<ndl:name>rtr.atla.net.internet2.edu:lo0.1</ndl:name>
 	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF;"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:lo0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:lo0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:lo0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:lo0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:so-2/1/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:so-2/1/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#University of Memphis"/>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:so-2/1/0">
+	<ndl:name>rtr.atla.net.internet2.edu:so-2/1/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#University of Memphis [NO-MONITOR]"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:so-2/0/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:so-2/0/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:so-2/0/0">
+	<ndl:name>rtr.atla.net.internet2.edu:so-2/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#University of South Florida"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-3/0/1">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-3/0/1</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-3/0/1">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-3/0/1</ndl:name>
 	<ndl:connectedTo rdf:resource="#to nms-rtr1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-3/0/2">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-3/0/2</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-3/0/2">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-3/0/2</ndl:name>
 	<ndl:connectedTo rdf:resource="#to nms-rtr2"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-3/0/2.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-3/0/2.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-3/0/2.0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-3/0/2.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Discard Interface"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/1/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/1/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Indiana Gigapop 10GbE | I2-INDI-ATLA-INDYGIGAPOP-00035"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/2/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/2/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#10GE to SOX &amp; through it to FLR, AMPATH"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:so-0/0/0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:so-0/0/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: ATLA-WASH OC192 | I2-ATLA-WASH-I2-00028"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/1/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/1/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#University of Louisville 10GbE | I2-LOUS-ATLA-ULOUISVILLE-00036"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:so-1/0/0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:so-1/0/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: ATLA-CHIC OC192 | I2-CHIC-ATLA-I2-00027"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Observatory HP5406"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0.11">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0.11</ndl:name>
-	<ndl:connectedTo rdf:resource="#ATLA Observatory vlan"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0.12">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0.12</ndl:name>
-	<ndl:connectedTo rdf:resource="#Observatory 1 Gig (temp)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0.13">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0.13</ndl:name>
-	<ndl:connectedTo rdf:resource="#test ISIS feed to nms-rpsv"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/1/0.110">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/1/0.110</ndl:name>
-	<ndl:connectedTo rdf:resource="#Indiana Gigapop"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/1/0.111">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/1/0.111</ndl:name>
-	<ndl:connectedTo rdf:resource="#[CPS] Indiana Gigapop"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/1/0.501">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/1/0.501</ndl:name>
-	<ndl:connectedTo rdf:resource="#University of Louisville"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:so-1/2/0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:so-1/2/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BB: OC-192 to HSTNng"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-2/3/0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-2/3/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: GigE to M5 via Level3/SOX metro fiber"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0.666">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0.666</ndl:name>
-	<ndl:connectedTo rdf:resource="#TEMPORARY racklan interface for 4/26 POP work - DELETE afterwards"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/2/0.193">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/2/0.193</ndl:name>
-	<ndl:connectedTo rdf:resource="#SOX 10GE"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/2/0.1800">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/2/0.1800</ndl:name>
-	<ndl:connectedTo rdf:resource="#Florida LambdaRail (TREAT AS A PARTICIPANT!!!)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-0/2/0.1801">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-0/2/0.1801</ndl:name>
-	<ndl:connectedTo rdf:resource="#AMPATH via SOX"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/1/0.503">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/1/0.503</ndl:name>
-	<ndl:connectedTo rdf:resource="#[CPS] University of Louisville"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:lo-0.1">
-	<ndl:name>rtr.ATLA.net.internet2.edu:lo-0.1</ndl:name>
-	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF;"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:lo-0.0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:lo-0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:fxp-0">
-	<ndl:name>rtr.ATLA.net.internet2.edu:fxp-0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-1/3/0.10">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-1/3/0.10</ndl:name>
-	<ndl:connectedTo rdf:resource="#Racklan #2"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.ATLA.net.internet2.edu:ge-3/0/0.12">
-	<ndl:name>rtr.ATLA.net.internet2.edu:ge-3/0/0.12</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-3/0/0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-3/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory 1 Gig;"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#rtracp3.ATLA.net.internet2.edu">
-	<ndl:name>rtracp3.ATLA.net.internet2.edu</ndl:name>
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/1/0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/1/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Indiana Gigapop 10GbE | I2-INDI-ATLA-INDYGIGAPOP-00035"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/2/0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/2/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#10GE to SOX &amp; through it to FLR, AMPATH"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:so-0/0/0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:so-0/0/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: ATLA-WASH OC192 | I2-ATLA-WASH-I2-00028"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/1/0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/1/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#University of Louisville 10GbE | I2-LOUS-ATLA-ULOUISVILLE-00036"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:so-1/0/0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:so-1/0/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: ATLA-CHIC OC192 | I2-CHIC-ATLA-I2-00027"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Racklan #2"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0.11">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0.11</ndl:name>
+	<ndl:connectedTo rdf:resource="#ATLA Observatory vlan"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0.12">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0.12</ndl:name>
+	<ndl:connectedTo rdf:resource="#Observatory 1 Gig (temp)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0.13">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0.13</ndl:name>
+	<ndl:connectedTo rdf:resource="#test ISIS feed to nms-rpsv"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/1/0.110">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/1/0.110</ndl:name>
+	<ndl:connectedTo rdf:resource="#Indiana Gigapop"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/1/0.111">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/1/0.111</ndl:name>
+	<ndl:connectedTo rdf:resource="#[CPS] Indiana Gigapop"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/1/0.501">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/1/0.501</ndl:name>
+	<ndl:connectedTo rdf:resource="#University of Louisville"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:so-1/2/0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:so-1/2/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: oc192 to HSTNng"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-2/3/0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-2/3/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: GigE to M5 via Level3/SOX metro fiber"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0.666">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0.666</ndl:name>
+	<ndl:connectedTo rdf:resource="#TEMPORARY racklan interface for 4/26 POP work - DELETE afterwards"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/2/0.193">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/2/0.193</ndl:name>
+	<ndl:connectedTo rdf:resource="#SOX 10GE"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/2/0.1800">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/2/0.1800</ndl:name>
+	<ndl:connectedTo rdf:resource="#Florida LambdaRail (TREAT AS A PARTICIPANT!!!)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-0/2/0.1801">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-0/2/0.1801</ndl:name>
+	<ndl:connectedTo rdf:resource="#AMPATH via SOX"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/1/0.503">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/1/0.503</ndl:name>
+	<ndl:connectedTo rdf:resource="#[CPS] University of Louisville"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:lo-0.1">
+	<ndl:name>rtr.atla.net.internet2.edu:lo-0.1</ndl:name>
+	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF;"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:lo-0.0">
+	<ndl:name>rtr.atla.net.internet2.edu:lo-0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:fxp-0">
+	<ndl:name>rtr.atla.net.internet2.edu:fxp-0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-1/3/0.10">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-1/3/0.10</ndl:name>
+	<ndl:connectedTo rdf:resource="#Racklan #2"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-3/0/0.12">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-3/0/0.12</ndl:name>
+	<ndl:connectedTo rdf:resource="#Observatory 1 Gig;"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.atla.net.internet2.edu:ge-2/3/1.0">
+	<ndl:name>rtr.atla.net.internet2.edu:ge-2/3/1.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: GigE to M5 via Level3/SOX metro fiber"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#rtracp3.atla.net.internet2.edu">
+	<ndl:name>rtracp3.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.ATLA.net.internet2.edu">
-	<ndl:name>mfp.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.atla.net.internet2.edu">
+	<ndl:name>mfp.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.ATLA.net.internet2.edu">
-	<ndl:name>nms-octr.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.atla.net.internet2.edu">
+	<ndl:name>nms-octr.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#tray.ATLA.net.internet2.edu">
-	<ndl:name>tray.ATLA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#tray.atla.net.internet2.edu">
+	<ndl:name>tray.atla.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Atlanta--router"/>
 </ndl:Device>
 
@@ -638,63 +660,63 @@
         <geo:long>-86.756188</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtrdcp.NASH.net.internet2.edu">
-	<ndl:name>rtrdcp.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.nash.net.internet2.edu">
+	<ndl:name>rtrdcp.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#ups.NASH.net.internet2.edu">
-	<ndl:name>ups.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#ups.nash.net.internet2.edu">
+	<ndl:name>ups.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.NASH.net.internet2.edu">
-	<ndl:name>mss.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.nash.net.internet2.edu">
+	<ndl:name>mss.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.NASH.net.internet2.edu">
-	<ndl:name>rtracp.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.nash.net.internet2.edu">
+	<ndl:name>rtracp.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.NASH.net.internet2.edu">
-	<ndl:name>nms-octr.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.nash.net.internet2.edu">
+	<ndl:name>nms-octr.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.NASH.net.internet2.edu">
-	<ndl:name>oob.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.nash.net.internet2.edu">
+	<ndl:name>oob.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.NASH.net.internet2.edu">
-	<ndl:name>lan.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.nash.net.internet2.edu">
+	<ndl:name>lan.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.NASH.net.internet2.edu">
-	<ndl:name>mfp.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.nash.net.internet2.edu">
+	<ndl:name>mfp.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp.NASH.net.internet2.edu">
-	<ndl:name>fdp.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp.nash.net.internet2.edu">
+	<ndl:name>fdp.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.NASH.net.internet2.edu">
-	<ndl:name>fdp2.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.nash.net.internet2.edu">
+	<ndl:name>fdp2.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.NASH.net.internet2.edu">
-	<ndl:name>fdp3.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.nash.net.internet2.edu">
+	<ndl:name>fdp3.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp4.NASH.net.internet2.edu">
-	<ndl:name>fdp4.NASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp4.nash.net.internet2.edu">
+	<ndl:name>fdp4.nash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Nashville--grooming"/>
 </ndl:Device>
 
@@ -704,38 +726,23 @@
         <geo:long>-86.149441</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#mss.INDI.net.internet2.edu">
-	<ndl:name>mss.INDI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.indi.net.internet2.edu">
+	<ndl:name>mss.indi.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.INDI.net.internet2.edu">
-	<ndl:name>rtrdcp.INDI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.indi.net.internet2.edu">
+	<ndl:name>rtrdcp.indi.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.INDI.net.internet2.edu">
-	<ndl:name>rtracp.INDI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.indi.net.internet2.edu">
+	<ndl:name>rtracp.indi.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.INDI.net.internet2.edu">
-	<ndl:name>nms-octr.INDI.net.internet2.edu</ndl:name>
-	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
-</ndl:Device>
-
-<ndl:Device rdf:about="#">
-	<ndl:name></ndl:name>
-	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
-</ndl:Device>
-
-<ndl:Device rdf:about="#oob.INDI.net.internet2.edu">
-	<ndl:name>oob.INDI.net.internet2.edu</ndl:name>
-	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
-</ndl:Device>
-
-<ndl:Device rdf:about="#ups.INDI.net.internet2.edu">
-	<ndl:name>ups.INDI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.indi.net.internet2.edu">
+	<ndl:name>nms-octr.indi.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
 </ndl:Device>
 
@@ -744,15 +751,36 @@
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtr.INDI.net.internet2.edu">
-	<ndl:name>rtr.INDI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.indi.net.internet2.edu">
+	<ndl:name>oob.indi.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
-	<ndl:hasInterface rdf:resource="#rtr.INDI.net.internet2.edu:GigabitEthernet0/0"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#rtr.INDI.net.internet2.edu:GigabitEthernet0/0">
-	<ndl:name>rtr.INDI.net.internet2.edu:GigabitEthernet0/0</ndl:name>
+<ndl:Device rdf:about="#ups.indi.net.internet2.edu">
+	<ndl:name>ups.indi.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#">
+	<ndl:name></ndl:name>
+	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#rtr.indi.net.internet2.edu">
+	<ndl:name>rtr.indi.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#Indianapolis--grooming"/>
+	<ndl:hasInterface rdf:resource="#rtr.indi.net.internet2.edu:GigabitEthernet0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.indi.net.internet2.edu:Tunnel1"/>
+</ndl:Device>
+
+<ndl:Interface rdf:about="#rtr.indi.net.internet2.edu:GigabitEthernet0/0">
+	<ndl:name>rtr.indi.net.internet2.edu:GigabitEthernet0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#to CTC6590 gi2/13"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.indi.net.internet2.edu:Tunnel1">
+	<ndl:name>rtr.indi.net.internet2.edu:Tunnel1</ndl:name>
+	<ndl:connectedTo rdf:resource="#NEWY Level3 Racklan"/>
 </ndl:Interface>
 
 <ndl:Location rdf:about="#Louisville--grooming">
@@ -761,58 +789,58 @@
         <geo:long>0</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtrdcp.LOUI.net.internet2.edu">
-	<ndl:name>rtrdcp.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.loui.net.internet2.edu">
+	<ndl:name>rtrdcp.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#sw.LOUI.net.internet2.edu">
-	<ndl:name>sw.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#sw.loui.net.internet2.edu">
+	<ndl:name>sw.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.LOUI.net.internet2.edu">
-	<ndl:name>oob.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.loui.net.internet2.edu">
+	<ndl:name>oob.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-oexp.LOUI.net.internet2.edu">
-	<ndl:name>nms-oexp.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-oexp.loui.net.internet2.edu">
+	<ndl:name>nms-oexp.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.LOUI.net.internet2.edu">
-	<ndl:name>rtracp.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.loui.net.internet2.edu">
+	<ndl:name>rtracp.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.LOUI.net.internet2.edu">
-	<ndl:name>mss.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.loui.net.internet2.edu">
+	<ndl:name>mss.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#tray.LOUI.net.internet2.edu">
-	<ndl:name>tray.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#tray.loui.net.internet2.edu">
+	<ndl:name>tray.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.LOUI.net.internet2.edu">
-	<ndl:name>fdp2.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.loui.net.internet2.edu">
+	<ndl:name>fdp2.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.LOUI.net.internet2.edu">
-	<ndl:name>fdp3.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.loui.net.internet2.edu">
+	<ndl:name>fdp3.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp4.LOUI.net.internet2.edu">
-	<ndl:name>fdp4.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp4.loui.net.internet2.edu">
+	<ndl:name>fdp4.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp5.LOUI.net.internet2.edu">
-	<ndl:name>fdp5.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp5.loui.net.internet2.edu">
+	<ndl:name>fdp5.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
@@ -1397,8 +1425,8 @@
 	<ndl:connectedTo rdf:resource="#unused"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#ups.LOUI.net.internet2.edu">
-	<ndl:name>ups.LOUI.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#ups.loui.net.internet2.edu">
+	<ndl:name>ups.loui.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Louisville--grooming"/>
 </ndl:Device>
 
@@ -1423,635 +1451,635 @@
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtr.CHIC.net.internet2.edu">
-	<ndl:name>rtr.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtr.chic.net.internet2.edu">
+	<ndl:name>rtr.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-4/0/1"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-4/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-4/0/2"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/1/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/0/0.10"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:so-0/2/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-1/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-1/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/1/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/1/0.21"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/1/0.20"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/0/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.135"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.121"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.144"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.103"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.159"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.250"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.212"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.191"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.179"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.178"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.188"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.205"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.258"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.281"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.397"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.402"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.332"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.348"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.423"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.356"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.345"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-1/0/0.107"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-1/1/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2046"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2065"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/0/0.443"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-0/0/0.3111"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:gr-0/3/0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2063"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ip-0/3/0.3"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2045"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/2/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/2/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/2/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/2/0.10"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:so-1/2/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2054"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ip-0/3/0.4"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ip-0/3/0.2"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:so-2/3/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2059"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:so-1/3/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.601"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:ge-2/1/0.152"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:lo-0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:lo-0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:fxp-0"/>
-	<ndl:hasInterface rdf:resource="#rtr.CHIC.net.internet2.edu:gr-0/3/0.5"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-4/0/1"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-4/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-4/0/2"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/1/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/0/0.10"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:so-0/2/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-1/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-1/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/1/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/1/0.21"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/1/0.20"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/0/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.135"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.121"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.144"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.103"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.159"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.250"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.212"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.191"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.179"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.178"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.188"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.205"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.258"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.281"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.397"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.402"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.332"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.348"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.423"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.356"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.345"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-1/0/0.107"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-1/1/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2046"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2065"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/0/0.443"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-0/0/0.3111"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:gr-0/3/0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2063"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ip-0/3/0.3"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2045"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/2/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/2/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/2/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/2/0.10"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:so-1/2/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2054"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ip-0/3/0.4"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ip-0/3/0.2"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:so-2/3/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/0/0.2059"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:so-1/3/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.601"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:ge-2/1/0.152"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:lo-0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:lo-0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:fxp-0"/>
+	<ndl:hasInterface rdf:resource="#rtr.chic.net.internet2.edu:gr-0/3/0.5"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-4/0/1">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-4/0/1</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-4/0/1">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-4/0/1</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-4/0/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-4/0/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-4/0/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-4/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#HP mgmt 1G interface"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-4/0/2">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-4/0/2</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-4/0/2">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-4/0/2</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/1/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/1/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#HP 5406 10GigE"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/1/0.11">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/1/0.11</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/1/0.11">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/1/0.11</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory 10 gig uplink"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/0/0.10">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/0/0.10</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/0/0.10">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/0/0.10</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: 10GIGE to Abilene CHINng via HOPI Force10"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:so-0/2/0.0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:so-0/2/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:so-0/2/0.0">
+	<ndl:name>rtr.chic.net.internet2.edu:so-0/2/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-WASH OC192 | I2-CHIC-WASH-I2-00002"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-1/1/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-1/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-1/1/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-1/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Nysernet 10GigE via Buffalo"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-1/0/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-1/0/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-1/0/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-1/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#MREN Force10 E1200 10GigE"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/1/0.12">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/1/0.12</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/1/0.12">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/1/0.12</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory 1 gig uplink"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/1/0.21">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/1/0.21</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/1/0.21">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/1/0.21</ndl:name>
 	<ndl:connectedTo rdf:resource="#VINI Data"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/1/0.20">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/1/0.20</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/1/0.20">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/1/0.20</ndl:name>
 	<ndl:connectedTo rdf:resource="#VINI Mgmt"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Starlight Force10"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Wiscren/Merit temporary 10GigE"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/0/0.11">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/0/0.11</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/0/0.11">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/0/0.11</ndl:name>
 	<ndl:connectedTo rdf:resource="#test int"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.135">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.135</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.135">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.135</ndl:name>
 	<ndl:connectedTo rdf:resource="#CA*net-Winnepeg via StarLight | AS6509"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.121">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.121</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.121">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.121</ndl:name>
 	<ndl:connectedTo rdf:resource="#CERN (1Gbs, primary v4 link) via Starlight | AS513"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.144">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.144</ndl:name>
-	<ndl:connectedTo rdf:resource="#CA*net-Toronto via Starlight | AS6509"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.103">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.103</ndl:name>
-	<ndl:connectedTo rdf:resource="#StarLight M10 via StarLight | AS:10764"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.159">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.159</ndl:name>
-	<ndl:connectedTo rdf:resource="#ASNet (Taiwan) via StarLight | AS:9264"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.250">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.250</ndl:name>
-	<ndl:connectedTo rdf:resource="#KREOnet2 via Starlight"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.212">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.212</ndl:name>
-	<ndl:connectedTo rdf:resource="#NISN via Starlight | AS:297"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.191">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.191</ndl:name>
-	<ndl:connectedTo rdf:resource="#6Tap via Starlight | AS3425"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.179">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.179</ndl:name>
-	<ndl:connectedTo rdf:resource="#DREN via StarLight | AS668"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.178">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.178</ndl:name>
-	<ndl:connectedTo rdf:resource="#HARNET | AS3662"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.188">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.188</ndl:name>
-	<ndl:connectedTo rdf:resource="#CERN DataTAG (v6 only) | AS:513"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.205">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.205</ndl:name>
-	<ndl:connectedTo rdf:resource="#FranceTelecom, multicast-only | AS5511"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.258">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.258</ndl:name>
-	<ndl:connectedTo rdf:resource="#CERN production IPv6 via STARLIGHT | AS:513"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.281">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.281</ndl:name>
-	<ndl:connectedTo rdf:resource="#TANET2 | AS:7539"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.397">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.397</ndl:name>
-	<ndl:connectedTo rdf:resource="#USGS M7i via Starlight | AS1842"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.402">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.402</ndl:name>
-	<ndl:connectedTo rdf:resource="#GLORIAD-new | AS20388"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.332">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.332</ndl:name>
-	<ndl:connectedTo rdf:resource="#SINET via Starlight | AS2907"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.348">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.348</ndl:name>
-	<ndl:connectedTo rdf:resource="#Ultralight Project via Starlight"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.423">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.423</ndl:name>
-	<ndl:connectedTo rdf:resource="#ESNET via Starlight | AS293"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.356">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.356</ndl:name>
-	<ndl:connectedTo rdf:resource="#APAN via JGN2 Hitachi via Starlight | AS7660"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.345">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.345</ndl:name>
-	<ndl:connectedTo rdf:resource="#HOPI Management VLAN (default gw)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-1/0/0.107">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-1/0/0.107</ndl:name>
-	<ndl:connectedTo rdf:resource="#MREN via StarLight | AS:22335"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-1/1/0.0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-1/1/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Nysernet 10GigE via Buffalo"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2046">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2046</ndl:name>
-	<ndl:connectedTo rdf:resource="#Wiscren via CIC"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2065">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2065</ndl:name>
-	<ndl:connectedTo rdf:resource="#CIC testpoint PC"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/0/0.443">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/0/0.443</ndl:name>
-	<ndl:connectedTo rdf:resource="#HOPI PC1 to Abilene Vlan"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-0/0/0.3111">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-0/0/0.3111</ndl:name>
-	<ndl:connectedTo rdf:resource="#FERMI-HOPI"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:gr-0/3/0.1">
-	<ndl:name>rtr.CHIC.net.internet2.edu:gr-0/3/0.1</ndl:name>
-	<ndl:connectedTo rdf:resource="#V6 Tunnel to OARnet"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2063">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2063</ndl:name>
-	<ndl:connectedTo rdf:resource="#Indiana Gigapop via CIC"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ip-0/3/0.3">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ip-0/3/0.3</ndl:name>
-	<ndl:connectedTo rdf:resource="#Portland State v6 Tunnel (behind PNW)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2045">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2045</ndl:name>
-	<ndl:connectedTo rdf:resource="#Indiana Gigapop via CIC - CPS"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/2/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/2/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Equinix Chicago"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/2/0.12">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/2/0.12</ndl:name>
-	<ndl:connectedTo rdf:resource="#Global Crossing Private Peering"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/2/0.11">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/2/0.11</ndl:name>
-	<ndl:connectedTo rdf:resource="#Equinix Chicago Public Switch"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/2/0.10">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/2/0.10</ndl:name>
-	<ndl:connectedTo rdf:resource="#EQCH Management Subnet"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:so-1/2/0.0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:so-1/2/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-KSCYng OC192 | OC192-6492974"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2054">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2054</ndl:name>
-	<ndl:connectedTo rdf:resource="#Northern Lights via CIC"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ip-0/3/0.4">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ip-0/3/0.4</ndl:name>
-	<ndl:connectedTo rdf:resource="#Singaren v6 Tunnel"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ip-0/3/0.2">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ip-0/3/0.2</ndl:name>
-	<ndl:connectedTo rdf:resource="#SINET v6 Tunnel [NO-MONITOR]"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:so-2/3/0.0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:so-2/3/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-ATLA OC192 | I2-CHIC-ATLA-I2-00027"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/0/0.2059">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/0/0.2059</ndl:name>
-	<ndl:connectedTo rdf:resource="#MERIT via CIC"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:so-1/3/0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:so-1/3/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-NEWY OC192 | I2-CHIC-NEWY-I2-00023"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.601">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.601</ndl:name>
-	<ndl:connectedTo rdf:resource="#DREN ipv6 only | AS668"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:ge-2/1/0.152">
-	<ndl:name>rtr.CHIC.net.internet2.edu:ge-2/1/0.152</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.144">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.144</ndl:name>
 	<ndl:connectedTo rdf:resource="#DTF (James) via StarLight | AS75"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:lo-0.1">
-	<ndl:name>rtr.CHIC.net.internet2.edu:lo-0.1</ndl:name>
-	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF"/>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.103">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.103</ndl:name>
+	<ndl:connectedTo rdf:resource="#StarLight M10 via StarLight | AS:10764"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:lo-0.0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:lo-0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.159">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.159</ndl:name>
+	<ndl:connectedTo rdf:resource="#ASNet (Taiwan) via StarLight | AS:9264"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:fxp-0">
-	<ndl:name>rtr.CHIC.net.internet2.edu:fxp-0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.250">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.250</ndl:name>
+	<ndl:connectedTo rdf:resource="#KREOnet2 via Starlight"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.CHIC.net.internet2.edu:gr-0/3/0.5">
-	<ndl:name>rtr.CHIC.net.internet2.edu:gr-0/3/0.5</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.212">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.212</ndl:name>
+	<ndl:connectedTo rdf:resource="#NISN via Starlight | AS:297"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.191">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.191</ndl:name>
+	<ndl:connectedTo rdf:resource="#6Tap via Starlight | AS3425"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.179">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.179</ndl:name>
+	<ndl:connectedTo rdf:resource="#DREN via StarLight | AS668"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.178">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.178</ndl:name>
+	<ndl:connectedTo rdf:resource="#HARNET | AS3662"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.188">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.188</ndl:name>
+	<ndl:connectedTo rdf:resource="#CERN DataTAG (v6 only) | AS:513"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.205">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.205</ndl:name>
+	<ndl:connectedTo rdf:resource="#FranceTelecom, multicast-only | AS5511"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.258">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.258</ndl:name>
+	<ndl:connectedTo rdf:resource="#CERN production IPv6 via STARLIGHT | AS:513"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.281">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.281</ndl:name>
+	<ndl:connectedTo rdf:resource="#TANET2 | AS:7539"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.397">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.397</ndl:name>
+	<ndl:connectedTo rdf:resource="#USGS M7i via Starlight | AS1842"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.402">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.402</ndl:name>
+	<ndl:connectedTo rdf:resource="#GLORIAD-new | AS20388"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.332">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.332</ndl:name>
+	<ndl:connectedTo rdf:resource="#SINET via Starlight | AS2907"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.348">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.348</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ultralight Project via Starlight"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.423">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.423</ndl:name>
+	<ndl:connectedTo rdf:resource="#DREN ipv6 only | AS668"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.356">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.356</ndl:name>
+	<ndl:connectedTo rdf:resource="#APAN via JGN2 Hitachi via Starlight | AS7660"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.345">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.345</ndl:name>
+	<ndl:connectedTo rdf:resource="#HOPI Management VLAN (default gw)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-1/0/0.107">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-1/0/0.107</ndl:name>
+	<ndl:connectedTo rdf:resource="#MREN via StarLight | AS:22335"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-1/1/0.0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-1/1/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Nysernet 10GigE via Buffalo"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2046">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2046</ndl:name>
+	<ndl:connectedTo rdf:resource="#Wiscren via CIC"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2065">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2065</ndl:name>
+	<ndl:connectedTo rdf:resource="#CIC testpoint PC"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/0/0.443">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/0/0.443</ndl:name>
+	<ndl:connectedTo rdf:resource="#HOPI PC1 to Abilene Vlan"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-0/0/0.3111">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-0/0/0.3111</ndl:name>
+	<ndl:connectedTo rdf:resource="#FERMI-HOPI"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:gr-0/3/0.1">
+	<ndl:name>rtr.chic.net.internet2.edu:gr-0/3/0.1</ndl:name>
 	<ndl:connectedTo rdf:resource="#V6 Tunnel to Workshop/Tradeshow [NO-MONITOR]"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#lan.CHIC.net.internet2.edu">
-	<ndl:name>lan.CHIC.net.internet2.edu</ndl:name>
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2063">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2063</ndl:name>
+	<ndl:connectedTo rdf:resource="#Indiana Gigapop via CIC"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ip-0/3/0.3">
+	<ndl:name>rtr.chic.net.internet2.edu:ip-0/3/0.3</ndl:name>
+	<ndl:connectedTo rdf:resource="#Portland State v6 Tunnel (behind PNW)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2045">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2045</ndl:name>
+	<ndl:connectedTo rdf:resource="#Indiana Gigapop via CIC - CPS"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/2/0">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/2/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Equinix Chicago"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/2/0.12">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/2/0.12</ndl:name>
+	<ndl:connectedTo rdf:resource="#Global Crossing Private Peering"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/2/0.11">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/2/0.11</ndl:name>
+	<ndl:connectedTo rdf:resource="#Equinix Chicago Public Switch"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/2/0.10">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/2/0.10</ndl:name>
+	<ndl:connectedTo rdf:resource="#EQCH Management Subnet"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:so-1/2/0.0">
+	<ndl:name>rtr.chic.net.internet2.edu:so-1/2/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-KSCYng OC192 | OC192-6492974"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2054">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2054</ndl:name>
+	<ndl:connectedTo rdf:resource="#Northern Lights via CIC"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ip-0/3/0.4">
+	<ndl:name>rtr.chic.net.internet2.edu:ip-0/3/0.4</ndl:name>
+	<ndl:connectedTo rdf:resource="#Singaren v6 Tunnel"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ip-0/3/0.2">
+	<ndl:name>rtr.chic.net.internet2.edu:ip-0/3/0.2</ndl:name>
+	<ndl:connectedTo rdf:resource="#SINET v6 Tunnel [NO-MONITOR]"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:so-2/3/0.0">
+	<ndl:name>rtr.chic.net.internet2.edu:so-2/3/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-ATLA OC192 | I2-CHIC-ATLA-I2-00027"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/0/0.2059">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/0/0.2059</ndl:name>
+	<ndl:connectedTo rdf:resource="#MERIT via CIC"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:so-1/3/0">
+	<ndl:name>rtr.chic.net.internet2.edu:so-1/3/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-NEWY OC192 | I2-CHIC-NEWY-I2-00023"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.601">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.601</ndl:name>
+	<ndl:connectedTo rdf:resource="#DREN ipv6 only | AS668"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:ge-2/1/0.152">
+	<ndl:name>rtr.chic.net.internet2.edu:ge-2/1/0.152</ndl:name>
+	<ndl:connectedTo rdf:resource="#DTF (James) via StarLight | AS75"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:lo-0.1">
+	<ndl:name>rtr.chic.net.internet2.edu:lo-0.1</ndl:name>
+	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:lo-0.0">
+	<ndl:name>rtr.chic.net.internet2.edu:lo-0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:fxp-0">
+	<ndl:name>rtr.chic.net.internet2.edu:fxp-0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.chic.net.internet2.edu:gr-0/3/0.5">
+	<ndl:name>rtr.chic.net.internet2.edu:gr-0/3/0.5</ndl:name>
+	<ndl:connectedTo rdf:resource="#V6 Tunnel to Workshop/Tradeshow [NO-MONITOR]"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#lan.chic.net.internet2.edu">
+	<ndl:name>lan.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 12"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 20"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 11"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 21"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:vlan 1"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:F3"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:F1"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A1"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A6"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A2"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A4"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A10"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A11"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A3"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A13"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A8"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A12"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A9"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A7"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:A14"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:D3"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:D1"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:B3"/>
-	<ndl:hasInterface rdf:resource="#lan.CHIC.net.internet2.edu:B1"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 12"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 20"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 11"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 21"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:F3"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:F1"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A1"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A6"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A2"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A4"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A10"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A11"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A3"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A13"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A8"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A12"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A9"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A7"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:A14"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:D3"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:D1"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:B3"/>
+	<ndl:hasInterface rdf:resource="#lan.chic.net.internet2.edu:B1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 12">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 12</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 12">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 12</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory 1 Gig uplink"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 10">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 10">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#RACKLAN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 20">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 20</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 20">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 20</ndl:name>
 	<ndl:connectedTo rdf:resource="#Vlan mgmt"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 11">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 11</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 11">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 11</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 21">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 21</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 21">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 21</ndl:name>
 	<ndl:connectedTo rdf:resource="#Vlan data"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:vlan 1">
-	<ndl:name>lan.CHIC.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:vlan 1">
+	<ndl:name>lan.chic.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:F3">
-	<ndl:name>lan.CHIC.net.internet2.edu:F3</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:F3">
+	<ndl:name>lan.chic.net.internet2.edu:F3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpho-eth3"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:F1">
-	<ndl:name>lan.CHIC.net.internet2.edu:F1</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:F1">
+	<ndl:name>lan.chic.net.internet2.edu:F1</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-othr-10ge2"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A1">
-	<ndl:name>lan.CHIC.net.internet2.edu:A1</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A1">
+	<ndl:name>lan.chic.net.internet2.edu:A1</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A6">
-	<ndl:name>lan.CHIC.net.internet2.edu:A6</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A6">
+	<ndl:name>lan.chic.net.internet2.edu:A6</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-oexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A2">
-	<ndl:name>lan.CHIC.net.internet2.edu:A2</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A2">
+	<ndl:name>lan.chic.net.internet2.edu:A2</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A4">
-	<ndl:name>lan.CHIC.net.internet2.edu:A4</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A4">
+	<ndl:name>lan.chic.net.internet2.edu:A4</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rlat-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A10">
-	<ndl:name>lan.CHIC.net.internet2.edu:A10</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A10">
+	<ndl:name>lan.chic.net.internet2.edu:A10</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A11">
-	<ndl:name>lan.CHIC.net.internet2.edu:A11</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A11">
+	<ndl:name>lan.chic.net.internet2.edu:A11</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpsv-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A3">
-	<ndl:name>lan.CHIC.net.internet2.edu:A3</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A3">
+	<ndl:name>lan.chic.net.internet2.edu:A3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpsv-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A13">
-	<ndl:name>lan.CHIC.net.internet2.edu:A13</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A13">
+	<ndl:name>lan.chic.net.internet2.edu:A13</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-othr-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A8">
-	<ndl:name>lan.CHIC.net.internet2.edu:A8</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A8">
+	<ndl:name>lan.chic.net.internet2.edu:A8</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-oexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A12">
-	<ndl:name>lan.CHIC.net.internet2.edu:A12</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A12">
+	<ndl:name>lan.chic.net.internet2.edu:A12</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rlat-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A9">
-	<ndl:name>lan.CHIC.net.internet2.edu:A9</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A9">
+	<ndl:name>lan.chic.net.internet2.edu:A9</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A7">
-	<ndl:name>lan.CHIC.net.internet2.edu:A7</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A7">
+	<ndl:name>lan.chic.net.internet2.edu:A7</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-othr-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:A14">
-	<ndl:name>lan.CHIC.net.internet2.edu:A14</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:A14">
+	<ndl:name>lan.chic.net.internet2.edu:A14</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-oexp-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:D3">
-	<ndl:name>lan.CHIC.net.internet2.edu:D3</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:D3">
+	<ndl:name>lan.chic.net.internet2.edu:D3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-othr-10ge1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:D1">
-	<ndl:name>lan.CHIC.net.internet2.edu:D1</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:D1">
+	<ndl:name>lan.chic.net.internet2.edu:D1</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpho-10ge1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:B3">
-	<ndl:name>lan.CHIC.net.internet2.edu:B3</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:B3">
+	<ndl:name>lan.chic.net.internet2.edu:B3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2-10ge1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CHIC.net.internet2.edu:B1">
-	<ndl:name>lan.CHIC.net.internet2.edu:B1</ndl:name>
+<ndl:Interface rdf:about="#lan.chic.net.internet2.edu:B1">
+	<ndl:name>lan.chic.net.internet2.edu:B1</ndl:name>
 	<ndl:connectedTo rdf:resource="#T640-ge0/1"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#nms-rlat.CHIC.net.internet2.edu">
-	<ndl:name>nms-rlat.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rlat.chic.net.internet2.edu">
+	<ndl:name>nms-rlat.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp2.CHIC.net.internet2.edu">
-	<ndl:name>obsacp2.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp2.chic.net.internet2.edu">
+	<ndl:name>obsacp2.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr2.CHIC.net.internet2.edu">
-	<ndl:name>nms-rthr2.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr2.chic.net.internet2.edu">
+	<ndl:name>nms-rthr2.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rexp.CHIC.net.internet2.edu">
-	<ndl:name>nms-rexp.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rexp.chic.net.internet2.edu">
+	<ndl:name>nms-rexp.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpsv.CHIC.net.internet2.edu">
-	<ndl:name>nms-rpsv.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpsv.chic.net.internet2.edu">
+	<ndl:name>nms-rpsv.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpho.CHIC.net.internet2.edu">
-	<ndl:name>nms-rpho.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpho.chic.net.internet2.edu">
+	<ndl:name>nms-rpho.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.CHIC.net.internet2.edu">
-	<ndl:name>nms-octr.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.chic.net.internet2.edu">
+	<ndl:name>nms-octr.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-othr.CHIC.net.internet2.edu">
-	<ndl:name>nms-othr.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-othr.chic.net.internet2.edu">
+	<ndl:name>nms-othr.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-oexp.CHIC.net.internet2.edu">
-	<ndl:name>nms-oexp.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-oexp.chic.net.internet2.edu">
+	<ndl:name>nms-oexp.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr.CHIC.net.internet2.edu">
-	<ndl:name>nms-rthr.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr.chic.net.internet2.edu">
+	<ndl:name>nms-rthr.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp.CHIC.net.internet2.edu">
-	<ndl:name>obsacp.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp.chic.net.internet2.edu">
+	<ndl:name>obsacp.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.CHIC.net.internet2.edu">
-	<ndl:name>oob.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.chic.net.internet2.edu">
+	<ndl:name>oob.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
-	<ndl:hasInterface rdf:resource="#oob.CHIC.net.internet2.edu:Loopback1"/>
-	<ndl:hasInterface rdf:resource="#oob.CHIC.net.internet2.edu:Async1"/>
+	<ndl:hasInterface rdf:resource="#oob.chic.net.internet2.edu:Loopback1"/>
+	<ndl:hasInterface rdf:resource="#oob.chic.net.internet2.edu:Async1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.CHIC.net.internet2.edu:Loopback1">
-	<ndl:name>oob.CHIC.net.internet2.edu:Loopback1</ndl:name>
+<ndl:Interface rdf:about="#oob.chic.net.internet2.edu:Loopback1">
+	<ndl:name>oob.chic.net.internet2.edu:Loopback1</ndl:name>
 	<ndl:connectedTo rdf:resource="#OOB Dialer"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#oob.CHIC.net.internet2.edu:Async1">
-	<ndl:name>oob.CHIC.net.internet2.edu:Async1</ndl:name>
+<ndl:Interface rdf:about="#oob.chic.net.internet2.edu:Async1">
+	<ndl:name>oob.chic.net.internet2.edu:Async1</ndl:name>
 	<ndl:connectedTo rdf:resource="#CHIC-OOB (312) 494-1632"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#mss.CHIC.net.internet2.edu">
-	<ndl:name>mss.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.chic.net.internet2.edu">
+	<ndl:name>mss.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
-	<ndl:hasInterface rdf:resource="#mss.CHIC.net.internet2.edu:A-1-1 RX LC SMF 14"/>
-	<ndl:hasInterface rdf:resource="#mss.CHIC.net.internet2.edu:A-1-1 TX LC SMF 20"/>
+	<ndl:hasInterface rdf:resource="#mss.chic.net.internet2.edu:A-1-1 RX LC SMF 14"/>
+	<ndl:hasInterface rdf:resource="#mss.chic.net.internet2.edu:A-1-1 TX LC SMF 20"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#mss.CHIC.net.internet2.edu:A-1-1 RX LC SMF 14">
-	<ndl:name>mss.CHIC.net.internet2.edu:A-1-1 RX LC SMF 14</ndl:name>
+<ndl:Interface rdf:about="#mss.chic.net.internet2.edu:A-1-1 RX LC SMF 14">
+	<ndl:name>mss.chic.net.internet2.edu:A-1-1 RX LC SMF 14</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena Dynamic OC-192 BB to CLEV"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#mss.CHIC.net.internet2.edu:A-1-1 TX LC SMF 20">
-	<ndl:name>mss.CHIC.net.internet2.edu:A-1-1 TX LC SMF 20</ndl:name>
+<ndl:Interface rdf:about="#mss.chic.net.internet2.edu:A-1-1 TX LC SMF 20">
+	<ndl:name>mss.chic.net.internet2.edu:A-1-1 TX LC SMF 20</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena Dynamic OC-192 BB to CLEV"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#dwdm.CHIC.net.internet2.edu">
-	<ndl:name>dwdm.CHIC.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#dwdm.chic.net.internet2.edu">
+	<ndl:name>dwdm.chic.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Level3 [router]"/>
 </ndl:Device>
 
@@ -2061,57 +2089,57 @@
         <geo:long>-81.658192</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#mss.CLEV.net.internet2.edu">
-	<ndl:name>mss.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.clev.net.internet2.edu">
+	<ndl:name>mss.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
-	<ndl:hasInterface rdf:resource="#mss.CLEV.net.internet2.edu:A-2-1 RX LC SMF"/>
-	<ndl:hasInterface rdf:resource="#mss.CLEV.net.internet2.edu:A-2-1 TX LC SMF"/>
+	<ndl:hasInterface rdf:resource="#mss.clev.net.internet2.edu:A-2-1 RX LC SMF"/>
+	<ndl:hasInterface rdf:resource="#mss.clev.net.internet2.edu:A-2-1 TX LC SMF"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#mss.CLEV.net.internet2.edu:A-2-1 RX LC SMF">
-	<ndl:name>mss.CLEV.net.internet2.edu:A-2-1 RX LC SMF</ndl:name>
+<ndl:Interface rdf:about="#mss.clev.net.internet2.edu:A-2-1 RX LC SMF">
+	<ndl:name>mss.clev.net.internet2.edu:A-2-1 RX LC SMF</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena Dynamic OC-192 BB to CHIC"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#mss.CLEV.net.internet2.edu:A-2-1 TX LC SMF">
-	<ndl:name>mss.CLEV.net.internet2.edu:A-2-1 TX LC SMF</ndl:name>
+<ndl:Interface rdf:about="#mss.clev.net.internet2.edu:A-2-1 TX LC SMF">
+	<ndl:name>mss.clev.net.internet2.edu:A-2-1 TX LC SMF</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena Dynamic OC-192 BB to CHIC"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#rtracp.CLEV.net.internet2.edu">
-	<ndl:name>rtracp.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.clev.net.internet2.edu">
+	<ndl:name>rtracp.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.CLEV.net.internet2.edu">
-	<ndl:name>rtrdcp.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.clev.net.internet2.edu">
+	<ndl:name>rtrdcp.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.CLEV.net.internet2.edu">
-	<ndl:name>lan.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.clev.net.internet2.edu">
+	<ndl:name>lan.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
-	<ndl:hasInterface rdf:resource="#lan.CLEV.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#lan.CLEV.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.clev.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#lan.clev.net.internet2.edu:vlan 1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.CLEV.net.internet2.edu:vlan 10">
-	<ndl:name>lan.CLEV.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#lan.clev.net.internet2.edu:vlan 10">
+	<ndl:name>lan.clev.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#CLEV Racklan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.CLEV.net.internet2.edu:vlan 1">
-	<ndl:name>lan.CLEV.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.clev.net.internet2.edu:vlan 1">
+	<ndl:name>lan.clev.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#nms-octr.CLEV.net.internet2.edu">
-	<ndl:name>nms-octr.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.clev.net.internet2.edu">
+	<ndl:name>nms-octr.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#inverter.CLEV.net.internet2.edu">
-	<ndl:name>inverter.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#inverter.clev.net.internet2.edu">
+	<ndl:name>inverter.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
 </ndl:Device>
 
@@ -2120,20 +2148,20 @@
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.CLEV.net.internet2.edu">
-	<ndl:name>oob.CLEV.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.clev.net.internet2.edu">
+	<ndl:name>oob.clev.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Cleveland--grooming"/>
-	<ndl:hasInterface rdf:resource="#oob.CLEV.net.internet2.edu:Loopback1"/>
-	<ndl:hasInterface rdf:resource="#oob.CLEV.net.internet2.edu:Async1"/>
+	<ndl:hasInterface rdf:resource="#oob.clev.net.internet2.edu:Loopback1"/>
+	<ndl:hasInterface rdf:resource="#oob.clev.net.internet2.edu:Async1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.CLEV.net.internet2.edu:Loopback1">
-	<ndl:name>oob.CLEV.net.internet2.edu:Loopback1</ndl:name>
+<ndl:Interface rdf:about="#oob.clev.net.internet2.edu:Loopback1">
+	<ndl:name>oob.clev.net.internet2.edu:Loopback1</ndl:name>
 	<ndl:connectedTo rdf:resource="#OOB Dialer"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#oob.CLEV.net.internet2.edu:Async1">
-	<ndl:name>oob.CLEV.net.internet2.edu:Async1</ndl:name>
+<ndl:Interface rdf:about="#oob.clev.net.internet2.edu:Async1">
+	<ndl:name>oob.clev.net.internet2.edu:Async1</ndl:name>
 	<ndl:connectedTo rdf:resource="#CLEV-oob 216-361-0275"/>
 </ndl:Interface>
 
@@ -2143,28 +2171,23 @@
         <geo:long>-79.970761</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#nms-octr.PITT.net.internet2.edu">
-	<ndl:name>nms-octr.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.pitt.net.internet2.edu">
+	<ndl:name>nms-octr.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.PITT.net.internet2.edu">
-	<ndl:name>mss.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.pitt.net.internet2.edu">
+	<ndl:name>mss.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.PITT.net.internet2.edu">
-	<ndl:name>rtrdcp.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.pitt.net.internet2.edu">
+	<ndl:name>rtrdcp.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.PITT.net.internet2.edu">
-	<ndl:name>rtracp.PITT.net.internet2.edu</ndl:name>
-	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
-</ndl:Device>
-
-<ndl:Device rdf:about="#">
-	<ndl:name></ndl:name>
+<ndl:Device rdf:about="#rtracp.pitt.net.internet2.edu">
+	<ndl:name>rtracp.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
@@ -2173,18 +2196,23 @@
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.PITT.net.internet2.edu">
-	<ndl:name>lan.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#">
+	<ndl:name></ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.PITT.net.internet2.edu">
-	<ndl:name>oob.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.pitt.net.internet2.edu">
+	<ndl:name>lan.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#ups.PITT.net.internet2.edu">
-	<ndl:name>ups.PITT.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.pitt.net.internet2.edu">
+	<ndl:name>oob.pitt.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#ups.pitt.net.internet2.edu">
+	<ndl:name>ups.pitt.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Pittsburgh--grooming"/>
 </ndl:Device>
 
@@ -2194,305 +2222,305 @@
         <geo:long>-77.014891</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtr.WASH.net.internet2.edu">
-	<ndl:name>rtr.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtr.wash.net.internet2.edu">
+	<ndl:name>rtr.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-2/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:so-3/0/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/2/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:so-0/0/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/3/0.4083"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/3/0.4082"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/3/0.442"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-2/0/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-2/0/2.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-2/0/1.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/1/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/1/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:so-1/1/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:so-2/1/0.110"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/2/0.359"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/2/0.352"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/2/0.3"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/2/0.506"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:so-2/2/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/2/0.921"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.669"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.297"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.668"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.183"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.166"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.88"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.202"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.987"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-0/1/0.1842"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:sonet-options.110"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-1/0/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:lo-0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:lo-0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:fxp-0"/>
-	<ndl:hasInterface rdf:resource="#rtr.WASH.net.internet2.edu:ge-3/2/0.507"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-2/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:so-3/0/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/2/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:so-0/0/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/3/0.4083"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/3/0.4082"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/3/0.442"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-2/0/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-2/0/2.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-2/0/1.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/1/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/1/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:so-1/1/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:so-2/1/0.110"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/2/0.359"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/2/0.352"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/2/0.3"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/2/0.506"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:so-2/2/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/2/0.921"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.669"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.297"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.668"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.183"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.166"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.88"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.202"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.987"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-0/1/0.1842"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:sonet-options.110"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-1/0/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:lo-0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:lo-0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:fxp-0"/>
+	<ndl:hasInterface rdf:resource="#rtr.wash.net.internet2.edu:ge-3/2/0.507"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-2/0/0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-2/0/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-2/0/0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-2/0/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Racklan HP 1Gig"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/1/0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/1/0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#to HP5406 B3 10GE"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:so-3/0/0.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:so-3/0/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:so-3/0/0.0">
+	<ndl:name>rtr.wash.net.internet2.edu:so-3/0/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: CHIC-WASH (Level3)"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#NGIX-EAST via Movaz LVL3-&gt;CLPK"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/2/0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/2/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/2/0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/2/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Reserved for OARNET 10G"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:so-0/0/0.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:so-0/0/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:so-0/0/0.0">
+	<ndl:name>rtr.wash.net.internet2.edu:so-0/0/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: NEWY-WASH I2-NEWY-WASH-I2-00001"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/3/0.4083">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/3/0.4083</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/3/0.4083">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/3/0.4083</ndl:name>
 	<ndl:connectedTo rdf:resource="#CHEETAH-HOPI interconnect for CUNY"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/3/0.4082">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/3/0.4082</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/3/0.4082">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/3/0.4082</ndl:name>
 	<ndl:connectedTo rdf:resource="#CHEETAH-HOPI interconnect for UVA"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/3/0.442">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/3/0.442</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/3/0.442">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/3/0.442</ndl:name>
 	<ndl:connectedTo rdf:resource="#HOPI PC1 to Abilene connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-2/0/0.12">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-2/0/0.12</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-2/0/0.12">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-2/0/0.12</ndl:name>
 	<ndl:connectedTo rdf:resource="#WASH Observatory 1G vlan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-2/0/2.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-2/0/2.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-2/0/2.0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-2/0/2.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-2/0/1.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-2/0/1.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-2/0/1.0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-2/0/1.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/1/0.11">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/1/0.11</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/1/0.11">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/1/0.11</ndl:name>
 	<ndl:connectedTo rdf:resource="#WASH Observatory vlan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/1/0.12">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/1/0.12</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/1/0.12">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/1/0.12</ndl:name>
 	<ndl:connectedTo rdf:resource="#WASH Obs 1Gig (temp)"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:so-1/1/0.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:so-1/1/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:so-1/1/0.0">
+	<ndl:name>rtr.wash.net.internet2.edu:so-1/1/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: ATLA-WASH I2-ATLA-WASH-I2-00028"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:so-2/1/0.110">
-	<ndl:name>rtr.WASH.net.internet2.edu:so-2/1/0.110</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:so-2/1/0.110">
+	<ndl:name>rtr.wash.net.internet2.edu:so-2/1/0.110</ndl:name>
 	<ndl:connectedTo rdf:resource="#Mid-Atlantic Crossroads (MAX)"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/2/0.359">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/2/0.359</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/2/0.359">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/2/0.359</ndl:name>
 	<ndl:connectedTo rdf:resource="#OARnet via Cleveland"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/2/0.352">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/2/0.352</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/2/0.352">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/2/0.352</ndl:name>
 	<ndl:connectedTo rdf:resource="#OARNET mcast-only peering vlan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/2/0.3">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/2/0.3</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/2/0.3">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/2/0.3</ndl:name>
 	<ndl:connectedTo rdf:resource="#Drexel University to Internet2 Network Peering"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/2/0.506">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/2/0.506</ndl:name>
-	<ndl:connectedTo rdf:resource="#PSC to Internet2 Network Peering"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:so-2/2/0.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:so-2/2/0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#NSF DRAGON"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/2/0.921">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/2/0.921</ndl:name>
-	<ndl:connectedTo rdf:resource="#OARNET [CPS]"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.669">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.669</ndl:name>
-	<ndl:connectedTo rdf:resource="#Wright-Patterson AFB/Wright State Univ ctr in Dayton via DREN"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.297">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.297</ndl:name>
-	<ndl:connectedTo rdf:resource="#NISN (via UMD NGIX) | AS:297"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.668">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.668</ndl:name>
-	<ndl:connectedTo rdf:resource="#DREN - Washington DC | AS:668"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.183">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.183</ndl:name>
-	<ndl:connectedTo rdf:resource="#MAX backup peering via NGIX-East"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.166">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.166</ndl:name>
-	<ndl:connectedTo rdf:resource="#NREN via UMD NGIX | AS24"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.88">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.88</ndl:name>
-	<ndl:connectedTo rdf:resource="#CLARA via NGIX and AWave-FIU"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.202">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.202</ndl:name>
-	<ndl:connectedTo rdf:resource="#GEANT (Frankfurt OC-192)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.987">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.987</ndl:name>
-	<ndl:connectedTo rdf:resource="#DREN v6-only, AS668"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-0/1/0.1842">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-0/1/0.1842</ndl:name>
-	<ndl:connectedTo rdf:resource="#US Geological Survey ( via UMD NGIX)) | AS:1842"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:sonet-options.110">
-	<ndl:name>rtr.WASH.net.internet2.edu:sonet-options.110</ndl:name>
-	<ndl:connectedTo rdf:resource="#Mid-Atlantic Crossroads (MAX)"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-1/0/0">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-1/0/0</ndl:name>
-	<ndl:connectedTo rdf:resource="#10GigE reserved for MAX"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:lo-0.1">
-	<ndl:name>rtr.WASH.net.internet2.edu:lo-0.1</ndl:name>
-	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:lo-0.0">
-	<ndl:name>rtr.WASH.net.internet2.edu:lo-0.0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:fxp-0">
-	<ndl:name>rtr.WASH.net.internet2.edu:fxp-0</ndl:name>
-	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
-</ndl:Interface>
-
-<ndl:Interface rdf:about="#rtr.WASH.net.internet2.edu:ge-3/2/0.507">
-	<ndl:name>rtr.WASH.net.internet2.edu:ge-3/2/0.507</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/2/0.506">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/2/0.506</ndl:name>
 	<ndl:connectedTo rdf:resource="#PSC to Internet2 Content Peering"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#nms-rthr.WASH.net.internet2.edu">
-	<ndl:name>nms-rthr.WASH.net.internet2.edu</ndl:name>
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:so-2/2/0.0">
+	<ndl:name>rtr.wash.net.internet2.edu:so-2/2/0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#NSF DRAGON"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/2/0.921">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/2/0.921</ndl:name>
+	<ndl:connectedTo rdf:resource="#OARNET [CPS]"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.669">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.669</ndl:name>
+	<ndl:connectedTo rdf:resource="#Wright-Patterson AFB/Wright State Univ ctr in Dayton via DREN"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.297">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.297</ndl:name>
+	<ndl:connectedTo rdf:resource="#NISN (via UMD NGIX) | AS:297"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.668">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.668</ndl:name>
+	<ndl:connectedTo rdf:resource="#DREN - Washington DC | AS:668"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.183">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.183</ndl:name>
+	<ndl:connectedTo rdf:resource="#MAX backup peering via NGIX-East"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.166">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.166</ndl:name>
+	<ndl:connectedTo rdf:resource="#NREN via UMD NGIX | AS24"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.88">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.88</ndl:name>
+	<ndl:connectedTo rdf:resource="#CLARA via NGIX and AWave-FIU"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.202">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.202</ndl:name>
+	<ndl:connectedTo rdf:resource="#GEANT (Frankfurt OC-192)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.987">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.987</ndl:name>
+	<ndl:connectedTo rdf:resource="#DREN v6-only, AS668"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-0/1/0.1842">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-0/1/0.1842</ndl:name>
+	<ndl:connectedTo rdf:resource="#US Geological Survey ( via UMD NGIX)) | AS:1842"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:sonet-options.110">
+	<ndl:name>rtr.wash.net.internet2.edu:sonet-options.110</ndl:name>
+	<ndl:connectedTo rdf:resource="#Mid-Atlantic Crossroads (MAX)"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-1/0/0">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-1/0/0</ndl:name>
+	<ndl:connectedTo rdf:resource="#10GigE reserved for MAX"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:lo-0.1">
+	<ndl:name>rtr.wash.net.internet2.edu:lo-0.1</ndl:name>
+	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:lo-0.0">
+	<ndl:name>rtr.wash.net.internet2.edu:lo-0.0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:fxp-0">
+	<ndl:name>rtr.wash.net.internet2.edu:fxp-0</ndl:name>
+	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#rtr.wash.net.internet2.edu:ge-3/2/0.507">
+	<ndl:name>rtr.wash.net.internet2.edu:ge-3/2/0.507</ndl:name>
+	<ndl:connectedTo rdf:resource="#PSC to Internet2 Content Peering"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#nms-rthr.wash.net.internet2.edu">
+	<ndl:name>nms-rthr.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr2.WASH.net.internet2.edu">
-	<ndl:name>nms-rthr2.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr2.wash.net.internet2.edu">
+	<ndl:name>nms-rthr2.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpsv.WASH.net.internet2.edu">
-	<ndl:name>nms-rpsv.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpsv.wash.net.internet2.edu">
+	<ndl:name>nms-rpsv.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rlat.WASH.net.internet2.edu">
-	<ndl:name>nms-rlat.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rlat.wash.net.internet2.edu">
+	<ndl:name>nms-rlat.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rexp.WASH.net.internet2.edu">
-	<ndl:name>nms-rexp.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rexp.wash.net.internet2.edu">
+	<ndl:name>nms-rexp.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.WASH.net.internet2.edu">
-	<ndl:name>nms-octr.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.wash.net.internet2.edu">
+	<ndl:name>nms-octr.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#pl2.WASH.net.internet2.edu">
-	<ndl:name>pl2.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#pl2.wash.net.internet2.edu">
+	<ndl:name>pl2.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.WASH.net.internet2.edu">
-	<ndl:name>lan.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.wash.net.internet2.edu">
+	<ndl:name>lan.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp.WASH.net.internet2.edu">
-	<ndl:name>rtrdcp.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.wash.net.internet2.edu">
+	<ndl:name>rtrdcp.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp2.WASH.net.internet2.edu">
-	<ndl:name>rtrdcp2.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp2.wash.net.internet2.edu">
+	<ndl:name>rtrdcp2.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.WASH.net.internet2.edu">
-	<ndl:name>mss.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.wash.net.internet2.edu">
+	<ndl:name>mss.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#obsacp.WASH.net.internet2.edu">
-	<ndl:name>obsacp.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp.wash.net.internet2.edu">
+	<ndl:name>obsacp.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.WASH.net.internet2.edu">
-	<ndl:name>oob.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.wash.net.internet2.edu">
+	<ndl:name>oob.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtrdcp3.WASH.net.internet2.edu">
-	<ndl:name>rtrdcp3.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp3.wash.net.internet2.edu">
+	<ndl:name>rtrdcp3.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp2.WASH.net.internet2.edu">
-	<ndl:name>rtracp2.WASH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp2.wash.net.internet2.edu">
+	<ndl:name>rtracp2.wash.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Washington DC--router"/>
 </ndl:Device>
 
@@ -2502,30 +2530,30 @@
         <geo:long>-75.162095</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#obsacp.PHIL.net.internet2.edu">
-	<ndl:name>obsacp.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#obsacp.phil.net.internet2.edu">
+	<ndl:name>obsacp.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.PHIL.net.internet2.edu">
-	<ndl:name>mss.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.phil.net.internet2.edu">
+	<ndl:name>mss.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.PHIL.net.internet2.edu">
-	<ndl:name>oob.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.phil.net.internet2.edu">
+	<ndl:name>oob.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
-	<ndl:hasInterface rdf:resource="#oob.PHIL.net.internet2.edu:Loopback1"/>
-	<ndl:hasInterface rdf:resource="#oob.PHIL.net.internet2.edu:Async1"/>
+	<ndl:hasInterface rdf:resource="#oob.phil.net.internet2.edu:Loopback1"/>
+	<ndl:hasInterface rdf:resource="#oob.phil.net.internet2.edu:Async1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.PHIL.net.internet2.edu:Loopback1">
-	<ndl:name>oob.PHIL.net.internet2.edu:Loopback1</ndl:name>
+<ndl:Interface rdf:about="#oob.phil.net.internet2.edu:Loopback1">
+	<ndl:name>oob.phil.net.internet2.edu:Loopback1</ndl:name>
 	<ndl:connectedTo rdf:resource="#OOB Dialer"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#oob.PHIL.net.internet2.edu:Async1">
-	<ndl:name>oob.PHIL.net.internet2.edu:Async1</ndl:name>
+<ndl:Interface rdf:about="#oob.phil.net.internet2.edu:Async1">
+	<ndl:name>oob.phil.net.internet2.edu:Async1</ndl:name>
 	<ndl:connectedTo rdf:resource="#PHIL-OOB"/>
 </ndl:Interface>
 
@@ -2534,30 +2562,30 @@
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.PHIL.net.internet2.edu">
-	<ndl:name>nms-octr.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.phil.net.internet2.edu">
+	<ndl:name>nms-octr.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.PHIL.net.internet2.edu">
-	<ndl:name>lan.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.phil.net.internet2.edu">
+	<ndl:name>lan.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
-	<ndl:hasInterface rdf:resource="#lan.PHIL.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#lan.PHIL.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.phil.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#lan.phil.net.internet2.edu:vlan 1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.PHIL.net.internet2.edu:vlan 10">
-	<ndl:name>lan.PHIL.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#lan.phil.net.internet2.edu:vlan 10">
+	<ndl:name>lan.phil.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#PHIL Racklan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.PHIL.net.internet2.edu:vlan 1">
-	<ndl:name>lan.PHIL.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.phil.net.internet2.edu:vlan 1">
+	<ndl:name>lan.phil.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#rtracp.PHIL.net.internet2.edu">
-	<ndl:name>rtracp.PHIL.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.phil.net.internet2.edu">
+	<ndl:name>rtracp.phil.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Philadelphia--grooming"/>
 </ndl:Device>
 
@@ -2582,16 +2610,49 @@
 	<ndl:locatedAt rdf:resource="#New York City - Level3"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.NEWY1118TH.net.internet2.edu">
-	<ndl:name>oob.NEWY1118TH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.newy1118th.net.internet2.edu">
+	<ndl:name>oob.newy1118th.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Level3"/>
-	<ndl:hasInterface rdf:resource="#oob.NEWY1118TH.net.internet2.edu:Loopback0"/>
+	<ndl:hasInterface rdf:resource="#oob.newy1118th.net.internet2.edu:Loopback0"/>
+	<ndl:hasInterface rdf:resource="#oob.newy1118th.net.internet2.edu:Tunnel1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.NEWY1118TH.net.internet2.edu:Loopback0">
-	<ndl:name>oob.NEWY1118TH.net.internet2.edu:Loopback0</ndl:name>
+<ndl:Interface rdf:about="#oob.newy1118th.net.internet2.edu:Loopback0">
+	<ndl:name>oob.newy1118th.net.internet2.edu:Loopback0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Internal private loopback for reverse telnet"/>
 </ndl:Interface>
+
+<ndl:Interface rdf:about="#oob.newy1118th.net.internet2.edu:Tunnel1">
+	<ndl:name>oob.newy1118th.net.internet2.edu:Tunnel1</ndl:name>
+	<ndl:connectedTo rdf:resource="#Tunnel back to Internet2 MOSS router at INDI POP"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#lan.newy1118th.net.internet2.edu">
+	<ndl:name>lan.newy1118th.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#New York City - Level3"/>
+	<ndl:hasInterface rdf:resource="#lan.newy1118th.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.newy1118th.net.internet2.edu:A1"/>
+</ndl:Device>
+
+<ndl:Interface rdf:about="#lan.newy1118th.net.internet2.edu:vlan 1">
+	<ndl:name>lan.newy1118th.net.internet2.edu:vlan 1</ndl:name>
+	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy1118th.net.internet2.edu:A1">
+	<ndl:name>lan.newy1118th.net.internet2.edu:A1</ndl:name>
+	<ndl:connectedTo rdf:resource="#I2 CPS to NEWY T640"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#obsacp.newy1118th.net.internet2.edu">
+	<ndl:name>obsacp.newy1118th.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#New York City - Level3"/>
+</ndl:Device>
+
+<ndl:Device rdf:about="#rtrdcp.newy1118th.net.internet2.edu">
+	<ndl:name>rtrdcp.newy1118th.net.internet2.edu</ndl:name>
+	<ndl:locatedAt rdf:resource="#New York City - Level3"/>
+</ndl:Device>
 
 <ndl:Location rdf:about="#Boston--grooming">
         <ndl:name>Boston--grooming</ndl:name>
@@ -2599,82 +2660,82 @@
         <geo:long>-71.054964</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#rtrdcp.BOST.net.internet2.edu">
-	<ndl:name>rtrdcp.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtrdcp.bost.net.internet2.edu">
+	<ndl:name>rtrdcp.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp.BOST.net.internet2.edu">
-	<ndl:name>fdp.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp.bost.net.internet2.edu">
+	<ndl:name>fdp.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp2.BOST.net.internet2.edu">
-	<ndl:name>fdp2.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp2.bost.net.internet2.edu">
+	<ndl:name>fdp2.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp3.BOST.net.internet2.edu">
-	<ndl:name>fdp3.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp3.bost.net.internet2.edu">
+	<ndl:name>fdp3.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#fdp4.BOST.net.internet2.edu">
-	<ndl:name>fdp4.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#fdp4.bost.net.internet2.edu">
+	<ndl:name>fdp4.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mfp.BOST.net.internet2.edu">
-	<ndl:name>mfp.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mfp.bost.net.internet2.edu">
+	<ndl:name>mfp.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.BOST.net.internet2.edu">
-	<ndl:name>oob.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.bost.net.internet2.edu">
+	<ndl:name>oob.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
-	<ndl:hasInterface rdf:resource="#oob.BOST.net.internet2.edu:Loopback1"/>
+	<ndl:hasInterface rdf:resource="#oob.bost.net.internet2.edu:Loopback1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.BOST.net.internet2.edu:Loopback1">
-	<ndl:name>oob.BOST.net.internet2.edu:Loopback1</ndl:name>
+<ndl:Interface rdf:about="#oob.bost.net.internet2.edu:Loopback1">
+	<ndl:name>oob.bost.net.internet2.edu:Loopback1</ndl:name>
 	<ndl:connectedTo rdf:resource="#OOB Dialer"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#nms-octr.BOST.net.internet2.edu">
-	<ndl:name>nms-octr.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.bost.net.internet2.edu">
+	<ndl:name>nms-octr.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtracp.BOST.net.internet2.edu">
-	<ndl:name>rtracp.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.bost.net.internet2.edu">
+	<ndl:name>rtracp.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#mss.BOST.net.internet2.edu">
-	<ndl:name>mss.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#mss.bost.net.internet2.edu">
+	<ndl:name>mss.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.BOST.net.internet2.edu">
-	<ndl:name>lan.BOST.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.bost.net.internet2.edu">
+	<ndl:name>lan.bost.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Boston--grooming"/>
-	<ndl:hasInterface rdf:resource="#lan.BOST.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#lan.BOST.net.internet2.edu:vlan 11"/>
-	<ndl:hasInterface rdf:resource="#lan.BOST.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.bost.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#lan.bost.net.internet2.edu:vlan 11"/>
+	<ndl:hasInterface rdf:resource="#lan.bost.net.internet2.edu:vlan 1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.BOST.net.internet2.edu:vlan 10">
-	<ndl:name>lan.BOST.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#lan.bost.net.internet2.edu:vlan 10">
+	<ndl:name>lan.bost.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#BOST Racklan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.BOST.net.internet2.edu:vlan 11">
-	<ndl:name>lan.BOST.net.internet2.edu:vlan 11</ndl:name>
+<ndl:Interface rdf:about="#lan.bost.net.internet2.edu:vlan 11">
+	<ndl:name>lan.bost.net.internet2.edu:vlan 11</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.BOST.net.internet2.edu:vlan 1">
-	<ndl:name>lan.BOST.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.bost.net.internet2.edu:vlan 1">
+	<ndl:name>lan.bost.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
@@ -2684,60 +2745,60 @@
         <geo:long>-87.620508</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#sw.EQCH.net.internet2.edu">
-	<ndl:name>sw.EQCH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#sw.eqch.net.internet2.edu">
+	<ndl:name>sw.eqch.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Equinix"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:vlan 12"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:vlan 11"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:vlan 1"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:A3"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:A1"/>
-	<ndl:hasInterface rdf:resource="#sw.EQCH.net.internet2.edu:B1"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:vlan 12"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:vlan 11"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:A3"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:A1"/>
+	<ndl:hasInterface rdf:resource="#sw.eqch.net.internet2.edu:B1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:vlan 12">
-	<ndl:name>sw.EQCH.net.internet2.edu:vlan 12</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:vlan 12">
+	<ndl:name>sw.eqch.net.internet2.edu:vlan 12</ndl:name>
 	<ndl:connectedTo rdf:resource="#GLBX Private IX"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:vlan 10">
-	<ndl:name>sw.EQCH.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:vlan 10">
+	<ndl:name>sw.eqch.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#Management Subnet"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:vlan 11">
-	<ndl:name>sw.EQCH.net.internet2.edu:vlan 11</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:vlan 11">
+	<ndl:name>sw.eqch.net.internet2.edu:vlan 11</ndl:name>
 	<ndl:connectedTo rdf:resource="#Equinix Peering Fabric"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:vlan 1">
-	<ndl:name>sw.EQCH.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:vlan 1">
+	<ndl:name>sw.eqch.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:A3">
-	<ndl:name>sw.EQCH.net.internet2.edu:A3</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:A3">
+	<ndl:name>sw.eqch.net.internet2.edu:A3</ndl:name>
 	<ndl:connectedTo rdf:resource="#Equinix Public Switch"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:A1">
-	<ndl:name>sw.EQCH.net.internet2.edu:A1</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:A1">
+	<ndl:name>sw.eqch.net.internet2.edu:A1</ndl:name>
 	<ndl:connectedTo rdf:resource="#Uplink to Chicago T640"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#sw.EQCH.net.internet2.edu:B1">
-	<ndl:name>sw.EQCH.net.internet2.edu:B1</ndl:name>
+<ndl:Interface rdf:about="#sw.eqch.net.internet2.edu:B1">
+	<ndl:name>sw.eqch.net.internet2.edu:B1</ndl:name>
 	<ndl:connectedTo rdf:resource="#GBLX Private IX"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#rtracp.EQCH.net.internet2.edu">
-	<ndl:name>rtracp.EQCH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtracp.eqch.net.internet2.edu">
+	<ndl:name>rtracp.eqch.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Equinix"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.EQCH.net.internet2.edu">
-	<ndl:name>oob.EQCH.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.eqch.net.internet2.edu">
+	<ndl:name>oob.eqch.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - Equinix"/>
 </ndl:Device>
 
@@ -2747,19 +2808,19 @@
         <geo:long>-87.616073</geo:long>
 </ndl:Location>
 
-<ndl:Device rdf:about="#lan.STAR.net.internet2.edu">
-	<ndl:name>lan.STAR.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.star.net.internet2.edu">
+	<ndl:name>lan.star.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - StarLight"/>
-	<ndl:hasInterface rdf:resource="#lan.STAR.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.star.net.internet2.edu:vlan 1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.STAR.net.internet2.edu:vlan 1">
-	<ndl:name>lan.STAR.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.star.net.internet2.edu:vlan 1">
+	<ndl:name>lan.star.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#oob.STAR.net.internet2.edu">
-	<ndl:name>oob.STAR.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.star.net.internet2.edu">
+	<ndl:name>oob.star.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#Chicago - StarLight"/>
 </ndl:Device>
 
@@ -2779,224 +2840,224 @@
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#rtr.NEWY32AOA.net.internet2.edu">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#rtr.newy32aoa.net.internet2.edu">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.10"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-0/1/0:0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-0/0/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-0/2/0.111"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.11"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/3/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.114"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.102"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.119"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.117"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.115"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.16"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ip-1/3/0.6119"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0.119"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0.441"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-1/1/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0.119"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ip-0/3/0.6119"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/2.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/1.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.20"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.21"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/0.12"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-1/3/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:sonet-options.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-3/1/0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:ge-1/2/0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:lo-0.1"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:lo-0.0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:fxp-0"/>
-	<ndl:hasInterface rdf:resource="#rtr.NEWY32AOA.net.internet2.edu:so-0/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:gr-1/3/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.10"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-0/1/0:0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-0/0/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-0/2/0.111"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.11"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/3/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/2/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.114"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.102"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.119"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.117"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.115"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.16"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ip-1/3/0.6119"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:gr-1/3/0.119"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/2/0.441"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-1/1/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:gr-0/3/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:gr-0/3/0.119"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ip-0/3/0.6119"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-2/0/2.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-2/0/1.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.20"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.21"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-2/0/0.12"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-1/3/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:sonet-options.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-3/1/0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:ge-1/2/0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:lo-0.1"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:lo-0.0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:fxp-0"/>
+	<ndl:hasInterface rdf:resource="#rtr.newy32aoa.net.internet2.edu:so-0/1/0"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#HP 5406 Racklan Switch"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:gr-1/3/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:gr-1/3/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENETv6 Tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.10">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.10</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.10">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/1/0.10</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWY Racklan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-0/1/0:0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-0/1/0:0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-0/1/0:0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-0/1/0:0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Surfnet OC48 via Global Crossing | AS1103"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-0/0/0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-0/0/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-0/0/0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-0/0/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE NEWY-WASH OC192 | I2-NEWY-WASH-I2-00001"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-0/2/0.111">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-0/2/0.111</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-0/2/0.111">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-0/2/0.111</ndl:name>
 	<ndl:connectedTo rdf:resource="#NOX - CPS"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.11">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.11</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.11">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/1/0.11</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWY Observatory vlan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/3/0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/3/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/3/0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/3/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Discard Interface"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/2/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/2/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#HOPI 10GigE"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.114">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.114</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.114">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.114</ndl:name>
 	<ndl:connectedTo rdf:resource="#MCIT/ENERGI (Egypt)"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.102">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.102</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.102">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.102</ndl:name>
 	<ndl:connectedTo rdf:resource="#GEANT | AS:20965"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.119">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.119</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.119">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.119</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENET | AS:2018"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.117">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.117</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.117">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.117</ndl:name>
 	<ndl:connectedTo rdf:resource="#TWAREN| AS:7539"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.115">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.115</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.115">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.115</ndl:name>
 	<ndl:connectedTo rdf:resource="#LHCnet (CERN)"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.1">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.1</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.1">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.1</ndl:name>
 	<ndl:connectedTo rdf:resource="#MANLAN Rack Lan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.16">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/0/0.16</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/0/0.16">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/0/0.16</ndl:name>
 	<ndl:connectedTo rdf:resource="#DRAC Project"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ip-1/3/0.6119">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ip-1/3/0.6119</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ip-1/3/0.6119">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ip-1/3/0.6119</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENETv6 Tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0.119">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:gr-1/3/0.119</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:gr-1/3/0.119">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:gr-1/3/0.119</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENET v4 tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0.441">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/2/0.441</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/2/0.441">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/2/0.441</ndl:name>
 	<ndl:connectedTo rdf:resource="#HOPI PC1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-1/1/0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-1/1/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-1/1/0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-1/1/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: NEWY-WASHng OC192 | OC192-6462049"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:gr-0/3/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:gr-0/3/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENETv6 Tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0.119">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:gr-0/3/0.119</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:gr-0/3/0.119">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:gr-0/3/0.119</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENET v4 tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ip-0/3/0.6119">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ip-0/3/0.6119</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ip-0/3/0.6119">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ip-0/3/0.6119</ndl:name>
 	<ndl:connectedTo rdf:resource="#TENETv6 Tunnel"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/2.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-2/0/2.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-2/0/2.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-2/0/2.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/1.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-2/0/1.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-2/0/1.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-2/0/1.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1 p2p connection"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.20">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.20</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.20">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/1/0.20</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWT VINI Mgmt"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.21">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-4/1/0.21</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-4/1/0.21">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-4/1/0.21</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWT VINI Data"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-2/0/0.12">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-2/0/0.12</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-2/0/0.12">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-2/0/0.12</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWY Observatory 1G vlan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-1/3/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-1/3/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-1/3/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-1/3/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE: NEWY-CHIC OC192 | I2-CHIC-NEWY-I2-00023"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:sonet-options.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:sonet-options.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:sonet-options.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:sonet-options.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Surfnet OC48 via Global Crossing | AS1103"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-3/1/0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-3/1/0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-3/1/0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-3/1/0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#BACKBONE - OC-192 to CHINng"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:ge-1/2/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:ge-1/2/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:ge-1/2/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:ge-1/2/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Reserved for Internet2 CPS"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:lo-0.1">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:lo-0.1</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:lo-0.1">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:lo-0.1</ndl:name>
 	<ndl:connectedTo rdf:resource="#Loopback for CPS VRF"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:lo-0.0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:lo-0.0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:lo-0.0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:lo-0.0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Internal Peering Point"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:fxp-0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:fxp-0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:fxp-0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:fxp-0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Management Ethernet - Unused"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#rtr.NEWY32AOA.net.internet2.edu:so-0/1/0">
-	<ndl:name>rtr.NEWY32AOA.net.internet2.edu:so-0/1/0</ndl:name>
+<ndl:Interface rdf:about="#rtr.newy32aoa.net.internet2.edu:so-0/1/0">
+	<ndl:name>rtr.newy32aoa.net.internet2.edu:so-0/1/0</ndl:name>
 	<ndl:connectedTo rdf:resource="#Manlan HDXc"/>
 </ndl:Interface>
 
@@ -3015,214 +3076,250 @@
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rthr.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rthr.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rthr.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rthr.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#lan.NEWY32AOA.net.internet2.edu">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#lan.newy32aoa.net.internet2.edu">
+	<ndl:name>lan.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 50"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 12"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 10"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 20"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 11"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 21"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:vlan 1"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A3"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A1"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A8"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A6"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A19"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A17"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:A2"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C6"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C16"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C5"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C12"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C7"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C4"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C11"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C13"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:C15"/>
-	<ndl:hasInterface rdf:resource="#lan.NEWY32AOA.net.internet2.edu:B3"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 50"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 12"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 10"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 20"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 11"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 21"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:vlan 1"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A3"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A1"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A8"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A6"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A19"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A17"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A2"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C6"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C16"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C5"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C12"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C7"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C4"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C11"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C13"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C15"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:B3"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:F2"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A24"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:A23"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C1"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C3"/>
+	<ndl:hasInterface rdf:resource="#lan.newy32aoa.net.internet2.edu:C2"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 50">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 50</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 50">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 50</ndl:name>
 	<ndl:connectedTo rdf:resource="#Alcatel/Ciena Interop"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 12">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 12</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 12">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 12</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory 1Gig uplink"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 10">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 10</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 10">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 10</ndl:name>
 	<ndl:connectedTo rdf:resource="#Mgmt Racklan"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 20">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 20</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 20">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 20</ndl:name>
 	<ndl:connectedTo rdf:resource="#VINI mgmt"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 11">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 11</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 11">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 11</ndl:name>
 	<ndl:connectedTo rdf:resource="#Observatory"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 21">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 21</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 21">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 21</ndl:name>
 	<ndl:connectedTo rdf:resource="#VINI data"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:vlan 1">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:vlan 1</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:vlan 1">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:vlan 1</ndl:name>
 	<ndl:connectedTo rdf:resource="#DEFAULT_VLAN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A3">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A3</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A3">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpsv-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A1">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A1</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A1">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A1</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A8">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A8</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A8">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A8</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-oexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A6">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A6</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A6">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A6</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-octr-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A19">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A19</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A19">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A19</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena C-CM module MAIN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A17">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A17</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A17">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A17</ndl:name>
 	<ndl:connectedTo rdf:resource="#Ciena A-CM module MAIN"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:A2">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:A2</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A2">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A2</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C6">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C6</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C6">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C6</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C16">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C16</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C16">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C16</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpho-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C5">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C5</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C5">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C5</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C12">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C12</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C12">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C12</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rexp-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C7">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C7</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C7">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C7</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpsv-eth0"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C4">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C4</ndl:name>
-	<ndl:connectedTo rdf:resource="#nms-rlat-eth1"/>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C4">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C4</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena CM2 Aux"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C11">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C11</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C11">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C11</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C13">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C13</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C13">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C13</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr1-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:C15">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:C15</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C15">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C15</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rpsv-eth1"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#lan.NEWY32AOA.net.internet2.edu:B3">
-	<ndl:name>lan.NEWY32AOA.net.internet2.edu:B3</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:B3">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:B3</ndl:name>
 	<ndl:connectedTo rdf:resource="#nms-rthr2-eth3"/>
 </ndl:Interface>
 
-<ndl:Device rdf:about="#nms-rthr2.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rthr2.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:F2">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:F2</ndl:name>
+	<ndl:connectedTo rdf:resource="#rtr.newy32aoa.net.internet2.edu ge-4/1/0.10"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A24">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A24</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena 1-A-3-1-2 [GE]"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:A23">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:A23</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena 1-A-3-1-1 [GE]"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C1">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C1</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena CM1 Main"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C3">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C3</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena CM1 Aux"/>
+</ndl:Interface>
+
+<ndl:Interface rdf:about="#lan.newy32aoa.net.internet2.edu:C2">
+	<ndl:name>lan.newy32aoa.net.internet2.edu:C2</ndl:name>
+	<ndl:connectedTo rdf:resource="#Ciena CM2 Main"/>
+</ndl:Interface>
+
+<ndl:Device rdf:about="#nms-rthr2.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rthr2.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rexp.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rexp.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rexp.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rexp.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpsv.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rpsv.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpsv.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rpsv.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rlat.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rlat.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rlat.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rlat.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-rpho.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-rpho.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-rpho.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-rpho.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-oexp.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-oexp.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-oexp.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-oexp.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-octr.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-octr.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-octr.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-octr.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#nms-othr.NEWY32AOA.net.internet2.edu">
-	<ndl:name>nms-othr.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#nms-othr.newy32aoa.net.internet2.edu">
+	<ndl:name>nms-othr.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
 </ndl:Device>
 
-<ndl:Device rdf:about="#oob.NEWY32AOA.net.internet2.edu">
-	<ndl:name>oob.NEWY32AOA.net.internet2.edu</ndl:name>
+<ndl:Device rdf:about="#oob.newy32aoa.net.internet2.edu">
+	<ndl:name>oob.newy32aoa.net.internet2.edu</ndl:name>
 	<ndl:locatedAt rdf:resource="#New York City - Nysernet [Router]"/>
-	<ndl:hasInterface rdf:resource="#oob.NEWY32AOA.net.internet2.edu:Loopback1"/>
-	<ndl:hasInterface rdf:resource="#oob.NEWY32AOA.net.internet2.edu:Async1"/>
+	<ndl:hasInterface rdf:resource="#oob.newy32aoa.net.internet2.edu:Loopback1"/>
+	<ndl:hasInterface rdf:resource="#oob.newy32aoa.net.internet2.edu:Async1"/>
 </ndl:Device>
 
-<ndl:Interface rdf:about="#oob.NEWY32AOA.net.internet2.edu:Loopback1">
-	<ndl:name>oob.NEWY32AOA.net.internet2.edu:Loopback1</ndl:name>
+<ndl:Interface rdf:about="#oob.newy32aoa.net.internet2.edu:Loopback1">
+	<ndl:name>oob.newy32aoa.net.internet2.edu:Loopback1</ndl:name>
 	<ndl:connectedTo rdf:resource="#OOB Dialer"/>
 </ndl:Interface>
 
-<ndl:Interface rdf:about="#oob.NEWY32AOA.net.internet2.edu:Async1">
-	<ndl:name>oob.NEWY32AOA.net.internet2.edu:Async1</ndl:name>
+<ndl:Interface rdf:about="#oob.newy32aoa.net.internet2.edu:Async1">
+	<ndl:name>oob.newy32aoa.net.internet2.edu:Async1</ndl:name>
 	<ndl:connectedTo rdf:resource="#NEWY32AOA-OOB (212) 966-4326"/>
 </ndl:Interface>
 
