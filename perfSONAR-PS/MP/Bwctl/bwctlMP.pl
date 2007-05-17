@@ -13,10 +13,10 @@ use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
-use skeletonMA;
-use skeletonMP;
+use perfSONAR_PS::MA::Bwctl; 
+use perfSONAR_PS::MP::Bwctl;
 
-my $fileName = "skeletonMP.pl";
+my $fileName = "bwctl.pl";
 my $functionName = "main";
 my $DEBUG = '';
 my $HELP = '';
