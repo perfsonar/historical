@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+            xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
 
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <!-- 
-    
-    <subject />
-    <eventType />
-    <parameters />
-    
-    Information about where the measurement takes place, who it is between, etc.
-    
-    -->
+    <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="cpr-bunger.rnoc.gatech.edu" />
+        <nmwgt:dst type="hostname" value="cpr-boggs.rnoc.gatech.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwg:parameter name="count">1</nmwg:parameter>
+    </ping:parameters>
   </nmwg:metadata>
 
   <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <nmwg:key id="1">
       <nmwg:parameters id="2">
-        <!-- 
-	
-	<parameter />
-	
-	Specifics for the backend data storage
-	
-	-->
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">$PSPSREPO/MP/Bwctl/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
-    </nmwg:key>  
+    </nmwg:key>
   </nmwg:data>
-  
+
 </nmwg:store>
+

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package skeletonMP;
+package perfSONAR_PS::MP::Bwctl;
 use Carp qw( croak );
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
@@ -15,14 +15,14 @@ use Data::Dumper;
 @EXPORT = ();
 our $VERSION = '0.02';
 
-# ================ Internal Package skeletonMP::Agent ================
+# ================ Internal Package BwctlMP::Agent ================
 
-package skeletonMP::Agent;
+package perfSONAR_PS::MP::Bwctl::Agent;
 use perfSONAR_PS::Common;
 sub new {
   my ($package, $log) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "skeletonMP::Agent";
+  $hash{"FILENAME"} = "perfSONAR_PS::MP::Bwctl::Agent";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $log and $log ne "") {
     $hash{"LOGFILE"} = $log;
@@ -37,7 +37,7 @@ sub new {
 
 sub setLog {
   my ($self, $log) = @_;  
-  $self->{FILENAME} = "skeletonMP::Agent";
+  $self->{FILENAME} = "perfSONAR_PS::MP::Bwctl::Agent";
   $self->{FUNCTION} = "\"setLog\"";  
   if(defined $log and $log ne "") {
     $self->{LOGFILE} = $log;
@@ -73,14 +73,14 @@ sub error {
 }
 
 
-# ================ Main Package skeletonMP ================
+# ================ Main Package BwctlMP ================
 
 
-package skeletonMP;
+package perfSONAR_PS::MP::Bwctl;
 sub new {
   my ($package, $conf, $ns, $metadata, $data) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "skeletonMP";
+  $hash{"FILENAME"} = "perfSONAR_PS::MP::Bwctl";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $conf and $conf ne "") {
     $hash{"CONF"} = \%{$conf};
@@ -112,7 +112,7 @@ sub new {
 
 sub setConf {
   my ($self, $conf) = @_;  
-  $self->{FILENAME} = "skeletonMP";  
+  $self->{FILENAME} = "perfSONAR_PS::MP::Bwctl";  
   $self->{FUNCTION} = "\"setHost\"";  
   if(defined $conf and $conf ne "") {
     $self->{CONF} = \%{$conf};
@@ -126,7 +126,7 @@ sub setConf {
 
 sub setNamespaces {
   my ($self, $ns) = @_;  
-  $self->{FILENAME} = "skeletonMP";  
+  $self->{FILENAME} = "perfSONAR_PS::MP::Bwctl";  
   $self->{FUNCTION} = "\"setNamespaces\""; 
   if(defined $namespaces and $namespaces ne "") {   
     $self->{NAMESPACES} = \%{$ns};
@@ -140,7 +140,7 @@ sub setNamespaces {
 
 sub setMetadata {
   my ($self, $metadata) = @_;  
-  $self->{FILENAME} = "skeletonMP";    
+  $self->{FILENAME} = "perfSONAR_PS::MP::Bwctl";    
   $self->{FUNCTION} = "\"setMetadata\"";  
   if(defined $metadata and $metadata ne "") {
     $self->{METADATA} = \%{$metadata};
@@ -154,7 +154,7 @@ sub setMetadata {
 
 sub setData {
   my ($self, $data) = @_;  
-  $self->{FILENAME} = "skeletonMP";    
+  $self->{FILENAME} = "perfSONAR_PS::MP::Bwctl";    
   $self->{FUNCTION} = "\"setData\"";  
   if(defined $data and $data ne "") {
     $self->{DATA} = \%{$data};
@@ -184,7 +184,7 @@ __END__
 
 =head1 NAME
 
-skeletonMP - A module starting point for MP functions...
+BwctlMP - A module starting point for MP functions...
 
 =head1 DESCRIPTION
 
@@ -192,7 +192,7 @@ skeletonMP - A module starting point for MP functions...
 
 =head1 SYNOPSIS
 
-    use skeletonMP;
+    use perfSONAR_PS::MP::Bwctl;
 
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";

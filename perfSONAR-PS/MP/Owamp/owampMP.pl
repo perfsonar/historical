@@ -12,8 +12,8 @@ use Data::Dumper;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::MA::General;
-use perfSONAR_PS::MA::Owamp; #use skeletonMA;
-use perfSONAR_PS::MP::Owamp; #use skeletonMP;
+use perfSONAR_PS::MA::Owamp;
+use perfSONAR_PS::MP::Owamp;
 
 my $DEBUG = 0;
 if($#ARGV == 0) {
@@ -31,7 +31,6 @@ my %ns = (
 
 		# Read in configuration information
 my %conf = ();
-#readConfiguration("./skeletonMP.conf", \%conf);
 readConfiguration("./owampMP.conf", \%conf);
 
 if(!$DEBUG) {

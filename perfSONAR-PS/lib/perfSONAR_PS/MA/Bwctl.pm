@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package skeletonMA;
+package perfSONAR_PS::MA::Bwctl;
 use Carp qw( croak );
 use XML::XPath;
 use perfSONAR_PS::Common;
@@ -19,7 +19,7 @@ our $VERSION = '0.02';
 sub new {
   my ($package, $conf, $ns, $metadata, $data) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "skeletonMA";
+  $hash{"FILENAME"} = "perfSONAR_PS::MA::Bwctl";
   $hash{"FUNCTION"} = "\"new\"";
   if(defined $conf and $conf ne "") {
     $hash{"CONF"} = \%{$conf};
@@ -115,7 +115,7 @@ sub error {
 __END__
 =head1 NAME
 
-skeletonMA - A module starting point for MA functions...
+BwctlMA - A module starting point for MA functions...
 
 =head1 DESCRIPTION
 
@@ -123,7 +123,7 @@ skeletonMA - A module starting point for MA functions...
 
 =head1 SYNOPSIS
 
-    use skeletonMA;
+    use perfSONAR_PS::MA::Bwctl;
 
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";

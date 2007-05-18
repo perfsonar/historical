@@ -37,7 +37,7 @@ my %ns = (
 
 		# Read in configuration information
 my %conf = ();
-readConfiguration("./skeletonMP.conf", \%conf);
+readConfiguration("./bwctlMP.conf", \%conf);
 $conf{"DEBUG"} = $DEBUG;
 
 if(!$DEBUG) {
@@ -207,7 +207,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id: skeletonMP.pl 132 2007-03-14 21:35:51Z zurawski $
+$Id: bwctlMP.pl 132 2007-03-14 21:35:51Z zurawski $
 
 =head1 COPYRIGHT AND LICENSE
 
