@@ -93,8 +93,8 @@ sub prepareData {
   $self->{FUNCTION} = "\"prepareData\"";
   cleanData(\%{$self});
   foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {    
-    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
-    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
     if($type eq "rrd") {  
       if(!defined $self->{DATADB}->{$file}) { 
         $self->{DATADB}->{$file} = new perfSONAR_PS::DB::RRD(
@@ -107,7 +107,7 @@ sub prepareData {
         );
       }
       $self->{DATADB}->{$file}->setVariable(
-        extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
+        extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
       );
     }
     elsif($type eq "sqlite"){
@@ -147,11 +147,11 @@ sub prepareCollectors {
     if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
       my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");
       my $snmpPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/snmp/2.0/", "snmp");    
-      my $hostName = extract(\%{$self}, $m->find(".//".$topoPrefix.":hostName")->get_node(1));      
-      my $ifIndex = extract(\%{$self}, $m->find(".//".$topoPrefix.":ifIndex")->get_node(1));
-      my $snmpVersion = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPVersion\"]")->get_node(1));
-      my $snmpCommunity = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPCommunity\"]")->get_node(1));
-      my $OID = extract(\%{$self}, $m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"OID\"]")->get_node(1));    
+      my $hostName = extract($m->find(".//".$topoPrefix.":hostName")->get_node(1));      
+      my $ifIndex = extract($m->find(".//".$topoPrefix.":ifIndex")->get_node(1));
+      my $snmpVersion = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPVersion\"]")->get_node(1));
+      my $snmpCommunity = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPCommunity\"]")->get_node(1));
+      my $OID = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"OID\"]")->get_node(1));    
       if(!defined $self->{AGENT}->{$hostName}) {    	  
         print "DEBUG:\tPreparing collector for \"".$hostName."\", \"".$snmpVersion."\", \"".$snmpCommunity."\".\n" if($self->{CONF}->{"DEBUG"});
         $self->{AGENT}->{$hostName} = new perfSONAR_PS::MP::SNMP::Agent(
@@ -238,11 +238,11 @@ sub collectMeasurements {
 	  
 	  foreach $did (@{$self->{LOOKUP}->{$s."-".$r}}) {	    
 	    my $d = $self->{STORE}->find("//nmwg:data[\@id=\"".$did."\"]")->get_node(1);
-            my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
-	    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+            my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+	    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
     
             if($type eq "rrd") {
-              my $dataSource = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
+              my $dataSource = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
               print "DEBUG:\tinserting (RRD): " , $self->{REFTIME}->{$s},",", $dataSource, ",",
                 $results{$r},"\n" if($self->{CONF}->{"DEBUG"});
               
@@ -266,9 +266,9 @@ sub collectMeasurements {
               );  
               $self->{DATADB}->{$file}->openDB;
               $self->{DATADB}->{$file}->insert(
-                extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1)),
-	        \%dbSchemaValues
-	      );
+                extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1)),
+	              \%dbSchemaValues
+	            );
               $self->{DATADB}->{$file}->closeDB;
             }
             elsif($type eq "mysql") {
@@ -285,8 +285,8 @@ sub collectMeasurements {
 		
   my @result = ();
   foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-    my $type = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
-    my $file = extract(\%{$self}, $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
     if($type eq "rrd") {
       $self->{DATADB}->{$file}->openDB;
       @result = $self->{DATADB}->{$file}->insertCommit;

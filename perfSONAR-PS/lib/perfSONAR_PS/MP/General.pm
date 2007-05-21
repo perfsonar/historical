@@ -7,7 +7,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::MP::Base;
 
 @ISA = ('Exporter');
-@EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup', 'extract' );
+@EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup');
 
 
 sub cleanMetadata {
@@ -77,26 +77,6 @@ sub lookup {
   }
   else {
     perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);  
-  }
-  return "";
-}
-
-
-sub extract {
-  my($mp, $node) = @_;
-  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"extract\"";    
-  if((defined $mp and $mp ne "") and
-     (defined $node and $node ne "")) {
-    if($node->getAttribute("value")) {
-      return $node->getAttribute("value");
-    }
-    else {
-      return $node->textContent;
-    }  
-  }
-  else {
-    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
   }
   return "";
 }
@@ -173,17 +153,7 @@ and the methods can be invoked directly (and sparingly).
     cleanData(\%{$mp}); 
     
     my $prefix = lookup(\%{$mp}, "http://ggf.org/ns/nmwg/base/2.0/", "nmwg");
-    
-    # consider the elements that could be stored in '$node':
-    #
-    #  <nmwg:parameter name="something">value</nmwg:parameter>
-    #  <nmwg:parameter name="something" value="value" />
-    #  <nmwg:parameter name="something" value="value" />value2</nmwg:parameter>
-    #
-    # 'value' would be returned for each of them
-    #
-    my $value = extract(\%{$mp}, $node);
-    
+        
     removeReferences(\%{$mp}, $id_value);
     
     
@@ -212,10 +182,6 @@ passed 'MP' object.
 
 Lookup the prefix value for a given URI in the NS hash.  If not found, supply a 
 simple deafult.
-
-=head2 extract($mp, $node)
-Returns a 'value' from a xml element, either the 'value' attribute or the 
-text field.
 
 =head2 removeReferences($mp, $id, $did)
 

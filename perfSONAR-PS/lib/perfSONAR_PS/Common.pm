@@ -9,7 +9,8 @@ use Time::HiRes qw( gettimeofday );
 
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
-           'chainMetadata', 'countRefs', 'genuid', 'getHostname');
+           'chainMetadata', 'countRefs', 'genuid', 'getHostname',
+           'extract');
 
 sub readXML {
   my ($file)  = @_;
@@ -212,6 +213,23 @@ sub getHostname {
 }
 
 
+sub extract {
+  my($node) = @_;
+  if(defined $node and $node ne "") {
+    if($node->getAttribute("value")) {
+      return $node->getAttribute("value");
+    }
+    else {
+      return $node->textContent;
+    }  
+  }
+  else {
+    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"extract\" at line ".__LINE__.".");
+  }
+  return "";
+}
+
+
 1;
 
 
@@ -277,6 +295,16 @@ can be invoked directly (and sparingly).
     print "A random id would look like this:\t'" , genuid() , "'\n";
 
     print "The hostname of the system is:\t'" , getHostname() , "'\n";
+
+    # consider the elements that could be stored in '$node':
+    #
+    #  <nmwg:parameter name="something">value</nmwg:parameter>
+    #  <nmwg:parameter name="something" value="value" />
+    #  <nmwg:parameter name="something" value="value" />value2</nmwg:parameter>
+    #
+    # 'value' would be returned for each of them
+    #
+    my $value = extract($ma, $node);    
        
 =head1 DETAILS
 
@@ -401,6 +429,11 @@ Generates a random number.
 =head2 getHostname()
 
 Returns the output of the 'hostname' function.
+
+=head2 extract($ma, $node)
+
+Returns a 'value' from a xml element, either the 'value' attribute or the 
+text field.
 
 =head1 SEE ALSO
 

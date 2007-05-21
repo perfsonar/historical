@@ -6,84 +6,7 @@ use Exporter;
 use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
-@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'getMetadatXQuery', 'getTime', 'extract', 'reMap');
-
-sub getResultMessage {
-  my ($id, $messageIdRef, $type, $content) = @_;   
-  if(defined $content and $content ne "") {
-    my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-    if(defined $id and $id ne "") {
-      $m = $m . " id=\"".$id."\"";
-    }
-    if(defined $messageIdRef and $messageIdRef ne "") {
-      $m = $m . " messageIdRef=\"".$messageIdRef."\"";
-    }
-    if(defined $type and $type ne "") {
-      $m = $m . " type=\"".$type."\"";
-    }        
-    $m = $m . ">\n  ";
-    $m = $m . $content;
-    $m = $m . "</nmwg:message>\n";
-    return $m;
-  }
-  else {
-    carp("perfSONAR_PS::MA::General:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
-  }
-  return "";
-}
-
-
-sub getResultCodeMessage {
-  my ($id, $messageIdRef, $type, $event, $description) = @_;   
-  if((defined $event and $event ne "") and 
-     (defined $description and $description ne "")) {
-    my $metadataId = genuid();
-    my $dataId = genuid();
-    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $event).getResultCodeData($dataId, $metadataId, $description));
-  }
-  else {
-    carp("perfSONAR_PS::MA::General:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
-  }
-  return "";
-}
-
-
-sub getResultCodeMetadata {
-  my ($id, $event) = @_;  
-  if((defined $id and $id ne "") and 
-     (defined $event and $event ne "")) {
-    my $md = "  <nmwg:metadata id=\"".$id."\">\n";
-    $md = $md . "    <nmwg:eventType>";
-    $md = $md . $event;
-    $md = $md . "</nmwg:eventType>\n";
-    $md = $md . "  </nmwg:metadata>\n";
-    return $md;
-  }
-  else {
-    carp("perfSONAR_PS::MA::General:\tMissing argument(s) to \"getResultMetadata\" at line ".__LINE__.".");
-  }
-  return "";
-}
-
-
-sub getResultCodeData {
-  my ($id, $metadataIdRef, $description) = @_;  
-  if((defined $id and $id ne "") and 
-     (defined $metadataIdRef and $metadataIdRef ne "") and 
-     (defined $description and $description ne "")) {
-    my $d = "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$metadataIdRef."\">\n";
-    $d = $d . "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
-    $d = $d . $description;
-    $d = $d . "</nmwgr:datum>\n";  
-    $d = $d . "  </nmwg:data>\n";
-    return $d;
-  }
-  else {
-    carp("perfSONAR_PS::MA::General:\tMissing argument(s) to \"getResultData\" at line ".__LINE__.".");
-  }
-  return "";
-}
+@EXPORT = ('getMetadatXQuery', 'getTime', 'reMap');
 
 
 sub getMetadatXQuery {
@@ -125,33 +48,26 @@ sub getTime {
     }
     
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
-      $ma->{TIME}->{"START"} = extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+      $ma->{TIME}->{"START"} = extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
-      $ma->{TIME}->{"END"} = extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
+      $ma->{TIME}->{"END"} = extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
-      $ma->{TIME}->{"START"} = eval(extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
+      $ma->{TIME}->{"START"} = eval(extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
-      $ma->{TIME}->{"END"} = eval(extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
+      $ma->{TIME}->{"END"} = eval(extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
-      $ma->{TIME}->{"START"} = extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
+      $ma->{TIME}->{"START"} = extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
       $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")) {
-      $ma->{TIME}->{"CF"} = extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")->get_node(1));
+      $ma->{TIME}->{"CF"} = extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")->get_node(1));
     }
     if($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")) {
-      $ma->{TIME}->{"RESOLUTION"} = extract($ma, 
-        $m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")->get_node(1));
+      $ma->{TIME}->{"RESOLUTION"} = extract($m->find(".//".$nmwg.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")->get_node(1));
     }
        
     foreach $t (keys %{$ma->{TIME}}) {
@@ -260,26 +176,6 @@ sub reMap {
 }
 
 
-sub extract {
-  my($ma, $node) = @_;
-  $ma->{FILENAME} = "perfSONAR_PS::MA::General";  
-  $ma->{FUNCTION} = "\"extract\"";    
-  if((defined $ma and $ma ne "") and
-     (defined $node and $node ne "")) {
-    if($node->getAttribute("value")) {
-      return $node->getAttribute("value");
-    }
-    else {
-      return $node->textContent;
-    }  
-  }
-  else {
-    perfSONAR_PS::MA::Base::error($ma, "Missing argument", __LINE__);
-  }
-  return "";
-}
-
-
 1;
 
 
@@ -299,20 +195,9 @@ and the methods can be invoked directly (and sparingly).
 
     use perfSONAR_PS::MA::General;
     use perfSONAR_PS::Common;
-        
-    my $id = genuid();	
-    my $idRef = genuid();
 
     my $content = "<nmwg:metadata />";
 	
-    my $msg = getResultMessage($id, $idRef, "response", $content);
-    
-    $msg = getResultCodeMessage($id, $idRef, "response", "error.ma.transport" , "something...");
-    
-    $msg = getResultCodeMetadata($id, "error.ma.transport);
-    
-    $msg = getResultCodeData($id, $idRef, "something...");
-
     reMap($ma, $content);
 
     # Consider this metadata:
@@ -365,17 +250,6 @@ and the methods can be invoked directly (and sparingly).
     #     'RESOLUTION' => ''    
     #   };
     
-    # consider the elements that could be stored in '$node':
-    #
-    #  <nmwg:parameter name="something">value</nmwg:parameter>
-    #  <nmwg:parameter name="something" value="value" />
-    #  <nmwg:parameter name="something" value="value" />value2</nmwg:parameter>
-    #
-    # 'value' would be returned for each of them
-    #
-    my $value = extract($ma, $node);    
-    
-    # or
     getTime($ma, $id);
     
 =head1 DETAILS
@@ -388,24 +262,6 @@ between functions.
 
 The offered API is basic for now, until more common features to MAs can be identified
 and utilized in this module.
-
-=head2 getResultMessage($id, $messageIdRef, $type, $content)
-
-The arguments are a message id, a messageIdRef, a messate type, and finally the 'content'
-which is understood to be the xml content of the message.  
-
-=head2 getResultCodeMessage($id, $messageIdRef, $type, $event, $description)
-
-The arguments are a message id, a messageIdRef, a messate type, an 'eventType' for the result
-code metadata, and a message for the result code data.  
-
-=head2 getResultCodeMetadata($id, $event)
-
-The arguments are a metadata id, and an 'eventType' for the result code metadata.
-
-=head2 getResultCodeData($id, $metadataIdRef, $description)
-
-The arguments are a data id, a metadataIdRef, and a message for the result code data.  
 
 =head2 reMap($ma, $node) 
 
@@ -428,11 +284,6 @@ Helper function to create an xquery string from a metadata object.
 
 Performs the task of extracting time/cf/resolution information from the
 request message.  
-
-=head2 extract($ma, $node)
-
-Returns a 'value' from a xml element, either the 'value' attribute or the 
-text field.
 
 =head2 error($ma, $msg, $line)	
 

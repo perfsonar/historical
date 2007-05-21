@@ -10,7 +10,10 @@ use XML::XPath;
 use XML::Writer;
 use XML::Writer::String;
 use LWP::UserAgent;
+
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Messages;
+
 
 @ISA = ('Exporter');
 @EXPORT = ();
@@ -49,6 +52,7 @@ sub new {
   $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
   $hash{"XSI"} = "http://www.w3.org/2001/XMLSchema-instance";
   $hash{"NAMESPACE"} = "http://ggf.org/ns/nmwg/base/2.0/";
+  $hash{"PREFIX"} = "nmwg";
   
   bless \%hash => $package;
 }
@@ -161,21 +165,21 @@ sub startDaemon {
 
 sub acceptCall {
   my ($self) = @_; 
+  my @nodelist = ();
   $self->{FUNCTION} = "\"acceptCall\"";    
   print $self->{FILENAME}.":\taccepting calls in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
   $self->{CALL} = $self->{DAEMON}->accept;
   $self->{REQUEST} = $self->{CALL}->get_request;
+
   $self->{RESPONSE} = HTTP::Response->new();
   $self->{RESPONSE}->header('Content-Type' => 'text/xml');
   $self->{RESPONSE}->header('user-agent' => 'perfSONAR-PS/'.$VERSION);
   $self->{RESPONSE}->code("200");
-
+   
   # lets strip out the first '/' to enable less stringent check on the endpoint
-  my $requestEndpoint = $self->{REQUEST}->uri;
-  $requestEndpoint =~ s/^(\/)+//g;
- 
-  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} and 
-     $self->{REQUEST}->method eq "POST") {
+  (my $requestEndpoint = $self->{REQUEST}->uri) =~ s/^(\/)+//g;
+
+  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} and $self->{REQUEST}->method eq "POST") {
     $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
     if (!$action =~ m/^.*message\/$/) {
       error($self, "Received 'INVALID ACTION TYPE':".$action."\"", __LINE__);      
@@ -183,12 +187,80 @@ sub acceptCall {
     }
     else {
       print $self->{FILENAME}.":\tcall accepted in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
-      return 1;
+        
+      my $parser = XML::LibXML->new();
+      $self->{REQUESTDOM} = $parser->parse_string($self->{REQUEST}->content);   
+#      undef @nodelist;
+      @nodelist = $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "message");      
+
+      if($#nodelist <= -1) {
+        my $msg = "Message element not found within request";
+        error($self, $msg, __LINE__);  
+        $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
+        return 2;
+      }
+      elsif($#nodelist >= 1) {
+        my $msg = "Too many message elements found within request";
+        error($self, $msg, __LINE__);  
+        $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
+        return 2;
+      }
+      else {      
+        if($self->{PREFIX} ne $nodelist[0]->prefix) {
+          $self->{PREFIX} = $nodelist[0]->prefix;
+        }           
+        my $messageId = $nodelist[0]->getAttribute("id");
+        my $messageType = $nodelist[0]->getAttribute("type");
+        
+        if($messageType eq "EchoRequest") {
+          foreach my $d ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {  
+            foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")) {  
+              if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
+                my $eventType = extract($m->find("./nmwg:eventType")->get_node(1));
+                if($eventType =~ m/^echo.*/) {
+	                my $msg = "The echo request has passed.";
+                  $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "success.echo", $msg);		  	
+                }
+                else {
+	                my $msg = "The echo request has failed.";
+                  error($self, $msg, __LINE__);  
+                  $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "failure.echo", $msg);		        
+                }
+              }   
+            }
+          }
+          return 2;
+        }
+        else {          
+          undef $self->{REQUESTDOM};
+          $self->{REQUESTDOM} = $parser->parse_string($nodelist[0]->toString);
+          $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});
+          foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")) {
+            if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACE}, "data", "metadataIdRef") == 0) {
+              $self->{REQUESTDOM}->getDocumentElement->removeChild($m);
+            }
+          }
+          return 1;  
+        }   
+      }     
     }   
   }
   else {
     error($self, "Reveived 'INVALID ENDPOINT':".$requestEndpoint."\"", __LINE__);  
     return 'INVALID ENDPOINT';      
+  }
+}
+
+
+sub getResponse {
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"getResponse\"";
+  if($self->{RESPONSE}) {
+    return $self->{RESPONSE};
+  }
+  else {
+    error($self, "Response not found", __LINE__);
+    return "";
   }
 }
 
@@ -219,6 +291,19 @@ sub getRequest {
     return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
   }
   return "";
+}
+
+
+sub getRequestDOM {
+  my ($self) = @_;
+  $self->{FUNCTION} = "\"getRequestDOM\"";
+  if($self->{REQUESTDOM}) {
+    return $self->{REQUESTDOM};
+  }
+  else {
+    error($self, "Request DOM not found", __LINE__);
+    return "";
+  }
 }
 
 
