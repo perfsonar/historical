@@ -23,7 +23,7 @@ our %maMap = (
 					endpoint => 'axis/services/MeasurementArchiveService',
 					eventType => 'utilization'
 				},
-				'ucaid.edu' => {
+				'internet2.edu' => {
 					host => 'rrdma.abilene.ucaid.edu', 
 					port => '8080', 
 					endpoint => 'axis/services/snmpMA',

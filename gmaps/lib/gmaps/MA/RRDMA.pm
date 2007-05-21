@@ -117,6 +117,7 @@ sub createRRDGraph
 	# beginning time
 	my @times = sort {$a <=> $b} keys %$data;
 	my $start = $times[0];
+	my $end = $times[$#times];
 
 	# entries
 	my $entries = scalar( @times );
@@ -131,9 +132,17 @@ sub createRRDGraph
 
 	# add the data into the rrd
 	my $prev = undef;
+	my $realStart = undef;
+	my $realEnd = undef;
+
 	foreach my $t ( @times )
 	{
 		next if $t <= $prev;
+
+		next if $t == 10;
+
+		$realStart = $t if $t < $realStart || ! defined $realStart;
+
 		if ( $data->{$t}->{'in'} ne '' 
 				&& $data->{$t}->{'out'} ne '' ) {
 			$rrd->add( $t, 'in:out', $data->{$t}->{'in'}, $data->{$t}->{'out'} );
@@ -146,14 +155,17 @@ sub createRRDGraph
 				&& $data->{$t}->{'out'} ne '' ) {
 			$rrd->add( $t, 'out', $data->{$t}->{'out'} );
 		}
+		
+		$realEnd = $t if $t > $realEnd || ! defined $realEnd;
+
 		$prev = $t;
 	}
 	
 	# now get the graph from the rrd
 	my ( undef, $pngFilename ) = &File::Temp::tempfile( UNLINK => 1 );		
-	
+	warn( "START: $realStart, END: $realEnd\n" );	
 	# ref to scalar
-	my $graph = $rrd->getGraph( $pngFilename, $times[0], $times[$#times] );
+	my $graph = $rrd->getGraph( $pngFilename, $realStart, $realEnd );
 
 	# clean up
 #	unlink $pngFilename or warn "Could not unlink $pngFilename.\n";;
@@ -199,8 +211,14 @@ sub getUtilizationData
 	foreach my $data ( $dataset->get_nodelist ) {
 		
 		my $time = $data->getAttribute('timeValue');
+		if ( ! $time ) {
+			$time = $data->getAttribute('time');
+		}
+		next if $time =~ /e\+/;
 		my $value = $data->getAttribute('value');
-	
+
+		next if $value eq 'nan';
+
 		#print "TIME: $time, $value\n";
 		push( @tuples, $time . ':' . $value );
 	

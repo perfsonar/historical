@@ -41,14 +41,20 @@
       #slac_logo {
         position: absolute;
         left: 12px;
-        bottom: 56px;
+        bottom: 110px;
         z-index: 99998;
+      }
+      #internet2_logo {
+        position: absolute;
+        left: 38px;
+        bottom: 60px;
+        z-index: 99997;
       }
       #perfsonar_logo {
         position: absolute;
         left: 25px;
         bottom: 27px;
-        z-index: 99997;
+        z-index: 99996;
       }
       #invert_markers, #select_all_markers, #select_none_markers {
         font-size: 6pt;
@@ -167,8 +173,12 @@
       }
     }
 
-    function toggleLines() {
-      var show = document.getElementById("toggle_lines").checked;
+    function toggleLines( off ) {
+      var toggle = document.getElementById("toggle_lines");
+      if ( toggle && off ) {
+        toggle.checked = false;
+      }
+      var show = toggle.checked;
       if ( ! show ) {
         for( var descr in glines ) {
           map.removeOverlay( glines[descr] );
@@ -313,14 +323,16 @@
         }
 
         var lineToggle = "show links " + '<input id=\"toggle_lines" type=\"checkbox\" onclick=\"javascript:toggleLines();\" checked><br>';
-        
+ 
         var markerToggle = 'markers: ' +
           '<input id=\"invert_markers\" type=\"button\" onclick=\"javascript:invertMarkers();\" value=\"Invert\">'
           + '<input id=\"select_all_markers\" type=\"button\" onclick=\"javascript:selectAllMarkers();\" value=\"All\">'
           + '<input id=\"select_none_markers\" type=\"button\" onclick=\"javascript:selectNoneMarkers();\" value=\"None\">';
                   
         document.getElementById("side_bar").innerHTML = lineToggle + markerToggle + '<hr>' + side_bar_html;   
-     
+
+        toggleLines( true );     
+
       });
         
     }
@@ -374,6 +386,7 @@
     <div id="map"></div>
     <div id="side_bar"></div>
     <div id="slac_logo"><img src="[% cgi %]?mode=slac_logo"/></div>
+    <div id="internet2_logo"><img src="[% cgi %]?mode=internet2_logo"/></div>
     <div id="perfsonar_logo"><img src="[% cgi %]?mode=perfsonar_logo"/></div>
   </body>
 </html>

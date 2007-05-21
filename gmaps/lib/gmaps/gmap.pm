@@ -56,6 +56,7 @@ sub setup {
 		     'spinner'		=> 'spinnerGraphic',			# wait graphic
 		     'slac_logo'		=> 'slacGraphic',			# slac logo
 		     'perfsonar_logo'	=> 'perfsonarGraphic',		# perfsonar logo
+		     'internet2_logo'	=> 'internet2Graphic',		# perfsonar logo
 		   );
 
 	return undef;    
@@ -236,6 +237,15 @@ sub perfsonarGraphic
 	return &catFile( $templatePath . '/perfsonar_logo_small.png' );
 }
 
+# returns the internet2 graphic
+sub internet2Graphic
+{
+       my $self = shift;
+
+       $self->header_add( -type => "image/png", -expires => '+24h' ); 
+       return &catFile( $templatePath . '/i2-clear.png' );
+}
+ 
 
 
 # enter the nodes in a form
