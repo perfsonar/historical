@@ -2,11 +2,19 @@
 
 use gmaps::MA::RRDMA;
 
+my $ma = $ARGV[0];
+my $port = $ARGV[1];
+my $endpoint = $ARGV[2];
+my $event = $ARGV[3];
+
+if ( ! defined $ma ) {
+print "usage:  <server> <port> <endpoint> <eventType>\n";
+exit;
+}
 
 
 my $routers = &gmaps::MA::RRDMA::getAllRouters( 
-		'mea1.es.net', 8080, 'axis/services/MeasurementArchiveService',
-		'utilization' );
+		$ma, $port, $endpoint, $event );
 		
 foreach my $r ( @$routers ) {
 	print "$r\n";

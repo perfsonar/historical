@@ -10,7 +10,7 @@ my $ip = '134.55.209.93';
 
 
 
-my $routerInfo = &gmaps::MA::RRDMA::getUtilization(  
+my $routerInfo = &gmaps::MA::RRDMA::getUtilizationData(  
 						'mea1.es.net',
 						'8080',
 						'/axis/services/MeasurementArchiveService',						

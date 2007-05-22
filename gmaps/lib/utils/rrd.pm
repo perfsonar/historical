@@ -107,7 +107,7 @@ sub getGraph
 	}
 	close PNG;
 	# remove temp file
-	unlink $png;
+#	unlink $png;
 
 	return \$out;
 }

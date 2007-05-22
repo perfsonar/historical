@@ -98,6 +98,10 @@
         GEvent.addListener( marker, "dblclick", function() {
           map.setCenter( point );
         });
+        // make single clicks the info box
+        GEvent.addListener( marker, "click", function() {
+            refreshInfoWindowTab( dns, ip );
+        });
 
         side_bar_html +=  "<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a>'
                 + " <input id=\"toggle_marker_" + ip + "\" type=\"checkbox\" onclick=\"javascript:toggleMarker('" + ip + "');\" checked>" + '<br>';
@@ -294,11 +298,7 @@
 	            
 	        // create the marker
 	        gmarkers[ip] = createMarker( lat, lng, dns, ip );
-	        // make single clicks the info box
-          GEvent.addListener( gmarkers[ip], "click", function() {
-            refreshInfoWindowTab( dns, ip );
-          });
-	          
+	         
 	        map.addOverlay( gmarkers[ip] );
 	      }
 	      document.getElementById("side_bar").innerHTML = side_bar_html;

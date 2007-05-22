@@ -7,7 +7,7 @@ use gmaps::LookupService;
 
 
 my $routers = &gmaps::LookupService::getAllRouters(  
-						'localhost', 8080, ''
+						'mea1.es.net', 8080, 'axis/services/MeasurementArchiveService'
 						);
 
 #						'selena.acad.bg',

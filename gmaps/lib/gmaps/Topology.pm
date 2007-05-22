@@ -6,10 +6,17 @@
 use gmaps::Topology::GeoIP;
 use gmaps::Topology::DNSLoc;
 
+use threads;
+use Thread::Queue;
+
+
 package gmaps::Topology;
 
 use Socket;
 use strict;
+
+# number of max parallel threads for lookup
+our $concurrentLookups = 7;
 
 
 sub getDNS
@@ -53,66 +60,144 @@ sub isIpAddress
 }
 
 
+sub getLatLong
+{
+	my $router = shift;
+	my $loc = shift;
+
+	# find out lat and long for router
+    my $ip = undef;
+        my $dns = undef;
+
+        my $long = undef;
+        my $lat = undef;
+
+        ( $ip, $dns ) = &getDNS( $router );
+
+        #warn "Looking at $ip ($dns)\n";
+
+        next if ! defined $ip;
+
+        if ( $loc ne '' ) {
+        my $module = 'gmaps::Topology::' . $loc . '::getLatLong';
+                ( $lat, $long ) = &$module( $dns );
+        }
+        else {
+                # try the dnslocators, if failed, use geoiptool
+                ( $lat, $long ) = &gmaps::Topology::DNSLoc::getLatLong( $dns );
+
+                if ( ! defined $long && ! defined $lat ) {
+                	( $lat, $long ) = &gmaps::Topology::GeoIP::getLatLong( $ip );
+        }
+        }
+        # if no lat long exists, set it inside of the bermuda triangel :)
+        if ( ! defined $long && ! defined $lat ) {
+        	$lat = '26.511129';
+                $long = '-71.48186';
+        }
+        
+        #print $routers->[$i] . "/$ip/$dns/$i = LAT: $lat, LONG: $long\n";
+
+	if($ip eq "64.57.28.243") {
+	  $lat = "33.750000";
+	  $long = "-84.418944";
+	}
+	elsif($ip eq "64.57.28.241") {
+	  $lat = "41.889867";
+	  $long = "-87.621278";
+	}
+	elsif($ip eq "64.57.28.242") {
+	  $lat = "40.737306";
+	  $long = "-73.916028";
+	}
+	elsif($ip eq "64.57.28.249") {
+	  $lat = "38.902583";
+	  $long = "-77.003167";
+	}
+
+	return ( $ip, $dns, $lat, $long );
+
+}
+
+# uses the two queues, one for a list of routers to query (queue) and another
+# for a list of results to store those queries into (marks).
+sub threadWrapper
+{
+	my $queue = shift;
+	my $marks = shift;
+	my $loc = shift;
+
+	while( $queue->pending ) {
+
+		my $router = $queue->dequeue;
+
+		# lock num threads
+		# get the lat long
+		my ( $ip, $dns, $lat, $long )  = &getLatLong( $router, $loc );
+		#warn '[' . threads->self->tid() . "] found $ip ($dns) @ $lat,$long\n";
+		# queeus' only support scalars!! argh!
+		my $ans = $ip . '==' . $dns . '==' . $lat . '==' . $long;
+		#warn "      $ans\n";
+		$marks->enqueue( $ans );
+
+	}
+	return undef;
+
+}
+
+
 # determines the coordinates fo the routers provided
 sub getCoords
 {
 	my $routers = shift;
 	my $loc = shift;
 	
-	my @marks = ();
+	my $marks : shared;
+	$marks = new Thread::Queue;
 	my %seen = ();
 
+	# enqueue list of routers in shared queue
+	my $queue : shared;
+	$queue =  new Thread::Queue;
+	for my $r ( @$routers ) {
+		$queue->enqueue( $r );
+	}
+
+	my @thread = ();
+
 	# find out the lat longs for each router
-	for( my $i=0; $i<scalar(@$routers); $i++ )
-	{
-	
-		# find out lat and long for router
-		my $ip = undef;
-		my $dns = undef;
-		
-		my $long = undef;
-		my $lat = undef;
+	# spawn off a series of threads to run 
+	for my $i ( 0..$concurrentLookups-1 ) {
+		push @thread, threads->new( \&threadWrapper, $queue, $marks, $loc );
+	} # foreach thread
 
-		( $ip, $dns ) = &getDNS( $routers->[$i] );
+	# sync results
+	for my $i ( 0.. $concurrentLookups-1 ) {
+		$thread[$i]->join;
+	}
 
-		next if ! defined $ip;
+	# need to stick an undef at the end of the marks to ensure that we do not block forever
+	$marks->enqueue( undef );
 
-  			if ( $loc ne '' ) {
-				my $module = 'gmaps::Topology::' . $loc . '::getLatLong';		
-				( $lat, $long ) = &$module( $dns );
-			}
-			else {
-				# try the dnslocators, if failed, use geoiptool
-				( $lat, $long ) = &gmaps::Topology::DNSLoc::getLatLong( $dns );
-			
-				if ( ! defined $long && ! defined $lat ) {
-					( $lat, $long ) = &gmaps::Topology::GeoIP::getLatLong( $ip );
-				}
-				
-				# if no lat long exists, set it inside of the bermuda triangel :)
-				if ( ! defined $long && ! defined $lat ) {
-					$lat = '26.511129';
-					$long = '-71.48186';
-				}
-			}
+	# dequeue the results
+	my @marks = ();
+	my $i = 0;
+	while ( my $info = $marks->dequeue ) {
+		#warn "MARK: $info\n";
 		
-		#print $routers->[$i] . "/$ip/$dns/$i = LAT: $lat, LONG: $long\n";
+		my %mark = ();
+		( $mark{ip}, $mark{dns}, $mark{lat}, $mark{long} ) = split /==/, $info;
 		
-		my %mark = (
-				'dns'  => $dns,
-				'ip'   => $ip,
-				'lat'  => $lat,
-				'long' => $long,
-			);
-		
+		#warn "GOT: $mark{ip} ($mark{dns}) @ $mark{lat},$mark{long}\n";
+                
 		# keep a tally of same coords, keep an array of which ones by index
-		my $coords = $lat . ',' . $long;
-		push @{$seen{$coords}}, $i;
-	
-		# add to list
-		push @marks, \%mark;
+		my $coords = $mark{lat} . ',' . $mark{long};
 		
-	} # foreach router
+		push @{$seen{$coords}}, $i;
+		push( @marks, \%mark );
+		
+		$i++;
+	}
 
 	# lets make sure that we don't overlap any nodes by checking the lat longs
 	# for each.

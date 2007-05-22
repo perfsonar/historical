@@ -163,7 +163,7 @@ sub createRRDGraph
 	
 	# now get the graph from the rrd
 	my ( undef, $pngFilename ) = &File::Temp::tempfile( UNLINK => 1 );		
-	warn( "START: $realStart, END: $realEnd\n" );	
+	#warn( "START: $realStart, END: $realEnd\n" );	
 	# ref to scalar
 	my $graph = $rrd->getGraph( $pngFilename, $realStart, $realEnd );
 

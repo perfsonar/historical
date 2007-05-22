@@ -17,7 +17,7 @@ use Template;
 
 package gmaps::gmap;
 
-our $templatePath = '/u/sf/ytl/Work/perfSONAR/perfSONAR-PS/trunk/gmaps/templates/';
+our $templatePath = '/usr/local/perfSONAR-PS/www/gmaps/templates/';
 our $server = 'http://134.79.24.133:8080/cgi-bin/gmaps.pl';
 our $googlemapKey = 'ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ';
 
@@ -112,6 +112,7 @@ sub getRouters
 		}
 		
 	}
+
 	return \@routers;
 }
 
@@ -375,7 +376,7 @@ sub createXml
 
 	# get the coords of routers
 	my $marks = &gmaps::Topology::getCoords( $routers );
-	
+
 	# get the interconnecting lines
 	my $lines = &gmaps::Topology::getLines( $marks );
 	
@@ -399,7 +400,7 @@ sub createXml
 	if ( defined $self ) {
 		$self->header_add(  -type => "text/xml" ); 
 	}
-		
+
 	return $out;
 }
 

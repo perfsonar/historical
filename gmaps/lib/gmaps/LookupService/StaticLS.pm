@@ -5,6 +5,8 @@ use gmaps::Topology;
 package gmaps::LookupService::StaticLS;
 
 our %maMap = (
+				'perfsonar.net' => { 
+				},
 				'geant2.net' => { 
 					host => 'stats.geant2.net', 
 					port => '80', 
@@ -114,7 +116,8 @@ sub getDomains
 sub getMA
 {
 	my $router = shift;
-	
+
+
 	my $ip = undef;
 	if ( &gmaps::Topology::isIpAddress( $router ) ) {
 		( $ip, $router ) = &gmaps::Topology::getDNS( $router );
@@ -126,7 +129,7 @@ sub getMA
 			return ( $maMap{$k}{host}, $maMap{$k}{port}, $maMap{$k}{endpoint}, $maMap{$k}{eventType} );
 		}
 	}
-	
+
 	# fail
 	return ( undef, undef, undef, undef );
 }
