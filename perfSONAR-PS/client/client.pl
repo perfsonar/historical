@@ -48,12 +48,16 @@ The purpose of this is to enable quick client side debugging of perfSONAR servic
 =cut
 
 use IO::File;
+use Getopt::Long;
+use strict;
+use Log::Log4perl qw(get_logger :levels);
+
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Common qw( readXML );
 
-use Getopt::Long;
-
-use strict;
+Log::Log4perl->init("logger.conf");
+my $logger = get_logger("perfSONAR_PS");
+$logger->level($DEBUG);
 
 our $DEBUG = 0;
 our $HOST = "localhost";
@@ -126,7 +130,7 @@ $filter = $FILTER unless defined $filter;
 print STDERR "HOST: $host, PORT: $port, ENDPOINT: $endpoint, FILE: $file\n" if $DEBUG;
 
 # start a transport agent
-my $sender = new perfSONAR_PS::Transport("./error.log", "", "", $host, $port, $endpoint);
+my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
 
 # Read the source XML file
 my $xml = readXML($file);
