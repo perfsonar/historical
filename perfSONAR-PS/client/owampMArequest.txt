@@ -1,0 +1,18 @@
+<nmwg:message type="MeasurementRequest" id="msg1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/">
+
+<nmwg:metadata id="owampRequest">
+        <owamp:subject id="sub2">
+                <nmwgt:endPointPair>                  
+                       <nmwgt:dst type="ipv4" value="198.32.10.220"/>
+                </nmwgt:endPointPair>
+        </owamp:subject>
+        <nmwg:eventType>owamp</nmwg:eventType>
+        <owamp:parameters id="param2">
+                <nmwg:parameter name="direction">to</nmwg:parameter>
+                <nmwg:parameter name="count">5</nmwg:parameter>
+                <nmwg:parameter name="portRange">2500-2999</nmwg:parameter>
+        </owamp:parameters>
+
+</nmwg:metadata>
+<nmwg:data id="2" metadataIdRef="owampRequest" />
+</nmwg:message>

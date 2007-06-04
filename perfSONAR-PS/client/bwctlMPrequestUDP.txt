@@ -1,0 +1,36 @@
+#
+
+<nmwg:message type="MeasurementRequest" id="msg1"
+xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+
+
+<nmwg:metadata id="metabase">
+        <bwctl:subject id="sub1">
+                <nmwgt:endPointPair>
+                        <nmwgt:dst type="ipv4" value="200.159.254.223"/>
+                </nmwgt:endPointPair>
+        </bwctl:subject>
+        <nmwg:eventType>bwctl</nmwg:eventType>
+        <bwctl:parameters id="param1">
+                <nmwg:parameter name="protocol" value="udp"/>
+        </bwctl:parameters>
+</nmwg:metadata>
+
+<nmwg:metadata id="metasend" metadataIdRef="metabase">
+        <bwctl:parameters id="param1">
+                <nmwg:parameter name="role" value="sender"/>
+        </bwctl:parameters>
+</nmwg:metadata>
+
+<nmwg:data id="sender" metadataIdRef="metasend" />
+
+<nmwg:metadata id="metarecv" metadataIdRef="metabase">
+        <bwctl:parameters id="param1">
+                <nmwg:parameter name="role">receiver</nmwg:parameter>
+        </bwctl:parameters>
+</nmwg:metadata>
+
+<nmwg:data id="receiver" metadataIdRef="metarecv" />
+</nmwg:message>

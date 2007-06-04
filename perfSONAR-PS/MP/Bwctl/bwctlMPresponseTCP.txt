@@ -1,0 +1,42 @@
+<nmwg:message id="msg1_resp" messageIdRef="msg1" type="MeasurementResponse" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+       <nmwg:metadata id="metabase_1_3">
+<bwctl:subject id="sub1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+        <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+<nmwgt:dst type="ipv4" value="200.159.254.223"/>
+        </nmwgt:endPointPair>
+</bwctl:subject>
+<bwctl:parameters id="param1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+        <nmwg:parameter name="protocol" value="tcp"/>
+</bwctl:parameters>
+<nmwg:eventType>bwctl</nmwg:eventType>
+        </nmwg:metadata>
+        <nmwg:metadata id="metabase_1_3">
+<bwctl:subject id="sub1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+        <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+<nmwgt:dst type="ipv4" value="200.159.254.223"/>
+        </nmwgt:endPointPair>
+</bwctl:subject>
+<bwctl:parameters id="param1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+        <nmwg:parameter name="protocol" value="tcp"/>
+</bwctl:parameters>
+<nmwg:eventType>bwctl</nmwg:eventType>
+        </nmwg:metadata>
+
+        <nmwg:metadata id="metarecv_0" metadataIdRef="metabase">
+<bwctl:parameters id="param1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+       <nmwg:parameter name="role">receiver</nmwg:parameter>
+</bwctl:parameters>
+         </nmwg:metadata>
+         <nmwg:metadata id="metasend_2" metadataIdRef="metabase">
+<bwctl:parameters id="param1" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/">
+        <nmwg:parameter name="role" value="sender"/>
+</bwctl:parameters>
+         </nmwg:metadata>
+
+         <nmwg:data id="sender_1" metadataIdRef="metasend_2">
+<bwctl:datum intervalEnd="10.0" intervalStart="0.0" intervalUnit="sec" numBytes="35962880" numBytesUnits="Bytes" tcpAdapterType="ethernet" tcpMSSSize="1448" tcpMSSUnit="bytes" tcpMTUSize="1500" tcpMTUUnit="bytes" tcpWindowSize="33304" tcpWindowUnit="Byte" timeType="unix" timeValue="1166120138340" value="28748418" valueUnits="bits/sec" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/"/>
+         </nmwg:data>
+         <nmwg:data id="receiver_0" metadataIdRef="metarecv_0">
+<bwctl:datum intervalEnd="10.0" intervalStart="0.0" intervalUnit="sec" numBytes="34988032" numBytesUnits="Bytes" tcpAdapterType="ethernet" tcpMSSSize="1448" tcpMSSUnit="bytes" tcpMTUSize="1500" tcpMTUUnit="bytes" tcpWindowSize="65536" tcpWindowUnit="Byte" timeType="unix" timeValue="1166120123870" value="27984829" valueUnits="bits/sec" xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/"/>
+         </nmwg:data>
+</nmwg:message>

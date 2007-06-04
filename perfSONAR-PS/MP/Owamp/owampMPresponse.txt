@@ -1,0 +1,23 @@
+<nmwg:message id="msg1_resp" messageIdRef="msg1" type="MeasurementResponse" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+     <nmwg:metadata id="owampRequest">
+<owamp:subject id="sub2" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/">
+       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+<nmwgt:dst type="ipv4" value="198.32.10.220"/>
+      </nmwgt:endPointPair>
+</owamp:subject>
+<owamp:parameters id="param2" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/">
+        <nmwg:parameter name="direction">to</nmwg:parameter>
+        <nmwg:parameter name="portRange">2500-2999</nmwg:parameter>
+   	        <nmwg:parameter name="count">5</nmwg:parameter>
+ 	</owamp:parameters>
+<nmwg:eventType>owamp</nmwg:eventType>
+      </nmwg:metadata>
+
+      <nmwg:data id="data1" metadataIdRef="owampRequest">
+<owamp:datum receiveSynchronized="1" receiveTime="14495978636873081285" receiveTimeError="0.223633" sendSynchronized="1" sendTime="14495978636504268294" sendTimeError="0.00527954" seqNum="0" timeType="unix" timeValue="1166119240176" ttl="249" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"/>
+<owamp:datum receiveSynchronized="1" receiveTime="14495978637552102730" receiveTimeError="0.223633" sendSynchronized="1" sendTime="14495978637182860242" sendTimeError="0.00527954" seqNum="1" timeType="unix" timeValue="1166119240177" ttl="249" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"/>
+<owamp:datum receiveSynchronized="1" receiveTime="14495978637641279135" receiveTimeError="0.223633" sendSynchronized="1" sendTime="14495978637273050260" sendTimeError="0.00527954" seqNum="2" timeType="unix" timeValue="1166119240177" ttl="249" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"/>
+<owamp:datum receiveSynchronized="1" receiveTime="14495978637963779640" receiveTimeError="0.223633" sendSynchronized="1" sendTime="14495978637595168513" sendTimeError="0.00527954" seqNum="3" timeType="unix" timeValue="1166119240177" ttl="249" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"/>
+<owamp:datum receiveSynchronized="1" receiveTime="14495978638128216758" receiveTimeError="0.223633" sendSynchronized="1" sendTime="14495978637758407335" sendTimeError="0.00527954" seqNum="4" timeType="unix" timeValue="1166119240177" ttl="249" xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"/>
+       </nmwg:data>
+</nmwg:message>
