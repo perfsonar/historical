@@ -1,25 +1,25 @@
 #!/usr/bin/perl -w -I ../../lib
 
+use warnings;
 use strict;
 use Getopt::Long;
-
 use threads;
 use threads::shared;
 use Thread::Semaphore; 
-
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
-use Data::Dumper;
-
+use Log::Log4perl qw(get_logger :levels);
+     
 use perfSONAR_PS::Common;
-use perfSONAR_PS::MA::Ping;
 use perfSONAR_PS::MP::Ping;
+use perfSONAR_PS::MA::Ping;
 
-my $fileName = "pingMP.pl";
-my $functionName = "main";
-my $DEBUG = '';
+Log::Log4perl->init("logger.conf");
+my $logger = get_logger("perfSONAR_PS");
+
+my $DEBUGFLAG = '';
 my $HELP = '';
-my $status = GetOptions ('verbose' => \$DEBUG,
+my $status = GetOptions ('verbose' => \$DEBUGFLAG,
                          'help' => \$HELP);
 
 if(!$status or $HELP) {
@@ -30,52 +30,56 @@ if(!$status or $HELP) {
 
 my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
 );
 
 		# Read in configuration information
 my %conf = ();
 readConfiguration("./pingMP.conf", \%conf);
-$conf{"DEBUG"} = $DEBUG;
 
-if(!$DEBUG) {
+    # set logging level
+if($DEBUGFLAG) {
+  $logger->level($DEBUG);    
+}
+else {
+  $logger->level($INFO); 
+}
+
+if(!$DEBUGFLAG) {
 		# flush the buffer
   $| = 1;
 		# start the daemon
   &daemonize;
 }
 
-print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DEBUG);
+$logger->debug("Starting '".threads->tid()."'");
 
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
 
 #my $mpThread = threads->new(\&measurementPoint);
 my $maThread = threads->new(\&measurementArchive);
-#my $regThread = threads->new(\&registerLS);
+my $regThread = threads->new(\&registerLS);
 
-if(!defined $maThread) {
-# || !defined $mpThread || !defined $regThread) {
-  print "Thread creation has failed...exiting...\n";
+#if(!defined $mpThread or 
+if(!defined $maThread or !defined $regThread) {
+  $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
 #$mpThread->join();
 $maThread->join();
-#$regThread->join();
-
-
+$regThread->join();
 
 
 
 
 
 sub measurementPoint {
-  my $functionName = "measurementPoint";
-  print $fileName.":\tStarting '".threads->tid()."' as the MP in ".$functionName."\n" if($DEBUG);
-
+  $logger->debug("Starting '".threads->tid()."' as the MP.");
+  
   my $mp = new perfSONAR_PS::MP::Ping(\%conf, \%ns, "");
   $mp->parseMetadata;
   $mp->prepareData;
@@ -89,23 +93,34 @@ sub measurementPoint {
 
 
 sub measurementArchive {
-  my $functionName = "measurementArchive";  
-  print $fileName.":\tStarting '".threads->tid()."' as the MA in ".$functionName."\n" if($DEBUG);
+  $logger->debug("Starting '".threads->tid()."' as the MA.");
 
-  my $ma = new perfSONAR_PS::MA::Ping(\%conf, \%ns, "");
+  my $ma = new perfSONAR_PS::MA::Ping(\%conf, \%ns);
   $ma->init;  
   while(1) {
-    $ma->receive;
-    $ma->respond;
+    my $runThread = threads->new(\&measurementArchiveQuery, $ma);
+    if(!defined $runThread) {
+      $logger->fatal("Thread creation has failed...exiting");
+      exit(1);
+    }
+    $runThread->join();  
   }  
   return;
 }
 
 
+sub measurementArchiveQuery {
+  my($ma) = @_; 
+  $logger->debug("Starting '".threads->tid()."' as the execution path.");
+  
+  $ma->receive;
+  $ma->respond;
+  return;
+}
+
+
 sub registerLS {
-  my $functionName = "registerLS";  
-  print $fileName.":\tStarting '".threads->tid()."' as the LS registration to \"".
-        $conf{"LS_INSTANCE"}."\" in ".$functionName."\n" if($DEBUG);
+  $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
 	
   return
 }
@@ -157,6 +172,10 @@ This function, meant to be used in the context of a thread, will listen on an ex
 port (specified in the conf file) and serve requests for data from outside entities.  The
 data and metadata are stored in various database structures.
 
+=head2 measurementArchiveQuery
+
+This performs the semi-automic operations of the MA.  
+
 =head2 registerLS
 
 This function, meant to be used in the context of a thread, will continously register
@@ -174,6 +193,7 @@ threads::shared
 Thread::Semaphore
 Time::HiRes qw( gettimeofday );
 POSIX qw( setsid )
+Log::Log4perl
 perfSONAR_PS::Common
 perfSONAR_PS::Transport
 perfSONAR_PS::MP::Ping
@@ -194,5 +214,6 @@ Copyright (C) 2007 by Jason Zurawski
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
 
 =cut
