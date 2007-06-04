@@ -1,16 +1,23 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::Messages;
+
+use warnings;
 use Carp qw( carp );
 use Exporter;
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::Common;
 
+
 @ISA = ('Exporter');
-@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData');
+@EXPORT = ('getResultMessage', 'getResultCodeMessage', 
+           'getResultCodeMetadata', 'getResultCodeData');
 
 sub getResultMessage {
-  my ($id, $messageIdRef, $type, $content) = @_;   
+  my ($id, $messageIdRef, $type, $content) = @_;  
+  my $logger = get_logger("perfSONAR_PS::Messages");
+   
   if(defined $content and $content ne "") {
     my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
     if(defined $id and $id ne "") {
@@ -25,10 +32,11 @@ sub getResultMessage {
     $m = $m . ">\n  ";
     $m = $m . $content;
     $m = $m . "</nmwg:message>\n";
+    $logger->debug("Result message created.");
     return $m;
   }
   else {
-    carp("perfSONAR_PS::Messages:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
+    $logger->error("Missing argument.");
   }
   return "";
 }
@@ -36,14 +44,17 @@ sub getResultMessage {
 
 sub getResultCodeMessage {
   my ($id, $messageIdRef, $type, $event, $description) = @_;   
+  my $logger = get_logger("perfSONAR_PS::Messages");
+  
   if((defined $event and $event ne "") and 
      (defined $description and $description ne "")) {
     my $metadataId = genuid();
     my $dataId = genuid();
+    $logger->debug("Result code message created.");
     return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $event).getResultCodeData($dataId, $metadataId, $description));
   }
   else {
-    carp("perfSONAR_PS::Messages:\tMissing argument \"content\" to \"getResultMessage\" at line ".__LINE__.".");
+    $logger->error("Missing argument(s).");
   }
   return "";
 }
@@ -51,6 +62,8 @@ sub getResultCodeMessage {
 
 sub getResultCodeMetadata {
   my ($id, $event) = @_;  
+  my $logger = get_logger("perfSONAR_PS::Messages");
+
   if((defined $id and $id ne "") and 
      (defined $event and $event ne "")) {
     my $md = "  <nmwg:metadata id=\"".$id."\">\n";
@@ -58,10 +71,11 @@ sub getResultCodeMetadata {
     $md = $md . $event;
     $md = $md . "</nmwg:eventType>\n";
     $md = $md . "  </nmwg:metadata>\n";
+    $logger->debug("Result code metadata created.");
     return $md;
   }
   else {
-    carp("perfSONAR_PS::Messages:\tMissing argument(s) to \"getResultMetadata\" at line ".__LINE__.".");
+    $logger->error("Missing argument(s).");
   }
   return "";
 }
@@ -69,6 +83,8 @@ sub getResultCodeMetadata {
 
 sub getResultCodeData {
   my ($id, $metadataIdRef, $description) = @_;  
+  my $logger = get_logger("perfSONAR_PS::Messages");
+
   if((defined $id and $id ne "") and 
      (defined $metadataIdRef and $metadataIdRef ne "") and 
      (defined $description and $description ne "")) {
@@ -77,10 +93,11 @@ sub getResultCodeData {
     $d = $d . $description;
     $d = $d . "</nmwgr:datum>\n";  
     $d = $d . "  </nmwg:data>\n";
+    $logger->debug("Result code data created.");
     return $d;
   }
   else {
-    carp("perfSONAR_PS::Messages:\tMissing argument(s) to \"getResultData\" at line ".__LINE__.".");
+    $logger->error("Missing argument(s).");
   }
   return "";
 }
@@ -168,7 +185,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 

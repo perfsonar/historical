@@ -1,12 +1,16 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::MP::Owamp;
+
+use Log::Log4perl qw(get_logger);
+use Data::Dumper;
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
-use Data::Dumper;
+
 
 @ISA = ('Exporter');
 @EXPORT = ();

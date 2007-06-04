@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::MA::Bwctl;
+
 use Carp qw( croak );
 use XML::XPath;
+use Log::Log4perl qw(get_logger);
+use Data::Dumper;
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
@@ -10,7 +14,6 @@ use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MA::General;
 
-use Data::Dumper;
 
 @ISA = ('Exporter');
 @EXPORT = ();

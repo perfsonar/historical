@@ -1,15 +1,19 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::MP::Base;
+
+use warnings;
+use Carp qw( carp );
+use Exporter;
+use Log::Log4perl qw(get_logger);
 
 @ISA = ('Exporter');
 @EXPORT = ();
 
+
 sub new {
   my ($package, $conf, $ns, $store) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::MP::Base";
-  $hash{"FUNCTION"} = "\"new\"";
   if(defined $conf and $conf ne "") {
     $hash{"CONF"} = \%{$conf};
   }
@@ -22,7 +26,6 @@ sub new {
   else {
     $hash{"STORE"} = "";
   }  
-
   %{$hash{"METADATAMARKS"}} = ();
   %{$hash{"DATAMARKS"}} = ();
   %{$hash{"DATADB"}} = ();
@@ -35,13 +38,12 @@ sub new {
 
 sub setConf {
   my ($self, $conf) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::Base";  
-  $self->{FUNCTION} = "\"setHost\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::Base");
   if(defined $conf and $conf ne "") {
     $self->{CONF} = \%{$conf};
   }
   else {
-    error($self, "Missing argument", __LINE__);  
+    $logger->error("Missing argument."); 
   }
   return;
 }
@@ -49,13 +51,12 @@ sub setConf {
 
 sub setNamespaces {
   my ($self, $ns) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::Base";  
-  $self->{FUNCTION} = "\"setNamespaces\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::Base");
   if(defined $namespaces and $namespaces ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");   
   }
   return;
 }
@@ -63,24 +64,13 @@ sub setNamespaces {
 
 sub setStore {
   my ($self, $store) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::Base";    
-  $self->{FUNCTION} = "\"setStore\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::Base");
   if(defined $store and $store ne "") {
     $self->{STORE} = $store;
   }
   else {
-    error($self, "Missing argument", __LINE__); 
+    $logger->error("Missing argument."); 
   }
-  return;
-}
-
-
-sub error {
-  my($self, $msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -108,8 +98,6 @@ to create other MP based objects.
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
     $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-    $conf{"DEBUG"} = 1;
     
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",

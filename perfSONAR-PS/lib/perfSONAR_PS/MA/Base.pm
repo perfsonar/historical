@@ -1,14 +1,22 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::MA::Base;
+
+use warnings;
+use Carp qw( carp );
+use Exporter;
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::Transport;
-use XML::LibXML;
+use perfSONAR_PS::Messages;
+use perfSONAR_PS::MA::General;
 
 @ISA = ('Exporter');
 @EXPORT = ();
 
+
 sub new {
-  my ($package, $conf, $ns, $store) = @_; 
+  my ($package, $conf, $ns) = @_; 
   my %hash = ();
   $hash{"FILENAME"} = "perfSONAR_PS::MA::Base";
   $hash{"FUNCTION"} = "\"new\"";
@@ -18,19 +26,9 @@ sub new {
   if(defined $ns and $ns ne "") {  
     $hash{"NAMESPACES"} = \%{$ns};     
   }     
-  if(defined $store and $store ne "") {
-    $hash{"STORE"} = $store;
-  }
-  else {
-    $hash{"STORE"} = "";
-  }
-  
   $hash{"LISTENER"} = "";
-  $hash{"REQUEST"} = "";
-  $hash{"REQUESTDOM"} = "";
   $hash{"REQUESTNAMESPACES"} = "";
-  $hash{"RESPONSE"} = "";
-    
+  $hash{"RESPONSE"} = "";    
   %{$hash{"RESULTS"}} = ();  
   %{$hash{"TIME"}} = ();
     
@@ -40,12 +38,13 @@ sub new {
 
 sub setConf {
   my ($self, $conf) = @_;   
-  $self->{FUNCTION} = "\"setConf\"";  
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
   if(defined $conf and $conf ne "") {
     $self->{CONF} = \%{$conf};
   }
   else {
-    error($self, "Missing argument", __LINE__); 
+    $logger->error("Missing argument."); 
   }
   return;
 }
@@ -53,25 +52,13 @@ sub setConf {
 
 sub setNamespaces {
   my ($self, $ns) = @_;    
-  $self->{FUNCTION} = "\"setNamespaces\""; 
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
   if(defined $namespaces and $namespaces ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
-    error($self, "Missing argument", __LINE__);      
-  }
-  return;
-}
-
-
-sub setStore {
-  my ($self, $store) = @_;  
-  $self->{FUNCTION} = "\"setStore\"";  
-  if(defined $store and $store ne "") {
-    $self->{STORE} = $store;
-  }
-  else {
-    error($self, "Missing argument", __LINE__); 
+    $logger->error("Missing argument.");       
   }
   return;
 }
@@ -79,42 +66,79 @@ sub setStore {
 
 sub init {
   my($self) = @_;  
-  $self->{FUNCTION} = "\"init\""; 
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
   if(defined $self->{CONF} and $self->{CONF} ne "") {
     $self->{LISTENER} = new perfSONAR_PS::Transport(
-      $self->{CONF}->{"LOGFILE"}, 
+      \%{$self->{NAMESPACES}},
       $self->{CONF}->{"PORT"}, 
       $self->{CONF}->{"ENDPOINT"}, 
       "", 
       "", 
-      "", 
-      $self->{CONF}->{"DEBUG"});  
+      "");  
     $self->{LISTENER}->startDaemon;
   }
   else {
-    error($self, "Missing configuration", __LINE__); 
+    $logger->error("Missing 'conf' object."); 
   }
   return;
+}
+
+
+sub keyRequest {
+  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
+  my $queryString = "//nmwg:metadata[" . getMetadatXQuery($self, $m->getAttribute("id"), 0) . "]";
+  $logger->debug("Query string \"".$queryString."\" created."); 
+	my @resultsString = $metadatadb->query($queryString);
+
+	if($#resultsString != -1) {
+	  for(my $x = 0; $x <= $#resultsString; $x++) {
+      my $parser = XML::LibXML->new();
+      $doc = $parser->parse_string($resultsString[$x]);  
+      my $mdset = $doc->find("//nmwg:metadata");
+      my $md = $mdset->get_node(1); 
+
+      $logger->debug("Metadata \"".$md->toString()."\" found."); 
+      $localContent = $localContent . $md->toString;  
+      
+      $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]"; 
+      $logger->debug("Query string \"".$queryString."\" created."); 
+	    my @dataResultsString = $metadatadb->query($queryString);	  
+	      	    
+	    if($#dataResultsString != -1) {    			  
+        for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		      $logger->debug("Data \"".$dataResultsString[$y]."\" found."); 
+          $localContent = $localContent . $dataResultsString[$y]; 
+        } 
+        $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "MetadataKeyResponse", $localContent);      
+	    }
+      else {
+	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
+        $logger->error($msg);
+        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);
+      }  
+	  }
+	}
+	else {
+	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
+    $logger->error($msg); 
+    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);	     
+	}
+  return $localContent;
 }
 
 
 sub respond {
   my($self) = @_;
-  $self->{FUNCTION} = "\"respond\""; 
-  print $self->{FILENAME}.":\tSending response \"".$self->{RESPONSE}."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
+  $logger->debug("Sending response.");
   $self->{LISTENER}->setResponse($self->{RESPONSE}, 1);
-  print $self->{FILENAME}.":\tClosing call in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"}); 
+
+  $logger->debug("Closing call.");
   $self->{LISTENER}->closeCall; 
-  return;
-}
-
-
-sub error {
-  my($self, $msg, $line) = @_;    
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -150,17 +174,22 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
     
-    my $ma = perfSONAR_PS::MA::Base->new(\%conf, \%ns, $store);
+    my $self = perfSONAR_PS::MA::Base->new(\%conf, \%ns);
 
     # or
-    # $ma = perfSONAR_PS::MA::Base->new;
-    # $ma->setConf(\%conf);
-    # $ma->setNamespaces(\%ns);    
-    # $ma->setStore($store);            
+    # $self = perfSONAR_PS::MA::Base->new;
+    # $self->setConf(\%conf);
+    # $self->setNamespaces(\%ns);              
 
-    $ma->init;
+    $self->init;
     
-    my $response = $ma->respond;
+    my $response = $self->respond;
+    if(!$response) {
+      $self->error($self, "Whoops...", __LINE__)
+    }
+
+    my $response2 = $self->keyRequest($self, $metadatadb, $metadata, $response2, 
+                                      $messageId, $messageIdRef)
 
 =head1 DETAILS
 
@@ -171,7 +200,7 @@ Additional logic is needed to address issues such as different backend storage f
 
 The offered API is simple, but offers the key functions we need in a measurement archive. 
 
-=head2 new(\%conf, \%ns, \%metadata, \%data)
+=head2 new(\%conf, \%ns)
 
 The accepted arguments may also be ommited in favor of the 'set' functions.
 
@@ -179,14 +208,16 @@ The accepted arguments may also be ommited in favor of the 'set' functions.
 
 (Re-)Sets the value for the 'conf' hash. 
 
-=head2 setStore($store) 
-
-(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
-
 =head2 init()
 
 Initialize the underlying transportation medium.  This function depends
 on certain conf file values.
+
+=head2 keyRequest($ma, $metadatadb, $metadata, $localContent, $messageId, $messageIdRef)
+
+Performs the common 'key request' task for a given metadata dabase, and 
+metadata 'id' value.  The 'localContent' is a variable that contains the 
+'message' (so far) to be returned to the user.
 
 =head2 respond()
 
@@ -200,7 +231,8 @@ Meant to be used internally.
 
 =head1 SEE ALSO
 
-L<XML::LibXML::Document>, L<perfSONAR_PS::Transport>
+L<Carp>, L<Exporter>, L<perfSONAR_PS::Transport>, 
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::MA::General>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

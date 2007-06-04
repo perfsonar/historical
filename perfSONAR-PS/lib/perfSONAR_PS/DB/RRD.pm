@@ -1,20 +1,16 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::RRD;
-use RRDp;
-use perfSONAR_PS::Common;
 
-@ISA = ('Exporter');
-@EXPORT = ();
+
+use RRDp;
+use Log::Log4perl qw(get_logger);
+use perfSONAR_PS::Common;
+	   
 	   
 sub new {
-  my ($package, $log, $path, $name, $dss, $error, $debug) = @_;   
+  my ($package, $path, $name, $dss, $error) = @_;   
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::DB::RRD";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $log and $log ne "") {
-    $hash{"LOGFILE"} = $log;
-  }    
   if(defined $path and $path ne "") {
     $hash{"PATH"} = $path;
   }
@@ -31,35 +27,19 @@ sub new {
     else {
       undef $RRDp::error_mode;
     }
-  }
-  if(defined $debug and $debug ne "") {
-    $hash{"DEBUG"} = $debug;  
-  }   
+  }  
   bless \%hash => $package;
-}
-
-
-sub setLog {
-  my ($self, $log) = @_;  
-  $self->{FUNCTION} = "\"setLog\"";  
-  if(defined $log and $log ne "") {
-    $self->{LOGFILE} = $log;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);    
-  }
-  return;
 }
 
 
 sub setFile {
   my ($self, $file) = @_;  
-  $self->{FUNCTION} = "\"setFile\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $file and $file ne "") {
     $self->{NAME} = $file;
   }
   else {
-    error($self, "Missing argument", __LINE__);  
+    $logger->error("Missing argument.");  
   }
   return;
 }
@@ -67,12 +47,12 @@ sub setFile {
 
 sub setPath {
   my ($self, $path) = @_;  
-  $self->{FUNCTION} = "\"setPath\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $path and $path ne "") {
     $self->{PATH} = $path;
   }
   else {
-    error($self, "Missing argument", __LINE__);  
+    $logger->error("Missing argument.");  
   }
   return;
 }
@@ -80,12 +60,12 @@ sub setPath {
 
 sub setVariables {
   my ($self, $dss) = @_;  
-  $self->{FUNCTION} = "\"setVariables\""; 
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $dss and $dss ne "") { 
     $hash{"DATASOURCES"} = \%{$dss};
   }
   else {
-    error($self, "Missing argument", __LINE__);  
+    $logger->error("Missing argument.");  
   }
   return;
 }
@@ -93,12 +73,12 @@ sub setVariables {
 
 sub setVariable {
   my ($self, $dss) = @_;  
-  $self->{FUNCTION} = "\"setVariable\""; 
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $dss and $dss ne "") {
     $self->{DATASOURCES}->{$dss} = "";
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -106,7 +86,7 @@ sub setVariable {
 
 sub setError {
   my ($self, $error) = @_;  
-  $self->{FUNCTION} = "\"setError\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $error and $error ne "") {
     if($error == 1) {
       $RRDp::error_mode = 'catch';
@@ -116,20 +96,7 @@ sub setError {
     }
   }
   else {
-    error($self, "Missing argument", __LINE__);
-  }
-  return;
-}
-
-
-sub setDebug {
-  my ($self, $debug) = @_;  
-  $self->{FUNCTION} = "\"setDebug\"";  
-  if(defined $debug and $debug ne "") {
-    $self->{DEBUG} = $debug;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -148,12 +115,12 @@ sub getErrorMessage {
 
 sub openDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"openDB\""; 
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $self->{PATH} and defined $self->{NAME}) {
     RRDp::start $self->{PATH};
   }
   else {
-    error($self, "Missing path or name in object", __LINE__);        
+    $logger->error("Missing path or name in object.");        
   }
   return;
 }
@@ -161,16 +128,16 @@ sub openDB {
 
 sub closeDB {
   my ($self) = @_;   
-  $self->{FUNCTION} = "\"closeDB\"";   
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if((defined $self->{PATH} and $self->{PATH} ne "") and 
      (defined $self->{NAME} and $self->{NAME} ne "")){
     my $status = RRDp::end;  
     if($status) {
-      error($self, $self->{PATH}." has returned status \"".$status."\" on closing", __LINE__);    
+      $logger->error($self->{PATH}." has returned status \"".$status."\" on closing.");    
     }
   }
   else {
-    error($self, "rrdtool is not open", __LINE__);  
+    $logger->error("RRD not open.");  
   }
   return;
 }
@@ -178,10 +145,9 @@ sub closeDB {
 
 sub query {
   my ($self, $cf, $resolution, $start, $end) = @_; 
-  $self->{FUNCTION} = "\"query\"";   
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   my %rrd_result = ();
   my @rrd_headings = ();  
-
   if(defined $cf and $cf ne "") {  
     $cmd = "fetch " . $self->{NAME} . " " . $cf;
     if(defined $resolution and $resolution ne "") {
@@ -193,13 +159,12 @@ sub query {
     if(defined $end and $end ne "") {
       $cmd = $cmd . " -e " . $end;
     }
- 
-    print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    $logger->debug("Command \"".$cmd."\" has been created.");
  
     RRDp::cmd $cmd;    
     my $answer = RRDp::read;      
     if($RRDp::error) {   
-      error($self, "Database error \"".$RRDp::error."\"", __LINE__); 
+      $logger->error("Database error \"".$RRDp::error."\"."); 
       %rrd_result = ();
       $rrd_result{ANSWER} = $RRDp::error;
     }
@@ -226,7 +191,7 @@ sub query {
     }
   }    
   else {
-    error($self, "Missing argument", __LINE__); 
+    $logger->error("Missing argument."); 
   }
   return %rrd_result; 
 }
@@ -234,21 +199,21 @@ sub query {
 
 sub insert {
   my ($self, $time, $ds, $value) = @_;
-  $self->{FUNCTION} = "\"insert\"";   
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if((defined $time and $time ne "") and
      (defined $ds and $ds ne "") and 
      (defined $value and $value ne "")) { 
     $self->{COMMIT}->{$time}->{$ds} = $value;
   }
   else { 
-    error($self, "Missing argument", __LINE__); 
+    $logger->error("Missing argument(s)."); 
   }  
 }
 
 
 sub insertCommit {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"insertCommit\""; 
+  my $logger = get_logger("perfSONAR_PS::DB::RRD");
   my $answer = "";
   my @result = ();
   foreach my $time (keys %{$self->{COMMIT}}) {
@@ -268,12 +233,12 @@ sub insertCommit {
       $counter++;
     }     
     if((!defined $template or $template eq "") or (!defined $values or $values eq "")){
-      error($self, "rrdtool cannot update when datasource values are not specified", __LINE__);  
+      $logger->error("RRDTool cannot update when datasource values are not specified.");  
     }
     else {
       delete $self->{COMMIT}->{$time};
       $cmd = $cmd . $template . " " . $values;     
-      print $self->{FILENAME}.":\tcommand \".$cmd.\" in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+      $logger->debug("Command \"".$cmd."\" created.");
       RRDp::cmd $cmd;
       $answer = RRDp::read; 
       if($RRDp::error) {   
@@ -289,8 +254,7 @@ sub insertCommit {
 
 
 sub firstValue {
-  my ($self) = @_;   
-  $self->{FUNCTION} = "\"firstValue\"";   
+  my ($self) = @_;
   RRDp::cmd "first " . $self->{NAME};
   $answer = RRDp::read;   
   if($RRDp::error) {   
@@ -304,8 +268,7 @@ sub firstValue {
 
 
 sub lastValue {
-  my ($self) = @_;   
-  $self->{FUNCTION} = "\"lastValue\"";     
+  my ($self) = @_;
   RRDp::cmd "last " . $self->{NAME};
   $answer = RRDp::read;   
   if($RRDp::error) {   
@@ -315,16 +278,6 @@ sub lastValue {
     return $$answer;
   }
   return "";
-}
-
-
-sub error {
-  my($self, $msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
-  return;
 }
 
 
@@ -347,7 +300,6 @@ with rrd files) to offer some common functionality.
     use perfSONAR_PS::DB::RRD;
 
     my $rrd = new perfSONAR_PS::DB::RRD(
-      "./error.log",
       "/usr/local/rrdtool/bin/rrdtool" , 
       "/home/jason/rrd/stout/stout.rrd",
       {'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""},
@@ -357,14 +309,12 @@ with rrd files) to offer some common functionality.
     # or also:
     # 
     # my $rrd = new perfSONAR_PS::DB::RRD;
-    # $rrd->setLog("./error.log");
     # $rrd->setFile("/home/jason/rrd/stout/stout.rrd");
     # $rrd->setPath("/usr/local/rrdtool/bin/rrdtool");  
     # $rrd->setVariables({'eth0-in'=>"" , 'eth0-out'=>"", 'eth1-in'=>"" , 'eth1-out'=>""});  
     # $rrd->setVariable("eth0-in");
     # ...
-    # $rrd->setError(1);  
-    # $rrd->setDebug($debug);     
+    # $rrd->setError(1);     
 
     # For reference, here is the create string for the rrd file:
     #
@@ -434,19 +384,14 @@ may then be invoked on the object for the specific database.
 The API of perfSONAR_PS::DB::RRD is rather simple, and attempts to mirror the API of the 
 other perfSONAR_PS::DB::* modules.  
 
-=head2 new($log, $path, $file, %datasources, $error)
+=head2 new($path, $file, %datasources, $error)
 
-The 'log' argument is the name of the log file where error or warning information may be 
-recorded.  The second represents the path to the rrdtool executable, the third represents 
-an actual rrd file.  The fourth can be a hash containing the names of the datasources in 
+The first arguments represents the path to the rrdtool executable, the second represents 
+an actual rrd file.  The third can be a hash containing the names of the datasources in 
 the rrd file. The final argument is a boolean indicating if errors should be thrown.  
 All arguments are optional, and the 'set' functions (setLog($log), setFile($file), 
 setPath($path), setVariables(%datasources), setVariables($ds), setError($error)) are 
 capable of setting the information as well.  
-
-=head2 setLog($log)
-
-(Re-)Sets the name of the log file to be used.
 
 =head2 setPath($path)
 
@@ -468,10 +413,6 @@ Adds $variable to the hash of datasources in the rrd file.
 
 (Re-)Sets the value of the error variable (only 1 or 0), which allows you to utilize the
 getErrorMessage() function.
-
-=head2 setDebug($debug)
-
-(Re-)Sets the value of the $debug switch.
 
 =head2 getErrorMessage()
 
@@ -525,15 +466,9 @@ Returns the 'last' timestamp in the RRD file.
 
 Returns the 'first' timestamp in the RRD file.  
 
-=head2 error($self, $msg, $line)	
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
-
 =head1 SEE ALSO
 
-L<RRDp>, L<perfSONAR_PS::Common>
+L<RRDp>, L<perfSONAR_PS::Common>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

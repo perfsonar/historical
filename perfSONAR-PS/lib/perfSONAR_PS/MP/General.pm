@@ -1,26 +1,30 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::MP::General;
+
+use warnings;
 use Carp qw( carp );
 use Exporter;  
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MP::Base;
 
 @ISA = ('Exporter');
-@EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup');
+@EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup', 
+            'parseXMLDB', 'parseFile');
 
 
 sub cleanMetadata {
   my($mp) = @_;  
-  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"cleanMetadata\"";
+  my $logger = get_logger("perfSONAR_PS::MP::General");
 
   if(defined $mp and $mp ne "") {
     $mp->{STORE} = chainMetadata($mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"});
-   
     foreach my $md ($mp->{STORE}->getElementsByTagNameNS($mp->{NAMESPACES}->{"nmwg"}, "metadata")) {
       my $count = countRefs($md->getAttribute("id"), $mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"}, "data", "metadataIdRef");
       if($count == 0) {
+        $logger->debug("Removing metadata \"".$md->getAttribute("id")."\" from the DOM.");
         $mp->{STORE}->getDocumentElement->removeChild($md);
       } 
       else {
@@ -29,7 +33,7 @@ sub cleanMetadata {
     }    
   }
   else {
-    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -37,12 +41,13 @@ sub cleanMetadata {
 
 sub cleanData {
   my($mp) = @_;
-  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"cleanData\"";
+  my $logger = get_logger("perfSONAR_PS::MP::General");
+  
   if(defined $mp and $mp ne "") {
     foreach my $d ($mp->{STORE}->getElementsByTagNameNS($mp->{NAMESPACES}->{"nmwg"}, "data")) {
       my $count = countRefs($d->getAttribute("metadataIdRef"), $mp->{STORE}, $mp->{NAMESPACES}->{"nmwg"}, "metadata", "id");
       if($count == 0) {
+        $logger->debug("Removing data \"".$d->getAttribute("id")."\" from the DOM.");
         $mp->{STORE}->getDocumentElement->removeChild($d);
       } 
       else {
@@ -51,7 +56,7 @@ sub cleanData {
     }
   }
   else {
-    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);  
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -59,8 +64,7 @@ sub cleanData {
 
 sub lookup {
   my($mp, $uri, $default) = @_;
-  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"lookup\"";
+  my $logger = get_logger("perfSONAR_PS::MP::General");
   
   if((defined $mp and $mp ne "") and 
      (defined $uri and $uri ne "") and 
@@ -73,10 +77,11 @@ sub lookup {
       }
     }
     $prefix = $default if($prefix eq "");
+    $logger->debug("Found prefix \"".$prefix."\".");
     return $prefix;
   }
   else {
-    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);  
+    $logger->error("Missing argument(s).");  
   }
   return "";
 }
@@ -84,8 +89,7 @@ sub lookup {
 
 sub removeReferences {
   my($mp, $id, $did) = @_;
-  $mp->{FILENAME} = "perfSONAR_PS::MP::General";  
-  $mp->{FUNCTION} = "\"removeReferences\"";    
+  my $logger = get_logger("perfSONAR_PS::MP::General");    
     
   if((defined $mp and $mp ne "") and
      (defined $id and $id ne "") and 
@@ -93,11 +97,11 @@ sub removeReferences {
      
     $mp->{DATAMARKS}->{$did}--;
     $mp->{METADATAMARKS}->{$id}--;
-    
     foreach my $dm (sort keys %{$mp->{DATAMARKS}}) {
       if($mp->{DATAMARKS}->{$dm} == 0) {
         delete $mp->{DATAMARKS}->{$dm};
         my $rmD = $mp->{STORE}->find("//nmwg:data[\@id=\"".$dm."\"]")->get_node(1);
+        $logger->debug("Removing data child \"".$dm."\" from the DOM.");
         $mp->{STORE}->getDocumentElement->removeChild($rmD);   
       }
     }
@@ -106,15 +110,71 @@ sub removeReferences {
       if($mp->{METADATAMARKS}->{$mm} == 0) {
         delete $mp->{METADATAMARKS}->{$mm};
         my $rmMD = $mp->{STORE}->find("//nmwg:metadata[\@id=\"".$mm."\"]")->get_node(1);
+        $logger->debug("Removing metadata child \"".$mm."\" from the DOM.");
         $mp->{STORE}->getDocumentElement->removeChild($rmMD);  
       }
     }  
   }
   else {
-    perfSONAR_PS::MP::Base::error($mp, "Missing argument", __LINE__);
+    $logger->error("Missing argument(s).");
   }
   return;
 }
+
+
+sub parseFile {
+  my($mp) = @_; 
+  my $logger = get_logger("perfSONAR_PS::MP::General");   
+  my $filedb = new perfSONAR_PS::DB::File(
+    $mp->{CONF}->{"METADATA_DB_FILE"}
+  );  
+  $filedb->openDB;   
+  $logger->debug("Connecting to file database \"".$mp->{CONF}->{"METADATA_DB_FILE"}."\".");
+  
+  return $filedb->getDOM();
+}
+
+
+sub parseXMLDB {
+  my($mp) = @_;  
+  my $logger = get_logger("perfSONAR_PS::MP::General");   
+  
+  my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+    $mp->{CONF}->{"METADATA_DB_NAME"}, 
+    $mp->{CONF}->{"METADATA_DB_FILE"},
+    \%{$mp->{NAMESPACES}}
+  );
+  $metadatadb->openDB;
+  $logger->debug("Connecting to XMLDB database \"".$mp->{CONF}->{"METADATA_DB_NAME"}."\".");
+
+  my $storeString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store ";
+  foreach my $ns (keys %{$mp->{NAMESPACES}}) {
+    $storeString = $storeString."xmlns:".$ns."=\"".$mp->{NAMESPACES}->{$ns}."\" ";
+  }
+  $storeString = $storeString.">";
+    
+  my @query = ("//nmwg:metadata", "//nmwg:data");  
+ 
+  for(my $y = 0; $y <= 1; $y++) {
+    $logger->debug("Query \"".$query[$y]."\" created.");
+    my @resultsString = $metadatadb->query($query[$y]);   
+        
+    if($#resultsString != -1) {   
+      for(my $x = 0; $x <= $#resultsString; $x++) {     	
+	      $storeString = $storeString . $resultsString[$x];
+      }    
+    }
+    else {
+      $logger->error($mp->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results.");      
+    } 
+  }
+  
+  $storeString = $storeString."</nmwg:store>";
+  my $parser = XML::LibXML->new();
+  
+  return $parser->parse_string($storeString); 
+}
+
 
 
 1;

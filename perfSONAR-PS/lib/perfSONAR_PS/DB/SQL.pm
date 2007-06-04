@@ -1,20 +1,16 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::SQL;
+
+
 use DBI;
+use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 
-@ISA = ('Exporter');
-@EXPORT = ();
 
 sub new {
-  my ($package, $log, $name, $user, $pass, $schema, $debug) = @_;   
+  my ($package, $name, $user, $pass, $schema) = @_;   
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::DB::SQL";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $log and $log ne "") {
-    $hash{"LOGFILE"} = $log;
-  }      
   if(defined $name and $name ne "") {
     $hash{"NAME"} = $name;
   }  
@@ -27,34 +23,18 @@ sub new {
   if(defined $schema and $schema ne "") {
     @{$hash{"SCHEMA"}} = @{$schema};
   } 
-  if(defined $debug and $debug ne "") {
-    $hash{"DEBUG"} = $debug;  
-  }   
   bless \%hash => $package;
-}
-
-
-sub setLog {
-  my ($self, $log) = @_;  
-  $self->{FUNCTION} = "\"setLog\"";  
-  if(defined $log and $log ne "") {
-    $self->{LOGFILE} = $log;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);    
-  }
-  return;
 }
 
 
 sub setName {
   my ($self, $name) = @_;  
-  $self->{FUNCTION} = "\"setName\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if(defined $name and $name ne "") {
     $self->{NAME} = $name;
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -62,12 +42,12 @@ sub setName {
 
 sub setUser {
   my ($self, $user) = @_;  
-  $self->{FUNCTION} = "\"setUser\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if(defined $user and $user ne "") {
     $self->{USER} = $user;
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -75,12 +55,12 @@ sub setUser {
 
 sub setPass {
   my ($self, $pass) = @_;  
-  $self->{FUNCTION} = "\"setPass\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if(defined $pass and $pass ne "") {
     $self->{PASS} = $pass;
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -88,25 +68,12 @@ sub setPass {
 
 sub setSchema {
   my ($self, $schema) = @_;  
-  $self->{FUNCTION} = "\"setSchema\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if(defined $schema and $schema ne "") {
     @{$self->{SCHEMA}} = @{$schema};
   } 
   else {
-    error($self, "Missing argument", __LINE__);
-  }
-  return;
-}
-
-
-sub setDebug {
-  my ($self, $debug) = @_;  
-  $self->{FUNCTION} = "\"setDebug\"";  
-  if(defined $debug and $debug ne "") {
-    $self->{DEBUG} = $debug;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);    
+    $logger->error("Missing argument.");
   }
   return;
 }
@@ -114,7 +81,7 @@ sub setDebug {
 
 sub openDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"openDB\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   eval {
     my %attr = (
       RaiseError => 1,
@@ -124,11 +91,10 @@ sub openDB {
       $self->{USER},
       $self->{PASS}, 
       \%attr
-    ) or 
-      error($self, "Database ".$self->{NAME}." unavailable with user ".$self->{NAME}." and password ".$self->{PASS}, __LINE__);               
+    ) or $logger->error("Database \"".$self->{NAME}."\" unavailable with user \"".$self->{NAME}."\" and password \"".$self->{PASS}."\".");               
   };
   if($@) {
-    error($self, "Open error \"".$@."\"", __LINE__);
+    $logger->error("Open error \"".$@."\".");
   }   
   return;
 }
@@ -136,12 +102,12 @@ sub openDB {
 
 sub closeDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"closeDB\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   eval {   
     $self->{HANDLE}->disconnect();
   };
   if($@) {
-    error($self, "Close error \"".$@."\"", __LINE__);
+    $logger->error("Close error \"".$@."\".");
   }   
   return;
 }
@@ -149,23 +115,22 @@ sub closeDB {
 
 sub query {
   my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"query\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   my $results = (); 
   if(defined $query and $query ne "") {  
-    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    $logger->debug("Query \"".$query."\" received.");
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
-      $sth->execute() or 
-        error($self, "Query error on statement \"".$query."\"", __LINE__);      	      
+      $sth->execute() or $logger->error("Query error on statement \"".$query."\".");      	      
       $results  = $sth->fetchall_arrayref;
     };
     if($@) {
-      error($self, "Query error \"".$@."\"", __LINE__);
+      $logger->error("Query error \"".$@."\".");
       return -1;
     } 
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   } 
   return $results;
 }
@@ -173,23 +138,22 @@ sub query {
 
 sub count {
   my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"count\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   my $results = -2; 
   if(defined $query and $query ne "") { 
-    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});   
+    $logger->debug("Query \"".$query."\" received.");   
     eval {
       my $sth = $self->{HANDLE}->prepare($query);
-      $sth->execute() or 
-        error($self, "Query error on statement \"".$query."\"", __LINE__);	
-      $results  = $sth->fetchall_arrayref;  
+      $sth->execute() or $logger->error("Query error on statement \"".$query."\".");	
+      $results = $sth->fetchall_arrayref;  
     };      
     if($@) {
-      error($self, "Query error \"".$@."\" on statement \"".$query."\"", __LINE__);
+      $logger->error("Query error \"".$@."\" on statement \"".$query."\".");
       return -1;
     } 
   } 
   else { 
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   } 
   return $#{$results}+1;
 }
@@ -197,11 +161,10 @@ sub count {
 
 sub insert {
   my ($self, $table, $argvalues) = @_;
-  $self->{FUNCTION} = "\"insert\"";   
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if((defined $table and $table ne "") and 
      (defined $argvalues and $argvalues ne "")) {
     my %values = %{$argvalues};
-
     my $insert = "insert into " . $table . " (";    
     for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {
       if($x == 0) {
@@ -221,23 +184,21 @@ sub insert {
       }
     }  
     $insert = $insert.")";
-    
-    print $self->{FILENAME}.":\tinsert \".$insert.\" prepared in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    $logger->debug("Insert \"".$insert."\" prepared.");
     eval {
       my $sth = $self->{HANDLE}->prepare($insert);
       for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {   
         $sth->bind_param($x+1, $values{$self->{SCHEMA}->[$x]});
       }
-      $sth->execute() or 
-        error($self, "Insert error on statement \"".$insert."\"", __LINE__);		      
+      $sth->execute() or $logger->error("Insert error on statement \"".$insert."\".");		      
     };
     if($@) {
-      error($self, "Insert error \"".$@."\" on statement \"".$insert."\"", __LINE__);
+      $logger->error("Insert error \"".$@."\" on statement \"".$insert."\".");
       return -1;
     }     
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   } 
   return 1;  
 }
@@ -245,33 +206,22 @@ sub insert {
 
 sub remove {
   my ($self, $delete) = @_;
-  $self->{FUNCTION} = "\"remove\"";
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
   if(defined $delete and $delete ne "") {
-    print $self->{FILENAME}.":\tdelete \".$delete.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    $logger->debug("Delete \"".$delete."\" received.");
     eval {     
       my $sth = $self->{HANDLE}->prepare($delete);
-      $sth->execute() or 
-        error($self, "Remove error on statement \"".$delete."\"", __LINE__);		      
+      $sth->execute() or $logger->error("Remove error on statement \"".$delete."\".");		      
     };
     if($@) {	
-      error($self, "Remove error \"".$@."\" on statement \"".$delete."\"", __LINE__);
+      $logger->error("Remove error \"".$@."\" on statement \"".$delete."\".");
       return -1;
     }     
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }    
   return 1;
-}
-
-
-sub error {
-  my($self, $msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
-  return;
 }
 
 
@@ -296,7 +246,6 @@ the specific database.
 
     my @dbSchema = ("id", "time", "value", "eventtype", "misc");
     my $db = new perfSONAR_PS::DB::SQL(
-      "./error.log";
       "DBI:SQLite:dbname=/home/jason/Netradar/MP/SNMP/netradar.db", 
       "",
       "",
@@ -306,12 +255,10 @@ the specific database.
     # or also:
     # 
     # my $db = new perfSONAR_PS::DB::SQL;
-    # $db->setLog("./error.log");
     # $db->setName("DBI:SQLite:dbname=/home/jason/netradar/MP/SNMP/netradar.db");
     # $db->setUser("");
     # $db->setPass("");    
-    # $db->setSchema(\@dbSchema);
-    # $db->setDebug($debug);     
+    # $db->setSchema(\@dbSchema);     
 
     $db->openDB;
 
@@ -371,20 +318,15 @@ specific database.
 The API of perfSONAR_PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
 perfSONAR_PS::DB::* modules.  
 
-=head2 new($log, $name, $user, $pass, $schema)
+=head2 new($name, $user, $pass, $schema)
 
-The 'log' argument is the name of the log file where error or warning information may be 
-recorded.  The second argument is the 'name' of the database (written as a DBI connection 
-string), and the forth arguments are the username and password (if any) used to connect to 
-the database.  The final argument is the table 'schema' for the database.  At current time 
-only a single table is supported.  The '$name' must be of the DBI connection format which 
-specifies a 'type' of database (MySQL, SQLite, etc) as well as a path or other connection 
-method.  It is important that you have the proper DBI modules installed for the specific 
-database you will be attempting to access. 
-
-=head2 setLog($log)
-
-(Re-)Sets the name of the log file to be used.
+The first argument is the 'name' of the database (written as a DBI connection string), and 
+the second and third arguments are the username and password (if any) used to connect to 
+the database.  The final argument is the table 'schema' for the database.  At current 
+time only a single table is supported.  The '$name' must be of the DBI connection 
+format which specifies a 'type' of database (MySQL, SQLite, etc) as well as a path or 
+other connection method.  It is important that you have the proper DBI modules installed 
+for the specific database you will be attempting to access. 
 
 =head2 setName($name)
 
@@ -404,10 +346,6 @@ modules installed for the specific database you will be attempting to access.
 =head2 setSchema($schema)
 
 (Re-)Sets the table schema for the database.
-
-=head2 setDebug($debug)
-
-(Re-)Sets the value of the $debug switch.
 
 =head2 openDB
 
@@ -445,15 +383,9 @@ The '$delete' string is an SQL statement to be sent to the database.  The statem
 must of course use the proper database schema elements and be properly formed.  Will 
 return 1 on success, -1 on failure.
 
-=head2 error($self, $msg, $line)	
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
-
 =head1 SEE ALSO
 
-L<DBI>, L<perfSONAR_PS::Common>
+L<DBI>, L<perfSONAR_PS::Common>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

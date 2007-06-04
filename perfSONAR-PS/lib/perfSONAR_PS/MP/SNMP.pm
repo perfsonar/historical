@@ -1,6 +1,11 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::MP::SNMP;
+
+use warnings;
+use Carp qw( carp );
+use Exporter;
+use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::MP::Base;
 use perfSONAR_PS::MP::General;
@@ -12,76 +17,21 @@ use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 
+
 sub parseMetadata {
   my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";    
-  $self->{FUNCTION} = "\"parseMetadata\"";
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP");
   
-  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {  
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-      $self->{CONF}->{"LOGFILE"},
-      $self->{CONF}->{"METADATA_DB_NAME"}, 
-      $self->{CONF}->{"METADATA_DB_FILE"},
-      \%{$self->{NAMESPACES}},
-      $self->{CONF}->{"DEBUG"}
-    );
-
-    $metadatadb->openDB;
-    
-    my $query = "//nmwg:metadata";
-    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
-    my @resultsStringMD = $metadatadb->query($query);   
-    
-    my $storeString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store ";
-    foreach my $ns (keys %{$self->{NAMESPACES}}) {
-      $storeString = $storeString."xmlns:".$ns."=\"".$self->{NAMESPACES}->{$ns}."\" ";
-    }
-    $storeString = $storeString.">";
-    
-    if($#resultsStringMD != -1) {   
-      for(my $x = 0; $x <= $#resultsStringMD; $x++) {     	
-	$storeString = $storeString . $resultsStringMD[$x];
-      }    
-    }
-    else {
-      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__);      
-    } 
-
-    $query = "//nmwg:data";
-    print "DEBUG:\tQuery: \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});
-    my @resultsStringD = $metadatadb->query($query);   
-    
-    if($#resultsStringD != -1) {    
-      for(my $x = 0; $x <= $#resultsStringD; $x++) { 	
-	$storeString = $storeString . $resultsStringD[$x];
-      }
-    }
-    else {
-      perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." returned 0 results for query \"".$query."\" ", __LINE__); 
-    }                 
-    $storeString = $storeString."</nmwg:store>";
-
-    my $parser = XML::LibXML->new();
-    $self->{STORE} = $parser->parse_string($storeString); 
-    cleanMetadata(\%{$self});
+  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+    $self->{STORE} = parseXMLDB($self);
+    cleanMetadata(\%{$self});    
   }
   elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {   
-    my $filedb = new perfSONAR_PS::DB::File(
-      $self->{CONF}->{"LOGFILE"},
-      $self->{CONF}->{"METADATA_DB_FILE"},
-      $self->{CONF}->{"DEBUG"}
-    );  
-   
-    $filedb->openDB;   
-    $self->{STORE} = $filedb->getDOM(); 
+    $self->{STORE} = parseFile($self);
     cleanMetadata(\%{$self});
   }
-  elsif(($self->{CONF}->{"METADATA_DB_TYPE"} eq "mysql") or 
-        ($self->{CONF}->{"METADATA_DB_TYPE"} eq "sqlite")) {
-    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not yet supported", __LINE__); 
-  }  
   else {
-    perfSONAR_PS::MP::Base::error($self, $self->{CONF}->{"METADATA_DB_TYPE"}." is not supported", __LINE__);
+    $logger->error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported."); 
   }
   return;
 }
@@ -89,22 +39,22 @@ sub parseMetadata {
 
 sub prepareData {
   my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"prepareData\"";
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP");
+  
   cleanData(\%{$self});
   foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {    
     my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
-    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));        
+
     if($type eq "rrd") {  
       if(!defined $self->{DATADB}->{$file}) { 
         $self->{DATADB}->{$file} = new perfSONAR_PS::DB::RRD(
-          $self->{CONF}->{"LOGFILE"}, 
           $self->{CONF}->{"RRDTOOL"}, 
           $file,
           "",
-          1,
-	  $self->{CONF}->{"DEBUG"}
+          1
         );
+        $logger->debug("Connectiong to RR database \"".$self->{DATADB}->{$file}."\".");
       }
       $self->{DATADB}->{$file}->setVariable(
         extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
@@ -114,21 +64,16 @@ sub prepareData {
       if(!defined $self->{DATADB}->{$file}) {  
         my @dbSchema = ("id", "time", "value", "eventtype", "misc");  
         $self->{DATADB}->{$file} = new perfSONAR_PS::DB::SQL(
-          $self->{CONF}->{"LOGFILE"}, 
           "DBI:SQLite:dbname=".$file, 
           "", 
-	  "", 
-	  \@dbSchema,
-	  $self->{CONF}->{"DEBUG"}
+	        "", 
+	        \@dbSchema
         );
+        $logger->debug("Connectiong to SQL database \"".$self->{DATADB}->{$file}."\".");
       }
     }
-    elsif($type eq "mysql") {
-      perfSONAR_PS::MP::Base::error($self, $type." is not yet supported", __LINE__);    
-      removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id")); 
-    }
     else {
-      perfSONAR_PS::MP::Base::error($self, $type." is not supported", __LINE__);
+      $logger->error($type." is not supported.");
       removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id"));
     }  
   }  
@@ -138,30 +83,29 @@ sub prepareData {
 
 sub prepareCollectors {
   my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"prepareCollectors\"";
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP");
       
   $self->{LOOKUP}->{"1.3.6.1.2.1.1.3.0"} = "timeticks";
-  
   foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
     if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
       my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");
-      my $snmpPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/snmp/2.0/", "snmp");    
+      my $snmpPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/snmp/2.0/", "snmp"); 
+         
       my $hostName = extract($m->find(".//".$topoPrefix.":hostName")->get_node(1));      
       my $ifIndex = extract($m->find(".//".$topoPrefix.":ifIndex")->get_node(1));
       my $snmpVersion = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPVersion\"]")->get_node(1));
       my $snmpCommunity = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPCommunity\"]")->get_node(1));
       my $OID = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"OID\"]")->get_node(1));    
+      
       if(!defined $self->{AGENT}->{$hostName}) {    	  
-        print "DEBUG:\tPreparing collector for \"".$hostName."\", \"".$snmpVersion."\", \"".$snmpCommunity."\".\n" if($self->{CONF}->{"DEBUG"});
         $self->{AGENT}->{$hostName} = new perfSONAR_PS::MP::SNMP::Agent(
-	  $self->{CONF}->{"LOGFILE"},
           $hostName, 
           "" ,
           $snmpVersion,
           $snmpCommunity,
           ""
         );
+        $logger->debug("Creating collector for \"".$hostName."\", \"".$snmpVersion."\", \"".$snmpCommunity."\".");
       }
       $self->{AGENT}->{$hostName}->setVariable($OID.".".$ifIndex);
   
@@ -178,8 +122,7 @@ sub prepareCollectors {
 
 sub prepareTime {
   my($self, $time) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"prepareTime\"";
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP");
     
   if(defined $time and $time ne "") {
     %{$self->{HOSTTICKS}} = ();
@@ -192,7 +135,7 @@ sub prepareTime {
     }  
   }
   else {
-    perfSONAR_PS::MP::Base::error($self, "Missing argument", __LINE__);      
+    $logger->error("Missing argument.");      
   }  
   return;
 }
@@ -200,12 +143,10 @@ sub prepareTime {
 
 sub collectMeasurements {
   my($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP";  
-  $self->{FUNCTION} = "\"collectMeasurements\"";
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP");
   
   foreach my $s (keys %{$self->{AGENT}}) {
-    print "DEBUG:\tCollecting data for \"".$s."\".\n" if($self->{CONF}->{"DEBUG"});
-    
+    $logger->debug("Collecting data for \"".$s."\".");
     my %results = ();
     %results = $self->{AGENT}->{$s}->collectVariables;
 
@@ -218,33 +159,30 @@ sub collectMeasurements {
       my $newHostTicks = 0;
       foreach my $r (keys %results) {
         if($self->{LOOKUP}->{$r} and $self->{LOOKUP}->{$r} eq "timeticks") {
-	  if($self->{HOSTTICKS}->{$s} == 0) {
-	    $self->{HOSTTICKS}->{$s} = $results{$r}/100;
-	    $newHostTicks = $results{$r}/100;
-	  }
-	  else {	    
-	    $newHostTicks = $results{$r}/100;	    
-	  }
-	  last;
-	}	
+	        if($self->{HOSTTICKS}->{$s} == 0) {
+	          $self->{HOSTTICKS}->{$s} = $results{$r}/100;
+	          $newHostTicks = $results{$r}/100;
+	        }
+	        else {	    
+	          $newHostTicks = $results{$r}/100;	    
+	        }
+	        last;
+	      }	
       }    
-
       $diff = $newHostTicks - $self->{HOSTTICKS}->{$s};
       $self->{HOSTTICKS}->{$s} = $newHostTicks;  
       $self->{REFTIME}->{$s} += $diff;
             
       foreach my $r (keys %results) { 
         if($self->{LOOKUP}->{$s."-".$r} and $self->{LOOKUP}->{$s."-".$r} ne "timeticks") {
-	  
-	  foreach $did (@{$self->{LOOKUP}->{$s."-".$r}}) {	    
-	    my $d = $self->{STORE}->find("//nmwg:data[\@id=\"".$did."\"]")->get_node(1);
+	        foreach $did (@{$self->{LOOKUP}->{$s."-".$r}}) {	    
+	          my $d = $self->{STORE}->find("//nmwg:data[\@id=\"".$did."\"]")->get_node(1);
             my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
-	    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+	          my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
     
             if($type eq "rrd") {
               my $dataSource = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
-              print "DEBUG:\tinserting (RRD): " , $self->{REFTIME}->{$s},",", $dataSource, ",",
-                $results{$r},"\n" if($self->{CONF}->{"DEBUG"});
+              $logger->debug("inserting (RRD): ".$self->{REFTIME}->{$s}.",".$dataSource.",".$results{$r},".");
               
               $self->{DATADB}->{$file}->insert(
                 $self->{REFTIME}->{$s}, 
@@ -253,9 +191,7 @@ sub collectMeasurements {
               );
             }
             elsif($type eq "sqlite") {
-              print "DEBUG:\tinserting (SQLite): " , $d->getAttribute("metadataIdRef"), ",", 
-                $self->{REFTIME}->{$s},",", $results{$r},",snmp,''\n" 
-                if($self->{CONF}->{"DEBUG"});
+              $logger->debug("inserting (SQLite): ".$d->getAttribute("metadataIdRef").",".$self->{REFTIME}->{$s}.",".$results{$r}.",snmp,''.");
               
               %dbSchemaValues = (
                 id => $d->getAttribute("metadataIdRef"), 
@@ -271,14 +207,11 @@ sub collectMeasurements {
 	            );
               $self->{DATADB}->{$file}->closeDB;
             }
-            elsif($type eq "mysql") {
-              perfSONAR_PS::MP::Base::error($self, "Database \"".$type."\" is not yet supported", __LINE__);
-            }
             else {
-              perfSONAR_PS::MP::Base::error($self, "Database \"".$type."\" is not supported", __LINE__);
+              $logger->error("Database \"".$type."\" is not supported.");
             }
-	  }
-	}
+	        }
+	      }
       }
     }
   }
@@ -291,15 +224,10 @@ sub collectMeasurements {
       $self->{DATADB}->{$file}->openDB;
       @result = $self->{DATADB}->{$file}->insertCommit;
       $self->{DATADB}->{$file}->closeDB;
-    }
-    else {
-      # do nothing
-    }  
+    } 
   }  
   return;
 }
-
-
 
 
 
@@ -308,16 +236,16 @@ sub collectMeasurements {
 
 
 package perfSONAR_PS::MP::SNMP::Agent;
+
 use Net::SNMP;
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::Common;
+
 sub new {
-  my ($package, $log, $host, $port, $ver, $comm, $vars, $debug) = @_; 
+  my ($package, $host, $port, $ver, $comm, $vars) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::MP::SNMP::Agent";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $log and $log ne "") {
-    $hash{"LOGFILE"} = $log;
-  }  
+
   if(defined $host and $host ne "") {
     $hash{"HOST"} = $host;
   }
@@ -335,38 +263,21 @@ sub new {
   }
   if(defined $var and $var ne "") {
     $hash{"VARIABLES"} = \%{$vars};  
-  }
-  if(defined $debug and $debug ne "") {
-    $hash{"DEBUG"} = $debug;  
-  }      
+  }    
   
   bless \%hash => $package;
 }
 
 
-sub setLog {
-  my ($self, $log) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";
-  $self->{FUNCTION} = "\"setLog\"";  
-  if(defined $log and $log ne "") {
-    $self->{LOGFILE} = $log;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);   
-  }
-  return;
-}
-
-
 sub setHost {
   my ($self, $host) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";
-  $self->{FUNCTION} = "\"setHost\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+   
   if(defined $host and $host ne "") {
     $self->{HOST} = $host;
   }
   else {
-    error($self, "Missing argument", __LINE__);      
+    $logger->error("Missing argument.");      
   }
   return;
 }
@@ -374,13 +285,13 @@ sub setHost {
 
 sub setPort {
   my ($self, $port) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";
-  $self->{FUNCTION} = "\"setPort\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+    
   if(defined $port and $port ne "") {
     $self->{PORT} = $port;
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");      
   }
   return;
 }
@@ -388,13 +299,13 @@ sub setPort {
 
 sub setVersion {
   my ($self, $ver) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"setVersion\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+   
   if(defined $ver and $ver ne "") {
     $self->{VERSION} = $ver;
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");     
   }
   return;
 }
@@ -402,13 +313,13 @@ sub setVersion {
 
 sub setCommunity {
   my ($self, $comm) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"setCommunity\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if(defined $comm and $comm ne "") {
     $self->{COMMUNITY} = $comm;
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");      
   }
   return;
 }
@@ -416,13 +327,13 @@ sub setCommunity {
 
 sub setVariables {
   my ($self, $vars) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"setVariables\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if(defined $var and $var ne "") {
     $hash{"VARIABLES"} = \%{$vars};
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");      
   }
   return;
 }
@@ -430,27 +341,13 @@ sub setVariables {
 
 sub setVariable {
   my ($self, $var) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"setVariable\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if(defined $var and $var ne "") {
     $self->{VARIABLES}->{$var} = "";
   }
   else {
-    error($self, "Missing argument", __LINE__);   
-  }
-  return;
-}
-
-
-sub setDebug {
-  my ($self, $debug) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";
-  $self->{FUNCTION} = "\"setDebug\"";  
-  if(defined $debug and $debug ne "") {
-    $self->{DEBUG} = $debug;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);      
+    $logger->error("Missing argument.");     
   }
   return;
 }
@@ -458,8 +355,7 @@ sub setDebug {
 
 sub getVariableCount {
   my ($self) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"getVariableCount\""; 
+
   my $num = 0;
   foreach my $oid (keys %{$self->{VARIABLES}}) {
     $num++;
@@ -470,11 +366,11 @@ sub getVariableCount {
 
 sub removeVariables {
   my ($self) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"removeVariables\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   undef $self->{VARIABLES};
   if(defined $self->{VARIABLES}) {
-    error($self, "Remove failure", __LINE__);   
+    $logger->error("Remove failure.");       
   }
   return;
 }
@@ -482,13 +378,13 @@ sub removeVariables {
 
 sub removeVariable {
   my ($self, $var) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"removeVariable\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if(defined $var and $var ne "") {
     delete $self->{VARIABLES}->{$var};
   }
   else {
-    error($self, "Missing argument", __LINE__);   
+    $logger->error("Missing argument.");      
   }
   return;
 }
@@ -496,8 +392,8 @@ sub removeVariable {
 
 sub setSession {
   my ($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"setSession\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if((defined $self->{COMMUNITY} and $self->{COMMUNITY} ne "") and 
      (defined $self->{VERSION} and $self->{VERSION} ne "") and 
      (defined $self->{HOST} and $self->{HOST} ne "") and 
@@ -510,15 +406,14 @@ sub setSession {
       -port          => $self->{PORT},
       -translate     => [
                          -timeticks => 0x0
-                        ]) or 
-      error($self, "Couldn't open SNMP session to \"".$self->{HOST}."\"", __LINE__);
+                        ]) or $logger->error("Couldn't open SNMP session to \"".$self->{HOST}."\".");
 	      
     if(!defined($self->{SESSION})) {
-      error($self, "SNMP error", __LINE__);
+      $logger->error("SNMP error.");
     }
   }
   else {
-    error($self, "Session requires arguments 'host', 'version', and 'community'", __LINE__);      
+    $logger->error("Session requires arguments 'host', 'version', and 'community'.");      
   }  
   return;
 }
@@ -526,13 +421,13 @@ sub setSession {
 
 sub closeSession {
   my ($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"closeSession\"";  
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+  
   if(defined $self->{SESSION}) {
     $self->{SESSION}->close;
   }
   else {
-    error($self, "Cannont close undefined session", __LINE__);
+    $logger->error("Cannont close undefined session.");
   }
   return;
 }
@@ -540,22 +435,21 @@ sub closeSession {
 
 sub collectVariables {
   my ($self) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"collectVariables\"";    
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+    
   if(defined $self->{SESSION}) {
   
     my @oids = ();
     foreach my $oid (keys %{$self->{VARIABLES}}) {
       push @oids, $oid;
     }
-  
+
     $self->{RESULT} = $self->{SESSION}->get_request(
       -varbindlist => \@oids
-    ) or 
-      error($self, "SNMP error", __LINE__);
+    ) or $logger->error("SNMP error.");
     
     if(!defined($self->{RESULT})) {
-      error($self, "SNMP error", __LINE__);
+      $logger->error("SNMP error.");
       return ('error' => -1);
     }    
     else {
@@ -563,7 +457,7 @@ sub collectVariables {
     }
   }
   else {
-    error($self, "Session to \"".$self->{HOST}."\" not found", __LINE__);     
+    $logger->error("Session to \"".$self->{HOST}."\" not found.");     
     return ('error' => -1);
   }      
 }
@@ -571,19 +465,18 @@ sub collectVariables {
 
 sub collect {
   my ($self, $var) = @_;
-  $self->{FILENAME} = "perfSONAR_PS::MP::SNMP::Agent";  
-  $self->{FUNCTION} = "\"collect\""; 
+  my $logger = get_logger("perfSONAR_PS::MP::SNMP::Agent");
+   
   if(defined $var and $var ne "") {   
     undef $self->{RESULT};
     if(defined $self->{SESSION}) {
       
       $self->{RESULT} = $self->{SESSION}->get_request(
         -varbindlist => [$var]
-      ) or 
-        error($self, "SNMP error: \"".$self->{ERROR}."\"", __LINE__); 
+      ) or $logger->error("SNMP error: \"".$self->{ERROR}."\"."); 
       
       if(!defined($self->{RESULT})) {
-        error($self, "SNMP error: \"".$self->{ERROR}."\"", __LINE__);          
+        $logger->error("SNMP error: \"".$self->{ERROR}."\".");          
         return -1;
       }    
       else {
@@ -591,22 +484,13 @@ sub collect {
       }
     }
     else {    
-      error($self, "Session to \"".$self->{HOST}."\" not found", __LINE__);   
+      $logger->error("Session to \"".$self->{HOST}."\" not found.");   
       return -1;
     }
   }
   else {
-    error($self, "Missing argument", __LINE__);  
+    $logger->error("Missing argument.");  
   }
-  return;
-}
-
-sub error {
-  my($self, $msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
 

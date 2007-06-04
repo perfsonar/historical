@@ -1,22 +1,26 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::Common;
+
+use warnings;
 use Carp qw( carp );
 use Exporter;
+
 use IO::File;
 use XML::XPath;
 use Time::HiRes qw( gettimeofday );
+use Log::Log4perl qw(get_logger);
 
 @ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'printError' , 'parse', 
-           'chainMetadata', 'countRefs', 'genuid', 'getHostname',
-           'extract');
+@EXPORT = ('readXML','readConfiguration', 'printError', 'chainMetadata', 
+           'countRefs', 'genuid', 'extract', 'reMap');
 
 sub readXML {
-  my ($file)  = @_;
+  my ($file)  = @_;  
+  my $logger = get_logger("perfSONAR_PS::Common");
+  
   if(defined $file and $file ne "") {
-    my $XML = new IO::File("<".$file) or 
-      carp("perfSONAR_PS::Common:\tCan't open file \"".$file."\" in \"readXML\" at line ".__LINE__.".");
+    my $XML = new IO::File("<".$file);
     if(defined $XML) {
       my $xmlstring = "";
       while (<$XML>) {
@@ -27,9 +31,12 @@ sub readXML {
       $XML->close();
       return $xmlstring;
     }
+    else {
+      $logger->error("Cannot open file \"".$file."\".");
+    }
   }
   else {
-    carp("perfSONAR_PS::Common:\tMissing argument to \"readXML\" at line ".__LINE__.".");
+    $logger->error("Missing argument.");
   }
   return "";
 }
@@ -37,43 +44,28 @@ sub readXML {
 
 sub readConfiguration {
   my ($file, $conf)  = @_;
+  my $logger = get_logger("perfSONAR_PS::Common");
+  
   if((defined $file and $file ne "") and 
      (defined $conf and $conf ne "")) {
-    my $CONF = new IO::File("<".$file) or 
-      carp("perfSONAR_PS::Common:\tCan't open configuration file \"".$file."\" in \"readConfiguration\" at line ".__LINE__.".");
+    my $CONF = new IO::File("<".$file);
     if(defined $CONF) {
       while (<$CONF>) {
-        if(!($_ =~ m/^#.*$/)) {
+        if(!($_ =~ m/^#.*$/) and !($_ =~ m/^\s+/)) {
           $_ =~ s/\n//;
           @values = split(/\?/,$_);
           $conf->{$values[0]} = $values[1];
+          $logger->debug("Found ".$values[0]." = \"".$values[1]."\".");
         }
       }          
       $CONF->close();
     }
-  }
-  else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"readConfiguration\" at line ".__LINE__.".");
-  }
-  return;
-}
-
-
-sub printError {
-  my($file, $msg) = @_;
-  if((defined $file and $file ne "") and 
-     (defined $msg and $msg ne "")) {
-    my $LOG = new IO::File("+>>".$file) or 
-      carp("perfSONAR_PS::Common:\tCan't open log file \"".$file."\" in \"printError\" at line ".__LINE__.".");
-    if(defined $LOG) {
-      my ($sec, $micro) = Time::HiRes::gettimeofday;
-      print $LOG "TIME: " , $sec , "." , $micro , "\t\t";
-      print $LOG $msg , "\n";
-      $LOG->close();
+    else {
+      $logger->error("Cannot open file \"".$file."\".");
     }
   }
   else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"printError\" at line ".__LINE__.".");
+    $logger->error("Missing argument(s).");
   }
   return;
 }
@@ -81,30 +73,39 @@ sub printError {
 
 sub chainMetadata {
   my($dom, $uri) = @_;
+  my $logger = get_logger("perfSONAR_PS::Common");
+
   if(defined $dom and $dom ne "") {
     foreach my $md ($dom->getElementsByTagNameNS($uri, "metadata")) {
       my @subjects = $md->getElementsByLocalName("subject");
       if($subjects[0]) {
         if($subjects[0]->getAttribute("metadataIdRef")) {
           foreach my $md2 ($dom->getElementsByTagNameNS($uri, "metadata")) {
-	    if($subjects[0]->getAttribute("metadataIdRef") eq $md2->getAttribute("id")) {
+	          if($subjects[0]->getAttribute("metadataIdRef") eq $md2->getAttribute("id")) {
+              $logger->debug("Found chain for subject \"".$subjects[0]->getAttribute("id")."\" and metadata \"".$md2->getAttribute("id")."\".");
+              
+              # XXX jason: [6/1/07]
+              # testing... (if we were to remove the unecessary subject)
+              $md->removeChild($subjects[0]);
+              
               chain($md2, $md, $md2);
-	    }
+	          }
           }
         }
       }
     }
   }
   else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"chainMetadata\" at line ".__LINE__.".");
+    $logger->error("Missing argument.");
   }
   return $dom;
 }
 
+
 sub chain {
   my($node, $ref, $ref2) = @_;
+  
   if($node->nodeType != 3) {
-    
     my $attrString = "";
     my $counter = 0;
     foreach my $attr ($node->attributes) {
@@ -137,7 +138,6 @@ sub chain {
         }
       }
     }
-    
     if($attrString) {
       $attrString = "[".$attrString."]";      
     }
@@ -156,9 +156,9 @@ sub chain {
 
     if($path) {  
       if(!($ref->find($path.$attrString))) {
-	my $name = $node->nodeName;
-	my $path2 = $path;
-	$path2 =~ s/\/$name$//;	  
+	      my $name = $node->nodeName;
+	      my $path2 = $path;
+	      $path2 =~ s/\/$name$//;	  
         if($ref->find($path2)) {
           $ref->find($path2)->get_node(1)->addChild($node->cloneNode(1));	 
         }
@@ -177,8 +177,11 @@ sub chain {
   return;
 }
 
+
 sub countRefs {
   my($id, $dom, $uri, $element, $attr) = @_;
+  my $logger = get_logger("perfSONAR_PS::Common");
+  
   if((defined $id and $id ne "") and 
      (defined $dom and $dom ne "") and 
      (defined $uri and $uri ne "") and 
@@ -193,28 +196,23 @@ sub countRefs {
     return $flag;
   }
   else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"countRefs\" at line ".__LINE__.".");
+    $logger->error("Missing argument(s).");
   }
+  $logger->debug("0 Refernces Found");
   return -1;  
 }
 
+
 sub genuid {
-  my ($r) = int( rand( 16777216 ) );
-  return ( $r + 1048576 );
-}
-
-
-sub getHostname {
-  open(HN, "hostname |");
-  my @hostName = <HN>;
-  $hostName[0] =~ s/\n//g;
-  close(HN);
-  return $hostName[0];
+  my $r = int(rand(16777216))+1048576;
+  return $r;
 }
 
 
 sub extract {
   my($node) = @_;
+  my $logger = get_logger("perfSONAR_PS::Common");
+  
   if(defined $node and $node ne "") {
     if($node->getAttribute("value")) {
       return $node->getAttribute("value");
@@ -224,9 +222,39 @@ sub extract {
     }  
   }
   else {
-    carp("perfSONAR_PS::Common:\tMissing argument(s) to \"extract\" at line ".__LINE__.".");
+    $logger->error("Missing argument.");
   }
   return "";
+}
+
+
+sub reMap {
+  my($requestNamespaces, $namespaces, $node) = @_;  
+  my $logger = get_logger("perfSONAR_PS::Common");
+  
+  if($node->prefix and $node->namespaceURI()) {
+    if(!$requestNamespaces->{$node->namespaceURI()}) {
+      $requestNamespaces->{$node->namespaceURI()} = $node->prefix;
+      $logger->debug("Setting namespace \"".$node->namespaceURI()."\" with prefix \"".$node->prefix."\".");
+    }
+    if(!($namespaces->{$node->prefix})) {
+      foreach my $ns (keys %{$namespaces}) {
+        if($namespaces->{$ns} eq $node->namespaceURI()) {
+          $node->setNamespace($namespaces->{$ns}, $ns, 1);
+          $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
+          last;
+        }
+      }    
+    }
+  }
+  if($node->hasChildNodes()) {
+    foreach my $c ($node->childNodes) {
+      if($node->nodeType != 3) {
+        $requestNamespaces = reMap($requestNamespaces, $namespaces, $c);
+      }
+    }
+  }
+  return $requestNamespaces;
 }
 
 
@@ -294,8 +322,6 @@ can be invoked directly (and sparingly).
 
     print "A random id would look like this:\t'" , genuid() , "'\n";
 
-    print "The hostname of the system is:\t'" , getHostname() , "'\n";
-
     # consider the elements that could be stored in '$node':
     #
     #  <nmwg:parameter name="something">value</nmwg:parameter>
@@ -304,7 +330,10 @@ can be invoked directly (and sparingly).
     #
     # 'value' would be returned for each of them
     #
-    my $value = extract($ma, $node);    
+    my $value = extract($node);    
+    
+    my %rns = ();
+    reMap(\%rns, \%ns, $DOM); 
        
 =head1 DETAILS
 
@@ -411,11 +440,7 @@ Which would then become:
 
 This chaining is useful for 'factoring out' large chunks of XML.
 
-=head2 chain($node, $ref, $ref2)
-
-Aux function of the chainMetadata command.  Not to be used externally.
-
-=head2 countRefs($id, \%struct, $value)
+=head2 countRefs($id, $dom, $uri, $element, $attr)
 
 Given a ID, and a series of 'struct' objects and a key 'value' to search on, this function 
 will return a 'count' of the number of times the id was seen as a reference to the objects.  
@@ -426,14 +451,15 @@ will return -1 on error.
 
 Generates a random number.
 
-=head2 getHostname()
+=head2 extract($node)
 
-Returns the output of the 'hostname' function.
-
-=head2 extract($ma, $node)
-
-Returns a 'value' from a xml element, either the 'value' attribute or the 
+Returns a 'value' from a xml element, either the value attribute or the 
 text field.
+
+=head2 reMap(\%{$rns}, \%{$ns}, $dom_node) 
+
+Re-map the nodes namespace prefixes to known prefixes (to not screw with the 
+XPath statements that will occur later).
 
 =head1 SEE ALSO
 

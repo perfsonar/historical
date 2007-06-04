@@ -1,63 +1,30 @@
 #!/usr/bin/perl
 
 package perfSONAR_PS::DB::File;
-use XML::LibXML;
 
-@ISA = ('Exporter');
-@EXPORT = ();
+
+use XML::LibXML;
+use Log::Log4perl qw(get_logger);
+
 
 sub new {
-  my ($package, $log, $file, $ns, $debug) = @_; 
+  my ($package, $file) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::DB::File";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $log and $log ne "") {
-    $hash{"LOGFILE"} = $log;
-  }    
   if(defined $file and $file ne "") {
     $hash{"FILE"} = $file;
   }  
-  if(defined $debug and $debug ne "") {
-    $hash{"DEBUG"} = $debug;  
-  }    
   bless \%hash => $package;
-}
-
-
-sub setLog {
-  my ($self, $log) = @_;  
-  $self->{FUNCTION} = "\"setLog\"";  
-  if(defined $log and $log ne "") {
-    $self->{LOGFILE} = $log;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);
-  }
-  return;
 }
 
 
 sub setFile {
   my ($self, $file) = @_;  
-  $self->{FUNCTION} = "\"setFile\"";  
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $file and $file ne "") {
     $self->{FILE} = $file;
   }
   else {
-    error($self, "Missing argument", __LINE__);  
-  }
-  return;
-}
-
-
-sub setDebug {
-  my ($self, $debug) = @_;  
-  $self->{FUNCTION} = "\"setDebug\"";  
-  if(defined $debug and $debug ne "") {
-    $self->{DEBUG} = $debug;
-  }
-  else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");  
   }
   return;
 }
@@ -65,13 +32,13 @@ sub setDebug {
 
 sub openDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"openDB\"";    
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{FILE}) {    
     my $parser = XML::LibXML->new();
     $self->{XML} = $parser->parse_file($self->{FILE});  
   }
   else {
-    error($self, "Missing file in object", __LINE__);      
+    $logger->error("Cannot open database, missing filename.");      
   }                  
   return;
 }
@@ -79,14 +46,14 @@ sub openDB {
 
 sub closeDB {
   my ($self) = @_;
-  $self->{FUNCTION} = "\"closeDB\""; 
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{XML} and $self->{XML} ne "") {
     open(FILE, ">".$self->{FILE});
     print FILE $self->{XML}->toString;
     close(FILE);
   }
   else {
-    error($self, "LibXML DOM structure not defined", __LINE__);  
+    $logger->error("LibXML DOM structure not defined.");  
   }
   return;
 }
@@ -94,10 +61,10 @@ sub closeDB {
 
 sub query {
   my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"query\"";        
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   my @results = ();
   if(defined $query and $query ne "") {
-    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});   
+    $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
       my $nodeset = $self->{XML}->find($query);
       foreach my $node (@{$nodeset}) {            	    
@@ -105,11 +72,11 @@ sub query {
       }
     }
     else {
-      error($self, "LibXML DOM structure not defined", __LINE__); 
+      $logger->error("LibXML DOM structure not defined."); 
     }
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }  
   return @results;
 }
@@ -117,19 +84,19 @@ sub query {
 
 sub count {
   my ($self, $query) = @_;
-  $self->{FUNCTION} = "\"count\"";  ;
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $query and $query ne "") {    
-    print $self->{FILENAME}.":\tquery \".$query.\" received in ".$self->{FUNCTION}."\n" if($self->{DEBUG});
+    $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
       my $nodeset = $self->{XML}->find($query);
       return $nodeset->size();  
     }
     else {
-      error($self, "LibXML DOM structure not defined", __LINE__); 
+      $logger->error("LibXML DOM structure not defined."); 
     }
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   } 
   return 0;   
 }
@@ -137,11 +104,12 @@ sub count {
 
 sub getDOM {
   my ($self) = @_;
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{XML} and $self->{XML} ne "") {
     return $self->{XML};  
   }
   else {
-    error($self, "LibXML DOM structure not defined", __LINE__); 
+    $logger->error("LibXML DOM structure not defined."); 
   }
   return ""; 
 }
@@ -153,18 +121,8 @@ sub setDOM {
     $self->{XML} = $dom;
   }
   else {
-    error($self, "Missing argument", __LINE__);
+    $logger->error("Missing argument.");
   }   
-  return;
-}
-
-
-sub error {
-  my($self, $msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  perfSONAR_PS::Common::printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -190,17 +148,13 @@ may then be invoked on the object for the specific database.
     use perfSONAR_PS::DB::File;
   
     my $file = new perfSONAR_PS::DB::File(
-      "./error.log",
-      "./store.xml",
-      1
+      "./store.xml"
     );
 
     # or also:
     # 
     # my $file = new perfSONAR_PS::DB::File;
-    # $file->setLog("./error.log");
     # $file->setFile("./store.xml");  
-    # $file->setDebug($debug);    
     
     $file->openDB();
 
@@ -208,7 +162,7 @@ may then be invoked on the object for the specific database.
 
     my @results = $file->query("//nmwg:metadata");
     foreach my $r (@results) {
-     print $r , "\n";
+      print $r , "\n";
     }
 
     $file->closeDB();
@@ -234,23 +188,13 @@ edit your XML file, do so out of band.
 The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
 the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($log, $file, $debug)
+=head2 new($file)
 
-The 'log' argument is the name of the log file where error or warning information may be 
-recorded.  The second argument is a strings representing the file to be opened.  The third 
-argument is a flag to indicate debugging.
-
-=head2 setLog($log)
-
-(Re-)Sets the name of the log file to be used.
+The only argument is a string representing the file to be opened.
 
 =head2 setFile($file)
 
 (Re-)Sets the name of the file to be used.
-
-=head2 setDebug($debug)
-
-(Re-)Sets the value of the $debug switch.
 
 =head2 openDB
 
@@ -277,16 +221,10 @@ Returns the internal XML::LibXML DOM object.
 =head2 setDOM($dom)
 
 Sets the value of of the internal XML::LibXML DOM object.
-
-=head2 error($self, $msg, $line)	
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.  
   
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<perfSONAR_PS::Common>
+L<XML::LibXML>, L<perfSONAR_PS::Common>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

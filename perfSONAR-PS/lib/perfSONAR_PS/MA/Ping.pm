@@ -2,14 +2,15 @@
 
 package perfSONAR_PS::MA::Ping;
 
+use threads;
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
-
-use threads;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
 

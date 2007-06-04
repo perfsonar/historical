@@ -2,13 +2,17 @@
 
 package perfSONAR_PS::MP::Ping;
 
+use XML::LibXML;
+use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::MP::Base;
 use perfSONAR_PS::MP::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
-use XML::LibXML;
+
+
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 
