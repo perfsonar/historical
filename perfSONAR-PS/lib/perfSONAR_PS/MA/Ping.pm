@@ -1,13 +1,16 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::MA::Ping;
 
-use threads;
+use warnings;
+use Carp qw( carp );
+use Exporter;
 use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
@@ -17,335 +20,246 @@ our @ISA = qw(perfSONAR_PS::MA::Base);
 
 sub receive {
   my($self) = @_;
-  $self->{FILENAME} = "\"perfSONAR_PS::MA::Ping\"";   
-  $self->{FUNCTION} = "\"receive\"";   
-  print $self->{FILENAME}.":\tAccepting calls in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});  
-  if($self->{LISTENER}->acceptCall == 1) {
-    $self->{REQUEST} = $self->{LISTENER}->getRequest;
-    print $self->{FILENAME}.":\tReceived request \"".$self->{REQUEST}."\" in ".$self->{FUNCTION}."\n" if($self->{CONF}->{"DEBUG"});    
-    my $handleThread = threads->new(\&handleRequest, $self);
-    if(!defined $handleThread) {
-      print "Thread creation has failed...exiting...\n";
-      exit(1);
-    }
-    $self->{RESPONSE} = $handleThread->join();
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+
+  my $readValue = $self->{LISTENER}->acceptCall;
+  if($readValue == 0) {
+    $logger->debug("Received 'shadow' request from below; no action required.");
+    $self->{RESPONSE} = $self->{LISTENER}->getResponse();
+  }
+  elsif($readValue == 1) {      
+    $logger->debug("Received request to act on.");
+    handleRequest($self);
   }
   else {
     my $msg = "Sent Request has was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
-    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
+    $logger->error($msg);
     $self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
   }
-  undef $self->{REQUEST};
   return;
 }
 
 
 sub handleRequest {
   my($self) = @_;
-  $self->{FILENAME} = "\"perfSONAR_PS::MA::Ping\"";
-  $self->{FUNCTION} = "\"handleRequest\"";   
-  undef $self->{RESPONSE};
-  my $parser = XML::LibXML->new();
-  $self->{REQUESTDOM} = $parser->parse_string($self->{REQUEST});   
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  delete $self->{RESPONSE};
 
-  reMap($self, $self->{REQUESTDOM}->getDocumentElement);
-
-  my $nodeset = $self->{REQUESTDOM}->find("/".$self->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"}.":message");
-  if($nodeset->size() < 1) {
-    my $msg = "Message element not found within request";
-    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-    $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
-  }
-  elsif($nodeset->size() == 1) {
-    my $msg = $nodeset->get_node(1);
-    my $messageId = $msg->getAttribute("id");
-    my $messageType = $msg->getAttribute("type");    
+  $self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
+  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or 
+     $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+    my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
+    my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
     my $messageIdReturn = genuid();    
 
-    $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACES}->{"nmwg"});
-
-    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-      if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACES}->{"nmwg"}, "data", "metadataIdRef") == 0) {
-        $self->{REQUESTDOM}->getDocumentElement->removeChild($m);
-      }
-    }    
-
-    if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or 
-       $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-      if($messageType eq "MetadataKeyRequest") {
-        handleKeyRequest($self, $messageIdReturn, $messageId, $self->{CONF}->{"METADATA_DB_TYPE"});
-      }
-      elsif($messageType eq "SetupDataRequest") {
-        handleDataRequest($self, $messageIdReturn, $messageId, $self->{CONF}->{"METADATA_DB_TYPE"}); 
-      }
-      elsif($messageType eq "MeasurementArchiveStoreRequest") {
-        my $msg = "Message type \"MeasurementArchiveStoreRequest\" is not yet supported";
-        perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-        $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MeasurementArchiveStoreResponse", "error.ma.message.type", $msg);
-      }
-      else {
-        my $msg = "Message type \"".$messageType."\" is not yet supported";
-        perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-        $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
-      }
+    if($messageType eq "MetadataKeyRequest" or 
+       $messageType eq "SetupDataRequest") {
+      $logger->debug("Parsing request.");
+      parseRequest($self, $messageIdReturn, $messageId, $messageType);
     }
     else {
-      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not supported";
-      perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);   
-      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.mp.snmp", $msg);
+      my $msg = "Message type \"".$messageType."\" is not yet supported";
+      $logger->error($msg);  
+      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
     }
   }
   else {
-    my $msg = "Too many message elements found within request";
-    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__); 
-    $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "response", "error.mp.snmp", $msg);
+    my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not supported";
+    $logger->error($msg); 
+    $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.mp.snmp", $msg);
   }
   return $self->{RESPONSE};
 }
 
 
-sub handleKeyRequest {
+sub parseRequest {
   my($self, $messageId, $messageIdRef, $type) = @_; 
-  $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
-  $self->{FUNCTION} = "\"handleKeyRequest\""; 
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
 
   my $localContent = "";
-  foreach my $d ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
+  foreach my $d ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
+    foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
       if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
       
         my $metadatadb;
-        if($type eq "file") {
+        if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
           $metadatadb = new perfSONAR_PS::DB::File(
-            $self->{CONF}->{"LOGFILE"},
-            $self->{CONF}->{"METADATA_DB_FILE"},
-            $self->{CONF}->{"DEBUG"}
+            $self->{CONF}->{"METADATA_DB_FILE"}
           );        
-	}
-	elsif($type eq "xmldb") {
-	  $metadatadb = new perfSONAR_PS::DB::XMLDB(
-            $self->{CONF}->{"LOGFILE"},
+	      }
+	      elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+	        $metadatadb = new perfSONAR_PS::DB::XMLDB(
             $self->{CONF}->{"METADATA_DB_NAME"}, 
             $self->{CONF}->{"METADATA_DB_FILE"},
-            \%{$self->{NAMESPACES}},
-	    $self->{CONF}->{"DEBUG"}
+            \%{$self->{NAMESPACES}}
           );	  
-	}
-	$metadatadb->openDB; 
-	my $queryString = "//nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
-        print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
-	@resultsString = $metadatadb->query($queryString);	
+	      }
+	      $metadatadb->openDB; 
+	      $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
+	      
+	      if($type eq "MetadataKeyRequest") {
+	        $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
+	      }
+	      elsif($type eq "SetupDataRequest") {         
+          getTime(\%{$self}, $m->getAttribute("id"));
+          if($m->find("//nmwg:metadata/nmwg:key")) {
+            $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+          }
+          else {
+            $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+          }	
+	      }
+      }   
+    }
+  }  
+  return;
+}
+
+
+sub setupDataKeyRequest {
+  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  
+	my $queryString = "//nmwg:data[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
+  $logger->debug("Query \"".$queryString."\" created."); 
+
+
+# XXX jason: [6/4/07]
+# Adding the 'cooked' md to the request        
+#  $localContent = $localContent . $m->toString();
+   
+   
+# XXX jason: [6/4/07]
+# Adding the 'original' md to the request
+  my $xp = XML::XPath->new( xml => $self->{LISTENER}->getRequest );
+  my $nodeset = $xp->find("//nmwg:message/nmwg:metadata");
+  if($nodeset->size() <= 0) {
+  }
+  else {  
+    foreach my $node ($nodeset->get_nodelist) {
+      $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
+    }
+  }
+
+   
+	my @resultsString = $metadatadb->query($queryString);   
+	if($#resultsString != -1) {
+    for(my $x = 0; $x <= $#resultsString; $x++) {	
+      $localContent = $localContent . handleData($self, $m->getAttribute("id"), $resultsString[$x], $messageId, $messageIdRef);
+    } 
+    $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);       
+  }
+	else {
+	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
+    $logger->error($msg);
+    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
+	}  
+  return;
+}
+
+
+sub setupDataRequest {
+  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  
+	my $queryString = "//nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 1) . "]";
+  $logger->debug("Query \"".$queryString."\" created.");
+	my @resultsString = $metadatadb->query($queryString);   
 	
 	if($#resultsString != -1) {
-	  for(my $x = 0; $x <= $#resultsString; $x++) {
-            my $parser = XML::LibXML->new();
-            $doc = $parser->parse_string($resultsString[$x]);  
-            my $mdset = $doc->find("//nmwg:metadata");
-            my $md = $mdset->get_node(1); 
+    for(my $x = 0; $x <= $#resultsString; $x++) {	
+      my $parser = XML::LibXML->new();
+      $doc = $parser->parse_string($resultsString[$x]);  
+      my $mdset = $doc->find("//nmwg:metadata");
+      my $md = $mdset->get_node(1); 
+  
+      $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]";
+      $logger->debug("Query \"".$queryString."\" created.");
+	    my @dataResultsString = $metadatadb->query($queryString);
+		
+	    if($#dataResultsString != -1) { 
 
-            print "DEBUG:\tMetadata \"".$md->toString()."\" created.\n" if($self->{CONF}->{"DEBUG"});
-            $localContent = $localContent . $md->toString;  
-            $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]";  
-            
-            print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
-	    my @dataResultsString = $metadatadb->query($queryString);	  
-	      	    
-	    if($#dataResultsString != -1) {    			  
-              for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		print "DEBUG:\tData \"".$dataResultsString[$y]."\" created.\n" if($self->{CONF}->{"DEBUG"});
-                $localContent = $localContent . $dataResultsString[$y]; 
-                $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "MetadataKeyResponse", $localContent);
-              }       
+
+# XXX jason: [6/4/07]
+# Adding the 'cooked' md to the request        
+#       $localContent = $localContent . $md->toString();
+
+     
+# XXX jason: [6/4/07]
+# Adding the 'original' md to the request
+        my $xp = XML::XPath->new( xml => $self->{LISTENER}->getRequest );
+        my $nodeset = $xp->find("//nmwg:message/nmwg:metadata");
+        if($nodeset->size() <= 0) {
+        }
+        else {  
+          foreach my $node ($nodeset->get_nodelist) {
+            $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
+          }
+        }
+                
+        
+        for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		      $localContent = $localContent . handleData($self, $m->getAttribute("id"), $dataResultsString[$y], $messageId, $messageIdRef);
+        } 
+        $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);  	    	  
 	    }
-            else {
+      else {
 	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-              perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-              $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);
-            }  
+        $logger->error($msg);  
+        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);
+      } 
 	  }
 	}
 	else {
 	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-          perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-          $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);	     
-	}		  	
-      }   
-    }
-  }
-}
-
-
-sub handleDataRequest {
-  my($self, $messageId, $messageIdRef, $type) = @_; 
-  $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
-  $self->{FUNCTION} = "\"handleDataRequest\""; 
-  
-  my $localContent = "";
-  foreach my $d ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-    foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
-      
-        my $metadatadb;
-        if($type eq "file") {
-          $metadatadb = new perfSONAR_PS::DB::File(
-            $self->{CONF}->{"LOGFILE"},
-            $self->{CONF}->{"METADATA_DB_FILE"},
-            $self->{CONF}->{"DEBUG"}
-          );     
-        }
-        elsif($type eq "xmldb") {
-	  $metadatadb = new perfSONAR_PS::DB::XMLDB(
-            $self->{CONF}->{"LOGFILE"},
-            $self->{CONF}->{"METADATA_DB_NAME"}, 
-            $self->{CONF}->{"METADATA_DB_FILE"},
-            \%{$self->{NAMESPACES}},
-	    $self->{CONF}->{"DEBUG"}
-          );	  
-        }
-        $metadatadb->openDB;  
-        
-        if($m->find("//nmwg:metadata/nmwg:key")) {
-	  my $queryString = "//nmwg:data[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
-          print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
-          
-          getTime(\%{$self}, $m->getAttribute("id"));
-          
-          $localContent = $localContent . $m->toString();
-          
-	  my @resultsString = $metadatadb->query($queryString);   
-	  if($#resultsString != -1) {
-            for(my $x = 0; $x <= $#resultsString; $x++) {	
-              handleData($self, $m->getAttribute("id"), $resultsString[$x], $localContent);
-            }        
-          }
-	  else {
-	    my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-            perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-            $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
-	  }                  
-        }
-        else {
-	  my $queryString = "//nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 1) . "]";
-          print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
-	  my @resultsString = $metadatadb->query($queryString);   
-	
-	  if($#resultsString != -1) {
-            for(my $x = 0; $x <= $#resultsString; $x++) {	
-              my $parser = XML::LibXML->new();
-              $doc = $parser->parse_string($resultsString[$x]);  
-              my $mdset = $doc->find("//nmwg:metadata");
-              my $md = $mdset->get_node(1); 
-  
-              $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]";
-              print "DEBUG:\tQuery \"".$queryString."\" created.\n" if($self->{CONF}->{"DEBUG"});
-	      my @dataResultsString = $metadatadb->query($queryString);
-		
-	      if($#dataResultsString != -1) { 
-                $localContent = $localContent . $m->toString;                
-                for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		  handleData($self, $m->getAttribute("id"), $dataResultsString[$y], $localContent);
-                }   	    	  
-	      }
-              else {
-	        my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-                perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-                $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);
-              } 
-	    }
-	  }
-	  else {
-	    my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-            perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-            $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
-	  }
-        }		
-      }   
-    }
-  }
+    $logger->error($msg);
+    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
+	}  
+  return;
 }
 
 
 sub handleData {
-  my($self, $id, $dataString, $localContent) = @_;
+  my($self, $id, $dataString, $messageId, $messageIdRef) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
   
-  print "DEBUG:\tData \"".$dataString."\" created.\n" if($self->{CONF}->{"DEBUG"});		    
+  my $localContent = "";
+  $logger->debug("Data \"".$dataString."\" found.");	    
   undef $self->{RESULTS};		    
 
   my $parser = XML::LibXML->new();
   $self->{RESULTS} = $parser->parse_string($dataString);   
   my $dt = $self->{RESULTS}->find("//nmwg:data")->get_node(1);
-  		 		
-  my $type = extract(
-    \%{$self}, $dt->find("./nmwg:key//nmwg:parameter[\@name=\"type\"]")->get_node(1));
+  my $type = extract($dt->find("./nmwg:key//nmwg:parameter[\@name=\"type\"]")->get_node(1));
                   
   if($type eq "sqlite") {
-    $localContent = $localContent . retrieveSQL($self, $dt, $id);		  		       
-    $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);	
+    $localContent = retrieveSQL($self, $dt, $id);		  		       
   }		
   else {
     my $msg = "Database \"".$type."\" is not yet supported";
-    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);  
-    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);
+    $logger->error($msg);    
+    $localContent = getResultCodeData(genuid(), $id, $msg);  
   }
-  return;
+  return $localContent;
 }
 
 
 sub retrieveSQL {
   my($self, $d, $mid) = @_;
-  $self->{FILENAME} = "\"perfSONAR_PS::MA::SNMP\"";
-  $self->{FUNCTION} = "\"retrieveSQL\""; 
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  
   my $responseString = "";
-
   my @dbSchema = ("id", "time", "value", "eventtype", "misc");
-
-  my $file = extract(
-    \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"file\"]")->get_node(1));
-  my $table = extract(
-    \%{$self}, $d->find("./nmwg:key//nmwg:parameter[\@name=\"table\"]")->get_node(1));
-    
+  my $result = getDataSQL($self, $d, \@dbSchema);  
   my $id = genuid();
-  my $datadb = new perfSONAR_PS::DB::SQL(
-    $self->{CONF}->{"LOGFILE"},
-    "DBI:SQLite:dbname=".$file,
-    "", 
-    "",
-    \@dbSchema,
-    $self->{CONF}->{"DEBUG"}
-  );
-		      
-  $datadb->openDB();
-  
-  my $query = "";
-  if($self->{TIME}->{"START"} or $self->{TIME}->{"END"}) {
-    $query = "select * from ".$table." where id=\"".$d->getAttribute("metadataIdRef")."\" and";
-    my $queryCount = 0;
-    if($self->{TIME}->{"START"}) {
-      $query = $query." time > ".$self->{TIME}->{"START"};
-      $queryCount++;
-    }
-    if($self->{TIME}->{"END"}) {
-      if($queryCount) {
-        $query = $query." and time < ".$self->{TIME}->{"END"}.";";
-      }
-      else {
-        $query = $query." time < ".$self->{TIME}->{"END"}.";";
-      }
-    }
-  }
-  else {
-    $query = "select * from ".$table.";"
-  }  
-
-  print "DEBUG:\tQuery \"".$query."\" created.\n" if($self->{CONF}->{"DEBUG"});  
-  
-  my $result = $datadb->query($query);
+    
   if($#{$result} == -1) {
     my $msg = "Query \"".$query."\" returned 0 results";
-    perfSONAR_PS::MA::Base::error($self, $msg, __LINE__);
+    $logger->error($msg);
     $responseString = $responseString . getResultCodeData($id, $mid, $msg); 
   }   
   else { 
+    $logger->debug("Data found.");
     $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
     for(my $a = 0; $a <= $#{$result}; $a++) {    
       $responseString = $responseString . "    <ping:datum";
@@ -354,15 +268,13 @@ sub retrieveSQL {
       my @misc = split(/,/,$result->[$a][4]);
       foreach my $m (@misc) {
         my @pair = split(/=/,$m);
-	$responseString = $responseString." ".$pair[0]."=\"".$pair[1]."\""; 
+	      $responseString = $responseString." ".$pair[0]."=\"".$pair[1]."\""; 
       }
       $responseString = $responseString . " />\n";
     }
     $responseString = $responseString . "  </nmwg:data>\n";
+    $logger->debug("Data block created.");
   }  
-
-  $datadb->closeDB();	  
-   
   return $responseString;
 }
 
@@ -373,7 +285,7 @@ sub retrieveSQL {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Ping - A module forthe Ping MA.
+perfSONAR_PS::MA::Ping - A module that provides methods for the Ping MA.  
 
 =head1 DESCRIPTION
 
@@ -387,31 +299,30 @@ related tasks of interacting with backend storage.
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/Ping/xmldb";
-    $conf{"METADATA_DB_FILE"} = "pingstore.dbxml";
-    $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-
+    $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
+    $conf{"PING"} = "/bin/ping";
+    
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
       nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+      ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
+      select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
     );
-
-    my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns, "");
     
+    my $ma = perfSONAR_PS::MA::Ping->new(\%conf, \%ns);
+
     # or
     # $ma = perfSONAR_PS::MA::Ping->new;
     # $ma->setConf(\%conf);
-    # $ma->setNamespaces(\%ns);
-    # $ma->setStore($store);   
-         
+    # $ma->setNamespaces(\%ns);      
+        
     $ma->init;  
     while(1) {
       $ma->receive;
       $ma->respond;
     }  
   
- 
+
 =head1 DETAILS
 
 This API is a work in progress, and still does not reflect the general access needed in an MA.
@@ -421,44 +332,31 @@ Additional logic is needed to address issues such as different backend storage f
 
 The offered API is simple, but offers the key functions we need in a measurement archive. 
 
-=head2 new(\%conf, \%ns, $store)
-
-The arguments represent a 'conf' hash from the calling MA, a hash of namespaces, and a LibXML DOM
-object for the store file.
-
-=head2 setConf(\%conf)
-
-(Re-)Sets the value for the 'conf' hash. 
-
-=head2 setStore($store) 
-
-(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
-
-=head2 init()
-
-Initialize transportation medium.
-
-=head2 receive()
+=head2 receive($self)
 
 Grabs message from transport object to begin processing.
 
-=head2 handleRequest()
+=head2 handleRequest($self)
 
-Interact with the metadata and data databases (information will be collected from 
-the conf hash as well as the backend metadata storage) to create a response for a given 
-request.  This response could be the correct data, or it could be a descriptive error 
-message if something happened to go wrong. 
+Functions as the 'gatekeeper' the the MA.  Will either reject or accept
+requets.  will also 'do nothing' in the event that a request has been
+acted on by the lower layer.  
 
-=head2 handleMetadataKeyRequest($self, $messageId, $messageIdRef, $type)
+=head2 parseRequest($self, $messageId, $messageIdRef, $type)
 
-Processes the MetadataKeyRequest message, which presents some loose metadata
-and requests a data key.
+Processes both the the MetadataKeyRequest and SetupDataRequest messages, which 
+preturn either metadata or data to the user.
 
-=head2 handleDataRequest($self, $messageId, $messageIdRef, $type)
-  
-Processes the SetupDataRequest message (with and without a key) which presents
-some metadata credentials, and returns a list of data.  
+=head2 setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef)
 
+Runs the specific needs of a SetupDataRequest when a key is presented to 
+the service.
+
+=head2 setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef)
+
+Runs the specific needs of a SetupDataRequest when a key is NOT presented to 
+the service.
+ 
 =head2 handleData($self, $id, $dataString, $localContent)
 
 Helper function to extract data from the backed storage.
@@ -467,20 +365,11 @@ Helper function to extract data from the backed storage.
 
 The data is extracted from the backed storage (in this case SQL). 
 
-=head2 respond()
-
-Send message stored in $self->{RESPONSE}.
-
-=head2 error($self, $msg, $line)	
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
-
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>, 
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
+L<perfSONAR_PS::DB::SQL>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

@@ -721,12 +721,6 @@ Starts the objects that will keep track of time (in relation to the remote sites
 Cycles through each of the 'perfSONAR_PS::MP::SNMP::Agent' objects and gathers the 
 necessary values.  
 
-=head2 error($msg, $line)	
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
-
 =head1 SEE ALSO
 
 L<Net::SNMP>, L<perfSONAR_PS::MP::Base>,  L<perfSONAR_PS::MP::General>, 
