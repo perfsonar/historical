@@ -11,19 +11,19 @@
       <nmwgt:interface>
         <nmwgt:hostName>mead</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
-        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:direction>out</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
   </nmwg:metadata>
 
   <nmwg:metadata id="meta2">
     <netutil:subject id="s2" metadataIdRef="meta1"/>  
-    <nmwg:parameters id="2">
-      <select:parameter name="time" operator="gte">1176728750</select:parameter>
-      <select:parameter name="time" operator="lte">1176728800</select:parameter>      
-      <select:parameter name="consolidationFunction">AVERAGE</select:parameter>     
-      <select:parameter name="resolution">10</select:parameter> 
-    </nmwg:parameters>
+    <select:parameters id="2">
+      <nmwg:parameter name="time" operator="gte">1180963820</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1180963920</nmwg:parameter>     
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>     
+      <nmwg:parameter name="resolution">10</nmwg:parameter> 
+    </select:parameters>
   </nmwg:metadata> 
   
   <nmwg:data id="data1" metadataIdRef="meta2" />

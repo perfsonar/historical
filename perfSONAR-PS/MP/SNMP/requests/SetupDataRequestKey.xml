@@ -9,7 +9,7 @@
      <nmwg:parameters id="2">
        <nmwg:parameter name="type">rrd</nmwg:parameter>
        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	
-       <nmwg:parameter name="file">/home/jason/convert/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+       <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
        <nmwg:parameter name="dataSource">eth0-in</nmwg:parameter>
      </nmwg:parameters>
    </nmwg:key> 
@@ -17,12 +17,12 @@
  
  <nmwg:metadata id="meta2">
    <netutil:subject id="s2" metadataIdRef="meta1"/>  
-   <nmwg:parameters id="2">
-     <select:parameter name="time" operator="gte">1176728770</select:parameter>
-     <select:parameter name="time" operator="lte">1176728800</select:parameter>      
-     <select:parameter name="consolidationFunction">AVERAGE</select:parameter>  
-     <select:parameter name="resolution">60</select:parameter>         
-   </nmwg:parameters>
+   <select:parameters id="2">
+     <nmwg:parameter name="time" operator="gte">1180963820</nmwg:parameter>
+     <nmwg:parameter name="time" operator="lte">1180963920</nmwg:parameter>      
+     <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>  
+     <nmwg:parameter name="resolution">1</nmwg:parameter>         
+   </select:parameters>
  </nmwg:metadata> 
   
  <nmwg:data id="data1" metadataIdRef="meta2"/>
