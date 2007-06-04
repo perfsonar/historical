@@ -5,21 +5,21 @@
              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
 
  <nmwg:metadata id="meta1">
-   <nmwg:key id="1">
-     <nmwg:parameters id="2">
-       <nmwg:parameter name="type">sqlite</nmwg:parameter>
-       <nmwg:parameter name="file">/home/jason/convert/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
-       <nmwg:parameter name="table">data</nmwg:parameter>
-     </nmwg:parameters>
-   </nmwg:key>  
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
  </nmwg:metadata>
  
  <nmwg:metadata id="meta2">
    <ping:subject id="s2" metadataIdRef="meta1"/>  
-   <nmwg:parameters id="2">
-     <select:parameter name="time" operator="gte">1176998877</select:parameter>
-     <select:parameter name="time" operator="lte">1176998887</select:parameter>           
-   </nmwg:parameters>
+   <select:parameters id="2">
+     <nmwg:parameter name="time" operator="gte">1180971580</nmwg:parameter>
+     <nmwg:parameter name="time" operator="lte">1180971590</nmwg:parameter>            
+   </select:parameters>
  </nmwg:metadata> 
   
  <nmwg:data id="data1" metadataIdRef="meta2"/>

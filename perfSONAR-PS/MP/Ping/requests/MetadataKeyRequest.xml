@@ -6,12 +6,12 @@
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
   <nmwg:metadata id="#meta1">
-    <ping:subject id="#ping">
-      <topo:endPointPair>
+    <ping:subject id="#netutil1">
+      <topo:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <topo:src type="hostname" value="mead" />
       </topo:endPointPair>
     </ping:subject>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data id="data1" metadataIdRef="#meta1"/>
