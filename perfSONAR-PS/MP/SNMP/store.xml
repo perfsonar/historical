@@ -6,12 +6,12 @@
   xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="192.168.0.202-1">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager0">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="mead0">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">192.168.0.202</nmwgt:ifAddress>
         <nmwgt:hostName>mead</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
-        <nmwgt:ifIndex>7</nmwgt:ifIndex>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>in</nmwgt:direction>
         <nmwgt:capacity>1000000000</nmwgt:capacity>
       </nmwgt:interface>
@@ -31,19 +31,19 @@
       <nmwg:parameters id="2">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth0-in</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
   </nmwg:data>
   
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="192.168.0.202-2">
-    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="lager1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="mead1">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">192.168.0.202</nmwgt:ifAddress>
         <nmwgt:hostName>mead</nmwgt:hostName>
         <nmwgt:ifName>eth0</nmwgt:ifName>
-        <nmwgt:ifIndex>7</nmwgt:ifIndex>
+        <nmwgt:ifIndex>2</nmwgt:ifIndex>
         <nmwgt:direction>out</nmwgt:direction>
         <nmwgt:capacity>1000000000</nmwgt:capacity>
       </nmwgt:interface>
@@ -63,7 +63,7 @@
       <nmwg:parameters id="4">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth0-out</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
@@ -95,7 +95,7 @@
       <nmwg:parameters id="6">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth0-in</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
@@ -127,7 +127,7 @@
       <nmwg:parameters id="8">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth0-out</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
@@ -159,7 +159,7 @@
       <nmwg:parameters id="10">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth1-in</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
@@ -191,7 +191,7 @@
       <nmwg:parameters id="12">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/stout.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth1-out</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
@@ -232,7 +232,7 @@
     <nmwg:key id="7">
       <nmwg:parameters id="14">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
 	<nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
@@ -256,7 +256,7 @@
     <nmwg:key id="8">
       <nmwg:parameters id="16">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
         <nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
@@ -287,7 +287,7 @@
     <nmwg:key id="9">
       <nmwg:parameters id="18">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
         <nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
@@ -298,7 +298,7 @@
       <nmwg:parameters id="22">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth1-in</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
@@ -329,7 +329,7 @@
     <nmwg:key id="10">
       <nmwg:parameters id="20">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/data.db</nmwg:parameter>
         <nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
@@ -340,7 +340,7 @@
       <nmwg:parameters id="24">
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	      
-        <nmwg:parameter name="file">/home/jason/new/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/SNMP/moonshine.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">eth1-out</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
