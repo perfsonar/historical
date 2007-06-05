@@ -9,6 +9,7 @@ use Thread::Semaphore;
 
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
+use Log::Log4perl qw(get_logger :levels);
 use Data::Dumper;
 
 use perfSONAR_PS::Common;
@@ -16,15 +17,16 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::MA::Bwctl; 
 use perfSONAR_PS::MP::Bwctl;
 
-my $fileName = "bwctl.pl";
-my $functionName = "main";
-my $DEBUG = '';
+Log::Log4perl->init("logger.conf");
+my $logger = get_logger("perfSONAR_PS");
+
+my $DEBUGFLAG = '';
 my $HELP = '';
-my $status = GetOptions ('verbose' => \$DEBUG,
+my $status = GetOptions ('verbose' => \$DEBUGFLAG,
                          'help' => \$HELP);
 
 if(!$status or $HELP) {
-  print "$0: starts the ping MP and MA.\n";
+  print "$0: starts the bwctl MP and MA.\n";
   print "\t$0 [--verbose --help]\n";
   exit(1);
 }
@@ -38,16 +40,23 @@ my %ns = (
 		# Read in configuration information
 my %conf = ();
 readConfiguration("./bwctlMP.conf", \%conf);
-$conf{"DEBUG"} = $DEBUG;
 
-if(!$DEBUG) {
+    # set logging level
+if($DEBUGFLAG) {
+  $logger->level($DEBUG);    
+}
+else {
+  $logger->level($INFO); 
+}
+
+if(!$DEBUGFLAG) {
 		# flush the buffer
   $| = 1;
 		# start the daemon
   &daemonize;
 }
 
-print $fileName.":\tStarting '".threads->tid()."' in ".$functionName."\n" if($DEBUG);
+$logger->debug("Starting '".threads->tid()."'");
 
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
@@ -57,7 +66,7 @@ my $maThread = threads->new(\&measurementArchive);
 my $regThread = threads->new(\&registerLS);
 
 if(!defined $mpThread || !defined $maThread || !defined $regThread) {
-  print "Thread creation has failed...exiting...\n";
+  $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
@@ -72,63 +81,50 @@ $regThread->join();
 
 
 sub measurementPoint {
-  my $functionName = "measurementPoint";
-  print $fileName.":\tStarting '".threads->tid()."' as the MP in ".$functionName."\n" if($DEBUG);
-
-  # initialize measurement info, time, etc.
-    
+  $logger->debug("Starting '".threads->tid()."' as the MP.");
+  
+  my $mp = new perfSONAR_PS::MP::Bwctl(\%conf, \%ns, "");
+  $mp->parseMetadata;
+  $mp->prepareData;
+  $mp->prepareCollectors;  
   while(1) {
-    
-    # collect measurement info
-    
+    $mp->collectMeasurements;
     sleep($conf{"MP_SAMPLE_RATE"});
   }
   return;  
 }
 
 
+
 sub measurementArchive {
-  my $functionName = "measurementArchive";  
-  print $fileName.":\tStarting '".threads->tid()."' as the MA listening at \"http://".getHostname().":".
-        $conf{"PORT"}.$conf{"ENDPOINT"}."\" in ".$functionName."\n" if($DEBUG);
-	
-  my $listener = new perfSONAR_PS::Transport($conf{"LOGFILE"}, $conf{"PORT"}, $conf{"ENDPOINT"}, "", "", "");  
-  $listener->startDaemon;
+  $logger->debug("Starting '".threads->tid()."' as the MA.");
 
-  my $MDId = genuid();
-  my $DId = genuid();
-    								
+  my $ma = new perfSONAR_PS::MA::Bwctl(\%conf, \%ns);
+  $ma->init;  
   while(1) {
-    my $response = "";
-    if($listener->acceptCall == 1) {
-
-      # do the ma stuff here...
-
-      print $fileName.":\tReceived request \"".$listener->getRequest."\" in ".$functionName."\n" if($DEBUG);
-      $response = getResultCodeMessage("", "", "response", "success", "sucess");
-      print $fileName.":\tSending response \"".$response."\" in ".$functionName."\n" if($DEBUG);
-      
-      $listener->setResponse($response, 1); 
+    my $runThread = threads->new(\&measurementArchiveQuery, $ma);
+    if(!defined $runThread) {
+      $logger->fatal("Thread creation has failed...exiting");
+      exit(1);
     }
-    else {
-      my $msg = "Sent Request has was not expected: ".
-                 $listener->{REQUEST}->uri.", ".$listener->{REQUEST}->method.", ".
-		 $listener->{REQUEST}->headers->{"soapaction"}.".";
-      printError($conf{"LOGFILE"}, $msg); 
-      $response = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
-      $listener->setResponse($response, 1); 		 	  
-    }
-    $listener->closeCall;
-  }
+    $runThread->join();  
+  }  
   return;
 }
 
 
+sub measurementArchiveQuery {
+  my($ma) = @_; 
+  $logger->debug("Starting '".threads->tid()."' as the execution path.");
+  
+  $ma->receive;
+  $ma->respond;
+  return;
+}
+
 sub registerLS {
-  my $functionName = "registerLS";  
-  print $fileName.":\tStarting '".threads->tid()."' as the LS registration to \"".
-        $conf{"LS_INSTANCE"}."\" in ".$functionName."\n" if($DEBUG);
-	
+  $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
+
   return
 }
 
@@ -147,17 +143,17 @@ sub daemonize {
 
 =head1 NAME
 
-pingMP.pl - An Ping based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
+bwctlMP.pl - An Bwctl based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
 capabilities.
 
 =head1 DESCRIPTION
 
-This script creates an MP and MA for an Ping based collector.  The service is also capable
+This script creates an MP and MA for an Bwctl based collector.  The service is also capable
 of registering with an LS instance.  
 
 =head1 SYNOPSIS
 
-./pingMP.pl [--verbose | --help]
+./bwctlMP.pl [--verbose | --help]
 
 The verbose flag allows lots of debug options to print to the screen.  If the option is
 omitted the service will run in daemon mode.
@@ -196,18 +192,19 @@ threads::shared
 Thread::Semaphore
 Time::HiRes qw( gettimeofday );
 POSIX qw( setsid )
+Log::Log4perl qw(get_logger :levels)
 perfSONAR_PS::Common
 perfSONAR_PS::Transport
-perfSONAR_PS::MP::Ping
-perfSONAR_PS::MA::Ping
+perfSONAR_PS::MP::Bwctl
+perfSONAR_PS::MA::Bwctl
 
 =head1 AUTHOR
 
-Jason Zurawski <zurawski@internet2.edu>
+Warren Matthews <warren.matthews@oit.gatech.edu>, Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id: bwctlMP.pl 132 2007-03-14 21:35:51Z zurawski $
+$Id$
 
 =head1 COPYRIGHT AND LICENSE
 

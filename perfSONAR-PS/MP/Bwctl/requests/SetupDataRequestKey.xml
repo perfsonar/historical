@@ -1,0 +1,27 @@
+<nmwg:message id="msg1"
+             type="SetupDataRequest"
+             xmlns:bwctl="http://ggf.org/ns/nmwg/tools/bwctl/2.0/"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+             xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+
+ <nmwg:metadata id="meta1">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">/home/warren/perfSONAR-PS/MP/bwctl/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+ </nmwg:metadata>
+ 
+ <nmwg:metadata id="meta2">
+   <select:subject id="s2" metadataIdRef="meta1"/>  
+   <select:parameters id="2">
+     <nmwg:parameter name="time" operator="gte">1180963820</nmwg:parameter>
+     <nmwg:parameter name="time" operator="lte">1180963920</nmwg:parameter>            
+   </select:parameters>
+ </nmwg:metadata> 
+  
+ <nmwg:data id="data1" metadataIdRef="meta2"/>
+
+</nmwg:message> 
