@@ -54,7 +54,7 @@ sub prepareData {
 	        "", 
 	        \@dbSchema
         );
-        $logger->debug("Connectiong to SQL database \"".$self->{DATADB}->{$file}."\".");
+        $logger->debug("Connectiong to SQL database \"".$file."\".");
       }
     }
     else {

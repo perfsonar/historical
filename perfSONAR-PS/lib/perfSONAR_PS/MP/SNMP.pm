@@ -54,7 +54,7 @@ sub prepareData {
           "",
           1
         );
-        $logger->debug("Connectiong to RR database \"".$self->{DATADB}->{$file}."\".");
+        $logger->debug("Connectiong to RR database \"".$file."\".");
       }
       $self->{DATADB}->{$file}->setVariable(
         extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
@@ -69,7 +69,7 @@ sub prepareData {
 	        "", 
 	        \@dbSchema
         );
-        $logger->debug("Connectiong to SQL database \"".$self->{DATADB}->{$file}."\".");
+        $logger->debug("Connectiong to SQL database \"".$file."\".");
       }
     }
     else {

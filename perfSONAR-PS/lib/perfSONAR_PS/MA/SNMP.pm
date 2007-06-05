@@ -339,9 +339,6 @@ related tasks of interacting with backend storage.
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
     $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    $conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
-    $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-    $conf{"DEBUG"} = 1;
     
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -350,13 +347,12 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
     
-    my $ma = perfSONAR_PS::MA::SNMP->new(\%conf, \%ns, "");
+    my $ma = perfSONAR_PS::MA::SNMP->new(\%conf, \%ns);
 
     # or
     # $ma = perfSONAR_PS::MA::SNMP->new;
     # $ma->setConf(\%conf);
-    # $ma->setNamespaces(\%ns);    
-    # $ma->setStore($store);   
+    # $ma->setNamespaces(\%ns);      
         
     $ma->init;  
     while(1) {
