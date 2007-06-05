@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message type="SetupDataRequest"
+	      id="msg1"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:owamp="http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+	      
+  <nmwg:metadata id="meta1">
+    <owamp:subject id="sub1">
+      <nmwgt:endPointPair>
+        <nmwgt:src type="hostname" value="cpr-bunger.rnoc.gatech.edu" />
+      </nmwgt:endPointPair>
+    </owamp:subject>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta2">
+    <select:subject id="s2" metadataIdRef="meta1"/>  
+    <select:parameters id="2">
+      <nmwg:parameter name="time" operator="gte">1180963820</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1180963920</nmwg:parameter>     
+    </select:parameters>
+  </nmwg:metadata> 
+  
+  <nmwg:data id="data1" metadataIdRef="meta2" />
+
+</nmwg:message>
