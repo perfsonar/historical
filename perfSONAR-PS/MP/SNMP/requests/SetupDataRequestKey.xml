@@ -16,10 +16,10 @@
  </nmwg:metadata>
  
  <nmwg:metadata id="meta2">
-   <netutil:subject id="s2" metadataIdRef="meta1"/>  
+   <select:subject id="s2" metadataIdRef="meta1"/>  
    <select:parameters id="2">
-     <nmwg:parameter name="time" operator="gte">1180963820</nmwg:parameter>
-     <nmwg:parameter name="time" operator="lte">1180963920</nmwg:parameter>      
+      <nmwg:parameter name="time" operator="gte">1181074465</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1181074480</nmwg:parameter>       
      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>  
      <nmwg:parameter name="resolution">1</nmwg:parameter>         
    </select:parameters>
