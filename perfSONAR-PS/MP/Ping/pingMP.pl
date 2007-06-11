@@ -60,16 +60,17 @@ my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
 
 my $mpThread = threads->new(\&measurementPoint);
-my $maThread = threads->new(\&measurementArchive);
+#my $maThread = threads->new(\&measurementArchive);
 my $regThread = threads->new(\&registerLS);
 
-if(!defined $mpThread or !defined $maThread or !defined $regThread) {
+#if(!defined $maThread or 
+if(!defined $mpThread or !defined $regThread) {
   $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
 $mpThread->join();
-$maThread->join();
+#$maThread->join();
 $regThread->join();
 
 
