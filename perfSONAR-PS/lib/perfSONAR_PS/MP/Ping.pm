@@ -13,6 +13,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::DB::RRD;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 
@@ -45,7 +46,21 @@ sub prepareData {
     my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
     my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));        
 
-    if($type eq "sqlite"){
+    if($type eq "rrd") {  
+      if(!defined $self->{DATADB}->{$file}) { 
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::RRD(
+          $self->{CONF}->{"RRDTOOL"}, 
+          $file,
+          "",
+          1
+        );
+        $logger->debug("Connectiong to RR database \"".$file."\".");
+      }
+      $self->{DATADB}->{$file}->setVariable(
+        extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
+      );
+    }
+    elsif($type eq "sqlite"){
       if(!defined $self->{DATADB}->{$file}) {  
         my @dbSchema = ("id", "time", "value", "eventtype", "misc");  
         $self->{DATADB}->{$file} = new perfSONAR_PS::DB::SQL(
@@ -112,9 +127,21 @@ sub collectMeasurements {
   foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
     my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
     my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
-    my $table = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
-      
-    if($type eq "sqlite") {
+    
+    if($type eq "rrd") {
+      my $dataSource = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));  
+      my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+      foreach my $r (sort keys %{$results}) {
+        $logger->debug("inserting (RRD): ".$results->{$r}->{"timeValue"}.",".$dataSource.",".$results->{$r}->{"time"},".");        
+        $self->{DATADB}->{$file}->insert(
+          $results->{$r}->{"timeValue"}, 
+          $dataSource, 
+          $results->{$r}->{"time"}
+        );
+      }
+    }      
+    elsif($type eq "sqlite") {
+      my $table = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
       $self->{DATADB}->{$file}->openDB;
       my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
       foreach my $r (sort keys %{$results}) {
@@ -140,7 +167,18 @@ sub collectMeasurements {
       }
       $self->{DATADB}->{$file}->closeDB;
     }
-  }  		
+  }  
+  
+  my @result = ();
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    if($type eq "rrd") {
+      $self->{DATADB}->{$file}->openDB;
+      @result = $self->{DATADB}->{$file}->insertCommit;
+      $self->{DATADB}->{$file}->closeDB;
+    } 
+  }    
   return;
 }
 

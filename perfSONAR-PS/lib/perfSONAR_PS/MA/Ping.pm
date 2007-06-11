@@ -13,6 +13,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
@@ -232,7 +233,10 @@ sub handleData {
   my $dt = $self->{RESULTS}->find("//nmwg:data")->get_node(1);
   my $type = extract($dt->find("./nmwg:key//nmwg:parameter[\@name=\"type\"]")->get_node(1));
                   
-  if($type eq "sqlite") {
+  if($type eq "rrd") {
+    $localContent = retrieveRRD($self, $dt, $id);		       
+  }
+  elsif($type eq "sqlite") {
     $localContent = retrieveSQL($self, $dt, $id);		  		       
   }		
   else {
@@ -275,6 +279,41 @@ sub retrieveSQL {
     $responseString = $responseString . "  </nmwg:data>\n";
     $logger->debug("Data block created.");
   }  
+  return $responseString;
+}
+
+
+sub retrieveRRD {
+  my($self, $d, $mid) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  
+  my $responseString = "";
+  $responseString = adjustRRDTime($self);
+  if(!$responseString) {
+    my $id = genuid();
+    
+    my %rrd_result = getDataRRD($self, $d, $mid, $id);
+    if($rrd_result{ERROR}) {
+      $logger->error("RRD error seen.");
+      $responseString = $rrd_result{ERROR};
+    }
+    else {
+      $logger->debug("Data found.");
+      $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
+      my $dataSource = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
+      my $valueUnits = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]")->get_node(1));
+    
+      foreach $a (sort(keys(%rrd_result))) {
+        foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
+	        if($b eq $dataSource) {
+	          $responseString = $responseString . "    <ping:datum time=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
+          }
+        }
+      }
+      $responseString = $responseString . "  </nmwg:data>\n";
+      $logger->debug("Data block created.");
+    }
+  }
   return $responseString;
 }
 
@@ -365,11 +404,15 @@ Helper function to extract data from the backed storage.
 
 The data is extracted from the backed storage (in this case SQL). 
 
+=head2 retrieveRRD($did)
+
+The data is extracted from the backed storage (in this case RRD). 
+
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>, 
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
