@@ -391,7 +391,7 @@ Warren Matthews E<lt>warren.matthews@oit.gatech.eduE<gt>, Jason Zurawski, E<lt>z
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007 by Jason Zurawski
+Copyright (C) 2007 by Internet2
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
