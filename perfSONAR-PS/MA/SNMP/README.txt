@@ -1,23 +1,25 @@
 Version:
 --------
-	20070417
+	20070613
 
 Installation:
 -------------
 
 	Perl Modules
 	------------
-		IO::File;
-		XML::XPath;
-		HTTP::Daemon;
-		HTTP::Response;
-		HTTP::Headers;
-		HTTP::Status;
-		XML::Writer;
-		XML::Writer::String;
-		LWP::UserAgent;
-		Time::HiRes
-		XML::LibXML
+      IO::File
+      Time::HiRes
+      Log::Log4perl
+      XML::XPath
+      XML::Writer
+      XML::Writer::String
+      XML::LibXML
+      HTTP::Daemon
+      HTTP::Response
+      HTTP::Headers
+      HTTP::Status
+      LWP::UserAgent
+		
 
 			I would suggest using CPAN to install:
 		
@@ -47,12 +49,18 @@ Installation:
                         You will need to create an XMLDB directory where the collections are stored,
                         I created ~/perfSONAR-PS/MA/SNMP/xmldb personally, but as long as the conf file
                         points to where it is located, it doesnt matter.
-						
-	snmpMA.conf
-	------------
-		Database and other collection related info that should reflect your setup.
+
+logger.conf
+-----------
+  Edit this file (by commenting or un-commenting directives) on where
+  to send the logging messages.  The choices are syslog, a log file, or
+  the screen.
+
+snmpMA.conf
+------------
+	Database and other collection related info that should reflect your setup.
 		
-		Comments at top of file tell you what you need.
+  Comments at top of file tell you what you need.
 
 
 store.xml File (instead of XMLDB):
