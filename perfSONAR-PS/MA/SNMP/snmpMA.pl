@@ -35,7 +35,7 @@ my %ns = (
 
 		# Read in configuration information
 my %conf = ();
-readConfiguration("./snmpMP.conf", \%conf);
+readConfiguration("./snmpMA.conf", \%conf);
 
     # set logging level
 if($DEBUGFLAG) {
@@ -160,7 +160,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 COPYRIGHT AND LICENSE
 
