@@ -1,177 +1,210 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package skeletonMP;
-use Carp qw( croak );
+
+use warnings;
+use Carp qw( carp );
+use Exporter;
+use Log::Log4perl qw(get_logger);
+
+use perfSONAR_PS::MP::Base;
+use perfSONAR_PS::MP::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
-use perfSONAR_PS::DB::XMLDB;
-use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
-use perfSONAR_PS::MP::General;
 
-use Data::Dumper;
+our @ISA = qw(perfSONAR_PS::MP::Base);
 
-@ISA = ('Exporter');
-@EXPORT = ();
-our $VERSION = '0.02';
+
+sub parseMetadata {
+  my($self) = @_;
+  my $logger = get_logger("skeletonMP");
+  
+  # Insert handling for other forms of database here, such as the xmldb.
+  
+  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {   
+    $self->{STORE} = parseFile($self);
+    cleanMetadata(\%{$self});
+  }
+  else {
+    $logger->error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported."); 
+  }
+  return;
+}
+
+
+sub prepareData {
+  my($self) = @_;
+  my $logger = get_logger("skeletonMP");
+  
+  cleanData(\%{$self});
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {    
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));        
+
+    # insert other 'back-end' database access methods here.  RRD is a popular choice.
+
+    if($type eq "sqlite"){
+      if(!defined $self->{DATADB}->{$file}) {  
+        my @dbSchema = ("id", "time", "value", "eventtype", "misc");  
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::SQL(
+          "DBI:SQLite:dbname=".$file, 
+          "", 
+	        "", 
+	        \@dbSchema
+        );
+        $logger->debug("Connectiong to SQL database \"".$file."\".");
+      }
+    }
+    else {
+      $logger->error($type." is not supported.");
+      removeReferences(\%{$self}, $d->getAttribute("metadataIdRef"), $d->getAttribute("id"));
+    }  
+  }  
+  return;
+}
+
+
+sub prepareCollectors {
+  my($self) = @_;
+  my $logger = get_logger("skeletonMP");
+      
+  foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+    if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
+
+      # upgrade this section to the specifics of your tool
+ 
+      my $commandString = $self->{CONF}->{"TOOL"};
+	    $logger->debug("Command \"".$commandString."\"");
+      $self->{AGENT}->{$m->getAttribute("id")} = new skeletonMP::Agent(
+        $commandString
+	    );
+
+    }    
+  }  
+  return;
+}
+
+
+sub collectMeasurements {
+  my($self) = @_;
+  my $logger = get_logger("skeletonMP");
+  
+  foreach my $p (keys %{$self->{AGENT}}) {
+    $logger->debug("Collecting for '" , $p , "'.");
+    $self->{AGENT}->{$p}->collect;
+  }
+  
+  my %dbSchemaValues = ();
+
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    
+    # add other database access methods here
+    
+    if($type eq "sqlite") {
+      my $table = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
+      $self->{DATADB}->{$file}->openDB;
+      my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+
+      $logger->debug("Inserting \"".$d->getAttribute("metadataIdRef").
+        "\", \"".$results->{"timeValue"}."\", \"".$results->{"time"}.
+	      "\", \"ping\", \"\" into table ".$table.".");
+             
+      %dbSchemaValues = (
+        id => $d->getAttribute("metadataIdRef"), 
+        time => $results->{"timeValue"}, 
+        value => $results->{"time"}, 
+        eventtype => "skeleton",  
+        misc => ""
+      );  
+      
+      $self->{DATADB}->{$file}->insert(
+        $table,
+	      \%dbSchemaValues
+      );
+      
+      $self->{DATADB}->{$file}->closeDB;
+    }
+  }  
+  
+  return;
+}
+
+
+
+
 
 # ================ Internal Package skeletonMP::Agent ================
 
 package skeletonMP::Agent;
+
+use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
+
+
+
 sub new {
-  my ($package, $log) = @_; 
+  my ($package, $cmd) = @_; 
   my %hash = ();
-  $hash{"FILENAME"} = "skeletonMP::Agent";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $log and $log ne "") {
-    $hash{"LOGFILE"} = $log;
-  }  
-  if(defined $debug and $debug ne "") {
-    $hash{"DEBUG"} = $debug;  
+  if(defined $cmd and $cmd ne "") {
+    $hash{"CMD"} = $cmd;
   }    
+  %{$hash{"RESULTS"}} = ();
+  bless \%hash => $package;
+}
+
+
+sub setCommand {
+  my ($self, $cmd) = @_;  
+  my $logger = get_logger("skeletonMP::Agent");
+  if(defined $cmd and $cmd ne "") {
+    $self->{CMD} = $cmd;
+  }
+  else {
+    $logger->error("Missing argument.");       
+  }
+  return;
+}
+
+
+sub collect {
+  my ($self) = @_;
+  my $logger = get_logger("skeletonMP::Agent");
+  
+  if(defined $self->{CMD} and $self->{CMD} ne "") {   
+    undef $self->{RESULTS};
+     
+    # upgrade thise section with specifics for your tool 
+     
+    my($sec, $frac) = Time::HiRes::gettimeofday;
+    $self->{RESULTS}->{"timeValue"} = eval($sec.".".$frac);
+        
+    open(CMD, $self->{CMD}." |") or 
+      $logger->error("Cannot open \"".$self->{CMD}."\"");
+    my @results = <CMD>;    
+    close(CMD);
     
-  bless \%hash => $package;
-}
-
-
-sub setLog {
-  my ($self, $log) = @_;  
-  $self->{FILENAME} = "skeletonMP::Agent";
-  $self->{FUNCTION} = "\"setLog\"";  
-  if(defined $log and $log ne "") {
-    $self->{LOGFILE} = $log;
+    ($self->{RESULTS}->{"time"} = $results[0]) =~ s/\n//;
   }
   else {
-    error("Missing argument", __LINE__);       
+    $logger->error("Missing command string.");     
   }
   return;
 }
 
 
-sub setDebug {
-  my ($self, $debug) = @_;  
-  $self->{FILENAME} = "perfSONAR_PS::MP::Ping::Agent";
-  $self->{FUNCTION} = "\"setDebug\"";  
-  if(defined $debug and $debug ne "") {
-    $self->{DEBUG} = $debug;
+sub getResults {
+  my ($self) = @_;
+  my $logger = get_logger("skeletonMP::Agent");
+  
+  if(defined $self->{RESULTS} and $self->{RESULTS} ne "") {   
+    return $self->{RESULTS};
   }
   else {
-    error("Missing argument", __LINE__);         
+    $logger->error("Cannot return NULL results.");    
   }
-  return;
-}
-
-
-sub error {
-  my($msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{"DEBUG"});
-  printError($self->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{"LOGFILE"} and $self->{"LOGFILE"} ne "");    
-  return;
-}
-
-
-# ================ Main Package skeletonMP ================
-
-
-package skeletonMP;
-sub new {
-  my ($package, $conf, $ns, $metadata, $data) = @_; 
-  my %hash = ();
-  $hash{"FILENAME"} = "skeletonMP";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $conf and $conf ne "") {
-    $hash{"CONF"} = \%{$conf};
-  }
-  if(defined $ns and $ns ne "") {  
-    $hash{"NAMESPACES"} = \%{$ns};     
-  }    
-  if(defined $metadata and $metadata ne "") {
-    $hash{"METADATA"} = \%{$metadata};
-  }
-  else {
-    %{$hash{"METADATA"}} = ();
-  }  
-  if(defined $data and $data ne "") {
-    $hash{"DATA"} = \%{$data};
-  }
-  else {
-    %{$hash{"DATA"}} = ();
-  }
-
-  %{$hash{"METADATAMARKS"}} = ();
-  %{$hash{"DATADB"}} = ();
-  %{$hash{"LOOKUP"}} = ();
-  %{$hash{"AGENT"}} = ();
-      
-  bless \%hash => $package;
-}
-
-
-sub setConf {
-  my ($self, $conf) = @_;  
-  $self->{FILENAME} = "skeletonMP";  
-  $self->{FUNCTION} = "\"setHost\"";  
-  if(defined $conf and $conf ne "") {
-    $self->{CONF} = \%{$conf};
-  }
-  else {
-    error("Missing argument", __LINE__);       
-  }
-  return;
-}
-
-
-sub setNamespaces {
-  my ($self, $ns) = @_;  
-  $self->{FILENAME} = "skeletonMP";  
-  $self->{FUNCTION} = "\"setNamespaces\""; 
-  if(defined $namespaces and $namespaces ne "") {   
-    $self->{NAMESPACES} = \%{$ns};
-  }
-  else {
-    error("Missing argument", __LINE__);       
-  }
-  return;
-}
-
-
-sub setMetadata {
-  my ($self, $metadata) = @_;  
-  $self->{FILENAME} = "skeletonMP";    
-  $self->{FUNCTION} = "\"setMetadata\"";  
-  if(defined $metadata and $metadata ne "") {
-    $self->{METADATA} = \%{$metadata};
-  }
-  else {
-    error("Missing argument", __LINE__);       
-  }
-  return;
-}
-
-
-sub setData {
-  my ($self, $data) = @_;  
-  $self->{FILENAME} = "skeletonMP";    
-  $self->{FUNCTION} = "\"setData\"";  
-  if(defined $data and $data ne "") {
-    $self->{DATA} = \%{$data};
-  }
-  else {
-    error("Missing argument", __LINE__);   
-  }
-  return;
-}
-
-
-sub error {
-  my($msg, $line) = @_;  
-  $line = "N/A" if(!defined $line or $line eq "");
-  print $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".\n" if($self->{CONF}->{"DEBUG"});
-  printError($self->{CONF}->{"LOGFILE"}, $self->{FILENAME}.":\t".$msg." in ".$self->{FUNCTION}." at line ".$line.".") 
-    if(defined $self->{CONF}->{"LOGFILE"} and $self->{CONF}->{"LOGFILE"} ne "");    
   return;
 }
 
@@ -184,78 +217,103 @@ __END__
 
 =head1 NAME
 
-skeletonMP - A module starting point for MP functions...
+skeletonMP - A module that performs the tasks of an MP designed for some form of measurement.  
 
 =head1 DESCRIPTION
 
-...
+The purpose of this module is to create simple objects that contain all necessary information
+to make measurements to various hosts.  The objects can then be re-used with minimal 
+effort.
 
 =head1 SYNOPSIS
 
     use skeletonMP;
 
     my %conf = ();
-    $conf{"METADATA_DB_TYPE"} = "xmldb";
-    $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-    $conf{"METADATA_DB_FILE"} = "store.dbxml";
-    $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-
+    $conf{"METADATA_DB_TYPE"} = "file";
+    $conf{"METADATA_DB_NAME"} = "";
+    $conf{"METADATA_DB_FILE"} = "/home/jason/perfSONAR-PS/MP/Ping/store.xml";
+    $conf{"MP_SAMPLE_RATE"} = 1;
+    $conf{"TOOL"} = "perl -e 'print rand(),\"\n;\"'";
+    
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
       nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+      select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+      skeleton => "http://ggf.org/ns/nmwg/tools/skeleton/2.0/"
     );
     
-    my $mp = new skeletonMP(\%conf, \%ns, "", "");
-
-    # or
-    # $mp = skeletonMP->new;
+    my $mp = new skeletonMP(\%conf, \%ns, "");
+    
+    # or:
+    #
+    # $mp = new skeletonMP;
     # $mp->setConf(\%conf);
     # $mp->setNamespaces(\%ns);
-    # $mp->setMetadata("");
-    # $mp->setData("");     
+    # $mp->setStore();
+                
+    $mp->parseMetadata;
+    $mp->prepareData;
+    $mp->prepareCollectors;  
+ 
+    while(1) {
+      $mp->collectMeasurements; 
+      sleep($conf{"MP_SAMPLE_RATE"});
+    }
+    
     
 =head1 DETAILS
 
-This module contains a submodule that is not meant to act as a standalone, but rather as
-a specialized structure for use only in this module.  The functions include:
+This module contains an 'Agent' submodule that is not meant to act as a standalone, but 
+rather as a specialized structure for use only in this module.  The functions include:
 
+  new($cmd)
 
-  new($log)
+    The 'log' argument is the name of the log file where error or warning information 
+    may be recorded.  The 'cmd' argument is the physical command to execute to gather 
+    measurement data.
 
-    The 'log' argument is the name of the log file where error or warning information may be 
-    recorded.
+  setCommand($cmd)
 
-  setLog($log)
+    (Re-)Sets the command for the ping agent object. 
 
-    (Re-)Sets the log file for the SNMP object.
+  collect()
 
-  error($msg, $line)	
+     Executes the command, parses, and stores the results into an object.
 
-    A 'message' argument is used to print error information to the screen and log files 
-    (if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-    Meant to be used internally.
+  getResults()
+
+     Returns the results object so it may be parsed.  
 
 A brief description using the API:
    
-    my $agent = new skeletonMP::Agent("./error.log");
+    my $agent = new skeletonMP::Agent("perl -e 'print rand(),\"\n;\"'");
 
     # or also:
     # 
     # my $agent = new skeletonMP::Agent;
-    # $agent->setLog("./error.log");
+    # $agent->setCommand("perl -e 'print rand(),\"\n;\"'");
 
+        
+    $agent->collect();
 
+    my $results = $agent->getResults;
+    foreach my $r (sort keys %{$results}) {
+      foreach my $r2 (keys %{$results->{$r}}) {
+        print $r , " - " , $r2 , " - " , $results->{$r}->{$r2} , "\n"; 
+      }
+      print "\n";
+    }
+    
 =head1 API
 
 The offered API is simple, but offers the key functions we need in a measurement point. 
 
-=head2 new(\%conf, \%ns, \%metadata, \%data)
+=head2 new(\%conf, \%ns, $store)
 
 The first argument represents the 'conf' hash from the calling MP.  The second argument
-is a hash of namespace values.  The final 2 values are structures containing metadata or 
-data information.  
+is a hash of namespace values.  The final value is an LibXML DOM object representing
+a store.
 
 =head2 setConf(\%conf)
 
@@ -265,39 +323,47 @@ data information.
 
 (Re-)Sets the value for the 'namespace' hash. 
 
-=head2 setMetadata(\%metadata) 
+=head2 setStore($store) 
 
-(Re-)Sets the value for the 'metadata' object. 
+(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
 
-=head2 setData(\%data) 
+=head2 parseMetadata()
 
-(Re-)Sets the value for the 'data' object. 
+Parses the metadata database (specified in the 'conf' hash) and loads the values for the
+data and metadata objects.  
 
-=head2 error($msg, $line)	
+=head2 prepareData()
 
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
+Prepares data db objects that relate to each of the valid data values in the data object.  
+
+=head2 prepareCollectors()
+
+Prepares the 'skeletonMP::Agent' objects for each of the metadata values in
+the metadata object.
+
+=head2 collectMeasurements()
+
+Cycles through each of the 'skeletonMP::Agent' objects and gathers the 
+necessary values.  
 
 =head1 SEE ALSO
 
-L<Carp>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::MA::General>, 
-L<Data::Dumper>
+L<perfSONAR_PS::MP::Base>, L<perfSONAR_PS::MP::General>, L<perfSONAR_PS::Common>, 
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+  L<https://mail.internet2.edu/wws/info/i2-perfsonar>
 
 The perfSONAR-PS subversion repository is located at:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS 
+  L<https://svn.internet2.edu/svn/perfSONAR-PS >
   
 Questions and comments can be directed to the author, or the mailing list. 
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
 =head1 AUTHOR
 
@@ -305,7 +371,7 @@ Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2007 by Jason Zurawski
+Copyright (C) 2007 by Internet2
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,

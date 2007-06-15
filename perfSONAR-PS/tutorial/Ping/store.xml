@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-	    xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+	          xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
 
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:src type="hostname" value="lager" />
+        <nmwgt:src type="hostname" value="mead" />
         <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
       </nmwgt:endPointPair>
     </ping:subject>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0/</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
     <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
-      <nmwg:parameter name="count">3</nmwg:parameter>      
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:parameter>
+      <nmwg:parameter name="count">1</nmwg:parameter>      
     </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
     <nmwg:key id="1">
       <nmwg:parameters id="2">
         <nmwg:parameter name="type">sqlite</nmwg:parameter>
-        <nmwg:parameter name="file">/home/jason/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
         <nmwg:parameter name="table">data</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
