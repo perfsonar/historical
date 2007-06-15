@@ -1,0 +1,1634 @@
+=head1 NAME
+
+perfSONAR_PS::Tutorial - A tutorial designed to aid in the development of 
+services (specifically Measurement Points [MPs] and Measurement Archives [MAs]) 
+in the perfSONAR-PS Framework.
+
+=head1 DESCRIPTION
+
+The aim of this tutorial is provide a good starting point for the
+development of an MP (and related MA) in the perfSONAR-PS 
+framework.  This tutorial assumes some knowledge of perl, most of 
+the 'base' perfSONAR-PS modules, knowledge of the measurement tool 
+that is to be used in the creation of the software (i.e. Ping, 
+Traceroute, OWAMP, etc,), and some basic knowledge of the NMWG protocols 
+for representing measurements in XML.  Questions should be referred 
+to the mailing list L<https://mail.internet2.edu/wws/info/i2-perfsonar> 
+and not the author directly.
+
+This tutorial will be centering on the development of a 'Ping' 
+MP and MA from the supplied skeleton classes (and help from 
+the additional modules already created).  Note that reference to 'Ping' 
+should be replaced with the MP you are intending to deploy (Traceroute, 
+OWAMP, etc.).  This MP will skip some of the details that I<WILL> 
+be necessary in a production MP such as additional error handling, 
+support for different database types (for both the metadata and data 
+storage), and documentation.
+
+A 'frozen' version of the Ping MP/MA will live in the tutorial
+directory after completion to further illustrate the steps; the 
+functioning Ping MA will no doubt experience a great increase in 
+functionality and complexity over time.
+
+=head2 Initialization
+
+Examine the contents of the $PSPSREPO/tutorial directory, these are
+the files that we will be using to start the process. [1]  Some of the 
+files should be placed in the correct locations, and to do so there 
+will need to be some additions to the directory structure.  We need 
+to create the following new locations:
+
+  mkdir $PSPSREPO/MP/Ping
+  mkdir $PSPSREPO/MP/Ping/log
+  mkdir $PSPSREPO/MP/Ping/requests
+  mkdir $PSPSREPO/MP/Ping/xmldb [2]
+  
+Now that the directories are set up, we can copy some files to the 
+correct locations:
+
+  cp $PSPSREPO/tutorial/skeletonMP.conf $PSPSREPO/MP/Ping
+  cp $PSPSREPO/tutorial/logger.conf $PSPSREPO/MP/Ping
+  cp $PSPSREPO/tutorial/skeletonMP.pl $PSPSREPO/MP/Ping
+  cp $PSPSREPO/tutorial/store.xml $PSPSREPO/MP/Ping
+  cp $PSPSREPO/tutorial/echo.xml $PSPSREPO/MP/Ping/requests
+  cp $PSPSREPO/tutorial/md.xml $PSPSREPO/MP/Ping/requests
+  cp $PSPSREPO/tutorial/sd.xml $PSPSREPO/MP/Ping/requests
+  cp $PSPSREPO/tutorial/perfSONAR_PS.db $PSPSREPO/MP/Ping
+  cp $PSPSREPO/tutorial/skeletonMP.pm $PSPSREPO/MP/Ping [3]
+  cp $PSPSREPO/tutorial/skeletonMA.pm $PSPSREPO/MP/Ping [3]
+
+The SQLite database L<http://sqlite.org> will be required to run this 
+service.  Be sure to have this installed either from source or through
+a package management system such as apt or yum.  Additionally if you
+choose to use an XMLDB (such as Berkeley [Oracle] XML DB 
+L<http://www.oracle.com/technology/tech/xml/xmldb/index.html>), that 
+should be installed as well.
+
+=head2 A Quick Test
+
+Once the files are in the new directory, it is possible to run some 
+quick tests to see how the MP and MA function.  This test works best 
+with three terminal windows:
+
+=head3 Terminal 1
+
+We will run the server from this window.  The skeleton is ready to
+go immediately by running this command:
+
+[jason@localhost Ping]$ $PSPSREPO/MP/Ping/./skeletonMP.pl --verbose
+
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_TYPE = "file".
+Use of uninitialized value in concatenation (.) or string at ../../lib/perfSONAR_PS/Common.pm line 58, <GEN0> line 22.
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_NAME = "".
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_FILE = "/home/jason/soon/perfSONAR-PS/tutorial/store.xml".
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found MP_SAMPLE_RATE = "1".
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found PORT = "8080".
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found ENDPOINT = "/axis/services/MP".
+2007/06/12 14:08:45 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found TOOL = "perl -e 'print rand(),"\n;"'".
+2007/06/12 14:08:45 DEBUG> skeletonMP.pl:55 main:: - Starting '0'
+2007/06/12 14:08:46 DEBUG> skeletonMP.pl:73 main::measurementPoint - Starting '1' as the MP.
+2007/06/12 14:08:46 DEBUG> General.pm:132 perfSONAR_PS::MP::General::parseFile - Connecting to file database "/home/jason/soon/perfSONAR-PS/tutorial/store.xml".
+2007/06/12 14:08:46 DEBUG> skeletonMP.pl:88 main::measurementArchive - Starting '2' as the MA.
+2007/06/12 14:08:46 DEBUG> Transport.pm:151 perfSONAR_PS::Transport::startDaemon - Starting daemon.
+2007/06/12 14:08:46 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+2007/06/12 14:08:46 DEBUG> skeletonMP.pl:106 main::measurementArchiveQuery - Starting '3' as the execution path.
+2007/06/12 14:08:46 DEBUG> Transport.pm:164 perfSONAR_PS::Transport::acceptCall - Accepting calls.
+2007/06/12 14:08:47 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+2007/06/12 14:08:48 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+...
+
+This is the debugging information from the service (activated by turning on the --verbose 
+flag).  This information also has the option of appearing in a log file, or even syslog by
+commenting and uncommenting some of the options in 'logger.conf':
+
+log4perl.appender.A1=Log::Dispatch::Screen
+#log4perl.appender.A1=Log::Dispatch::Syslog
+#log4perl.appender.A1=Log::Dispatch::File
+
+Leave this server running for a while as it is collecting data via the MP.  We we contact
+the MA using the client application.
+
+=head3 Terminal 2
+
+Open up the SQLite database:
+
+[jason@localhost Ping]$ sqlite3 $PSPSREPO/MP/Ping/perfSONAR_PS.db 
+SQLite version 3.3.13
+Enter ".help" for instructions
+sqlite> select * from data;
+meta1|1181595472.84163|0.17414122897117|skeleton|
+meta1|1181595474.11603|0.770206942063854|skeleton|
+meta1|1181595475.1402|0.792307254699157|skeleton|
+meta1|1181595476.16828|0.119825592105375|skeleton|
+...
+sqlite> exit
+
+When doing the simple select statement, you should start to see the data
+appear in the database (its just random for now).  This data will continue to
+populate as the MP stays active.
+
+=head3 Terminal 3
+
+The last terminal will be used to call the client application to contact
+the running MA with some of the messages that it may process.  The first
+message is a simple 'EchoRequest':
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/echo.xml
+
+2007/06/12 14:16:39 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/12 14:16:39 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8080/axis/services/MP".
+2007/06/12 14:16:39 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="id1" type="EchoResponse">
+    <nmwg:metadata id="3059761">
+    <nmwg:eventType>success.echo</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data id="17180517" metadataIdRef="3059761">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">The echo request has passed.</nmwgr:datum>
+  </nmwg:data>
+</nmwg:message>
+
+The purpose of this message is to check the status of a running service.  If the service responds with
+a 'success' status, we can assume it is up and running and accepting other forms of messages.
+
+The second message is a 'MetadataKeyRequest':
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/md.xml
+
+2007/06/12 14:17:53 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/12 14:17:53 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8080/axis/services/MP".
+2007/06/12 14:17:53 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="1583743" messageIdRef="#message1" type="MetadataKeyResponse">
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <!-- 
+    
+    <subject />
+    <eventType />
+    <parameters />
+    
+    Information about where the measurement takes place, who it is between, etc.
+    
+    -->  
+    <skel:subject xmlns:skel="http://ggf.org/ns/nmwg/tools/skeleton/2.0/" id="sub1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="localhost" />
+        <nmwgt:dst type="hostname" value="localhost" />
+      </nmwgt:endPointPair>
+    </skel:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/skeleton/2.0</nmwg:eventType>
+    <skel:parameters xmlns:skel="http://ggf.org/ns/nmwg/tools/skeleton/2.0/" id="param1">
+      <nmwg:parameter name="something">?</nmwg:parameter>      
+    </skel:parameters>   
+  </nmwg:metadata><nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data1" metadataIdRef="meta1">
+
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+      <!-- 
+
+              <parameter />
+
+              Specifics for the backend data storage
+
+            -->       
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">./perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data></nmwg:message>
+
+The purpose of a MetadataKeyRequest is to query the database on the backend (the store file) 
+with some basic information with the hopes you can get some 'keys' to data.  The returned 
+key can then be used to gather the underlying data in future requests.
+
+The final message is a 'SetupDataRequest'.  This particular message can function like
+the previous MetadataKeyRequest, or it can contain a key obtained from the previous step.
+It is important to note that the times in this message should be changed to times that
+currently exist in the SQLite database for collected data:
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/sd.xml
+
+2007/06/12 14:20:08 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/12 14:20:08 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8080/axis/services/MP".
+2007/06/12 14:20:08 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="7110746" messageIdRef="msg1" type="SetupDataResponse">
+  <nmwg:metadata id="meta1">
+    <skel:subject xmlns:skel="http://ggf.org/ns/nmwg/tools/skeleton/2.0/" id="s1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:dst type="hostname" value="localhost" />
+      </nmwgt:endPointPair>
+    </skel:subject>
+  </nmwg:metadata><nmwg:metadata id="meta2">
+    <select:subject xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" id="s2" metadataIdRef="meta1" />  
+    <select:parameters xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" id="2">
+      <nmwg:parameter name="time" operator="gte">1181672280</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1181672290</nmwg:parameter>     
+    </select:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="16450218" metadataIdRef="meta2">
+    <skel:datum time="1181672280.92306" value="0.691278848172264" />
+    <skel:datum time="1181672281.9391" value="0.805970483766036" />
+    <skel:datum time="1181672282.97078" value="0.787562800412164" />
+    <skel:datum time="1181672283.99922" value="0.821180208194168" />
+    <skel:datum time="1181672285.75762" value="0.516428423886286" />
+    <skel:datum time="1181672286.9592" value="0.592591031993837" />
+    <skel:datum time="1181672287.12267" value="0.317321094525145" />
+    <skel:datum time="1181672288.15141" value="0.905361074329452" />
+    <skel:datum time="1181672289.16762" value="0.122050766906799" />
+  </nmwg:data>
+</nmwg:message>
+
+The MP/MA can be shut off now, and the database can be exited if the tests
+were successful.  We will now begin the process of modifying the files
+for conversion into a Ping specific service.
+
+=head2 Modifications
+
+Rename the following files:
+
+mv $PSPSREPO/MP/Ping/skeletonMP.pl $PSPSREPO/MP/Ping/pingMP.pl
+mv $PSPSREPO/MP/Ping/skeletonMP.conf $PSPSREPO/MP/Ping/pingMP.conf
+mv $PSPSREPO/MP/Ping/skeletonMA.pm $PSPSREPO/lib/perfSONAR_PS/MA/Ping.pm
+mv $PSPSREPO/MP/Ping/skeletonMP.pm $PSPSREPO/lib/perfSONAR_PS/MP/Ping.pm
+
+With the files renamed and in the correct locations, do some 
+find/replacing on any references to 'skeletonMP' and skeletonMA' (specifically 
+referring to the modules, there will also be references to the skeletonMP.conf 
+file) and replace these with the new name 'perfSONAR_PS::MP::Ping' or 
+'perfSONAR_PS::MA::Ping'.  This should be done in the modules as well 
+as in the pingMP conf and perl files. [4]
+
+The pingMP.conf file will also need to be edited to point to the new 
+correct location of the store.xml file:
+
+  METADATA_DB_TYPE?file
+  METADATA_DB_NAME?
+  METADATA_DB_FILE?$PSPSREPO/MP/Ping/store.xml 
+
+If you are in fact using an XMLDB instead, you can enter the info like this:
+
+  METADATA_DB_TYPE?xmldb
+  METADATA_DB_NAME?$PSPSREPO/MP/Ping/xmldb
+  METADATA_DB_FILE?pingstore.dbxml
+
+Other directives such as:
+
+  MP_SAMPLE_RATE?1
+  PORT?8080
+  ENDPOINT?/axis/services/pingMP
+
+Can be adjusted as well to suit your own personal setup.  If you find
+the need to add new directives, please do so.  Make sure to document
+your changes.
+
+The directive:
+
+  TOOL?perl -e 'print rand(),"\n;"'
+
+Should be changed to something more descriptive such as:
+
+  PING?/bin/ping
+
+=head2 Metadata Storage
+
+The next step involves the structure of the Metadata storage, we will
+be editing the store.xml file for this.  This section requires some work
+with both XML and the XML schemas used by the NMWG and perfSONAR to 
+represent/store/exchange network measurements. [5]
+
+A Ping measurement is I<point to point> by nature, and we should use either
+the v2 or v3 incarnation of the endPointPair topology element to describe
+this measurement.  When trying to capture the intention of measurements
+(especially those where no examples may exist yet) take a look at the
+nmwg repository L<http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/>
+and examine examples or schema files to get a better idea.  Follow the 
+README in this directory to get some 'expert' advice.  
+
+Lets take a look at the ping tool:
+
+
+[jason@localhost perfSONAR_PS]$ ping -h
+Usage: ping [-LRUbdfnqrvVaA] [-c count] [-i interval] [-w deadline]
+            [-p pattern] [-s packetsize] [-t ttl] [-I interface or address]
+            [-M mtu discovery hint] [-S sndbuf]
+            [ -T timestamp option ] [ -Q tos ] [hop1 ...] destination
+	    
+	    
+The interested user can read the man page and see what each of the 
+switches is capable of doing, for this tutorial we are only concerned with
+one option, but the following list are useful to the ping command 
+in general:
+
+       -c count
+              Stop  after  sending  count  ECHO_REQUEST packets. With deadline
+              option, ping waits for count ECHO_REPLY packets, until the time-
+              out expires.
+
+       -i interval
+              Wait interval seconds between sending each packet.  The  default
+              is  to  wait for one second between each packet normally, or not
+              to wait in flood mode. Only super-user may set interval to  val-
+              ues less 0.2 seconds.
+
+       -s packetsize
+              Specifies  the  number of data bytes to be sent.  The default is
+              56, which translates into 64 ICMP data bytes when combined  with
+              the 8 bytes of ICMP header data.
+
+       -t ttl Set the IP Time to Live.
+       
+       -w deadline
+              Specify a timeout, in seconds, before ping exits  regardless  of
+              how  many  packets have been sent or received. In this case ping
+              does not stop after count packet are sent, it waits  either  for
+              deadline  expire  or until count probes are answered or for some
+              error notification from network.
+
+       -W timeout
+              Time to wait for a response, in seconds. The option affects only
+              timeout  in  absence  of any responses, otherwise ping waits for
+              two RTTs.
+
+
+For the sake of this tutorial we will only be concerned with the '-c' 
+parameter, but most other parameters will be handled in the same way.
+
+An example of a ping would be:
+
+
+[jason@localhost Ping]$ ping -c 3 ellis.internet2.edu
+PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=52 time=40.6 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=52 time=40.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=3 ttl=52 time=40.9 ms
+
+--- ellis.internet2.edu ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 1998ms
+rtt min/avg/max/mdev = 40.582/40.712/40.936/0.228 ms
+
+
+A closer look at this interaction gives us two actors:
+
+	Source Computer:
+		Hostname: 	localhost (The machine that 'kicked off')
+		IP Address:	192.168.0.200
+		
+	Destination Computer:
+		Hostname:	ellis.internet2.edu
+		IP Address:	207.75.164.31
+
+	Parameter(s)
+		Count = 3
+
+We can construct a metadata description (following known NMW-WG formatted 
+examples) using this information: [6]
+
+
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="localhost" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwg:parameter name="count">3</nmwg:parameter>      
+    </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+
+For now, this is as good as we can do with our description of the actors of
+a ping relationship.  This is more than enough to get started with the MP.  
+The second step will be to determine what 'backend' we will be using to store
+the data.  For the rest of this tutorial I will be using an SQL database, 
+specifically the SQLite compact database.  
+
+For the sake of finishing the store.xml file, we can quickly describe the
+'structure' of the XML, and explain what it all means in the next section.  
+We will now create the data block that will describe the location of the 
+ping data.  Consider this:
+
+
+  <nmwg:data id="data1" metadataIdRef="meta1" 
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">$PSPSREPO/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data>
+
+
+The first thing to notice is the relationship between the initial metadata, and this
+new data block.  These structures are tied together via the id and metadataIdRef 
+attributes.  Inside of this data we keep a 'key'; this is specifically database 
+contact information.  We have interest in keeping track of information for databases
+such as the table, a file name (or other way we can contact the database such as a
+URL) and the type of database we wish to use.
+
+This translates into creating a small database (perfSONAR_PS.db), which has a
+single table (data), and is of type sqlite.  Similar database structures can be
+created for MySQL, and RR databases.  Please examine the store files of other 
+deployed services (SNMP MA) for examples of their format.  
+
+We will now turn our attention to storing the results of the ping into this
+database that we have described in the XML specification.
+
+=head2 Data Storage
+
+Lets take a look at the output of the command once more:
+
+
+[jason@localhost Ping]$ ping -c 3 ellis.internet2.edu
+PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=52 time=40.6 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=52 time=40.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=3 ttl=52 time=40.9 ms
+
+--- ellis.internet2.edu ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 1998ms
+rtt min/avg/max/mdev = 40.582/40.712/40.936/0.228 ms
+
+
+The necessary parts of this result can be described as:
+
+	Sent Data Bytes: 	56 (really 64 = 56 + 8 Bytes of ICMP Header)
+	Sequence Number:	1,2,3
+	TTL:			52
+	Measured Value:		40.6, 40.5, 40.9 ms
+	
+	Statistical Information:
+		MIN RTT:	40.582 ms
+		MAX RTT:	40.712 ms
+		AVG RTT:	40.936 ms
+		MDEV RTT:	0.228 ms
+		Transmitted:	3
+		Received:	3
+		Packet Loss:	0%
+		Elapsed Time:	1998 ms
+
+The actual data we will want to save (for this example) will be the number of
+sent bytes (it doesn't matter which value, as long as you note somewhere that the
+header is or is not included; we will choose to include the header), the sequence
+number, the ttl, the measured value, and of course the starting time of the
+measurement (which must be observed external to the ping operation).  This last 
+item will need to be adjusted for the various factors such as where in the 
+sequence the measurement has occurred, etc.  
+
+To store this info we will be using an SQL database (specifically SQLite, but the
+commands to store into another database such as MySQL will be the same) with a 
+very simple schema ($PSPSREPO/tutorial/db-lite.sql):
+
+
+create table data (
+  id                    int unsigned not null,  
+  time                  int unsigned not null,
+  value                 int unsigned,
+  eventtype             varchar(128) not null,
+  misc                  varchar(128), 
+  unique (id, time, value, eventtype, misc)
+);
+
+
+This schema does not have explicit fields for ttl, bytes, etc.  The only explicit 
+items are an ID (which is related to the metadata block), the time, the value, an
+eventType (which we will use something such as 'ping' or the fully qualified name
+for ping that comes from the characteristics document), and finally a 'misc' field
+which will contain the remaining data in a separated fashion, such as:
+
+
+  numBytes=64,seqNum=1,ttl=51 
+
+
+The reason for this simple arrangement is that the secondary values do not make the
+measurement unique; the time, value, eventType, and ID do this.  Secondly, it will
+be rare that searching on these values would occur; the common case (the case that
+should be the fastest) will involve searching on the other 4 items.  With this 
+arrangement it is also possible for other forms of measurement to live in the
+same SQL database.  The designer is of course free to make the schema as complex 
+as they like, although interoperability with other MAs may be challenging.  
+
+We will of course need to create the sqlite database for this to work 
+properly, the above schema statement can be saved to a file called
+'db-lite.sql': [7]
+
+
+[jason@localhost Ping]$ sqlite3 perfSONAR_PS.db
+SQLite version 3.3.6
+Enter ".help" for instructions
+sqlite> .read db-lite.sql
+sqlite> .schema data
+CREATE TABLE data (
+  id                    int unsigned not null,  
+  time                  int unsigned not null,
+  value                 int unsigned,
+  eventtype             varchar(128) not null,
+  misc                  varchar(128), 
+  unique (id, time, value, eventtype, misc)
+);
+sqlite> .exit
+
+
+=head2 Metadata/Data Final Steps
+
+The final version of the store.xml file should look something like this:
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+	    xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <ping:subject id="sub1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="localhost" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <ping:parameters id="param1" xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/">
+      <nmwg:parameter name="count">3</nmwg:parameter>      
+    </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">$PSPSREPO/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data>
+  
+</nmwg:store>
+
+
+Be sure that 'pingMP.conf' is pointing to this file, as it describes the actual
+measurements we will be performing.  
+
+If you choose to use the XMLDB as the backend storage for the XML, it is possible to
+use a utility function (in $PSPSREPO/util) to 'load' the database for you.  It I<IS> 
+still required that you prepare the store.xml file as above, but all queries can then be
+handled by the XMLDB which offers more power and functionality than a simple flat file.
+
+To use the utility function:
+  
+  
+  $PSPSREPO/util/./loadXMLDB.pl [--verbose] --environment=$PSPSREPO/MP/Ping/xmldb
+    --container=pingstore.dbxml --filename=$PSPSREPO/MP/Ping/store.xml
+
+
+This will load the store.xml file into the specified 'environment' and 'container' of
+the XMLDB.  
+
+Now that setup is complete, we can start to focus on the actual coding.
+
+=head2 MP Construction
+
+We will first turn our attention to developing the MP portion of this service.  If 
+we were to make a checklist of things the MP should do, we could write it thus:
+
+  1). Connect to backend storage (file/XMLDB)
+
+  2). Create objects for each valid metadata/data block pair.
+
+  3). Create 'collection' objects that will perform the
+      measurement, parse the results, and store into the
+      backend.
+      
+  4). Manage time gathering functions.
+  
+  5). In a loop, gather time, perform measurement, store, 
+      then repeat.
+
+We will turn our attention first the driver program, pingMP.pl.  The parts of interest
+to us include the function that is executed by the MP thread:
+
+
+sub measurementPoint {
+  $logger->debug("Starting '".threads->tid()."' as the MP.");
+  
+  my $mp = new skeletonMP(\%conf, \%ns, "");
+  $mp->parseMetadata;
+  $mp->prepareData;
+  $mp->prepareCollectors;  
+  while(1) {
+    $mp->collectMeasurements;
+    sleep($conf{"MP_SAMPLE_RATE"});
+  }
+  return;  
+}
+
+
+The skeleton MP already had a lot of the 'tooling' we will require as demonstrated
+by the previous tests we conducted.  We will not (under normal circumstances) want to
+make changes to this part of the code.  We will however be examining each of these
+called functions as they exist in the skeletonMP module (which is now refered to
+as perfSONAR_PS::MP::Ping).
+
+Open $PSPSREPO/lib/perfSONAR_PS/MP/Ping.pm, and we will examine each of the files
+and make the necessary (or desirable) changes.
+
+=head3 new
+
+This function is contained in perfSONAR_PS::MP::Base, we will not be changing this
+for the tutorial.  If you require some extra data to be included into the base MP, 
+this function I<MAY> be modified to suite your needs, although it is not recommended
+as all of the MPs will use this as their starting point.  It is possible to redefine
+the new() function as a part of subsequent MP development to override the defaults.
+
+=head3 parseMetadata
+
+The parseMetadata function is designed to interact with backend storage and 
+form a local copy of the necessary metadata/data pairs (necessary in this 
+case means pairs that are well formed and will be used to make measurements) for
+use in future functions.
+
+This function is ready to work with a 'file' type of database without
+any modifications.  It is possible to add XMLDB support rather simply by adding an
+additional clause to the if statement:
+
+
+  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+    $self->{STORE} = parseXMLDB($self);
+    cleanMetadata(\%{$self});    
+  }
+
+
+The parseXMLDB function is available in the perfSONAR_PS::MP::General module and
+will not need to be re-created.  The same is true for cleanMetadata.
+
+The file and XMLDB access represent the most common ways to store and use metadata
+information, and will really be the only two choices a service would need.  The file
+only access presents a very simple interface that does not have the burden of needing
+external software (such as Berkeley [Oracle] XMLDB) and could present an easier
+to manage service.  We will be focusing on the file db for the rest of this tutorial, 
+but will make note of changes that would help to install the XMLDB.
+
+=head3 prepareData
+
+The prepareData function has the job of parsing the local copy of the store 
+file (created in parseMetadata) and extracting the 'useful' places we wish 
+to make a measurement (i.e. well formed metadata/data pairs) and creating 
+database objects for each of the specified 'data' storage areas (i.e. we 
+can use an RRD file or SQLite database repeatedly instead of I<EVERY> 
+metadata having a different storage medium).  
+
+This function is already configured to deal with SQLite databases (the primary
+database we will use for the Ping MP/MA).  We can add other forms like an 
+RRD file [8]:
+
+
+    if($type eq "rrd") {  
+      if(!defined $self->{DATADB}->{$file}) { 
+        $self->{DATADB}->{$file} = new perfSONAR_PS::DB::RRD(
+          $self->{CONF}->{"RRDTOOL"}, 
+          $file,
+          "",
+          1
+        );
+        $logger->debug("Connecting to RR database \"".$file."\".");
+      }
+      $self->{DATADB}->{$file}->setVariable(
+        extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"dataSource\"]")->get_node(1))
+      );
+    }
+    
+    
+Note that when using an RRD file we must 'set' the specified datasource value.  RRD
+files I<MUST> be updated at the same time for a specific time.  For example this
+RRD file:
+
+
+    rrdtool create ping.rrd --start N --step 1 \
+      DS:copland:GAUGE:5:U:U \
+      DS:seal:GAUGE:5:U:U \
+      RRA:AVERAGE:0.5:5:8640
+
+
+Has two data sources (the hosts copland and seal).  If we were to gather 
+measurements for each of the hosts (1 and 1.5) at the same time (1181742101) we
+would need an update statement such as:
+
+
+    rrdtool update ping.rrd -t copland:seal:1181742101:1:1.5
+
+
+It would be incorrect to perform an action like this:
+
+
+    rrdtool update ping.rrd -t copland1181742101:1
+        and
+    rrdtool update ping.rrd -t seal:1181742101:1.5
+
+
+This is due to the way RRD tool stores data, once a time has been updated,
+it is impossible to go back.
+
+The current state of prepareData is acceptable if you only intend to accept 
+SQLite as the storage medium.
+
+=head3 prepareCollectors
+
+The prepareCollectors Function has the job of making objects that will
+perform the measurements to each of the hosts specified in the
+store.xml file.  As such we will first discuss the action of collecting
+data and creating the collection 'Agent' object.
+
+=head4 skeletonMP::Agent and perfSONAR_PS::MP::Ping::Agent
+
+The skeleton agent was developed more or less to be a toy, it 
+performs a useless 'measurement' (getting a random number from
+perl and recording the time it received the measurement).  
+
+Although useless, it provides most of the framework that is necessary
+to create a useful mechanism to make real measurements.  This tutorial
+explores the options of running the tool directly, and parsing the output.
+This can sometimes be a tricky task (especially when tools have different
+output formats and may differ from platform to platform).  As such
+it is important to search perl modules for APIs that may be useful
+for a specific tool.
+
+The basic functions in the skeleton are:
+
+=head5 new, setCommand
+
+Prepares the object.  For now this can accept the 'command string' that
+is required to run the tool.  Ping would look like:
+
+
+    /bin/ping HOST
+
+
+We could of course build this longer due to parameters:
+
+
+    /bin/ping -c 1 HOST
+    
+    
+We are quick to realize that building the command string is imporant
+(especially when dealing with the 'order' of things).  We will build
+the command in the actual MP, the agent just needs the final version.
+
+The setCommand function can be used alternatively to inserting the
+command in new, or it can be used to change a command.  Under normal
+circumstances these two functions should not change.  Other functions
+may of course need to be added 
+
+=head5 collect
+
+The collect function is charged with performing the command specified
+in the previous section, parsing it for useful bits, and storing the
+results in a structure we can retrieve later.  This task can be complex 
+(depending on the format of the data) but is not impossible.  First we 
+look at the most important part of the toy measurement in the skeleton:
+
+
+    my($sec, $frac) = Time::HiRes::gettimeofday;
+    $self->{RESULTS}->{"timeValue"} = eval($sec.".".$frac);
+        
+    open(CMD, $self->{CMD}." |") or 
+      $logger->error("Cannot open \"".$self->{CMD}."\"");
+    my @results = <CMD>;    
+    close(CMD);
+    
+    ($self->{RESULTS}->{"time"} = $results[0]) =~ s/\n//;
+
+
+We are interested in getting the time first.  The method above
+gets an exact time via Time::HiRes, using something simpler like
+'localtime' would also do, depending on the exact time 
+specification required by the service.
+
+The next part simply runs the command externally (via a system call)
+and parses the output.  We will need to change this a little for
+ping.  Consider this ping operation:
+
+
+[jason@localhost Ping]$ ping -c 3 ellis.internet2.edu
+PING ellis.internet2.edu (207.75.164.31) 56(84) bytes of data.
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=1 ttl=52 time=40.6 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=2 ttl=52 time=40.5 ms
+64 bytes from ellis.internet2.edu (207.75.164.31): icmp_seq=3 ttl=52 time=40.9 ms
+
+--- ellis.internet2.edu ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 1998ms
+rtt min/avg/max/mdev = 40.582/40.712/40.936/0.228 ms
+
+
+We would need to parse 8 lines of data after this command has completed, 
+consider this for loop:
+
+
+    for(my $x = 1; $x <= ($#results-4); $x++) { 
+    }
+    
+    
+This loop will cycle through and grab I<ONLY> the data result lines.  We are
+not interested in the first line, or the statistics (for now).  Future 
+iterations may change this approach, but we will progress like this for now.
+
+Inside of the for loop we need to extract the useful bits.  The first
+step is to split on the ':' character:
+
+64 bytes from ellis.internet2.edu (207.75.164.31): 
+icmp_seq=1 ttl=52 time=40.6 ms
+
+We can use this command:
+
+
+      my @resultString = split(/:/,$results[$x]);        
+
+
+The first section of this split contains only one useful bit of information, 
+the number of bytes sent:
+
+
+      ($self->{RESULTS}->{$x}->{"bytes"} = $resultString[0]) =~ s/\sbytes.*$//;
+
+
+This regular expression will strip off the useless stuff at the end
+of the line.  We will now turn our attention to the second part of that
+split string, we first start by stripping off the useless whitespace:
+
+
+      for ($resultString[1]) {
+        s/\n//;
+        s/^\s*//;
+      }
+
+
+Then we can use a tokenizer to split the items by a single space:
+    
+    
+      my @tok = split(/ /, $resultString[1]);
+      foreach my $t (@tok) {
+        if($t =~ m/^.*=.*$/) {
+          (my $first = $t) =~ s/=.*$//;
+	        (my $second = $t) =~ s/^.*=//;
+	        $self->{RESULTS}->{$x}->{$first} = $second;  
+        }
+        else {
+          $self->{RESULTS}->{$x}->{"units"} = $t;
+        }
+      }
+      $self->{RESULTS}->{$x}->{"timeValue"} = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
+      $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
+    }
+
+
+We will store the results in a hash after splitting each by the '='
+sigh (i.e. icmp_seq=1, etc.) and finally adjust the timestamp of each 
+measurement by the offset of the result.  The final function thus looks
+like this:
+
+
+sub collect {
+  my ($self) = @_;
+  my $logger = get_logger("perfSONAR_PS::MP::Ping::Agent");
+  
+  if(defined $self->{CMD} and $self->{CMD} ne "") {   
+    undef $self->{RESULTS};
+     
+    my($sec, $frac) = Time::HiRes::gettimeofday;
+    my $time = eval($sec.".".$frac);
+        
+    open(CMD, $self->{CMD}." |") or 
+      $logger->error("Cannot open \"".$self->{CMD}."\"");
+    my @results = <CMD>;    
+    close(CMD);
+    
+    for(my $x = 1; $x <= ($#results-4); $x++) { 
+      my @resultString = split(/:/,$results[$x]);        
+      ($self->{RESULTS}->{$x}->{"bytes"} = $resultString[0]) =~ s/\sbytes.*$//;
+      for ($resultString[1]) {
+        s/\n//;
+        s/^\s*//;
+      }
+    
+      my @tok = split(/ /, $resultString[1]);
+      foreach my $t (@tok) {
+        if($t =~ m/^.*=.*$/) {
+          (my $first = $t) =~ s/=.*$//;
+	        (my $second = $t) =~ s/^.*=//;
+	        $self->{RESULTS}->{$x}->{$first} = $second;  
+        }
+        else {
+          $self->{RESULTS}->{$x}->{"units"} = $t;
+        }
+      }
+      $self->{RESULTS}->{$x}->{"timeValue"} = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
+      $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
+    }
+  }
+  else {
+    $logger->error("Missing command string.");     
+  }
+  return;
+}
+
+
+=head5 getResults
+
+This function should return the results hash if available, otherwise
+it should register an error.  This function should not be modified.
+
+=head3 prepareCollectors (cont.)
+
+Once we have prepared our Agent to make measurements, prepare collectors
+needs to be modified to create each agent that is required.
+
+For ping in particular and other tools in general we will need to 
+extract information from the local copy of the store file to 'create' 
+the command string that will execute the measurement.  
+
+Using the skeleton as a base:
+
+
+  foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+    if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
+
+      # create collectors
+
+    }    
+  }  
+
+
+This ensures we only create 'valid' collectors from the available metadata/data
+pairs in the local copy of the store file.
+
+Getting the 'appropriate' information to form the command line string is the
+next step.  This should be a very specific operation, depending on how the
+tool works, but developing ping allows us to address some of the major 
+challenges.  Recall that we will need to know the location of the ping binary 
+(this comes from the conf file), parameters, and finally the destination host we 
+will be sending the measurement too.
+
+The simplest case of running a ping therefore requires this set of code:
+
+
+      my $commandString = $self->{CONF}->{"PING"}." ";
+      my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");      
+      my $host = extract($m->find(".//".$topoPrefix.":dst")->get_node(1)); 
+    
+      if(!defined $host or $host eq "") {
+	      $logger->error("Destination host not specified.");	  
+      }
+      else {
+        $commandString = $commandString . $host;
+      }   
+      
+      
+We first start to build the command using the binary information.  Then we need
+to find our destination host.  This becomes a two part process, we first need to
+find the correct element and to do this we need to know what 'prefix' mapping
+to a URI we are using on the backend.  We are careful not to force the use of a 
+specific prefix, but rather we I<WILL> be looking for a specific URI.  Once
+we determine the correct prefix, we then 'extract' the proper element to 
+ger our destination host.  Each of the auxiliary functions is defined in the
+various other modules, so there will be little to develop here.
+
+The final step is construction of the simple command line.  We can use similar 
+logic to work in the notion of the parameters (we are only supporting one 
+parameter, so this is trivial):
+
+
+sub prepareCollectors {
+  my($self) = @_;
+  my $logger = get_logger("perfSONAR_PS::MP::Ping");
+      
+  foreach my $m ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+    if($self->{METADATAMARKS}->{$m->getAttribute("id")}) {
+
+      my $commandString = $self->{CONF}->{"PING"}." ";
+      my $topoPrefix = lookup($self, "http://ggf.org/ns/nmwg/topology/2.0/", "nmwgt");      
+      my $pingPrefix = lookup($self, "http://ggf.org/ns/nmwg/tools/ping/2.0/", "ping");    
+      my $host = extract($m->find(".//".$topoPrefix.":dst")->get_node(1)); 
+      my $count = extract($m->find(".//".$pingPrefix.":parameters/nmwg:parameter[\@name=\"count\"]")->get_node(1));
+             
+      if(!defined $host or $host eq "") {
+	      $logger->error("Destination host not specified.");	  
+      }
+      else {
+        $commandString = $commandString . $host;
+        if(defined $count) {
+          $commandString = $commandString . " -c " . $count;  
+        }
+	      $logger->debug("Command \"".$commandString."\"");
+        $self->{AGENT}->{$m->getAttribute("id")} = new perfSONAR_PS::MP::Ping::Agent(
+          $commandString
+	      );
+      }     
+    }    
+  }  
+  return;
+}
+
+
+The final step is creating an agent with the specified command line string.  With
+our agents created, and ready to be used we finally turn our attention to collecting
+the measurements.
+
+=head3 collectMeasurements
+
+The collectMeasurements function is called from the pingMP.pl program to perform
+the actual measurement, and store the resulting data into a database.  This
+function then deals with two specific objects we have created namely the
+database object and the measurement agent object.  We first turn our attention
+to the collection object, first we will collect data for all of them:
+
+
+  foreach my $p (keys %{$self->{AGENT}}) {
+    $logger->debug("Collecting for '" , $p , "'.");
+    $self->{AGENT}->{$p}->collect;
+  }
+  
+  
+Once collected, we will then turn our attention to extracting the results, 
+and storing them into the database backend (SQLite in this case).  First we
+will iterate through all of the data blocks, checking to see which ones
+are of type 'sqlite' (the only database we are supporting).  We will need
+to extract some information as well such as the name of the table and
+the name of the SQLite database file.
+
+
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+   
+    if($type eq "sqlite") {
+      my $table = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
+      my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+      
+    }
+    else {
+      $logger->error("Database not supported.");
+    }
+  }  
+
+
+We now need to do some things in series: open the database, extract the
+proper set of results, insert them into the database, then close the
+database:
+
+
+      $self->{DATADB}->{$file}->openDB;
+      
+      my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+      
+      foreach my $r (sort keys %{$results}) {
+        %dbSchemaValues = (
+          id => $d->getAttribute("metadataIdRef"), 
+          time => $results->{$r}->{"timeValue"}, 
+          value => $results->{$r}->{"time"}, 
+          eventtype => "ping",  
+          misc => "numBytes=".$results->{$r}->{"bytes"}.
+            ",ttl=".$results->{$r}->{"ttl"}.",seqNum=".
+            $results->{$r}->{"icmp_seq"}.",units=".
+            $results->{$r}->{"units"}
+        );  
+      
+        $self->{DATADB}->{$file}->insert(
+          $table,
+	        \%dbSchemaValues
+        );
+      }
+      $self->{DATADB}->{$file}->closeDB;
+      
+      
+The final version of the function should look like this:   
+
+
+sub collectMeasurements {
+  my($self) = @_;
+  my $logger = get_logger("perfSONAR_PS::MP::Ping");
+  
+  foreach my $p (keys %{$self->{AGENT}}) {
+    $logger->debug("Collecting for '" , $p , "'.");
+    $self->{AGENT}->{$p}->collect;
+  }
+  
+  my %dbSchemaValues = ();
+
+  foreach my $d ($self->{STORE}->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+    my $type = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]")->get_node(1));  
+    my $file = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"file\"]")->get_node(1));
+    
+    if($type eq "sqlite") {
+      my $table = extract($d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"table\"]")->get_node(1));
+      $self->{DATADB}->{$file}->openDB;
+      my $results = $self->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+      foreach my $r (sort keys %{$results}) {
+        $logger->debug("Inserting \"".$d->getAttribute("metadataIdRef").
+          "\", \"".$results->{$r}->{"timeValue"}."\", \"".$results->{$r}->{"time"}.
+	        "\", \"ping\", \""."numBytes=".$results->{$r}->{"bytes"}.",ttl=".
+	        $results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.
+	        ",units=".$results->{$r}->{"units"}."\" into table ".
+	        $table.".");
+             
+        %dbSchemaValues = (
+          id => $d->getAttribute("metadataIdRef"), 
+          time => $results->{$r}->{"timeValue"}, 
+          value => $results->{$r}->{"time"}, 
+          eventtype => "ping",  
+          misc => "numBytes=".$results->{$r}->{"bytes"}.",ttl=".$results->{$r}->{"ttl"}.",seqNum=".$results->{$r}->{"icmp_seq"}.",units=".$results->{$r}->{"units"}
+        );  
+      
+        $self->{DATADB}->{$file}->insert(
+          $table,
+	        \%dbSchemaValues
+        );
+      }
+      $self->{DATADB}->{$file}->closeDB;
+    }
+    else {
+      $logger->error("Database not supported.");
+    }
+  }  
+  return;
+}
+
+=head3 Final thoughts
+
+The simple MP should provide a baseline for individuals interested in 
+providing perfSONAR access to various measurement tools.  There are 
+several options we have not explored such as various database 
+technologies, the data 'push' interface that can be used to store
+results in a separate MA, and an interface that would offer 'live'
+measurements.
+
+Please consult the other MP code bases (Such as Traceroute, OWAMP, BWCTL 
+and SNMP) for clues on how to do operations not presented here.
+
+=head2 MA Construction
+
+Construction of the MA portion of this service will allow the data that
+is gathered via the MP be 'exposed' via a Web Services interface and will
+be queried against by the various clients of the perfSONAR framework.
+
+If we were to make a checklist of things the MA should do, we could write
+it thus:
+
+
+  1). Establish a listening point.
+
+  2). Reject 'bad' requests, and deliver the 'nmwg:message' in 
+      the SOAP envelope to the backend if the message is acceptable.
+  
+  3). Determine the message type, take the appropriate action.
+      
+  4). Return the results of the queries, or error messages if something
+      is wrong.
+  
+  5). Continue listening.
+      
+Most of the heavy lifting in the MA is done via the skeleton interface, 
+and the only real 'work' that is necessary is adding support for the
+various backends ('file' is presented here, XMLDB can be seen in other
+MA implementations), different message types, and of course the presentation
+of data in alternate formats.
+
+We will turn our attention first the driver program, pingMP.pl.  The parts of interest
+to us include the functions that are executed by the MA thread(s):
+
+
+sub measurementArchive {
+  $logger->debug("Starting '".threads->tid()."' as the MA.");
+
+  my $ma = new skeletonMA(\%conf, \%ns);
+  $ma->init;  
+  while(1) {
+    my $runThread = threads->new(\&measurementArchiveQuery, $ma);
+    if(!defined $runThread) {
+      $logger->fatal("Thread creation has failed...exiting");
+      exit(1);
+    }
+    $runThread->join();  
+  }  
+  return;
+}
+
+
+sub measurementArchiveQuery {
+  my($ma) = @_; 
+  $logger->debug("Starting '".threads->tid()."' as the execution path.");
+  
+  $ma->receive;
+  $ma->respond;
+  return;
+}
+
+
+The functionality is split this way to allow multiple requests to be handled
+at the same time.  The items of interest are the creation of the object, and
+the continued receiving and responding to messages.
+
+The skeleton MA already has almost all of the 'tooling' we will require as 
+demonstrated by the previous tests we conducted.  We will not (under normal 
+circumstances) want to make changes to this part of the code.  We will however 
+be examining some functions in the skeletonMA module (which is now refered 
+to as perfSONAR_PS::MA::Ping) and making minor adjustments to 'customize'
+the MA.
+
+Open $PSPSREPO/lib/perfSONAR_PS/MA/Ping.pm, and we will examine each of the files
+and make the necessary (or desirable) changes.
+
+=head3 new
+
+This function is contained in perfSONAR_PS::MA::Base, we will not be changing this
+for the tutorial.  If you require some extra data to be included into the base MP, 
+this function I<MAY> be modified to suite your needs, although it is not recomended
+as all of the MPs will use this as their starting point.  It is possible to redefine
+the new() function as a part of subsequent MA development to override the defaults.
+
+=head3 receive
+
+This function interacts with the Transport module below.  It is I<NOT> to be
+modified under normal circumstances.
+
+=head3 handleRequest
+
+Handle request will check the metadata backend for an appropriate type, and
+parse the message to gain which 'type' it is.  The common messages types of
+"MetadataKeyRequest" and "SetupDataRequest" are supported in this skeleton,
+specialized types may be added here.  Note that the "Echo" messages are no
+longer supported by the MA directly and are now handled in the Transport
+module.
+
+Under normal circumstances this function I<should> not need modification.
+
+=head3 parseRequest
+
+parseRequest will consult the metadata backend (in this case we are assuming
+file, XMLDB can easily be added) and performing the common query cases.  
+MetadataKeyRequest has been moved to the base class as it is a very common
+case for MAs to perform and should not differ based on type.  SetupDataRequest
+can present a key, or just metadata to be parsed and requires functions
+to handle each case.
+
+Adding additional database types would look something like this:
+
+
+        my $metadatadb;
+        if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+          $metadatadb = new perfSONAR_PS::DB::File(
+            $self->{CONF}->{"METADATA_DB_FILE"}
+          );        
+	      }
+	      elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+	        $metadatadb = new perfSONAR_PS::DB::XMLDB(
+            $self->{CONF}->{"METADATA_DB_NAME"}, 
+            $self->{CONF}->{"METADATA_DB_FILE"},
+            \%{$self->{NAMESPACES}}
+          );	  
+	      }
+	      
+
+Under normal circumstances this function I<should> not need modification.
+
+=head3 setupDataKeyRequest
+
+Performs a query of the metadata database using the supplied key, then
+queries the backend data storage (if the key was found initially).  Errors
+are printed on failure.  
+
+Under normal circumstances this function I<should> not need modification.
+
+=head3 setupDataRequest
+
+Similar to the previous function, although since we are not provided with
+the key we must search the metadata storage for the request.
+
+Under normal circumstances this function I<should> not need modification.
+
+=head3 handleData
+
+Performs data retrieval from the backend storage.  This function will need
+to be modified if 'new' database types are added, such as RRD tool:
+
+  if($type eq "rrd") {
+    $localContent = retrieveRRD($self, $dt, $id);		       
+  }
+  elsif($type eq "sqlite") {
+    $localContent = retrieveSQL($self, $dt, $id);		  		       
+  }		
+  
+We would then need to write a function such as retrieveRRD, an example
+of this can be found in the SNMP MA documentation.
+
+=head3 retrieveSQL
+
+This function queries the data storage (SQLite in this case) for data
+related to a specific ID.  The results are then formed into XML, 
+and sent back in the return message. 
+
+The only modification that is necessary here is the namespace prefix
+of the datum elements, or the addition or suppression of fields in
+the SQLite database.
+
+=head3 Final thoughts
+
+The MA is much easier to run 'out of the box' due to its set functions.  
+The only reason we are duplicating as much code as we are through the
+skeleton is the customization that is available (database types, 
+namespace issues, etc.).  
+
+=head2 Ping MP Tests
+
+
+
+
+
+
+
+
+
+
+
+
+Once the files are in the new directory, it is possible to run some 
+quick tests to see how the MP and MA function.  This test works best 
+with three terminal windows:
+
+=head3 Terminal 1
+
+We will run the server from this window.  The skeleton is ready to
+go immediately by running this command:
+
+[jason@localhost Ping]$ $PSPSREPO/MP/Ping/./pingMP.pl --verbose
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_TYPE = "file".
+Use of uninitialized value in concatenation (.) or string at ../../lib/perfSONAR_PS/Common.pm line 58, <GEN0> line 29.
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_NAME = "".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found METADATA_DB_FILE = "/home/jason/soon/perfSONAR-PS/MP/Ping/store.xml".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found MP_SAMPLE_RATE = "1".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found PORT = "8080".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found ENDPOINT = "/axis/services/pingMP".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found LS_REGISTRATION_INTERVAL = "60".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found LS_INSTANCE = "http://mead:8080/axis/services/LS".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found PING = "/bin/ping".
+2007/06/15 14:18:12 DEBUG> Common.pm:58 perfSONAR_PS::Common::readConfiguration - Found RRDTOOL = "/usr/local/rrdtool/bin/rrdtool".
+2007/06/15 14:18:12 DEBUG> pingMP.pl:57 main:: - Starting '0'
+2007/06/15 14:18:12 DEBUG> pingMP.pl:80 main::measurementPoint - Starting '1' as the MP.
+2007/06/15 14:18:12 DEBUG> General.pm:132 perfSONAR_PS::MP::General::parseFile - Connecting to file database "/home/jason/soon/perfSONAR-PS/MP/Ping/store.xml".
+2007/06/15 14:18:12 DEBUG> Ping.pm:72 perfSONAR_PS::MP::Ping::prepareData - Connecting to SQL database "/home/jason/soon/perfSONAR-PS/MP/Ping/perfSONAR_PS.db".
+2007/06/15 14:18:12 DEBUG> General.pm:80 perfSONAR_PS::MP::General::lookup - Found prefix "nmwgt".
+2007/06/15 14:18:12 DEBUG> General.pm:80 perfSONAR_PS::MP::General::lookup - Found prefix "ping".
+2007/06/15 14:18:12 DEBUG> Ping.pm:105 perfSONAR_PS::MP::Ping::prepareCollectors - Command "/bin/ping ellis.internet2.edu -c 1"
+2007/06/15 14:18:12 DEBUG> Ping.pm:121 perfSONAR_PS::MP::Ping::collectMeasurements - Collecting for 'meta1'.
+2007/06/15 14:18:12 DEBUG> pingMP.pl:95 main::measurementArchive - Starting '2' as the MA.
+2007/06/15 14:18:12 DEBUG> Transport.pm:151 perfSONAR_PS::Transport::startDaemon - Starting daemon.
+2007/06/15 14:18:12 DEBUG> Ping.pm:148 perfSONAR_PS::MP::Ping::collectMeasurements - Inserting "meta1", "1181931492.61923", "0.206", "ping", "numBytes=64,ttl=63,seqNum=1,units=ms" into table data.
+2007/06/15 14:18:12 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+2007/06/15 14:18:12 DEBUG> pingMP.pl:113 main::measurementArchiveQuery - Starting '4' as the execution path.
+2007/06/15 14:18:12 DEBUG> Transport.pm:164 perfSONAR_PS::Transport::acceptCall - Accepting calls.
+2007/06/15 14:18:12 DEBUG> pingMP.pl:122 main::registerLS - Starting '3' as the LS registration to "http://mead:8080/axis/services/LS".
+2007/06/15 14:18:13 DEBUG> Ping.pm:121 perfSONAR_PS::MP::Ping::collectMeasurements - Collecting for 'meta1'.
+2007/06/15 14:18:13 DEBUG> Ping.pm:148 perfSONAR_PS::MP::Ping::collectMeasurements - Inserting "meta1", "1181931493.94803", "0.308", "ping", "numBytes=64,ttl=63,seqNum=1,units=ms" into table data.
+2007/06/15 14:18:14 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+2007/06/15 14:18:15 DEBUG> Ping.pm:121 perfSONAR_PS::MP::Ping::collectMeasurements - Collecting for 'meta1'.
+2007/06/15 14:18:15 DEBUG> Ping.pm:148 perfSONAR_PS::MP::Ping::collectMeasurements - Inserting "meta1", "1181931495.31871", "0.278", "ping", "numBytes=64,ttl=63,seqNum=1,units=ms" into table data.
+2007/06/15 14:18:15 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+2007/06/15 14:18:16 DEBUG> Ping.pm:121 perfSONAR_PS::MP::Ping::collectMeasurements - Collecting for 'meta1'.
+2007/06/15 14:18:16 DEBUG> Ping.pm:148 perfSONAR_PS::MP::Ping::collectMeasurements - Inserting "meta1", "1181931496.99881", "0.275", "ping", "numBytes=64,ttl=63,seqNum=1,units=ms" into table data.
+2007/06/15 14:18:16 DEBUG> SQL.pm:187 perfSONAR_PS::DB::SQL::insert - Insert "insert into data (id, time, value, eventtype, misc) values (?, ?, ?, ?, ?)" prepared.
+
+...
+
+This is the same debug info as before, and we can see that are are in fact inserting data
+into the database.  
+
+Leave this server running for a while as it is collecting data via the MP.  We we contact
+the MA using the client application.
+
+=head3 Terminal 2
+
+Open up the SQLite database:
+
+[jason@localhost Ping]$ sqlite3 $PSPSREPO/MP/Ping/perfSONAR_PS.db 
+SQLite version 3.3.13
+Enter ".help" for instructions
+sqlite> select * from data;
+meta1|1181931492.61923|0.206|ping|numBytes=64,ttl=63,seqNum=1,units=ms
+meta1|1181931493.94803|0.308|ping|numBytes=64,ttl=63,seqNum=1,units=ms
+meta1|1181931495.31871|0.278|ping|numBytes=64,ttl=63,seqNum=1,units=ms
+meta1|1181931496.99881|0.275|ping|numBytes=64,ttl=63,seqNum=1,units=ms
+sqlite> .exit
+
+
+When doing the simple select statement, you should start to see the data
+appear in the database.  This data will continue to populate as the MP 
+stays active.
+
+=head3 Terminal 3
+
+The last terminal will be used to call the client application to contact
+the running MA with some of the messages that it may process.  The first
+message is a simple 'EchoRequest':
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/echo.xml
+
+2007/06/12 14:16:39 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/12 14:16:39 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8080/axis/services/MP".
+2007/06/12 14:16:39 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="id1" type="EchoResponse">
+    <nmwg:metadata id="3059761">
+    <nmwg:eventType>success.echo</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data id="17180517" metadataIdRef="3059761">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">The echo request has passed.</nmwgr:datum>
+  </nmwg:data>
+</nmwg:message>
+
+
+The second message is a 'MetadataKeyRequest', we will need to edit the basic request to 
+something more appropriate (i.e. in the store.xml file):
+
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/md.xml
+
+2007/06/15 14:23:01 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/15 14:23:01 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://mead:8080/axis/services/pingMP".
+2007/06/15 14:23:01 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="6113028" messageIdRef="#message1" type="MetadataKeyResponse">
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <ping:subject xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="sub1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="hostname" value="mead" />
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
+    <ping:parameters xmlns:ping="http://ggf.org/ns/nmwg/tools/ping/2.0/" id="param1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:parameter>
+      <nmwg:parameter name="count">1</nmwg:parameter>      
+    </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
+  </nmwg:metadata><nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data1" metadataIdRef="meta1">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:data></nmwg:message>
+  
+
+The final messages are two forms of 'SetupDataRequest', one featuring a key and
+the other without a key.  First we explore the key option (again, be sure to
+edit sd.xml):
+
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/sd.xml
+
+2007/06/15 14:23:05 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/15 14:23:05 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://mead:8080/axis/services/pingMP".
+2007/06/15 14:23:06 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="1914261" messageIdRef="msg1" type="SetupDataResponse">
+  <nmwg:metadata id="meta1">
+    <nmwg:key id="1">
+      <nmwg:parameters id="2">
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MP/Ping/perfSONAR_PS.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+ </nmwg:metadata><nmwg:metadata id="meta2">
+   <ping:subject id="s2" metadataIdRef="meta1" />  
+   <select:parameters id="2">
+     <nmwg:parameter name="time" operator="gte">1181931490</nmwg:parameter>
+     <nmwg:parameter name="time" operator="lte">1181931495</nmwg:parameter>            
+   </select:parameters>
+ </nmwg:metadata>
+  <nmwg:data id="15002056" metadataIdRef="meta2">
+    <ping:datum time="1181931492.61923" value="0.206" numBytes="64" ttl="63" seqNum="1" units="ms" />
+    <ping:datum time="1181931493.94803" value="0.308" numBytes="64" ttl="63" seqNum="1" units="ms" />
+  </nmwg:data>
+</nmwg:message>
+
+
+And finally the no key option:
+
+
+[jason@localhost Ping]$ $PSPSREPO/client/./client.pl --server=localhost 
+--port=8080 --endpoint=axis/services/MP $PSPSREPO/MP/Ping/requests/sd.xml
+
+2007/06/15 14:23:03 DEBUG> Transport.pm:389 perfSONAR_PS::Transport::makeEnvelope - Envelope created.
+2007/06/15 14:23:03 DEBUG> Transport.pm:411 perfSONAR_PS::Transport::sendReceive - Sending information to "http://mead:8080/axis/services/pingMP".
+2007/06/15 14:23:03 DEBUG> Transport.pm:422 perfSONAR_PS::Transport::sendReceive - Response returned.
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="11696086" messageIdRef="msg1" type="SetupDataResponse">
+  <nmwg:metadata id="meta1">
+    <ping:subject id="s1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:dst type="hostname" value="ellis.internet2.edu" />
+      </nmwgt:endPointPair>
+    </ping:subject>
+  </nmwg:metadata><nmwg:metadata id="meta2">
+    <ping:subject id="s2" metadataIdRef="meta1" />  
+    <select:parameters id="2">
+      <nmwg:parameter name="time" operator="gte">1181931490</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1181931495</nmwg:parameter>       
+    </select:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="2448271" metadataIdRef="meta2">
+    <ping:datum time="1181931492.61923" value="0.206" numBytes="64" ttl="63" seqNum="1" units="ms" />
+    <ping:datum time="1181931493.94803" value="0.308" numBytes="64" ttl="63" seqNum="1" units="ms" />
+  </nmwg:data>
+</nmwg:message>
+
+
+The MP/MA can be shut off now, and the database can be exited if the tests
+were successful.
+
+=head2 Closing Remarks
+
+This concludes the MP/MA tutorial.  Please provide feedback on it's
+usefulness or uselessness to the mailing list.
+
+=head1 FOOTNOTES
+
+=over 4
+
+=item 1
+
+Notation such as $PSPSREPO indicates a 'variable' assignment.  I am not 
+
+=item 2
+
+This directory is only required if you are utilizing an XMLDB (specifically the
+Berkeley [Oracle] XMLDB.  If you are NOT planning on adding XMLDB support the 
+directory is unnecessary.
+
+=item 3
+
+This will not be the final home for this library, but we will stick it here
+for now so we can execute the code to be sure it works.
+
+=item 4
+
+Please try to use the I<full> name of the measurement tool with appropriate 
+capitalization, i.e. the I<traceroute> tool should become I<Traceroute>, and not
+I<Trcrt>, etc.
+
+=item 5
+
+Take a look at L<http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/schema/README.txt>
+for more help on developing new schemas.
+
+=item 6
+
+Note that I am using the ping namespace and prefix here for the subject and the
+parameters.  If you are inventing a new namespace (say for BWCTL or pathchirp)
+you would use this new namespace/prefix pair here.
+
+=item 7
+
+Note that we are using the database and table names from the previous section
+that were entered into the store.xml file.
+
+=item 8
+
+Note the inclusion of another conf file directive for the location of RRDTOOL:
+  
+  RRDTOOL?/usr/local/rrdtool/bin/rrdtool
+
+=back
+
+=head1 SEE ALSO
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  L<https://mail.internet2.edu/wws/info/i2-perfsonar>
+
+The perfSONAR-PS subversion repository is located at:
+
+  L<https://svn.internet2.edu/svn/perfSONAR-PS>
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 VERSION
+
+$Id:$
+
+=head1 AUTHOR
+
+Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
