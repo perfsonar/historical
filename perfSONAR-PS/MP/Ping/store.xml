@@ -15,6 +15,7 @@
       <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:parameter>
       <nmwg:parameter name="count">1</nmwg:parameter>      
     </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
@@ -39,6 +40,7 @@
       <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:parameter>
       <nmwg:parameter name="count">1</nmwg:parameter>      
     </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data2" metadataIdRef="meta2">
@@ -64,6 +66,7 @@
       <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:parameter>
       <nmwg:parameter name="count">1</nmwg:parameter>      
     </ping:parameters>   
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/ping/2.0</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data3" metadataIdRef="meta3">
