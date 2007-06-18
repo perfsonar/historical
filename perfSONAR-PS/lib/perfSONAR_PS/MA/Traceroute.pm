@@ -12,6 +12,7 @@ use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
+use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
@@ -45,15 +46,20 @@ sub handleRequest {
   delete $self->{RESPONSE};
 
   $self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
-  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or
+     $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
     my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
     my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
     my $messageIdReturn = genuid();    
 
     if($messageType eq "MetadataKeyRequest" or 
        $messageType eq "SetupDataRequest") {
-      $logger->debug("Parsing request.");
+      $logger->debug("Parsing data request.");
       parseRequest($self, $messageIdReturn, $messageId, $messageType);
+    }
+    elsif($messageType eq "MeasurementArchiveStoreRequest") {
+      $logger->debug("Parsing storage request.");
+      #parseRequest($self, $messageIdReturn, $messageId, $messageType);      
     }
     else {
       my $msg = "Message type \"".$messageType."\" is not yet supported";
@@ -79,9 +85,19 @@ sub parseRequest {
     foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
       if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
       
-        my $metadatadb = new perfSONAR_PS::DB::File(
-          $self->{CONF}->{"METADATA_DB_FILE"}
-        );        
+        my $metadatadb;
+        if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+          $metadatadb = new perfSONAR_PS::DB::File(
+            $self->{CONF}->{"METADATA_DB_FILE"}
+          );        
+	      }
+	      elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+	        $metadatadb = new perfSONAR_PS::DB::XMLDB(
+            $self->{CONF}->{"METADATA_DB_NAME"}, 
+            $self->{CONF}->{"METADATA_DB_FILE"},
+            \%{$self->{NAMESPACES}}
+          );	  
+	      }     
 	      
 	      $metadatadb->openDB; 
 	      $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");

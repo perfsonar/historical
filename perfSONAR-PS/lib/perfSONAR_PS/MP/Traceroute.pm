@@ -25,6 +25,10 @@ sub parseMetadata {
     $self->{STORE} = parseFile($self);
     cleanMetadata(\%{$self});
   }
+  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+    $self->{STORE} = parseXMLDB($self);
+    cleanMetadata(\%{$self});    
+  }  
   else {
     $logger->error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported."); 
   }
