@@ -17,8 +17,8 @@
   <nmwg:metadata id="meta2">
     <select:subject id="s2" metadataIdRef="meta1"/>  
     <select:parameters id="2">
-      <nmwg:parameter name="time" operator="gte">1181914630</nmwg:parameter>
-      <nmwg:parameter name="time" operator="lte">1181914633</nmwg:parameter>     
+      <nmwg:parameter name="time" operator="gte">1182178090</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">1182178095</nmwg:parameter> 
     </select:parameters>
   </nmwg:metadata> 
   
