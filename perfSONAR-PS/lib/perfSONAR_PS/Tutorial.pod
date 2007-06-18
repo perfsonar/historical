@@ -330,7 +330,7 @@ in general:
               Wait interval seconds between sending each packet.  The  default
               is  to  wait for one second between each packet normally, or not
               to wait in flood mode. Only super-user may set interval to  val-
-              ues less 0.2 seconds.
+              use less 0.2 seconds.
 
        -s packetsize
               Specifies  the  number of data bytes to be sent.  The default is
@@ -382,7 +382,7 @@ A closer look at this interaction gives us two actors:
 	Parameter(s)
 		Count = 3
 
-We can construct a metadata description (following known NMW-WG formatted 
+We can construct a metadata description (following known NM-WG formatted 
 examples) using this information: [6]
 
 
@@ -630,7 +630,7 @@ sub measurementPoint {
 The skeleton MP already had a lot of the 'tooling' we will require as demonstrated
 by the previous tests we conducted.  We will not (under normal circumstances) want to
 make changes to this part of the code.  We will however be examining each of these
-called functions as they exist in the skeletonMP module (which is now refered to
+called functions as they exist in the skeletonMP module (which is now referred to
 as perfSONAR_PS::MP::Ping).
 
 Open $PSPSREPO/lib/perfSONAR_PS/MP/Ping.pm, and we will examine each of the files
@@ -773,7 +773,7 @@ We could of course build this longer due to parameters:
     /bin/ping -c 1 HOST
     
     
-We are quick to realize that building the command string is imporant
+We are quick to realize that building the command string is important
 (especially when dealing with the 'order' of things).  We will build
 the command in the actual MP, the agent just needs the final version.
 
@@ -992,7 +992,7 @@ find the correct element and to do this we need to know what 'prefix' mapping
 to a URI we are using on the backend.  We are careful not to force the use of a 
 specific prefix, but rather we I<WILL> be looking for a specific URI.  Once
 we determine the correct prefix, we then 'extract' the proper element to 
-ger our destination host.  Each of the auxiliary functions is defined in the
+get our destination host.  Each of the auxiliary functions is defined in the
 various other modules, so there will be little to develop here.
 
 The final step is construction of the simple command line.  We can use similar 
@@ -1232,7 +1232,7 @@ the continued receiving and responding to messages.
 The skeleton MA already has almost all of the 'tooling' we will require as 
 demonstrated by the previous tests we conducted.  We will not (under normal 
 circumstances) want to make changes to this part of the code.  We will however 
-be examining some functions in the skeletonMA module (which is now refered 
+be examining some functions in the skeletonMA module (which is now referred 
 to as perfSONAR_PS::MA::Ping) and making minor adjustments to 'customize'
 the MA.
 
@@ -1243,7 +1243,7 @@ and make the necessary (or desirable) changes.
 
 This function is contained in perfSONAR_PS::MA::Base, we will not be changing this
 for the tutorial.  If you require some extra data to be included into the base MP, 
-this function I<MAY> be modified to suite your needs, although it is not recomended
+this function I<MAY> be modified to suite your needs, although it is not recommended
 as all of the MPs will use this as their starting point.  It is possible to redefine
 the new() function as a part of subsequent MA development to override the defaults.
 
