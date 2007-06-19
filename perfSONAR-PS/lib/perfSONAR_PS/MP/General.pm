@@ -12,7 +12,7 @@ use perfSONAR_PS::MP::Base;
 
 @ISA = ('Exporter');
 @EXPORT = ( 'cleanMetadata', 'cleanData', 'removeReferences', 'lookup', 
-            'parseXMLDB', 'parseFile');
+            'parseXMLDB', 'parseFile', 'parseString');
 
 
 sub cleanMetadata {
@@ -132,6 +132,21 @@ sub parseFile {
   $logger->debug("Connecting to file database \"".$mp->{CONF}->{"METADATA_DB_FILE"}."\".");
   
   return $filedb->getDOM();
+}
+
+
+sub parseString {
+  my($mp) = @_; 
+  my $logger = get_logger("perfSONAR_PS::MP::General");
+  my $parser = XML::LibXML->new();
+  my $result = $parser->parse_string($mp->{CONF}->{"METADATA_DB_FILE"});
+  if(defined $result and $result ne "") {
+    return $result;
+  }
+  else {
+    $logger->error("XML parsing error.");
+  }
+  return "";
 }
 
 

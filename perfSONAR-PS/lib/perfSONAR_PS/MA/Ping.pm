@@ -54,7 +54,8 @@ sub handleRequest {
     my $messageIdReturn = genuid();    
 
     if($messageType eq "MetadataKeyRequest" or 
-       $messageType eq "SetupDataRequest") {
+       $messageType eq "SetupDataRequest" or 
+       $messageType eq "MeasurementRequest") {
       $logger->debug("Parsing request.");
       parseRequest($self, $messageIdReturn, $messageId, $messageType);
     }
@@ -82,39 +83,95 @@ sub parseRequest {
     foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
       if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
       
-        my $metadatadb;
-        if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-          $metadatadb = new perfSONAR_PS::DB::File(
-            $self->{CONF}->{"METADATA_DB_FILE"}
-          );        
-	      }
-	      elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-	        $metadatadb = new perfSONAR_PS::DB::XMLDB(
-            $self->{CONF}->{"METADATA_DB_NAME"}, 
-            $self->{CONF}->{"METADATA_DB_FILE"},
-            \%{$self->{NAMESPACES}}
-          );	  
-	      }
-	      $metadatadb->openDB; 
-	      $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
+        if($type eq "MeasurementRequest") {
+          $localContent = measurementRequest($self, $metadatadb, $m, $d, $localContent, $messageId, $messageIdRef);  
+        }
+        else {
+          my $metadatadb;
+          if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+            $metadatadb = new perfSONAR_PS::DB::File(
+              $self->{CONF}->{"METADATA_DB_FILE"}
+            );        
+	        }
+	        elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+	          $metadatadb = new perfSONAR_PS::DB::XMLDB(
+              $self->{CONF}->{"METADATA_DB_NAME"}, 
+              $self->{CONF}->{"METADATA_DB_FILE"},
+              \%{$self->{NAMESPACES}}
+            );	  
+	        }
+	        $metadatadb->openDB; 
+	        $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
 	      
-	      if($type eq "MetadataKeyRequest") {
-	        $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
-	      }
-	      elsif($type eq "SetupDataRequest") {         
-          getTime(\%{$self}, $m->getAttribute("id"));
-          if($m->find("//nmwg:metadata/nmwg:key")) {
-            $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-          }
-          else {
-            $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-          }	
+	        if($type eq "MetadataKeyRequest") {
+	          $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
+	        }
+	        elsif($type eq "SetupDataRequest") {         
+            getTime(\%{$self}, $m->getAttribute("id"));
+            if($m->find("//nmwg:metadata/nmwg:key")) {
+              $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+            }
+            else {
+              $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+            }	
+	        }
 	      }
       }   
     }
   }  
   return;
 }
+
+
+sub measurementRequest {
+  my($self, $metadatadb, $m, $d, $localContent, $messageId, $messageIdRef) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Ping");
+  
+  $localContent = $localContent. $m->toString();
+
+  my %conf = ();  
+  $conf{"METADATA_DB_TYPE"} = "string";
+  $conf{"METADATA_DB_NAME"} = "";
+  $conf{"METADATA_DB_FILE"} = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."	           xmlns:ping=\"http://ggf.org/ns/nmwg/tools/ping/2.0/\">\n\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}.$m->toString()."\n\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}.$d->toString()."\n\n";
+  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."</nmwg:store>\n";
+  $conf{"PING"} = $self->{CONF}->{"PING"};
+
+  $mp = new perfSONAR_PS::MP::Ping(\%conf, \%{$self->{"NAMESPACES"}}, "");
+  $mp->parseMetadata;
+  $mp->prepareCollectors;  
+
+  $localContent = $localContent . "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+
+  foreach my $p (keys %{$mp->{AGENT}}) {
+    $logger->debug("Collecting for '" , $p , "'.");
+    $mp->{AGENT}->{$p}->collect;
+
+    my $results = $mp->{AGENT}->{$d->getAttribute("metadataIdRef")}->getResults;
+    $localContent = $localContent . "    <ping:datum ";
+    foreach my $r (sort keys %{$results}) {
+      foreach my $r2 (sort keys %{$results->{$r}}) {
+        if($r2 eq "time") {
+          $localContent = $localContent . "value=\"" . $results->{$r}->{$r2} . "\" ";
+        }
+        else {
+          $localContent = $localContent . $r2 . "=\"" . $results->{$r}->{$r2} . "\" ";
+        }
+      }
+    }
+    $localContent = $localContent . "/>\n";
+  }
+  $localContent = $localContent . "  </nmwg:data>\n";
+  
+  $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "MeasurementResponse", $localContent); 
+  return;
+}
+
+
 
 
 sub setupDataKeyRequest {

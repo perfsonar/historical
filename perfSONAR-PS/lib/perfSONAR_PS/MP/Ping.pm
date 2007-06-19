@@ -30,6 +30,10 @@ sub parseMetadata {
     $self->{STORE} = parseFile($self);
     cleanMetadata(\%{$self});
   }
+  elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "string") {   
+    $self->{STORE} = parseString($self);
+    cleanMetadata(\%{$self});
+  }
   else {
     $logger->error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported."); 
   }
@@ -253,6 +257,7 @@ sub collect {
           $self->{RESULTS}->{$x}->{"units"} = $t;
         }
       }
+      $self->{RESULTS}->{$x}->{"timeType"} = "unix";
       $self->{RESULTS}->{$x}->{"timeValue"} = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
       $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
     }
