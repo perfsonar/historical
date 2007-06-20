@@ -1,0 +1,19 @@
+<!-- This file should create a dynamic list of alarams and configuraiton
+  settings and should be generated from the pinger daemon. Users are not
+  advised to change or alter any of these fields -->
+<PingER version="3.0.0">
+
+  <Alarms>
+    <Host name="www.kek.jp">
+      <param name="TimeOfFirstFailure value="1181783960"/>
+    </Host>
+    <Host name="1.b.c">
+      <param name="TimeOfFirstFailure" value="1181784056"/>
+    </Host>
+  </Alarms>
+
+  <Configuration>
+    <param name="BeaconListLastChecked" value="1181782812"/>
+  </Configuration>
+
+</PingER>

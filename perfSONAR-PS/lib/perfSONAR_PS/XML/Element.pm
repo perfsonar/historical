@@ -338,7 +338,7 @@ sub asString {
   my $string = '';
   
   if(defined $indent) {
-    $string .=  indent($indent, 1);
+    $string .=  ' ' x $indent;
   }
   else {
     $indent = 0;
@@ -354,7 +354,7 @@ sub asString {
       $string .= $c->asString($indent+2);
     }
     if(defined $indent) {
-      $string .= indent($indent, 1);
+      $string .= ' ' x $indent;
     }
     $string .=  "</" . $self->{Prefix} . ":" . $self->{LocalName} . ">\n";
   }

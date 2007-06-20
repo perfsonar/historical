@@ -51,6 +51,7 @@ use IO::File;
 use Getopt::Long;
 use strict;
 use Log::Log4perl qw(get_logger :levels);
+use XML::LibXML;
 
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Common qw( readXML );
@@ -63,7 +64,7 @@ our $DEBUG = 0;
 our $HOST = "localhost";
 our $PORT = "5000";
 our $ENDPOINT = '/axis/services/MP';
-our $FILTER = '//nmwg:message';	# xpath query filter
+our $FILTER = '/';	# xpath query filter
 our %opts = ();
 
 our $help_needed;
@@ -93,14 +94,12 @@ my $endpoint;
 my $filter;
 my $file;
 if ( scalar @ARGV eq 2 ) {
-	if ( $ARGV[0] =~ /^http:\/\/([^\/]*)\/?(.*)$/ ) {
-		( $host, $port ) = split /:/, $1;
-		$endpoint = $2;
-	} else {
-		die "Argument 1 must be a URI if more than one parameter used.\n";
+	
+	( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ARGV[0] );
+	
+	if ( ! defined $host && ! defined $port && ! defined $endpoint ) {
+		 die "Argument 1 must be a URI if more than one parameter used.\n";
 	}
-	$port =~ s/^://g if ( $port =~ m/^:/ ) ;
-	$endpoint = '/' . $endpoint unless $endpoint =~ /^\//;
 
 	$file = $ARGV[1];
 } else {
@@ -157,22 +156,19 @@ sub dump
 	
 	my $xp;
    if( UNIVERSAL::can($response, "isa") ? "1" : "0" == 1
-      	&& $xml->isa('XML::XPath')) {
-    	$xp = $response;  		
+      	&& $xml->isa('XML::LibXML')) {
+    	$xp = $response;
    } else {
-   	    $xp = XML::XPath->new( xml => $response );
+    my $parser = XML::LibXML->new();
+    $xp = $parser->parse_string($response);  
    }
 
-    my $nodeset = $xp->find( $find );
-    if($nodeset->size() <= 0) {
-		die "Nothing found for xpath statement $find.\n";
+    my @res = $xp->findnodes( "$find" );
+
+    foreach my $n ( @res ) {
+		print $n->toString() . "\n";
     }
-    
-	# For now, print out the result message
-    foreach my $node ($nodeset->get_nodelist) {
-        print XML::XPath::XMLParser::as_string($node) , "\n";
-    }
-    
+	return;
 }
 
 

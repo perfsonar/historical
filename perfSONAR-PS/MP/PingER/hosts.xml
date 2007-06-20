@@ -1,0 +1,27 @@
+<Host id="frcu.eun.eg">
+  <param name="IP" value="193.227.1.1"/>
+  <param ref="#host-defaults"/>
+  <param ref="#pingset-default"/>
+  <param ref="#alarm-defaults"/>
+  <param ref="#store-defaults"/>
+</Host>
+ <Host id="iepmbw.bnl.org">
+  <param name="IP" value="134.79.240.38"/>
+  <param ref="#host-defaults"/>
+  <param ref="#pingset-default"/>
+  <param ref="#alarm-defaults"/>
+  <param ref="#store-defaults"/>
+  <Ping id="#ping-small">
+    <param name="TestPeriod" value="3"/>
+    <param name="count" value="2"/>
+
+  </Ping>
+</Host>
+<Host id="pinger-ncp.ncp.edu.pk">
+  <param name="Enabled" value="false"/>
+  <param name="IP" value="202.83.167.109"/>
+  <param ref="#host-defaults"/>
+  <param ref="#pingset-default"/>
+  <param ref="#alarm-defaults"/>
+  <param ref="#store-defaults"/>
+</Host>

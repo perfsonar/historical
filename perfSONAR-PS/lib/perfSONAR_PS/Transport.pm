@@ -130,6 +130,34 @@ sub setContactPort {
 }
 
 
+sub splitURI
+{
+	my $uri = shift;
+	my $host = undef;
+	my $port= undef;
+	my $endpoint = undef;
+	if ( $uri =~ /^http:\/\/([^\/]*)\/?(.*)$/ ) {
+		( $host, $port ) = split /:/, $1;
+		$endpoint = $2;
+	} 
+	if ( ! defined $port || $port eq '' ) {
+		$port = 80;
+	}
+	if ( $port =~ m/^:/ ) {
+		$port =~ s/^://g;
+	}
+	$endpoint = '/' . $endpoint unless $endpoint =~ /^\//;
+
+	return ( $host, $port, $endpoint );
+}
+
+sub getHttpURI {
+	my $host= shift;
+	my $port = shift;
+	my $endpoint = shift;
+	return 'http://' . $host . ':' . $port . '/' . $endpoint;
+}
+
 sub setContactEndPoint {
   my ($self, $contactEndPoint) = @_;  
   my $logger = get_logger("perfSONAR_PS::Transport");
@@ -396,9 +424,8 @@ sub sendReceive {
   my $logger = get_logger("perfSONAR_PS::Transport");
    
   $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
-  $method_name = "";
 
-  my $httpEndpoint = qq[http://$self->{CONTACT_HOST}:$self->{CONTACT_PORT}/$self->{CONTACT_ENDPOINT}];
+  my $httpEndpoint = &getHttpURI( $self->{CONTACT_HOST}, $self->{CONTACT_PORT}, $self->{CONTACT_ENDPOINT});
 
   my $userAgent = "";
   if(defined $timeout and $timeout ne "") {
@@ -418,6 +445,12 @@ sub sendReceive {
   my $httpResponse = $userAgent->request($sendSoap);
   my $responseCode = $httpResponse->code();
   my $responseContent = $httpResponse->content();
+  
+  # lets do some error checking:
+  if ( $responseContent =~ /^500 Can't connect to .* \((.*)\)/ ) {
+ 	die "Could not connect to $httpEndpoint: $1.\n"; 
+  }
+  # others?
   
   $logger->debug("Response returned."); 
   

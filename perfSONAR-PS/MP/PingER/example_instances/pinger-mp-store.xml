@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!-- Purpose:   This is an example store file of pingER data -->
+<!--
+  all of the examples are from the following ping test:
+
+[ytl@iepm-bw:~]$ ping -c 10 atlang-hstnng.abilene.ucaid.edu
+PING atlang-hstnng.abilene.ucaid.edu (198.32.8.34) 56(84) bytes of data.
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=0 ttl=53 time=75.1 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=1 ttl=53 time=75.2 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=2 ttl=53 time=75.2 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=3 ttl=53 time=75.2 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=4 ttl=53 time=80.5 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=5 ttl=53 time=75.2 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=6 ttl=53 time=75.1 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=7 ttl=53 time=75.2 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=8 ttl=53 time=75.1 ms
+64 bytes from atlang-hstnng.abilene.ucaid.edu (198.32.8.34): icmp_seq=9 ttl=53 time=75.2 ms
+
+--- atlang-hstnng.abilene.ucaid.edu ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9097ms
+rtt min/avg/max/mdev = 75.185/75.753/80.549/1.603 ms, pipe 2
+
+-->
+
+<nmwg:store type="store" 
+            id="#store"
+            xmlns="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+            xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+            xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/1.0/"> 
+
+
+  <nmwg:metadata id="#meta1">
+    <pinger:subject id="#subject" 
+      <topo:endPointPair>
+        <topo:src type="ipv4" value="iepm-bw.slac.stanford.edu"/>
+        <topo:dst type="ipv4" value="atlang-hstnng.abilene.ucaid.edu"/>
+      </topo:endPointPair>
+    </pinger:subject>
+    <pinger:parameters>
+      <nmwg:parameter name="count">10</nmwg:parameter>
+      <nmwg:parameter name="timeValue">1138699951</nmwg:parameter>
+      <nmwg:parameter name="timeType>unix</nmwg:parameter>
+    </pinger:parameters>
+  </nmwg:metadata>
+
+  <nmwg:data id="#data1"
+            metadataIdRef="#meta1">
+    <pinger:datum value="75.1" seqNum="1" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="2" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="3" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="4" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="80.5" seqNum="5" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="6" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.1" seqNum="7" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="8" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.1" seqNum="9" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum value="75.2" seqNum="10" numBytes="64" ttl="53" valueUnits="msec"/>
+    <pinger:datum name="minRtt" value="75.185" valueUnits="msec"/>
+    <pinger:datum name="maxRtt" value="80.549" valueUnits="msec"/>
+    <pinger:datum name="meanRtt" value="75.753" valueUnits="msec"/>
+    <pinger:datum name="minIpd" value="0.0" valueUnits="msec"/>
+    <pinger:datum name="maxIpd" value="0.7" valueUnits="msec"/>
+    <pinger:datum name="lossPercent" value="0"/>
+    <pinger:datum name="iqrIpd" value="0.0"/>
+    <pinger:datum name="meanIpd" value="0.011"/>
+    <pinger:datum name="outOfOrder" value="false"/>
+    <pinger:datum name="duplicates" value="false"/>
+  </nmwg:data>
+
+</nmwg:store>
