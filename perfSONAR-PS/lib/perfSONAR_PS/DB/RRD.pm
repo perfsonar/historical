@@ -118,11 +118,12 @@ sub openDB {
   my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $self->{PATH} and defined $self->{NAME}) {
     RRDp::start $self->{PATH};
+    return 0;
   }
   else {
     $logger->error("Missing path or name in object.");        
+    return -1;
   }
-  return;
 }
 
 
@@ -134,12 +135,14 @@ sub closeDB {
     my $status = RRDp::end;  
     if($status) {
       $logger->error($self->{PATH}." has returned status \"".$status."\" on closing.");    
+      return -1;
     }
+    return 0;
   }
   else {
     $logger->error("RRD not open.");  
+    return -1;
   }
-  return;
 }
 
 
@@ -327,7 +330,9 @@ with rrd files) to offer some common functionality.
     # RRA:AVERAGE:0.5:10:60480
 
     # will also 'open' a connection to a file:
-    $rrd->openDB();
+    if ($rrd->openDB() == -1) {
+      print "Error opening database\n";
+    }
 
     my %rrd_result = $rrd->query(
       "AVERAGE", 
@@ -370,8 +375,10 @@ with rrd files) to offer some common functionality.
       print "first Error: " , $rrd->getErrorMessage() , "\n";
     }
     
-    $rrd->closeDB;    
-
+    if ($rrd->closeDB == -1) {
+      print "Error closing database\n";
+    }
+    
 =head1 DETAILS
 
 RRDp was never meant to a rich API; it's goal is simply to provide a method of interacting
@@ -423,11 +430,11 @@ the error level is set to 0.
 =head2 openDB()
 
 Open is used to start the reading process from an rrd file, by preparing named pipes
-that will interact with the rrd file.
+that will interact with the rrd file.  Returns 0 on success and -1 on failure.
 
 =head2 closeDB()
 
-Closes the connection to the rrd file.  
+Closes the connection to the rrd file.  Returns 0 on success and -1 on failure.
 
 =head2 query($cf, $resolution, $start, $end)
 

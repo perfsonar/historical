@@ -84,13 +84,18 @@ sub openDB {
   };
   if(my $e = catch std::exception) {
     $logger->error("Error \"".$e->what()."\".");
+    return -1;
   }
   elsif($e = catch DbException) {
     $logger->error("Error \"".$e->what()."\".");       
+    return -1;
   }        
   elsif($@) {
     $logger->error("Error \"".$@."\".");      
+    return -1;
   } 
+
+  return 0;
 }
 
 
@@ -118,16 +123,20 @@ sub query {
     };
     if(my $e = catch std::exception) {
       $logger->error("Error \"".$e->what()."\".");
+      return -1;
     }
     elsif($e = catch DbException) {
       $logger->error("Error \"".$e->what()."\".");    
+      return -1;
     }        
     elsif($@) {
       $logger->error("Error \"".$@."\".");      
+      return -1;
     }   
   }
   else {
     $logger->error("Missing argument");   
+    return -1;
   } 
   return @resString; 
 }
@@ -163,6 +172,7 @@ sub count {
   else {
     $logger->error("Missing argument.");    
   } 
+
   return -1;
 }
 
@@ -184,18 +194,23 @@ sub insertIntoContainer {
     };
     if(my $e = catch std::exception) {
       $logger->error("Error \"".$e->what()."\".");
+      return -1;
     }
     elsif($e = catch DbException) {
       $logger->error("Error \"".$e->what()."\"."); 
+      return -1;
     }        
     elsif($@) {
       $logger->error("Error \"".$@."\"."); 
+      return -1;
     }  
   }     
   else {
     $logger->error("Missing argument");  
+    return -1;
   }   
-  return;
+
+  return 0;
 }
 
 
@@ -221,18 +236,23 @@ sub insertElement {
     };
     if(my $e = catch std::exception) {
       $logger->error("Error \"".$e->what()."\".");
+      return -1;
     }
     elsif($e = catch DbException) {
       $logger->error("Error \"".$e->what()."\".");    
+      return -1;
     }        
     elsif($@) {
       $logger->error("Error \"".$@."\".");      
+      return -1;
     }  
   }     
   else {
     $logger->error("Missing argument."); 
+    return -1;
   }   
-  return;
+
+  return 0;
 }
 
 
@@ -249,18 +269,23 @@ sub remove {
     };
     if(my $e = catch std::exception) {
       $logger->error("Error \"".$e->what()."\".");	
+      return -1;
     }
     elsif($e = catch DbException) {
       $logger->error("Error \"".$e->what()."\".");      
+      return -1;
     }        
     elsif($@) {
       $logger->error("Error \"".$@."\".");	
+      return -1;
     }  
   }     
   else {
     $logger->error("Missing argument.");  
+    return -1;
   }   
-  return;
+
+  return 0;
 }
 
 
@@ -304,7 +329,9 @@ collection.  Each method may then be invoked on the object for the specific data
     # $db->setContainer("snmpstore.dbxml");
     # $db->setNamespaces(\%ns);    
     
-    $db->openDB;
+    if ($db->openDB == -1) {
+      print "Error opening database\n";
+    }
 
     print "There are " , $db->count("//nmwg:metadata") , " elements in the XMLDB.\n\n";
 
@@ -319,10 +346,14 @@ collection.  Each method may then be invoked on the object for the specific data
     }  
 
     my $xml = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"test\" />";
-    $db->insertIntoContainer($xml, "test");
+    if ($db->insertIntoContainer($xml, "test") == -1) {
+      print "Couldn't insert node into container\n";
+    }
 
     my $xml2 = "<nmwg:subject xmlns:nmwg='http://ggf.org/ns/nmwg/base/2.0/'/>";
-    $db->insertElement("/nmwg:metadata[\@id='test']", $xml2);
+    if ($db->insertElement("/nmwg:metadata[\@id='test']", $xml2) == -1) {
+      print "Couldn't insert element\n";
+    }
 
     print "There are " , $db->count("//nmwg:metadata") , " elements in the XMLDB.\n\n";
 
@@ -336,7 +367,9 @@ collection.  Each method may then be invoked on the object for the specific data
       print "Nothing Found.\n";
     } 
 
-    $db->remove("test");
+    if ($db->remove("test") == -1) {
+      print "Error removing test\n";
+    }
 
 =head1 DETAILS
 
@@ -378,7 +411,7 @@ used).
 =head2 openDB
 
 Opens and initializes objects for interacting with the database such as managers and 
-containers.
+containers. Returns 0 on success and -1 on failure.
 
 =head2 query($query)
 
@@ -390,13 +423,13 @@ The string $query must be an XPath expression to be sent to the database.  Examp
     
   //nmwg:parameter[@name="SNMPVersion" and @value="1"]
   
-Results are returned as an array of strings.
+Results are returned as an array of strings or -1 on error.
 
 =head2 count($query)
 
 The string $query must also be an XPath expression that is sent to the database.  
 The result of this expression is simple the number of elements that match the 
-query.
+query. Returns -1 on error.
 
 =head2 insertIntoContainer($content, $name)
 
@@ -405,7 +438,7 @@ well formed.  The second argument, '$name', is the name to be used in the databa
 for this content.  Think of this as the 'primary key'.  Most times the 'id' field of
 the XML element can be used for the name safely.  Note that this will insert the
 item in question DIRECTLY into the container, it will not be the child of any 
-elements.  
+elements.  Returns 0 on success and -1 on error.
 
 =head insertElement($xquery, $content)
 
@@ -428,10 +461,12 @@ The call would then look like:
 
 db->insertElement("/a/b[@id='2']", "<c atr='1'/>");
 
+Returns 0 on success and -1 on error.
+
 =head2 remove($name)
 
 The only argument here, '$name', is the name (primary key) of the element to be removed
-from the database.   
+from the database.  Returns 0 on success and -1 on error.
 
 =head1 SEE ALSO
 

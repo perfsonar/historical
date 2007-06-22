@@ -82,6 +82,8 @@ sub setSchema {
 sub openDB {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $retval;
+
   eval {
     my %attr = (
       RaiseError => 1,
@@ -91,12 +93,16 @@ sub openDB {
       $self->{USER},
       $self->{PASS}, 
       \%attr
-    ) or $logger->error("Database \"".$self->{NAME}."\" unavailable with user \"".$self->{NAME}."\" and password \"".$self->{PASS}."\".");               
+    ) or $logger->error("Database \"".$self->{NAME}."\" unavailable with user \"".$self->{NAME}."\" and password \"".$self->{PASS}."\".");
   };
   if($@) {
     $logger->error("Open error \"".$@."\".");
-  }   
-  return;
+    $retval = -1;
+  } else {
+    $retval = 0;
+  }
+
+  return $retval;
 }
 
 
@@ -108,8 +114,11 @@ sub closeDB {
   };
   if($@) {
     $logger->error("Close error \"".$@."\".");
-  }   
-  return;
+    $retval = -1;
+  } else {
+    $retval = 0;
+  }
+  return $retval;
 }
 
 
@@ -126,11 +135,12 @@ sub query {
     };
     if($@) {
       $logger->error("Query error \"".$@."\".");
-      return -1;
+      $results = -1;
     } 
   }
   else {
     $logger->error("Missing argument.");
+    $results = -1;
   } 
   return $results;
 }
@@ -139,7 +149,7 @@ sub query {
 sub count {
   my ($self, $query) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::SQL");
-  my $results = -2; 
+  my $results; 
   if(defined $query and $query ne "") { 
     $logger->debug("Query \"".$query."\" received.");   
     eval {
@@ -154,6 +164,7 @@ sub count {
   } 
   else { 
     $logger->error("Missing argument.");
+    return -1;
   } 
   return $#{$results}+1;
 }
@@ -199,6 +210,7 @@ sub insert {
   }
   else {
     $logger->error("Missing argument.");
+    return -1;
   } 
   return 1;  
 }
@@ -220,6 +232,7 @@ sub remove {
   }
   else {
     $logger->error("Missing argument.");
+    return -1;
   }    
   return 1;
 }
@@ -260,7 +273,9 @@ the specific database.
     # $db->setPass("");    
     # $db->setSchema(\@dbSchema);     
 
-    $db->openDB;
+    if ($db->openDB == -1) {
+      print "Error opening database\n";
+    }
 
     my $count = $db->count("select * from data");
     if($count == -1) {
@@ -271,7 +286,7 @@ the specific database.
     }
 
     my $result = $db->query("select * from data where time < 1163968390 and time > 1163968360");
-    if($result == -1) {
+    if($#result == -1) {
       print "Error executing query statement\n";
     }   
     else { 
@@ -302,7 +317,9 @@ the specific database.
       print "Error executing insert statement\n";
     }
 
-    $db->closeDB;
+    if ($db->closeDB == -1) {
+      print "Error closing database\n";
+    }
        
 
 =head1 DETAILS
@@ -349,11 +366,11 @@ modules installed for the specific database you will be attempting to access.
 
 =head2 openDB
 
-Prepares a handle to the database.
+Prepares a handle to the database. Returns 0 on success and -1 on failure.
 
 =head2 closeDB
 
-Closes the handle to the database.
+Closes the handle to the database. Returns 0 on success and -1 on failure.
 
 =head2 query($query)
 

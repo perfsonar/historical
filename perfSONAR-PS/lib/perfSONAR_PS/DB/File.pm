@@ -39,8 +39,9 @@ sub openDB {
   }
   else {
     $logger->error("Cannot open database, missing filename.");      
+    return -1;
   }                  
-  return;
+  return 0;
 }
 
 
@@ -48,14 +49,19 @@ sub closeDB {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{XML} and $self->{XML} ne "") {
-    open(FILE, ">".$self->{FILE});
-    print FILE $self->{XML}->toString;
-    close(FILE);
+    if (defined open(FILE, ">".$self->{FILE})) {
+      print FILE $self->{XML}->toString;
+      close(FILE);
+      return 0;
+    } else {
+      $logger->error("Couldn't open output file \"".$self->{FILE}."\"");
+      return -1;
+    }
   }
   else {
     $logger->error("LibXML DOM structure not defined.");  
+    return -1;
   }
-  return;
 }
 
 
@@ -70,15 +76,17 @@ sub query {
       foreach my $node (@{$nodeset}) {            	    
         push @results, $node->toString;
       }
+      return @results;
     }
     else {
       $logger->error("LibXML DOM structure not defined."); 
+      return -1;
     }
   }
   else {
     $logger->error("Missing argument.");
+    return -1;
   }  
-  return @results;
 }
 
 
@@ -93,12 +101,13 @@ sub count {
     }
     else {
       $logger->error("LibXML DOM structure not defined."); 
+      return -1;
     }
   }
   else {
     $logger->error("Missing argument.");
+    return -1;
   } 
-  return 0;   
 }
 
 
@@ -198,25 +207,27 @@ The only argument is a string representing the file to be opened.
 
 =head2 openDB
 
-Opens the file, and creates the necessary objects to read and query the contents. 
+Opens the file, and creates the necessary objects to read and query the contents. Will return 0
+on success and -1 on failure.
 
 =head2 closeDB
 
-Closes the file.
+Closes the file. Returns 0 on success and -1 on failure.
 
 =head2 query($query)
 
 The '$query' string is an XPath expression that will be performed on the open file.  The results
-are returned as an array of strings.  
+are returned as an array of strings. Will return -1 on error.
 
 =head2 count($query)
 
 The '$query' string is an XPath expression that will be performed on the open file.  The results
-this time are a count of the number of elements that match the XPath expression.
+this time are a count of the number of elements that match the XPath expression. Will return -1
+on error.
 
 =head2 getDOM()
 
-Returns the internal XML::LibXML DOM object.
+Returns the internal XML::LibXML DOM object. Will return "" on error.
 
 =head2 setDOM($dom)
 
