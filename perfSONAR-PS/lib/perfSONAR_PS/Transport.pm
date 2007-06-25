@@ -363,7 +363,8 @@ sub setResponse {
     if(defined $envelope and $envelope ne "") {
       $content = $self->makeEnvelope($content) ;
     }
-    $self->{RESPONSE} = HTTP::Response->parse($content);
+    $self->{RESPONSE}->message("success");
+    $self->{RESPONSE}->content($content);
   }
   else {
     $logger->error("Missing argument.");    
