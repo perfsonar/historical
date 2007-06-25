@@ -236,6 +236,14 @@ sub getTime {
       $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
     }
 
+    # RRD MA compatability
+    if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")) {
+      $ma->{TIME}->{"START"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")->get_node(1));
+    }
+    if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")) {
+      $ma->{TIME}->{"END"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")->get_node(1));
+    }
+
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
       $ma->{TIME}->{"START"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
     }
