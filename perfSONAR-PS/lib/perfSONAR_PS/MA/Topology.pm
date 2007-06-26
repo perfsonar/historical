@@ -95,6 +95,7 @@ sub handleRequest {
 sub parseRequest {
 	my($self, $messageId, $messageIdRef, $type) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $status;
 
 	my $localContent = "";
 	foreach my $d ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
@@ -103,16 +104,16 @@ sub parseRequest {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				if ($eventType eq "Path.Status") {
-					$localContent = $self->topologyRequest($m, $d, $localContent, $messageId, $messageIdRef);
+					($status, $localContent) = $self->topologyRequest($m, $d, $localContent, $messageId, $messageIdRef);
 				} else {
 					$logger->error("Unknown event type: " .  $eventType);
-					return undef;
+					return ( -1, "Unknown event type" )
 				}
 			}
 		}
 	}
 
-	return $localContent;
+	return ($status, $localContent);
 }
 
 
@@ -131,12 +132,12 @@ sub topologyRequest {
 	$localContent .= $m->toString();
 
 	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-	my $res = $self->dumpDatabase;
-	if (defined $res) {
+	my ($status, $res) = $self->dumpDatabase;
+	if ($status == 0) {
 		$localContent .= $res;
 	} else {
-		$logger->error("Couldn't dump topology structure");
-		return undef;
+		$logger->error("Couldn't dump topology structure: $res");
+		return ($status, $res);
 	}
 	$localContent .= "  </nmwg:data>\n";
 
@@ -144,7 +145,7 @@ sub topologyRequest {
 	print OUTPUT $localContent;
 	close(OUTPUT);
 
-	return $localContent;
+	return (0, $localContent);
 }
 
 sub dumpDatabase {
@@ -153,26 +154,28 @@ sub dumpDatabase {
 
 	if (!defined $self->{DATADB}) {
 		$logger->error("No database to dump");
-		return undef;
+		return (-1, "No database to dump");
 	}
 
 	my $res = $self->{DATADB}->openDB;
 	if ($res == -1) {
 		$logger->error("Couldn't open topology database");
-		return undef;
+		return (-1, "Couldn't open topology database");
 	}
 
 	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQL") {
-		$res = $self->dumpSQLDatabase;
+		($status, $res) = $self->dumpSQLDatabase;
 	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XMLDB") {
-		$res = $self->dumpXMLDatabase;
+		($status, $res) = $self->dumpXMLDatabase;
 	} else {
 		$logger->error("Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"});
+		$self->{DATADB}->closeDB;
+		return (-1, "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"});
 	}
 
 	$self->{DATADB}->closeDB;
 
-	return $res;
+	return (0, $res);
 }
 
 sub dumpSQLDatabase {
@@ -182,7 +185,7 @@ sub dumpSQLDatabase {
 	my $nodes = $self->{DATADB}->query("select id, name, country, city, institution, latitude, longitude from nodes");
 	if ($nodes == -1) {
 		$logger->error("Couldn't grab list of nodes");
-		return undef;
+		return (-1, "Couldn't grab list of nodes");
 	}
 
 	$localContent = "";
@@ -206,7 +209,7 @@ sub dumpSQLDatabase {
 	my $links = $self->{DATADB}->query("select id, name, globalName, type from links");
 	if ($links == -1) {
 		$logger->error("Couldn't grab list of links");
-		return undef;
+		return (-1, "Couldn't grab list of links");
 	}
 
 	foreach $link_ref (@{ $links }) {
@@ -220,6 +223,7 @@ sub dumpSQLDatabase {
 		my $nodes = $self->{DATADB}->query("select node_id, role, link_index from link_nodes where link_id=\'".$link[0]."\'");
 		if ($nodes == -1) {
 			$logger->error("Couldn't grab list of nodes associated with link ".$link[0]);
+			return (-1, "Couldn't grab list of nodes associated with link " . $link[0]);
 		}
 
 		# dump the link information in XML format
@@ -239,11 +243,11 @@ sub dumpSQLDatabase {
 		$localContent .= "</nmwgt:link>\n";
 	}
 
-	return $localContent;
+	return (0, $localContent);
 }
 
 sub dumpXMLDatabase {
-	return undef;
+	return (-1, "XML Databases unsupported");
 }
 
 1;
