@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:store xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+            xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/"
+            xmlns:nmwgtopo3="http://ggf.org/ns/nmwg/topology/base/3.0/"
+            xmlns:nmtl2="http://ggf.org/ns/nmwg/topology/l2/3.0/"
+            xmlns:nmtl3="http://ggf.org/ns/nmwg/topology/l3/3.0/">
+
+  <nmwg:metadata id="md1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:subject id="sub-Internet2-1">
+      <nmwgtopo3:node id="Internet2-1" xmlns:nmwgtopo3="http://ggf.org/ns/nmwg/topology/base/3.0/">
+        <nmwgtopo3:type>TopologyPoint</nmwgtopo3:type>
+        <nmwgtopo3:name type="logical">Internet2-1</nmwgtopo3:name>
+        <nmwgtopo3:country>USA</nmwgtopo3:country>
+        <nmwgtopo3:city>Ann Arbor</nmwgtopo3:city>
+        <nmwgtopo3:institution>Internet2</nmwgtopo3:institution>
+        <nmwgtopo3:latitude>0</nmwgtopo3:latitude>
+        <nmwgtopo3:longitude>0</nmwgtopo3:longitude>
+      </nmwgtopo3:node>
+    </nmwg:subject>
+  </nmwg:metadata>
+        
+  <nmwg:metadata id="md2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:subject id="sub-Internet2-2">
+      <nmwgtopo3:node id="Internet2-2" xmlns:nmwgtopo3="http://ggf.org/ns/nmwg/topology/base/3.0/">
+        <nmwgtopo3:type>TopologyPoint</nmwgtopo3:type>
+        <nmwgtopo3:name type="logical">Internet2-2</nmwgtopo3:name>
+        <nmwgtopo3:country>USA</nmwgtopo3:country>
+        <nmwgtopo3:city>Ann Arbor</nmwgtopo3:city>
+        <nmwgtopo3:institution>Internet2</nmwgtopo3:institution>
+        <nmwgtopo3:latitude>0</nmwgtopo3:latitude>
+        <nmwgtopo3:longitude>0</nmwgtopo3:longitude>
+      </nmwgtopo3:node>
+    </nmwg:subject>
+  </nmwg:metadata>
+    
+  <nmwg:metadata id="md3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:subject id="sub-Internet2-3">
+      <nmtl2:link xmlns:nmtl2="http://ggf.org/ns/nmwg/topology/l2/3.0/">                
+        <nmtl2:name type="logical">Internet2-Link</nmtl2:name>
+        <nmtl2:globalName type="logical">Internet2-Link</nmtl2:globalName>
+        <nmtl2:type>NREN_Link</nmtl2:type>
+        <nmwgtopo3:node nodeIdRef="Internet2-1" xmlns:nmwgtopo3="http://ggf.org/ns/nmwg/topology/base/3.0/"> 
+          <nmwgtopo3:role>EndPoint</nmwgtopo3:role>
+        </nmwgtopo3:node>
+        <nmwgtopo3:node nodeIdRef="Internet2-2" xmlns:nmwgtopo3="http://ggf.org/ns/nmwg/topology/base/3.0/"> 
+          <nmwgtopo3:role>DemarcPoint</nmwgtopo3:role>
+        </nmwgtopo3:node>
+      </nmtl2:link>
+    </nmwg:subject>
+    <nmwg:parameters>
+      <nmwg:parameter name="supportedEventType">Path.Status</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+    
+  <nmwg:data id="data1" metadataIdRef="md3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:key id="k1">
+      <nmwg:parameters id="p1">
+        <nmwg:parameter name="pathId">Internet2-Link</nmwg:parameter>
+        <nmwg:parameter name="type">sqlite</nmwg:parameter>      
+        <nmwg:parameter name="file">/home/jason/soon/perfSONAR-PS/MA/Status/data.db</nmwg:parameter>
+        <nmwg:parameter name="table">data</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key> 
+  </nmwg:data>       
+    
+</nmwg:store>

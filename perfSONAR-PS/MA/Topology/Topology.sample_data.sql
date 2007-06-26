@@ -1,0 +1,16 @@
+insert into link_nodes (link_id, node_id, role, link_index) values ('link1', 'node1', 'EndPoint', 0);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link1', 'node2', 'EndPoint', 1);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link2', 'node2', 'EndPoint', 0);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link2', 'node3', 'EndPoint', 1);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link3', 'node3', 'EndPoint', 0);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link3', 'node4', 'EndPoint', 1);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link4', 'node4', 'EndPoint', 0);
+insert into link_nodes (link_id, node_id, role, link_index) values ('link4', 'node1', 'EndPoint', 1);
+insert into links (id, name, globalName, type) values ('link1', 'n1n2', 'n1n2.internet2', 'domain');
+insert into links (id, name, globalName, type) values ('link2', 'n2n3', 'n2n3.internet2', 'domain');
+insert into links (id, name, globalName, type) values ('link3', 'n3n4', 'n3n4.internet2', 'domain');
+insert into links (id, name, globalName, type) values ('link4', 'n4n1', 'n4n1.internet2', 'domain');
+insert into nodes (id, name, country, city, institution, longitude, latitude) values ('node1', 'Node1', 'US', 'Ann Arbor', 'Internet2', 0.0, 0.0);
+insert into nodes (id, name, country, city, institution, longitude, latitude) values ('node2', 'Node2', 'US', 'Ann Arbor', 'Internet2', 0.0, 0.0);
+insert into nodes (id, name, country, city, institution, longitude, latitude) values ('node3', 'Node3', 'US', 'Ann Arbor', 'Internet2', 0.0, 0.0);
+insert into nodes (id, name, country, city, institution, longitude, latitude) values ('node4', 'Node4', 'US', 'Ann Arbor', 'Internet2', 0.0, 0.0);
