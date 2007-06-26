@@ -1,0 +1,144 @@
+package perfSONAR_PS::XML::Namespace;
+ 
+use Log::Log4perl qw(get_logger);
+
+
+sub new {
+ my $that = shift;
+  my $class = ref($that) || $that;
+  my @param = @_;
+  my $self = { 'nmwg' => "http://ggf.org/ns/nmwg/base/2.0/",
+               'nmwgr' => "http://ggf.org/ns/nmwg/result/2.0/" ,
+	     ###  'select'  => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+	       'netutil' => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/", 
+	
+	       'traceroute' =>"http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
+	       'snmp' =>  "http://ggf.org/ns/nmwg/tools/snmp/2.0/", 
+	       'ping' => "http://ggf.org/ns/nmwg/tools/ping/2.0/", 
+	       'owamp' =>"http://ggf.org/ns/nmwg/tools/owamp/2.0/", 
+	       'bwctl' =>"http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+	       'pinger' =>"http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+	       'iperf' =>"http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+	      
+	       'nmwgt' => "http://ggf.org/ns/nmwg/topology/2.0/",	
+	       'nmtl4' => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
+	       'nmtl3' => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+               'nmwgtopo3' => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+		
+		'nmtm' => "http://ggf.org/ns/nmwg/time/2.0/",
+		
+		 LOGGER => undef}; 
+  bless $self, $class;
+  $self->{LOGGER} = get_logger($that);
+  my %conf = ();
+  if(@param) {
+     if ($param[0] eq '-hash') { 
+       %conf = %{$param[1]} 
+     } else {
+       %conf = @param;
+     }
+     $self->{LOGGER}->debug(" params: " . ( join " : " , @param) );
+     foreach my $cf ( keys %conf ) {
+        (my $stripped_cf = $cf) =~ s/\-//;
+       if(exists $self->{$stripped_cf}) {
+           $self->{$stripped_cf} = $conf{$cf};
+        }  else {
+            $self->{LOGGER}->warn("Unknown option: $cf - " . $conf{$cf}) ;
+        }
+     }
+  } 
+  return $self;
+
+}
+
+ 
+
+sub getNsByKey {
+   my $self = shift;
+   return $self->{$_};
+
+}
+
+#
+#  set namespace URI 
+#
+sub setNsByKey {
+   my $self = shift;
+   my ($key , $val) = @_;
+   return  $self->{$key}=$val;
+ 
+}
+
+1;
+
+
+
+__END__
+=head1 NAME
+
+Namespace -  a container for namespaces 
+
+=head1 DESCRIPTION
+
+The purpose of this module is to  create OO interface to namespace registration and therefore
+add the layer of abstraction for any namespace related operation. All  perfSONAR-PS classes should
+work with the instance of this class and avoid using explicit namespace declarations. 
+
+=head1 SYNOPSIS
+ 
+    use perfSONAR_PS::XML::Namespace; 
+    # create Namespace object with default URIs
+    $ns = perfSONAR_PS::XML::Namespace->new();
+    
+    # overwrite  Namespace object with  custom URIs
+    $nss =  {'pinger' => 'http://newpinger/namespace/'};
+    $ns = perfSONAR_PS::XML::Namespace->new(-hash => $nss);
+    
+    # overwrite only specific Namesapce   with  custom URI 
+    
+    $ns = perfSONAR_PS::XML::Namespace->new(-pinger =>   'http://newpinger/namespace/');
+      
+    $pinger_uri = $ns->getNsByKey('pinger'); ## get URI by key
+    $ns->setNsByKey('pinger' =>  'http://newpinger/namespace/'); ## set URI by key
+    
+ 
+=head1 API
+
+There are many get/set methods
+
+=head2 new(-NS => \%nss)
+
+Creates a new object, pass hash ref as collection of namesapces 
+
+=head2 getNsByKey('pinger') 
+
+Returns namesapce string by id of the namespace, where kyes are:
+'nmwg', 'nmwgr',  'nmwgt','nmwgtopo3','nmtl3','nmtl4', 'nmtm', 'traceroute','snmp', 'ping', 'owamp', 'netutil', 'bwctl','pinger', 'iperf'
+
+=head2 setNsByKey('pinger' =>  'http://newpinger/namespace/' ) 
+
+Sets namespace URI string by id of the namespace or defnies the new one
+
+  
+
+=head1 SEE ALSO
+ 
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS 
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 AUTHOR
+
+Maxim Grigoriev, E<lt>maxim@fnal.govE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
