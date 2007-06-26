@@ -36,7 +36,7 @@ my %ns = (
 
 		# Read in configuration information
 my %conf = ();
-readConfiguration("./statusMA.conf", \%conf);
+readConfiguration("./topologyMA.conf", \%conf);
 
     # set logging level
 if($DEBUGFLAG) {
