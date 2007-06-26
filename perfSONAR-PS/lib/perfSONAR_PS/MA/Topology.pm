@@ -75,10 +75,10 @@ sub handleRequest {
 
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling topology request.");
-		my $response = $self->parseRequest($messageIdReturn, $messageId, $messageType);
-		if (!defined $response) {
+		my ($status, $response) = $self->parseRequest($messageIdReturn, $messageId, $messageType);
+		if ($status != 0) {
 			$logger->error("Unable to handle topology request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", "Unable to handle topology request");
+			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
 		} else {
 			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
 		}
@@ -175,7 +175,7 @@ sub dumpDatabase {
 
 	$self->{DATADB}->closeDB;
 
-	return (0, $res);
+	return ($status, $res);
 }
 
 sub dumpSQLDatabase {
@@ -189,6 +189,7 @@ sub dumpSQLDatabase {
 	}
 
 	$localContent = "";
+	$interfaceContent = "";
 
 	foreach $node_ref (@{ $nodes }) {
 		my @node = @{ $node_ref };
@@ -203,6 +204,22 @@ sub dumpSQLDatabase {
   		$localContent .= "	<nmwgt:institution>".$node[4]."</nmwgt:institution>\n";
   		$localContent .= "	<nmwgt:latitude>".$node[5]."</nmwgt:latitude>\n";
   		$localContent .= "	<nmwgt:longitude>".$node[6]."</nmwgt:longitude>\n";
+
+		my $ifs = $self->{DATADB}->query("select name, type, capacity from interfaces where node_id=\'".$node[0]."\'");
+		if ($ifs == -1) {
+			$logger->error("Couldn't grab list of interfaces for node ".$node[0]);
+			return (-1, "Couldn't grab list of interfaces for node ".$node[0]);
+		}
+
+		foreach $if_ref (@{ $ifs }) {
+			my @if = @{ $if_ref };
+
+			$localContent .= "	<nmwgt:interface id=\"".$if[0]."\">\n";
+			$localContent .= "		<nmwgt:type>".$if[1]."</nmwgt:type>\n";
+			$localContent .= "		<nmwgt:capacity>".$if[2]."</nmwgt:capacity>\n";
+			$localContent .= "	</nmwgt:interface>\n";
+		}
+
 		$localContent .= "</nmwgt:node>\n";
 	}
 
@@ -215,12 +232,12 @@ sub dumpSQLDatabase {
 	foreach $link_ref (@{ $links }) {
 		my @link = @{ $link_ref };
 
-		$link_node_query = "select node_id, role, link_index from link_nodes where link_id=\'".$link[0]."\'";
-		if ($time ne "") {
+		$link_node_query = "select node_id, interface, role, link_index from link_nodes where link_id=\'".$link[0]."\'";
+		if (defined $time and $time ne "") {
 			$link_node_query .= " and start_time <= $time and end_time >= $time";
 		}
 
-		my $nodes = $self->{DATADB}->query("select node_id, role, link_index from link_nodes where link_id=\'".$link[0]."\'");
+		my $nodes = $self->{DATADB}->query($link_node_query);
 		if ($nodes == -1) {
 			$logger->error("Couldn't grab list of nodes associated with link ".$link[0]);
 			return (-1, "Couldn't grab list of nodes associated with link " . $link[0]);
@@ -235,8 +252,9 @@ sub dumpSQLDatabase {
 		foreach $node_ref (@{ $nodes }) {
 			my @node = @{ $node_ref };
 			$localContent .= "	<nmwgt:node nodeIdRef=\"".$node[0]."\">\n";
-			$localContent .= "		<nmwgt:role>".$node[1]."</nmwgt:role>\n";
-			$localContent .= "		<nmwgt:link_index>".$node[2]."</nmwgt:link_index>\n";
+			$localContent .= "		<nmwgt:interface>".$node[1]."</nmwgt:interface>\n";
+			$localContent .= "		<nmwgt:role>".$node[2]."</nmwgt:role>\n";
+			$localContent .= "		<nmwgt:link_index>".$node[3]."</nmwgt:link_index>\n";
 			$localContent .= "	</nmwgt:node>\n";
 		}
 
