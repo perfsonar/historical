@@ -1,4 +1,4 @@
-package SimpleConfig;
+package perfSONAR_PS::SimpleConfig;
 ########################################
 #
 #  maxim@fnal.gov 2007
@@ -12,7 +12,9 @@ package SimpleConfig;
 
 use strict;
 use warnings;
+use XML::Simple;
 use Log::Log4perl qw(get_logger); 
+ 
 
 # exported package globals go here
  
@@ -22,16 +24,17 @@ use Log::Log4perl qw(get_logger);
   my $that = shift;
   my $class = ref($that) || $that;
   my @param = @_;
-  my $self = { FILE => undef, DATA => undef, DIALOG => undef, VALIDKEYS => undef, PROMPTS => undef,  LOGGER => undef}; 
+  my $self = { FILE => undef, DELIMITER => '=', DATA => undef, DIALOG => undef, VALIDKEYS => undef, PROMPTS => undef,  LOGGER => undef}; 
   bless $self, $class;
-  $self->{LOGGER} = get_logger($that);
-  my %conf = undef;
+  $self->{LOGGER} = get_logger("$that");
+  my %conf = ();
   if(@param) {
      if ($param[0] eq '-hash') { 
        %conf = %{$param[1]} 
      } else {
        %conf = @param;
      }
+     $self->{LOGGER}->debug(" module: $that  params: " . ( join " : " , @param) );
      foreach my $cf ( keys %conf ) {
         (my $stripped_cf = $cf) =~ s/\-//;
        if(exists $self->{$stripped_cf}) {
@@ -54,6 +57,16 @@ sub promptEnter{
 } 
 #
 #
+#
+sub setDelimiter{
+   my $self = shift;
+   my $sep = shift;  
+   if($sep !~ /^[\=\+\!\#\:\;\-\*]$/) {
+       $self->{LOGGER}->error("Delimiter is not supported: $sep") ; 
+   } else {
+    $self->{DELIMITER} = $sep;
+   }
+}
 #
 sub setDialog{
    my $self = shift;
@@ -107,16 +120,25 @@ sub setData {
 sub store {
   my  $self  = shift;
   my $filen = shift;
-  my $file_to_store = (defined $filen && -e $filen)?$filen:$self->{FILE};
+  my $file_to_store = (defined $filen)?$filen:$self->{FILE};
  
   open OUTF, "+>$file_to_store" or  $self->{LOGGER}->error(" Failed to store config file: $file_to_store") ;
-  foreach my $key ( map {$_->[1]} sort { $a->[0] <=>  $b->[0]} map {[$self->{DATA}->{$_}{order}, $_]} keys %{$self->{DATA}}) { 
-   my $comment = $self->{DATA}->{$key}{comment}?$self->{DATA}->{$key}{comment}:"#\n"; 
-   print OUTF $comment .   $key . "=" . ($self->{DATA}->{$key}{pre}?$self->{DATA}->{$key}{pre}:$self->{DATA}->{$key}{value}) . "\n";
-   $self->{LOGGER}->debug($comment  .    $key . "=" .  ($self->{DATA}->{$key}{pre}?$self->{DATA}->{$key}{pre}:$self->{DATA}->{$key}{value}));
+  foreach my $key ( map {$_->[1]} sort {$a->[0] <=>  $b->[0]} map {[$self->{DATA}->{$_}{order}, $_]} keys %{$self->{DATA}}) { 
+     my $comment = $self->{DATA}->{$key}{comment}?$self->{DATA}->{$key}{comment}:"#\n"; 
+     my $value = ($self->{DATA}->{$key}{pre}?$self->{DATA}->{$key}{pre}:$self->{DATA}->{$key}{value});
+     my $key_type = ref($value);
+      $self->{LOGGER}->debug(" This option  $key is : $key_type");
+     if(  $key_type eq 'HASH' ) {
+            print OUTF $comment .  XMLout($value, RootName => $key ) . "\n";
+    
+     } else {
+         print OUTF $comment .   $key .   $self->{DELIMITER}  .  "$value\n";
+         $self->{LOGGER}->debug($comment  .    $key . $self->{DELIMITER} .   $value);
+     }
   } 
   close OUTF;
 }
+# 
 #
 #   parse  simple config with interpolation and comments preservation 
 #
@@ -129,46 +151,74 @@ sub parse {
   $self->{LOGGER}->debug( "File $file_to_open opened for parsing " ); 
   my %config = ();
   my $comment = undef;
-  my $order = 0;
-  
+  my $order = 1;
+  my $xml_start = undef;
+  my $xml_config = undef;
+  my $pattern = '^([\w\.\-]+)\s*\\' . $self->{DELIMITER} . '\s*(.+)';
+  my %xml_comment = ();
+  my $cur_xml  = 'undefined';
   while(<INF>) {
     chomp;
      s/^\s+?//;
+     
     if(m/^\#/) {
-       $comment .= "$_\n";
-    } else {
-       s/\s+//g;
-       if(m/^([\w\.\-]+)\=(.+)/) {
-          my $key = $1;
-	  my $value = $2;
-	  my $vpattern = $self->{VALIDKEYS}?$self->{VALIDKEYS}->{$key}:undef; 
-	  my $pkey = $self->{PROMPTS}?$self->{PROMPTS}->{$key}:undef; 
-	  $vpattern = qr/$vpattern/ if $vpattern;
-	  if($self->{DIALOG} &&   $pkey) {
-	      my $entered =  promptEnter("  Please enter the value for the $pkey (Default is $value)>");
-	      while($entered && ( $vpattern  && $entered !~ $vpattern  )) {
-	         $entered =  promptEnter("!!! Entered value is  not valid according to regexp: $vpattern , please re-enter>");
-	      }
-	      $value = $entered?$entered:$value;
-	  }  
-	  if( $vpattern   && $value !~  $vpattern ) {
-	      $self->{LOGGER}->error( "Parser failed, value:$value for $key is NOT VALID according to pattern:  $vpattern" );
-	  }
-	   
-	  $config{$key}{value} = $value;
- 	  $config{$key}{order}=$order++;
-	  $order++;
-	  if ($comment) {
+       if($xml_start) {
+         $xml_comment{$cur_xml} .= "$_\n";
+       } else {
+         $comment .= "$_\n";
+       }
+     } else {
+       s/\s+$//g; 
+       if(!$xml_start && m/^\<\s*([\w\-]+)\b?[^\>]*\>/) {
+         $xml_start = $1;
+	 $xml_config .= $_;
+	 $cur_xml  =  $xml_start;
+	 if($xml_comment{undefined}) {
+	   $xml_comment{$cur_xml} = $xml_comment{undefined};
+	   delete $xml_comment{undefined};
+	 }
+       } elsif( $xml_start ) {
+         if( m/^\<\/\s*($xml_start)\s*\>/) { 
+           $xml_config .= $_;
+	   $self->{LOGGER}->debug(" XML fragment: $xml_config ");
+	    
+	   my $xml_cf =  XMLin($xml_config,   KeyAttr => {}, ForceArray => 1); 
+	    
+	   $config{$xml_start}{value} = $self->_parseXML(  $xml_cf ); 
+	     
+	   foreach my $c_key (keys %xml_comment) {
+	       $xml_comment{$c_key} =~ s/\#+//g;
+	       $config{$xml_start}{comment} .= "# $c_key --  $xml_comment{$c_key}\n";
+	   }
+	   %xml_comment = (); 
+	   $config{$xml_start}{order} = $order++;
+	   $cur_xml = undef; 
+	   $xml_start = undef; 	
+         } elsif( m/^\<\s*([\w\-]+)\b?[^\>]*\>/) {
+	   $cur_xml  = $1;
+           $xml_config .= $_;
+         } else{
+	   $xml_config .= $_;
+         }
+       } elsif(m/$pattern/o) {
+           my $key = $1;
+	   my $value = $2;
+	   $config{$key}{value} =  $self->_processKey($key, $value ); 
+	    $config{$key}{order}= $order++;
+	   if ($comment) {
 	      $config{$key}{comment} = $comment ;
 	      $comment = '';
-	  }
+           }
+       } else {
+          $self->{LOGGER}->debug(" ... Just a pattern:$pattern  a string: $_");
        }
-    }
+     }
   }
   close INF;
-  $self->{LOGGER}->debug(" interpolating ...\n");
+  $self->{LOGGER}->debug(" interpolating only key=value options...\n");
   #  interpolate all values 
   foreach my $key (keys %config) {
+     next if ref($config{$key}{value}) eq 'HASH' ; 
      my (  @tmp_keys) =  $config{$key}{value} =~ /[^\\]?\$\{?([a-zA-Z]+(?:\w+)?)\}?/g; 
      foreach my $sub_key (@tmp_keys) {
        $self->{LOGGER}->debug(" CHECK  $config{$key}{value} -> $sub_key  \n");	
@@ -184,8 +234,47 @@ sub parse {
   
   return \%config;
 }
- 
- 
+#
+#  recursive walk through the XML::Simple tree
+#
+sub _parseXML {
+  my $self = shift;
+  my $xml_cf  = shift;
+    
+  foreach my $key (keys %{$xml_cf}) {
+     if(ref($xml_cf->{$key}) eq 'HASH') {
+       $xml_cf->{$key} = $self->_parseXML($xml_cf->{$key});
+     } elsif(ref($xml_cf->{$key}) eq 'ARRAY') {
+        $xml_cf->{$key}->[0] = $self->_processKey($key, $xml_cf->{$key}->[0]);
+     } else {
+        $xml_cf->{$key} = $self->_processKey($key, $xml_cf->{$key});
+     }
+  }
+  return $xml_cf;
+} 
+
+sub _processKey {
+  my $self  = shift;
+  my($key, $value ) = @_;
+  $value =~ s/^\s+//; 
+  $value =~ s/\s+$//; 
+  my $vpattern = ($self->{VALIDKEYS} && $self->{VALIDKEYS}->{$key})?qr/$self->{VALIDKEYS}->{$key}/:undef; 
+  my $pkey =   ($self->{PROMPTS}  &&$self->{PROMPTS}->{$key})?$self->{PROMPTS}->{$key}:undef; 
+  
+  if($self->{DIALOG} &&   $pkey) {
+     my $entered =   promptEnter("  Please enter the value for the $pkey (Default is $value)>");
+     while($entered && ( $vpattern  && $entered !~ $vpattern  )) {
+	 $entered =  promptEnter("!!! Entered value is  not valid according to regexp: $vpattern , please re-enter>");
+     }
+     $value = $entered?$entered:$value;
+  }  
+  if( $vpattern   && $value !~  $vpattern ) {
+     $self->{LOGGER}->error( "Parser failed, value:$value for $key is NOT VALID according to pattern:  $vpattern" );
+  }
+   
+  return $value; 
+  
+}
 
 1;
 
@@ -193,8 +282,9 @@ sub parse {
  
 =head1 NAME
 
-SimpleConfig -   Config parser Module with comment preservation, order preservation, simple variable interpolation
-                and user's dialog functionality. User can set prompts and validation patterns
+SimpleConfig -   Config parser module with comment preservation, order preservation, simple variable interpolation
+                and user's dialog functionality. User can set prompts, validation patterns, delimiter. It supports inclusion of
+		the XML config fragments.
 
 =head1 SYNOPSIS
 
@@ -208,8 +298,11 @@ SimpleConfig -   Config parser Module with comment preservation, order preservat
  #
  #   use dialog prompts from this hashref
  $conf->setPrompts(\%prompts_hash); 
- #  
-  #   use validation patterns from this hashref
+ #   
+ #  set delimiter
+ $conf->setDelimiter('='); # this is default delimiter
+ #
+ #   use validation patterns from this hashref
  $conf->setValidkeys(\%validkeys_hash); 
  #   parse and have a "chat" with user at the same time
  $config_hashref = $conf->parse;
@@ -225,20 +318,16 @@ SimpleConfig -   Config parser Module with comment preservation, order preservat
 This module opens a config file and parses it's contents for you. The B<new> method
 accepts several parameters. The method B<parse> returns a hash reference
 which contains all options and it's associated values of your config file as well as comments above.
-If the -dialog mode is set then at the moment of parsing user will be prompted to enter different value and
+If the -DIALOG mode is set then at the moment of parsing user will be prompted to enter different value and
 if validation pattern for this particular key was defined then it will be validated and user could be asked to
 enter different value if it fail.
 
-The format of config files supported by B<SimpleConfig> is   simple
-<name>=<value> pairs and comments are any line which starts with #. Also, it will interpolate any perl variable 
-which looks as ${?[A-Za-z]\w+}?. The order of appearance of such variables in the config file is not important.
+The format of config files supported by B<SimpleConfig> is   
+<name>=<value> pairs or XML fragments ( by XML::Simple, means no namespaces ) and comments are any line which starts with #, altough inside of 
+XML blocks the interpolation wont work. It will interpolate any perl variable 
+which looks as ${?[A-Za-z]\w+}? for simple key=value options. The order of appearance of such variables in the config file is not important.
 
-
-
-
-=head1 DETAILS
-
-
+ 
 =over
 
 
@@ -255,14 +344,14 @@ Possible ways to call B<new()>:
  $conf = new SimpleConfig(-FILE => "my.conf", -DATA => $hashref);  # use current hash ref with options
  
  $conf = new SimpleConfig(-FILE => "my.conf", -DIALOG => 'yes', -PROMPTS => \%promts_hash); # prompt user to enter new value for every -key- which held inside of  %prompts_hash
- $conf = new SimpleConfig(-FILE => "my.conf", -DIALOG => 'yes', 
-                          -PROMPTS => \%promts_hash, -VALIDKEYS => \%validation_patterns); # ... and validate every new value against the validation pattern
+ $conf = new SimpleConfig(-FILE => "my.conf", -DIALOG => 'yes', -DELIMITER => '?',
+                          -PROMPTS => \%promts_hash, -VALIDKEYS => \%validation_patterns); # set delimiter as '?'... and validate every new value against the validation pattern
  
 
 This method returns a B<SimpleConfig> object (a hash blessed into "SimpleConfig" namespace.
 All further methods must be used from that returned object. see below.
 Please note that setting -DIALOG option into the "true" is not enough, because the method will look only for the keys defined in the %prompts_hash 
-An alternative way to call B<new()> is supplying an option -HASH with  hash reference to the set of  the options.
+An alternative way to call B<new()> is supplying an option -hash with  hash reference to the set of  the options.
 
 =item B<-FILE>
 
@@ -277,23 +366,60 @@ A hash reference, which will be used as the config, i.e.:
 
  -DATA => \%somehash,  the dash '-' is optional
 
-where %somehash should be formatted as     ( $key1 => ('comment' => "#some comment\n#more comments\n", 
-                                                       'value' => $value1),
-					    $key2 => ('comment' => "#some comment\n#more comments\n", 
-                                                      'value' => $value2), ) 
+where %somehash should be formatted as     ( 'key1' => ('comment' => "#some comment\n#more comments\n", 
+                                                       'value' => 'Value1',
+						       'order' => '1',
+						      ),
+					    'key2' => ('comment' => "#some comment\n#more comments\n", 
+                                                      'value' =>  'Value2',
+						      'order' => '2'
+						     ),
+					    'key3' =>  ('comment' => "#some comment\n#more comments\n",
+					                 'order' => '3',
+							 'value' =>  { 'XML_root_key' => {
+							                             'xml_attribute_1' => 'attribute_value',
+							                             'sub_xml_key1' =>  ['sub_xml_value1'],
+							                             'sub_xml_key2' =>   ['sub_xml_value2'],
+								                     'sub_xml_key3'=>   ['sub_xml_value3'],	
+								                        },
+							              }		
+						      )
+					   ) 
 
 =item B<-DIALOG>
 
 Set up an interactive mode, Please note that setting -DIALOG option into the "true" is not enough,
 because this method will look only for the keys defined in the %prompts_hash ,  the dash '-' is optional
 
+=item B<-DELIMITER>
+
+Default delimiter is '='. Any single character from this list  = : ; + ! # ?  - *   is accepted. Please be careful with : since it could  be part of URL.
+
 =item B<-PROMPTS>
 
 Hash ref with prompt text for  particular -key- ,  the dash '-' is optional 
-
+where hash should be formatted as     (   'key1' =>   ' Name of the key 1',
+					  'key2' =>   'Name of the key 2 ',
+					   'key3' =>  ' Name of the key 3 ', 
+					   'sub_xml_key1' =>  'Name of the key1   ',
+					   'sub_xml_key2' =>  ' Name of the key2 ' ,
+					 	 
+					   ) 
+It will reuse the same PROMPT  for the same key					   
 =item B<-VALIDKEYS>
 
 Hash ref with  validation patterns  for  particular -key- ,  the dash '-' is optional
+where hash should be formatted as     (    'key1' =>   '\w+',
+					   'key2' =>   '\d+',
+					   'key3' =>  '\w\w\:\w\w\:\w\w\:\w\w\:\w\w\:\w\w\', 
+					    'sub_xml_key1' =>  '\d+',
+					    'sub_xml_key2' =>  '\w+' ,
+					 	 		
+						 
+					   ) 
+
+It will reuse the same validation pattern  for the same key	
+
 =back
 
 
@@ -340,6 +466,8 @@ Possible ways to call B<store()>:
 
 
 =head2   B<setPrompts()>
+
+
  
  
 =head2   B<setDialog()>
@@ -360,14 +488,23 @@ For example the config file for SNMP MA could  be written as:
  METADATA_DB_NAME=
  SNMP_BASE = /home/jason/convert/perfSONAR-PS/MP/SNMP
  METADATA_DB_FILE=$SNMP_BASE/store.xml
- 
+ # port to connet
  PORT=8080
  ENDPOINT=/axis/services/snmpMA
  RRDTOOL=/usr/local/rrdtool/bin/rrdtool
+ #sql config
+ <SQL production="1">
+    <DB_DRIVER>
+        mysql
+    </DB_DRIVER>
+     <DB_NAME>
+        snmp
+    </DB_NAME>
+</SQL>
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>
+L<Log::Log4perl>, L<XML::Simple> 
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
