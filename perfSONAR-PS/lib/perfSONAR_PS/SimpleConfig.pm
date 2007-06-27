@@ -94,7 +94,19 @@ sub setPrompts {
    $self->{PROMPTS} = shift;
 
 }
-  
+# 
+#  the complex key will be normalized
+#    'key1' => { 'key2' =>   'value' }
+#  will be returned as 'key1_key2' => 'value'
+#
+sub getNormalizedData {
+   my $self = shift;
+   use Data::Dumper;
+   $self->{LOGGER}->debug(" ... Normalized data: \n" .  Dumper  _normalize($self->{DATA},''));
+   return  _normalize($self->{DATA},'');
+   
+}
+   
  
 # 
 #
@@ -185,7 +197,7 @@ sub parse {
 	   my $xml_cf =  XMLin($xml_config,   KeyAttr => {}, ForceArray => 1); 
 	    
 	   $config{$xml_start}{value} = $self->_parseXML(  $xml_cf ); 
-	     
+	 
 	   foreach my $c_key (keys %xml_comment) {
 	       $xml_comment{$c_key} =~ s/\#+//g;
 	       $config{$xml_start}{comment} .= "# $c_key --  $xml_comment{$c_key}\n";
@@ -231,7 +243,7 @@ sub parse {
       }
   }
   $self->{DATA}=\%config;
-  
+ $self->{LOGGER}->debug(" Config data: \n" . Dumper $self->{DATA});
   return \%config;
 }
 #
@@ -252,6 +264,32 @@ sub _parseXML {
   }
   return $xml_cf;
 } 
+#
+#    key normalization
+#  'value' = > { 'key0' => ['value0'],  'key1' => { 'key12' =>   ['value12' ]}, 'key2' => { 'key22' =>   ['value22' ]}}
+#
+sub _normalize {
+  my ($data, $parent) = @_;
+  my %new_data = ();
+  foreach my $key ( keys %{$data} ) { 
+       my $new_key   = $parent?"$parent\_$key":$key; 
+       my $value =  $data->{$key};
+       if( ref($value) eq 'HASH' &&  ref($value->{value}) eq 'HASH' ) {
+          %new_data  =  (%new_data , %{_normalize($data->{$key}->{value}, $new_key)});
+       } elsif( ref($value) eq 'ARRAY' ) {
+         $new_data{$new_key} =  $data->{$key}->[0];
+       } elsif(ref($value) eq 'HASH' && $value->{value}) { 
+          $new_data{$new_key} =  $value->{value};
+       } else {
+        $new_data{$new_key} =  $value;
+       }
+   } 
+   return \%new_data ; 
+} 
+#
+#  
+#
+#
 
 sub _processKey {
   my $self  = shift;
@@ -323,11 +361,38 @@ if validation pattern for this particular key was defined then it will be valida
 enter different value if it fail.
 
 The format of config files supported by B<SimpleConfig> is   
-<name>=<value> pairs or XML fragments ( by XML::Simple, means no namespaces ) and comments are any line which starts with #, altough inside of 
-XML blocks the interpolation wont work. It will interpolate any perl variable 
-which looks as ${?[A-Za-z]\w+}? for simple key=value options. The order of appearance of such variables in the config file is not important.
+<name>=<value> pairs or XML fragments ( by XML::Simple, means no namespaces ) and comments are any line which starts with #, although inside of 
+XML blocks the interpolation does not work. It will interpolate any perl variable 
+which looks as ${?[A-Za-z]\w+}? for simple key=value options ONLY. The order of appearance of such variables in the config file is not important.
 
- 
+It presents config file contetnts as hash ref where internal structure is:
+( 'key1' => {'comment' => "#some comment\n#more comments\n", 
+                                                       'value' => 'Value1',
+						       'order' => '1',
+						      },
+					    'key2' => {'comment' => "#some comment\n#more comments\n", 
+                                                      'value' =>  'Value2',
+						      'order' => '2'
+						     },
+					    'XMLRootKey' =>  {'comment' => "#some comment\n#more comments\n",
+					                 'order' => '3',
+							 'value' =>  { 
+							                   'xmlAttribute1' => 'attribute_value',
+							                   'subXmlKey1' =>  ['sub_xml_value1'],
+							                   'subXmlKey2' =>   ['sub_xml_value2'],
+								           'subXmlKey3'=>   ['sub_xml_value3'],     
+								      }		
+						      }
+					   ) 
+ The normalized ( flat hash with only key=value pairs ) view of the config could be obtained by getNormalizedData() call.
+ All tree- like options will be flatted as key1_subkey1_subsubkey1. So the structure above will be converted into:
+ ('key1' => 'Value1', 
+ 'key2' =>   'Value2', 
+ 'XMLRootKey_xmlAttribute1' => 'attribute_value',
+ 'XMLRootKey_subXmlKey1' =>  'sub_xml_value1' ,
+ 'XMLRootKey_subXmlKey2' =>   'sub_xml_value2',
+ 'XMLRootKey_subXmlKey3'=>    'sub_xml_value3' , )    
+						 
 =over
 
 
@@ -366,24 +431,23 @@ A hash reference, which will be used as the config, i.e.:
 
  -DATA => \%somehash,  the dash '-' is optional
 
-where %somehash should be formatted as     ( 'key1' => ('comment' => "#some comment\n#more comments\n", 
+where %somehash should be formatted as     ( 'key1' => {'comment' => "#some comment\n#more comments\n", 
                                                        'value' => 'Value1',
 						       'order' => '1',
-						      ),
-					    'key2' => ('comment' => "#some comment\n#more comments\n", 
+						      },
+					    'key2' => {'comment' => "#some comment\n#more comments\n", 
                                                       'value' =>  'Value2',
 						      'order' => '2'
-						     ),
-					    'key3' =>  ('comment' => "#some comment\n#more comments\n",
+						     },
+					    'XML_root_key' =>  {'comment' => "#some comment\n#more comments\n",
 					                 'order' => '3',
-							 'value' =>  { 'XML_root_key' => {
-							                             'xml_attribute_1' => 'attribute_value',
-							                             'sub_xml_key1' =>  ['sub_xml_value1'],
-							                             'sub_xml_key2' =>   ['sub_xml_value2'],
-								                     'sub_xml_key3'=>   ['sub_xml_value3'],	
-								                        },
-							              }		
-						      )
+							 'value' =>  { 
+							                   'xml_attribute_1' => 'attribute_value',
+							                   'sub_xml_key1' =>  ['sub_xml_value1'],
+							                   'sub_xml_key2' =>   ['sub_xml_value2'],
+								           'sub_xml_key3'=>   ['sub_xml_value3'],     
+								      }		
+						      }
 					   ) 
 
 =item B<-DIALOG>
@@ -438,6 +502,11 @@ Possible ways to call B<parse()>:
   $config_hashref = $conf->parse();  
   
 This method returns a  a hash ref.
+
+=head2   B<getNormalizedData()>
+
+This method returns a  normalized hash ref, see explanation above.
+
 
 
 =head2   B<store()>
