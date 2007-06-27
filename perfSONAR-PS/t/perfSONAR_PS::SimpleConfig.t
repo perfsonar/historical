@@ -4,7 +4,7 @@ use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
  
 use_ok('perfSONAR_PS::SimpleConfig');
-use perfSONAR_PS::SimpleConfig;
+use   perfSONAR_PS::SimpleConfig;
 Log::Log4perl->init("./t/logger.conf");
 
 my %CONF_VALID = (PORT => '\d+');
@@ -16,7 +16,7 @@ my %CONF_KEYS = (PORT => ' enter any number  and press Enter ');
   my $conf =  undef;
  # 2 
   eval {
-     $conf = new SimpleConfig(-FILE => $cfg ) 
+     $conf = new perfSONAR_PS::SimpleConfig(-FILE => $cfg ) 
   };
   ok( $conf , "perfSONAR_PS::SimpleConfig create object");
   $@ = undef;
@@ -41,7 +41,7 @@ my %CONF_KEYS = (PORT => ' enter any number  and press Enter ');
  
   # 6
     
-   $conf = new SimpleConfig(-FILE=> $cfg, -DIALOG => '1',   -VALIDKEYS => \%CONF_VALID, -PROMPTS => \%CONF_KEYS); 
+   $conf = new perfSONAR_PS::SimpleConfig(-FILE=> $cfg, -DIALOG => '1',   -VALIDKEYS => \%CONF_VALID, -PROMPTS => \%CONF_KEYS); 
    ok( $conf , "perfSONAR_PS::SimpleConfig create object with patterns and prompts");
   
  # 7
