@@ -7,7 +7,7 @@ use_ok('perfSONAR_PS::SimpleConfig');
 use   perfSONAR_PS::SimpleConfig;
 Log::Log4perl->init("./t/logger.conf");
 
-my %CONF_VALID = (PORT => '\d+');
+my %CONF_VALID = (PORT => '^\d+$', DB_NAME => '^\w+$', DB_DRIVER => '^SQLite|mysql|Pg$');
 
 my %CONF_KEYS = (PORT => ' enter any number  and press Enter ');
 
@@ -25,10 +25,12 @@ my %CONF_KEYS = (PORT => ' enter any number  and press Enter ');
  my $hashref1 =  $conf->parse; 
  ok($hashref1  , " perfSONAR_PS::SimpleConfig parse file  " );
    
-
- #  4 
- my $hashref2 =  $conf->getData;
- ok( !cmpStr($hashref1, $hashref2) , "perfSONAR_PS::SimpleConfig  getData: returned wrong hash   " );
+ 
+   
+ 
+#  4 
+  my $hashref3 =  $conf->getNormalizedData;
+  ok( $hashref3 , "perfSONAR_PS::SimpleConfig  getNormalizedData OK " );
   
  
 # 5
