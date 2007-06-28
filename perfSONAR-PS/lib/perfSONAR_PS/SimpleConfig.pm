@@ -167,49 +167,30 @@ sub parse {
   my $xml_start = undef;
   my $xml_config = undef;
   my $pattern = '^([\w\.\-]+)\s*\\' . $self->{DELIMITER} . '\s*(.+)';
-  my %xml_comment = ();
-  my $cur_xml  = 'undefined';
+   
   while(<INF>) {
     chomp;
      s/^\s+?//;
      
     if(m/^\#/) {
-       if($xml_start) {
-         $xml_comment{$cur_xml} .= "$_\n";
-       } else {
          $comment .= "$_\n";
-       }
-     } else {
+       } else {
        s/\s+$//g; 
        if(!$xml_start && m/^\<\s*([\w\-]+)\b?[^\>]*\>/) {
          $xml_start = $1;
 	 $xml_config .= $_;
-	 $cur_xml  =  $xml_start;
-	 if($xml_comment{undefined}) {
-	   $xml_comment{$cur_xml} = $xml_comment{undefined};
-	   delete $xml_comment{undefined};
-	 }
        } elsif( $xml_start ) {
          if( m/^\<\/\s*($xml_start)\s*\>/) { 
            $xml_config .= $_;
-	   $self->{LOGGER}->debug(" XML fragment: $xml_config ");
-	    
 	   my $xml_cf =  XMLin($xml_config,   KeyAttr => {}, ForceArray => 1); 
-	    
 	   $config{$xml_start}{value} = $self->_parseXML(  $xml_cf ); 
-	 
-	   foreach my $c_key (keys %xml_comment) {
-	       $xml_comment{$c_key} =~ s/\#+//g;
-	       $config{$xml_start}{comment} .= "# $c_key --  $xml_comment{$c_key}\n";
-	   }
-	   %xml_comment = (); 
+	   if ($comment) {
+	      $config{$xml_start}{comment} = $comment ;
+	      $comment = '';
+           }
 	   $config{$xml_start}{order} = $order++;
-	   $cur_xml = undef; 
 	   $xml_start = undef; 	
-         } elsif( m/^\<\s*([\w\-]+)\b?[^\>]*\>/) {
-	   $cur_xml  = $1;
-           $xml_config .= $_;
-         } else{
+         }  else{
 	   $xml_config .= $_;
          }
        } elsif(m/$pattern/o) {
@@ -272,7 +253,8 @@ sub _normalize {
   my ($data, $parent) = @_;
   my %new_data = ();
   foreach my $key ( keys %{$data} ) { 
-       my $new_key   = $parent?"$parent\_$key":$key; 
+       my $new_key   = $parent?"$parent\_$key":$key;
+        
        my $value =  $data->{$key};
        if( ref($value) eq 'HASH' &&  ref($value->{value}) eq 'HASH' ) {
           %new_data  =  (%new_data , %{_normalize($data->{$key}->{value}, $new_key)});
@@ -361,9 +343,10 @@ if validation pattern for this particular key was defined then it will be valida
 enter different value if it fail.
 
 The format of config files supported by B<SimpleConfig> is   
-<name>=<value> pairs or XML fragments ( by XML::Simple, means no namespaces ) and comments are any line which starts with #, although inside of 
-XML blocks the interpolation does not work. It will interpolate any perl variable 
-which looks as ${?[A-Za-z]\w+}? for simple key=value options ONLY. The order of appearance of such variables in the config file is not important.
+<name>=<value> pairs or XML fragments ( by XML::Simple,  namespaces are not supported) and comments are any line which starts with #.
+Comments inside of XML fragments will pop-up on top of the related fragment. It will interpolate any perl variable 
+which looks as ${?[A-Za-z]\w+}? for simple key=value options ONLY. Means inside of XML blocks the interpolation does not work.
+The order of appearance of such variables in the config file is not important.
 
 It presents config file contetnts as hash ref where internal structure is:
 ( 'key1' => {'comment' => "#some comment\n#more comments\n", 
@@ -392,7 +375,9 @@ It presents config file contetnts as hash ref where internal structure is:
  'XMLRootKey_subXmlKey1' =>  'sub_xml_value1' ,
  'XMLRootKey_subXmlKey2' =>   'sub_xml_value2',
  'XMLRootKey_subXmlKey3'=>    'sub_xml_value3' , )    
-						 
+ 
+the case of the key will be preserved.						 
+
 =over
 
 
