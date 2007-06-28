@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+ 
+<nmwg:store type="store" 
+            id="pingerstore"
+            xmlns="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+            xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+            xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/1.0/"> 
+
+
+  <nmwg:metadata id="pingermeta1">
+    <pinger:subject id="pingersubject1"> 
+      <topo:endPointPair>
+        <topo:src type="ipv4" value="iepm-bw.slac.stanford.edu"/>
+        <topo:dst type="ipv4" value="atlang-hstnng.abilene.ucaid.edu"/>
+      </topo:endPointPair>
+    </pinger:subject>
+    <pinger:parameters>
+      <nmwg:parameter name="count">10</nmwg:parameter>
+      <nmwg:parameter name="timeValue">1138699951</nmwg:parameter>
+      <nmwg:parameter name="timeType">unix</nmwg:parameter>
+    </pinger:parameters>
+  </nmwg:metadata>
+ 
+
+    <nmwg:data id="pingerdata2" metadataIdRef="pingermeta1">
+    <nmwg:key id="k1">
+      <nmwg:parameters id="p1">
+        <nmwg:parameter name="type">mysql</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">msec</nmwg:parameter>	    
+      </nmwg:parameters>
+    </nmwg:key> 
+  </nmwg:data>
+
+</nmwg:store>
