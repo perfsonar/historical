@@ -9,7 +9,7 @@ sub new {
   my @param = @_;
   my $self = { 'nmwg' => "http://ggf.org/ns/nmwg/base/2.0/",
                'nmwgr' => "http://ggf.org/ns/nmwg/result/2.0/" ,
-	     ###  'select'  => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+	       'select'  => "http://ggf.org/ns/nmwg/ops/select/2.0/",
 	       'netutil' => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/", 
 	
 	       'traceroute' =>"http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
@@ -19,8 +19,11 @@ sub new {
 	       'bwctl' =>"http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
 	       'pinger' =>"http://ggf.org/ns/nmwg/tools/pinger/2.0/",
 	       'iperf' =>"http://ggf.org/ns/nmwg/tools/iperf/2.0/",
-	      
+	     
+	       'average'=> "http://ggf.org/ns/nmwg/ops/average/2.0/",
 	       'nmwgt' => "http://ggf.org/ns/nmwg/topology/2.0/",	
+	       'topo'=> "http://ggf.org/ns/nmwg/topology/2.0/",
+	     
 	       'nmtl4' => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
 	       'nmtl3' => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
                'nmwgtopo3' => "http://ggf.org/ns/nmwg/topology/base/3.0/",
@@ -113,7 +116,11 @@ Creates a new object, pass hash ref as collection of namesapces
 =head2 getNsByKey('pinger') 
 
 Returns namesapce string by id of the namespace, where kyes are:
-'nmwg', 'nmwgr',  'nmwgt','nmwgtopo3','nmtl3','nmtl4', 'nmtm', 'traceroute','snmp', 'ping', 'owamp', 'netutil', 'bwctl','pinger', 'iperf'
+'nmwg', 'nmwgr  
+'nmwgt' ( aliased as 'topo' too),'nmwgtopo3' 
+'nmtl3','nmtl4', 'nmtm' 
+'select', 'average'
+'traceroute','snmp', 'ping', 'owamp', 'netutil', 'bwctl','pinger', 'iperf
 
 =head2 setNsByKey('pinger' =>  'http://newpinger/namespace/' ) 
 
