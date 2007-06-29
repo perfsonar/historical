@@ -45,11 +45,9 @@ my %ns = (
 );  
   
 my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-  "./perfSONAR_PS.log",
   $XMLDBENV, 
   $XMLDBCONT,
-  \%ns,
-  $DEBUG
+  \%ns
 );
 
 $metadatadb->openDB;

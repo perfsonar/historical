@@ -15,6 +15,7 @@ use XML::Writer;
 use XML::Writer::String;
 use LWP::UserAgent;
 use Log::Log4perl qw(get_logger);
+use XML::LibXML;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -256,7 +257,7 @@ sub acceptCall {
         }
         else {  
           $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
-          foreach my $m ($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")) {
+          foreach my $m ($self->{REQUESTDOM}->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACE}, "metadata")) {
             if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACE}, "data", "metadataIdRef") == 0) {
               $logger->debug("Removing child metadata \"".$m->getAttribute("id")."\" from the DOM.");
               $self->{REQUESTDOM}->getDocumentElement->removeChild($m); 
