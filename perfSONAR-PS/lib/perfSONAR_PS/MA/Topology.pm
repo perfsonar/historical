@@ -3,16 +3,18 @@
 package perfSONAR_PS::MA::Topology;
 
 use warnings;
+use strict;
 use Carp qw( carp );
 use Exporter;
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
-#use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
@@ -24,18 +26,38 @@ sub init {
 
 	$self->SUPER::init;
 
-	if (!defined $self->{CONF}->{"TOPO_DB_FILE"} or $self->{CONF}->{"TOPO_DB_FILE"} eq "") {
-		$logger->error("No database specified");
-		return -1;
-	}
-
 	if (!defined $self->{CONF}->{"TOPO_DB_TYPE"} or $self->{CONF}->{"TOPO_DB_TYPE"} eq "") {
 		$logger->error("No database type specified");
 		return -1;
 	}
 
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQL") {
+	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQLite") {
+		if (!defined $self->{CONF}->{"TOPO_DB_FILE"} or $self->{CONF}->{"TOPO_DB_FILE"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(TOPO_DB_FILE)");
+			return -1;
+		}
+
 		$self->{DATADB} = new perfSONAR_PS::DB::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"TOPO_DB_FILE"});
+	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
+		my %ns = (
+				nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+				netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+				nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+				snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+				nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
+			 );
+
+		if (!defined $self->{CONF}->{"TOPO_DB_FILE"} or $self->{CONF}->{"TOPO_DB_FILE"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file(TOPO_DB_FILE)");
+			return -1;
+		}
+
+		if (!defined $self->{CONF}->{"TOPO_DB_NAME"} or $self->{CONF}->{"TOPO_DB_NAME"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(TOPO_DB_NAME)");
+			return -1;
+		}
+
+		$self->{DATADB}= new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;
@@ -75,13 +97,17 @@ sub handleRequest {
 
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling topology request.");
-		my ($status, $response) = $self->parseRequest($messageIdReturn, $messageId, $messageType);
+		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
 		if ($status != 0) {
 			$logger->error("Unable to handle topology request");
 			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
 		} else {
 			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
 		}
+	} elsif ($messageType eq "ChangeTopology") {
+		$logger->debug("Handling ChangeTopology Request");
+		
+		my ($status, $response) = $self->changeTopology($self->{LISTENER}->getRequestDOM());
 	} else {
 		my $msg = "Message type \"".$messageType."\" is not yet supported";
 		$logger->error($msg);
@@ -93,41 +119,114 @@ sub handleRequest {
 
 
 sub parseRequest {
-	my($self, $messageId, $messageIdRef, $type) = @_;
+	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $status;
 
 	my $localContent = "";
-	foreach my $d ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-		foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+
+	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				if ($eventType eq "Path.Status") {
-					($status, $localContent) = $self->topologyRequest($m, $d, $localContent, $messageId, $messageIdRef);
+					my ($status, $res) = $self->pathStatusRequest($m, $d);
+					if ($status != 0) {
+						$logger->error("Couldn't dump topology information");
+						return ($status, $res);
+					}
+
+					$localContent .= $res;
 				} else {
-					$logger->error("Unknown event type: " .  $eventType);
-					return ( -1, "Unknown event type" )
+					$logger->error("Unknown event type: ".$eventType);
+					return ( -1, "Unknown event type: ".$eventType )
 				}
 			}
 		}
 	}
 
-	return ($status, $localContent);
+	return (0, $localContent);
 }
 
-
-sub topologyRequest {
-	my($self, $m, $d, $localContent, $messageId, $messageIdRef) = @_;
+sub changeTopology {
+	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	$localContent .= "<nmwg:parameters id=\"storeId\"><nmwg:parameter name=\"DomainName\">";
-	if (defined $self->{CONF}->{"domain"}) {
-		$localContent .= $self->{CONF}->{"domain"};
-	} else {
-		$localContent .= "UNKNOWN";
+	my $localContent = "";
+
+	foreach my $data ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		foreach my $md ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+			if ($data->getAttribute("metadataIdRef") eq $md->getAttribute("id")) {
+				my $eventType = $md->findvalue("nmwg:eventType");
+
+				$self->normalizeTopology($data);
+
+				my ($status, $res);
+
+				if ($eventType eq "updateTopology") {
+					($status, $res) = $self->changeXMLDB("update", $data);
+				} elsif ($eventType eq "addTopology") {
+					($status, $res) = $self->changeXMLDB("add", $data);
+				} elsif ($eventType eq "removeTopology") {
+					($status, $res) = $self->changeXMLDB("remove", $data);
+				} else {
+					$status = -1;
+					$res = "Unknown topology modification type: $eventType";
+				}
+
+				if ($status != 0) {
+					$logger->error("Error handling topology request");
+					# this should undo any previous changes.
+				}
+
+				$localContent .= $res;
+			}
+		}
 	}
-	$localContent .= "</nmwg:parameter></nmwg:parameters>";
+
+	# commit the transaction
+
+	return (0, $localContent);
+}
+
+sub changeXMLDB($$$) {
+	my ($self, $modification, $root) = @_;
+
+	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+		
+	}
+
+	foreach my $link ($root->getChildrenByTagName("nmtopo:node")) {
+		
+	}
+
+	return (0, "");
+}
+
+sub changeTopologyRequest($$$) {
+	my ($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $localContent = "";
+
+	$localContent .= $m->toString();
+
+	$self->normalizeTopology($m);
+
+	return (0, $localContent);
+}
+
+sub pathStatusRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $localContent = "";
+
+#	$localContent .= "<nmwg:parameters id=\"storeId\"><nmwg:parameter name=\"DomainName\">";
+#	if (defined $self->{CONF}->{"domain"}) {
+#		$localContent .= $self->{CONF}->{"domain"};
+#	} else {
+#		$localContent .= "UNKNOWN";
+#	}
+#	$localContent .= "</nmwg:parameter></nmwg:parameters>";
 
 	$localContent .= $m->toString();
 
@@ -151,31 +250,171 @@ sub topologyRequest {
 sub dumpDatabase {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my ($status, $res);
 
 	if (!defined $self->{DATADB}) {
-		$logger->error("No database to dump");
-		return (-1, "No database to dump");
+		my $msg = "No database to dump";
+		$logger->error($msg);
+		return (-1, $msg);
 	}
 
-	my $res = $self->{DATADB}->openDB;
-	if ($res == -1) {
-		$logger->error("Couldn't open topology database");
-		return (-1, "Couldn't open topology database");
+	$status = $self->{DATADB}->openDB;
+	if ($status == -1) {
+		my $msg = "Couldn't open topology database";
+		$logger->error($msg);
+		return (-1, $msg);
 	}
 
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQL") {
+	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQLite") {
 		($status, $res) = $self->dumpSQLDatabase;
-	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XMLDB") {
+	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
 		($status, $res) = $self->dumpXMLDatabase;
 	} else {
-		$logger->error("Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"});
+		my $msg = "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
+		$logger->error($msg);
 		$self->{DATADB}->closeDB;
-		return (-1, "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"});
+		return (-1, $msg);
 	}
 
 	$self->{DATADB}->closeDB;
 
 	return ($status, $res);
+}
+
+sub dumpXMLDatabase($) {
+	my ($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	my $content = "";
+
+	my @nodes = $self->{DATADB}->query("/nmtopo:node");
+	if ($#nodes == -1) {
+		my $msg = "Couldn't find list of nodes in DB";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$content .= join("", @nodes);
+
+	my @links = $self->{DATADB}->query("/nmtopo:link");
+	if ($#links == -1) {
+		my $msg = "Couldn't find list of links in DB";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$content .= join("", @links);
+
+	return (0, $content);
+}
+
+sub addXMLDatabase {
+	return (-1, "XML Databases unsupported");
+}
+
+# The goal of normalization is to bring all first class entities: nodes,
+# interfaces and links to the top level. These entities can be defined inside
+# of other entities, so we must grot through the DOM finding instances where
+# people have declared entities inside of other entities(for example, an
+# interface defined inside of a node). When we find an instance, we pull the
+# entity up to the top-level and replace it with a node containing simply an
+# IdRef to keep the meaning the same.
+#
+# e.g.
+#    <nmtopo:link id="link1">
+#        <nmtopo:link id="sublink1">
+#            <nmtopo:interface interfaceIdRef="node1iface1" />
+#            <nmtopo:interface id="node2iface1" nodeIdRef="node2">
+#        </nmtopo:link>
+#    </nmtopo:link>
+#    <nmtopo:node id="node1">
+#        <nmtopo:interface id="node1iface1" />
+#    </nmtopo:node>
+#    <nmtopo:node id="node2" />
+# 
+#  would become
+#    <nmtopo:link id="link1>
+#        <nmtopo:link linkIdRef="sublink1">
+#    </nmtopo:link>
+#    <nmtopo:link id="link1>
+#        <nmtopo:interface interfaceIdRef="node1iface1" />
+#        <nmtopo:interface interfaceIdRef="node2iface1" />
+#    </nmtopo:link>
+#    <nmtopo:node id="node1">
+#        <nmtopo:interface interfaceIdRef="node1iface1" />
+#    </nmtopo:node>
+#    <nmtopo:node id="node2">
+#        <nmtopo:interface interfaceIdRef="node2iface1" />
+#    </nmtopo:node>
+#    <nmtopo:interface id="node1iface1" />
+#    <nmtopo:interface id="node2iface1" />
+
+sub normalizeTopology($$) {
+	my ($self, $root) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $link ($root->getChildrenByTagName("nmtopo:link")) {
+		normalizeLink("", $root, $link);
+	}
+
+	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+		normalizeNode("", $root, $node);
+	}
+}
+
+sub normalizeNode($$$) {
+	my ($self, $root, $node) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $interface ($node->getChildrenByTagName("nmtopo:interface")) {
+		if (defined $interface->getAttribute("id")) {
+			# it's a new interface, pull it to the top level
+			if (!defined $interface->getAttribute("nodeIdRef")) {
+				$interface->setAttribute("nodeIdRef", $node->getAttribute("id"));
+			}
+			my $new_node = $node->addNewChild("", "nmtopo:interface");
+			$new_node->setAttribute("interfaceIdRef", $interface->getAttribute("id"));
+			$node->removeChild($interface);
+			$root->appendChild($interface);
+		} elsif (!defined $interface->getAttribute("interfaceIdRef")) {
+			# XXX Complain
+		}
+	}
+}
+
+sub normalizeLink($$$) {
+	my ($self, $root, $link) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $interface ($link->getChildrenByTagName("nmtopo:interface")) {
+		if (defined $interface->getAttribute("id") and !defined $interface->getAttribute("nodeIdRef")) {
+			# XXX Complain
+		} elsif (defined $interface->getAttribute("id")) {
+			# it's a new interface, pull it to the top level
+			my $new_node = $link->addNewChild("", "nmtopo:interface");
+			$new_node->setAttribute("interfaceIdRef", $interface->getAttribute("id"));
+			$link->removeChild($interface);
+			$root->appendChild($interface);
+		} elsif (!defined $interface->getAttribute("interfaceIdRef")) {
+			# XXX Complain
+		}
+	}
+
+	foreach my $sublink ($link->getChildrenByTagName("nmtopo:link")) {
+		if (defined $sublink->getAttribute("id")) {
+			# remove the sublink and replace it with a reference
+			my $new_node = $sublink->addNewChild("", "nmtopo:link");
+			$new_node->setAttribute("linkIdRef", $link->getAttribute("id"));
+			$link->removeChild($sublink);
+			$root->appendChild($sublink);
+
+			my ($status, $res) = $self->normalizeLinkTopology($root, $sublink);
+		} elsif (!defined $sublink->getAttribute("linkIdRef")) {
+			# XXX Complain
+		}
+	}
+
+	return (0, "");
 }
 
 sub dumpSQLDatabase {
@@ -188,10 +427,9 @@ sub dumpSQLDatabase {
 		return (-1, "Couldn't grab list of nodes");
 	}
 
-	$localContent = "";
-	$interfaceContent = "";
+	my $localContent = "";
 
-	foreach $node_ref (@{ $nodes }) {
+	foreach my $node_ref (@{ $nodes }) {
 		my @node = @{ $node_ref };
 
 		# dump the node information in XML format
@@ -211,7 +449,7 @@ sub dumpSQLDatabase {
 			return (-1, "Couldn't grab list of interfaces for node ".$node[0]);
 		}
 
-		foreach $if_ref (@{ $ifs }) {
+		foreach my $if_ref (@{ $ifs }) {
 			my @if = @{ $if_ref };
 
 			$localContent .= "	<nmwgt:interface id=\"".$if[0]."\">\n";
@@ -229,10 +467,10 @@ sub dumpSQLDatabase {
 		return (-1, "Couldn't grab list of links");
 	}
 
-	foreach $link_ref (@{ $links }) {
+	foreach my $link_ref (@{ $links }) {
 		my @link = @{ $link_ref };
 
-		$link_node_query = "select node_id, interface, role, link_index from link_nodes where link_id=\'".$link[0]."\'";
+		my $link_node_query = "select node_id, interface, role, link_index from link_nodes where link_id=\'".$link[0]."\'";
 		if (defined $time and $time ne "") {
 			$link_node_query .= " and start_time <= $time and end_time >= $time";
 		}
@@ -249,7 +487,7 @@ sub dumpSQLDatabase {
   		$localContent .= "	<nmwgt:globalName type=\"logical\">".$link[2]."</nmwgt:globalName>\n";
 		$localContent .= "	<nmwgt:type>".$link[3]."</nmwgt:type>\n";
 
-		foreach $node_ref (@{ $nodes }) {
+		foreach my $node_ref (@{ $nodes }) {
 			my @node = @{ $node_ref };
 			$localContent .= "	<nmwgt:node nodeIdRef=\"".$node[0]."\">\n";
 			$localContent .= "		<nmwgt:interface>".$node[1]."</nmwgt:interface>\n";
@@ -264,12 +502,7 @@ sub dumpSQLDatabase {
 	return (0, $localContent);
 }
 
-sub dumpXMLDatabase {
-	return (-1, "XML Databases unsupported");
-}
-
 1;
-
 
 __END__
 =head1 NAME
@@ -314,7 +547,7 @@ while(1) {
 
 =head1 DETAILS
 
-This API is a work in progress, and still does not reflect the general access needed in an MA.
+This API is a work in progress, and still does not reflect the general access needed nn an MA.
 Additional logic is needed to address issues such as different backend storage facilities.
 
 =head1 API
