@@ -1,8 +1,8 @@
-create table data (
-  id			int unsigned not null,  
-  time			int unsigned not null,
-  value			int unsigned,
-  eventtype		varchar(128) not null,
-  misc			varchar(128), 
-  unique (id, time, value, eventtype, misc)
+create table link_status (
+  link_id varchar(255) not null,
+  link_knowledge varchar(32) not null,
+  start_time float not null,
+  end_time float not null,
+  oper_status varchar(32) not null,
+  admin_status varchar(32) not null
 );
