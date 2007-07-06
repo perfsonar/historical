@@ -3,9 +3,11 @@
 package perfSONAR_PS::MA::Status;
 
 use warnings;
+use strict;
 use Carp qw( carp );
 use Exporter;
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
@@ -13,367 +15,445 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
+sub init {
+	my ($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	$self->SUPER::init;
+
+	if (!defined $self->{CONF}->{"STATUS_DB_TYPE"} or $self->{CONF}->{"STATUS_DB_TYPE"} eq "") {
+		$logger->error("No database type specified");
+		return -1;
+	}
+
+	if ($self->{CONF}->{"STATUS_DB_TYPE"} eq "SQLite") {
+		if (!defined $self->{CONF}->{"STATUS_DB_FILE"} or $self->{CONF}->{"STATUS_DB_FILE"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_DB_FILE)");
+			return -1;
+		}
+
+		$self->{DATADB} = new perfSONAR_PS::DB::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
+		if (!defined $self->{DATADB}) {
+			my $msg = "No database to dump";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+	} else {
+		$logger->error("Invalid database type specified");
+		return -1;
+	}
+
+	return 0;
+}
 
 sub receive {
-  my($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-  my $readValue = $self->{LISTENER}->acceptCall;
-  if($readValue == 0) {
-    $logger->debug("Received 'shadow' request from below; no action required.");
-    $self->{RESPONSE} = $self->{LISTENER}->getResponse();
-  }
-  elsif($readValue == 1) {      
-    $logger->debug("Received request to act on.");
-    handleRequest($self);
-  }
-  else {
-    my $msg = "Sent Request has was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
-    $logger->error($msg);
-    $self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg); 
-  }
-  return;
+	my $readValue = $self->{LISTENER}->acceptCall;
+	if($readValue == 0) {
+		$logger->debug("Received 'shadow' request from below; no action required.");
+		$self->{RESPONSE} = $self->{LISTENER}->getResponse();
+	} elsif($readValue == 1) {
+		$logger->debug("Received request to act on.");
+		handleRequest($self);
+	} else {
+		my $msg = "Sent Request was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
+		$logger->error($msg);
+		$self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg);
+	}
+	return;
 }
-
 
 sub handleRequest {
-  my($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
-  delete $self->{RESPONSE};
+	my($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	delete $self->{RESPONSE};
+	my $messageIdReturn = genuid();
+	my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
+	my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");
 
-  $self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
-  if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or 
-     $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-    my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
-    my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
-    my $messageIdReturn = genuid();    
+	$self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
 
-    if($messageType eq "MetadataKeyRequest" or 
-       $messageType eq "SetupDataRequest") {
-      $logger->debug("Parsing request.");
-      parseRequest($self, $messageIdReturn, $messageId, $messageType);
-    }
-    else {
-      my $msg = "Message type \"".$messageType."\" is not yet supported";
-      $logger->error($msg);  
-      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
-    }
-  }
-  else {
-    my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not supported";
-    $logger->error($msg); 
-    $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.mp.snmp", $msg);
-  }
-  return $self->{RESPONSE};
+	if($messageType eq "SetupDataRequest") {
+		$logger->debug("Handling status request.");
+		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
+		if ($status != 0) {
+			$logger->error("Unable to handle status request");
+			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
+		} else {
+			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
+		}
+	} else {
+		my $msg = "Message type \"".$messageType."\" is not yet supported";
+		$logger->error($msg);
+		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+	}
+
+	return $self->{RESPONSE};
 }
-
 
 sub parseRequest {
-  my($self, $messageId, $messageIdRef, $type) = @_; 
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($self, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-  my $localContent = "";
-  foreach my $d ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-    foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
-      
-        my $metadatadb;
-        if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-          $metadatadb = new perfSONAR_PS::DB::File(
-            $self->{CONF}->{"METADATA_DB_FILE"}
-          );        
-	      }
-	      elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-	        $metadatadb = new perfSONAR_PS::DB::XMLDB(
-            $self->{CONF}->{"METADATA_DB_NAME"}, 
-            $self->{CONF}->{"METADATA_DB_FILE"},
-            \%{$self->{NAMESPACES}}
-          );	  
-	      }
-	      $metadatadb->openDB; 
-	      $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
-	      
-	      if($type eq "MetadataKeyRequest") {
-	        $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
-	      }
-	      elsif($type eq "SetupDataRequest") {         
-          getTime(\%{$self}, $m->getAttribute("id"));
-          if($m->find("//nmwg:metadata/nmwg:key")) {
-            $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-          }
-          else {
-            $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-          }	
-	      }
-      }   
-    }
-  }  
-  return;
-}
+	my $localContent = "";
 
+	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				my $eventType = $m->findvalue("nmwg:eventType");
 
-sub setupDataKeyRequest {
-  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
-  
-	my $queryString = "//nmwg:data[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
-  $logger->debug("Query \"".$queryString."\" created."); 
+				if ($eventType eq "Database.Dump") {
+					my ($status, $res) = $self->pathStatusRequest($m, $d);
+					if ($status != 0) {
+						$logger->error("Couldn't dump status information");
+						return ($status, $res);
+					}
 
-  my $xp = XML::XPath->new( xml => $self->{LISTENER}->getRequest );
-  my $nodeset = $xp->find("//nmwg:message/nmwg:metadata");
-  if($nodeset->size() <= 0) {
-  }
-  else {  
-    foreach my $node ($nodeset->get_nodelist) {
-      $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
-    }
-  }
-   
-	my @resultsString = $metadatadb->query($queryString);   
-	if($#resultsString != -1) {
-    for(my $x = 0; $x <= $#resultsString; $x++) {	
-      $localContent = $localContent . handleData($self, $m->getAttribute("id"), $resultsString[$x], $messageId, $messageIdRef);
-    } 
-    $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);       
-  }
-	else {
-	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-    $logger->error($msg);
-    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
-	}  
-  return;
-}
+					$localContent .= $res;
+				} elsif ($eventType eq "Link.History") {
+					my ($status, $res) = $self->linkHistoryRequest($m, $d);
+					if ($status != 0) {
+						$logger->error("Couldn't dump link history information");
+						return ($status, $res);
+					}
 
+					$localContent .= $res;
+				} elsif ($eventType eq "Link.Recent") {
+					my ($status, $res) = $self->linkRecentRequest($m, $d);
+					if ($status != 0) {
+						$logger->error("Couldn't dump link information");
+						return ($status, $res);
+					}
 
-sub setupDataRequest {
-  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
-  
-	my $queryString = "//nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 1) . "]";
-  $logger->debug("Query \"".$queryString."\" created.");
-	my @resultsString = $metadatadb->query($queryString);   
-	
-	if($#resultsString != -1) {
-    for(my $x = 0; $x <= $#resultsString; $x++) {	
-      my $parser = XML::LibXML->new();
-      $doc = $parser->parse_string($resultsString[$x]);  
-      my $mdset = $doc->find("//nmwg:metadata");
-      my $md = $mdset->get_node(1); 
-  
-      $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]";
-      $logger->debug("Query \"".$queryString."\" created.");
-	    my @dataResultsString = $metadatadb->query($queryString);
-		
-	    if($#dataResultsString != -1) { 
-
-        my $xp = XML::XPath->new( xml => $self->{LISTENER}->getRequest );
-        my $nodeset = $xp->find("//nmwg:message/nmwg:metadata");
-        if($nodeset->size() <= 0) {
-        }
-        else {  
-          foreach my $node ($nodeset->get_nodelist) {
-            $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
-          }
-        }
-                        
-        for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		      $localContent = $localContent . handleData($self, $m->getAttribute("id"), $dataResultsString[$y], $messageId, $messageIdRef);
-        } 
-        $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);  	    	  
-	    }
-      else {
-	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-        $logger->error($msg);  
-        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);
-      } 
-	  }
+					$localContent .= $res;
+				} else {
+					$logger->error("Unknown event type: ".$eventType);
+					return ( -1, "Unknown event type: ".$eventType )
+				}
+			}
+		}
 	}
-	else {
-	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-    $logger->error($msg);
-    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
-	}  
-  return;
+
+	return (0, $localContent);
 }
 
+sub pathStatusRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $localContent = "";
 
-sub handleData {
-  my($self, $id, $dataString, $messageId, $messageIdRef) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
-  
-  my $localContent = "";
-  $logger->debug("Data \"".$dataString."\" found.");	    
-  undef $self->{RESULTS};		    
+	$localContent .= $m->toString();
 
-  my $parser = XML::LibXML->new();
-  $self->{RESULTS} = $parser->parse_string($dataString);   
-  my $dt = $self->{RESULTS}->find("//nmwg:data")->get_node(1);
-  my $type = extract($dt->find("./nmwg:key//nmwg:parameter[\@name=\"type\"]")->get_node(1));
-                  
-  if($type eq "sqlite") {
-    $localContent = retrieveSQL($self, $dt, $id);		  		       
-  }		
-  else {
-    my $msg = "Database \"".$type."\" is not yet supported";
-    $logger->error($msg);    
-    $localContent = getResultCodeData(genuid(), $id, $msg);  
-  }
-  return $localContent;
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my ($status, $res) = $self->dumpDatabase;
+	if ($status == 0) {
+		$localContent .= $res;
+	} else {
+		$logger->error("Couldn't dump status structure: $res");
+		return ($status, $res);
+	}
+	$localContent .= "  </nmwg:data>\n";
+
+	return (0, $localContent);
 }
 
+sub linkRecentRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $localContent = "";
 
-sub retrieveSQL {
-  my($self, $d, $mid) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Status");
-  
-  my $responseString = "";
-  my @dbSchema = ("id", "time", "value", "eventtype", "misc");
-  my $result = getDataSQL($self, $d, \@dbSchema);  
-  my $id = genuid();
-    
-  if($#{$result} == -1) {
-    my $msg = "Query \"".$query."\" returned 0 results";
-    $logger->error($msg);
-    $responseString = $responseString . getResultCodeData($id, $mid, $msg); 
-  }   
-  else { 
-    $logger->debug("Data found.");
-    $responseString = $responseString . "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
-    for(my $a = 0; $a <= $#{$result}; $a++) {    
-      $responseString = $responseString . "    <nmwg:datum";
-      $responseString = $responseString." ".$dbSchema[1]."=\"".$result->[$a][1]."\"";
-      $responseString = $responseString." ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
-      my @misc = split(/,/,$result->[$a][4]);
-      foreach my $m (@misc) {
-        my @pair = split(/=/,$m);
-	      $responseString = $responseString." ".$pair[0]."=\"".$pair[1]."\""; 
-      }
-      $responseString = $responseString . " />\n";
-    }
-    $responseString = $responseString . "  </nmwg:data>\n";
-    $logger->debug("Data block created.");
-  }  
-  return $responseString;
+	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+
+	if (!defined $link_id or $link_id eq "") {
+		my $msg = "No link id specified in request";
+		$logger->error($msg);
+		return (0, $msg);
+	}
+
+	$localContent .= $m->toString();
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my ($status, $res) = $self->dumpLastLinkState($link_id);
+	if ($status == 0) {
+		$localContent .= $res;
+	} else {
+		$logger->error("Couldn't dump link status: $res");
+		return ($status, $res);
+	}
+	$localContent .= "  </nmwg:data>\n";
+
+	return (0, $localContent);
 }
 
+sub linkHistoryRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $localContent = "";
+
+	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+
+	if (!defined $link_id or $link_id eq "") {
+		my $msg = "No link id specified in request";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$localContent .= $m->toString();
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my ($status, $res) = $self->dumpLinkStatus($link_id, "");
+	if ($status == 0) {
+		$localContent .= $res;
+	} else {
+		$logger->error("Couldn't dump link status: $res");
+		return ($status, $res);
+	}
+	$localContent .= "  </nmwg:data>\n";
+
+	return (0, $localContent);
+}
+
+sub dumpDatabase {
+	my($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($status, $res);
+
+	if ($self->{CONF}->{"STATUS_DB_TYPE"} eq "SQLite") {
+		($status, $res) = $self->dumpSQLDatabase;
+	} else {
+		my $msg = "Unknown status database type: ".$self->{CONF}->{"STATUS_DB_TYPE"};
+		$logger->error($msg);
+		$self->{DATADB}->closeDB;
+		return (-1, $msg);
+	}
+
+	$self->{DATADB}->closeDB;
+
+	return ($status, $res);
+}
+
+sub dumpSQLDatabase($$$) {
+	my ($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $links = $self->{DATADB}->query("select distinct link_id from link_status");
+	if ($links == -1) {
+		$logger->error("Couldn't grab list of links");
+		return (-1, "Couldn't grab list of links");
+	}
+
+	my $localContent = "";
+
+	foreach my $link_ref (@{ $links }) {
+		my @link = @{ $link_ref };
+
+		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link[0]."\' order by end_time");
+		if ($states == -1) {
+			$logger->error("Couldn't grab information for link ".$link[0]);
+			return (-1, "Couldn't grab information for link ".$link[0]);
+		}
+
+		foreach my $state_ref (@{ $states }) {
+			my @state = @{ $state_ref };
+
+			$localContent .= $self->__dumpLinkState($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
+		}
+	}
+
+	return (0, $localContent);
+}
+
+sub dumpLinkStatus($$$) {
+	my ($self, $link_id, $time) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $localContent = "";
+
+	my $query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\'";
+	if (defined $time and $time ne "") {
+		$query .= "where end_time => $time and start_time <= $time";
+	}
+
+	my $status = $self->{DATADB}->openDB;
+	if ($status == -1) {
+		my $msg = "Couldn't open status database";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $states = $self->{DATADB}->query($query);
+	if ($states == -1) {
+		$logger->error("Couldn't grab information for node ".$link_id);
+		return (-1, "Couldn't grab information for node ".$link_id);
+	}
+
+	foreach my $state_ref (@{ $states }) {
+		my @state = @{ $state_ref };
+
+		$localContent .= $self->__dumpLinkState($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
+	}
+
+	return (0, $localContent);
+}
+
+sub __dumpLinkState($$$$$) {
+	my ($self, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
+
+	my $localContent = "";
+	$localContent .= "<nmtopo:linkStatus linkID=\"".$link_id."\" knowledge=\"".$knowledge."\" startTime=\"".$start_time."\" endTime=\"".$end_time."\">\n";
+	$localContent .= "	<nmtopo:operStatus>".$oper_status."</nmtopo:operStatus>\n";
+	$localContent .= "	<nmtopo:adminStatus>".$admin_status."</nmtopo:adminStatus>\n";
+	$localContent .= "</nmtopo:linkStatus>\n";
+
+	return $localContent;
+}
+
+sub dumpLastLinkState($$$) {
+	my ($self, $link_id) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $localContent = "";
+
+	my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
+	if ($states == -1) {
+		$logger->error("Couldn't grab information for node ".$link_id);
+		return (-1, "Couldn't grab information for node ".$link_id);
+	}
+
+	foreach my $state_ref (@{ $states }) {
+		my @state = @{ $state_ref };
+
+		$localContent .= $self->__dumpLinkState($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
+	}
+
+	return (0, $localContent);
+}
 
 1;
-
 
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Status - A module that provides methods for the Status MA.  
+perfSONAR_PS::MA::Status - A module that provides methods for the Status MA.
 
 =head1 DESCRIPTION
 
-This module aims to offer simple methods for dealing with requests for information, and the 
-related tasks of interacting with backend storage.  
+This module aims to offer simple methods for dealing with requests for information, and the
+related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::MA::Status;
+use perfSONAR_PS::MA::Status;
 
-    my %conf = ();
-    $conf{"METADATA_DB_TYPE"} = "xmldb";
-    $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/Status/xmldb";
-    $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    
-    my %ns = (
-      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-      netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
-    );
-    
-    my $ma = perfSONAR_PS::MA::Status->new(\%conf, \%ns);
+my %conf = ();
+$conf{"METADATA_DB_TYPE"} = "xmldb";
+$conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/Status/xmldb";
+$conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
+$conf{"PING"} = "/bin/ping";
 
-    # or
-    # $ma = perfSONAR_PS::MA::Status->new;
-    # $ma->setConf(\%conf);
-    # $ma->setNamespaces(\%ns);      
-        
-    $ma->init;  
-    while(1) {
-      $ma->receive;
-      $ma->respond;
-    }  
-  
+my %ns = (
+		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+		nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+		ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
+		select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+	 );
+
+my $ma = perfSONAR_PS::MA::Status->new(\%conf, \%ns);
+
+# or
+# $ma = perfSONAR_PS::MA::Status->new;
+# $ma->setConf(\%conf);
+# $ma->setNamespaces(\%ns);
+
+$ma->init;
+while(1) {
+	$ma->receive;
+	$ma->respond;
+}
+
 
 =head1 DETAILS
 
-This API is a work in progress, and still does not reflect the general access needed in an MA.
-Additional logic is needed to address issues such as different backend storage facilities.  
+This API is a work in progress, and still does not reflect the general access needed nn an MA.
+Additional logic is needed to address issues such as different backend storage facilities.
 
 =head1 API
 
-The offered API is simple, but offers the key functions we need in a measurement archive. 
+The offered API is simple, but offers the key functions we need in a measurement archive.
 
 =head2 receive($self)
 
-Grabs message from transport object to begin processing.
+	Grabs message from transport object to begin processing.
 
 =head2 handleRequest($self)
 
-Functions as the 'gatekeeper' the the MA.  Will either reject or accept
-requets.  will also 'do nothing' in the event that a request has been
-acted on by the lower layer.  
+	Functions as the 'gatekeeper' the the MA.  Will either reject or accept
+	requets.  will also 'do nothing' in the event that a request has been
+	acted on by the lower layer.
 
 =head2 parseRequest($self, $messageId, $messageIdRef, $type)
 
-Processes both the the MetadataKeyRequest and SetupDataRequest messages, which 
-preturn either metadata or data to the user.
+	Processes both the the MetadataKeyRequest and SetupDataRequest messages, which
+	preturn either metadata or data to the user.
 
 =head2 setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef)
 
-Runs the specific needs of a SetupDataRequest when a key is presented to 
-the service.
+	Runs the specific needs of a SetupDataRequest when a key is presented to
+	the service.
 
 =head2 setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef)
 
-Runs the specific needs of a SetupDataRequest when a key is NOT presented to 
-the service.
- 
+	Runs the specific needs of a SetupDataRequest when a key is NOT presented to
+	the service.
+
 =head2 handleData($self, $id, $dataString, $localContent)
 
-Helper function to extract data from the backed storage. 
+	Helper function to extract data from the backed storage.
 
-=head2 retrieveSQL($did)	
+=head2 retrieveSQL($did)
 
-The data is extracted from the backed storage (in this case SQL). 
+	The data is extracted from the backed storage (in this case SQL).
 
-=head1 SEE ALSO
+=head2 retrieveRRD($did)
 
-L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>, 
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, 
-L<perfSONAR_PS::DB::SQL>
+	The data is extracted from the backed storage (in this case RRD).
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+	=head1 SEE ALSO
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+	L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
+	L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>,
+	L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::DB::RRD>
 
-The perfSONAR-PS subversion repository is located at:
+	To join the 'perfSONAR-PS' mailing list, please visit:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS 
-  
-Questions and comments can be directed to the author, or the mailing list. 
+	https://mail.internet2.edu/wws/info/i2-perfsonar
 
-=head1 VERSION
+	The perfSONAR-PS subversion repository is located at:
 
-$Id:$
+	https://svn.internet2.edu/svn/perfSONAR-PS
 
-=head1 AUTHOR
+	Questions and comments can be directed to the author, or the mailing list.
 
-Aaron Brown, E<lt>aaron@internet2.eduE<gt>, Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+	=head1 VERSION
 
-=head1 COPYRIGHT AND LICENSE
+	$Id: Status.pm 242 2007-06-19 21:22:24Z zurawski $
 
-Copyright (C) 2007 by Internet2
+	=head1 AUTHOR
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
-at your option, any later version of Perl 5 you may have available.
+	Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+
+	=head1 COPYRIGHT AND LICENSE
+
+	Copyright (C) 2007 by Internet2
+
+	This library is free software; you can redistribute it and/or modify
+	it under the same terms as Perl itself, either Perl version 5.8.8 or,
+	at your option, any later version of Perl 5 you may have available.
