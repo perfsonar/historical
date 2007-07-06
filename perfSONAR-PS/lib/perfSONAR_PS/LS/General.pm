@@ -23,8 +23,14 @@ sub createControlKey {
 
 
 sub createKey {
-  my($id, $key, $eventType) = @_;
-  my $keyElement = "  <nmwg:metadata id=\"".$id."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+  my($id, $metadataIdRef, $key, $eventType) = @_;
+  my $keyElement = "  <nmwg:metadata id=\"".$id."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" ";
+	if(defined $metadataIdRef and $metadataIdRef ne "") {
+	  $keyElement = $keyElement . "metadataIdRef=\"".$metadataIdRef."\" >\n";
+	}
+	else {
+	  $keyElement = $keyElement . ">\n";
+	}
 	$keyElement = $keyElement . "    <nmwg:parameters id=\"parameters\">\n";
 	$keyElement = $keyElement . "      <nmwg:parameter name=\"lsKey\">".$key."</nmwg:parameter>\n";
 	$keyElement = $keyElement . "    </nmwg:parameters>\n";

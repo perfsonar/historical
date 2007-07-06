@@ -219,13 +219,13 @@ sub acceptCall {
       if($nodeset->size() <= 0) {
         my $msg = "Message element not found within request";
         $logger->error($msg);
-        $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
+        $self->{RESPONSEMESSAGE} = getResultCodeMessage(genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
         return 0;
       }
       elsif($nodeset->size() > 1) {
         my $msg = "Too many message elements found within request";
         $logger->error($msg); 
-        $self->{RESPONSE} = getResultCodeMessage(genuid(), "", "response", "error.mp.snmp", $msg);  
+        $self->{RESPONSEMESSAGE} = getResultCodeMessage(genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
         return 0;      
       }    
       else {   
@@ -245,12 +245,12 @@ sub acceptCall {
             if($eventType =~ m/^echo.*/) {
 	            my $msg = "The echo request has passed.";
 	            $logger->debug($msg);
-              $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "success.echo", $msg);		  	                 
+              $self->{RESPONSEMESSAGE} = getResultCodeMessage($messageId, $messageIdRef, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "success.echo", $msg);		  	                 
             }
             else {
 	            my $msg = "The echo request has failed.";
               $logger->error($msg);
-              $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "EchoResponse", "failure.echo", $msg);		        
+              $self->{RESPONSEMESSAGE} = getResultCodeMessage($messageId, $messageIdRef, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "failure.echo", $msg);		        
             }          
           }
           return 0;
@@ -259,8 +259,8 @@ sub acceptCall {
           $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
           foreach my $m ($self->{REQUESTDOM}->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACE}, "metadata")) {
             if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACE}, "data", "metadataIdRef") == 0) {
-              $logger->debug("Removing child metadata \"".$m->getAttribute("id")."\" from the DOM.");
-              $self->{REQUESTDOM}->getDocumentElement->removeChild($m); 
+#              $logger->debug("Removing child metadata \"".$m->getAttribute("id")."\" from the DOM.");
+#              $self->{REQUESTDOM}->getDocumentElement->removeChild($m); 
             }
           }    
           return 1;  
@@ -279,8 +279,8 @@ sub getResponse {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Transport");
   
-  if($self->{RESPONSE}) {
-    return $self->{RESPONSE};
+  if($self->{RESPONSEMESSAGE}) {
+    return $self->{RESPONSEMESSAGE};
   }
   else {
     $logger->error("Response not found.");
@@ -359,7 +359,6 @@ sub setResponseAsXPath {
 sub setResponse {
   my ($self, $content, $envelope) = @_;  
   my $logger = get_logger("perfSONAR_PS::Transport");
-   
   if(defined $content and $content ne "") {
     if(defined $envelope and $envelope ne "") {
       $content = $self->makeEnvelope($content) ;
@@ -449,7 +448,7 @@ sub sendReceive {
   my $responseContent = $httpResponse->content();
   
   # lets do some error checking:
-  if ( $responseContent =~ /^500 Can't connect to .* \((.*)\)/ ) {
+  if ( $responseContent =~ /^500 Cant connect to .* \((.*)\)/ ) {
  	die "Could not connect to $httpEndpoint: $1.\n"; 
   }
   # others?

@@ -12,5 +12,21 @@
   </nmwg:metadata>
 		 
   <nmwg:data metadataIdRef="deregister" id="d1"/>
-      		   
+<!--
+  <nmwg:data metadataIdRef="deregister" id="d1">
+    <nmwg:metadata id="meta1">
+      <perfsonar:subject id="subj1" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+        <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+          <nmwgt:hostName>atlang-hstnng.abilene.ucaid.edu</nmwgt:hostName>
+          <nmwgt:ifName>unknown</nmwgt:ifName>
+          <nmwgt:ifDescription>hstn:oc192(p2p)::show:intracloud</nmwgt:ifDescription>
+          <nmwgt:ifAddress type="ipv4">198.32.8.34</nmwgt:ifAddress>
+          <nmwgt:direction>in</nmwgt:direction>
+          <nmwgt:capacity>10000000000</nmwgt:capacity>
+        </nmwgt:interface>
+      </perfsonar:subject>
+      <nmwg:eventType>utilization</nmwg:eventType>
+    </nmwg:metadata>
+  </nmwg:data>
+      		   -->
 </nmwg:message>

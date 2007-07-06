@@ -190,12 +190,15 @@ sub queryForName {
 sub queryByName {
   my ($self, $name) = @_; 
   my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $content = "";
   if(defined $name and $name ne "") {
     eval {
       $logger->debug("Query for name \"".$name."\" received.");
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();
       my $document = $self->{CONTAINER}->getDocument($self->{TRANSACTION}, $name);
+      $content = $document->getName;
       $self->{TRANSACTION}->commit();
+      $logger->debug("Document found.");
     };
     if(my $e = catch std::exception) {
       if($e->getExceptionCode() == 11) {
@@ -219,8 +222,8 @@ sub queryByName {
   else {
     $logger->error("Missing argument");   
     return -1;
-  } 
-  return 1; 
+  }  
+  return $content; 
 }
 
 
@@ -340,7 +343,7 @@ sub insertElement {
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";     
     eval {
       $logger->debug("Query \"".$fullQuery."\" and content \"".$content."\" received.");
-      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();             
+      $self->{TRANSACTION} = $self->{MANAGER}->createT+ransaction();             
       $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
       foreach my $prefix (keys %{$self->{NAMESPACES}}) {
         $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});

@@ -43,7 +43,7 @@ sub getResultMessage {
 
 
 sub getResultCodeMessage {
-  my ($id, $messageIdRef, $type, $event, $description) = @_;   
+  my ($id, $messageIdRef, $metadataIdRef, $type, $event, $description) = @_;   
   my $logger = get_logger("perfSONAR_PS::Messages");
   
   if((defined $event and $event ne "") and 
@@ -51,7 +51,7 @@ sub getResultCodeMessage {
     my $metadataId = genuid();
     my $dataId = genuid();
     $logger->debug("Result code message created.");
-    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $event).getResultCodeData($dataId, $metadataId, $description));
+    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $metadataIdRef, $event).getResultCodeData($dataId, $metadataId, $description));
   }
   else {
     $logger->error("Missing argument(s).");
@@ -61,12 +61,18 @@ sub getResultCodeMessage {
 
 
 sub getResultCodeMetadata {
-  my ($id, $event) = @_;  
+  my ($id, $metadataIdRef, $event) = @_; 
   my $logger = get_logger("perfSONAR_PS::Messages");
 
   if((defined $id and $id ne "") and 
      (defined $event and $event ne "")) {
-    my $md = "  <nmwg:metadata id=\"".$id."\">\n";
+    my $md = "  <nmwg:metadata id=\"".$id."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" ";
+    if(defined $metadataIdRef and $metadataIdRef ne "") {
+      $md = $md . " metadataIdRef=\"".$metadataIdRef."\" >\n";
+    }
+    else {
+      $md = $md . ">\n";
+    } 
     $md = $md . "    <nmwg:eventType>";
     $md = $md . $event;
     $md = $md . "</nmwg:eventType>\n";
@@ -135,7 +141,7 @@ methods can be invoked directly (and sparingly).
     
     $msg = getResultCodeMessage($id, $idRef, "response", "error.ma.transport" , "something...");
     
-    $msg = getResultCodeMetadata($id, "error.ma.transport);
+    $msg = getResultCodeMetadata($id, $mdIdRef, "error.ma.transport);
     
     $msg = getResultCodeData($id, $idRef, "something...");
 
@@ -161,9 +167,10 @@ which is understood to be the xml content of the message.
 The arguments are a message id, a messageIdRef, a messate type, an 'eventType' for the result
 code metadata, and a message for the result code data.  
 
-=head2 getResultCodeMetadata($id, $event)
+=head2 getResultCodeMetadata($id, $mdIdRef, $event)
 
-The arguments are a metadata id, and an 'eventType' for the result code metadata.
+The arguments are a metadata id, a metadataIdRef (optional), and an 'eventType' for the 
+result code metadata.
 
 =head2 getResultCodeData($id, $metadataIdRef, $description)
 
