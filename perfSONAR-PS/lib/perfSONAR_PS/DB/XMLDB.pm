@@ -26,7 +26,7 @@ sub new {
 
 sub setEnvironment {
   my ($self, $env) = @_;  
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $env and $env ne "") {
     $self->{ENVIRONMENT} = $env;
   }
@@ -39,7 +39,7 @@ sub setEnvironment {
 
 sub setContainer {
   my ($self, $cont) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $cont and $cont ne "") {
     $self->{CONTAINERFILE} = $cont;
   }
@@ -52,7 +52,7 @@ sub setContainer {
 
 sub setNamespaces {
   my ($self, $ns) = @_;  
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $namespaces and $namespaces ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
@@ -65,7 +65,7 @@ sub setNamespaces {
 
 sub openDB {
   my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   eval {
     $self->{ENV} = new DbEnv(0);
     $self->{ENV}->set_cachesize(0, 64 * 1024, 1);
@@ -99,9 +99,53 @@ sub openDB {
 }
 
 
+sub xQuery {
+  my ($self, $query) = @_; 
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
+  my @resString = ();
+  if(defined $query and $query ne "") {
+    my $results = "";
+    my $value = "";  
+    my $stuff = $self->{CONTAINER}->getName();
+    $query =~ s/CHANGEME/$stuff/g;
+    eval {
+      $logger->debug("Query \"".$query."\" received.");
+      $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
+      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+        $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
+      }          
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();
+      $results = $self->{MANAGER}->query($self->{TRANSACTION}, $query, $self->{QUERYCONTEXT});
+      while( $results->next($value) ) {    
+        push @resString, $value."\n";
+      }	
+      $value = "";
+      $self->{TRANSACTION}->commit();
+    };
+    if(my $e = catch std::exception) {
+      $logger->error("Error \"".$e->what()."\".");
+      return -1;
+    }
+    elsif($e = catch DbException) {
+      $logger->error("Error \"".$e->what()."\".");    
+      return -1;
+    }        
+    elsif($@) {
+      $logger->error("Error \"".$@."\".");      
+      return -1;
+    }   
+  }
+  else {
+    $logger->error("Missing argument");   
+    return -1;
+  } 
+  return @resString; 
+}
+
+
 sub query {
   my ($self, $query) = @_; 
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my @resString = ();
   if(defined $query and $query ne "") {
     my $results = "";
@@ -144,7 +188,7 @@ sub query {
 
 sub queryForName {
   my ($self, $query) = @_; 
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my @resString = ();
   if(defined $query and $query ne "") {
     my $results = "";
@@ -189,7 +233,7 @@ sub queryForName {
 
 sub queryByName {
   my ($self, $name) = @_; 
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my $content = "";
   if(defined $name and $name ne "") {
     eval {
@@ -229,7 +273,7 @@ sub queryByName {
 
 sub updateByName {
   my ($self, $content, $name) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if((defined $content and $content ne "") and 
      (defined $name and $name ne "")) {    
     eval {        
@@ -266,7 +310,7 @@ sub updateByName {
 
 sub count {
   my ($self, $query) = @_; 
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my $results;
   if(defined $query and $query ne "") {
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";    
@@ -301,7 +345,7 @@ sub count {
 
 sub insertIntoContainer {
   my ($self, $content, $name) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if((defined $content and $content ne "") and 
      (defined $name and $name ne "")) {    
     eval {        
@@ -338,12 +382,12 @@ sub insertIntoContainer {
 
 sub insertElement {
   my ($self, $query, $content) = @_;     
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if((defined $content and $content ne "") and (defined $query  and $query ne "")) {          
     my $fullQuery = "collection('".$self->{CONTAINER}->getName()."')$query";     
     eval {
       $logger->debug("Query \"".$fullQuery."\" and content \"".$content."\" received.");
-      $self->{TRANSACTION} = $self->{MANAGER}->createT+ransaction();             
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();             
       $self->{QUERYCONTEXT} = $self->{MANAGER}->createQueryContext();
       foreach my $prefix (keys %{$self->{NAMESPACES}}) {
         $self->{QUERYCONTEXT}->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
@@ -380,7 +424,7 @@ sub insertElement {
 
 sub remove {
   my ($self, $name) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $name and $name ne "") {  
     eval {
       $logger->debug("Remove \"".$name."\" received.");

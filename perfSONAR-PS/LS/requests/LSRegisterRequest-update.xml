@@ -29,7 +29,7 @@
     
   <nmwg:data id="data0" metadataIdRef="serviceLookupInfo">
     <nmwg:metadata id="meta1">
-      <perfsonar:subject id="subj1" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <netutil:subject id="subj1" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
         <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
           <nmwgt:hostName>atlang-hstnng.abilene.ucaid.edu</nmwgt:hostName>
           <nmwgt:ifName>unknown</nmwgt:ifName>
@@ -38,12 +38,12 @@
           <nmwgt:direction>in</nmwgt:direction>
           <nmwgt:capacity>10000000000</nmwgt:capacity>
         </nmwgt:interface>
-      </perfsonar:subject>
+      </netutil:subject>
       <nmwg:eventType>utilization</nmwg:eventType>
     </nmwg:metadata>
 
     <nmwg:metadata id="meta1">
-      <perfsonar:subject id="subj1" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <netutil:subject id="subj1" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
         <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
           <nmwgt:hostName>atlang33-hstnng.abilene.ucaid.edu</nmwgt:hostName>
           <nmwgt:ifName>unknown</nmwgt:ifName>
@@ -52,7 +52,7 @@
           <nmwgt:direction>in</nmwgt:direction>
           <nmwgt:capacity>10000000000</nmwgt:capacity>
         </nmwgt:interface>
-      </perfsonar:subject>
+      </netutil:subject>
       <nmwg:eventType>utilization</nmwg:eventType>
     </nmwg:metadata>    
     
@@ -60,7 +60,7 @@
 
   <nmwg:data id="data1" metadataIdRef="serviceLookupInfo">
     <nmwg:metadata id="meta2">
-      <perfsonar:subject id="subj1" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <netutil:subject id="subj1" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
         <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
           <nmwgt:hostName>atlang22-hstnng.abilene.ucaid.edu</nmwgt:hostName>
           <nmwgt:ifName>unknown</nmwgt:ifName>
@@ -69,7 +69,7 @@
           <nmwgt:direction>in</nmwgt:direction>
           <nmwgt:capacity>10000000000</nmwgt:capacity>
         </nmwgt:interface>
-      </perfsonar:subject>
+      </netutil:subject>
       <nmwg:eventType>utilization</nmwg:eventType>
     </nmwg:metadata>
   </nmwg:data>

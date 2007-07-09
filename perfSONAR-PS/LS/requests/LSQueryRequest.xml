@@ -7,13 +7,11 @@
   <nmwg:metadata id="meta1">
   
     <xquery:subject id="sub1">
-      declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
-      declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";
-      declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";
-      declare namespace xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/";			
 
-      /nmwg:store/nmwg:metadata
-      
+	declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
+  declare namespace netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/";
+	/nmwg:store/nmwg:data/nmwg:metadata/netutil:subject
+
     </xquery:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
   </nmwg:metadata>
@@ -21,3 +19,4 @@
   <nmwg:data metadataIdRef="meta1" id="d1"/>
 
 </nmwg:message>
+

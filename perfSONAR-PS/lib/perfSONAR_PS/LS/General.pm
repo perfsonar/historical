@@ -8,7 +8,7 @@ use Exporter;
 use Log::Log4perl qw(get_logger);
 
 @ISA = ('Exporter');
-@EXPORT = ('createControlKey', 'createKey', 'createData', 'getXQuery');
+@EXPORT = ('createControlKey', 'createKey', 'createMetadata', 'createData', 'getXQuery');
 
 
 sub createControlKey {
@@ -37,6 +37,17 @@ sub createKey {
 	$keyElement = $keyElement . "    <nmwg:eventType>".$eventType."</nmwg:eventType>\n";
 	$keyElement = $keyElement . "  </nmwg:metadata>\n";    
   return $keyElement;
+}
+
+
+sub createMetadata {
+  my($id, $metadataIdRef, $content) = @_;
+  my $mdElement = "  <nmwg:metadata id=\"".$id."\" ";
+  if(defined $metadataIdRef and $metadataIdRef ne "") {
+    $mdElement = $mdElement . "metadataIdRef=\"".$metadataIdRef."\" ";
+  }
+  $mdElement = $mdElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" />\n";  
+  return $mdElement;
 }
 
 

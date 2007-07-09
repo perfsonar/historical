@@ -32,7 +32,9 @@ my %ns = (
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
   perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-  psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"   
+  psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+  xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
+  xpath => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/"
 );
 
 		# Read in configuration information

@@ -154,7 +154,11 @@ sub lsRegisterRequest {
  	          foreach my $d_md ($d->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
               my @resultsString = $metadatadb->queryForName("//nmwg:data[" . getXQuery($d_md) . "]");   
               if($#resultsString == -1) {
-	              $metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
+	              #$metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
+
+	              $metadatadb->insertIntoElement(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
+	              	              
+	              
 	              $logger->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
 	              $keys{$mdKey}++;              
               }
@@ -420,7 +424,7 @@ sub lsQueryRequest {
   my($self) = @_; 
   my $logger = get_logger("perfSONAR_PS::LS::LS");
 
-  my $localContent = "<nmwg:metadata>success</nmwg:metadata>";
+  my $localContent = "";
   
   my $metadatadb = new perfSONAR_PS::DB::XMLDB(
     $self->{CONF}->{"METADATA_DB_NAME"}, 
@@ -429,17 +433,92 @@ sub lsQueryRequest {
   );	  
 	$metadatadb->openDB; 
 	      
-  my $timedb = new perfSONAR_PS::DB::XMLDB(
+  my $controldb = new perfSONAR_PS::DB::XMLDB(
     $self->{CONF}->{"METADATA_DB_NAME"}, 
     $self->{CONF}->{"METADATA_DB_CONTROL_FILE"},
     \%{$self->{NAMESPACES}}
   );	  
-  $timedb->openDB; 
+  $controldb->openDB; 
+  $logger->debug("Databases opened, parsing message.");
+
+  # LS Query Steps
+  # ---------------------
+  # Does MD have an xquery:subject (support more later)
+  # Y: does it have an eventType?
+  #   Y: Supported eventType?
+  #     Y: Send query to DB, perpare results
+  #     N: Send 'error.ls.querytype_not_suported' error
+  #   N: Send 'error.ls.no_querytype' error
+  # N: Send 'error.ls.query.query_not_found' error
+
+  my $query = "";
+  my $queryType = "";
+	my $mdId = "";
+	my $dId = "";
+	my($sec, $frac) = Time::HiRes::gettimeofday;
 	        
   foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
     foreach my $m ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
       if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 	      $logger->debug("Matched a Pair");
+
+        $query = extract($m->find("./xquery:subject")->get_node(1));
+        if($query) {
+          $logger->debug("Query found in metadata, proceeding with QueryRequest.");
+          
+          $queryType = extract($m->find("./nmwg:eventType")->get_node(1));
+          if($queryType) {
+            if($queryType eq "service.lookup.xquery" or 
+               $queryType eq "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0") {
+            
+              $logger->debug("QueryType is valid, proceeding with QueryRequest."); 
+
+              # some hacky stuff for right now...
+              $query =~ s/&lt;/</g;
+              $query =~ s/&gt;/>/g;
+              $query =~ s/\s{1}\// collection('CHANGEME')\//g;
+        
+              my @resultsString = $metadatadb->xQuery($query);   
+              my $dataString = "";
+              for(my $x = 0; $x <= $#resultsString; $x++) {
+                $dataString = $dataString . $resultsString[$x];
+  	          }
+print "\n\n" , $dataString , "\n\n";
+	            $mdId = "resultMetadata.lsKey.".genuid();
+	            $dId = "resultData.lsKey.".genuid();
+	            if($dataString) {
+	              $localContent = $localContent . createMetadata($mdId, $m->getAttribute("id")); 
+	              $localContent = $localContent . createData($dId, $mdId, $dataString); 
+	            }
+	            else {
+                $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.empty_results");
+                $localContent = $localContent . getResultCodeData($dId, $mdId, "Nothing returned for search.");	            
+	            }
+	            $logger->debug("Adding info to response message.");
+  	        }
+  	        else {
+              $logger->error("Query type not found in metadata, sending error mesasge.");
+	            $mdId = "resultMetadata.".genuid();
+	            $dId = "resultData.".genuid();      
+              $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.querytype_not_suported");
+              $localContent = $localContent . getResultCodeData($dId, $mdId, "Given query type is not supported ");
+  	        }
+          }
+          else {
+            $logger->error("Query type not found in metadata, sending error mesasge.");
+	          $mdId = "resultMetadata.".genuid();
+	          $dId = "resultData.".genuid();      
+            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.no_querytype");
+            $localContent = $localContent . getResultCodeData($dId, $mdId, "No query type in message");
+          }
+        }
+        else {
+          $logger->error("Query not found in metadata, sending error mesasge.");
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.query_not_found");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Query not found in sent metadata.");
+        }	      
       }   
     }
   }  
