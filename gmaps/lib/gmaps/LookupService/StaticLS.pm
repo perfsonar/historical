@@ -103,6 +103,13 @@ our %maMap = (
 					endpoint => 'perfSONAR-RRD-MA-2.0/services/MeasurementArchiveService',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
+                                'slac.stanford.edu' => {
+                                        host => '134.79.199.220',
+                                        port => '8080',
+                                        endpoint => 'axis/serviecs/snmpMA',
+                                        eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                                },
+
 
 			);
 
