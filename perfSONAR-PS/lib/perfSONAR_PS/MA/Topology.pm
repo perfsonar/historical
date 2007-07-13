@@ -173,13 +173,15 @@ sub changeTopology {
 }
 
 sub changeXMLDB($$$) {
-	my ($self, $type, $root) = @_;
+	my ($self, $type, $topology) = @_;
 
-	if ($type eq "topology.update") {
+	if ($type eq "topology.change.replace") {
+		
+	} elsif ($type eq "topology.change.update") {
 
-	} elsif ($type eq "topology.add") {
+	} elsif ($type eq "topology.change.add") {
 
-	} elsif ($type eq "topology.remove") {
+	} elsif ($type eq "topology.change.remove") {
 
 	}
 	return (0, "");
@@ -214,7 +216,7 @@ sub queryRequest($$$$) {
 	}
 
 	$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-
+	$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
 	if ($type eq "topology.lookup.all") {
 		my ($status, $res) = $self->queryDatabase_dump;
 		if ($status == 0) {
@@ -234,6 +236,7 @@ sub queryRequest($$$$) {
 
 	}
 
+	$localContent .= "</nmtopo:topology>\n";
 	$localContent .= "</nmwg:data>\n";
 
 	return (0, $localContent);
@@ -316,7 +319,7 @@ sub dumpXMLDatabase($) {
 
 	my $content = "";
 
-	my @results = $self->{DATADB}->query("/*:topology");
+	my @results = $self->{DATADB}->query("/*:network");
 	if ($#results == -1) {
 		my $msg = "Couldn't find list of nodes in DB";
 		$logger->error($msg);
@@ -338,7 +341,9 @@ sub topologyNormalize($) {
 	$topology{"links"} = ();
 	$topology{"ports"} = ();
 
-	my ($status, $res) = topologyNormalize_networks($root, \%topology);
+	my ($status, $res);
+
+	($status, $res) = topologyNormalize_networks($root, \%topology);
 	if ($status != 0) {
 		return ($status, $res);
 	}
@@ -363,7 +368,7 @@ sub topologyNormalize_networks($$) {
 	my ($root, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+	foreach my $network ($root->getChildrenByLocalName("network")) {
 		my $id = $network->getAttribute("id");
 		my $fqid;
 
@@ -391,7 +396,7 @@ sub topologyNormalize_nodes($$) {
 	my ($root, $topology, $uri) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+	foreach my $network ($root->getChildrenByLocalName("network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_nodes($network, $topology, $fqid);
 		if ($status != 0) {
@@ -399,7 +404,7 @@ sub topologyNormalize_nodes($$) {
 		}
 	}
 
-	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+	foreach my $node ($root->getChildrenByLocalName("node")) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
@@ -455,7 +460,7 @@ sub topologyNormalize_ports($$) {
 	my ($root, $topology, $uri) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+	foreach my $network ($root->getChildrenByLocalName("network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_ports($network, $topology, $fqid);
 		if ($status != 0) {
@@ -463,7 +468,7 @@ sub topologyNormalize_ports($$) {
 		}
 	}
 
-	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+	foreach my $node ($root->getChildrenByLocalName("node")) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
@@ -479,7 +484,7 @@ sub topologyNormalize_ports($$) {
 		}
 	}
 
-	foreach my $port ($root->getChildrenByTagName("nmtopo:port")) {
+	foreach my $port ($root->getChildrenByLocalName("port")) {
 		my $id = $port->getAttribute("id");
 		my $fqid;
 
@@ -533,7 +538,7 @@ sub topologyNormalize_links($$) {
 	my ($root, $topology, $uri) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+	foreach my $network ($root->getChildrenByLocalName("network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_links($network, $topology, $fqid);
 		if ($status != 0) {
@@ -541,7 +546,7 @@ sub topologyNormalize_links($$) {
 		}
 	}
 
-	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+	foreach my $node ($root->getChildrenByLocalName("node")) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
@@ -557,7 +562,7 @@ sub topologyNormalize_links($$) {
 		}
 	}
 
-	foreach my $port ($root->getChildrenByTagName("nmtopo:port")) {
+	foreach my $port ($root->getChildrenByLocalName("port")) {
 		my $id = $port->getAttribute("id");
 		my $fqid;
 
@@ -573,7 +578,7 @@ sub topologyNormalize_links($$) {
 		}
 	}
 
-	foreach my $link ($root->getChildrenByTagName("nmtopo:link")) {
+	foreach my $link ($root->getChildrenByLocalName("link")) {
 		my $id = $link->getAttribute("id");
 		my $fqid;
 
@@ -597,7 +602,7 @@ sub topologyNormalize_links($$) {
 
 			my $num_ports = 0;
 
-			foreach my $port ($link->getChildrenByTagName("nmtopo:port")) {
+			foreach my $port ($link->getChildrenByLocalName("port")) {
 				my $idref = $port->getAttribute("portIdRef");
 
 				$logger->debug("Got port ref: ".$idref."");
@@ -618,7 +623,7 @@ sub topologyNormalize_links($$) {
 					return (-1, $msg);
 				}
 
-				my $link_element = $port->find("./nmtopo:link")->get_node(1);
+				my $link_element = $port->find("./*[local-name()='link']")->get_node(1);
 
 				if (defined $link_element) {
 					my $link_idref = $link_element->getAttribute("linkIdRef");
@@ -680,7 +685,7 @@ sub networkReplaceChild($$$) {
 	my ($network, $new_node, $fqid) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $node ($network->getChildrenByTagName("nmtopo:node")) {
+	foreach my $node ($network->getChildrenByLocalName("node")) {
 		my $id = $node->getAttribute("nodeIdRef"); 
 		next if (!defined $id or $id eq "");
 		$id = idSanitize($id);
@@ -697,7 +702,7 @@ sub nodeReplaceChild($$$) {
 	my ($node, $new_port, $fqid) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $port ($node->getChildrenByTagName("nmtopo:port")) {
+	foreach my $port ($node->getChildrenByLocalName("port")) {
 		my $id = $port->getAttribute("portIdRef"); 
 		next if (!defined $id or $id eq "");
 		$id = idSanitize($id);
@@ -714,7 +719,7 @@ sub portReplaceChild($$$) {
 	my ($port, $new_link, $fqid) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $link ($port->getChildrenByTagName("nmtopo:link")) {
+	foreach my $link ($port->getChildrenByLocalName("link")) {
 		my $id = $port->getAttribute("linkIdRef"); 
 		next if (!defined $id or $id eq "");
 		$id = idSanitize($id);
@@ -798,6 +803,7 @@ sub idBaseLevel($) {
 		return $id;
 	}
 }
+
 1;
 
 __END__
