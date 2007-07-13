@@ -14,7 +14,7 @@ function Speed(options){
         // "canvas"
 
         // defaults
-        "maxValue": 1000,
+        "maxValue": 100,
         "numBars": 70,              // how many bars
         "percentBar": 0.6,          // how much of each 'bar' is lit
         "emptyAlpha": 0.3,          // how much to obscure colors

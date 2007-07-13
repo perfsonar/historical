@@ -13,29 +13,36 @@
 <script type="text/javascript">
 
 var hostInterfaces = {
-    "anna-raptor1.internet2.edu": {
+    "mitc-m10.internet2.edu": {
         "name": "Ann Arbor",
-        "data": ["1010001", "1020001"],
-    },
-    "206.196.176.229": {
-        "name": "McLean",
-        "data": [
-            "1000004",
-            "1020001",
-            "1000001",
-            "1000002",
-            "1010001",
-            "1010012",
-            "1020002",
-            ],
-    },
-    "chin-force10.hopi.internet2.edu": {
-        "name": "Chicago",
-        "data": [
-            "34144278",
-            ],
-    },
+        "data": ["76"]
+    }
 };
+
+//var hostInterfaces = {
+//    "anna-raptor1.internet2.edu": {
+//        "name": "Ann Arbor",
+//        "data": ["1010001", "1020001"],
+//    },
+//    "206.196.176.229": {
+//        "name": "McLean",
+//        "data": [
+//            "1000004",
+//            "1020001",
+//            "1000001",
+//            "1000002",
+//            "1010001",
+//            "1010012",
+//            "1020002",
+//            ],
+//    },
+//    "chin-force10.hopi.internet2.edu": {
+//        "name": "Chicago",
+//        "data": [
+//            "34144278",
+//            ],
+//    },
+//};
 
 function updateHost(){
     var hosti = document.forms["options"].hostName.selectedIndex;
@@ -102,15 +109,19 @@ createLoggingPane();
                     <div id="form-fields">
                         <form name="options">
                             <select id="hostName" name="hostName" onChange="updateHost();">
-                                <option value="anna-raptor1.internet2.edu">Ann Arbor</option>
-                                <option value="206.196.176.229">McLean</option>
-                                <option value="chin-force10.hopi.internet2.edu">Chicago</option>
+                                <option value="mitc-m10.internet2.edu">Ann Arbor</option>
                             </select>
                             <select id="ifName" name="ifName">
                             </select>
                             <select id="direction" name="direction">
-                                <option value="in">in</option>
-                                <option value="out">out</option>
+                                <option value="ifInOctets">ifInOctets</option>
+                                <option value="ifOutOctets">ifOutOctets</option>
+                                <option value="ifInErrors">ifInErrors</option>
+                                <option value="ifOutErrors">ifOutErrors</option>
+                                <option value="ifInDiscards">ifOutDiscards</option>
+                                <option value="ifOutDiscards">ifOutDiscards</option>
+                                <option value="ifHCInOctets">ifHCInOctets</option>
+                                <option value="ifHCOutOctets">ifHCOutOctets</option>
                             </select>
                         </form>
                     </div>

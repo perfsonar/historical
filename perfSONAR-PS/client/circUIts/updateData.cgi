@@ -25,9 +25,9 @@ my $fakeServiceMode = $cgi->param('fakeServiceMode');
 
 my $int = $cgi->param('resolution') || 5;
 my $maxValue = $cgi->param('maxValue') || 1000;
-my $host = $cgi->param('hostName') || "anna-raptor1.internet2.edu";
-my $index = $cgi->param('ifName') || "1010001";
-my $direction = $cgi->param('direction') || "in";
+my $host = $cgi->param('hostName') || "mitc-m10.internet2.edu";
+my $index = $cgi->param('ifName') || "76";
+my $direction = $cgi->param('direction') || "ifHCOutOctets";
 my $npoints = $cgi->param('npoints') || 5;
 my $refTime = $cgi->param('refTime') || "now";
 
@@ -60,7 +60,7 @@ sub getReferenceTime{
         ($sec, $frac) = Time::HiRes::gettimeofday;  
 
         # XXX: Remove when SNMP_MA ignores last RRD value
-#        $sec -= 10;
+        $sec -= 5;
 
         # XXX: Remove when this is done by SNMP_MA
         # put on interval boundary for broken rrdtool

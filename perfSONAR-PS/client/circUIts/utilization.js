@@ -5,14 +5,14 @@ var defOptionsUtil = {
         "npoints":   100,
         "fakeServiceMode": 0,
         "xOriginIsZero": false,
-        "yAxis":[0,1000],
+        "yAxis":[0,100],
         "yTicks":[
         {label: "0", v: 0},
-        {label: "200", v: 200},
-        {label: "400", v: 400},
-        {label: "600", v: 600},
-        {label: "800", v: 800},
-        {label: "1000", v: 1000},
+        {label: "20", v: 20},
+        {label: "40", v: 40},
+        {label: "60", v: 60},
+        {label: "80", v: 80},
+        {label: "100", v: 100},
         ],
     };
 var layout = null;
