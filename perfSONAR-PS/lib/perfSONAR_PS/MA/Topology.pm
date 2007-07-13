@@ -87,29 +87,23 @@ sub handleRequest {
 
 	$self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
 
+	my ($status, $response);
+
 	if($messageType eq "SetupDataRequest") {
-		$logger->debug("Handling topology request.");
-		my ($status, $response) = $self->queryTopology($self->{LISTENER}->getRequestDOM());
-		if ($status != 0) {
-			$logger->error("Unable to handle topology request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
-		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
-		}
+		($status, $response) = $self->queryTopology($self->{LISTENER}->getRequestDOM());
 	} elsif ($messageType eq "TopologyChangeRequest") {
-		$logger->debug("Handling ChangeTopology Request");
-		
-		my ($status, $response) = $self->changeTopology($self->{LISTENER}->getRequestDOM());
-		if ($status != 0) {
-			$logger->error("Unable to handle topology request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
-		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "TopologyChangeRequest", $response);
-		}
+		($status, $response) = $self->changeTopology($self->{LISTENER}->getRequestDOM());
 	} else {
-		my $msg = "Message type \"".$messageType."\" is not yet supported";
-		$logger->error($msg);
-		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+		$status = "error.ma.message.type";
+		$response = "Message type \"".$messageType."\" is not yet supported";
+		$logger->error($response);
+	}
+
+	if ($status ne "") {
+		$logger->error("Unable to handle topology request: $status/$response");
+		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", $status, $response);
+	} else {
+		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType, $response);
 	}
 
 	return $self->{RESPONSE};
@@ -128,7 +122,7 @@ sub queryTopology {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				my ($status, $res) = $self->queryRequest($eventType, $m, $d);
-				if ($status != 0) {
+				if ($status ne "") {
 					$logger->error("Couldn't dump topology information");
 					return ($status, $res);
 				}
@@ -138,7 +132,7 @@ sub queryTopology {
 		}
 	}
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub changeTopology {
@@ -156,9 +150,9 @@ sub changeTopology {
 
 				my $topology = $data->find("nmtopo:topology")->get_node(1);
 				if (!defined $topology) {
-					my $msg = "No topology defined: ".$data->toString;
+					my $msg = "No topology defined in change topology request";
 					$logger->error($msg);
-					return (-1, $msg);
+					return ("error.topology.query.topology_not_found", $msg);
 				}
 
 				topologyNormalize($topology);
@@ -176,7 +170,7 @@ sub changeTopology {
 				$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
 
 				my ($status, $res) = $self->changeXMLDB($eventType, $topology);
-				if ($status != 0) {
+				if ($status ne "") {
 					$logger->error("Error handling topology request");
 					# this should undo any previous changes.
 					return ($status, $res);
@@ -191,7 +185,7 @@ sub changeTopology {
 
 	# commit the transaction
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub changeXMLDB($$$) {
@@ -213,7 +207,7 @@ sub changeXMLDB($$$) {
 			if (!defined $id) {
 				my $msg = "Network with no id found";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			$self->{DATADB}->remove($id);
@@ -225,7 +219,7 @@ sub changeXMLDB($$$) {
 			if ($self->{DATADB}->insertIntoContainer($network->toString, $id) != 0) {
 				my $msg = "Couldn't insert data into database";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.ma", $msg);
 			}
 
 			$localContent .= $network->toString;
@@ -240,7 +234,7 @@ sub changeXMLDB($$$) {
 
 	}
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub queryRequest($$$$) {
@@ -261,7 +255,7 @@ sub queryRequest($$$$) {
 	$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
 	if ($type eq "topology.lookup.all") {
 		my ($status, $res) = $self->queryDatabase_dump;
-		if ($status == 0) {
+		if ($status eq "") {
 			$localContent .= $res;
 		} else {
 			$logger->error("Couldn't dump topology structure: $res");
@@ -269,19 +263,23 @@ sub queryRequest($$$$) {
 		}
 	} elsif ($type eq "topology.lookup.xquery") {
 		my ($status, $res) = $self->queryDatabase_xQuery($m);
-		if ($status == 0) {
+		if ($status eq "") {
 			$localContent .= $res;
 		} else {
 			$logger->error("Couldn't query topology: $res");
 			return ($status, $res);
 		}
 
+	} else {
+		my $msg = "Unknown query type: ".$type;
+		$logger->error($msg);
+		return ("error.topology.query.invalid_query", $msg);
 	}
 
 	$localContent .= "</nmtopo:topology>\n";
 	$localContent .= "</nmwg:data>\n";
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub queryDatabase_xQuery($$) {
@@ -294,12 +292,12 @@ sub queryDatabase_xQuery($$) {
 	if ($self->{CONF}->{"TOPO_DB_TYPE"} ne "XML") {
 		my $msg = "xQuery unsupported for database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.topology.ma", $msg);
 	}
 
 	my $query = extract($m->find("./xquery:subject")->get_node(1));
 	if (!defined $query or $query eq "") {
-		return (-1, "No query given in request");
+		return ("error.topology.query.query_not_found", "No query given in request");
 	}
 
 	$query =~ s/\s{1}\// collection('CHANGEME')\//g;
@@ -307,20 +305,20 @@ sub queryDatabase_xQuery($$) {
 	if ($self->{DATADB}->openDB != 0) {
 		my $msg = "Couldn't open database";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.topology.ma", $msg);
 	}
 
 	my $queryResults = $self->{DATADB}->xQuery($query);
 	if ($queryResults == -1) {
 		$logger->error("Couldn't query database");
-		return (-1, "Couldn't query database");
+		return ("error.topology.ma", "Couldn't query database");
 	}
 
 	foreach my $line (@{ $queryResults }) {
 		$localContent .= $line;
 	}
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub queryDatabase_dump {
@@ -331,23 +329,22 @@ sub queryDatabase_dump {
 	if (!defined $self->{DATADB}) {
 		my $msg = "No database to dump";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.topology.ma", $msg);
 	}
 
 	$status = $self->{DATADB}->openDB;
 	if ($status == -1) {
 		my $msg = "Couldn't open topology database";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.topology.ma", $msg);
 	}
 
 	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
 		($status, $res) = $self->dumpXMLDatabase;
 	} else {
-		my $msg = "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
-		$logger->error($msg);
-		$self->{DATADB}->closeDB;
-		return (-1, $msg);
+		$status = "error.topology.ma";
+		$res = "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
+		$logger->error($res);
 	}
 
 	$self->{DATADB}->closeDB;
@@ -363,14 +360,14 @@ sub dumpXMLDatabase($) {
 
 	my @results = $self->{DATADB}->query("/*:network");
 	if ($#results == -1) {
-		my $msg = "Couldn't find list of nodes in DB";
+		my $msg = "Couldn't find list of nodes in database";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.topology.ma", $msg);
 	}
 
 	$content .= join("", @results);
 
-	return (0, $content);
+	return ("", $content);
 }
 
 sub topologyNormalize($) {
@@ -386,22 +383,22 @@ sub topologyNormalize($) {
 	my ($status, $res);
 
 	($status, $res) = topologyNormalize_networks($root, \%topology);
-	if ($status != 0) {
+	if ($status ne "") {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_nodes($root, \%topology, "");
-	if ($status != 0) {
+	if ($status ne "") {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_ports($root, \%topology, "");
-	if ($status != 0) {
+	if ($status ne "") {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_links($root, \%topology, "");
-	if ($status != 0) {
+	if ($status ne "") {
 		return ($status, $res);
 	}
 }
@@ -417,7 +414,7 @@ sub topologyNormalize_networks($$) {
 		if (!defined $id) {
 			my $msg = "No id for specified network";
 			 $logger->error($msg);
-			return (-1, $msg);
+			return ("error.topology.invalid_topology", $msg);
 		}
 
 		if (idIsFQ($id) == 0) {
@@ -431,7 +428,7 @@ sub topologyNormalize_networks($$) {
 		$topology->{"networks"}->{$id} = $network;
 	}
 
-	return (0, "");
+	return ("", "");
 }
 
 sub topologyNormalize_nodes($$) {
@@ -441,7 +438,7 @@ sub topologyNormalize_nodes($$) {
 	foreach my $network ($root->getChildrenByTagNameNS("*", "network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_nodes($network, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -456,7 +453,7 @@ sub topologyNormalize_nodes($$) {
 			} else {
 				my $msg = "Node has no id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 		}
 
@@ -464,7 +461,7 @@ sub topologyNormalize_nodes($$) {
 			if ($uri eq "") {
 				my $msg = "Node $id has no parent and is not fully qualified";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			$fqid = idAddLevel($uri, $id);
@@ -482,7 +479,7 @@ sub topologyNormalize_nodes($$) {
 			if (!defined $network) {
 				my $msg = "Node $fqid references non-existent network: $network_id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.inalid_topology", $msg);
 			}
 
 			$logger->debug("Moving $fqid to $network_id");
@@ -505,7 +502,7 @@ sub topologyNormalize_ports($$) {
 	foreach my $network ($root->getChildrenByTagNameNS("*", "network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_ports($network, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -521,7 +518,7 @@ sub topologyNormalize_ports($$) {
 		}
 
 		my ($status, $res) = topologyNormalize_ports($node, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -536,7 +533,7 @@ sub topologyNormalize_ports($$) {
 			} else {
 				my $msg = "Port has no id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 		}
 
@@ -544,7 +541,7 @@ sub topologyNormalize_ports($$) {
 			if ($uri eq "") {
 				my $msg = "Port $id has no parent and is not fully qualified";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			$fqid = idAddLevel($uri, $id);
@@ -561,7 +558,7 @@ sub topologyNormalize_ports($$) {
 			if (!defined $node) {
 				my $msg = "Port $fqid references non-existent node: $node_id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			# remove the port from $root and add it to the node
@@ -583,7 +580,7 @@ sub topologyNormalize_links($$) {
 	foreach my $network ($root->getChildrenByTagNameNS("*", "network")) {
 		my $fqid = $network->getAttribute("id");
 		my ($status, $res) = topologyNormalize_links($network, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -599,7 +596,7 @@ sub topologyNormalize_links($$) {
 		}
 
 		my ($status, $res) = topologyNormalize_links($node, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -615,7 +612,7 @@ sub topologyNormalize_links($$) {
 		}
 
 		my ($status, $res) = topologyNormalize_links($port, $topology, $fqid);
-		if ($status != 0) {
+		if ($status ne "") {
 			return ($status, $res);
 		}
 	}
@@ -633,7 +630,7 @@ sub topologyNormalize_links($$) {
 			} else {
 				my $msg = "Link has no id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 		}
 
@@ -651,7 +648,7 @@ sub topologyNormalize_links($$) {
 				if (!defined $idref or $idref eq "") {
 					my $msg = "Link $id refers to port with no portIdRef";
 					$logger->error($msg);
-					return (-1, $msg);
+					return ("error.topology.invalid_topology", $msg);
 				}
 
 				$idref = idSanitize($idref);
@@ -662,7 +659,7 @@ sub topologyNormalize_links($$) {
 				if (!defined $port) {
 					my $msg = "Link $id refers to non-existent port $idref";
 					$logger->error($msg);
-					return (-1, $msg);
+					return ("error.topology.invalid_topology", $msg);
 				}
 
 				my $link_element = $port->find("./*[local-name()='link']")->get_node(1);
@@ -672,7 +669,7 @@ sub topologyNormalize_links($$) {
 					if (!defined $link_idref or idSanitize($link_idref) ne $new_link_fqid) {
 						my $msg = "$new_link_fqid slated to replace existing link";
 						$logger->error($msg);
-						return (-1, $msg);
+						return ("error.topology.invalid_topology", $msg);
 					}
 
 					$logger->debug("Replacing child");
@@ -690,7 +687,7 @@ sub topologyNormalize_links($$) {
 			if ($num_ports == 0) {
 				my $msg = "Link $id has no port to attach to";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			$root->removeChild($link);
@@ -709,7 +706,7 @@ sub topologyNormalize_links($$) {
 			if (!defined $port) {
 				my $msg = "Link $fqid references non-existent port: $port_id";
 				$logger->error($msg);
-				return (-1, $msg);
+				return ("error.topology.invalid_topology", $msg);
 			}
 
 			# remove the link from $root and add it to the port
