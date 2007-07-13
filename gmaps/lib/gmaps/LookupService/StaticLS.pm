@@ -1,8 +1,11 @@
 #!/bin/env perl
 
 use gmaps::Topology;
+use Log::Log4perl qw(get_logger);
 
 package gmaps::LookupService::StaticLS;
+
+our $logger = Log::Log4perl->get_logger( "gmaps::LookupService::StaticLS");
 
 our %maMap = (
 				'perfsonar.net' => { 
@@ -21,13 +24,18 @@ our %maMap = (
 				},
 				'es.net'	=> { 
 					host => 'mea1.es.net', 
-					port => '8080', 
-					endpoint => 'axis/services/MeasurementArchiveService',
-					eventType => 'utilization'
+					#port => '8080', 
+					#endpoint => 'axis/services/MeasurementArchiveService',
+					port => '8090',
+					endpoint => 'axis/services/snmpMA',
+					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
 				'internet2.edu' => {
-					host => 'rrdma.abilene.ucaid.edu', 
-					port => '8080', 
+					#host => 'rrdma.abilene.ucaid.edu', 
+					#port => '8080', 
+					#endpoint => 'axis/services/snmpMA',
+					host => '129.79.216.183',
+					port => '8080',
 					endpoint => 'axis/services/snmpMA',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
@@ -51,9 +59,9 @@ our %maMap = (
 				},
 				'fnal.gov' => {
 					host => 'lhcopnmon1-mgm.fnal.gov', 
-					port => '8080', 
-					endpoint => 'axis/services/MeasurementArchiveService',
-					eventType => 'utilization'
+					port => '8091', 
+					endpoint => 'axis/services/snmpMA',
+					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
 				'garr.it' => {
 					host => 'srv4.dir.garr.it', 
@@ -103,12 +111,12 @@ our %maMap = (
 					endpoint => 'perfSONAR-RRD-MA-2.0/services/MeasurementArchiveService',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
-                                'slac.stanford.edu' => {
-                                        host => '134.79.199.220',
-                                        port => '8080',
-                                        endpoint => 'axis/serviecs/snmpMA',
-                                        eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
-                                },
+                'slac.stanford.edu' => {
+                    host => 'lanmon-dev.slac.stanford.edu',
+                    port => '8080',
+                    endpoint => 'axis/services/snmpMA',
+                    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                },
 
 
 			);
@@ -122,17 +130,30 @@ sub getDomains
 
 sub getMA
 {
+	my $ip = shift;
 	my $router = shift;
 
-
-	my $ip = undef;
 	if ( &gmaps::Topology::isIpAddress( $router ) ) {
 		( $ip, $router ) = &gmaps::Topology::getDNS( $router );
+	}
+		
+	# if the ip doesn' tnot resolve, search the ip and return the MA
+	if ( ! defined $router || $router eq '' ) {
+		$logger->info( "Router not defined for ip $ip!");
+
+		my $ma = undef;
+		if ( $ip =~ /^172\.16\./ ) {
+			$ma = 'fnal.gov';
+		}
+		$logger->info( "Found $ma" );
+		# fake
+		return ( $maMap{$ma}{host}, $maMap{$ma}{port}, $maMap{$ma}{endpoint}, $maMap{$ma}{eventType} );
 	}
 	
 	# and do a mapping for the ma info
 	foreach my $k ( keys %maMap ) {
 		if( $router =~ /$k$/) {
+			$logger->info( "Found $k" );
 			return ( $maMap{$k}{host}, $maMap{$k}{port}, $maMap{$k}{endpoint}, $maMap{$k}{eventType} );
 		}
 	}

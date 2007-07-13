@@ -7,20 +7,20 @@
    <h1>SLAC perfSONAR gmaps demonstration</h1>
    <h2>Please enter some routers<h2>
     <form method="get" action="[% cgi %]" enctype="multipart/form-data">
-      <input type="hidden" name="mode" value="[% mapMode %]"/>
       <textarea name="raw" rows="20" cols="72"></textarea>
-      <input type="submit" name="action" value="Go" />
+      <input type="submit" name="mode" value="[% mapMode %]" />
+      <input type="submit" name="mode" value="[% listMode %]" />
     </form>
     
     <h2>Or select a domain to gather routers from<h2>
     <form method="get" action="[% cgi %]" enctype="multipart/form-data">
-      <input type="hidden" name="mode" value="[% mapMode %]"/>
       <select name="domain">
-        [% FOREACH domain = domains %]
+        [%- FOREACH domain = domains %]
         <option value="[% domain %]">[%domain %]</option>
-        [% END %]
+        [%- END %]
       </select>
-      <input type="submit" name="action" value="Go" />
+      <input type="submit" name="mode" value="[% mapMode %]" />
+      <input type="submit" name="mode" value="[% listMode %]" />
     </form>
         
     <h3>Info</h3>

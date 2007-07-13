@@ -1,19 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <markers>
-  [% FOREACH mark = marks %]
-  <marker 
-          ip="[% mark.ip %]"
-          dns="[% mark.dns %]"
-          lat="[% mark.lat %]"
-          long="[% mark.long %]"
-  />
-  [% END %]
-  [% FOREACH line = lines %]
-  <line
-         descr="[% line.descr %]"
-         srclat="[% line.srclat %]"
-         srclng="[% line.srclng %]"
-         dstlat="[% line.dstlat %]"
-         dstlng="[% line.dstlng %]"
-  />
-  [% END %]
+  [%- FOREACH mark = marks %]
+  <marker ip="[% mark.ifAddress %]"          dns="[% mark.gmapsLabel %]"
+          lat="[% mark.latitude %]"          long="[% mark.longitude %]"  />
+  [%- END %]
+  [%- FOREACH line = lines %]
+  <line  descr="[% line.descr %]"
+         srclat="[% line.srclat %]"         srclng="[% line.srclng %]"
+         dstlat="[% line.dstlat %]"         dstlng="[% line.dstlng %]"   />
+  [%- END %]
 </markers>

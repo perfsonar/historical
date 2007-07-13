@@ -1,4 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Strict//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
@@ -73,8 +74,6 @@
     var side_bar_html = '';
     
     var map;
-    var mlat;
-    var mlng;
     var activeIP;
     var activeDNS;
     
@@ -120,7 +119,12 @@
       
       var d = new Date();
       var header =  "<h3>" + dns + " (" + ip + ")</h3>";
-      var graph = "[% cgi %]?mode=[% graphMode %]&ip=" + ip + "&bogus=" + d.getTime();
+      var graph = "[% cgi %]?mode=[% graphMode %]&bogus=" + d.getTime() + "&ip=" + ip;
+      // split the dns name in case we have a specific interface to look at
+      var array = dns.split(":");
+      if ( array[1] ) {
+        graph += "&if=" + array[1];
+      }
       var tabs = [
         new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph_'" + ip + " height='168px' width='481px' src='" + graph + "'/></p>" ),
         new GInfoWindowTab( "Info", header + table )
@@ -201,47 +205,6 @@
       refreshInfoWindowTab( dns, ip );
       map.getInfoWindow().hide();
       map.getInfoWindow().show();
-    }
-    
-    
-    function zoom(direction) {
-      var m = map.fromLatLngToDivPixel( new GLatLng( mlat, mlng ) );
-      var c = map.fromLatLngToDivPixel( map.getCenter() );
-      if ( direction == 'in' ) {
-        var x = c.x - ((m.x - c.x) * -.5);
-        var y = c.y - ((m.y - c.y) * -.5);
-        var n = map.fromDivPixelToLatLng( new GPoint(x,y) );
-        map.setCenter(n);
-        map.zoomIn();
-      } else {
-        var x = c.x - (m.x - c.x);
-        var y = c.y - (m.y - c.y );
-        var n = map.fromDivPixelToLatLng( new GPoint(x,y) );
-        map.setCenter(n);
-        map.zoomOut();
-      }
-    }
-    
-    GMap2.prototype.wheelZoom = function(event) {
-      if (window.event) {
-        var x = event.offsetX;
-        var y = event.offsetY;
-      } else {
-        var x = event.layerX;
-        var y = event.layerY;
-      }
-      if (window.event) {
-        event.returnValue = false; //IE
-      }
-      if (event.cancelable) {
-        event.preventDefault(); //dom
-      }
-      if ((event.detail || -event.wheelDelta) < 0) { 
-        zoom('in');
-      } else {
-        zoom('out');
-      }
-      return false;
     }
     
     function bearing( from, to ) {
@@ -351,18 +314,11 @@
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
         map.setCenter(new GLatLng(40,0), 2);
-
+        map.enableScrollWheelZoom();
+        
         // populate map 
         getXml( "[% cgi %]?mode=[% xmlMode %]&[% args %]" );
 
-        GEvent.addDomListener(mapDiv, "DOMMouseScroll", map.wheelZoom); // dom
-        GEvent.addDomListener(mapDiv, "mousewheel", map.wheelZoom); // ie
-        GEvent.addListener( map, "mousemove", function(point) {
-              mlat = point.y.toFixed(6);
-              mlng = point.x.toFixed(6);
-            }
-          );
-                 
         // Monitor the window resize event and let the map know when it occurs
         if (window.attachEvent) { 
           window.attachEvent("onresize", function() { map.onResize()} );

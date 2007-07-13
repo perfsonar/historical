@@ -8,12 +8,16 @@ use gmaps::Topology::DNSLoc;
 
 use threads;
 use Thread::Queue;
+use Log::Log4perl qw(get_logger);
 
 
 package gmaps::Topology;
 
 use Socket;
-use strict;
+use Data::Dumper;
+
+our $logger = Log::Log4perl->get_logger("gmaps::MA::RRDMA");
+
 
 # number of max parallel threads for lookup
 our $concurrentLookups = 7;
@@ -24,9 +28,11 @@ sub getDNS
 	my $ip = shift;
 	my $dns = undef;
 
+	$logger->info( "IN: ip: $ip, dns: $dns");
 	# ip is actual ip, get the dns
 	if ( &isIpAddress( $ip ) ) {
-		$dns = gethostbyaddr(inet_aton($ip), AF_INET);
+		$dns = gethostbyaddr(inet_aton($ip), AF_INET)
+			unless $ip eq '172.16.12.1';	# blatant hack to reduce time for fnal lookup
 		if ( ! defined $dns ) {
 			return ( $ip, undef );
 		}
@@ -40,11 +46,12 @@ sub getDNS
 			$ip = inet_ntoa( $i );
 		}
 		else {
-			warn "DUNNO! $dns, $i\n";
+			$logger->warn( "unknown dns for ip $ip\n" );
 			return ( undef, $dns );
 		}
 	}
 
+	$logger->info( "OUT: ip: $ip, dns: $dns" );
 	return ( $ip, $dns );
 }
 
@@ -72,7 +79,12 @@ sub getLatLong
         my $long = undef;
         my $lat = undef;
 
+		$logger->info( "looking at $router");
         ( $ip, $dns ) = &getDNS( $router );
+
+		if ( ! defined $dns) {
+			$dns = $ip;
+		}
 
         #warn "Looking at $ip ($dns)\n";
 
@@ -137,7 +149,7 @@ sub threadWrapper
 		#warn '[' . threads->self->tid() . "] found $ip ($dns) @ $lat,$long\n";
 		# queeus' only support scalars!! argh!
 		my $ans = $ip . '==' . $dns . '==' . $lat . '==' . $long;
-		#warn "      $ans\n";
+		$logger->info($ans);
 		$marks->enqueue( $ans );
 
 	}
@@ -147,20 +159,24 @@ sub threadWrapper
 
 
 # determines the coordinates fo the routers provided
+# routers{ip:ifname}
 sub getCoords
 {
-	my $routers = shift;
+	my $metadata = shift; # array of metadata hash refs
 	my $loc = shift;
-	
+		
 	my $marks : shared;
 	$marks = new Thread::Queue;
-	my %seen = ();
 
 	# enqueue list of routers in shared queue
 	my $queue : shared;
 	$queue =  new Thread::Queue;
-	for my $r ( @$routers ) {
-		$queue->enqueue( $r );
+	my %seenip = ();
+	foreach my $md ( @$metadata ) {
+		my $ip = $md->{ifAddress};
+		next if $seenip{$ip}++;		
+		$logger->info( "enqueuing $ip");
+		$queue->enqueue( $ip );
 	}
 
 	my @thread = ();
@@ -180,24 +196,57 @@ sub getCoords
 	$marks->enqueue( undef );
 
 	# dequeue the results
-	my @marks = ();
-	my $i = 0;
+
+	my @tempmarks = ();
 	while ( my $info = $marks->dequeue ) {
 		#warn "MARK: $info\n";
 		
 		my %mark = ();
 		( $mark{ip}, $mark{dns}, $mark{lat}, $mark{long} ) = split /==/, $info;
 		
-		#warn "GOT: $mark{ip} ($mark{dns}) @ $mark{lat},$mark{long}\n";
-                
-		# keep a tally of same coords, keep an array of which ones by index
-		my $coords = $mark{lat} . ',' . $mark{long};
-		
-		push @{$seen{$coords}}, $i;
-		push( @marks, \%mark );
-		
-		$i++;
+		push( @tempmarks, \%mark );	
 	}
+
+	# we use this counter to see how many points we have that in total
+	my %seen = ();
+
+	# so now we have all the routers in @tempmarks with teh ip/dns/lat/long
+	my @marks = ();
+		
+	# lets make sure that we include all interfaces (ifnames) for each node
+	# so we add a new mark for each; make use of seenip
+    foreach my $m ( @tempmarks ) {
+    	
+    	$logger->info( "looking at " . $m->{ip});
+    	
+    	# if we have more than one interface on ip, then make sure we expand on 
+    	# the interfaecs into marks
+   	$logger->info( $m->{ip} . " has " . $seenip{$m->{ip}}  . " entries");
+
+    	if ( $seenip{$m->{ip}} > 1 ) {
+    		
+		foreach my $md ( @$metadata ) {
+			$logger->info( "looking at " . $md->{ifAddress} );
+			if ( $md->{ifAddress} eq $m->{ip} ) {
+				# keep a tally of same coords, keep an array of which ones by index
+#				my $coords = $m->{lat} . ',' . $m->{long};
+#				push @{$seen{$coords}}, $md->{id};
+				&setInfo( $md, $m, \%seen );
+				$logger->info( "  adding as " . $md->{'gmapsLabel'} );
+			}
+		}
+    	} 
+    	else {
+		foreach my $md ( @$metadata ) { 
+		
+			next unless $md->{ifAddress} eq $m->{ip};
+ #			my $coords = $m->{lat} . ',' . $m->{long};
+#			push @{$seen{$coords}}, $md->{id};
+			&setInfo( $md, $m, \%seen );
+			$logger->info( "  adding as " . $md->{'gmapsLabel'} );
+		}
+    	}
+    }
 
 	# lets make sure that we don't overlap any nodes by checking the lat longs
 	# for each.
@@ -215,46 +264,80 @@ sub getCoords
 		next if $c eq ',';
 		
 		my $n = 1;
-		foreach my $i (@indexes) {
+		foreach my $id (@indexes) {
+
+			$logger->info( "adding jitter to $id 's location" );
+
 			# create a cirle around the coords, with each node at 360/$nodesAtSameCoords degrees
 			# from each other
 			my $angle = 360 / ( $nodesAtSameCoords / $n );
-			$marks[$i]->{lat} = $marks[$i]->{lat} + ($radius * sin( $angle ));
-			$marks[$i]->{long} = $marks[$i]->{long} + ($radius * cos( $angle ));
+			foreach my $md ( @$metadata ) {
+				next unless $md->{id} eq $id;
+				$md->{latitude} = $md->{latitude} + ($radius * sin( $angle ));
+				$md->{longitude} = $md->{longitude} + ($radius * cos( $angle ));
+			}
 			$n++;
 		}
 	}
 
-	return \@marks;
+	return $metadata;
 }
 
+
+sub setInfo
+{
+	my $md = shift;
+	my $m = shift;
+	my $seen = shift;
+
+	my $name = $md->{hostName};
+	$name .= '@' . $md->{authRealm} if exists $md->{authRealm};
+        $name = $m->{dns} if ! $name;
+        $md->{'gmapsLabel'} = $name;
+	$md->{'gmapsLabel'} .= ':' . $md->{ifName} if exists $md->{ifName};
+        $md->{latitude} = $m->{lat};
+        $md->{longitude} = $m->{long};
+
+        # keep a tally of same coords, keep an array of which ones by index
+        my $coords = $m->{lat} . ',' . $m->{long};
+        push @{$seen->{$coords}}, $md->{id};
+
+	return;
+}
 
 sub markOkay
 {
 	my $thisMark = shift;
-	if ( $thisMark->{'lat'} =~ /^26.51/ && $thisMark->{'long'} =~ /^-71.48/ ) {
+	#$logger->info( Dumper $thisMark );
+	if ( $thisMark->{'latitude'} =~ /^26.51/ && $thisMark->{'longitude'} =~ /^-71.48/ ) {
+		$logger->info("false");
 		return 0;
 	}
+	$logger->info("true");
 	return 1;
 }
 
 sub getLines
 {
-	my $marks = shift;
+	my $marks = shift; # array of metadata hash refs
 	
 	my @lines = ();
 	
 	my $prevMark = undef;
 	
-	foreach my $thisMark (@$marks) {
+	foreach my $thisMark ( @$marks) {
+
+#		$logger->info( "looking at " . Dumper $thisMark );
+
 		if ( defined $prevMark && &markOkay( $thisMark ) ) {
 			my $line = {
-						'descr'  => $prevMark->{'ip'} . '-' . $thisMark->{'ip'},
-						'srclat' => $prevMark->{'lat'},
-						'srclng' => $prevMark->{'long'},
-						'dstlat' => $thisMark->{'lat'},
-						'dstlng' => $thisMark->{'long'}
+						'descr'  => $prevMark->{'ifAddress'} . '-' . $thisMark->{'ifAddress'},
+						'srclat' => $prevMark->{'latitude'},
+						'srclng' => $prevMark->{'longitude'},
+						'dstlat' => $thisMark->{'latitude'},
+						'dstlng' => $thisMark->{'longitude'}
 						};
+			$logger->info( "Adding line " . $line->{'descr'} );
 			push( @lines, $line );
 			$prevMark = $thisMark;
 		}

@@ -10,11 +10,14 @@ use gmaps::Topology;
 use Template;
 use File::Temp qw( tempfile );
 use utils::rrd;
+use Log::Log4perl qw(get_logger);
 
 package gmaps::MA::RRDMA;
 
-
+use Data::Dumper;
 use strict;
+
+our $logger = Log::Log4perl->get_logger("gmaps::MA::RRDMA");
 
 
 
@@ -52,6 +55,7 @@ sub get
 	
 	my $ip = shift;
 	my $eventType = shift;
+	my $ifname = shift;
 	
 	unless ( &gmaps::Topology::isIpAddress( $ip ) ) {
 		die "ip address needs to be supplied.";
@@ -61,6 +65,7 @@ sub get
 
 	my $vars = {
 			'router' => $ip,
+			'ifName' => $ifname,
 			'eventType' => $eventType,
 		};
 	my $request = &processTemplate( $request, $vars );
@@ -83,6 +88,14 @@ sub getGraph
 	if ( $metadata eq '' ) {
 		$metadata = &getMetadata( $xp )
 	}
+
+#	$logger->info( "xp" );
+#	my $nodeset = $xp->find( '/' );
+#	foreach my $node ( $nodeset->get_nodelist ) {
+#		$logger->info( XML::XPath::XMLParser::as_string( $node ) );
+#	}
+
+	$logger->info( "metadata: " . Dumper $metadata );
 	
 	my $inMetaId = undef;
 	my $outMetaId = undef;
@@ -96,7 +109,7 @@ sub getGraph
 		}
 	}
 
-	#print "FOUND: in=$inMetaId, out=$outMetaId\n";
+	$logger->info("Found metadata ids: in=$inMetaId, out=$outMetaId" );
 	my $data = undef;
 	
 	# now we need to fetch the data from the xpath xml structure
@@ -203,7 +216,7 @@ sub getUtilizationData
 	my $xp = shift;
 	my $metadataIdRef = shift;
 	
-	#print "\nSEARCHING FOR $metadataIdRef\n";
+	$logger->info( "Looking for $metadataIdRef" );
 	my $dataset = $xp->find( '//nmwg:data[@metadataIdRef="' . $metadataIdRef . '"]/nmwg:datum' );
 	
 	my @tuples = ();
@@ -214,12 +227,12 @@ sub getUtilizationData
 		if ( ! $time ) {
 			$time = $data->getAttribute('time');
 		}
-		next if $time =~ /e\+/;
+		next unless $time =~ /^\d+$/;
 		my $value = $data->getAttribute('value');
 
 		next if $value eq 'nan';
 
-		#print "TIME: $time, $value\n";
+		$logger->info( "TIME: $time, $value" );
 		push( @tuples, $time . ':' . $value );
 	
 	}
@@ -254,14 +267,14 @@ sub getMetadata
     	
     	foreach my $subnode ( $subnodeset->get_nodelist )
     	{	    	
-			my $tag = $subnode->getLocalName();
-			my $info = $subnode->string_value();
+		my $tag = $subnode->getLocalName();
+		my $info = $subnode->string_value();
 
-			if ( $tag eq 'capacity' ) {
-				$info = &commify( $info ) . ' bit/sec';
-			}
+		if ( $tag eq 'capacity' ) {
+			$info = &commify( $info ) . ' bit/sec';
+		}
    
-	   		$meta{$id}{$tag} = $info;
+	   	$meta{$id}{$tag} = $info;
     	}
 
    }
@@ -300,15 +313,24 @@ sub sendTemplate2Array
 	my $vars = shift;
 	my $xpathFilter = shift;
 	
-#	print "FILTER: " . $xpathFilter . "\n";
+	#print "FILTER: " . $xpathFilter . "\n";
 	
 	my $request = &processTemplate( $requestTemplate, $vars );
+	
+	$logger->info( " request: $request\n" );
+	
 	my $response = &gmaps::Transport::getArray( 
 						$maHost, $maPort, $maEndpoint, 
 						$request, $xpathFilter );
 
+	$logger->info( "response: @$response\n" );
+
+
 	return $response;
 }
+
+
+
 
 ###
 # queries the MA directly to determine what meta data is stored and returns the ip's for those routers
@@ -323,21 +345,34 @@ sub getAllRouters
 	
 	my $vars = { 'eventType'	=> $eventType	};
 
-	my $routers = sendTemplate2Array( 
+	# sendt he template and parse output
+	my $metakeys = sendTemplate2XPath( 
 						$maHost, $maPort, $maEndpoint,
 						${gmaps::gmap::templatePath} . 'rrdma_all-routers-ip-address_xml.tt2',
-						$vars,
-						'//nmwg:metadata/netutil:subject/nmwgt:interface/nmwgt:ifAddress[@type="ipv4"]/text()' );
+						$vars
+					);
 
-	my %seen = ();
-	
-	my @final = ();
-	foreach my $r ( @$routers ) {
-		next unless ( gmaps::Topology::isIpAddress( $r ) );
-		push @final, $r unless $seen{$r}++;
+	# we now want to grab the router list and its ifName
+#  <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+#    <nmwgt:ifAddress type="ipv4">198.124.252.110</nmwgt:ifAddress>
+#    <nmwgt:hostName>fnal-mr1.es.net</nmwgt:hostName>
+#    <nmwgt:ifName>Vlan1805</nmwgt:ifName>
+#    <nmwgt:ifDescription>fnal-mr1->fnal-pt1:10ge(vlan)::show:intracloud</nmwgt:ifDescription>
+#    <nmwgt:capacity>10000000000</nmwgt:capacity>
+#    <nmwgt:direction>in</nmwgt:direction>
+#    <nmwgt:authRealm>ESnet-Public</nmwgt:authRealm>
+#  </nmwgt:interface>
+
+	my $metadatas = &getMetadata( $metakeys );
+
+	my @array = ();
+	foreach my $meta ( keys %$metadatas ) {
+		$logger->info( "Found $meta\n" . Dumper $metadatas->{$meta} );		
+		$metadatas->{$meta}->{id} = $meta;
+		push @array, $metadatas->{$meta};
 	}
-	
-	return \@final;	
+
+	return \@array;
 }
 
 

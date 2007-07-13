@@ -17,6 +17,10 @@ use Template;
 
 package gmaps::gmap;
 
+use Data::Dumper;
+
+use Log::Log4perl qw(get_logger :levels);
+
 our $templatePath = '/usr/local/perfSONAR-PS/www/gmaps/templates/';
 our $server = 'http://134.79.24.133:8080/cgi-bin/gmaps.pl';
 our $googlemapKey = 'ABQIAAAAVyIxGI3Xe9C2hg8IelerBBSCiUxZOw432i6dgwL13ERiRlaSNRS5laPT7HkzCJQupyaoW8s87EsHmQ';
@@ -35,32 +39,48 @@ sub setup {
     $self->mode_param('mode');
     
     $self->run_modes(
-    	     'enter'	=> 'enterNodes',			# form to process router/domain info
+	'enter'	=> 'enterNodes',			# form to process router/domain info
 
-		     'map'		=> 'mapFromXml',			# returns the googlemap with async. xml of nodes (createXml)
-		     'mapInline'	=> 'mapWithInlineJavascript',	# returns googlemap with inline javascript of ndoes
+	'map'		=> 'mapFromXml',		# returns the googlemap with async. xml of nodes (createXml)
+	'mapInline'	=> 'mapWithInlineJavascript',	# returns googlemap with inline javascript of ndoes
 	
-		     'graph'	=> 'rrdmaUtilizationGraph',	# returns the rrdma utilization graph
-		     'graphOnly' => 'rrdmaUtilizationGraphOnly',
+	'graph'		=> 'rrdmaUtilizationGraph',	# returns the rrdma utilization graph
+	'list' 		=> 'rrdmaUtilizationGraphOnly',
 	
-		     'info'		=> 'rrdmaInfoXml',			# returns info about a router
-		     'ma'		=> 'ma',						# info about ma
-		     'geo'		=> 'geoInfo',
+	'info'		=> 'rrdmaInfoXml',		# returns info about a router
+	'ma'		=> 'ma',			# info about ma
+	'geo'		=> 'geoInfo',
 
-		     'xml'		=> 'createXml',				# returns an xml of long lats and nodes
-		     'kml'		=> 'createKml',				# returns a kml file of nodes
+	'xml'		=> 'createXml',			# returns an xml of long lats and nodes
+	'kml'		=> 'createKml',			# returns a kml file of nodes
 
-		     'routers'		=> 'testRouters',		# returns the parsed output
+	'routers'	=> 'testRouters',		# returns the parsed output
 
-			# logo
-		     'spinner'		=> 'spinnerGraphic',			# wait graphic
-		     'slac_logo'		=> 'slacGraphic',			# slac logo
-		     'perfsonar_logo'	=> 'perfsonarGraphic',		# perfsonar logo
-		     'internet2_logo'	=> 'internet2Graphic',		# perfsonar logo
-		   );
+	#logo
+	'spinner'	=> 'spinnerGraphic',		# wait graphic
+	'slac_logo'	=> 'slacGraphic',		# slac logo
+	'perfsonar_logo'	=> 'perfsonarGraphic',	# perfsonar logo
+	'internet2_logo'	=> 'internet2Graphic',	# perfsonar logo
+   );
 
 	return undef;    
 }
+
+
+
+# run these before calling runbmode
+# set up db and templates
+sub cgiapp_prerun
+{
+	my $self = shift;
+     
+	Log::Log4perl->init("/var/www/cgi-bin/logger.conf");
+	$self->param( 'logger' => &get_logger("gmaps") );
+
+}
+
+
+
 
 sub teardown {
     my $self = shift;
@@ -74,46 +94,75 @@ sub teardown {
 #######################################################################
 
 # utility function to grab all the routers inputted form teh get statment
+# returns
 sub getRouters 
 {
 	my $self = shift;
 	my $in = shift;
+		
+	my @metadata = ();
 	
-	my @routers = ();
-	
+	my $id = 0;
+
 	if ( defined $in ) {
-		@routers = &parseRouters( $in );
+		$self->param('logger')->info( "in statement found" . $in );
+		foreach my $r ( &parseRouters( $in ) ) {
+			next if ! gmaps::utils::IP::isAnIP( $r );
+			my $md = ();
+			$md->{ifAddress} = $r;
+			$self->param('logger')->info( "Found in $r" );
+			$md->{id} = $id;
+			push @metadata, $md; 
+			$id++;
+		}
 	}
 	
 	elsif ( defined $self ) {
-		my $q = $self->query();
-		
 		# get ips dierct from input
-		@routers = $q->param('ip');
-		
+		my @ips = $self->query()->param('ip');
+		foreach my $ip ( @ips ) {
+			my $md = ();
+			$md->{ifAddress} = $ip;
+			$md->{id} = $id;
+			$self->param('logger')->info( "Found ip $ip" );
+				
+			push @metadata, $md;
+			$id++;
+		}	
 		# grep from teh raw input
 		# if not routers defined, then check for string (from enter sub)
-		if ( scalar( @routers ) == 0 
-				&& defined $q->param('raw'))
+		if ( defined $self->query()->param('raw'))
 		{
-			my $raw = $q->param('raw');
-			if ( $raw =~ /ARRAY/ ) {
-				$raw = "@$raw";
+			my @raws = $self->query()->param('raw');
+			foreach my $raw ( @raws ) {
+			$self->param("logger")->info( "Found raw statement $raw" );
+			    foreach my $r ( &parseRouters( $raw ) ) {
+				$self->param("logger")->info("Found raw $r");
+				my $md = ();
+				$md->{ifAddress} = $r;
+				$md->{id} = $id;
+				push @metadata, $md;
+				$id++;
+			   }
 			}
-			@routers = &parseRouters( $raw );
 		}
 		
 		# process domain (do a fetch on the MA for all registered routers)
-		my @domainRouters = $q->param('domain');
+		my @domainRouters = $self->query()->param('domain');
 		foreach my $d ( @domainRouters ) {
-			my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $d );
-			my $nodes = &gmaps::MA::RRDMA::getAllRouters( $host, $port, $endpoint, $eventType );
-			push( @routers, @$nodes );
+			$self->param('logger')->info("Looking for domain $d");
+			my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( undef, $d );
+			my $data = &gmaps::MA::RRDMA::getAllRouters( $host, $port, $endpoint, $eventType );
+		
+			
+			push @metadata, @$data;
 		}
 		
 	}
 
-	return \@routers;
+	$self->param("logger")->info( "Final nodes: " . Dumper \@metadata );
+
+	return \@metadata;
 }
 
 # grab all the ip/dns entries from text
@@ -126,6 +175,7 @@ sub parseRouters
 
 	
 	foreach my $n (@nodes) {
+
 		# make sure we have a separator
 		next unless $n =~ m/\.(\w+)\./;
 		
@@ -140,13 +190,11 @@ sub parseRouters
 	my @final = ();
 	my %seen = ();
 	# make sure we don't have duplicates ()ip and dns also)
-	foreach my $n ( @nodes2 ) {
-		
+	foreach my $n ( @nodes2 ) {	
 		my ( $ip, $dns ) = &gmaps::Topology::getDNS( $n );
 		push( @final, $ip ) unless $seen{$ip}++;
 
 	}
-
 
 	return @final;
 }
@@ -165,9 +213,11 @@ sub passArgs
 	#	print "IP; @ip\n";
 		@domain = $q->param('domain');
 	#	print "DOMAIN: @domain\n";
-		my @rawIps = &parseRouters( $q->param('raw') );
+		my $meta = &getRouters( $self );
+		foreach my $meta ( @$meta )  {
+			push( @ip, $meta->{ifAddress} )
+		}
 	#	print "RAW: @rawIps\n";
-		push( @ip, @rawIps )
 	}
 	
 	foreach my $i (@ip) {
@@ -177,9 +227,11 @@ sub passArgs
 		$d = 'domain=' . $d;
 	}
 	
-	my $args = join '&', @ip;
+	my $args = undef;
 	if ( scalar @domain ) {
 		$args .= join '&', @domain;
+	} else {
+		$args = join '&', @ip;
 	}
 	
 	#print "<p>OUT: $args<p>";
@@ -248,12 +300,14 @@ sub internet2Graphic
 }
  
 
-
+	
 # enter the nodes in a form
 sub enterNodes
 {
 
 	my $self = shift;
+	
+	$self->param('logger')->info("enterNodes");
 	
 	my @domains = sort &gmaps::LookupService::StaticLS::getDomains();
 	
@@ -261,8 +315,9 @@ sub enterNodes
 	my $vars = {
       			'cgi'  => $server,
       			'mapMode' => 'map',
+      			'listMode' => 'list',
       			'domains' => \@domains
-				};	
+				};
 	my $file = $templatePath . '/gmaps_enterNodes_html.tt2';
 	my $output = '';
 	$tt->process( $file, $vars, \$output )
@@ -289,7 +344,7 @@ sub createKML
 		next if ( $lat eq undef || $long eq undef );
 	
 		# get the ip address and dns
-		my ( $ip2, $dns ) = gmaps::Topology::getDNS( $ip );
+		my ( $ip2, $dns ) = &gmaps::Topology::getDNS( $ip );
 	
 		# get the descr
 		my $desc = &gmaps::gmap::getDescr( undef, $ip );
@@ -372,22 +427,27 @@ sub createXmlFull
 sub createXml
 {
 	my $self = shift;
-	my $routers = &getRouters( $self, @_ );
 
+	my $metadata = $self->getRouters( @_ ); # returns array of metadata's 
+	
 	# get the coords of routers
-	my $marks = &gmaps::Topology::getCoords( $routers );
+	&gmaps::Topology::getCoords( $metadata );
+	
+	$self->param("logger")->info( Dumper $metadata );
 
 	# get the interconnecting lines
-	my $lines = &gmaps::Topology::getLines( $marks );
+	my $lines = &gmaps::Topology::getLines( $metadata );
 	
 	# create template object
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );		
 	my $file = undef;
 	my $vars = {};
-		
+
+	$self->param('logger')->info("processing template");
+
 	my $out = '';
 	$vars = {
-      			'marks'  => $marks,
+      			'marks'  => $metadata,
       			'lines'  => $lines
 			};	
 	$file = $templatePath . '/gmaps_xml.tt2';
@@ -401,6 +461,9 @@ sub createXml
 		$self->header_add(  -type => "text/xml" ); 
 	}
 
+
+	$self->param('logger')->info("  returning: \n$out");
+	
 	return $out;
 }
 
@@ -424,7 +487,7 @@ sub mapFromXml
 					'args'		=> $args,
 					'xmlMode' 	=> 'xml',
 					'infoMode' 	=> 'info',
-					'graphMode' => 'graph',
+					'graphMode' 	=> 'graph',
 					'googlemapKey' 		=> $googlemapKey,
 					'refreshInterval' 	=> $refresh,
 				};
@@ -532,12 +595,16 @@ sub rrdmaUtilizationGraph
 	my $self = shift;
 
 	my $ip = gmaps::Topology::isIpAddress( $self->query()->param( 'ip' ) );
+	my $ifname = $self->query()->param( 'if' );
+
+	$self->param('logger')->info( "Looking for $ip, interface $ifname");
+
 	if ( ! defined $ip ) {
+		$self->param('logger')->crit("Why is no IP defined?!");
 		( $ip, undef ) = gmaps::Topology::getDNS( $self->query()->param( 'ip' ) );
 	}
 	
-	my ( $routerInfo, $meta, undef, undef ) = &rrdmaFetch( $ip );
-	#warn "$ip :: info: $routerInfo, meta: $meta\n";
+	my ( $routerInfo, $meta, undef, undef ) = &rrdmaFetch( $ip, $ifname );
 
 	# output is always a graph/png	
 	$self->header_add( -type => "image/png", -expires => 'now' ); 
@@ -608,10 +675,12 @@ sub rrdmaUtilizationGraphOnly
 sub rrdmaFetch
 {
 	my $router = shift;
-	
+	my $ifname = shift;
+
 	# the ma needs the dns entry to work, so get dns name of router
 	my ( $ip, $dns ) = gmaps::Topology::getDNS( $router );
- 	my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $dns );
+ 	my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $ip, $dns );
+
  	if ( ! defined $host or $host eq '' ) {
  		return ( undef, undef, undef, undef ); 
  	}
@@ -621,7 +690,9 @@ sub rrdmaFetch
 						$port,
 						$endpoint,						
 						$ip,
-						$eventType );
+						$eventType,
+						$ifname
+					 );
 
 	my $meta = &gmaps::MA::RRDMA::getMetadata( $data );
 

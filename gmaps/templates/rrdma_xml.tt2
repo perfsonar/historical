@@ -3,20 +3,31 @@
               type="SetupDataRequest"		   
               xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
               xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/" 
-              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/" >
 
   <nmwg:metadata id="#meta1">
-
     <netutil:subject id="#netutil1">
       <topo:interface>
         <topo:ifAddress type="ipv4">[% router %]</topo:ifAddress>
+        [%- IF ifName %]
+        <topo:ifName>[% ifName %]</topo:ifName>
+        [%- END %]
       </topo:interface>
     </netutil:subject>
-
     <nmwg:eventType>[% eventType %]</nmwg:eventType>
-
   </nmwg:metadata>
 
-  <nmwg:data id="data1" metadataIdRef="#meta1"/>
+  <nmwg:metadata id="#meta2">
+    <select:subject id="s2" metadataIdRef="#meta1"/>
+    <select:parameters id="2">
+      <nmwg:parameter name="time" operator="gte">N-3600</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">N</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">300</nmwg:parameter>
+    </select:parameters>
+  </nmwg:metadata>
+
+  <nmwg:data id="#data1" metadataIdRef="#meta2"/>
 
 </nmwg:message>
