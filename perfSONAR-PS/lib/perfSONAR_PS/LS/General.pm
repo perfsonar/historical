@@ -7,8 +7,10 @@ use Carp qw( carp );
 use Exporter;
 use Log::Log4perl qw(get_logger);
 
+use perfSONAR_PS::Common;
+
 @ISA = ('Exporter');
-@EXPORT = ('createControlKey', 'createKey', 'createMetadata', 'createData', 'getXQuery');
+@EXPORT = ('createControlKey', 'createKey', 'createMetadata', 'createData', 'getXQuery', 'cleanLS');
 
 
 sub createControlKey {
@@ -140,6 +142,59 @@ sub subjectQuery {
   }
   return $queryString;
 }
+
+
+sub cleanLS {
+  my($conf, $ns) = @_;
+
+  my $logger = get_logger("perfSONAR_PS::LS::LS");
+
+  my $metadatadb = new perfSONAR_PS::DB::XMLDB(
+    $conf->{"METADATA_DB_NAME"}, 
+    $conf->{"METADATA_DB_FILE"},
+    \%{$ns}
+  );	  
+	$metadatadb->openDB; 
+	      
+  my $controldb = new perfSONAR_PS::DB::XMLDB(
+    $conf->{"METADATA_DB_NAME"}, 
+    $conf->{"METADATA_DB_CONTROL_FILE"},
+    \%{$ns}
+  );	  
+  $controldb->openDB; 
+  $logger->debug("Databases opened, parsing message.");
+
+	my($sec, $frac) = Time::HiRes::gettimeofday;
+	
+  my @resultsString = $controldb->query("/nmwg:metadata");   
+  if($#resultsString != -1) {
+    for(my $x = 0; $x <= $#resultsString; $x++) {	
+      my $parser = XML::LibXML->new();
+      my $doc = $parser->parse_string($resultsString[$x]);  
+      my $time = extract($doc->getDocumentElement->find("./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]")->get_node(1));
+      my $key = $doc->getDocumentElement->getAttribute("id");
+      if($time and $key and $sec >= $time) {
+        # remove
+        
+ 	      my @resultsString = $metadatadb->queryForName("//nmwg:data[\@metadataIdRef=\"".$key."\"]");   
+        for(my $x = 0; $x <= $#resultsString; $x++) {
+          $logger->debug("Removing data \"".$resultsString[$x]."\".");
+          $metadatadb->remove($resultsString[$x]);
+        }      
+
+        $logger->debug("Removing control info \"".$key."\".");
+        $controldb->remove($key);
+                            
+        $logger->debug("Removing service info \"".$key."\".");
+        $metadatadb->remove($key);        
+        
+      }
+    } 
+  }
+  
+  return;
+}
+
 
 1;
 

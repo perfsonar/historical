@@ -85,7 +85,6 @@ sub handleRequest {
 }
 
 
-
 sub lsRegisterRequest {
   my($self) = @_; 
   my $logger = get_logger("perfSONAR_PS::LS::LS");
@@ -128,113 +127,106 @@ sub lsRegisterRequest {
   #     N: Update Control Info, insert, 'success.ls.register'
   #   N: Send 'error.ls.registration.access_point_missing' error
 
-  foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-    foreach my $m ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-        $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
+  foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {      
+    my $m = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+    if(defined $m) {        
+      $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
 
-        $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
-        if($mdKey) {
-          $logger->debug("Key found in metadata, proceeding with registration update.");
+      $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
+      if($mdKey) {
+        $logger->debug("Key found in metadata, proceeding with registration update.");
           
+        if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
+          my $result = $metadatadb->queryByName($mdKey); 
+          if($result) {
+            $logger->debug("Key already exists, updating control time information.");     
+	          $controldb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey);       
+            $keys{$mdKey} = 1;
+          }
+          else {
+            $keys{$mdKey} = -1;
+          }            
+        }
+          
+        if($keys{$mdKey} >= 1) {
+          my $dCount = 0;
+ 	        foreach my $d_md ($d->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+            my @resultsString = $metadatadb->queryForName("//nmwg:data[" . getXQuery($d_md) . "]");   
+            if($#resultsString == -1) {
+	            $metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
+	            $logger->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
+	            $keys{$mdKey}++; 
+	            $dCount++;             
+            }
+	        }	
+	        $mdId = "resultMetadata.lsKey.".genuid();
+	        $dId = "resultData.lsKey.".genuid();
+	        $localContent = $localContent . createKey($mdId, $m->getAttribute("id"), $mdKey, "success.ls.register"); 
+	        $localContent = $localContent . createData($dId, $mdId, "<nmwg:datum value=\"[".$dCount."] Data elements have been updated with key [".$mdKey."]\" />");         
+        }
+        elsif($keys{$mdKey} == -1) {
+          $logger->error("Key not found in database, sending error mesasge.");
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");
+        }
+      }
+      else {
+        $logger->debug("Key not found in message, proceeding with registration.");
+          
+        $mdKey = extract($m->find("./perfsonar:subject/psservice:service/psservice:accessPoint")->get_node(1));
+        if($mdKey) {
           if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-            $keys{$mdKey} = 0;
+	          $logger->debug("Found accessPoint \"".$mdKey."\".");
             my $result = $metadatadb->queryByName($mdKey); 
             if($result) {
-              $logger->debug("Key already exists, updating control time information.");     
-	            $controldb->updateByName(createControlKey($mdKey, $sec), $mdKey);       
-              $keys{$mdKey} = 1;
+              $keys{$mdKey} = -1;
+              $logger->error("The key seems to be in use already, sending an error mesasge.");
             }
             else {
-              $keys{$mdKey} = -1;
-            }            
+              $keys{$mdKey} = 1;              
+              $logger->debug("New registration info, inserting service metadata and time information.");
+	            my $service = $m->cloneNode(1);
+	            $service->setAttribute("id", $mdKey);
+	            $metadatadb->insertIntoContainer($service->toString, $mdKey);
+	            $controldb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey);
+	          }  
           }
           
           if($keys{$mdKey} >= 1) {
- 	          foreach my $d_md ($d->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-              my @resultsString = $metadatadb->queryForName("//nmwg:data[" . getXQuery($d_md) . "]");   
-              if($#resultsString == -1) {
-	              #$metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
-
-	              $metadatadb->insertIntoElement(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
-	              	              
-	              
-	              $logger->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
-	              $keys{$mdKey}++;              
-              }
-	          }	
+	          my $dCount = 0;
+	          foreach my $d_md ($d->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+	            $metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
+	            $logger->debug("Inserting measurement metadata as 'data'.");
+	            $keys{$mdKey}++;
+	            $dCount++;
+	          }
 	          $mdId = "resultMetadata.lsKey.".genuid();
 	          $dId = "resultData.lsKey.".genuid();
 	          $localContent = $localContent . createKey($mdId, $m->getAttribute("id"), $mdKey, "success.ls.register"); 
-	          $localContent = $localContent . createData($dId, $mdId, "<nmwg:datum value=\"Data has been updated with key [".$mdKey."]\" />");         
+	          $localContent = $localContent . createData($dId, $mdId, "<nmwg:datum value=\"[".$dCount."] Data elements have been registered with key [".$mdKey."]\" />"); 
+	          $logger->debug("Adding info to response message.");
           }
           elsif($keys{$mdKey} == -1) {
-            $logger->error("Key not found in database, sending error mesasge.");
 	          $mdId = "resultMetadata.".genuid();
 	          $dId = "resultData.".genuid();      
-            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
-            $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");
+            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_in_use");
+            $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" is already in use.");
           }
         }
         else {
-          $logger->debug("Key not found in message, proceeding with registration.");
-          
-          $mdKey = extract($m->find("./perfsonar:subject/psservice:service/psservice:accessPoint")->get_node(1));
-          if($mdKey) {
-
-            if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-              $keys{$mdKey} = 0;
-	            $logger->debug("Found accessPoint \"".$mdKey."\".");
-	          
-              my $result = $metadatadb->queryByName($mdKey); 
-              if($result) {
-                $keys{$mdKey} = -1;
-                $logger->error("The key seems to be in use already, sending an error mesasge.");
-              }
-              else {
-                $keys{$mdKey} = 1;              
-                $logger->debug("New registration info, inserting service metadata and time information.");
-              
-	              my $service = $m->cloneNode(1);
-	              $service->setAttribute("id", $mdKey);
-	              $metadatadb->insertIntoContainer($service->toString, $mdKey);
-	              $controldb->insertIntoContainer(createControlKey($mdKey, $sec), $mdKey);
-	            }  
-            }
-          
-            if($keys{$mdKey} >= 1) {
-	            foreach my $d_md ($d->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-	              $metadatadb->insertIntoContainer(createData($mdKey."/".$sec."/".$keys{$mdKey}, $mdKey, $d_md->toString), $mdKey."/".$sec."/".$keys{$mdKey});
-	              $logger->debug("Inserting measurement metadata as 'data'.");
-	              $keys{$mdKey}++;
-	            }
-	            $mdId = "resultMetadata.lsKey.".genuid();
-	            $dId = "resultData.lsKey.".genuid();
-	            $localContent = $localContent . createKey($mdId, $m->getAttribute("id"), $mdKey, "success.ls.register"); 
-	            $localContent = $localContent . createData($dId, $mdId, "<nmwg:datum value=\"Data has been registered with key [".$mdKey."]\" />"); 
-	            $logger->debug("Adding info to response message.");
-            }
-            elsif($keys{$mdKey} == -1) {
-	            $mdId = "resultMetadata.".genuid();
-	            $dId = "resultData.".genuid();      
-              $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_in_use");
-              $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" is already in use.");
-            }
-          }
-          else {
-            $logger->error("AccessPoint not found in message to create a key, sending error mesasge.");
-	          $mdId = "resultMetadata.".genuid();
-	          $dId = "resultData.".genuid();      
-            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.registration.access_point_missing");
-            $localContent = $localContent . getResultCodeData($dId, $mdId, "Cannont register data, accessPoint was not supplied.");
-          }
+          $logger->error("AccessPoint not found in message to create a key, sending error mesasge.");
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.registration.access_point_missing");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Cannont register data, accessPoint was not supplied.");
         }
       }
-    }
+    }    
   }
   return $localContent;
 }
-
 
 
 sub lsDeregisterRequest {
@@ -274,73 +266,79 @@ sub lsDeregisterRequest {
   #   N: Send 'error.ls.key_not_found' error
   # N: Send 'error.ls.deregister.key_not_found' error
 
-  foreach my $m ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-    $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
-    if($mdKey) {
-      $logger->debug("Key found in metadata, proceeding with deregistration."); 
-      
-      my $result = $metadatadb->queryByName($mdKey); 
-      if($result) {
+  foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {      
+    my $m = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+    if(defined $m) {        
+      $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
 
-        $logger->debug("Key found in database, searching for data elements.");     
-        foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-          if($m->getAttribute("id") eq $d->getAttribute("metadataIdRef")) {      
- 	          my @deregs = $d->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata");
- 	          if($#deregs == -1) {
-              $logger->debug("Bare key found, deregistering everything related to \"".$result."\"."); 
+      $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
+      if($mdKey) {
+        my $result = "";
+        if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
+          $result = $metadatadb->queryByName($mdKey); 
+          if($result) {     
+            $keys{$mdKey} = 1;
+          }
+          else {
+            $keys{$mdKey} = -1;
+          }            
+        }
+          
+        if($keys{$mdKey} >= 1) {
+          $logger->debug("Key found in database, searching for data elements.");     
+ 	        my @deregs = $d->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata");
+ 	        if($#deregs == -1) {
+            $logger->debug("Bare key found, deregistering everything related to \"".$result."\"."); 
               
- 	            my @resultsString = $metadatadb->queryForName("//nmwg:data[\@metadataIdRef=\"".$result."\"]");   
+ 	          my @resultsString = $metadatadb->queryForName("//nmwg:data[\@metadataIdRef=\"".$result."\"]");   
+            for(my $x = 0; $x <= $#resultsString; $x++) {
+              $logger->debug("Removing data \"".$resultsString[$x]."\".");
+              $metadatadb->remove($resultsString[$x]);
+            }      
+
+            $logger->debug("Removing control info \"".$result."\".");
+            $controldb->remove($result);
+                            
+            $logger->debug("Removing service info \"".$result."\".");
+            $metadatadb->remove($result);
+              
+	          $mdId = "resultMetadata.".genuid();
+	          $dId = "resultData.".genuid();      
+            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "success.ls.deregister");
+            $localContent = $localContent . getResultCodeData($dId, $mdId, "Removed [".($#resultsString+1)."] data elements and service info for key \"".$result."\".");              
+ 	        }
+ 	        else {
+ 	          $logger->debug("Data found with key, deregistering each individually."); 	            
+ 	          foreach my $d_md (@deregs) {
+              my @resultsString = $metadatadb->queryForName("//nmwg:data[" . getXQuery($d_md) . "]");   
               for(my $x = 0; $x <= $#resultsString; $x++) {
                 $logger->debug("Removing data \"".$resultsString[$x]."\".");
                 $metadatadb->remove($resultsString[$x]);
-              }      
-
-              $logger->debug("Removing control info \"".$result."\".");
-              $controldb->remove($result);
-                            
-              $logger->debug("Removing service info \"".$result."\".");
-              $metadatadb->remove($result);
-              
+              } 
 	            $mdId = "resultMetadata.".genuid();
 	            $dId = "resultData.".genuid();      
               $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "success.ls.deregister");
-              $localContent = $localContent . getResultCodeData($dId, $mdId, "Removed [".($#resultsString+1)."] data elements and service info for key \"".$result."\".");              
+              $localContent = $localContent . getResultCodeData($dId, $mdId, "Removed [".($#resultsString+1)."] data elements for key \"".$result."\"."); 
  	          }
- 	          else {
- 	            $logger->debug("Data found with key, deregistering each individually.");
- 	            
- 	            foreach my $d_md (@deregs) {
-                my @resultsString = $metadatadb->queryForName("//nmwg:data[" . getXQuery($d_md) . "]");   
-                for(my $x = 0; $x <= $#resultsString; $x++) {
-                  $logger->debug("Removing data \"".$resultsString[$x]."\".");
-                  $metadatadb->remove($resultsString[$x]);
-                } 
-	              $mdId = "resultMetadata.".genuid();
-	              $dId = "resultData.".genuid();      
-                $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "success.ls.deregister");
-                $localContent = $localContent . getResultCodeData($dId, $mdId, "Removed [".($#resultsString+1)."] data elements for key \"".$result."\"."); 
- 	            }
- 	          }
-          }
+ 	        }
+        }
+        else {
+          $logger->error("Key not found in database, sending error mesasge.");
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");
         }
       }
       else {
-        $logger->error("Key not found in database, sending error mesasge.");
+        $logger->error("Key not found in metadata, sending error mesasge.");
 	      $mdId = "resultMetadata.".genuid();
 	      $dId = "resultData.".genuid();      
-        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
-        $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");
-      } 
-    }
-    else {
-      $logger->error("Key not found in metadata, sending error mesasge.");
-	    $mdId = "resultMetadata.".genuid();
-	    $dId = "resultData.".genuid();      
-      $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.deregister.key_not_found");
-      $localContent = $localContent . getResultCodeData($dId, $mdId, "Key not found in sent metadata.");
+        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.deregister.key_not_found");
+        $localContent = $localContent . getResultCodeData($dId, $mdId, "Key not found in sent metadata.");
+      }
     }
   }
-
   return $localContent;
 }
 
@@ -379,45 +377,52 @@ sub lsKeepaliveRequest {
   #   Y: update control info
   # N: Send 'error.ls.keepalive.key_not_found' error
 
-  foreach my $m ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-    $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
-    if($mdKey) {
-      $logger->debug("Key found in metadata, proceeding with keepalive."); 
-      
-      my $result = $metadatadb->queryByName($mdKey); 
-      if($result) {
-        $logger->debug("Updating control time information.");     
-	      $controldb->updateByName(createControlKey($mdKey, $sec), $mdKey);
-	      $mdId = "resultMetadata.".genuid();
-	      $dId = "resultData.".genuid();      
-        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "success.ls.keepalive");
-        $localContent = $localContent . getResultCodeData($dId, $mdId, "Key \"".$mdKey."\" was updated.");
+  foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {      
+    my $m = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+    if(defined $m) {        
+      $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
+
+      $mdKey = extract($m->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]")->get_node(1));
+      if($mdKey) {
+        my $result = "";
+        if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
+          $result = $metadatadb->queryByName($mdKey); 
+          if($result) {     
+            $keys{$mdKey} = 1;
+          }
+          else {
+            $keys{$mdKey} = -1;
+          }            
+        }
+          
+        if($keys{$mdKey} == 1) {
+          $logger->debug("Updating control time information.");     
+	        $controldb->updateByName(createControlKey($mdKey, $sec), $mdKey);
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "success.ls.keepalive");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Key \"".$mdKey."\" was updated.");
+          $keys{$mdKey}++;
+        }
+        elsif($keys{$mdKey} == -1) {
+          $logger->error("Key not found in database, sending error mesasge.");
+	        $mdId = "resultMetadata.".genuid();
+	        $dId = "resultData.".genuid();      
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");        
+        }
       }
       else {
-        $logger->error("Key not found in database, sending error mesasge.");
+        $logger->error("Key not found in metadata, sending error mesasge.");
 	      $mdId = "resultMetadata.".genuid();
 	      $dId = "resultData.".genuid();      
-        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.key_not_found");
-        $localContent = $localContent . getResultCodeData($dId, $mdId, "Sent key \"".$mdKey."\" was not registered.");
-      } 
-    }
-    else {
-      $logger->error("Key not found in metadata, sending error mesasge.");
-	    $mdId = "resultMetadata.".genuid();
-	    $dId = "resultData.".genuid();      
-      $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.keepalive.key_not_found");
-      $localContent = $localContent . getResultCodeData($dId, $mdId, "Key not found in sent metadata.");
+        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.keepalive.key_not_found");
+        $localContent = $localContent . getResultCodeData($dId, $mdId, "Key not found in sent metadata.");
+      }
     }
   }
-
   return $localContent;
 }
-
-
-
-
-
-
 
 
 sub lsQueryRequest {
@@ -458,78 +463,78 @@ sub lsQueryRequest {
 	my($sec, $frac) = Time::HiRes::gettimeofday;
 	        
   foreach my $d ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
-    foreach my $m ($self->{LISTENER}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
-      if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-	      $logger->debug("Matched a Pair");
+    my $m = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+    if(defined $m) {    
+	    $logger->debug("Matched a Pair");
 
-        $query = extract($m->find("./xquery:subject")->get_node(1));
-        if($query) {
-          $logger->debug("Query found in metadata, proceeding with QueryRequest.");
+      $query = extract($m->find("./xquery:subject")->get_node(1));
+      if($query) {
+        $logger->debug("Query found in metadata, proceeding with QueryRequest.");
           
-          $queryType = extract($m->find("./nmwg:eventType")->get_node(1));
-          if($queryType) {
-            if($queryType eq "service.lookup.xquery" or 
-               $queryType eq "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0") {
+        $queryType = extract($m->find("./nmwg:eventType")->get_node(1));
+        if($queryType) {
+          if($queryType eq "service.lookup.xquery" or 
+             $queryType eq "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0") {
             
-              $logger->debug("QueryType is valid, proceeding with QueryRequest."); 
+            $logger->debug("QueryType is valid, proceeding with QueryRequest."); 
 
-              # some hacky stuff for right now...
-              $query =~ s/&lt;/</g;
-              $query =~ s/&gt;/>/g;
-              $query =~ s/\s{1}\// collection('CHANGEME')\//g;
+            # some hacky stuff for right now...
+            $query =~ s/&lt;/</g;
+            $query =~ s/&gt;/>/g;
+            $query =~ s/\s{1}\// collection('CHANGEME')\//g;
         
-              my @resultsString = $metadatadb->xQuery($query);   
-              my $dataString = "";
-              for(my $x = 0; $x <= $#resultsString; $x++) {
-                $dataString = $dataString . $resultsString[$x];
-  	          }
-print "\n\n" , $dataString , "\n\n";
-	            $mdId = "resultMetadata.lsKey.".genuid();
-	            $dId = "resultData.lsKey.".genuid();
-	            if($dataString) {
-	              $localContent = $localContent . createMetadata($mdId, $m->getAttribute("id")); 
-	              $localContent = $localContent . createData($dId, $mdId, $dataString); 
-	            }
-	            else {
-                $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.empty_results");
-                $localContent = $localContent . getResultCodeData($dId, $mdId, "Nothing returned for search.");	            
-	            }
-	            $logger->debug("Adding info to response message.");
+            my @resultsString = $metadatadb->xQuery($query);   
+            my $dataString = "";
+            for(my $x = 0; $x <= $#resultsString; $x++) {
+              $dataString = $dataString . $resultsString[$x];
   	        }
-  	        else {
-              $logger->error("Query type not found in metadata, sending error mesasge.");
-	            $mdId = "resultMetadata.".genuid();
-	            $dId = "resultData.".genuid();      
-              $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.querytype_not_suported");
-              $localContent = $localContent . getResultCodeData($dId, $mdId, "Given query type is not supported ");
-  	        }
-          }
-          else {
+
+	          $mdId = "resultMetadata.lsKey.".genuid();
+	          $dId = "resultData.lsKey.".genuid();
+	          if($dataString) {
+	            $localContent = $localContent . createMetadata($mdId, $m->getAttribute("id")); 
+	            $localContent = $localContent . createData($dId, $mdId, $dataString); 
+	          }
+	          else {
+              $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.empty_results");
+              $localContent = $localContent . getResultCodeData($dId, $mdId, "Nothing returned for search.");	            
+	          }
+	          $logger->debug("Adding info to response message.");
+  	      }
+  	      else {
             $logger->error("Query type not found in metadata, sending error mesasge.");
 	          $mdId = "resultMetadata.".genuid();
 	          $dId = "resultData.".genuid();      
-            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.no_querytype");
-            $localContent = $localContent . getResultCodeData($dId, $mdId, "No query type in message");
-          }
+            $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.querytype_not_suported");
+            $localContent = $localContent . getResultCodeData($dId, $mdId, "Given query type is not supported ");
+  	      }
         }
         else {
-          $logger->error("Query not found in metadata, sending error mesasge.");
+          $logger->error("Query type not found in metadata, sending error mesasge.");
 	        $mdId = "resultMetadata.".genuid();
 	        $dId = "resultData.".genuid();      
-          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.query_not_found");
-          $localContent = $localContent . getResultCodeData($dId, $mdId, "Query not found in sent metadata.");
-        }	      
-      }   
-    }
+          $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.no_querytype");
+          $localContent = $localContent . getResultCodeData($dId, $mdId, "No query type in message");
+        }
+      }
+      else {
+        $logger->error("Query not found in metadata, sending error mesasge.");
+	      $mdId = "resultMetadata.".genuid();
+	      $dId = "resultData.".genuid();      
+        $localContent = $localContent . getResultCodeMetadata($mdId, $m->getAttribute("id"), "error.ls.query.query_not_found");
+        $localContent = $localContent . getResultCodeData($dId, $mdId, "Query not found in sent metadata.");
+      }	      
+    }   
   }  
   return $localContent;
 }
 
 
-
+1;
 
 
 __END__
+
 =head1 NAME
 
 perfSONAR_PS::LS::LS - 

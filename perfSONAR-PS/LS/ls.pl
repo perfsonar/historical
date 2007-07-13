@@ -10,14 +10,17 @@ use Log::Log4perl qw(get_logger :levels);
      
 use perfSONAR_PS::Common;
 use perfSONAR_PS::LS::LS;
+use perfSONAR_PS::LS::General;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
 
 my $DEBUGFLAG = '';
 my $HELP = '';
+my $CONF = '';
 my $status = GetOptions ('verbose' => \$DEBUGFLAG,
-                         'help' => \$HELP);
+                         'help' => \$HELP,
+                         'conf' => \$CONF);
 
 if(!$status or $HELP) {
   print "$0: starts the snmp MP and MA.\n";
@@ -41,6 +44,11 @@ my %ns = (
 my %conf = ();
 readConfiguration("./ls.conf", \%conf);
 
+    # specify a new store.xml on the command line
+if($conf{"METADATA_DB_TYPE"} eq "file" and $CONF) {
+  $conf{"METADATA_DB_FILE"} = $CONF;
+}
+
     # set logging level
 if($DEBUGFLAG) {
   $logger->level($DEBUG);    
@@ -60,17 +68,17 @@ $logger->debug("Starting '".threads->tid()."'");
 
 my $lsThread = threads->new(\&lookupService);
 my $regThread = threads->new(\&registerLS);
+my $reapThread = threads->new(\&cleanLS);
 
-if(!defined $lsThread or !defined $regThread) {
+if(!defined $lsThread or !defined $regThread or !defined $reapThread) {
   $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
 $lsThread->join();
 $regThread->join();
+$reapThread->join();
 
-# need a 'reaping' thread to clean out the old stuff, run it
-# every now and then
 
 
 
@@ -107,6 +115,20 @@ sub registerLS {
 	
   return
 }
+
+
+sub cleanLS {
+  $logger->debug("Starting '".threads->tid()."' to clean the LS.");
+  if(defined $conf{"LS_REAPER_INTERVAL"}) {
+    while(1) {
+      $logger->debug("Running reaper...");
+      perfSONAR_PS::LS::General::cleanLS(\%conf, \%ns);
+      sleep($conf{"LS_REAPER_INTERVAL"});
+    }
+  }
+  return;  
+}
+
 
 
 sub daemonize {
