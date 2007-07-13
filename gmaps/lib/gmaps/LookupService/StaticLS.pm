@@ -139,7 +139,7 @@ sub getMA
 		
 	# if the ip doesn' tnot resolve, search the ip and return the MA
 	if ( ! defined $router || $router eq '' ) {
-		$logger->info( "Router not defined for ip $ip!");
+		$logger->info( "Could not determine automatically ma for ip $ip!");
 
 		my $ma = undef;
 		if ( $ip =~ /^172\.16\./ ) {
@@ -147,7 +147,7 @@ sub getMA
 		} elsif ( $ip =~ /^172\.18\./ || $ip eq '192.68.191.149' ) {
 			$ma = 'slac.stanford.edu';
 		}
-		$logger->info( "Found $ma" );
+		$logger->info( "Manual override MA to $ma" );
 		# fake
 		return ( $maMap{$ma}{host}, $maMap{$ma}{port}, $maMap{$ma}{endpoint}, $maMap{$ma}{eventType} );
 	}

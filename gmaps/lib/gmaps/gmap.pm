@@ -45,7 +45,7 @@ sub setup {
 	'mapInline'	=> 'mapWithInlineJavascript',	# returns googlemap with inline javascript of ndoes
 	
 	'graph'		=> 'rrdmaUtilizationGraph',	# returns the rrdma utilization graph
-	'list' 		=> 'rrdmaUtilizationGraphOnly',
+	'list' 		=> 'rrdmaUtilizationGraphList',
 	
 	'info'		=> 'rrdmaInfoXml',		# returns info about a router
 	'ma'		=> 'ma',			# info about ma
@@ -212,8 +212,10 @@ sub passArgs
 	
 	my @ip = ();
 	my @domain = ();
+	
+	my $q = $self->query();
+	
 	if ( defined $self ) {
-		my $q = $self->query();
 		@ip = $q->param('ip');
 	#	print "IP; @ip\n";
 		@domain = $q->param('domain');
@@ -234,15 +236,40 @@ sub passArgs
 	
 	my $args = undef;
 	if ( scalar @domain ) {
-		$args .= join '&', @domain;
+		$args = join '&', @domain;
 	} else {
 		$args = join '&', @ip;
 	}
-	
-	#print "<p>OUT: $args<p>";
-	
+
 	return $args;	
 }
+
+sub passGraphArgs
+{
+	my $self = shift;
+	my $q = $self->query();
+
+	my $args = undef;
+        # add graph settings
+        if ( $q->param('period') ) {
+                $args .= '&period='. $q->param( 'period' )
+        }
+        if ( $q->param('cf') ) {
+                $args .= '&period=' . $q->param( 'cf' )
+        }
+        if ( $q->param('resolution') ) {
+                $args .= '&resolution=' . $q->param( 'resolution' )
+        }
+	if ( $q->param('refresh') ) {
+                $args .= '&refresh=' . $q->param( 'refresh' )
+        }
+
+
+	return $args;
+
+
+}
+
 
 # simply outputs the routers to screen
 sub testRouters
@@ -478,18 +505,17 @@ sub mapFromXml
 {
 	my $self = shift;
 
-	my $args = &passArgs( $self, @_ );
-
 	# write the output to return to the client
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 	my $vars = {
-					'cgi'		=> $server,
-					'args'		=> $args,
-					'xmlMode' 	=> 'xml',
-					'infoMode' 	=> 'info',
-					'graphMode' 	=> 'graph',
-					'googlemapKey' 		=> $googlemapKey,
-				};
+			'cgi'		=> $server,
+			'args'		=> $self->passArgs( @_ ),
+			'graphArgs'	=> $self->passGraphArgs( ),
+			'xmlMode' 	=> 'xml',
+			'infoMode' 	=> 'info',
+			'graphMode' 	=> 'graph',
+			'googlemapKey' 		=> $googlemapKey,
+		};
 	if ( $self->query()->param('refresh') ) {
 		$vars->{'REFRESHINTERVAL'} = $self->query()->param('refresh');
 	}
@@ -595,29 +621,32 @@ sub rrdmaInfoXml
 sub rrdmaUtilizationGraph
 {
 	my $self = shift;
+	my $q = $self->query();
 
-	my $ip = gmaps::Topology::isIpAddress( $self->query()->param( 'ip' ) );
-	my $ifname = $self->query()->param( 'if' );
+	my $ip = gmaps::Topology::isIpAddress( $q->param( 'ip' ) );
+	my $ifname = $q->param( 'if' );
 
 	$self->param('logger')->info( "Looking for $ip, interface $ifname");
 
 	if ( ! defined $ip ) {
 		$self->param('logger')->fatal("Why is no IP defined?!");
-		( $ip, undef ) = gmaps::Topology::getDNS( $self->query()->param( 'ip' ) );
 	}
+
+	use Data::Dumper;
+	$self->param('logger')->info( "DUMP " . Dumper $q );
 	
-	my ( $routerInfo, $meta, undef, undef ) = &rrdmaFetch( $ip, $ifname );
+	my ( $data, $meta, undef, undef ) = &rrdmaFetch( $ip, $ifname, $q->param( 'period' ), $q->param( 'cf' ), $q->param( 'resolution' ) );
 
 	# output is always a graph/png	
 	$self->header_add( -type => "image/png", -expires => 'now' ); 
 
 	# error if no ma matched
-	unless( defined $routerInfo && defined $meta ) {
+	unless( defined $data && defined $meta ) {
 		return &catFile( $templatePath . '/noma.png' );
 	} 	
 
 	# dereference graph	
-	my $png = &gmaps::MA::RRDMA::getGraph( $routerInfo, $meta );
+	my $png = &gmaps::MA::RRDMA::getGraph( $data, $meta );
 	
 	if ( ! defined $png ) {
 		return &catFile( $templatePath . '/nodata.png' );
@@ -627,7 +656,7 @@ sub rrdmaUtilizationGraph
 }
 
 # returns a html of the util grpah, refresh automatically
-sub rrdmaUtilizationGraphOnly
+sub rrdmaUtilizationGraphList
 {
 	my $self = shift;
 	my $metadata = &getRouters( $self, @_ );
@@ -637,7 +666,8 @@ sub rrdmaUtilizationGraphOnly
 	foreach my $r ( @$metadata ) {
 		$self->param('logger')->info("Found " . Dumper $r );
 		my $coords = {};
-		&gmaps::Topology::setInfo( $r, $coords, undef );
+		( $r->{ifAddress}, $r->{hostName} ) = &gmaps::Topology::getDNS( $r->{ifAddress} );
+		&gmaps::Topology::setInfo( $r );
 		push @hosts, $r;
 	}
 	
@@ -651,6 +681,7 @@ sub rrdmaUtilizationGraphOnly
       			'routers'  => \@hosts,
       			'graphMode'  => 'graph',
       			'cgi'		=> $server,
+			'graphArgs'	=> $self->passGraphArgs(),
 			};
 	if ( $self->query()->param('refresh') ) {
 		$vars->{'REFRESHINTERVAL'} = $self->query()->param('refresh') ;
@@ -676,6 +707,10 @@ sub rrdmaFetch
 {
 	my $router = shift;
 	my $ifname = shift;
+	
+	my $period = shift;
+	my $cf = shift;
+	my $resolution = shift;
 
 	# the ma needs the dns entry to work, so get dns name of router
 	my ( $ip, $dns ) = gmaps::Topology::getDNS( $router );
@@ -685,13 +720,9 @@ sub rrdmaFetch
  		return ( undef, undef, undef, undef ); 
  	}
  	
-	my $data = &gmaps::MA::RRDMA::get(  
-						$host,
-						$port,
-						$endpoint,						
-						$ip,
-						$eventType,
-						$ifname
+	my $data = &gmaps::MA::RRDMA::get( 	$host, $port, $endpoint,
+						$ip, $eventType, $ifname,
+						$period, $cf, $resolution				
 					 );
 
 	my $meta = &gmaps::MA::RRDMA::getMetadata( $data );

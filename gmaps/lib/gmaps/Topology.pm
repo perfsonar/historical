@@ -291,16 +291,20 @@ sub setInfo
 	my $seen = shift;
 
 	my $name = $md->{hostName};
+        
+	if ( defined $m ) {
+        	$name = $m->{dns} if ! $name;
+		$md->{latitude} = $m->{lat};
+        	$md->{longitude} = $m->{long};
+        	# keep a tally of same coords, keep an array of which ones by index
+        	my $coords = $m->{lat} . ',' . $m->{long};
+        	push @{$seen->{$coords}}, $md->{id} if defined $seen;
+	}
+        
+	# set the label for the item
 	$name .= '@' . $md->{authRealm} if exists $md->{authRealm};
-        $name = $m->{dns} if ! $name;
-        $md->{'gmapsLabel'} = $name;
+	$md->{'gmapsLabel'} = $name;
 	$md->{'gmapsLabel'} .= ':' . $md->{ifName} if exists $md->{ifName};
-        $md->{latitude} = $m->{lat};
-        $md->{longitude} = $m->{long};
-
-        # keep a tally of same coords, keep an array of which ones by index
-        my $coords = $m->{lat} . ',' . $m->{long};
-        push @{$seen->{$coords}}, $md->{id};
 
 	return;
 }

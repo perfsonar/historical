@@ -1,5 +1,5 @@
 [%- DEFAULT
-  REFRESHINTERVAL = 30
+  REFRESHINTERVAL = 15
 -%]
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
    "http://www.w3.org/TR/html4/strict.dtd">
@@ -128,6 +128,10 @@
       if ( array[1] ) {
         graph += "&if=" + array[1];
       }
+      [%- IF graphArgs %]
+      graph += "[% graphArgs %]";
+      [%- END %]
+
       var tabs = [
         new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph_'" + ip + " height='168px' width='481px' src='" + graph + "'/></p>" ),
         new GInfoWindowTab( "Info", header + table )

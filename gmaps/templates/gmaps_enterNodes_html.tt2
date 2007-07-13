@@ -22,7 +22,19 @@
       <input type="submit" name="mode" value="[% mapMode %]" />
       <input type="submit" name="mode" value="[% listMode %]" />
     </form>
-        
+    
+    <h2>Joint Techs Demo</h2>
+    <form method="get" action="[% cgi %]" enctype="multipart/form-data">
+      <input type="hidden" name="domain" value="es.net"/>
+      <!--
+<input type="hidden" name="domain" value="internet2.edu"/>
+	-->
+      <input type="hidden" name="domain" value="slac.stanford.edu"/>
+      <input type="hidden" name="domain" value="fnal.gov"/>
+      <input type="submit" name="mode" value="[% mapMode %]"/>
+      <input type="submit" name="mode" value="[% listMode %]"/>
+    </form>
+ 
     <h3>Info</h3>
     Developed by Yee-Ting Li (ytl at slac.stanford.edu) at Stanford Linear Accelerator Center. Project Page at <a href="https://wiki.internet2.edu/confluence/display/PSPS/gmaps">Googlemaps for perfSONAR</a>
 </body>

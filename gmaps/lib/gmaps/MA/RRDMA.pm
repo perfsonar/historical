@@ -57,6 +57,10 @@ sub get
 	my $eventType = shift;
 	my $ifname = shift;
 	
+	my $period = shift;
+	my $cf = shift;
+	my $resolution = shift;
+
 	unless ( &gmaps::Topology::isIpAddress( $ip ) ) {
 		die "ip address needs to be supplied.";
 	}
@@ -68,6 +72,19 @@ sub get
 			'ifName' => $ifname,
 			'eventType' => $eventType,
 		};
+
+	if ( defined $period ) {
+		$vars->{'PERIOD'} = $period;
+	}
+	if ( defined $cf ) {
+		$vars->{'CF'} = $cf;
+	}
+	if ( defined $resolution ) {
+		$vars->{'RESOLUTION'} = $resolution;
+	}
+
+	$logger->info("period $period, cf $cf, resolution $resolution" );
+
 	my $request = &processTemplate( $request, $vars );
 	#print "REQ: $request\n";
 
@@ -176,7 +193,7 @@ sub createRRDGraph
 	
 	# now get the graph from the rrd
 	my ( undef, $pngFilename ) = &File::Temp::tempfile( UNLINK => 1 );		
-	#warn( "START: $realStart, END: $realEnd\n" );	
+	$logger->info( "start time: $realStart, end time: $realEnd" );	
 	# ref to scalar
 	my $graph = $rrd->getGraph( $pngFilename, $realStart, $realEnd );
 

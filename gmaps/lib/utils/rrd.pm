@@ -4,13 +4,15 @@
 # quick hack to create rrd graphs
 #######################################################################
 
+use Log::Log4perl qw( get_logger :levels );
+
 use RRDs;
 package utils::rrd;
 
 
 use strict;
 
-
+our $logger = Log::Log4perl->get_logger("utils::rrd" );
 
 sub new {
     my $class = shift;
@@ -91,6 +93,8 @@ sub getGraph
 	# graph sepcs
 	push @args, 'AREA:inBits#00FF00:in';
 	push @args, 'LINE2:outBits#0000FF:out';
+
+	$logger->info( "args: @args" );
 
 	$self->{'png'} = $png;
 	RRDs::graph $png, @args;
