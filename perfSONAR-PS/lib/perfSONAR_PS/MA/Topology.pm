@@ -16,7 +16,6 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
-use perfSONAR_PS::DB::SQL;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
@@ -31,14 +30,7 @@ sub init {
 		return -1;
 	}
 
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQLite") {
-		if (!defined $self->{CONF}->{"TOPO_DB_FILE"} or $self->{CONF}->{"TOPO_DB_FILE"} eq "") {
-			$logger->error("You specified a SQLite Database, but then did not specify a database file(TOPO_DB_FILE)");
-			return -1;
-		}
-
-		$self->{DATADB} = new perfSONAR_PS::DB::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"TOPO_DB_FILE"});
-	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
+	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
 		my %ns = (
 				nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
 				netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
@@ -97,7 +89,7 @@ sub handleRequest {
 
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling topology request.");
-		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
+		my ($status, $response) = $self->queryTopology($self->{LISTENER}->getRequestDOM());
 		if ($status != 0) {
 			$logger->error("Unable to handle topology request");
 			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
@@ -118,7 +110,7 @@ sub handleRequest {
 }
 
 
-sub parseRequest {
+sub queryTopology {
 	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
@@ -129,18 +121,13 @@ sub parseRequest {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
-				if ($eventType eq "Path.Status") {
-					my ($status, $res) = $self->pathStatusRequest($m, $d);
-					if ($status != 0) {
-						$logger->error("Couldn't dump topology information");
-						return ($status, $res);
-					}
-
-					$localContent .= $res;
-				} else {
-					$logger->error("Unknown event type: ".$eventType);
-					return ( -1, "Unknown event type: ".$eventType )
+				my ($status, $res) = $self->queryRequest($eventType, $m, $d);
+				if ($status != 0) {
+					$logger->error("Couldn't dump topology information");
+					return ($status, $res);
 				}
+
+				$localContent .= $res;
 			}
 		}
 	}
@@ -159,24 +146,20 @@ sub changeTopology {
 			if ($data->getAttribute("metadataIdRef") eq $md->getAttribute("id")) {
 				my $eventType = $md->findvalue("nmwg:eventType");
 
-				$self->normalizeTopology($data);
-
-				my ($status, $res);
-
-				if ($eventType eq "updateTopology") {
-					($status, $res) = $self->changeXMLDB("update", $data);
-				} elsif ($eventType eq "addTopology") {
-					($status, $res) = $self->changeXMLDB("add", $data);
-				} elsif ($eventType eq "removeTopology") {
-					($status, $res) = $self->changeXMLDB("remove", $data);
-				} else {
-					$status = -1;
-					$res = "Unknown topology modification type: $eventType";
+				my $topology = $data->find("nmtopo:topology");
+				if (!defined $topology) {
+					my $msg = "No topology defined";
+					$logger->error($msg);
+					return (-1, $msg);
 				}
 
+				normalizeTopology($topology);
+
+				my ($status, $res) = $self->changeXMLDB($eventType, $topology);
 				if ($status != 0) {
 					$logger->error("Error handling topology request");
 					# this should undo any previous changes.
+					return ($status, $res);
 				}
 
 				$localContent .= $res;
@@ -190,16 +173,15 @@ sub changeTopology {
 }
 
 sub changeXMLDB($$$) {
-	my ($self, $modification, $root) = @_;
+	my ($self, $type, $root) = @_;
 
-	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
-		
+	if ($type eq "topology.update") {
+
+	} elsif ($type eq "topology.add") {
+
+	} elsif ($type eq "topology.remove") {
+
 	}
-
-	foreach my $link ($root->getChildrenByTagName("nmtopo:node")) {
-		
-	}
-
 	return (0, "");
 }
 
@@ -210,44 +192,93 @@ sub changeTopologyRequest($$$) {
 
 	$localContent .= $m->toString();
 
-	$self->normalizeTopology($m);
+#	$self->normalizeTopology($m);
 
 	return (0, $localContent);
 }
 
-sub pathStatusRequest($$$) {
-	my($self, $m, $d) = @_;
+
+
+sub queryRequest($$$$) {
+	my($self, $type, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my $localContent = "";
 
-#	$localContent .= "<nmwg:parameters id=\"storeId\"><nmwg:parameter name=\"DomainName\">";
-#	if (defined $self->{CONF}->{"domain"}) {
-#		$localContent .= $self->{CONF}->{"domain"};
-#	} else {
-#		$localContent .= "UNKNOWN";
-#	}
-#	$localContent .= "</nmwg:parameter></nmwg:parameters>";
-
 	$localContent .= $m->toString();
+	$localContent .= "\n";
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-	my ($status, $res) = $self->dumpDatabase;
-	if ($status == 0) {
-		$localContent .= $res;
-	} else {
-		$logger->error("Couldn't dump topology structure: $res");
-		return ($status, $res);
+	my $md_id = $m->getAttribute("id");
+	my $d_id = $d->getAttribute("id");
+	if (!defined $d_id) {
+		$d_id = genuid();
 	}
-	$localContent .= "  </nmwg:data>\n";
 
-	open(OUTPUT, ">results");
-	print OUTPUT $localContent;
-	close(OUTPUT);
+	$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+
+	if ($type eq "topology.lookup.all") {
+		my ($status, $res) = $self->queryDatabase_dump;
+		if ($status == 0) {
+			$localContent .= $res;
+		} else {
+			$logger->error("Couldn't dump topology structure: $res");
+			return ($status, $res);
+		}
+	} elsif ($type eq "topology.lookup.xquery") {
+		my ($status, $res) = $self->queryDatabase_xQuery($m);
+		if ($status == 0) {
+			$localContent .= $res;
+		} else {
+			$logger->error("Couldn't query topology: $res");
+			return ($status, $res);
+		}
+
+	}
+
+	$localContent .= "</nmwg:data>\n";
 
 	return (0, $localContent);
 }
 
-sub dumpDatabase {
+sub queryDatabase_xQuery($$) {
+	my($self, $m) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $localContent = "";
+
+	$logger->debug("queryDatabase_xQuery()");
+
+	if ($self->{CONF}->{"TOPO_DB_TYPE"} ne "XML") {
+		my $msg = "xQuery unsupported for database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $query = extract($m->find("./xquery:subject")->get_node(1));
+	if (!defined $query or $query eq "") {
+		return (-1, "No query given in request");
+	}
+
+	$query =~ s/\s{1}\// collection('CHANGEME')\//g;
+
+	if ($self->{DATADB}->openDB != 0) {
+		my $msg = "Couldn't open database";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $queryResults = $self->{DATADB}->xQuery($query);
+	if ($queryResults == -1) {
+		$logger->error("Couldn't query database");
+		return (-1, "Couldn't query database");
+	}
+
+	foreach my $line (@{ $queryResults }) {
+		$localContent .= $line;
+	}
+
+	return (0, $localContent);
+}
+
+sub queryDatabase_dump {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my ($status, $res);
@@ -265,9 +296,7 @@ sub dumpDatabase {
 		return (-1, $msg);
 	}
 
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "SQLite") {
-		($status, $res) = $self->dumpSQLDatabase;
-	} elsif ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
+	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
 		($status, $res) = $self->dumpXMLDatabase;
 	} else {
 		my $msg = "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
@@ -287,221 +316,488 @@ sub dumpXMLDatabase($) {
 
 	my $content = "";
 
-	my @nodes = $self->{DATADB}->query("/nmtopo:node");
-	if ($#nodes == -1) {
+	my @results = $self->{DATADB}->query("/*:topology");
+	if ($#results == -1) {
 		my $msg = "Couldn't find list of nodes in DB";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
 
-	$content .= join("", @nodes);
-
-	my @links = $self->{DATADB}->query("/nmtopo:link");
-	if ($#links == -1) {
-		my $msg = "Couldn't find list of links in DB";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	$content .= join("", @links);
+	$content .= join("", @results);
 
 	return (0, $content);
 }
 
-sub addXMLDatabase {
-	return (-1, "XML Databases unsupported");
-}
-
-# The goal of normalization is to bring all first class entities: nodes,
-# interfaces and links to the top level. These entities can be defined inside
-# of other entities, so we must grot through the DOM finding instances where
-# people have declared entities inside of other entities(for example, an
-# interface defined inside of a node). When we find an instance, we pull the
-# entity up to the top-level and replace it with a node containing simply an
-# IdRef to keep the meaning the same.
-#
-# e.g.
-#    <nmtopo:link id="link1">
-#        <nmtopo:link id="sublink1">
-#            <nmtopo:interface interfaceIdRef="node1iface1" />
-#            <nmtopo:interface id="node2iface1" nodeIdRef="node2">
-#        </nmtopo:link>
-#    </nmtopo:link>
-#    <nmtopo:node id="node1">
-#        <nmtopo:interface id="node1iface1" />
-#    </nmtopo:node>
-#    <nmtopo:node id="node2" />
-# 
-#  would become
-#    <nmtopo:link id="link1>
-#        <nmtopo:link linkIdRef="sublink1">
-#    </nmtopo:link>
-#    <nmtopo:link id="link1>
-#        <nmtopo:interface interfaceIdRef="node1iface1" />
-#        <nmtopo:interface interfaceIdRef="node2iface1" />
-#    </nmtopo:link>
-#    <nmtopo:node id="node1">
-#        <nmtopo:interface interfaceIdRef="node1iface1" />
-#    </nmtopo:node>
-#    <nmtopo:node id="node2">
-#        <nmtopo:interface interfaceIdRef="node2iface1" />
-#    </nmtopo:node>
-#    <nmtopo:interface id="node1iface1" />
-#    <nmtopo:interface id="node2iface1" />
-
-sub normalizeTopology($$) {
-	my ($self, $root) = @_;
+sub topologyNormalize($) {
+	my ($root) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $link ($root->getChildrenByTagName("nmtopo:link")) {
-		normalizeLink("", $root, $link);
+	my %topology = ();
+	$topology{"networks"} = ();
+	$topology{"nodes"} = ();
+	$topology{"links"} = ();
+	$topology{"ports"} = ();
+
+	my ($status, $res) = topologyNormalize_networks($root, \%topology);
+	if ($status != 0) {
+		return ($status, $res);
 	}
 
-	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
-		normalizeNode("", $root, $node);
+	($status, $res) = topologyNormalize_nodes($root, \%topology, "");
+	if ($status != 0) {
+		return ($status, $res);
+	}
+
+	($status, $res) = topologyNormalize_ports($root, \%topology, "");
+	if ($status != 0) {
+		return ($status, $res);
+	}
+
+	($status, $res) = topologyNormalize_links($root, \%topology, "");
+	if ($status != 0) {
+		return ($status, $res);
 	}
 }
 
-sub normalizeNode($$$) {
-	my ($self, $root, $node) = @_;
+sub topologyNormalize_networks($$) {
+	my ($root, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	foreach my $interface ($node->getChildrenByTagName("nmtopo:interface")) {
-		if (defined $interface->getAttribute("id")) {
-			# it's a new interface, pull it to the top level
-			if (!defined $interface->getAttribute("nodeIdRef")) {
-				$interface->setAttribute("nodeIdRef", $node->getAttribute("id"));
-			}
-			my $new_node = $node->addNewChild("", "nmtopo:interface");
-			$new_node->setAttribute("interfaceIdRef", $interface->getAttribute("id"));
-			$node->removeChild($interface);
-			$root->appendChild($interface);
-		} elsif (!defined $interface->getAttribute("interfaceIdRef")) {
-			# XXX Complain
+	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+		my $id = $network->getAttribute("id");
+		my $fqid;
+
+		if (!defined $id) {
+			my $msg = "No id for specified network";
+			 $logger->error($msg);
+			return (-1, $msg);
 		}
-	}
-}
 
-sub normalizeLink($$$) {
-	my ($self, $root, $link) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+		if (idIsFQ($id) == 0) {
+			$id = idConstruct($id);
 
-	foreach my $interface ($link->getChildrenByTagName("nmtopo:interface")) {
-		if (defined $interface->getAttribute("id") and !defined $interface->getAttribute("nodeIdRef")) {
-			# XXX Complain
-		} elsif (defined $interface->getAttribute("id")) {
-			# it's a new interface, pull it to the top level
-			my $new_node = $link->addNewChild("", "nmtopo:interface");
-			$new_node->setAttribute("interfaceIdRef", $interface->getAttribute("id"));
-			$link->removeChild($interface);
-			$root->appendChild($interface);
-		} elsif (!defined $interface->getAttribute("interfaceIdRef")) {
-			# XXX Complain
-		}
-	}
+			$network->setAttribute("id", $id);
+		}		
 
-	foreach my $sublink ($link->getChildrenByTagName("nmtopo:link")) {
-		if (defined $sublink->getAttribute("id")) {
-			# remove the sublink and replace it with a reference
-			my $new_node = $sublink->addNewChild("", "nmtopo:link");
-			$new_node->setAttribute("linkIdRef", $link->getAttribute("id"));
-			$link->removeChild($sublink);
-			$root->appendChild($sublink);
+		$logger->debug("Adding $id");
 
-			my ($status, $res) = $self->normalizeLinkTopology($root, $sublink);
-		} elsif (!defined $sublink->getAttribute("linkIdRef")) {
-			# XXX Complain
-		}
+		$topology->{"networks"}->{$id} = $network;
 	}
 
 	return (0, "");
 }
 
-sub dumpSQLDatabase {
-	my ($self, $time) = @_;
+sub topologyNormalize_nodes($$) {
+	my ($root, $topology, $uri) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	my $nodes = $self->{DATADB}->query("select id, name, country, city, institution, latitude, longitude from nodes");
-	if ($nodes == -1) {
-		$logger->error("Couldn't grab list of nodes");
-		return (-1, "Couldn't grab list of nodes");
+	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+		my $fqid = $network->getAttribute("id");
+		my ($status, $res) = topologyNormalize_nodes($network, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
 	}
 
-	my $localContent = "";
+	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+		my $id = $node->getAttribute("id");
+		my $fqid;
 
-	foreach my $node_ref (@{ $nodes }) {
-		my @node = @{ $node_ref };
-
-		# dump the node information in XML format
-
-		$localContent .= "<nmwgt:node id=\"".$node[0]."\">\n";
-		$localContent .= "	<nmwgt:type>TopologyPoint</nmwgt:type>\n";
-  		$localContent .= "	<nmwgt:name type=\"logical\">".$node[1]."</nmwgt:name>\n";
-  		$localContent .= "	<nmwgt:country>".$node[2]."</nmwgt:country>\n";
-  		$localContent .= "	<nmwgt:city>".$node[3]."</nmwgt:city>\n";
-  		$localContent .= "	<nmwgt:institution>".$node[4]."</nmwgt:institution>\n";
-  		$localContent .= "	<nmwgt:latitude>".$node[5]."</nmwgt:latitude>\n";
-  		$localContent .= "	<nmwgt:longitude>".$node[6]."</nmwgt:longitude>\n";
-
-		my $ifs = $self->{DATADB}->query("select name, type, capacity from interfaces where node_id=\'".$node[0]."\'");
-		if ($ifs == -1) {
-			$logger->error("Couldn't grab list of interfaces for node ".$node[0]);
-			return (-1, "Couldn't grab list of interfaces for node ".$node[0]);
+		if (!defined $id) {
+			if (defined $node->getAttribute("nodeIdRef")) {
+				next;
+			} else {
+				my $msg = "Node has no id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
 		}
 
-		foreach my $if_ref (@{ $ifs }) {
-			my @if = @{ $if_ref };
+		if (idIsFQ($id) == 0) {
+			if ($uri eq "") {
+				my $msg = "Node $id has no parent and is not fully qualified";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
 
-			$localContent .= "	<nmwgt:interface id=\"".$if[0]."\">\n";
-			$localContent .= "		<nmwgt:type>".$if[1]."</nmwgt:type>\n";
-			$localContent .= "		<nmwgt:capacity>".$if[2]."</nmwgt:capacity>\n";
-			$localContent .= "	</nmwgt:interface>\n";
+			$fqid = idAddLevel($uri, $id);
+
+		} else {
+			$fqid = idSanitize($id);
+
+			if ($uri ne "") {
+				# compare the uri with the FQ id
+			}
+
+			my $network_id = idRemoveLevel($fqid);
+			my $network = $topology->{"networks"}->{$network_id};
+
+			if (!defined $network) {
+				my $msg = "Node $fqid references non-existent network: $network_id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$logger->debug("Moving $fqid to $network_id");
+
+			# remove the node from $root and add it to the network
+			$root->removeChild($node);
+			networkReplaceChild($network, $node, $fqid);
+			$node->setAttribute("id", idBaseLevel($fqid));
 		}
 
-		$localContent .= "</nmwgt:node>\n";
+		$logger->debug("Adding $fqid");
+		$topology->{"nodes"}->{$fqid} = $node;
 	}
-
-	my $links = $self->{DATADB}->query("select id, name, globalName, type from links");
-	if ($links == -1) {
-		$logger->error("Couldn't grab list of links");
-		return (-1, "Couldn't grab list of links");
-	}
-
-	foreach my $link_ref (@{ $links }) {
-		my @link = @{ $link_ref };
-
-		my $link_node_query = "select node_id, interface, role, link_index from link_nodes where link_id=\'".$link[0]."\'";
-		if (defined $time and $time ne "") {
-			$link_node_query .= " and start_time <= $time and end_time >= $time";
-		}
-
-		my $nodes = $self->{DATADB}->query($link_node_query);
-		if ($nodes == -1) {
-			$logger->error("Couldn't grab list of nodes associated with link ".$link[0]);
-			return (-1, "Couldn't grab list of nodes associated with link " . $link[0]);
-		}
-
-		# dump the link information in XML format
-		$localContent .= "<nmwgt:link id=\"".$link[0]."\">\n";
-  		$localContent .= "	<nmwgt:name type=\"logical\">".$link[1]."</nmwgt:name>\n";
-  		$localContent .= "	<nmwgt:globalName type=\"logical\">".$link[2]."</nmwgt:globalName>\n";
-		$localContent .= "	<nmwgt:type>".$link[3]."</nmwgt:type>\n";
-
-		foreach my $node_ref (@{ $nodes }) {
-			my @node = @{ $node_ref };
-			$localContent .= "	<nmwgt:node nodeIdRef=\"".$node[0]."\">\n";
-			$localContent .= "		<nmwgt:interface>".$node[1]."</nmwgt:interface>\n";
-			$localContent .= "		<nmwgt:role>".$node[2]."</nmwgt:role>\n";
-			$localContent .= "		<nmwgt:link_index>".$node[3]."</nmwgt:link_index>\n";
-			$localContent .= "	</nmwgt:node>\n";
-		}
-
-		$localContent .= "</nmwgt:link>\n";
-	}
-
-	return (0, $localContent);
 }
 
+sub topologyNormalize_ports($$) {
+	my ($root, $topology, $uri) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+		my $fqid = $network->getAttribute("id");
+		my ($status, $res) = topologyNormalize_ports($network, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+		my $id = $node->getAttribute("id");
+		my $fqid;
+
+		if (idIsFQ($id) == 0) {
+			$fqid = idAddLevel($uri, $id);
+		} else {
+			$fqid = idSanitize($id);
+		}
+
+		my ($status, $res) = topologyNormalize_ports($node, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $port ($root->getChildrenByTagName("nmtopo:port")) {
+		my $id = $port->getAttribute("id");
+		my $fqid;
+
+		if (!defined $id) {
+			if (defined $port->getAttribute("portIdRef")) {
+				next;
+			} else {
+				my $msg = "Port has no id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+		}
+
+		if (idIsFQ($id) == 0) {
+			if ($uri eq "") {
+				my $msg = "Port $id has no parent and is not fully qualified";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$fqid = idAddLevel($uri, $id);
+		} else {
+			$fqid = idSanitize($id);
+
+			if ($uri ne "") {
+				# compare the uri with the FQ id
+			} 
+
+			my $node_id = idRemoveLevel($fqid);
+			my $node = $topology->{"nodes"}->{$node_id};
+
+			if (!defined $node) {
+				my $msg = "Port $fqid references non-existent node: $node_id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			# remove the port from $root and add it to the node
+			$root->removeChild($port);
+			nodeReplaceChild($node, $port, $fqid);
+			$port->setAttribute("id", idBaseLevel($fqid));
+		}
+
+		$logger->debug("Adding $fqid");
+		$topology->{"ports"}->{$fqid} = $port;
+		$port->setAttribute("id", idBaseLevel($fqid));
+	}
+}
+
+sub topologyNormalize_links($$) {
+	my ($root, $topology, $uri) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $network ($root->getChildrenByTagName("nmtopo:network")) {
+		my $fqid = $network->getAttribute("id");
+		my ($status, $res) = topologyNormalize_links($network, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $node ($root->getChildrenByTagName("nmtopo:node")) {
+		my $id = $node->getAttribute("id");
+		my $fqid;
+
+		if (idIsFQ($id) == 0) {
+			$fqid = idAddLevel($uri, $id);
+		} else {
+			$fqid = idSanitize($id);
+		}
+
+		my ($status, $res) = topologyNormalize_links($node, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $port ($root->getChildrenByTagName("nmtopo:port")) {
+		my $id = $port->getAttribute("id");
+		my $fqid;
+
+		if (idIsFQ($id) == 0) {
+			$fqid = idAddLevel($uri, $id);
+		} else {
+			$fqid = idSanitize($id);
+		}
+
+		my ($status, $res) = topologyNormalize_links($port, $topology, $fqid);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $link ($root->getChildrenByTagName("nmtopo:link")) {
+		my $id = $link->getAttribute("id");
+		my $fqid;
+
+		$logger->debug("Handling $id");
+
+		if (!defined $id) {
+			if (!defined $link->getAttribute("link") and defined $link->getAttribute("linkIdRef")) {
+				$logger->debug("Link appears to be a pointer, skipping");
+				next;
+			} else {
+				my $msg = "Link has no id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+		}
+
+		if (idIsFQ($id) == 0) {
+			$logger->debug("$id not qualified: ".$root->localname."");
+
+			next if ($root->localname eq "port");
+
+			my $num_ports = 0;
+
+			foreach my $port ($link->getChildrenByTagName("nmtopo:port")) {
+				my $idref = $port->getAttribute("portIdRef");
+
+				$logger->debug("Got port ref: ".$idref."");
+				if (!defined $idref or $idref eq "") {
+					my $msg = "Link $id refers to port with no portIdRef";
+					$logger->error($msg);
+					return (-1, $msg);
+				}
+
+				$idref = idSanitize($idref);
+				my $new_link = $link->cloneNode(1);
+				my $new_link_fqid = idAddLevel($idref, $id);
+				my $port = $topology->{"ports"}->{$idref};
+
+				if (!defined $port) {
+					my $msg = "Link $id refers to non-existent port $idref";
+					$logger->error($msg);
+					return (-1, $msg);
+				}
+
+				my $link_element = $port->find("./nmtopo:link")->get_node(1);
+
+				if (defined $link_element) {
+					my $link_idref = $link_element->getAttribute("linkIdRef");
+					if (!defined $link_idref or idSanitize($link_idref) ne $new_link_fqid) {
+						my $msg = "$new_link_fqid slated to replace existing link";
+						$logger->error($msg);
+						return (-1, $msg);
+					}
+
+					$logger->debug("Replacing child");
+					$link_element->replaceNode($new_link);
+				} else {
+					$logger->debug("Appending child");
+					$port->appendChild($new_link);
+				}
+
+				$logger->debug("Adding $new_link_fqid");
+				$topology->{"links"}->{$new_link_fqid} = $new_link;
+				$num_ports++;
+			}
+
+			if ($num_ports == 0) {
+				my $msg = "Link $id has no port to attach to";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$root->removeChild($link);
+
+			$fqid = idAddLevel($uri, $id);
+		} else {
+			$fqid = idSanitize($id);
+
+			if ($uri ne "") {
+				# compare the uri with the FQ id
+			}
+
+			my $port_id = idRemoveLevel($fqid);
+			my $port = $topology->{"ports"}->{$port_id};
+
+			if (!defined $port) {
+				my $msg = "Link $fqid references non-existent port: $port_id";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			# remove the link from $root and add it to the port
+			$root->removeChild($link);
+			portReplaceChild($port, $link, $fqid);
+			$logger->debug("Adding $fqid");
+			$topology->{"links"}->{$fqid} = $link;
+			$link->setAttribute("id", idBaseLevel($fqid));
+		}
+	}
+}
+
+# XXX ReplaceChild may need to merge the new node and the replaced node
+sub networkReplaceChild($$$) {
+	my ($network, $new_node, $fqid) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $node ($network->getChildrenByTagName("nmtopo:node")) {
+		my $id = $node->getAttribute("nodeIdRef"); 
+		next if (!defined $id or $id eq "");
+		$id = idSanitize($id);
+		$logger->debug("comparing $id to $fqid");
+		if ($id eq $fqid) {
+			$network->removeChild($node);
+		}
+	}
+
+	$network->addChild($new_node);
+}
+
+sub nodeReplaceChild($$$) {
+	my ($node, $new_port, $fqid) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $port ($node->getChildrenByTagName("nmtopo:port")) {
+		my $id = $port->getAttribute("portIdRef"); 
+		next if (!defined $id or $id eq "");
+		$id = idSanitize($id);
+		$logger->debug("comparing $id to $fqid");
+		if ($id eq $fqid) {
+			$node->removeChild($port);
+		}
+	}
+
+	$node->addChild($new_port);
+}
+
+sub portReplaceChild($$$) {
+	my ($port, $new_link, $fqid) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	foreach my $link ($port->getChildrenByTagName("nmtopo:link")) {
+		my $id = $port->getAttribute("linkIdRef"); 
+		next if (!defined $id or $id eq "");
+		$id = idSanitize($id);
+		$logger->debug("comparing $id to $fqid");
+		if ($id eq $fqid) {
+			$port->removeChild($link);
+		}
+	}
+
+	$port->addChild($new_link);
+}
+
+sub idConstruct {
+	my ($domain, $node, $interface, $link) = @_;
+
+	my $id = "";
+
+	return $id if (!defined $domain);
+
+	$id .= "http://$domain/";
+
+	return $id if (!defined $node);
+
+	$id .= "$node/";
+
+	return $id if (!defined $interface);
+
+	$id .= "$interface/";
+
+	return $id if (!defined $link);
+
+	$id .= "$link/";
+
+	return $id;
+}
+
+sub idIsFQ($) {
+	my ($id) = @_;
+
+	return 1 if ($id =~ /^http:\/\//);
+
+	return 0;
+}
+
+sub idAddLevel($) {
+	my ($id, $new_level) = @_;
+	if ($id =~ /\/$/) {
+		$id .= $new_level . "/";
+	} else {
+		$id .= "/".$new_level . "/";
+	}
+
+	return $id;
+}
+
+sub idRemoveLevel($) {
+	my ($id) = @_;
+	my $i = rindex($id, "/");
+
+	if ($id =~ /(http:\/\/.*\/)[^\/]+\/$/) {
+		return $1;
+	} else {
+		return $id;
+	}
+}
+
+sub idSanitize($) {
+	my ($id) = @_;
+
+	return $id if ($id =~ /\/$/);
+
+	return $id."/";
+}
+
+sub idBaseLevel($) {
+	my ($id) = @_;
+
+	if ($id =~ /http:\/\/.*\/([^\/]+)\/$/) {
+		return $1;
+	} else {
+		return $id;
+	}
+}
 1;
 
 __END__
@@ -564,7 +860,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 	requets.  will also 'do nothing' in the event that a request has been
 	acted on by the lower layer.
 
-=head2 parseRequest($self, $messageId, $messageIdRef, $type)
+=head2 queryTopology($self, $messageId, $messageIdRef, $type)
 
 	Processes both the the MetadataKeyRequest and SetupDataRequest messages, which
 	preturn either metadata or data to the user.
