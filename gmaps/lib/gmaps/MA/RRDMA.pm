@@ -232,7 +232,7 @@ sub getUtilizationData
 
 		next if $value eq 'nan';
 
-		$logger->info( "TIME: $time, $value" );
+		$logger->debug( "TIME: $time, $value" );
 		push( @tuples, $time . ':' . $value );
 	
 	}

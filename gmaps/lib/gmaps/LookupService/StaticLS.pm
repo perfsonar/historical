@@ -111,12 +111,12 @@ our %maMap = (
 					endpoint => 'perfSONAR-RRD-MA-2.0/services/MeasurementArchiveService',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
-                'slac.stanford.edu' => {
-                    host => 'lanmon-dev.slac.stanford.edu',
-                    port => '8080',
-                    endpoint => 'axis/services/snmpMA',
-                    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
-                },
+                		'slac.stanford.edu' => {
+              	 	 	    host => 'net-desk1.slac.stanford.edu',
+            			    port => '8080',
+                    		    endpoint => 'axis/services/snmpMA',
+                    		    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                		},
 
 
 			);
@@ -144,6 +144,8 @@ sub getMA
 		my $ma = undef;
 		if ( $ip =~ /^172\.16\./ ) {
 			$ma = 'fnal.gov';
+		} elsif ( $ip =~ /^172\.18\./ || $ip eq '192.68.191.149' ) {
+			$ma = 'slac.stanford.edu';
 		}
 		$logger->info( "Found $ma" );
 		# fake

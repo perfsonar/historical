@@ -31,15 +31,14 @@ sub getDNS
 	$logger->info( "IN: ip: $ip, dns: $dns");
 	# ip is actual ip, get the dns
 	if ( &isIpAddress( $ip ) ) {
+		$logger->info( "Fetching dns for ip $ip" );
 		$dns = gethostbyaddr(inet_aton($ip), AF_INET)
 			unless $ip eq '172.16.12.1';	# blatant hack to reduce time for fnal lookup
-		if ( ! defined $dns ) {
-			return ( $ip, undef );
-		}
 	}
 	# ip is dns, get the ip
 	else {
 		$dns = $ip;
+		$logger->info("Fetching ip for dns $dns" );
 		my $i = inet_aton($dns);
 
 		if ( $i ne '' ) {
@@ -47,11 +46,12 @@ sub getDNS
 		}
 		else {
 			$logger->warn( "unknown dns for ip $ip\n" );
-			return ( undef, $dns );
 		}
 	}
 
 	$logger->info( "OUT: ip: $ip, dns: $dns" );
+	undef $dns if $dns eq '';
+	undef $ip if $ip eq '';
 	return ( $ip, $dns );
 }
 

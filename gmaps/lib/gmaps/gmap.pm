@@ -74,7 +74,12 @@ sub cgiapp_prerun
 {
 	my $self = shift;
      
-	Log::Log4perl->init("/var/www/cgi-bin/logger.conf");
+	my $conf = $templatePath . '/gmaps.conf';
+	if ( -e $conf ) {
+	  Log::Log4perl->init( $conf );
+	} else {
+	  Log::Log4perl->easy_init($ERROR);
+	}
 	$self->param( 'logger' => &get_logger("gmaps") );
 
 }
@@ -475,11 +480,6 @@ sub mapFromXml
 
 	my $args = &passArgs( $self, @_ );
 
-    my $refresh = $self->query()->param('refresh');
-    if ( $refresh eq '' || $refresh !~ /\d+/ ) {
-    	$refresh = 60;
-    }
-
 	# write the output to return to the client
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 	my $vars = {
@@ -489,8 +489,10 @@ sub mapFromXml
 					'infoMode' 	=> 'info',
 					'graphMode' 	=> 'graph',
 					'googlemapKey' 		=> $googlemapKey,
-					'refreshInterval' 	=> $refresh,
 				};
+	if ( $self->query()->param('refresh') ) {
+		$vars->{'REFRESHINTERVAL'} = $self->query()->param('refresh');
+	}
 	my $file = $templatePath . '/gmaps_html.tt2';
 	
 	my $out = '';
@@ -600,7 +602,7 @@ sub rrdmaUtilizationGraph
 	$self->param('logger')->info( "Looking for $ip, interface $ifname");
 
 	if ( ! defined $ip ) {
-		$self->param('logger')->crit("Why is no IP defined?!");
+		$self->param('logger')->fatal("Why is no IP defined?!");
 		( $ip, undef ) = gmaps::Topology::getDNS( $self->query()->param( 'ip' ) );
 	}
 	
@@ -628,19 +630,15 @@ sub rrdmaUtilizationGraph
 sub rrdmaUtilizationGraphOnly
 {
 	my $self = shift;
-	my $routers = &getRouters( $self, @_ );
-	
-	my $refresh = $self->query()->param('refresh');
-	if ( $refresh eq '' || $refresh !~ /\d+/ ) {
-		$refresh = 10;
-	}
+	my $metadata = &getRouters( $self, @_ );
 	
 	# get dns for each
 	my @hosts = ();
-	foreach my $r ( @$routers ) {
-		my ( $ip, $dns ) = &gmaps::Topology::getDNS( $r );
-		my $var = { dns => $dns, ip => $ip };
-		push @hosts, $var;
+	foreach my $r ( @$metadata ) {
+		$self->param('logger')->info("Found " . Dumper $r );
+		my $coords = {};
+		&gmaps::Topology::setInfo( $r, $coords, undef );
+		push @hosts, $r;
 	}
 	
 	# create template object
@@ -653,8 +651,10 @@ sub rrdmaUtilizationGraphOnly
       			'routers'  => \@hosts,
       			'graphMode'  => 'graph',
       			'cgi'		=> $server,
-      			'refreshInterval' => $refresh,
-			};	
+			};
+	if ( $self->query()->param('refresh') ) {
+		$vars->{'REFRESHINTERVAL'} = $self->query()->param('refresh') ;
+	}	
 	$file = $templatePath . '/gmaps-graph_html.tt2';
 	
 	my $out = '';
