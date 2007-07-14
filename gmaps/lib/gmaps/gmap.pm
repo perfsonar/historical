@@ -48,8 +48,8 @@ sub setup {
 	'list' 		=> 'rrdmaUtilizationGraphList',
 	
 	'info'		=> 'rrdmaInfoXml',		# returns info about a router
-	'ma'		=> 'ma',			# info about ma
-	'geo'		=> 'geoInfo',
+	'ma'		=> 'measurementArchiveInfo',			# info about ma
+#	'geo'		=> 'geoInfo',
 
 	'xml'		=> 'createXml',			# returns an xml of long lats and nodes
 	'kml'		=> 'createKml',			# returns a kml file of nodes
@@ -63,7 +63,7 @@ sub setup {
 	'internet2_logo'	=> 'internet2Graphic',	# perfsonar logo
    );
 
-	return undef;    
+   return undef;    
 }
 
 
@@ -81,6 +81,8 @@ sub cgiapp_prerun
 	  Log::Log4perl->easy_init($ERROR);
 	}
 	$self->param( 'logger' => &get_logger("gmaps") );
+	
+	$self->param('logger')->info( "Entering run mode " . $self->mode_param() );
 
 }
 
@@ -98,8 +100,21 @@ sub teardown {
 # utility functions
 #######################################################################
 
+sub createIf
+{
+	my $in = shift; # from parseIf
+	my $id = shift;
+	my $md = ();
+	( $md->{ifAddress}, $md->{ifName} ) = &splitIf( $in );
+	if ( defined $id ) {
+		$md->{id} = $id;
+	}
+	
+	return $md;
+}
+
 # utility function to grab all the routers inputted form teh get statment
-# returns
+# returns an array of hashes with ifAddress, ifName etc
 sub getRouters 
 {
 	my $self = shift;
@@ -110,28 +125,20 @@ sub getRouters
 	my $id = 0;
 
 	if ( defined $in ) {
-		$self->param('logger')->info( "in statement found" . $in );
-		foreach my $r ( &parseRouters( $in ) ) {
-			next if ! gmaps::utils::IP::isAnIP( $r );
-			my $md = ();
-			$md->{ifAddress} = $r;
-			$self->param('logger')->info( "Found in $r" );
-			$md->{id} = $id;
-			push @metadata, $md; 
+		foreach my $if ( &parseIf( $in ) ) {
+			#next if ! gmaps::utils::IP::isAnIP( $r );
+			push @metadata, &createIf( $if, $id ); 
 			$id++;
 		}
 	}
 	
 	elsif ( defined $self ) {
+		$self->param('logger')->info( "in statement? " . $in );
 		# get ips dierct from input
-		my @ips = $self->query()->param('ip');
-		foreach my $ip ( @ips ) {
-			my $md = ();
-			$md->{ifAddress} = $ip;
-			$md->{id} = $id;
-			$self->param('logger')->info( "Found ip $ip" );
-				
-			push @metadata, $md;
+		my @ifs = $self->query()->param('if');
+		foreach my $if ( @ifs ) {
+			$self->param('logger')->info( "Found in param if: $if" );
+			push @metadata, &createIf( $if, $id );
 			$id++;
 		}	
 		# grep from teh raw input
@@ -140,13 +147,9 @@ sub getRouters
 		{
 			my @raws = $self->query()->param('raw');
 			foreach my $raw ( @raws ) {
-			$self->param("logger")->info( "Found raw statement $raw" );
-			    foreach my $r ( &parseRouters( $raw ) ) {
-				$self->param("logger")->info("Found raw $r");
-				my $md = ();
-				$md->{ifAddress} = $r;
-				$md->{id} = $id;
-				push @metadata, $md;
+			    $self->param("logger")->info( "Found raw statement $raw" );
+			    foreach my $if ( &parseIf( $raw ) ) {
+				push @metadata, &createIf( $if, $id );
 				$id++;
 			   }
 			}
@@ -170,65 +173,65 @@ sub getRouters
 	return \@metadata;
 }
 
-# grab all the ip/dns entries from text
-sub parseRouters
+
+# returns an array of ifAddress:ifName from the raw text input
+sub parseIf
 {
 	my $raw = shift;
-	
+
 	my @nodes = split /\s+/, $raw;
 	my @nodes2 = ();
-
 	
-	foreach my $n (@nodes) {
+	# get all the ip addresses
+        foreach my $n (@nodes) {
 
-		# make sure we have a separator
-		next unless $n =~ m/\.(\w+)\./;
-		
-		# strip brackets of traceroute ips
-		if ( $n =~ m/(\d+\.\d+\.\d+\.\d+)/ ) {
-			$n = $1;
-			next unless &gmaps::Topology::isIpAddress( $n );
+                # make sure we have a separator
+                next unless $n =~ m/\.(\w+)\./;
+
+		# if we have a dns supplied, map it to an ip address for lookup purposes
+		# if we have an associated if with teh node, strip it
+		my $node = undef;
+		my $if = undef;
+		( $node, $if ) = split /\:/, $n;
+		if ( ! &gmaps::Topology::isIpAddress( $node ) ) {
+			( $node, undef ) =  &gmaps::Topology::getDNS( $node );
 		}
-		push( @nodes2, $n );
-	}
-	
-	my @final = ();
-	my %seen = ();
-	# make sure we don't have duplicates ()ip and dns also)
-	foreach my $n ( @nodes2 ) {	
-		my ( $ip, $dns ) = &gmaps::Topology::getDNS( $n );
-		push( @final, $ip ) unless $seen{$ip}++;
 
-	}
+		# reconstruct it to add to list
+		my $final = $node;
+		$final .= ':' . $if if defined $if;
 
-	return @final;
+                push( @nodes2, $final );
+        }
+
+	return @nodes2;
+}
+
+# splits the ifAddress:ifNAme from parseInterfaces
+sub splitIf
+{
+	my $in = shift;
+	my $ip = undef;
+	my $if = undef;
+	if ( $in =~ /\:/ ) {
+		( $ip, $if ) = split /\:/, $in;
+	} else {
+		$ip = $in;
+	}
+	return ( $ip, $if );
 }
 
 # push the arguments to other script
 sub passArgs
 {
-	my $self = shift;
-	my @other = shift;
-	
-	my @ip = ();
-	my @domain = ();
-	
+	my $self = shift;	
 	my $q = $self->query();
 	
-	if ( defined $self ) {
-		@ip = $q->param('ip');
-	#	print "IP; @ip\n";
-		@domain = $q->param('domain');
-	#	print "DOMAIN: @domain\n";
-		my $meta = &getRouters( $self );
-		foreach my $meta ( @$meta )  {
-			push( @ip, $meta->{ifAddress} )
-		}
-	#	print "RAW: @rawIps\n";
-	}
+	my @if = $q->param('if');
+	my @domain = $q->param('domain');
 	
-	foreach my $i (@ip) {
-		$i = 'ip=' . $i;
+	foreach my $i (@if) {
+		$i = 'if=' . $i;
 	}
 	foreach my $d (@domain) {
 		$d = 'domain=' . $d;
@@ -238,7 +241,7 @@ sub passArgs
 	if ( scalar @domain ) {
 		$args = join '&', @domain;
 	} else {
-		$args = join '&', @ip;
+		$args = join '&', @if;
 	}
 
 	return $args;	
@@ -469,7 +472,7 @@ sub createXml
 
 	# get the interconnecting lines
 	my $lines = &gmaps::Topology::getLines( $metadata );
-	
+
 	# create template object
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );		
 	my $file = undef;
@@ -493,7 +496,6 @@ sub createXml
 		$self->header_add(  -type => "text/xml" ); 
 	}
 
-
 	$self->param('logger')->info("  returning: \n$out");
 	
 	return $out;
@@ -509,12 +511,12 @@ sub mapFromXml
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 	my $vars = {
 			'cgi'		=> $server,
-			'args'		=> $self->passArgs( @_ ),
+			'args'		=> $self->passArgs( ),
 			'graphArgs'	=> $self->passGraphArgs( ),
 			'xmlMode' 	=> 'xml',
 			'infoMode' 	=> 'info',
 			'graphMode' 	=> 'graph',
-			'googlemapKey' 		=> $googlemapKey,
+			'googlemapKey' 	=> $googlemapKey,
 		};
 	if ( $self->query()->param('refresh') ) {
 		$vars->{'REFRESHINTERVAL'} = $self->query()->param('refresh');
@@ -585,8 +587,10 @@ sub rrdmaInfoXml
 {
 	my $self = shift;
 	
-	my $ip = gmaps::Topology::isIpAddress( $self->query()->param( 'ip' ) );
- 	my ( $routerInfo, $meta, $ma, $eventType ) = &rrdmaFetch( $ip );
+	my $interface =  $self->query()->param( 'if' );
+	my ( $ip, $if ) = &splitIf( $interface );
+
+ 	my ( $routerInfo, $meta, $ma, $eventType ) = &rrdmaFetch( $ip, $if );
  
 	if ( ! defined $meta ) {
 		$ma = 'unknown';
@@ -623,10 +627,10 @@ sub rrdmaUtilizationGraph
 	my $self = shift;
 	my $q = $self->query();
 
-	my $ip = gmaps::Topology::isIpAddress( $q->param( 'ip' ) );
-	my $ifname = $q->param( 'if' );
+	my $interface = $q->param( 'if' );
+	my ( $ip, $ifname ) = &splitIf( $interface );
 
-	$self->param('logger')->info( "Looking for $ip, interface $ifname");
+	$self->param('logger')->info( "Looking for $ip, interface $ifname (from $interface)");
 
 	if ( ! defined $ip ) {
 		$self->param('logger')->fatal("Why is no IP defined?!");
@@ -712,9 +716,11 @@ sub rrdmaFetch
 	my $cf = shift;
 	my $resolution = shift;
 
+
 	# the ma needs the dns entry to work, so get dns name of router
 	my ( $ip, $dns ) = gmaps::Topology::getDNS( $router );
  	my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $ip, $dns );
+
 
  	if ( ! defined $host or $host eq '' ) {
  		return ( undef, undef, undef, undef ); 
@@ -731,18 +737,20 @@ sub rrdmaFetch
 }
 
 # displays the MA configuration set for the routers
-sub ma
+sub measurementArchiveInfo
 {
 	my $self = shift;
 
-	my $routers = &getRouters( $self, @_ );
-
+	my $routers = $self->getRouters( @_ );
 	my $output = '';
 	
 	foreach my $router ( @$routers ) 
 	{
-		my ( $ip, $dns ) = gmaps::Topology::getDNS( $router );	
-	 	my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $dns );
+
+		$self->param('logger')->info( "Looking at " . $router->{ifAddress} . ':' . $router->{ifName} );
+
+		my ( $ip, $dns ) = gmaps::Topology::getDNS( $router->{ifAddress} );	
+	 	my ( $host, $port, $endpoint, $eventType ) = &gmaps::LookupService::StaticLS::getMA( $ip, $dns );
 	
 		my $ma = 'http://' . $host . ':' . $port . '/' . $endpoint;
 		
@@ -753,12 +761,14 @@ sub ma
 		
 		my $this = '';
 		my $vars = {
-						'input'	=> $router,
 						'ip'	=> $ip,
 						'dns'	=> $dns,
 						'ma'	=> $ma,
 						'eventType' => $eventType
 					};
+		if ( exists $router->{ifName} ) {
+			$vars->{ifName} = $router->{ifName}
+		}
 		my $file = $templatePath. '/gmaps-ma_html.tt2';
 		my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 		$tt->process( $file, $vars, \$this )

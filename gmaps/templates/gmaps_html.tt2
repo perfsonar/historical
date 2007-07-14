@@ -77,23 +77,18 @@
     var side_bar_html = '';
     
     var map;
-    var activeIP;
-    var activeDNS;
-    
-    function createMarker( lat, lng, dns, ip ) {        
- 
-      if ( dns == '' ) {
-        dns = ip;
-      }
-              
-      if ( ! parseFloat(lat) && ! parseFloat(lng) ) {
+    var activeIf;
+    var activeLabel;
 
-        side_bar_html += dns + '<input type="checkbox" disabled>' + '<br>';
-        
+    function createAMarker( lat, lng, label, iface ) {
+      if ( label == '' ) { label = iface; }
+ 
+      if ( ! parseFloat(lat) && ! parseFloat(lng) ) {
+        side_bar_html += label + '<input type="checkbox" disabled>' + '<br>';
       } else {
 
         var point = new GLatLng( lat,lng );
-        var tooltip = dns + ' (' + ip + ')';
+        var tooltip = label + ' (' + iface + ')';
         var marker = new GMarker(point, {title:tooltip});
 
         // make double clicks center on the marker
@@ -102,38 +97,37 @@
         });
         // make single clicks the info box
         GEvent.addListener( marker, "click", function() {
-            refreshInfoWindowTab( dns, ip );
+            refreshInfoWindowTab( label, iface );
         });
 
-        side_bar_html +=  "<a href=\"javascript:focus('" + dns + "','" + ip + "');\">" + dns + '</a>'
-                + " <input id=\"toggle_marker_" + ip + "\" type=\"checkbox\" onclick=\"javascript:toggleMarker('" + ip + "');\" checked>" + '<br>';
+        side_bar_html +=  
+                "<a href=\"javascript:focus('" + label + "','" + iface + "');\">" + label + '</a>'
+                + "  <input id=\"toggle_marker_" + iface + '"'
+                + '         type="checkbox" '
+                + "         onclick=\"javascript:toggleMarker('" + iface + "');\" checked>"
+                + '<br>';
         
         return marker;
       
       }
     }
     
-    function getTabs( dns, ip ) {
+    function getTabs( label, iface ) {
       var req = GXmlHttp.create();
-      req.open( "GET", "[% cgi %]?mode=[% infoMode %]&ip=" + ip, false );
+      req.open( "GET", "[% cgi %]?mode=[% infoMode %]&if=" + iface, false );
       req.send( null );
       var serializer = new XMLSerializer();
       table = serializer.serializeToString( req.responseXML );
       
       var d = new Date();
-      var header =  "<h3>" + dns + " (" + ip + ")</h3>";
-      var graph = "[% cgi %]?mode=[% graphMode %]&bogus=" + d.getTime() + "&ip=" + ip;
-      // split the dns name in case we have a specific interface to look at
-      var array = dns.split(":");
-      if ( array[1] ) {
-        graph += "&if=" + array[1];
-      }
+      var header =  "<h3>" + label + " (" + iface + ")</h3>";
+      var graph = "[% cgi %]?mode=[% graphMode %]&bogus=" + d.getTime() + "&if=" + iface;
       [%- IF graphArgs %]
       graph += "[% graphArgs %]";
       [%- END %]
 
       var tabs = [
-        new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph_'" + ip + " height='168px' width='481px' src='" + graph + "'/></p>" ),
+        new GInfoWindowTab( "Utilization", header + "<p align=\"center\"><img id='utilGraph_'" + iface + " height='168px' width='481px' src='" + graph + "'/></p>" ),
         new GInfoWindowTab( "Info", header + table )
       ];
      
@@ -142,49 +136,49 @@
 
     function refreshInfoWindow() {
       if( ! map.getInfoWindow().isHidden() )
-        refreshInfoWindowTab( activeDNS, activeIP );
+        refreshInfoWindowTab( activeLabel, activeIf );
     }
     
-    function refreshInfoWindowTab( dns, ip ) {
-      activeIP = ip;
-      activeDNS = dns;
-      var tabs = getTabs( dns, ip );
-      gmarkers[ip].openInfoWindowTabsHtml( tabs );   
+    function refreshInfoWindowTab( label, iface ) {
+      activeIf = iface;
+      activeLabel = label;
+      var tabs = getTabs( label, iface );
+      gmarkers[iface].openInfoWindowTabsHtml( tabs );   
     }
     
-    function toggleMarker( ip ) {
-      var marker = gmarkers[ip];
+    function toggleMarker( iface ) {
+      var marker = gmarkers[iface];
       if ( marker.isHidden() ) {
-        gmarkers[ip].show();
+        gmarkers[iface].show();
       } else {
-        gmarkers[ip].hide();
+        gmarkers[iface].hide();
       }
     }
     
     function invertMarkers() {
-      for( var ip in gmarkers ) {
-        var checkbox = document.getElementById("toggle_marker_" + ip);
-        if( gmarkers[ip].isHidden() ) {
-          gmarkers[ip].show();
+      for( var iface in gmarkers ) {
+        var checkbox = document.getElementById("toggle_marker_" + iface);
+        if( gmarkers[iface].isHidden() ) {
+          gmarkers[iface].show();
           checkbox.checked = true;
         } else {
-          gmarkers[ip].hide();
+          gmarkers[iface].hide();
           checkbox.checked = false;
         }
       }
     }
     
     function selectAllMarkers() {
-      for( var ip in gmarkers ) {
-        gmarkers[ip].show();
-        document.getElementById("toggle_marker_" + ip).checked = true;
+      for( var iface in gmarkers ) {
+        gmarkers[iface].show();
+        document.getElementById("toggle_marker_" + iface).checked = true;
       }
     }
 
     function selectNoneMarkers() {
-      for( var ip in gmarkers ) {
-        gmarkers[ip].hide();
-        document.getElementById("toggle_marker_" + ip).checked = false;
+      for( var iface in gmarkers ) {
+        gmarkers[iface].hide();
+        document.getElementById("toggle_marker_" + iface).checked = false;
       }
     }
 
@@ -208,8 +202,8 @@
     }
     
     
-    function focus( dns, ip ) {
-      refreshInfoWindowTab( dns, ip );
+    function focus( label, iface ) {
+      refreshInfoWindowTab( label, iface );
       map.getInfoWindow().hide();
       map.getInfoWindow().show();
     }
@@ -263,13 +257,13 @@
 	        var lat = markers[i].getAttribute("lat");
 	        var lng = markers[i].getAttribute("long");
 	          
-	        var dns = markers[i].getAttribute("dns");
-	        var ip = markers[i].getAttribute("ip");
+	        var label = markers[i].getAttribute("label");
+	        var iface = markers[i].getAttribute("if");
 	            
 	        // create the marker
-	        gmarkers[ip] = createMarker( lat, lng, dns, ip );
+	        gmarkers[iface] = createAMarker( lat, lng, label, iface);
 	         
-	        map.addOverlay( gmarkers[ip] );
+	        map.addOverlay( gmarkers[iface] );
 	      }
 	      document.getElementById("side_bar").innerHTML = side_bar_html;
 	
@@ -292,12 +286,24 @@
 	         
         }
 
-        var lineToggle = "show links " + '<input id=\"toggle_lines" type=\"checkbox\" onclick=\"javascript:toggleLines();\" checked><br>';
+        var lineToggle = "show links "
+           + '<input id=\"toggle_lines" '
+           + '       type="checkbox" ' 
+           + '       onclick="javascript:toggleLines();" checked><br>';
  
-        var markerToggle = 'markers: ' +
-          '<input id=\"invert_markers\" type=\"button\" onclick=\"javascript:invertMarkers();\" value=\"Invert\">'
-          + '<input id=\"select_all_markers\" type=\"button\" onclick=\"javascript:selectAllMarkers();\" value=\"All\">'
-          + '<input id=\"select_none_markers\" type=\"button\" onclick=\"javascript:selectNoneMarkers();\" value=\"None\">';
+        var markerToggle = 'markers: ' 
+           + '<input id="invert_markers" '
+           + '       type="button" ' 
+           + '       onclick="javascript:invertMarkers();" ' 
+           + '       value="Invert">'
+           + '<input id="select_all_markers" '
+           + '       type="button" '
+           + '       onclick="javascript:selectAllMarkers();" '
+           + '       value="All">'
+           + '<input id="select_none_markers" ' 
+           + '       type="button" '
+           + '       onclick="javascript:selectNoneMarkers();" '
+           + '       value="None">';
                   
         document.getElementById("side_bar").innerHTML = lineToggle + markerToggle + '<hr>' + side_bar_html;   
 

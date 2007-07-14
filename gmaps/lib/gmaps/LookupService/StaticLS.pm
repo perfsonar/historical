@@ -36,7 +36,7 @@ our %maMap = (
 					#endpoint => 'axis/services/snmpMA',
 					host => '129.79.216.183',
 					port => '8080',
-					endpoint => 'axis/services/snmpMA',
+					endpoint => 'perfSONAR_PS/services/snmpMA',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
 				'switch.ch' => { 
@@ -117,6 +117,18 @@ our %maMap = (
                     		    endpoint => 'axis/services/snmpMA',
                     		    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
                 		},
+                                'sox.net' => {
+                                    host => 'bunsen.rnoc.gatech.edu',
+                                    port => '8080',
+                                    endpoint => 'axis/services/snmpMA',
+                                    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                                },
+                                'gatech.edu' => {
+                                    host => 'bunsen.rnoc.gatech.edu',
+                                    port => '8080',
+                                    endpoint => 'axis/services/snmpMA',
+                                    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                                },
 
 
 			);
@@ -133,35 +145,45 @@ sub getMA
 	my $ip = shift;
 	my $router = shift;
 
+	$logger->info( "Looking up $ip, $router" );
+
 	if ( &gmaps::Topology::isIpAddress( $router ) ) {
 		( $ip, $router ) = &gmaps::Topology::getDNS( $router );
 	}
+	
+	my $ma = undef;
 		
 	# if the ip doesn' tnot resolve, search the ip and return the MA
 	if ( ! defined $router || $router eq '' ) {
-		$logger->info( "Could not determine automatically ma for ip $ip!");
+		$logger->warn( "Could not determine automatically ma for ip $ip!");
 
-		my $ma = undef;
-		if ( $ip =~ /^172\.16\./ ) {
+		if ( $ip =~ /^172\.16\./ || $ip =~ /^172\.17\./ ) {
 			$ma = 'fnal.gov';
 		} elsif ( $ip =~ /^172\.18\./ || $ip eq '192.68.191.149' ) {
 			$ma = 'slac.stanford.edu';
 		}
-		$logger->info( "Manual override MA to $ma" );
-		# fake
-		return ( $maMap{$ma}{host}, $maMap{$ma}{port}, $maMap{$ma}{endpoint}, $maMap{$ma}{eventType} );
+		if ( $ma ) {
+			$logger->warn( "Manual override MA to $ma" );
+		} 
+
 	}
+
 	
 	# and do a mapping for the ma info
 	foreach my $k ( keys %maMap ) {
 		if( $router =~ /$k$/) {
 			$logger->info( "Found $k" );
-			return ( $maMap{$k}{host}, $maMap{$k}{port}, $maMap{$k}{endpoint}, $maMap{$k}{eventType} );
+			$ma = $k;
 		}
+		last if ( $ma );
 	}
 
-	# fail
-	return ( undef, undef, undef, undef );
+	if ( ! defined $ma ) {
+		$logger->fatal ( "Could not determine MA for ip=$ip, router=$router");
+		return ( undef, undef, undef, undef );
+	}
+
+	return ( $maMap{$ma}{host}, $maMap{$ma}{port}, $maMap{$ma}{endpoint}, $maMap{$ma}{eventType} );
 }
 
 

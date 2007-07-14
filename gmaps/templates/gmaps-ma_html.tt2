@@ -1,9 +1,6 @@
 
+<hr>
 <table>
-  <tr>
-    <td><b>Input</b></td>
-    <td>[% input %]</td>
-  </tr>
   <tr>
     <td><b>IP</b></td>
     <td>[% ip %]</td>

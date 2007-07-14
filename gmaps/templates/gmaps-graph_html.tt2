@@ -9,32 +9,26 @@
     <script type="text/javascript">
       //<![CDATA[ 
 
-      var ips = new Array();
       var ifs = new Array();
       [% FOREACH router = routers %]
-      ips.push("[% router.ifAddress %]"); 
-      ifs.push("[% router.ifName %]");
-      [% END %]
+      ifs.push("[% router.ifAddress %][% IF router.ifName %]:[% router.ifName %][% END %]");
+      [%- END %]
     
       function refreshGraphs() {
-        for( var i=0; i<ips.length; i++ ) {
+        for( var i=0; i<ifs.length; i++ ) {
           // need to add bogus parameter to prevent hitting the cache
           var d = new Date();
           var uri = "[% cgi %]?mode=[% graphMode %]&bogus=" + d.getTime();
-          uri += "&ip=" + ips[i];
-          if ( ifs[i] ) {
-            uri += "&if=" + ifs[i];
-          }
-          uri += [% IF graphArgs %]"[% graphArgs %]"[% END %];
+          uri += "&if=" + ifs[i];
+          
+          [%- IF graphArgs -%]
+          uri += "[% graphArgs %]";
+          [%- END -%]
 
-          var div = "graph_" + ips[i];
-          if ( ifs[i] ) {
-            div += "_" + ifs[i];
-          }
-
+          var div = "graph_" + ifs[i];
           document.getElementById( div ).src = uri;
 
-         }
+        }
       }
     
       setInterval( "refreshGraphs();", [% REFRESHINTERVAL %] * 1000 );
@@ -44,11 +38,11 @@
   </head>
   <body>
     [% FOREACH router = routers %]
-    <h3>[% router.gmapsLabel %] ([% router.ifAddress %])</h3>
+    <h3>[% router.gmapsLabel %] ([% router.ifAddress %][% IF router.ifName %]:[% router.ifName %][% END %])</h3>
     <p align="center">
-      <img id="graph_[% router.ifAddress %][% IF router.ifName %]_[% router.ifName %][% END %]"
+      <img id="graph_[% router.ifAddress %][% IF router.ifName %]:[% router.ifName %][% END %]"
         height="168px" width="481px" 
-        src="[% cgi %]?mode=[% graphMode %]&ip=[% router.ifAddress %][% IF router.ifName %]&if=[% router.ifName %][% END %][% IF graphArgs %][% graphArgs %][% END %]"/>
+        src="[% cgi %]?mode=[% graphMode %]&if=[% router.ifAddress %][% IF router.ifName %]:[% router.ifName %][% END %][% IF graphArgs %][% graphArgs %][% END %]"/>
     </p>
     [% END %]
   </body>

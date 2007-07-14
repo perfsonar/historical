@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <markers>
   [%- FOREACH mark = marks %]
-  <marker ip="[% mark.ifAddress %]"          dns="[% mark.gmapsLabel %]"
+  <marker if="[% mark.ifAddress %][% IF mark.ifName %]:[% mark.ifName %][% END %]"          label="[% mark.gmapsLabel %]"
           lat="[% mark.latitude %]"          long="[% mark.longitude %]"  />
   [%- END %]
   [%- FOREACH line = lines %]

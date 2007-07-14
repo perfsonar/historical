@@ -335,7 +335,7 @@ sub getLines
 
 		if ( defined $prevMark && &markOkay( $thisMark ) ) {
 			my $line = {
-						'descr'  => $prevMark->{'ifAddress'} . '-' . $thisMark->{'ifAddress'},
+						'descr'  => $prevMark->{'gmapsLabel'} . '-' . $thisMark->{'gmapsLabel'},
 						'srclat' => $prevMark->{'latitude'},
 						'srclng' => $prevMark->{'longitude'},
 						'dstlat' => $thisMark->{'latitude'},
