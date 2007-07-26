@@ -4,7 +4,7 @@ use warnings;
 use Carp qw( carp );
 use Exporter;
 use Log::Log4perl qw(get_logger);
-use perfSONAR_PS::MA::PingER::DB_Config::DBLoader;
+use perfSONAR_PS::DB::DBLoader;
 
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
@@ -12,7 +12,9 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::XML::Namespace;
 use perfSONAR_PS::DB::RRD;
+
 use POSIX qw(strftime);
   
 our @ISA = qw(perfSONAR_PS::MA::Base);
@@ -38,10 +40,7 @@ sub init {
 		return -1;
 	}
 	
-       $self->{CONF}->{"SQL_DB_NAME"}  = "dbname=$db_name"  if( $db_driver =~ /SQLite|Pg/); 
-  
-       
-	 
+        
 	return 0;
 }
 
@@ -77,26 +76,23 @@ sub receive {
   $self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
   if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or 
      $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-    my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
-    my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
-    my $messageIdReturn = genuid();    
-
-    if($messageType eq "MetadataKeyRequest" or 
-       $messageType eq "SetupDataRequest" or 
-       $messageType eq "MeasurementRequest") {
-      $logger->debug("Parsing request.");
-      parseRequest($self, $messageIdReturn, $messageId, $messageType);
-    }
-    else {
-      my $msg = "Message type \"".$messageType."\" is not yet supported";
-      $logger->error($msg);  
-      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+     my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
+     my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
+     my $messageIdReturn = genuid();    
+######## will be added later |MeasurementArchiveStoreRequest
+     if($messageType =~ /^MetadataKeyRequest|SetupDataRequest|MeasurementRequest$/) {
+        $logger->debug("Parsing request.");
+        parseRequest($self, $messageIdReturn, $messageId, $messageType);
+     } else {
+        my $msg = "Message type \"".$messageType."\" is not yet supported";
+        $logger->error($msg);  
+        $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
     }
   }
   else {
     my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" is not supported";
     $logger->error($msg); 
-    $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.mp.snmp", $msg);
+    $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.ma", $msg);
   }
   return $self->{RESPONSE};
 }
@@ -112,39 +108,39 @@ sub parseRequest {
       if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) { 
       
         if($type eq "MeasurementRequest") {
-          $localContent = measurementRequest($self, $metadatadb, $m, $d, $localContent, $messageId, $messageIdRef);  
-        }
-        else {
-          my $metadatadb;
-          if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
-            $metadatadb = new perfSONAR_PS::DB::File(
-              $self->{CONF}->{"METADATA_DB_FILE"}
-            );        
-	        }
-	        elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
-	          $metadatadb = new perfSONAR_PS::DB::XMLDB(
-              $self->{CONF}->{"METADATA_DB_NAME"}, 
-              $self->{CONF}->{"METADATA_DB_FILE"},
-              \%{$self->{NAMESPACES}}
-            );	  
-	        }
-	        $metadatadb->openDB; 
-	        $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
+           $localContent = measurementRequest($self, $metadatadb, $m, $d, $localContent, $messageId, $messageIdRef);  
+        }  else {
+           my $metadatadb;
+           if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file") {
+              $metadatadb = new perfSONAR_PS::DB::File(
+                            $self->{CONF}->{"METADATA_DB_FILE"}
+                             );        
+	   } elsif($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+	      $metadatadb = new perfSONAR_PS::DB::XMLDB(
+                            $self->{CONF}->{"METADATA_DB_NAME"}, 
+                            $self->{CONF}->{"METADATA_DB_FILE"},
+                            \%{$self->{NAMESPACES}}
+                            );	  
+	   }
+	   $metadatadb->openDB; 
+	   $logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");
 	      
-	        if($type eq "MetadataKeyRequest") {
-	          $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
-	        }
-	        elsif($type eq "SetupDataRequest") {         
-            getTime(\%{$self}, $m->getAttribute("id"));
-            if($m->find("//nmwg:metadata/nmwg:key")) {
-              $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-            }
-            else {
-              $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
-            }	
-	        }
-	      }
-      }   
+	   if($type eq "MetadataKeyRequest") {
+	       $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
+	   } elsif($type eq "SetupDataRequest") {         
+               getTime(\%{$self}, $m->getAttribute("id"));
+               if($m->find("//nmwg:metadata/nmwg:key")) {
+                  $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+               }  else {
+                  $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+               }	
+	   } 
+	   #elsif($type eq "MesurementArchiveStoreRequest") {         
+           #      MAStoreRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
+           #   
+	   #}
+        }   
+      }
     }
   }  
   return;
@@ -159,13 +155,14 @@ sub parseRequest {
   my %conf = ();  
   $conf{"METADATA_DB_TYPE"} = "string";
   $conf{"METADATA_DB_NAME"} = "";
-  $conf{"METADATA_DB_FILE"} = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."	           xmlns:ping=\"http://ggf.org/ns/nmwg/tools/pinger/2.0/\">\n\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}.$m->toString()."\n\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}.$d->toString()."\n\n";
-  $conf{"METADATA_DB_FILE"} = $conf{"METADATA_DB_FILE"}."</nmwg:store>\n";
+  $conf{"METADATA_DB_FILE"} = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<nmwg:store";
+  foreach my $nm (qw/nmwg nmwgt pinger/) {
+    $conf{"METADATA_DB_FILE"} .=    "    xmlns:$nm=\"" . $self->{NAMESPACES}->{$nm} . "\"\n";
+  }
+  $conf{"METADATA_DB_FILE"} .= "\">\n\n";
+  $conf{"METADATA_DB_FILE"} .=   $m->toString()."\n\n";
+  $conf{"METADATA_DB_FILE"} .=   $d->toString()."\n\n";
+  $conf{"METADATA_DB_FILE"} .=   "</nmwg:store>\n";
   $conf{"PING"} = $self->{CONF}->{"PING"};
 
   $mp = new perfSONAR_PS::MP::PingER(\%conf, \%{$self->{"NAMESPACES"}}, "");
@@ -297,8 +294,7 @@ sub setupDataRequest {
 	}  
   return;
 }
-
-
+ 
 sub handleData {
   my($self, $id, $dataString, $messageId, $messageIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::PingER");
@@ -326,7 +322,7 @@ sub handleData {
   return $localContent;
 }
 
-
+#retrive datum from SQL DB
  
 sub retrieveSQL {
   my($self, $d, $mid, $type) = @_;
@@ -334,29 +330,7 @@ sub retrieveSQL {
   my $responseString = ''; 
   my $responseHeader ="\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
   my $responseFooter =  "  </nmwg:data>\n";
-  my %db2xml = (
-                 'pkgs_rcvd' =>   undef ,
-		 'ttl' =>  'ttl',
-		 'numBytes' =>   'numBytes' ,
-		 'min_time'  => 'minRtt'  ,
-                 'avrg_time' =>  'meanRtt',
-                 'max_time'  => 'maxRtt' ,
-		 'medianRtt'  => 'medianRtt',
-                 'timestamp' =>   'timestamp',
-	         'iqr_delay' => 'iqrIpd',
-	         'lossPercent' => 'lossPercent',
-		 'min_delay' => 'minIpd',
-		 'ipdv' => 'meanIpd', 
-		 'max_delay'  => 'maxIpd',
-		 'clp' => 'clp',
-		 'pkgs_sent' =>  'count',
-		 'pkgs_size' =>  'packetSize',
-		 
-		 'protocol' => undef, 
-		 'interval' => 'interval',
-		 'outOfOrder' =>  'outOfOrder' , ## depending on Db engine its going to be
-		 'dupl' =>   'duplicates',
-		);
+   
   my $file = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"file\"]")->get_node(1));
   my $table = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"table\"]")->get_node(1));
    
@@ -374,28 +348,30 @@ sub retrieveSQL {
   $db_driver=  'Pg' if( $db_driver =~ /^pg$/i);
   $db_name = "dbname=$db_name"  if( $db_driver =~ /SQLite|Pg/); 
   my $query = "";   
-  my  $datadb =  perfSONAR_PS::MA::PingER::DB_Config::DBLoader->connect("DBI:$db_driver:$db_name",
+   $self->{DBH} =  perfSONAR_PS::DB::DBLoader->connect("DBI:$db_driver:$db_name",
                               $self->{CONF}->{SQL_DB_USER},$self->{CONF}->{SQL_DB_PASS}, 
 			      {AutoCommit => 1, RaiseError => 1});
    
   my $metaID = $d->getAttribute("metadataIdRef");
   my @tables = _getTables($self->{TIME}->{"START"}, $self->{TIME}->{"END"});
-  
+ 
   foreach my $table (@tables) {
-     my @resultset =  $datadb->resultset($table)->search({metaID => $metaID, timestamp => {'-between' => [$self->{TIME}->{"START"}, $self->{TIME}->{"END"}]}});     
-     foreach my  $result (@$resultset) {
-      $responseString .=   "    <pinger:datum";
-       foreach my $el  (keys %db2xml) {
-         if($db2xml{$el} && $result->has_column_loaded($el))  {
-            $responseString .=  " ". $db2xml{$el}."=\"".$result->get_column($el)."\"";
+     my $resultset =  $self->{DBH}->resultset($table)->search({metaID => $metaID,
+                              timestamp => {'-between' => [$self->{TIME}->{"START"}, $self->{TIME}->{"END"}]}});     
+     ### get next row			      
+     while(my  $result = $resultset->next) { 
+         $responseString .=   "    <pinger:datum";
+	 ### get hash of column name=> value
+	 my %temp_row = $result->get_columns;
+         foreach  my $el (keys %temp_row) {
+                $responseString .=  "  \"$el\"=\"" . $temp_row{$el} ."\"";
          }
-       }
-       $responseString .=  " />\n";
-    } 
+         $responseString .=  " />\n";
+     } 
   }			      
   
   my $id = genuid();
-  $datadb->disconnect(); 
+  $self->{DBH}->disconnect() if $self->{DBH}; 
      
   if(!$responseString) {
     my $msg = "Query \"".$query."\" returned 0 results";
@@ -409,15 +385,18 @@ sub retrieveSQL {
   }  
   return $responseString;
 }
-
+#
+#  get the name of the data table ( data_yyyyMM format ) for specific time period
+#  bad thing is here: 'data_' is hardcoded
+#
 sub _getTables($$) {
     my($stime, $etime) = @_;
     my %list = ();
     my $One_DAY_inSec = 86400;
     $stime =  $stime?$stime:(14*$One_DAY_inSec);  ## only allow 2 weeks of data by default
     $etime =  $etime?$etime: gmtime(time); ## now in UTC
-    for(my $i = $stime; $i<=$etime; $i+= 86400) {
-       $list{(strftime "pairs_%Y%m", gmtime($i))} = 1; 
+    for(my $i = $stime; $i<=$etime; $i+= $One_DAY_inSec ) {
+       $list{(strftime "data_%Y%m", gmtime($i))} = 1; 
     }
     return (keys %list);
 }
