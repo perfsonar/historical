@@ -47,7 +47,7 @@ CREATE TABLE regions (
   PRIMARY KEY (region_id));
  
 #
-#   the type of the site ( Beacon, Monitoring Host, Disabled.. anything else ?)
+#   the type of the site ( Beacon, Monitoring Host, Monitored, Disabled.. anything else ?)
 #
 CREATE  TABLE types (
   type_id  smallint,
@@ -97,8 +97,9 @@ CREATE TABLE  metaData  (
 #   pinger data table, some fields have names differnt from XML schema since there where
 #   inherited from the current pinger data table
 #   pkts_rcvd field left as indicator of 100% loss test ( 0 packets )
+#   its named data_yyyyMM to separate from old format - pairs_yyyyMM
 #
-CREATE TABLE  pairs_200707  (
+CREATE TABLE  data_200707  (
  metaID varchar(52)   NOT NULL,
  pkts_rcvd smallint NOT NULL, 
  minRtt float,
