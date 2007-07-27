@@ -152,7 +152,9 @@ sub pathStatusRequest($$$) {
 
 	$localContent .= $m->toString();
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my $mdid = $m->getAttribute("id");
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
 	my ($status, $res) = $self->dumpDatabase;
 	if ($status == 0) {
 		$localContent .= $res;
@@ -180,7 +182,9 @@ sub linkRecentRequest($$$) {
 
 	$localContent .= $m->toString();
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my $mdid = $m->getAttribute("id");
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
 	my ($status, $res) = $self->dumpLastLinkState($link_id);
 	if ($status == 0) {
 		$localContent .= $res;
@@ -208,7 +212,9 @@ sub linkHistoryRequest($$$) {
 
 	$localContent .= $m->toString();
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my $mdid = $m->getAttribute("id");
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
 	my ($status, $res) = $self->dumpLinkStatus($link_id, "");
 	if ($status == 0) {
 		$localContent .= $res;
@@ -243,6 +249,13 @@ sub dumpDatabase {
 sub dumpSQLDatabase($$$) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $status = $self->{DATADB}->openDB;
+	if ($status == -1) {
+		my $msg = "Couldn't open status database";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
 	my $links = $self->{DATADB}->query("select distinct link_id from link_status");
 	if ($links == -1) {
@@ -321,6 +334,13 @@ sub dumpLastLinkState($$$) {
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	my $localContent = "";
+
+	my $status = $self->{DATADB}->openDB;
+	if ($status == -1) {
+		my $msg = "Couldn't open status database";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
 	my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
 	if ($states == -1) {
