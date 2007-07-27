@@ -176,7 +176,7 @@ sub insert {
   if((defined $table and $table ne "") and 
      (defined $argvalues and $argvalues ne "")) {
     my %values = %{$argvalues};
-    my $insert = "insert into " . $table . " (";    
+    my $insert = "insert into " . $table . " (";
     for(my $x = 0; $x <= $#{$self->{SCHEMA}}; $x++) {
       if($x == 0) {
         $insert = $insert.$self->{SCHEMA}->[$x];
@@ -215,6 +215,46 @@ sub insert {
   return 1;  
 }
 
+sub update {
+  my ($self, $table, $wherevalues, $updatevalues) = @_;
+  my $logger = get_logger("perfSONAR_PS::DB::SQL");
+  if((defined $table and $table ne "") and
+     (defined $wherevalues and $wherevalues ne "") and
+     (defined $updatevalues and $updatevalues ne "")) {
+    my $first;
+    my %where = %{$wherevalues};
+    my %values = %{$updatevalues};
+
+    my $where = "";
+    foreach $var (keys %where) {
+      $where .= " and " if ($where ne "");
+      $where .= $var." = ".$where{$var};
+    }
+ 
+    my $values = "";
+    foreach $var (keys %values) {
+      $values .= ", " if ($values ne "");
+      $values .= $var." = ".$values{$var};
+    }
+
+    my $sql = "update " . $table . " set " . $values . " where " . $where;
+
+    $logger->debug("Update \"".$sql."\" prepared.");
+    eval {
+      my $sth = $self->{HANDLE}->prepare($sql);
+      $sth->execute() or $logger->error("Update error on statement \"".$sql."\".");
+    };
+    if($@) {
+      $logger->error("Update error \"".$@."\" on statement \"".$sql."\".");
+      return -1;
+    }
+  }
+  else {
+    $logger->error("Missing argument.");
+    return -1;
+  } 
+  return 1;
+}
 
 sub remove {
   my ($self, $delete) = @_;
