@@ -73,7 +73,9 @@ sub measurementRequest($$$) {
 
 	$localContent .= $md->toString();
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+	my $mdid = $md->getAttribute("id");
+
+	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
 
 	$localContent .= $self->dumpLinkState($link_id, $self->{LINKS}->{$link_id}->{"knowledge"}, $oper_time, $oper_time, $link_oper_value, $link_admin_value);
 
