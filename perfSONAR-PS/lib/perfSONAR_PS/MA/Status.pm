@@ -16,7 +16,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
-use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::MA::Status::Client::SQL;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
@@ -37,8 +37,8 @@ sub init {
 			return -1;
 		}
 
-		$self->{DATADB} = new perfSONAR_PS::DB::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
-		if (!defined $self->{DATADB}) {
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
+		if (!defined $self->{CLIENT}) {
 			my $msg = "No database to dump";
 			$logger->error($msg);
 			return (-1, $msg);
@@ -111,7 +111,7 @@ sub parseRequest {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				if ($eventType eq "Database.Dump") {
-					my ($status, $res) = $self->pathStatusRequest($m, $d);
+					my ($status, $res) = $self->lookupAll($m, $d);
 					if ($status != 0) {
 						$logger->error("Couldn't dump status information");
 						return ($status, $res);
@@ -119,7 +119,7 @@ sub parseRequest {
 
 					$localContent .= $res;
 				} elsif ($eventType eq "Link.History") {
-					my ($status, $res) = $self->linkHistoryRequest($m, $d);
+					my ($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
 					if ($status != 0) {
 						$logger->error("Couldn't dump link history information");
 						return ($status, $res);
@@ -127,7 +127,7 @@ sub parseRequest {
 
 					$localContent .= $res;
 				} elsif ($eventType eq "Link.Recent") {
-					my ($status, $res) = $self->linkRecentRequest($m, $d);
+					my ($status, $res) = $self->lookupLinkRecentRequest($m, $d);
 					if ($status != 0) {
 						$logger->error("Couldn't dump link information");
 						return ($status, $res);
@@ -142,35 +142,92 @@ sub parseRequest {
 		}
 	}
 
+	open(OUT, ">out.res");
+	print OUT $localContent;
+	close OUT;
+
 	return (0, $localContent);
 }
 
-sub pathStatusRequest($$$) {
+sub lookupAllRequest($$$) {
 	my($self, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
+	my ($status, $res);
 
-	$localContent .= $m->toString();
+	($status, $res) = $self->{CLIENT}->openDB;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->getAll;
+	if ($status != 0) {
+		my $msg = "Couldn't get information from database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
 	my $mdid = $m->getAttribute("id");
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-	my ($status, $res) = $self->dumpDatabase;
-	if ($status == 0) {
-		$localContent .= $res;
-	} else {
-		$logger->error("Couldn't dump status structure: $res");
-		return ($status, $res);
+	$localContent .= $m->toString()."\n";
+
+	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	foreach my $link (@{ $res }) {
+		$localContent .= $self->writeoutLinkState($link);
 	}
-	$localContent .= "  </nmwg:data>\n";
+	$localContent .= "</nmwg:data>\n";
 
 	return (0, $localContent);
 }
 
-sub linkRecentRequest($$$) {
+sub lookupLinkHistoryRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($status, $res);
+	my $localContent = "";
+
+	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+
+	if (!defined $link_id or $link_id eq "") {
+		my $msg = "No link id specified in request";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->openDB;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->getLinkHistory($link_id);
+	if ($status != 0) {
+		my $msg = "Couldn't get information about link $link_id from database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $mdid = $m->getAttribute("id");
+
+	$localContent .= $m->toString()."\n";
+
+	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	foreach my $link (@{ $res }) {
+		$localContent .= $self->writeoutLinkState($link);
+	}
+	$localContent .= "</nmwg:data>\n";
+
+	return (0, $localContent);
+}
+
+sub lookupLinkRecentRequest($$$) {
 	my($self, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
+	my ($status, $res);
 
 	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
 
@@ -180,181 +237,44 @@ sub linkRecentRequest($$$) {
 		return (0, $msg);
 	}
 
-	$localContent .= $m->toString();
+	($status, $res) = $self->{CLIENT}->openDB;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->getLastLinkStatus($link_id);
+	if ($status != 0) {
+		my $msg = "Couldn't get information about link $link_id from database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
 	my $mdid = $m->getAttribute("id");
 
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-	my ($status, $res) = $self->dumpLastLinkState($link_id);
-	if ($status == 0) {
-		$localContent .= $res;
-	} else {
-		$logger->error("Couldn't dump link status: $res");
-		return ($status, $res);
-	}
-	$localContent .= "  </nmwg:data>\n";
+	$localContent .= $m->toString()."\n";
+
+	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	$localContent .= $self->writeoutLinkState($res);
+	$localContent .= "</nmwg:data>\n";
 
 	return (0, $localContent);
 }
 
-sub linkHistoryRequest($$$) {
-	my($self, $m, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-	my $localContent = "";
-
-	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
-
-	if (!defined $link_id or $link_id eq "") {
-		my $msg = "No link id specified in request";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	$localContent .= $m->toString();
-
-	my $mdid = $m->getAttribute("id");
-
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-	my ($status, $res) = $self->dumpLinkStatus($link_id, "");
-	if ($status == 0) {
-		$localContent .= $res;
-	} else {
-		$logger->error("Couldn't dump link status: $res");
-		return ($status, $res);
-	}
-	$localContent .= "  </nmwg:data>\n";
-
-	return (0, $localContent);
-}
-
-sub dumpDatabase {
-	my($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-	my ($status, $res);
-
-	if ($self->{CONF}->{"STATUS_DB_TYPE"} eq "SQLite") {
-		($status, $res) = $self->dumpSQLDatabase;
-	} else {
-		my $msg = "Unknown status database type: ".$self->{CONF}->{"STATUS_DB_TYPE"};
-		$logger->error($msg);
-		$self->{DATADB}->closeDB;
-		return (-1, $msg);
-	}
-
-	$self->{DATADB}->closeDB;
-
-	return ($status, $res);
-}
-
-sub dumpSQLDatabase($$$) {
-	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my $links = $self->{DATADB}->query("select distinct link_id from link_status");
-	if ($links == -1) {
-		$logger->error("Couldn't grab list of links");
-		return (-1, "Couldn't grab list of links");
-	}
-
-	my $localContent = "";
-
-	foreach my $link_ref (@{ $links }) {
-		my @link = @{ $link_ref };
-
-		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link[0]."\' order by end_time");
-		if ($states == -1) {
-			$logger->error("Couldn't grab information for link ".$link[0]);
-			return (-1, "Couldn't grab information for link ".$link[0]);
-		}
-
-		foreach my $state_ref (@{ $states }) {
-			my @state = @{ $state_ref };
-
-			$localContent .= $self->__dumpLinkState($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
-		}
-	}
-
-	return (0, $localContent);
-}
-
-sub dumpLinkStatus($$$) {
-	my ($self, $link_id, $time) = @_;
+sub writeoutLinkState($$) {
+	my ($self, $link) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	my $localContent = "";
 
-	my $query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\'";
-	if (defined $time and $time ne "") {
-		$query .= "where end_time => $time and start_time <= $time";
-	}
-
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my $states = $self->{DATADB}->query($query);
-	if ($states == -1) {
-		$logger->error("Couldn't grab information for node ".$link_id);
-		return (-1, "Couldn't grab information for node ".$link_id);
-	}
-
-	foreach my $state_ref (@{ $states }) {
-		my @state = @{ $state_ref };
-
-		$localContent .= $self->__dumpLinkState($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
-	}
-
-	return (0, $localContent);
-}
-
-sub __dumpLinkState($$$$$) {
-	my ($self, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
-
-	my $localContent = "";
-	$localContent .= "<nmtopo:linkStatus linkID=\"".$link_id."\" knowledge=\"".$knowledge."\" startTime=\"".$start_time."\" endTime=\"".$end_time."\">\n";
-	$localContent .= "	<nmtopo:operStatus>".$oper_status."</nmtopo:operStatus>\n";
-	$localContent .= "	<nmtopo:adminStatus>".$admin_status."</nmtopo:adminStatus>\n";
+	$logger->debug("writing out ". $link->getID);
+	$localContent .= "<nmtopo:linkStatus linkID=\"".$link->getID."\" knowledge=\"".$link->getKnowledge."\" startTime=\"".$link->getStartTime."\" endTime=\"".$link->getEndTime."\">\n";
+	$localContent .= "	<nmtopo:operStatus>".$link->getOperStatus."</nmtopo:operStatus>\n";
+	$localContent .= "	<nmtopo:adminStatus>".$link->getAdminStatus."</nmtopo:adminStatus>\n";
 	$localContent .= "</nmtopo:linkStatus>\n";
 
 	return $localContent;
-}
-
-sub dumpLastLinkState($$$) {
-	my ($self, $link_id) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-
-	my $localContent = "";
-
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
-	if ($states == -1) {
-		$logger->error("Couldn't grab information for node ".$link_id);
-		return (-1, "Couldn't grab information for node ".$link_id);
-	}
-
-	foreach my $state_ref (@{ $states }) {
-		my @state = @{ $state_ref };
-
-		$localContent .= $self->__dumpLinkState($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
-	}
-
-	return (0, $localContent);
 }
 
 1;
