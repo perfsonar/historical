@@ -111,7 +111,7 @@ sub parseRequest {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				if ($eventType eq "Database.Dump") {
-					my ($status, $res) = $self->lookupAll($m, $d);
+					my ($status, $res) = $self->lookupAllRequest($m, $d);
 					if ($status != 0) {
 						$logger->error("Couldn't dump status information");
 						return ($status, $res);
@@ -169,13 +169,21 @@ sub lookupAllRequest($$$) {
 		return (-1, $msg);
 	}
 
+	print "STUFF: ".Dumper($res);
+
+	my %links = %{ $res };
+
 	my $mdid = $m->getAttribute("id");
 
 	$localContent .= $m->toString()."\n";
 
 	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-	foreach my $link (@{ $res }) {
-		$localContent .= $self->writeoutLinkState($link);
+
+	foreach my $link_id (keys %links) {
+		print "LINK_ID: $link_id\n";
+		foreach my $link (@{ $links{$link_id} }) {
+			$localContent .= $self->writeoutLinkState($link);
+		}
 	}
 	$localContent .= "</nmwg:data>\n";
 
@@ -203,7 +211,9 @@ sub lookupLinkHistoryRequest($$$) {
 		return (-1, $msg);
 	}
 
-	($status, $res) = $self->{CLIENT}->getLinkHistory($link_id);
+	my @tmp_array = ( $link_id );
+
+	($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);
@@ -244,7 +254,9 @@ sub lookupLinkRecentRequest($$$) {
 		return (-1, $msg);
 	}
 
-	($status, $res) = $self->{CLIENT}->getLastLinkStatus($link_id);
+	my @tmp_array = ( $link_id );
+
+	($status, $res) = $self->{CLIENT}->getLastLinkStatus(\@tmp_array);
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);

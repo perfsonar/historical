@@ -121,7 +121,7 @@ sub getStatusArchive($$$) {
 
 	my $stat_msg = $res;
 
-	my @links = ();
+	my %links = ();
 
 	foreach my $data ($stat_msg->getElementsByLocalName("data")) {
 		foreach my $metadata ($stat_msg->getElementsByLocalName("metadata")) {
@@ -133,20 +133,17 @@ sub getStatusArchive($$$) {
 					return (-1, $msg);
 				}
 
-				($status, $res) = dataToLinkStatus($data);
+				($status, $res) = parseResponse($data, \%links);
 				if ($status != 0) {
 					my $msg = "Error parsing archive response: $res";
 					$logger->error($msg);
 					return (-1, $msg);
 				}
-
-				push @links, @{ $res };
 			}
 		}
 	}
 
-	return (0, \@links);
-
+	return (0, \%links);
 }
 
 sub getAll($) {
@@ -182,11 +179,9 @@ sub getLastLinkStatus($$) {
 	return ($status, $res);
 }
 
-sub dataToLinkStatus($) {
-	my ($data) = @_;
+sub parseResponse($$) {
+	my ($data, $links) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::MA");
-
-	my @links = ();
 
 	foreach my $link ($data->getElementsByLocalName("linkStatus")) {
 		my $id = $link->getAttribute("linkID");
@@ -203,10 +198,13 @@ sub dataToLinkStatus($) {
 		}
 
 		my $new_link = new perfSONAR_PS::MA::Status::Link($id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
-		push @links, $new_link;
+		if (!defined $links->{$id}) {
+			$links->{$id} = ();
+		}
+		push @{ $links->{$id} }, $new_link;
 	}
 
-	return (0, \@links);
+	return (0, "");
 }
 
 1;

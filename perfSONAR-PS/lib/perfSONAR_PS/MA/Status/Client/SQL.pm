@@ -87,7 +87,7 @@ sub getAll($) {
 		return (-1, "Couldn't grab list of links");
 	}
 
-	my @links = ();
+	my %links = ();
 
 	foreach my $link_ref (@{ $links }) {
 		my @link = @{ $link_ref };
@@ -102,22 +102,36 @@ sub getAll($) {
 			my @state = @{ $state_ref };
 
 			my $new_link = new perfSONAR_PS::MA::Status::Link($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
-			push @links, $new_link;
+			if (!defined $links{$link[0]}) {
+				$links{$link[0]} = ();
+			}
+			push @{ $links{$link[0]} }, $new_link;
 		}
 	}
 
-	return (0, \@links);
+	return (0, \%links);
 }
 
 sub getLinkHistory($$$) {
-	my ($self, $link_id, $time) = @_;
+	my ($self, $link_ids, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
-	my $query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\'";
+	my $query = "select link_id, link_knowledge, start_time, end_time, oper_status, admin_status from link_status ";
+	my $i = 0;
+	foreach my $link_id (@{ $link_ids }) {
+		if ($i == 0) {
+			$query .= "where (link_id=\'".$link_id."\'";
+		} else {
+			$query .= "or link_id=\'".$link_id."\'";
+		}
+		$i++;
+	}
+	$query .= ")";
+
 	if (defined $time and $time ne "") {
-		$query .= "where end_time => $time and start_time <= $time";
+		$query .= "and end_time => $time and start_time <= $time";
 	}
 
 	my $status = $self->{DATADB}->openDB;
@@ -129,24 +143,28 @@ sub getLinkHistory($$$) {
 
 	my $states = $self->{DATADB}->query($query);
 	if ($states == -1) {
-		$logger->error("Couldn't grab information for node ".$link_id);
-		return (-1, "Couldn't grab information for node ".$link_id);
+		$logger->error("Couldn't grab link history information");
+		return (-1, "Couldn't grab link history information");
 	}
 
-	my @links = ();
+	my %links = ();
 
 	foreach my $state_ref (@{ $states }) {
 		my @state = @{ $state_ref };
 
-		my $new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
-		push @links, $new_link;
+		my $new_link = new perfSONAR_PS::MA::Status::Link($state[0], $state[1], $state[2], $state[3], $state[4], $state[5]);
+		if (!defined $links{$state[0]}) {
+			$links{$state[0]} = ();
+		}
+
+		push @{ $links{$state[0]} }, $new_link;
 	}
 
-	return (0, \@links);
+	return (0, \%links);
 }
 
 sub getLastLinkStatus($$$) {
-	my ($self, $link_id) = @_;
+	my ($self, $link_ids) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
@@ -158,25 +176,25 @@ sub getLastLinkStatus($$$) {
 		return (-1, $msg);
 	}
 
-	my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
-	if ($states == -1) {
-		$logger->error("Couldn't grab information for node ".$link_id);
-		return (-1, "Couldn't grab information for node ".$link_id);
+	my %links;
+
+	foreach my $link_id (@{ $link_ids }) {
+		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
+		if ($states == -1) {
+			$logger->error("Couldn't grab information for node ".$link_id);
+			return (-1, "Couldn't grab information for node ".$link_id);
+		}
+
+		foreach my $state_ref (@{ $states }) {
+			my @state = @{ $state_ref };
+			my $new_link;
+
+			$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
+			$links{$link_id} = ($new_link);
+		}
 	}
 
-	my $new_link;
-
-	foreach my $state_ref (@{ $states }) {
-		my @state = @{ $state_ref };
-
-		$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
-	}
-
-	if (!defined $new_link) {
-		$logger->error("Link not defined?!?");
-	}
-
-	return (0, $new_link);
+	return (0, \%links);
 }
 
 1;
