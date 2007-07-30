@@ -18,6 +18,8 @@ use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
+use perfSONAR_PS::MA::Status::Client::MA;
+
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
 sub init {
@@ -26,18 +28,8 @@ sub init {
 
 	$self->SUPER::init;
 
-	if (!defined $self->{CONF}->{"STATUS_MA_HOST"} or $self->{CONF}->{"STATUS_MA_HOST"} eq "") {
-		$logger->error("No status MA port specified");
-		return -1;
-	}
-
-	if (!defined $self->{CONF}->{"STATUS_MA_PORT"} or $self->{CONF}->{"STATUS_MA_PORT"} eq "") {
-		$logger->error("No status MA port specified");
-		return -1;
-	}
-
-	if (!defined $self->{CONF}->{"STATUS_MA_ENDPOINT"} or $self->{CONF}->{"STATUS_MA_ENDPOINT"} eq "") {
-		$logger->error("No status MA endpoint specified");
+	if (!defined $self->{CONF}->{"STATUS_MA"} or $self->{CONF}->{"STATUS_MA"} eq "") {
+		$logger->error("No status MA URI specified");
 		return -1;
 	}
 
@@ -117,9 +109,9 @@ sub handleRequest {
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling status request.");
 		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
-		if ($status != 0) {
-			$logger->error("Unable to handle status request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
+		if ($status ne "") {
+			$logger->error("Unable to handle status request: \"$status\": $response");
+			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", $status, $response);
 		} else {
 			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
 		}
@@ -156,13 +148,13 @@ sub parseRequest {
 					$localContent .= $res;
 				} else {
 					$logger->error("Unknown event type: ".$eventType);
-					return ( -1, "Unknown event type: ".$eventType )
+					return ( "error.ma.message.event_type", "Unknown event type: ".$eventType )
 				}
 			}
 		}
 	}
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub handlePathStatusRequest($) {
@@ -175,7 +167,7 @@ sub handlePathStatusRequest($) {
 	if ($status != 0) {
 		my $msg = "Error consulting topology archive: $res";
 		$logger->error($msg);
-		return ("error.ma", $msg);
+		return (-1, $msg);
 	}
 
 	my $topo_msg = $res;
@@ -207,22 +199,77 @@ sub handlePathStatusRequest($) {
 		}
 	}
 
-	my ($junk, $status_request) = buildStatusRequest($self->{LINKS});
-
-	($status, $res) = consultArchive($self->{CONF}->{STATUS_MA_HOST}, $self->{CONF}->{STATUS_MA_PORT}, $self->{CONF}->{STATUS_MA_ENDPOINT}, $status_request);
-	if ($status != 0) {
-		my $msg = "Problem consulting specified link status measurement archive: $res";
+	my $status_client = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{STATUS_MA});
+	if (!defined $status_client) {
+		my $msg = "Problem creating client for status MA";
 		$logger->error($msg);
 		return ("error.ma", $msg);
 	}
 
-	my $stat_msg = $res;
-
-	($status, $res) = parseLinkStatusOutput($stat_msg, $self->{LINKS});
-	if ($status ne "") {
-		my $msg = "Error parsing link status output: $res";
+	($status, $res) = $status_client->open;
+	if ($status != 0) {
+		my $msg = "Problem opening status MA: $res";
 		$logger->error($msg);
 		return ("error.ma", $msg);
+	}
+
+	my @link_ids = ();
+	foreach my $link_id (keys %{ $self->{LINKS} }) {
+		push @link_ids, $self->{LINKS}->{$link_id}->{"archiveId"};
+	}
+
+	($status, $res) = $status_client->getLastLinkStatus(\@link_ids);
+	if ($status != 0) {
+		my $msg = "Error getting link status: $res";
+		$logger->error($msg);
+		return ("error.ma", $msg);
+	}
+
+	foreach my $link (@{ $res }) {
+		my $id = $link->getID;
+
+		$logger->debug("Got information on link $id");
+
+		if (!defined $self->{LINKS}->{$id}) {
+			$logger->warn("Response from server contains a link we didn't ask for");
+			next;
+		}
+
+		my $prev_domain = "";
+		my $link_type = "BROKEN";
+
+		foreach my $node (@{ $self->{LINKS}->{$id}->{"endpoints"} }) {
+			my ($domain, @junk) = split(/-/, $node->{"node"}->{"name"});
+			$logger->debug("DOMAIN: ". $domain . " NAME: ".$node->{"node"}->{"name"});
+			print Dumper ($node->{"node"});
+			if ($prev_domain ne "") {
+				if ($domain eq $prev_domain) {
+					$link_type = "DOMAIN_Link";
+				} else {
+					if ($link->getKnowledge eq "full") {
+						$link_type = "ID_Link";
+					} else {
+						$link_type = "ID_LinkPartialInfo";
+					}
+				}
+			} else {
+				$prev_domain = $domain;
+			}
+		}
+
+		$self->{LINKS}->{$id}->{"mdid"} = genuid();
+		$self->{LINKS}->{$id}->{"time"} = $link->getEndTime;
+		$self->{LINKS}->{$id}->{"type"} = $link_type;
+		$self->{LINKS}->{$id}->{"operStatus"} = $link->getOperStatus;
+		$self->{LINKS}->{$id}->{"adminStatus"} = $link->getAdminStatus;
+	}
+
+	foreach my $link_id (keys %{ $self->{LINKS} }) {
+		if (!defined $self->{LINKS}->{$link_id}->{"time"}) {
+			my $msg = "Did not receive any information about link $link_id";
+			$logger->error($msg);
+			return ("error.ma", $msg);
+		}
 	}
 
 	my $localContent = "";
@@ -231,45 +278,6 @@ sub handlePathStatusRequest($) {
 	$localContent .= outputLinks($self->{LINKS});
 
 	return ("", $localContent);
-}
-
-sub consultArchive($$$$) {
-	my ($host, $port, $endpoint, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
-
-	# start a transport agent
-	my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
-
-	my $envelope = $sender->makeEnvelope($request);
-	my $response = $sender->sendReceive($envelope);
-
-	if (!defined $response or $response eq "") {
-		my $msg = "No response received from status service";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my $parser = XML::LibXML->new();
-	my $doc = $parser->parse_string($response);  
-
-	# XXX ridiculous hack to make ->find not die
-	my $attr = $doc->createAttributeNS( '', 'dummy', '' );
-	$doc->getDocumentElement()->setAttributeNodeNS( $attr );
-
-	my $nodeset = $doc->find("//nmwg:message");
-	if($nodeset->size <= 0) {
-		my $msg = "Message element not found in response";
-		$logger->error($msg);
-		return (-1, $msg);
-	} elsif($nodeset->size > 1) {
-		my $msg = "Too many message elements found in response";
-		$logger->error($msg); 
-		return (-1, $msg);
-	}
-
-	my $nmwg_msg = $nodeset->get_node(1); 
-
-	return (0, $nmwg_msg);
 }
 
 sub idBaseLevel($) {
@@ -297,32 +305,6 @@ EOR
 		;
 
 	return $topology_request;
-}
-
-sub buildStatusRequest($) {
-	my ($links) = @_;
-	my $request = "";
-
-	$request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-
-	my $i = 0;
-
-	foreach my $link_id (keys %{ $links }) {
-		my $link = $links->{$link_id};
-
-		$request .= "<nmwg:metadata id=\"meta$i\">\n";
-		$request .= "  <nmwg:eventType>Link.Recent</nmwg:eventType>\n";
-		$request .= "  <nmwg:parameters>\n";
-		$request .= "    <nmwg:parameter name=\"linkId\">".$link->{"archiveId"}."</nmwg:parameter>\n";
-		$request .= "  </nmwg:parameters>\n";
-		$request .= "</nmwg:metadata>\n";
-		$request .= "<nmwg:data id=\"data$i\" metadataIdRef=\"meta$i\" />\n";
-		$i++;
-	}
-
-	$request .= "</nmwg:message>\n";
-
-	return ("", $request);
 }
 
 sub outputNodes($) {
@@ -574,89 +556,48 @@ sub parseLinkStatusOutput($$) {
 	my ($output, $links) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
-	foreach my $data ($output->getElementsByLocalName("data")) {
-		foreach my $metadata ($output->getElementsByLocalName("metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $eventType = $metadata->findvalue("nmwg:eventType");
-
-				if ($eventType eq "Link.Recent") {
-					my $link_id = $metadata->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
-					if (!defined $link_id) {
-						my $msg = "Received link information, but no link id";
-						$logger->error($msg);
-						return ("error.ma", $msg);
-					}
-
-					$logger->debug("Got information on link $link_id");
-
-					if (!defined $links->{$link_id}) {
-						$logger->warn("Response from server contains a link we didn't ask for");
-						next;
-					}
-
-					my $link_status = $data->find("./nmtopo:linkStatus")->get_node(1);
-					if (!defined $link_status) {
-						my $msg = "Response from server does not contain any link status";
-						$logger->error($msg);
-						return ("error.ma", $msg);
-					}
-
-					my $time = $link_status->getAttribute("endTime");
-					my $knowledge = $link_status->getAttribute("knowledge");
-					my $operStatus = $link_status->findvalue("./nmtopo:operStatus");
-					my $adminStatus = $link_status->findvalue("./nmtopo:adminStatus");
-
-					if (!defined $time or !defined $knowledge or !defined $operStatus or !defined $adminStatus) {
-						my $msg = "Response from server contains incomplete link status";
-						$logger->error($msg);
-						return ("error.ma", $msg);
-					}
-
-					my $prev_domain = "";
-					my $link_type = "BROKEN";
-
-					foreach my $node (@{ $links->{$link_id}->{"endpoints"} }) {
-						my ($domain, @junk) = split(/-/, $node->{"node"}->{"name"});
-						$logger->debug("DOMAIN: ". $domain . " NAME: ".$node->{"node"}->{"name"});
-						print Dumper ($node->{"node"});
-						if ($prev_domain ne "") {
-							if ($domain eq $prev_domain) {
-								$link_type = "DOMAIN_Link";
-							} else {
-								if ($knowledge eq "full") {
-									$link_type = "ID_Link";
-								} else {
-									$link_type = "ID_LinkPartialInfo";
-								}
-							}
-						} else {
-							$prev_domain = $domain;
-						}
-					}
-
-					$links->{$link_id}->{"mdid"} = genuid();
-					$links->{$link_id}->{"time"} = $time;
-					$links->{$link_id}->{"type"} = $link_type;
-					$links->{$link_id}->{"operStatus"} = $operStatus;
-					$links->{$link_id}->{"adminStatus"} = $adminStatus;
-				} else {
-					my $msg = "Received invalid response event from server: $eventType";
-					$logger->error($msg);
-					return ("error.ma", $msg);
-				}
-			}
-		}
-	}
-
-	foreach my $link_id (keys %{ $links }) {
-		if (!defined $links->{$link_id}->{"time"}) {
-			my $msg = "Did not receive any information about link $link_id";
-			$logger->error($msg);
-			return ("error.ma", $msg);
-		}
-	}
 
 	return ("", "");
+}
+
+package perfSONAR_PS::MA::CircuitStatus::Link;
+
+use Log::Log4perl qw(get_logger);
+
+# endpoints, mdid, time, type, operStatus, adminStatus
+sub new {
+	my ($package, $id, $archive_id, $metadata_id, $type, $time, $operStatus, $adminStatus) = @_;
+	my %hash = ();
+
+	if (defined $id and $id ne "") {
+		$hash{"ID"} = $id;
+	}
+
+	if (defined $archive_id and $archive_id ne "") {
+		$hash{"ARCHIVE_ID"} = $archive_id;
+	}
+
+	if (defined $metadata_id and $metadata_id ne "") {
+		$hash{"METADATA_ID"} = $metadata_id;
+	}
+
+	if (defined $type and $type ne "") {
+		$hash{"TYPE"} = $type;
+	}
+
+	if (defined $time and $time ne "") {
+		$hash{"TIME"} = $time;
+	}
+
+	if (defined $operStatus and $operStatus ne "") {
+		$hash{"OPER_STATUS"} = $operStatus;
+	}
+
+	if (defined $adminStatus and $adminStatus ne "") {
+		$hash{"ADMIN_STATUS"} = $adminStatus;
+	}
+
+	bless \%hash => $package;
 }
 
 1;
