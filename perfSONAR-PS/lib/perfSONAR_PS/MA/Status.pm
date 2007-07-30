@@ -155,7 +155,7 @@ sub lookupAllRequest($$$) {
 	my $localContent = "";
 	my ($status, $res);
 
-	($status, $res) = $self->{CLIENT}->openDB;
+	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
@@ -196,7 +196,7 @@ sub lookupLinkHistoryRequest($$$) {
 		return (-1, $msg);
 	}
 
-	($status, $res) = $self->{CLIENT}->openDB;
+	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
@@ -237,7 +237,7 @@ sub lookupLinkRecentRequest($$$) {
 		return (0, $msg);
 	}
 
-	($status, $res) = $self->{CLIENT}->openDB;
+	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
