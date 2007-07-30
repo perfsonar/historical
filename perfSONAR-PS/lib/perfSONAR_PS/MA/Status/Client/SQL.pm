@@ -1,5 +1,6 @@
 package perfSONAR_PS::MA::Status::Client::SQL;
 
+use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MA::Status::Link;
@@ -20,7 +21,7 @@ sub new {
 	bless \%hash => $package;
 }
 
-sub openDB($) {
+sub open($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
@@ -45,7 +46,7 @@ sub openDB($) {
 	return (0, "");
 }
 
-sub closeDB($) {
+sub close($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
@@ -64,6 +65,7 @@ sub setDBIString($$) {
 }
 
 sub dbIsOpen($) {
+	my ($self) = @_;
 	return $self->{DB_OPEN};
 }
 
@@ -136,7 +138,7 @@ sub getLinkHistory($$$) {
 	foreach my $state_ref (@{ $states }) {
 		my @state = @{ $state_ref };
 
-		my $new_link = new perfSONAR_PS::MA::Status::Link($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
+		my $new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
 		push @links, $new_link;
 	}
 
