@@ -328,9 +328,23 @@ sub retrieveSQL {
   my($self, $d, $mid, $type) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::PingER");
   my $responseString = ''; 
-  my $responseHeader ="\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
+  my $responseHeader ="\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n"; 
+  
   my $responseFooter =  "  </nmwg:data>\n";
-   
+  my %return_vars = ('minRtt' => {name => 'minRtt', unit => 'msec' },
+		    'maxRtt' =>  {name =>  'maxRtt', unit => 'msec'} ,
+		    'meanRtt' =>  {name =>   'meanRtt', unit => 'msec'},
+		    'medianRtt' =>  {name =>  'medianRtt' , unit => 'msec'} ,
+		    'minIpd' => {name =>  'minIpd' , unit => 'msec'},
+		    'maxIpd' => {name =>   'maxIpd', unit => 'msec'} ,
+		    'meanIpd' =>  {name =>  'meanIpd', unit => 'msec'},   
+		    'medianIpd' => {name =>  'medianIpd', unit => 'msec'} ,  
+		    'lossPercent' =>  {name =>  'lossPercent'  },
+		    'clp' => {name => 'clp'},
+		    'iprIpd' =>  {name =>  'iprIpd' },
+		    'outOfOrder' =>  {name =>  'outOfOrder'},
+		    'duplicates' =>  {name => 'duplicates'} );
+		    
   my $file = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"file\"]")->get_node(1));
   my $table = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"table\"]")->get_node(1));
    
@@ -354,19 +368,32 @@ sub retrieveSQL {
    
   my $metaID = $d->getAttribute("metadataIdRef");
   my @tables = _getTables($self->{TIME}->{"START"}, $self->{TIME}->{"END"});
- 
+  if( $self->{TIME}->{"START"} && $self->{TIME}->{"END"} && ($self->{TIME}->{"START"} < $self->{TIME}->{"END"} )) {
+     $responseHeader .=  "<nmwg:commonTime type=\"range\">\n  <nmtm:start type=\"unix\" value=\"" .
+                           $self->{TIME}->{"START"} . "\"/>\n" .
+			    "<nmtm:end type=\"unix\" value=\"" .
+                           $self->{TIME}->{"END"} . "\"/>\n";
+     $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";			   
+  } elsif($self->{TIME}->{"START"})  {
+        $responseHeader .=  "<nmwg:commonTime type=\"unix\"  value=\"" .  $self->{TIME}->{"START"} . "\">\n"; 
+        $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";	
+  } elsif($self->{TIME}->{"END"})  {
+        $responseHeader .=  "<nmwg:commonTime type=\"unix\"  value=\"" .  $self->{TIME}->{"START"} . "\">\n"; 
+        $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";	
+  }
+  
   foreach my $table (@tables) {
      my $resultset =  $self->{DBH}->resultset($table)->search({metaID => $metaID,
                               timestamp => {'-between' => [$self->{TIME}->{"START"}, $self->{TIME}->{"END"}]}});     
      ### get next row			      
      while(my  $result = $resultset->next) { 
-         $responseString .=   "    <pinger:datum";
-	 ### get hash of column name=> value
+        ### get hash of column name=> value
 	 my %temp_row = $result->get_columns;
-         foreach  my $el (keys %temp_row) {
-                $responseString .=  "  \"$el\"=\"" . $temp_row{$el} ."\"";
-         }
-         $responseString .=  " />\n";
+	foreach  my $el (keys %return_vars ) {
+              $responseString .=  " <pinger:datum  name=\"" .$return_vars{$el}->{name} ."\"  value=\"". $temp_row{$el} ."\"";
+	      $responseString .=  $return_vars{$el}->{unit}?"  valueUnits=\"". $return_vars{$el}->{unit} . "\"/>":"/>";
+        }
+     
      } 
   }			      
   
