@@ -10,6 +10,7 @@ use Log::Log4perl qw(get_logger :levels);
      
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MA::SNMP;
+use perfSONAR_PS::LS::Register;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
@@ -101,6 +102,11 @@ sub measurementArchiveQuery {
 sub registerLS {
   $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
 	
+	my $ls = new perfSONAR_PS::LS::Register(\%conf, \%ns);
+	while(1) {
+	  $ls->register;
+	  sleep($conf{"LS_REGISTRATION_INTERVAL"});
+	}
   return
 }
 
@@ -166,7 +172,6 @@ POSIX qw( setsid )
 Log::Log4perl
 perfSONAR_PS::Common
 perfSONAR_PS::Transport
-perfSONAR_PS::MP::SNMP
 perfSONAR_PS::MA::SNMP
 
 =head1 AUTHOR
@@ -175,7 +180,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id: snmpMP.pl 212 2007-06-04 13:50:07Z zurawski $
+$Id$
 
 =head1 COPYRIGHT AND LICENSE
 

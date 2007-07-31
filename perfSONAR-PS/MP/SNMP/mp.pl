@@ -160,7 +160,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id: snmpMP.pl 212 2007-06-04 13:50:07Z zurawski $
+$Id$
 
 =head1 COPYRIGHT AND LICENSE
 
