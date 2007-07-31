@@ -54,16 +54,17 @@ if(!$DEBUGFLAG) {
 
 $logger->debug("Starting '".threads->tid()."'");
 
-my $maThread = threads->new(\&measurementArchive);
 
-if(!defined $maThread) {
+my $maThread = threads->new(\&measurementArchive);
+my $regThread = threads->new(\&registerLS);
+
+if(!defined $maThread or !defined $regThread) {
   $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
 $maThread->join();
-
-
+$regThread->join();
 
 
 
@@ -97,6 +98,13 @@ sub measurementArchiveQuery {
 }
 
 
+sub registerLS {
+  $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
+	
+  return
+}
+
+
 sub daemonize {
   chdir '/' or die "Can't chdir to /: $!";
   open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
@@ -115,19 +123,20 @@ snmpMP.pl - An SNMP based MA (MeasurementArchive).
 
 =head1 DESCRIPTION
 
-This script creates an MA for an SNMP based collector. 
+This script creates an MA for an SNMP based collector.  The service is also capable
+of registering with an LS instance.  
 
 =head1 SYNOPSIS
 
-./snmpMP.pl [--verbose | --help]
+./ma.pl [--verbose | --help]
 
 The verbose flag allows lots of debug options to print to the screen.  If the option is
 omitted the service will run in daemon mode.
 
 =head1 FUNCTIONS
 
-The following functions are used within this script to execute 
-MA listening and delivery. 
+The following functions are used within this script to execute the 2 major tasks of
+LS registration and MA listening and delivery.
 
 =head2 measurementArchive
 
@@ -138,6 +147,11 @@ data and metadata are stored in various database structures.
 =head2 measurementArchiveQuery
 
 This performs the semi-automic operations of the MA.  
+
+=head2 registerLS
+
+This function, meant to be used in the context of a thread, will continously register
+and update its information with the LS specified in the conf file.  
 
 =head2 daemonize
 
@@ -152,6 +166,7 @@ POSIX qw( setsid )
 Log::Log4perl
 perfSONAR_PS::Common
 perfSONAR_PS::Transport
+perfSONAR_PS::MP::SNMP
 perfSONAR_PS::MA::SNMP
 
 =head1 AUTHOR
