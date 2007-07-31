@@ -225,8 +225,8 @@ sub handlePathStatusRequest($) {
 		return ("error.ma", $msg);
 	}
 
-	foreach my $link (@{ $res }) {
-		my $id = $link->getID;
+	foreach my $id (%{ $res }) {
+		my $link = pop(@{ $res->{$id} });
 
 		$logger->debug("Got information on link $id");
 
@@ -241,7 +241,6 @@ sub handlePathStatusRequest($) {
 		foreach my $node (@{ $self->{LINKS}->{$id}->{"endpoints"} }) {
 			my ($domain, @junk) = split(/-/, $node->{"node"}->{"name"});
 			$logger->debug("DOMAIN: ". $domain . " NAME: ".$node->{"node"}->{"name"});
-			print Dumper ($node->{"node"});
 			if ($prev_domain ne "") {
 				if ($domain eq $prev_domain) {
 					$link_type = "DOMAIN_Link";
@@ -486,8 +485,6 @@ sub parseTopology($$$) {
 
 	$logger->debug("parseTopology()");
 
-	print "Topo ID: ".Dumper($topology_ids);
-
 	foreach my $domain ($topology->getChildrenByLocalName("domain")) {
 		$logger->debug("domain: ".$domain->getAttribute("id"));
 		foreach my $node ($domain->getChildrenByLocalName("node")) {
@@ -524,8 +521,6 @@ sub parseTopology($$$) {
 				$topology_ids->{$id}->{"name"} = $domain_name."-".$new_name;
 			}
 
-			print Dumper ($topology_ids->{$id}->{"node"});
-
 			if (defined $longitude) {
 				# conversions may need to be made
 				$topology_ids->{$id}->{"longitude"} = $longitude;
@@ -558,46 +553,6 @@ sub parseLinkStatusOutput($$) {
 
 
 	return ("", "");
-}
-
-package perfSONAR_PS::MA::CircuitStatus::Link;
-
-use Log::Log4perl qw(get_logger);
-
-# endpoints, mdid, time, type, operStatus, adminStatus
-sub new {
-	my ($package, $id, $archive_id, $metadata_id, $type, $time, $operStatus, $adminStatus) = @_;
-	my %hash = ();
-
-	if (defined $id and $id ne "") {
-		$hash{"ID"} = $id;
-	}
-
-	if (defined $archive_id and $archive_id ne "") {
-		$hash{"ARCHIVE_ID"} = $archive_id;
-	}
-
-	if (defined $metadata_id and $metadata_id ne "") {
-		$hash{"METADATA_ID"} = $metadata_id;
-	}
-
-	if (defined $type and $type ne "") {
-		$hash{"TYPE"} = $type;
-	}
-
-	if (defined $time and $time ne "") {
-		$hash{"TIME"} = $time;
-	}
-
-	if (defined $operStatus and $operStatus ne "") {
-		$hash{"OPER_STATUS"} = $operStatus;
-	}
-
-	if (defined $adminStatus and $adminStatus ne "") {
-		$hash{"ADMIN_STATUS"} = $adminStatus;
-	}
-
-	bless \%hash => $package;
 }
 
 1;
