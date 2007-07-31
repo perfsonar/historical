@@ -109,6 +109,8 @@ CREATE TABLE  data_200707  (
  clp float,
  iqrIpd float,
  lossPercent  float,
+ rtts text,
+ seqNums text,
  INDEX (meanRtt, medianRtt, lossPercent, meanIpd, clp),
  FOREIGN KEY (metaID) references metaData (metaID),
  PRIMARY KEY  (metaID, timestamp));

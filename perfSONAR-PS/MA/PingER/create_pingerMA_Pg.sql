@@ -107,7 +107,9 @@ CREATE TABLE  data_200707  (
  outOfOrder  boolean,
  clp real,
  iqrIpd real,
- lossPercent  real,
+ lossPercent  real, 
+ rtts text,
+ seqNums text,
  INDEX (meanRtt, medianRtt, lossPercent, meanIpd, clp),
  FOREIGN KEY (metaID) references metaData (metaID),
  PRIMARY KEY  (metaID, timestamp));
