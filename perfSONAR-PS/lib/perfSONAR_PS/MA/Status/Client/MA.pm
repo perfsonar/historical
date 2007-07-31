@@ -4,6 +4,7 @@ use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::MA::Status::Link;
 use perfSONAR_PS::Common;
+use Data::Dumper;
 
 sub new {
 	my ($package, $uri_string) = @_;
@@ -164,7 +165,16 @@ sub getStatusArchive($$$) {
 					return (-1, $msg);
 				}
 
-				($status, $res) = parseResponse($data, \%links);
+				my $link_id = $metadata->findvalue('./nmwg:subject/nmtopo:link/@id');
+				if (!defined $link_id or $link_id eq "") {
+					my $msg = "Response does not contain a link id";
+					$logger->error($msg);
+					return (-1, $msg);
+				}
+
+				$logger->debug("got information on link: $link_id");
+
+				($status, $res) = parseResponse($link_id, $data, \%links);
 				if ($status != 0) {
 					my $msg = "Error parsing archive response: $res";
 					$logger->error($msg);
@@ -177,29 +187,64 @@ sub getStatusArchive($$$) {
 	return (0, \%links);
 }
 
-sub parseResponse($$) {
-	my ($data, $links) = @_;
+sub parseResponse($$$) {
+	my ($link_id, $data, $links) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::MA");
 
-	foreach my $link ($data->getElementsByLocalName("linkStatus")) {
-		my $id = $link->getAttribute("linkID");
+	foreach my $link ($data->getElementsByLocalName("datum")) {
+		my $time = $link->getAttribute("timeValue");
+		my $time_type = $link->getAttribute("timeType");
 		my $start_time = $link->getAttribute("startTime");
+		my $start_time_type = $link->getAttribute("startTimeType");
 		my $end_time = $link->getAttribute("endTime");
+		my $end_time_type = $link->getAttribute("endTimeType");
 		my $knowledge = $link->getAttribute("knowledge");
-		my $operStatus = $link->findvalue("./nmtopo:operStatus");
-		my $adminStatus = $link->findvalue("./nmtopo:adminStatus");
+		my $operStatus = $link->findvalue("./ifevt:stateOper");
+		my $adminStatus = $link->findvalue("./ifevt:stateAdmin");
 
-		if (!defined $id or !defined $start_time or !defined $end_time or !defined $knowledge or !defined $operStatus or !defined $adminStatus) {
-			my $msg = "Response from server contains incomplete link status: $id $start_time $end_time $knowledge $operStatus $adminStatus: ".$link->toString;
+		if (!defined $knowledge or !defined $operStatus or !defined $adminStatus or $adminStatus eq "" or $operStatus eq "" or $knowledge eq "") {
+			my $msg = "Response from server contains incomplete link status: ".$link->toString;
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		my $new_link = new perfSONAR_PS::MA::Status::Link($id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
-		if (!defined $links->{$id}) {
-			$links->{$id} = ();
+		if ((!defined $time or !defined $time_type) and (!defined $start_time or !defined $start_time_type or !defined $end_time or !defined $end_time_type)) {
+			my $msg = "Response from server contains incomplete link status: ".$link->toString;
+			$logger->error($msg);
+			return (-1, $msg);
 		}
-		push @{ $links->{$id} }, $new_link;
+
+		if (defined $time_type and $time_type ne "unix") {
+			my $msg = "Response from server contains invalid time type \"".$time_type."\": ".$link->toString;
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (defined $start_time_type and $start_time_type ne "unix") {
+			my $msg = "Response from server contains invalid time type \"".$start_time_type."\": ".$link->toString;
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (defined $end_time_type and $end_time_type ne "unix") {
+			my $msg = "Response from server contains invalid time type \"".$end_time_type."\": ".$link->toString;
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $new_link;
+
+		if (!defined $start_time) {
+		$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $knowledge, $time, $time, $operStatus, $adminStatus);
+		} else {
+		$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
+		}
+
+		if (!defined $links->{$link_id}) {
+			$links->{$link_id} = ();
+		}
+
+		push @{ $links->{$link_id} }, $new_link;
 	}
 
 	return (0, "");

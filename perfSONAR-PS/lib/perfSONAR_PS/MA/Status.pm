@@ -109,8 +109,6 @@ sub handleRequest {
 			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
 		}
 
-		print Dumper(\%all_namespaces);
-
 		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces);
 	}
 
@@ -269,23 +267,27 @@ sub lookupAllRequest($$$) {
 		return ("error.common.storage.fetch", $msg);
 	}
 
-	print "STUFF: ".Dumper($res);
-
 	my %links = %{ $res };
 
 	my $mdid = $m->getAttribute("id");
 
 	$localContent .= $m->toString()."\n";
 
-	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" metadataIdRef=\"$mdid\">\n";
-
+	my $i = genuid();
 	foreach my $link_id (keys %links) {
-		print "LINK_ID: $link_id\n";
+		$localContent .= "<nmwg:metadata id=\"meta$i\" metadataIdRef=\"$mdid\">\n";
+		$localContent .= "  <nmwg:subject id=\"sub$i\">\n";
+		$localContent .= "    <nmtopo:link id=\"$link_id\" />\n";
+		$localContent .= "  </nmwg:subject>\n";
+		$localContent .= "</nmwg:metadata>\n";
+		$localContent .= "<nmwg:data metadataIdRef=\"meta$i\">\n";
 		foreach my $link (@{ $links{$link_id} }) {
 			$localContent .= $self->writeoutLinkState($link);
 		}
+		$localContent .= "</nmwg:data>\n";
+
+		$i++;
 	}
-	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
 }
@@ -324,7 +326,7 @@ sub lookupLinkHistoryRequest($$$) {
 
 	$localContent .= $m->toString()."\n";
 
-	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" metadataIdRef=\"$mdid\">\n";
+	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
 	foreach my $link (@{ $res }) {
 		$localContent .= $self->writeoutLinkState($link);
 	}
@@ -367,8 +369,6 @@ sub lookupLinkRecentRequest($$$) {
 
 	$localContent .= $m->toString()."\n";
 
-	print Dumper($res)."\n";
-
 	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
 	$localContent .= $self->writeoutLinkState($res->{$link_id});
 	$localContent .= "</nmwg:data>\n";
@@ -376,17 +376,21 @@ sub lookupLinkRecentRequest($$$) {
 	return ("", $localContent);
 }
 
-sub writeoutLinkState($$) {
-	my ($self, $link) = @_;
+sub writeoutLinkState($$$) {
+	my ($self, $link, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	my $localContent = "";
 
-	$logger->debug("writing out ". $link->getID);
-	$localContent .= "<nmtopo:linkStatus linkID=\"".$link->getID."\" knowledge=\"".$link->getKnowledge."\" startTime=\"".$link->getStartTime."\" endTime=\"".$link->getEndTime."\">\n";
-	$localContent .= "	<nmtopo:operStatus>".$link->getOperStatus."</nmtopo:operStatus>\n";
-	$localContent .= "	<nmtopo:adminStatus>".$link->getAdminStatus."</nmtopo:adminStatus>\n";
-	$localContent .= "</nmtopo:linkStatus>\n";
+	if (!defined $time or $time eq "") {
+	$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
+	$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
+	} else {
+	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
+	}
+	$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
+	$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
+	$localContent .= "</ifevt:datum>\n";
 
 	return $localContent;
 }

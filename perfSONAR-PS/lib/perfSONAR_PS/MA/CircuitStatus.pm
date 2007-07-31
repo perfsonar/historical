@@ -106,19 +106,36 @@ sub handleRequest {
 
 	$self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
 
+	my ($status, $response);
+
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling status request.");
-		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
-		if ($status ne "") {
-			$logger->error("Unable to handle status request: \"$status\": $response");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", $status, $response);
-		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
-		}
+		($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
 	} else {
-		my $msg = "Message type \"".$messageType."\" is not yet supported";
-		$logger->error($msg);
-		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+		$status = "error.ma.message.type";
+		$response ="Message type \"".$messageType."\" is not yet supported";
+
+		$logger->error($response);
+	}
+
+	if ($status ne "") {
+		$logger->error("Error handling request: $status/$response");
+
+		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", $status, $response);
+	} else {
+		my %all_namespaces = ();
+
+		my $request_namespaces = $self->{LISTENER}->getRequestNamespaces();
+
+		foreach my $uri (keys %{ $request_namespaces }) {
+			$all_namespaces{$request_namespaces->{$uri}} = $uri;
+		}
+
+		foreach my $prefix (keys %{ $self->{NAMESPACES} }) {
+			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
+		}
+
+		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces);
 	}
 
 	return $self->{RESPONSE};
@@ -331,6 +348,7 @@ sub outputNodes($) {
 
 sub outputLinks($) {
 	my ($links, $nodes) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
 	my $content = "";
 
@@ -353,6 +371,12 @@ sub outputLinks($) {
 		$content .= "  </nmwg:subject>\n";
 		$content .= "</nmwg:metadata>\n";
 
+		$content .= "<nmwg:data id=\"data$i\" metadataIdRef=\"".$link->{"mdid"}."\">\n";
+		$content .= "  <ifevt:datum timeType=\"unix\" timeValue=\"".$link->{"time"}."\">\n";
+		$content .= "    <ifevt:stateAdmin>".$link->{"adminStatus"}."</ifevt:stateAdmin>\n";
+		$content .= "    <ifevt:operAdmin>".$link->{"operStatus"}."</ifevt:operAdmin>\n";
+		$content .= "  </ifevt:datum>\n";
+		$content .= "</nmwg:data>\n";
 		$i++;
 	}
 
