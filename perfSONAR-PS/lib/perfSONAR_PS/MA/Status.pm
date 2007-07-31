@@ -82,14 +82,24 @@ sub handleRequest {
 	$self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
 
 	if($messageType eq "SetupDataRequest") {
-		$logger->debug("Handling status request.");
-		my ($status, $response) = $self->parseRequest($self->{LISTENER}->getRequestDOM());
+		$logger->debug("Handling lookup request.");
+		my ($status, $response) = $self->parseLookupRequest($self->{LISTENER}->getRequestDOM());
 		if ($status != 0) {
 			$logger->error("Unable to handle status request");
 			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
 		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response);
+			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response, $self->{REQUESTNAMESPACES});
 		}
+	} elsif ($messageType eq "MeasurementArchiveStoreRequest") {
+		$logger->debug("Handling store request.");
+		my ($status, $response) = $self->parseStoreRequest($self->{LISTENER}->getRequestDOM());
+		if ($status != 0) {
+			$logger->error("Unable to handle status request");
+			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
+		} else {
+			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "MeasurementArchiveStoreRequest", $response, $self->{REQUESTNAMESPACES});
+		}
+
 	} else {
 		my $msg = "Message type \"".$messageType."\" is not yet supported";
 		$logger->error($msg);
@@ -99,7 +109,89 @@ sub handleRequest {
 	return $self->{RESPONSE};
 }
 
-sub parseRequest {
+sub parseStoreRequest {
+	my ($self, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $localContent = "";
+
+	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
+				my $knowledge = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="knowledge"]');
+				my $time = $d->findvalue('./ifevt:datum/@timeValue');
+				my $time_type = $d->findvalue('./ifevt:datum/@timeType');
+				my $adminState = $d->findvalue('./ifevt:datum/ifevt:stateAdmin');
+				my $operState = $d->findvalue('./ifevt:datum/ifevt:operAdmin');
+
+				if (!defined $link_id) {
+					my $msg = "Metadata ".$m->getAttribute("id")." is missing the link id";
+					$logger->error($msg);
+					return ("error.ma", $msg);
+				}
+
+				if (!defined $knowledge) {
+					my $msg = "Metadata ".$m->getAttribute("id")." is missing knowledge parameter";
+					$logger->error($msg);
+					return ("error.ma", $msg);
+				}
+
+				if (!defined $time or !defined $time_type or !defined $adminState or !defined $operState) {
+					my $msg = "Data ".$d->getAttribute("id")." is incomplete";
+					$logger->error($msg);
+					return ("error.ma", $msg);
+				}
+
+				if ($time_type ne "unix") {
+					my $msg = "Time type must be unix timestamp";
+					$logger->error($msg);
+					return ("error.ma", $msg);
+				}
+
+				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
+				if ($status != 0) {
+					my $msg = "Couldn't handle store request: $res";
+					$logger->error($msg);
+					return ("error.ma", $msg);
+				}
+
+				# give them back what they gave us?
+
+				$localContent .= $m->toString;
+				$localContent .= $d->toString;
+			}
+		}
+	}
+
+	return (0, $localContent);
+}
+
+sub handleStoreRequest($$$$$) {
+	my ($self, $link_id, $knowledge, $time, $operState, $adminState) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($status, $res);
+
+	$logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState)");
+
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, 0);
+	if ($status != 0) {
+		my $msg = "Database update failed: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	return (0, "");
+}
+
+sub parseLookupRequest {
 	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
@@ -196,7 +288,7 @@ sub lookupLinkHistoryRequest($$$) {
 	my ($status, $res);
 	my $localContent = "";
 
-	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+	my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
@@ -239,7 +331,7 @@ sub lookupLinkRecentRequest($$$) {
 	my $localContent = "";
 	my ($status, $res);
 
-	my $link_id = $m->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+	my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
@@ -267,8 +359,10 @@ sub lookupLinkRecentRequest($$$) {
 
 	$localContent .= $m->toString()."\n";
 
+	print Dumper($res)."\n";
+
 	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-	$localContent .= $self->writeoutLinkState($res);
+	$localContent .= $self->writeoutLinkState($res->{$link_id});
 	$localContent .= "</nmwg:data>\n";
 
 	return (0, $localContent);
@@ -351,7 +445,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 	requets.  will also 'do nothing' in the event that a request has been
 	acted on by the lower layer.
 
-=head2 parseRequest($self, $messageId, $messageIdRef, $type)
+=head2 parseLookupRequest($self, $messageId, $messageIdRef, $type)
 
 	Processes both the the MetadataKeyRequest and SetupDataRequest messages, which
 	preturn either metadata or data to the user.

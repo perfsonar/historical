@@ -15,9 +15,8 @@ use perfSONAR_PS::MP::Base;
 use perfSONAR_PS::MP::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
-#use perfSONAR_PS::DB::XMLDB;
-#use perfSONAR_PS::DB::RRD;
-use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::MA::Status::Client::SQL;
+use perfSONAR_PS::MA::Status::Client::MA;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 
@@ -32,73 +31,33 @@ sub init($) {
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"STATUS_DB_TYPE"} or $self->{CONF}->{"STATUS_DB_TYPE"} eq "") {
-		$logger->error("No database type specified");
+	if (!defined $self->{CONF}->{"STATUS_MA_TYPE"} or $self->{CONF}->{"STATUS_MA_TYPE"} eq "") {
+		$logger->error("No status MA type specified");
 		return -1;
 	}
 
-	if ($self->{CONF}->{"STATUS_DB_TYPE"} eq "SQLite") {
-		if (!defined $self->{CONF}->{"STATUS_DB_FILE"} or $self->{CONF}->{"STATUS_DB_FILE"} eq "") {
-			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_DB_FILE)");
+	if ($self->{CONF}->{"STATUS_MA_TYPE"} eq "SQLite") {
+		if (!defined $self->{CONF}->{"STATUS_MA_FILE"} or $self->{CONF}->{"STATUS_MA_FILE"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_MA_FILE)");
 			return -1;
 		}
 
 		my @dbSchema = ("link_id", "link_knowledge", "start_time", "end_time", "oper_status", "admin_status");  
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_MA_FILE"});
+	} elsif ($self->{CONF}->{"STATUS_MA_TYPE"} eq "MA") {
+		if (!defined $self->{CONF}->{"STATUS_MA_URI"} or $self->{CONF}->{"STATUS_MA_URI"} eq "") {
+			$logger->error("You specified to use an MA, but did not specify which one(STATUS_MA_URI)");
+			return -1;
+		}
+
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{"STATUS_MA_URI"});
 	} else {
-		$logger->error("Invalid database type specified");
+		$logger->error("Invalid status MA type specified");
 		return -1;
 	}
 
 	return 0;
-}
-
-sub measurementRequest($$$) {
-	my ($self, $md, $data) = @_;
-	my $logger = get_logger("perfSONAR_PS::MP::Status");
-
-	$logger->debug("measurementRequest()");
-
-	my $link_id = $md->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
-
-	if (!defined $self->{LINKS}->{$link_id}) {
-		my $msg = "Invalid link specified";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my ($status, $oper_time, $link_oper_value, $admin_time, $link_admin_value) = $self->collectLinkMeasurements($link_id);
-	if ($status != 0) {
-		$logger->error("Couldn't collect measurements for link $link_id");
-		return ($status, $oper_time);
-	}
-
-	my $localContent = "";
-
-	$localContent .= $md->toString();
-
-	my $mdid = $md->getAttribute("id");
-
-	$localContent .= "\n  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
-
-	$localContent .= $self->dumpLinkState($link_id, $self->{LINKS}->{$link_id}->{"knowledge"}, $oper_time, $oper_time, $link_oper_value, $link_admin_value);
-
-	$localContent .= "  </nmwg:data>\n";
-
-	return (0, $localContent);
-}
-
-sub dumpLinkState($$$$$) {
-	my ($self, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
-
-	my $localContent = "";
-	$localContent .= "<nmtopo:linkStatus linkID=\"".$link_id."\" knowledge=\"".$knowledge."\" startTime=\"".$start_time."\" endTime=\"".$end_time."\">\n";
-	$localContent .= "	<nmtopo:operStatus>".$oper_status."</nmtopo:operStatus>\n";
-	$localContent .= "	<nmtopo:adminStatus>".$admin_status."</nmtopo:adminStatus>\n";
-	$localContent .= "</nmtopo:linkStatus>\n";
-
-	return $localContent;
 }
 
 sub parseLinkFile($) {

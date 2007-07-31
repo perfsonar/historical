@@ -15,11 +15,19 @@ use perfSONAR_PS::Common;
            'getResultCodeData', 'createMetadata', 'createData');
 
 sub getResultMessage {
-  my ($id, $messageIdRef, $type, $content) = @_;  
+  my ($id, $messageIdRef, $type, $content, $namespaces) = @_;  
   my $logger = get_logger("perfSONAR_PS::Messages");
    
   if(defined $content and $content ne "") {
     my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
+
+    if(defined $namespaces) {
+       foreach $ns (keys %{ $namespaces }) {
+         next if $namespaces->{$ns} eq "nmwg";
+         $m .= " xmlns:".$namespaces->{$ns}."=\"$ns\"";
+       }
+    }
+
     if(defined $id and $id ne "") {
       $m = $m . " id=\"".$id."\"";
     }
