@@ -10,8 +10,8 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
-@EXPORT = ('createControlKey', 'createKey', 'createMetadata', 'createData', 'getXQuery', 'cleanLS');
-
+@EXPORT = ('createControlKey', 'createKey', 'createMetadata', 
+           'createData', 'getXQuery', 'cleanLS');
 
 sub createControlKey {
   my($key, $time) = @_;
@@ -236,7 +236,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 

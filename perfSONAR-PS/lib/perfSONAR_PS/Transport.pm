@@ -240,15 +240,15 @@ sub acceptCall {
             $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
           };
           if ($@) {
-                my $msg = "Parse failed: ".$@;
-		$msg =~ s/&/&amp;/g;
-		$msg =~ s/</&lt;/g;
-		$msg =~ s/>/&gt;/g;
-		$msg =~ s/'/&apos;/g;
-		$msg =~ s/"/&quot;/g;
-                $logger->error($msg);
-                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
-                return 0;
+            my $msg = "Parse failed: ".$@;
+            $msg =~ s/&/&amp;/g;
+            $msg =~ s/</&lt;/g;
+            $msg =~ s/>/&gt;/g;
+            $msg =~ s/'/&apos;/g;
+            $msg =~ s/"/&quot;/g;
+            $logger->error($msg);
+            $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
+            return 0;
           }
 
           $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          

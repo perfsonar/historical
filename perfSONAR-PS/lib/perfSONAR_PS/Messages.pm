@@ -12,7 +12,7 @@ use perfSONAR_PS::Common;
 
 @ISA = ('Exporter');
 @EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'createMetadata', 'createData');
+           'getResultCodeData', 'createMetadata', 'createData', 'createEchoRequest');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content, $namespaces) = @_;  
@@ -20,14 +20,13 @@ sub getResultMessage {
    
   if(defined $content and $content ne "") {
     my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-
     if(defined $namespaces) {
        foreach $ns (keys %{ $namespaces }) {
          next if $ns eq "nmwg";
          $m .= " xmlns:".$ns."=\"".$namespaces->{$ns}."\"";
+
        }
     }
-
     if(defined $id and $id ne "") {
       $m = $m . " id=\"".$id."\"";
     }
@@ -153,6 +152,18 @@ sub createData {
 }
 
 
+sub createEchoRequest {
+  my $mdID = "metadata.".genuid();
+  my $echo = "<nmwg:message type=\"EchoRequest\" id=\"message.".genuid()."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+  $echo = $echo . "  <nmwg:metadata id=\"".$mdID."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+  $echo = $echo . "    <nmwg:eventType>http://schemas.perfsonar.net/tools/admin/echo/2.0</nmwg:eventType>\n";
+  $echo = $echo . "  </nmwg:metadata>\n";
+  $echo = $echo . "  <nmwg:data id=\"data.".genuid()."\" metadataIdRef=\"".$mdID."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"/>\n";
+  $echo = $echo . "</nmwg:message>\n";
+  return $echo;
+}
+
+
 1;
 
 
@@ -249,7 +260,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id: Transport.pm 267 2007-07-06 19:38:45Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

@@ -555,7 +555,7 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id: Transport.pm 267 2007-07-06 19:38:45Z zurawski $
+$Id$
 
 =head1 AUTHOR
 

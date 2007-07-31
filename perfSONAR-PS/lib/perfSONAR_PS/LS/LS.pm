@@ -48,7 +48,7 @@ sub handleRequest {
   if($self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
     my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
     my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
-    my $messageIdReturn = genuid();    
+    my $messageIdReturn = "message.".genuid();    
 
     if($messageType eq "LSRegisterRequest") {
       $logger->debug("Parsing LSRegister request.");
@@ -482,8 +482,15 @@ sub lsQueryRequest {
             $query =~ s/&lt;/</g;
             $query =~ s/&gt;/>/g;
             $query =~ s/\s{1}\// collection('CHANGEME')\//g;
-        
-            my @resultsString = $metadatadb->xQuery($query);   
+
+            my @resultsString = ();
+            if($query =~ m/collection\('control\.dbxml'\)/) {        
+              @resultsString = $controldb->xQuery($query);   
+            }
+            else {
+              @resultsString = $metadatadb->xQuery($query);   
+            }
+  
             my $dataString = "";
             for(my $x = 0; $x <= $#resultsString; $x++) {
               $dataString = $dataString . $resultsString[$x];
