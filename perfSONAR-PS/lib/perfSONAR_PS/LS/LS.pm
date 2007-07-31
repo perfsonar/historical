@@ -49,31 +49,38 @@ sub handleRequest {
     my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
     my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");    
     my $messageIdReturn = "message.".genuid();    
+     
+    my $msgParams = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:parameters")->get_node(1); 
+    if($msgParams) {
+      $logger->debug("Found message parameters.");
+      $msgParams = handleMessageParameters($self, $msgParams);
+      $msgParams = $msgParams->toString."\n";
+    } 
 
     if($messageType eq "LSRegisterRequest") {
       $logger->debug("Parsing LSRegister request.");
       my $response = lsRegisterRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSRegisterResponse", $response);
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSRegisterResponse", $msgParams.$response);
     }
     elsif($messageType eq "LSDeregisterRequest") {
       $logger->debug("Parsing LSDeregister request.");
       my $response = lsDeregisterRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSDeregisterResponse", $response);
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSDeregisterResponse", $msgParams.$response);
     }
     elsif($messageType eq "LSKeepaliveRequest") {
       $logger->debug("Parsing LSKeepalive request.");
       my $response = lsKeepaliveRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSKeepaliveResponse", $response);
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSKeepaliveResponse", $msgParams.$response);
     }
     elsif($messageType eq "LSQueryRequest") {
       $logger->debug("Parsing LSQuery request.");
       my $response = lsQueryRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSQueryResponse", $response);
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "LSQueryResponse", $msgParams.$response);
     }
     else {
       my $msg = "Message type \"".$messageType."\" is not yet supported";
       $logger->error($msg);  
-      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", "error.ls.message.type", $msg);
+      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", "error.ls.message.type", $msgParams.$msg);
     }
   }
   else {
@@ -82,6 +89,32 @@ sub handleRequest {
     $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", "MetadataKeyResponse", "error.ls", $msg);
   }
   return $self->{RESPONSE};
+}
+
+
+sub handleMessageParameters {
+  my($self, $msgParams) = @_;
+  my $logger = get_logger("perfSONAR_PS::LS::LS");
+  foreach my $p ($msgParams->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "parameter")) {
+    if($p->getAttribute("name") eq "lsTTL") {
+      $logger->debug("Found TTL parameter.");
+      my $time = extract($p);
+      if($time < (int $self->{"CONF"}->{"LS_TTL"}/2) or $time > $self->{"CONF"}->{"LS_TTL"}) {
+        if($p->getAttribute("value")) {
+          $logger->debug("Changing TTL attribute value.");
+          $p->setAttribute("value", $self->{"CONF"}->{"LS_TTL"});
+        }
+        elsif($p->childNodes) {
+          if($p->firstChild->nodeType == 3) {
+            my $oldChild = $p->removeChild($p->firstChild);
+            $p->appendTextNode($self->{"CONF"}->{"LS_TTL"});
+            $logger->debug("Changing TTL text value.");
+          }
+        }
+      }
+    }
+  }
+  return $msgParams;
 }
 
 

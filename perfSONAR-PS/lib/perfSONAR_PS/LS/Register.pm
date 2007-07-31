@@ -130,6 +130,7 @@ sub createServiceMetadata {
 sub callLS {
   my($self, $sender, $message) = @_;
   my $logger = get_logger("perfSONAR_PS::LS::Register");
+print $message , "\n\n";  
   my $responseContent = $sender->sendReceive($sender->makeEnvelope($message));  
   my $parser = XML::LibXML->new(); 
   if(defined $responseContent and $responseContent ne "" and !($responseContent =~ m/^\d+/)) { 
@@ -144,6 +145,7 @@ sub callLS {
     else {
       my $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
       if($msg) {
+print $msg->toString , "\n\n";
         if($msg->find("./nmwg:metadata/nmwg:eventType/text()")->get_node(1)->toString =~ m/^success/) {
           $logger->debug("Request was successful.");
           return 1;
@@ -209,9 +211,9 @@ sub register {
 	    }
     }
 
-    if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regMetadata.$regData, ""))) {
+    if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, ""))) {
       $regMetadata = createServiceMetadata($self, $mdID, "");
-      if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
+      if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
         $logger->error("Unable to register data with LS.");
       }
       else {
