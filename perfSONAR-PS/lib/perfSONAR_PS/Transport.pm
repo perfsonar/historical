@@ -241,9 +241,9 @@ sub acceptCall {
           };
           if ($@) {
                 my $msg = "Parse failed: ".$@;
+		$msg =~ s/&/&amp;/g;
 		$msg =~ s/</&lt;/g;
 		$msg =~ s/>/&gt;/g;
-		$msg =~ s/&/&amp;/g;
 		$msg =~ s/'/&apos;/g;
 		$msg =~ s/"/&quot;/g;
                 $logger->error($msg);
