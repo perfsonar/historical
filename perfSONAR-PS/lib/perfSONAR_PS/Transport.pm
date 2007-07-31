@@ -235,8 +235,22 @@ sub acceptCall {
         else {   
           my $parser = XML::LibXML->new(); 
           delete $self->{REQUESTDOM}; 
-        
-          $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
+       
+          eval { 
+            $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
+          };
+          if ($@) {
+                my $msg = "Parse failed: ".$@;
+		$msg =~ s/</&lt;/g;
+		$msg =~ s/>/&gt;/g;
+		$msg =~ s/&/&amp;/g;
+		$msg =~ s/'/&apos;/g;
+		$msg =~ s/"/&quot;/g;
+                $logger->error($msg);
+                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "failure.parse", $msg);
+                return 0;
+          }
+
           $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
 
           my $messageId = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("id");
@@ -253,7 +267,7 @@ sub acceptCall {
                 $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "success.echo", $msg);		  	                 
               }
               else {
-	              my $msg = "The echo request has failed.";
+	        my $msg = "The echo request has failed.";
                 $logger->error($msg);
                 $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "failure.echo", $msg);		        
               }          
