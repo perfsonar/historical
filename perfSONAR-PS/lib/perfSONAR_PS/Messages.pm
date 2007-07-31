@@ -24,7 +24,7 @@ sub getResultMessage {
     if(defined $namespaces) {
        foreach $ns (keys %{ $namespaces }) {
          next if $namespaces->{$ns} eq "nmwg";
-         $m .= " xmlns:".$ns."=\"".$namespaces{$ns}."\"";
+         $m .= " xmlns:".$ns."=\"".$namespaces->{$ns}."\"";
        }
     }
 
