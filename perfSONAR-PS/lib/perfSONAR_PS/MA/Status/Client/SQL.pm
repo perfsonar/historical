@@ -4,6 +4,7 @@ use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MA::Status::Link;
+use Data::Dumper;
 
 sub new {
 	my ($package, $dbi_string) = @_;
@@ -27,7 +28,9 @@ sub open($) {
 
 	return (0, "") if ($self->{DB_OPEN} != 0);
 
-	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING});
+        my @dbSchema = ("link_id", "link_knowledge", "start_time", "end_time", "oper_status", "admin_status"); 
+
+	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING}, "", "", \@dbSchema);
 	if (!defined $self->{DATADB}) {
 		my $msg = "Couldn't open specified database";
 		$logger->error($msg);
@@ -163,7 +166,7 @@ sub getLinkHistory($$$) {
 	return (0, \%links);
 }
 
-sub getLastLinkStatus($$$) {
+sub getLastLinkStatus($$) {
 	my ($self, $link_ids) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
@@ -195,6 +198,82 @@ sub getLastLinkStatus($$$) {
 	}
 
 	return (0, \%links);
+}
+
+sub updateLinkStatus($$$$$$$) {
+	my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $prev_end_time;
+
+	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
+
+	my $status = $self->{DATADB}->openDB;
+	if ($status == -1) {
+		my $msg = "Couldn't open status database";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (defined $do_update and $do_update != 0) {
+		my @tmp_array = ( $link_id );
+
+		my ($status, $res) = $self->getLastLinkStatus(\@tmp_array);
+
+		if ($status != 0) {
+			my $msg = "No previous value for $link_id to update";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $link = $res->{$link_id};
+
+		if ($link->getOperStatus ne $oper_value or $link->getAdminStatus ne $admin_value) {
+			$logger->debug("Something changed on link $link_id: ".$oper_value."/".$link->getOperStatus." ".$admin_value."/".$link->getAdminStatus);
+			$do_update = 0;
+		} else {
+			$prev_end_time = $link->getEndTime;
+		}
+	} else {
+		$do_update = 0;
+	}
+
+	if ($do_update != 0) {
+		$logger->debug("Updating $link_id");
+
+		my %updateValues = (
+				end_time => $time,
+				);
+
+		my %where = (
+				link_id => "'$link_id'",
+				end_time => $prev_end_time,
+			    );
+
+		if ($self->{DATADB}->update("link_status", \%where, \%updateValues) == -1) {
+			$logger->error("Couldn't update link status for link $link_id");
+			$self->{DATADB}->closeDB;
+			return -1;
+		}
+	} else {
+		my %insertValues = (
+				link_id => $link_id,
+				start_time => $time,
+				end_time => $time,
+				oper_status => $oper_value,
+				admin_status => $admin_value,
+				link_knowledge => $knowledge_level,
+				);
+
+		if ($self->{DATADB}->insert("link_status", \%insertValues) == -1) {
+			$logger->error("Couldn't update link status for link $link_id");
+			$self->{DATADB}->closeDB;
+			return -1;
+		}
+	}
+
+	$self->{DATADB}->closeDB;
+
+	return 0;
 }
 
 1;

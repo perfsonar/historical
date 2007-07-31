@@ -24,7 +24,10 @@ our @ISA = qw(perfSONAR_PS::MP::Base);
 sub init($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
-	if ($self->parse_link_file != 0) {
+
+	$logger->debug("init()");
+
+	if ($self->parseLinkFile != 0) {
 		$logger->error("couldn't load links to measure");
 		return -1;
 	}
@@ -42,7 +45,7 @@ sub init($) {
 
 		my @dbSchema = ("link_id", "link_knowledge", "start_time", "end_time", "oper_status", "admin_status");  
 
-		$self->{DATADB} = new perfSONAR_PS::DB::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"}, "", "", \@dbSchema);
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;
@@ -54,6 +57,8 @@ sub init($) {
 sub measurementRequest($$$) {
 	my ($self, $md, $data) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
+
+	$logger->debug("measurementRequest()");
 
 	my $link_id = $md->findvalue("./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
 
@@ -96,10 +101,12 @@ sub dumpLinkState($$$$$) {
 	return $localContent;
 }
 
-sub parse_link_file($) {
+sub parseLinkFile($) {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
 	my $links_config;
+
+	$logger->debug("parseLinkFile()");
 
 	if (!defined $self->{CONF}->{"LINK_FILE_TYPE"} or $self->{CONF}->{"LINK_FILE_TYPE"} eq "") {
 		$logger->error("no link file type specified");
@@ -123,19 +130,10 @@ sub parse_link_file($) {
 	my %links = ();
 
 	foreach my $link ($links_config->getElementsByTagName("link")) {
-		my $link_id = $link->getAttribute("id");
 		my $knowledge = $link->getAttribute("knowledge");
 
-		if (!defined $link_id or $link_id eq "") {
-			$logger->error("link has no specified id");
-			return -1;
-		} elsif (defined $links{$link_id}) {
-			$logger->error("tried to redefine link: $link_id");
-			return -1;
-		}
-
 		if (!defined $knowledge) {
-			$logger->error("It is not stated whether or knowledge of link $link_id is full or partial");
+			$logger->error("It is not stated whether or knowledge is full or partial");
 			return -1;
 		}
 
@@ -153,7 +151,7 @@ sub parse_link_file($) {
 			if (defined $oper_info) {
 				($status, $oper_agent_ref) = $self->readAgent($oper_info, "oper");
 				if ($status != 0) {
-					$logger->error("Problem parsing operational status agent for link $link_id");
+					$logger->error("Problem parsing operational status agent for link");
 					return -1;
 				}
 
@@ -164,7 +162,7 @@ sub parse_link_file($) {
 			if (defined $admin_info) {
 				($status, $admin_agent_ref) = $self->readAgent($admin_info, "admin");
 				if ($status != 0) {
-					$logger->error("Problem parsing adminstrative status agent for link $link_id");
+					$logger->error("Problem parsing adminstrative status agent for link");
 					return -1;
 				}
 
@@ -172,7 +170,7 @@ sub parse_link_file($) {
 			}
 
 			if (!defined $agents_info{"admin"} and !defined $agents_info{"oper"}) {
-				my $msg = "Empty agent specified for link $link_id";
+				my $msg = "Empty agent specified for link";
 				$logger->error($msg);
 				return -1;
 			}
@@ -181,13 +179,32 @@ sub parse_link_file($) {
 		}
 
 		if ($#link_agents == -1) {
-			$logger->error("Didn't specify any agents for link $link_id");
+			$logger->error("Didn't specify any agents for link");
 			return -1;
 		}
 
 		$link_properties{"agents"} = \@link_agents;
 		$link_properties{"knowledge"} = $knowledge;
-		$links{"$link_id"} = \%link_properties;
+
+		my $have_id;
+
+		foreach my $id_elm ($link->getElementsByTagName("id")) {
+			my $id = $id_elm->textContent;
+
+			if (defined $links{"$id"}) {
+				$logger->error("Attempting to redefine link $id");
+				return -1;
+			}
+			
+			$link_properties{"primary"} = $id;
+			$links{"$id"} = \%link_properties;
+			$have_id = 1;
+		}
+
+		if (!defined $have_id or $have_id != 1) {
+			$logger->error("No ids associated with specified link");
+			return -1;
+		}
 	}
 
 	$self->{LINKS} = \%links;
@@ -310,7 +327,7 @@ sub runAgent($$) {
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
 	my ($measurement_time, $measurement_value);
 
-	$logger->debug("runAgent");
+	$logger->debug("runAgent()");
 
 	if ($agent{'type'} eq "none") {
 		return (0, "", "unknown");
@@ -388,6 +405,8 @@ sub collectLinkMeasurements($$) {
 	my($self, $link_id) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
 
+	$logger->debug("collectLinkMeasurements()");
+
 	my $link_oper_value = "unknown";
 	my $link_admin_value = "unknown";
 	my $set_oper_value = 0;
@@ -453,73 +472,71 @@ sub collectLinkMeasurements($$) {
 	return (0, $oper_time, $link_oper_value, $admin_time, $link_admin_value);
 }
 
-sub collectMeasurements {
-	my($self) = @_;
+sub collectMeasurements($$) {
+	my($self, $interval_number) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
+	my ($status, $res);
+
+	$logger->debug("collectMeasurements()");
+
+	my $do_update = 0;
+
+	$do_update = 1 if ($interval_number > 0);
+
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
 	foreach my $link_id (keys %{$self->{LINKS}}) {
-		my ($status, $oper_time, $link_oper_value, $admin_time, $link_admin_value) = $self->collectLinkMeasurements($link_id);
+		my ($oper_time, $link_oper_value, $admin_time, $link_admin_value);
+
+		my $link = $self->{LINKS}->{$link_id};
+
+		next if ($link_id ne $self->{LINKS}->{$link_id}->{"primary"});
+
+		($status, $oper_time, $link_oper_value, $admin_time, $link_admin_value) = $self->collectLinkMeasurements($link_id);
+
 		if ($status != 0) {
-			$logger->error("Couldn't run information on link $link_id");
+			$logger->error("Couldn't get information on link $link_id");
 			return (-1, $oper_time);
 		}
 
-		if ($self->storeLinkStatus_SQL($self->{DATADB}, $oper_time, $link_id, $self->{LINKS}->{$link_id}->{"knowledge"}, $link_oper_value, $link_admin_value) != 0) {
-			$logger->error("Couldn't store link status for link $link_id");
-		}
-	}
-}
+		# cache the results
+		$link->{"primary_results"}->{"oper_time"} = $oper_time;
+		$link->{"primary_results"}->{"oper_value"} = $link_oper_value;
+		$link->{"primary_results"}->{"admin_time"} = $admin_time;
+		$link->{"primary_results"}->{"admin_value"} = $link_admin_value;
 
-sub storeLinkStatus_SQL($$$$$$$$$) {
-	my($self, $datadb, $time, $link_id, $knowledge_level, $oper_value, $admin_value) = @_;
-	my $logger = get_logger("perfSONAR_PS::MP::Status");
-
-	$datadb->openDB;
-
-	if (defined $self->{PREVUPDATE}->{$link_id}->{"oper_value"} and $self->{PREVUPDATE}->{$link_id}->{"oper_value"} eq $oper_value and defined $self->{PREVUPDATE}->{$link_id}->{"admin_value"} and $self->{PREVUPDATE}->{$link_id}->{"admin_value"} eq $admin_value) {
-		my %updateValues = (
-			end_time => $time,
-		);
-
-		my %where = (
-			link_id => "'$link_id'",
-			end_time => $self->{PREVUPDATE}->{$link_id}->{"time"},
-		);
-
-		if ($datadb->update("link_status", \%where, \%updateValues) == -1) {
-			$logger->error("Couldn't update link status for link $link_id");
-			$datadb->closeDB;
-			return -1;
-		}
-	} else {
-		my %insertValues = (
-			link_id => $link_id,
-			start_time => $time,
-			end_time => $time,
-			oper_status => $oper_value,
-			admin_status => $admin_value,
-			link_knowledge => $knowledge_level,
-		);
-
-		if ($datadb->insert("link_status", \%insertValues) == -1) {
-			$logger->error("Couldn't update link status for link $link_id");
-			$datadb->closeDB;
-			return -1;
+		($status, $res) = $self->{CLIENT}->updateLinkStatus($oper_time, $link_id, $self->{LINKS}->{$link_id}->{"knowledge"}, $link_oper_value, $link_admin_value, $do_update);
+		if ($status != 0) {
+			$logger->error("Couldn't store link status for link $link_id: $res");
 		}
 	}
 
-	$self->{PREVUPDATE}->{$link_id} = ();
-	$self->{PREVUPDATE}->{$link_id}->{"time"} = $time;
-	$self->{PREVUPDATE}->{$link_id}->{"oper_value"} = $oper_value;
-	$self->{PREVUPDATE}->{$link_id}->{"admin_value"} = $admin_value;
+	foreach my $link_id (keys %{$self->{LINKS}}) {
+		my ($oper_time, $link_oper_value, $admin_time, $link_admin_value);
 
-	$datadb->closeDB;
+		next if ($link_id eq $self->{LINKS}->{$link_id}->{"primary"});
 
-	return 0;
+		my $link = $self->{LINKS}->{$link_id};
+
+		# use the cached the results
+		$oper_time = $link->{"primary_results"}->{"oper_time"};
+		$link_oper_value = $link->{"primary_results"}->{"oper_value"};
+		$admin_time = $link->{"primary_results"}->{"admin_time"};
+		$link_admin_value = $link->{"primary_results"}->{"admin_value"};
+
+		($status, $res) = $self->{CLIENT}->updateLinkStatus($oper_time, $link_id, $self->{LINKS}->{$link_id}->{"knowledge"}, $link_oper_value, $link_admin_value, $do_update);
+		if ($status != 0) {
+			$logger->error("Couldn't store link status for link $link_id: $res");
+		}
+	}
 }
 
 # ================ Internal Package perfSONAR_PS::MP::Status::SNMPAgent ================
-
 
 package perfSONAR_PS::MP::Status::SNMPAgent;
 

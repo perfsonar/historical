@@ -108,16 +108,23 @@ sub measurementArchiveQuery {
 sub measurementPoint {
 	$logger->debug("Starting '".threads->tid()."' as the MP.");
 
+	$logger->debug("measurementPoint()");
+
 	my $mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
 	if ($mp->init != 0) {
 		$logger->error("Couldn't initialize Status monitor");
 		exit(-1);
 	}
 
+	my $i = 0;
 	while(1) {
-		$mp->collectMeasurements;
+
+		$logger->debug("Collection Measurements: Iteration $i");
+
+		$mp->collectMeasurements($i);
 
 		sleep($conf{"MP_SAMPLE_RATE"});
+		$i++;
 	}
 	return;  
 }
