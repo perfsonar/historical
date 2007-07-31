@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<nmwg:message type="SetupDataRequest"
-	      id="msg1"
+<nmwg:message id="msg1"
+              type="SetupDataRequest"
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilisation/2.0/"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
 	      
-  <nmwg:metadata id="meta1">
-    <netutil:subject id="s1">
-      <nmwgt:interface>
+  <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <netutil:subject id="s1" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
         <nmwgt:hostName>mead</nmwgt:hostName>
-        <nmwgt:ifName>eth0</nmwgt:ifName>
-        <nmwgt:direction>out</nmwgt:direction>
+        <nmwgt:ifName>eth1</nmwgt:ifName>
+        <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
   </nmwg:metadata>
 
-  <nmwg:metadata id="meta2">
-    <select:subject id="s2" metadataIdRef="meta1"/>  
-    <select:parameters id="2">
-      <nmwg:parameter name="time" operator="gte">1181074465</nmwg:parameter>
-      <nmwg:parameter name="time" operator="lte">1181074480</nmwg:parameter>     
+  <nmwg:metadata id="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <select:subject id="s2" metadataIdRef="meta1" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"/>  
+    <select:parameters id="2" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+      <nmwg:parameter name="time" operator="gte">N-50</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">N</nmwg:parameter>      
       <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>     
       <nmwg:parameter name="resolution">10</nmwg:parameter> 
     </select:parameters>
   </nmwg:metadata> 
   
-  <nmwg:data id="data1" metadataIdRef="meta2" />
+  <nmwg:data id="data1" metadataIdRef="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
 
 </nmwg:message>

@@ -1,0 +1,35 @@
+<nmwg:message id="msg1" type="MetadataKeyRequest"
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" 
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+
+  <nmwg:parameters id="msgparam1">
+    <nmwg:parameter name="authToken">Internet2</nmwg:parameter>
+    <nmwg:parameter name="timeValue">1138699961</nmwg:parameter>
+    <nmwg:parameter name="timeType">unix</nmwg:parameter>
+  </nmwg:parameters>     
+  
+  <nmwg:metadata id="meta1">    
+    <nmwg:key>
+      <nmwg:parameters id="param1">
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">eth1-out</nmwg:parameter>
+      </nmwg:parameters>      
+    </nmwg:key>     
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta2">
+    <select:subject id="iusub2" metadataIdRef="meta1"/>
+    <select:parameters id="param1">              
+      <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+      <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">60</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>    
+  </nmwg:metadata>
+
+  <nmwg:data id="data1" metadataIdRef="meta2"/>
+
+</nmwg:message>
+

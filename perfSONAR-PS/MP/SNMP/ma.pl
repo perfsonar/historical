@@ -9,7 +9,6 @@ use POSIX qw( setsid );
 use Log::Log4perl qw(get_logger :levels);
      
 use perfSONAR_PS::Common;
-use perfSONAR_PS::MP::SNMP;
 use perfSONAR_PS::MA::SNMP;
 
 Log::Log4perl->init("logger.conf");
@@ -55,39 +54,21 @@ if(!$DEBUGFLAG) {
 
 $logger->debug("Starting '".threads->tid()."'");
 
-my $mpThread = threads->new(\&measurementPoint);
+
 my $maThread = threads->new(\&measurementArchive);
 my $regThread = threads->new(\&registerLS);
 
-if(!defined $mpThread or !defined $maThread or !defined $regThread) {
+if(!defined $maThread or !defined $regThread) {
   $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
-$mpThread->join();
 $maThread->join();
 $regThread->join();
 
 
 
 
-
-sub measurementPoint {
-  $logger->debug("Starting '".threads->tid()."' as the MP.");
-  
-  my $mp = new perfSONAR_PS::MP::SNMP(\%conf, \%ns, "", "");
-  $mp->parseMetadata;
-  $mp->prepareData;
-  $mp->prepareCollectors;
-
-  my($sec, $frac) = Time::HiRes::gettimeofday;
-  $mp->prepareTime($sec.".".$frac);
-  while(1) {      
-    $mp->collectMeasurements;
-    sleep($conf{"MP_SAMPLE_RATE"});
-  }
-  return;  
-}
 
 
 sub measurementArchive {
@@ -138,31 +119,24 @@ sub daemonize {
 
 =head1 NAME
 
-snmpMP.pl - An SNMP based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
-capabilities.
+snmpMP.pl - An SNMP based MA (MeasurementArchive).
 
 =head1 DESCRIPTION
 
-This script creates an MP and MA for an SNMP based collector.  The service is also capable
+This script creates an MA for an SNMP based collector.  The service is also capable
 of registering with an LS instance.  
 
 =head1 SYNOPSIS
 
-./snmpMP.pl [--verbose | --help]
+./ma.pl [--verbose | --help]
 
 The verbose flag allows lots of debug options to print to the screen.  If the option is
 omitted the service will run in daemon mode.
 
 =head1 FUNCTIONS
 
-The following functions are used within this script to execute the 3 major tasks of
-LS registration, MP operation, and MA listening and delivery.
-
-=head2 measurementPoint
-
-This function, meant to be used in the context of a thread, will continuously poll
-the 'store.xml' list of metadata to gather measurements, storing them in backend
-storage also specified by the 'store.xml' file.  
+The following functions are used within this script to execute the 2 major tasks of
+LS registration and MA listening and delivery.
 
 =head2 measurementArchive
 
@@ -201,7 +175,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id$
+$Id: snmpMP.pl 212 2007-06-04 13:50:07Z zurawski $
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -1,0 +1,80 @@
+<nmwg:message id="msg4" type="SetupDataRequest"
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" 
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+
+  <nmwg:parameters id="msgparam1">
+    <nmwg:parameter name="authToken">Internet2</nmwg:parameter>
+    <nmwg:parameter name="timeValue">1127250480</nmwg:parameter>
+    <nmwg:parameter name="timeType">unix</nmwg:parameter>     
+  </nmwg:parameters>   
+
+  <nmwg:metadata id="meta01">
+    <netutil:subject id="iusub01">
+      <nmwgt:interface>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta0" metadataIdRef="meta01">
+    <netutil:subject id="iusub0">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+      </nmwgt:interface>
+    </netutil:subject>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta4" metadataIdRef="meta0">
+    <netutil:subject id="iusub1">
+      <nmwgt:interface>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+      </nmwgt:interface>
+    </netutil:subject>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta1-in" metadataIdRef="meta4">
+    <netutil:subject id="iusub1">
+      <nmwgt:interface>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta1-out" metadataIdRef="meta4">
+    <netutil:subject id="iusub1">
+      <nmwgt:interface>
+        <nmwgt:direction>out</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta2">
+    <select:subject id="iusub2" metadataIdRef="meta1-in"/>
+    <select:parameters id="param1">
+      <nmwg:parameter name="startTime">1121558400</nmwg:parameter>
+      <nmwg:parameter name="endTime">1121731200</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">60</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:metadata id="meta3">
+    <select:subject id="iusub3" metadataIdRef="meta1-out"/>
+    <select:parameters id="param1">
+      <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+      <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">60</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
+  </nmwg:metadata>
+
+  <nmwg:data id="data1" metadataIdRef="meta2"/>
+  <nmwg:data id="data2" metadataIdRef="meta3"/>
+
+</nmwg:message>

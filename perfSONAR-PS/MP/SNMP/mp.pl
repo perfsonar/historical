@@ -10,7 +10,6 @@ use Log::Log4perl qw(get_logger :levels);
      
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MP::SNMP;
-use perfSONAR_PS::MA::SNMP;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
@@ -56,16 +55,14 @@ if(!$DEBUGFLAG) {
 $logger->debug("Starting '".threads->tid()."'");
 
 my $mpThread = threads->new(\&measurementPoint);
-my $maThread = threads->new(\&measurementArchive);
 my $regThread = threads->new(\&registerLS);
 
-if(!defined $mpThread or !defined $maThread or !defined $regThread) {
+if(!defined $mpThread or !defined $regThread) {
   $logger->fatal("Thread creation has failed...exiting.");
   exit(1);
 }
 
 $mpThread->join();
-$maThread->join();
 $regThread->join();
 
 
@@ -90,33 +87,6 @@ sub measurementPoint {
 }
 
 
-sub measurementArchive {
-  $logger->debug("Starting '".threads->tid()."' as the MA.");
-
-  my $ma = new perfSONAR_PS::MA::SNMP(\%conf, \%ns);
-  $ma->init;  
-  while(1) {
-    my $runThread = threads->new(\&measurementArchiveQuery, $ma);
-    if(!defined $runThread) {
-      $logger->fatal("Thread creation has failed...exiting");
-      exit(1);
-    }
-    $runThread->join();  
-  }  
-  return;
-}
-
-
-sub measurementArchiveQuery {
-  my($ma) = @_; 
-  $logger->debug("Starting '".threads->tid()."' as the execution path.");
-  
-  $ma->receive;
-  $ma->respond;
-  return;
-}
-
-
 sub registerLS {
   $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
 	
@@ -138,12 +108,11 @@ sub daemonize {
 
 =head1 NAME
 
-snmpMP.pl - An SNMP based collection agent (MeasurementPoint) with MA (MeasurementArchive) 
-capabilities.
+snmpMP.pl - An SNMP based collection agent (MeasurementPoint).
 
 =head1 DESCRIPTION
 
-This script creates an MP and MA for an SNMP based collector.  The service is also capable
+This script creates an MP for an SNMP based collector.  The service is also capable
 of registering with an LS instance.  
 
 =head1 SYNOPSIS
@@ -155,25 +124,15 @@ omitted the service will run in daemon mode.
 
 =head1 FUNCTIONS
 
-The following functions are used within this script to execute the 3 major tasks of
-LS registration, MP operation, and MA listening and delivery.
+The following functions are used within this script to execute the 2 major tasks of
+LS registration and MP operation.
 
 =head2 measurementPoint
 
 This function, meant to be used in the context of a thread, will continuously poll
 the 'store.xml' list of metadata to gather measurements, storing them in backend
 storage also specified by the 'store.xml' file.  
-
-=head2 measurementArchive
-
-This function, meant to be used in the context of a thread, will listen on an external
-port (specified in the conf file) and serve requests for data from outside entities.  The
-data and metadata are stored in various database structures.
-
-=head2 measurementArchiveQuery
-
-This performs the semi-automic operations of the MA.  
-
+ 
 =head2 registerLS
 
 This function, meant to be used in the context of a thread, will continously register
@@ -201,7 +160,7 @@ Jason Zurawski <zurawski@internet2.edu>
 
 =head1 VERSION
 
-$Id$
+$Id: snmpMP.pl 212 2007-06-04 13:50:07Z zurawski $
 
 =head1 COPYRIGHT AND LICENSE
 
