@@ -9,8 +9,7 @@
     <xquery:subject id="sub1">
 
 	declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
-  declare namespace netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/";
-	/nmwg:store/nmwg:data/nmwg:metadata/netutil:subject
+	collection('control.dbxml')/nmwg:metadata[@id="http://lhcopnmon1-mgm.fnal.gov:8091/axis/services/snmpMA"]
 
     </xquery:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
