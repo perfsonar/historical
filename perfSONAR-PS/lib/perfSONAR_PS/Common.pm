@@ -13,7 +13,7 @@ use Log::Log4perl qw(get_logger);
 
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'printError', 'chainMetadata', 
-           'countRefs', 'genuid', 'extract', 'reMap');
+           'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive');
 
 sub readXML {
   my ($file)  = @_;  
@@ -257,6 +257,44 @@ sub reMap {
   return $requestNamespaces;
 }
 
+sub consultArchive($$$$) {
+	my ($host, $port, $endpoint, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::Common");
+
+	# start a transport agent
+	my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+
+	my $envelope = $sender->makeEnvelope($request);
+	my $response = $sender->sendReceive($envelope);
+
+	if (!defined $response or $response eq "") {
+		my $msg = "No response received from status service";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $parser = XML::LibXML->new();
+	my $doc = $parser->parse_string($response);  
+
+	# XXX ridiculous hack to make ->find not die
+	my $attr = $doc->createAttributeNS( '', 'dummy', '' );
+	$doc->getDocumentElement()->setAttributeNodeNS( $attr );
+
+	my $nodeset = $doc->find("//nmwg:message");
+	if($nodeset->size <= 0) {
+		my $msg = "Message element not found in response";
+		$logger->error($msg);
+		return (-1, $msg);
+	} elsif($nodeset->size > 1) {
+		my $msg = "Too many message elements found in response";
+		$logger->error($msg); 
+		return (-1, $msg);
+	}
+
+	my $nmwg_msg = $nodeset->get_node(1); 
+
+	return (0, $nmwg_msg);
+}
 
 1;
 
