@@ -2,12 +2,10 @@
 
 package perfSONAR_PS::DB::RRD;
 
-
 use RRDp;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
-	   
-	   
+	   	   
 sub new {
   my ($package, $path, $name, $dss, $error) = @_;   
   my %hash = ();
@@ -391,7 +389,7 @@ may then be invoked on the object for the specific database.
 The API of perfSONAR_PS::DB::RRD is rather simple, and attempts to mirror the API of the 
 other perfSONAR_PS::DB::* modules.  
 
-=head2 new($path, $file, %datasources, $error)
+=head2 new($package, $path, $name, $dss, $error)
 
 The first arguments represents the path to the rrdtool executable, the second represents 
 an actual rrd file.  The third can be a hash containing the names of the datasources in 
@@ -400,78 +398,59 @@ All arguments are optional, and the 'set' functions (setLog($log), setFile($file
 setPath($path), setVariables(%datasources), setVariables($ds), setError($error)) are 
 capable of setting the information as well.  
 
-=head2 setPath($path)
+=head2 setFile($self, $file)
 
-(Re-)Sets the value of the 'path' to the rrdtool executable.
+Sets the RRD filename.
 
-=head2 setFile($file)
+=head2 setPath($self, $path)
 
-(Re-)Sets the value of the name of the rrd 'file' we wish to read from.
+Sets the 'path' to the RRD binary.
 
-=head2 setVariables(\%variables)
+=head2 setVariables($self, $dss)
 
-Passes a hash of 'datasource' variables names to the object.
+Sets several variables (in an array) in the RRD.
 
-=head2 setVariable($variable)
+=head2 setVariable($self, $dss)
 
-Adds $variable to the hash of datasources in the rrd file.
+Sets a variable value in the RRD.
 
-=head2 setError($error)
+=head2 setError($self, $error)
 
-(Re-)Sets the value of the error variable (only 1 or 0), which allows you to utilize the
-getErrorMessage() function.
+Sets the error variable.
 
-=head2 getErrorMessage()
+=head2 getErrorMessage($self)
 
-Returns the value of an internal error variable ($RRDp::error) if this value happened to 
-be set after executing an rrd command.  Note that this will always return nothing if
-the error level is set to 0.
+Gets any error returned from the underlying RRDp module.  
 
-=head2 openDB()
+=head2 openDB($self)
 
-Open is used to start the reading process from an rrd file, by preparing named pipes
-that will interact with the rrd file.  Returns 0 on success and -1 on failure.
+'Opens' (creates a pipe) to an RRD.
 
-=head2 closeDB()
+=head2 closeDB($self)
 
-Closes the connection to the rrd file.  Returns 0 on success and -1 on failure.
+'Closes' (terminates the pipe) of an open RRD.
 
-=head2 query($cf, $resolution, $start, $end)
+=head2 query($self, $cf, $resolution, $start, $end)
 
-The '$cf' is the consolidation function to call (AVERAGE,MIN,MAX,LAST), The 
-'$resolution' is the interval you want the values to have (seconds per value).  
-The '$start' and '$end' are the starting and ending times of the series, these
-are measured in seconds since epoch (1970-01-01).  It is also possible to
-use the directive 'N' (or 'n') to imply 'now'.  The value of 'N' may also
-be manipulated (N-100).   
+Query a RRD with specific times/resolutions.
 
-The results (if any) are returned in a 'hash of hashes' of the form:
+=head2 insert($self, $time, $ds, $value)
 
-  $results{TIME}{DS} = VALUE
-  
-The example use shows how to retrieve and order these values.  
+'Inserts' a time/value pair for a given variable.  These are not inserted
+into the RRD, but will 'wait' until we commit.  This allows us to stack
+up a bunch of values first.  and reuse time values.  
 
-=head2 insert($time, $ds, $value)
+=head2 insertCommit($self)
 
-The first value represents time in seconds since epoch (1970-01-01), or the
-value 'N' (or 'n').  The second argument is a datasource in the rrd file.  The 
-final argument is the value the datasource is measured to have at the particular 
-moment in time.  The insert function does not 'finalize' interaction with the rrd 
-file, but instead prepares the potential values.  Running insertCommit() will
-physically update the file.
+'Commits' all outstanding variables time/data pairs for a given RRD.
 
-=head2 insertCommit()
+=head2 firstValue($self)
 
-Takes the values that are stored in the datasource variables and the particular 
-instant in time, and sends the changes to the rrd file.
+Returns the first value of an RRD
 
-=head2 firstValue
+=head2 lastValue($self)
 
-Returns the 'last' timestamp in the RRD file.  
-
-=head2 lastValue
-
-Returns the 'first' timestamp in the RRD file.  
+Returns the last value of an RRD. 
 
 =head1 SEE ALSO
 
@@ -489,11 +468,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -502,3 +481,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

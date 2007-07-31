@@ -64,7 +64,7 @@ sub setNamespaces {
   my ($self, $ns) = @_;    
   my $logger = get_logger("perfSONAR_PS::Transport");
    
-  if(defined $namespaces and $namespaces ne "") {   
+  if(defined $ns and $ns ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
   else {
@@ -196,7 +196,8 @@ sub acceptCall {
   $self->{CALL} = $self->{DAEMON}->accept;
   delete $self->{REQUEST};
   $self->{REQUEST} = $self->{CALL}->get_request;
-
+  my $msg = "";
+  
   $self->{RESPONSE} = HTTP::Response->new();
   $self->{RESPONSE}->header('Content-Type' => 'text/xml');
   $self->{RESPONSE}->header('user-agent' => 'perfSONAR-PS/'.$VERSION);
@@ -205,71 +206,78 @@ sub acceptCall {
   # lets strip out the first '/' to enable less stringent check on the endpoint
   (my $requestEndpoint = $self->{REQUEST}->uri) =~ s/^(\/)+//g;
 
-  if($requestEndpoint eq $self->{LISTEN_ENDPOINT} and $self->{REQUEST}->method eq "POST") {
-    $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
-    if (!$action =~ m/^.*message\/$/) {
-      $logger->error("Received message with 'INVALID ACTION TYPE'.");     
-      return 'INVALID ACTION TYPE';
-    }
-    else {
-      $logger->debug("Accepted call.");
-
-   	  my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
-      my $nodeset = $xp->find("//nmwg:message");
-      if($nodeset->size() <= 0) {
-        my $msg = "Message element not found within request";
-        $logger->error($msg);
-        $self->{RESPONSEMESSAGE} = getResultCodeMessage(genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-        return 0;
+  if($requestEndpoint eq $self->{LISTEN_ENDPOINT}) {
+    if($self->{REQUEST}->method eq "POST") {
+      my $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
+      if (!$action =~ m/^.*message\/$/) {
+        $msg = "Received message with 'INVALID ACTION TYPE'.";
+        $logger->error($msg);     
+        $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);       
+        return 'INVALID ACTION TYPE';
       }
-      elsif($nodeset->size() > 1) {
-        my $msg = "Too many message elements found within request";
-        $logger->error($msg); 
-        $self->{RESPONSEMESSAGE} = getResultCodeMessage(genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-        return 0;      
-      }    
-      else {   
-        my $parser = XML::LibXML->new(); 
-        delete $self->{REQUESTDOM}; 
-        
-        $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
-        $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
+      else {
+        $logger->debug("Accepted call.");
 
-        my $messageId = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("id");
-        my $messageType = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("type");
-
-        if($messageType eq "EchoRequest") {              
-          if($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "data")->get_node(1)->getAttribute("metadataIdRef") eq
-             $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id")) {
-            my $eventType = extract($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->find("./nmwg:eventType")->get_node(1));
-            if($eventType =~ m/^echo.*/) {
-	            my $msg = "The echo request has passed.";
-	            $logger->debug($msg);
-              $self->{RESPONSEMESSAGE} = getResultCodeMessage($messageId, $messageIdRef, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "success.echo", $msg);		  	                 
-            }
-            else {
-	            my $msg = "The echo request has failed.";
-              $logger->error($msg);
-              $self->{RESPONSEMESSAGE} = getResultCodeMessage($messageId, $messageIdRef, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "failure.echo", $msg);		        
-            }          
-          }
+   	    my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
+        my $nodeset = $xp->find("//nmwg:message");
+        if($nodeset->size() <= 0) {
+          my $msg = "Message element not found within request";
+          $logger->error($msg);
+          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
           return 0;
         }
-        else {  
-          $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
-          foreach my $m ($self->{REQUESTDOM}->getDocumentElement->getChildrenByTagNameNS($self->{NAMESPACE}, "metadata")) {
-            if(countRefs($m->getAttribute("id"), $self->{REQUESTDOM}, $self->{NAMESPACE}, "data", "metadataIdRef") == 0) {
-#              $logger->debug("Removing child metadata \"".$m->getAttribute("id")."\" from the DOM.");
-#              $self->{REQUESTDOM}->getDocumentElement->removeChild($m); 
+        elsif($nodeset->size() > 1) {
+          my $msg = "Too many message elements found within request";
+          $logger->error($msg); 
+          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
+          return 0;      
+        }    
+        else {   
+          my $parser = XML::LibXML->new(); 
+          delete $self->{REQUESTDOM}; 
+        
+          $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
+          $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
+
+          my $messageId = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("id");
+          my $messageType = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("type");
+
+          if($messageType eq "EchoRequest") {              
+            if($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "data")->get_node(1)->getAttribute("metadataIdRef") eq
+               $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id")) {
+              my $eventType = extract($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->find("./nmwg:eventType")->get_node(1));
+              if($eventType =~ m/^echo.*/ or 
+                 $eventType eq "http://schemas.perfsonar.net/tools/admin/echo/2.0") {
+	              my $msg = "The echo request has passed.";
+	              $logger->debug($msg);
+                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "success.echo", $msg);		  	                 
+              }
+              else {
+	              my $msg = "The echo request has failed.";
+                $logger->error($msg);
+                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "failure.echo", $msg);		        
+              }          
             }
-          }    
-          return 1;  
-        }         
-      } 
+            return 0;
+          }
+          else {  
+            $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
+            return 1;  
+          }         
+        } 
+      }
+    }
+    else {
+      $msg = "Received message with 'INVALID REQUEST', are you using a web browser?.";
+      $logger->error($msg);     
+      $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
+      return 'INVALID REQUEST';     
     }   
   }
   else { 
-    $logger->error("Received message with 'INVALID ENDPOINT'.");
+    $msg = "Received message with 'INVALID ENDPOINT'.";
+    $logger->error($msg);     
+    $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
     return 'INVALID ENDPOINT';      
   }
 }
@@ -318,7 +326,7 @@ sub getRequest {
   my $logger = get_logger("perfSONAR_PS::Transport");
 
   my $xp = $self->getRequestAsXPath();
-  $nodeset = $xp->find('//nmwg:message');
+  my $nodeset = $xp->find('//nmwg:message');
   if($nodeset->size() <= 0) {
     $logger->error("Message element not found or in wrong namespace.");     
   }
@@ -423,9 +431,7 @@ sub makeEnvelope {
 sub sendReceive {
   my($self, $envelope, $timeout) = @_;
   my $logger = get_logger("perfSONAR_PS::Transport");
-   
-  $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
-
+  my $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
   my $httpEndpoint = &getHttpURI( $self->{CONTACT_HOST}, $self->{CONTACT_PORT}, $self->{CONTACT_ENDPOINT});
 
   my $userAgent = "";
@@ -555,35 +561,27 @@ Document-Literal message structure.
 
 =head1 API
 
-The API of the transport class is meant to simplfy common information transportation issues in
-WS envirnments.  
+The API of the transport class is meant to simplfy common information transportation 
+issues in WS envirnments.  
 
-=head2 new(\%ns, $log, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint, $debug) 
+=head2 new($package, $ns, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) 
 
-The 'ns' argument is a hash of namespace to prefix mappings.  The 'log' argument is the name of 
-the log file where error or warning information may be recorded.  The 'port' and 'listenEndPoint' 
-arguments set values that will be used if the object will be used to listen for and accept 
-incomming calls.  The 'contactHost', 'contactPort', and 'contactEndPoint' set the values that 
-are used if the object is used to send information to a remote host.  All values can be left 
-blank and set via the various set functions.
-
+The 'ns' argument is a hash of namespace to prefix mappings.  The 'port' and 
+'listenEndPoint' arguments set values that will be used if the object will be 
+used to listen for and accept incomming calls.  The 'contactHost', 'contactPort', 
+and 'contactEndPoint' set the values that are used if the object is used to 
+send information to a remote host.  All values can be left blank and set via 
+the various set functions.
 
 =head2 setNamespaces($self,\%ns)
 
 (Re-)Sets the value for the 'namespace' hash. 
-
-
-=head2 setLog($self, $log)  
-
-(Re-)Sets the value for the 'log' variable.
-
 
 =head2 setPort($self, $port)  
 
 (Re-)Sets the value for the 'port' variable.  This value 
 represents which particular TCP port on the host that will 
 have the listening service.
-
   
 =head2 setListenEndPoint($self, $listenEndPoint)  
 
@@ -598,19 +596,16 @@ http://localhost:8080/services/MP
 
 Would be '/services/MP'.
 
-
 =head2 setContactHost($self, $contactHost)  
 
 (Re-)Sets the value for the 'contactHost' variable.  The contact 
 host is the hostname of a remote host that is supplying a service.
-
 
 =head2 setContactPort($self, $contactPort)  
 
 (Re-)Sets the value for the 'contactPort' variable.  The 
 contact port is the port on a remote host that is supplying a 
 service.
-
 
 =head2 setContactEndPoint($self, $contactEndPoint)  
 
@@ -619,11 +614,13 @@ contact endPoint is the endPoint on a remote host that is
 supplying a service.  See 'setListenEndPoint' for a more 
 detailed description.
 
+=head2 splitURI($uri)
 
-=head2 setDebug($self, $debug)
+Splits the contents of a URI into host, port, and endpoint.
 
-(Re-)Sets the value for the 'debug' variable.
+=head2 getHttpURI($host, $port, $endpoint)
 
+Creates a URI from a host, port, and endpoint
 
 =head2 startDaemon($self)
 
@@ -631,91 +628,58 @@ Starts an HTTP daemon on the given host listening to the specified port.
 This method will cause the program to halt if the port in question is 
 not available.
 
-
 =head2 acceptCall($self)
 
-Listens on the 'host:port/endPoint' for any requests.  The requests 
-are checked for validity and a message is returned on error, a 1 is 
-returned on success, or a 0 is returned if the request can be handled 
-'locally', without the aide of the upper level service framework.  
-On success the request message can be parsed via the getRequest() 
-method. The possible messages that may be returned on error are:
-	
-	'INVALID ACTION TYPE'
-	'INVALID ENDPOINT'
-	
-These correspond to the obvious errors.
-
+Accepts a call from the daemon, and performs the necessary handling 
+operations.
 
 =head2 getResponse($self)
 
-Returns a 'prepraed' response, if one exists.  One may exist
-due to the echo service making one, or an obvious error seen in
-the message.  This response will be used instead of the
-upper level being required.
-
+Gets and returns the contents of the RESPONSE string.  
 
 =head2 getRequestNamespaces($self)
 
-Returns a mapping of request namespaces.
-
+Gets and returns the contents of the REQUESTNAMESPACE hash.  
 
 =head2 getRequestAsXPath($self)
 
-Returns the nmwg:message from a given request in the form of an XPath 
-object.
-
+Gets and returns the request as an XPath object.  
 
 =head2 getRequest($self)
 
-Returns the nmwg:message from a given request.
-
+Gets and returns the contents of the REQUEST string.  
 
 =head2 getRequestDOM($self)
 
-Returns the nmwg:message as a LibXML DOM from a given 
-request.
+Gets and returns the contents of the REQUEST as a DOM object.  
 
+=head2 setResponseAsXPath($self, $xpath) 
 
-=head2 setResponseAsXPath($self, $xpath)
+Sets the RESPONSE as an XPath object.
 
-Sets the content of a response messages where the input is an 
-XPath object.
+=head2 setResponse($self, $content, $envelope) 
 
+Sets the response to the content, allows you to specify if
+an envelope is or is not needed.
 
-=head2 setResponse($self, $content, $envelope)
-  
-Sets the content of a response messages.  'envelope' is a boolean 
-value indicating if we need an envelope to be constructed.    
-  
-  
 =head2 closeCall($self)
 
-Closes a given call to the service by sending a response message.
-
+Closes a call, undefs variables.
 
 =head2 makeEnvelope($self, $content)
 
-Makes a SOAP formated envelope.
-
-
+Makes a SOAP envelope for some content.
+  
 =head2 sendReceive($self, $envelope, $timeout)
 
-Sents a soap formated envelope, and a timeout value to the contact host/port/endPoint.
-
-
-=head2 error($self, $msg, $line)
-
-A 'message' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
-
+Sends and receives a SOAP envelope.
 
 =head1 SEE ALSO
 
 L<Carp>, L<Exporter>, L<HTTP::Daemon>, L<HTTP::Response>, L<HTTP::Headers>, 
 L<HTTP::Status>, L<XML::XPath>, L<XML::Writer>, L<XML::Writer::String>, 
-L<LWP::UserAgent>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>
+L<LWP::UserAgent>, L<Log::Log4perl>, L<XML::LibXML>, L<perfSONAR_PS::Common>, 
+L<perfSONAR_PS::Messages>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -733,7 +697,7 @@ $Id$
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -742,3 +706,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

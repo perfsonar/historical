@@ -93,9 +93,9 @@ sub prepareCollectors {
          
       my $hostName = extract($m->find(".//".$topoPrefix.":hostName")->get_node(1));      
       my $ifIndex = extract($m->find(".//".$topoPrefix.":ifIndex")->get_node(1));
-      my $snmpVersion = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPVersion\"]")->get_node(1));
-      my $snmpCommunity = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"SNMPCommunity\"]")->get_node(1));
-      my $OID = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"OID\"]")->get_node(1));    
+      my $snmpVersion = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"version\"]")->get_node(1));
+      my $snmpCommunity = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"community\"]")->get_node(1));
+      my $OID = extract($m->find(".//".$snmpPrefix.":parameters/nmwg:parameter[\@name=\"oid\"]")->get_node(1));    
       
       if(!defined $self->{AGENT}->{$hostName}) {    	  
         $self->{AGENT}->{$hostName} = new perfSONAR_PS::MP::SNMP::Agent(

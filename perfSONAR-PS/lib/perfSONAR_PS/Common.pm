@@ -5,14 +5,13 @@ package perfSONAR_PS::Common;
 use warnings;
 use Carp qw( carp );
 use Exporter;
-
 use IO::File;
 use XML::XPath;
 use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger);
 
 @ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'printError', 'chainMetadata', 
+@EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive');
 
 sub readXML {
@@ -53,7 +52,7 @@ sub readConfiguration {
       while (<$CONF>) {
         if(!($_ =~ m/^#.*$/) and !($_ =~ m/^\s+/)) {
           $_ =~ s/\n//;
-          @values = split(/\?/,$_);
+          my @values = split(/\?/,$_);
           $conf->{$values[0]} = $values[1];
           $logger->debug("Found ".$values[0]." = \"".$values[1]."\".");
         }
@@ -74,23 +73,41 @@ sub readConfiguration {
 sub chainMetadata {
   my($dom, $uri) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
+  
 
   if(defined $dom and $dom ne "") {
-    foreach my $md ($dom->getElementsByTagNameNS($uri, "metadata")) {
-      my @subjects = $md->getElementsByLocalName("subject");
-      if($subjects[0]) {
-        if($subjects[0]->getAttribute("metadataIdRef")) {
-          foreach my $md2 ($dom->getElementsByTagNameNS($uri, "metadata")) {
-	          if($subjects[0]->getAttribute("metadataIdRef") eq $md2->getAttribute("id")) {
-              $logger->debug("Found chain for subject \"".$subjects[0]->getAttribute("id")."\" and metadata \"".$md2->getAttribute("id")."\".");
-              
-              # XXX jason: [6/1/07]
-              # testing... (if we were to remove the unecessary subject)
-              $md->removeChild($subjects[0]);
-              
-              chain($md2, $md, $md2);
-	          }
+    my %mdChains = ();
+  
+    my $changes = 1;
+    while($changes) {
+      $changes = 0;
+      foreach my $md ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+        if($md->getAttribute("metadataIdRef")) {
+          if(!$mdChains{$md->getAttribute("metadataIdRef")}) {
+            $mdChains{$md->getAttribute("metadataIdRef")} = 0;
           }
+          if($mdChains{$md->getAttribute("id")} != $mdChains{$md->getAttribute("metadataIdRef")}+1) {
+            $mdChains{$md->getAttribute("id")} = $mdChains{$md->getAttribute("metadataIdRef")}+1;
+            $changes = 1;
+          }
+        }
+      }
+    }
+
+    my @sorted = sort {$mdChains{$a} <=> $mdChains{$b}} keys %mdChains;
+    for(my $x = 0; $x <= $#sorted; $x++) {
+      $mdChains{$sorted[$x]} = 0;
+      foreach my $md ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+        if($md->getAttribute("id") eq $sorted[$x]){
+          foreach my $md2 ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+            if($md->getAttribute("metadataIdRef") and 
+              $md2->getAttribute("id") eq $md->getAttribute("metadataIdRef")){
+              metadataChaining($md2, $md);
+              $md->removeAttribute("metadataIdRef");
+              last;
+            }
+          }
+          last;
         }
       }
     }
@@ -101,82 +118,105 @@ sub chainMetadata {
   return $dom;
 }
 
-
-sub chain {
-  my($node, $ref, $ref2) = @_;
-  
-  if($node->nodeType != 3) {
-    my $attrString = "";
-    my $counter = 0;
-    foreach my $attr ($node->attributes) {
-      if($attr->isa('XML::LibXML::Attr')) {
-        if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
-          if($counter == 0) {  
-            $attrString = $attrString . "@" . $attr->getName . "=\"" . $attr->getValue . "\"";
-          }
-          else {
-            $attrString = $attrString . " and @" . $attr->getName . "=\"" . $attr->getValue . "\"";
-          }
-          $counter++;
-        }
-      }
-    }
-    
-    if($node->hasChildNodes()) {
-      my @children = $node->childNodes;
-      if($#children == 0) {
-        if($node->firstChild->nodeType == 3) {        
-          (my $value = $node->firstChild->textContent) =~ s/\s*//g;
-          if($value) {
-            if($counter == 0) {
-              $attrString = $attrString . "text()=\"" . $value . "\"";
-            }
-            else {
-              $attrString = $attrString . " and text()=\"" . $value . "\"";
-            }      
-          }        
-        }
-      }
-    }
-    if($attrString) {
-      $attrString = "[".$attrString."]";      
-    }
-    
-    my $path = "";
-    if($node->nodePath() =~ m/nmwg:store/) {
-      ($path = $node->nodePath()) =~ s/\/nmwg:store\/nmwg:metadata//;
-      $path =~ s/\[\d\]//g;
-      $path =~ s/^\///g;  
+sub metadataChaining {
+  my($node, $original) = @_;
+  if(!($node->getName eq "\#text")) {
+    if($node->getName eq "nmwg:parameter") {
+      exact($node, $original);
     }
     else {
-      ($path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-      $path =~ s/\[\d\]//g;
-      $path =~ s/^\///g;  
+      elements($node, $original, "");
+      attributes($node, $original);
     }
-
-    if($path) {  
-      if(!($ref->find($path.$attrString))) {
-	      my $name = $node->nodeName;
-	      my $path2 = $path;
-	      $path2 =~ s/\/$name$//;	  
-        if($ref->find($path2)) {
-          $ref->find($path2)->get_node(1)->addChild($node->cloneNode(1));	 
-        }
-        else {
-          $ref->addChild($node->cloneNode(1));	 
-        } 
-      }
-    }
-  
     if($node->hasChildNodes()) {
       foreach my $c ($node->childNodes) {
-        chain($c, $ref, $ref2);
+        metadataChaining($c, $original);
       }
     }
   }
   return;
 }
 
+sub getPath {
+  my($node) = @_;
+  my $path = "";
+  if($node->nodePath() =~ m/nmwg:store/) {
+    ($path = $node->nodePath()) =~ s/\/nmwg:store\/nmwg:metadata//;
+    $path =~ s/\[\d+\]//g;
+    $path =~ s/^\///g;  
+  }
+  elsif($node->nodePath() =~ m/nmwg:message/) {
+    ($path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+    $path =~ s/\[\d+\]//g;
+    $path =~ s/^\///g;  
+  }  
+  return $path;
+}
+
+
+sub elements {
+  my($node, $original, $extra) = @_;
+  my $path = getPath($node);
+  if($path) {
+    if(!($original->find($path.$extra))) {
+	    my $name = $node->nodeName;
+	    my $path2 = $path;
+	    $path2 =~ s/\/$name$//;	  
+      if($original->find($path2)) {      
+        $original->find($path2)->get_node(1)->addChild($node->cloneNode(1));	 
+      }
+      else {
+        $original->addChild($node->cloneNode(1));	 
+      } 
+    }   
+  } 
+  return;
+}
+
+sub attributes {
+  my($node, $original) = @_;
+  my $path = getPath($node);
+  foreach my $attr ($node->attributes) {
+    if($attr->isa('XML::LibXML::Attr')) {
+      if($attr->getName ne "id") {
+        if($path) {
+          if(!($original->find($path."[@".$attr->getName."]"))) {
+            if($original->find($path)) {      
+              $original->find($path)->get_node(1)->setAttribute($attr->getName, $attr->getValue);
+            }
+          }              
+        }        
+      }
+    }
+  }
+  return;
+}
+
+sub exact {
+  my($node, $original) = @_;
+  my $path = getPath($node);
+
+  my $attrString = "";
+  my $counter = 0;
+  foreach my $attr ($node->attributes) {
+    if($attr->isa('XML::LibXML::Attr')) {
+      if($attr->getName ne "id") {
+        if($counter == 0) {  
+          $attrString = $attrString . "@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+        }
+        else {
+          $attrString = $attrString . " and @" . $attr->getName . "=\"" . $attr->getValue . "\"";
+        }
+        $counter++;
+      }
+    }
+  }
+  if($attrString) {
+    $attrString = "[".$attrString."]";      
+  }
+  elements($node, $original, $attrString);
+  return;
+}
 
 sub countRefs {
   my($id, $dom, $uri, $element, $attr) = @_;
@@ -321,20 +361,14 @@ can be invoked directly (and sparingly).
     # use perfSONAR_PS::Common qw( readXML readConfiguration )
 
     my $xml = readXML("./store.xml");
-    if(!($xml)) {
-      printError("./error.log", "XML File is empty."); 
-      exit(1);
-    }
 
     my %conf = ();
     readConfiguration("./db.conf", \%conf);
-
-
+    
     # To see the structure of the conf hash:
     # 
     # use Data::Dumper;
     # print Dumper(%conf) , "\n";
-
 
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -411,11 +445,6 @@ Would return a hash such as:
 
 Function will warn on error.  
 
-=head2 printError($file, $msg)
-
-Writes the contents of '$msg' (along with a timestamp) to this designated log file 
-'$file'.  Function will warn on error.  
-
 =head2 chainMetadata($dom, $uri)
 
 Given a dom of objects (and a uri), this function will continuously loop through performing
@@ -428,7 +457,7 @@ a 'chaining' operation to share values between metadata objects.  An example wou
         <nmwgt:hostName>stout</nmwgt:hostName>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
   </nmwg:metadata>  
 
   <nmwg:metadata id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="1">
@@ -439,44 +468,55 @@ a 'chaining' operation to share values between metadata objects.  An example wou
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
   </nmwg:metadata>
-
-  <nmwg:metadata id="3">
-    <netutil:subject id="3" metadataIdRef="2"/>
-    <nmwg:parameters id="3">
-      <select:parameter name="time" operator="gte">
-        1172173843
-      </select:parameter>
-      <select:parameter name="time" operator="lte">
-        1172173914
-      </select:parameter>      
-    </nmwg:parameters>
-  </nmwg:metadata>  
 
 Which would then become:
 
-  <nmwg:metadata id="3">
+  <nmwg:metadata id="2">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="1">
       <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
         <nmwgt:ifAddress type="ipv4">128.4.133.167</nmwgt:ifAddress>
         <nmwgt:hostName>stout</nmwgt:hostName>
         <nmwgt:ifName>eth1</nmwgt:ifName>
+        <nmwgt:ifIndex>3</nmwgt:ifIndex>
         <nmwgt:direction>in</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
-    <nmwg:parameters id="3">
-      <select:parameter name="time" operator="gte">
-        1172173843
-      </select:parameter>
-      <select:parameter name="time" operator="lte">
-        1172173914
-      </select:parameter>      
-    </nmwg:parameters>
   </nmwg:metadata>  
 
 This chaining is useful for 'factoring out' large chunks of XML.
+
+=head2 metadataChaining($node, $original)
+
+The auxilary function from chain metadata, this is called when we notice we
+have a merge chain.  It will be called recursively as we process the metadata
+block.  The arguments are the current node we are dealing with, and the 
+'original' block used for comparisons.  Note this function should not be called 
+externally.
+
+=head2 getPath($node)
+
+Cleans up the 'path' (XPath location) of a node by removing positional 
+notation, and the root elements.  This path is then returned.  Note this 
+function should not be called externally.
+
+=head2 elements($node, $original, $extra)
+
+Given a node (and knowing what the original structure looks like) adds 
+'missing' elements when needed.  Note this function should not be called 
+externally.
+
+=head2 attributes($node, $original)
+
+Given a node (and knowing what the original structure looks like) adds
+'missing' attributes.  Note this function should not be called externally.
+
+=head2 exact($node, $original)
+
+Checks parameter nodes for 'exact' matches.  Note this function should not 
+be called externally.
 
 =head2 countRefs($id, $dom, $uri, $element, $attr)
 
@@ -501,7 +541,7 @@ XPath statements that will occur later).
 
 =head1 SEE ALSO
 
-L<Carp>, L<Exporter>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>
+L<Carp>, L<Exporter>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -515,11 +555,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: Transport.pm 267 2007-07-06 19:38:45Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -528,3 +568,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

@@ -2,11 +2,9 @@
 
 package perfSONAR_PS::DB::SQL;
 
-
 use DBI;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
-
 
 sub new {
   my ($package, $name, $user, $pass, $schema) = @_;   
@@ -375,7 +373,7 @@ specific database.
 The API of perfSONAR_PS::DB::SQL is rather simple, and attempts to mirror the API of the other 
 perfSONAR_PS::DB::* modules.  
 
-=head2 new($name, $user, $pass, $schema)
+=head2 new($package, $name, $user, $pass, $schema)
 
 The first argument is the 'name' of the database (written as a DBI connection string), and 
 the second and third arguments are the username and password (if any) used to connect to 
@@ -385,60 +383,45 @@ format which specifies a 'type' of database (MySQL, SQLite, etc) as well as a pa
 other connection method.  It is important that you have the proper DBI modules installed 
 for the specific database you will be attempting to access. 
 
-=head2 setName($name)
+=head2 setName($self, $name)
 
-(Re-)Sets the 'name' of the database (written as an DBI connection string).  The name must 
-be of the DBI connection format which specifies a 'type' of database (MySQL, SQLite, etc) as 
-well as a path or other connection method.  It is important that you have the proper DBI 
-modules installed for the specific database you will be attempting to access. 
+Sets the name of the database (write as a DBI connection string).  
 
-=head2 setUser($user)
+=head2 setUser($self, $user)
 
-(Re-)Sets the username and password (if any) used to connect to the database.
+Sets the user of the database.
 
-=head2 setPass($pass)
+=head2 setPass($self, $pass)
 
-(Re-)Sets the password (if any) used to connect to the database.
+Sets the password for the database.
 
-=head2 setSchema($schema)
+=head2 setSchema($self, $schema)
 
-(Re-)Sets the table schema for the database.
+Sets the schema of the database (as a table).  
 
-=head2 openDB
+=head2 openDB($self)
 
-Prepares a handle to the database. Returns 0 on success and -1 on failure.
+Opens the dabatase.
 
-=head2 closeDB
+=head2 closeDB($self)
 
-Closes the handle to the database. Returns 0 on success and -1 on failure.
+Closes the database.
 
-=head2 query($query)
+=head2 query($self, $query)
 
-The '$query' string is an SQL statement to be sent to the database.  The statement must
-of course use the proper database schema elements and be properly formed.  Will return
--1 on error.
+Queries the database.
 
-The results of this command are an array of database 'rows'.  
+=head2 count($self, $query)
 
-=head2 count($query)
+Counts the number of results of a query in the database.
 
-The '$query' string is an SQL statement to be sent to the database.  The statement must
-of course use the proper database schema elements and be properly formed.  Will return
--1 on error.
+=head2 insert($self, $table, $argvalues)
 
-The results of this command are the number of result rows that WOULD be returned. 
+Inserts items in the database.
 
-=head2 insert($table, $argvalues)
+=head2 remove($self, $delete)
 
-The first argument is the specific table to operate on within the database, the second 
-argument deals with the column names (related to the schema) and the values to be 
-inserted.  Will return 1 on success, -1 on failure.
-
-=head2 remove($delete)
-
-The '$delete' string is an SQL statement to be sent to the database.  The statement 
-must of course use the proper database schema elements and be properly formed.  Will 
-return 1 on success, -1 on failure.
+Removes items from the database.
 
 =head1 SEE ALSO
 
@@ -456,11 +439,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -469,3 +452,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

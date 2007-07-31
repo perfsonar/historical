@@ -11,8 +11,8 @@ use perfSONAR_PS::Common;
 
 
 @ISA = ('Exporter');
-@EXPORT = ('getResultMessage', 'getResultCodeMessage', 
-           'getResultCodeMetadata', 'getResultCodeData');
+@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
+           'getResultCodeData', 'createMetadata', 'createData');
 
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content) = @_;  
@@ -48,8 +48,8 @@ sub getResultCodeMessage {
   
   if((defined $event and $event ne "") and 
      (defined $description and $description ne "")) {
-    my $metadataId = genuid();
-    my $dataId = genuid();
+    my $metadataId = "metadata.".genuid();
+    my $dataId = "data.".genuid();
     $logger->debug("Result code message created.");
     return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $metadataIdRef, $event).getResultCodeData($dataId, $metadataId, $description));
   }
@@ -109,6 +109,42 @@ sub getResultCodeData {
 }
 
 
+sub createMetadata {
+  my($id, $metadataIdRef, $content) = @_;
+  my $mdElement = "  <nmwg:metadata id=\"".$id."\" ";
+  if(defined $metadataIdRef and $metadataIdRef ne "") {
+    $mdElement = $mdElement . "metadataIdRef=\"".$metadataIdRef."\" ";
+  }
+  if(defined $content and $content ne "") {
+    $mdElement = $mdElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";  
+	  $mdElement = $mdElement . "    " . $content . "\n";
+	  $mdElement = $mdElement . "  </nmwg:metadata>\n";
+  }
+  else {
+    $mdElement = $mdElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" />\n"; 
+  }
+  return $mdElement;
+}
+
+
+sub createData {
+  my($dataId, $metadataId, $content) = @_;
+  my $dataElement = "  <nmwg:data id=\"".$dataId."\" ";
+  if(defined $metadataId and $metadataId ne "") {  
+    $dataElement = $dataElement . "metadataIdRef=\"".$metadataId."\" ";
+	}
+  if(defined $content and $content ne "") {
+    $dataElement = $dataElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";  
+	  $dataElement = $dataElement . "    " . $content . "\n";
+	  $dataElement = $dataElement . "  </nmwg:data>\n";
+  }
+  else {
+    $dataElement = $dataElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" />\n"; 
+  }
+  return $dataElement;
+}
+
+
 1;
 
 
@@ -141,11 +177,15 @@ methods can be invoked directly (and sparingly).
     
     $msg = getResultCodeMessage($id, $idRef, "response", "error.ma.transport" , "something...");
     
-    $msg = getResultCodeMetadata($id, $mdIdRef, "error.ma.transport);
+    $msg = getResultCodeMetadata($id, $idRef, "error.ma.transport);
     
     $msg = getResultCodeData($id, $idRef, "something...");
+    
+    $msg = createMetadata($id, $idRef, $content);
 
-       
+    $msg = createData($id, $idRef, $content);
+    
+           
 =head1 DETAILS
 
 The API for this module aims to be simple; note that this is not an object and 
@@ -159,26 +199,34 @@ constructs.
 
 =head2 getResultMessage($id, $messageIdRef, $type, $content)
 
-The arguments are a message id, a messageIdRef, a messate type, and finally the 'content'
-which is understood to be the xml content of the message.  
+Given a messageId, messageIdRef, a type, and some amount of content a 
+message element is returned.
 
-=head2 getResultCodeMessage($id, $messageIdRef, $type, $event, $description)
+=head2 getResultCodeMessage($id, $messageIdRef, $metadataIdRef, $type, $event, $description)
 
-The arguments are a message id, a messageIdRef, a messate type, an 'eventType' for the result
-code metadata, and a message for the result code data.  
+Given a messageId, messageIdRef, metadataIdRef, messageType, event code, and
+some sort of description, generate a result code message.  This function uses
+the getResultCodeMetadata and getResultCodeData.  
 
-=head2 getResultCodeMetadata($id, $mdIdRef, $event)
+=head2 getResultCodeMetadata($id, $metadataIdRef, $event)
 
-The arguments are a metadata id, a metadataIdRef (optional), and an 'eventType' for the 
-result code metadata.
+Given an id, metadataIdRef, and some event code retuns the result metadata.
 
 =head2 getResultCodeData($id, $metadataIdRef, $description)
 
-The arguments are a data id, a metadataIdRef, and a message for the result code data.  
+Given an id, metadataIdRef, and some description return the result data.
+
+=head2 createMetadata($id, $metadataIdRef, $content)
+
+Given an id, metadataIdRef and some content, create a metadata.
+
+=head2 createData($dataId, $metadataId, $content)
+
+Given an id, metadataIdRef and some content, create a data.
 
 =head1 SEE ALSO
 
-L<Carp>, L<Exporter>
+L<Carp>, L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -192,11 +240,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: Transport.pm 267 2007-07-06 19:38:45Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -205,3 +253,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

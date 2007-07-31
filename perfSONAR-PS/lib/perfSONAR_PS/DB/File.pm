@@ -2,10 +2,8 @@
 
 package perfSONAR_PS::DB::File;
 
-
 use XML::LibXML;
 use Log::Log4perl qw(get_logger);
-
 
 sub new {
   my ($package, $file) = @_; 
@@ -197,45 +195,41 @@ edit your XML file, do so out of band.
 The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
 the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($file)
+=head2 new($package, $file)
 
 The only argument is a string representing the file to be opened.
 
-=head2 setFile($file)
+=head2 setFile($self, $file)
 
 (Re-)Sets the name of the file to be used.
 
-=head2 openDB
+=head2 openDB($self)  
 
-Opens the file, and creates the necessary objects to read and query the contents. Will return 0
-on success and -1 on failure.
+Opens the database, will return status of operation.
 
-=head2 closeDB
+=head2 closeDB($self)
 
-Closes the file. Returns 0 on success and -1 on failure.
+Close the database, will return status of operation.
 
-=head2 query($query)
+=head2 query($self, $query)
 
-The '$query' string is an XPath expression that will be performed on the open file.  The results
-are returned as an array of strings. Will return -1 on error.
+Given a query, returns the results or nothing.  
 
-=head2 count($query)
+=head2 count($self, $query)
 
-The '$query' string is an XPath expression that will be performed on the open file.  The results
-this time are a count of the number of elements that match the XPath expression. Will return -1
-on error.
+Counts the results of a query.  
 
-=head2 getDOM()
+=head2 getDOM($self)
 
 Returns the internal XML::LibXML DOM object. Will return "" on error.
 
-=head2 setDOM($dom)
+=head2 setDOM($self, $dom)
 
-Sets the value of of the internal XML::LibXML DOM object.
+Sets the DOM object.
   
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<perfSONAR_PS::Common>, L<Log::Log4perl>
+L<XML::LibXML>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -249,11 +243,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -262,3 +256,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

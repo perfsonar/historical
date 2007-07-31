@@ -85,6 +85,22 @@ sub init {
 }
 
 
+sub respond {
+  my($self) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
+  $logger->debug("Sending response.");
+  $self->{LISTENER}->setResponse($self->{RESPONSE}, 1);
+
+  $logger->debug("Closing call.");
+  $self->{LISTENER}->closeCall; 
+  return;
+}
+
+#
+# NOTE: (JZ - 7/30/07) This function is depricated
+# 
+
 sub keyRequest {
   my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::Base");
@@ -130,19 +146,6 @@ sub keyRequest {
 }
 
 
-sub respond {
-  my($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
-  
-  $logger->debug("Sending response.");
-  $self->{LISTENER}->setResponse($self->{RESPONSE}, 1);
-
-  $logger->debug("Closing call.");
-  $self->{LISTENER}->closeCall; 
-  return;
-}
-
-
 1;
 
 
@@ -164,8 +167,6 @@ related tasks of interacting with backend storage.
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
     $conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-    $conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-    $conf{"DEBUG"} = 1;
     
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -187,9 +188,6 @@ related tasks of interacting with backend storage.
     if(!$response) {
       $self->error($self, "Whoops...", __LINE__)
     }
-
-    my $response2 = $self->keyRequest($self, $metadatadb, $metadata, $response2, 
-                                      $messageId, $messageIdRef)
 
 =head1 DETAILS
 
@@ -213,25 +211,17 @@ The accepted arguments may also be ommited in favor of the 'set' functions.
 Initialize the underlying transportation medium.  This function depends
 on certain conf file values.
 
-=head2 keyRequest($ma, $metadatadb, $metadata, $localContent, $messageId, $messageIdRef)
-
-Performs the common 'key request' task for a given metadata dabase, and 
-metadata 'id' value.  The 'localContent' is a variable that contains the 
-'message' (so far) to be returned to the user.
-
 =head2 respond()
 
 Send message stored in $self->{RESPONSE}.
 
-=head2 error($self, $msg, $line)	
+=head2 keyRequest(($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef)
 
-A 'msg' argument is used to print error information to the screen and log files 
-(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.  
-Meant to be used internally.
+DEPRICATED
 
 =head1 SEE ALSO
 
-L<Carp>, L<Exporter>, L<perfSONAR_PS::Transport>, 
+L<Carp>, L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Transport>, 
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::MA::General>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
@@ -250,7 +240,7 @@ $Id$
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -259,3 +249,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut

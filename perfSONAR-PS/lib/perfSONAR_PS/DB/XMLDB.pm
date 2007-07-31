@@ -2,11 +2,9 @@
 
 package perfSONAR_PS::DB::XMLDB;
 
-
 use Sleepycat::DbXml 'simple';
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
-
 
 sub new {
   my ($package, $env, $cont, $ns) = @_; 
@@ -547,7 +545,7 @@ objects and catches many errors.  The methods presented here are rather simple b
 The API of perfSONAR_PS::DB::XMLDB is rather simple, and attempts to
 mirror the API of the other perfSONAR_PS::DB::* modules.  
 
-=head2 new($env, $cont, \%ns)
+=head2 new($package, $env, $cont, $ns)
 
 The first argument represents the "environment" (the directory where the xmldb was created, 
 such as '/home/jason/Netradar/MP/SNMP/xmldb'; this should not be confused with the actual 
@@ -557,29 +555,29 @@ environment).  The fourth argument is a hash reference containing a prefix to na
 mapping.  All namespaces that may appear in the container should be mapped (there is no 
 harm is sending mappings that will not be used).  
 
-=head2 setEnvironment($env)
+=head2 setEnvironment($self, $env)
 
 (Re-)Sets the "environment" (the directory where the xmldb was created, such as 
 '/home/jason/Netradar/MP/SNMP/xmldb'; this should not be confused with the actual 
 installation directory).
 
-=head2 setContainer($cont)
+=head2 setContainer($self, $cont)
 
 (Re-)Sets the "container" (a specific file that lives in the environment, such as 'snmpstore.dbxml'; 
 many containers can live in a single environment).
 
-=head2 setNamespaces(\%ns)
-  
+=head2 setNamespaces($self, $ns)
+
 (Re-)Sets the hash reference containing a prefix to namespace mapping.  All namespaces that may 
 appear in the container should be mapped (there is no harm is sending mappings that will not be 
 used).
 
-=head2 openDB
+=head2 openDB($self)
 
-Opens and initializes objects for interacting with the database such as managers and 
-containers. Returns 0 on success and -1 on failure.
+Opens the database
 
-=head2 query($query)
+=head2 xQuery($self, $query)
+
 
 The string $query must be an XPath expression to be sent to the database.  Examples are:
 
@@ -589,51 +587,53 @@ The string $query must be an XPath expression to be sent to the database.  Examp
     
   //nmwg:parameter[@name="SNMPVersion" and @value="1"]
   
-Results are returned as an array of strings or -1 on error.
+Results are returned as an array of strings or error status.  This function should be
+used for XQuery statements.  
 
-=head2 count($query)
+=head2 query($self, $query)
+
+
+The string $query must be an XPath expression to be sent to the database.  Examples are:
+
+  //nmwg:metadata
+  
+    or
+    
+  //nmwg:parameter[@name="SNMPVersion" and @value="1"]
+  
+Results are returned as an array of strings or error status.  This function should be
+used for XPath statements.  
+
+=head2 queryForName($self, $query)
+
+Given a query, return the 'name' of the container.
+
+=head2 queryByName($self, $name)
+
+Given a name, see if it exists in the container.  
+
+=head2 updateByName($self, $content, $name)
+
+Update container content by name. 
+
+=head2 count($self, $query)
 
 The string $query must also be an XPath expression that is sent to the database.  
 The result of this expression is simple the number of elements that match the 
 query. Returns -1 on error.
 
-=head2 insertIntoContainer($content, $name)
+=head2 insertIntoContainer($self, $content, $name)
 
-The first argument, '$content', is XML markup in string form.  It should of course be
-well formed.  The second argument, '$name', is the name to be used in the database
-for this content.  Think of this as the 'primary key'.  Most times the 'id' field of
-the XML element can be used for the name safely.  Note that this will insert the
-item in question DIRECTLY into the container, it will not be the child of any 
-elements.  Returns 0 on success and -1 on error.
+Insert the content into the container with the name.  
 
-=head insertElement($xquery, $content)
+=head2 insertElement($self, $query, $content)
 
-The first argument represents an XQuery expression (the results of which should
-be where you wish to place the XML element), the second argument is the well formed
-chunk of XML that is to be inserted.  For example, here is a sample of the XML already
-in the container (store.dbxml):
+Perform a query, and insert the content into this result.
 
-<a>
-  <b id='1' />
-  <b id='2' />
-</a>
+=head2 remove($self, $name)
 
-To insert a child "<c atr='1'/>" as a child of "<b id='2'>", we first need to construct the
-proper XQuery expression:
-
-/a/b[@id='2']
-
-The call would then look like:
-
-db->insertElement("/a/b[@id='2']", "<c atr='1'/>");
-
-Returns 0 on success and -1 on error.
-
-=head2 remove($name)
-
-The only argument here, '$name', is the name (primary key) of the element to be removed
-from the database.  Returns 0 on success and -1 on error.
-
+Remove the container w/ the given name.  
+  
 =head1 SEE ALSO
 
 L<Sleepycat::DbXml>, L<perfSONAR_PS::Common>, L<Log::Log4perl>
@@ -650,11 +650,11 @@ Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id:$
+$Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
 
 =head1 AUTHOR
 
-Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -663,3 +663,5 @@ Copyright (C) 2007 by Internet2
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut
