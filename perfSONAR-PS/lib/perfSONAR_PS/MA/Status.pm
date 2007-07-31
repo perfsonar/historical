@@ -79,31 +79,39 @@ sub handleRequest {
 	my $messageId = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("id");
 	my $messageType = $self->{LISTENER}->getRequestDOM()->getDocumentElement->getAttribute("type");
 
-	$self->{REQUESTNAMESPACES} = $self->{LISTENER}->getRequestNamespaces();
+	my ($status, $response);
 
 	if($messageType eq "SetupDataRequest") {
 		$logger->debug("Handling lookup request.");
-		my ($status, $response) = $self->parseLookupRequest($self->{LISTENER}->getRequestDOM());
-		if ($status != 0) {
-			$logger->error("Unable to handle status request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
-		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataRequest", $response, $self->{REQUESTNAMESPACES});
-		}
+		($status, $response) = $self->parseLookupRequest($self->{LISTENER}->getRequestDOM());
 	} elsif ($messageType eq "MeasurementArchiveStoreRequest") {
 		$logger->debug("Handling store request.");
-		my ($status, $response) = $self->parseStoreRequest($self->{LISTENER}->getRequestDOM());
-		if ($status != 0) {
-			$logger->error("Unable to handle status request");
-			$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.content", $response);
-		} else {
-			$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "MeasurementArchiveStoreRequest", $response, $self->{REQUESTNAMESPACES});
+		($status, $response) = $self->parseStoreRequest($self->{LISTENER}->getRequestDOM());
+	} else {
+		$status = "error.common.action_not_supported";
+		$response = "Message type \"".$messageType."\" is not yet supported";
+	}
+
+	if ($status ne "") {
+		$logger->error("Error handling request: $status/$response");
+		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", $status, $response);
+	} else {
+
+		my %all_namespaces = ();
+
+		my $request_namespaces = $self->{LISTENER}->getRequestNamespaces();
+
+		foreach my $uri (keys %{ $request_namespaces }) {
+			$all_namespaces{$request_namespaces->{$uri}} = $uri;
 		}
 
-	} else {
-		my $msg = "Message type \"".$messageType."\" is not yet supported";
-		$logger->error($msg);
-		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+		foreach my $prefix (keys %{ $self->{NAMESPACES} }) {
+			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
+		}
+
+		print Dumper(\%all_namespaces);
+
+		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces);
 	}
 
 	return $self->{RESPONSE};
@@ -118,7 +126,7 @@ sub parseStoreRequest {
 	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
 		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
+				my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
 				my $knowledge = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="knowledge"]');
 				my $time = $d->findvalue('./ifevt:datum/@timeValue');
 				my $time_type = $d->findvalue('./ifevt:datum/@timeType');
@@ -128,32 +136,32 @@ sub parseStoreRequest {
 				if (!defined $link_id) {
 					my $msg = "Metadata ".$m->getAttribute("id")." is missing the link id";
 					$logger->error($msg);
-					return ("error.ma", $msg);
+					return ("error.ma.query.incomplete_metadata", $msg);
 				}
 
 				if (!defined $knowledge) {
 					my $msg = "Metadata ".$m->getAttribute("id")." is missing knowledge parameter";
 					$logger->error($msg);
-					return ("error.ma", $msg);
+					return ("error.ma.query.incomplete_metadata", $msg);
 				}
 
 				if (!defined $time or !defined $time_type or !defined $adminState or !defined $operState) {
 					my $msg = "Data ".$d->getAttribute("id")." is incomplete";
 					$logger->error($msg);
-					return ("error.ma", $msg);
+					return ("error.ma.query.incomplete_data", $msg);
 				}
 
 				if ($time_type ne "unix") {
 					my $msg = "Time type must be unix timestamp";
 					$logger->error($msg);
-					return ("error.ma", $msg);
+					return ("error.ma.query.invalid_timestamp_type", $msg);
 				}
 
 				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
 				if ($status != 0) {
 					my $msg = "Couldn't handle store request: $res";
 					$logger->error($msg);
-					return ("error.ma", $msg);
+					return ($status, $res);
 				}
 
 				# give them back what they gave us?
@@ -164,7 +172,7 @@ sub parseStoreRequest {
 		}
 	}
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub handleStoreRequest($$$$$) {
@@ -178,17 +186,17 @@ sub handleStoreRequest($$$$$) {
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.open", $msg);
 	}
 
 	($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, 0);
 	if ($status != 0) {
 		my $msg = "Database update failed: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.update", $msg);
 	}
 
-	return (0, "");
+	return ("", "");
 }
 
 sub parseLookupRequest {
@@ -220,7 +228,7 @@ sub parseLookupRequest {
 					$localContent .= $res;
 				} elsif ($eventType eq "Link.Recent") {
 					my ($status, $res) = $self->lookupLinkRecentRequest($m, $d);
-					if ($status != 0) {
+					if ($status ne "") {
 						$logger->error("Couldn't dump link information");
 						return ($status, $res);
 					}
@@ -238,7 +246,7 @@ sub parseLookupRequest {
 	print OUT $localContent;
 	close OUT;
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub lookupAllRequest($$$) {
@@ -251,14 +259,14 @@ sub lookupAllRequest($$$) {
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.open", $msg);
 	}
 
 	($status, $res) = $self->{CLIENT}->getAll;
 	if ($status != 0) {
 		my $msg = "Couldn't get information from database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.fetch", $msg);
 	}
 
 	print "STUFF: ".Dumper($res);
@@ -269,7 +277,7 @@ sub lookupAllRequest($$$) {
 
 	$localContent .= $m->toString()."\n";
 
-	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" metadataIdRef=\"$mdid\">\n";
 
 	foreach my $link_id (keys %links) {
 		print "LINK_ID: $link_id\n";
@@ -279,7 +287,7 @@ sub lookupAllRequest($$$) {
 	}
 	$localContent .= "</nmwg:data>\n";
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub lookupLinkHistoryRequest($$$) {
@@ -288,19 +296,19 @@ sub lookupLinkHistoryRequest($$$) {
 	my ($status, $res);
 	my $localContent = "";
 
-	my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
+	my $link_id = $m->findvalue('./nmwg:subject/*[@local-name()=\'link\']/@id');
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.ma.status.no_link_id", $msg);
 	}
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.open", $msg);
 	}
 
 	my @tmp_array = ( $link_id );
@@ -309,20 +317,20 @@ sub lookupLinkHistoryRequest($$$) {
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.fetch", $msg);
 	}
 
 	my $mdid = $m->getAttribute("id");
 
 	$localContent .= $m->toString()."\n";
 
-	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" metadataIdRef=\"$mdid\">\n";
 	foreach my $link (@{ $res }) {
 		$localContent .= $self->writeoutLinkState($link);
 	}
 	$localContent .= "</nmwg:data>\n";
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub lookupLinkRecentRequest($$$) {
@@ -331,19 +339,19 @@ sub lookupLinkRecentRequest($$$) {
 	my $localContent = "";
 	my ($status, $res);
 
-	my $link_id = $m->findvalue('./nmwg:subject/nmtopo:link/@id');
+	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
 		$logger->error($msg);
-		return (0, $msg);
+		return ("error.ma.status.no_link_id", $msg);
 	}
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my $msg = "Couldn't open connection to database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.open", $msg);
 	}
 
 	my @tmp_array = ( $link_id );
@@ -352,7 +360,7 @@ sub lookupLinkRecentRequest($$$) {
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.common.storage.fetch", $msg);
 	}
 
 	my $mdid = $m->getAttribute("id");
@@ -361,11 +369,11 @@ sub lookupLinkRecentRequest($$$) {
 
 	print Dumper($res)."\n";
 
-	$localContent .= "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topology/2.0/\" metadataIdRef=\"$mdid\">\n";
+	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
 	$localContent .= $self->writeoutLinkState($res->{$link_id});
 	$localContent .= "</nmwg:data>\n";
 
-	return (0, $localContent);
+	return ("", $localContent);
 }
 
 sub writeoutLinkState($$) {

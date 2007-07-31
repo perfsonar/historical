@@ -247,7 +247,7 @@ sub acceptCall {
 		$msg =~ s/'/&apos;/g;
 		$msg =~ s/"/&quot;/g;
                 $logger->error($msg);
-                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "failure.parse", $msg);
+                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
                 return 0;
           }
 
