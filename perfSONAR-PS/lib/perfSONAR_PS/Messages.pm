@@ -24,7 +24,7 @@ sub getResultMessage {
     if(defined $namespaces) {
        foreach $ns (keys %{ $namespaces }) {
          next if $namespaces->{$ns} eq "nmwg";
-         $m .= " xmlns:".$namespaces->{$ns}."=\"$ns\"";
+         $m .= " xmlns:".$ns."=\"".$namespaces{$ns}."\"";
        }
     }
 
@@ -205,10 +205,11 @@ between functions.
 The API of perfSONAR_PS::Messages offers simple calls to create message
 constructs.
 
-=head2 getResultMessage($id, $messageIdRef, $type, $content)
+=head2 getResultMessage($id, $messageIdRef, $type, $content, $namespaces)
 
-Given a messageId, messageIdRef, a type, and some amount of content a 
-message element is returned.
+Given a messageId, messageIdRef, a type, and some amount of content a message
+element is returned. If $namespaces is specified, it adds the specified
+namespaces to the resulting nmwg:message.
 
 =head2 getResultCodeMessage($id, $messageIdRef, $metadataIdRef, $type, $event, $description)
 
