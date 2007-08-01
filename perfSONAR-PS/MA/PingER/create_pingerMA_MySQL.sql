@@ -74,13 +74,13 @@ CREATE TABLE   ipaddr_intervals (
 #     meta data table ( [eriod is an interval, since interval is reserved word )
 #
 CREATE TABLE  metaData  (
-  metaID BIGINT NOT NULL AUTO_INCREMENT,
+ metaID BIGINT NOT NULL AUTO_INCREMENT,
  ip_name_src varchar(52),
  ip_name_dst varchar(52),
+ transport varchar(10)  NOT NULL,
  packetSize smallint   NOT NULL,
  count smallint   NOT NULL,
- protocol varchar(10)  NOT NULL,
- period smallint,
+ packetInterval smallint,
  deadline smallint,
  ttl smallint,
  INDEX (ip_name_src, ip_name_dst, packetSize, count),
@@ -109,8 +109,8 @@ CREATE TABLE  data_200707  (
  clp float,
  iqrIpd float,
  lossPercent  float,
- rtts text,
- seqNums text,
+ rtts text, -- should be stored as csv of ping rtts
+ seqNums text, -- should be stored as csv of ping sequence numbers
  INDEX (meanRtt, medianRtt, lossPercent, meanIpd, clp),
  FOREIGN KEY (metaID) references metaData (metaID),
  PRIMARY KEY  (metaID, timestamp));

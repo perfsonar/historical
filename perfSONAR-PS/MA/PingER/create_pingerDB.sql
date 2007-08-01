@@ -79,16 +79,16 @@ CREATE TABLE   ipaddr_intervals (
 #     meta data table 
 #
 CREATE TABLE  metaData  (
-  metaID varchar(52) NOT NULL,
+ metaID varchar(52) NOT NULL,
  ip_name_src varchar(52),
  ip_name_dst varchar(52),
+ transport varchar  NOT NULL,
  packetSize smallint   NOT NULL,
  count smallint   NOT NULL,
- protocol varchar  NOT NULL,
- interval smallint,
+ packetInterval smallint,
  deadline smallint,
  ttl smallint,
- INDEX(ip_name_src,ip_name_dst,  packetSize, count),
+ INDEX (ip_name_src,ip_name_dst,  packetSize, count),
  FOREIGN KEY (ip_name_src, ip_name_dst) references hostInfo (ip_name, ip_name),
  PRIMARY KEY  (metaID));
 
@@ -101,7 +101,6 @@ CREATE TABLE  metaData  (
 #
 CREATE TABLE  data_200707  (
  metaID varchar(52)   NOT NULL,
- pkts_rcvd smallint NOT NULL, 
  minRtt float,
  meanRtt float,
  medianRtt float,
@@ -112,9 +111,11 @@ CREATE TABLE  data_200707  (
  maxIpd float,
  duplicates tinyint(1),
  outOfOrder  tinyint(1),
-  clp float,
+ clp float,
  iqrIpd float,
-  lossPercent  float,
+ lossPercent  float,
+ rtts text, -- should be stored as csv of ping rtts
+ seqNums text, -- should be stored as csv of ping sequence numbers
   INDEX(meanRtt, lossPercent, meanIpd ),
   FOREIGN KEY (metaID) references metaData (metaID),
   PRIMARY KEY  (metaID ,timestamp));
