@@ -168,8 +168,8 @@ sub getLinkHistory($$$) {
 	return (0, \%links);
 }
 
-sub getLastLinkStatus($$) {
-	my ($self, $link_ids) = @_;
+sub getLinkStatus($$$) {
+	my ($self, $link_ids, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
@@ -184,7 +184,15 @@ sub getLastLinkStatus($$) {
 	my %links;
 
 	foreach my $link_id (@{ $link_ids }) {
-		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1");
+		my $query;
+
+		if ($time eq "") {
+		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1";
+		} else {
+		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' and start_time <= \'$time\' and end_time >= '$time'";
+		}
+
+		my $states = $self->{DATADB}->query($query);
 		if ($states == -1) {
 			$logger->error("Couldn't grab information for node ".$link_id);
 			return (-1, "Couldn't grab information for node ".$link_id);
@@ -223,7 +231,7 @@ sub updateLinkStatus($$$$$$$) {
 	if (defined $do_update and $do_update != 0) {
 		my @tmp_array = ( $link_id );
 
-		my ($status, $res) = $self->getLastLinkStatus(\@tmp_array);
+		my ($status, $res) = $self->getLinkStatus(\@tmp_array, "");
 
 		if ($status != 0) {
 			my $msg = "No previous value for $link_id to update";
@@ -340,7 +348,7 @@ on the object for the specific database.
 		push @links, $id;
 	}
 
-	($status, $res) = $status_client->getLastLinkStatus(\@links);
+	($status, $res) = $status_client->getLinkStatus(\@links, "");
 	if ($status != 0) {
 		print "Problem obtaining most recent link status: $res\n";
 		exit(-1);

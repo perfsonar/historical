@@ -228,8 +228,8 @@ sub parseLookupRequest {
 					}
 
 					$localContent .= $res;
-				} elsif ($eventType eq "Link.Recent") {
-					my ($status, $res) = $self->lookupLinkRecentRequest($m, $d);
+				} elsif ($eventType eq "Link.Status") {
+					my ($status, $res) = $self->lookupLinkStatusRequest($m, $d);
 					if ($status ne "") {
 						$logger->error("Couldn't dump link information");
 						return ($status, $res);
@@ -346,13 +346,19 @@ sub lookupLinkHistoryRequest($$$) {
 	return ("", $localContent);
 }
 
-sub lookupLinkRecentRequest($$$) {
+sub lookupLinkStatusRequest($$$) {
 	my($self, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
 
 	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
+	my $time = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="time"]');
+
+	if (!defined $time or $time eq "now") {
+		# no time simply grabs the most recent information
+		$time = "";
+	}
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
@@ -369,7 +375,7 @@ sub lookupLinkRecentRequest($$$) {
 
 	my @tmp_array = ( $link_id );
 
-	($status, $res) = $self->{CLIENT}->getLastLinkStatus(\@tmp_array);
+	($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);

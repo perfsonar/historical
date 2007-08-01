@@ -68,13 +68,8 @@ sub buildLinkRequest($$$) {
 	my ($links, $type, $time) = @_;
 	my $request = "";
 
-	if ($type ne "Link.History" and $type ne "Link.Recent") {
+	if ($type ne "Link.History" and $type ne "Link.Status") {
 		my $msg = "Request type must be either Link.History or Link.Recent";
-		return (-1, $msg);
-	}
-
-	if (defined $time and $time ne "" and $type eq "Link.Recent") {
-		my $msg = "Time parameter is incompatible with Link.Recent type";
 		return (-1, $msg);
 	}
 
@@ -256,19 +251,19 @@ sub getAll($) {
 }
 
 sub getLinkHistory($$$) {
-	my ($self, $link_ids, $time) = @_;
+	my ($self, $link_ids) = @_;
 
-	my ($request, $metas) = buildLinkRequest($link_ids, "Link.History", $time);
+	my ($request, $metas) = buildLinkRequest($link_ids, "Link.History", "");
 
 	my ($status, $res) = $self->getStatusArchive($metas, $request);
 
 	return ($status, $res);
 }
 
-sub getLastLinkStatus($$) {
-	my ($self, $link_ids) = @_;
+sub getLinkStatus($$$) {
+	my ($self, $link_ids, $time) = @_;
 
-	my ($request, $metas) = buildLinkRequest($link_ids, "Link.Recent", "");
+	my ($request, $metas) = buildLinkRequest($link_ids, "Link.Status", $time);
 
 	my ($status, $res) = $self->getStatusArchive($metas, $request);
 
@@ -379,7 +374,7 @@ on the object for the specific database.
 		push @links, $id;
 	}
 	
-	($status, $res) = $status_client->getLastLinkStatus(\@links);
+	($status, $res) = $status_client->getLinkStatus(\@links, "");
 	if ($status != 0) {
 		print "Problem obtaining most recent link status: $res\n";
 		exit(-1);
