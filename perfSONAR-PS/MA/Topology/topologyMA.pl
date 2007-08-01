@@ -31,7 +31,8 @@ my %ns = (
   netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+  nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
 );
 
 		# Read in configuration information

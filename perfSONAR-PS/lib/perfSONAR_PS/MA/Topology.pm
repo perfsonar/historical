@@ -17,6 +17,8 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 
+use perfSONAR_PS::MA::Topology::Client::XMLDB;
+
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
 sub init {
@@ -40,6 +42,16 @@ sub init {
 			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(TOPO_DB_NAME)");
 			return -1;
 		}
+
+		my %ns = (
+			nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+			netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+			nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+			snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
+		 );
+
+		$self->{CLIENT}= new perfSONAR_PS::MA::Topology::Client::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;
@@ -93,7 +105,19 @@ sub handleRequest {
 		$logger->error("Unable to handle topology request: $status/$response");
 		$self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", $status, $response);
 	} else {
-		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType, $response);
+		my %all_namespaces = ();
+
+		my $request_namespaces = $self->{LISTENER}->getRequestNamespaces();
+
+		foreach my $uri (keys %{ $request_namespaces }) {
+			$all_namespaces{$request_namespaces->{$uri}} = $uri;
+		}
+
+		foreach my $prefix (keys %{ $self->{NAMESPACES} }) {
+			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
+		}
+
+		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType, $response, \%all_namespaces);
 	}
 
 	return $self->{RESPONSE};
@@ -601,6 +625,44 @@ sub queryRequest($$$$) {
 	my($self, $type, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my $localContent = "";
+	my ($status, $res);
+
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.open", $msg);
+	}
+
+	my $dataContent;
+	if ($type eq "topology.lookup.all") {
+		($status, $res) = $self->{CLIENT}->getAll;
+		if ($status != 0) {
+			my $msg = "Database dump failed: $res";
+			$logger->error($msg);
+			return ("error.common.storage.fetch", $msg);
+		}
+
+		$dataContent = $res->toString;
+	} elsif ($type eq "topology.lookup.xquery") {
+		my $query = extract($m->find("./xquery:subject")->get_node(1));
+		if (!defined $query or $query eq "") {
+			return ("error.topology.query.query_not_found", "No query given in request");
+		}
+
+		($status, $res) = $self->{CLIENT}->xQuery($query);
+		if ($status != 0) {
+			my $msg = "Database query failed: $res";
+			$logger->error($msg);
+			return ("error.common.storage.query", $msg);
+		}
+
+		$dataContent .= "<nmtopo:topology>\n";
+		$dataContent .= $res;
+		$dataContent .= "</nmtopo:topology>\n";
+	} else {
+		return ("error.topology.query.invalid_query_type", "$type is not a valid query type");
+	}
 
 	$localContent .= $m->toString();
 	$localContent .= "\n";
@@ -611,131 +673,11 @@ sub queryRequest($$$$) {
 		$d_id = genuid();
 	}
 
-	$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-	$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
-	if ($type eq "topology.lookup.all") {
-		my ($status, $res) = $self->queryDatabase_dump;
-		if ($status eq "") {
-			$localContent .= $res;
-		} else {
-			$logger->error("Couldn't dump topology structure: $res");
-			return ($status, $res);
-		}
-	} elsif ($type eq "topology.lookup.xquery") {
-		my ($status, $res) = $self->queryDatabase_xQuery($m);
-		if ($status eq "") {
-			$localContent .= $res;
-		} else {
-			$logger->error("Couldn't query topology: $res");
-			return ($status, $res);
-		}
-
-	} else {
-		my $msg = "Unknown query type: ".$type;
-		$logger->error($msg);
-		return ("error.topology.query.invalid_query", $msg);
-	}
-
-	$localContent .= "</nmtopo:topology>\n";
+	$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\">\n";
+	$localContent .= $dataContent;
 	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
-}
-
-sub queryDatabase_xQuery($$) {
-	my($self, $m) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $localContent = "";
-
-	$logger->debug("queryDatabase_xQuery()");
-
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} ne "XML") {
-		my $msg = "xQuery unsupported for database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	my $query = extract($m->find("./xquery:subject")->get_node(1));
-	if (!defined $query or $query eq "") {
-		return ("error.topology.query.query_not_found", "No query given in request");
-	}
-
-	$query =~ s/\s{1}\// collection('CHANGEME')\//g;
-
-	if (!defined $self->{DATADB}) {
-		my $msg = "No database to query against";
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	if ($self->{DATADB}->openDB != 0) {
-		my $msg = "Couldn't open database";
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	my $queryResults = $self->{DATADB}->xQuery($query);
-	if ($queryResults == -1) {
-		$logger->error("Couldn't query database");
-		return ("error.topology.ma", "Couldn't query database");
-	}
-
-	$self->{DATADB}->closeDB;
-
-	foreach my $line (@{ $queryResults }) {
-		$localContent .= $line;
-	}
-
-	return ("", $localContent);
-}
-
-sub queryDatabase_dump {
-	my($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my ($status, $res);
-
-	if (!defined $self->{DATADB}) {
-		my $msg = "No database to dump";
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	$status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open topology database";
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
-		($status, $res) = $self->dumpXMLDatabase;
-	} else {
-		$status = "error.topology.ma";
-		$res = "Unknown topology database type: ".$self->{CONF}->{"TOPO_DB_TYPE"};
-		$logger->error($res);
-	}
-
-	$self->{DATADB}->closeDB;
-
-	return ($status, $res);
-}
-
-sub dumpXMLDatabase($) {
-	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-
-	my $content = "";
-
-	my @results = $self->{DATADB}->query("/*:domain");
-	if ($#results == -1) {
-		my $msg = "Couldn't find list of nodes in database";
-		$logger->error($msg);
-		return ("error.topology.ma", $msg);
-	}
-
-	$content .= join("", @results);
-
-	return ("", $content);
 }
 
 sub topologyNormalize($) {
