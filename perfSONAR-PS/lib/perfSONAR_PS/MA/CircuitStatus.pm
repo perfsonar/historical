@@ -19,6 +19,7 @@ use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
 use perfSONAR_PS::MA::Status::Client::MA;
+use perfSONAR_PS::MA::Topology::Client::MA;
 
 our @ISA = qw(perfSONAR_PS::MA::Base);
 
@@ -33,18 +34,8 @@ sub init {
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"TOPOLOGY_MA_HOST"} or $self->{CONF}->{"TOPOLOGY_MA_HOST"} eq "") {
-		$logger->error("No topology MA port specified");
-		return -1;
-	}
-
-	if (!defined $self->{CONF}->{"TOPOLOGY_MA_PORT"} or $self->{CONF}->{"TOPOLOGY_MA_PORT"} eq "") {
-		$logger->error("No topology MA port specified");
-		return -1;
-	}
-
-	if (!defined $self->{CONF}->{"TOPOLOGY_MA_ENDPOINT"} or $self->{CONF}->{"TOPOLOGY_MA_ENDPOINT"} eq "") {
-		$logger->error("No topology MA endpoint specified");
+	if (!defined $self->{CONF}->{"TOPOLOGY_MA"} or $self->{CONF}->{"TOPOLOGY_MA"} eq "") {
+		$logger->error("No topology MA URI specified");
 		return -1;
 	}
 
@@ -177,43 +168,36 @@ sub parseRequest {
 sub handlePathStatusRequest($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my ($status, $res);
 
-	my $topology_request = buildTopologyRequest();
-
-	my ($status, $res) = consultArchive($self->{CONF}->{TOPOLOGY_MA_HOST}, $self->{CONF}->{TOPOLOGY_MA_PORT}, $self->{CONF}->{TOPOLOGY_MA_ENDPOINT}, $topology_request);
-	if ($status != 0) {
-		my $msg = "Error consulting topology archive: $res";
+	my $topo_client = new perfSONAR_PS::MA::Topology::Client::MA($self->{CONF}->{TOPOLOGY_MA});
+	if (!defined $topo_client) {
+		my $msg = "Problem creating client for topology MA";
 		$logger->error($msg);
-		return (-1, $msg);
+		return ("error.ma", $msg);
 	}
 
-	my $topo_msg = $res;
+	($status, $res) = $topo_client->open;
+	if ($status != 0) {
+		my $msg = "Problem opening topology MA: $res";
+		$logger->error($msg);
+		return ("error.ma", $msg);
+	}
 
-	foreach my $data ($topo_msg->getElementsByLocalName("data")) {
-		foreach my $metadata ($topo_msg->getElementsByLocalName("metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $eventType = $metadata->findvalue("nmwg:eventType");
-				if ($eventType ne "topology.lookup.all") {
-					my $msg = "Invalid response eventType received: $eventType";
-					$logger->error($msg);
-					return ("error.ma", $msg);
-				}
+	($status, $res) = $topo_client->getAll;
+	if ($status != 0) {
+		my $msg = "Error getting topology information: $res";
+		$logger->error($msg);
+		return ("error.ma", $msg);
+	}
 
-				my $topology = $data->find("nmtopo:topology")->get_node(1);
-				if (!defined $topology) {
-					my $msg = "No topology defined in change topology response";
-					$logger->error($msg);
-					return ("error.ma", $msg);
-				}
+	my $topology = $res;
 
-				my ($status, $res) = parseTopology($topology, $self->{NODES}, $self->{DOMAIN});
-				if ($status ne "") {
-					my $msg = "Error parsing topology: $res";
-					$logger->error($msg);
-					return ("error.ma", $msg);
-				}
-			}
-		}
+	($status, $res) = parseTopology($topology, $self->{NODES}, $self->{DOMAIN});
+	if ($status ne "") {
+		my $msg = "Error parsing topology: $res";
+		$logger->error($msg);
+		return ("error.ma", $msg);
 	}
 
 	my $status_client = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{STATUS_MA});

@@ -36,7 +36,9 @@ my %ns = (
 		netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
 		nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
 		snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-		select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+		select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+		nmtb => "http://ogf.org/schema/network/topology/base/20070707/",
 	 );
 
 if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {

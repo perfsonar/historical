@@ -107,7 +107,9 @@ sub xQuery($$) {
 		return ("error.topology.ma", "Couldn't query database: $error");
 	}
 
+	$localContent .= "<nmtopo:topology>\n";
 	$localContent .= join("", @queryResults);
+	$localContent .= "</nmtopo:topology>\n";
 
 	return (0, $localContent);
 }
