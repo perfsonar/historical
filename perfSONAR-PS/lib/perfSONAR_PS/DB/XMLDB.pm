@@ -98,7 +98,7 @@ sub openDB {
 
 
 sub xQuery {
-  my ($self, $query) = @_; 
+  my ($self, $query, $error) = @_; 
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my @resString = ();
   if(defined $query and $query ne "") {
@@ -121,28 +121,37 @@ sub xQuery {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      $logger->error("Error \"".$e->what()."\".");
+      my $msg = "Error \"".$e->what()."\".";
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }
     elsif($e = catch DbException) {
-      $logger->error("Error \"".$e->what()."\".");    
+      my $msg = "Error \"".$e->what()."\".";    
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }        
     elsif($@) {
-      $logger->error("Error \"".$@."\".");      
+      my $msg = "Error \"".$@."\".";      
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }   
   }
   else {
-    $logger->error("Missing argument");   
+    my $msg = "Missing argument";   
+    $logger->error($msg);
+    $$error = $msg if (defined $error);
     return -1;
   } 
+  $$error = "" if (defined $error);
   return @resString; 
 }
 
 
 sub query {
-  my ($self, $query) = @_; 
+  my ($self, $query, $error) = @_; 
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my @resString = ();
   if(defined $query and $query ne "") {
@@ -164,22 +173,31 @@ sub query {
       $self->{TRANSACTION}->commit();
     };
     if(my $e = catch std::exception) {
-      $logger->error("Error \"".$e->what()."\".");
+      my $msg = "Error \"".$e->what()."\".";
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }
     elsif($e = catch DbException) {
-      $logger->error("Error \"".$e->what()."\".");    
+      my $msg = "Error \"".$e->what()."\".";    
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }        
     elsif($@) {
-      $logger->error("Error \"".$@."\".");      
+      my $msg = "Error \"".$@."\".";      
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
       return -1;
     }   
   }
   else {
-    $logger->error("Missing argument");   
+    $msg = "Missing argument";   
+    $logger->error($msg);
+    $$error = $msg if (defined $error);
     return -1;
   } 
+  $$error = "" if (defined $error);
   return @resString; 
 }
 
@@ -452,6 +470,11 @@ sub remove {
   return 0;
 }
 
+sub closeDB {
+  # Perl auto-closes the DB so a specific function to do so is
+  # unnecessary, but keeps the API consistent
+}
+
 
 1;
 
@@ -576,7 +599,23 @@ used).
 
 Opens the database
 
-=head2 xQuery($self, $query)
+=head2 xQuery($self, $query, \$error)
+
+
+The string $query must be an XPath expression to be sent to the database.  Examples are:
+
+  //nmwg:metadata
+  
+    or
+    
+  //nmwg:parameter[@name="SNMPVersion" and @value="1"]
+  
+Results are returned as an array of strings or error status.  This function
+should be used for XQuery statements.  The error parameter is optional and
+is a reference to a scalar. The function will use it to return the error
+message if one occurred, it returns the empty string otherwise.
+
+=head2 query($self, $query, \$error)
 
 
 The string $query must be an XPath expression to be sent to the database.  Examples are:
@@ -588,21 +627,10 @@ The string $query must be an XPath expression to be sent to the database.  Examp
   //nmwg:parameter[@name="SNMPVersion" and @value="1"]
   
 Results are returned as an array of strings or error status.  This function should be
-used for XQuery statements.  
+used for XPath statements.  The error parameter is optional and is a reference
+to a scalar. The function will use it to return the error message if one
+occurred, it returns the empty string otherwise.
 
-=head2 query($self, $query)
-
-
-The string $query must be an XPath expression to be sent to the database.  Examples are:
-
-  //nmwg:metadata
-  
-    or
-    
-  //nmwg:parameter[@name="SNMPVersion" and @value="1"]
-  
-Results are returned as an array of strings or error status.  This function should be
-used for XPath statements.  
 
 =head2 queryForName($self, $query)
 
