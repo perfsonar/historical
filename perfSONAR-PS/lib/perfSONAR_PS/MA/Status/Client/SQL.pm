@@ -63,6 +63,8 @@ sub close($) {
 sub setDBIString($$) {
 	my ($self, $dbi_string) = @_;
 
+	$self->close();
+
 	$self->{DB_OPEN} = 0;
 	$self->{DBI_STRING} = $dbi_string;
 }
@@ -72,7 +74,7 @@ sub dbIsOpen($) {
 	return $self->{DB_OPEN};
 }
 
-sub getDBIString($$) {
+sub getDBIString($) {
 	my ($self) = @_;
 
 	return $self->{DBI_STRING};
@@ -193,7 +195,11 @@ sub getLastLinkStatus($$) {
 			my $new_link;
 
 			$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
-			$links{$link_id} = ($new_link);
+
+			my @newa = ();
+			push @newa, $new_link;
+
+			$links{$link_id} = \@newa;
 		}
 	}
 
@@ -277,3 +283,198 @@ sub updateLinkStatus($$$$$$$) {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+perfSONAR_PS::MA::Status::Client::SQL - A module that provides methods for
+dealing interacting with Status MAs directly.
+
+=head1 DESCRIPTION
+
+This modules allows one to interact with the Status MA SQL Backend directly
+using a standard set of methods. The API provided is identical to the API for
+interacting with the MAs via its Web Services interface. Thus, a client written
+to read from or update a Status MA can be easily modified to interact directly
+with its underlying database allowing more efficient interactions if required.
+
+The module is to be treated as an object, where each instance of the object
+represents a connection to a single database. Each method may then be invoked
+on the object for the specific database.  
+
+=head1 SYNOPSIS
+
+	use perfSONAR_PS::MA::Status::Client::SQL;
+
+	my $status_client = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=status.db");
+	if (!defined $status_client) {
+		print "Problem creating client for status MA\n";
+		exit(-1);
+	}
+
+	my ($status, $res) = $status_client->open;
+	if ($status != 0) {
+		print "Problem opening status MA: $res\n";
+		exit(-1);
+	}
+
+	($status, $res) = $status_client->getAll();
+	if ($status != 0) {
+		print "Problem getting complete database: $res\n";
+		exit(-1);
+	}
+
+	my @links = (); 
+
+	foreach my $id (keys %{ $res }) {
+		print "Link ID: $id\n";
+
+		foreach my $link ( @{ $res->{$id} }) {
+			print "\t" . $link->getStartTime . " - " . $link->getEndTime . "\n";
+			print "\t-Knowledge Level: " . $link->getKnowledge . "\n";
+			print "\t-operStatus: " . $link->getOperStatus . "\n";
+			print "\t-adminStatus: " . $link->getAdminStatus . "\n";
+		}
+	
+		push @links, $id;
+	}
+
+	($status, $res) = $status_client->getLastLinkStatus(\@links);
+	if ($status != 0) {
+		print "Problem obtaining most recent link status: $res\n";
+		exit(-1);
+	}
+
+	foreach my $id (keys %{ $res }) {
+		print "Link ID: $id\n";
+
+		foreach my $link ( @{ $res->{$id} }) {
+			print "-operStatus: " . $link->getOperStatus . "\n";
+			print "-adminStatus: " . $link->getAdminStatus . "\n";
+		}
+	}
+
+	($status, $res) = $status_client->getLinkHistory(\@links);
+	if ($status != 0) {
+		print "Problem obtaining link history: $res\n";
+		exit(-1);
+	}
+
+	foreach my $id (keys %{ $res }) {
+		print "Link ID: $id\n";
+	
+		foreach my $link ( @{ $res->{$id} }) {
+			print "-operStatus: " . $link->getOperStatus . "\n";
+			print "-adminStatus: " . $link->getAdminStatus . "\n";
+		}
+	}
+
+=head1 DETAILS
+
+=head1 API
+
+The API os perfSONAR_PS::MA::Status::Client::SQL is rather simple and greatly
+resembles the messages types received by the server. It is also identical to
+the perfSONAR_PS::MA::Status::Client::MA API allowing easy construction of
+programs that can interface via the MA server or directly with the database.
+
+=head2 new($package, $dbi_string)
+
+The new function takes a DBI connection string as its first argument. This
+specifies which DB to read from/write to.
+
+=head2 open($self)
+
+The open function opens the database to read from/write to. The function
+returns an array containing two items. The first is the return status of the
+function, 0 on success and non-zero on failure. The second is the error message
+generated if applicable.
+
+=head2 close($self)
+
+The close function closes the associated database. It returns 0 on success and
+-1 on failure.
+
+=head2 setDBIString($self, $dbi_string)
+
+The setDBIString function changes the database that the instance uses. If open,
+it closes the current database.
+
+=head2 dbIsOpen($self)
+
+The dbIsOpen function checks whether the database backend is currently open. If so, it returns 1, if not, 0.
+
+=head2 getDBIString($self)
+
+The getDBIString function returns the current DBI string
+
+=head2 getAll($self)
+
+The getAll function gets the full contents of the database. It returns the
+results as a hash with the key being the link id. Each element of the hash is
+an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+of the specified link at a certain point in time.
+
+=head2 getLinkHistory($self, $link_ids)
+
+The getLinkHistory function returns the complete history of a set of links. The
+$link_ids parameter is a reference to an array of link ids. It returns the
+results as a hash with the key being the link id. Each element of the hash is
+an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+of the specified link at a certain point in time.
+
+=head2 getLinkStatus($self, $link_ids, $time)
+
+The getLinkStatus function returns the link status at the specified time. The
+$link_ids parameter is a reference to an array of link ids. $time is the time
+at which you'd like to know each link's status. If $time is an empty string, it
+returns the most recent information it has about each link. It returns the
+results as a hash with the key being the link id. Each element of the hash is
+an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+of the specified link at a certain point in time.
+
+=head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
+
+The updateLinkStatus function adds a new data point for the specified link.
+$time is the time at which the measurement occured. $link_id is the link to
+update. $knowledge_level says whether or not this measurement can tell us
+everything about a given link ("full") or whether the information only
+corresponds to one side of the link("partial"). $oper_value is the current
+operational status and $admin_value is the current administrative status.
+$do_update tells whether or not we should try to update the a given range of
+information(e.g. if you were polling the link and knew that nothing had changed
+from the previous iteration, you could set $do_update to 1 and the server would
+elongate the previous range instead of creating a new one).
+
+=head1 SEE ALSO
+
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::MA::Status::Link>,L<perfSONAR_PS::MA::Status::Client::MA>, L<Log::Log4perl>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS 
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut

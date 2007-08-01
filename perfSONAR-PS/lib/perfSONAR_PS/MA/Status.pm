@@ -112,6 +112,10 @@ sub handleRequest {
 		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces);
 	}
 
+	open(RESP, ">out.resp");
+	print RESP $self->{RESPONSE};
+	close(RESP);
+
 	return $self->{RESPONSE};
 }
 
@@ -156,7 +160,7 @@ sub parseStoreRequest {
 				}
 
 				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
-				if ($status != 0) {
+				if ($status ne "") {
 					my $msg = "Couldn't handle store request: $res";
 					$logger->error($msg);
 					return ($status, $res);
@@ -210,7 +214,7 @@ sub parseLookupRequest {
 
 				if ($eventType eq "Database.Dump") {
 					my ($status, $res) = $self->lookupAllRequest($m, $d);
-					if ($status != 0) {
+					if ($status ne "") {
 						$logger->error("Couldn't dump status information");
 						return ($status, $res);
 					}
@@ -298,7 +302,11 @@ sub lookupLinkHistoryRequest($$$) {
 	my ($status, $res);
 	my $localContent = "";
 
-	my $link_id = $m->findvalue('./nmwg:subject/*[@local-name()=\'link\']/@id');
+	$logger->debug("lookupLinkHistoryRequest()");
+
+	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
+
+	$logger->debug("got link $link_id");
 
 	if (!defined $link_id or $link_id eq "") {
 		my $msg = "No link id specified in request";
@@ -327,9 +335,12 @@ sub lookupLinkHistoryRequest($$$) {
 	$localContent .= $m->toString()."\n";
 
 	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-	foreach my $link (@{ $res }) {
-		$localContent .= $self->writeoutLinkState($link);
+	foreach my $link_id (%{ $res }) {
+		foreach my $link (@{ $res->{$link_id} }) {
+			$localContent .= $self->writeoutLinkState($link);
+		}
 	}
+
 	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
@@ -370,7 +381,7 @@ sub lookupLinkRecentRequest($$$) {
 	$localContent .= $m->toString()."\n";
 
 	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-	$localContent .= $self->writeoutLinkState($res->{$link_id});
+	$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }));
 	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
