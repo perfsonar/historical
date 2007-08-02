@@ -275,12 +275,14 @@ sub reMap {
   if($node->prefix and $node->namespaceURI()) {
     if(!$requestNamespaces->{$node->namespaceURI()}) {
       $requestNamespaces->{$node->namespaceURI()} = $node->prefix;
+      $node->ownerDocument->getDocumentElement->setNamespace($node->namespaceURI(), $node->prefix, 0);
       $logger->debug("Setting namespace \"".$node->namespaceURI()."\" with prefix \"".$node->prefix."\".");
     }
     if(!($namespaces->{$node->prefix})) {
       foreach my $ns (keys %{$namespaces}) {
         if($namespaces->{$ns} eq $node->namespaceURI()) {
           $node->setNamespace($namespaces->{$ns}, $ns, 1);
+          $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
           $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
           last;
         }
