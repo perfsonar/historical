@@ -186,7 +186,7 @@ sub startDaemon {
 
 
 sub acceptCall {
-  my ($self) = @_; 
+  my ($self, $error) = @_; 
   my $logger = get_logger("perfSONAR_PS::Transport");
      
   $logger->debug("Accepting calls.");
@@ -197,6 +197,8 @@ sub acceptCall {
   $self->{REQUEST} = $self->{CALL}->get_request;
   my $msg = "";
   
+  $$error = "" if (defined $error);
+
   $self->{RESPONSE} = HTTP::Response->new();
   $self->{RESPONSE}->header('Content-Type' => 'text/xml');
   $self->{RESPONSE}->header('user-agent' => 'perfSONAR-PS/'.$VERSION);
@@ -212,7 +214,8 @@ sub acceptCall {
         $msg = "Received message with 'INVALID ACTION TYPE'.";
         $logger->error($msg);     
         $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);       
-        return 'INVALID ACTION TYPE';
+	$$error = $msg if (defined $error);
+        return 0;
       }
       else {
         $logger->debug("Accepted call.");
@@ -230,6 +233,7 @@ sub acceptCall {
           $msg =~ s/'/&apos;/g;
           $msg =~ s/"/&quot;/g;
           $logger->error($msg);
+	  $$error = $msg if (defined $error);
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
           return 0;
         }
@@ -241,12 +245,14 @@ sub acceptCall {
           if($messages->size() <= 0) {
             my $msg = "Message element not found within request";
             $logger->error($msg);
+            $$error = $msg if (defined $error);
             $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
             return 0;
           }
           elsif($messages->size() > 1) {
             my $msg = "Too many message elements found within request";
             $logger->error($msg); 
+	    $$error = $msg if (defined $error);
             $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
             return 0;      
           }    
@@ -292,6 +298,7 @@ sub acceptCall {
           $msg = "Received message with incorrect message URI.";
           $logger->error($msg);     
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
+	  $$error = $msg if (defined $error);
           return 0;   
         }
       }
@@ -300,14 +307,16 @@ sub acceptCall {
       $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
       $logger->error($msg);     
       $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-      return 'INVALID REQUEST';     
+      $$error = $msg if (defined $error);
+      return 0;
     }   
   }
   else { 
     $msg = "Received message with 'INVALID ENDPOINT'.";
     $logger->error($msg);     
     $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-    return 'INVALID ENDPOINT';      
+    $$error = $msg if (defined $error);
+    return 0;
   }
 }
 
