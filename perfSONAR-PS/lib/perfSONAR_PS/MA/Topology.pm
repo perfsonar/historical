@@ -143,20 +143,27 @@ sub queryTopology {
 			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
 		 );
 
-	$self->{DATADB}= new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
+	$self->{DATADB} = new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
 
 	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		$logger->debug("Data id: ".$d->getAttribute("id")." ref: ".$d->getAttribute("metadataIdRef"));
 		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				$logger->debug("Found corresponding metadata id");
+
 				my $eventType = $m->findvalue("nmwg:eventType");
 
 				my ($status, $res) = $self->queryRequest($eventType, $m, $d);
 				if ($status ne "") {
-					$logger->error("Couldn't dump topology information");
-					return ($status, $res);
-				}
+					$logger->error("Couldn't handle requested metadata: $res");
 
-				$localContent .= $res;
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $res;
+				}
 			}
 		}
 	}
@@ -666,7 +673,9 @@ sub queryRequest($$$$) {
 		$dataContent .= $res;
 		$dataContent .= "</nmtopo:topology>\n";
 	} else {
-		return ("error.topology.query.invalid_query_type", "$type is not a valid query type");
+		my $msg = "Unknown event type: $type";
+		$logger->error($msg);
+		return ("error.ma.eventtype_not_supported", $msg);
 	}
 
 	$localContent .= $m->toString();

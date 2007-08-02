@@ -117,10 +117,6 @@ sub handleRequest {
 		$self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces);
 	}
 
-	open(RESP, ">out.resp");
-	print RESP $self->{RESPONSE};
-	close(RESP);
-
 	return $self->{RESPONSE};
 }
 
@@ -166,15 +162,14 @@ sub parseStoreRequest {
 
 				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
 				if ($status ne "") {
-					my $msg = "Couldn't handle store request: $res";
-					$logger->error($msg);
-					return ($status, $res);
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $m->toString;
+					$localContent .= $d->toString;
 				}
-
-				# give them back what they gave us?
-
-				$localContent .= $m->toString;
-				$localContent .= $d->toString;
 			}
 		}
 	}
@@ -217,41 +212,32 @@ sub parseLookupRequest {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
+				my ($status, $res);
+
 				if ($eventType eq "Database.Dump") {
-					my ($status, $res) = $self->lookupAllRequest($m, $d);
-					if ($status ne "") {
-						$logger->error("Couldn't dump status information");
-						return ($status, $res);
-					}
-
-					$localContent .= $res;
+					($status, $res) = $self->lookupAllRequest($m, $d);
 				} elsif ($eventType eq "Link.History") {
-					my ($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
-					if ($status != 0) {
-						$logger->error("Couldn't dump link history information");
-						return ($status, $res);
-					}
-
-					$localContent .= $res;
+					($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
 				} elsif ($eventType eq "Link.Status") {
-					my ($status, $res) = $self->lookupLinkStatusRequest($m, $d);
-					if ($status ne "") {
-						$logger->error("Couldn't dump link information");
-						return ($status, $res);
-					}
-
-					$localContent .= $res;
+					($status, $res) = $self->lookupLinkStatusRequest($m, $d);
 				} else {
-					$logger->error("Unknown event type: ".$eventType);
-					return ( -1, "Unknown event type: ".$eventType )
+					$status = "error.ma.eventtype_not_supported";
+					$res = "Unknown event type: ".$eventType;
+				}
+
+				if ($status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $res;
 				}
 			}
 		}
 	}
-
-	open(OUT, ">out.res");
-	print OUT $localContent;
-	close OUT;
 
 	return ("", $localContent);
 }

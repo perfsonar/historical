@@ -148,21 +148,27 @@ sub parseRequest {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $eventType = $m->findvalue("nmwg:eventType");
 
+				my ($status, $res);
+
 				if ($eventType eq "Path.Status") {
-
-					$logger->debug("Path.Status found");
-
-					my ($status, $res) = $self->handlePathStatusRequest;
-					if ($status ne "") {
-						$logger->error("Couldn't dump status information");
-						return ($status, $res);
-					}
-
-					$localContent .= $res;
+					($status, $res) = $self->handlePathStatusRequest;
 				} else {
-					$logger->error("Unknown event type: ".$eventType);
-					return ( "error.ma.message.event_type", "Unknown event type: ".$eventType )
+					$status = "error.ma.eventtype_not_supported";
+					$res = "Unknown event type: ".$eventType;
+					$logger->error($res);
 				}
+
+				if ($status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $res;
+				}
+
 			}
 		}
 	}
@@ -224,7 +230,7 @@ sub handlePathStatusRequest($) {
 		push @link_ids, $self->{LINKS}->{$link_id}->{"archiveId"};
 	}
 
-	($status, $res) = $status_client->getLastLinkStatus(\@link_ids);
+	($status, $res) = $status_client->getLinkStatus(\@link_ids);
 	if ($status != 0) {
 		my $msg = "Error getting link status: $res";
 		$logger->error($msg);
