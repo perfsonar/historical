@@ -289,7 +289,7 @@ sub acceptCall {
               return 0;
             }
             else {  
-              $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}->getDocumentElement(), $self->{NAMESPACE});   
+              $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
               return 1;  
             }         
           } 
