@@ -235,61 +235,69 @@ sub acceptCall {
         }
 
         $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);   
-        my $messages = $self->{REQUESTDOM}->getDocumentElement->find(".//nmwg:message");
-
-        if($messages->size() <= 0) {
-          my $msg = "Message element not found within request";
-          $logger->error($msg);
-          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-          return 0;
-        }
-        elsif($messages->size() > 1) {
-          my $msg = "Too many message elements found within request";
-          $logger->error($msg); 
-          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-          return 0;      
-        }    
-        else {   
-          #$self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
-          my $messageId = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("id");
-          my $messageType = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("type");
-          
-          if($messageType eq "EchoRequest") { 
-            my $localContent = "";
-            foreach my $d ($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {      
-              my $m = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
-              if(defined $m) {        
-                $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
-                my $eventType = extract($m->find("./nmwg:eventType")->get_node(1));
-                if($eventType =~ m/^echo.*/ or 
-                   $eventType eq "http://schemas.perfsonar.net/tools/admin/echo/2.0") {
-	                my $msg = "The echo request has passed.";
-	                $logger->debug($msg);
-	                my $mdID = "metadata.".genuid();
-	                $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.echo");
-	                $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
-                }
-                else {
-	                my $msg = "The echo request has failed.";
-                  $logger->error($msg);
-	                my $mdID = "metadata.".genuid();
-	                $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "failure.echo");
-	                $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
-                }   
-              }
-            }
-            $self->{RESPONSEMESSAGE} = getResultMessage("message.".genuid(), $messageId, "EchoResponse", $localContent);   
+        
+        if($self->{REQUESTDOM}->getDocumentElement->lookupNamespacePrefix("http://ggf.org/ns/nmwg/base/2.0/")) {
+          my $messages = $self->{REQUESTDOM}->getDocumentElement->find(".//nmwg:message");
+          if($messages->size() <= 0) {
+            my $msg = "Message element not found within request";
+            $logger->error($msg);
+            $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
             return 0;
           }
-          else {  
-            $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1) = chainMetadata($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1), $self->{NAMESPACE});   
-            return 1;  
-          }         
-        } 
+          elsif($messages->size() > 1) {
+            my $msg = "Too many message elements found within request";
+            $logger->error($msg); 
+            $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
+            return 0;      
+          }    
+          else {   
+            #$self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
+            my $messageId = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("id");
+            my $messageType = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("type");
+          
+            if($messageType eq "EchoRequest") { 
+              my $localContent = "";
+              foreach my $d ($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {      
+                my $m = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+                if(defined $m) {        
+                  $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
+                  my $eventType = extract($m->find("./nmwg:eventType")->get_node(1));
+                  if($eventType =~ m/^echo.*/ or 
+                     $eventType eq "http://schemas.perfsonar.net/tools/admin/echo/2.0") {
+	                  my $msg = "The echo request has passed.";
+	                  $logger->debug($msg);
+	                  my $mdID = "metadata.".genuid();
+	                  $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.echo");
+	                  $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
+                  }
+                  else {
+	                  my $msg = "The echo request has failed; using the wrong eventType?";
+                    $logger->error($msg);
+	                  my $mdID = "metadata.".genuid();
+	                  $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "failure.echo");
+	                  $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
+                  }   
+                }
+              }
+              $self->{RESPONSEMESSAGE} = getResultMessage("message.".genuid(), $messageId, "EchoResponse", $localContent);   
+              return 0;
+            }
+            else {  
+              $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1), $self->{NAMESPACE});   
+              return 1;  
+            }         
+          } 
+        }
+        else {
+          $msg = "Received message with incorrect message URI.";
+          $logger->error($msg);     
+          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
+          return 0;   
+        }
       }
     }
     else {
-      $msg = "Received message with 'INVALID REQUEST', are you using a web browser?.";
+      $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
       $logger->error($msg);     
       $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
       return 'INVALID REQUEST';     
