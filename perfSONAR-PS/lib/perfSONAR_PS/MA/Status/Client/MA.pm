@@ -323,11 +323,11 @@ __END__
 =head1 NAME
 
 perfSONAR_PS::MA::Status::Client::MA - A module that provides methods for
-dealing interacting with Status MA servers.
+interacting with Status MA servers.
 
 =head1 DESCRIPTION
 
-This modules allows one to interact with the Status MA via its Web Services
+This module allows one to interact with the Status MA via its Web Services
 interface. The API provided is identical to the API for interacting with the
 MA database directly. Thus, a client written to read from or update a Status MA
 can be easily modified to interact directly with its underlying database

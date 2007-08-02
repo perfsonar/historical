@@ -10,7 +10,7 @@ use Data::Dumper;
 
 sub new {
 	my ($package, $uri_string) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::MA");
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::MA");
 
 	my %hash;
 
@@ -166,3 +166,104 @@ sub getAll {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+perfSONAR_PS::MA::Topology::Client::MA - A module that provides methods for
+interacting with Topology MA servers.
+
+=head1 DESCRIPTION
+
+This modules allows one to interact with the Topology MA via its Web Services
+interface. The API provided is identical to the API for interacting with the
+topology database directly. Thus, a client written to read from or update a
+Topology MA can be easily modified to interact directly with its underlying
+database allowing more efficient interactions if required.
+
+The module is to be treated as an object, where each instance of the object
+represents a connection to a single database. Each method may then be invoked
+on the object for the specific database.  
+
+=head1 SYNOPSIS
+
+=head1 DETAILS
+
+=head1 API
+
+The API for perfSONAR_PS::MA::Topology::Client::MA is rather simple and greatly
+resembles the messages types received by the server. It is also identical to
+the perfSONAR_PS::MA::Topology::Client::SQL API allowing easy construction of
+programs that can interface via the MA server or directly with the database.
+
+=head2 new($package, $uri_string)
+
+The new function takes a URI connection string as its first argument. This
+specifies which MA to interact with.
+
+=head2 open($self)
+
+The open function could be used to open a persistent connection to the MA.
+However, currently, it is simply a stub function.
+
+=head2 close($self)
+
+The close function could close a persistent connection to the MA. However,
+currently, it is simply a stub function.
+
+=head2 setURIString($self, $uri_string)
+
+The setURIString function changes the MA that the instance uses.
+
+=head2 dbIsOpen($self)
+
+This function is a stub function that always returns 1.
+
+=head2 getURIString($)
+
+The getURIString function returns the current URI string
+
+=head2 getAll($self)
+
+The getAll function gets the full contents of the MA. It returns the results as
+a ref to a LibXML element pointing to the <nmtopo:topology> structure
+containing the contents of the MA's database. 
+
+=head2 xQuery($self, $xquery)
+
+The xQuery function performs an xquery on the specified MA. It returns the
+results as a string.
+
+=head1 SEE ALSO
+
+L<perfSONAR_PS::MA::Topology::Client::XMLDB>, L<Log::Log4perl>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS 
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=
+
