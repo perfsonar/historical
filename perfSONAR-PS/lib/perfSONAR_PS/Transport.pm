@@ -10,7 +10,6 @@ use HTTP::Daemon;
 use HTTP::Response;
 use HTTP::Headers;
 use HTTP::Status;
-use XML::XPath;
 use XML::Writer;
 use XML::Writer::String;
 use LWP::UserAgent;
@@ -218,64 +217,72 @@ sub acceptCall {
       else {
         $logger->debug("Accepted call.");
 
-   	    my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
-        my $nodeset = $xp->find("//nmwg:message");
-        if($nodeset->size() <= 0) {
+        my $parser = XML::LibXML->new(); 
+        delete $self->{REQUESTDOM}; 
+        eval { 
+          $self->{REQUESTDOM} = $parser->parse_string($self->{REQUEST}->content);
+        };
+        if($@) {
+          my $msg = "Parse failed: ".$@;
+          $msg =~ s/&/&amp;/g;
+          $msg =~ s/</&lt;/g;
+          $msg =~ s/>/&gt;/g;
+          $msg =~ s/'/&apos;/g;
+          $msg =~ s/"/&quot;/g;
+          $logger->error($msg);
+          $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
+          return 0;
+        }
+
+        $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);   
+        my $messages = $self->{REQUESTDOM}->getDocumentElement->find(".//nmwg:message");
+
+        if($messages->size() <= 0) {
           my $msg = "Message element not found within request";
           $logger->error($msg);
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
           return 0;
         }
-        elsif($nodeset->size() > 1) {
+        elsif($messages->size() > 1) {
           my $msg = "Too many message elements found within request";
           $logger->error($msg); 
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
           return 0;      
         }    
         else {   
-          my $parser = XML::LibXML->new(); 
-          delete $self->{REQUESTDOM}; 
-       
-          eval { 
-            $self->{REQUESTDOM} = $parser->parse_string(XML::XPath::XMLParser::as_string($nodeset->get_node(1)));
-          };
-          if ($@) {
-            my $msg = "Parse failed: ".$@;
-            $msg =~ s/&/&amp;/g;
-            $msg =~ s/</&lt;/g;
-            $msg =~ s/>/&gt;/g;
-            $msg =~ s/'/&apos;/g;
-            $msg =~ s/"/&quot;/g;
-            $logger->error($msg);
-            $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
-            return 0;
-          }
-
-          $self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
-
-          my $messageId = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("id");
-          my $messageType = $self->{REQUESTDOM}->getDocumentElement()->getAttribute("type");
-
-          if($messageType eq "EchoRequest") {              
-            if($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "data")->get_node(1)->getAttribute("metadataIdRef") eq
-               $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id")) {
-              my $eventType = extract($self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->find("./nmwg:eventType")->get_node(1));
-              if($eventType =~ m/^echo.*/ or 
-                 $eventType eq "http://schemas.perfsonar.net/tools/admin/echo/2.0") {
-	              my $msg = "The echo request has passed.";
-	              $logger->debug($msg);
-                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "success.echo", $msg);		  	                 
+          #$self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
+          my $messageId = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("id");
+          my $messageType = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("type");
+          
+          if($messageType eq "EchoRequest") { 
+            my $localContent = "";
+            foreach my $d ($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {      
+              my $m = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+              if(defined $m) {        
+                $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
+                my $eventType = extract($m->find("./nmwg:eventType")->get_node(1));
+                if($eventType =~ m/^echo.*/ or 
+                   $eventType eq "http://schemas.perfsonar.net/tools/admin/echo/2.0") {
+	                my $msg = "The echo request has passed.";
+	                $logger->debug($msg);
+	                my $mdID = "metadata.".genuid();
+	                $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.echo");
+	                $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
+                }
+                else {
+	                my $msg = "The echo request has failed.";
+                  $logger->error($msg);
+	                my $mdID = "metadata.".genuid();
+	                $localContent = $localContent . getResultCodeMetadata($mdID, $m->getAttribute("id"), "failure.echo");
+	                $localContent = $localContent . getResultCodeData("data.".genuid(), $mdID, $msg);
+                }   
               }
-              else {
-	        my $msg = "The echo request has failed.";
-                $logger->error($msg);
-                $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), $messageId, $self->{REQUESTDOM}->getElementsByTagNameNS($self->{NAMESPACE}, "metadata")->get_node(1)->getAttribute("id"), "EchoResponse", "failure.echo", $msg);		        
-              }          
             }
+            $self->{RESPONSEMESSAGE} = getResultMessage("message.".genuid(), $messageId, "EchoResponse", $localContent);   
             return 0;
           }
           else {  
-            $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}, $self->{NAMESPACE});   
+            $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1) = chainMetadata($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1), $self->{NAMESPACE});   
             return 1;  
           }         
         } 
