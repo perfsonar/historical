@@ -214,7 +214,7 @@ sub acceptCall {
         $msg = "Received message with 'INVALID ACTION TYPE'.";
         $logger->error($msg);     
         $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);       
-	$$error = $msg if (defined $error);
+	      $$error = $msg if (defined $error);
         return 0;
       }
       else {
@@ -233,7 +233,7 @@ sub acceptCall {
           $msg =~ s/'/&apos;/g;
           $msg =~ s/"/&quot;/g;
           $logger->error($msg);
-	  $$error = $msg if (defined $error);
+	        $$error = $msg if (defined $error);
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "ErrorResponse", "error.common.parse_error", $msg);
           return 0;
         }
@@ -252,19 +252,19 @@ sub acceptCall {
           elsif($messages->size() > 1) {
             my $msg = "Too many message elements found within request";
             $logger->error($msg); 
-	    $$error = $msg if (defined $error);
+	          $$error = $msg if (defined $error);
             $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
             return 0;      
           }    
           else {   
-            #$self->{REQUESTNAMESPACES} = reMap(\%{$self->{REQUESTNAMESPACES}}, \%{$self->{NAMESPACES}}, $self->{REQUESTDOM}->getDocumentElement);          
-            my $messageId = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("id");
-            my $messageType = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getAttribute("type");
-          
+            my $messageId = $messages->get_node(1)->getAttribute("id");
+            my $messageType = $messages->get_node(1)->getAttribute("type");
+            $self->{REQUESTDOM} = $parser->parse_string($messages->get_node(1)->toString);
+
             if($messageType eq "EchoRequest") { 
               my $localContent = "";
-              foreach my $d ($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {      
-                my $m = $self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1)->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
+              foreach my $d ($self->{REQUESTDOM}->getDocumentElement()->getElementsByTagNameNS($self->{NAMESPACE}, "data")) {      
+                my $m = $self->{REQUESTDOM}->getDocumentElement()->find("./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]")->get_node(1);
                 if(defined $m) {        
                   $logger->debug("Matching MD/D pair found: data \"".$d->getAttribute("id")."\" and metadata \"".$m->getAttribute("id")."\".");
                   my $eventType = extract($m->find("./nmwg:eventType")->get_node(1));
@@ -289,7 +289,7 @@ sub acceptCall {
               return 0;
             }
             else {  
-              $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}->getDocumentElement()->find(".//nmwg:message")->get_node(1), $self->{NAMESPACE});   
+              $self->{REQUESTDOM} = chainMetadata($self->{REQUESTDOM}->getDocumentElement(), $self->{NAMESPACE});   
               return 1;  
             }         
           } 
@@ -298,7 +298,7 @@ sub acceptCall {
           $msg = "Received message with incorrect message URI.";
           $logger->error($msg);     
           $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
-	  $$error = $msg if (defined $error);
+	        $$error = $msg if (defined $error);
           return 0;   
         }
       }
