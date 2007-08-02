@@ -64,17 +64,22 @@ sub receive {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	my $readValue = $self->{LISTENER}->acceptCall;
-	if($readValue == 0) {
-		$logger->debug("Received 'shadow' request from below; no action required.");
-		$self->{RESPONSE} = $self->{LISTENER}->getResponse();
-	} elsif($readValue == 1) {
-		$logger->debug("Received request to act on.");
-		handleRequest($self);
-	} else {
-		my $msg = "Sent Request was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
+	eval {
+		my $readValue = $self->{LISTENER}->acceptCall;
+		if($readValue == 0) {
+			$logger->debug("Received 'shadow' request from below; no action required.");
+			$self->{RESPONSE} = $self->{LISTENER}->getResponse();
+		} elsif($readValue == 1) {
+			$logger->debug("Received request to act on.");
+			handleRequest($self);
+		}
+	};
+	if ($@) {
+		my $msg = "Unhandled exception or crash: $@";
 		$logger->error($msg);
-		$self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg);
+
+		$self->{RESPONSE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred");  
+
 	}
 	return;
 }
@@ -1143,19 +1148,19 @@ sub idConstruct {
 
 	return $id if (!defined $domain);
 
-	$id .= "urn:nmtopo:/$domain";
+	$id .= "urn:nmtopo:$domain";
 
 	return $id if (!defined $node);
 
-	$id .= "/$node";
+	$id .= "_$node";
 
 	return $id if (!defined $interface);
 
-	$id .= "/$interface";
+	$id .= "_$interface";
 
 	return $id if (!defined $link);
 
-	$id .= "/$link";
+	$id .= "_$link";
 
 	return $id;
 }
@@ -1170,10 +1175,10 @@ sub idIsFQ($) {
 
 sub idAddLevel($) {
 	my ($id, $new_level) = @_;
-	if ($id =~ /\/$/) {
+	if ($id =~ /urn:nmtop:$/) {
 		$id .= $new_level;
 	} else {
-		$id .= "/".$new_level;
+		$id .= "_".$new_level;
 	}
 
 	return $id;
@@ -1182,7 +1187,7 @@ sub idAddLevel($) {
 sub idRemoveLevel($) {
 	my ($id) = @_;
 
-	if ($id =~ /(urn:nmtopo:.*)\/[^\/]+$/) {
+	if ($id =~ /(urn:nmtopo:.*)_[^_]+$/) {
 		return $1;
 	} else {
 		return $id;
@@ -1203,7 +1208,7 @@ sub idSanitize($) {
 sub idBaseLevel($) {
 	my ($id) = @_;
 
-	if ($id =~ /urn:nmtopo:.*\/([^\/]+)$/) {
+	if ($id =~ /urn:nmtopo:.*_([^_]+)$/) {
 		return $1;
 	} else {
 		return $id;

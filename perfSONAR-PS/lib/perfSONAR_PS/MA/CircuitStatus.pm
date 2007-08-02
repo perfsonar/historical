@@ -72,17 +72,22 @@ sub receive {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
-	my $readValue = $self->{LISTENER}->acceptCall;
-	if($readValue == 0) {
-		$logger->debug("Received 'shadow' request from below; no action required.");
-		$self->{RESPONSE} = $self->{LISTENER}->getResponse();
-	} elsif($readValue == 1) {
-		$logger->debug("Received request to act on.");
-		handleRequest($self);
-	} else {
-		my $msg = "Sent Request was not expected: ".$self->{LISTENER}->{REQUEST}->uri.", ".$self->{LISTENER}->{REQUEST}->method.", ".$self->{LISTENER}->{REQUEST}->headers->{"soapaction"}.".";
+	eval {
+		my $readValue = $self->{LISTENER}->acceptCall;
+		if($readValue == 0) {
+			$logger->debug("Received 'shadow' request from below; no action required.");
+			$self->{RESPONSE} = $self->{LISTENER}->getResponse();
+		} elsif($readValue == 1) {
+			$logger->debug("Received request to act on.");
+			handleRequest($self);
+		}
+	};
+	if ($@) {
+		my $msg = "Unhandled exception or crash: $@";
 		$logger->error($msg);
-		$self->{RESPONSE} = getResultCodeMessage("", "", "response", "error.transport.soap", $msg);
+
+		$self->{RESPONSE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred");  
+
 	}
 	return;
 }
