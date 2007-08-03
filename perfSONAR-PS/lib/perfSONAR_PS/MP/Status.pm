@@ -42,9 +42,7 @@ sub init($) {
 			return -1;
 		}
 
-		my @dbSchema = ("link_id", "link_knowledge", "start_time", "end_time", "oper_status", "admin_status");  
-
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_MA_FILE"});
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_MA_FILE"}, $self->{CONF}->{"STATUS_MA_TABLE"});
 	} elsif ($self->{CONF}->{"STATUS_MA_TYPE"} eq "MA") {
 		if (!defined $self->{CONF}->{"STATUS_MA_URI"} or $self->{CONF}->{"STATUS_MA_URI"} eq "") {
 			$logger->error("You specified to use an MA, but did not specify which one(STATUS_MA_URI)");

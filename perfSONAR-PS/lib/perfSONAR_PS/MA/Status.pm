@@ -24,7 +24,10 @@ sub init {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-	$self->SUPER::init;
+	if ($self->SUPER::init != 0) {
+		$logger->error("Couldn't initialize MA parent class");
+		return -1;
+	}
 
 	if (!defined $self->{CONF}->{"STATUS_DB_TYPE"} or $self->{CONF}->{"STATUS_DB_TYPE"} eq "") {
 		$logger->error("No database type specified");
@@ -37,13 +40,12 @@ sub init {
 			return -1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"});
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"}, $self->{CONF}->{"STATUS_DB_TABLE"});
 		if (!defined $self->{CLIENT}) {
 			my $msg = "No database to dump";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
-
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;

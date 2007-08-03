@@ -7,13 +7,18 @@ use perfSONAR_PS::MA::Status::Link;
 use Data::Dumper;
 
 sub new {
-	my ($package, $dbi_string) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my ($package, $dbi_string, $table) = @_;
 
 	my %hash;
 
 	if (defined $dbi_string and $dbi_string ne "") { 
 		$hash{"DBI_STRING"} = $dbi_string;
+	}
+
+	if (defined $table and $table ne "") { 
+		$hash{"DB_TABLE"} = $table;
+	} else {
+		$hash{"DB_TABLE"} = "link_status";
 	}
 
 	$hash{"DB_OPEN"} = 0;
@@ -29,6 +34,8 @@ sub open($) {
 	return (0, "") if ($self->{DB_OPEN} != 0);
 
         my @dbSchema = ("link_id", "link_knowledge", "start_time", "end_time", "oper_status", "admin_status"); 
+
+	$logger->debug("Table: ".$self->{DB_TABLE});
 
 	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING}, "", "", \@dbSchema);
 	if (!defined $self->{DATADB}) {
@@ -86,7 +93,7 @@ sub getAll($) {
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
-	my $links = $self->{DATADB}->query("select distinct link_id from link_status");
+	my $links = $self->{DATADB}->query("select distinct link_id from ".$self->{DB_TABLE});
 	if ($links == -1) {
 		$logger->error("Couldn't grab list of links");
 		return (-1, "Couldn't grab list of links");
@@ -97,7 +104,7 @@ sub getAll($) {
 	foreach my $link_ref (@{ $links }) {
 		my @link = @{ $link_ref };
 
-		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link[0]."\' order by end_time");
+		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link[0]."\' order by end_time");
 		if ($states == -1) {
 			$logger->error("Couldn't grab information for link ".$link[0]);
 			return (-1, "Couldn't grab information for link ".$link[0]);
@@ -123,20 +130,20 @@ sub getLinkHistory($$$) {
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
-	my $query = "select link_id, link_knowledge, start_time, end_time, oper_status, admin_status from link_status ";
+	my $query = "select link_id, link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE};
 	my $i = 0;
 	foreach my $link_id (@{ $link_ids }) {
 		if ($i == 0) {
-			$query .= "where (link_id=\'".$link_id."\'";
+			$query .= " where (link_id=\'".$link_id."\'";
 		} else {
-			$query .= "or link_id=\'".$link_id."\'";
+			$query .= " or link_id=\'".$link_id."\'";
 		}
 		$i++;
 	}
 	$query .= ")";
 
 	if (defined $time and $time ne "") {
-		$query .= "and end_time => $time and start_time <= $time";
+		$query .= " and end_time => $time and start_time <= $time";
 	}
 
 	my $status = $self->{DATADB}->openDB;
@@ -187,9 +194,9 @@ sub getLinkStatus($$$) {
 		my $query;
 
 		if ($time eq "") {
-		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' order by end_time desc limit 1";
+		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' order by end_time desc limit 1";
 		} else {
-		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from link_status where link_id=\'".$link_id."\' and start_time <= \'$time\' and end_time >= '$time'";
+		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' and start_time <= \'$time\' and end_time >= '$time'";
 		}
 
 		my $states = $self->{DATADB}->query($query);
@@ -239,7 +246,7 @@ sub updateLinkStatus($$$$$$$) {
 			return (-1, $msg);
 		}
 
-		my $link = $res->{$link_id};
+		my $link = pop(@{ $res->{$link_id} });
 
 		if ($link->getOperStatus ne $oper_value or $link->getAdminStatus ne $admin_value) {
 			$logger->debug("Something changed on link $link_id: ".$oper_value."/".$link->getOperStatus." ".$admin_value."/".$link->getAdminStatus);
@@ -263,7 +270,7 @@ sub updateLinkStatus($$$$$$$) {
 				end_time => $prev_end_time,
 			    );
 
-		if ($self->{DATADB}->update("link_status", \%where, \%updateValues) == -1) {
+		if ($self->{DATADB}->update($self->{DB_TABLE}, \%where, \%updateValues) == -1) {
 			$logger->error("Couldn't update link status for link $link_id");
 			$self->{DATADB}->closeDB;
 			return -1;
@@ -278,7 +285,7 @@ sub updateLinkStatus($$$$$$$) {
 				link_knowledge => $knowledge_level,
 				);
 
-		if ($self->{DATADB}->insert("link_status", \%insertValues) == -1) {
+		if ($self->{DATADB}->insert($self->{DB_TABLE}, \%insertValues) == -1) {
 			$logger->error("Couldn't update link status for link $link_id");
 			$self->{DATADB}->closeDB;
 			return -1;
