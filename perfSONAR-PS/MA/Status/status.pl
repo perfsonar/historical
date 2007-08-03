@@ -37,7 +37,9 @@ my %ns = (
 		netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
 		nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
 		snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-		select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+		select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+		nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
 	 );
 
 if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
@@ -69,36 +71,54 @@ if(!$DEBUGFLAG) {
 
 $logger->debug("Starting '".threads->tid()."'");
 
-my $maThread = threads->new(\&measurementArchive);
-my $mpThread = threads->new(\&measurementPoint);
-
-if(!defined $maThread or !defined $mpThread) {
-	$logger->fatal("Thread creation has failed...exiting.");
-	exit(1);
+my $ma = new perfSONAR_PS::MA::Status(\%conf, \%ns);
+if ($ma->init != 0) {
+	$logger->error("Couldn't initialize Status MA");
+	exit(-1);
 }
 
-$maThread->join();
-$mpThread->join();
+my $mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
+if ($mp->init != 0) {
+	$logger->error("Couldn't initialize Status monitor");
+	exit(-1);
+}
+
+my $ma_pid = fork();
+if ($ma_pid == 0) {
+	measurementArchive();
+	exit(0);
+}
+
+my $mp_pid = fork();
+if ($mp_pid == 0) {
+	measurementPoint();
+	exit(0);
+}
+
+waitpid($mp_pid, 0);
+waitpid($ma_pid, 0);
 
 sub measurementArchive {
-	$logger->debug("Starting '".threads->tid()."' as the MA.");
+	$logger->debug("Starting '".$$."' as the MA.");
 
-	my $ma = new perfSONAR_PS::MA::Status(\%conf, \%ns);
-	$ma->init;  
 	while(1) {
-		my $runThread = threads->new(\&measurementArchiveQuery, $ma);
-		if(!defined $runThread) {
-			$logger->fatal("Thread creation has failed...exiting");
-			exit(1);
+		my $pid = fork();
+		if ($pid == 0) {
+			measurementArchiveQuery($ma);
+			exit(0);
+		} elsif ($pid < 0) {
+			$logger->error("Error spawning child");
+		} else {
+			waitpid($pid, 0);
 		}
-		$runThread->join();  
-	}  
+	}
+
 	return;
 }
 
 sub measurementArchiveQuery {
 	my($ma) = @_; 
-	$logger->debug("Starting '".threads->tid()."' as the execution path.");
+	$logger->debug("Starting '".$$."' as the execution path.");
 
 	$ma->receive;
 	$ma->respond;
@@ -106,15 +126,7 @@ sub measurementArchiveQuery {
 }
 
 sub measurementPoint {
-	$logger->debug("Starting '".threads->tid()."' as the MP.");
-
-	$logger->debug("measurementPoint()");
-
-	my $mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
-	if ($mp->init != 0) {
-		$logger->error("Couldn't initialize Status monitor");
-		exit(-1);
-	}
+	$logger->debug("Starting '".$$."' as the MP.");
 
 	my $i = 0;
 	while(1) {

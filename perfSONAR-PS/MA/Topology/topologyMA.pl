@@ -55,33 +55,36 @@ if(!$DEBUGFLAG) {
 }
 
 $logger->debug("Starting '".threads->tid()."'");
-
-my $maThread = threads->new(\&measurementArchive);
-#my $regThread = threads->new(\&registerLS);
-
-if (!defined $maThread) {
-  $logger->fatal("Thread creation has failed...exiting.");
-  exit(1);
+my $ma = new perfSONAR_PS::MA::Topology(\%conf, \%ns);
+if ($ma->init != 0) {
+	$logger->error("Couldn't initialize Topology MA");
+	exit(-1);
 }
 
-$maThread->join();
+my $ma_pid = fork();
+if ($ma_pid == 0) {
+	measurementArchive();
+	exit(0);
+}
+
+waitpid($ma_pid, 0);
 
 sub measurementArchive {
-  $logger->debug("Starting '".threads->tid()."' as the MA.");
+	$logger->debug("Starting '".threads->tid()."' as the MA.");
 
-  my $ma = new perfSONAR_PS::MA::Topology(\%conf, \%ns);
-  $ma->init;  
-  while(1) {
-    my $runThread = threads->new(\&measurementArchiveQuery, $ma);
-    if(!defined $runThread) {
-      $logger->fatal("Thread creation has failed...exiting");
-      exit(1);
-    }
-    $runThread->join();  
-  }  
-  return;
+	while(1) {
+		my $pid = fork();
+		if ($pid == 0) {
+			measurementArchiveQuery($ma);
+			exit(0);
+		} elsif ($pid < 0) {
+			$logger->error("Error spawning child");
+		} else {
+			waitpid($pid, 0);
+		}
+	}  
+	return;
 }
-
 
 sub measurementArchiveQuery {
   my($ma) = @_; 
