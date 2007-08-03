@@ -76,10 +76,11 @@ sub init {
       "", 
       "", 
       "");  
-    $self->{LISTENER}->startDaemon;
+    return $self->{LISTENER}->startDaemon;
   }
   else {
     $logger->error("Missing 'conf' object."); 
+    return -1;
   }
   return;
 }
