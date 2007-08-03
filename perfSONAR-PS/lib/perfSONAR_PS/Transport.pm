@@ -180,8 +180,13 @@ sub startDaemon {
   $self->{DAEMON} = HTTP::Daemon->new(
     LocalPort => $self->{PORT},
     ReuseAddr => 1
-  ) or $logger->error("Cannot start daemon.");
-  return;
+  ); 
+  if (!defined $self->{DAEMON}) {
+    $logger->error("Cannot start daemon.");
+    return -1;
+  }
+
+  return 0;
 }
 
 
@@ -663,8 +668,7 @@ Creates a URI from a host, port, and endpoint
 =head2 startDaemon($self)
 
 Starts an HTTP daemon on the given host listening to the specified port.  
-This method will cause the program to halt if the port in question is 
-not available.
+This method will return 0 on success and -1 on failure.
 
 =head2 acceptCall($self)
 
