@@ -62,21 +62,19 @@ CREATE TABLE contacts (
 # ipaddr  table to keep track on what ip address was assigned with pinger hostname
 #   ip_number has length of 64 - to accomodate possible IPv6 
 #
-CREATE TABLE   ipaddr_intervals (
+CREATE TABLE host (
  ip_name varchar(52) NOT NULL, 
  ip_number varchar(64) NOT NULL,
- active_start  bigint(12) NOT NULL, 
- active_end bigint(12)  NOT NULL, 
  comments text, 
- PRIMARY KEY  (ip_name, ip_number, active_end)); 
+ PRIMARY KEY  (ip_name, ip_number) );
 
 #
 #     meta data table ( [eriod is an interval, since interval is reserved word )
 #
 CREATE TABLE  metaData  (
  metaID BIGINT NOT NULL AUTO_INCREMENT,
- ip_name_src varchar(52),
- ip_name_dst varchar(52),
+ ip_name_src varchar(52) NOT NULL,
+ ip_name_dst varchar(52) NOT NULL,
  transport varchar(10)  NOT NULL,
  packetSize smallint   NOT NULL,
  count smallint   NOT NULL,
@@ -84,8 +82,8 @@ CREATE TABLE  metaData  (
  deadline smallint,
  ttl smallint,
  INDEX (ip_name_src, ip_name_dst, packetSize, count),
- FOREIGN KEY (ip_name_src) references ipaddr_intervals (ip_name),
- FOREIGN KEY (ip_name_dst) references ipaddr_intervals (ip_name),
+ FOREIGN KEY (ip_name_src) references host (ip_name),
+ FOREIGN KEY (ip_name_dst) references host (ip_name),
  PRIMARY KEY  (metaID));
 
 
