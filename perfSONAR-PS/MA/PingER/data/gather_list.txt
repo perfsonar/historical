@@ -1,0 +1,16 @@
+#
+http://pinger.fnal.gov/cgi-bin/ping_data.pl
+http://iepmbw.cern.ch/cgi-bin/ping_data.pl
+http://ns.hepgrid.uerj.br/cgi-bin/ping_data.pl
+http://ping.unesp.br/cgi-bin/ping_data.pl
+http://ping.desy.de/cgi-bin/outside_hosts/ping_data.pl
+http://pinger.ascr.doe.gov/cgi-bin/ping_data.pl
+http://yumj2.kek.jp/cgi-bin/ping_data.pl
+http://icfamon.rl.ac.uk/cgi-bin/ping_data.pl
+http://www.slac.stanford.edu/cgi-wrap/ping_data.pl
+http://sitka.triumf.ca/cgi-bin/ping_data.pl
+http://icfamon.dl.ac.uk/cgi-bin/ping_data.pl
+http://pinger.es.net/cgi-bin/ping_data.pl
+http://users.sdsc.edu/~matthews/ping_data.pl
+http://v-www.ihep.ac.cn/cgi-ping/ping_data.pl
+http://pinger.ictp.it/cgi-bin/ping_data.pl
