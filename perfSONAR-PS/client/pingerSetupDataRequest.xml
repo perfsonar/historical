@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<nmwg:message id="message1"
+              type="SetupDataRequest"
+              xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+              xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+   
+   <nmwg:metadata id="meta426">
+    <pinger:subject id="subject426">
+      <topo:endPointPair>
+        <topo:src type="ipv4" value="hepnrc.hep.net"/> 
+      </topo:endPointPair>
+    </pinger:subject>
+  </nmwg:metadata>
+ 
+  
+  <nmwg:data id="data426" metadataIdRef="meta426"/>
+
+</nmwg:message> 
