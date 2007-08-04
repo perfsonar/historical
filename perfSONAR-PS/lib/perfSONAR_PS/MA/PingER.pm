@@ -3,6 +3,7 @@ package perfSONAR_PS::MA::PingER;
 use warnings;
 use Carp qw( carp );
 use Exporter;
+use DBI;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::DBLoader;
 
@@ -43,11 +44,7 @@ sub init {
         
 	return 0;
 }
-
-sub DESTROY {
-    my  $self  = shift;
-    $self->{DBH}->disconnect if   $self->{DBH};
-}
+ 
 
 sub receive {
 	my($self) = @_;
@@ -101,7 +98,7 @@ sub receive {
 sub parseRequest {
   my($self, $messageId, $messageIdRef, $type) = @_; 
   my $logger = get_logger("perfSONAR_PS::MA::PingER");
-
+  my $messageIdReturn = genuid(); 
   my $localContent = "";
   foreach my $d ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {  
     foreach my $m ($self->{LISTENER}->getRequestDOM()->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {  
@@ -129,12 +126,18 @@ sub parseRequest {
 	       $localContent = perfSONAR_PS::MA::Base::keyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);	      	      
 	   } elsif($type eq "SetupDataRequest") {         
                getTime(\%{$self}, $m->getAttribute("id"));
-               if($m->find("//nmwg:metadata/nmwg:key")) {
+               if($m->find("./nmwg:key")) {
+	          $logger->debug("Processing   setupDataKeyRequest ");
                   $localContent = setupDataKeyRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
                }  else {
+	           $logger->debug("Processing   setupDataRequest ");
                   $localContent = setupDataRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
                }	
-	   } 
+	   } else {
+	       my $msg = " Request: [$type] is not supported";
+	       $logger->error($msg); 
+               $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $type , "error.ma", $msg );
+	   }
 	   #elsif($type eq "MesurementArchiveStoreRequest") {         
            #      MAStoreRequest($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef);
            #   
@@ -195,36 +198,25 @@ sub parseRequest {
   return;
 }
 
-
 sub setupDataKeyRequest {
   my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::PingER");
-  
-	my $queryString = "//nmwg:data[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
+
+  my $queryString = "//nmwg:data[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 0) . "]";
   $logger->debug("Query \"".$queryString."\" created."); 
 
-
-# XXX jason: [6/4/07]
-# Adding the 'cooked' md to the request        
-#  $localContent = $localContent . $m->toString();
-   
-   
-# XXX jason: [6/4/07]
-# Adding the 'original' md to the request
-  my $xp = XML::XPath->new( xml => $self->{LISTENER}->getRequest );
-  my $nodeset = $xp->find("//nmwg:message/nmwg:metadata");
-  if($nodeset->size() <= 0) {
-  }
-  else {  
-    foreach my $node ($nodeset->get_nodelist) {
-      $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
-    }
-  }
-
-   
 	my @resultsString = $metadatadb->query($queryString);   
 	if($#resultsString != -1) {
     for(my $x = 0; $x <= $#resultsString; $x++) {	
+
+      my $parser = XML::LibXML->new();
+      $doc = $parser->parse_string($resultsString[$x]);  
+      my $mdset = $doc->find("//nmwg:metadata");
+      my $md = $mdset->get_node(1); 
+      
+      # psUI Hack
+      $localContent = $localContent . $md->toString;
+
       $localContent = $localContent . handleData($self, $m->getAttribute("id"), $resultsString[$x], $messageId, $messageIdRef);
     } 
     $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);       
@@ -236,11 +228,11 @@ sub setupDataKeyRequest {
 	}  
   return;
 }
-
+ 
 sub setupDataRequest {
   my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::PingER");
-  
+   
 	my $queryString = "//nmwg:metadata[" . getMetadatXQuery(\%{$self}, $m->getAttribute("id"), 1) . "]";
   $logger->debug("Query \"".$queryString."\" created.");
 	my @resultsString = $metadatadb->query($queryString);   
@@ -272,25 +264,27 @@ sub setupDataRequest {
         }
         else {  
           foreach my $node ($nodeset->get_nodelist) {
-            $localContent .= XML::XPath::XMLParser::as_string($node);
+            $localContent = $localContent . XML::XPath::XMLParser::as_string($node);
           }
         }
-        foreach my $dt (@dataResultsString) {
-	   $localContent .=  handleData($self, $m->getAttribute("id"), $dt, $messageId, $messageIdRef);
+                
+        
+        for(my $y = 0; $y <= $#dataResultsString; $y++) {
+		      $localContent = $localContent . handleData($self, $m->getAttribute("id"), $dataResultsString[$y], $messageId, $messageIdRef);
         } 
         $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "SetupDataResponse", $localContent);  	    	  
 	    }
       else {
 	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
         $logger->error($msg);  
-        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.ma.pinger", $msg);
+        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);
       } 
 	  }
 	}
 	else {
 	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
     $logger->error($msg);
-    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.ma.pinger", $msg);	                   
+    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "SetupDataResponse", "error.mp.snmp", $msg);	                   
 	}  
   return;
 }
@@ -307,11 +301,11 @@ sub handleData {
   $self->{RESULTS} = $parser->parse_string($dataString);   
   my $dt = $self->{RESULTS}->find("//nmwg:data")->get_node(1);
   my $type = extract($dt->find("./nmwg:key//nmwg:parameter[\@name=\"type\"]")->get_node(1));
-                  
+  $logger->debug("Storage TYPE $type  found.");	                
   if($type eq "rrd") {
     $localContent = retrieveRRD($self, $dt, $id);		       
   }
-  elsif($type =~ /^sqlite|mysql|pg/) {
+  elsif($type =~ /^sqlite|mysql|pg/i) {
     $localContent = retrieveSQL($self, $dt, $id);		  		       
   }		
   else {
@@ -344,10 +338,11 @@ sub retrieveSQL {
 		    'iprIpd' =>  {name =>  'iprIpd' },
 		    'outOfOrder' =>  {name =>  'outOfOrder'},
 		    'duplicates' =>  {name => 'duplicates'} );
-		    
-  my $file = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"file\"]")->get_node(1));
-  my $table = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"table\"]")->get_node(1));
-   
+ my($file, $table ) ;		    
+  if($db_driver =~ /^sqlite$/i) {
+      $file = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"file\"]")->get_node(1));
+      $table = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"table\"]")->get_node(1));
+  } 
   #
   # dbname could be  <DBNAME>:<PORT> or for SQLite - dbname=<FILENAME> , so its driver + storage type
   #  $db_driver could be mysql, SQLite , oracle and so on
@@ -361,10 +356,12 @@ sub retrieveSQL {
   $db_driver=  'SQLite' if( $db_driver =~ /^sqlite$/i);
   $db_driver=  'Pg' if( $db_driver =~ /^pg$/i);
   $db_name = "dbname=$db_name"  if( $db_driver =~ /SQLite|Pg/); 
-  my $query = "";   
-   $self->{DBH} =  perfSONAR_PS::DB::DBLoader->connect("DBI:$db_driver:$db_name",
+  my $query = ""; 
+  $logger->debug("Connecting ot data db DBI:$db_driver:$db_name:localhost user:" . $self->{CONF}->{SQL_DB_USER});  
+  my $dbih =  DBI->connect("DBI:$db_driver:$db_name:localhost",
                               $self->{CONF}->{SQL_DB_USER},$self->{CONF}->{SQL_DB_PASS}, 
-			      {AutoCommit => 1, RaiseError => 1});
+			      {AutoCommit => 1, RaiseError => 1}) or
+			       $logger->error("SQL DB failed" . $DBI::errstr);
    
   my $metaID = $d->getAttribute("metadataIdRef");
   my @tables = _getTables($self->{TIME}->{"START"}, $self->{TIME}->{"END"});
@@ -374,31 +371,45 @@ sub retrieveSQL {
 			    "<nmtm:end type=\"unix\" value=\"" .
                            $self->{TIME}->{"END"} . "\"/>\n";
      $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";			   
-  } elsif($self->{TIME}->{"START"})  {
+  } elsif($self->{TIME}->{"START"} && !$self->{TIME}->{"END"})  {
+        $self->{TIME}->{"END"} = time;
         $responseHeader .=  "<nmwg:commonTime type=\"unix\"  value=\"" .  $self->{TIME}->{"START"} . "\">\n"; 
         $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";	
   } elsif($self->{TIME}->{"END"})  {
+        $self->{TIME}->{"START"} = $self->{TIME}->{"END"}  - 7200; # 2 hour
         $responseHeader .=  "<nmwg:commonTime type=\"unix\"  value=\"" .  $self->{TIME}->{"START"} . "\">\n"; 
         $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";	
+  } else {
+     $self->{TIME}->{"START"} = time - 7200; # 2 hour
+     $self->{TIME}->{"END"} = time;
+     $responseHeader .=  "<nmwg:commonTime type=\"range\">\n  <nmtm:start type=\"unix\" value=\"" .
+                           $self->{TIME}->{"START"} . "\"/>\n" .
+			    "<nmtm:end type=\"unix\" value=\"" .
+                           $self->{TIME}->{"END"} . "\"/>\n";
+     $responseFooter .=   "</nmwg:commonTime>\n $responseFooter";
   }
-  
+  $metaID =~ s/^meta(\d+)$/$1/;
+  $logger->debug(" Looking for metaID : meta$metaID");
   foreach my $table (@tables) {
-     my $resultset =  $self->{DBH}->resultset($table)->search({metaID => $metaID,
-                              timestamp => {'-between' => [$self->{TIME}->{"START"}, $self->{TIME}->{"END"}]}});     
-     ### get next row			      
-     while(my  $result = $resultset->next) { 
-        ### get hash of column name=> value
-	 my %temp_row = $result->get_columns;
-	foreach  my $el (keys %return_vars ) {
-              $responseString .=  " <pinger:datum  name=\"" .$return_vars{$el}->{name} ."\"  value=\"". $temp_row{$el} ."\"";
+    $logger->debug(" Next table $table looking for  '". $self->{TIME}->{"START"} . "' and '" .$self->{TIME}->{"END"});
+      my  $data_get =    $dbih->prepare("select * from  $table where metaID='$metaID' and timestamp between '" .
+                        $self->{TIME}->{"START"} . "' and '" .$self->{TIME}->{"END"}."'") 
+			or   $logger->error("SQL DB failed" . $DBI::errstr);  
+      $data_get->execute() or   $logger->error("SQL DB failed" . $DBI::errstr); 
+     ### get next row	
+     while (my  $temp_row = $data_get->fetchrow_hashref())  {  
+        foreach  my $el (keys %return_vars ) {
+	    if($temp_row->{$el}) {
+              $responseString .=  " <pinger:datum  name=\"" .$return_vars{$el}->{name} ."\"  value=\"". $temp_row->{$el} ."\"";
 	      $responseString .=  $return_vars{$el}->{unit}?"  valueUnits=\"". $return_vars{$el}->{unit} . "\"/>":"/>";
+	    }
         }
-     
      } 
+     $data_get->finish if $data_get;
   }			      
   
   my $id = genuid();
-  $self->{DBH}->disconnect() if $self->{DBH}; 
+  $dbih->disconnect() if  $dbih; 
      
   if(!$responseString) {
     my $msg = "Query \"".$query."\" returned 0 results";
