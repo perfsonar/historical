@@ -7,7 +7,7 @@ use threads;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 use Log::Log4perl qw(get_logger :levels);
-use SimpleConfig;
+ 
      
 use perfSONAR_PS::Common;
  
@@ -32,7 +32,7 @@ if(!$status or $HELP) {
 
 my $ns =  perfSONAR_PS::XML::Namespace->new();
 my %local_ns = ();
-foreach my $ns_key (qw/nmwg  nmwgt pinger  nmtl3 select/) {
+foreach my $ns_key (qw/nmwg  topo  pinger  nmtl3 select/) {
  $local_ns{$ns_key} = $ns->getNsByKey($ns_key);
 } 
 my %CONF_PROMPTS = ( "METADATA_DB_TYPE" => "type of the internal metaData DB ( file| xmldb  ) ", 
