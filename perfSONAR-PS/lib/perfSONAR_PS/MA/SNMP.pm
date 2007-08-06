@@ -54,20 +54,28 @@ sub handleRequest {
   my $messageIdReturn = "message.".genuid(); 
   if($self->{CONF}->{"METADATA_DB_TYPE"} eq "file" or 
      $self->{CONF}->{"METADATA_DB_TYPE"} eq "xmldb") {
+     
+    my $msgParams = $self->{LISTENER}->getRequestDOM()->getDocumentElement->find("./nmwg:parameters")->get_node(1); 
+    if($msgParams) {
+      $logger->debug("Found message parameters.");
+      $msgParams = handleMessageParameters($self, $msgParams);
+      $msgParams = $msgParams->toString."\n";
+    }      
+     
     if($messageType eq "MetadataKeyRequest") {
       $logger->debug("Parsing MetadataKey request.");
       my $response = maMetadataKeyRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "MetadataKeyResponse", $response);    
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "MetadataKeyResponse", $msgParams.$response);    
     }
     elsif($messageType eq "SetupDataRequest") {
       $logger->debug("Parsing SetupData request.");
       my $response = maSetupDataRequest($self);
-      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataResponse", $response);  
+      $self->{RESPONSE} = getResultMessage($messageIdReturn, $messageId, "SetupDataResponse", $msgParams.$response);  
     }
     else {
       my $msg = "Message type \"".$messageType."\" is not yet supported";
       $logger->error($msg);  
-      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", "error.ma.message.type", $msg);
+      $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", "error.ma.message.type", $msg);
     }
   }
   else {
@@ -76,6 +84,25 @@ sub handleRequest {
     $self->{RESPONSE} = getResultCodeMessage($messageIdReturn, $messageId, "MetadataKeyResponse", "error.mp.snmp", $msg);
   }
   return;
+}
+
+
+sub handleMessageParameters {
+  my($self, $msgParams) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
+  foreach my $p ($msgParams->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "parameter")) {
+    if($p->getAttribute("name") eq "timeType") {
+      $logger->debug("Found timeType parameter.");
+      my $type = extract($p);
+      if($type =~ m/^unix$/i) {
+        $self->{"TIMETYPE"} = "unix";
+      }
+      elsif($type =~ m/^iso/i) {
+        $self->{"TIMETYPE"} = "iso";
+      } 
+    }
+  }
+  return $msgParams;
 }
 
 
@@ -193,19 +220,19 @@ sub metadataKeyRetrieveKey {
 	  $logger->debug("Found a key in metadata storage.");
     my $parser = XML::LibXML->new();
     my $doc = $parser->parse_string($resultsString[0]);  
-    my $key = $doc->find("//nmwg:data/nmwg:key")->get_node(1);	
-    if($key) {   
+    my $key2 = $doc->find("//nmwg:data/nmwg:key")->get_node(1);	
+    if($key2) {   
       if(defined $chain and $chain ne "") {
         $logger->debug("Preparing to search chain for modifications.");
         if($self->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
           foreach my $p ($chain->find("./select:parameters")->get_node(1)->childNodes) {
             $logger->debug("Modifying chain.");
-            $key->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
+            $key2->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
           }
         }
       }    
       print $tempHandle createMetadata($mdId, $id, $key->toString);
-      print $tempHandle createData($dId, $mdId, $key->toString);
+      print $tempHandle createData($dId, $mdId, $key2->toString);
 	  }
 	  else {
       my $msg = "Key error in metadata storage.";
@@ -223,6 +250,15 @@ sub metadataKeyRetrieveKey {
   return;
 }
 
+
+#metadataKeyRetrieveMetadataData(
+#\%{$self}, 
+#$metadatadb, 
+#$m, 
+#"", 
+#$m->getAttribute("id"), 
+#$tempHandle
+#);
 
 sub metadataKeyRetrieveMetadataData {
   my($self, $metadatadb, $metadata, $chain, $id, $tempHandle) = @_;
@@ -245,29 +281,54 @@ sub metadataKeyRetrieveMetadataData {
 	    my @dataResultsString = $metadatadb->query($queryString);	  
 	    if($#dataResultsString != -1) {   			  
         $logger->debug("Founding matching data in metadata storage.");
-        $mdId = "metadata.".genuid();
-        $md->setAttribute("metadataIdRef", $id);
-        $md->setAttribute("id", $mdId);
-        
-        print $tempHandle $md->toString;  
+
         for(my $y = 0; $y <= $#dataResultsString; $y++) {
           my $parser2 = XML::LibXML->new();
           my $doc2 = $parser2->parse_string($dataResultsString[$y]);  
           my $d = $doc2->find("//nmwg:data")->get_node(1);
-      
-          $dId = "data.".genuid();
-          $d->setAttribute("metadataIdRef", $mdId);
-          $d->setAttribute("id", $dId);
-          if(defined $chain and $chain ne "") {
-            $logger->debug("Preparing to search chain for modifications.");
-            if($self->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
-              foreach my $p ($chain->find("./select:parameters")->get_node(1)->childNodes) {
-                $logger->debug("Modifying chain.");
-                $d->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
+
+          my $eventTypes = $metadata->find("./nmwg:eventType");
+          my $eventTypes2 = $metadata->find(".//nmwg:parameter[\@name=\"supportedEventType\"]");
+          my $supportedEventTypes = $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"supportedEventType\"]");
+          
+          my $match = 0;
+          foreach my $set ($supportedEventTypes->get_nodelist) {
+            last if($match == 1);
+            foreach my $et ($eventTypes->get_nodelist) {
+              if(extract($et) eq extract($set)) {
+                $match = 1;
+                last;
               }
-            }        
+            }
+            foreach my $et2 ($eventTypes2->get_nodelist) {
+              if(extract($et2) eq extract($set)) {
+                $match = 1;
+                last;
+              }
+            }
           }
-          print $tempHandle $d->toString; 
+
+          if($match) {
+            $dId = "data.".genuid();
+            $mdId = "metadata.".genuid();
+            $d->setAttribute("metadataIdRef", $mdId);
+            $d->setAttribute("id", $dId);
+            if(defined $chain and $chain ne "") {
+              $logger->debug("Preparing to search chain for modifications.");
+              if($self->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
+                foreach my $p ($chain->find("./select:parameters")->get_node(1)->childNodes) {
+                  $logger->debug("Modifying chain.");
+                  $d->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
+                }
+              }        
+            }
+            $md->setAttribute("metadataIdRef", $id);
+            $md->setAttribute("id", $mdId);        
+            print $tempHandle $md->toString; 
+         
+            print $tempHandle $d->toString; 
+          }
+
         }      
 	    }
       else {
@@ -415,13 +476,37 @@ sub setupDataRetrieveMetadataData {
       $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]";
       $logger->debug("Query \"".$queryString."\" created.");
 	    my @dataResultsString = $metadatadb->query($queryString);
-	    if($#dataResultsString != -1) { 
-        $mdId = "metadata.".genuid();
-        $md->setAttribute("metadataIdRef", $id);
-        $md->setAttribute("id", $mdId);
-        print $tempHandle $md->toString();      
+	    if($#dataResultsString != -1) {             
         for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		      print $tempHandle handleData($self, $md->getAttribute("id"), $dataResultsString[$y], $tempHandle);
+          my $parser2 = XML::LibXML->new();
+          my $doc2 = $parser2->parse_string($dataResultsString[$y]);  
+          my $d = $doc2->find("//nmwg:data")->get_node(1);
+          my $eventTypes = $metadata->find("./nmwg:eventType");
+          my $eventTypes2 = $metadata->find(".//nmwg:parameter[\@name=\"supportedEventType\"]");
+          my $supportedEventTypes = $d->find("./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"supportedEventType\"]");
+          my $match = 0;
+          foreach my $set ($supportedEventTypes->get_nodelist) {
+            last if($match == 1);
+            foreach my $et ($eventTypes->get_nodelist) {
+              if(extract($et) eq extract($set)) {
+                $match = 1;
+                last;
+              }
+            }
+            foreach my $et2 ($eventTypes2->get_nodelist) {
+              if(extract($et2) eq extract($set)) {
+                $match = 1;
+                last;
+              }
+            }
+          }
+          if($match) {
+            $mdId = "metadata.".genuid();
+            $md->setAttribute("metadataIdRef", $id);
+            $md->setAttribute("id", $mdId);
+		        print $tempHandle $md->toString();  
+		        print $tempHandle handleData($self, $md->getAttribute("id"), $dataResultsString[$y], $tempHandle);
+          }
         }     	  
       }
       else {
@@ -545,21 +630,26 @@ sub retrieveSQL {
     $logger->debug("Data found.");
     print $tempHandle "\n  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$mid."\">\n";
 
-    if($#{$result} < $self->{"CONF"}->{"DATA_LIMIT"}) {
-      for(my $a = 0; $a <= $#{$result}; $a++) {    
-        print $tempHandle "    <nmwg:datum timeType=\"unix\"";
-        print $tempHandle " ".$dbSchema[1]."Value=\"".$result->[$a][1]."\"";
-        print $tempHandle " ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
-        my @misc = split(/,/,$result->[$a][4]);
-        foreach my $m (@misc) {
-          my @pair = split(/=/,$m);
-	        print $tempHandle " ".$pair[0]."=\"".$pair[1]."\""; 
-        }
-        print $tempHandle " />\n";
+    for(my $a = 0; $a <= $#{$result}; $a++) {    
+      print $tempHandle "    <nmwg:datum timeType=\"";
+        
+      if($self->{"TIMETYPE"} and $self->{"TIMETYPE"} eq "iso") {      
+        my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($result->[$a][1]);
+        print $tempHandle "ISO\" ".$dbSchema[1]."Value=\"";
+        printf $tempHandle "%04d-%02d-%02dT%02d:%02d:%02dZ\n", ($year+1900), ($mon+1), $mday, $hour, $min, $sec;
+        print $tempHandle "\"";
       }
-    }
-    else {
-      print $tempHandle "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\" value=\"Results too large to return.\" />\n";        
+      else {
+        print $tempHandle "unix\" ".$dbSchema[1]."Value=\"".$result->[$a][1]."\"";
+      }
+        
+      print $tempHandle " ".$dbSchema[2]."=\"".$result->[$a][2]."\"";
+      my @misc = split(/,/,$result->[$a][4]);
+      foreach my $m (@misc) {
+        my @pair = split(/=/,$m);
+	      print $tempHandle " ".$pair[0]."=\"".$pair[1]."\""; 
+      }
+      print $tempHandle " />\n";
     }
     
     print $tempHandle "  </nmwg:data>\n";
@@ -589,19 +679,24 @@ sub retrieveRRD {
       my $dataSource = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]")->get_node(1));
       my $valueUnits = extract($d->find("./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]")->get_node(1));
     
-      if(keys(%rrd_result) < $self->{"CONF"}->{"DATA_LIMIT"}) {
-        foreach $a (sort(keys(%rrd_result))) {
-          foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
-	          if($b eq $dataSource) {
-	            print $tempHandle "    <nmwg:datum timeType=\"unix\" timeValue=\"".$a."\" value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
+      foreach $a (sort(keys(%rrd_result))) {
+        foreach $b (sort(keys(%{$rrd_result{$a}}))) { 
+	        if($b eq $dataSource) {
+	          print $tempHandle "    <nmwg:datum timeType=\"";
+            if($self->{"TIMETYPE"} and $self->{"TIMETYPE"} eq "iso") {      
+              my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($a);
+              print $tempHandle "ISO\" timeValue=\"";
+              printf $tempHandle "%04d-%02d-%02dT%02d:%02d:%02dZ\n", ($year+1900), ($mon+1), $mday, $hour, $min, $sec;
+              print $tempHandle "\"";
             }
+            else {
+              print $tempHandle "unix\" timeValue=\"".$a."\"";
+            }	          
+	          print $tempHandle " value=\"".$rrd_result{$a}{$b}."\" valueUnits=\"".$valueUnits."\"/>\n";
           }
         }
       }
-      else {
-        print $tempHandle "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\" value=\"Results too large to return.\" />\n";        
-      }
-            
+      
       print $tempHandle "  </nmwg:data>\n";
       $logger->debug("Data block created.");
     }

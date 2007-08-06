@@ -17,42 +17,43 @@ use perfSONAR_PS::Common;
 sub getResultMessage {
   my ($id, $messageIdRef, $type, $content, $namespaces) = @_;  
   my $logger = get_logger("perfSONAR_PS::Messages");
-   
-  if(defined $content and $content ne "") {
-    my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-    if(defined $namespaces) {
-       foreach $ns (keys %{ $namespaces }) {
-         next if $ns eq "nmwg";
-         $m .= " xmlns:".$ns."=\"".$namespaces->{$ns}."\"";
 
-       }
-    }
-    if(defined $id and $id ne "") {
-      $m = $m . " id=\"".$id."\"";
-    }
-    if(defined $messageIdRef and $messageIdRef ne "") {
-      $m = $m . " messageIdRef=\"".$messageIdRef."\"";
-    }
-    if(defined $type and $type ne "") {
-      $m = $m . " type=\"".$type."\"";
-    }        
-    $m = $m . ">\n  ";
+  my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
+  if(defined $namespaces) {
+     foreach $ns (keys %{ $namespaces }) {
+       next if $ns eq "nmwg";
+       $m .= " xmlns:".$ns."=\"".$namespaces->{$ns}."\"";
+
+     }
+  }
+  if(defined $id and $id ne "") {
+    $m = $m . " id=\"".$id."\"";
+  }
+  if(defined $messageIdRef and $messageIdRef ne "") {
+    $m = $m . " messageIdRef=\"".$messageIdRef."\"";
+  }
+  if(defined $type and $type ne "") {
+    $m = $m . " type=\"".$type."\"";
+  }        
+  $m = $m . ">\n  ";
+  if(defined $content and $content ne "") {    
     $m = $m . $content;
-    $m = $m . "</nmwg:message>\n";
-    $logger->debug("Result message created.");
-    return $m;
   }
   else {
     $logger->error("Missing argument.");
-  }
-  return "";
+    my $mdID = "metadata.".genuid();
+    $m = $m . getResultCodeMetadata($mdID, "", "failure.service");
+    $m = $m . getResultCodeData("data.".genuid(), $mdID, "Internal Service Error; content not created for message.");
+  }  
+  $m = $m . "</nmwg:message>\n";
+  $logger->debug("Result message created.");
+  return $m;
 }
 
 
 sub getResultCodeMessage {
   my ($id, $messageIdRef, $metadataIdRef, $type, $event, $description) = @_;   
   my $logger = get_logger("perfSONAR_PS::Messages");
-  
   if((defined $event and $event ne "") and 
      (defined $description and $description ne "")) {
     my $metadataId = "metadata.".genuid();
@@ -62,6 +63,7 @@ sub getResultCodeMessage {
   }
   else {
     $logger->error("Missing argument(s).");
+    
   }
   return "";
 }

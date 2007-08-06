@@ -18,6 +18,17 @@ use perfSONAR_PS::Messages;
 
 sub getMetadataXQuery {
   my($node, $queryString) = @_;
+  my $query = getSPXQuery($node, "");
+  my $eventTypeQuery = getEventTypeXQuery($node, "");
+  if($eventTypeQuery) {
+    $query = $query . " and " . $eventTypeQuery . "]";
+  }
+  return $query;
+}
+
+
+sub getSPXQuery {
+  my($node, $queryString) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   if(defined $node and $node ne "") {
     my $queryCount = 0;
@@ -25,15 +36,48 @@ sub getMetadataXQuery {
       if(!($node->nodePath() =~ m/select:parameters\/nmwg:parameter/)) {
         (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
         $path =~ s/\[\d+\]//g;
-        $path =~ s/^\///g;  
-        ($queryCount, $queryString) = xQueryAttributes($node, $path, $queryCount, $queryString);
-        if($node->hasChildNodes()) {          
-          ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);
-          foreach my $c ($node->childNodes) {
-            $queryString = getMetadataXQuery($c, $queryString);
+        $path =~ s/^\///g;    
+        if($path ne "nmwg:eventType" and !($path =~ m/parameters$/)) {
+          ($queryCount, $queryString) = xQueryAttributes($node, $path, $queryCount, $queryString);
+          if($node->hasChildNodes()) {          
+            ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);
+            foreach my $c ($node->childNodes) {
+              $queryString = getSPXQuery($c, $queryString);
+            }
+          }
+        }
+        elsif($path =~ m/parameters$/) {
+          if($node->hasChildNodes()) {   
+            ($queryCount, $queryString) = xQueryParameters($node, $path, $queryCount, $queryString);
           }
         }
       }
+    }
+    return $queryString;
+  }
+  else {
+    $logger->error("Missing argument(s).");
+  }
+  return "";
+}
+
+
+sub getEventTypeXQuery {
+  my($node, $queryString) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::General");
+  if(defined $node and $node ne "") {
+    if($node->nodeType != 3) {
+      (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+      $path =~ s/\[\d+\]//g;
+      $path =~ s/^\///g;  
+      if($path eq "nmwg:eventType") {
+        if($node->hasChildNodes()) {          
+          $queryString = xQueryEventType($node, $path, $queryString);
+        }
+      }   
+      foreach my $c ($node->childNodes) {
+        $queryString = getEventTypeXQuery($c, $queryString);
+      }        
     }
     return $queryString;
   }
@@ -54,26 +98,29 @@ sub getDataXQuery {
       $path =~ s/\/nmwg:message\/nmwg:data//;
       $path =~ s/\[\d+\]//g;
       $path =~ s/^\///g;    
-      ($queryCount, $queryString) = xQueryAttributes($node, $path, $queryCount, $queryString);
 
-      if($node->hasChildNodes()) {
-        ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);    
-        foreach my $c ($node->childNodes) {
-          (my $path2 = $c->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-          $path2 =~ s/\/nmwg:message\/nmwg:data//;
-          $path2 =~ s/\[\d\]//g;
-          $path2 =~ s/^\///g; 
-    
-          if(!(($path2 eq "nmwg:key/nmwg:parameters/nmwg:parameter") and
-             (($c->getAttribute("name") eq "startTime") or 
-              ($c->getAttribute("name") eq "endTime") or 
-              ($c->getAttribute("name") eq "time") or 
-              ($c->getAttribute("name") eq "resolution") or 
-              ($c->getAttribute("name") eq "consolidationFunction")))) {
+      if($path =~ m/nmwg:parameters$/ or 
+         $path =~ m/snmp:parameters$/ or 
+         $path =~ m/netutil:parameters$/ or 
+         $path =~ m/neterr:parameters$/ or 
+         $path =~ m/netdisc:parameters$/) {
+        if($node->hasChildNodes()) {   
+          ($queryCount, $queryString) = xQueryParameters($node, $path, $queryCount, $queryString);
+        }
+      }
+      else {      
+        ($queryCount, $queryString) = xQueryAttributes($node, $path, $queryCount, $queryString);
+        if($node->hasChildNodes()) {
+          ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);    
+          foreach my $c ($node->childNodes) {
+            (my $path2 = $c->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+            $path2 =~ s/\/nmwg:message\/nmwg:data//;
+            $path2 =~ s/\[\d+\]//g;
+            $path2 =~ s/^\///g; 
             $queryString = getDataXQuery($c, $queryString);
           }
         }
-      } 
+      }
     }
     return $queryString;  
   }
@@ -84,8 +131,93 @@ sub getDataXQuery {
 }
 
 
+sub xQueryParameters {
+  my($node, $path, $queryCount, $queryString) = @_;
+  my %paramHash = ();
+  if($node->hasChildNodes()) {  
+    my $last = "";
+    foreach my $c ($node->childNodes) {
+      (my $path2 = $c->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+      $path2 =~ s/\/nmwg:message\/nmwg:data//;
+      $path2 =~ s/\[\d+\]//g;
+      $path2 =~ s/^\///g; 
+      
+      if($path2 =~ m/nmwg:parameters\/nmwg:parameter$/ or 
+         $path2 =~ m/snmp:parameters\/nmwg:parameter$/ or 
+         $path2 =~ m/netutil:parameters\/nmwg:parameter$/ or 
+         $path2 =~ m/netdisc:parameters\/nmwg:parameter$/ or
+         $path2 =~ m/neterr:parameters\/nmwg:parameter$/) {
+        foreach my $attr ($c->attributes) {
+          if($attr->isa('XML::LibXML::Attr')) {
+            if($attr->getName eq "name") {
+              $last = "\@name=\"".$attr->getValue."\"";
+            }
+            else {
+              if(($last ne "\@name=\"startTime\"") and 
+                 ($last ne "\@name=\"endTime\"") and 
+                 ($last ne "\@name=\"time\"") and 
+                 ($last ne "\@name=\"resolution\"") and 
+                 ($last ne "\@name=\"consolidationFunction\"")) {
+                if($paramHash{$last}) {
+                  $paramHash{$last} .= " or ".$last."and \@".$attr->getName."=\"".$attr->getValue."\"";
+                  if($attr->getName eq "value") {
+                    $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
+                  }
+                }
+                else {
+                  $paramHash{$last} = $last."and \@".$attr->getName."=\"".$attr->getValue."\"";
+                  if($attr->getName eq "value") {
+                    $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        if(($last ne "\@name=\"startTime\"") and 
+           ($last ne "\@name=\"endTime\"") and 
+           ($last ne "\@name=\"time\"") and 
+           ($last ne "\@name=\"resolution\"") and 
+           ($last ne "\@name=\"consolidationFunction\"")) {      
+          if($c->childNodes->size() >= 1) {
+            if($c->firstChild->nodeType == 3) {        
+              (my $value = $c->firstChild->textContent) =~ s/\s*//g;
+              if($value) {
+                if($paramHash{$last}) {
+                  $paramHash{$last} .= " or ".$last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";               
+                }
+                else {
+                  $paramHash{$last} = $last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";  
+                }            
+              }
+            }
+          }
+        }    
+      }
+    }
+  }  
+
+  foreach my $key (sort keys %paramHash) {
+    if($queryString) {
+      $queryString = $queryString . " and ";
+    }
+    if($path eq "nmwg:parameters") {
+      $queryString = $queryString . "./*[local-name()=\"parameters\"]/nmwg:parameter[";
+    }
+    else {
+      $queryString = $queryString . $path . "/nmwg:parameter[";
+    }
+    $queryString = $queryString . $paramHash{$key} . "]";
+  }
+
+  return ($queryCount, $queryString);
+}
+
+
 sub xQueryAttributes {
   my($node, $path, $queryCount, $queryString) = @_;
+
   foreach my $attr ($node->attributes) {
     if($attr->isa('XML::LibXML::Attr')) {
       if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
@@ -138,10 +270,35 @@ sub xQueryText {
 }
 
 
+sub xQueryEventType {
+  my($node, $path, $queryString) = @_;
+  my @children = $node->childNodes;
+  if($#children == 0) {
+    if($node->firstChild->nodeType == 3) {        
+      (my $value = $node->firstChild->textContent) =~ s/\s*//g;
+      if($value) {
+        if($queryString) {
+          $queryString = $queryString . " or ";
+          $queryString = $queryString . "text()=\"" . $value . "\"";
+        }
+        else {
+          $queryString = $queryString . $path . "[";
+          $queryString = $queryString . "text()=\"" . $value . "\"";
+        }
+        return $queryString;
+      }        
+    }
+  }
+  return $queryString;
+}
+
+
 sub getTime {
   my($ma, $id) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
-      
+  
+  undef $ma->{TIME};
+  
   if((defined $ma and $ma ne "") and
      (defined $id and $id ne "")) {
 
@@ -305,7 +462,9 @@ sub adjustRRDTime {
       $logger->debug("New end time \"".$ma->{TIME}->{"END"}."\".");
     }
   }  
-  $ma->{TIME}->{"START"} = $ma->{TIME}->{"START"} - $ma->{TIME}->{"RESOLUTION"};
+  if($ma->{TIME}->{"START"} and $ma->{TIME}->{"RESOLUTION"}) {
+    $ma->{TIME}->{"START"} = $ma->{TIME}->{"START"} - $ma->{TIME}->{"RESOLUTION"};
+  }
   return;
 }
 
