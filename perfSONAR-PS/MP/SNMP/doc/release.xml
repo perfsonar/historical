@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>perfSONAR-PS 1.0b SNMP MA Release Notes</title>
+
+    <author>
+      <firstname>J.</firstname>
+      <surname>Zurawski</surname>
+      <affiliation>
+        <address><email>zurawski@internet2.edu</email></address>
+      </affiliation>
+    </author>
+
+    <copyright>
+      <year>2006</year>
+      <year>2007</year>
+      <holder>Internet2</holder>
+    </copyright>
+
+  </articleinfo>
+
+  <sect1>
+    <title>Introduction</title>
+    <para>
+      Insert text here...
+    </para>
+  </sect1>
+  
+  <sect1>
+    <title>Licence</title>
+    <para>
+      Insert text here...
+    </para>
+  </sect1>
+  
+  <sect1>
+    <title>Installation</title>
+    <para>
+      Insert text here...
+    </para>
+    
+    <sect2>
+      <title>Pre-Requisites</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Configuration</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Testing</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Troubleshooting</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+  </sect1>
+  
+  <sect1>
+    <title>Supported Message Types</title>
+    <para>
+      Insert text here...
+    </para>
+    
+    <sect2>
+      <title>Echo Request</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+   
+    <sect2>
+      <title>MetadataKeyRequest</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>    
+    
+    <sect2>
+      <title>SetupDataRequest</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>    
+
+    <sect2>
+      <title>...Storage...</title>
+      <para>
+        Insert text here...
+      </para>
+    </sect2>
+  </sect1>  
+
+  <sect1>
+    <title>Additional Info</title>
+    <para>
+      Insert text here...
+    </para>
+  </sect1>
+  
+</article>
