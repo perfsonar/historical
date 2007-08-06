@@ -50,6 +50,33 @@ sub init($) {
 		}
 
 		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{"STATUS_MA_URI"});
+	} elsif ($self->{CONF}->{"STATUS_MA_TYPE"} eq "MySQL") {
+		my $dbi_string = "dbi:mysql";
+
+		if (!defined $self->{CONF}->{"STATUS_MA_NAME"} or $self->{CONF}->{"STATUS_MA_NAME"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_MA_NAME)");
+			return -1;
+		}
+
+		$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_NAME"};
+
+		if (!defined $self->{CONF}->{"STATUS_MA_HOST"} or $self->{CONF}->{"STATUS_MA_HOST"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_MA_HOST)");
+			return -1;
+		}
+
+		$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_HOST"};
+
+		if (defined $self->{CONF}->{"STATUS_MA_PORT"} and $self->{CONF}->{"STATUS_MA_PORT"} ne "") {
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_PORT"};
+		}
+
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_MA_USERNAME"}, $self->{CONF}->{"STATUS_MA_PASSWORD"});
+		if (!defined $self->{CLIENT}) {
+			my $msg = "Couldn't create SQL client";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
 	} else {
 		$logger->error("Invalid status MA type specified");
 		return -1;

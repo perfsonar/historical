@@ -46,6 +46,33 @@ sub init {
 			$logger->error($msg);
 			return (-1, $msg);
 		}
+	} elsif ($self->{CONF}->{"STATUS_DB_TYPE"} eq "MySQL") {
+		my $dbi_string = "dbi:mysql";
+
+		if (!defined $self->{CONF}->{"STATUS_DB_NAME"} or $self->{CONF}->{"STATUS_DB_NAME"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_DB_NAME)");
+			return -1;
+		}
+
+		$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_NAME"};
+
+		if (!defined $self->{CONF}->{"STATUS_DB_HOST"} or $self->{CONF}->{"STATUS_DB_HOST"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_DB_HOST)");
+			return -1;
+		}
+
+		$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_HOST"};
+
+		if (defined $self->{CONF}->{"STATUS_DB_PORT"} and $self->{CONF}->{"STATUS_DB_PORT"} ne "") {
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_PORT"};
+		}
+
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_DB_USERNAME"}, $self->{CONF}->{"STATUS_DB_PASSWORD"});
+		if (!defined $self->{CLIENT}) {
+			my $msg = "Couldn't create SQL client";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;
@@ -348,6 +375,8 @@ sub lookupLinkStatusRequest($$$) {
 	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
 	my $time = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="time"]');
 
+	$logger->debug("Time: \"$time\"");
+
 	if (!defined $time or $time eq "now") {
 		# no time simply grabs the most recent information
 		$time = "";
@@ -380,7 +409,7 @@ sub lookupLinkStatusRequest($$$) {
 	$localContent .= $m->toString()."\n";
 
 	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-	$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }));
+	$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
 	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);

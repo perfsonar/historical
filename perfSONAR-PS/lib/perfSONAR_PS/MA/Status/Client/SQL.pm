@@ -7,12 +7,20 @@ use perfSONAR_PS::MA::Status::Link;
 use Data::Dumper;
 
 sub new {
-	my ($package, $dbi_string, $table) = @_;
+	my ($package, $dbi_string, $db_username, $db_password, $table) = @_;
 
 	my %hash;
 
 	if (defined $dbi_string and $dbi_string ne "") { 
 		$hash{"DBI_STRING"} = $dbi_string;
+	}
+
+	if (defined $db_username and $db_username ne "") { 
+		$hash{"DB_USERNAME"} = $db_username;
+	}
+
+	if (defined $db_password and $db_password ne "") { 
+		$hash{"DB_PASSWORD"} = $db_password;
 	}
 
 	if (defined $table and $table ne "") { 
@@ -37,7 +45,7 @@ sub open($) {
 
 	$logger->debug("Table: ".$self->{DB_TABLE});
 
-	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING}, "", "", \@dbSchema);
+	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING}, $self->{DB_USERNAME}, $self->{DB_PASSWORD}, \@dbSchema);
 	if (!defined $self->{DATADB}) {
 		my $msg = "Couldn't open specified database";
 		$logger->error($msg);
