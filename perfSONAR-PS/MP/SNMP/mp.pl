@@ -26,11 +26,13 @@ if(!$status or $HELP) {
 }
 
 my %ns = (
-  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
   netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+  neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+  netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
+  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
 );
 
 		# Read in configuration information

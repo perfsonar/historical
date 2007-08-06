@@ -2,74 +2,30 @@
 <nmwg:message id="#message1"
               type="MetadataKeyRequest"
               xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-              xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/"
+              xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+
+  <nmwg:parameters>
+    <nmwg:parameter name="timeType">ISO</nmwg:parameter>
+  </nmwg:parameters>
 
   <nmwg:metadata id="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <netutil:subject id="s1" xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/">
-      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-        <nmwgt:direction>in</nmwgt:direction>
-      </nmwgt:interface>
-    </netutil:subject>
-  </nmwg:metadata>
-  
- <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-  
- <nmwg:metadata id="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-   <select:subject id="s3" metadataIdRef="meta1" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" />  
-   <select:parameters id="3" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
-     <nmwg:parameter name="time" operator="gte">N-50</nmwg:parameter>
-     <nmwg:parameter name="time" operator="lte">N</nmwg:parameter>       
-     <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>  
-     <nmwg:parameter name="resolution">1</nmwg:parameter>         
-   </select:parameters>
- </nmwg:metadata> 
-  
- <nmwg:data id="data2" metadataIdRef="meta2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-
-
-  <nmwg:metadata id="meta3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <nmwg:key id="1">
-      <nmwg:parameters id="2">
+    <nmwg:key id="k3">
+      <nmwg:parameters id="p5">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter> 
         <nmwg:parameter name="type">rrd</nmwg:parameter>
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	
         <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
-        <nmwg:parameter name="dataSource">eth1-in</nmwg:parameter>                     
+        <nmwg:parameter name="dataSource">output</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key> 
   </nmwg:metadata>
   
- <nmwg:data id="data3" metadataIdRef="meta3" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
+ <nmwg:data id="data1" metadataIdRef="meta1" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
   
- <nmwg:metadata id="meta4" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-   <select:subject id="s3" metadataIdRef="meta3" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" />  
-   <select:parameters id="3" xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
-     <nmwg:parameter name="time" operator="gte">N-50</nmwg:parameter>
-     <nmwg:parameter name="time" operator="lte">N</nmwg:parameter>       
-     <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>  
-     <nmwg:parameter name="resolution">1</nmwg:parameter>         
-   </select:parameters>
- </nmwg:metadata> 
-  
- <nmwg:data id="data4" metadataIdRef="meta4" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-
-  <nmwg:metadata id="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-    <nmwg:key id="k1">
-      <nmwg:parameters id="p2">
-        <nmwg:parameter name="type">rrd</nmwg:parameter>
-        <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>
-        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
-        <nmwg:parameter name="dataSource">eth1-in</nmwg:parameter>
-        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="time" operator="gte">N-50</nmwg:parameter>
-        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="time" operator="lte">N</nmwg:parameter>       
-        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="consolidationFunction">AVERAGE</nmwg:parameter>  
-        <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="resolution">1</nmwg:parameter>         
-      </nmwg:parameters>
-    </nmwg:key>
-
-  </nmwg:metadata>
-  
- <nmwg:data id="data5" metadataIdRef="meta5" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" />
-
 </nmwg:message> 

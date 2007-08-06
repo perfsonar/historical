@@ -1,0 +1,734 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="message.5937913" 
+              messageIdRef="msg3" type="SetupDataResponse">
+
+  <nmwg:parameters id="msgparam1">
+    <nmwg:parameter name="timeType">unix</nmwg:parameter>
+  </nmwg:parameters>
+  
+  <!-- expected non-ranged response -->
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.8441812" metadataIdRef="meta1">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.7321508" metadataIdRef="metadata.8441812">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  <!-- expected non-ranged response -->  
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.6570791" metadataIdRef="meta2">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.5675563" metadataIdRef="metadata.6570791">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->  
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.3062638" metadataIdRef="meta3">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.13263442" metadataIdRef="metadata.3062638">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.16977767" metadataIdRef="meta3">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.5968349" metadataIdRef="metadata.16977767">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.6783137" metadataIdRef="meta4">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.13418126" metadataIdRef="metadata.6783137">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.5440186" metadataIdRef="meta4">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.13780439" metadataIdRef="metadata.5440186">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.14937927" metadataIdRef="meta5">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.14181821" metadataIdRef="metadata.14937927">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.17373229" metadataIdRef="meta5">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.14985117" metadataIdRef="metadata.17373229">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.5347993" metadataIdRef="meta6">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.12246019" metadataIdRef="metadata.5347993">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.6571685" metadataIdRef="meta6">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.9624697" metadataIdRef="metadata.6571685">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.8709920" metadataIdRef="meta7">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.15138023" metadataIdRef="metadata.8709920">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.3046570" metadataIdRef="meta7">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.10561683" metadataIdRef="metadata.3046570">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- expected non-ranged response -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.2083881" metadataIdRef="meta8">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.1969868" metadataIdRef="metadata.2083881">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="6.5829796981e+07" valueUnits="Bps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Bps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Bps"/>
+  </nmwg:data>
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.16111159" metadataIdRef="meta8">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.4900249" metadataIdRef="metadata.16111159">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- expected non-ranged response(s) -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.10772943" metadataIdRef="meta10">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.8685980" metadataIdRef="metadata.10772943">
+    <nmwg:datum timeType="unix" timeValue="1186342440" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186428780" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186428840" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  <!-- 11 does not get a response -->   
+  
+  
+  
+  
+  
+  
+  <!-- expected ranged response -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.5424196" metadataIdRef="meta12">
+    <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">
+      <nmwgt:interface xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:ifName>eth0</nmwgt:ifName>
+        <nmwgt:ifIndex>6</nmwgt:ifIndex>
+        <nmwgt:direction>in</nmwgt:direction>
+        <nmwgt:capacity>1000000000</nmwgt:capacity>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <snmp:parameters xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/" id="p1">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>      
+      <nmwg:parameter name="version" value="1"/>
+      <nmwg:parameter name="community" value="public"/>
+      <nmwg:parameter name="oid" value="1.3.6.1.2.1.2.2.1.10"/>
+      <nmwg:parameter name="alias" value="ifInOctets"/>
+    </snmp:parameters>
+  </nmwg:metadata>
+  <nmwg:data id="data.1670012" metadataIdRef="metadata.5424196">
+    <nmwg:datum timeType="unix" timeValue="1121472000" value="nan" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1121904000" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1121907600" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  <!-- expected non-ranged response -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.14697221" metadataIdRef="meta13">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  <nmwg:data id="data.4003369" metadataIdRef="metadata.14697221">
+    <nmwg:datum timeType="unix" timeValue="1186344420" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186430760" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186430820" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  <!-- expected error -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.17319148" metadataIdRef="meta14">
+    <nmwg:eventType>error.ma.storage.result</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data id="data.6053180" metadataIdRef="metadata.17319148">
+    <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Keys error in metadata storage.</nmwgr:datum>
+  </nmwg:data>
+  
+  
+  <!-- expected non-ranged response -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.5886304" metadataIdRef="meta15">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk4">   
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>    
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+
+  <nmwg:data id="data.5124243" metadataIdRef="metadata.5886304">
+    <nmwg:datum timeType="unix" timeValue="1186344420" value="0.0000000000e+00" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1186430760" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1186430820" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  <!-- nothing for 16 -->     
+  
+  <!-- expected ranged response -->   
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.6962583" metadataIdRef="meta17">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+            
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="startTime">1121472000</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="endTime">1121904000</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="resolution">60</nmwg:parameter>
+    </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+
+  <nmwg:data id="data.15974781" metadataIdRef="metadata.6962583">
+    <nmwg:datum timeType="unix" timeValue="1121472000" value="nan" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1121904000" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1121907600" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  
+  
+  
+  
+  
+  <!-- expected ranged response -->    
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.1854257" metadataIdRef="meta18">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>        
+        <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+        <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+        <nmwg:parameter name="resolution">60</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+
+  <nmwg:data id="data.15631194" metadataIdRef="metadata.1854257">
+    <nmwg:datum timeType="unix" timeValue="1121472000" value="nan" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1121904000" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1121907600" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+  
+  <!-- nothing for 19 -->    
+  
+  <!-- expected ranged response -->    
+  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.8288639" metadataIdRef="meta20">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+            
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="startTime">1131472000</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="endTime">1131904000</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" name="resolution">160</nmwg:parameter>
+    </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+
+  <nmwg:data id="data.5648626" metadataIdRef="metadata.8288639">
+    <nmwg:datum timeType="unix" timeValue="1131471900" value="nan" valueUnits="Eps"/>
+    <!-- ...lots of stuff... --> 
+    <nmwg:datum timeType="unix" timeValue="1131903900" value="nan" valueUnits="Eps"/>
+    <nmwg:datum timeType="unix" timeValue="1131904200" value="nan" valueUnits="Eps"/>
+  </nmwg:data>
+  
+  
+</nmwg:message>

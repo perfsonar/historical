@@ -1,0 +1,324 @@
+<nmwg:message id="msg3" type="SetupDataRequest"              
+              xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
+              xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/"
+              xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+                   
+  <nmwg:parameters id="msgparam1">
+    <nmwg:parameter name="timeType">unix</nmwg:parameter>
+  </nmwg:parameters>     
+
+  <!-- Non-Key Tests -->
+
+  <!-- standard -->
+
+  <nmwg:metadata id="meta1">
+    <netutil:subject id="subj1">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+  <nmwg:data id="data1" metadataIdRef="meta1"/>
+  
+  <!-- supportedEventType -->
+  
+  <nmwg:metadata id="meta2">
+    <netutil:subject id="subj2">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p2">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+    </nmwg:parameters>    
+  </nmwg:metadata> 
+  <nmwg:data id="data2" metadataIdRef="meta2"/>
+
+  <!-- 2 eventTypes (more results than previous) -->
+  
+  <nmwg:metadata id="meta3">
+    <netutil:subject id="subj3">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+  <nmwg:data id="data3" metadataIdRef="meta3"/>
+
+  <!-- 2 supportedEvenTypes -->
+  
+  <nmwg:metadata id="meta4">
+    <netutil:subject id="subj4">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:parameters id="p4">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>    
+  </nmwg:metadata> 
+  <nmwg:data id="data4" metadataIdRef="meta4"/>
+
+  <!-- both (1) -->
+  
+  <nmwg:metadata id="meta5">
+    <netutil:subject id="subj5">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:parameters id="p5">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data5" metadataIdRef="meta5"/>
+
+  <!-- both (2) -->
+  
+  <nmwg:metadata id="meta6">
+    <netutil:subject id="subj6">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
+    <nmwg:parameters id="p6">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data6" metadataIdRef="meta6"/>
+  
+  <!-- 2 supportedEventTypes (other ns) -->
+  
+  <nmwg:metadata id="meta7">
+    <netutil:subject id="subj7">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <snmp:parameters id="p7">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+    </snmp:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data7" metadataIdRef="meta7"/>  
+
+  <!-- 2 supportedEventTypes (other ns 2) -->
+  
+  <nmwg:metadata id="meta8">
+    <netutil:subject id="subj8">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <select:parameters id="p8">
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>
+      <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+    </select:parameters>
+  </nmwg:metadata> 
+  <nmwg:data id="data8" metadataIdRef="meta8"/> 
+  
+
+  <!-- standard w/ merge chaining -->
+
+  <nmwg:metadata id="meta9">
+    <netutil:subject id="subj9">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+
+  <nmwg:metadata id="meta10" metadataIdRef="meta9">
+    <netutil:subject id="subj10">
+      <nmwgt:interface>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+  </nmwg:metadata> 
+  <nmwg:data id="data10" metadataIdRef="meta10"/>
+
+  <!-- standard w/ subject chaining -->
+
+  <nmwg:metadata id="meta11">
+    <netutil:subject id="subj11">
+      <nmwgt:interface>
+        <nmwgt:ifAddress type="ipv4">192.168.1.4</nmwgt:ifAddress>
+        <nmwgt:hostName>mead</nmwgt:hostName>
+        <nmwgt:direction>in</nmwgt:direction>
+      </nmwgt:interface>
+    </netutil:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+  
+  <nmwg:metadata id="meta12">
+    <select:subject id="iusub12" metadataIdRef="meta11"/> 
+    <select:parameters id="param1">      
+      <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+      <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">60</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>    
+  </nmwg:metadata>  
+  
+  <nmwg:data id="data12" metadataIdRef="meta12"/>
+  
+
+  <!-- Key Tests -->
+
+  <!-- standard -->
+
+  <nmwg:metadata id="meta13">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:metadata> 
+  <nmwg:data id="data13" metadataIdRef="meta13"/>
+
+  <!-- missing stuff (key should fail) -->
+
+  <nmwg:metadata id="meta14">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk4">      
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:metadata> 
+  <nmwg:data id="data14" metadataIdRef="meta14"/>
+  
+  <!-- eventTypes (instead of supportedEventTypes) [have no effect now] -->
+
+  <nmwg:metadata id="meta15">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk4">   
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>    
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>   
+  </nmwg:metadata> 
+  <nmwg:data id="data15" metadataIdRef="meta15"/>  
+
+  <!-- key w/ chaining -->
+
+  <nmwg:metadata id="meta16">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:metadata> 
+
+  <nmwg:metadata id="meta17">
+    <select:subject id="iusub17" metadataIdRef="meta16"/> 
+    <select:parameters id="param1">      
+      <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+      <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">60</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>    
+  </nmwg:metadata>    
+  
+  <nmwg:data id="data17" metadataIdRef="meta17"/>
+  
+  <!-- cooked key  -->
+
+  <nmwg:metadata id="meta18">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>        
+        <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+        <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+        <nmwg:parameter name="resolution">60</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:metadata> 
+  <nmwg:data id="data18" metadataIdRef="meta18"/>
+  
+  <!-- cooked key w/ chaining -->    
+
+  <nmwg:metadata id="meta19">
+    <nmwg:key id="k2">
+      <nmwg:parameters id="pk2">
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>
+        <nmwg:parameter name="supportedEventType">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>       
+        <nmwg:parameter name="type">rrd</nmwg:parameter>
+        <nmwg:parameter name="valueUnits">Eps</nmwg:parameter>	
+        <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
+        <nmwg:parameter name="dataSource">inerror</nmwg:parameter>        
+        <nmwg:parameter name="startTime">1121472000</nmwg:parameter>
+        <nmwg:parameter name="endTime">1121904000</nmwg:parameter>
+        <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+        <nmwg:parameter name="resolution">60</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>  
+  </nmwg:metadata> 
+  
+  <nmwg:metadata id="meta20">
+    <select:subject id="iusub20" metadataIdRef="meta19"/> 
+    <select:parameters id="param1">      
+      <nmwg:parameter name="startTime">1131472000</nmwg:parameter>
+      <nmwg:parameter name="endTime">1131904000</nmwg:parameter>
+      <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>
+      <nmwg:parameter name="resolution">160</nmwg:parameter>
+    </select:parameters>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>    
+  </nmwg:metadata>    
+  
+  <nmwg:data id="data20" metadataIdRef="meta20"/>
+
+</nmwg:message>

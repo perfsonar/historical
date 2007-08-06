@@ -29,9 +29,11 @@ if(!$status or $HELP) {
 my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
   netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+  neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+  netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/"
 );
 
 		# Read in configuration information
@@ -101,13 +103,14 @@ sub measurementArchiveQuery {
 
 sub registerLS {
   $logger->debug("Starting '".threads->tid()."' as the LS registration to \"".$conf{"LS_INSTANCE"}."\".");
-	
-	my $ls = new perfSONAR_PS::LS::Register(\%conf, \%ns);
-	while(1) {
-	  $ls->register;
-	  sleep($conf{"LS_REGISTRATION_INTERVAL"});
+	if($conf{"LS_REGISTER"}) {
+	  my $ls = new perfSONAR_PS::LS::Register(\%conf, \%ns);
+	  while(1) {
+	    $ls->register;
+	    sleep($conf{"LS_REGISTRATION_INTERVAL"});
+	  }
 	}
-  return
+  return;
 }
 
 
