@@ -237,7 +237,7 @@ sub handlePathStatusRequest($) {
 		return ("error.ma", $msg);
 	}
 
-	foreach my $id (%{ $res }) {
+	foreach my $id (keys %{ $res }) {
 		my $link = pop(@{ $res->{$id} });
 
 		$logger->debug("Got information on link $id");
