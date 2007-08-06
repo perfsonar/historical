@@ -1,0 +1,32 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+	xmlns:nmtopo="http://ogf.org/schema/network/topology/base/20070707/" 
+	xmlns:ifevt="http://ggf.org/ns/nmwg/event/status/base/2.0/"
+	id="8451100" type="SetupDataRequestResponse">
+  <nmwg:metadata id="meta0">
+    <nmwg:eventType>Link.Status</nmwg:eventType>
+    <nmwg:subject id="sub0">
+      <nmtopo:link id="link1" />
+    </nmwg:subject>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="meta0">
+    <ifevt:datum timeType="unix" timeValue="1186433844" knowledge="full" startTime="1186433844" startTimeType="unix" endTime="1186433844" endTimeType="unix">
+      <ifevt:stateOper>up</ifevt:stateOper>
+      <ifevt:stateAdmin>normaloperation</ifevt:stateAdmin>
+    </ifevt:datum>
+  </nmwg:data>
+  <nmwg:metadata id="meta1">
+    <nmwg:eventType>Link.Status</nmwg:eventType>
+    <nmwg:subject id="sub1">
+      <nmtopo:link id="link2" />
+    </nmwg:subject>
+    <nmwg:parameters>
+      <nmwg:parameter name="time">1186432302</nmwg:parameter>
+    </nmwg:parameters>
+  </nmwg:metadata>
+  <nmwg:data metadataIdRef="meta1">
+    <ifevt:datum knowledge="partial" timeType="unix" timeValue="1186432302">
+      <ifevt:stateOper>up</ifevt:stateOper>
+      <ifevt:stateAdmin>normaloperation</ifevt:stateAdmin>
+    </ifevt:datum>
+  </nmwg:data>
+</nmwg:message>

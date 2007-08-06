@@ -1,0 +1,14 @@
+<nmwg:message type="SetupDataRequest"
+  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+  xmlns:nmtopo="http://ggf.org/ns/nmwg/topology/base/3.0/">
+
+<nmwg:metadata id="meta0">
+  <nmwg:eventType>Link.History</nmwg:eventType>
+  <nmwg:subject id="sub0">
+    <nmtopo:link id="link1" />
+  </nmwg:subject>
+</nmwg:metadata>
+
+<nmwg:data id="data0" metadataIdRef="meta0" />
+
+</nmwg:message>
