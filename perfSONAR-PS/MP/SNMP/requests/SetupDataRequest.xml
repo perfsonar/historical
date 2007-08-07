@@ -7,7 +7,8 @@
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
               xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
               xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
 
   <nmwg:parameters>
     <nmwg:parameter name="timeType" value="unix" />

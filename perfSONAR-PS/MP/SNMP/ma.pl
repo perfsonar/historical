@@ -33,7 +33,8 @@ my %ns = (
   netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/"
+  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+  nmtm => "http://ggf.org/ns/nmwg/time/2.0/"
 );
 
 		# Read in configuration information

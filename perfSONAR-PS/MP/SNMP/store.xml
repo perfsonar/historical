@@ -4,7 +4,8 @@
              xmlns:neterr="http://ggf.org/ns/nmwg/characteristic/errors/2.0/"
              xmlns:netdisc="http://ggf.org/ns/nmwg/characteristic/discards/2.0/"
              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/"
-             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+             xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+             xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="m1">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="s1">

@@ -7,7 +7,8 @@
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
               xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
               xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/">
+              xmlns:snmp="http://ggf.org/ns/nmwg/tools/snmp/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">
 
   <nmwg:parameters>
     <nmwg:parameter name="timeType">ISO</nmwg:parameter>
@@ -22,6 +23,13 @@
         <nmwg:parameter name="valueUnits">Bps</nmwg:parameter>	
         <nmwg:parameter name="file">/home/jason/LS/perfSONAR-PS/MP/SNMP/mead.rrd</nmwg:parameter>
         <nmwg:parameter name="dataSource">output</nmwg:parameter>
+        
+        <nmwg:parameter name="startTime">
+          <nmtm:end type="unix" xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/">1186493151</nmtm:end>
+        </nmwg:parameter>
+        <nmwg:parameter name="endTime">1186493211</nmwg:parameter>
+        <nmwg:parameter name="resolution">1</nmwg:parameter> 
+        <nmwg:parameter name="consolidationFunction">AVERAGE</nmwg:parameter>   
       </nmwg:parameters>
     </nmwg:key> 
   </nmwg:metadata>
