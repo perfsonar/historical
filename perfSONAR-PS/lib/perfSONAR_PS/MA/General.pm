@@ -6,6 +6,7 @@ use warnings;
 use Carp qw( carp );
 use Exporter;
 use Log::Log4perl qw(get_logger);
+use Time::Local;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -313,26 +314,29 @@ sub getTime {
       $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
     }
 
+    # look for time objects...
+    my $tm = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/time/2.0/"};
+
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")) {
-      $ma->{TIME}->{"START"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")->get_node(1));
+      $ma->{TIME}->{"START"} = findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")->get_node(1), $tm, "start");
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")) {
-      $ma->{TIME}->{"END"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")->get_node(1));
+      $ma->{TIME}->{"END"} = findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")->get_node(1), $tm, "end");
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
-      $ma->{TIME}->{"START"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1));
+      $ma->{TIME}->{"START"} = findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")->get_node(1), $tm, "start");
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
-      $ma->{TIME}->{"END"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1));
+      $ma->{TIME}->{"END"} = findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")->get_node(1), $tm, "end");    
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
-      $ma->{TIME}->{"START"} = eval(extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1))+1);
+      $ma->{TIME}->{"START"} = eval(findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")->get_node(1), $tm, "start")+1);
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
-      $ma->{TIME}->{"END"} = eval(extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1))+1);
+      $ma->{TIME}->{"END"} = eval(findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")->get_node(1), $tm, "end")+1);
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
-      $ma->{TIME}->{"START"} = extract($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1));
+      $ma->{TIME}->{"START"} = findTime($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")->get_node(1), $tm, "");
       $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
     }
     if($m->find(".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]")) {
@@ -344,6 +348,7 @@ sub getTime {
     foreach my $t (keys %{$ma->{TIME}}) {
       $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
     }
+
     if($ma->{TIME}->{"START"} and 
        $ma->{TIME}->{"END"} and 
        $ma->{TIME}->{"START"} > $ma->{TIME}->{"END"}) {
@@ -355,6 +360,64 @@ sub getTime {
     return 0;
   }
   return 1;
+}
+
+
+sub findTime {
+  my($parameter, $timePrefix, $type) = @_;
+  if($timePrefix and $parameter->find("./".$timePrefix.":time")) {
+    my $timeElement = $parameter->find("./".$timePrefix.":time")->get_node(1);
+    if($timeElement->getAttribute("type") =~ m/ISO/i) {
+      return convertISO(extract($timeElement));
+    }
+    else {
+      return extract($timeElement);
+    }
+  }
+  elsif($timePrefix and $type and $parameter->find("./".$timePrefix.":".$type)) {
+    my $timeElement = $parameter->find("./".$timePrefix.":".$type)->get_node(1);
+    if($timeElement->getAttribute("type") =~ m/ISO/i) {
+      return convertISO(extract($timeElement));
+    }
+    else {
+      return extract($timeElement);
+    }    
+  }
+  elsif($parameter->hasChildNodes()) {
+    foreach my $p ($parameter->childNodes) {
+      if($p->nodeType == 3) {
+        (my $value = $p->textContent) =~ s/\s*//g;
+        if($value) {
+          return $value;
+        }
+        else {
+          return "";
+        }
+      }
+    }
+    return "";  
+  }  
+  else {
+    return "";
+  }
+}
+
+
+sub convertISO {
+  my($iso) = @_;
+  my($first, $second) = split(/T/, $iso);
+  my($year, $mon, $day) = split(/-/, $first);
+  my($hour, $min, $sec) = split(/:/, $second);
+  my ($sec, $frac) = split(/\./, $sec);      
+  my $zone = $frac;
+  $frac =~ s/\D+//g;
+  $zone =~ s/\d+//g;          
+  if($zone eq "Z") {
+    return timegm($sec,$min,$hour,$day,$mon-1,$year-1900);
+  }
+  else {
+    return timelocal($sec,$min,$hour,$day,$mon-1,$year-1900);
+  }
 }
 
 
