@@ -3,7 +3,6 @@
 use warnings;
 use strict;
 use Getopt::Long;
-use threads;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 use Log::Log4perl qw(get_logger :levels);
@@ -34,10 +33,6 @@ if(!$status or $HELP) {
 
 my %ns = (
 		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-		netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-		nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-		snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-		select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
 		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
 		nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
 	 );
@@ -69,7 +64,7 @@ if(!$DEBUGFLAG) {
 	&daemonize;
 }
 
-$logger->debug("Starting '".threads->tid()."'");
+$logger->debug("Starting '".$$."'");
 
 my $ma = new perfSONAR_PS::MA::Status(\%conf, \%ns);
 if ($ma->init != 0) {
@@ -104,7 +99,8 @@ sub measurementArchive {
 	while(1) {
 		my $pid = fork();
 		if ($pid == 0) {
-			measurementArchiveQuery($ma);
+			$ma->receive;
+			$ma->respond;
 			exit(0);
 		} elsif ($pid < 0) {
 			$logger->error("Error spawning child");
@@ -112,17 +108,6 @@ sub measurementArchive {
 			waitpid($pid, 0);
 		}
 	}
-
-	return;
-}
-
-sub measurementArchiveQuery {
-	my($ma) = @_; 
-	$logger->debug("Starting '".$$."' as the execution path.");
-
-	$ma->receive;
-	$ma->respond;
-	return;
 }
 
 sub measurementPoint {
@@ -130,15 +115,15 @@ sub measurementPoint {
 
 	my $i = 0;
 	while(1) {
+		my $do_update = 1;
 
-		$logger->debug("Collection Measurements: Iteration $i");
+		$do_update = 0 if ($i == 0);
 
-		$mp->collectMeasurements($i);
+		$mp->collectMeasurements($do_update);
 
 		sleep($conf{"MP_SAMPLE_RATE"});
 		$i++;
 	}
-	return;  
 }
 
 sub daemonize {
@@ -170,24 +155,25 @@ omitted the service will run in daemon mode.
 
 =head1 FUNCTIONS
 
-The following functions are used within this script to execute the 3 major tasks of
-LS registration, MP collection, and MA listening and delivery.
+The following functions are used within this script to execute the 2 major tasks of
+MP collection, and MA listening and delivery.
 
 =head2 measurementPoint
 
-This function, meant to be used in the context of a thread, will continuously poll
-the 'store.xml' list of metadata to gather measurements, storing them in backend
-storage also specified by the 'store.xml' file.  
+This function, meant to be used in the context of a thread or process, will
+continuously collect measurements using the Status MP.
 
 =head2 measurementArchive
 
-This function, meant to be used in the context of a thread, will listen on an external
-port (specified in the conf file) and serve requests for data from outside entities.  The
-data and metadata are stored in various database structures.
+This function, meant to be used in the context of a thread or process, will
+listen on an external port (specified in the conf file) and pass on requests for
+data from outside entities to the MA.
 
-=head2 measurementArchiveQuery
+=head2 registerLS
 
-This performs the semi-automic operations of the MA.  
+This function, meant to be used in the context of a thread or process, will
+register the Status service with the LS specified in the configuration and
+periodically refresh it.
 
 =head2 daemonize
 
@@ -196,13 +182,12 @@ Sends the program to the background by eliminating ties to the calling terminal.
 =head1 REQUIRES
 
 Getopt::Long;
-threads
 Time::HiRes qw( gettimeofday );
 POSIX qw( setsid )
 Log::Log4perl
 perfSONAR_PS::Common
-perfSONAR_PS::Transport
 perfSONAR_PS::MA::Status
+perfSONAR_PS::MP::Status
 
 =head1 AUTHOR
 

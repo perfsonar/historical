@@ -231,6 +231,56 @@ sub register {
   return;
 }
 
+sub register_withData {
+  my ($self, $data_ref) = @_;
+  my $logger = get_logger("perfSONAR_PS::LS::Register");
+
+  (my $host = $self->{"CONF"}->{"LS_INSTANCE"}) =~ s/http:\/\///; 
+  (my $port = $host) =~ s/^.*://;
+  (my $endpoint = $port) =~ s/^\d+\///; 
+  $host =~ s/\/.*//; 
+  $host =~ s/:.*//; 
+  $port =~ s/\/.*//;
+
+  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+  
+  if(!$self->{"ALIVE"}) {
+    $self->{"ALIVE"} = $self->callLS($sender, createEchoRequest());
+  }
+  
+  if($self->{"ALIVE"}) {
+    my $regParam = "";
+    $regParam .= "  <nmwg:parameters id=\"parameters.".genuid()."\">\n";
+    $regParam .= "    <nmwg:parameter name=\"lsTTL\">".$self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"}."</nmwg:parameter>\n";
+    $regParam .= "  </nmwg:parameters>\n";
+
+    my $mdID = "metadata.".genuid();
+    my $regMetadata = $self->createKeyMetadata($mdID, "");
+
+    my $regData = "";
+    foreach $data (@{ $data_ref }) {
+      $regData .= createData("data.".genuid(), $mdID, $data);
+    }
+
+    if(!$self->callLS($sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, ""))) {
+      $regMetadata = createServiceMetadata($self, $mdID, "");
+      if(!$self->callLS($sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
+        $logger->error("Unable to register data with LS.");
+      }
+      else {
+        $logger->debug("LS Registration successful.");
+      }
+    }
+    else {
+      $logger->debug("LS Registration successful.");
+    }
+  }
+  else {
+    $logger->error("Unable to register data with LS.");
+  }
+
+  return;
+}
 
 1;
 
