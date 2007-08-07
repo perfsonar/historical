@@ -83,7 +83,7 @@ sub init {
 			return -1;
 		}
 
-		# fill in sane defaults if the user does not
+# fill in sane defaults if the user does not
 
 		if (!defined $self->{CONF}->{SERVICE_TYPE} or $self->{CONF}->{SERVICE_TYPE}) {
 			$self->{CONF}->{SERVICE_TYPE} = "MA";
@@ -227,117 +227,117 @@ sub parseStoreRequest {
 		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
-									     my $knowledge = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="knowledge"]');
-									     my $time = $d->findvalue('./ifevt:datum/@timeValue');
-									     my $time_type = $d->findvalue('./ifevt:datum/@timeType');
-									     my $adminState = $d->findvalue('./ifevt:datum/ifevt:stateAdmin');
-									     my $operState = $d->findvalue('./ifevt:datum/ifevt:operAdmin');
+				my $knowledge = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="knowledge"]');
+				my $time = $d->findvalue('./ifevt:datum/@timeValue');
+				my $time_type = $d->findvalue('./ifevt:datum/@timeType');
+				my $adminState = $d->findvalue('./ifevt:datum/ifevt:stateAdmin');
+				my $operState = $d->findvalue('./ifevt:datum/ifevt:operAdmin');
 
-									     if (!defined $link_id) {
-									     my $msg = "Metadata ".$m->getAttribute("id")." is missing the link id";
-									     $logger->error($msg);
-									     return ("error.ma.query.incomplete_metadata", $msg);
-									     }
-
-									     if (!defined $knowledge) {
-									     my $msg = "Metadata ".$m->getAttribute("id")." is missing knowledge parameter";
-									     $logger->error($msg);
-									     return ("error.ma.query.incomplete_metadata", $msg);
-									     }
-
-									     if (!defined $time or !defined $time_type or !defined $adminState or !defined $operState) {
-									     my $msg = "Data ".$d->getAttribute("id")." is incomplete";
-									     $logger->error($msg);
-									     return ("error.ma.query.incomplete_data", $msg);
-									     }
-
-									     if ($time_type ne "unix") {
-									     my $msg = "Time type must be unix timestamp";
-									     $logger->error($msg);
-									     return ("error.ma.query.invalid_timestamp_type", $msg);
-									     }
-
-									     my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
-									     if ($status ne "") {
-									     my $mdID = "metadata.".genuid();
-
-									     $localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-									     $localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
-									     } else {
-									     $localContent .= $m->toString;
-									     $localContent .= $d->toString;
-									     }
-									     }
-									     }
-									     }
-
-									     return ("", $localContent);
-									     }
-
-									     sub handleStoreRequest($$$$$) {
-									     my ($self, $link_id, $knowledge, $time, $operState, $adminState) = @_;
-									     my $logger = get_logger("perfSONAR_PS::MA::Status");
-									     my ($status, $res);
-
-									     $logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState)");
-
-									     ($status, $res) = $self->{CLIENT}->open;
-									     if ($status != 0) {
-									     my $msg = "Couldn't open connection to database: $res";
-									     $logger->error($msg);
-									     return ("error.common.storage.open", $msg);
-									     }
-
-									     ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, 0);
-									     if ($status != 0) {
-									     my $msg = "Database update failed: $res";
-									     $logger->error($msg);
-									     return ("error.common.storage.update", $msg);
-									     }
-
-									     return ("", "");
-									     }
-
-				sub parseLookupRequest {
-					my ($self, $request) = @_;
-					my $logger = get_logger("perfSONAR_PS::MA::Status");
-
-					my $localContent = "";
-
-					foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-						foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-							if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-								my $eventType = $m->findvalue("nmwg:eventType");
-
-								my ($status, $res);
-
-								if ($eventType eq "Database.Dump") {
-									($status, $res) = $self->lookupAllRequest($m, $d);
-								} elsif ($eventType eq "Link.History") {
-									($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
-								} elsif ($eventType eq "Link.Status") {
-									($status, $res) = $self->lookupLinkStatusRequest($m, $d);
-								} else {
-									$status = "error.ma.eventtype_not_supported";
-									$res = "Unknown event type: ".$eventType;
-								}
-
-								if ($status ne "") {
-									$logger->error("Couldn't handle requested metadata: $res");
-
-									my $mdID = "metadata.".genuid();
-
-									$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-									$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
-								} else {
-									$localContent .= $res;
-								}
-							}
-						}
-					}
-
-					return ("", $localContent);
+				if (!defined $link_id) {
+					my $msg = "Metadata ".$m->getAttribute("id")." is missing the link id";
+					$logger->error($msg);
+					return ("error.ma.query.incomplete_metadata", $msg);
 				}
+
+				if (!defined $knowledge) {
+					my $msg = "Metadata ".$m->getAttribute("id")." is missing knowledge parameter";
+					$logger->error($msg);
+					return ("error.ma.query.incomplete_metadata", $msg);
+				}
+
+				if (!defined $time or !defined $time_type or !defined $adminState or !defined $operState) {
+					my $msg = "Data ".$d->getAttribute("id")." is incomplete";
+					$logger->error($msg);
+					return ("error.ma.query.incomplete_data", $msg);
+				}
+
+				if ($time_type ne "unix") {
+					my $msg = "Time type must be unix timestamp";
+					$logger->error($msg);
+					return ("error.ma.query.invalid_timestamp_type", $msg);
+				}
+
+				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
+				if ($status ne "") {
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $m->toString;
+					$localContent .= $d->toString;
+				}
+			}
+		}
+	}
+
+	return ("", $localContent);
+}
+
+sub handleStoreRequest($$$$$) {
+	my ($self, $link_id, $knowledge, $time, $operState, $adminState) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($status, $res);
+
+	$logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState)");
+
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.open", $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, 0);
+	if ($status != 0) {
+		my $msg = "Database update failed: $res";
+		$logger->error($msg);
+		return ("error.common.storage.update", $msg);
+	}
+
+	return ("", "");
+}
+
+sub parseLookupRequest {
+	my ($self, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my $localContent = "";
+
+	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
+		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				my $eventType = $m->findvalue("nmwg:eventType");
+
+				my ($status, $res);
+
+				if ($eventType eq "Database.Dump") {
+					($status, $res) = $self->lookupAllRequest($m, $d);
+				} elsif ($eventType eq "Link.History") {
+					($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
+				} elsif ($eventType eq "Link.Status") {
+					($status, $res) = $self->lookupLinkStatusRequest($m, $d);
+				} else {
+					$status = "error.ma.eventtype_not_supported";
+					$res = "Unknown event type: ".$eventType;
+				}
+
+				if ($status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+
+					my $mdID = "metadata.".genuid();
+
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
+				} else {
+					$localContent .= $res;
+				}
+			}
+		}
+	}
+
+	return ("", $localContent);
+}
 
 sub lookupAllRequest($$$) {
 	my($self, $m, $d) = @_;
@@ -394,112 +394,110 @@ sub lookupLinkHistoryRequest($$$) {
 
 	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
 
-						     $logger->debug("got link $link_id");
+	$logger->debug("got link $link_id");
 
-						     if (!defined $link_id or $link_id eq "") {
-						     my $msg = "No link id specified in request";
-						     $logger->error($msg);
-						     return ("error.ma.status.no_link_id", $msg);
-						     }
+	if (!defined $link_id or $link_id eq "") {
+		my $msg = "No link id specified in request";
+		$logger->error($msg);
+		return ("error.ma.status.no_link_id", $msg);
+	}
 
-						     ($status, $res) = $self->{CLIENT}->open;
-						     if ($status != 0) {
-						     my $msg = "Couldn't open connection to database: $res";
-						     $logger->error($msg);
-						     return ("error.common.storage.open", $msg);
-						     }
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.open", $msg);
+	}
 
-						     my @tmp_array = ( $link_id );
+	my @tmp_array = ( $link_id );
 
-						     ($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
-						     if ($status != 0) {
-						     my $msg = "Couldn't get information about link $link_id from database: $res";
-						     $logger->error($msg);
-						     return ("error.common.storage.fetch", $msg);
-						     }
+	($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
+	if ($status != 0) {
+		my $msg = "Couldn't get information about link $link_id from database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.fetch", $msg);
+	}
 
-						     my $mdid = $m->getAttribute("id");
+	my $mdid = $m->getAttribute("id");
 
-						     $localContent .= $m->toString()."\n";
+	$localContent .= $m->toString()."\n";
 
-						     $localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-						     foreach my $link_id (%{ $res }) {
-						     foreach my $link (@{ $res->{$link_id} }) {
-						     $localContent .= $self->writeoutLinkState($link);
-						     }
-						     }
+	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
+	foreach my $link_id (%{ $res }) {
+		foreach my $link (@{ $res->{$link_id} }) {
+			$localContent .= $self->writeoutLinkState($link);
+		}
+	}
 
-						     $localContent .= "</nmwg:data>\n";
+	$localContent .= "</nmwg:data>\n";
 
-						     return ("", $localContent);
-						     }
-
-						     sub lookupLinkStatusRequest($$$) {
-						     my($self, $m, $d) = @_;
-						     my $logger = get_logger("perfSONAR_PS::MA::Status");
-						     my $localContent = "";
-						     my ($status, $res);
-
-						     my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
-						     my $time = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="time"]');
-
-						     $logger->debug("Time: \"$time\"");
-
-						     if (!defined $time or $time eq "now") {
-# no time simply grabs the most recent information
-$time = "";
+	return ("", $localContent);
 }
 
-if (!defined $link_id or $link_id eq "") {
-my $msg = "No link id specified in request";
-$logger->error($msg);
-return ("error.ma.status.no_link_id", $msg);
-}
+sub lookupLinkStatusRequest($$$) {
+	my($self, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $localContent = "";
+	my ($status, $res);
 
-($status, $res) = $self->{CLIENT}->open;
-if ($status != 0) {
-my $msg = "Couldn't open connection to database: $res";
-$logger->error($msg);
-return ("error.common.storage.open", $msg);
-}
+	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
+	my $time = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="time"]');
 
-my @tmp_array = ( $link_id );
+	if (!defined $time or $time eq "now") {
+		# no time simply grabs the most recent information
+		$time = "";
+	}
 
-($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
-if ($status != 0) {
-my $msg = "Couldn't get information about link $link_id from database: $res";
-$logger->error($msg);
-return ("error.common.storage.fetch", $msg);
-}
+	if (!defined $link_id or $link_id eq "") {
+		my $msg = "No link id specified in request";
+		$logger->error($msg);
+		return ("error.ma.status.no_link_id", $msg);
+	}
 
-my $mdid = $m->getAttribute("id");
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my $msg = "Couldn't open connection to database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.open", $msg);
+	}
 
-$localContent .= $m->toString()."\n";
+	my @tmp_array = ( $link_id );
 
-$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
-$localContent .= "</nmwg:data>\n";
+	($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
+	if ($status != 0) {
+		my $msg = "Couldn't get information about link $link_id from database: $res";
+		$logger->error($msg);
+		return ("error.common.storage.fetch", $msg);
+	}
 
-return ("", $localContent);
+	my $mdid = $m->getAttribute("id");
+
+	$localContent .= $m->toString()."\n";
+
+	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
+	$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
+	$localContent .= "</nmwg:data>\n";
+
+	return ("", $localContent);
 }
 
 sub writeoutLinkState($$$) {
-my ($self, $link, $time) = @_;
-my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my ($self, $link, $time) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-my $localContent = "";
+	my $localContent = "";
 
-if (!defined $time or $time eq "") {
-$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
-$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
-} else {
-$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
-}
-$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
-$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
-$localContent .= "</ifevt:datum>\n";
+	if (!defined $time or $time eq "") {
+	$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
+	$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
+	} else {
+	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
+	}
+	$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
+	$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
+	$localContent .= "</ifevt:datum>\n";
 
-return $localContent;
+	return $localContent;
 }
 
 1;
