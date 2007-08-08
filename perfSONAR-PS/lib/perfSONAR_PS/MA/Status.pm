@@ -32,7 +32,7 @@ sub init {
 		return -1;
 	}
 
-	if ($self->{CONF}->{"STATUS_DB_TYPE"} eq "SQLite") {
+	if (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "sqlite") {
 		if (!defined $self->{CONF}->{"STATUS_DB_FILE"} or $self->{CONF}->{"STATUS_DB_FILE"} eq "") {
 			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_DB_FILE)");
 			return -1;
@@ -44,7 +44,7 @@ sub init {
 			$logger->error($msg);
 			return (-1, $msg);
 		}
-	} elsif ($self->{CONF}->{"STATUS_DB_TYPE"} eq "MySQL") {
+	} elsif (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "mysql") {
 		my $dbi_string = "dbi:mysql";
 
 		if (!defined $self->{CONF}->{"STATUS_DB_NAME"} or $self->{CONF}->{"STATUS_DB_NAME"} eq "") {
@@ -484,6 +484,8 @@ sub lookupLinkStatusRequest($$$) {
 sub writeoutLinkState($$$) {
 	my ($self, $link, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	return "" if (!defined $link);
 
 	my $localContent = "";
 
