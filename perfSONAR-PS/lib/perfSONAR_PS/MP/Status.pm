@@ -31,54 +31,95 @@ sub init($) {
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"STATUS_MA_TYPE"} or $self->{CONF}->{"STATUS_MA_TYPE"} eq "") {
-		$logger->error("No status MA type specified");
-		return -1;
-	}
+	if (defined $self->{CONF}->{"STATUS_MA_TYPE"}) {
+		if (lc($self->{CONF}->{"STATUS_MA_TYPE"}) eq "sqlite") {
+			if (!defined $self->{CONF}->{"STATUS_MA_FILE"} or $self->{CONF}->{"STATUS_MA_FILE"} eq "") {
+				$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_MA_FILE)");
+				return -1;
+			}
 
-	if ($self->{CONF}->{"STATUS_MA_TYPE"} eq "SQLite") {
-		if (!defined $self->{CONF}->{"STATUS_MA_FILE"} or $self->{CONF}->{"STATUS_MA_FILE"} eq "") {
-			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_MA_FILE)");
+			$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_MA_FILE"}, $self->{CONF}->{"STATUS_MA_TABLE"});
+		} elsif (lc($self->{CONF}->{"STATUS_MA_TYPE"}) eq "ma") {
+			if (!defined $self->{CONF}->{"STATUS_MA_URI"} or $self->{CONF}->{"STATUS_MA_URI"} eq "") {
+				$logger->error("You specified to use an MA, but did not specify which one(STATUS_MA_URI)");
+				return -1;
+			}
+
+			$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{"STATUS_MA_URI"});
+		} elsif (lc($self->{CONF}->{"STATUS_MA_TYPE"}) eq "mysql") {
+			my $dbi_string = "dbi:mysql";
+
+			if (!defined $self->{CONF}->{"STATUS_MA_NAME"} or $self->{CONF}->{"STATUS_MA_NAME"} eq "") {
+				$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_MA_NAME)");
+				return -1;
+			}
+
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_NAME"};
+
+			if (!defined $self->{CONF}->{"STATUS_MA_HOST"} or $self->{CONF}->{"STATUS_MA_HOST"} eq "") {
+				$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_MA_HOST)");
+				return -1;
+			}
+
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_HOST"};
+
+			if (defined $self->{CONF}->{"STATUS_MA_PORT"} and $self->{CONF}->{"STATUS_MA_PORT"} ne "") {
+				$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_PORT"};
+			}
+
+			$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_MA_USERNAME"}, $self->{CONF}->{"STATUS_MA_PASSWORD"});
+			if (!defined $self->{CLIENT}) {
+				my $msg = "Couldn't create SQL client";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+		}
+	} elsif (defined $self->{CONF}->{"STATUS_DB_TYPE"}) {
+		if (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "sqlite") {
+			if (!defined $self->{CONF}->{"STATUS_DB_FILE"} or $self->{CONF}->{"STATUS_DB_FILE"} eq "") {
+				$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_DB_FILE)");
+				return -1;
+			}
+
+			$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_DB_FILE"}, $self->{CONF}->{"STATUS_DB_TABLE"});
+			if (!defined $self->{CLIENT}) {
+				my $msg = "No database to dump";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+		} elsif (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "mysql") {
+			my $dbi_string = "dbi:mysql";
+
+			if (!defined $self->{CONF}->{"STATUS_DB_NAME"} or $self->{CONF}->{"STATUS_DB_NAME"} eq "") {
+				$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_DB_NAME)");
+				return -1;
+			}
+
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_NAME"};
+
+			if (!defined $self->{CONF}->{"STATUS_DB_HOST"} or $self->{CONF}->{"STATUS_DB_HOST"} eq "") {
+				$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_DB_HOST)");
+				return -1;
+			}
+
+			$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_HOST"};
+
+			if (defined $self->{CONF}->{"STATUS_DB_PORT"} and $self->{CONF}->{"STATUS_DB_PORT"} ne "") {
+				$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_PORT"};
+			}
+
+			$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_DB_USERNAME"}, $self->{CONF}->{"STATUS_DB_PASSWORD"});
+			if (!defined $self->{CLIENT}) {
+				my $msg = "Couldn't create SQL client";
+				$logger->error($msg);
+				return -1;
+			}
+		} else {
+			$logger->error("Invalid database type specified");
 			return -1;
-		}
-
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$self->{CONF}->{"STATUS_MA_FILE"}, $self->{CONF}->{"STATUS_MA_TABLE"});
-	} elsif ($self->{CONF}->{"STATUS_MA_TYPE"} eq "MA") {
-		if (!defined $self->{CONF}->{"STATUS_MA_URI"} or $self->{CONF}->{"STATUS_MA_URI"} eq "") {
-			$logger->error("You specified to use an MA, but did not specify which one(STATUS_MA_URI)");
-			return -1;
-		}
-
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{"STATUS_MA_URI"});
-	} elsif ($self->{CONF}->{"STATUS_MA_TYPE"} eq "MySQL") {
-		my $dbi_string = "dbi:mysql";
-
-		if (!defined $self->{CONF}->{"STATUS_MA_NAME"} or $self->{CONF}->{"STATUS_MA_NAME"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_MA_NAME)");
-			return -1;
-		}
-
-		$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_NAME"};
-
-		if (!defined $self->{CONF}->{"STATUS_MA_HOST"} or $self->{CONF}->{"STATUS_MA_HOST"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_MA_HOST)");
-			return -1;
-		}
-
-		$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_HOST"};
-
-		if (defined $self->{CONF}->{"STATUS_MA_PORT"} and $self->{CONF}->{"STATUS_MA_PORT"} ne "") {
-			$dbi_string .= ":".$self->{CONF}->{"STATUS_MA_PORT"};
-		}
-
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_MA_USERNAME"}, $self->{CONF}->{"STATUS_MA_PASSWORD"});
-		if (!defined $self->{CLIENT}) {
-			my $msg = "Couldn't create SQL client";
-			$logger->error($msg);
-			return (-1, $msg);
 		}
 	} else {
-		$logger->error("Invalid status MA type specified");
+		$logger->error("Need to specify a location to store the status reports");
 		return -1;
 	}
 
@@ -89,8 +130,6 @@ sub parseLinkFile($) {
 	my($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MP::Status");
 	my $links_config;
-
-	$logger->debug("parseLinkFile()");
 
 	if (!defined $self->{CONF}->{"LINK_FILE_TYPE"} or $self->{CONF}->{"LINK_FILE_TYPE"} eq "") {
 		$logger->error("no link file type specified");
@@ -192,6 +231,8 @@ sub parseLinkFile($) {
 	}
 
 	$self->{LINKS} = \%links;
+
+	$logger->info(Dumper(\%links));
 
 	return 0;
 }

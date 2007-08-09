@@ -6,6 +6,21 @@ use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::MA::Status::Link;
 use Data::Dumper;
 
+my %valid_oper_states = (
+	up => '',
+	down => '',
+	degraded => '',
+	unknown => '',
+);
+
+my %valid_admin_states = (
+	normaloperation => '',
+	maintenance => '',
+	troubleshooting => '',
+	underrepair => '',
+	unknown => '',
+);
+
 sub new {
 	my ($package, $dbi_string, $db_username, $db_password, $table) = @_;
 
@@ -233,6 +248,17 @@ sub updateLinkStatus($$$$$$$) {
 	my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
 	my $prev_end_time;
+
+	$oper_value = lc($oper_value);
+	$admin_value = lc($admin_value);
+
+	if (!defined $valid_oper_states{$oper_value}) {
+		return (-1, "Invalid operational state: $oper_value");
+	}
+
+	if (!defined $valid_admin_states{$admin_value}) {
+		return (-1, "Invalid administrative state: $admin_value");
+	}
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 

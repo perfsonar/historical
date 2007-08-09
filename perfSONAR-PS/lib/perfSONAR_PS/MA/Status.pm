@@ -77,13 +77,17 @@ sub init {
 	}
 
 	if (defined $self->{CONF}->{"LS_INSTANCE"} and $self->{CONF}->{"LS_INSTANCE"} ne "") {
-		if (!defined $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} or $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} eq "") {
-			my $msg = "You specified to use an LS_INSTANCE, but did not specify the LS_REGISTRATION_INTERVAL";
+		if (!defined $self->{CONF}->{"SERVICE_ACCESSPOINT"} or $self->{CONF}->{"SERVICE_ACCESSPOINT"} eq "") {
+			my $msg = "You specified to specify a SERVICE_ACCESSPOINT so that people consulting the LS know how to get to this service.";
 			$logger->error($msg);
 			return -1;
 		}
 
-# fill in sane defaults if the user does not
+		# fill in sane defaults if the user does not
+
+		if (!defined $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} or $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} eq "") {
+			$self->{CONF}->{"LS_REGISTRATION_INTERVAL"} = 5; # 5 minutes
+		}
 
 		if (!defined $self->{CONF}->{SERVICE_TYPE} or $self->{CONF}->{SERVICE_TYPE}) {
 			$self->{CONF}->{SERVICE_TYPE} = "MA";

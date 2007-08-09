@@ -86,9 +86,11 @@ sub buildLinkRequest($$$) {
 		$request .= "  <nmwg:subject id=\"sub$i\">\n";
 		$request .= "    <nmtopo:link id=\"$link_id\" />\n";
 		$request .= "  </nmwg:subject>\n";
+		if (defined $time and $time ne "") {
 		$request .= "  <nmwg:parameters>\n";
-		$request .= "    <nmwg:parameter name=\"time\">$time</nmwg:parameter>\n" if defined $time;
+		$request .= "    <nmwg:parameter name=\"time\">$time</nmwg:parameter>\n";
 		$request .= "  </nmwg:parameters>\n";
+		}
 		$request .= "</nmwg:metadata>\n";
 		$request .= "<nmwg:data id=\"data$i\" metadataIdRef=\"meta$i\" />\n";
 
