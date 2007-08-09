@@ -64,14 +64,9 @@ sub buildGetAllRequest() {
 	return ($request, \@metadata_ids);
 }
 
-sub buildLinkRequest($$$) {
-	my ($links, $type, $time) = @_;
+sub buildLinkRequest($$) {
+	my ($links, $time) = @_;
 	my $request = "";
-
-	if ($type ne "Link.History" and $type ne "Link.Status") {
-		my $msg = "Request type must be either Link.History or Link.Recent";
-		return (-1, $msg);
-	}
 
 	$request .= "<nmwg:message type=\"SetupDataRequest\"\n";
 	$request .= "  xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
@@ -82,7 +77,7 @@ sub buildLinkRequest($$$) {
 
 	foreach my $link_id (@{ $links }) {
 		$request .= "<nmwg:metadata id=\"meta$i\">\n";
-		$request .= "  <nmwg:eventType>$type</nmwg:eventType>\n";
+		$request .= "  <nmwg:eventType>Link.Status</nmwg:eventType>\n";
 		$request .= "  <nmwg:subject id=\"sub$i\">\n";
 		$request .= "    <nmtopo:link id=\"$link_id\" />\n";
 		$request .= "  </nmwg:subject>\n";
@@ -118,6 +113,9 @@ sub buildUpdateRequest($$$$$$) {
 	$request .= "  </nmwg:subject>\n";
 	$request .= "  <nmwg:parameters>\n";
 	$request .= "    <nmwg:parameter name=\"knowledge\">$knowledge_level</nmwg:parameter>\n";
+	if ($do_update != 0) {
+	$request .= "    <nmwg:parameter name=\"update\">yes</nmwg:parameter>\n";
+	}
 	$request .= "  </nmwg:parameters>\n";
 	$request .= "</nmwg:metadata>\n";
 	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
@@ -255,7 +253,7 @@ sub getAll($) {
 sub getLinkHistory($$$) {
 	my ($self, $link_ids) = @_;
 
-	my ($request, $metas) = buildLinkRequest($link_ids, "Link.History", "");
+	my ($request, $metas) = buildLinkRequest($link_ids, "all");
 
 	my ($status, $res) = $self->getStatusArchive($metas, $request);
 
@@ -265,7 +263,7 @@ sub getLinkHistory($$$) {
 sub getLinkStatus($$$) {
 	my ($self, $link_ids, $time) = @_;
 
-	my ($request, $metas) = buildLinkRequest($link_ids, "Link.Status", $time);
+	my ($request, $metas) = buildLinkRequest($link_ids, $time);
 
 	my ($status, $res) = $self->getStatusArchive($metas, $request);
 

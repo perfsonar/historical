@@ -232,6 +232,7 @@ sub parseStoreRequest {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
 				my $knowledge = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="knowledge"]');
+				my $do_update = $m->findvalue('./nmwg:parameters/nmwg:parameter[@name="update"]');
 				my $time = $d->findvalue('./ifevt:datum/@timeValue');
 				my $time_type = $d->findvalue('./ifevt:datum/@timeType');
 				my $adminState = $d->findvalue('./ifevt:datum/ifevt:stateAdmin');
@@ -261,7 +262,17 @@ sub parseStoreRequest {
 					return ("error.ma.query.invalid_timestamp_type", $msg);
 				}
 
-				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState);
+				if (defined $do_update) {
+					if (lc($do_update) eq "yes") {
+						$do_update = 1;
+					} elsif (lc($do_update) eq "no") {
+						$do_update = 0;
+					}
+				} else {
+					$do_update = 0;
+				}
+
+				my ($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
 				if ($status ne "") {
 					my $mdID = "metadata.".genuid();
 
@@ -278,12 +289,12 @@ sub parseStoreRequest {
 	return ("", $localContent);
 }
 
-sub handleStoreRequest($$$$$) {
-	my ($self, $link_id, $knowledge, $time, $operState, $adminState) = @_;
+sub handleStoreRequest($$$$$$) {
+	my ($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my ($status, $res);
 
-	$logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState)");
+	$logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update)");
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -292,7 +303,7 @@ sub handleStoreRequest($$$$$) {
 		return ("error.common.storage.open", $msg);
 	}
 
-	($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, 0);
+	($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, $do_update);
 	if ($status != 0) {
 		my $msg = "Database update failed: $res";
 		$logger->error($msg);
@@ -317,8 +328,6 @@ sub parseLookupRequest {
 
 				if ($eventType eq "Database.Dump") {
 					($status, $res) = $self->lookupAllRequest($m, $d);
-				} elsif ($eventType eq "Link.History") {
-					($status, $res) = $self->lookupLinkHistoryRequest($m, $d);
 				} elsif ($eventType eq "Link.Status") {
 					($status, $res) = $self->lookupLinkStatusRequest($m, $d);
 				} else {
@@ -378,62 +387,12 @@ sub lookupAllRequest($$$) {
 		$localContent .= "</nmwg:metadata>\n";
 		$localContent .= "<nmwg:data metadataIdRef=\"meta$i\">\n";
 		foreach my $link (@{ $links{$link_id} }) {
-			$localContent .= $self->writeoutLinkState($link);
+			$localContent .= $self->writeoutLinkState_range($link);
 		}
 		$localContent .= "</nmwg:data>\n";
 
 		$i++;
 	}
-
-	return ("", $localContent);
-}
-
-sub lookupLinkHistoryRequest($$$) {
-	my($self, $m, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-	my ($status, $res);
-	my $localContent = "";
-
-	$logger->debug("lookupLinkHistoryRequest()");
-
-	my $link_id = $m->findvalue('./nmwg:subject/*[local-name()=\'link\']/@id');
-
-	$logger->debug("got link $link_id");
-
-	if (!defined $link_id or $link_id eq "") {
-		my $msg = "No link id specified in request";
-		$logger->error($msg);
-		return ("error.ma.status.no_link_id", $msg);
-	}
-
-	($status, $res) = $self->{CLIENT}->open;
-	if ($status != 0) {
-		my $msg = "Couldn't open connection to database: $res";
-		$logger->error($msg);
-		return ("error.common.storage.open", $msg);
-	}
-
-	my @tmp_array = ( $link_id );
-
-	($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
-	if ($status != 0) {
-		my $msg = "Couldn't get information about link $link_id from database: $res";
-		$logger->error($msg);
-		return ("error.common.storage.fetch", $msg);
-	}
-
-	my $mdid = $m->getAttribute("id");
-
-	$localContent .= $m->toString()."\n";
-
-	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-	foreach my $link_id (%{ $res }) {
-		foreach my $link (@{ $res->{$link_id} }) {
-			$localContent .= $self->writeoutLinkState($link);
-		}
-	}
-
-	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
 }
@@ -467,7 +426,12 @@ sub lookupLinkStatusRequest($$$) {
 
 	my @tmp_array = ( $link_id );
 
-	($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
+	if ($time eq "all") {
+		($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
+	} else {
+		($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
+	}
+
 	if ($status != 0) {
 		my $msg = "Couldn't get information about link $link_id from database: $res";
 		$logger->error($msg);
@@ -479,10 +443,33 @@ sub lookupLinkStatusRequest($$$) {
 	$localContent .= $m->toString()."\n";
 
 	$localContent .= "<nmwg:data metadataIdRef=\"$mdid\">\n";
-	$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
+	if ($time eq "all") {
+		foreach my $link (@{ $res->{$link_id} }) {
+			$localContent .= $self->writeoutLinkState_range($link);
+		}
+	} else {
+		$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
+	}
 	$localContent .= "</nmwg:data>\n";
 
 	return ("", $localContent);
+}
+
+sub writeoutLinkState_range($$$) {
+	my ($self, $link) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	return "" if (!defined $link);
+
+	my $localContent = "";
+
+	$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
+	$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
+	$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
+	$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
+	$localContent .= "</ifevt:datum>\n";
+
+	return $localContent;
 }
 
 sub writeoutLinkState($$$) {
@@ -494,8 +481,7 @@ sub writeoutLinkState($$$) {
 	my $localContent = "";
 
 	if (!defined $time or $time eq "") {
-	$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
-	$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
+	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
 	} else {
 	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
 	}
