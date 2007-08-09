@@ -275,7 +275,7 @@ sub updateLinkStatus($$$$$$$) {
 	my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
 	my $prev_end_time;
 
-	my $request = buildUpdateRequest($link_id, $time, $knowledge_level, $oper_value, $admin_value, $do_update);
+	my ($request, $mdids) = buildUpdateRequest($link_id, $time, $knowledge_level, $oper_value, $admin_value, $do_update);
 
 	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
 	if (!defined $host && !defined $port && !defined $endpoint) {

@@ -236,21 +236,21 @@ sub parseStoreRequest {
 				my $time = $d->findvalue('./ifevt:datum/@timeValue');
 				my $time_type = $d->findvalue('./ifevt:datum/@timeType');
 				my $adminState = $d->findvalue('./ifevt:datum/ifevt:stateAdmin');
-				my $operState = $d->findvalue('./ifevt:datum/ifevt:operAdmin');
+				my $operState = $d->findvalue('./ifevt:datum/ifevt:stateOper');
 
-				if (!defined $link_id) {
+				if (!defined $link_id or $link_id eq "") {
 					my $msg = "Metadata ".$m->getAttribute("id")." is missing the link id";
 					$logger->error($msg);
 					return ("error.ma.query.incomplete_metadata", $msg);
 				}
 
-				if (!defined $knowledge) {
+				if (!defined $knowledge or $knowledge eq "") {
 					my $msg = "Metadata ".$m->getAttribute("id")." is missing knowledge parameter";
 					$logger->error($msg);
 					return ("error.ma.query.incomplete_metadata", $msg);
 				}
 
-				if (!defined $time or !defined $time_type or !defined $adminState or !defined $operState) {
+				if (!defined $time or $time eq "" or !defined $time_type or $time_type eq "" or !defined $adminState or $adminState eq "" or !defined $operState or $operState eq "") {
 					my $msg = "Data ".$d->getAttribute("id")." is incomplete";
 					$logger->error($msg);
 					return ("error.ma.query.incomplete_data", $msg);
@@ -262,11 +262,15 @@ sub parseStoreRequest {
 					return ("error.ma.query.invalid_timestamp_type", $msg);
 				}
 
-				if (defined $do_update) {
+				if (defined $do_update and $do_update ne "") {
 					if (lc($do_update) eq "yes") {
 						$do_update = 1;
 					} elsif (lc($do_update) eq "no") {
 						$do_update = 0;
+					} else {
+						my $msg = "Update must be 'yes' or 'no'";
+						$logger->error($msg);
+						return ("error.ma.query.invalid_update", $msg);
 					}
 				} else {
 					$do_update = 0;
