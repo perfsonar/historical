@@ -6,6 +6,7 @@ use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::XMLDB;
 use Data::Dumper;
+use perfSONAR_PS::MA::Topology::Topology;
 
 sub new {
 	my ($package, $db_container, $db_file, $ns) = @_;
@@ -173,6 +174,361 @@ sub getAll {
 	}
 
 	return (0, $topology);
+}
+
+sub getUniqueIDs($) {
+	my ($self) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $error;
+	my (@domain_ids, @network_ids, @path_ids);
+
+	my ($status, $results) = $self->getAll();
+	if ($status != 0) {
+		return ($status, $results);
+	}
+
+	my @ids = ();
+
+	foreach my $node ($results->getChildrenByLocalName("domain")) {
+		my $id = $node->getAttribute("id");
+		my $uri = $node->namespaceURI();
+		my $prefix = $node->prefix;
+
+		my %info = (
+			type => 'domain',
+			id => $id,
+			prefix => $prefix,
+			uri => $uri,
+		);
+
+		push @ids, \%info;
+	}
+
+	foreach my $node ($results->getChildrenByLocalName("network")) {
+		my $id = $node->getAttribute("id");
+		my $uri = $node->namespaceURI();
+		my $prefix = $node->prefix;
+
+		my %info = (
+			type => 'network',
+			id => $id,
+			prefix => $prefix,
+			uri => $uri,
+		);
+
+		push @ids, \%info;
+	}
+
+	foreach my $node ($results->getChildrenByLocalName("path")) {
+		my $id = $node->getAttribute("id");
+		my $uri = $node->namespaceURI();
+		my $prefix = $node->prefix;
+
+		my %info = (
+			type => 'path',
+			id => $id,
+			prefix => $prefix,
+			uri => $uri,
+		);
+
+		push @ids, \%info;
+	}
+
+	return (0, \@ids);
+}
+
+sub changeTopology($$) {
+	my ($self, $type, $topology) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my ($status, $res);
+
+	my %comparison_attrs = (
+		link => ( id => '' ),
+		node => ( id => '' ),
+		port => ( id => '' ),
+		domain => ( id => '' ),
+	);
+
+	if ($type ne "update" and $type ne "replace" and $type ne "add") {
+		my $msg = "Invalid topology change specified: $type";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my @namespaces = $topology->getNamespaces();
+
+	my %domains = ();
+	my %nodes = ();
+	my %ports = ();
+	my %links = ();
+
+	foreach my $domain ($topology->getChildrenByTagNameNS("*", "domain")) {
+		my $id = $domain->getAttribute("id");
+		my $fqid;
+
+		if (!defined $id or $id eq "") {
+			my $msg = "Domain with no id found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (idIsFQ($id) != 0) {
+			$id = idBaseLevel($id);
+			$fqid = $id;
+		} else {
+			$fqid = idConstruct($id);
+		}
+
+		my $new_domain;
+		my $old_domain = $self->lookupDomain($id, \%domains);
+
+		if ($type eq "update") {
+			if (!defined $old_domain) {
+				my $msg = "Domain $id to update, but not found";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_domain = mergeNodes_general($old_domain, $domain, \%comparison_attrs);
+		} elsif ($type eq "replace") {
+			$new_domain = $domain->cloneNode(1);
+		} elsif ($type eq "add") {
+			if (defined $old_domain) {
+				my $msg = "Domain $id already exists";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+		}
+
+		$domains{$fqid} = $new_domain;
+	}
+
+	foreach my $node ($topology->getChildrenByTagNameNS("*", "node")) {
+		my $id = $node->getAttribute("id");
+		if (!defined $id or $id eq "") {
+			my $msg = "Node with no id found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (idIsFQ($id) == 0) {
+			my $msg = "Node with non-fully qualified id, $id, is specified at top-level";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+
+
+		my $domain_id = idRemoveLevel($id);
+
+		my $domain = $self->lookupDomain($domain_id, \%domains);
+		if (!defined $domain) {
+			my $msg = "Domain $domain_id for node $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $basename = idBaseLevel($id);
+
+		my $new_node;
+		my $old_node = $domain->find("./*[local-name()=\'node\' and \@id='$basename']")->get_node(1);
+
+		if ($type eq "update") {
+			if (!defined $old_node) {
+				my $msg = "Node $id to update, but not found";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_node = mergeNodes_general($old_node, $node, \%comparison_attrs);
+		} elsif ($type eq "replace") {
+			$new_node = $node->cloneNode(1);
+		} elsif ($type eq "add") {
+			if (defined $old_node) {
+				my $msg = "Node $id already exists";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_node = $node->cloneNode(1);
+		}
+
+		if (defined $new_node) {
+			$new_node->setAttribute("id", $basename);
+
+			if (defined $old_node) {
+				$old_node->replaceNode($new_node);
+			} else {
+				domainReplaceChild($domain, $new_node, $id);
+			}
+		}
+
+		$nodes{$id} = $new_node;
+	}
+
+	foreach my $port ($topology->getChildrenByTagNameNS("*", "port")) {
+		my $id = $port->getAttribute("id");
+		if (!defined $id or $id eq "") {
+			my $msg = "Port with no id found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (idIsFQ($id) == 0) {
+			my $msg = "Port with non-fully qualified id, $id, is specified at top-level";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+
+		my $node_id = idRemoveLevel($id);
+		my $domain_id = idRemoveLevel($node_id);
+
+		my $domain = $self->lookupDomain($domain_id, \%domains);
+		if (!defined $domain) {
+			my $msg = "Domain $domain_id for node $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $node = $self->lookupNodes($domain, $node_id, \%nodes);
+
+		if (!defined $node) {
+			my $msg = "Node $node_id for port $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $basename = idBaseLevel($id);
+
+		my $new_port = $port->cloneNode(1);
+		my $old_port = $node->find("./*[local-name()=\'port\' and \@id='$basename']")->get_node(1);
+
+		if ($type eq "update") {
+			if (!defined $old_port) {
+				my $msg = "Node $id to update, but not found";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_port = mergeNodes_general($old_port, $port, \%comparison_attrs);
+		} elsif ($type eq "replace") {
+			$new_port = $port->cloneNode(1);
+		} elsif ($type eq "add") {
+			if (defined $old_port) {
+				my $msg = "Port $id already exists";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_port = $port->cloneNode(1);
+		}
+
+		if (defined $new_port) {
+			$new_port->setAttribute("id", $basename);
+
+			if (defined $old_port) {
+				$old_port->replaceNode($new_port);
+			} else {
+				nodeReplaceChild($node, $new_port, $id);
+			}
+		}
+
+		$ports{$id} = $new_port;
+	}
+
+	foreach my $link ($topology->getChildrenByTagNameNS("*", "link")) {
+		my $id = $link->getAttribute("id");
+		if (!defined $id or $id eq "") {
+			my $msg = "Link with no id found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (idIsFQ($id) == 0) {
+			my $msg = "Link with non-fully qualified id, $id, is specified at top-level";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $port_id = idRemoveLevel($id);
+		my $node_id = idRemoveLevel($id);
+		my $domain_id = idRemoveLevel($node_id);
+
+		my $domain = $self->lookupDomain($domain_id, \%domains);
+		if (!defined $domain) {
+			my $msg = "Domain $domain_id for node $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $node = $self->lookupNode($domain, $node_id, \%nodes);
+		if (!defined $node) {
+			my $msg = "Node $node_id for link $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $port = $self->lookupPort($node, $port_id, \%ports);
+		if (!defined $port) {
+			my $msg = "Port $port_id for link $id not found";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my $basename = idBaseLevel($id);
+
+		my $new_link;
+		my $old_link = $link->find("./*[local-name()=\'link\' and \@id='$basename']")->get_node(1);
+
+		if ($type eq "update") {
+			if (!defined $old_link) {
+				my $msg = "Link $id to update, but not found";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_link = mergeNodes_general($old_link, $link, \%comparison_attrs);
+		} elsif ($type eq "replace") {
+			$new_link = $link->cloneNode(1);
+		} elsif ($type eq "add") {
+			if (defined $old_link) {
+				my $msg = "Link $id already exists";
+				$logger->error($msg);
+				return (-1, $msg);
+			}
+
+			$new_link = $link->cloneNode(1);
+		}
+
+		if (defined $new_link) {
+			$new_link->setAttribute("id", $basename);
+
+			if (defined $old_link) {
+				$old_link->replaceNode($new_link);
+			} else {
+				portReplaceChild($port, $new_link, $id);
+			}
+		}
+
+		$links{$id} = $new_link;
+	}
+
+	# we only pulled in domains if something changed, so update
+	# any domain we have
+	foreach my $fq_domain_id (keys %domains) {
+		my $id = idBaseLevel($fq_domain_id);
+
+		$self->{DATADB}->remove($id);
+
+		if ($self->{DATADB}->insertIntoContainer($domains{$fq_domain_id}->toString, $id) != 0) {
+			my $msg = "Error updating $fq_domain_id";
+			$logger->error($msg);
+			return ("error.topology.ma", $msg);
+		}
+	}
+
+	return (0, "");
 }
 
 1;
