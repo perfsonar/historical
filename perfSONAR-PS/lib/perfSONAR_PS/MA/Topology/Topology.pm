@@ -184,7 +184,7 @@ sub topologyNormalize_links($$$$) {
 		my $id = $link->getAttribute("id");
 		my $fqid;
 
-		$logger->debug("Handling $id");
+		$logger->debug("Handling link $id");
 
 		if (!defined $id) {
 			if (!defined $link->getAttribute("link") and defined $link->getAttribute("linkIdRef")) {
@@ -200,7 +200,12 @@ sub topologyNormalize_links($$$$) {
 		if (idIsFQ($id) == 0) {
 			$logger->debug("$id not qualified: ".$root->localname."");
 
-			next if ($root->localname eq "port");
+			if ($root->localname eq "port") {
+				my $port_id = $root->getAttribute("id");
+				my $fqid = idAddLevel($port_id, $id);
+				$link->setAttribute("id", $fqid);
+				next;
+			}
 
 			my $num_ports = 0;
 
@@ -273,7 +278,8 @@ sub topologyNormalize_links($$$$) {
 			}
 			$logger->debug("Adding $fqid");
 			$topology->{"links"}->{$fqid} = $link;
-			$link->setAttribute("id", idBaseLevel($fqid));
+			$link->setAttribute("id", $fqid);
+			#$link->setAttribute("id", idBaseLevel($fqid));
 		}
 	}
 }
@@ -344,13 +350,15 @@ sub topologyNormalize_ports($$$$) {
 				# remove the port from $root and add it to the node
 				$root->removeChild($port);
 				nodeReplaceChild($node, $port, $fqid);
-				$port->setAttribute("id", idBaseLevel($fqid));
+				$port->setAttribute("id", $fqid);
+				#$port->setAttribute("id", idBaseLevel($fqid));
 			}
 		}
 
 		$logger->debug("Adding $fqid");
 		$topology->{"ports"}->{$fqid} = $port;
-		$port->setAttribute("id", idBaseLevel($fqid));
+		$port->setAttribute("id", $fqid);
+#		$port->setAttribute("id", idBaseLevel($fqid));
 	}
 }
 
@@ -412,7 +420,8 @@ sub topologyNormalize_nodes($$$$) {
 				# remove the node from $root and add it to the domain
 				$root->removeChild($node);
 				domainReplaceChild($domain, $node, $fqid);
-				$node->setAttribute("id", idBaseLevel($fqid));
+				$node->setAttribute("id", $fqid);
+				#$node->setAttribute("id", idBaseLevel($fqid));
 			}
 		}
 
@@ -441,7 +450,7 @@ sub topologyNormalize_domains($$) {
 			$id = idConstruct($id);
 
 			$domain->setAttribute("id", $id);
-		}		
+		}
 
 		$logger->debug("Adding $id");
 

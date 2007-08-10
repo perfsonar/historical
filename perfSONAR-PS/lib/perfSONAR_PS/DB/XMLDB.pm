@@ -167,6 +167,7 @@ sub query {
       $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();
       $results = $self->{MANAGER}->query($self->{TRANSACTION}, $fullQuery, $self->{QUERYCONTEXT});
       while( $results->next($value) ) {
+	$logger->info("Results: $value");
         push @resString, $value."\n";
       }	
       $value = "";
@@ -286,6 +287,44 @@ sub queryByName {
   return $content; 
 }
 
+sub getDocumentByName {
+  my ($self, $name) = @_; 
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
+  my $content = "";
+  if(defined $name and $name ne "") {
+    eval {
+      $logger->debug("Query for name \"".$name."\" received.");
+      $self->{TRANSACTION} = $self->{MANAGER}->createTransaction();
+      my $document = $self->{CONTAINER}->getDocument($self->{TRANSACTION}, $name);
+      $content = $document->getContent;
+      $self->{TRANSACTION}->commit();
+      $logger->debug("Document found.");
+    };
+    if(my $e = catch std::exception) {
+      if($e->getExceptionCode() == 11) {
+        $logger->debug("Document not found.");
+        return -1;
+      }
+      else {
+        $logger->error("Error \"".$e->what()."\".");
+        return -1;      
+      }
+    }
+    elsif($e = catch DbException) {
+      $logger->error("Error \"".$e->what()."\".");    
+      return -1;
+    }        
+    elsif($@) {
+      $logger->error("Error \"".$@."\".");      
+      return -1;
+    }   
+  }
+  else {
+    $logger->error("Missing argument");   
+    return -1;
+  }  
+  return (0, $content); 
+}
 
 sub updateByName {
   my ($self, $content, $name) = @_;

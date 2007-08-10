@@ -7,6 +7,7 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::XMLDB;
 use Data::Dumper;
 use perfSONAR_PS::MA::Topology::Topology;
+use perfSONAR_PS::MA::Topology::ID;
 
 sub new {
 	my ($package, $db_container, $db_file, $ns) = @_;
@@ -391,7 +392,7 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		my $node = $self->lookupNodes($domain, $node_id, \%nodes);
+		my $node = $self->lookupNode($domain, $node_id, \%nodes);
 
 		if (!defined $node) {
 			my $msg = "Node $node_id for port $id not found";
@@ -529,6 +530,53 @@ sub changeTopology($$) {
 	}
 
 	return (0, "");
+}
+
+sub lookupDomain($$$) {
+        my ($self, $id, $domains) = @_;
+
+        if (idIsFQ($id) != 0) {
+                $id = idBaseLevel($id);
+        }
+
+        if (!defined $domains->{$id}) {
+                my ($status, $doc) = $self->{DATADB}->getDocumentByName($id);
+
+                if ($status != 0) {
+                        return undef;
+                }
+
+                my $parser = XML::LibXML->new();
+                my $pdoc = $parser->parse_string($doc);
+                my $domain = $pdoc->getDocumentElement;
+
+                $domains->{$id} = $domain;
+
+                return $domain;
+        } else {
+                # use the cache'd copy
+                return $domains->{$id};
+        }
+}
+
+sub lookupNode($$$) {
+        my ($self, $domain, $id, $nodes) = @_;
+
+        return $nodes->{$id} if (defined $nodes->{$id});
+
+        my $node_basename = idBaseLevel($id);
+
+        return $domain->find("./*[local-name()=\'node\' and \@id='$node_basename']")->get_node(1);
+}
+
+sub lookupPort($$$) {
+        my ($self, $node, $id, $ports) = @_;
+
+        return $ports->{$id} if (defined $ports->{$id});
+
+        my $port_basename = idBaseLevel($id);
+
+        return $node->find("./*[local-name()=\'port\' and \@id='$port_basename']")->get_node(1);
 }
 
 1;
