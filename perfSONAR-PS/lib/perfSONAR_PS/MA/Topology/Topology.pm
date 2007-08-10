@@ -401,7 +401,6 @@ sub topologyNormalize_nodes($$$$) {
 			}
 
 			$fqid = idAddLevel($uri, $id);
-
 		} else {
 			$fqid = $id;
 
@@ -420,11 +419,12 @@ sub topologyNormalize_nodes($$$$) {
 				# remove the node from $root and add it to the domain
 				$root->removeChild($node);
 				domainReplaceChild($domain, $node, $fqid);
-				$node->setAttribute("id", $fqid);
+		#		$node->setAttribute("id", $fqid);
 				#$node->setAttribute("id", idBaseLevel($fqid));
 			}
 		}
 
+		$node->setAttribute("id", $fqid);
 		$logger->debug("Adding $fqid");
 		$topology->{"nodes"}->{$fqid} = $node;
 	}

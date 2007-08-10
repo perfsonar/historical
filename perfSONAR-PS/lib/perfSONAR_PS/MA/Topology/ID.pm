@@ -12,7 +12,7 @@ sub idConstruct {
 
 	return $id if (!defined $domain);
 
-	$id .= "urn:nmtopo:".idEncode($domain);
+	$id .= "urn:ogf:network:".idEncode($domain);
 
 	return $id if (!defined $node);
 
@@ -32,7 +32,7 @@ sub idConstruct {
 sub idIsFQ($) {
 	my ($id) = @_;
 
-	return 1 if ($id =~ /^urn:nmtopo:(.*)$/);
+	return 1 if ($id =~ /^urn:ogf:network:(.*)$/);
 
 	return 0;
 }
@@ -42,7 +42,7 @@ sub idAddLevel($$) {
 
 	$new_level = idEncode($new_level);
 
-	if ($id =~ /urn:nmtopo:$/) {
+	if ($id =~ /urn:ogf:network:$/) {
 		$id .= $new_level;
 	} else {
 		$id .= ":".$new_level;
@@ -54,7 +54,7 @@ sub idAddLevel($$) {
 sub idRemoveLevel($) {
 	my ($id) = @_;
 
-	if ($id =~ /(urn:nmtopo.*):[^:]+$/) {
+	if ($id =~ /(urn:ogf:network.*):[^:]+$/) {
 		return $1;
 	} else {
 		return $id;
@@ -66,7 +66,7 @@ sub idBaseLevel($) {
 
 	my $ret_id;
 
-	if ($id =~ /urn:nmtopo.*:([^:]+)$/) {
+	if ($id =~ /urn:ogf:network.*:([^:]+)$/) {
 		$ret_id = $1;
 	} else {
 		$ret_id = $id;

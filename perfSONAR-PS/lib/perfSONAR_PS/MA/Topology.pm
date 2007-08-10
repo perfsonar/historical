@@ -139,7 +139,11 @@ sub buildLSMetadata($$$$) {
 
 	$md .= "<nmwg:metadata id=\"$md_id\">\n";
 	$md .= "<nmwg:subject id=\"sub0\">\n";
+	if (!defined $prefix or $prefix eq "") {
+	$md .= " <$type xmlns=\"$uri\" id=\"$id\" />\n";
+	} else {
 	$md .= " <$prefix:$type xmlns:$prefix=\"$uri\" id=\"$id\" />\n";
+	}
 	$md .= "</nmwg:subject>\n";
 	$md .= "<nmwg:eventType>topology</nmwg:eventType>\n";
 	$md .= "</nmwg:metadata>\n";
@@ -220,14 +224,6 @@ sub queryTopology {
 
 	my $localContent = "";
 
-	my %ns = (
-			nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-			nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
-		 );
-
-	$self->{DATADB} = new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
-
 	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
 		$logger->debug("Data id: ".$d->getAttribute("id")." ref: ".$d->getAttribute("metadataIdRef"));
 		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
@@ -269,17 +265,13 @@ sub changeTopology {
 			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
 		 );
 
-	$self->{DATADB}= new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
-
-	if ($self->{DATADB}->openDB != 0) {
+	if ($self->{CLIENT}->open != 0) {
 		my ($status, $res);
 		$status = "error.topology.ma";
 		$res = "Couldn't open database";
 		$logger->error($res);
 		return ($status, $res);
 	}
-
-	$transaction = $self->{DATADB}->startTransaction;
 
 	foreach my $data ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
 		foreach my $md ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
@@ -291,14 +283,12 @@ sub changeTopology {
 				if (!defined $topology) {
 					my $msg = "No topology defined in change topology request";
 					$logger->error($msg);
-					$self->{DATADB}->abortTransaction($transaction);
 					return ("error.topology.query.topology_not_found", $msg);
 				}
 
 				($status, $res) = topologyNormalize($topology);
 				if ($status ne "") {
 					$logger->error("Couldn't normalize topology");
-					$self->{DATADB}->abortTransaction($transaction);
 					return ($status, $res);
 				}
 
@@ -314,11 +304,21 @@ sub changeTopology {
 				$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
 				$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
 
-				($status, $res) = $self->changeXMLDB($eventType, $topology);
+				my $changeType;
+
+				if ($eventType eq "topology.change.add") {
+					$changeType = "add";					
+				} elsif ($eventType eq "topology.change.update") {
+					$changeType = "update";					
+				} elsif ($eventType eq "topology.change.replace") {
+					$changeType = "replace";					
+				} else {
+					$logger->error("Invalid change type: \"$eventType\"");
+				}
+
+				($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
 				if ($status ne "") {
-					$logger->error("Error handling topology request: aborting all changes");
-					# this should undo any previous changes.
-					$self->{DATADB}->abortTransaction($transaction);
+					$logger->error("Error handling topology request");
 					return ($status, $res);
 				}
 
@@ -327,390 +327,6 @@ sub changeTopology {
 				$localContent .= "</nmwg:data>\n";
 			}
 		}
-	}
-
-	$self->{DATADB}->commitTransaction($transaction);
-
-	return ("", $localContent);
-}
-
-sub lookupDomain($$$) {
-	my ($self, $id, $domains) = @_;
-
-	if (idIsFQ($id) != 0) {
-		$id = idBaseLevel($id);
-	}
-
-	if (!defined $domains->{$id}) {
-		my ($status, $doc) = $self->{DATADB}->getDocumentByName($id);
-
-		if ($status != 0) {
-			return undef;
-		}
-
-		my $parser = XML::LibXML->new();
-		my $pdoc = $parser->parse_string($doc);
-		my $domain = $pdoc->getDocumentElement;
-
-		$domains->{$id} = $domain;
-
-		return $domain;
-	} else {
-		# use the cache'd copy
-		return $domains->{$id};
-	}
-}
-
-sub lookupNode($$$) {
-	my ($self, $domain, $id, $nodes) = @_;
-
-	return $nodes->{$id} if (defined $nodes->{$id});
-
-	my $node_basename = idBaseLevel($id);
-
-	return $domain->find("./*[local-name()=\'node\' and \@id='$node_basename']")->get_node(1);
-}
-
-sub lookupPort($$$) {
-	my ($self, $node, $id, $ports) = @_;
-
-	return $ports->{$id} if (defined $ports->{$id});
-
-	my $port_basename = idBaseLevel($id);
-
-	return $node->find("./*[local-name()=\'port\' and \@id='$port_basename']")->get_node(1);
-}
-
-sub changeXMLDB($$$) {
-	my ($self, $type, $topology, $transaction) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-
-	my $localContent = "";
-
-	my %comparison_attrs = {
-		'link' => { id => '' },
-		'node' => { id => '' },
-		'port' => { id => '' },
-		'domain' => { id => '' },
-	};
-
-	if ($type eq "topology.change.update" or $type eq "topology.change.replace" or $type eq "topology.change.add" or $type eq "topology.change.remove") {
-		my @namespaces = $topology->getNamespaces();
-
-		my %domains = ();
-		my %nodes = ();
-		my %ports = ();
-		my %links = ();
-		my %domains_to_delete = ();
-
-		foreach my $domain ($topology->getChildrenByTagNameNS("*", "domain")) {
-			my $id = $domain->getAttribute("id");
-			my $fqid;
-
-			if (!defined $id or $id eq "") {
-				my $msg = "Domain with no id found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			if (idIsFQ($id) != 0) {
-				$id = idBaseLevel($id);
-				$fqid = $id;
-			} else {
-				$fqid = idConstruct($id);
-			}
-
-			my $new_domain;
-			my $old_domain = $self->lookupDomain($id, \%domains);
-
-			if ($type eq "topology.change.update") {
-				if (!defined $old_domain) {
-					my $msg = "Domain $id to update, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_domain = mergeNodes_general($old_domain, $domain, \%comparison_attrs);
-			} elsif ($type eq "topology.change.replace") {
-				$new_domain = $domain->cloneNode(1);
-			} elsif ($type eq "topology.change.add") {
-				if (defined $old_domain) {
-					my $msg = "Domain $id already exists";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-			} elsif ($type eq "topology.change.remove") {
-				if (!defined $old_domain) {
-					my $msg = "Domain $id to remove, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$domains_to_delete{$fqid} = "";
-			}
-
-			$domains{$fqid} = $new_domain;
-		}
-
-		foreach my $node ($topology->getChildrenByTagNameNS("*", "node")) {
-			my $id = $node->getAttribute("id");
-			if (!defined $id or $id eq "") {
-				my $msg = "Node with no id found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			if (idIsFQ($id) == 0) {
-				my $msg = "Node with non-fully qualified id, $id, is specified at top-level";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-
-
-			my $domain_id = idRemoveLevel($id);
-
-			my $domain = $self->lookupDomain($domain_id, \%domains);
-			if (!defined $domain) {
-				my $msg = "Domain $domain_id for node $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $basename = idBaseLevel($id);
-
-			my $new_node;
-			my $old_node = $domain->find("./*[local-name()=\'node\' and \@id='$basename']")->get_node(1);
-
-			if ($type eq "topology.change.update") {
-				if (!defined $old_node) {
-					my $msg = "Node $id to update, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_node = mergeNodes_general($old_node, $node, \%comparison_attrs);
-			} elsif ($type eq "topology.change.replace") {
-				$new_node = $node->cloneNode(1);
-			} elsif ($type eq "topology.change.add") {
-				if (defined $old_node) {
-					my $msg = "Node $id already exists";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_node = $node->cloneNode(1);
-			} elsif ($type eq "topology.change.remove") {
-				if (!defined $old_node) {
-					my $msg = "Node $id to remove, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_node = undef;
-
-				$domain->removeChild($old_node);
-			}
-
-			if (defined $new_node) {
-				$new_node->setAttribute("id", $basename);
-
-				if (defined $old_node) {
-					$old_node->replaceNode($new_node);
-				} else {
-					domainReplaceChild($domain, $new_node, $id);
-				}
-			}
-
-			$nodes{$id} = $new_node;
-		}
-
-		foreach my $port ($topology->getChildrenByTagNameNS("*", "port")) {
-			my $id = $port->getAttribute("id");
-			if (!defined $id or $id eq "") {
-				my $msg = "Port with no id found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			if (idIsFQ($id) == 0) {
-				my $msg = "Port with non-fully qualified id, $id, is specified at top-level";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-
-			my $node_id = idRemoveLevel($id);
-			my $domain_id = idRemoveLevel($node_id);
-
-			my $domain = $self->lookupDomain($domain_id, \%domains);
-			if (!defined $domain) {
-				my $msg = "Domain $domain_id for node $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $node = $self->lookupNodes($domain, $node_id, \%nodes);
-
-			if (!defined $node) {
-				my $msg = "Node $node_id for port $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $basename = idBaseLevel($id);
-
-			my $new_port = $port->cloneNode(1);
-			my $old_port = $node->find("./*[local-name()=\'port\' and \@id='$basename']")->get_node(1);
-
-			if ($type eq "topology.change.update") {
-				if (!defined $old_port) {
-					my $msg = "Node $id to update, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_port = mergeNodes_general($old_port, $port, \%comparison_attrs);
-			} elsif ($type eq "topology.change.replace") {
-				$new_port = $port->cloneNode(1);
-			} elsif ($type eq "topology.change.add") {
-				if (defined $old_port) {
-					my $msg = "Port $id already exists";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_port = $port->cloneNode(1);
-			} elsif ($type eq "topology.change.remove") {
-				if (!defined $old_port) {
-					my $msg = "Port $id to remove, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_port = undef;
-
-				$node->removeChild($old_port);
-			}
-
-			if (defined $new_port) {
-				$new_port->setAttribute("id", $basename);
-
-				if (defined $old_port) {
-					$old_port->replaceNode($new_port);
-				} else {
-					nodeReplaceChild($node, $new_port, $id);
-				}
-			}
-
-			$ports{$id} = $new_port;
-		}
-
-		foreach my $link ($topology->getChildrenByTagNameNS("*", "link")) {
-			my $id = $link->getAttribute("id");
-			if (!defined $id or $id eq "") {
-				my $msg = "Link with no id found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			if (idIsFQ($id) == 0) {
-				my $msg = "Link with non-fully qualified id, $id, is specified at top-level";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-
-			my $port_id = idRemoveLevel($id);
-			my $node_id = idRemoveLevel($id);
-			my $domain_id = idRemoveLevel($node_id);
-
-			my $domain = $self->lookupDomain($domain_id, \%domains);
-			if (!defined $domain) {
-				my $msg = "Domain $domain_id for node $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $node = $self->lookupNode($domain, $node_id, \%nodes);
-			if (!defined $node) {
-				my $msg = "Node $node_id for link $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $port = $self->lookupPort($node, $port_id, \%ports);
-			if (!defined $port) {
-				my $msg = "Port $port_id for link $id not found";
-				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
-			}
-
-			my $basename = idBaseLevel($id);
-
-			my $new_link;
-			my $old_link = $link->find("./*[local-name()=\'link\' and \@id='$basename']")->get_node(1);
-
-			if ($type eq "topology.change.update") {
-				if (!defined $old_link) {
-					my $msg = "Link $id to update, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_link = mergeNodes_general($old_link, $link, \%comparison_attrs);
-			} elsif ($type eq "topology.change.replace") {
-				$new_link = $link->cloneNode(1);
-			} elsif ($type eq "topology.change.add") {
-				if (defined $old_link) {
-					my $msg = "Link $id already exists";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_link = $link->cloneNode(1);
-			} elsif ($type eq "topology.change.remove") {
-				if (!defined $old_link) {
-					my $msg = "Link $id to remove, but not found";
-					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
-				}
-
-				$new_link = undef;
-
-				$port->removeChild($old_link);
-			}
-
-			if (defined $new_link) {
-				$new_link->setAttribute("id", $basename);
-
-				if (defined $old_link) {
-					$old_link->replaceNode($new_link);
-				} else {
-					portReplaceChild($port, $new_link, $id);
-				}
-			}
-
-			$links{$id} = $new_link;
-		}
-
-		# we only pulled in domains if something changed, so update
-		# any domain we have
-		foreach my $fq_domain_id (keys %domains) {
-			my $id = idBaseLevel($fq_domain_id);
-
-			$self->{DATADB}->remove($id);
-
-			if ($self->{DATADB}->insertIntoContainer($domains{$fq_domain_id}->toString, $id) != 0) {
-				my $msg = "Error updating $fq_domain_id";
-				$logger->error($msg);
-				return ("error.topology.ma", $msg);
-			}
-		}
-	} else {
-		my $msg = "Invalid change type specified $type";
-		$logger->error($msg);
-		return ("error.topology.change.invalid_change_type", $msg);
 	}
 
 	return ("", $localContent);

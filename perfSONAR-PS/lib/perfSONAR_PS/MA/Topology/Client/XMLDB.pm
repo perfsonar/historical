@@ -183,6 +183,8 @@ sub getUniqueIDs($) {
 	my $error;
 	my (@domain_ids, @network_ids, @path_ids);
 
+	return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
+
 	my ($status, $results) = $self->getAll();
 	if ($status != 0) {
 		return ($status, $results);
@@ -242,6 +244,8 @@ sub changeTopology($$) {
 	my ($self, $type, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
 	my ($status, $res);
+
+	return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
 
 	my %comparison_attrs = (
 		link => ( id => '' ),
@@ -518,12 +522,50 @@ sub changeTopology($$) {
 	# we only pulled in domains if something changed, so update
 	# any domain we have
 	foreach my $fq_domain_id (keys %domains) {
-		my $id = idBaseLevel($fq_domain_id);
+		my $id = "domain_".idBaseLevel($fq_domain_id);
 
 		$self->{DATADB}->remove($id);
 
 		if ($self->{DATADB}->insertIntoContainer($domains{$fq_domain_id}->toString, $id) != 0) {
 			my $msg = "Error updating $fq_domain_id";
+			$logger->error($msg);
+			return ("error.topology.ma", $msg);
+		}
+	}
+
+	foreach my $path ($topology->getChildrenByTagNameNS("*", "path")) {
+		my $id = $path->getAttribute("id");
+		if (!defined $id) {
+			my $msg = "Error, no path id specified in given path";
+			$logger->error($msg);
+			return ("error.topology.invalid_topology", $msg);
+		}
+
+		$id = "path_".$id;
+
+		$self->{DATADB}->remove($id);
+
+		if ($self->{DATADB}->insertIntoContainer($path->toString, $id) != 0) {
+			my $msg = "Error updating $id";
+			$logger->error($msg);
+			return ("error.topology.ma", $msg);
+		}
+	}
+
+	foreach my $network ($topology->getChildrenByTagNameNS("*", "network")) {
+		my $id = $network->getAttribute("id");
+		if (!defined $id) {
+			my $msg = "Error, no network id specified in given network";
+			$logger->error($msg);
+			return ("error.topology.invalid_topology", $msg);
+		}
+
+		$id = "network_".$id;
+
+		$self->{DATADB}->remove($id);
+
+		if ($self->{DATADB}->insertIntoContainer($network->toString, $id) != 0) {
+			my $msg = "Error updating $id";
 			$logger->error($msg);
 			return ("error.topology.ma", $msg);
 		}
@@ -540,7 +582,7 @@ sub lookupDomain($$$) {
         }
 
         if (!defined $domains->{$id}) {
-                my ($status, $doc) = $self->{DATADB}->getDocumentByName($id);
+                my ($status, $doc) = $self->{DATADB}->getDocumentByName("domain_".$id);
 
                 if ($status != 0) {
                         return undef;
