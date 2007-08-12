@@ -269,7 +269,6 @@ sub changeTopology($$) {
 
 	foreach my $domain ($topology->getChildrenByTagNameNS("*", "domain")) {
 		my $id = $domain->getAttribute("id");
-		my $fqid;
 
 		if (!defined $id or $id eq "") {
 			my $msg = "Domain with no id found";
@@ -277,15 +276,21 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		if (idIsFQ($id) != 0) {
-			$id = idBaseLevel($id);
-			$fqid = $id;
-		} else {
-			$fqid = idConstruct($id);
+		if (idIsFQ($id, "domain") == 0) {
+			my $msg = "Domain with non-fully qualified id, $id, is specified";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		my ($status, $res) = validateDomain($domain);
+		if ($status != 0) {
+			my $msg = "Invalid domain, $id, specified: $res";
+			$logger->error($msg);
+			return (-1, $msg);
 		}
 
 		my $new_domain;
-		my $old_domain = $self->lookupDomain($id, \%domains);
+		my $old_domain = $self->lookupElement($id, \%domains, \%nodes, \%ports);
 
 		if ($type eq "update") {
 			if (!defined $old_domain) {
@@ -305,38 +310,35 @@ sub changeTopology($$) {
 			}
 		}
 
-		$domains{$fqid} = $new_domain;
+		$domains{$id} = $new_domain;
 	}
 
 	foreach my $node ($topology->getChildrenByTagNameNS("*", "node")) {
 		my $id = $node->getAttribute("id");
+
 		if (!defined $id or $id eq "") {
 			my $msg = "Node with no id found";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		if (idIsFQ($id) == 0) {
+		if (idIsFQ($id, "node") == 0) {
 			my $msg = "Node with non-fully qualified id, $id, is specified at top-level";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-
-
-		my $domain_id = idRemoveLevel($id);
-
-		my $domain = $self->lookupDomain($domain_id, \%domains);
-		if (!defined $domain) {
-			my $msg = "Domain $domain_id for node $id not found";
+		my ($status, $res) = validateNode($node);
+		if ($status != 0) {
+			my $msg = "Invalid node , $id, specified: $res";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		my $basename = idBaseLevel($id);
+		my $domain = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
+		my $old_node = $self->lookupElement($id, \%domains, \%nodes, \%ports);
 
 		my $new_node;
-		my $old_node = $domain->find("./*[local-name()=\'node\' and \@id='$basename']")->get_node(1);
 
 		if ($type eq "update") {
 			if (!defined $old_node) {
@@ -358,9 +360,7 @@ sub changeTopology($$) {
 			$new_node = $node->cloneNode(1);
 		}
 
-		if (defined $new_node) {
-			$new_node->setAttribute("id", $basename);
-
+		if (defined $node) {
 			if (defined $old_node) {
 				$old_node->replaceNode($new_node);
 			} else {
@@ -373,45 +373,34 @@ sub changeTopology($$) {
 
 	foreach my $port ($topology->getChildrenByTagNameNS("*", "port")) {
 		my $id = $port->getAttribute("id");
+
 		if (!defined $id or $id eq "") {
 			my $msg = "Port with no id found";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		if (idIsFQ($id) == 0) {
+		if (idIsFQ($id, "port") == 0) {
 			my $msg = "Port with non-fully qualified id, $id, is specified at top-level";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-
-		my $node_id = idRemoveLevel($id);
-		my $domain_id = idRemoveLevel($node_id);
-
-		my $domain = $self->lookupDomain($domain_id, \%domains);
-		if (!defined $domain) {
-			my $msg = "Domain $domain_id for node $id not found";
+		my ($status, $res) = validatePort($port);
+		if ($status != 0) {
+			my $msg = "Invalid port , $id, specified: $res";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		my $node = $self->lookupNode($domain, $node_id, \%nodes);
+		my $node = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
+		my $old_port = $self->lookupElement($id, \%domains, \%nodes, \%ports);
 
-		if (!defined $node) {
-			my $msg = "Node $node_id for port $id not found";
-			$logger->error($msg);
-			return (-1, $msg);
-		}
-
-		my $basename = idBaseLevel($id);
-
-		my $new_port = $port->cloneNode(1);
-		my $old_port = $node->find("./*[local-name()=\'port\' and \@id='$basename']")->get_node(1);
+		my $new_port;
 
 		if ($type eq "update") {
 			if (!defined $old_port) {
-				my $msg = "Node $id to update, but not found";
+				my $msg = "Port $id to update, but not found";
 				$logger->error($msg);
 				return (-1, $msg);
 			}
@@ -429,9 +418,7 @@ sub changeTopology($$) {
 			$new_port = $port->cloneNode(1);
 		}
 
-		if (defined $new_port) {
-			$new_port->setAttribute("id", $basename);
-
+		if (defined $node) {
 			if (defined $old_port) {
 				$old_port->replaceNode($new_port);
 			} else {
@@ -450,41 +437,23 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		if (idIsFQ($id) == 0) {
+		if (idIsFQ($id, "link") == 0) {
 			my $msg = "Link with non-fully qualified id, $id, is specified at top-level";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		my $port_id = idRemoveLevel($id);
-		my $node_id = idRemoveLevel($id);
-		my $domain_id = idRemoveLevel($node_id);
-
-		my $domain = $self->lookupDomain($domain_id, \%domains);
-		if (!defined $domain) {
-			my $msg = "Domain $domain_id for node $id not found";
+		my ($status, $res) = validateLink($link);
+		if ($status != 0) {
+			my $msg = "Invalid link , $id, specified: $res";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
 
-		my $node = $self->lookupNode($domain, $node_id, \%nodes);
-		if (!defined $node) {
-			my $msg = "Node $node_id for link $id not found";
-			$logger->error($msg);
-			return (-1, $msg);
-		}
-
-		my $port = $self->lookupPort($node, $port_id, \%ports);
-		if (!defined $port) {
-			my $msg = "Port $port_id for link $id not found";
-			$logger->error($msg);
-			return (-1, $msg);
-		}
-
-		my $basename = idBaseLevel($id);
+		my $port = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
+		my $old_link = $self->lookupElement($id, \%domains, \%nodes, \%ports);
 
 		my $new_link;
-		my $old_link = $link->find("./*[local-name()=\'link\' and \@id='$basename']")->get_node(1);
 
 		if ($type eq "update") {
 			if (!defined $old_link) {
@@ -506,9 +475,7 @@ sub changeTopology($$) {
 			$new_link = $link->cloneNode(1);
 		}
 
-		if (defined $new_link) {
-			$new_link->setAttribute("id", $basename);
-
+		if (defined $port) {
 			if (defined $old_link) {
 				$old_link->replaceNode($new_link);
 			} else {
@@ -521,18 +488,59 @@ sub changeTopology($$) {
 
 	# we only pulled in domains if something changed, so update
 	# any domain we have
-	foreach my $fq_domain_id (keys %domains) {
-		my $id = "domain_".idBaseLevel($fq_domain_id);
+	foreach my $domain_id (keys %domains) {
+		my $id = "domain_".$domain_id;
 
 		$self->{DATADB}->remove($id);
 
-		if ($self->{DATADB}->insertIntoContainer($domains{$fq_domain_id}->toString, $id) != 0) {
-			my $msg = "Error updating $fq_domain_id";
+		if ($self->{DATADB}->insertIntoContainer($domains{$domain_id}->toString, $id) != 0) {
+			my $msg = "Error updating $domain_id";
 			$logger->error($msg);
 			return ("error.topology.ma", $msg);
 		}
 	}
 
+	foreach my $node_id (keys %nodes) {
+		my $id = "node_".$node_id;
+
+		$self->{DATADB}->remove($id);
+
+		if (!defined $nodes{$node_id}->parentNode) {
+			if ($self->{DATADB}->insertIntoContainer($nodes{$node_id}->toString, $id) != 0) {
+				my $msg = "Error updating $node_id";
+				$logger->error($msg);
+				return ("error.topology.ma", $msg);
+			}
+		}
+	}
+
+	foreach my $port_id (keys %ports) {
+		my $id = "port_".$port_id;
+
+		$self->{DATADB}->remove($id);
+
+		if (!defined $ports{$port_id}->parentNode) {
+			if ($self->{DATADB}->insertIntoContainer($ports{$port_id}->toString, $id) != 0) {
+				my $msg = "Error updating $port_id";
+				$logger->error($msg);
+				return ("error.topology.ma", $msg);
+			}
+		}
+	}
+
+	foreach my $link_id (keys %links) {
+		my $id = "link_".$link_id;
+
+		$self->{DATADB}->remove($id);
+
+		if (!defined $links{$link_id}->parentNode) {
+			if ($self->{DATADB}->insertIntoContainer($links{$link_id}->toString, $id) != 0) {
+				my $msg = "Error updating $link_id";
+				$logger->error($msg);
+				return ("error.topology.ma", $msg);
+			}
+		}
+	}
 	foreach my $path ($topology->getChildrenByTagNameNS("*", "path")) {
 		my $id = $path->getAttribute("id");
 		if (!defined $id) {
@@ -574,51 +582,140 @@ sub changeTopology($$) {
 	return (0, "");
 }
 
-sub lookupDomain($$$) {
-        my ($self, $id, $domains) = @_;
+sub lookupElement($$$$$$) {
+        my ($self, $id, $domains, $nodes, $ports, $links) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
 
-        if (idIsFQ($id) != 0) {
-                $id = idBaseLevel($id);
-        }
+	my ($status, $domain_id, $node_id, $port_id, $link_id) = idSplit($id, 1);
+	if ($status != 0) {
+		my $msg = "Invalid id: $id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
 
-        if (!defined $domains->{$id}) {
-                my ($status, $doc) = $self->{DATADB}->getDocumentByName("domain_".$id);
+	if (defined $link_id) {
+		if (defined $links->{$link_id}) {
+			return $links->{$link_id};
+		} else {
+			my ($status, $res) = $self->lookupElement($port_id);
+			my $parent = $res;
+			my $link;
+			if (!defined $parent) {
+				($status, my $doc) = $self->{DATADB}->getDocumentByName("link_".$link_id);
 
-                if ($status != 0) {
-                        return undef;
-                }
+				if ($status != 0) {
+					my $msg = "Link $link_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
 
-                my $parser = XML::LibXML->new();
-                my $pdoc = $parser->parse_string($doc);
-                my $domain = $pdoc->getDocumentElement;
+				my $parser = XML::LibXML->new();
+				my $pdoc = $parser->parse_string($doc);
+				$link = $pdoc->getDocumentElement;
+			} else {
+				foreach my $curr_link ($parent->getChildrenByTagNameNS("*", "link")) {
+					if ($curr_link->getAttribute("id") eq $link_id) {
+						$link = $curr_link;
+						last;
+					}
+				}
+			}
 
-                $domains->{$id} = $domain;
+			$links->{$link_id} = $link;
 
-                return $domain;
-        } else {
-                # use the cache'd copy
-                return $domains->{$id};
-        }
-}
+			return (0, $link);
+		}
+	}
 
-sub lookupNode($$$) {
-        my ($self, $domain, $id, $nodes) = @_;
+	if (defined $port_id) {
+		if (defined $ports->{$port_id}) {
+			return $ports->{$port_id};
+		} else {
+			my ($status, $res) = $self->lookupElement($node_id);
+			my $parent = $res;
+			my $port;
+			if (!defined $parent) {
+				($status, my $doc) = $self->{DATADB}->getDocumentByName("port_".$port_id);
 
-        return $nodes->{$id} if (defined $nodes->{$id});
+				if ($status != 0) {
+					my $msg = "Port $port_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
 
-        my $node_basename = idBaseLevel($id);
+				my $parser = XML::LibXML->new();
+				my $pdoc = $parser->parse_string($doc);
+				$port = $pdoc->getDocumentElement;
+			} else {
+				foreach my $curr_port ($parent->getChildrenByTagNameNS("*", "port")) {
+					if ($curr_port->getAttribute("id") eq $port_id) {
+						$port = $curr_port;
+						last;
+					}
+				}
+			}
 
-        return $domain->find("./*[local-name()=\'node\' and \@id='$node_basename']")->get_node(1);
-}
+			$ports->{$port_id} = $port;
 
-sub lookupPort($$$) {
-        my ($self, $node, $id, $ports) = @_;
+			return (0, $port);
+		}
+	}
 
-        return $ports->{$id} if (defined $ports->{$id});
+	if (defined $node_id) {
+		if (defined $nodes->{$node_id}) {
+			return $nodes->{$node_id};
+		} else {
+			my ($status, $res) = $self->lookupElement($domain_id);
+			my $parent = $res;
+			my $node;
+			if (!defined $parent) {
+				($status, my $doc) = $self->{DATADB}->getDocumentByName("node_".$node_id);
 
-        my $port_basename = idBaseLevel($id);
+				if ($status != 0) {
+					my $msg = "Node $node_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
 
-        return $node->find("./*[local-name()=\'port\' and \@id='$port_basename']")->get_node(1);
+				my $parser = XML::LibXML->new();
+				my $pdoc = $parser->parse_string($doc);
+				$node = $pdoc->getDocumentElement;
+			} else {
+				foreach my $curr_node ($parent->getChildrenByTagNameNS("*", "node")) {
+					if ($curr_node->getAttribute("id") eq $node_id) {
+						$node = $curr_node;
+						last;
+					}
+				}
+			}
+
+			$nodes->{$node_id} = $node;
+
+			return (0, $node);
+		}
+	}
+
+	if (defined $domain_id) {
+		if (defined $domains->{$domain_id}) {
+			return $domains->{$domain_id};
+		} else {
+			my ($status, $doc) = $self->{DATADB}->getDocumentByName("domain_".$domain_id);
+
+			if ($status != 0) {
+				my $msg = "Domain $domain_id not found";
+				$logger->error($msg);
+				return (-1, $msg);
+			} 
+
+			my $parser = XML::LibXML->new();
+			my $pdoc = $parser->parse_string($doc);
+			my $domain = $pdoc->getDocumentElement;
+
+			$domains->{$domain_id} = $domain;
+
+			return (0, $domain);
+		}
+	}
 }
 
 1;

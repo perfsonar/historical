@@ -5,7 +5,7 @@ use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 
 @ISA  = ('Exporter');
-@EXPORT = ('topologyNormalize');
+@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink');
 
 sub mergeNodes_general($$$);
 sub domainReplaceChild($$$);
@@ -143,7 +143,7 @@ sub topologyNormalize_links($$$$) {
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
 		my ($status, $res) = topologyNormalize_links($domain, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -152,8 +152,13 @@ sub topologyNormalize_links($$$$) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "node");
+		if ($n == 0) {
 			$fqid = idAddLevel($uri, $id);
+		} elsif ($n == -1) {
+			my $msg = "Node $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			$fqid = $id;
 		}
@@ -168,8 +173,13 @@ sub topologyNormalize_links($$$$) {
 		my $id = $port->getAttribute("id");
 		my $fqid;
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "port");
+		if ($n == 0) {
 			$fqid = idAddLevel($uri, $id);
+		} elsif ($n == -1) {
+			my $msg = "Port $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			$fqid = $id;
 		}
@@ -197,7 +207,12 @@ sub topologyNormalize_links($$$$) {
 			}
 		}
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "link");
+		if ($n == -1) {
+			my $msg = "Link $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
+		} elsif ($n == 0) {
 			$logger->debug("$id not qualified: ".$root->localname."");
 
 			if ($root->localname eq "port") {
@@ -279,7 +294,6 @@ sub topologyNormalize_links($$$$) {
 			$logger->debug("Adding $fqid");
 			$topology->{"links"}->{$fqid} = $link;
 			$link->setAttribute("id", $fqid);
-			#$link->setAttribute("id", idBaseLevel($fqid));
 		}
 	}
 }
@@ -302,8 +316,13 @@ sub topologyNormalize_ports($$$$) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "node");
+		if ($n == 0) {
 			$fqid = idAddLevel($uri, $id);
+		} elsif ($n == -1) {
+			my $msg = "Node $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			$fqid = $id;
 		}
@@ -328,7 +347,8 @@ sub topologyNormalize_ports($$$$) {
 			}
 		}
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "port");
+		if ($n == 0) {
 			if ($uri eq "") {
 				my $msg = "Port $id has no parent and is not fully qualified";
 				$logger->error($msg);
@@ -336,6 +356,10 @@ sub topologyNormalize_ports($$$$) {
 			}
 
 			$fqid = idAddLevel($uri, $id);
+		} elsif ($n == -1) {
+			my $msg = "Port $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			$fqid = $id;
 
@@ -350,15 +374,12 @@ sub topologyNormalize_ports($$$$) {
 				# remove the port from $root and add it to the node
 				$root->removeChild($port);
 				nodeReplaceChild($node, $port, $fqid);
-				$port->setAttribute("id", $fqid);
-				#$port->setAttribute("id", idBaseLevel($fqid));
 			}
 		}
 
 		$logger->debug("Adding $fqid");
 		$topology->{"ports"}->{$fqid} = $port;
 		$port->setAttribute("id", $fqid);
-#		$port->setAttribute("id", idBaseLevel($fqid));
 	}
 }
 
@@ -393,7 +414,8 @@ sub topologyNormalize_nodes($$$$) {
 
 		$logger->debug("Found node: $id");
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "node");
+		if ($n == 0) {
 			if ($uri eq "") {
 				my $msg = "Node $id has no parent and is not fully qualified";
 				$logger->error($msg);
@@ -401,6 +423,10 @@ sub topologyNormalize_nodes($$$$) {
 			}
 
 			$fqid = idAddLevel($uri, $id);
+		} elsif ($n == -1) {
+			my $msg = "Node $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			$fqid = $id;
 
@@ -419,8 +445,6 @@ sub topologyNormalize_nodes($$$$) {
 				# remove the node from $root and add it to the domain
 				$root->removeChild($node);
 				domainReplaceChild($domain, $node, $fqid);
-		#		$node->setAttribute("id", $fqid);
-				#$node->setAttribute("id", idBaseLevel($fqid));
 			}
 		}
 
@@ -446,7 +470,12 @@ sub topologyNormalize_domains($$) {
 			return ("error.topology.invalid_topology", $msg);
 		}
 
-		if (idIsFQ($id) == 0) {
+		my $n = idIsFQ($id, "domain");
+		if ($n == -1) {
+			my $msg = "Domain $id has an invalid fully-qualified id";
+			$logger->error($msg);
+			return (-1, $msg);
+		} elsif ($n == 0) {
 			$id = idConstruct($id);
 
 			$domain->setAttribute("id", $id);
@@ -491,6 +520,229 @@ sub topologyNormalize($) {
 	if ($status ne "") {
 		return ($status, $res);
 	}
+}
+
+sub validateDomain($) {
+	my ($domain) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	$logger->info("Validating domain");
+
+	my $id = $domain->getAttribute("id");
+	if (!defined $id or $id eq "") {
+		my $msg = "Domain has no id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (idIsFQ($id, "domain") != 1) {
+		my $msg = "Domain has non-properly qualified id: $id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $node ($domain->getChildrenByTagNameNS("*", "node")) {
+		my ($status, $res) = validateNode($node);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $other_domain($domain->getChildrenByTagNameNS("*", "domain")) {
+		my $msg = "Found domain with domain in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $link ($domain->getChildrenByTagNameNS("*", "link")) {
+		my $msg = "Found domain with link in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $path ($domain->getChildrenByTagNameNS("*", "path")) {
+		my $msg = "Found domain with path in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $network ($domain->getChildrenByTagNameNS("*", "network")) {
+		my $msg = "Found domain with network in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	return (0, "");
+}
+
+sub validateNode($) {
+	my ($node) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	$logger->info("Validating node");
+
+	my $id = $node->getAttribute("id");
+	if (!defined $id or $id eq "") {
+		my $msg = "Node has no id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (idIsFQ($id, "node") != 1) {
+		my $msg = "Node has non-properly qualified id: $id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $port ($node->getChildrenByTagNameNS("*", "port")) {
+		my ($status, $res) = validatePort($port);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $other_node ($node->getChildrenByTagNameNS("*", "node")) {
+		my $msg = "Found node with node in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $link ($node->getChildrenByTagNameNS("*", "link")) {
+		my $msg = "Found node with link in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $path ($node->getChildrenByTagNameNS("*", "path")) {
+		my $msg = "Found node with path in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $network ($node->getChildrenByTagNameNS("*", "network")) {
+		my $msg = "Found node with network in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $domain ($node->getChildrenByTagNameNS("*", "domain")) {
+		my $msg = "Found node with domain in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	return (0, "");
+}
+
+sub validatePort($) {
+	my ($port) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	$logger->info("Validating port");
+
+	my $id = $port->getAttribute("id");
+	if (!defined $id or $id eq "") {
+		my $msg = "Port has no id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (idIsFQ($id, "port") != 1) {
+		my $msg = "Port has non-properly qualified id: $id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $link ($port->getChildrenByTagNameNS("*", "link")) {
+		my ($status, $res) = validateLink($link);
+		if ($status != 0) {
+			return ($status, $res);
+		}
+	}
+
+	foreach my $other_port ($port->getChildrenByTagNameNS("*", "port")) {
+		my $msg = "Found port with port in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $node ($port->getChildrenByTagNameNS("*", "node")) {
+		my $msg = "Found port with node in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $path ($port->getChildrenByTagNameNS("*", "path")) {
+		my $msg = "Found port with path in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $network ($port->getChildrenByTagNameNS("*", "network")) {
+		my $msg = "Found port with network in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $domain ($port->getChildrenByTagNameNS("*", "domain")) {
+		my $msg = "Found port with domain in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	return (0, "");
+}
+
+sub validateLink($) {
+	my ($link) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	$logger->info("Validating link");
+
+	my $id = $link->getAttribute("id");
+	if (!defined $id or $id eq "") {
+		my $msg = "Link has no id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (idIsFQ($id, "link") != 1) {
+		my $msg = "Link has non-properly qualified id: $id";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $other_link ($link->getChildrenByTagNameNS("*", "link")) {
+		my $msg = "Found link with link in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $node ($link->getChildrenByTagNameNS("*", "node")) {
+		my $msg = "Found link with node in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $path ($link->getChildrenByTagNameNS("*", "path")) {
+		my $msg = "Found link with path in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $network ($link->getChildrenByTagNameNS("*", "network")) {
+		my $msg = "Found link with network in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $domain ($link->getChildrenByTagNameNS("*", "domain")) {
+		my $msg = "Found link with domain in it";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	return (0, "");
 }
 
 1;
