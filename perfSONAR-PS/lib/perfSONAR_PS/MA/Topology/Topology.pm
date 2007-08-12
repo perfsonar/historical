@@ -5,7 +5,7 @@ use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 
 @ISA  = ('Exporter');
-@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink');
+@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild');
 
 sub mergeNodes_general($$$);
 sub domainReplaceChild($$$);

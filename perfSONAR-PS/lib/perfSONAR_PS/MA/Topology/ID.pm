@@ -144,10 +144,10 @@ sub idSplit($$) {
 	my $link_id = idDecode($fields[6]) if defined $fields[6];
 
 	if ($fq) {
-		$domain_id = idConstruct($domain_id);
-		$node_id = idConstruct($domain_id, $node_id) if defined $node_id;
-		$port_id = idConstruct($domain_id, $node_id, $port_id) if defined $port_id;
 		$link_id = idConstruct($domain_id, $node_id, $port_id, $link_id) if defined $link_id;
+		$port_id = idConstruct($domain_id, $node_id, $port_id) if defined $port_id;
+		$node_id = idConstruct($domain_id, $node_id) if defined $node_id;
+		$domain_id = idConstruct($domain_id);
 	}
 
 	return (0, $domain_id, $node_id, $port_id, $link_id);

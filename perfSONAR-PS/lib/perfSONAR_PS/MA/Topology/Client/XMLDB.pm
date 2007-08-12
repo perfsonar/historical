@@ -141,6 +141,33 @@ sub getAll {
 
 	$content .= join("", @results);
 
+	@results = $self->{DATADB}->query("/*:node", \$error);
+	if ($error ne "") {
+		my $msg = "Couldn't get list of nodes from database: $error";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$content .= join("", @results);
+
+	@results = $self->{DATADB}->query("/*:port", \$error);
+	if ($error ne "") {
+		my $msg = "Couldn't get list of ports from database: $error";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$content .= join("", @results);
+
+	@results = $self->{DATADB}->query("/*:link", \$error);
+	if ($error ne "") {
+		my $msg = "Couldn't get list of links from database: $error";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	$content .= join("", @results);
+
 	@results = $self->{DATADB}->query("/*:network", \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of networks from database: $error";
@@ -290,7 +317,10 @@ sub changeTopology($$) {
 		}
 
 		my $new_domain;
-		my $old_domain = $self->lookupElement($id, \%domains, \%nodes, \%ports);
+		my $old_domain;
+
+		($status, $res) = $self->lookupElement($id, \%domains, \%nodes, \%ports, \%links);
+		$old_domain = $res if ($status == 0);
 
 		if ($type eq "update") {
 			if (!defined $old_domain) {
@@ -335,10 +365,15 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		my $domain = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
-		my $old_node = $self->lookupElement($id, \%domains, \%nodes, \%ports);
-
+		my $domain;
 		my $new_node;
+		my $old_node;
+
+		($status, $res) = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports, \%links);
+		$domain = $res if ($status == 0);
+
+		($status, $res) = $self->lookupElement($id, \%domains, \%nodes, \%ports, \%links);
+		$old_node = $res if ($status == 0);
 
 		if ($type eq "update") {
 			if (!defined $old_node) {
@@ -360,7 +395,7 @@ sub changeTopology($$) {
 			$new_node = $node->cloneNode(1);
 		}
 
-		if (defined $node) {
+		if (defined $domain) {
 			if (defined $old_node) {
 				$old_node->replaceNode($new_node);
 			} else {
@@ -393,10 +428,16 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		my $node = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
-		my $old_port = $self->lookupElement($id, \%domains, \%nodes, \%ports);
-
+		my $node;
+		my $old_port;
 		my $new_port;
+
+		($status, $res) = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports, \%links);
+		$node = $res if ($status == 0);
+
+		($status, $res) = $self->lookupElement($id, \%domains, \%nodes, \%ports, \%links);
+		$old_port = $res if ($status == 0);
+
 
 		if ($type eq "update") {
 			if (!defined $old_port) {
@@ -450,10 +491,15 @@ sub changeTopology($$) {
 			return (-1, $msg);
 		}
 
-		my $port = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports);
-		my $old_link = $self->lookupElement($id, \%domains, \%nodes, \%ports);
-
+		my $port;
+		my $old_link;
 		my $new_link;
+
+		($status, $res) = $self->lookupElement(idRemoveLevel($id), \%domains, \%nodes, \%ports, \%links);
+		$port = $res if ($status == 0);
+
+		($status, $res) = $self->lookupElement($id, \%domains, \%nodes, \%ports, \%links);
+		$old_link = $res if ($status == 0);
 
 		if ($type eq "update") {
 			if (!defined $old_link) {
@@ -505,7 +551,9 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
-		if (!defined $nodes{$node_id}->parentNode) {
+		# if the element is top-level, it's parent is a document of
+		# some type, but it's parent doesn't have a parent.
+		if (!defined $nodes{$node_id}->parentNode->parentNode) {
 			if ($self->{DATADB}->insertIntoContainer($nodes{$node_id}->toString, $id) != 0) {
 				my $msg = "Error updating $node_id";
 				$logger->error($msg);
@@ -519,7 +567,7 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
-		if (!defined $ports{$port_id}->parentNode) {
+		if (!defined $ports{$port_id}->parentNode->parentNode) {
 			if ($self->{DATADB}->insertIntoContainer($ports{$port_id}->toString, $id) != 0) {
 				my $msg = "Error updating $port_id";
 				$logger->error($msg);
@@ -533,7 +581,7 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
-		if (!defined $links{$link_id}->parentNode) {
+		if (!defined $links{$link_id}->parentNode->parentNode) {
 			if ($self->{DATADB}->insertIntoContainer($links{$link_id}->toString, $id) != 0) {
 				my $msg = "Error updating $link_id";
 				$logger->error($msg);
@@ -541,6 +589,7 @@ sub changeTopology($$) {
 			}
 		}
 	}
+
 	foreach my $path ($topology->getChildrenByTagNameNS("*", "path")) {
 		my $id = $path->getAttribute("id");
 		if (!defined $id) {
@@ -586,6 +635,8 @@ sub lookupElement($$$$$$) {
         my ($self, $id, $domains, $nodes, $ports, $links) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
 
+	$logger->debug("Looking up element \"$id\"");
+
 	my ($status, $domain_id, $node_id, $port_id, $link_id) = idSplit($id, 1);
 	if ($status != 0) {
 		my $msg = "Invalid id: $id";
@@ -598,9 +649,8 @@ sub lookupElement($$$$$$) {
 			return $links->{$link_id};
 		} else {
 			my ($status, $res) = $self->lookupElement($port_id);
-			my $parent = $res;
 			my $link;
-			if (!defined $parent) {
+			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("link_".$link_id);
 
 				if ($status != 0) {
@@ -613,6 +663,8 @@ sub lookupElement($$$$$$) {
 				my $pdoc = $parser->parse_string($doc);
 				$link = $pdoc->getDocumentElement;
 			} else {
+				my $parent = $res;
+
 				foreach my $curr_link ($parent->getChildrenByTagNameNS("*", "link")) {
 					if ($curr_link->getAttribute("id") eq $link_id) {
 						$link = $curr_link;
@@ -632,9 +684,8 @@ sub lookupElement($$$$$$) {
 			return $ports->{$port_id};
 		} else {
 			my ($status, $res) = $self->lookupElement($node_id);
-			my $parent = $res;
 			my $port;
-			if (!defined $parent) {
+			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("port_".$port_id);
 
 				if ($status != 0) {
@@ -647,6 +698,8 @@ sub lookupElement($$$$$$) {
 				my $pdoc = $parser->parse_string($doc);
 				$port = $pdoc->getDocumentElement;
 			} else {
+				my $parent = $res;
+
 				foreach my $curr_port ($parent->getChildrenByTagNameNS("*", "port")) {
 					if ($curr_port->getAttribute("id") eq $port_id) {
 						$port = $curr_port;
@@ -666,9 +719,8 @@ sub lookupElement($$$$$$) {
 			return $nodes->{$node_id};
 		} else {
 			my ($status, $res) = $self->lookupElement($domain_id);
-			my $parent = $res;
 			my $node;
-			if (!defined $parent) {
+			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("node_".$node_id);
 
 				if ($status != 0) {
@@ -681,6 +733,8 @@ sub lookupElement($$$$$$) {
 				my $pdoc = $parser->parse_string($doc);
 				$node = $pdoc->getDocumentElement;
 			} else {
+				my $parent = $res;
+
 				foreach my $curr_node ($parent->getChildrenByTagNameNS("*", "node")) {
 					if ($curr_node->getAttribute("id") eq $node_id) {
 						$node = $curr_node;
