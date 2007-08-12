@@ -9,6 +9,7 @@ use IO::File;
 use XML::XPath;
 use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 @ISA = ('Exporter');
 @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
@@ -271,7 +272,7 @@ sub extract {
 sub reMap {
   my($requestNamespaces, $namespaces, $node) = @_;  
   my $logger = get_logger("perfSONAR_PS::Common");
-  
+
   if($node->prefix and $node->namespaceURI()) {
     if(!$requestNamespaces->{$node->namespaceURI()}) {
       $requestNamespaces->{$node->namespaceURI()} = $node->prefix;
@@ -284,6 +285,20 @@ sub reMap {
           $node->setNamespace($namespaces->{$ns}, $ns, 1);
           $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
           $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
+          last;
+        }
+      }    
+    }
+  } elsif ((!defined $node->prefix or $node->prefix eq "") and defined $node->namespaceURI()) {
+    if (defined $requestNamespaces->{$node->namespaceURI()}) {
+      $node->setNamespace($node->namespaceURI(), $requestNamespaces->{$node->namespaceURI()}, 1);
+    } else {
+      foreach my $ns (keys %{$namespaces}) {
+        if($namespaces->{$ns} eq $node->namespaceURI()) {
+          $node->setNamespace($namespaces->{$ns}, $ns, 1);
+          $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
+          $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
+          $requestNamespaces->{$node->namespaceURI()} = $ns;
           last;
         }
       }    
@@ -540,6 +555,17 @@ text field.
 
 Re-map the nodes namespace prefixes to known prefixes (to not screw with the 
 XPath statements that will occur later).
+
+=head2 consultArchive($host, $port, $endpoint, $request)
+This function can be used to easily consult a measurement archive. It's a thin
+wrapper around the sendReceive function in the perfSONAR_PS::Transport module.
+You specify the host, port and endpoint for the MA you wish to consult and the
+request you wish to send. The function sends the request to the MA, parses the
+response and returns to you the LibXML element corresponding to the
+nmwg:message portion of the response. The return value an array of the form
+($status, $res) where status is 0 means the function was able to send the
+request and get a properly formed response and -1 on failure. $res contains the
+LibXML element on success and an error message on failure.
 
 =head1 SEE ALSO
 

@@ -1,11 +1,14 @@
 package perfSONAR_PS::MA::Topology::Topology;
 
 use perfSONAR_PS::MA::Topology::ID;
+use perfSONAR_PS::Common;
+use Data::Dumper;
+
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 
 @ISA  = ('Exporter');
-@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild');
+@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces');
 
 sub mergeNodes_general($$$);
 sub domainReplaceChild($$$);
@@ -16,6 +19,24 @@ sub topologyNormalize_ports($$$$);
 sub topologyNormalize_nodes($$$$);
 sub topologyNormalize_domains($$);
 sub topologyNormalize($);
+
+my %topology_namespaces = (
+	ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
+	ethernet => "http://ogf.org/schema/network/topology/ethernet/20070707/",
+	ipv4 => "http://ogf.org/schema/network/topology/ipv4/20070707/",
+	ipv6 => "http://ogf.org/schema/network/topology/ipv6/20070707/",
+	nmtb => "http://ogf.org/schema/network/topology/base/20070707/",
+	nmtl2 => "http://ogf.org/schema/network/topology/l2/20070707/",
+	nmtl3 => "http://ogf.org/schema/network/topology/l3/20070707/",
+	nmtl4 => "http://ogf.org/schema/network/topology/l4/20070707/",
+	nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
+	sonet => "http://ogf.org/schema/network/topology/sonet/20070707/",
+	transport => "http://ogf.org/schema/network/topology/transport/20070707/",
+);
+
+sub getTopologyNamespaces() {
+	return %topology_namespaces;
+}
 
 sub mergeNodes_general($$$) {
 	my ($old_node, $new_node, $attrs) = @_;
@@ -492,6 +513,10 @@ sub topologyNormalize_domains($$) {
 sub topologyNormalize($) {
 	my ($root) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	my %ns = ();
+
+	reMap(\%ns, \%topology_namespaces, $root);
 
 	my %topology = ();
 	$topology{"domains"} = ();
