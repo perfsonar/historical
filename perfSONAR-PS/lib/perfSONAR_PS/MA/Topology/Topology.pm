@@ -19,6 +19,11 @@ sub topologyNormalize_ports($$$$);
 sub topologyNormalize_nodes($$$$);
 sub topologyNormalize_domains($$);
 sub topologyNormalize($);
+sub getTopologyNamespaces();
+sub validateDomain($);
+sub validateNode($);
+sub validatePort($);
+sub validateLink($);
 
 my %topology_namespaces = (
 		ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
@@ -159,7 +164,7 @@ sub topologyNormalize_links($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("normalizing links");
+	$logger->info("Normalizing links");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
@@ -185,7 +190,7 @@ sub topologyNormalize_links($$$$) {
 		}
 
 		my ($status, $res) = topologyNormalize_links($node, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -206,7 +211,7 @@ sub topologyNormalize_links($$$$) {
 		}
 
 		my ($status, $res) = topologyNormalize_links($port, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -224,7 +229,7 @@ sub topologyNormalize_links($$$$) {
 			} else {
 				my $msg = "Link has no id";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 		}
 
@@ -252,7 +257,7 @@ sub topologyNormalize_links($$$$) {
 				if (!defined $idref or $idref eq "") {
 					my $msg = "Link $id refers to port with no portIdRef";
 					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
+					return (-1, $msg);
 				}
 
 				$idref = $idref;
@@ -263,7 +268,7 @@ sub topologyNormalize_links($$$$) {
 				if (!defined $port) {
 					my $msg = "Link $id refers to non-existent port $idref";
 					$logger->error($msg);
-					return ("error.topology.invalid_topology", $msg);
+					return (-1, $msg);
 				}
 
 				my $link_element = $port->find("./*[local-name()='link']")->get_node(1);
@@ -273,7 +278,7 @@ sub topologyNormalize_links($$$$) {
 					if (!defined $link_idref or idSanitize($link_idref) ne $new_link_fqid) {
 						my $msg = "$new_link_fqid slated to replace existing link";
 						$logger->error($msg);
-						return ("error.topology.invalid_topology", $msg);
+						return (-1, $msg);
 					}
 
 					$logger->debug("Replacing child");
@@ -291,7 +296,7 @@ sub topologyNormalize_links($$$$) {
 			if ($num_ports == 0) {
 				my $msg = "Link $id has no port to attach to";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 
 			$root->removeChild($link);
@@ -323,12 +328,12 @@ sub topologyNormalize_ports($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("normalizing ports");
+	$logger->info("Normalizing ports");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
 		my ($status, $res) = topologyNormalize_ports($domain, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -349,7 +354,7 @@ sub topologyNormalize_ports($$$$) {
 		}
 
 		my ($status, $res) = topologyNormalize_ports($node, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -364,7 +369,7 @@ sub topologyNormalize_ports($$$$) {
 			} else {
 				my $msg = "Port has no id";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 		}
 
@@ -373,7 +378,7 @@ sub topologyNormalize_ports($$$$) {
 			if ($uri eq "") {
 				my $msg = "Port $id has no parent and is not fully qualified";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 
 			$fqid = idAddLevel($uri, $id);
@@ -408,13 +413,13 @@ sub topologyNormalize_nodes($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("normalizing nodes");
+	$logger->info("Normalizing nodes");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
 		$logger->debug("Found domain: $fqid");
 		my ($status, $res) = topologyNormalize_nodes($domain, $topology, $fqid, $top_level);
-		if ($status ne "") {
+		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
@@ -429,7 +434,7 @@ sub topologyNormalize_nodes($$$$) {
 			} else {
 				my $msg = "Node has no id";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 		}
 
@@ -440,7 +445,7 @@ sub topologyNormalize_nodes($$$$) {
 			if ($uri eq "") {
 				my $msg = "Node $id has no parent and is not fully qualified";
 				$logger->error($msg);
-				return ("error.topology.invalid_topology", $msg);
+				return (-1, $msg);
 			}
 
 			$fqid = idAddLevel($uri, $id);
@@ -479,7 +484,7 @@ sub topologyNormalize_domains($$) {
 	my ($root, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("normalizing domains");
+	$logger->info("Normalizing domains");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $id = $domain->getAttribute("id");
@@ -488,7 +493,7 @@ sub topologyNormalize_domains($$) {
 		if (!defined $id) {
 			my $msg = "No id for specified domain";
 			 $logger->error($msg);
-			return ("error.topology.invalid_topology", $msg);
+			return (-1, $msg);
 		}
 
 		my $n = idIsFQ($id, "domain");
@@ -507,12 +512,14 @@ sub topologyNormalize_domains($$) {
 		$topology->{"domains"}->{$id} = $domain;
 	}
 
-	return ("", "");
+	return (0, "");
 }
 
 sub topologyNormalize($) {
 	my ($root) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+
+	$logger->debug("Normalizing topology");
 
 	my %ns = ();
 
@@ -527,22 +534,22 @@ sub topologyNormalize($) {
 	my ($status, $res);
 
 	($status, $res) = topologyNormalize_domains($root, \%topology);
-	if ($status ne "") {
+	if ($status != 0) {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_nodes($root, \%topology, "", $root);
-	if ($status ne "") {
+	if ($status != 0) {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_ports($root, \%topology, "", $root);
-	if ($status ne "") {
+	if ($status != 0) {
 		return ($status, $res);
 	}
 
 	($status, $res) = topologyNormalize_links($root, \%topology, "", $root);
-	if ($status ne "") {
+	if ($status != 0) {
 		return ($status, $res);
 	}
 }
@@ -771,3 +778,100 @@ sub validateLink($) {
 }
 
 1;
+
+__END__
+=head1 NAME
+
+perfSONAR_PS::MA::Topology::Topology - A module that provides various utility functions for Topology structures.
+
+=head1 DESCRIPTION
+
+This module contains a set of utility functions that are used to interact with
+Topology structures.
+
+=head1 SYNOPSIS
+
+=head1 DETAILS
+
+=head1 API
+
+=head2 mergeNodes_general($old_node, $new_node, $attrs)
+
+	Takes two LibXML nodes containing structures and merges them together.
+	The $attrs variable is a pointer to a hash describing which attributes
+	on a node should be compared to define equality.
+
+	To have links compared based on their 'id' attribute, you would specify $attrs as such:
+
+	my %attrs = (
+		link => ( id => '' );
+	);
+
+=head2 domainReplaceChild($domain, $new_node, $id)
+
+	Take a domain, a node and its fqid and replaces any children that are
+	"IdRef'd" to the node with the actual node.
+	
+=head2 nodeReplaceChild($node, $new_port, $id)
+
+	Take a node, a port and its fqid and replaces any children that are
+	"IdRef'd" to the port with the actual port.
+	
+=head2 portReplaceChild($port, $new_link, $id)
+
+	Take a port, a link and its fqid and replaces any children that are
+	"IdRef'd" to the link with the actual link.
+	
+=head2 topologyNormalize($topology)
+
+	Takes a topology structure and normalizes it into
+	"domain/node/port/link" format. If a stray node/port/link is found, it
+	is moved up to the top-level if it's not already there.
+
+=head2 getTopologyNamespaces()
+
+	Returns the set of prefix/uri mappings for Topology in a hash table.
+
+=head2 validateDomain($domain)
+
+	Does some basic validation of the sepcified domain.
+
+=head2 validateNode($node)
+
+	Does some basic validation of the sepcified node.
+
+=head2 validatePort($port)
+
+	Does some basic validation of the sepcified port.
+
+=head2 validateLink($link)
+
+	Does some basic validation of the sepcified link.
+
+=head1 SEE ALSO
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, E<lt>aaron@internet2.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.

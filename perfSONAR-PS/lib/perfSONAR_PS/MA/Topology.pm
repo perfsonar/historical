@@ -263,59 +263,65 @@ sub changeTopology {
 		foreach my $md ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
 			if ($data->getAttribute("metadataIdRef") eq $md->getAttribute("id")) {
 				my $eventType = $md->findvalue("nmwg:eventType");
-				my ($status, $res);
 
-				my $topology = $data->find("nmtopo:topology")->get_node(1);
-				if (!defined $topology) {
-					my $msg = "No topology defined in change topology request";
-					$logger->error($msg);
-					return ("error.topology.query.topology_not_found", $msg);
-				}
-
-				($status, $res) = topologyNormalize($topology);
+				my ($status, $res) = $self->changeRequest($eventType, $md, $data);
 				if ($status ne "") {
-					$logger->error("Couldn't normalize topology");
-					return ($status, $res);
-				}
+					$logger->error("Couldn't handle requested metadata: $res");
 
-				$localContent .= $md->toString();
-				$localContent .= "\n";
+					my $mdID = "metadata.".genuid();
 
-				my $md_id = $md->getAttribute("id");
-				my $d_id = $data->getAttribute("id");
-				if (!defined $d_id) {
-					$d_id = genuid();
-				}
-
-				$localContent .= "<nmwg:data id=\"$d_id\" metadataIdRef=\"$md_id\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-				$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ggf.org/ns/nmwg/topo/base/2.0\">\n";
-
-				my $changeType;
-
-				if ($eventType eq "topology.change.add") {
-					$changeType = "add";					
-				} elsif ($eventType eq "topology.change.update") {
-					$changeType = "update";					
-				} elsif ($eventType eq "topology.change.replace") {
-					$changeType = "replace";					
+					$localContent .= getResultCodeMetadata($mdID, $md->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
 				} else {
-					$logger->error("Invalid change type: \"$eventType\"");
+					$localContent .= $res;
 				}
-
-				($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
-				if ($status ne "") {
-					$logger->error("Error handling topology request");
-					return ($status, $res);
-				}
-
-				$localContent .= $res;
-				$localContent .= "</nmtopo:topology>\n";
-				$localContent .= "</nmwg:data>\n";
 			}
 		}
 	}
 
 	return ("", $localContent);
+}
+
+sub changeRequest($$$$) {
+	my($self, $type, $m, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my ($status, $res);
+	my $localContent = "";
+
+	my $topology = $d->find("nmtopo:topology")->get_node(1);
+	if (!defined $topology) {
+		my $msg = "No topology defined in change topology request";
+		$logger->error($msg);
+		return ("error.topology.query.topology_not_found", $msg);
+	}
+
+	($status, $res) = topologyNormalize($topology);
+	if ($status != 0) {
+		$logger->error("Couldn't normalize topology");
+		return ("error.topology.invalid_topology", $res);
+	}
+
+	my $changeType;
+
+	if ($type eq "topology.change.add") {
+		$changeType = "add";					
+	} elsif ($type eq "topology.change.update") {
+		$changeType = "update";					
+	} elsif ($type eq "topology.change.replace") {
+		$changeType = "replace";					
+	} else {
+		my $msg = "Invalid change type: \"$type\"";
+		$logger->error($msg);
+		return ("error.topology.invalid_change_type", $msg);
+	}
+
+	($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
+	if ($status != 0) {
+		$logger->error("Error handling topology request");
+		return ("error.topology.ma", $res);
+	}
+
+	return ("", "");
 }
 
 sub queryRequest($$$$) {

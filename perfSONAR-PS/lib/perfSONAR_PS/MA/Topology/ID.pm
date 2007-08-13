@@ -5,6 +5,15 @@ use Exporter;
 @ISA  = ('Exporter');
 @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit');
 
+sub idConstruct;
+sub idIsFQ($$);
+sub idAddLevel($$);
+sub idRemoveLevel($);
+sub idBaseLevel($);
+sub idEncode($);
+sub idDecode($);
+sub idSplit($$);
+
 sub idConstruct {
 	my ($domain, $node, $interface, $link) = @_;
 
@@ -35,8 +44,6 @@ sub idIsFQ($$) {
 	return 0 if (!($id =~ /^urn:ogf:network:(.*)$/));
 
 	my @fields = split(':', $id);
-
-	print "ID: $id FIELDS: $#fields\n";
 
 	if ($type eq "domain") {
 		return 1 if ($#fields == 3);
@@ -154,3 +161,89 @@ sub idSplit($$) {
 }
 
 1;
+
+__END__
+=head1 NAME
+
+perfSONAR_PS::MA::Topology::ID - A module that provides various utility functions for Topology IDs.
+
+=head1 DESCRIPTION
+
+This module contains a set of utility functions that are used to interact with
+Topology IDs.
+
+=head1 SYNOPSIS
+
+=head1 DETAILS
+
+=head1 API
+
+=head2 idConstruct($domain_id, $node_id, $port_id, $link_id)
+
+	Constructs an a fully-qualified id based on the specified elements. The
+	only required element is "$domain_id", all others are optional.
+
+=head2 idIsFQ($id, $type)
+
+	Checks if the specified ID is a fully-qualified ID of the specified
+	type. If it is not a fully-qualified id, the function returns 0. If it
+	is an incorrect fully-qualified id(e.g. too many elements), it returns
+	-1. If it is a correctly specified fully-qualified id, it returns 1.
+
+=head2 idAddLevel($id, $new_level)
+
+	Takes a fully-qualified id and adds a new level onto it.
+
+=head2 idRemoveLevel($id)
+
+	Takes a fully-qualified id and returns the parent level for the id.
+
+=head2 idBaseLevel($id)
+
+	Returns the base level of the specified id.
+
+	e.g. urn:ogf:network:hopi:losa would return 'losa'
+
+=head2 idEncode($element)
+
+	Performs any necessary encoding of the specified element for inclusion
+	in a fully-qualified id.
+
+=head2 idDecode($element)
+
+	Decodes the specified element from a fully-qualified id.
+
+=head2 idSplit($id, $fq)
+
+	Splits the specified fully-qualified id into its component elements. If
+	$fq is 1, the returns components are all fully-qualified. If the id is
+	incorrect(e.g. has too many or too few elements), it returns -1 for its
+	status otherwise, it returns 0.
+
+=head1 SEE ALSO
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, E<lt>aaron@internet2.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
