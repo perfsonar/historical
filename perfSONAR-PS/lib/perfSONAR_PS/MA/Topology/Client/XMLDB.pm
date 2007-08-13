@@ -556,53 +556,53 @@ sub changeTopology($$) {
 	foreach my $node_id (keys %nodes) {
 		my $id = "node_".$node_id;
 
-		$self->{DATADB}->remove($id);
+		next if (defined $nodes{$node_id}->parentNode->parentNode);
 
 		# if the element is top-level, it's parent is a document of
 		# some type, but it's parent doesn't have a parent.
-		if (!defined $nodes{$node_id}->parentNode->parentNode) {
-			$nodes{$node_id}->unbindNode;
-			$nodes{$node_id}->setNamespace($nodes{$node_id}->namespaceURI(), $nodes{$node_id}->prefix, 1);
+		$self->{DATADB}->remove($id);
 
-			if ($self->{DATADB}->insertIntoContainer($nodes{$node_id}->toString, $id) != 0) {
-				my $msg = "Error updating $node_id";
-				$logger->error($msg);
-				return (-1, $msg);
-			}
+		$nodes{$node_id}->unbindNode;
+		$nodes{$node_id}->setNamespace($nodes{$node_id}->namespaceURI(), $nodes{$node_id}->prefix, 1);
+
+		if ($self->{DATADB}->insertIntoContainer($nodes{$node_id}->toString, $id) != 0) {
+			my $msg = "Error updating $node_id";
+			$logger->error($msg);
+			return (-1, $msg);
 		}
 	}
 
 	foreach my $port_id (keys %ports) {
 		my $id = "port_".$port_id;
 
-		$self->{DATADB}->remove($id);
+		next if (defined $ports{$port_id}->parentNode->parentNode);
 
 		$ports{$port_id}->unbindNode;
 		$ports{$port_id}->setNamespace($ports{$port_id}->namespaceURI(), $ports{$port_id}->prefix, 1);
 
-		if (!defined $ports{$port_id}->parentNode->parentNode) {
-			if ($self->{DATADB}->insertIntoContainer($ports{$port_id}->toString, $id) != 0) {
-				my $msg = "Error updating $port_id";
-				$logger->error($msg);
-				return (-1, $msg);
-			}
+		$self->{DATADB}->remove($id);
+
+		if ($self->{DATADB}->insertIntoContainer($ports{$port_id}->toString, $id) != 0) {
+			my $msg = "Error updating $port_id";
+			$logger->error($msg);
+			return (-1, $msg);
 		}
 	}
 
 	foreach my $link_id (keys %links) {
 		my $id = "link_".$link_id;
 
+		next if (defined $links{$link_id}->parentNode->parentNode);
+
 		$self->{DATADB}->remove($id);
 
 		$links{$link_id}->unbindNode;
 		$links{$link_id}->setNamespace($links{$link_id}->namespaceURI(), $links{$link_id}->prefix, 1);
 
-		if (!defined $links{$link_id}->parentNode->parentNode) {
-			if ($self->{DATADB}->insertIntoContainer($links{$link_id}->toString, $id) != 0) {
-				my $msg = "Error updating $link_id";
-				$logger->error($msg);
-				return (-1, $msg);
-			}
+		if ($self->{DATADB}->insertIntoContainer($links{$link_id}->toString, $id) != 0) {
+			my $msg = "Error updating $link_id";
+			$logger->error($msg);
+			return (-1, $msg);
 		}
 	}
 
@@ -668,9 +668,9 @@ sub lookupElement($$$$$$) {
 
 	if (defined $link_id) {
 		if (defined $links->{$link_id}) {
-			return $links->{$link_id};
+			return (0, $links->{$link_id});
 		} else {
-			my ($status, $res) = $self->lookupElement($port_id);
+			my ($status, $res) = $self->lookupElement($port_id, $domains, $nodes, $ports, $links);
 			my $link;
 			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("link_".$link_id);
@@ -693,6 +693,12 @@ sub lookupElement($$$$$$) {
 						last;
 					}
 				}
+
+				if (!defined $link) {
+					my $msg = "Link $link_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
 			}
 
 			$links->{$link_id} = $link;
@@ -703,9 +709,9 @@ sub lookupElement($$$$$$) {
 
 	if (defined $port_id) {
 		if (defined $ports->{$port_id}) {
-			return $ports->{$port_id};
+			return (0, $ports->{$port_id});
 		} else {
-			my ($status, $res) = $self->lookupElement($node_id);
+			my ($status, $res) = $self->lookupElement($node_id, $domains, $nodes, $ports, $links);
 			my $port;
 			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("port_".$port_id);
@@ -738,9 +744,9 @@ sub lookupElement($$$$$$) {
 
 	if (defined $node_id) {
 		if (defined $nodes->{$node_id}) {
-			return $nodes->{$node_id};
+			return (0, $nodes->{$node_id});
 		} else {
-			my ($status, $res) = $self->lookupElement($domain_id);
+			my ($status, $res) = $self->lookupElement($domain_id, $domains, $nodes, $ports, $links);
 			my $node;
 			if ($status != 0) {
 				($status, my $doc) = $self->{DATADB}->getDocumentByName("node_".$node_id);
@@ -773,7 +779,7 @@ sub lookupElement($$$$$$) {
 
 	if (defined $domain_id) {
 		if (defined $domains->{$domain_id}) {
-			return $domains->{$domain_id};
+			return (0, $domains->{$domain_id});
 		} else {
 			my ($status, $doc) = $self->{DATADB}->getDocumentByName("domain_".$domain_id);
 

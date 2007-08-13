@@ -124,8 +124,6 @@ sub registerLS {
 	}
 }
 
-# XXX prefix!
-
 sub buildLSMetadata($$$$) {
 	my ($id, $type, $prefix, $uri) = @_;
 	my $md = "";
@@ -251,7 +249,8 @@ sub changeTopology {
 
 	my $localContent = "";
 
-	if ($self->{CLIENT}->open != 0) {
+	my ($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
 		my ($status, $res);
 		$status = "error.topology.ma";
 		$res = "Couldn't open database";
@@ -273,7 +272,8 @@ sub changeTopology {
 					$localContent .= getResultCodeMetadata($mdID, $md->getAttribute("id"), $status);
 					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res);
 				} else {
-					$localContent .= $res;
+					$localContent .= $md->toString;
+					$localContent .= $data->toString;
 				}
 			}
 		}
@@ -288,7 +288,7 @@ sub changeRequest($$$$) {
 	my ($status, $res);
 	my $localContent = "";
 
-	my $topology = $d->find("nmtopo:topology")->get_node(1);
+	my $topology = $d->find("./*[local-name()='topology']")->get_node(1);
 	if (!defined $topology) {
 		my $msg = "No topology defined in change topology request";
 		$logger->error($msg);

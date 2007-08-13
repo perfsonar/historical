@@ -8,7 +8,7 @@ use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 
 @ISA  = ('Exporter');
-@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces');
+@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces', 'mergeNodes_general');
 
 sub mergeNodes_general($$$);
 sub domainReplaceChild($$$);
@@ -47,64 +47,109 @@ sub mergeNodes_general($$$) {
 	my ($old_node, $new_node, $attrs) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	my $node = $old_node->cloneNode;
+	if ($old_node->getType != $new_node->getType) {
+		$logger->warn("Inconsistent node types, old ".$old_node->getType. " vs new ".$new_node->getType . ", simply replacing old with new");
+		return $new_node;
+	}
+
+	if ($new_node->getType == 3) { # text node
+		return $new_node;
+	}
+
+	if ($new_node->getType != 1) {
+		$logger->warn("Received unknown node type: ".$new_node->getType.", returning new node");
+		return $new_node;
+	}
+
+	if ($new_node->localname ne $old_node->localname) {
+		$logger->warn("Received inconsistent node names: ".$old_node->localname." and ".$new_node->getType.", returning new node");
+		return $new_node;
+	}
+
+	my $node = $old_node->cloneNode(1);
 
 	my @new_attributes = $new_node->getAttributes();
 
 	foreach my $attribute (@new_attributes) {
-		$node->setAttribute($attribute->getName, $attribute->getValue);
+		if ($attribute->getType == 2) {
+			$node->setAttribute($attribute->getName, $attribute->getValue);
+		} else {
+			$logger->warn("Unknown attribute type, ".$attribute->getType.", skipping");
+		}
 	}
-
 
 	my %elements = ();
 
 	foreach my $elem ($node->getChildNodes) {
-		$elements{$elem->localname} = $elem;
+		next if (!defined $elem->localname);
+		$elements{$elem->localname} = () if (!defined $elements{$elem->localname});
+		push @{ $elements{$elem->localname} }, $elem;
 	}
 
 	foreach my $elem ($new_node->getChildNodes) {
 		my $is_equal;
 
-		if (defined $attrs->{$elem->localname} and defined $elements{$elem->localname}) {
-			$is_equal = 1;
-
-			foreach my $attr (keys %{ $attrs->{$elem->localname} }) {
-				my $old_attr = $elements{$elem->localname}->getAttributes($attr);
-				my $new_attr = $elem->getAttributes($attr);
-
-				if (defined $old_attr and defined $new_attr) {
-					# if the attribute exists in both the old node and the new node, compare them
-					if ($old_attr->getValue ne $new_attr->getValue) {
-						$is_equal = 0;
-					}
-				} elsif (defined $old_attr or defined $new_attr) {
-					# if the attribute exists in one or the other, obviously they cannot be equal
-					$is_equal = 0;
+		if ($elem->getType == 3) {
+			# Since we don't know which text node it is, we have to
+			# remove all of them... sigh...
+			foreach my $tn ($node->getChildNodes) {
+				if ($tn->getType == 3) {
+					$node->removeChild($tn);
 				}
 			}
+
+			$node->addChild($elem->cloneNode(1));
+		}
+
+		next if (!defined $elem->localname);
+
+		my $old_elem;
+		if (defined $attrs->{$elem->localname} and defined $elements{$elem->localname}) {
+			my $i = 0;
+
+			foreach my $tmp_elem (@{ $elements{$elem->localname} }) {
+				$is_equal = 1;
+
+				foreach my $attr (keys %{ $attrs->{$elem->localname} }) {
+					my $old_attr = $tmp_elem->getAttributes($attr);
+					my $new_attr = $elem->getAttributes($attr);
+
+					if (defined $old_attr and defined $new_attr) {
+						# if the attribute exists in both the old node and the new node, compare them
+						if ($old_attr->getValue ne $new_attr->getValue) {
+							$is_equal = 0;
+						}
+					} elsif (defined $old_attr or defined $new_attr) {
+						# if the attribute exists in one or the other, obviously they cannot be equal
+						$is_equal = 0;
+					}
+				}
+
+				if ($is_equal) {
+					$old_elem = $tmp_elem;
+					splice(@{ $elements{$elem->localname} }, $i, 1);
+					last;
+				}
+
+				$i++;
+			}
 		} elsif (defined $elements{$elem->localname}) {
-			$is_equal = 1;
-		} else {
-			$is_equal = 0;
+			$old_elem = pop(@{ $elements{$elem->localname} });
 		}
 
 		my $new_child;
-		if ($elem->hasChildNodes) {
-			if ($is_equal) {
-				$new_child = mergeNodes_general($elements{$elem->localname}, $elem, $attrs);
-			} else {
-				$new_child = $elem->cloneNode(1);
-			}
+
+		if (defined $old_elem) {
+			$new_child = mergeNodes_general($old_elem, $elem, $attrs);
+			$node->removeChild($old_elem);
 		} else {
 			$new_child = $elem->cloneNode(1);
 		}
 
-		if ($is_equal) {
-			$node->removeChild($elements{$elem->localname});
-		}
-
 		$node->appendChild($new_child);
 	}
+
+	$logger->debug("Merged Node: ".$node->toString);
 
 	return $node;
 }
