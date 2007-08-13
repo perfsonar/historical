@@ -3,14 +3,14 @@
 use warnings;
 use strict;
 use Getopt::Long;
-use threads;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 use Log::Log4perl qw(get_logger :levels);
-     
+use Data::Dumper;
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MA::Topology;
-#use perfSONAR_PS::MP::Topology;
+use perfSONAR_PS::MA::Topology::Topology;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
@@ -18,43 +18,36 @@ my $logger = get_logger("perfSONAR_PS");
 my $DEBUGFLAG = '';
 my $HELP = '';
 my $status = GetOptions ('verbose' => \$DEBUGFLAG,
-                         'help' => \$HELP);
+		'help' => \$HELP);
 
 if(!$status or $HELP) {
-  print "$0: starts the topology MA.\n";
-  print "\t$0 [--verbose --help]\n";
-  exit(1);
+	print "$0: starts the topology MA.\n";
+	print "\t$0 [--verbose --help]\n";
+	exit(1);
 }
 
-my %ns = (
-  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-  nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
-);
-
-		# Read in configuration information
+# Read in configuration information
 my %conf = ();
 readConfiguration("./topologyMA.conf", \%conf);
 
-    # set logging level
+# set logging level
 if($DEBUGFLAG) {
-  $logger->level($DEBUG);    
-}
-else {
-  $logger->level($INFO); 
+	$logger->level($DEBUG);    
+} else {
+	$logger->level($INFO); 
 }
 
 if(!$DEBUGFLAG) {
-		# flush the buffer
-  $| = 1;
-		# start the daemon
-  &daemonize;
+	# flush the buffer
+	$| = 1;
+	# start the daemon
+	&daemonize;
 }
 
-$logger->debug("Starting '".threads->tid()."'");
+my %ns = getTopologyNamespaces();
+$ns{"nmwg"} = "http://ggf.org/ns/nmwg/base/2.0/";
+
+$logger->debug("Starting '".$$."'");
 my $ma = new perfSONAR_PS::MA::Topology(\%conf, \%ns);
 if ($ma->init != 0) {
 	$logger->error("Couldn't initialize Topology MA");
@@ -70,7 +63,7 @@ if ($ma_pid == 0) {
 waitpid($ma_pid, 0);
 
 sub measurementArchive {
-	$logger->debug("Starting '".threads->tid()."' as the MA.");
+	$logger->debug("Starting '".$$."' as the MA.");
 
 	while(1) {
 		my $pid = fork();
@@ -83,27 +76,25 @@ sub measurementArchive {
 			waitpid($pid, 0);
 		}
 	}  
-	return;
 }
 
 sub measurementArchiveQuery {
-  my($ma) = @_; 
-  $logger->debug("Starting '".threads->tid()."' as the execution path.");
-  
-  $ma->receive;
-  $ma->respond;
-  return;
+	my($ma) = @_; 
+	$logger->debug("Starting '".$$."' as the execution path.");
+
+	$ma->receive;
+	$ma->respond;
 }
 
 sub daemonize {
-  chdir '/' or die "Can't chdir to /: $!";
-  open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
-  open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
-  open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
-  defined(my $pid = fork) or die "Can't fork: $!";
-  exit if $pid;
-  setsid or die "Can't start a new session: $!";
-  umask 0;
+	chdir '/' or die "Can't chdir to /: $!";
+	open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
+	open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
+	open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
+	defined(my $pid = fork) or die "Can't fork: $!";
+	exit if $pid;
+	setsid or die "Can't start a new session: $!";
+	umask 0;
 }
 
 
@@ -128,9 +119,10 @@ The following functions are used within this script.
 
 =head2 measurementArchive
 
-This function, meant to be used in the context of a thread, will listen on an external
-port (specified in the conf file) and serve requests for data from outside entities.  The
-data and metadata are stored in various database structures.
+This function, meant to be used in the context of a thread or process, will
+listen on an external port (specified in the conf file) and serve requests for
+data from outside entities.  The data and metadata are stored in various
+database structures.
 
 =head2 measurementArchiveQuery
 
@@ -143,7 +135,6 @@ Sends the program to the background by eliminating ties to the calling terminal.
 =head1 REQUIRES
 
 Getopt::Long;
-threads
 Time::HiRes qw( gettimeofday );
 POSIX qw( setsid )
 Log::Log4perl

@@ -38,12 +38,14 @@ my $parser = XML::LibXML->new();
 my $doc = $parser->parse_file($ifile);
 
 my ($status, $res) =  topologyNormalize($doc->documentElement());
-if ($status ne "") {
+if ($status != 0) {
 	$logger->debug("Error parsing topology: $res");
 	exit(-1);
 }
 
 my %ns;
+
+%ns = getTopologyNamespaces();
 
 # we probably should collect all the namespaces here
 my @namespaces = $doc->documentElement()->getNamespaces();
