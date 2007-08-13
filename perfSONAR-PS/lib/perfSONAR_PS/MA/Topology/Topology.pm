@@ -21,17 +21,17 @@ sub topologyNormalize_domains($$);
 sub topologyNormalize($);
 
 my %topology_namespaces = (
-	ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
-	ethernet => "http://ogf.org/schema/network/topology/ethernet/20070707/",
-	ipv4 => "http://ogf.org/schema/network/topology/ipv4/20070707/",
-	ipv6 => "http://ogf.org/schema/network/topology/ipv6/20070707/",
-	nmtb => "http://ogf.org/schema/network/topology/base/20070707/",
-	nmtl2 => "http://ogf.org/schema/network/topology/l2/20070707/",
-	nmtl3 => "http://ogf.org/schema/network/topology/l3/20070707/",
-	nmtl4 => "http://ogf.org/schema/network/topology/l4/20070707/",
-	nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
-	sonet => "http://ogf.org/schema/network/topology/sonet/20070707/",
-	transport => "http://ogf.org/schema/network/topology/transport/20070707/",
+		ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
+		ethernet => "http://ogf.org/schema/network/topology/ethernet/20070707/",
+		ipv4 => "http://ogf.org/schema/network/topology/ipv4/20070707/",
+		ipv6 => "http://ogf.org/schema/network/topology/ipv6/20070707/",
+		nmtb => "http://ogf.org/schema/network/topology/base/20070707/",
+		nmtl2 => "http://ogf.org/schema/network/topology/l2/20070707/",
+		nmtl3 => "http://ogf.org/schema/network/topology/l3/20070707/",
+		nmtl4 => "http://ogf.org/schema/network/topology/l4/20070707/",
+		nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
+		sonet => "http://ogf.org/schema/network/topology/sonet/20070707/",
+		transport => "http://ogf.org/schema/network/topology/transport/20070707/",
 );
 
 sub getTopologyNamespaces() {

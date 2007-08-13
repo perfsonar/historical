@@ -43,13 +43,7 @@ sub init {
 			return -1;
 		}
 
-		my %ns = (
-			nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-			netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-			nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-			snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
-		 );
+		my %ns = getTopologyNamespaces();
 
 		$self->{CLIENT}= new perfSONAR_PS::MA::Topology::Client::XMLDB($self->{CONF}->{"TOPO_DB_NAME"}, $self->{CONF}->{"TOPO_DB_FILE"}, \%ns);
 	} else {
@@ -256,14 +250,6 @@ sub changeTopology {
 	my $transaction;
 
 	my $localContent = "";
-
-	my %ns = (
-			nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-			netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-			nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-			snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-			nmtopo=>"http://ggf.org/ns/nmwg/topology/base/3.0/",
-		 );
 
 	if ($self->{CLIENT}->open != 0) {
 		my ($status, $res);
