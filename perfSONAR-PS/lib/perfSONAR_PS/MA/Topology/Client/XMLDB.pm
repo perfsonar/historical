@@ -106,7 +106,7 @@ sub xQuery($$) {
 	my @queryResults = $self->{DATADB}->xQuery($xquery, \$error);
 	if ($error ne "") {
 		$logger->error("Couldn't query database");
-		return ("error.topology.ma", "Couldn't query database: $error");
+		return (-1, "Couldn't query database: $error");
 	}
 
 	$localContent .= "<nmtopo:topology>\n";
@@ -537,12 +537,19 @@ sub changeTopology($$) {
 	foreach my $domain_id (keys %domains) {
 		my $id = "domain_".$domain_id;
 
+		# This is a hack to force the namespace declaration into the
+		# node we're going to insert. A better solution would be to
+		# have each node declare its namespace, but I'm not sure how to
+		# finagle libxml into doing that.
+		$domains{$domain_id}->unbindNode;
+		$domains{$domain_id}->setNamespace($domains{$domain_id}->namespaceURI(), $domains{$domain_id}->prefix, 1);
+
 		$self->{DATADB}->remove($id);
 
 		if ($self->{DATADB}->insertIntoContainer($domains{$domain_id}->toString, $id) != 0) {
 			my $msg = "Error updating $domain_id";
 			$logger->error($msg);
-			return ("error.topology.ma", $msg);
+			return (-1, $msg);
 		}
 	}
 
@@ -554,10 +561,13 @@ sub changeTopology($$) {
 		# if the element is top-level, it's parent is a document of
 		# some type, but it's parent doesn't have a parent.
 		if (!defined $nodes{$node_id}->parentNode->parentNode) {
+			$nodes{$node_id}->unbindNode;
+			$nodes{$node_id}->setNamespace($nodes{$node_id}->namespaceURI(), $nodes{$node_id}->prefix, 1);
+
 			if ($self->{DATADB}->insertIntoContainer($nodes{$node_id}->toString, $id) != 0) {
 				my $msg = "Error updating $node_id";
 				$logger->error($msg);
-				return ("error.topology.ma", $msg);
+				return (-1, $msg);
 			}
 		}
 	}
@@ -567,11 +577,14 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
+		$ports{$port_id}->unbindNode;
+		$ports{$port_id}->setNamespace($ports{$port_id}->namespaceURI(), $ports{$port_id}->prefix, 1);
+
 		if (!defined $ports{$port_id}->parentNode->parentNode) {
 			if ($self->{DATADB}->insertIntoContainer($ports{$port_id}->toString, $id) != 0) {
 				my $msg = "Error updating $port_id";
 				$logger->error($msg);
-				return ("error.topology.ma", $msg);
+				return (-1, $msg);
 			}
 		}
 	}
@@ -581,11 +594,14 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
+		$links{$link_id}->unbindNode;
+		$links{$link_id}->setNamespace($links{$link_id}->namespaceURI(), $links{$link_id}->prefix, 1);
+
 		if (!defined $links{$link_id}->parentNode->parentNode) {
 			if ($self->{DATADB}->insertIntoContainer($links{$link_id}->toString, $id) != 0) {
 				my $msg = "Error updating $link_id";
 				$logger->error($msg);
-				return ("error.topology.ma", $msg);
+				return (-1, $msg);
 			}
 		}
 	}
@@ -602,10 +618,13 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
+		$path->unbindNode;
+		$path->setNamespace($path->namespaceURI(), $path->prefix, 1);
+
 		if ($self->{DATADB}->insertIntoContainer($path->toString, $id) != 0) {
 			my $msg = "Error updating $id";
 			$logger->error($msg);
-			return ("error.topology.ma", $msg);
+			return (-1, $msg);
 		}
 	}
 
@@ -621,10 +640,13 @@ sub changeTopology($$) {
 
 		$self->{DATADB}->remove($id);
 
+		$network->unbindNode;
+		$network->setNamespace($network->namespaceURI(), $network->prefix, 1);
+
 		if ($self->{DATADB}->insertIntoContainer($network->toString, $id) != 0) {
 			my $msg = "Error updating $id";
 			$logger->error($msg);
-			return ("error.topology.ma", $msg);
+			return (-1, $msg);
 		}
 	}
 
