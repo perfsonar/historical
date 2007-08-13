@@ -303,12 +303,12 @@ sub changeRequest($$$$) {
 
 	my $changeType;
 
-	if ($type eq "topology.change.add") {
-		$changeType = "add";					
-	} elsif ($type eq "topology.change.update") {
-		$changeType = "update";					
-	} elsif ($type eq "topology.change.replace") {
-		$changeType = "replace";					
+	if ($type eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
+		$changeType = "add";
+	} elsif ($type eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
+		$changeType = "update";
+	} elsif ($type eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
+		$changeType = "replace";
 	} else {
 		my $msg = "Invalid change type: \"$type\"";
 		$logger->error($msg);
@@ -338,7 +338,7 @@ sub queryRequest($$$$) {
 	}
 
 	my $dataContent;
-	if ($type eq "topology.lookup.all") {
+	if ($type eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
 		($status, $res) = $self->{CLIENT}->getAll;
 		if ($status != 0) {
 			my $msg = "Database dump failed: $res";
@@ -347,7 +347,7 @@ sub queryRequest($$$$) {
 		}
 
 		$dataContent = $res->toString;
-	} elsif ($type eq "topology.lookup.xquery") {
+	} elsif ($type eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
 		my $query = extract($m->find("./xquery:subject")->get_node(1));
 		if (!defined $query or $query eq "") {
 			return ("error.topology.query.query_not_found", "No query given in request");
