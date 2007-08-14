@@ -76,37 +76,37 @@ sub init {
 		return -1;
 	}
 
-	if (defined $self->{CONF}->{"LS_INSTANCE"} and $self->{CONF}->{"LS_INSTANCE"} ne "") {
-		if (!defined $self->{CONF}->{"SERVICE_ACCESSPOINT"} or $self->{CONF}->{"SERVICE_ACCESSPOINT"} eq "") {
-			my $msg = "You specified to specify a SERVICE_ACCESSPOINT so that people consulting the LS know how to get to this service.";
-			$logger->error($msg);
-			return -1;
-		}
+	if (!defined $self->{CONF}->{"DISABLE_REGISTRATION"} or $self->{CONF}->{"DISABLE_REGISTRATION"} == 0) {
+		if (defined $self->{CONF}->{"LS_INSTANCE"} and $self->{CONF}->{"LS_INSTANCE"} ne "") {
+			if (!defined $self->{CONF}->{"SERVICE_ACCESSPOINT"} or $self->{CONF}->{"SERVICE_ACCESSPOINT"} eq "") {
+				my $msg = "You specified to specify a SERVICE_ACCESSPOINT so that people consulting the LS know how to get to this service.";
+				$logger->error($msg);
+				return -1;
+			}
 
-		# fill in sane defaults if the user does not
+			# fill in sane defaults if the user does not
+			if (!defined $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} or $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} eq "") {
+				$self->{CONF}->{"LS_REGISTRATION_INTERVAL"} = 5; # 5 minutes
+			}
 
-		if (!defined $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} or $self->{CONF}->{"LS_REGISTRATION_INTERVAL"} eq "") {
-			$self->{CONF}->{"LS_REGISTRATION_INTERVAL"} = 5; # 5 minutes
-		}
+			if (!defined $self->{CONF}->{SERVICE_TYPE} or $self->{CONF}->{SERVICE_TYPE}) {
+				$self->{CONF}->{SERVICE_TYPE} = "MA";
+			}
 
-		if (!defined $self->{CONF}->{SERVICE_TYPE} or $self->{CONF}->{SERVICE_TYPE}) {
-			$self->{CONF}->{SERVICE_TYPE} = "MA";
-		}
+			if (!defined $self->{CONF}->{SERVICE_DESCRIPTION} or $self->{CONF}->{SERVICE_DESCRIPTION}) {
+				$self->{CONF}->{SERVICE_DESCRIPTION} = "Link Status Measurement Archive";
+			}
 
-		if (!defined $self->{CONF}->{SERVICE_DESCRIPTION} or $self->{CONF}->{SERVICE_DESCRIPTION}) {
-			$self->{CONF}->{SERVICE_DESCRIPTION} = "Link Status Measurement Archive";
-		}
-
-		my $reg_pid = fork();
-		if ($reg_pid == 0) {
-			$self->registerLS();
-			exit(0);
-		} elsif ($reg_pid < 0) {
-			$logger->error("Couldn't start LS registration process");
-			return -1;
+			my $reg_pid = fork();
+			if ($reg_pid == 0) {
+				$self->registerLS();
+				exit(0);
+			} elsif ($reg_pid < 0) {
+				$logger->error("Couldn't start LS registration process");
+				return -1;
+			}
 		}
 	}
-
 	return 0;
 }
 
@@ -139,7 +139,8 @@ sub registerLS {
 		$md .= "<nmwg:subject id=\"sub$i\">\n";
 		$md .= " <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070707/\" id=\"$link_id\" />\n";
 		$md .= "</nmwg:subject>\n";
-		$md .= "<nmwg:eventType>status</nmwg:eventType>\n";
+		$md .= "<nmwg:eventType>Link.Status</nmwg:eventType>\n";
+		$md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
 		$md .= "</nmwg:metadata>\n";
 		push @link_mds, $md;
 		$i++;
@@ -332,7 +333,8 @@ sub parseLookupRequest {
 
 				if ($eventType eq "Database.Dump") {
 					($status, $res) = $self->lookupAllRequest($m, $d);
-				} elsif ($eventType eq "Link.Status") {
+				} elsif ($eventType eq "Link.Status" or
+						$eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
 					($status, $res) = $self->lookupLinkStatusRequest($m, $d);
 				} else {
 					$status = "error.ma.eventtype_not_supported";

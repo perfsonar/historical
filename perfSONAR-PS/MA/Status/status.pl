@@ -66,32 +66,60 @@ if(!$DEBUGFLAG) {
 
 $logger->debug("Starting '".$$."'");
 
-my $ma = new perfSONAR_PS::MA::Status(\%conf, \%ns);
-if ($ma->init != 0) {
-	$logger->error("Couldn't initialize Status MA");
-	exit(-1);
+my ($enable_ma, $enable_mp);
+my ($ma, $ma_pid, $mp, $mp_pid);
+
+if (!defined $conf{DISABLE_MA} or $conf{DISABLE_MA} == 0) {
+	$enable_ma = 1;
+} else {
+	$enable_ma = 0;
 }
 
-my $mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
-if ($mp->init != 0) {
-	$logger->error("Couldn't initialize Status monitor");
-	exit(-1);
+if (!defined $conf{DISABLE_COLLECTOR} or $conf{DISABLE_COLLECTOR} == 0) {
+	$enable_mp = 1;
+} else {
+	$enable_mp = 0;
 }
 
-my $ma_pid = fork();
-if ($ma_pid == 0) {
-	measurementArchive();
-	exit(0);
+if ((!defined $conf{SAMPLE_RATE} or $conf{SAMPLE_RATE} == 0) and $enable_mp) {
+	$logger->warn("Sample rate is unset. Disabling status collector");
+	$enable_mp = 0;
 }
 
-my $mp_pid = fork();
-if ($mp_pid == 0) {
-	measurementPoint();
-	exit(0);
+if ($enable_ma) {
+	$ma = new perfSONAR_PS::MA::Status(\%conf, \%ns);
+	if ($ma->init != 0) {
+		$logger->error("Couldn't initialize Status MA");
+		exit(-1);
+	}
 }
 
-waitpid($mp_pid, 0);
-waitpid($ma_pid, 0);
+if ($enable_mp) {
+	$mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
+	if ($mp->init != 0) {
+		$logger->error("Couldn't initialize Status monitor");
+		exit(-1);
+	}
+}
+
+if ($enable_ma) {
+	$ma_pid = fork();
+	if ($ma_pid == 0) {
+		measurementArchive();
+		exit(0);
+	}
+}
+
+if ($enable_mp) {
+	$mp_pid = fork();
+	if ($mp_pid == 0) {
+		measurementPoint();
+		exit(0);
+	}
+}
+
+waitpid($ma_pid, 0) if ($enable_ma);
+waitpid($mp_pid, 0) if ($enable_mp);
 
 sub measurementArchive {
 	$logger->debug("Starting '".$$."' as the MA.");
@@ -121,7 +149,7 @@ sub measurementPoint {
 
 		$mp->collectMeasurements($do_update);
 
-		sleep($conf{"MP_SAMPLE_RATE"});
+		sleep($conf{"SAMPLE_RATE"});
 		$i++;
 	}
 }
