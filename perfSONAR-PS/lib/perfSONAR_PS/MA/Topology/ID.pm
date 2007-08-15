@@ -109,8 +109,8 @@ sub idBaseLevel($) {
 sub idEncode($) {
 	my ($id) = @_;
 
-	$id =~ s/:/%3A/g;
 	$id =~ s/%/%25/g;
+	$id =~ s/:/%3A/g;
 	$id =~ s/#/%23/g;
 	$id =~ s/\//%2F/g;
 	$id =~ s/\?/%3F/g;
@@ -122,10 +122,10 @@ sub idDecode($) {
 	my ($id) = @_;
 
 	$id =~ s/%3A/:/g;
-	$id =~ s/%25/%/g;
 	$id =~ s/%23/#/g;
 	$id =~ s/%2F/\//g;
 	$id =~ s/%3F/?/g;
+	$id =~ s/%25/%/g;
 
 	return $id;
 }
