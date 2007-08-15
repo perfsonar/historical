@@ -716,6 +716,13 @@ sub setVariables {
 	return;
 }
 
+sub setCacheLength($$) {
+	my ($self, $cache_length) = @_;
+
+	if (defined $cache_length and $cache_length ne "") {
+		$self->{"CACHE_LENGTH"} = $cache_length;
+	}
+}
 
 sub addVariable {
 	my ($self, $var) = @_;
@@ -925,258 +932,65 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MP::Status - A module that provides methods for creating structures to gather
-and store data from SNMP sources.  The submodule, 'perfSONAR_PS::MP::Status::SNMPAgent', is
-responsible for the polling of SNMP data from a resource.
+perfSONAR_PS::MP::Status - A module that will collect link status information and
+store the results into a Link Status MA.
 
 =head1 DESCRIPTION
 
-The purpose of this module is to create simple objects that contain all necessary information
-to poll SNMP data from a specific resource.  The objects can then be re-used with minimal
-effort.
+This module loads a set of links and can be used to collect status information
+on those links and store the results into a Link Status MA.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MP::Status;
-use Time::HiRes qw( gettimeofday );
-
-my %conf = ();
-$conf{"METADATA_DB_TYPE"} = "xmldb";
-$conf{"METADATA_DB_NAME"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-$conf{"METADATA_DB_FILE"} = "snmpstore.dbxml";
-$conf{"RRDTOOL"} = "/usr/local/rrdtool/bin/rrdtool";
-$conf{"LOGFILE"} = "./log/perfSONAR-PS-error.log";
-
-my %ns = (
-		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-		netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-		nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-		snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
-	 );
-
-my $mp = new perfSONAR_PS::MP::Status(\%conf, \%ns, "", "");
-$mp->load_measurement_info;
-$mp->prepareData;
-$mp->prepareCollectors;
-
-my($sec, $frac) = Time::HiRes::gettimeofday;
-$mp->prepareTime($sec.".".$frac);
-
-$mp->collectMeasurements;
-
 =head1 DETAILS
 
-The Net::SNMP API is rich with features, and does offer lots of functionality we choose not
-to re-package here.  perfSONAR-PS for the most part is not interested in writing SNMP data,
-   and currently only supports versions 1 and 2 of the spec.  As such we only provide simple
-   methods that accomplish our goals.  We do recognize the importance of these other functions,
-   and they may be provided in the future.
+This module is meant to be used to periodically collect information about Link
+Status. It can do this by running scripts or consulting SNMP servers directly.
+It reads a configuration file that contains the set of links to track. It can
+then be used to periodically obtain the status and then store the results into
+a measurement archive. 
 
-   This module contains a submodule that is not meant to act as a standalone, but rather as
-   a specialized structure for use only in this module.  The functions include:
-
-
-new($log, $host, $port, $version, $community, \%variables)
-
-	The 'log' argument is the name of the log file where error or warning information may be
-	recorded.  The second argument is a string representing the 'host' from which to collect
-	SNMP data.  The third argument is a numerical 'port' number (will default to 161 if unset).
-	It is also possible to supply the port number via the host name, as in 'hostname:port'.
-	The fourth argument, 'version', is a string that represents the version of snmpd that is
-	running on the target host, currently this module supports versions 1 and 2 only.  The
-	fifth argument is a string representing the 'community' that allows snmp reading on the
-	target host.  The final argument is a hash of oids representing the variables to be
-	polled from the target.  All of these arguments are optional, and may be set or
-	re-set with the other functions.
-
-setLog($log)
-
-	(Re-)Sets the log file for the SNMP object.
-
-setHost($host)
-
-	(Re-)Sets the target host for the SNMP object.
-
-setPort($port)
-
-	(Re-)Sets the port for the target host on the SNMP object.
-
-setVersion($version)
-
-	(Re-)Sets the version of snmpd running on the target host.
-
-setCommunity($community)
-
-	(Re-)Sets the community that snmpd is allowing ot be read on the target host.
-
-setSession()
-
-	Establishes a connection to the target host with the supplied information.  It is
-	necessary to have the host, community, and version set for this to work; port will
-	default to 161 if unset.  If changes are made to any of the above variables, the
-	session will need to be re-set from this function
-
-setVariables(\%variables)
-
-	Passes a hash of 'oid' encoded variables to the object; these oids will be used
-	when the 'collectVariables' routine is called to gather the proper values.
-
-addVariable($variable)
-
-	Adds $variable to the hash of oids to be collected when the 'collectVariables'
-	routine is called.
-
-removeVariables()
-
-	Removes all variables from the hash of oids.
-
-removeVariable($variable)
-
-	Removes $variable from the hash of oids to be collected when the 'collectVariables'
-	routine is called.
-
-collectVariables()
-
-	Collects all variables from the target host that are specified in the hash of oids.  The
-	results are returned in a hash with keys representing each oid.  Will return -1
-	on error.
-
-collect($variable)
-
-	Collects the oid represented in $variable, and returns this value.  Will return -1
-	on error.
-
-closeSession()
-
-	Closes the session to the target host.
-
-error($msg, $line)	
-
-	A 'message' argument is used to print error information to the screen and log files
-	(if present).  The 'line' argument can be attained through the __LINE__ compiler directive.
-	Meant to be used internally.
-
-	A brief description using the API:
-
-
-	my %vars = (
-			'.1.3.6.1.2.1.2.2.1.10.2' => ""
-		   );
-
-	my $snmp = new perfSONAR_PS::MP::Status::SNMPAgent(
-			"./error.log", "lager", 161, "1", "public",
-			\%vars
-			);
-
-# or also:
-#
-# my $snmp = new perfSONAR_PS::MP::Status::SNMPAgent;
-# $snmp->setLog("./error.log");
-# $snmp->setHost("lager");
-# $snmp->setPort(161);
-# $snmp->setVersion("1");
-# $snmp->setCommunity("public");
-# $snmp->setVariables(\%vars);
-
-	$snmp->setSession;
-
-	my $single_result = $snmp->collect(".1.3.6.1.2.1.2.2.1.16.2");
-
-	$snmp->addVariable(".1.3.6.1.2.1.2.2.1.16.2");
-
-	my ($status, $res) = $snmp->collectVariables;
-	if ($status != 0) {
-		print "Error collecting variables\n";
-		exit(-1);
-	}
-
-	my %results = %{ $res };
-	foreach my $var (sort keys %results) {
-		print $var , "\t-\t" , $results{$var} , "\n";
-	}
-
-$snmp->removeVariable(".1.3.6.1.2.1.2.2.1.16.2");
-
-# to remove ALL variables
-#
-# $snmp->removeVariables;
-
-$snmp->closeSession;
-
+It includes a submodule SNMPAgent that provides a caching SNMP poller allowing
+easier interaction with SNMP servers.
 
 =head1 API
 
-The offered API is simple, but offers the key functions we need in a measurement point.
+=head2 init($self)
+	This function initializes the collector. It returns 0 on success and -1
+	on failure.
 
-=head2 new(\%conf, \%ns, $store)
+=head2 collectLinkMeasurements($self, $link_id)
+	This function can be called by external users to collect and store the
+	status of a single link.
 
-	The first argument represents the 'conf' hash from the calling MP.  The second argument
-	is a hash of namespace values.  The final value is an LibXML DOM object representing
-	a store.
+=head2 collectMeasurements($self, $interval_number)
+	This function is called by external users to collect and store the
+	status for all links.
 
-=head2 setConf(\%conf)
+=head1 SEE ALSO
 
-	(Re-)Sets the value for the 'conf' hash.
+To join the 'perfSONAR-PS' mailing list, please visit:
 
-=head2 setNamespaces(\%ns)
+https://mail.internet2.edu/wws/info/i2-perfsonar
 
-	(Re-)Sets the value for the 'namespace' hash.
+The perfSONAR-PS subversion repository is located at:
 
-=head2 setStore($store)
+https://svn.internet2.edu/svn/perfSONAR-PS
 
-	(Re-)Sets the value for the 'store' object, which is really just a XML::LibXML::Document
+Questions and comments can be directed to the author, or the mailing list.
 
-=head2 load_measurement_info()
+=head1 VERSION
 
-	Parses the metadata database (specified in the 'conf' hash) and loads the values for the
-	data and metadata objects.
+$Id:$
 
-=head2 prepareData()
+=head1 AUTHOR
 
-	Prepares data db objects that relate to each of the valid data values in the data object.
+Aaron Brown, E<lt>aaron@internet2.eduE<gt>, Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
 
-=head2 prepareCollectors()
+=head1 COPYRIGHT AND LICENSE
 
-	Prepares the 'perfSONAR_PS::MP::Status::SNMPAgent' objects for each of the metadata values in
-	the metadata object.
+Copyright (C) 2007 by Internet2
 
-=head2 prepareTime($time)
-
-	Starts the objects that will keep track of time (in relation to the remote sites).
-
-=head2 collectMeasurements()
-
-	Cycles through each of the 'perfSONAR_PS::MP::Status::SNMPAgent' objects and gathers the
-	necessary values.
-
-	=head1 SEE ALSO
-
-	L<Net::SNMP>, L<perfSONAR_PS::MP::Base>,  L<perfSONAR_PS::MP::General>,
-	L<perfSONAR_PS::Common>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>,
-	L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>, L<XML::LibXML>
-
-	To join the 'perfSONAR-PS' mailing list, please visit:
-
-	https://mail.internet2.edu/wws/info/i2-perfsonar
-
-	The perfSONAR-PS subversion repository is located at:
-
-	https://svn.internet2.edu/svn/perfSONAR-PS
-
-	Questions and comments can be directed to the author, or the mailing list.
-
-	=head1 VERSION
-
-	$Id:$
-
-	=head1 AUTHOR
-
-	Aaron Brown, E<lt>aaron@internet2.eduE<gt>, Jason Zurawski, E<lt>zurawski@internet2.eduE<gt>
-
-	=head1 COPYRIGHT AND LICENSE
-
-	Copyright (C) 2007 by Internet2
-
-	This library is free software; you can redistribute it and/or modify
-	it under the same terms as Perl itself, either Perl version 5.8.8 or,
-	at your option, any later version of Perl 5 you may have available.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
