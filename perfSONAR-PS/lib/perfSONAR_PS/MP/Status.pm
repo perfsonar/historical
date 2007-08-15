@@ -232,8 +232,6 @@ sub parseLinkFile($) {
 
 	$self->{LINKS} = \%links;
 
-	$logger->info(Dumper(\%links));
-
 	return 0;
 }
 
@@ -343,6 +341,8 @@ sub readAgent($$$) {
 	# here is where we could pull in the possibility of a mapping from the
 	# output of the SNMP/script/whatever to "up, down, degraded, unknown"
 
+	$agent_info{"status_type"} = $agent_type;
+
 	return (0, \%agent_info);
 }
 
@@ -357,7 +357,8 @@ sub runAgent($$) {
 	if ($agent{'type'} eq "none") {
 		return (0, "", "unknown");
 	} elsif ($agent{'type'} eq "script") {
-		my $cmd = $agent{'script'};
+		my $cmd .= $agent{'script'}." ".$agent{'status_type'};
+
 		if (defined $agent{'parameters'}) {
 			$cmd .= " ".$agent{'parameters'};
 		}
@@ -368,19 +369,47 @@ sub runAgent($$) {
 		my @lines = <SCRIPT>;
 		close(SCRIPT);
 
-		if ($#lines == 0) {
-			chomp($lines[0]);
-			my ($time, $status) = split(',', $lines[0]);
-			if (lc($status) ne "up" and lc($status) ne "degraded" and lc($status) ne "down") {
-				$measurement_value = "unknown";
-			} else {
-				$measurement_value = lc($status);
-			}
-			$measurement_time = $time;
-		} else {
+		if ($#lines < 0) {
+			my $msg = "script returned no output";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if ($#lines > 0) {
 			my $msg = "script returned invalid output: more than one line";
 			$logger->error($msg);
 			return (-1, $msg);
+		}
+
+		chomp($lines[0]);
+		($measurement_time, $measurement_value) = split(',', $lines[0]);
+
+		$logger->debug("Script returned: ".$lines[0]);
+
+		if (!defined $measurement_time or $measurement_time eq "") {
+ 			my $msg = "script returned invalid output: does not contain measurement time";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		if (!defined $measurement_value or $measurement_value eq "") {
+ 			my $msg = "script returned invalid output: does not contain link status";
+			$logger->error($msg);
+			return (-1, $msg);
+		}
+
+		$measurement_value = lc($measurement_value);
+
+		if ($agent{'status_type'} eq "oper") {
+			if ($self->{CLIENT}->isValidOperState($measurement_value) == 0) {
+				$logger->warn("Unknown operational state: \"$measurement_value\", setting to \"unknown\"");
+				$measurement_value = "unknown";
+			}
+		} else {
+			if ($self->{CLIENT}->isValidAdminState($measurement_value) == 0) {
+				$logger->warn("Unknown administrative state: \"$measurement_value\", setting to \"unknown\"");
+				$measurement_value = "unknown";
+			}
 		}
 	} elsif ($agent{'type'} eq "constant") {
 		$measurement_value = $agent{'constant'};
@@ -391,31 +420,44 @@ sub runAgent($$) {
 		$measurement_time = $agent{'snmp_agent'}->getHostTime;
 		$agent{'snmp_agent'}->closeSession;
 
-		if ($agent{'oid'} eq "1.3.6.1.2.1.2.2.1.8") {
-			if ($measurement_value eq "2") {
-				$measurement_value = "down";
-			} elsif ($measurement_value eq "1") {
-				$measurement_value = "up";
+		if (defined $measurement_value) {
+			if ($agent{'oid'} eq "1.3.6.1.2.1.2.2.1.8") {
+				if ($measurement_value eq "2") {
+					$measurement_value = "down";
+				} elsif ($measurement_value eq "1") {
+					$measurement_value = "up";
+				} else {
+					$measurement_value = "unknown";
+				}
+			} elsif ($agent{'oid'} eq "1.3.6.1.2.1.2.2.1.7") {
+				if ($measurement_value eq "2") {
+					$measurement_value = "down";
+				} elsif ($measurement_value eq "1") {
+					$measurement_value = "normaloperation";
+				} elsif ($measurement_value eq "3") {
+					$measurement_value = "troubleshooting";
+				} else {
+					$measurement_value = "unknown";
+				}
 			} else {
-				$measurement_value = "unknown";
+				# XXX I'm not sure what they actually spit out here...we may need a mapping...
 			}
-		} elsif ($agent{'oid'} eq "1.3.6.1.2.1.2.2.1.7") {
-			if ($measurement_value eq "2") {
-				$measurement_value = "down";
-			} elsif ($measurement_value eq "1") {
-				$measurement_value = "normaloperation";
-			} elsif ($measurement_value eq "3") {
-				$measurement_value = "troubleshooting";
-			} else {
-				$measurement_value = "unknown";
-			}
-		} else {
-			# XXX I'm not sure what they actually spit out here...we may need a mapping...
 		}
-
 	} else {
 		my $msg;
 		$msg = "got an unknown method for obtaining the operational status: ".$agent{'type'};
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (!defined $measurement_value or $measurement_value eq "") {
+		my $msg = "Received no measurement value";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	if (!defined $measurement_time or $measurement_time eq "") {
+		my $msg = "Received no measurement time";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
@@ -525,11 +567,13 @@ sub collectMeasurements($$) {
 		($status, $oper_time, $link_oper_value, $admin_time, $link_admin_value) = $self->collectLinkMeasurements($link_id);
 
 		if ($status != 0) {
-			$logger->error("Couldn't get information on link $link_id");
-			return (-1, $oper_time);
+			$link->{"primary_results"}->{"success"} = 0;
+			$logger->warn("Couldn't get information on link $link_id");
+			next;
 		}
 
 		# cache the results
+		$link->{"primary_results"}->{"success"} = 1;
 		$link->{"primary_results"}->{"oper_time"} = $oper_time;
 		$link->{"primary_results"}->{"oper_value"} = $link_oper_value;
 		$link->{"primary_results"}->{"admin_time"} = $admin_time;
@@ -547,6 +591,8 @@ sub collectMeasurements($$) {
 		next if ($link_id eq $self->{LINKS}->{$link_id}->{"primary"});
 
 		my $link = $self->{LINKS}->{$link_id};
+
+		next if ($link->{"primary_results"}->{"success"} == 0);
 
 		# use the cached the results
 		$oper_time = $link->{"primary_results"}->{"oper_time"};
@@ -694,10 +740,13 @@ sub getVar {
 
 	if (!defined $self->{VARIABLES}->{$var} || !defined $self->{CACHED_TIME} || time() - $self->{CACHED_TIME} > $self->{CACHE_LENGTH}) {
 		$self->{VARIABLES}->{$var} = "";
-		my %results = %{ $self->collectVariables() };
-		if (defined $results{"error"} and $results{"error"} ne "") {
+
+		my ($status, $res) = $self->collectVariables();
+		if ($status != 0) {
 			return undef;
 		}
+
+		my %results = %{ $res };
 
 		$self->{CACHED} = \%results;
 		$self->{CACHED_TIME} = time();
@@ -713,11 +762,13 @@ sub getHostTime {
 
 sub refreshVariables {
 	my ($self) = @_;
-	my %results = $self->collectVariables();
+	my ($status, $res) = $self->collectVariables();
 
-	if (defined $results{"error"} and $results{"error"} ne "") {
+	if ($status != 0) {
 		return;
 	}
+
+	my %results = %{ $res };
 
 	$self->{CACHED} = \%results;
 	$self->{CACHED_TIME} = time();
@@ -812,8 +863,9 @@ sub collectVariables {
 		my $res = $self->{SESSION}->get_request(-varbindlist => \@oids) or $logger->error("SNMP error.");
 
 		if(!defined($res)) {
-			$logger->error("SNMP error: ".$self->{SESSION}->error);
-			return ('error' => -1);
+			my $msg = "SNMP error: ".$self->{SESSION}->error;
+			$logger->error($msg);
+			return (-1, $msg);
 		} else {
 			my %results;
 
@@ -834,11 +886,12 @@ sub collectVariables {
 				$self->{HOSTTICKS} = $new_ticks;
 			}
 
-			return $res;
+			return (0, $res);
 		}
 	} else {
-		$logger->error("Session to \"".$self->{HOST}."\" not found.");
-		return ('error' => -1);
+		my $msg = "Session to \"".$self->{HOST}."\" not found.";
+		$logger->error($msg);
+		return (-1, $msg);
 	}
 }
 
@@ -1031,7 +1084,13 @@ error($msg, $line)
 
 	$snmp->addVariable(".1.3.6.1.2.1.2.2.1.16.2");
 
-	my %results = $snmp->collectVariables;
+	my ($status, $res) = $snmp->collectVariables;
+	if ($status != 0) {
+		print "Error collecting variables\n";
+		exit(-1);
+	}
+
+	my %results = %{ $res };
 	foreach my $var (sort keys %results) {
 		print $var , "\t-\t" , $results{$var} , "\n";
 	}

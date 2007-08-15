@@ -77,7 +77,7 @@ sub buildLinkRequest($$) {
 
 	foreach my $link_id (@{ $links }) {
 		$request .= "<nmwg:metadata id=\"meta$i\">\n";
-		$request .= "  <nmwg:eventType>Link.Status</nmwg:eventType>\n";
+		$request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
 		$request .= "  <nmwg:subject id=\"sub$i\">\n";
 		$request .= "    <nmtopo:link id=\"$link_id\" />\n";
 		$request .= "  </nmwg:subject>\n";

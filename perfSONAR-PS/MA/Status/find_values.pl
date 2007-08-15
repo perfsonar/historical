@@ -3,7 +3,10 @@
 # find_values.pl
 #     This is a sample script to show how status information about a given link
 #     should be output. It simply randomly selects a state based on the
-#     argument passed.
+#     type of status being checked.
+#
+#     The first paramter will always exist and will be the type of status being
+#     looked up: 'admin' or 'oper'
 #
 #     A real script might consult an SNMP MA or consult the router via the CLI
 #

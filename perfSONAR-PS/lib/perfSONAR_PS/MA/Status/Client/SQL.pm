@@ -50,6 +50,18 @@ sub new {
 	bless \%hash => $package;
 }
 
+sub isValidOperState($$) {
+	my ($self, $state) = @_;
+	return 1 if (defined $valid_oper_states{lc($state)});
+	return 0;
+}
+
+sub isValidAdminState($$) {
+	my ($self, $state) = @_;
+	return 1 if (defined $valid_admin_states{lc($state)});
+	return 0;
+}
+
 sub open($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
