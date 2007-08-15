@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w -I ../../lib
 
+#################
+# changeID.pl
+#     This script allows you to change the link_id on a Link Status MA
+#     database. If multiple new ids are specified, each datum in the set is
+#     replaced with a new datum for each new id.
+#################
+
 use strict;
 use Log::Log4perl qw(get_logger :levels);
 
