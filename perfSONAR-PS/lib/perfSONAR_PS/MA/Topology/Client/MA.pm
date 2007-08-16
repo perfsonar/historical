@@ -6,6 +6,7 @@ use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Common;
+use perfSONAR_PS::Transport;
 use Data::Dumper;
 
 sub new {
@@ -83,6 +84,30 @@ sub buildXqueryRequest($) {
 
 }
 
+sub buildChangeTopologyRequest($$) {
+	my ($type, $topology) = @_;
+	my $eventType;
+
+	if ($type eq "add") {
+		$eventType = "http://ggf.org/ns/nmwg/topology/change/add/20070809";
+	} elsif ($type eq "update") {
+		$eventType = "http://ggf.org/ns/nmwg/topology/change/update/20070809";
+	} elsif ($type eq "replace") {
+		$eventType = "http://ggf.org/ns/nmwg/topology/change/replace/20070809";
+	}
+
+	my $request = "";
+
+	$request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+	$request .= "<nmwg:metadata id=\"meta0\">\n";
+	$request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+	$request .= "</nmwg:metadata>\n";
+	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
+	$request .= $topology->toString;
+	$request .= "</nmwg:data>\n";
+	$request .= "</nmwg:message>\n";
+}
+
 sub xQuery($$) {
 	my ($self, $xquery) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
@@ -148,6 +173,51 @@ sub getAll {
 	}
 
 	my $topo_msg = $res;
+
+	foreach my $data ($topo_msg->getElementsByLocalName("data")) {
+		foreach my $metadata ($topo_msg->getElementsByLocalName("metadata")) {
+			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
+				my $topology = $data->find('./nmtopo:topology')->get_node(1);
+				if (defined $topology) {
+					return (0, $topology);
+				} 
+			}
+		}
+	}
+
+	my $msg = "Response does not contain a topology";
+	$logger->error($msg);
+	return (-1, $msg);
+}
+
+sub changeTopology($$) {
+	my ($self, $type, $topology) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my @results;
+	my $error;
+	my ($status, $res);
+
+	my $request = buildChangeTopologyRequest($type, $topology);
+
+	$logger->debug("Change Request: ".$request);
+
+	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
+	if (!defined $host && !defined $port && !defined $endpoint) {
+		my $msg = "Specified argument is not a URI";
+		my $logger->error($msg);
+		return (-1, $msg);
+	}
+
+	($status, $res) = consultArchive($host, $port, $endpoint, $request);
+	if ($status != 0) {
+		my $msg = "Error consulting archive: $res";
+		$logger->error($msg);
+		return (-1, $msg);
+	}
+
+	my $topo_msg = $res;
+
+	$logger->debug("Change Response: ".$topo_msg->toString);
 
 	foreach my $data ($topo_msg->getElementsByLocalName("data")) {
 		foreach my $metadata ($topo_msg->getElementsByLocalName("metadata")) {

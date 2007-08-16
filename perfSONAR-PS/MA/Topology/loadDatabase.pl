@@ -17,30 +17,58 @@ use XML::LibXML;
 use strict;
 use Data::Dumper;
 use perfSONAR_PS::MA::Topology::Client::XMLDB;
+use perfSONAR_PS::MA::Topology::Client::MA;
 use perfSONAR_PS::MA::Topology::Topology;
 use perfSONAR_PS::MA::Topology::ID;
 use Log::Log4perl qw(get_logger :levels);
+use Getopt::Long;
 
 Log::Log4perl->init("logger.conf");
 
-my $ifile = shift;
-my $xmldbenv = shift;
-my $xmldbcontainer = shift;
-my $ofile = shift;
-my $logger = get_logger("perfSONAR_PS::MA::Topology");
+my %opts;
+my $help_needed;
+my $DEBUG;
 
-if (!defined $ifile or !defined $xmldbenv or !defined $xmldbcontainer) {
-	$logger->debug("Error: need to specify input file, xml db environment andxml db container. Also, if you want a file to output the munged XML into");
+my $ok = GetOptions (
+		'debug'    	=> \$DEBUG,
+		'output=s'	=> \$opts{OUTPUT_FILE},
+		'db_dir=s'  	=> \$opts{DB_DIR},
+		'db_filename=s'	=> \$opts{DB_FILENAME},
+		'uri=s'		=> \$opts{URI},
+		'help'     	=> \$help_needed
+	);
+
+my $input_file = shift;
+
+
+if (!defined $input_file or $input_file eq "") {
+	print "Error: you must specify a topology input file\n";
+	$help_needed = 1;
+}
+
+if (!defined $opts{URI} and (!defined $opts{DB_DIR} or !defined $opts{DB_FILENAME})) {
+	print "Error: you must specify either a URI or the Database directory/filename\n";
+	$help_needed = 1;
+}
+
+if (not $ok or $help_needed) {
+	print "$0: loads a topology into a database replacing the existing topology elements.\n";
+	print "    [--output=NORMALIZED_TOPOLOGY_FILE] [--db_dir=DATABASE_DIRECTORY] [--db_filename=DATABASE_FILENAME] [--uri=REMOTE_TOPOLOGY_ARCHIVE] INPUT_FILE\n";
 	exit(-1);
 }
 
-my $parser = XML::LibXML->new();
-my $doc = $parser->parse_file($ifile);
+my $logger = get_logger("perfSONAR_PS::MA::Topology");
+my ($status, $res);
 
-my ($status, $res) =  topologyNormalize($doc->documentElement());
-if ($status != 0) {
-	$logger->debug("Error parsing topology: $res");
-	exit(-1);
+my $parser = XML::LibXML->new();
+my $doc = $parser->parse_file($input_file);
+
+if (defined $opts{OUTPUT_FILE}) {
+	($status, $res) =  topologyNormalize($doc->documentElement());
+	if ($status != 0) {
+		$logger->debug("Error normalizing topology: $res");
+		exit(-1);
+	}
 }
 
 my %ns;
@@ -53,7 +81,13 @@ foreach my $namespace (@namespaces) {
 	$ns{$namespace->prefix} = $namespace->getNamespaceURI;
 }
 
-my $client = new perfSONAR_PS::MA::Topology::Client::XMLDB($xmldbenv, $xmldbcontainer, \%ns);
+my $client;
+if (defined $opts{URI}) {
+	$client = new perfSONAR_PS::MA::Topology::Client::MA($opts{URI});
+} else {
+	$client = new perfSONAR_PS::MA::Topology::Client::XMLDB($opts{DB_DIR}, $opts{DB_FILE}, \%ns);
+}
+
 ($status, $res) = $client->open;
 if ($status != 0) {
 	$logger->debug("Couldn't open requested database");
@@ -66,8 +100,8 @@ if ($status != 0) {
 	exit(-1);
 }
 
-if (defined $ofile) {
-	$doc->toFile($ofile);
+if (defined $opts{OUTPUT_FILE}) {
+	$doc->toFile($opts{OUTPUT_FILE});
 }
 
 exit(0);

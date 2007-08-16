@@ -209,7 +209,7 @@ sub topologyNormalize_links($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Normalizing links");
+	$logger->debug("Normalizing links");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
@@ -373,7 +373,7 @@ sub topologyNormalize_ports($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Normalizing ports");
+	$logger->debug("Normalizing ports");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
@@ -458,7 +458,7 @@ sub topologyNormalize_nodes($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Normalizing nodes");
+	$logger->debug("Normalizing nodes");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $fqid = $domain->getAttribute("id");
@@ -529,7 +529,7 @@ sub topologyNormalize_domains($$) {
 	my ($root, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Normalizing domains");
+	$logger->debug("Normalizing domains");
 
 	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
 		my $id = $domain->getAttribute("id");
@@ -603,7 +603,7 @@ sub validateDomain($) {
 	my ($domain) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Validating domain");
+	$logger->debug("Validating domain");
 
 	my $id = $domain->getAttribute("id");
 	if (!defined $id or $id eq "") {
@@ -637,17 +637,17 @@ sub validateDomain($) {
 		return (-1, $msg);
 	}
 
-	foreach my $path ($domain->getChildrenByTagNameNS("*", "path")) {
-		my $msg = "Found domain with path in it";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	foreach my $network ($domain->getChildrenByTagNameNS("*", "network")) {
-		my $msg = "Found domain with network in it";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
+#	foreach my $path ($domain->getChildrenByTagNameNS("*", "path")) {
+#		my $msg = "Found domain with path in it";
+#		$logger->error($msg);
+#		return (-1, $msg);
+#	}
+#
+#	foreach my $network ($domain->getChildrenByTagNameNS("*", "network")) {
+#		my $msg = "Found domain with network in it";
+#		$logger->error($msg);
+#		return (-1, $msg);
+#	}
 
 	return (0, "");
 }
@@ -656,7 +656,7 @@ sub validateNode($) {
 	my ($node) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Validating node");
+	$logger->debug("Validating node");
 
 	my $id = $node->getAttribute("id");
 	if (!defined $id or $id eq "") {
@@ -715,7 +715,7 @@ sub validatePort($) {
 	my ($port) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Validating port");
+	$logger->debug("Validating port");
 
 	my $id = $port->getAttribute("id");
 	if (!defined $id or $id eq "") {
@@ -774,7 +774,7 @@ sub validateLink($) {
 	my ($link) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
 
-	$logger->info("Validating link");
+	$logger->debug("Validating link");
 
 	my $id = $link->getAttribute("id");
 	if (!defined $id or $id eq "") {
