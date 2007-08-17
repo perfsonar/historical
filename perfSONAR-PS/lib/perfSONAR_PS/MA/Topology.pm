@@ -288,6 +288,8 @@ sub changeRequest($$$$) {
 	my ($status, $res);
 	my $localContent = "";
 
+	$logger->info("Req: ".$d->toString);
+
 	my $topology = $d->find("./*[local-name()='topology']")->get_node(1);
 	if (!defined $topology) {
 		my $msg = "No topology defined in change topology request";
@@ -360,9 +362,7 @@ sub queryRequest($$$$) {
 			return ("error.common.storage.query", $msg);
 		}
 
-		$dataContent .= "<nmtopo:topology>\n";
 		$dataContent .= $res;
-		$dataContent .= "</nmtopo:topology>\n";
 	} else {
 		my $msg = "Unknown event type: $type";
 		$logger->error($msg);

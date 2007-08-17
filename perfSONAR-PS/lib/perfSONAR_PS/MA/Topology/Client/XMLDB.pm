@@ -734,6 +734,13 @@ sub lookupElement($$$$$$) {
 						last;
 					}
 				}
+
+				if (!defined $port) {
+					my $msg = "Port $port_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
+
 			}
 
 			$ports->{$port_id} = $port;
@@ -769,6 +776,14 @@ sub lookupElement($$$$$$) {
 						last;
 					}
 				}
+
+				if (!defined $node) {
+					my $msg = "Node $node_id not found";
+					$logger->error($msg);
+					return (-1, $msg);
+				} 
+
+
 			}
 
 			$nodes->{$node_id} = $node;
@@ -798,6 +813,8 @@ sub lookupElement($$$$$$) {
 			return (0, $domain);
 		}
 	}
+
+	return (-1, "It should never get here");
 }
 
 1;
