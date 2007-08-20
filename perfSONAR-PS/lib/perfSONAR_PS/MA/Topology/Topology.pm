@@ -354,18 +354,26 @@ sub topologyNormalize_links($$$$) {
 			my $port = $topology->{"ports"}->{$port_id};
 
 			if (!defined $port) {
+				my $msg = "Link $fqid references non-existent domain $port_id, moving to top-level";
+				$logger->debug($msg);
+
 				# move it to the top level
 				$root->removeChild($link);
 				$top_level->appendChild($link);
 			} else {
+				my $msg = "Moving link $fqid to port $port_id";
+				$logger->debug($msg);
+
 				# remove the link from $root and add it to the port
 				$root->removeChild($link);
 				portReplaceChild($port, $link, $fqid);
 			}
+
 			$logger->debug("Adding $fqid");
-			$topology->{"links"}->{$fqid} = $link;
-			$link->setAttribute("id", $fqid);
 		}
+
+		$topology->{"links"}->{$fqid} = $link;
+		$link->setAttribute("id", $fqid);
 	}
 }
 
