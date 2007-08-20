@@ -25,7 +25,10 @@ sub init {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	$self->SUPER::init;
+	if ($self->SUPER::init != 0) {
+		$logger->error("Couldn't initialize parent class");
+		return -1;
+	}
 
 	if (!defined $self->{CONF}->{"TOPO_DB_TYPE"} or $self->{CONF}->{"TOPO_DB_TYPE"} eq "") {
 		$logger->error("No database type specified");
