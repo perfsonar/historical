@@ -288,7 +288,7 @@ sub queryByName {
 }
 
 sub getDocumentByName {
-  my ($self, $name) = @_; 
+  my ($self, $name, $error) = @_; 
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   my $content = "";
   if(defined $name and $name ne "") {
@@ -298,32 +298,43 @@ sub getDocumentByName {
       my $document = $self->{CONTAINER}->getDocument($self->{TRANSACTION}, $name);
       $content = $document->getContent;
       $self->{TRANSACTION}->commit();
-      $logger->debug("Document found.");
     };
     if(my $e = catch std::exception) {
       if($e->getExceptionCode() == 11) {
-        $logger->debug("Document not found.");
-        return -1;
+        my $msg = "Document not found";
+        $logger->debug($msg);
+        $$error = $msg if defined $error;
+	return "";
       }
       else {
-        $logger->error("Error \"".$e->what()."\".");
-        return -1;      
+        my $msg = "Error \"".$e->what()."\".";
+        $logger->error($msg);
+        $$error = $msg if defined $error;
+	return "";
       }
     }
     elsif($e = catch DbException) {
-      $logger->error("Error \"".$e->what()."\".");    
-      return -1;
-    }        
+      my $msg = "Error \"".$e->what()."\".";
+      $logger->error($msg);
+      $$error = $msg if defined $error;
+      return "";
+    }
     elsif($@) {
-      $logger->error("Error \"".$@."\".");      
-      return -1;
-    }   
+      my $msg = "Error \"".$@."\".";
+      $logger->error($msg);
+      $$error = $msg if defined $error;
+      return "";
+    }
   }
   else {
-    $logger->error("Missing argument");   
-    return -1;
-  }  
-  return (0, $content); 
+    my $msg = "Missing argument";
+    $logger->error($msg);
+    $$error = $msg if defined $error;
+    return "";
+  }
+
+  $$error = "" if defined $error;
+  return ($content);
 }
 
 sub updateByName {

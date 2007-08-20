@@ -673,9 +673,9 @@ sub lookupElement($$$$$$) {
 			my ($status, $res) = $self->lookupElement($port_id, $domains, $nodes, $ports, $links);
 			my $link;
 			if ($status != 0) {
-				($status, my $doc) = $self->{DATADB}->getDocumentByName("link_".$link_id);
-
-				if ($status != 0) {
+				my $error;
+				my $doc = $self->{DATADB}->getDocumentByName("link_".$link_id, \$error);
+				if ($error ne "") {
 					my $msg = "Link $link_id not found";
 					$logger->error($msg);
 					return (-1, $msg);
@@ -714,9 +714,10 @@ sub lookupElement($$$$$$) {
 			my ($status, $res) = $self->lookupElement($node_id, $domains, $nodes, $ports, $links);
 			my $port;
 			if ($status != 0) {
-				($status, my $doc) = $self->{DATADB}->getDocumentByName("port_".$port_id);
+				my $error;
+				my $doc = $self->{DATADB}->getDocumentByName("port_".$port_id, \$error);
 
-				if ($status != 0) {
+				if ($error ne "") {
 					my $msg = "Port $port_id not found";
 					$logger->error($msg);
 					return (-1, $msg);
@@ -756,9 +757,10 @@ sub lookupElement($$$$$$) {
 			my ($status, $res) = $self->lookupElement($domain_id, $domains, $nodes, $ports, $links);
 			my $node;
 			if ($status != 0) {
-				($status, my $doc) = $self->{DATADB}->getDocumentByName("node_".$node_id);
+				my $error;
+				my $doc = $self->{DATADB}->getDocumentByName("node_".$node_id, \$error);
 
-				if ($status != 0) {
+				if ($error ne "") {
 					my $msg = "Node $node_id not found";
 					$logger->error($msg);
 					return (-1, $msg);
@@ -782,8 +784,6 @@ sub lookupElement($$$$$$) {
 					$logger->error($msg);
 					return (-1, $msg);
 				} 
-
-
 			}
 
 			$nodes->{$node_id} = $node;
@@ -796,9 +796,10 @@ sub lookupElement($$$$$$) {
 		if (defined $domains->{$domain_id}) {
 			return (0, $domains->{$domain_id});
 		} else {
-			my ($status, $doc) = $self->{DATADB}->getDocumentByName("domain_".$domain_id);
+			my $error;
+			my $doc = $self->{DATADB}->getDocumentByName("domain_".$domain_id, \$error);
 
-			if ($status != 0) {
+			if ($error ne "") {
 				my $msg = "Domain $domain_id not found";
 				$logger->error($msg);
 				return (-1, $msg);
