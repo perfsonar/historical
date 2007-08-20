@@ -216,7 +216,7 @@ sub acceptCall {
     if($self->{REQUEST}->method eq "POST") {
       my $action = $self->{REQUEST}->headers->{"soapaction"} ^ $self->{NAMESPACE};    
       if (!$action =~ m/^.*message\/$/) {
-        $msg = "Received message with 'INVALID ACTION TYPE'.";
+        $msg = "Received message with invalid action type: \"$action\".";
         $logger->error($msg);     
         $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);       
 	      $$error = $msg if (defined $error);
@@ -309,7 +309,7 @@ sub acceptCall {
       }
     }
     else {
-      $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
+      $msg = "Received message with invalid request, are you using a web browser?";
       $logger->error($msg);     
       $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
       $$error = $msg if (defined $error);
@@ -317,7 +317,7 @@ sub acceptCall {
     }   
   }
   else { 
-    $msg = "Received message with 'INVALID ENDPOINT'.";
+    $msg = "Received message with invalid endpoint: \"$requestEndpoint\"";
     $logger->error($msg);     
     $self->{RESPONSEMESSAGE} = getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg);  
     $$error = $msg if (defined $error);
