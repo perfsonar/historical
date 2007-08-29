@@ -1,5 +1,78 @@
 #!/usr/bin/perl -w -I ../../lib
 
+=head1 NAME
+
+pingerMP.pl - An PingER based collection agent (MeasurementPoint). Exports results in perfSONAR
+schema format to a remote MA
+
+=head1 DESCRIPTION
+
+This script creates an MP for a PingER based collector.  The service is not yet also capable
+of registering with an LS instance.  
+
+=head1 SYNOPSIS
+
+./pingerMP.pl [--verbose | --help]
+
+The verbose flag allows lots of debug options to print to the screen.  If the option is
+omitted the service will run in daemon mode.
+
+=head1 FUNCTIONS
+
+The following functions are used within this script to execute the major tasks of
+LS registration, MP operation, and MA listening and delivery.
+
+=head2 measurementPoint
+
+This function, meant to be used in the context of a thread, will continuously poll
+the 'store.xml' list of metadata to gather measurements, storing them in backend
+storage also specified by the 'store.xml' file.
+
+=head2 registerLS
+
+This function, meant to be used in the context of a thread, will continously register
+and update its information with the LS specified in the conf file.  
+
+=head2 daemonize
+
+Sends the program to the background by eliminating ties to the calling terminal.  
+
+=head1 REQUIRES
+
+Getopt::Long;
+threads
+threads::shared
+Thread::Semaphore
+Time::HiRes qw( gettimeofday );
+POSIX qw( setsid )
+Log::Log4perl
+perfSONAR_PS::Common
+perfSONAR_PS::Transport
+perfSONAR_PS::MP::PingER
+perfSONAR_PS::XML::Base
+perfSONAR_PS::XML::PingER
+
+
+=head1 AUTHOR
+
+Yee-Ting Li <ytl@slac.stanford.edu>
+
+=head1 VERSION
+
+$Id: pingMP.pl 224 2007-06-11 13:25:58Z zurawski $
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Yee-Ting Li
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+
+=cut
+
+
 use warnings;
 use strict;
 use Getopt::Long;
@@ -13,16 +86,13 @@ use Log::Log4perl qw(get_logger :levels);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MP::PingER;
 
+# get the logging instance
 Log::Log4perl->init("logger.conf");
-
 my $logger = get_logger("perfSONAR_PS");
-
-
-
 
 my $DEBUGFLAG = '';
 my $HELP = '';
-my $CONFIGURATION = 'pinger3.xml';
+our $CONFIGURATION = 'pingerMP.conf';
 
 my $status = GetOptions (
 		'config=s' => \$CONFIGURATION,
@@ -30,7 +100,7 @@ my $status = GetOptions (
         'help' => \$HELP );
 
 if(!$status or $HELP) {
-  print "$0: starts the pingER MP and MA.\n";
+  print "$0: starts the pingER MP.\n";
   print "\t$0 [--verbose --help]\n";
   exit(1);
 }
@@ -38,12 +108,13 @@ if(!$status or $HELP) {
 my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-  pinger => "http://ggf.org/ns/nmwg/tools/pinger/1.0/",
-  nmwgt4 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+  nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+  nmtl4 => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
 );
 
-    # set logging level
+# set logging level
 if($DEBUGFLAG) {
   $logger->level($DEBUG);    
 }
@@ -52,13 +123,17 @@ else {
 }
 
 if(!$DEBUGFLAG) {
-		# flush the buffer
+  # flush the buffer
   $| = 1;
-		# start the daemon
+  # start the daemon
   &daemonize;
 }
 
 $logger->debug("Starting '".threads->tid()."'");
+
+# parse the configuraiton file
+my %conf = ();
+readConfiguration( $CONFIGURATION, \%conf);
 
 my $reval:shared = 0;
 my $sem = Thread::Semaphore->new(1);
@@ -79,22 +154,19 @@ $mpThread->join();
 
 
 
-
+###
+# create an instance of the MP
+###
 sub measurementPoint {
   $logger->debug("Starting '".threads->tid()."' as the MP.");
   
-  my $mp = new perfSONAR_PS::MP::PingER( $CONFIGURATION, \%ns,);
+  my $mp = new perfSONAR_PS::MP::PingER( \%conf, \%ns,);
   $mp->parseMetadata;
   $mp->prepareMetadata;
 
+  # start scheduler for pings
   $mp->run( );
 
-#  $mp->prepareData;
-#  $mp->prepareCollectors;  
-#  while(1) {
-#    $mp->collectMeasurements;
-#    sleep($conf{"MP_SAMPLE_RATE"});
-#  }
   return;  
 }
 
@@ -111,3 +183,4 @@ sub daemonize {
   umask 0;
 }
 
+1;

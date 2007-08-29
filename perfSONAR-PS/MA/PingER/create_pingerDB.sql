@@ -20,6 +20,7 @@ CREATE TABLE  hostInfo  (
  longitude  float,
  latitude  float,
  contact_id int, 
+ FOREIGN KEY ( ip_name ) references host ( ip_name ), 
  FOREIGN KEY ( contact_id) references contacts ( contact_id), 
  FOREIGN KEY ( address_id) references address  (  address_id), 
  FOREIGN KEY ( type_id) references  types( type_id), 
@@ -66,13 +67,13 @@ CREATE TABLE contacts (
 #
 # ipaddr  table to keep track on what ip address was assigned with pinger hostname
 #
-CREATE TABLE   ipaddr_intervals (
+CREATE TABLE   host (
  ip_name varchar(52) NOT NULL, 
  ip_number varchar(15) NOT NULL,
- active_start  bigint(12) NOT NULL, 
- active_end bigint(12)  NOT NULL, 
+-- active_start  bigint(12) NOT NULL, 
+-- active_end bigint(12)  NOT NULL, 
  comments blob,
- FOREIGN KEY (ip_name) references hostInfo (ip_name),
+-- FOREIGN KEY (ip_name) references hostInfo (ip_name),
  PRIMARY KEY  (ip_name, ip_number)); 
 
 #
@@ -89,7 +90,7 @@ CREATE TABLE  metaData  (
  deadline smallint,
  ttl smallint,
  INDEX (ip_name_src,ip_name_dst,  packetSize, count),
- FOREIGN KEY (ip_name_src, ip_name_dst) references hostInfo (ip_name, ip_name),
+ FOREIGN KEY (ip_name_src, ip_name_dst) references host (ip_name, ip_name),
  PRIMARY KEY  (metaID));
 
 

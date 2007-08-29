@@ -1,4 +1,69 @@
 #!/usr/bin/perl -w
+
+=head1 NAME
+
+perfSONAR_PS::MP::PingER - A module that performs the tasks of an MP designed for the 
+ping measurement under the framework of the PingER project
+
+=head1 DESCRIPTION
+
+The purpose of this module is to create objects that contain all necessary information
+to make ping measurements to various hosts. It supports a scheduler of to perform the pings
+as defined in the store.xml file (which is locally stored under $self->{'STORE'}).
+
+Internally, two helper packages are part of this module: an Agent class, which performs the tests, 
+a Scheduler class which organises the tests to be run, and a Config class which parses the STORE
+file.
+
+=head1 SYNOPSIS
+
+    use perfSONAR_PS::MP::PingER;
+
+    my %conf = ();
+    
+    # definition of where the list of hosts and parameters to ping are located
+    $conf{"METADATA_DB_TYPE"} = "file";
+    $conf{"METADATA_DB_NAME"} = "";
+    $conf{"METADATA_DB_FILE"} = "store.xml";
+
+    # command to run pings; the various variables will be subsituted upon execution
+    # with the specific parameters of the test
+    $conf{"PING"} = "/bin/ping -n -c %count% -i %interval% -s %packetSize% -t %ttl%  %destination%";
+
+    # port and endpoint for the MP to listen on for on-demand measurements
+    $conf{"PORT"} = 8080;
+    $conf{"ENDPOINT"} = '/perfSONAR_PS/services/pingMP';
+    $conf{"LS_REGISTRATION_INTERVAL"} = 60;
+    $conf{"LS_INSTANCE"} = 'http://mead:8080/axis/services/LS';
+
+    # namespace definitions    
+    my %ns = (
+      nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+      nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+      pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/"    
+    );
+    
+    # create a new instance of the MP
+    my $mp = new perfSONAR_PS::MP::PingER(\%conf, \%ns, "");
+    
+    # or:
+    #
+    # $mp = new perfSONAR_PS::MP::PingER;
+    # $mp->setConf(\%conf);
+    # $mp->setNamespaces(\%ns);
+    # $mp->setStore();
+
+    my $mp = new perfSONAR_PS::MP::PingER( \%conf, \%ns,);
+    $mp->parseMetadata;
+    $mp->prepareMetadata;
+
+    # start scheduler for pings
+    $mp->run( );
+
+
+=cut
+
+
 use perfSONAR_PS::Common;
 
 use perfSONAR_PS::DB::File;
@@ -24,32 +89,31 @@ our @ISA = qw(perfSONAR_PS::MP::Base);
 my $logger = get_logger("perfSONAR_PS::MP::PingER");
 
 
-###
-# overload new to support new configuraiton from xml
-###
-sub new {
-  my ($package, $config, $ns ) = @_; 
-  my %hash = ();
-  if(defined $ns and $ns ne "") {  
-    $hash{"NAMESPACES"} = \%{$ns};     
-  }    
-  if(defined $config and $config ne "") {
-  	# xpath
-    $hash{"CONF"}{'METADATA_DB_TYPE'} = 'file';
-    $hash{"CONF"}{'METADATA_DB_FILE'} = $config;
-  }
-  
-  %{$hash{"DATADB"}} = ();
-  %{$hash{"LOOKUP"}} = ();
-  
-  $hash{"CONFIG"} = undef;
-  $hash{"SCHEDULE"} = undef;
+=head2 new(\%conf, \%ns, $store)
 
-  bless \%hash => $package;
+The first argument represents the 'conf' hash from the calling MP.  The second argument
+is a hash of namespace values.  The final value is an LibXML DOM object representing
+a store.
+
+
+=head2 conf( \%conf )
+
+Gets/sets the instance of %conf
+=cut
+sub conf
+{
+	my $self = shift;
+	if ( @_ ) {
+		$self->{CONF} = shift;
+	}
+	return $self->{CONF};
 }
 
 
+=head2 config( \%conf )
 
+Gets/sets the instance of xml file
+=cut
 sub config
 {
 	my $self = shift;
@@ -58,6 +122,11 @@ sub config
 	}
 	return $self->{CONFIG};
 }
+
+=head2 shedule( $scheduler )
+
+Gets/sets the instance of the Scheduler
+=cut
 
 sub schedule
 {
@@ -69,17 +138,21 @@ sub schedule
 }
 
 
-###
-# parses the config file and stores it internally as $self->{STORE} (as dom)
-###
+=head2 parseMetadata( )
+
+Parses the config file (defined by $conf{'METADATA_DB_TYPE'} and $conf{'METADATA_DB_FILE'}), then
+stores it internally as $self->{STORE} (as DOM)
+
+Currently only supports $conf{'METADATA_DB_TYPE'} == 'file'
+
+=cut
+
 sub parseMetadata {
   my($self) = @_;
 
-  
   if( $self->{CONF}->{'METADATA_DB_TYPE'} eq 'file' ) {   
     $self->{STORE} = parseFile($self);
     cleanMetadata(\%{$self});
-    
   }
   else {
     $logger->error($self->{CONF}->{"METADATA_DB_TYPE"}." is not supported."); 
@@ -88,16 +161,22 @@ sub parseMetadata {
 }
 
 
-###
-# generates config and schedules to be used
-###
-sub prepareMetadata {
+=head2 prepareMetadata()
 
+Generates the config and schedules to be used for the instance of the MP
+
+=cut
+sub prepareMetadata 
+{
   my($self) = @_;
   
   # config 
   my $dom = perfSONAR_PS::MP::PingER::Config->new( $self->{STORE} );
-  $self->config( $dom  );
+  # setup the source details
+  $dom->sourceIP( $self->conf()->{LOCAL_IP} );
+  $dom->sourceName( $self->conf()->{LOCAL_HOSTNAME} );
+  
+  $self->config( $dom );
   #$logger->info( "CONFIG: " . $self->config()->dump() );
   
   # schedule 
@@ -111,12 +190,12 @@ sub prepareMetadata {
 }
 
 
-###
-# starts the thread so that it will go through the schedule and determine when and how to run
-# tests
-###
+=head2 run( )
+
+Starts an endless loop scheduling and running tests as defined in $self->{'STORE'} until the
+program is terminated.
+=cut
 my $numChildren = 0;
-my $maxChildren = 8;
 my %child = ();
 my $i = 0;
 $SIG{CHLD} = \&REAPER;
@@ -130,24 +209,25 @@ sub run
 	{
     
 		my $badExit = 0;
+
+		#$logger->info( "MAX THREADS: "  . $self->conf()->{MAX_THREADS} );
 	
 		# wait for a signal from a dead child or something
 		# if all children are occupised
-		if ( $numChildren >= $maxChildren ) {
+		if ( $numChildren >= $self->conf()->{MAX_THREADS} ) {
 			$logger->debug("at max forks; waiting...");
 			sleep;
 		}
 	
 		if (! exists $child{$i} )
 		{
-			my ( $testTime, $test ) = $self->waitForNextTest();
+			my ( $testTime, $pingId ) = $self->waitForNextTest();
 	
-			if ( defined $test )
+			if ( defined $pingId )
 			{
-				$logger->debug("[$i] About to run test " . $self->schedule()->getTestHost($test) . " using " . $self->schedule()->getTestPingId($test));
-				( $testTime, $test ) = $self->schedule()->popTest( );
-				$self->schedule()->addNextTest( $test );
-				$self->startTest( $i, $test );
+				( $testTime, $pingId ) = $self->schedule()->popTest( );
+				$self->schedule()->addNextTest( $pingId );
+				$self->startTest( $i, $pingId );
 			} 
 			else {
 				$badExit = 1;
@@ -156,25 +236,25 @@ sub run
 	
 		if ( ! $badExit ) {
 			$i++;
-			$i -= $maxChildren if( $i >= $maxChildren );
+			$i -= $self->conf()->{MAX_THREADS} if( $i >= $self->conf()->{MAX_THREADS} );
 		}	    
 
 	}
 	return;
 }
 
-###
-# sleeps around unti lthe next test; prob is that ipc can cause this to exit for any other
-# signal. therefore, need some cleverness
-###
+=head2 waitForNextTest( )
+
+Blocking function that sleeps until the next test. Problem is that ipc can cause the sleep to exit
+for any signal. Therefore, some cleverness in determine the actual slept time is required.
+=cut
 sub waitForNextTest
 {
 	my $self = shift;
 
-	my ( $time, $test ) = $self->schedule()->peekTest();
+	my ( $time, $pingId ) = $self->schedule()->peekTest();
 	my $now = &perfSONAR_PS::MP::PingER::Schedule::getNowTime();
 	my $wait = $time - $now;
-	#$logger->debug( "TEST: $time, NOW:: $now ($wait) $test");
 
 	# wait some time for a signal
 	if ( $wait > 0.0 ) {
@@ -191,11 +271,12 @@ sub waitForNextTest
 		
 	}
 
-	return ( $time, $test );
+	return ( $time, $pingId );
 
 }
 
-sub REAPER {                        # takes care of dead children
+# takes care of dead children
+sub REAPER {                        
     $SIG{CHLD} = \&REAPER;
     my $pid = undef;
     while( ( $pid = waitpid( -1, &WNOHANG) ) > 0 ) 
@@ -211,13 +292,19 @@ sub REAPER {                        # takes care of dead children
 }
 
 
+=head2 startTest( $pid, $Test )
 
+Spawns off a forked instance in order to run the object Test that defines the metadataId of the test
+to the run at the time this function is called. The forked instance will also deal with the storage
+defintions fo the Test. The $pid is required to keep a state of all tests that are currently being
+run.
+=cut
 sub startTest
 {
 	my $self = shift;
 	my $forkedProcessNumber = shift;
-	my $test = shift;
-
+	my $pingId = shift;
+	
 	   # block signal for fork
 	    my $sigset = POSIX::SigSet->new(SIGINT);
 	    sigprocmask( SIG_BLOCK, $sigset)
@@ -248,36 +335,52 @@ sub startTest
 		    $SIG{HUP} ='DEFAULT';
 			
 			# run the test
-			my $agent = $self->prepareCollector( $test, $self->{"NAMESPACES"} );
-			$agent->collect();
+			my $test = $self->schedule()->getTest( $pingId );
+			my $agent = $self->prepareCollector( $test );
 
-			# get the results out
-			$logger->info( "RESULTS for\n" . Dumper $agent->getResults() );
-			#my $dom = $agent->getResultsDOM();
-			#$logger->info( "RESULTS for\n" . $dom->toString() );
-	
-			# write to teh stores
-			my $host = $self->schedule()->getTestHost( $test );
-			my $nodemetadata = $self->config()->getNodeMetadata( $host );
-			$self->prepareData( $host, $nodemetadata );
-			$self->storeData( $host, $agent, $nodemetadata );
+			$logger->info( "Staring test using metadataId $pingId...");
 			
+			if ( $agent->collect() < 0 ) {
+				
+				# error!
+				$logger->fatal( "Could not perform test with metadataId " . $self->schedule()->getTestPingId( $test ) );
+				
+			} else {
+
+				# get the results out
+				$logger->debug( "RESULTS for\n" . Dumper $agent->getResults() );
+		
+				# write to teh stores
+				#my $host = $self->schedule()->getTestHost( $test );
+				#my $nodemetadata = $self->config()->getNodeMetadata( $host );
+				#$logger->info( Dumper $test );
+				$self->prepareData( $pingId );
+				$self->storeData( $pingId, $agent );
+
+			}			
 			exit;
 	    }
 
 }
 
 
-sub prepareData {
-  my $self = shift;
-  my $node = shift;
-  my $nodeMetaData = shift;
- 
-   my $store = $self->config()->getNodeStores( $node, $nodeMetaData );
+=head2 prepareData( $metadataId )
 
-  foreach my $id ( keys %$store ) {
-	my $type = $store->{$id}->{Type};
-  	my $uri = $store->{$id}->{URI};
+Prepares the storage of PingER data to the stores defined in $self->{'STORE'}.
+=cut
+sub prepareData {
+	
+  my $self = shift;
+  my $pingId = shift;
+  
+  my $stores = $self->config()->getStores( $pingId );
+
+  foreach my $id ( keys %$stores ) {
+  	
+	my $type = $stores->{$id}->{type};
+  	my $uri = $stores->{$id}->{file};
+  	
+  	$logger->debug( "Type: $type, $uri: $uri");
   	  	
   	if ( $type eq 'MA') {
   		my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $uri );
@@ -307,52 +410,46 @@ sub prepareData {
 }
 
 
-###
-# returns a agent to run test given
-###
+=head2 prepareCollector( $Test )
+
+Creates and returns a PingER Agent to run the given $Test
+=cut
 sub prepareCollector {
   my $self = shift;
   my $test = shift;
-  my $ns = shift;
-  
-  # need to get the relevant datastrcuture for the node test
-  my $node = $self->schedule()->getTestHost( $test );
-  my $ping = $self->schedule()->getTestPingId( $test );
-  my $hash = $self->config()->getNodeMetadata( $node, $ping );
   
   # get the command line string
-  my $cmd = undef;
-
-  if ( $hash->{$node}->{Ping}->{$ping}->{TestProtocol} eq 'IPV4') {
-    $cmd = $self->config()->getSystemParam( 'PingV4Cmd' );
-  } elsif ( $hash->{$node}->{Ping}->{$ping}->{TestProtocol} eq 'IPV6' ) {
-	$cmd = $self->config()->getSystemParam( 'PingV6Cmd' ); 
-  } else {
-  	$logger->fatal( "Do not understand Ping Protocol '" . $hash->{$node}->{Ping}->{$ping}->{Protocol} . "'.");
+  $logger->info( Dumper $test );
+  
+  my $cmd = $self->{'CONF'}->{'PING'};
+  if ( ! defined $cmd ) {
+  	$logger->fatal( "Do not understand Ping Protocol '" . Dumper $test . "'.");
   }
 
-  return perfSONAR_PS::MP::PingER::Agent->new( $cmd, $hash->{$node}->{Ping}->{$ping}, $node, $ns );
+  $logger->info( Dumper $self->{'NAMESPACES'});
+
+  return perfSONAR_PS::MP::PingER::Agent->new( $cmd, $test, $self->{'NAMESPACES'} );
 
 }
 
 
-###
-# smae as collect measurments
-###
+=head2 storeData( $metadataId, $Agent )
+
+Stores the results from the Agent instance into the stores as defined with a metaDataRefId of $metadataId
+=cut
 sub storeData
 {
 	my $self = shift;
-	my $node = shift;
+	my $pingId = shift;
 	my $agent = shift;
-	my $nodeMetaData = shift;
 
 	#foreach store of the node, insert the data
-	my $store = $self->config()->getNodeStores( $node, $nodeMetaData );
+	my $stores = $self->config()->getStores( $pingId );
 	#$logger->info( "Storing agent results into \n". Dumper $store );
 	
-	foreach my $id ( keys %$store ) {
-		my $type = $store->{$id}->{Type};
-		my $uri = $store->{$id}->{URI};
+	foreach my $id ( keys %$stores ) {
+		my $type = $stores->{$id}->{type};
+		my $uri = $stores->{$id}->{file};
 		
 		next if (! defined $type || $type eq '') || (! defined $uri || $uri eq '' ); 
 		
@@ -362,31 +459,64 @@ sub storeData
 		 	
 		} else {	
 			if ( $type eq 'MA' ) {
-				# TODO: 
+
 				my $dom = $agent->getResultsDOM();
 				$logger->info( "Inserting data into MA $uri (" . $self->{DATADB}->{$uri}. "):\n" . $dom->toString() );
-						
 	
-				$self->{DATADB}->{$uri}->insert( $dom );
+				my $status = $self->{DATADB}->{$uri}->insert( $dom );
+				if ( $status == 0 ) {
+					# okay
+				} elsif ( $status == -1 ) {
+					$logger->fatal( "Could not insert into remote MA $uri");
+				} else {
+					$logger->fatal( "Unknown error in insert into remote MA $uri: " . $self->error() );
+				}
 				
-			} elsif ( $type eq 'sqlite') {
-				$logger->info( "Storing data into sqlite.");
-		# TODO: need schema
-	
-			}
+			} 
 			else {
 				$logger->error( "Unknown storage type " . $type . ".");
 			}
 	        $self->{DATADB}->{$uri}->closeDB if exists $self->{DATADB}->{$uri};
-			}
+		}
 	}
 	return;
 }
 
 
-sub collectMeasurements {
 
-}
+=head1 SEE ALSO
+
+L<perfSONAR_PS::MP::Base>, L<perfSONAR_PS::MP::General>, L<perfSONAR_PS::Common>, 
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::DB::SQL>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS 
+  
+Questions and comments can be directed to the author, or the mailing list. 
+
+=head1 VERSION
+
+$Id: PingER.pm 242 2007-06-19 21:22:24Z zurawski $
+
+=head1 AUTHOR
+
+Yee-Ting Li, E<lt>ytl@slac.stanford.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2007 by Internet2
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
+
 
 
 # ================ Internal Package perfSONAR_PS::MP::PingER::Config ================
@@ -408,6 +538,25 @@ sub new {
   bless \%hash => $package;
 }
 
+sub sourceName()
+{
+	my $self = shift;
+	if ( @_ ) {
+		$self->{SOURCENAME} = shift;
+	}
+	return $self->{SOURCENAME};
+}
+
+sub sourceIP()
+{
+	my $self = shift;
+	if ( @_ ) {
+		$self->{SOURCEIP} = shift;
+	}
+	return $self->{SOURCEIP};
+}
+
+
 sub dump
 {
 	my $self = shift;
@@ -416,141 +565,90 @@ sub dump
 	$logger->info( "Config: " . Dumper $self->{STORE});
 }
 
-sub getPings
+
+sub parse
 {
 	my $self = shift;
-	my $node = shift;
-	my $hash = shift;
-
-	return ( keys %{$hash->{$node}->{Ping}} );
-}
-
-# returns the info about a node
-sub getNodeMetadata
-{
-	my $self = shift;
-	my $node = shift;
-	
 	my $logger = get_logger("perfSONAR_PS::MP::PingER::Config");	
 
-	# get the host 
-	my $hostElement = $self->{STORE}->findnodes(
-        			'/PingER/Hosts/Host[@id="' . $node . '"]' 
-                           )->[0];
+	# get the dest host 
+	my $xpath = '/nmwg:store/nmwg:metadata';
 
+	# source information filter
+	my $srcNode = $self->sourceName();
+	my $srcIP = $self->sourceIP();
+	if ( defined $srcNode ) {
+	 $xpath .= '[child::pinger:subject/nmtl4:endPointPair/nmtl4:endPoint[@role=\'src\'][@protocol=\'icmp\']/nmtl3:interface/nmtl3:ifHostName=\'' . $srcNode . '\']';
+	}
+	if ( defined $srcIP ) {
+	 $xpath .= '[child::pinger:subject/nmtl4:endPointPair/nmtl4:endPoint[@role=\'src\'][@protocol=\'icmp\']/nmtl3:interface/nmtl3:ipAddress=\'' . $srcIP . '\']';
+	}
 
-	#$logger->debug("GET: " . $hostElement->toString());
+	$logger->debug("Finding: $xpath");
+
+	my $hostElement = $self->{STORE}->findnodes( $xpath );
 
 	# create an xml element of the defaults, then override it with the overwrite settings
-	my %host = ();
+	my $host = {};
 		
-	#$logger->debug( $n->toString() );
+	foreach my $nodes ( $hostElement->get_nodelist ) {
+
+		#$logger->debug( $nodes->toString() );
+
+		# use the id attr as unique pointer to the test
+		my $id = $nodes->find( './@id' );
+		$host->{'PingER'}->{$id} = {};
 		
-	foreach my $p ( $hostElement->findnodes( './param' ) ) {
-        	my $name = $p->getAttribute( 'name' );
-                my $val = $p->getAttribute('value' );
-		next if ! $name || $name eq '';
-                $host{$node}{$name} = $val if( $name && $val );
-        }
-
-
-
-	foreach my $c ( $hostElement->childNodes() ) {
-		
-		#$logger->debug( $c->toString() );
-
-		my $tag = $c->localName();
-		next if ( ! $tag || $tag ne 'param' );
-
-		my $ref = $c->getAttribute( 'ref' );
-		if ( defined $ref ) {
-		
-			#$logger->debug( "FOUND: " . $ref );
-			my @defaults = $self->{STORE}->findnodes( '/PingER/Defaults/param[@name="' . $ref . '"]/*');
-				
-			$logger->fatal( "Could not find param reference to '$ref' for '$node'." ) if scalar @defaults == 0;
-			foreach my $def ( @defaults ) { 
-				my $name = $def->localName();
-				next if ! $name || $name eq '';
-				my $id = $def->getAttribute(  'id' );
-				#$logger->debug( " GOT: '" . $def->toString() . ";" );
-				# populate params
-				foreach my $p ( $def->findnodes( './param' ) ) {
-					my $key = $p->getAttribute( 'name' );
-					my $val = $p->getAttribute( 'value' );
-					next if !$key || $key eq '';
-					#$logger->debug( "NODE: $node, NAME: $name, ID: $id, KEY: $key");
-					$host{$node}{$name}{$id}{$key} = $val;
-				}
-			}
-
-		
+		foreach my $param ( $nodes->findnodes('./pinger:parameters/nmwg:parameter' )->get_nodelist )
+		{
+			#$logger->debug( "Found: " . $param->toString() );
+			my $name = $param->getAttribute( 'name' );
+	        my $val = $param->textContent();
+			next if ! $name || $name eq '';
+    	    #$logger->debug( "  found $name $val");
+        	$host->{'PingER'}->{$id}->{$name} = $val;
 		}
-	} # foreach findnodes
-
-	# now override with the settings within the host
-	foreach my $n ( $hostElement->childNodes() ) {
-		my $tag = $n->localName();
-		next if ( !$tag || $tag eq 'param' );	# we should have processed all of them above
-		my $id = $n->getAttribute( 'id' );
-		next if ! $id || $id eq '';
-		foreach my $p ( $n->findnodes( './param' ) ) {
-			my $name = $p->getAttribute( 'name' );
-			my $val = $p->getAttribute( 'value' );
-			next if ! $name || $name eq '' ;
-			$host{$node}{$tag}{$id}{$name} = $val;
-
-		}
-	}
-
-
-	#$logger->debug( $host );
-	
-	return \%host;
-} 
-
-sub getAllNodes
-{
-	my $self = shift;
-	
-	my @out = ();
-	my %seen = ();
-	#$logger->debug("get all nodes");
-	foreach my $n ( $self->{STORE}->findnodes( '/PingER/Hosts/Host') ) {
-		my $tag = $n->localName();
-		my $node = $n->getAttribute( 'id' );
-		next if $node eq '';
-		push @out, $node unless $seen{$node}++;
+		
+		# add the host details to the item
+		$host->{'PingER'}->{$id}->{'destIP'} = $nodes->findnodes('./pinger:subject/nmtl4:endPointPair/nmtl4:endPoint[@role=\'dst\']/nmtl3:interface/nmtl3:ipAddress')->[0]->textContent();
+		$host->{'PingER'}->{$id}->{'destName'} = $nodes->findnodes('./pinger:subject/nmtl4:endPointPair/nmtl4:endPoint[@role=\'dst\']/nmtl3:interface/nmtl3:ifHostName')->[0]->textContent();
+		
+		$host->{'PingER'}->{$id}->{'srcName'} = $self->sourceName();
+		$host->{'PingER'}->{$id}->{'srcIP'} = $self->sourceIP();
+		
 	}
 	
-	return @out;
+	$logger->debug( Dumper $host );
+	
+	return $host;
 
 }
 
-sub getSystemParam
-{
-	my $self = shift;
-	my $param = shift;
-	foreach my $n ( $self->{STORE}->findnodes( '/PingER/Configuration/System/param') ) {
-		my $name = $n->getAttribute( 'name' );
-		my $value = $n->getAttribute( 'value' );
-		next if ! $name || $name eq '';
-		return $value if ( $name eq $param );
-	}
-	return undef;
-}
 
-sub getNodeStores
+sub getStores
 {
 	my $self = shift;
-	my $node = shift;
-	my $nodeMetaData = shift;
-	
-	if ( ! defined $nodeMetaData ) {
-		$nodeMetaData = $self->getNodeMetadata( $node );
+	my $id = shift;
+
+	my $xpath = '/nmwg:store/nmwg:data[@metadataIdRef=\'' . $id . '\']';
+	$logger->debug( "looking for id: $id with '$xpath'");
+
+	my $nodes = $self->{STORE}->findnodes( $xpath );
+
+	my $out = {};
+	foreach my $node ( $nodes->get_nodelist ) {
+		my $id = $node->getAttribute( 'id');
+		#$logger->info( $node->toString() );
+		foreach my $n ( $node->findnodes( './nmwg:key/nmwg:parameters/nmwg:parameter' )->get_nodelist ) {
+			my $name = $n->getAttribute("name");
+			my $value = $n->textContent();
+			$out->{$id}->{$name} = $value;
+		}
 	}
-	#print Dumper $nodeMetaData;
-	return $nodeMetaData->{$node}->{'Store'};
+	
+	#$logger->info( "out; " . Dumper $out);
+		
+	return $out;
 
 }
 
@@ -564,15 +662,19 @@ use Log::Log4perl qw(get_logger);
 use Time::HiRes qw ( &gettimeofday );
 use Data::Dumper;
 
-
+###
+# keep two datastructures of itnerest: METADATA which contains all the tests indexed by the metadataId, and
+# SCHEDULE which maintains a hash of epoch time of the test with the metadataId (we do not point to the METADATA
+# datastructure directly as we need the id's sometimes.)
+###
 
 sub new {
   my ( $package, $config ) = @_; 
   my %hash = ();
   $hash{"CONFIG"} = $config;
   %{$hash{"SCHEDULE"}} = ();
-  $hash{"CHIDLREN_OCCUPIED"} = 0;
-  $hash{"MAX_CHILDREN"} = 2;
+  $hash{"CHILDREN_OCCUPIED"} = 0;
+  $hash{"METADATA"} = undef;
   bless \%hash => $package;
 }
 
@@ -585,14 +687,6 @@ sub children
 	return $self-{"CHILDREN_OCCUPIED"};
 }
 
-sub maxChildren
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{"MAX_CHILDREN"} = shift;
-	}
-	return $self-{"MAX_CHILDREN"};
-}
 
 sub config
 {
@@ -610,6 +704,16 @@ sub getNowTime
 }
 
 
+# returns the info about a node
+#TODO: ensure namespaec agnositicity in xpaths
+sub getTest
+{
+	my $self = shift;
+	my $pingId = shift;
+	
+	return \%{$self->{"METADATA"}->{PingER}->{$pingId}};
+} 
+
 # sets the schedule for tests
 sub initiate
 {
@@ -617,14 +721,15 @@ sub initiate
 	my $logger = get_logger("perfSONAR_PS::MP::PingER::Schedule");
 
 	my %schedule = ();
-	foreach my $host ( $self->config()->getAllNodes() ) {
-		my $hostMetadata = $self->config()->getNodeMetadata($host ); 
-		my @pings = $self->config()->getPings( $host, $hostMetadata );
-		foreach my $ping ( @pings ) {
-			#$logger->debug( "Add Test: HOST: $host, PING: $ping" );
-			my $test = &createTest ( $host, $ping );
-			$self->addNextTest( $test, $hostMetadata );
-		}
+
+	$self->{"METADATA"} = $self->config()->parse( );
+	my @pingIds = keys %{$self->{"METADATA"}->{'PingER'}} ;
+	if ( scalar @pingIds < 1 ) {
+		$logger->logdie( "Schedular could not determine any tests to run");
+	}
+	foreach my $id ( @pingIds ) {
+		$logger->debug( "Add PING: $id" );
+		$self->addNextTest( $id );
 	}
 
 	return;
@@ -634,7 +739,7 @@ sub initiate
 sub popTest
 {
 	my $self = shift;
-	my ( $time, $test ) = $self->peekTest();
+	my ( $time, $pingId ) = $self->peekTest();
 
 	if ( defined $time ) {
 		# may be an array	
@@ -647,7 +752,7 @@ sub popTest
 		else {
 			delete $self->{SCHEDULE}->{$time};
 		}	
-		return ( $time, $test );
+		return ( $time, $pingId );
 	}
 	return ( undef, undef );
 }
@@ -656,14 +761,14 @@ sub popTest
 sub peekTest
 {
 	my $self = shift;
+	
 	my @times = sort {$a<=>$b} keys %{$self->{SCHEDULE}};
-
 	if ( scalar @times ) {
 
 		my $start = $times[0];
-		my $test = $self->{SCHEDULE}->{$start}->[0];
-
-		return ( $start, $test );
+		my $pingId = $self->{SCHEDULE}->{$start}->[0];
+	
+		return ( $start, $pingId );
 
 	}
 	
@@ -676,24 +781,19 @@ sub peekTest
 sub addNextTest
 {
 	my $self = shift;
-	my $test = shift;
+	my $logger = get_logger("perfSONAR_PS::MP::PingER::Schedule");
+	my $pingId = shift;
 
-	my $node = $self->getTestHost( $test );
-	my $pingId = $self->getTestPingId( $test );
-
-	my $hostMetadata = shift;	# optional
 	my $since = shift; # this is so that we add the test at the offset + since (epoch)
 
     my $now = $since;
 	if ( ! defined $now ) {
 		$now = &getNowTime();
 	}
-	if ( ! defined $hostMetadata ) {
-		$hostMetadata = $self->config()->getNodeMetadata( $node );
-	}
-    my $nextTime = &getNextTestTime( $hostMetadata, $node, $pingId );
 
-    $self->addTest( $nextTime, $test );
+    my $nextTime = $self->getNextTestTime( $pingId );
+
+    $self->addTest( $nextTime, $pingId );
 	
 	return;
 }
@@ -702,55 +802,25 @@ sub addTest
 {
 	my $self = shift;
 	my $time = shift;
-	my $test = shift;
-
-	#$logger->info( "ADDIN: $time "  . Dumper( $test ));
+	my $pingId = shift;
 
 	# if tehre is already at test at this time, append it
-	push @{$self->{SCHEDULE}->{$time}}, $test;
+	push @{$self->{SCHEDULE}->{$time}}, $pingId;
 
 	return;	
 }
 
-sub getTestHost
-{
-	my $self = shift;
-	my $test = shift;
-	
-	my @out = keys %$test; 
-	return $out[0];
-}
-
-sub getTestPingId
-{
-	my $self = shift;
-	my $test = shift;
-	
-	return $test->{$self->getTestHost($test)};
-
-}
-
-sub createTest
-{
-	my $host = shift;
-	my $pingId = shift;
-
-	my %test = ();
-	$test{$host} = $pingId;
-
-	return \%test;
-}
 
 sub getNextTestTime
 {
-	my $hash = shift;
-	my $node = shift;
-	my $ping = shift;
+	my $self = shift;
+	my $pingId = shift;
 
-	my $period = $hash->{$node}->{Ping}->{$ping}->{TestPeriod};
-	my $offset = $hash->{$node}->{Ping}->{$ping}->{TestOffset};
+	my $test = $self->getTest( $pingId );
 
-	#$logger->debug( "PERIOD: $period, OFFSET: $offset" );
+	my $period = $test->{testPeriod};
+	my $offset = $test->{testOffset};
+
 	my $rand = 0;
 	if ( $offset > 0 ) {
 		$rand = rand( $offset/2 ) - $offset;
@@ -766,14 +836,18 @@ sub getNextTestTime
 
 package perfSONAR_PS::MP::PingER::Agent;
 
+use IEPM::PingER::Statistics;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
+
+use perfSONAR_PS::XML::PingER;
+
 use Data::Dumper;
 
 
 
 sub new {
-  my ($package, $ping, $options, $host, $ns ) = @_; 
+  my ($package, $ping, $options, $ns ) = @_; 
   my %hash = ();
   if(defined $ping and $ping ne "") {
     $hash{"PING"} = $ping;
@@ -781,16 +855,11 @@ sub new {
   if(defined $options and $options ne "") {
     $hash{"OPTIONS"} = $options;
   } 
-   if(defined $host and $host ne "") {
-    $hash{"HOST"} = $host;
-  }
    if(defined $ns and $ns ne "") {
     $hash{"NAMESPACES"} = $ns;
   }
   %{$hash{"RESULTS"}} = ();
-  $hash{'MINRTT'} = undef;
-  $hash{'MAXRTT'} = undef;
-  $hash{'MEANRTT'} = undef;
+
   bless \%hash => $package;
 }
 
@@ -813,16 +882,6 @@ sub options
 }
 
 
-sub host
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{"HOST"} = shift;
-	}
-	return $self->{"HOST"};
-}
-
-
 sub namespaces
 {
 	my $self = shift;
@@ -834,76 +893,124 @@ sub namespaces
 
 
 
-sub collect {
+sub collect 
+{
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::MP::PingER::Agent");
-
   
   # parse the options into a commandline
   $self->{CMD} = $self->ping();
   while( my ($k,$v) = each %{$self->{"OPTIONS"}} ) {
-		#print "$k: $v\n";
 		$self->{CMD} =~ s/\%$k\%/$v/g;
 	}
 
-  my $host = $self->{"HOST"};
+  my $host = $self->options()->{destIP};
+  if ( ! defined $host ) {
+ 	 $host = $self->options()->{destName};
+  }
+
   $self->{CMD} =~ s/\%destination\%/$host/g;
   
-  
   if(defined $self->{CMD} and $self->{CMD} ne "") {   
+  	
     undef $self->{RESULTS};
      
     my($sec, $frac) = Time::HiRes::gettimeofday;
     my $time = eval($sec.".".$frac);
         
-    open(CMD, $self->{CMD}." |") or 
-      $logger->error("Cannot open \"".$self->{CMD}."\"");
+    open(CMD, $self->{CMD}." 2>&1 |") or 
+    $logger->error("Cannot open \"".$self->{CMD}."\"");
       
-      $logger->info( "Running '$self->{CMD}'... ");
-    my @results = <CMD>;    
+    $logger->info( "Running '$self->{CMD}'... ");
+    my @results = <CMD>;
     close(CMD);
     
-    # parse the results into a hash
-    for(my $x = 1; $x <= ($#results-4); $x++) { 
-      my @resultString = split(/:/,$results[$x]);        
-      ($self->{RESULTS}->{$x}->{"bytes"} = $resultString[0]) =~ s/\sbytes.*$//;
-      for ($resultString[1]) {
-        s/\n//;
-        s/^\s*//;
-      }
-    
-      my @tok = split(/ /, $resultString[1]);
-      foreach my $t (@tok) {
-        if($t =~ m/^.*=.*$/) {
-          (my $first = $t) =~ s/=.*$//;
-	        (my $second = $t) =~ s/^.*=//;
-	        $self->{RESULTS}->{$x}->{$first} = $second;  
-        }
-        else {
-          $self->{RESULTS}->{$x}->{"units"} = $t;
-        }
-      }
-      $self->{RESULTS}->{$x}->{"timeValue"} = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
-      $time = $time + eval($self->{RESULTS}->{$x}->{"time"}/1000);
-    }
-    # loop to get summary stats
-    for( my $x = $#results-1; $x <= $#results; $x++ ) {
-	#$logger->debug( "$x :: $results[$x]");
-      if ( $results[$x] =~ /^(\d+) packets transmitted, (\d+) received/ ) {
-	$self->{SENT} = $1;
-	$self->{RECV} = $2;
-      } elsif ( $results[$x] =~ /^rtt min\/avg\/max\/mdev \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
-	$self->{MINRTT} = $1;
-	$self->{MAXRTT} = $3;
-	$self->{MEANRTT} = $2;
-      }
+    #/unknown host/
+    # with ping we would get at least 3 lines of output; a header line, and two stats lines
+    if ( scalar @results < 4 ) {
+    	$logger->fatal( "Something went wrong running command '$self->{CMD}': @results");
+    	return -1;
+    } else {
+    	$self->{'RESULTS'} = $self->parse( \@results, $time );
     }
     
   }
   else {
     $logger->error("Missing command string.");     
   }
-  return;
+  return 0;
+}
+
+
+sub parse
+{
+	my $self = shift;
+	my $cmdOutput = shift;
+	
+    # parse the results into a hash
+    my $vars = {};
+    
+    my $time = shift; # work out start time of time
+    
+    for( my $x = 1; $x < scalar @$cmdOutput - 4; $x++ ) {
+    	$logger->debug( "LINE: " . $cmdOutput->[$x] );
+    	my @string = split /:/, $cmdOutput->[$x];
+    	my $v = {};
+		( $v->{'bytes'} = $string[0] ) =~ s/\s*bytes.*$//;
+		foreach my $t ( split /\s+/, $string[1] ) {
+		  $logger->debug( "looking at $t");
+          if( $t =~ m/(.*)=(\s*\d+\.?\d*)/ ) { 
+	        $v->{$1} = $2;
+	        $logger->debug( "  found $1 with $2");
+          } else {
+            $v->{'units'} = $t; 
+          }
+		}
+		
+    	push @{$vars->{'bytes'}}, $v->{'bytes'};
+    	push @{$vars->{'rtts'}}, $v->{'time'};
+    	push @{$vars->{'seqs'}}, $v->{'icmp_seq'};
+		push @{$vars->{'ttls'}}, $v->{'ttl'};
+        push @{$vars->{'timeValues'}}, $time + eval($v->{'time'}/1000);
+      	$time = $time + eval($v->{'time'}/1000);
+    
+    }
+   
+    
+	# hires result?
+    ( $vars->{minRtt}, $vars->{meanRtt}, $vars->{maxRtt}, undef ) = &IEPM::PingER::Statistics::RTT::calculate( $vars->{'rtts'} );
+	# ipd
+    ( $vars->{minIpd}, $vars->{meanIpd}, $vars->{maxIpd}, undef, $vars->{iprIpd} ) = &IEPM::PingER::Statistics::IPD::calculate( $vars->{'rtts'} );
+	
+	
+	# get rest of results
+	# hires results from ping output
+	for( my $x = (scalar @$cmdOutput - 2); $x < (scalar @$cmdOutput) ; $x++ ) {
+		$logger->debug( "LINE: " . $cmdOutput->[$x]);
+ 		if ( $cmdOutput->[$x] =~ /^(\d+) packets transmitted, (\d+) received/ ) {
+			$vars->{sent} = $1;
+			$vars->{recv} = $2;
+        } elsif ( $cmdOutput->[$x] =~ /^rtt min\/avg\/max\/mdev \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
+			$vars->{minRtt} = $1;
+			$vars->{maxRtt} = $3;
+			$vars->{meanRtt} = $2;
+ 		}
+	}
+	
+    # loss
+    $vars->{lossPercent} = &IEPM::PingER::Statistics::Loss::calculate( $vars->{sent}, $vars->{recv} );
+    $vars->{clp} = &IEPM::PingER::Statistics::Loss::CLP::calculate( $vars->{sent}, $vars->{recv}, $vars->{'seqs'} );
+
+	# duplicates
+	($vars->{outOfOrder}, $vars->{duplicates}) = &IEPM::PingER::Statistics::Other::calculate( $vars->{'seqs'} );
+
+	# remove calculation variables
+	delete $vars->{sent};
+	delete $vars->{recv};
+
+	#$logger->info( Dumper $vars );
+
+	return $vars;
 }
 
 
@@ -930,177 +1037,38 @@ sub getResultsDOM {
   
   if(defined $self->{RESULTS} and $self->{RESULTS} ne "") {   
 
-	#$logger->debug( "NS: " . Dumper $self->namespaces() );
+	$logger->debug( "NS: " . Dumper $self->namespaces() );
 
 	my $doc = XML::LibXML::Document->new();
 	$doc->createElementNS( $self->namespaces()->{'nmwg'}, 'nmwg' );
 	$doc->createElementNS( $self->namespaces()->{'pinger'}, 'pinger' );
-	$doc->createElementNS( $self->namespaces()->{'nmwgt4'}, 'nmwgt4' );
+	$doc->createElementNS( $self->namespaces()->{'nmtl3'}, 'nmwgt3' );
+	$doc->createElementNS( $self->namespaces()->{'nmtl4'}, 'nmwgt4' );
 
 	my $root = $doc->createElement('message');
 	$root->setNamespace( $self->namespaces()->{'nmwg'}, 'nmwg' );
-
 	$doc->setDocumentElement($root);
 
-	#$logger->debug( "creating metadata" );	
-	my $metadata = $doc->createElement('metadata');
-	$metadata->setAttribute( 'id', '#id' );
-	$metadata->setNamespace( $self->namespaces()->{'nmwg'}, 'nmwg' );
+	my $metaId = '#id';
+	my $dataId = '#data';
+
+	my $metadata = &perfSONAR_PS::XML::PingER::createMetaData(
+		$doc, $self->namespaces(),
+		$self->options()->{srcName}, $self->options()->{destName}, $self->options()->{destIP}, $self->options()->{destIP},
+		$self->options(),
+		$metaId
+	    ); 
 	$root->appendChild($metadata);
 
-	# subject
-	#$logger->debug( "creating subject" );	
-	my $subj = $doc->createElement( 'subject' );
-	$subj->setNamespace( $self->namespaces()->{'pinger'}, 'pinger' );
-	$metadata->appendChild( $subj );
-
-	#$logger->debug( "creating endpoint pair" );	
-	my $endPoint = $doc->createElement( 'endPointPair' );
-	$endPoint->setNamespace( $self->namespaces()->{nmwgt4}, 'nmwgt4' );
-	$subj->appendChild( $endPoint );	
-
-	#$logger->debug( "creating source" );	
-	my $source = $doc->createElement( 'endPoint' );
-	$source->setNamespace( $self->namespaces()->{nmwgt4}, 'nmwgt4' );
-	$source->setAttribute( 'role', 'src' );
-	$source->setAttribute( 'protocol', 'icmp' );
-	$endPoint->appendChild( $source );
-
-	my $sourceNode = $doc->createElement( 'address' );
-	$sourceNode->setNamespace( $self->namespaces()->{nmwgt4}, 'nmwgt4' );
-	$sourceNode->setAttribute( 'value', 'FILL ME IN' ); #TODO:
-	$source->appendChild( $sourceNode );
-
-
-	#$logger->debug( "creating dest" );	
-	my $dest = $doc->createElement( 'endPoint' );
-	$dest->setNamespace( $self->namespaces()->{nmwgt4}, 'nmwgt4' );
-	$dest->setAttribute( 'role', 'dst' );
-	$dest->setAttribute( 'protocol', 'icmp' );
-	$endPoint->appendChild( $dest );
-
-	my $destNode = $doc->createElement( 'address' );
-	$destNode->setNamespace( $self->namespaces()->{nmwgt4}, 'nmwgt4' );
-	$destNode->setAttribute( 'value', $self->host() );
-	$dest->appendChild( $destNode );
-
-	# parameters
-	#$logger->debug( "creating params" );	
-	my $param = $doc->createElement( 'parameters' );
-	$param->setNamespace( $self->namespaces()->{'pinger'}, 'pinger' );
-	$metadata->appendChild( $param );
-	
-	while( my ($k,$v) = each %{$self->options()} ) {
-		next if $k =~ /^Test/;
-		my $p = $doc->createElement( 'parameter' );
-		$p->setNamespace( $self->namespaces()->{'nmwg'}, 'nmwg' );
-		$p->setAttribute( 'name', $k );
-		my $text = XML::LibXML::Text->new( $v );
-		$p->appendChild( $text );
-		$param->appendChild( $p );
-	}
-
-
-	my $data = $doc->createElement('data');
-	$data->setNamespace( $self->namespaces()->{'nmwg'}, 'nmwg' );
-	$data->setAttribute( 'id', '#data');
-	$data->setAttribute( 'metadataIdRef', '#id');
+	# data
+	my $data = &perfSONAR_PS::XML::PingER::createData( 
+		$doc, $self->namespaces(), 
+		$self->getResults(),
+		$dataId, $metaId
+		 );
 	$root->appendChild( $data );
-
-	my $vars = {
-		'minRtt' => undef,
-		'maxRtt' => undef,
-		'meanRtt' => undef,
-		'minIpd' => undef,
-		'maxIpd' => undef,
-		'lossPercent' => undef,
-		'iprIpd' => undef,
-		'meanIpd' => undef,
-		'outOfOrder' => 'false',
-		'duplicates' => 'false'
-		};
-
-
-	my $totalRtt = undef;
-	my $countRtt = 0;
-	my $totalIpd = undef;
-	my @ipd = ();
 	
-	my $lastSeq = 0;
-
-	my $lastLatency = undef;
-	#$logger->debug( "creating real datums" );	
-	foreach my $ping (sort {$a<=>$b} keys (%{$self->{RESULTS}} )) {
-	   
-	   my $datum = $doc->createElement( 'datum' );
-	   $datum->setNamespace( $self->namespaces()->{'pinger'}, 'pinger' );
-
-	   my $latency = $self->{RESULTS}->{$ping}->{'time'};
-	   $datum->setAttribute('value', $latency);
-	   $datum->setAttribute('seqNum', $self->{RESULTS}->{$ping}->{'icmp_seq'});
-	   $datum->setAttribute('numBytes', $self->{RESULTS}->{$ping}->{'bytes'});
-	   $datum->setAttribute('ttl', $self->{RESULTS}->{$ping}->{'ttl'});
-	   $datum->setAttribute('timeType', 'unix' );
-	   $datum->setAttribute('timeValue', $self->{RESULTS}->{$ping}->{'timeValue'});
-
-	   $data->appendChild( $datum );	   
-
-	   # determine mins etc
-	   $vars->{minRtt} = $latency if !defined $vars->{minRtt} || $latency < $vars->{minRtt};
-	   $vars->{maxRtt} = $latency if !defined $vars->{maxRtt} || $latency > $vars->{maxRtt};
-	   $totalRtt += $latency;
-	   $countRtt++;
-	
-	   # last seq
-	   $vars->{outOfOrder} = 'true' if $self->{RESULTS}->{$ping}->{'icmp_seq'} < $lastSeq;
-	   $lastSeq = $self->{RESULTS}->{$ping}->{'icmp_seq'};
-
-	   # duplicates
-	   # ???
-
-	   if ( $lastLatency ) {
-		push @ipd, $latency - $lastLatency;
-	   }
-	  $lastLatency = $latency;
-
-	}
-
-	$vars->{meanRtt} = $totalRtt / $countRtt;
-	# ipd
-	foreach my $i ( @ipd ) {
-		$vars->{minIpd} = $i if !defined $vars->{minIpd} || $i < $vars->{minIpd};
-		$vars->{maxIpd} = $i if !defined $vars->{maxIpd} ||  $i > $vars->{maxIpd};
-		$totalIpd += $i;
-	}
-	$vars->{meanIpd} = $totalIpd / scalar @ipd;
-
-	# hires results from output
-	$vars->{minRtt} = $self->{'MINRTT'} if defined $self->{'MINRTT'};
-	$vars->{maxRtt} = $self->{'MAXRTT'} if defined $self->{'MAXRTT'};
-	$vars->{minRtt} = $self->{'MEANRTT'} if defined $self->{'MEANRTT'};
-
-	# lossPercent
-	if ( defined $self->{SENT} && defined $self->{RECV} ) {
-		$vars->{lossPercent} = 1.0 - $self->{RECV} / $self->{SENT};
-	}	
-
-	# duplicates
-	#
-	# iqrRtt
-	#
-
-	#$logger->debug( "creating derived datums" );	
-	# owrk out the averages etc
-	while( my ( $k,$v ) = each %$vars ) {
-		next if (  (!defined $k || $k eq '' )  ||  (!defined $v || $v eq '' ) );
-		my $datum = $doc->createElement( 'datum' );
-                $datum->setNamespace( $self->namespaces()->{'pinger'}, 'pinger' );
-		$datum->setAttribute( 'name', $k );
-		$datum->setAttribute( 'value', $v );
-		$data->appendChild( $datum );
-	}
-	
-		#$logger->debug( "done!" );
+	#$logger->debug( "done!" );
 	return $doc;
 
   }

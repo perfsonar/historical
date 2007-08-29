@@ -1,10 +1,58 @@
 #!/usr/bin/perl
 
-###
-# simple database accessor class for the remote storage of local dom (libXML) from say MP's.
-# could potentially be used as a proxy class in future to redirect storage calls.
-#
-###
+
+=head1 NAME
+
+perfSONAR_PS::DB::MA - A module that provides simple database accessor methods for the 
+remote storage of local dom (libXML) to a defined MA.
+Could potentially be used as a proxy class in future to redirect storage calls.
+
+=head1 DESCRIPTION
+
+The purpose of this module is to enable the non co-location of a MP and MA instance. For
+example, it may be beneficial to house a cental MA for all MP's, and not have MP's actually do 
+any storage of data locally on the machines that they are running on. This module allows MPs to 
+treat a remote MA instance as if it were a local Storage subsystem.
+
+It bascially works as a proxy for the perfSONAR xml storeRequest messages.
+
+=head1 SYNOPSIS
+
+    use perfSONAR_PS::DB::MA;
+
+	# Preparing data storage for Measurement Archive located at $uri
+	my $uri = 'http://localhost:8080/some/endpoint/service
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $uri );
+
+	# connect to the remote database (opens socket connection to $uri)
+	my $db = new perfSONAR_PS::DB::MA( $host, $port, $endpoint );
+	$db->openDB();
+
+    # or also:
+    # 
+    # my $db = new perfSONAR_PS::DB::SQL;
+    # $db->setHost("localhost");
+    # $db->setPort("8080");
+    # $db->setEndPoint("/some/endpoint/service");     
+
+    if ($db->openDB == -1) {
+      print "Error opening database\n";
+    }
+
+    # data retrival systems not implemented (is there a need?)
+
+    # assume that we have a instance dom storeRequest document from the output of
+    # an MP as $dom
+
+    $status = $db->insert( $dom );
+    if($status == -1) {
+      print "Error executing insert statement\n";
+    }
+
+    if ($db->closeDB == -1) {
+      print "Error closing database\n";
+    }
+=cut
 
 
 package perfSONAR_PS::DB::MA;
@@ -148,6 +196,18 @@ sub setDOM {
 }
 
 
+###
+# set/gets the error message last seen
+##
+sub error
+{
+	my $self = shift;
+	if ( @_ ) {
+		$self->{ERROR} = shift;
+	}
+	return $self->{ERROR};
+}
+
 sub insert
 {
 	my $self = shift;
@@ -166,7 +226,12 @@ sub insert
 		my $responseContent = $self->{"TRANSACTION"}->sendReceive($envelope);
 		
 		# TODO: should a remote ma respond with anything? like a confirmation?
-		#$logger->debug( "RESPONSE: $responseContent");
+		$logger->debug( "RESPONSE: $responseContent");
+		
+		if ( $responseContent =~ /(The requested URL .* was not found on this server.)/ ) {
+			$self->error( "$1" );
+			return -1;
+		}
 	}
 	else {
 		$logger->error("Could not insert blank document.")
@@ -175,7 +240,7 @@ sub insert
 	} else {
 		$logger->error("Transaction has not been setup.")
 	}
-	return;
+	return 0;
 }
 
 1;
