@@ -112,5 +112,3 @@ CREATE TABLE  data_200707  (
  INDEX (meanRtt, medianRtt, lossPercent, meanIpd, clp),
  FOREIGN KEY (metaID) references metaData (metaID),
  PRIMARY KEY  (metaID, timestamp));
-
-
