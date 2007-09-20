@@ -1,6 +1,6 @@
 package perfSONAR_PS::XML::Namespace;
 
-use version; our $VERSION = qv('2.0_1'); 
+use version; our $VERSION = qv('3.0_1'); 
 use Log::Log4perl qw(get_logger);
 
 
@@ -25,11 +25,15 @@ sub new {
 	       'nmwgt' => "http://ggf.org/ns/nmwg/topology/2.0/",	
 	       'topo'=> "http://ggf.org/ns/nmwg/topology/2.0/",
 	     
-	       'nmtl4' => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
-	       'nmtl3' => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
-               'nmwgtopo3' => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-		
-		'nmtm' => "http://ggf.org/ns/nmwg/time/2.0/",
+	       'nmtl4' => "http://ogf.org/schema/network/topology/l4/20070707 ",
+	       'nmtl3' => "http://ogf.org/schema/network/topology/l3/20070707",
+               
+               'nmtl2' => "http://ogf.org/schema/network/topology/l2/20070707/",
+               'nmtopo' => "http://ogf.org/schema/network/topology/base/20070707/",
+	       'nmtb' => "http://ogf.org/schema/network/topology/base/20070707/", 
+	      
+	       'nmtm' => "http://ggf.org/ns/nmwg/time/2.0/",
+	       
 		
 		 LOGGER => undef}; 
   bless $self, $class;
