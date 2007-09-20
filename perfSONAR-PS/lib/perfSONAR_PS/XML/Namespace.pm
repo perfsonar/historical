@@ -1,5 +1,6 @@
 package perfSONAR_PS::XML::Namespace;
- 
+
+use version; our $VERSION = qv('2.0_1'); 
 use Log::Log4perl qw(get_logger);
 
 
