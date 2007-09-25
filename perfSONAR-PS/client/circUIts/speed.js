@@ -1,9 +1,11 @@
-
 // TODO: Get some opts from cookies?
+
+var isNull = MochiKit.Base.isUndefinedOrNull;
+
 var defOptions = {
         "resolution":   5,
         "npoints":   5,
-        "fakeServiceMode": 0,
+        "fakeServiceMode": 0
     };
 
 function Speed(options){
@@ -14,7 +16,7 @@ function Speed(options){
         // "canvas"
 
         // defaults
-        "maxValue": 100,
+        "maxValue": 10000,
         "numBars": 70,              // how many bars
         "percentBar": 0.6,          // how much of each 'bar' is lit
         "emptyAlpha": 0.3,          // how much to obscure colors
@@ -27,11 +29,8 @@ function Speed(options){
         "dataPeriod": 5,     // seconds
         "jitterPercent":    0.005,   // bounce a bit around value :)
 
-        "doIntro":  true,
-
-        // TODO: set to a valid id to have current value put there
-        //"labelName":  false,
         "labelName":  "speedo-value",
+        "doIntro":  true
     };
 
     for(var p in options){
@@ -64,23 +63,37 @@ function Speed(options){
 
     this.lastDataUpdate = this.nextDataUpdate = this.dataStale = 0;
 
-    /*
-       Create 2 canvas's - same size as one passed in.
-       divide height/24
-       draw grey boxes on one,
-       do gradient on the other
-       Setup scaling (maxValue)
-     */
+    this.hc = this.canvas.height;
+    this.wc = this.canvas.width;
 
-    this.empty = document.createElement('canvas');
-    this.full = document.createElement('canvas');
-    this.empty.style.background =
-        this.full.style.background =
-        this.canvas.style.background;
-    this.hc = this.empty.height = this.full.height = this.canvas.height;
-    this.wc = this.empty.width = this.full.width = this.canvas.width;
+    // fillstyle for drawing 'empty' bar
+    var estyle = this.ctx.createLinearGradient(0,this.hc,0,0);
 
-    this.initCanvas();
+    estyle.addColorStop(0.0,"rgba(0,255,0," + this.options.emptyAlpha + ")");
+    estyle.addColorStop(0.1,"rgba(0,255,0," + this.options.emptyAlpha + ")");
+
+    estyle.addColorStop(0.45,"rgba(255,255,0," + this.options.emptyAlpha + ")");
+    estyle.addColorStop(0.55,"rgba(255,255,0," + this.options.emptyAlpha + ")");
+
+    estyle.addColorStop(0.9,"rgba(255,0,0," + this.options.emptyAlpha + ")");
+    estyle.addColorStop(1.0,"rgba(255,0,0," + this.options.emptyAlpha + ")");
+
+    // fillstyle for drawing 'full' bar
+    var fstyle = this.ctx.createLinearGradient(0,this.hc,0,0);
+
+    fstyle.addColorStop(0.0,"rgba(0,255,0,1)");
+    fstyle.addColorStop(0.1,"rgba(0,255,0,1)");
+
+    fstyle.addColorStop(0.45,"rgba(255,255,0,1)");
+    fstyle.addColorStop(0.55,"rgba(255,255,0,1)");
+
+    fstyle.addColorStop(0.9,"rgba(255,0,0,1)");
+    fstyle.addColorStop(1.0,"rgba(255,0,0,1)");
+
+    this.estyle = estyle;
+    this.fstyle = fstyle;
+
+    // this.initCanvas();
 
     if(this.options.labelName){
         this.label = $(this.options.labelName);
@@ -94,54 +107,6 @@ function Speed(options){
     }
 
     return this;
-}
-
-Speed.prototype.initCanvas = function(options){
-
-    /* gradients */
-    var fctx = this.full.getContext("2d");
-    var ectx = this.empty.getContext("2d");
-
-
-    // First draw scaled color 'led style' value indicator
-    var fullStyle = fctx.createLinearGradient(0,this.hc,0,0);
-
-    fullStyle.addColorStop(0.0,"rgba(0,255,0,1)");
-    fullStyle.addColorStop(0.1,"rgba(0,255,0,1)");
-
-    fullStyle.addColorStop(0.45,"rgba(255,255,0,1)");
-    fullStyle.addColorStop(0.55,"rgba(255,255,0,1)");
-
-    fullStyle.addColorStop(0.9,"rgba(255,0,0,1)");
-    fullStyle.addColorStop(1.0,"rgba(255,0,0,1)");
-
-    var hb = this.hc/this.options.numBars;
-    var hl = hb * this.options.percentBar;
-    var wb = this.wc;
-
-    fctx.save();
-    fctx.beginPath();
-    fctx.globalCompositeOperation = "source-over";
-    fctx.fillStyle = fullStyle;
-    fctx.clearRect(0,0,this.wc,this.hc);
-    for(var i = 0; i < this.options.numBars; i++){
-        fctx.rect(0,(hb*i)+(.5*hl),wb,hl);
-    }
-    fctx.closePath();
-    fctx.fill();
-    fctx.restore();
-
-    // Copy 'full' image to 'empty' one, but set alpha to
-    // reduce colors (make it look unlit)
-    ectx.save();
-    ectx.beginPath();
-    ectx.globalCompositeOperation = "source-over";
-    ectx.globalAlpha = this.options.emptyAlpha;
-    ectx.drawImage(this.full,0,0);
-    ectx.closePath();
-    ectx.restore();
-
-    return;
 }
 
 Speed.prototype.appendData = function(a){
@@ -305,40 +270,44 @@ Speed.prototype.refresh = function(){
     if(randValue > this.options.maxValue) randValue = this.options.maxValue;
 
     var yLevel = this.hc*randValue/this.options.maxValue;
+    var nBars = this.options.numBars -
+                    (this.options.numBars * randValue/this.options.maxValue);
+    var hb = this.hc/this.options.numBars;
+    var hl = hb * this.options.percentBar;
     var w = this.wc;
 
     this.ctx.save();
-    this.ctx.beginPath();
-    this.ctx.globalCompositeOperation = "source-over";
+    this.ctx.clearRect(
+            0,0,
+            w,this.hc);
     if(stale){
-        this.ctx.drawImage(this.empty,
-                0,0,                        // source x,y
-                this.wc,this.hc);
-        this.ctx.globalAlpha = this.options.staleAlpha;
-        this.ctx.drawImage(this.full,
-                0,this.hc - yLevel,
-                w,yLevel,
-                0,this.hc - yLevel,
-                w,yLevel);
         this.ctx.translate(this.wc*(1-this.options.staleWidth)*.5,0);
-        this.ctx.globalAlpha = 1;
         w *= this.options.staleWidth;
     }
-    this.ctx.drawImage(this.empty,
-            0,0,                        // source x,y
-            w,this.hc - yLevel,   // source w,h
-            0,0,                        // dest x,y
-            w,this.hc - yLevel);  // dest w,h
-    this.ctx.drawImage(this.full,
-            0,this.hc - yLevel,
-            w,yLevel,
-            0,this.hc - yLevel,
-            w,yLevel);
+
+    // empty portion
+    this.ctx.fillStyle = this.estyle;
+    this.ctx.beginPath();
+    for(var i=0; i < nBars; i++){
+        this.ctx.rect(0,(hb*i)+(.5*hl),w,hl);
+    }
     this.ctx.closePath();
+    this.ctx.fill();
+
+    // full portion
+    this.ctx.fillStyle = this.fstyle;
+    this.ctx.beginPath();
+    for(var i=nBars; i < this.options.numBars; i++){
+        this.ctx.rect(0,(hb*i)+(.5*hl),w,hl);
+    }
+    this.ctx.closePath();
+    this.ctx.fill();
+
     this.ctx.restore();
 
     if(this.label){
         this.label.textContent = Math.floor(this.nextValue);
+        this.label.innerText = Math.floor(this.nextValue);
     }
 
     return;
@@ -368,18 +337,22 @@ function loadDataSpeed(req) {
     MochiKit.Async.callLater(speed.options.dataPeriod-1,newDataSpeed);
 }
 
+var getHost;
+var getInterface;
+var getDirection;
+
 function newDataSpeed(){
     if(!goSpeed) return;
 
     var query = "updateData.cgi";
     query +="?resolution="+defOptions.resolution+"&npoints="+defOptions.npoints+"&fakeServiceMode="+defOptions.fakeServiceMode+"&";
-    if(getHost){
+    if(!isNull(getHost)){
         query += "hostName="+getHost()+"&";
     }
-    if(getInterface){
+    if(!isNull(getInterface)){
         query += "ifName="+getInterface()+"&";
     }
-    if(getDirection){
+    if(!isNull(getDirection)){
         query += "direction="+getDirection()+"&";
     }
 
@@ -406,7 +379,7 @@ function startStopSpeed(){
 // TODO: Fix hardcoded id names for start/stop
 var options = {
     "canvasName": "speedo",
-    "startStopName": "start-stop-speed",
+    "startStopName": "start-stop-speed"
 };
 
 

@@ -12,40 +12,36 @@
 
 <script type="text/javascript">
 
+// this data structure should eventually be returned from a CGI based
+// on info from an LS or IS (info) service
 var hostInterfaces = {
-    "mitc-m10.internet2.edu": {
+    "anna-raptor1.internet2.edu": {
         "name": "Ann Arbor",
-        "data": ["76"]
-    }
+        "ifNames": ["1010001", "1020001"],
+    },
+    "206.196.176.229": {
+        "name": "McLean",
+        "ifNames": [
+            "1000004",
+            "1020001",
+            "1000001",
+            "1000002",
+            "1010001",
+            "1010012",
+            "1020002",
+            ],
+    },
+    "chin-force10.hopi.internet2.edu": {
+        "name": "Chicago",
+        "ifNames": [
+            "34144278",
+            ],
+    },
 };
-
-//var hostInterfaces = {
-//    "anna-raptor1.internet2.edu": {
-//        "name": "Ann Arbor",
-//        "data": ["1010001", "1020001"],
-//    },
-//    "206.196.176.229": {
-//        "name": "McLean",
-//        "data": [
-//            "1000004",
-//            "1020001",
-//            "1000001",
-//            "1000002",
-//            "1010001",
-//            "1010012",
-//            "1020002",
-//            ],
-//    },
-//    "chin-force10.hopi.internet2.edu": {
-//        "name": "Chicago",
-//        "data": [
-//            "34144278",
-//            ],
-//    },
-//};
 
 function updateHost(){
     var hosti = document.forms["options"].hostName.selectedIndex;
+log("hosti: ", hosti);
     var host = document.forms["options"].hostName[hosti].value;
     var ifName = document.forms["options"].ifName;
 
@@ -56,10 +52,10 @@ function updateHost(){
 
     // add set for newly selected host
     var i;
-    var data = hostInterfaces[host].data;
-    for(i=0;i<data.length;i++){
+    var ifNames = hostInterfaces[host].ifNames;
+    for(i=0;i<ifNames.length;i++){
         var o=document.createElement('option');
-        o.text=data[i];
+        o.text=ifNames[i];
         try{
             ifName.add(o,null);
         }
@@ -68,12 +64,35 @@ function updateHost(){
         }
 
     }
+
+    return;
 }
 
+function initHost(){
+    var i;
+    var ifName = document.forms["options"].ifName;
+
+    for(h in hostInterfaces){
+        var o=document.createElement('option');
+        o.text=hostInterfaces[h].name;
+log("Adding host: ",h);
+        try{
+            ifName.add(o,null);
+        }
+        catch(ex){
+            ifName.add(o);
+        }
+    }
+
+    document.forms["options"].hostName.selectedIndex = 0;
+    updateHost();
+
+    return;
+}
 
 addLoadEvent(initGraph);
 addLoadEvent(initSpeed);
-addLoadEvent(updateHost);
+addLoadEvent(initHost);
 
 var getHost = function(){
 
@@ -109,19 +128,12 @@ createLoggingPane();
                     <div id="form-fields">
                         <form name="options">
                             <select id="hostName" name="hostName" onChange="updateHost();">
-                                <option value="mitc-m10.internet2.edu">Ann Arbor</option>
                             </select>
                             <select id="ifName" name="ifName">
                             </select>
                             <select id="direction" name="direction">
-                                <option value="ifInOctets">ifInOctets</option>
-                                <option value="ifOutOctets">ifOutOctets</option>
-                                <option value="ifInErrors">ifInErrors</option>
-                                <option value="ifOutErrors">ifOutErrors</option>
-                                <option value="ifInDiscards">ifOutDiscards</option>
-                                <option value="ifOutDiscards">ifOutDiscards</option>
-                                <option value="ifHCInOctets">ifHCInOctets</option>
-                                <option value="ifHCOutOctets">ifHCOutOctets</option>
+                                <option value="in">in</option>
+                                <option value="out">out</option>
                             </select>
                         </form>
                     </div>

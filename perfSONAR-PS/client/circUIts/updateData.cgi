@@ -13,9 +13,9 @@ use perfSONAR_PS::Transport;
 
 # Eventually get these from config (or even app)
 my $server = "packrat.internet2.edu";
-my $port = 8081;
-my $endpoint = "axis/services/snmpMP";
-my $filter = '//nmwg:message//snmp:datum';
+my $port = 8080;
+my $endpoint = "perfSONAR_PS/services/snmpMA";
+my $filter = '//nmwg:message//nmwg:datum';
 
 my $cgi = new CGI;
 
@@ -24,10 +24,10 @@ my $cgi = new CGI;
 my $fakeServiceMode = $cgi->param('fakeServiceMode');
 
 my $int = $cgi->param('resolution') || 5;
-my $maxValue = $cgi->param('maxValue') || 1000;
-my $host = $cgi->param('hostName') || "mitc-m10.internet2.edu";
-my $index = $cgi->param('ifName') || "76";
-my $direction = $cgi->param('direction') || "ifHCOutOctets";
+my $maxValue = $cgi->param('maxValue') || 10000;
+my $host = $cgi->param('hostName') || "rtr129-93-239-128.unl.edu";
+my $index = $cgi->param('ifIndex') || 4;
+my $direction = $cgi->param('direction') || "out";
 my $npoints = $cgi->param('npoints') || 5;
 my $refTime = $cgi->param('refTime') || "now";
 
@@ -58,20 +58,12 @@ sub getReferenceTime{
 
     if($sec eq "now"){
         ($sec, $frac) = Time::HiRes::gettimeofday;  
-
-        # XXX: Remove when SNMP_MA ignores last RRD value
-        $sec -= 5;
-
-        # XXX: Remove when this is done by SNMP_MA
-        # put on interval boundary for broken rrdtool
-        if($do_res_hack && $sec%$int){
-            $sec = int($sec/$int)*$int; # this is end time - so round-down
-        }
     }
 
     $sec;
 }
 
+# XXX: $host ignored for now, not needed for fmm07
 sub makeMessage {
   my($host, $index, $time, $int, $direction, $npoints) = @_;
   my $ret;
@@ -79,29 +71,47 @@ sub makeMessage {
   my $etime = $time;
 
   $ret =<<"ENDMESS";
-<nmwg:message type=\"request\"
+<nmwg:message type=\"SetupDataRequest\"
 	      id=\"msg1\"
-              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"
               xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\"
+              xmlns:neterr=\"http://ggf.org/ns/nmwg/characteristic/errors/2.0/\"
+              xmlns:netdisc=\"http://ggf.org/ns/nmwg/characteristic/discards/2.0/\"
+              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"
               xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"
               xmlns:select=\"http://ggf.org/ns/nmwg/ops/select/2.0/\"
+              xmlns:nmtm=\"http://ggf.org/ns/nmwg/ops/time/2.0/\"
               xmlns:snmp=\"http://ggf.org/ns/nmwg/tools/snmp/2.0/\">
+
   <nmwg:metadata id=\"m1\">
     <netutil:subject id=\"s1\">
       <nmwgt:interface>
-        <nmwgt:hostName>$host</nmwgt:hostName>
-        <nmwgt:ifName>$index</nmwgt:ifName>
+        <nmwgt:ifIndex>$index</nmwgt:ifIndex>
         <nmwgt:direction>$direction</nmwgt:direction>
       </nmwgt:interface>
     </netutil:subject>
-    <nmwg:parameters id=\"p1\">
-      <select:parameter name=\"time\" operator=\"gte\">$stime</select:parameter>
-      <select:parameter name=\"time\" operator=\"lte\">$etime</select:parameter>\n";     
-      <select:parameter name=\"consolidationFunction\">AVERAGE</select:parameter>\n";  
-      <select:parameter name=\"resolution\">$int</select:parameter>
+
+    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
+
+    <nmwg:parameters id=\"p-netutil\">
+        <nmwg:parameter name=\"supportedEventType\">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
     </nmwg:parameters>
   </nmwg:metadata>
-  <nmwg:data id=\"d1\" metadataIdRef=\"m1\"/>
+
+  <nmwg:metadata id=\"m1c\">
+    <select:subject id=\"sub1c\" metadataIdRef=\"m1\"/>
+
+    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
+
+    <select:parameters id=\"mc-p1\">
+      <select:parameter name=\"startTime\">$stime</select:parameter>
+      <select:parameter name=\"endTime\">$etime</select:parameter>
+      <select:parameter name=\"resolution\">$int</select:parameter>
+      <select:parameter name=\"consolidationFunction\">AVERAGE</select:parameter>
+    </select:parameters>
+
+  </nmwg:metadata>
+
+  <nmwg:data id=\"d1\" metadataIdRef=\"m1c\"/>
 </nmwg:message>
 ENDMESS
 
@@ -129,6 +139,7 @@ sub fetchPerfsonarData{
     warn "Post sender";
 
     my $mess = makeMessage($host, $index, $sec, $int, $direction, $npoints);
+#    warn $mess;
     my $env = $sender->makeEnvelope($mess);
 
     warn "Pre send data";
@@ -154,8 +165,17 @@ sub fetchPerfsonarData{
 
     my $data =  "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
     foreach my $d ($nodeset->get_nodelist) {
-        my $t = int($d->getAttribute("time"));
-        # mbps
+        my $tt = $d->getAttribute("timeType");
+        my $du = $d->getAttribute("valueUnits");
+
+        if($tt ne "unix"){
+            die "Unsupported timeType in response: $tt";
+        }
+        if($du ne "Bps"){
+            die "Unsupported valueUnits in response: $du";
+        }
+        my $t = int($d->getAttribute("timeValue"));
+        # convert to mbps
         my $v = int($d->getAttribute("value")) * 8 / 1000000;
         next if($v eq 'nan');
         $data .= '        ['. $t. "," . $v. '],'. "\n";
