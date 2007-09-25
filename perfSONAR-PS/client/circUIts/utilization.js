@@ -1,19 +1,19 @@
 
 // TODO: Get some opts from cookies?
 var defOptionsUtil = {
-        "resolution":   10,
+        "resolution":   5,
         "npoints":   100,
         "fakeServiceMode": 0,
         "xOriginIsZero": false,
-        "yAxis":[0,1000],
+        "yAxis":[0,10000],
         "yTicks":[
         {label: "0", v: 0},
-        {label: "200", v: 200},
-        {label: "400", v: 400},
-        {label: "600", v: 600},
-        {label: "800", v: 800},
-        {label: "1000", v: 1000},
-        ],
+        {label: "2000", v: 2000},
+        {label: "4000", v: 4000},
+        {label: "6000", v: 6000},
+        {label: "8000", v: 8000},
+        {label: "10000", v: 10000},
+        ]
     };
 var layout = null;
 var renderer = null;
@@ -30,7 +30,15 @@ function loadDataUtil(req) {
 
     log("json got:", json);
 
-    layout.addDataset("sample",json.servdata.data);
+    // Add a 0 data value to beginning and end of rrd data to deal
+    // with lame PlotKit desire to draw to the corners.
+
+    var data = json.servdata.data;
+    data.splice(0,0,[json.servdata.data[0][0] - 1, 0]);
+    data[data.length] =
+            [json.servdata.data[json.servdata.data.length-1][0]+1,0];
+
+    layout.addDataset("sample",data);
 
     var i;
     var morig,mnew,sec;
@@ -96,7 +104,7 @@ function newDataUtil(){
         query += "hostName="+getHost()+"&";
     }
     if(getInterface){
-        query += "ifName="+getInterface()+"&";
+        query += "ifIndex="+getInterface()+"&";
     }
     if(getDirection){
         query += "direction="+getDirection()+"&";

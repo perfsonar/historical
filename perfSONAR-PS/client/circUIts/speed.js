@@ -25,7 +25,7 @@ function Speed(options){
         "staleAlpha": 0.4,          // how much to obscure colors
         "staleWidth": 0.75,          // how much to obscure colors
 
-        "refreshPeriod": 0.090,// seconds
+        "refreshPeriod": 0.100,// seconds
         "dataPeriod": 5,     // seconds
         "jitterPercent":    0.005,   // bounce a bit around value :)
 
@@ -269,7 +269,6 @@ Speed.prototype.refresh = function(){
     if(randValue < 0) randValue = 0;
     if(randValue > this.options.maxValue) randValue = this.options.maxValue;
 
-    var yLevel = this.hc*randValue/this.options.maxValue;
     var nBars = this.options.numBars -
                     (this.options.numBars * randValue/this.options.maxValue);
     var hb = this.hc/this.options.numBars;
@@ -295,19 +294,21 @@ Speed.prototype.refresh = function(){
     this.ctx.fill();
 
     // full portion
-    this.ctx.fillStyle = this.fstyle;
-    this.ctx.beginPath();
-    for(var i=nBars; i < this.options.numBars; i++){
-        this.ctx.rect(0,(hb*i)+(.5*hl),w,hl);
+    if(nBars < this.options.numBars){
+        this.ctx.fillStyle = this.fstyle;
+        this.ctx.beginPath();
+        for(var i=nBars; i < this.options.numBars; i++){
+            this.ctx.rect(0,(hb*i)+(.5*hl),w,hl);
+        }
+        this.ctx.closePath();
+        this.ctx.fill();
     }
-    this.ctx.closePath();
-    this.ctx.fill();
 
     this.ctx.restore();
 
     if(this.label){
-        this.label.textContent = Math.floor(this.nextValue);
-        this.label.innerText = Math.floor(this.nextValue);
+        this.label.textContent = Math.floor(this.nextValue) + " Mbps";
+        this.label.innerText = Math.floor(this.nextValue) + " Mbps";
     }
 
     return;

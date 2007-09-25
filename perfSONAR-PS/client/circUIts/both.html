@@ -15,52 +15,44 @@
 // this data structure should eventually be returned from a CGI based
 // on info from an LS or IS (info) service
 var hostInterfaces = {
-    "anna-raptor1.internet2.edu": {
-        "name": "Ann Arbor",
-        "ifNames": ["1010001", "1020001"],
-    },
-    "206.196.176.229": {
-        "name": "McLean",
-        "ifNames": [
-            "1000004",
-            "1020001",
-            "1000001",
-            "1000002",
-            "1010001",
-            "1010012",
-            "1020002",
-            ],
-    },
-    "chin-force10.hopi.internet2.edu": {
-        "name": "Chicago",
-        "ifNames": [
-            "34144278",
-            ],
-    },
+    "ks-42-tenge4-2-130.r.greatplains.net":{
+        "name": "UNL",
+        "ifIndexes": [3,4,5]
+    }
 };
 
 function updateHost(){
     var hosti = document.forms["options"].hostName.selectedIndex;
 log("hosti: ", hosti);
-    var host = document.forms["options"].hostName[hosti].value;
-    var ifName = document.forms["options"].ifName;
+    var hostName = document.forms["options"].hostName[hosti].value;
+log("hostName: ", hostName);
 
-    // remove current ifNames
-    while(ifName.length > 0){
-        ifName.remove(0);
+    var ifIndexes = null;
+    for(var k in hostInterfaces){
+log("k: ", k);
+log("hostInterfaces[k].name: ", hostInterfaces[k].name);
+        if (hostInterfaces[k].name == hostName){
+            ifIndexes = hostInterfaces[k].ifIndexes;
+        }
+    }
+
+    var ifIndex = document.forms["options"].ifIndex;
+
+    // remove current ifIndexes
+    while(ifIndex.length > 0){
+        ifIndex.remove(0);
     }
 
     // add set for newly selected host
     var i;
-    var ifNames = hostInterfaces[host].ifNames;
-    for(i=0;i<ifNames.length;i++){
+    for(i=0;i<ifIndexes.length;i++){
         var o=document.createElement('option');
-        o.text=ifNames[i];
+        o.text=ifIndexes[i];
         try{
-            ifName.add(o,null);
+            ifIndex.add(o,null);
         }
         catch(ex){
-            ifName.add(o);
+            ifIndex.add(o);
         }
 
     }
@@ -70,17 +62,17 @@ log("hosti: ", hosti);
 
 function initHost(){
     var i;
-    var ifName = document.forms["options"].ifName;
+    var hostName = document.forms["options"].hostName;
 
     for(h in hostInterfaces){
         var o=document.createElement('option');
         o.text=hostInterfaces[h].name;
 log("Adding host: ",h);
         try{
-            ifName.add(o,null);
+            hostName.add(o,null);
         }
         catch(ex){
-            ifName.add(o);
+            hostName.add(o);
         }
     }
 
@@ -99,9 +91,9 @@ var getHost = function(){
     return document.forms["options"].hostName.value;
 }
 var getInterface = function(){
-    var ifName = document.forms["options"].ifName;
+    var ifIndex = document.forms["options"].ifIndex;
 
-    return ifName.value;
+    return ifIndex.value;
 }
 
 var getDirection = function(){
@@ -127,17 +119,19 @@ createLoggingPane();
                 <td align="left" valign="top">
                     <div id="form-fields">
                         <form name="options">
-                            <select id="hostName" name="hostName" onChange="updateHost();">
+                            <select id="hostName" name="hostName" onChange="updateHost();">hostName
                             </select>
-                            <select id="ifName" name="ifName">
+                            <select id="ifIndex" name="ifIndex">ifIndex
                             </select>
-                            <select id="direction" name="direction">
+                            <select id="direction" name="direction">direction
                                 <option value="in">in</option>
                                 <option value="out">out</option>
                             </select>
                         </form>
                     </div>
                 </td>
+            </tr>
+            <tr>
                 <td valign="top">
                     <div id="div-example">
                         <canvas id="plot" width="400" height="420"
