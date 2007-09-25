@@ -116,22 +116,6 @@ createLoggingPane();
         </table>
         <table align="center" cellpadding=10>
             <tr>
-                <td align="left" valign="top">
-                    <div id="form-fields">
-                        <form name="options">
-                            <select id="hostName" name="hostName" onChange="updateHost();">hostName
-                            </select>
-                            <select id="ifIndex" name="ifIndex">ifIndex
-                            </select>
-                            <select id="direction" name="direction">direction
-                                <option value="in">in</option>
-                                <option value="out">out</option>
-                            </select>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            <tr>
                 <td valign="top">
                     <div id="div-example">
                         <canvas id="plot" width="400" height="420"
@@ -155,6 +139,22 @@ createLoggingPane();
                 </td>
                 <td align="center">
                     <input id="start-stop-speed" type="button" value="Stop"/>
+                </td>
+            </tr>
+            <tr>
+                <td align="left" valign="top">
+                    <div id="form-fields">
+                        <form name="options">
+                            <select id="hostName" name="hostName" onChange="updateHost();">hostName
+                            </select>
+                            <select id="ifIndex" name="ifIndex">ifIndex
+                            </select>
+                            <select id="direction" name="direction">direction
+                                <option value="in">in</option>
+                                <option value="out">out</option>
+                            </select>
+                        </form>
+                    </div>
                 </td>
             </tr>
         </table>

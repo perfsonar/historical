@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -I /usr/local/perfSONAR-PS/lib -I/Users/boote/dev/perfSONAR-PS/trunk/perfSONAR-PS/lib
+#!/usr/bin/perl -w -I /usr/local/perfSONAR-PS/lib -I/Users/boote/dev/perfSONAR-PS/trunk/perfSONAR-PS/lib -I/home/boote/dev/perfSONAR-PS/trunk/perfSONAR-PS/lib
 
 use strict;
 use FindBin;
