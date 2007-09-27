@@ -1,7 +1,5 @@
-#!/usr/bin/perl
-
 use Statistics::Descriptive;
-use Log::Log4perl qw(get_logger :levels);
+use Log::Log4perl qw(get_logger);
 
 
 
@@ -11,32 +9,29 @@ package IEPM::PingER::Statistics::RTT;
 
 our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::RTT");
 
+use strict;
+
 sub calculate
 {
   my $rtts = shift; # reference to list of rtts
   
   $logger->debug("input: $rtts");
-  if ( $rtts !~ /ARRAY/ ) {
-    $logger->fatal( "Input needs to be a reference to an array of rtt values ($rtts).");
+ 
+  if ( ref($rtts) ne 'ARRAY' ) {
+    $logger->error( "Input needs to be a reference to an array of rtt values ($rtts).");
     return ( undef, undef, undef, undef );
   }
+  my $size = scalar @$rtts;
+  $logger->debug( "Size: $size"); 
   
-  $logger->debug( "size: " . scalar @$rtts );
-   if ( scalar @$rtts > 0 ) {
+   if ( $size  > 0 ) {
 
      my $stat = Statistics::Descriptive::Full->new();
 
-     for( my $i=0; $i<scalar @$rtts; $i++ ) {
-
-        return  ( undef, undef, undef, undef ) unless ( $rtts->[$i] =~ /^\s*\d\.?\d*\s*$/ );
-  	$stat->add_data( $rtts->[$i] );
+     for( my $i=0; $i<$size ; $i++ ) {
+           $stat->add_data( $rtts->[$i] );
      }
-     my $min = $stat->min();
-     my $max = $stat->max();
-     my $mean = $stat->mean();
-     my $median = $stat->median();
-
-     return ( $min == 0 ? undef : $min, $mean == 0 ? undef : $mean, $max == 0 ? undef : $max, $median == 0 ? undef : $median );
+     return ($stat->min(), $stat->max(),  $stat->mean(), $stat->median() );
 	  
    } else {
   	  return ( undef, undef, undef, undef );
@@ -56,40 +51,35 @@ sub calculate
   my $rtts = shift; # reference to list of rtts
   
   $logger->debug("input: $rtts");
-  if ( $rtts !~ /ARRAY/ ) {
-    $logger->fatal( "Input needs to be a reference to an array of latency values.");
+ 
+  if ( ref($rtts) ne 'ARRAY') {
+    $logger->error( "Input needs to be a reference to an array of latency values.");
     return ( undef, undef, undef, undef, undef );
   }
  
   my $size = scalar @$rtts;
-  $logger->debug( "Size: " . $size ); 
+  $logger->debug( "Size: $size"); 
   
   # need special case as we can not determine the ipd for only one packet
   if ( $size > 1 ) {
 
     my $stat = Statistics::Descriptive::Full->new();
- 
-        return  ( undef, undef, undef, undef, undef ) unless ( $rtts->[0] =~ /^\s*\d\.?\d*\s*$/ );
+    my @ipds = ();
+    for( my $i=1; $i<$size; $i++ ) {  	
+      my $ipd = $rtts->[$i] - $rtts->[$i-1];
+      $ipd = abs( $ipd );
+      $logger->debug( " adding $ipd"); 
+      $stat->add_data($ipd);
+    }
 
-  	  my @ipds = ();
-	  for( my $i=1; $i<scalar @$rtts; $i++ ) {
-  	
-            return  ( undef, undef, undef, undef, undef ) unless ( $rtts->[$i] =~ /^\s*\d\.?\d*\s*$/ );
-	    my $ipd = $rtts->[$i] - $rtts->[$i-1];
-	    $ipd = sprintf( "%.3f", abs( $ipd ) );;
-	    $logger->debug( " adding $ipd"); 
-	    $stat->add_data($ipd);
+    my $seventyfifth = $stat->percentile(75);
+    my $twentyfifth = $stat->percentile(25);
+    my $iqr = undef;
+    if ( defined $seventyfifth && defined $twentyfifth ) {
+	  $iqr = $seventyfifth - $twentyfifth;
+    }
 
-	  }
-	  
-	  my $seventyfifth = $stat->percentile(75);
-	  my $twentyfifth = $stat->percentile(25);
-	  my $iqr = undef;
-	  if ( defined $seventyfifth && defined $seventyfifth ) {
-	  	$iqr = $seventyfifth - $twentyfifth;
-	  }
-	  
-	  return ( $stat->min(), $stat->mean(), $stat->max(), $stat->median(),  $iqr );
+    return ( $stat->min(), $stat->mean(), $stat->max(), $stat->median(),  $iqr );
 
   } else {
     return ( undef, undef, undef, undef, undef );
@@ -101,7 +91,7 @@ sub calculate
 #######################################################################
 package IEPM::PingER::Statistics::Other;
 #######################################################################
-
+use strict;
 our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::Other");
 
 ###
@@ -113,15 +103,16 @@ sub calculate
   my $recv = shift;
 
   my $seqs = shift;
-
-  
   $logger->debug( "input: sent $sent, recv $recv, seqs $seqs");
-  if ( $seqs !~ /ARRAY/ ) {
-    $logger->fatal( "Input needs to be a reference to an array of packet sequence values.");
+ 
+  if ( ref($seqs) ne 'ARRAY') {
+    $logger->error( "Input needs to be a reference to an array of packet sequence values.");
     return ( undef, undef );
   }
+   my $size = scalar @$seqs;
+  $logger->debug( "Size: $size"); 
   
-  return ( undef, undef ) if scalar @$seqs < 2;
+  return ( undef, undef ) if $size < 2;
   
   # dups and ooo
   my $dups = 0;
@@ -137,7 +128,7 @@ sub calculate
   #doubel check the input
   return (undef,undef) if ( $seqs->[0] > $sent );
 
-  for( my $i=1; $i<scalar @$seqs; $i++) {
+  for( my $i=1; $i< $size; $i++) {
     
     return (undef, undef) if ( $seqs->[$i] > $sent );
 
@@ -170,7 +161,7 @@ sub calculate
 #######################################################################
 package IEPM::PingER::Statistics::Loss;
 #######################################################################
-
+use strict;
 our $logger = Log::Log4perl::get_logger("IEPM::PingER::Statistics::Loss");
 
 ###
@@ -180,21 +171,22 @@ sub calculate
 {
   my $sent = shift;
   my $recv = shift;
-  
+    
+  $recv  |=0;
   $logger->debug("input: $sent / $recv");
-  if ( ! defined $sent || ! defined $recv || $sent < $recv ) {
-    $logger->fatal( "Error in parsing loss with sent ($sent), recieved ($recv).");
-    return undef;
+  if (  !$sent ||   $sent < $recv ) {
+    $logger->error( "Error in parsing loss with sent ($sent), recieved ($recv)");
+    return -1;
   }
   
-  return 100 - 100 * ( $recv / $sent );
+  return 100. - 100. * ( $recv / $sent );
 }
 
 
 #######################################################################
 package IEPM::PingER::Statistics::Loss::CLP;
 #######################################################################
-
+use strict;
 ###
 # Conditional Loss Probability (CLP) defined in Characterizing End-to-end
 # Packet Delay and Loss in the Internet by J. Bolot in the Journal of
@@ -212,50 +204,45 @@ sub calculate
   my $pktSent = shift;
   my $pktRcvd = shift;
   my $seqs = shift;
-  
-  $logger->debug( "input: sent $pktSent / recv $pktRcvd ($seqs)");
-  if ( $seqs !~ /ARRAY/ ) {
-    $logger->fatal( "Input should be list of sequence numbers.");
-  }
-  # undef if no data  
-  return undef if scalar @$seqs < 1;
-  
-  if ( $pktRcvd != scalar @$seqs ) {
-    $logger->fatal( "pkts recvd ($pktRcvd) is not equal to size of array (@$seqs)");
+ 
+ 
+  my $stringified_arr =   join ",", @$seqs;
+  ### check if $seqs a reference to array
+  if ( ref($seqs) ne  'ARRAY') {
+      $logger->error( "Input should be list of sequence numbers $stringified_arr");
+      return undef;
+  }  
+   my $size = scalar @$seqs;
+  $logger->debug( "Size: $size"); 
+    
+  if ( $pktRcvd !=  $size ) {
+    $logger->error( "pkts recvd ($pktRcvd) is not equal to size $size of array $stringified_arr ");
     return undef;
   }
-
-  my @lost_packets=();
-  my @icmp_seqs = @$seqs;  
+  ### lookup hash with sequence numbers as keys and sequence numbers + 1 as values 
+  ###  ( to get defined value for the first packet
+  ###  duplicated packets will be considered as lost, reordered packets will be ignored
+  ###  for example: 0 2 3 4 5 5 6 7 sequence with 8 packets sent and 
+  my %lookup_seq = map {($_+1) =>  ($_+1)} @$seqs;
   my $consecutive_packet_loss=0;
-  
-  $logger->debug( "Determining lost packets from sequence (@$seqs)");
-  for my $i (0 ..  $pktSent - 1 ) {
-     $logger->debug( " Looking at packet #$i");
-     if(!defined($icmp_seqs[$i])) {
-       $logger->debug( "  seqs[$i] not defined (sent '$pktSent' recv '$pktRcvd') for @$seqs" );
-     }
-     if($icmp_seqs[$i] != $i) {
-       return undef if ( $icmp_seqs[$i] > $pktSent );
-       push @lost_packets, $i;
-       unshift @icmp_seqs, "0";
-       $logger->debug( "  Found lost packet #$i (lost: @lost_packets) / (all: @icmp_seqs)");
-     }
-  }
-
-  $logger->debug( "Determining consequtively lost packets");
-
-  for my $j (1 .. scalar @lost_packets - 1) {	
-  	$logger->debug( " Looking at lost pkt #" . $lost_packets[$j] . " compared to pkt #" . $lost_packets[$j-1]);
-    if ($lost_packets[$j]==$lost_packets[$j-1]+1) {
-      $consecutive_packet_loss++;
-      $logger->debug( "  Consequtively lost packets = $consecutive_packet_loss");
-    }
-  }
-  my $clp = undef;
   my $lost_packets = $pktSent - $pktRcvd;
-  if ( $lost_packets > 1  ) {
-    $clp = sprintf "%3.3f", $consecutive_packet_loss*100/($lost_packets - 1);
+  $logger->debug( "input: sent $pktSent / recv $pktRcvd");
+ 
+  $logger->debug( "Determining lost packets from sequence $stringified_arr");
+  for my $i (2 ..    $pktSent) {
+     $logger->debug( " Looking at packet #$i ");
+     unless($lookup_seq{$i-1}) {
+        $consecutive_packet_loss++ unless  $lookup_seq{$i};
+        $logger->debug( "  Found lost packet #$i ");
+     }    
+  }
+
+  $logger->debug( "Determining Conditional Loss Probability where lost_packets=$lost_packets");
+ 
+  my $clp = undef;
+   
+  if ( $lost_packets > 1) {
+    $clp =  $consecutive_packet_loss*100/($lost_packets - 1);
   }
   return $clp;
   
