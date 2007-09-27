@@ -10,7 +10,7 @@ export PING_GATHER_CMD
 PING_ADD_CMD="$BINDIR/add_2pinger_MA.pl"
 export PING_ADD_CMD
 
-BUILD_MA_CMD="$BINDIR/build_pingerStore.p"
+BUILD_MA_CMD="$BINDIR/build_pingerStore.pl"
 export BUILD_MA_CMD
 
 GATHER_LIST="/home/netadmin/new_pinger/data/gather_list.txt"

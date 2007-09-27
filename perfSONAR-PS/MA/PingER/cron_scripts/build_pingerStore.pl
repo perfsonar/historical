@@ -24,11 +24,11 @@ my $dbh =  DBI->connect("DBI:mysql:pingerMA:localhost", $username, '',
                                                 {RaiseError => 0,
                                                  PrintError => 0}) or 
            croak("Cant connect to database, please try later or send message to pinger\@fnal.gov " . $DBI::errstr);
-my $select_stm = qq{select  metaID, ip_name_src,  ip_name_dst, ip_address_src, ip_address_dst, transport, packetSize, count, packetInterval  from metaData  };
+my $select_stm = qq{select  metaID, ip_name_src,  ip_name_dst,    transport, packetSize, count, packetInterval  from metaData  };
 my $sth =  $dbh->prepare("$select_stm");
    $sth->execute() or croak(" OOops , cant query MySQl DB: ". $DBI::errstr);
   
-while(my($meta, $src_n, $dst_n, $src_ip, $dst_ip, $transp, $pingsz, $pkg_s, $inter) = $sth->fetchrow_array()) {
+while(my($meta, $src_n, $dst_n,   $transp, $pingsz, $pkg_s, $inter) = $sth->fetchrow_array()) {
   print PAIRFL qq{ 
   <nmwg:metadata  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta$meta">
     <pinger:subject xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" id="subject$meta"> 
