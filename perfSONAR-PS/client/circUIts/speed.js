@@ -83,6 +83,7 @@ function Speed(options){
     
     // keep track of the number of refreshes between data value changes
     this.steps = 0;
+    this.currentValue = this.nextValue = 0;
 
     this.hc = this.canvas.height;
     this.wc = this.canvas.width;
@@ -351,6 +352,25 @@ function loadDataSpeed(req) {
 
     // XXX: Verify return succeeded.
 
+    // XXX: Can remove when Jason corrects service
+    // removes any trailing 0 data. (rrd is still modifying these)
+    while(json.servdata.data.length > 1){
+        var arrElem = json.servdata.data[json.servdata.data.length-1];
+        var val;
+        if(arrElem.length > 1){
+            val = arrElem[1];
+        }
+        else{
+            val = arrElem;
+        }
+
+        if(val != 0){
+            break;
+        }
+
+        json.servdata.data.length--;
+    }
+            
     log("loadData: speed.appendData()", Date());
     speed.appendData(json.servdata.data);
     log("loadData: speed.data.length: ",speed.data.length);

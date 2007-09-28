@@ -30,12 +30,29 @@ function loadDataUtil(req) {
 
     if(!goUtil) return;
 
-    log("JSON:",req.responseText);
-    log("PRE: evalJSON", Date());
+//    log("JSON:",req.responseText);
+//    log("PRE: evalJSON", Date());
     var json = MochiKit.Async.evalJSONRequest(req);
-    log("POST: evalJSON", Date());
+//    log("POST: evalJSON", Date());
 
-    log("json got:", json);
+    // XXX: Can remove when Jason corrects service
+    // removes any trailing 0 data. (rrd is still modifying these)
+    while(json.servdata.data.length > 1){
+        var arrElem = json.servdata.data[json.servdata.data.length-1];
+        var val;
+        if(arrElem.length > 1){
+            val = arrElem[1];
+        }
+        else{
+            val = arrElem;
+        }
+
+        if(val != 0){
+            break;
+        }
+
+        json.servdata.data.length--;
+    }
 
     // Add a 0 data value to beginning and end of rrd data to deal
     // with lame PlotKit desire to draw to the corners.
@@ -117,7 +134,7 @@ function newDataUtil(){
     if(getDirection){
         query += "direction="+getDirection()+"&";
     }
-    log("Fetch Data: ", Date());
+//    log("Fetch Data: ", Date());
     // TODO: Change to POST and specify args
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest(query);
     doreq.addCallback(loadDataUtil);
@@ -128,11 +145,11 @@ function startStopUtil(){
 
     if(goUtil){
         $('start-stop-util').value = "Stop";
-        log("Starting data loop", Date());
+//        log("Starting data loop", Date());
         newDataUtil();
     }
     else{
-        log("Stopping data loop", Date());
+//        log("Stopping data loop", Date());
         $('start-stop-util').value = "Start";
     }
 }
