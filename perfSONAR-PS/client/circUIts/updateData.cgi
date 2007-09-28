@@ -134,17 +134,18 @@ sub fetchFakeData{
 sub fetchPerfsonarData{
     my($host, $index, $time, $int, $direction, $npoints) = @_;
 
-    warn "Pre sender";
+#    warn "Pre sender";
     my $sender = new perfSONAR_PS::Transport("/tmp/pSerror.log", "", "", $server, $port, $endpoint);
-    warn "Post sender";
+#    warn "Post sender";
 
     my $mess = makeMessage($host, $index, $sec, $int, $direction, $npoints);
 #    warn $mess;
     my $env = $sender->makeEnvelope($mess);
 
-    warn "Pre send data";
+#    warn "Pre send data";
     my $response = $sender->sendReceive($env);
-    warn "Post send data";
+#    warn $response;
+#    warn "Post send data";
 
 # Turn the response into an XPath object
     my $xp;
@@ -156,9 +157,9 @@ sub fetchPerfsonarData{
     }
 
 # pull all the snmp:datum from the response
-    warn "Pre find";
+#    warn "Pre find";
     my $nodeset = $xp->find( $filter );
-    warn "Post find";
+#    warn "Post find";
     if($nodeset->size() <= 0) {
         die "Nothing found for xpath statement $filter.\n";
     }

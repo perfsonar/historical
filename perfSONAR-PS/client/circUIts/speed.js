@@ -21,13 +21,16 @@ function Speed(options){
         "percentBar": 0.6,          // how much of each 'bar' is lit
         "emptyAlpha": 0.3,          // how much to obscure colors
 
-        // "dataStalePeriod":             // defaults to 2 * dataPeriod
         "staleAlpha": 0.4,          // how much to obscure colors
-        "staleWidth": 0.75,          // how much to obscure colors
+        "staleWidth": 0.75,         // how much to obscure colors
 
-        "refreshPeriod": 0.100,// seconds
-        "dataPeriod": 5,     // seconds
-        "jitterPercent":    0.005,   // bounce a bit around value :)
+        "jitterPercent":    0.005,  // bounce a bit around value :)
+
+        "dataPeriod":       5,      // seconds - how often to poll pS
+
+        "refreshPeriod":    0.100,  // seconds - how often to update screen
+        "minDataPeriod":    1,      // seconds - min duration to show one value
+        "dataStalePeriod":  15,     // seconds - when to show 'inactive'
 
         "labelName":  "speedo-value",
         "doIntro":  true
@@ -44,24 +47,42 @@ function Speed(options){
     this.canvas = this.options.canvas;
     this.ctx = this.canvas.getContext("2d");
 
+    /*
+     * Options sanity checks
+     */
     if(this.options.maxValue <= 0){
         throw new Error("Speed: \"maxValue\" must be > 0");
     }
 
-    if(this.options.dataPeriod < this.options.refreshPeriod){
-        throw new Error("Speed: \"dataPeriod\" must be > \"refreshPeriod\"");
+    if(this.options.dataStalePeriod <= 0){
+        throw new Error("Speed: \"dataStalePeriod\" must be > 0");
+    }
+    if(this.options.minDataPeriod <= 0){
+        throw new Error("Speed: \"minDataPeriod\" must be > 0");
+    }
+    if(this.options.dataStalePeriod <= 0){
+        throw new Error("Speed: \"dataStalePeriod\" must be > 0");
     }
 
-    if(!this.options.dataStalePeriod){
-        this.options.dataStalePeriod = 2 * this.options.dataPeriod;
+    if(this.options.dataStalePeriod < this.options.minDataPeriod){
+        throw new Error("Speed: \"minDataPeriod\" must be < \"dataStalePeriod\"");
+    }
+    if(this.options.minDataPeriod < this.options.refreshPeriod){
+        throw new Error("Speed: \"refreshPeriod\" must be < \"minDataPeriod\"");
     }
 
-    // convert periods to milliseconds
+    // convert to milli for js event requests
     this.refreshPeriod = this.options.refreshPeriod * 1000;
-    this.dataPeriod = this.options.dataPeriod * 1000;
-    this.dataStalePeriod = this.options.dataStalePeriod * 1000;
 
-    this.lastDataUpdate = this.nextDataUpdate = this.dataStale = 0;
+    // Determine number of refresh 'steps' before a new datavalue can be shown
+    this.minRefreshSteps = this.options.minDataPeriod /
+                                        this.options.refreshPeriod;
+    // Determine number of refresh 'steps' before data is stale
+    this.maxRefreshSteps = this.options.dataStalePeriod /
+                                        this.options.refreshPeriod;
+    
+    // keep track of the number of refreshes between data value changes
+    this.steps = 0;
 
     this.hc = this.canvas.height;
     this.wc = this.canvas.width;
@@ -149,7 +170,7 @@ Speed.prototype.appendData = function(a){
         }
     }
 
-    log("appendData: data has ",this.data.length);
+    log("appendData: speedo data has ",this.data.length);
     if(this.data.length > 0){
         if(this.data[this.data.length-1].length){
             log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1].toPrecision(9),"]");
@@ -194,11 +215,34 @@ Speed.prototype.refresh = function(){
 
     // fetch data from beginning of this.data array
     var stale = false;
-    var nowDate = new Date();
-    var now = nowDate.getTime();
     var newValue;
-    if(now > this.nextDataUpdate){
+
+    this.steps++;
+
+    if(this.steps < this.minRefreshSteps){
+        // take one more step toward the 'next' value.
+
+        var valDiff = this.nextValue - this.currentValue;
+
+        if(valDiff){
+            newValue = this.currentValue +
+                                (valDiff * this.steps / this.minRefreshSteps);
+        }
+        else{
+            newValue = this.currentValue;
+        }
+    }
+    else{
+        // Time to update to a new data value
+
         if(this.data && this.data.length){
+            var nDate;
+            var nTime;
+            var nextTime;
+
+            // new data value - reset steps
+            this.steps = 0;
+
             // update currentValue and nextValue
             var currentValue = this.data.shift();
 
@@ -217,22 +261,16 @@ Speed.prototype.refresh = function(){
             else{
                 nextValue = this.data[0];
             }
+
             if(nextValue.length > 1){
                 this.nextValue = nextValue[1];
             }
             else{
                 this.nextValue = nextValue;
             }
-
-
-            this.lastDataUpdate = now;
-            this.nextDataUpdate = now + this.dataPeriod;
-            this.dataStale = now + this.dataStalePeriod;
-
-
         }
         else{
-            if(now > this.dataStale){
+            if(this.steps > this.maxRefreshSteps){
                 stale = true;
                 if(this.interval){
                     clearInterval(this.interval);
@@ -241,22 +279,6 @@ Speed.prototype.refresh = function(){
             }
         }
         newValue = this.currentValue;
-    }
-    else{
-        /*
-         * linear (or other?) interpolation to approximate this update based
-         * on target value and time.
-         */
-        if(!this.lastDataUpdate) this.lastDataUpdate = now;
-        var timeDiff = now - this.lastDataUpdate;
-        var valDiff = this.nextValue - this.currentValue;
-        if(valDiff){
-            newValue = this.currentValue +
-                (valDiff * timeDiff / this.dataPeriod);
-        }
-        else{
-            newValue = this.currentValue;
-        }
     }
 
     var randValue = newValue;
@@ -326,10 +348,8 @@ function loadDataSpeed(req) {
     log("loadData: Data received:", Date());
     log("loadData: json:",req.responseText);
     var json = MochiKit.Async.evalJSONRequest(req);
-    //XXX: temporarily ignore last value
-    if(json.servdata.data.length > 1){
-        json.servdata.data.length -= 1;
-    }
+
+    // XXX: Verify return succeeded.
 
     log("loadData: speed.appendData()", Date());
     speed.appendData(json.servdata.data);
@@ -351,7 +371,7 @@ function newDataSpeed(){
         query += "hostName="+getHost()+"&";
     }
     if(!isNull(getInterface)){
-        query += "ifName="+getInterface()+"&";
+        query += "ifIndex="+getInterface()+"&";
     }
     if(!isNull(getDirection)){
         query += "direction="+getDirection()+"&";

@@ -82,9 +82,10 @@ log("Adding host: ",h);
     return;
 }
 
+addLoadEvent(initHost);
 addLoadEvent(initGraph);
 addLoadEvent(initSpeed);
-addLoadEvent(initHost);
+createLoggingPane();
 
 var getHost = function(){
 
@@ -102,7 +103,6 @@ var getDirection = function(){
     return direction.value;
 }
 
-createLoggingPane();
 </script>
 
 <body>

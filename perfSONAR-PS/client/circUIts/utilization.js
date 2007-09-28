@@ -2,9 +2,16 @@
 // TODO: Get some opts from cookies?
 var defOptionsUtil = {
         "resolution":   5,
-        "npoints":   100,
+        "npoints":   72,
         "fakeServiceMode": 0,
         "xOriginIsZero": false,
+        "axisLabelFontSize": 14,
+        "axisLabelColor": Color.blackColor(),
+        "padding": {
+            "left": 33,
+            "right": 17,
+            "top": 10,
+            "bottom": 10},
         "yAxis":[0,10000],
         "yTicks":[
         {label: "0", v: 0},
@@ -50,10 +57,10 @@ function loadDataUtil(req) {
     // totally hacked assuming 1000 seconds of spread from min-max
     // Need to do something real here...
 
-    // tick every 2 minutes
+    // tick every 2 minutes (replaced with 1 for now)
     sec = mnDate.getSeconds();
     morig = mnDate.getMinutes();
-    mnew = Math.floor(morig/2.0) * 2;
+    mnew = Math.floor(morig/1.0) * 1;
     // make changes to Date object using increments of millisecs so
     // all date arithmetic is handled by "Date".
     i = json.servdata.data[0][0]-sec; // min boundry
@@ -67,7 +74,7 @@ function loadDataUtil(req) {
         morig++;
         i = 60-sec;
     }
-    mnew = Math.ceil(morig/2.0) * 2;
+    mnew = Math.ceil(morig/1.0) * 1;
     i += json.servdata.data[json.servdata.data.length-1][0]; // min boundry
     i += (mnew-morig)*60;
     mxDate = new Date(i*1000);
@@ -78,7 +85,8 @@ function loadDataUtil(req) {
     var mx = mxDate.valueOf()/1000;
 
     dateOptions.xAxis = [mn,mx];
-    for(i=mn;i<=mx;i+=120){
+//    for(i=mn;i<=mx;i+=120){
+    for(i=mn;i<=mx;i+=60){
         mnDate = new Date(i*1000);
         mnew = mnDate.getMinutes();
         ticks.push({label: mnew, v: i});
