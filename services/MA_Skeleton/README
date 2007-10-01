@@ -1,0 +1,33 @@
+This files in this directory provide a skeleton MA that can be modified to
+create new MAs. In the files, there are comments marked with an "XXX" that
+denote where you may need to be modify when creating new MAs.
+
+There are 2 files in the directory that must be modified and one that can be
+modified but is not required to create an MA.
+
+  skeleton.pl - This is the driver for the MA and handles many of the tasks
+  related to instantiation of the MA and the launching of new processes to
+  handle incoming requests. The modifications to this file should be minimal,
+  mainly replacing instances of the word 'skeleton' or 'Skeleton' with an
+  appropriate name.
+
+  Skeleton.pm - This file will contain the bulk of your new MA. The
+  changes/additions to this file will be major due to the differing nature of
+  the various MAs that one may want to create. Like the skeleton.pl file, all
+  references to "skeleton" or "Skeleton" will need to be replaced with
+  appropriate names. Beyond that, the scope of the rest of the changes depend
+  heavily on what the role of the MA is. A given MA may change default
+  configuration options, the set of namespaces used, the message handling or
+  the event type handling.
+
+  configure.pl - This file is optional as its job is to create the
+  configuration file to be used by your MA. Its purpose is to ask people simple
+  questions and create the configuration file for the MA. As before, references
+  to "Skeleton" or "skeleton" should be changed appropriately. However, new
+  questions should be added to ask the user about other configuration options
+  available.
+
+Once you have modified these files, simply, rename skeleton.pl and Skeleton.pm
+appropriately and copy the file formely known as Skeleton.pm to
+"../../lib/perfSONAR_PS/MA". You should then be able to execute the skeleton.pl
+and it should startup your service.

@@ -11,14 +11,12 @@ sub locate($$);
 sub dbxml_version();
 sub readConfiguration($$);
 
-my $DIST_URL = "http://download.oracle.com/berkeley-db/dbxml-2.3.10.tar.gz";
-
-print " -- perfSONAR-PS Topology MA Configuration --\n";
+print " -- perfSONAR-PS Skeleton MA Configuration --\n";
 print " - [press enter for the default choice] -\n\n";
 
 my $file = shift;
 
-$file = &ask("What file should I write the configuration to? ", "topology.conf", undef, '.+');
+$file = &ask("What file should I write the configuration to? ", "skeleton.conf", undef, '.+');
 
 my %var = ();
 my %prev = ();
@@ -27,6 +25,9 @@ my $tmp;
 if (-f $file) {
 	readConfiguration($file, \%prev);
 }
+
+# XXX This header should be changed to include the configuration options
+# available
 
 my $header = <<EOF
 # ######################################################### #
@@ -62,14 +63,6 @@ my $header = <<EOF
 #            can include location info, etc. Defaults to    #
 #            "Topology Measurement Archive"                 #
 #                                                           #
-#     TOPO_DB_TYPE = XML                                    #
-#     TOPO_DB_ENVIRONMENT = The directory where the         #
-#            database file lives. This directory should be  #
-#            specific to this database.                     #
-#     TOPO_DB_FILE = The database file's name               #
-#                                                           #
-#     READ_ONLY = 0 or 1. Renders the MA read-only.         #
-#                                                           #
 #     MAX_WORKER_PROCESSES = Maximum number of child        #
 #            processes that can be spawned at a given time. #
 #                                                           #
@@ -79,6 +72,9 @@ my $header = <<EOF
 # ######################################################### #
 EOF
 ;
+
+# XXX this array should be changed to include the perl modules and the minimum
+# version of each module required by your MA
 my @needs = (
              [ 'warnings', '0' ],
 	     [ 'strict', '0' ],
@@ -100,19 +96,11 @@ my @needs = (
 
 $var{"PORT"} = &ask("Enter the listen port ", "8083", $prev{"PORT"}, '^\d+$');
 
-$var{"ENDPOINT"} = &ask("Enter the listen end point ", "/perfSONAR_PS/services/topology", $prev{"ENDPOINT"}, "");
+$var{"ENDPOINT"} = &ask("Enter the listen end point ", "/perfSONAR_PS/services/skeleton", $prev{"ENDPOINT"}, "");
 
 $var{"MAX_WORKER_PROCESSES"} = &ask("Enter the maximum number of children processes (0 means infinite) ", "0", $prev{"MAX_WORKER_PROCESSES"}, "");
 
 $var{"MAX_WORKER_LIFETIME"} = &ask("Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0", $prev{"MAX_WORKER_LIFETIME"}, "");
-
-$var{"TOPO_DB_TYPE"} = "XML";
-
-$var{"TOPO_DB_ENVIRONMENT"} = &ask("Enter the directory containing the XML Database (if relative, it's relative to the installation directory) ", "xmldb", $prev{"TOPO_DB_ENVIRONMENT"}, "");
-
-$var{"TOPO_DB_FILE"} = &ask("Enter the filename for the XML Database ", "topology.dbxml", $prev{"TOPO_DB_FILE"}, "");
-
-$var{"READ_ONLY"} = &ask("Is this service read-only? ", "0|1", $prev{"READ_ONLY"}, '^[01]$');
 
 $var{"ENABLE_REGISTRATION"} = &ask("Will this service register with an LS ", "0|1", $prev{"ENABLE_REGISTRATION"}, '^[01]$');
 
@@ -182,54 +170,6 @@ for my $need_ref (@needs) {
   }
 }
 
-print "Checking for \"Sleepycat XML DB\": ";
-
-my $flag = dbxml_version();
-
-eval {
-  require Sleepycat::DbXml;
-};
-
-if($@ or !$flag) {
-  print "\tNot Found.\n";
-  print <<EOT;
-This module requires dbxml 2.(2|3).x to be installed. It is
-available in the dbxml distribution:
-  $DIST_URL
-EOT
-
-  $| = 1;
-  print "Do you want to install it right now ([y]/n)?";
-  my $in = <>;
-  chomp $in;
-  if($in =~ /^\s*$/ or $in =~ /y/i) {
-    if($> != 0) {
-      die "\nYou need to use sudo or be root to do this.\n";
-    }
-
-    my $dir = "/usr/local/dbxml-2.3.10";
-
-    $dir = &ask("Directory to install Sleepycat XML DB to ", "$dir", undef, '.+');
-
-    my $configure_opts = "--prefix=$dir --enable-perl";
-
-    eval {
-      install_DBXML($DIST_URL, $configure_opts);
-    };
-    if($@) {
-      print $@;
-      note();
-      exit 0;
-    }
-  }
-  else {
-    note();
-    exit 0;
-  }
-} else {
-  print "\tok.\n";
-}
-
 sub ask($$$$) {
   my($prompt,$value,$prev_value,$regex) = @_;
 
@@ -271,58 +211,6 @@ sub locate($$) {
   else {
     return $default;
   }
-}
-
-sub install_DBXML($$) {
-  my ($url, $config_opts) = @_;
-  my $mod = CPAN::Shell->expand("Module","LWP::Simple");
-  if($mod) {
-    if(!$mod->inst_version) {
-      CPAN::Shell->install($mod);
-    }
-  }
-  require LWP::Simple;
-  print STDERR "Downloading ... ";
-  LWP::Simple::getstore($url, basename($url)) or
-    die "Cannot download $url ($!)";
-  print STDERR "done.\n";
-  system("gzip -dc dbxml-2.3.10.tar.gz | tar xfv -; cd dbxml-2.3.10; ./buildall.sh $config_opts") and die "Install failed: $!";
-  return;
-}
-
-
-sub note() {
-  print "################################################\n";
-  print "# Please check the INSTALL file for additional #\n";
-  print "# help.  You can download the DBXML library f- #\n";
-  print "# rom:                                         #\n";
-  print "# $DIST_URL\n";
-  print "# and compile it using:                        #\n";
-  print "#   buildall.sh --prefix=[directory] --enable-perl #\n";
-  print "####################################################\n";
-  return;
-}
-
-
-sub dbxml_version() {
-  my @paths = split /:/, $ENV{PATH};
-  push @paths, qw(/bin /sbin /usr /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /usr/local/dbxml-2.3.10/bin /usr/dbxml-2.3.10/bin /opt/dbxml-2.3.10/bin);
-
-  for(@paths) {
-    if(-x "$_/dbxml") {
-      open(PIPE, "$_/dbxml -V |");
-      my @data = join '', <PIPE>;
-      close(PIPE);
-
-      foreach my $d (@data) {
-        if($d =~ m/.*Berkeley\s{1}DB\s{1}XML\s{1}2\.(2|3).*/) {
-          return 1;
-        }
-      }
-    }
-  }
-
-  return 0;
 }
 
 sub readConfiguration($$) {
