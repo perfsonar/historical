@@ -1,0 +1,334 @@
+              perfSONAR-PS Circuit Status Measurement Point (MP)
+================================================================================
+Version:  1.0
+Date:     September 7, 2007
+Author:   Aaron Brown <aaron@internet2.edu>
+
+
+
+Introduction
+Caveats
+Installation
+  Prerequisites
+    Known Issues
+  Circuit Status MP
+  Configuration
+  Testing
+Additional Information
+References
+
+
+
+Introduction
+================================================================================
+
+This document describes the installation procedures of the perfSONAR-PS Link
+Status Measurement Point (MP).  perfSONAR-PS is an implementation of the
+perfSONAR standard written in the Perl programming language.  [1, 2]
+perfSONAR-PS aims for complete compatibility with all other implementations of
+the perfSONAR standard when possible.
+
+The Circuit Status MP has been designed to integrate with the Topology, Lookup
+and Link Status services to provide an E2EMon compatible service. The rest of
+this document will describe the steps needed to install and configure this
+software.
+
+
+Caveats
+================================================================================
+
+This software represents the first widespread release of perfSONAR-PS.  As such
+we are still experimenting with packaging and delivery methods that will best
+fit the user community.  
+
+This release is being presented as a 'stand-alone' application.  Other
+perfSONAR-PS services will be presented the same way, and do not share the
+underlying libraries.  Future releases *WILL* share the core code, and will be
+available through the more accessible and standardized Comprehensive Perl
+Archive Network (CPAN) tool.  
+
+We thank the user community in advance for bearing with this flux in
+installation procedure and still look forward to hearing comments that will
+make the process of obtaining and installing perfSONAR code much faster and
+easier. 
+
+
+Installation
+================================================================================
+
+Before installing the Measurement Point, be sure to check if you currently
+have the software listed in the prerequisite sub-section.  Software versions
+may change from prior releases of perfSONAR-PS without explicit notice.
+
+
+
+  Prerequisites
+  ======================================
+
+  To ensure proper installation and functioning, the Circuit Status MP requires
+  a set of Perl Modules. Some of these are included in the base Perl
+  installation on many machines, although it is important to check all to be
+  sure upgrades are not available.
+
+  The most straightforward way to install Perl modules is through the CPAN
+  administrative interface available on most machines:
+
+      sudo perl -MCPAN -e shell
+
+  If this is your first time using CPAN, there will be several questions to
+  answer as you prepare the interface.  You will eventually be presented with a
+  shell:
+
+      cpan[1]>
+
+  Modules may be installed by typing:
+
+      cpan[1]>install MODULE::NAME
+
+  Instructions may appear as the installation proceeds, errors may also
+  occur that will need to be handled.  If a module is installed, a message may
+  appear:
+
+      cpan[1]> install MODULE::NAME
+      MODULE::NAME is up to date (1.9707).
+
+  This is a list of the necessary modules for the Circuit Status MP:
+
+    - Cwd
+    - Exporter
+    - File::Basename
+    - Getopt::Long
+    - IO::File
+    - Log::Log4perl
+    - Module::Load
+    - POSIX
+    - strict
+    - Time::HiRes
+    - Time::Local
+    - warnings;
+    - XML::LibXML;
+    - XML::XPath;
+    - HTTP::Daemon
+    - LWP::UserAgent
+    - Sleepycat XML DB Perl Bindings **
+    - DBI *
+    - DBD::SQLite or DBD::MySQL *
+
+    * If you use the topology service remotely, this is unecessary
+    ** If you use the status service remotely, these are unecessary
+
+      Known Issues
+      ==============
+
+      Some modules require software libraries that may not be installed on most
+      systems.  Although it is normally the job of the module designer to take
+      care of these situations, this is not always the case.  Specifically the
+      XML modules (XML::XPath, XML::LibXML) require the the XML::Parser module
+      that depends on several internal libraries.
+
+      If you system is equipped with a software management system (such as apt,
+      yum, or up2date) try and locate the 'xml-parser-perl' package via the
+      search interface.  This is the easiest way to avoid trouble with CPAN.
+      Additionally, ensure that 'libxml2-dev', the LibXML version 2 development
+      libraries, are also available.
+
+  Circuit Status MP
+  ======================================
+
+  After installing the prerequisite software, the remaining steps to getting
+  the Circuit Status MP working are few.  The software directory (where you found
+  this INSTALL file!) should be placed in a common location such as /usr/local
+  or /opt.  This is not a requirement.
+
+  There are three major configuration files that may need to be adjusted.
+
+
+  Configuration
+  ======================================
+
+  logger.conf -
+    This file contains information regarding logging in the perfSONAR-PS
+    architecture.  There is a choice between three methods:
+
+      log4perl.appender.A1=Log::Dispatch::Screen
+      log4perl.appender.A1=Log::Dispatch::Syslog
+      log4perl.appender.A1=Log::Dispatch::File
+
+    The 'Screen' method sends log files to the output screen, The 'Syslog'
+    method will append the log messages directly to the Syslog system, and the
+    'File' method appends log messages to a specified log file (specified via
+    log4perl.appender.A1.filename).
+
+    The default setting is to log to the screen.
+
+
+
+  circuitstatus.conf -
+    This file contains detailed information and settings that help operate the
+    Circuit Status MP.  There is a script included 'configure.pl' that will ask
+    you a series of questions and auto-generate this file. Here is a listing of
+    the major directives, and their purpose.  Defaults are included in the
+    initial file, and for most instances will work fine:
+
+      PORT                      - Listen port for the application.  This should be something that can be accessed from the outside world.
+      ENDPOINT                  - An 'endPoint' is a contact string that a service is listening on.  This is used in conjunction with the port and hostname:
+
+                                  http://HOST:PORT/end/Point/String
+
+      LINK_FILE                 - The set of links to collect status information on
+      LINK_FILE_TYPE            - The only valid value is 'file'
+
+      TOPOLOGY_MA_TYPE          - MA, XML or None
+      TOPOLOGY_MA_URI           - The remote MA to obtain node information from
+      TOPOLOGY_MA_FILE          - The file for a local MA to obtain node information from
+      TOPOLOGY_MA_ENVIRONMENT   - The file for a local MA to obtain node information from
+
+      STATUS_MA_TYPE            - MA, LS, SQLite or MySQL
+      STATUS_MA_URI             - The remote MA to obtain link information from
+      LS                        - The URI of the LS to obtain status information from
+      STATUS_MA_FILE            - The local SQLite database to obtain link information from
+      STATUS_MA_NAME            - The MySQL database to obtain link information from
+      STATUS_MA_HOST            - The MySQL database host
+      STATUS_MA_PORT            - The MySQL database port
+      STATUS_MA_USERNAME        - The MySQL database username
+      STATUS_MA_PASSWORD        - The MySQL database password
+
+      CACHE_LENGTH              - The amount of time to cache the response for current status. Setting to 0 disables caching.
+      CACHE_FILE                - The file to cache the current results in.
+
+      MAX_WORKER_PROCESSES      - Maximum number of child processes that can be spawned at a given time.
+
+  links.conf -
+    This file contains the descriptions of each link to be monitored.  See the
+    current links.conf for an example of the format.
+
+
+
+  Testing
+  ======================================
+
+  The MP will need to be configured to specify, at minimum, the various
+  services to use.  Once configured, you can test that the MP is up and
+  listening for requests. You will need two terminal sessions to test out the
+  MP, one for the server and the other for a client application (included).
+
+  In the first terminal:
+    Enter the directory where the software is installed, run this command:
+
+      ./circuitstatus.pl --verbose
+
+    You will see output similar to this:
+
+XXX replace with correct output
+
+      2007/08/14 10:30:21 DEBUG> ma.pl:50 main:: - Starting '0'
+      2007/08/14 10:30:21 DEBUG> ma.pl:67 main::measurementPoint - Starting '1' as the MP.
+      2007/08/14 10:30:21 DEBUG> Transport.pm:165 perfSONAR_PS::Transport::startDaemon - Starting daemon.
+      2007/08/14 10:30:21 DEBUG> ma.pl:91 main::registerLS - Starting '2' as the LS registration to "http://perfSONAR2.cis.udel.edu:8181/perfSONAR_PS/services/LS".
+      2007/08/14 10:30:21 DEBUG> ma.pl:84 main::measurementPointQuery - Starting '3' as the execution path.
+      2007/08/14 10:30:21 DEBUG> Transport.pm:183 perfSONAR_PS::Transport::acceptCall - Accepting calls.
+
+    The server is started, and it has started its major functions:
+    registering data with an LS and listening for calls.  The LS registration
+    functionality is disabled by default.
+
+
+
+  In the second terminal:
+    Enter the directory where the software is installed, change into the 'client' directory, and run this command:
+
+      ./client.pl --server=localhost --port=8084 --endpoint=perfSONAR_PS/services/circuitstatus requests/EchoRequest.xml
+
+    This will tell the client to contact the MP which is running on:
+
+      http://localhost:8084/perfSONAR_PS/services/circuitstatus
+
+    And will send a simple 'Echo' message (to see if the server is active).  The client will see this output if everything is running smoothly:
+
+      2007/08/14 10:33:50 INFO> client.pl:39 main:: - Starting Request: 1187102030.489619
+      2007/08/14 10:33:50 DEBUG> Transport.pm:144 perfSONAR_PS::Transport::getHttpURI - Created URI: http://localhost:8081/perfSONAR_PS/services/snmpMP
+      2007/08/14 10:33:50 DEBUG> Transport.pm:457 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8081/perfSONAR_PS/services/snmpMP".
+      2007/08/14 10:33:51 DEBUG> Transport.pm:474 perfSONAR_PS::Transport::sendReceive - Response returned.
+      <?xml version="1.0"?>
+      <SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+        <SOAP-ENV:Header/>
+        <SOAP-ENV:Body>
+          <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="message.13362268" messageIdRef="echoRequest1" type="EchoResponse">
+            <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.15799447" metadataIdRef="meta1">
+              <nmwg:eventType>success.echo</nmwg:eventType>
+            </nmwg:metadata>
+            <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data.8393180" metadataIdRef="metadata.15799447">
+              <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">The echo request has passed.</nmwgr:datum>
+            </nmwg:data>
+          </nmwg:message>
+        </SOAP-ENV:Body>
+      </SOAP-ENV:Envelope>
+
+      2007/08/14 10:33:51 INFO> client.pl:87 main:: - Completing Request:     1187102031.177600
+      2007/08/14 10:33:51 INFO> client.pl:88 main:: - Total Request Time:     0.687980890274048
+
+
+
+    If you are not seeing a similar message, you may see something such as this:
+
+      2007/08/14 10:40:30 INFO> client.pl:39 main:: - Starting Request:       1187102430.310318
+      2007/08/14 10:40:30 DEBUG> Transport.pm:144 perfSONAR_PS::Transport::getHttpURI - Created URI: http://localhost:8081/perfSONAR_PS/services/snmpMP
+      2007/08/14 10:40:30 DEBUG> Transport.pm:457 perfSONAR_PS::Transport::sendReceive - Sending information to "http://localhost:8081/perfSONAR_PS/services/snmpMP".
+      2007/08/14 10:40:30 DEBUG> Transport.pm:474 perfSONAR_PS::Transport::sendReceive - Response returned.
+      :1: parser error : Start tag expected, '<' not found
+      500 Can't connect to localhost:8081 (connect: Connection refused)
+      ^ at ./client.pl line 105
+
+    This message indicates that the server is not properly listening on the
+    port you are contacting, perhaps it is listening on another, the port is
+    firewalled, or it may not be started at all.  Please check the above steps,
+    and try again.
+
+
+  In the first terminal:
+    This information will appear when the call comes in:
+
+      2007/08/14 10:33:51 DEBUG> Transport.pm:212 perfSONAR_PS::Transport::acceptCall - Accepted call.
+      2007/08/14 10:33:51 DEBUG> Common.pm:280 perfSONAR_PS::Common::reMap - Setting namespace "http://schemas.xmlsoap.org/soap/envelope/" with prefix "SOAP-ENV".
+      2007/08/14 10:33:51 DEBUG> Common.pm:280 perfSONAR_PS::Common::reMap - Setting namespace "http://ggf.org/ns/nmwg/base/2.0/" with prefix "nmwg".
+      2007/08/14 10:33:51 INFO> SNMP.pm:28 perfSONAR_PS::MP::SNMP::receive - Received Request:        1187102031.172121
+      2007/08/14 10:33:51 DEBUG> Transport.pm:419 perfSONAR_PS::Transport::closeCall - Closing call.
+      2007/08/14 10:33:51 INFO> SNMP.pm:48 perfSONAR_PS::MP::SNMP::receive - Request Completed:       1187102031.173890
+      2007/08/14 10:33:51 INFO> SNMP.pm:49 perfSONAR_PS::MP::SNMP::receive - Total Service Time:      0.00176906585693359
+      Scalars leaked: 1
+      2007/08/14 10:33:51 DEBUG> ma.pl:84 main::measurementPointQuery - Starting '4' as the execution path.
+      2007/08/14 10:33:51 DEBUG> Transport.pm:183 perfSONAR_PS::Transport::acceptCall - Accepting calls.
+
+
+
+  The other messages in the 'client/requests' may also be tried, with similar results.
+
+
+
+Additional Information
+================================================================================
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+All questions and comments should be directed to the mailing list and not to the author directly.
+
+The perfSONAR-PS subversion repository (containing the most recent versions of all source code) is located:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS
+
+Bugs, feature requests, and improvements use an issue tracking system, located here:
+
+https://bugs.internet2.edu/jira/browse/PSPS
+
+Copyright (C) 2006, 2007 by Internet2
+
+
+
+References
+================================================================================
+
+[1]  http://www.perfsonar.net/
+[2]  http://www.perl.org/
+[3]  http://perfsonar.acad.bg/
