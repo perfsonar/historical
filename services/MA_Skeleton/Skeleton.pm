@@ -29,6 +29,7 @@ my %config_defaults = (
 	SERVICE_DESCRIPTION => "Skeleton Measurement Archive",
 );
 
+# XXX fill in with the namespaces that your MA uses
 my %default_namespaces = (
 	nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
 );
@@ -40,6 +41,7 @@ sub getDefaultConfig {
 sub getDefaultNamespaces {
 	return \%default_namespaces;
 }
+
 sub init {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Skeleton");
@@ -66,7 +68,8 @@ sub registerLS($) {
 	# with the LS. The function should generate an array of metadata
 	# strings to register and call $ls->register_withData with the array.
 
-	#my $ls = new perfSONAR_PS::LS::Register($self->{CONF}, $self->{NAMESPACES});
+	# my $ls = new perfSONAR_PS::LS::Register($self->{CONF}, $self->{NAMESPACES});
+	# ...create an array of metadatas...
 	# return $ls->register_withData(\@mds);
 	$logger->warn("No registerLS function implemented");
 }
@@ -119,7 +122,10 @@ sub __handleRequest($$) {
 	# XXX
 	# This function calls the handler type for each different message type.
 	# When the response is returned, it creates the response message for
-	# the request.
+	# the request. If you handle different message types, you should
+	# include them here. The function calls be calls could consist of call
+	# to a single multiplexing handleMessage-type function or calls to
+	# separate functions for each message type.
 
 	if($messageType eq "SetupDataRequest") {
 		($status, $response) = $self->handleMessage($messageType, $request->getRequestDOM()->documentElement);
