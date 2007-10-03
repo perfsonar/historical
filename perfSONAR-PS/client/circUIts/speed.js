@@ -5,7 +5,7 @@ var isNull = MochiKit.Base.isUndefinedOrNull;
 var defOptions = {
         "resolution":   5,
         "npoints":   5,
-        "fakeServiceMode": 1
+        "fakeServiceMode": 0
     };
 
 function Speed(options){
@@ -29,7 +29,7 @@ function Speed(options){
         "dataPeriod":       5,      // seconds - how often to poll pS
 
         "refreshPeriod":    0.100,  // seconds - how often to update screen
-        "minDataPeriod":    1,      // seconds - min duration to show one value
+        "minDataPeriod":    2,      // seconds - min duration to show one value
         "dataStalePeriod":  15,     // seconds - when to show 'inactive'
 
         "useMaxValueSmoothing":   true,
@@ -85,6 +85,7 @@ function Speed(options){
                                         this.options.refreshPeriod;
     
     // keep track of the number of refreshes between data value changes
+    this.stale = true;
     this.steps = 0;
     this.currentValue = this.nextValue = 0;
     this.maxHistoryValues = [];
@@ -178,7 +179,7 @@ Speed.prototype.appendData = function(a){
     log("appendData: speedo data has ",this.data.length);
     if(this.data.length > 0){
         if(this.data[this.data.length-1].length){
-            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1].toPrecision(9),"]");
+//            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1].toPrecision(9),"]");
         }
     }
 
@@ -217,14 +218,12 @@ Speed.prototype.intro = function(){
 }
 
 Speed.prototype.refresh = function(){
-
     // fetch data from beginning of this.data array
-    var stale = false;
     var newValue;
 
     this.steps++;
 
-    if(this.steps < this.minRefreshSteps){
+    if(!this.stale && (this.steps < this.minRefreshSteps)){
         // take one more step toward the 'next' value.
 
         var valDiff = this.nextValue - this.currentValue;
@@ -236,6 +235,7 @@ Speed.prototype.refresh = function(){
         else{
             newValue = this.currentValue;
         }
+
     }
     else{
         // Time to update to a new data value
@@ -247,6 +247,7 @@ Speed.prototype.refresh = function(){
 
             // new data value - reset steps
             this.steps = 0;
+            this.stale = false;
 
             // update currentValue and nextValue
             this.currentValue = this.nextValue;
@@ -266,27 +267,26 @@ Speed.prototype.refresh = function(){
                     this.maxHistoryValues.shift();
                 }
                 this.nextValue = Math.max.apply(null,this.maxHistoryValues);
-                log("History Values: ", this.maxHistoryValues);
-                log("MaxHistory Value: ", this.nextValue);
             }
             else{
                 this.nextValue = nextValue;
             }
+            newValue = this.currentValue;
         }
         else{
             if(this.steps > this.maxRefreshSteps){
-                stale = true;
+                this.stale = true;
                 if(this.interval){
                     clearInterval(this.interval);
                     delete this.interval;
                 }
             }
+            newValue = this.nextValue;
         }
-        newValue = this.currentValue;
     }
 
     var randValue = newValue;
-    if(!stale){
+    if(!this.stale){
         // random jitter for target
         var reach = this.options.maxValue * this.options.jitterPercent;
         randValue = (newValue - reach) + (2 * reach * Math.random());
@@ -305,7 +305,7 @@ Speed.prototype.refresh = function(){
     this.ctx.clearRect(
             0,0,
             w,this.hc);
-    if(stale){
+    if(this.stale){
         this.ctx.translate(this.wc*(1-this.options.staleWidth)*.5,0);
         w *= this.options.staleWidth;
     }
