@@ -2,14 +2,15 @@
 // TODO: Get some opts from cookies?
 var defOptionsUtil = {
         "resolution":   5,
+//        "resolution":   10,
         "npoints":   72,
         "fakeServiceMode": 0,
         "xOriginIsZero": false,
         "axisLabelFontSize": 14,
         "axisLabelColor": Color.blackColor(),
         "padding": {
-            "left": 33,
-            "right": 17,
+            "left": 40,
+            "right": 10,
             "top": 10,
             "bottom": 10},
         "yAxis":[0,10000],

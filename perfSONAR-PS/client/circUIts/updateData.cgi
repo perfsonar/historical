@@ -12,7 +12,7 @@ use Time::HiRes qw( gettimeofday );
 use perfSONAR_PS::Transport;
 
 # Eventually get these from config (or even app)
-my $server = "packrat.internet2.edu";
+my $server = "patdev0.internet2.edu";
 my $port = 8080;
 my $endpoint = "perfSONAR_PS/services/snmpMA";
 my $filter = '//nmwg:message//nmwg:datum';
@@ -23,7 +23,7 @@ my $cgi = new CGI;
 # TODO: Modify default to false...
 my $fakeServiceMode = $cgi->param('fakeServiceMode');
 
-my $int = $cgi->param('resolution') || 5;
+my $int = $cgi->param('resolution') || 10;
 my $maxValue = $cgi->param('maxValue') || 10000;
 my $host = $cgi->param('hostName') || "rtr129-93-239-128.unl.edu";
 my $index = $cgi->param('ifIndex') || 4;
@@ -58,6 +58,7 @@ sub getReferenceTime{
 
     if($sec eq "now"){
         ($sec, $frac) = Time::HiRes::gettimeofday;  
+        $sec -= 2;
     }
 
     $sec;

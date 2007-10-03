@@ -5,7 +5,7 @@ var isNull = MochiKit.Base.isUndefinedOrNull;
 var defOptions = {
         "resolution":   5,
         "npoints":   5,
-        "fakeServiceMode": 0
+        "fakeServiceMode": 1
     };
 
 function Speed(options){
@@ -24,7 +24,7 @@ function Speed(options){
         "staleAlpha": 0.4,          // how much to obscure colors
         "staleWidth": 0.75,         // how much to obscure colors
 
-        "jitterPercent":    0.005,  // bounce a bit around value :)
+        "jitterPercent":    0.001,  // bounce a bit around value :)
 
         "dataPeriod":       5,      // seconds - how often to poll pS
 
@@ -32,8 +32,11 @@ function Speed(options){
         "minDataPeriod":    1,      // seconds - min duration to show one value
         "dataStalePeriod":  15,     // seconds - when to show 'inactive'
 
+        "useMaxValueSmoothing":   true,
+        "maxValueSmoothingHistory":   4,
+
         "labelName":  "speedo-value",
-        "doIntro":  true
+        "doIntro":  false
     };
 
     for(var p in options){
@@ -84,6 +87,7 @@ function Speed(options){
     // keep track of the number of refreshes between data value changes
     this.steps = 0;
     this.currentValue = this.nextValue = 0;
+    this.maxHistoryValues = [];
 
     this.hc = this.canvas.height;
     this.wc = this.canvas.width;
@@ -245,26 +249,25 @@ Speed.prototype.refresh = function(){
             this.steps = 0;
 
             // update currentValue and nextValue
-            var currentValue = this.data.shift();
-
-            if(currentValue.length > 1){
-                this.currentValue = currentValue[1];
-            }
-            else{
-                this.currentValue = currentValue;
-            }
+            this.currentValue = this.nextValue;
 
             // update nextValue
-            var nextValue;
-            if(this.data.length < 1){
-                nextValue = this.currentValue;
-            }
-            else{
-                nextValue = this.data[0];
-            }
+            var nextValue = this.data.shift();
 
             if(nextValue.length > 1){
-                this.nextValue = nextValue[1];
+                nextValue = nextValue[1];
+            }
+
+            // maxValue smoothing for 'nextValue'
+            if(this.options.useMaxValueSmoothing){
+                this.maxHistoryValues.push(nextValue);
+                if(this.maxHistoryValues.length >
+                                        this.options.maxValueSmoothingHistory){
+                    this.maxHistoryValues.shift();
+                }
+                this.nextValue = Math.max.apply(null,this.maxHistoryValues);
+                log("History Values: ", this.maxHistoryValues);
+                log("MaxHistory Value: ", this.nextValue);
             }
             else{
                 this.nextValue = nextValue;
