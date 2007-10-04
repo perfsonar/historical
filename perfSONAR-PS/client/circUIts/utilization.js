@@ -155,12 +155,20 @@ function startStopUtil(){
     }
 }
 
+var utilOptions = {
+    "plotCanvasName":   "plot"
+//  "startStopName":    "start-stop-util"
+};
+
 function initGraph(){
     layout = new PlotKit.Layout("line",defOptionsUtil);
 
     newDataUtil();
 
-    renderer = new SweetCanvasRenderer($('plot'),
+    renderer = new SweetCanvasRenderer($(utilOptions.plotCanvasName),
             layout,defOptionsUtil);
-    MochiKit.Signal.connect("start-stop-util", 'onclick', startStopUtil);
+//    if(utilOptions.startStopName !== undefined){
+//        MochiKit.Signal.connect(utilOptions.startStopName, 'onclick',
+//                                                            startStopUtil);
+//    }
 }

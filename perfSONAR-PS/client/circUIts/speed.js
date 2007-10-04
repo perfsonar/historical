@@ -422,8 +422,8 @@ function startStopSpeed(){
 
 // TODO: Fix hardcoded id names for start/stop
 var options = {
-    "canvasName": "speedo",
-    "startStopName": "start-stop-speed"
+    "canvasName": "speedo"
+//    "startStopName": "start-stop-speed"
 };
 
 
@@ -438,6 +438,9 @@ function initSpeed(){
     speed = new Speed({"canvas": $(options.canvasName)});
     newDataSpeed();
 
-    MochiKit.Signal.connect("start-stop-speed", 'onclick', startStopSpeed);
+    if(options.startStopName !== undefined){
+        MochiKit.Signal.connect(options.startStopName, 'onclick',
+            startStopSpeed);
+    }
 }
 
