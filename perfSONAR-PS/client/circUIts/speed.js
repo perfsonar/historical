@@ -333,8 +333,8 @@ Speed.prototype.refresh = function(){
     this.ctx.restore();
 
     if(this.label){
-        this.label.textContent = Math.floor(this.nextValue) + " Mbps";
-        this.label.innerText = Math.floor(this.nextValue) + " Mbps";
+        this.label.textContent = Math.floor(this.nextValue)/1000 + " Gbps";
+        this.label.innerText = Math.floor(this.nextValue)/1000 + " Gbps";
     }
 
     return;

@@ -9,18 +9,18 @@ var defOptionsUtil = {
         "axisLabelFontSize": 14,
         "axisLabelColor": Color.blackColor(),
         "padding": {
-            "left": 40,
+            "left": 20,
             "right": 10,
-            "top": 10,
+            "top": 0,
             "bottom": 10},
         "yAxis":[0,10000],
         "yTicks":[
         {label: "0", v: 0},
-        {label: "2000", v: 2000},
-        {label: "4000", v: 4000},
-        {label: "6000", v: 6000},
-        {label: "8000", v: 8000},
-        {label: "10000", v: 10000},
+        {label: "2", v: 2000},
+        {label: "4", v: 4000},
+        {label: "6", v: 6000},
+        {label: "8", v: 8000},
+        {label: "10", v: 10000},
         ]
     };
 var layout = null;
