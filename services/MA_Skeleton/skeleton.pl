@@ -9,6 +9,9 @@ use Log::Log4perl qw(get_logger :levels);
 use File::Basename;
 use POSIX ":sys_wait_h";
 use Cwd;
+use Config::Simple;
+use Module::Load;
+use Data::Dumper;
 
 # we need a fully-qualified directory name in case we daemonize so that we can
 # still access scripts or other files specified in configuration files in a
@@ -32,12 +35,14 @@ BEGIN {
 use lib "$libdir";
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::MA::Skeleton;
+use perfSONAR_PS::SOAP_Daemon;
+use perfSONAR_PS::Messages;
+use perfSONAR_PS::MA::Handler;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
 
-$0 = "skeleton.pl  ($$)";
+$0 = "ma.pl  ($$)";
 
 my %child_pids = ();
 
@@ -52,95 +57,79 @@ my $HELP = '';
 my $CONFIG_FILE  = '';
 
 my $status = GetOptions (
-		'read-only' => \$READ_ONLY,
 		'config=s' => \$CONFIG_FILE,
 		'verbose' => \$DEBUGFLAG,
 		'help' => \$HELP);
 
 if(!$status or $HELP) {
-	print "$0: starts the skeleton MA.\n";
-	print "\t$0 [--config /path/to/config --read-only --verbose --help]\n";
+	print "$0: starts the MA daemon.\n";
+	print "\t$0 [--config /path/to/config --verbose --help]\n";
 	exit(1);
 }
 
 if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
-	$CONFIG_FILE = "./skeleton.conf";
+	$CONFIG_FILE = "./ma.conf";
 }
 
 # Read in configuration information
 my %conf = ();
 
-my $default_ma_conf = &perfSONAR_PS::MA::Skeleton::getDefaultConfig();
-if (defined $default_ma_conf) {
-	foreach my $key (keys %{ $default_ma_conf }) {
-		$conf{$key} = $default_ma_conf->{$key};
-	}
-}
-
-if (readConfiguration($CONFIG_FILE, \%conf) != 0) {
+if (!Config::Simple->import_from($CONFIG_FILE, \%conf)) {
 	$logger->error("Couldn't read in specified configuration file: $CONFIG_FILE");
 	exit(-1);
 }
 
-# XXX override the users configuration if they specify differently on the
-# command-line. An example would be "read-only" if the MA could be set
-# read-only.
-if (defined $READ_ONLY and $READ_ONLY ne "") {
-	$conf{"READ_ONLY"} = 1;
+if (!defined $conf{"default.max_worker_lifetime"} or $conf{"default.max_worker_lifetime"} eq "") {
+	$conf{"default.max_worker_lifetime"} = 0;
 }
 
-foreach my $key (keys %conf) {
-	$logger->debug("Config: $key = $conf{$key}");
+if (!defined $conf{"default.max_worker_processes"} or $conf{"default.max_worker_processes"} eq "") {
+	$conf{"default.max_worker_processes"} = 0;
 }
 
-my %ns;
-
-my $default_ma_ns = &perfSONAR_PS::MA::Skeleton::getDefaultNamespaces();
-foreach my $prefix (keys %{ $default_ma_ns }) {
-	$ns{$prefix} = $default_ma_ns->{$prefix};
-}
-
-# XXX You could add any prefixes not included in the default set of namespaces
-# $ns{"nmtopo4"} = "http://ggf.org/ns/topology/base/4.0/";
-
-my ($enable_ls);
-
-if (!defined $conf{ENABLE_REGISTRATION} or $conf{ENABLE_REGISTRATION} == 0) {
-	$enable_ls = 0;
-} else {
-	$enable_ls = 1;
-}
-
-if ($enable_ls) {
-	if (!defined $conf{"LS_INSTANCE"} or $conf{"LS_INSTANCE"} eq "") {
-		my $msg = "You specified to specify a LS_INSTANCE so that we know which LS to register with.";
-		$logger->error($msg);
-		exit -1;
-	}
-
-	if (!defined $conf{"SERVICE_ACCESSPOINT"} or $conf{"SERVICE_ACCESSPOINT"} eq "") {
-		my $msg = "You specified to specify a SERVICE_ACCESSPOINT so that people consulting the LS know how to get to this service.";
-		$logger->error($msg);
-		exit -1;
-	}
-
-	# configuration is done in minutes, but the LS registration
-	# messages need this to be in seconds so we have to convert.
-	$conf{"LS_REGISTRATION_INTERVAL"} *= 60;
+if (!defined $conf{"default.modules"} or $conf{"default.modules"} eq "") {
+	$logger->error("No list of modules defined");
+	exit(-1);
 }
 
 # set logging level
 if($DEBUGFLAG) {
-	$logger->level($DEBUG);    
+	$logger->level($DEBUG);
 } else {
-	$logger->level($INFO); 
+	$logger->level($INFO);
 }
 
 $logger->debug("Starting '".$$."'");
 
-my $ma = new perfSONAR_PS::MA::Skeleton(\%conf, \%ns, $dirname);
-if ($ma->init != 0) {
-	$logger->error("Couldn't initialize Skeleton MA");
+my $ma_handler = new perfSONAR_PS::MA::Handler();
+my @ls_modules;
+
+if (ref($conf{"default.modules"}) ne "ARRAY") {
+	$logger->info("Type: ".ref($conf{"default.modules"})."\n");
+
+	my @array = ();
+	push @array, $conf{"default.modules"};
+
+	$conf{"default.modules"} = \@array;
+}
+
+foreach my $module (@{ $conf{"default.modules"} }) {
+	load $module;
+	my $ma = $module->new(\%conf);
+
+	if ($ma->init($ma_handler) != 0) {
+		$logger->error("Error initializing $module");
+		exit(-1);
+	}
+
+	if ($ma->needLS()) {
+		push @ls_modules, $ma;
+	}
+}
+
+my $listener = new perfSONAR_PS::SOAP_Daemon($conf{"default.port"});
+if ($listener->startDaemon() != 0) {
+	$logger->error("Couldn't start MA SOAP listener");
 	exit(-1);
 }
 
@@ -160,14 +149,10 @@ if ($ma_pid == 0) {
 
 $child_pids{$ma_pid} = "";
 
-my $ls_pid;
-if ($enable_ls) {
-	# launch the LS process and add its pid to the list of children pids
-	# clear out the %child_pids on the child since it doesn't have any children
-	$ls_pid = fork();
+foreach my $ma (@ls_modules) {
+	my $ls_pid = fork();
 	if ($ls_pid == 0) {
-		%child_pids = ();
-		registerLS();
+		registerLS($ma);
 		exit(0);
 	} elsif ($ls_pid < 0) {
 		$logger->error("Couldn't spawn LS");
@@ -182,7 +167,8 @@ foreach my $pid (keys %child_pids) {
 	waitpid($pid, 0);
 }
 
-sub measurementArchive {
+sub measurementArchive($) {
+	my ($conf) = @_;
 	my $outstanding_children = 0;
 
 	%child_pids = ();
@@ -190,8 +176,8 @@ sub measurementArchive {
 	$logger->debug("Starting '".$$."' as the MA.");
 
 	while(1) {
-		if ($conf{"MAX_WORKER_PROCESSES"} > 0) {
-			while ($outstanding_children >= $conf{"MAX_WORKER_PROCESSES"}) {
+		if (defined $conf{"default.max_worker_processes"} and $conf{"default.max_worker_processes"} > 0) {
+			while ($outstanding_children >= $conf{"default.max_worker_processes"}) {
 				$logger->debug("Waiting for a slot to open");
 				my $kid = waitpid(-1, 0);
 				if ($kid > 0) {
@@ -201,22 +187,19 @@ sub measurementArchive {
 			}
 		}
 
-		my ($n, $request, $error);
+		my ($res, $request, $endpoint, $error);
 
-		$n = $ma->receive(\$request, \$error);
+		$res = $listener->receive(\$request, \$error);
 
-		if (defined $error and $error ne "") {
-			$logger->error("Error in receive call: $error");
-		}
-
-		if ($n == 0) {
-			$logger->debug("Received 'shadow' request from below; no action required.");
+		if ($res ne "") {
+			$logger->error("Receive failed: $error");
+			$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", $res, $error));
 			$request->finish();
 		} elsif (defined $request) {
 			my $pid = fork();
 			if ($pid == 0) {
 				%child_pids = ();
-				$ma->handleRequest($request);
+				handleRequest($request);
 				$request->finish();
 				exit(0);
 			} elsif ($pid < 0) {
@@ -233,17 +216,19 @@ sub measurementArchive {
 			delete $child_pids{$kid};
 			$outstanding_children--;
 		}
-	}  
+	}
 }
 
-sub registerLS {
+sub registerLS($) {
+	my ($ma) = @_;
+
 	%child_pids = ();
 
 	$logger->debug("Starting '".$$."' for LS registration");
 
 	while(1) {
 		$ma->registerLS;
-		sleep($conf{"LS_REGISTRATION_INTERVAL"});
+		sleep($conf{"default.ls_registration_interval"});
 	}
 }
 
@@ -269,17 +254,115 @@ sub signalHandler {
 	exit(0);
 }
 
+sub handleRequest($$) {
+	my ($request) = @_;
+
+	# This function is a wrapper around the __handleRequest function.  The
+	# purpose of the function is to handle the case where a crash occurs
+	# while handling the request or the handling of the request runs for
+	# too long.
+
+	eval {
+ 		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
+		alarm($conf{"default.max_worker_lifetime"}) if (defined $conf{"default.max_worker_lifetime"} and $conf{"default.max_worker_lifetime"} > 0);
+		__handleRequest($request);
+ 	};
+
+	# disable the alarm after the eval is done
+	alarm(0);
+
+	if ($@) {
+		my $msg = "Unhandled exception or crash: $@";
+		$logger->error($msg);
+
+		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred"));
+	}
+
+	$request->finish;
+}
+
+sub __handleRequest($$) {
+	my ($request) = @_;
+
+	my $error;
+	my $localContent = "";
+
+	$request->parse(\$error);
+
+	if (defined $error and $error ne "") {
+		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error"));
+
+		return;
+	}
+
+	my $message = $request->getRequestDOM()->getDocumentElement();;
+	my $messageId = $message->getAttribute("id");
+	my $messageType = $message->getAttribute("type");
+
+	my $found_pair = 0;
+
+	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
+		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				my $eventType = findvalue($m, "./nmwg:eventType");
+
+				$found_pair = 1;
+
+				my ($status, $res1, $res2);
+
+				if (!defined $eventType or $eventType eq "") {
+					$status = "error.ma.no_eventtype";
+					$res1 = "No event type specified for metadata: ".$m->getAttribute("id");
+				} else {
+					($status, $res1, $res2) = $ma_handler->handleEvent($request->getEndpoint, $messageType, $eventType, $m, $d);
+				}
+
+				if ($status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res1");
+					my $mdID = "metadata.".genuid();
+					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res1, 1);
+				} else {
+					$localContent .= $res1;
+					$localContent .= $res2;
+				}
+			}
+		}
+	}
+
+	if ($found_pair == 0) {
+		my $mdID = "metadata.".genuid();
+		$localContent .= getResultCodeMetadata($mdID, "", "error.ma.no_metadata_data_pair");
+		$localContent .= getResultCodeData("data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
+	}
+
+	my $messageIdReturn = genuid();
+	my %all_namespaces = ();
+
+#	my $request_namespaces = $request->getNamespaces();
+#
+#	foreach my $uri (keys %{ $request_namespaces }) {
+#		$all_namespaces{$request_namespaces->{$uri}} = $uri;
+#	}
+#
+#	foreach my $prefix (keys %{ $ma->{NAMESPACES} }) {
+#		$all_namespaces{$prefix} = $ma->{NAMESPACES}->{$prefix};
+#	}
+
+	$request->setResponse(getResultMessage($messageIdReturn, $messageId, $messageType, $localContent, \%all_namespaces));
+}
+
 =head1 NAME
 
-skeleton.pl - An basic MA (Measurement Archive) framework
+ma.pl - An basic MA (Measurement Archive) framework
 
 =head1 DESCRIPTION
 
-This script shows how a script for a given service should look. 
+This script shows how a script for a given service should look.
 
 =head1 SYNOPSIS
 
-./skeleton.pl [--verbose | --help]
+./ma.pl [--verbose | --help]
 
 The verbose flag allows lots of debug options to print to the screen.  If the option is
 omitted the service will run in daemon mode.
@@ -297,11 +380,11 @@ database structures.
 
 =head2 measurementArchiveQuery
 
-This performs the semi-automic operations of the MA.  
+This performs the semi-automic operations of the MA.
 
 =head2 daemonize
 
-Sends the program to the background by eliminating ties to the calling terminal.  
+Sends the program to the background by eliminating ties to the calling terminal.
 
 =head2 killChildren
 
@@ -319,7 +402,7 @@ POSIX qw( setsid )
 Log::Log4perl
 perfSONAR_PS::Common
 perfSONAR_PS::Transport
-perfSONAR_PS::MA::Skeleton
+perfSONAR_PS::MA::Echo
 
 =head1 AUTHOR
 
