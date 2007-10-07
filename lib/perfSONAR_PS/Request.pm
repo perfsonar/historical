@@ -50,8 +50,18 @@ sub setRequest {
   return;
 }
 
-sub parse($$$) {
-  my ($self, $ns, $error) = @_;
+sub getEndpoint($) {
+	my ($self) = @_;
+	my $endpoint = $self->{REQUEST}->uri;
+
+	# lets strip out the first '/' to enable less stringent check on the endpoint
+	$endpoint =~ s/^(\/)+//g;
+
+	return $endpoint;
+}
+
+sub parse($$) {
+  my ($self, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
 
   if (!defined $self->{REQUEST}) {
@@ -76,11 +86,10 @@ sub parse($$$) {
 	  return -1;
   }
 
-  $self->{NAMESPACES} = &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $ns, $dom->getDocumentElement);
+  &perfSONAR_PS::Common::mapNamespaces($dom->getDocumentElement, $self->{NAMESPACES});
 
-  my $prefix = $dom->getDocumentElement->lookupNamespacePrefix("http://ggf.org/ns/nmwg/base/2.0/");
-
-  if(!defined $prefix or $prefix eq "") {
+  my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
+  if (!defined $nmwg_prefix) {
     my $msg = "Received message with incorrect message URI";
     $logger->error($msg);
     $$error = $msg if (defined $error);
@@ -89,8 +98,8 @@ sub parse($$$) {
 
   my $messages = find($dom->getDocumentElement, ".//nmwg:message");
 
-  if($messages->size() <= 0) {
-    my $msg = "Message element not found within request";
+  if (!defined $messages or $messages->size() <= 0) {
+    my $msg = "Couldn't find message element in request";
     $logger->error($msg);
     $$error = $msg if (defined $error);
     return -1;
@@ -105,6 +114,8 @@ sub parse($$$) {
 
   my $new_dom;
   $new_dom = $parser->parse_string($messages->get_node(1)->toString);
+
+  $logger->info("To string: ".$new_dom->toString);
 
   $self->{REQUESTDOM} = $new_dom;
   $$error = "";

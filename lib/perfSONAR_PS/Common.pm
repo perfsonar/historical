@@ -3,17 +3,18 @@
 package perfSONAR_PS::Common;
 
 use warnings;
+use strict;
 use Exporter;
 use IO::File;
 use XML::XPath;
 use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger);
 
-@ISA = ('Exporter');
-@EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
+our @ISA = ('Exporter');
+our @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'queryLS', 'escapeString', 'unescapeString',
-             'makeEnvelope');
+             'makeEnvelope', 'mapNamespaces');
 
 sub find {
   my ($node, $query, $return_first) = @_;
@@ -393,6 +394,30 @@ sub extract {
   return "";
 }
 
+sub mapNamespaces($$) {
+	my ($node, $namespaces) = @_;
+	my $logger = get_logger("perfSONAR_PS::Common");
+
+        my $uri = $node->namespaceURI();
+        my $prefix = $node->prefix();
+	if(defined $prefix and $prefix ne "" and $uri) {
+		if(!defined $namespaces->{$uri}) {
+			$namespaces->{$uri} = $prefix;
+			$node->ownerDocument->getDocumentElement->setNamespace($uri, $prefix, 0);
+		}
+	} elsif ((!defined $prefix or $prefix eq "") and defined $uri) {
+		if (defined $namespaces->{$uri}) {
+			$node->setNamespace($uri, $namespaces->{$uri}, 1);
+		}
+	}
+	if($node->hasChildNodes()) {
+		foreach my $c ($node->childNodes) {
+			if($node->nodeType != 3) {
+				mapNamespaces($c, $namespaces);
+			}
+		}
+	}
+}
 
 sub reMap {
   my($requestNamespaces, $namespaces, $node) = @_;  
@@ -523,6 +548,7 @@ sub unescapeString($) {
 
 sub convertISO {
   my($iso) = @_;
+  my $logger = get_logger("perfSONAR_PS::Common");
   if(defined $iso and $iso ne "") {
     my($first, $second) = split(/T/, $iso);
     my($year, $mon, $day) = split(/-/, $first);
