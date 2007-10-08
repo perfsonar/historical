@@ -104,7 +104,7 @@ $logger->debug("Starting '".$$."'");
 my $ma_handler = new perfSONAR_PS::MA::Handler();
 my @ls_modules;
 
-if (ref($conf{"default.modules"}) ne "ARRAY") {
+if (!ref($conf{"default.modules"}) or ref($conf{"default.modules"}) ne "ARRAY") {
 	$logger->info("Type: ".ref($conf{"default.modules"})."\n");
 
 	my @array = ();
@@ -193,8 +193,10 @@ sub measurementArchive($) {
 
 		if ($res ne "") {
 			$logger->error("Receive failed: $error");
-			$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", $res, $error));
-			$request->finish();
+			if (defined $request) {
+				$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", $res, $error));
+				$request->finish();
+			}
 		} elsif (defined $request) {
 			my $pid = fork();
 			if ($pid == 0) {
@@ -323,8 +325,12 @@ sub __handleRequest($$) {
 					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
 					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res1, 1);
 				} else {
-					$localContent .= $res1;
-					$localContent .= $res2;
+					foreach my $ret_md (@{ $res1 }) {
+						$localContent .= $ret_md;
+					}
+					foreach my $ret_d (@{ $res2 }) {
+						$localContent .= $ret_d;
+					}
 				}
 			}
 		}
