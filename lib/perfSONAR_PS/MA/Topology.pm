@@ -15,34 +15,43 @@ use perfSONAR_PS::MA::Topology::Topology;
 use perfSONAR_PS::MA::Topology::Client::XMLDB;
 use perfSONAR_PS::LS::Register;
 
-our @ISA = qw(perfSONAR_PS::MA::Base);
+sub new {
+	my ($package, $conf, $directory) = @_;
 
-sub init {
-	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my %hash = ();
 
-	if ($self->SUPER::init != 0) {
-		$logger->error("Couldn't initialize parent class");
-		return -1;
+	if(defined $conf and $conf ne "") {
+		$hash{"CONF"} = \%{$conf};
 	}
 
-	if (!defined $self->{CONF}->{"TOPO_DB_TYPE"} or $self->{CONF}->{"TOPO_DB_TYPE"} eq "") {
+	if (defined $directory and $directory ne "") {
+		$hash{"DIRECTORY"} = $directory;
+	}
+
+	bless \%hash => $package;
+}
+
+sub init {
+	my ($self, $handler) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+
+	if (!defined $self->{CONF}->{"topology.db_type"} or $self->{CONF}->{"topology.db_type"} eq "") {
 		$logger->error("No database type specified");
 		return -1;
 	}
 
-	if ($self->{CONF}->{"TOPO_DB_TYPE"} eq "XML") {
-		if (!defined $self->{CONF}->{"TOPO_DB_FILE"} or $self->{CONF}->{"TOPO_DB_FILE"} eq "") {
-			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file(TOPO_DB_FILE)");
+	if ($self->{CONF}->{"topology.db_type"} eq "XML") {
+		if (!defined $self->{CONF}->{"topology.db_file"} or $self->{CONF}->{"topology.db_file"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file(topology.db_file)");
 			return -1;
 		}
 
-		if (!defined $self->{CONF}->{"TOPO_DB_ENVIRONMENT"} or $self->{CONF}->{"TOPO_DB_ENVIRONMENT"} eq "") {
-			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(TOPO_DB_ENVIRONMENT)");
+		if (!defined $self->{CONF}->{"topology.db_environment"} or $self->{CONF}->{"topology.db_environment"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(topology.db_environment)");
 			return -1;
 		}
 
-		my $environment = $self->{CONF}->{"TOPO_DB_ENVIRONMENT"};
+		my $environment = $self->{CONF}->{"topology.db_environment"};
 		if (defined $self->{DIRECTORY}) {
 			if (!($environment =~ "^/")) {
 				$environment = $self->{DIRECTORY}."/".$environment;
@@ -51,11 +60,11 @@ sub init {
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"READ_ONLY"} and $self->{CONF}->{"READ_ONLY"} == 1) {
+		if (defined $self->{CONF}->{"topology.read_only"} and $self->{CONF}->{"topology.read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		my $file = $self->{CONF}->{"TOPO_DB_FILE"};
+		my $file = $self->{CONF}->{"topology.db_file"};
 		my %ns = getTopologyNamespaces();
 
 		$self->{CLIENT}= new perfSONAR_PS::MA::Topology::Client::XMLDB($environment, $file, \%ns, $read_only);
@@ -63,6 +72,16 @@ sub init {
 		$logger->error("Invalid database type specified");
 		return -1;
 	}
+
+	if (!defined $self->{CONF}->{"topology.endpoint"}) {
+		$self->{CONF}->{"topology.endpoint"} = "/perfSONAR_PS/services/topology";
+	}
+
+	$handler->add($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
+	$handler->add($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
+	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
+	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
+	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
 
 	return 0;
 }
@@ -123,249 +142,127 @@ sub buildLSMetadata($$$$) {
 	$md .= "</nmwg:metadata>\n";
 }
 
-sub receive($) {
+sub needLS() {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $n;
-	my $request;
-	my $error;
-
-	do {
-		$request = undef;
-
-		$n = $self->{LISTENER}->acceptCall(\$request, \$error);
-		if ($n == 0) {
-			$logger->debug("Received 'shadow' request from below; no action required.");
-			$request->finish;
-		}
-
-		if (defined $error and $error ne "") {
-			$logger->error("Error in accept call: $error");
-		}
-	} while ($n == 0);
-
-	return $request;
+	return ($self->{CONF}->{"topology.enable_registration"});
 }
 
-sub handleRequest($$) {
-	my ($self, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+sub handleEvent($$$$) {
+	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
 
-	$logger->debug("Handling request");
+	my $retMetadata;
+	my $retData;
+	my $mdID = "metadata.".genuid();
+	my $msg = "The echo request has passed.";
 
-	eval {
- 		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
-		alarm($self->{CONF}->{"MAX_WORKER_LIFETIME"}) if (defined $self->{CONF}->{"MAX_WORKER_LIFETIME"} and $self->{CONF}->{"MAX_WORKER_LIFETIME"} > 0);
-		__handleRequest($self, $request);
- 	};
-
-	# disable the alarm after the eval is done
-	alarm(0);
-
-	if ($@) {
-		my $msg = "Unhandled exception or crash: $@";
-		$logger->error($msg);
-
-		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred"));
-	}
-
-	$request->finish;
-
-	return;
-}
-
-sub __handleRequest($$) {
-	my($self, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $messageIdReturn = genuid();
-	my $messageId = $request->getRequestDOM()->getDocumentElement->getAttribute("id");
-	my $messageType = $request->getRequestDOM()->getDocumentElement->getAttribute("type");
-
-	$self->{REQUESTNAMESPACES} = $request->getNamespaces();
-
-	my ($status, $response);
-
-	if($messageType eq "SetupDataRequest") {
-		($status, $response) = $self->queryTopology($request->getRequestDOM()->documentElement);
-	} elsif ($messageType eq "TopologyChangeRequest") {
-		($status, $response) = $self->changeTopology($request->getRequestDOM()->documentElemenet);
-	} else {
-		$status = "error.ma.message.type";
-		$response = "Message type \"".$messageType."\" is not yet supported";
-		$logger->error($response);
-	}
-
-	if ($status ne "") {
-		$logger->error("Unable to handle topology request: $status/$response");
-		$request->setResponse(getResultCodeMessage($messageIdReturn, $messageId, "", $messageType."Response", $status, $response, 1));
-	} else {
-		my %all_namespaces = ();
-
-		my $request_namespaces = $request->getNamespaces();
-
-		foreach my $uri (keys %{ $request_namespaces }) {
-			$all_namespaces{$request_namespaces->{$uri}} = $uri;
-		}
-
-		foreach my $prefix (keys %{ $self->{NAMESPACES} }) {
-			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
-		}
-
-		$request->setResponse(getResultMessage($messageIdReturn, $messageId, $messageType, $response, \%all_namespaces));
+	if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
+		return $self->queryTopology($eventType, $md, $d);
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
+		return $self->queryTopology($eventType, $md, $d);
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
+		return $self->changeTopology($eventType, $md, $d);
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
+		return $self->changeTopology($eventType, $md, $d);
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
+		return $self->changeTopology($eventType, $md, $d);
 	}
 }
 
 sub queryTopology($$) {
-	my ($self, $request) = @_;
+	my ($self, $eventType, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my ($status, $res);
 
-	my $localContent = "";
-
-	my $found_match = 0;
-
-	foreach my $d ($request->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-		foreach my $m ($request->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my $eventType = findvalue($m, "./nmwg:eventType");
-
-				$found_match = 1;
-
-				my ($status, $res);
-
-				if (!defined $eventType or $eventType eq "") {
-					$status = "error.ma.no_eventtype";
-					$res = "No event type specified for metadata: ".$m->getAttribute("id");
-				} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-					($status, $res) = $self->queryAllRequest();
-				} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
-					my $query = findvalue($m, "./xquery:subject");
-
-					if (!defined $query or $query eq "") {
-						$status = "error.topology.query.query_not_found";
-						$res =  "No query given in request";
-					} else {
-						($status, $res) = $self->queryXqueryRequest($query);
-					}
-				} else {
-					$status = "error.topology.query.invalid_event_type";
-					$res =  "No query given in request";
-				}
-
-				if ($status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
-					my $mdID = "metadata.".genuid();
-					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-				} else {
-					$localContent .= $m->toString;
-					$localContent .= createData("data.".genuid(), $m->getAttribute("id"), $res);
-				}
+	($status, $res) = $self->{CLIENT}->open;
+	if ($status != 0) {
+		my ($status, $res);
+		$status = "error.topology.ma";
+		$res = "Couldn't open database";
+		$logger->error($res);
+	} else {
+		if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
+			($status, $res) = $self->queryAllRequest();
+		} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
+			my $query = findvalue($m, "./xquery:subject");
+	
+			if (!defined $query or $query eq "") {
+				$status = "error.topology.query.query_not_found";
+				$res =  "No query given in request";
+			} else {
+				($status, $res) = $self->queryXqueryRequest($query);
 			}
 		}
 	}
 
-	if ($found_match == 0) {
-		my $status = "error.ma.no_metadata_data_pair";
-		my $res = "There was no data/metadata pair found";
-
+	my (@ret_mds, @ret_data);
+	if ($status ne "") {
+		$logger->error("Couldn't handle requested metadata: $res");
 		my $mdID = "metadata.".genuid();
-
-		$localContent .= getResultCodeMetadata($mdID, "", $status);
-		$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
+		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+		push @ret_data, getResultCodeData("data.".genuid(), $mdID, $res, 1);
+	} else {
+		push @ret_mds, $m->toString;
+		push @ret_data, createData("data.".genuid(), $m->getAttribute("id"), $res);
 	}
 
-	return ("", $localContent);
+	return ("", \@ret_mds, \@ret_data);
 }
 
 sub changeTopology($$) {
-	my ($self, $request) = @_;
+	my ($self, $eventType, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $transaction;
+	my $changeType;
 
-	my $localContent = "";
+	if ($changeType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
+		$changeType = "add";
+	} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
+		$changeType = "update";
+	} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
+		$changeType = "replace";
+	}
+
+	my $topology = find($d, "./*[local-name()='topology']", 1);
 
 	my ($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
 		my ($status, $res);
 		$status = "error.topology.ma";
 		$res = "Couldn't open database";
-		$logger->error($res);
-		return ($status, $res);
+	} elsif (!defined $topology) {
+		$status = "error.topology.query.topology_not_found";
+		$res = "No topology defined in change topology request for metadata: ".$m->getAttribute("id");
+	} else {
+		($status, $res) = $self->changeRequest($changeType, $topology);
 	}
 
-	my $found_match = 0;
+	my @ret_mds = ();
+	my @ret_data = ();
 
-	foreach my $data ($request->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-		foreach my $md ($request->getChildrenByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $md->getAttribute("id")) {
-				my $eventType = findvalue($md, "nmwg:eventType");
-				my $changeType;
-				my $topology = find($data, "./*[local-name()='topology']", 1);
-
-				if (defined $eventType and $eventType ne "") {
-					if ($changeType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
-						$changeType = "add";
-					} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
-						$changeType = "update";
-					} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
-						$changeType = "replace";
-					}
-				}
-
-				my ($status, $res);
-
-				if (!defined $eventType or $eventType eq "") {
-					$status = "error.ma.no_eventtype";
-					$res = "No event type specified for metadata: ".$md->getAttribute("id");
-				} elsif (!defined $changeType) {
-					$status = "error.topology.invalid_change_type";
-					$res = "Invalid change type: \"$eventType\"";
-				} elsif (!defined $topology) {
-					$status = "error.topology.query.topology_not_found";
-					$res = "No topology defined in change topology request for metadata: ".$md->getAttribute("id");
-				} else {
-					($status, $res) = $self->changeRequest($changeType, $topology);
-				}
-
-				if ($status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
-
-					my $mdID = "metadata.".genuid();
-
-					$localContent .= getResultCodeMetadata($mdID, $md->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-				} else {
-					my $changeDesc;
-					my $mdID = "metadata.".genuid();
-
-					if ($changeType eq "add") {
-						$changeDesc = "added";
-					} elsif ($changeType eq "replace") {
-						$changeDesc = "replaced";
-					} elsif ($changeType eq "update") {
-						$changeDesc = "updated";
-					}
-
-					$localContent .= $md->toString;
-					$localContent .= getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.ma.".$changeDesc);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
-
-				}
-			}
-		}
-	}
-
-	if ($found_match == 0) {
-		my $status = "error.ma.no_metadata_data_pair";
-		my $res = "There was no data/metadata pair found";
+	if ($status ne "") {
+		$logger->error("Couldn't handle requested metadata: $res");
 
 		my $mdID = "metadata.".genuid();
 
-		$localContent .= getResultCodeMetadata($mdID, "", $status);
-		$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
+		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
+		push @ret_data, getResultCodeData("data.".genuid(), $mdID, $res, 1);
+	} else {
+		my $changeDesc;
+		my $mdID = "metadata.".genuid();
+
+		if ($changeType eq "add") {
+			$changeDesc = "added";
+		} elsif ($changeType eq "replace") {
+			$changeDesc = "replaced";
+		} elsif ($changeType eq "update") {
+			$changeDesc = "updated";
+		}
+
+		push @ret_mds, $m->toString;
+		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.ma.".$changeDesc);
+		push @ret_data, getResultCodeData("data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
 	}
 
-	return ("", $localContent);
+	return ("", \@ret_mds, \@ret_data);
 }
 
 sub changeRequest($$$) {
@@ -433,23 +330,35 @@ sub queryXqueryRequest($$) {
 	return ("", $res);
 }
 
+
 1;
 
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Topology - A module that provides methods for the Topology MA.
+perfSONAR_PS::MA::Skeleton - A skeleton of an MA module that can be modified as needed.
 
 =head1 DESCRIPTION
 
-This module aims to offer simple methods for dealing with requests for information, and the
-related tasks of interacting with backend storage.
+This module aims to be easily modifiable to support new and different MA types.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::Topology;
+use perfSONAR_PS::MA::Skeleton;
 
-my %conf = readConfiguration();
+my %conf;
+
+my $default_ma_conf = &perfSONAR_PS::MA::Skeleton::getDefaultConfig();
+if (defined $default_ma_conf) {
+	foreach my $key (keys %{ $default_ma_conf }) {
+		$conf{$key} = $default_ma_conf->{$key};
+	}
+}
+
+if (readConfiguration($CONFIG_FILE, \%conf) != 0) {
+	print "Couldn't read config file: $CONFIG_FILE\n";
+	exit(-1);
+}
 
 my %ns = (
 		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -457,10 +366,10 @@ my %ns = (
 		nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
 	 );
 
-my $ma = perfSONAR_PS::MA::Topology->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::MA::Skeleton->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::Topology->new;
+# $ma = perfSONAR_PS::MA::Skeleton->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 
@@ -478,17 +387,25 @@ while(1) {
 
 =head1 API
 
-The offered API is simple, but offers the key functions we need in a measurement archive.
+The offered API is simple, but offers the key functions needed in a measurement archive.
 
-=head2 init 
+=head2 getDefaultConfig
 
-       Initializes the MP and validates or fills in entries in the
-	configuration file. Returns 0 on success and -1 on failure.
+	Returns a reference to a hash containing default configuration options
+
+=head2 getDefaultNamespaces
+
+	Returns a reference to a hash containing the set of namespaces used by
+	the MA
+
+=head2 init
+
+       Initializes the MA and validates the entries in the
+       configuration file. Returns 0 on success and -1 on failure.
 
 =head2 registerLS($self)
 
-	Reads the information contained in the database and registers it with
-	the specified LS.
+	Registers the data contained in the MA with the configured LS.
 
 =head2 receive($self)
 
@@ -504,84 +421,20 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 	Validates that the message is one that we can handle, calls the
 	appropriate function for the message type and builds the response
-	message. 
+	message.
 
-=head2 parseStoreRequest($self, $request)
+=head2 handleMessage($self, $messageType, $message)
+	Handles the specific message. This should entail iterating through the
+	metadata/data pairs and handling each one.
 
-	Goes through each metadata/data pair, extracting the eventType and
-	calling the function associated with that eventType.
+=head2 handleMetadataPair($$$$) {
+	Handles a specific metadata/data request.
 
-=head2 handleStoreRequest($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update)
-
-	Stores the new link information into the database. If an update is to
-	be performed, the function reads in the most recent data for the
-	specified link and updates it.
-
-=head2 parseLookupRequest($self, $request)
-
-	Goes through each metadata/data pair, extracting the eventType and
-	any other relevant information calling the function associated with
-	that eventType.
-
-=head2 lookupAllRequest($self, $metadata, $data)
-
-	Reads all link information from the database and constructs the
-	metadata/data pairs for the response.
-
-=head2 lookupLinkStatusRequest($self, $metadata, $data, $link_id, $time)
-
-	Looks up the requested link information from the database and
-	constructs the metadata/data pairs for the response.
-
-=head2 writeoutLinkState_range($self, $link)
-
-	Writes out the requested link in a format slightly different than the
-	normal ifevt. The ifevt schema has only the concept of events at a
-	single point in time. This output is compatible with applications
-	expecting the normal ifevt output, but also contains a start time and
-	an end time during which the status was the same.
-
-=head2 writeoutLinkState($self, $link, $time)
-
-	Writes out the requested link according to the ifevt schema. If time is
-	empty, it simply uses the end time of the given range as the time for
-	the event.
-
-=head2 buildLSMetadata($id, $type, $prefix, $uri)
-
-	Writes out the metadata for the given element. It takes the topology
-	id, the element type(e.g. domain, path, etc), the prefix (nmtopo, ipv4,
-	nmtl3, etc) and the uri associated with that prefix. It then returns a
-	metadata block made up of those elements.
-
-=head2 queryTopology($self, $request)
-
-	Goes through each metadata/data pair, extracting the eventType and
-	calling the function associated with that eventType.
-
-=head2 changeTopology($self, $request)
-
-	Goes through each metadata/data pair, extracting the eventType and
-	calling the function associated with that eventType.
-
-=head2 changeRequest($self, $type, $topology)
-
-	Normalizes the topology from the request and tries to insert it into
-	the database.
-
-=head2 queryAllRequest($self)
-
-	Performs the getAll query on the database and returns the results.
-
-=head2 queryXqueryRequest($self, $xquery)
-
-	Performs an xQuery query on the database and returns the results.
 
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::LS::Register>,
-L<perfSONAR_PS::MA::Status::Client::SQL>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::LS::Register>
 
 
 To join the 'perfSONAR-PS' mailing list, please visit:
@@ -603,12 +456,12 @@ $Id:$
 Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
- 
+
 You should have received a copy of the Internet2 Intellectual Property Framework along
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
+
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.

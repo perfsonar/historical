@@ -114,7 +114,7 @@ sub xQuery($$) {
 		return (-1, "Couldn't query database: $error");
 	}
 
-	$localContent .= "<nmtopo:topology>\n";
+	$localContent .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
 	$localContent .= join("", @queryResults);
 	$localContent .= "</nmtopo:topology>\n";
 

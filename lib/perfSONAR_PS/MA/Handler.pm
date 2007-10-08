@@ -53,6 +53,8 @@ sub addRegex($$$$$) {
 	my ($self, $endpoint, $messageType, $eventRegex, $ma) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Handler");
 
+	$logger->debug("Adding handler for $endpoint, $messageType, $eventRegex");
+
 	if ($endpoint eq "") {
 		if (!defined $self->{GENERICHANDLERS_REGEX}->{$messageType}) {
 			$self->{GENERICHANDLERS_REGEX}->{$messageType} = ();
@@ -78,6 +80,9 @@ sub addRegex($$$$$) {
 
 sub handleEvent($$$$) {
 	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+
+	$logger->debug("Handling event: $endpoint, $messageType, $eventType");
 
 	if (defined $self->{ENDPOINTSPECIFIC}->{$endpoint} and
 			defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType} and

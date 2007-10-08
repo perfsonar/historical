@@ -52,10 +52,16 @@ sub handleEvent($$$$) {
 	my $mdID = "metadata.".genuid();
 	my $msg = "The echo request has passed.";
 
+	my @ret_data = ();
+	my @ret_mds = ();
+
 	$retMetadata = getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.echo");
 	$retData = getResultCodeData("data.".genuid(), $mdID, $msg);
 
-	return ("", $retMetadata, $retData);
+	push @ret_mds, $retMetadata;
+	push @ret_data, $retData;
+
+	return ("", \@ret_mds, \@ret_data);
 }
 
 1;

@@ -48,10 +48,16 @@ sub handleEvent($$$$) {
 	my $mdID = "metadata.".genuid();
 	my $msg = "The skeleton exists.";
 
+	my @ret_data = ();
+	my @ret_mds = ();
+
 	$retMetadata = getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.skeleton");
 	$retData = getResultCodeData("data.".genuid(), $mdID, $msg);
 
-	return ("", $retMetadata, $retData);
+	push @ret_mds, $retMetadata;
+	push @ret_data, $retData;
+
+	return ("", \@ret_mds, \@ret_data);
 }
 
 1;
