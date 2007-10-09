@@ -12,7 +12,8 @@ use Time::HiRes qw( gettimeofday );
 use perfSONAR_PS::Transport;
 
 # Eventually get these from config (or even app)
-my $server = "patdev0.internet2.edu";
+#my $server = "patdev0.internet2.edu";
+my $server = "packrat.internet2.edu";
 my $port = 8080;
 my $endpoint = "perfSONAR_PS/services/snmpMA";
 my $filter = '//nmwg:message//nmwg:datum';
