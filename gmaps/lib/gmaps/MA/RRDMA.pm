@@ -35,10 +35,10 @@ sub processTemplate
 	
 	my ( undef, $filename) = &File::Temp::tempfile( UNLINK => 1 );	
 	$tt->process( $requestXML, $vars, $filename )
-        || die $tt->error;
+        || $logger->logdie( "Error processing template: " . $tt->error );
 
 	my $out = &perfSONAR_PS::Common::readXML( $filename );
-	unlink $filename or warn "Could not unlink $filename.\n";
+	unlink $filename or $logger->warn( "Could not unlink $filename." );
 
 	return $out;
 	
@@ -56,6 +56,8 @@ sub get
 	my $ip = shift;
 	my $eventType = shift;
 	my $ifname = shift;
+	
+	$logger->info("forming from MA '$maHost:$maPort/$maEndpoint' for IP '$ip', IF '$ifname' for eventType '$eventType'" );
 	
 	my $period = shift;
 	my $cf = shift;
@@ -75,7 +77,13 @@ sub get
 
 	if ( defined $period ) {
 		$vars->{'PERIOD'} = $period;
+	} else {
+		$vars->{'PERIOD'} = 86400;
 	}
+	# need to have real time becuase of problems with using N
+	$vars->{"ENDTIME"} = time();
+	$vars->{'STARTTIME'} = $vars->{'ENDTIME'} - $vars->{'PERIOD'};
+
 	if ( defined $cf ) {
 		$vars->{'CF'} = $cf;
 	}
@@ -83,14 +91,16 @@ sub get
 		$vars->{'RESOLUTION'} = $resolution;
 	}
 
-	$logger->info("period $period, cf $cf, resolution $resolution" );
 
+	$logger->info("period $period, cf $cf, resolution $resolution" );
+	
 	my $request = &processTemplate( $request, $vars );
-	#print "REQ: $request\n";
+	$logger->debug( "Sending to MA: $request" );
 
 	my $response = &gmaps::Transport::getString( 
 				$maHost, $maPort, $maEndpoint, 
 				$request );
+#	$logger->debug( "Recvd: $response" );
 
 	# usie the xpath statement if necessary
    	return XML::XPath->new( xml => $response );
@@ -100,6 +110,7 @@ sub getGraph
 {
 	my $xp = shift;# output of getUtilization
 	my $metadata = shift;
+
 	
 	# retrieve the meta data info if necessary
 	if ( $metadata eq '' ) {
@@ -112,7 +123,7 @@ sub getGraph
 #		$logger->info( XML::XPath::XMLParser::as_string( $node ) );
 #	}
 
-	$logger->info( "metadata: " . Dumper $metadata );
+	$logger->debug( "metadata: " . Dumper $metadata );
 	
 	my $inMetaId = undef;
 	my $outMetaId = undef;
@@ -134,6 +145,8 @@ sub getGraph
 				&getUtilizationData( $xp, $inMetaId ),
 				&getUtilizationData( $xp, $outMetaId )
 			);
+
+	#$logger->debug( Dumper $data );
 	
 	return &createRRDGraph( $data );
 	
@@ -157,7 +170,7 @@ sub createRRDGraph
 	}
 
 	# create temp rrd
-	my ( undef, $rrdFile ) = &File::Temp::tempfile( UNLINK => 1 );	
+	my ( undef, $rrdFile ) = &File::Temp::tempfile( ) ; #UNLINK => 1 );	
 	my $rrd = utils::rrd->new( $rrdFile, $start, $entries );
 
 	# add the data into the rrd
@@ -233,29 +246,55 @@ sub getUtilizationData
 	my $xp = shift;
 	my $metadataIdRef = shift;
 	
-	$logger->info( "Looking for $metadataIdRef" );
-	my $dataset = $xp->find( '//nmwg:data[@metadataIdRef="' . $metadataIdRef . '"]/nmwg:datum' );
-	
-	my @tuples = ();
-				
-	foreach my $data ( $dataset->get_nodelist ) {
-		
-		my $time = $data->getAttribute('timeValue');
-		if ( ! $time ) {
-			$time = $data->getAttribute('time');
-		}
-		next unless $time =~ /^\d+$/;
-		my $value = $data->getAttribute('value');
+	$logger->info( "Getting utilisation data for '$metadataIdRef'" );
 
-		next if $value eq 'nan';
-
-		$logger->debug( "TIME: $time, $value" );
-		push( @tuples, $time . ':' . $value );
+	my @statements = (
+		'//nmwg:data[@metadataIdRef="' . $metadataIdRef . '"]/netutil:datum',
+		'//nmwg:data[@metadataIdRef="' . $metadataIdRef . '"]/nmwg:datum'
+	);
 	
+	my $tuples = [];
+
+	while( scalar @$tuples < 1 ) {
+		last unless scalar @statements;
+		my $statement = pop @statements;
+		$tuples = &getValues( $xp, $statement,  );
 	}
 
-	return ( \@tuples );
+	$logger->debug( "Entries = " . scalar @$tuples );
+
+	return $tuples ;
 }
+
+sub getValues
+{
+	my $xp = shift;
+	my $find = shift;
+	
+	my $dataset = $xp->find( $find );
+
+	my @tuples = ();
+
+        foreach my $data ( $dataset->get_nodelist ) {
+
+                my $time = $data->getAttribute('timeValue');
+                if ( ! $time ) {
+                        $time = $data->getAttribute('time');
+                }
+                next unless $time =~ /^\d+$/;
+		# stupid bug
+		next if $time < 1000000; #1192056660
+                my $value = $data->getAttribute('value');
+
+                next if $value eq 'nan';
+
+    #            $logger->debug( "Adding tuple: $time, $value" );
+                push( @tuples, $time . ':' . $value );
+        }
+
+	return \@tuples;
+}
+
 
 sub commify {
     local($_) = shift;
@@ -334,13 +373,13 @@ sub sendTemplate2Array
 	
 	my $request = &processTemplate( $requestTemplate, $vars );
 	
-	$logger->info( " request: $request\n" );
+	#$logger->debug( " request: $request\n" );
 	
 	my $response = &gmaps::Transport::getArray( 
 						$maHost, $maPort, $maEndpoint, 
 						$request, $xpathFilter );
 
-	$logger->info( "response: @$response\n" );
+	#$logger->debug( "response: @$response\n" );
 
 
 	return $response;
@@ -361,6 +400,8 @@ sub getAllRouters
 	my $eventType = shift;
 	
 	my $vars = { 'eventType'	=> $eventType	};
+
+	$logger->debug( "Getting a list of all the routers from $maHost:$maPort/$maEndpoint for $eventType");
 
 	# sendt he template and parse output
 	my $metakeys = sendTemplate2XPath( 

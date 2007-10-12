@@ -1,5 +1,4 @@
 [%- DEFAULT
-  PERIOD = 86400
   CONSOLIDATIONFUNCTION = AVERAGE
   RESOLUTION = 10
 -%]
@@ -26,8 +25,8 @@
   <nmwg:metadata id="#meta2">
     <select:subject id="#period1" metadataIdRef="#meta1"/>
     <select:parameters id="#param1">
-      <nmwg:parameter name="time" operator="gte">N-[% PERIOD %]</nmwg:parameter>
-      <nmwg:parameter name="time" operator="lte">N</nmwg:parameter>
+      <nmwg:parameter name="time" operator="gte">[% STARTTIME %]</nmwg:parameter>
+      <nmwg:parameter name="time" operator="lte">[% ENDTIME %]</nmwg:parameter>
       <nmwg:parameter name="consolidationFunction">[% CONSOLIDATIONFUNCTION %]</nmwg:parameter>
       <nmwg:parameter name="resolution">[% RESOLUTION %]</nmwg:parameter>
     </select:parameters>

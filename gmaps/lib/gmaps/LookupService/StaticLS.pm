@@ -2,6 +2,7 @@
 
 use gmaps::Topology;
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 package gmaps::LookupService::StaticLS;
 
@@ -24,17 +25,12 @@ our %maMap = (
 				},
 				'es.net'	=> { 
 					host => 'mea1.es.net', 
-					#port => '8080', 
-					#endpoint => 'axis/services/MeasurementArchiveService',
-					port => '8090',
-					endpoint => 'axis/services/snmpMA',
+					port => '8080',
+					endpoint => 'perfSONAR_PS/services/snmpMA',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
 				'internet2.edu' => {
-					#host => 'rrdma.abilene.ucaid.edu', 
-					#port => '8080', 
-					#endpoint => 'axis/services/snmpMA',
-					host => '129.79.216.183',
+					host => 'util.net.internet2.edu',
 					port => '8080',
 					endpoint => 'perfSONAR_PS/services/snmpMA',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
@@ -60,7 +56,7 @@ our %maMap = (
 				'fnal.gov' => {
 					host => 'lhcopnmon1-mgm.fnal.gov', 
 					port => '8091', 
-					endpoint => 'axis/services/snmpMA',
+					endpoint => 'perfSONAR_PS/services/snmpMA',
 					eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
 				},
 				'garr.it' => {
@@ -129,6 +125,12 @@ our %maMap = (
                                     endpoint => 'axis/services/snmpMA',
                                     eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
                                 },
+                                'udel.edu' => {
+                                    host => 'ale.pc.cis.udel.edu',
+                                    port => '6767',
+                                    endpoint => 'perfSONAR_PS/services/snmpMA',
+                                    eventType => 'http://ggf.org/ns/nmwg/characteristic/utilization/2.0'
+                                },
 
 
 			);
@@ -145,7 +147,7 @@ sub getMA
 	my $ip = shift;
 	my $router = shift;
 
-	$logger->info( "Looking up $ip, $router" );
+	$logger->info( "Looking up IP: '$ip', Router: '$router'" );
 
 	if ( &gmaps::Topology::isIpAddress( $router ) ) {
 		( $ip, $router ) = &gmaps::Topology::getDNS( $router );
@@ -183,6 +185,7 @@ sub getMA
 		return ( undef, undef, undef, undef );
 	}
 
+	$logger->debug( "Returning Host: '$maMap{$ma}{host}', Port: '$maMap{$ma}{port}', Endpoint: '$maMap{$ma}{endpoint}', Eventtype: '$maMap{$ma}{eventType}'" );
 	return ( $maMap{$ma}{host}, $maMap{$ma}{port}, $maMap{$ma}{endpoint}, $maMap{$ma}{eventType} );
 }
 

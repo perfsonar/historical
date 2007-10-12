@@ -23,7 +23,9 @@ sub new {
 	$self->{filename} = shift;    
     $self->{startTime} = shift;
     $self->{entries} = shift;
-    
+
+    $logger->debug( "Creating rrd file $self->{filename}, $self->{startTime}, $self->{entries}" );    
+
     # args
     my @args = ();
     push @args, "--start=" . $self->{startTime};
@@ -34,8 +36,8 @@ sub new {
     # create the rrd here
     RRDs::create $self->{filename}, @args;
  	my $ans = RRDs::error;
-	die( "Error creating rrd " . $self->{filename} .  ": $ans.\n\n" )
-		if $ans ne undef || $ans ne '';   
+	$logger->logdie( "Error creating rrd " . $self->{filename} .  ": $ans.\n\n" )
+		if defined $ans || $ans ne '';   
     
     return $self;
 }
@@ -68,7 +70,7 @@ sub add
 	my $ans = RRDs::error;
 	if( defined $ans || $ans ne '' ) {
 		return undef if $ans =~ /illegal attempt to update using time/;
-		warn( "Error updating " . $self->{filename} . " $ans.\n" );
+		$logger->warn( "Error updating " . $self->{filename} . " $ans.\n" );
 	}
 	return undef;
 }

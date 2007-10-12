@@ -81,8 +81,8 @@ sub cgiapp_prerun
 	  Log::Log4perl->easy_init($ERROR);
 	}
 	$self->param( 'logger' => &get_logger("gmaps") );
-	
-	$self->param('logger')->info( "Entering run mode " . $self->mode_param() );
+
+	#$self->param('logger')->info( "Entering run mode '' with " . Dumper $self->query() );
 
 }
 
@@ -125,6 +125,7 @@ sub getRouters
 	my $id = 0;
 
 	if ( defined $in ) {
+		$self->param('logger')->debug( "in='" . $in . "'" );
 		foreach my $if ( &parseIf( $in ) ) {
 			#next if ! gmaps::utils::IP::isAnIP( $r );
 			push @metadata, &createIf( $if, $id ); 
@@ -133,22 +134,23 @@ sub getRouters
 	}
 	
 	elsif ( defined $self ) {
-		$self->param('logger')->info( "in statement? " . $in );
+		$self->param('logger')->debug("self call" . Dumper $self );
 		# get ips dierct from input
 		my @ifs = $self->query()->param('if');
 		foreach my $if ( @ifs ) {
-			$self->param('logger')->info( "Found in param if: $if" );
+			$self->param('logger')->debug( "Found in param if: $if" );
 			push @metadata, &createIf( $if, $id );
 			$id++;
 		}	
 		# grep from teh raw input
 		# if not routers defined, then check for string (from enter sub)
-		if ( defined $self->query()->param('raw'))
+		if ( defined $self->query()->param('raw') )
 		{
 			my @raws = $self->query()->param('raw');
 			foreach my $raw ( @raws ) {
-			    $self->param("logger")->info( "Found raw statement $raw" );
+			    $self->param("logger")->debug( "Found raw statement $raw" );
 			    foreach my $if ( &parseIf( $raw ) ) {
+				next if ( $if =~ /^\(.*\)$/ );
 				push @metadata, &createIf( $if, $id );
 				$id++;
 			   }
@@ -168,7 +170,7 @@ sub getRouters
 		
 	}
 
-	$self->param("logger")->info( "Final nodes: " . Dumper \@metadata );
+	$self->param("logger")->debug( "Final nodes: " . Dumper \@metadata );
 
 	return \@metadata;
 }
@@ -226,7 +228,7 @@ sub passArgs
 {
 	my $self = shift;	
 	my $q = $self->query();
-	
+
 	my @if = $q->param('if');
 	my @domain = $q->param('domain');
 	
@@ -237,11 +239,19 @@ sub passArgs
 		$d = 'domain=' . $d;
 	}
 	
+	my $other = $self->getRouters();
+	my @raw = ();
+	foreach my $r (@$other) {
+		push ( @raw, 'if=' . $r->{ifAddress} );
+	}
+	
 	my $args = undef;
 	if ( scalar @domain ) {
 		$args = join '&', @domain;
-	} else {
+	} elsif ( scalar @if ) {
 		$args = join '&', @if;
+	} else {
+		$args = join '&', @raw;
 	}
 
 	return $args;	
@@ -395,80 +405,18 @@ sub createKML
 }	
 
 # returns an xml of the markers
-sub createXmlFull
-{
-	my $self = shift;
-	my $routers = &getRouters( $self, @_ );
-	
-	my $marks = &gmaps::Topology::getCoords( $routers );
-	
-	# create template object
-	my $tt = Template->new( { 'ABSOLUTE' => 1 } );		
-	my $file = undef;
-	my $vars = {};
-	
-	# add the extra panel info
-	foreach my $m (@$marks)
-	{
-			
-		# get the utilization tab html		
-		$vars = {
-				'dns'	=> $m->{'dns'},
-				'ip'	=> $m->{'ip'},
-				'cgi' 	=> $server . '?mode=graph&ip=' . $m->{'ip'}
-				};
-		$file = $templatePath. '/gmaps-utilization_html.tt2';
-		$tt->process( $file, $vars, \$m->{'utilTab'} )
-        	|| die $tt->error;
-        $m->{'utilTab'} = &escapeString( $m->{'utilTab'} );
-	
-		# info tab
-		# get ma info
-		
-		# TODO: do i care?
-		$vars = {
-				'ma'		=> $m->{'dns'},
-				'hostName'	=> $m->{'ip'},
-				'ifName' 	=> $server . '?mode=graph&ip=' . $m->{'ip'},
-			};
-		$file = $templatePath. '/gmaps-info_html.tt2';
-		$tt->process( $file, $vars, \$m->{'infoTab'} )
-        	|| die $tt->error;
-        $m->{'infoTab'} = &escapeString( $m->{'infoTab'} );
-
-
-	}
-	
-	# final xml
-	if ( defined $self ) {
-		$self->header_add(  -type => "text/xml" ); 
-	}
-	
-	my $out = '';
-	$vars = {
-      			'marks'  => $marks
-			};	
-	$file = $templatePath . '/gmaps_xml.tt2';
-	
-	my $out = '';
-	$tt->process( $file, $vars, \$out )
-        || die $tt->error;
-	
-	return $out;
-}
-
-
-# returns an xml of the markers
 sub createXml
 {
 	my $self = shift;
+
+	$self->param('logger')->debug( Dumper $self );
 
 	my $metadata = $self->getRouters( @_ ); # returns array of metadata's 
 	
 	# get the coords of routers
 	&gmaps::Topology::getCoords( $metadata );
 	
-	$self->param("logger")->info( Dumper $metadata );
+	$self->param("logger")->debug( "Fetching list of nodes for " . Dumper $metadata );
 
 	# get the interconnecting lines
 	my $lines = &gmaps::Topology::getLines( $metadata );
@@ -507,6 +455,8 @@ sub mapFromXml
 {
 	my $self = shift;
 
+	$self->param('logger')->info("Generating google map page");
+
 	# write the output to return to the client
 	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
 	my $vars = {
@@ -529,38 +479,6 @@ sub mapFromXml
 	
 	$self->header_add(  -type => "text/html" ); 		
 	return $out;
-}
-
-# return a map with the nodes inlined as javascript
-sub mapWithInlineJavascript
-{
-	my $self = shift;
-	my $routers = &getRouters( $self, @_ );
-
-	my @marks = ();
-	my %seen = ();
-	
-	my $marks = &gmaps::Topology::getCoords( $routers );
-	
-	# write the output to return to the client
-	my $tt = Template->new( { 'ABSOLUTE' => 1 } );	
-	my $vars = {
-					'graphUri'	=> $server . '?mode=graph&ip=',
-					'infoUri'	=> $server . '?mode=info&ip=',
-      				'marks'  => \@marks,
-				};
-	my $file = $templatePath . '/gmaps_html-inline.tt2';
-	
-	my $out = '';
-	$tt->process( $file, $vars, \$out )
-        || die $tt->error;
-	
-	
-	undef @marks;
-	undef $file;
-	
-	return $out;
-
 }
 
 # simply cats the output to a variable reference (good for returning pics)
@@ -636,9 +554,6 @@ sub rrdmaUtilizationGraph
 		$self->param('logger')->fatal("Why is no IP defined?!");
 	}
 
-	use Data::Dumper;
-	$self->param('logger')->info( "DUMP " . Dumper $q );
-	
 	my ( $data, $meta, undef, undef ) = &rrdmaFetch( $ip, $ifname, $q->param( 'period' ), $q->param( 'cf' ), $q->param( 'resolution' ) );
 
 	# output is always a graph/png	
@@ -694,7 +609,7 @@ sub rrdmaUtilizationGraphList
 	
 	my $out = '';
 	$tt->process( $file, $vars, \$out )
-        || die $tt->error;
+        || $self->param('logger')->logdie( "template error " . $tt->error );
 	
 	# final xml
 	if ( defined $self ) {

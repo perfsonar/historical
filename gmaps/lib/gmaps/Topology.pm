@@ -165,6 +165,8 @@ sub getCoords
 	my $metadata = shift; # array of metadata hash refs
 	my $loc = shift;
 		
+	$logger->info( "Getting coordinates..." );
+
 	my $marks : shared;
 	$marks = new Thread::Queue;
 

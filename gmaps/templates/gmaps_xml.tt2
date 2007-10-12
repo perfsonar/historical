@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <markers>
   [%- FOREACH mark = marks %]
+  [%- IF mark.latitude AND mark.longitude %]
   <marker if="[% mark.ifAddress %][% IF mark.ifName %]:[% mark.ifName %][% END %]"          label="[% mark.gmapsLabel %]"
           lat="[% mark.latitude %]"          long="[% mark.longitude %]"  />
+  [%- END -%]
   [%- END %]
   [%- FOREACH line = lines %]
+  [%- IF line.srclat AND line.dstlat %]
   <line  descr="[% line.descr %]"
          srclat="[% line.srclat %]"         srclng="[% line.srclng %]"
          dstlat="[% line.dstlat %]"         dstlng="[% line.dstlng %]"   />
+  [%- END %]
   [%- END %]
 </markers>
