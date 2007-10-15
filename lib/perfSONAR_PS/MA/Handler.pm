@@ -9,10 +9,12 @@ sub new($) {
 	my ($package) = @_;
 	my %hash = ();
 
-	$hash{"ENDPOINTSPECIFICHANDLERS"} = ();
-	$hash{"GENERICHANDLERS"} = ();
-	$hash{"ENDPOINTSPECIFICHANDLERS_REGEX"} = ();
-	$hash{"GENERICHANDLERS_REGEX"} = ();
+	$hash{"EP_EV_HANDLERS"} = ();
+	$hash{"ALL_EV_HANDLERS"} = ();
+	$hash{"EP_EV_HANDLERS_REGEX"} = ();
+	$hash{"ALL_EV_HANDLERS_REGEX"} = ();
+	$hash{"EP_MSG_HANDLERS"} = ();
+	$hash{"ALL_MSG_HANDLERS"} = ();
 	$hash{"VALIDENDPOINTS"} = ();
 
 	bless \%hash => $package;
@@ -25,25 +27,37 @@ sub add($$$$$) {
 	$logger->debug("Adding handler for $endpoint, $messageType, $eventType");
 
 	if ($endpoint eq "") {
-		if (!defined $self->{GENERICHANDLERS}->{$messageType}) {
-			$self->{GENERICHANDLERS}->{$messageType} = ();
+		if (!defined $self->{ALL_EV_HANDLERS}->{$messageType}) {
+			$self->{ALL_EV_HANDLERS}->{$messageType} = ();
 		}
 
-		$self->{GENERICHANDLERS}->{$messageType}->{$eventType} = $ma;
+		if ($eventType eq "") {
+			$self->{ALL_MSG_HANDLERS}->{$messageType} = $ma;
+		} else {
+			$self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType} = $ma;
+		}
 	} else {
 		$endpoint =~ s/^(\/)+//g;
 
 		$self->{VALIDENDPOINTS}->{$endpoint} = "";
 
-		if (!defined $self->{ENDPOINTSPECIFIC}->{$endpoint}) {
-			$self->{ENDPOINTSPECIFIC}->{$endpoint} = ();
-		}
+		if ($eventType ne "") {
+			if (!defined $self->{EP_EV_HANDLERS}->{$endpoint}) {
+				$self->{EP_EV_HANDLERS}->{$endpoint} = ();
+			}
 
-		if (!defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}) {
-			$self->{ENDPOINTSPECIFIC}->{$endpoint}->{$endpoint}->{$messageType} = ();
-		}
+			if (!defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}) {
+				$self->{EP_EV_HANDLERS}->{$endpoint}->{$endpoint}->{$messageType} = ();
+			}
 
-		$self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}->{$eventType} = $ma;
+			$self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType} = $ma;
+		} else {
+			if (!defined $self->{EP_MSG_HANDLERS}->{$endpoint}) {
+				$self->{EP_MSG_HANDLERS}->{$endpoint} = ();
+			}
+
+			$self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType} = $ma;
+		}
 	}
 
 	return 0;
@@ -56,23 +70,23 @@ sub addRegex($$$$$) {
 	$logger->debug("Adding handler for $endpoint, $messageType, $eventRegex");
 
 	if ($endpoint eq "") {
-		if (!defined $self->{GENERICHANDLERS_REGEX}->{$messageType}) {
-			$self->{GENERICHANDLERS_REGEX}->{$messageType} = ();
+		if (!defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}) {
+			$self->{ALL_EV_HANDLERS_REGEX}->{$messageType} = ();
 		}
 
-		$self->{GENERICHANDLERS_REGEX}->{$messageType}->{$eventRegex} = $ma;
+		$self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$eventRegex} = $ma;
 	} else {
 		$endpoint =~ s/^(\/)+//g;
 
-		if (!defined $self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint}) {
-			$self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint} = ();
+		if (!defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}) {
+			$self->{EP_EV_HANDLERS_REGEX}->{$endpoint} = ();
 		}
 
-		if (!defined $self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint}->{$messageType}) {
-			$self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint}->{$messageType} = ();
+		if (!defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}) {
+			$self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType} = ();
 		}
 
-		$self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint}->{$messageType}->{$eventRegex} = $ma;
+		$self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}->{$eventRegex} = $ma;
 	}
 
 	return 0;
@@ -84,52 +98,70 @@ sub handleEvent($$$$) {
 
 	$logger->debug("Handling event: $endpoint, $messageType, $eventType");
 
-	if (defined $self->{ENDPOINTSPECIFIC}->{$endpoint} and
-			defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType} and
-			defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}->{$eventType}) {
-		return $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+	my ($valid_endpoint, $valid_messagetype, $valid_eventtype);
+
+	my $valid_endpoint = defined $self->{VALIDENDPOINTS}->{$endpoint};
+	my $valid_messagetype = ($valid_endpoint and
+					(defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} or
+					 defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType} or
+					 defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType} or
+					 defined $self->{ALL_EV_HANDLERS}->{$messageType} or
+					 defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType} or
+					 defined $self->{ALL_MSG_HANDLERS}->{$messageType}));
+
+	if (!$valid_endpoint) {
+		return ("error.perfSONAR_PS.transport", "Received message with invalid endpoint: $endpoint");
 	}
 
-	if (defined $self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint} and
-			defined $self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$endpoint}->{$messageType}) {
-		foreach my $regex (keys %{$self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$messageType}}) {
+	if (!$valid_messagetype) {
+		return ("error.ma.message.type", "Message type \"".$messageType."\" is not yet supported");
+	}
+
+	if (defined $self->{EP_EV_HANDLERS}->{$endpoint} and
+			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} and
+			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}) {
+		return $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+	}
+
+	if (defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint} and
+			defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}) {
+		foreach my $regex (keys %{$self->{EP_EV_HANDLERS_REGEX}->{$messageType}}) {
 			if ($eventType =~ /$regex/) {
-				return $self->{ENDPOINTSPECIFICHANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+				return $self->{EP_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
 			}
 		}
 	}
 
-	if (defined $self->{GENERICHANDLERS}->{$messageType} and defined $self->{GENERICHANDLERS}->{$messageType}->{$eventType}) {
+	if (defined $self->{ALL_EV_HANDLERS}->{$messageType} and defined $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}) {
 		foreach my $valid_endpoint (keys %{ $self->{VALIDENDPOINTS} }) {
 			if ($valid_endpoint eq $endpoint) {
-				return $self->{GENERICHANDLERS}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+				return $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
 			}
 		}
 	}
 
-	if (defined $self->{GENERICHANDLERS_REGEX}->{$messageType}) {
+	if (defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}) {
 		foreach my $valid_endpoint (keys %{ $self->{VALIDENDPOINTS} }) {
 			if ($valid_endpoint eq $endpoint) {
-				foreach my $regex (keys %{$self->{GENERICHANDLERS_REGEX}->{$messageType}}) {
+				foreach my $regex (keys %{$self->{ALL_EV_HANDLERS_REGEX}->{$messageType}}) {
 					if ($eventType =~ /$regex/) {
-						return $self->{GENERICHANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+						return $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
 					}
 				}
 			}
 		}
 	}
 
-	if (!defined $self->{VALIDENDPOINTS}->{$endpoint}) {
-		return ("error.perfSONAR_PS.transport", "Received message with invalid endpoint: $endpoint");
+	if (defined $self->{EP_MSG_HANDLERS}->{$endpoint} and
+		defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}) {
+		return $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
 	}
 
-	if (!defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}) {
-		return ("error.ma.message.type", "Message type \"".$messageType."\" is not yet supported");
+	if (defined $self->{ALL_MSG_HANDLERS}->{$messageType}) {
+		return $self->{ALL_MSG_HANDLERS}->{$messageType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
 	}
 
-	if (!defined $self->{ENDPOINTSPECIFIC}->{$endpoint}->{$messageType}->{$eventType}) {
-		return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
-	}
+	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\" on endpoint \"$endpoint\"");
 }
 
 1;

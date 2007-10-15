@@ -14,30 +14,38 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::LS::Register;
 use perfSONAR_PS::MA::Status::Client::SQL;
 
-our @ISA = qw(perfSONAR_PS::MA::Base);
-$VERSION = '1.0';
+sub new {
+	my ($package, $conf, $directory) = @_;
 
-sub init {
-	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my %hash = ();
 
-	if ($self->SUPER::init != 0) {
-		$logger->error("Couldn't initialize MA parent class");
-		return -1;
+	if(defined $conf and $conf ne "") {
+		$hash{"CONF"} = \%{$conf};
 	}
 
-	if (!defined $self->{CONF}->{"STATUS_DB_TYPE"} or $self->{CONF}->{"STATUS_DB_TYPE"} eq "") {
+	if (defined $directory and $directory ne "") {
+		$hash{"DIRECTORY"} = $directory;
+	}
+
+	bless \%hash => $package;
+}
+
+sub init {
+	my ($self, $handler) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	if (!defined $self->{CONF}->{"status.db_type"} or $self->{CONF}->{"status.db_type"} eq "") {
 		$logger->error("No database type specified");
 		return -1;
 	}
 
-	if (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "sqlite") {
-		if (!defined $self->{CONF}->{"STATUS_DB_FILE"} or $self->{CONF}->{"STATUS_DB_FILE"} eq "") {
-			$logger->error("You specified a SQLite Database, but then did not specify a database file(STATUS_DB_FILE)");
+	if (lc($self->{CONF}->{"status.db_type"}) eq "sqlite") {
+		if (!defined $self->{CONF}->{"status.db_file"} or $self->{CONF}->{"status.db_file"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(status.db_file)");
 			return -1;
 		}
 
-		my $file = $self->{CONF}->{"STATUS_DB_FILE"};
+		my $file = $self->{CONF}->{"status.db_file"};
 		if (defined $self->{DIRECTORY}) {
 			if (!($file =~ "^/")) {
 				$file = $self->{DIRECTORY}."/".$file;
@@ -46,44 +54,44 @@ sub init {
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"READ_ONLY"} and $self->{CONF}->{"READ_ONLY"} == 1) {
+		if (defined $self->{CONF}->{"status.read_only"} and $self->{CONF}->{"status.read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"STATUS_DB_TABLE"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"status.db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "No database to dump";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
-	} elsif (lc($self->{CONF}->{"STATUS_DB_TYPE"}) eq "mysql") {
+	} elsif (lc($self->{CONF}->{"status.db_type"}) eq "mysql") {
 		my $dbi_string = "dbi:mysql";
 
-		if (!defined $self->{CONF}->{"STATUS_DB_NAME"} or $self->{CONF}->{"STATUS_DB_NAME"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database (STATUS_DB_NAME)");
+		if (!defined $self->{CONF}->{"status.db_name"} or $self->{CONF}->{"status.db_name"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database (status.db_name)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_NAME"};
+		$dbi_string .= ":".$self->{CONF}->{"status.db_name"};
 
-		if (!defined $self->{CONF}->{"STATUS_DB_HOST"} or $self->{CONF}->{"STATUS_DB_HOST"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database host (STATUS_DB_HOST)");
+		if (!defined $self->{CONF}->{"status.db_host"} or $self->{CONF}->{"status.db_host"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database host (status.db_host)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_HOST"};
+		$dbi_string .= ":".$self->{CONF}->{"status.db_host"};
 
-		if (defined $self->{CONF}->{"STATUS_DB_PORT"} and $self->{CONF}->{"STATUS_DB_PORT"} ne "") {
-			$dbi_string .= ":".$self->{CONF}->{"STATUS_DB_PORT"};
+		if (defined $self->{CONF}->{"status.db_port"} and $self->{CONF}->{"status.db_port"} ne "") {
+			$dbi_string .= ":".$self->{CONF}->{"status.db_port"};
 		}
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"READ_ONLY"} and $self->{CONF}->{"READ_ONLY"} == 1) {
+		if (defined $self->{CONF}->{"status.read_only"} and $self->{CONF}->{"status.read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"STATUS_DB_USERNAME"}, $self->{CONF}->{"STATUS_DB_PASSWORD"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"status.db_username"}, $self->{CONF}->{"status.db_password"}, $self->{CONF}->{"status.db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "Couldn't create SQL client";
 			$logger->error($msg);
@@ -103,58 +111,15 @@ sub init {
 
 	$self->{CLIENT}->close;
 
+	$handler->add($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
+	$handler->add($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
+
 	return 0;
 }
 
-sub receive($) {
+sub needLS() {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-	my $n;
-	my $request;
-	my $error;
-
-	do {
-		$request = undef;
-
-		$n = $self->{LISTENER}->acceptCall(\$request, \$error);
-		if ($n == 0) {
-			$logger->debug("Received 'shadow' request from below; no action required.");
-			$request->finish;
-		}
-
-		if (defined $error and $error ne "") {
-			$logger->error("Error in accept call: $error");
-		}
-	} while ($n == 0);
-
-	return $request;
-}
-
-sub handleRequest($$) {
-	my ($self, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-
-	$logger->debug("Handling request");
-
-	eval {
-		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
-		alarm($self->{CONF}->{"MAX_WORKER_LIFETIME"}) if (defined $self->{CONF}->{"MAX_WORKER_LIFETIME"} and $self->{CONF}->{"MAX_WORKER_LIFETIME"} > 0);
-		__handleRequest($self, $request);
-	};
-
-	# disable the alarm after the eval is done
-	alarm(0);
-
-	if ($@) {
-		my $msg = "Unhandled exception or crash: $@";
-		$logger->error($msg);
-
-		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred"));
-	}
-
-	$request->finish;
-
-	return;
+	return ($self->{CONF}->{"status.enable_registration"});
 }
 
 sub registerLS {
@@ -163,9 +128,18 @@ sub registerLS {
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"LS_INSTANCE"} or $self->{CONF}->{"LS_INSTANCE"} eq "");
+	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status.ls"} or $self->{CONF}->{"status.ls"} eq "");
 
-	$ls = new perfSONAR_PS::LS::Register($self->{CONF}, $self->{NAMESPACES});
+	my %ls_conf = (
+		LS_INSTANCE => $self->{CONF}->{"status.ls"},
+		SERVICE_TYPE => $self->{CONF}->{"status.service_type"},
+		SERVICE_NAME => $self->{CONF}->{"status.service_name"},
+		SERVICE_DESCRIPTION => $self->{CONF}->{"status.service_description"},
+		SERVICE_ACCESSPOINT => $self->{CONF}->{"status.service_accesspoint"},
+		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"default.registration_interval"},
+	);
+
+	$ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -188,7 +162,7 @@ sub registerLS {
 
 		$md .= "<nmwg:metadata id=\"meta$i\">\n";
 		$md .= "<nmwg:subject id=\"sub$i\">\n";
-		$md .= " <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070707/\" id=\"".escapeString($link_id)."\" />\n";
+		$md .= " <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
 		$md .= "</nmwg:subject>\n";
 		$md .= "<nmwg:eventType>Link.Status</nmwg:eventType>\n";
 		$md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
@@ -202,132 +176,95 @@ sub registerLS {
 	return $ls->register_withData(\@link_mds);
 }
 
-sub __handleRequest {
-	my($self, $request) = @_;
+sub handleEvent($$$$) {
+	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
-	delete $self->{RESPONSE};
-	my $messageIdReturn = genuid();
-	my $messageId = $request->getRequestDOM()->getDocumentElement->getAttribute("id");
-	my $messageType = $request->getRequestDOM()->getDocumentElement->getAttribute("type");
 
-	my ($status, $response);
+	if ($messageType eq "MeasurementArchiveStoreRequest") {
+		$logger->info("Calling handleStoreRequest");
+		if ($eventType ne "") {
+			return ("error.ma.no_event_type", "No event type specified for metadata id ".$md->getAttribute("id"));
+		}
 
-	if($messageType eq "SetupDataRequest") {
-		$logger->debug("Handling lookup request.");
-		($status, $response) = $self->parseLookupRequest($request->getRequestDOM());
-	} elsif ($messageType eq "MeasurementArchiveStoreRequest") {
-		$logger->debug("Handling store request.");
-		($status, $response) = $self->parseStoreRequest($request->getRequestDOM());
+		return $self->handleStoreRequest($md, $d);
 	} else {
-		$status = "error.common.action_not_supported";
-		$response = "Message type \"".$messageType."\" is not yet supported";
+		$logger->info("Calling handleQueryRequest");
+		return $self->handleQueryRequest($eventType, $md, $d);
+	}
+}
+
+sub handleStoreRequest($$$) {
+	my ($self, $md, $d) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	my ($status, $res);
+	my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
+	my $knowledge = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="knowledge"]');
+	my $do_update = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="update"]');
+	my $time = findvalue($d, './ifevt:datum/@timeValue');
+	my $time_type = findvalue($d, './ifevt:datum/@timeType');
+	my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
+	my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
+
+	if (!defined $knowledge or $knowledge eq "") {
+		$knowledge = "full";
+	} else {
+		$knowledge = lc($knowledge);
+	}
+
+	if (defined $do_update and $do_update ne "") {
+		if (lc($do_update) eq "yes") {
+			$do_update = 1;
+		} elsif (lc($do_update) eq "no") {
+			$do_update = 0;
+		}
+	} else {
+		$do_update = 0;
+	}
+
+	if (!defined $link_id or $link_id eq "") {
+		$status = "error.ma.query.incomplete_metadata";
+		$res = "Metadata ".$md->getAttribute("id")." is missing the link id";
+		$logger->error($res);
+	} elsif ($knowledge ne "full" and $knowledge ne "partial") {
+		$status = "error.ma.query.invalid_knowledge_level";
+		$res = "Invalid knowledge level specified, \"$knowledge\", must be either 'full' or 'partial'";
+		$logger->error($res);
+	} elsif (!defined $time or $time eq "" or !defined $time_type or $time_type eq "" or !defined $adminState or $adminState eq "" or !defined $operState or $operState eq "") {
+		$status = "error.ma.query.incomplete_data";
+		$res = "Data block is missing:";
+		$res .= " 'time'" if (!defined $time or $time eq "");
+		$res .= " 'time type'" if (!defined $time_type or $time_type eq "");
+		$res .= " 'administrative state'" if (!defined $adminState or $adminState eq "");
+		$res .= " 'operational state'" if (!defined $operState or $operState eq "");
+		$logger->error($res);
+	} elsif ($time_type ne "unix") {
+		$status = "error.ma.query.invalid_timestamp_type";
+		$res = "Time type must be 'unix'";
+		$logger->error($res);
+	} elsif (!defined $do_update) {
+		$status = "error.ma.query.invalid_update_parameter";
+		$res = "The update parameter, if included, must be 'yes' or 'no', not '$do_update'";
+		$logger->error($res);
+	} else {
+		($status, $res) = $self->__handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
 	}
 
 	if ($status ne "") {
-		$logger->error("Error handling request: $status/$response");
-		$request->setResponse(getResultCodeMessage($messageIdReturn, $messageId, $messageType."Response", $status, $response, 1));
+		return ($status, $res);
 	} else {
+		my $mdID = "metadata.".genuid();
+		my @ret_elements;
 
-		my %all_namespaces = ();
+		push @ret_elements, $md->toString;
+		push @ret_elements, getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.ma.added");
+		push @ret_elements, getResultCodeData("data.".genuid(), $mdID, "new data element successfully added", 1);
 
-		my $request_namespaces = $request->getNamespaces();
-
-		foreach my $uri (keys %{ $request_namespaces }) {
-			$all_namespaces{$request_namespaces->{$uri}} = $uri;
-		}
-
-		foreach my $prefix (keys %{ $self->{NAMESPACES} }) {
-			$all_namespaces{$prefix} = $self->{NAMESPACES}->{$prefix};
-		}
-
-		$request->setResponse(getResultMessage($messageIdReturn, $messageId, $messageType."Response", $response, \%all_namespaces));
+		return ("", \@ret_elements);
 	}
-
-	return;
 }
 
-sub parseStoreRequest {
-	my ($self, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
-
-	my $localContent = "";
-
-	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my ($status, $res);
-				my $link_id = findvalue($m, './nmwg:subject/*[local-name()=\'link\']/@id');
-				my $knowledge = findvalue($m, './nmwg:parameters/nmwg:parameter[@name="knowledge"]');
-				my $do_update = findvalue($m, './nmwg:parameters/nmwg:parameter[@name="update"]');
-				my $time = findvalue($d, './ifevt:datum/@timeValue');
-				my $time_type = findvalue($d, './ifevt:datum/@timeType');
-				my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
-				my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
-
-				if (!defined $knowledge or $knowledge eq "") {
-					$knowledge = "full";
-				} else {
-					$knowledge = lc($knowledge);
-				}
-
-				if (defined $do_update and $do_update ne "") {
-					if (lc($do_update) eq "yes") {
-						$do_update = 1;
-					} elsif (lc($do_update) eq "no") {
-						$do_update = 0;
-					}
-				} else {
-					$do_update = 0;
-				}
-
-				if (!defined $link_id or $link_id eq "") {
-					$status = "error.ma.query.incomplete_metadata";
-					$res = "Metadata ".$m->getAttribute("id")." is missing the link id";
-					$logger->error($res);
-				} elsif ($knowledge ne "full" and $knowledge ne "partial") {
-					$status = "error.ma.query.invalid_knowledge_level";
-					$res = "Invalid knowledge level specified, \"$knowledge\", must be either 'full' or 'partial'";
-					$logger->error($res);
-				} elsif (!defined $time or $time eq "" or !defined $time_type or $time_type eq "" or !defined $adminState or $adminState eq "" or !defined $operState or $operState eq "") {
-					$status = "error.ma.query.incomplete_data";
-					$res = "Data block is missing:";
-					$res .= " 'time'" if (!defined $time or $time eq "");
-					$res .= " 'time type'" if (!defined $time_type or $time_type eq "");
-					$res .= " 'administrative state'" if (!defined $adminState or $adminState eq "");
-					$res .= " 'operational state'" if (!defined $operState or $operState eq "");
-					$logger->error($res);
-				} elsif ($time_type ne "unix") {
-					$status = "error.ma.query.invalid_timestamp_type";
-					$res = "Time type must be 'unix'";
-					$logger->error($res);
-				} elsif (!defined $do_update) {
-					$status = "error.ma.query.invalid_update_parameter";
-					$res = "The update parameter, if included, must be 'yes' or 'no', not '$do_update'";
-					$logger->error($res);
-				} else {
-					($status, $res) = $self->handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
-				}
-
-				if ($status ne "") {
-					my $mdID = "metadata.".genuid();
-
-					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-				} else {
-					my $mdID = "metadata.".genuid();
-
-					$localContent .= $m->toString;
-					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.ma.added");
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, "new data element successfully added", 1);
-				}
-			}
-		}
-	}
-
-	return ("", $localContent);
-}
-
-sub handleStoreRequest($$$$$$) {
+sub __handleStoreRequest($$$$$$) {
 	my ($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my ($status, $res);
@@ -351,94 +288,30 @@ sub handleStoreRequest($$$$$$) {
 	return ("", "");
 }
 
-sub parseLookupRequest {
-	my ($self, $request) = @_;
+sub handleQueryRequest {
+	my ($self, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-	my $localContent = "";
+	my ($status, $res);
 
-	my $found_match = 0;
-
-	foreach my $d ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "data")) {
-		foreach my $m ($request->getElementsByTagNameNS($self->{NAMESPACES}->{"nmwg"}, "metadata")) {
-			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my $eventType = findvalue($m, "nmwg:eventType");
-
-				$found_match = 1;
-
-				my ($status, $res);
-
-				if (!defined $eventType or $eventType eq "") {
-					$status = "error.ma.no_eventtype";
-					$res = "No event type specified for metadata: ".$m->getAttribute("id");
-				} elsif ($eventType eq "Database.Dump") {
-					($status, $res) = $self->lookupAllRequest($m, $d);
-				} elsif ($eventType eq "Link.Status" or
-						$eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
-
-					my $link_id = findvalue($m, './nmwg:subject/*[local-name()=\'link\']/@id');
-					my $time = findvalue($m, './nmwg:parameters/nmwg:parameter[@name="time"]');
-
-					if (!defined $time or $time eq "now") {
-					# no time simply grabs the most recent information
-						$time = "";
-					}
-
-					if (!defined $link_id or $link_id eq "") {
-						$status = "error.ma.status.no_link_id"; 
-						$res = "No link id specified in request";
-					} else {
-						($status, $res) = $self->lookupLinkStatusRequest($link_id, $time);
-					}
-
-					if ($status eq "") {
-						my $mdID = "metadata.".genuid();
-						my $tmp = "";
-
-						$tmp .= $m->toString;
-						$tmp .= createData("data.".genuid(), $m->getAttribute("id"), $res);
-
-						$res = $tmp;
-					}
-				} else {
-					$status = "error.ma.eventtype_not_supported";
-					$res = "Unknown event type: ".$eventType;
-				}
-
-				if ($status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
-
-					my $mdID = "metadata.".genuid();
-
-					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-				} else {
-					$localContent .= $res;
-				}
-			}
-		}
+	if ($eventType eq "Database.Dump") {
+		($status, $res) = $self->lookupAllRequest($md, $d);
+	} elsif ($eventType eq "Link.Status" or
+			$eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
+		($status, $res) = $self->lookupLinkStatusRequest($md, $d);
 	}
 
-	if ($found_match == 0) {
-		my $status = "error.ma.no_metadata_data_pair";
-		my $res = "There was no data/metadata pair found";
-
-		$logger->error($res);
-
-		my $mdID = "metadata.".genuid();
-
-		$localContent .= getResultCodeMetadata($mdID, "", $status);
-		$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-	}
-
-	return ("", $localContent);
+	return ($status, $res);
 }
 
+
 sub lookupAllRequest($$$) {
-	my($self, $m, $d) = @_;
+	my ($self, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
+
+	my $mdID = $md->getAttribute("id");
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -456,34 +329,47 @@ sub lookupAllRequest($$$) {
 
 	my %links = %{ $res };
 
-	my $mdid = $m->getAttribute("id");
+	my @ret_elements = ();
 
-	$localContent .= $m->toString()."\n";
+	push @ret_elements, $md->toString;
 
 	my $i = genuid();
 	foreach my $link_id (keys %links) {
-		$localContent .= "<nmwg:metadata id=\"meta$i\" metadataIdRef=\"$mdid\">\n";
-		$localContent .= "  <nmwg:subject id=\"sub$i\">\n";
-		$localContent .= "    <nmtopo:link id=\"$link_id\" />\n";
-		$localContent .= "  </nmwg:subject>\n";
-		$localContent .= "</nmwg:metadata>\n";
-		$localContent .= "<nmwg:data metadataIdRef=\"meta$i\">\n";
+		my $mdID = "meta$i";
+		my $subID = "sub$i";
+		my $md_content = "";
+		$md_content .= "<nmwg:subject id=\"sub$i\">\n";
+		$md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"$link_id\" />\n";
+		$md_content .= "</nmwg:subject>\n";
+		push @ret_elements, createMetadata($mdID, $md->getAttribute("id"), $md_content);
+		my $data_content = "";
 		foreach my $link (@{ $links{$link_id} }) {
-			$localContent .= $self->writeoutLinkState_range($link);
+			$data_content .= $self->writeoutLinkState_range($link);
 		}
-		$localContent .= "</nmwg:data>\n";
-
+		push @ret_elements, createData("data.".$i, $mdID, $data_content);
 		$i++;
 	}
 
-	return ("", $localContent);
+	return ("", \@ret_elements);
 }
 
 sub lookupLinkStatusRequest($$$) {
-	my($self, $link_id, $time) = @_;
+	my($self, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
+
+	my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
+	my $time = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="time"]');
+
+	if (!defined $time or $time eq "now") {
+		# no time simply grabs the most recent information
+		$time = "";
+	}
+
+	if (!defined $link_id or $link_id eq "") {
+		return ("error.ma.status.no_link_id", "No link id specified in request");
+	}
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -506,15 +392,21 @@ sub lookupLinkStatusRequest($$$) {
 		return ("error.common.storage.fetch", $msg);
 	}
 
-	if ($time eq "all") {
-		foreach my $link (@{ $res->{$link_id} }) {
-			$localContent .= $self->writeoutLinkState_range($link);
-		}
-	} else {
-		$localContent .= $self->writeoutLinkState(pop(@{ $res->{$link_id} }), $time);
-	}
+	my @ret_elements = ();
 
-	return ("", $localContent);
+	push @ret_elements, $md->toString;
+
+	my $data_content = "";
+	foreach my $link (@{ $res->{$link_id} }) {
+		if ($time eq "all") {
+			$data_content .= $self->writeoutLinkState_range($link);
+		} else {
+			$data_content .= $self->writeoutLinkState($link, $time);
+		}
+	}
+	push @ret_elements, createData("data.".genuid(), $md->getAttribute("id"), $data_content);
+
+	return ("", \@ret_elements);
 }
 
 sub writeoutLinkState_range($$$) {
@@ -525,7 +417,7 @@ sub writeoutLinkState_range($$$) {
 
 	my $localContent = "";
 
-	$localContent .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
+	$localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
 	$localContent .= "	startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
 	$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
 	$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
@@ -543,9 +435,9 @@ sub writeoutLinkState($$$) {
 	my $localContent = "";
 
 	if (!defined $time or $time eq "") {
-	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
+	$localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
 	} else {
-	$localContent .= "<ifevt:datum knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
+	$localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
 	}
 	$localContent .= "	<ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
 	$localContent .= "	<ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
@@ -638,7 +530,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 	be performed, the function reads in the most recent data for the
 	specified link and updates it.
 
-=head2 parseLookupRequest($self, $request)
+=head2 parseQueryRequest($self, $request)
 
 	Goes through each metadata/data pair, extracting the eventType and
 	any other relevant information calling the function associated with

@@ -86,6 +86,11 @@ if (!defined $conf{"default.max_worker_lifetime"} or $conf{"default.max_worker_l
 if (!defined $conf{"default.max_worker_processes"} or $conf{"default.max_worker_processes"} eq "") {
 	$conf{"default.max_worker_processes"} = 0;
 }
+if (!defined $conf{"default.ls_registration_interval"} or $conf{"default.ls_registration_interval"} eq "") {
+	$conf{"default.ls_registration_interval"} = 60;
+}
+
+$conf{"default.ls_registration_interval"} *= 60;
 
 if (!defined $conf{"default.modules"} or $conf{"default.modules"} eq "") {
 	$logger->error("No list of modules defined");
@@ -310,26 +315,23 @@ sub __handleRequest($$) {
 
 				$found_pair = 1;
 
-				my ($status, $res1, $res2);
+				my ($status, $res);
 
 				if (!defined $eventType or $eventType eq "") {
 					$status = "error.ma.no_eventtype";
-					$res1 = "No event type specified for metadata: ".$m->getAttribute("id");
+					$res = "No event type specified for metadata: ".$m->getAttribute("id");
 				} else {
-					($status, $res1, $res2) = $ma_handler->handleEvent($request->getEndpoint, $messageType, $eventType, $m, $d);
+					($status, $res) = $ma_handler->handleEvent($request->getEndpoint, $messageType, $eventType, $m, $d);
 				}
 
 				if ($status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res1");
+					$logger->error("Couldn't handle requested metadata: $res");
 					my $mdID = "metadata.".genuid();
 					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res1, 1);
+					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
 				} else {
-					foreach my $ret_md (@{ $res1 }) {
-						$localContent .= $ret_md;
-					}
-					foreach my $ret_d (@{ $res2 }) {
-						$localContent .= $ret_d;
+					foreach my $ret_elm (@{ $res }) {
+						$localContent .= $ret_elm;
 					}
 				}
 			}
