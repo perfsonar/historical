@@ -1,14 +1,49 @@
 package perfSONAR_PS::XML::Namespace;
+{
+=head1 NAME
+
+Namespace -  a container for namespaces 
+
+=head1 DESCRIPTION
+
+The purpose of this module is to  create OO interface to namespace registration and therefore
+add the layer of abstraction for any namespace related operation. All  perfSONAR-PS classes should
+work with the instance of this class and avoid using explicit namespace declaration. 
+
+=head1 SYNOPSIS
+ 
+    use perfSONAR_PS::XML::Namespace; 
+    # create Namespace object with default URIs
+    $ns = perfSONAR_PS::XML::Namespace->new();
+    
+    # overwrite  Namespace object with  custom URIs
+    $nss =  {'pinger' => 'http://newpinger/namespace/'};
+    $ns = perfSONAR_PS::XML::Namespace->new(-hash => $nss);
+    
+    # overwrite only specific Namespace   with  custom URI 
+    
+    $ns = perfSONAR_PS::XML::Namespace->new(-pinger =>   'http://newpinger/namespace/');
+      
+    $pinger_uri = $ns->getNsByKey('pinger'); ## get URI by key
+    $ns->setNsByKey('pinger' =>  'http://newpinger/namespace/'); ## set URI by key
+    
+ 
+=head1 API
+
+There are many get/set methods
+
+=head2 new(-NS => \%nss)
+
+Creates a new object, pass hash ref as collection of namespaces 
+  or new(-pinger => http://ggf.org/ns/nmwg/tools/pinger/2.0/",   'nmwgr' => "http://ggf.org/ns/nmwg/result/2.0/")
+
+=cut
 
 use version; our $VERSION = qv('3.0_1'); 
 use Log::Log4perl qw(get_logger);
 
-
-sub new {
- my $that = shift;
-  my $class = ref($that) || $that;
-  my @param = @_;
-  my $self = { 'nmwg' => "http://ggf.org/ns/nmwg/base/2.0/",
+our $nss = {
+           'nmwg' => "http://ggf.org/ns/nmwg/base/2.0/",
                'nmwgr' => "http://ggf.org/ns/nmwg/result/2.0/" ,
 	       'select'  => "http://ggf.org/ns/nmwg/ops/select/2.0/",
 	       'netutil' => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/", 
@@ -33,25 +68,28 @@ sub new {
 	       'nmtb' => "http://ogf.org/schema/network/topology/base/20070707/", 
 	      
 	       'nmtm' => "http://ggf.org/ns/nmwg/time/2.0/",
-	       
-		
-		 LOGGER => undef}; 
+	   };
+sub new {
+ my $that = shift;
+  my $class = ref($that) || $that;
+  my @param = @_;
+  my $self =   $nss ; 
   bless $self, $class;
-  $self->{LOGGER} = get_logger($that);
+  my $logger =  get_logger($that);
   my %conf = ();
   if(@param) {
-     if ($param[0] eq '-hash') { 
+     if ($param[0] eq '-NS') { 
        %conf = %{$param[1]} 
      } else {
        %conf = @param;
      }
-     $self->{LOGGER}->debug(" params: " . ( join " : " , @param) );
+     $logger->debug(" params: " . ( join " : " , @param) );
      foreach my $cf ( keys %conf ) {
         (my $stripped_cf = $cf) =~ s/\-//;
        if(exists $self->{$stripped_cf}) {
            $self->{$stripped_cf} = $conf{$cf};
         }  else {
-            $self->{LOGGER}->warn("Unknown option: $cf - " . $conf{$cf}) ;
+            $logger->warn("Unknown option: $cf - " . $conf{$cf}) ;
         }
      }
   } 
@@ -59,22 +97,54 @@ sub new {
 
 }
 
+=head2 getNsByKey()
+
+Returns namespace string by id of the namespace, where kyes are:
+'nmwg', 'nmwgr  
+'nmwgt' ( aliased as 'topo' too),'nmwgtopo3' 
+'nmtl3','nmtl4', 'nmtm' 
+'select', 'average'
+'traceroute','snmp', 'ping', 'owamp', 'netutil', 'bwctl','pinger', 'iperf
+
+ Might be utized as Class method:
+   my $URI =   Namespace::getNsByKey($key);  
+
+=cut
  
 
 sub getNsByKey {
    my $self = shift;
-   return $self->{$_};
-
+   my $key = shift;
+   my $logger =  get_logger($that);
+   if(ref($self)) {
+     if ( ! defined $self->{$key} ) {
+   	$logger->error( "Key '$key' not found");
+   	return undef;
+      }
+      return $self->{$key};
+   } else {
+      if ( ! defined $nss->{$self} ) {
+   	$logger->error( "Key '$self' not found");
+   	return undef;
+      }
+     return $nss->{$self};
+   } 
+   
+  
 }
 
-#
-#  set namespace URI 
-#
+=head2 setNsByKey('pinger' =>  'http://newpinger/namespace/' ) 
+
+Sets namespace URI string by id of the namespace or defnies the new one
+ 
+=cut
+
 sub setNsByKey {
    my $self = shift;
    my ($key , $val) = @_;
    return  $self->{$key}=$val;
- 
+}
+
 }
 
 1;
@@ -82,56 +152,8 @@ sub setNsByKey {
 
 
 __END__
-=head1 NAME
 
-Namespace -  a container for namespaces 
-
-=head1 DESCRIPTION
-
-The purpose of this module is to  create OO interface to namespace registration and therefore
-add the layer of abstraction for any namespace related operation. All  perfSONAR-PS classes should
-work with the instance of this class and avoid using explicit namespace declarations. 
-
-=head1 SYNOPSIS
  
-    use perfSONAR_PS::XML::Namespace; 
-    # create Namespace object with default URIs
-    $ns = perfSONAR_PS::XML::Namespace->new();
-    
-    # overwrite  Namespace object with  custom URIs
-    $nss =  {'pinger' => 'http://newpinger/namespace/'};
-    $ns = perfSONAR_PS::XML::Namespace->new(-hash => $nss);
-    
-    # overwrite only specific Namesapce   with  custom URI 
-    
-    $ns = perfSONAR_PS::XML::Namespace->new(-pinger =>   'http://newpinger/namespace/');
-      
-    $pinger_uri = $ns->getNsByKey('pinger'); ## get URI by key
-    $ns->setNsByKey('pinger' =>  'http://newpinger/namespace/'); ## set URI by key
-    
- 
-=head1 API
-
-There are many get/set methods
-
-=head2 new(-NS => \%nss)
-
-Creates a new object, pass hash ref as collection of namesapces 
-
-=head2 getNsByKey('pinger') 
-
-Returns namesapce string by id of the namespace, where kyes are:
-'nmwg', 'nmwgr  
-'nmwgt' ( aliased as 'topo' too),'nmwgtopo3' 
-'nmtl3','nmtl4', 'nmtm' 
-'select', 'average'
-'traceroute','snmp', 'ping', 'owamp', 'netutil', 'bwctl','pinger', 'iperf
-
-=head2 setNsByKey('pinger' =>  'http://newpinger/namespace/' ) 
-
-Sets namespace URI string by id of the namespace or defnies the new one
-
-  
 
 =head1 SEE ALSO
  
@@ -154,3 +176,5 @@ Maxim Grigoriev, E<lt>maxim@fnal.govE<gt>
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
+
+=cut
