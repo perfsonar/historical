@@ -40,8 +40,8 @@ sub needLS() {
 	return 0;
 }
 
-sub handleEvent($$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+sub handleEvent($$$$$) {
+	my ($self, $doc, $endpoint, $messageType, $eventType, $md, $d) = @_;
 
 	my $retMetadata;
 	my $retData;
@@ -50,13 +50,10 @@ sub handleEvent($$$$) {
 
 	my @ret_elements = ();
 
-	$retMetadata = getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.skeleton");
-	$retData = getResultCodeData("data.".genuid(), $mdID, $msg);
+	getResultCodeMetadata($doc, $mdID, $md->getAttribute("id"), "success.skeleton");
+	getResultCodeData($doc, "data.".genuid(), $mdID, $msg, 1);
 
-	push @ret_elements, $retMetadata;
-	push @ret_elements, $retData;
-
-	return ("", \@ret_elements);
+	return ("", "");
 }
 
 1;

@@ -93,7 +93,7 @@ sub addRegex($$$$$) {
 }
 
 sub handleEvent($$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my ($self, $doc, $endpoint, $messageType, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Handler");
 
 	$logger->debug("Handling event: $endpoint, $messageType, $eventType");
@@ -120,14 +120,14 @@ sub handleEvent($$$$) {
 	if (defined $self->{EP_EV_HANDLERS}->{$endpoint} and
 			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} and
 			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}) {
-		return $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+		return $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 	}
 
 	if (defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint} and
 			defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}) {
 		foreach my $regex (keys %{$self->{EP_EV_HANDLERS_REGEX}->{$messageType}}) {
 			if ($eventType =~ /$regex/) {
-				return $self->{EP_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+				return $self->{EP_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 			}
 		}
 	}
@@ -135,7 +135,7 @@ sub handleEvent($$$$) {
 	if (defined $self->{ALL_EV_HANDLERS}->{$messageType} and defined $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}) {
 		foreach my $valid_endpoint (keys %{ $self->{VALIDENDPOINTS} }) {
 			if ($valid_endpoint eq $endpoint) {
-				return $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+				return $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 			}
 		}
 	}
@@ -145,7 +145,7 @@ sub handleEvent($$$$) {
 			if ($valid_endpoint eq $endpoint) {
 				foreach my $regex (keys %{$self->{ALL_EV_HANDLERS_REGEX}->{$messageType}}) {
 					if ($eventType =~ /$regex/) {
-						return $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+						return $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 					}
 				}
 			}
@@ -154,11 +154,11 @@ sub handleEvent($$$$) {
 
 	if (defined $self->{EP_MSG_HANDLERS}->{$endpoint} and
 		defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}) {
-		return $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+		return $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 	}
 
 	if (defined $self->{ALL_MSG_HANDLERS}->{$messageType}) {
-		return $self->{ALL_MSG_HANDLERS}->{$messageType}->handleEvent($endpoint, $messageType, $eventType, $md, $d);
+		return $self->{ALL_MSG_HANDLERS}->{$messageType}->handleEvent($doc, $endpoint, $messageType, $eventType, $md, $d);
 	}
 
 	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\" on endpoint \"$endpoint\"");

@@ -38,6 +38,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::SOAP_Daemon;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::MA::Handler;
+use perfSONAR_PS::XML::Document_string;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
@@ -199,7 +200,9 @@ sub measurementArchive($) {
 		if ($res ne "") {
 			$logger->error("Receive failed: $error");
 			if (defined $request) {
-				$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", $res, $error));
+				my $doc = new perfSONAR_PS::XML::Document_string();
+				getResultCodeMessage($doc, "message.".genuid(), "", "", "response", $res, $error, undef, 1);
+				$request->setResponse($doc->getValue());
 				$request->finish();
 			}
 		} elsif (defined $request) {
@@ -282,7 +285,9 @@ sub handleRequest($$) {
 		my $msg = "Unhandled exception or crash: $@";
 		$logger->error($msg);
 
-		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred"));
+		my $doc = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+		$request->setResponse($doc->getValue());
 	}
 
 	$request->finish;
@@ -297,16 +302,22 @@ sub __handleRequest($$) {
 	$request->parse(\$error);
 
 	if (defined $error and $error ne "") {
-		$request->setResponse(getResultCodeMessage("message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error"));
-
+		my $doc = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error", undef, 1);
+		$request->setResponse($doc->getValue());
 		return;
 	}
 
 	my $message = $request->getRequestDOM()->getDocumentElement();;
 	my $messageId = $message->getAttribute("id");
 	my $messageType = $message->getAttribute("type");
+	my $messageIdReturn = genuid();
 
 	my $found_pair = 0;
+
+	my $doc = new perfSONAR_PS::XML::Document_string();
+
+	$doc->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "message", { id=>$messageId, type=>$messageType, messageIdRef=>$messageIdReturn });
 
 	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
 		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
@@ -321,18 +332,14 @@ sub __handleRequest($$) {
 					$status = "error.ma.no_eventtype";
 					$res = "No event type specified for metadata: ".$m->getAttribute("id");
 				} else {
-					($status, $res) = $ma_handler->handleEvent($request->getEndpoint, $messageType, $eventType, $m, $d);
+					($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, $eventType, $m, $d);
 				}
 
 				if ($status ne "") {
 					$logger->error("Couldn't handle requested metadata: $res");
 					my $mdID = "metadata.".genuid();
-					$localContent .= getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-					$localContent .= getResultCodeData("data.".genuid(), $mdID, $res, 1);
-				} else {
-					foreach my $ret_elm (@{ $res }) {
-						$localContent .= $ret_elm;
-					}
+					getResultCodeMetadata($doc, $mdID, $m->getAttribute("id"), $status);
+					getResultCodeData($doc, "data.".genuid(), $mdID, $res, 1);
 				}
 			}
 		}
@@ -340,24 +347,13 @@ sub __handleRequest($$) {
 
 	if ($found_pair == 0) {
 		my $mdID = "metadata.".genuid();
-		$localContent .= getResultCodeMetadata($mdID, "", "error.ma.no_metadata_data_pair");
-		$localContent .= getResultCodeData("data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
+		getResultCodeMetadata($doc, $mdID, "", "error.ma.no_metadata_data_pair");
+		getResultCodeData($doc, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
 	}
 
-	my $messageIdReturn = genuid();
-	my %all_namespaces = ();
+	$doc->endElement("message");
 
-#	my $request_namespaces = $request->getNamespaces();
-#
-#	foreach my $uri (keys %{ $request_namespaces }) {
-#		$all_namespaces{$request_namespaces->{$uri}} = $uri;
-#	}
-#
-#	foreach my $prefix (keys %{ $ma->{NAMESPACES} }) {
-#		$all_namespaces{$prefix} = $ma->{NAMESPACES}->{$prefix};
-#	}
-
-	$request->setResponse(getResultMessage($messageIdReturn, $messageId, $messageType, $localContent, \%all_namespaces));
+	$request->setResponse($doc->getValue());
 }
 
 =head1 NAME

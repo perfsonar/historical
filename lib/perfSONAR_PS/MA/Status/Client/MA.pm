@@ -67,8 +67,7 @@ sub buildLinkRequest($$) {
 	my $request = "";
 
 	$request .= "<nmwg:message type=\"SetupDataRequest\"\n";
-	$request .= "  xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-	$request .= "  xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070707/\">\n";
+	$request .= "  xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n\n";
 
 	my %metadata_ids = ();
 	my $i = 0;
@@ -77,7 +76,7 @@ sub buildLinkRequest($$) {
 		$request .= "<nmwg:metadata id=\"meta$i\">\n";
 		$request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
 		$request .= "  <nmwg:subject id=\"sub$i\">\n";
-		$request .= "    <nmtopo:link id=\"".escapeString($link_id)."\" />\n";
+		$request .= "    <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
 		$request .= "  </nmwg:subject>\n";
 		if (defined $time and $time ne "") {
 		$request .= "  <nmwg:parameters>\n";
@@ -103,12 +102,10 @@ sub buildUpdateRequest($$$$$$) {
 	my $request = "";
 
 	$request .= "<nmwg:message type=\"MeasurementArchiveStoreRequest\"\n";
-	$request .= "        xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-	$request .= "        xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070707/\"\n";
-	$request .= "        xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\">\n";
+	$request .= "        xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
 	$request .= "<nmwg:metadata id=\"meta0\">\n";
 	$request .= "  <nmwg:subject id=\"sub0\">\n";
-	$request .= "    <nmtopo:link id=\"".escapeString($link_id)."\" />\n";
+	$request .= "    <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
 	$request .= "  </nmwg:subject>\n";
 	$request .= "  <nmwg:parameters>\n";
 	$request .= "    <nmwg:parameter name=\"knowledge\">$knowledge_level</nmwg:parameter>\n";
@@ -118,7 +115,7 @@ sub buildUpdateRequest($$$$$$) {
 	$request .= "  </nmwg:parameters>\n";
 	$request .= "</nmwg:metadata>\n";
 	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
-	$request .= "<ifevt:datum timeType=\"unix\" timeValue=\"$time\">\n";
+	$request .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"$time\">\n";
 	$request .= "  <ifevt:stateAdmin>$admin_value</ifevt:stateAdmin>\n";
 	$request .= "  <ifevt:stateOper>$oper_value</ifevt:stateOper>\n";
 	$request .= "</ifevt:datum>\n";

@@ -2,7 +2,7 @@
 
 package perfSONAR_PS::LS::Register;
 
-use warnings;
+use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger);
 
@@ -10,8 +10,8 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
 
-@ISA = ('Exporter');
-@EXPORT = ();
+our @ISA = ('Exporter');
+our @EXPORT = ();
 
 
 sub new {
@@ -55,74 +55,56 @@ sub setNamespaces {
   return;
 }
 
-sub createKeyMetadata {
-  my($self, $id, $metadataIdRef) = @_;
+sub createKeyMetadata($$$$) {
+  my($self, $output, $id, $metadataIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::LS::Register");
-  
+ 
   if(!defined $id or $id eq "") {
     $id = "metadata.".genuid();
   }
-  my $metadata = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$id."\"";
-  
-  if(defined $metadataIdRef and $metadataIdRef ne "") {
-    $metadata = $metadata . " metadataIdRef=\"".$metadataIdRef."\">\n";
-  }
-  else {
-    $metadata = $metadata . ">\n";    
-  }
-  if(defined $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} and $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} ne "") {
-    $metadata = $metadata . "    <nmwg:key id=\"key.".genuid()."\">\n";
-    $metadata = $metadata . "      <nmwg:parameters id=\"parameters.".genuid()."\">\n";
-    $metadata = $metadata . "        <nmwg:parameter name=\"lsKey\">".$self->{"CONF"}->{"SERVICE_ACCESSPOINT"}."</nmwg:parameter>\n";
-    $metadata = $metadata . "      </nmwg:parameters>\n";
-    $metadata = $metadata . "    </nmwg:key>\n";  
-  } 
-  $metadata = $metadata . "  </nmwg:metadata>\n";
-  return $metadata;
+
+  startMetadata($output, $id, "", undef);
+   $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "key", { id=>"key.".genuid() }, undef);
+    startParameters($output, "parameters.".genuid());
+     addParameter($output, "lsKey", $self->{"CONF"}->{"SERVICE_ACCESSPOINT"});
+    endParameters($output);
+   $output->endElement("key");
+  endMetadata($output);
 }
 
 
 sub createServiceMetadata {
-  my($self, $id, $metadataIdRef) = @_;
+  my($self, $output, $id, $metadataIdRef) = @_;
   my $logger = get_logger("perfSONAR_PS::LS::Register");
   
   if(!defined $id or $id eq "") {
     $id = "metadata.".genuid();
   }
-  my $metadata = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$id."\"";
-  if(defined $metadataIdRef and $metadataIdRef ne "") {
-    $metadata = $metadata . " metadataIdRef=\"".$metadataIdRef."\">\n";
-  }
-  else {
-    $metadata = $metadata . ">\n";    
-  }
+
+  startMetadata($output, $id, "", undef);
   if((defined $self->{"CONF"}->{"SERVICE_NAME"} and $self->{"CONF"}->{"SERVICE_NAME"} ne "") or
      (defined $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} and $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} ne "") or 
      (defined $self->{"CONF"}->{"SERVICE_TYPE"} and $self->{"CONF"}->{"SERVICE_TYPE"} ne "") or
      (defined $self->{"CONF"}->{"SERVICE_DESCRIPTION"} and $self->{"CONF"}->{"SERVICE_DESCRIPTION"} ne "")) {
-    $metadata = $metadata . "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
-    $metadata = $metadata . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-    if(defined $self->{"CONF"}->{"SERVICE_NAME"} and 
-       $self->{"CONF"}->{"SERVICE_NAME"} ne "") {
-      $metadata = $metadata . "        <psservice:serviceName>".$self->{"CONF"}->{"SERVICE_NAME"}."</psservice:serviceName>\n";
-    }
-    if(defined $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} and 
-       $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} ne "") {
-      $metadata = $metadata . "        <psservice:accessPoint>".$self->{"CONF"}->{"SERVICE_ACCESSPOINT"}."</psservice:accessPoint>\n";
-    }
-    if(defined $self->{"CONF"}->{"SERVICE_TYPE"} and 
-       $self->{"CONF"}->{"SERVICE_TYPE"} ne "") {
-      $metadata = $metadata . "        <psservice:serviceType>".$self->{"CONF"}->{"SERVICE_TYPE"}."</psservice:serviceType>\n";
-    }
-    if(defined $self->{"CONF"}->{"SERVICE_DESCRIPTION"} and 
-       $self->{"CONF"}->{"SERVICE_DESCRIPTION"} ne "") {
-      $metadata = $metadata . "        <psservice:serviceDescription>".$self->{"CONF"}->{"SERVICE_DESCRIPTION"}."</psservice:serviceDescription>\n";
-    }
-    $metadata = $metadata . "      </psservice:service>\n";
-    $metadata = $metadata . "    </perfsonar:subject>\n";
+   $output->startElement("perfsonar", "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", "subject", undef, undef);
+    $output->startElement("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/", "service", undef, undef);
+     if(defined $self->{"CONF"}->{"SERVICE_NAME"} and $self->{"CONF"}->{"SERVICE_NAME"} ne "") {
+      $output->createElement("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/", "serviceName", undef, undef, $self->{"CONF"}->{"SERVICE_NAME"});
+     }
+     if(defined $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} and $self->{"CONF"}->{"SERVICE_ACCESSPOINT"} ne "") {
+      $logger->debug("Adding accesspoint");
+      $output->createElement("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/", "accessPoint", undef, undef, $self->{"CONF"}->{"SERVICE_ACCESSPOINT"});
+     }
+     if(defined $self->{"CONF"}->{"SERVICE_TYPE"} and $self->{"CONF"}->{"SERVICE_TYPE"} ne "") {
+      $output->createElement("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/", "serviceType", undef, undef, $self->{"CONF"}->{"SERVICE_TYPE"});
+     }
+     if(defined $self->{"CONF"}->{"SERVICE_DESCRIPTION"} and $self->{"CONF"}->{"SERVICE_DESCRIPTION"} ne "") {
+      $output->createElement("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/", "serviceDescription", undef, undef, $self->{"CONF"}->{"SERVICE_DESCRIPTION"});
+     }
+    $output->endElement("service");
+   $output->endElement("subject");
   } 
-  $metadata = $metadata . "  </nmwg:metadata>\n";
-  return $metadata;
+  endMetadata($output);
 }
 
 
@@ -137,16 +119,16 @@ sub callLS {
   }
   my $parser = XML::LibXML->new(); 
   if(defined $responseContent and $responseContent ne "" and !($responseContent =~ m/^\d+/)) { 
-    my $doc = ""; 
+    my $output = ""; 
     eval { 
-      $doc = $parser->parse_string($responseContent); 
+      $output = $parser->parse_string($responseContent); 
     };
     if($@) {
       $logger->error("Parser failed: ".$@);
       return 0; 
     }
     else {
-      my $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
+      my $msg = $output->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
       if($msg) {
         my $eventType = findvalue($msg, "./nmwg:metadata/nmwg:eventType");
         if(defined $eventType and $eventType =~ m/^success/) {
@@ -176,7 +158,9 @@ sub register {
   my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
   
   if(!$self->{"ALIVE"}) {
-    $self->{"ALIVE"} = callLS($self, $sender, createEchoRequest("ls"));
+    my $output = new perfSONAR_PS::XML::Document_string();
+    createEchoRequest($output);
+    $self->{"ALIVE"} = callLS($self, $sender, $output->getValue());
   }
   
   if($self->{"ALIVE"}) {
@@ -195,43 +179,67 @@ sub register {
 	  }
 	  $metadatadb->openDB; 
   	$logger->debug("Connecting to \"".$self->{CONF}->{"METADATA_DB_TYPE"}."\" database.");  
-  
-    my $mdID = "metadata.".genuid();
-    my $regMetadata = createKeyMetadata($self, $mdID, "");
-    my $regData = "";
-    
-    my $regParam = "  <nmwg:parameters id=\"parameters.".genuid()."\">\n";
-    $regParam = $regParam . "    <nmwg:parameter name=\"lsTTL\">".$self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"}."</nmwg:parameter>\n";
-    $regParam = $regParam . "  </nmwg:parameters>\n";
 
     my $queryString = "//nmwg:metadata";
     $logger->debug("Query \"".$queryString."\" created.");
-	  my @resultsString = $metadatadb->query($queryString);   
-	  if($#resultsString != -1) {
-	    $logger->debug("Found metadata in metadata storage.");
-	    for(my $x = 0; $x <= $#resultsString; $x++) { 
-        $regData = $regData . createData("data.".genuid(), $mdID, $resultsString[$x]);
-	    }
+    my @resultsString = $metadatadb->query($queryString);   
+    if($#resultsString != -1) {
+      $logger->debug("Found metadata in metadata storage.");
     }
 
-    if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
-      $regMetadata = createServiceMetadata($self, $mdID, "");
-      if(!callLS($self, $sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
-        $logger->error("Unable to register data with LS.");
-      }
-      else {
+    my ($output, $msgID, $mdID, $dID, $paramsID); 
+
+    $output = new perfSONAR_PS::XML::Document_string();
+    $msgID = "message.".genuid();
+    $mdID = "metadata.".genuid();
+    $dID = "data.".genuid();
+    $paramsID = "parameters.".genuid();
+
+
+    startMessage($output, $msgID, "", "LSRegisterRequest", "", { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" });
+     startParameters($output, $paramsID);
+       addParameter($output, "lsTTL", $self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"});
+     endParameters($output);
+     createKeyMetadata($self, $mdID, "", $output);
+ 
+     for(my $x = 0; $x <= $#resultsString; $x++) { 
+       createData($output, "data.".genuid(), $mdID, $resultsString[$x], undef);
+     }
+
+    endMessage($output);
+
+    if (callLS($self, $sender, $output->getValue())) {
         $logger->debug("LS Registration successful.");
-      }
+        return 0;
     }
-    else {
+
+    $output = new perfSONAR_PS::XML::Document_string();
+    $msgID = "message.".genuid();
+    $mdID = "metadata.".genuid();
+    $dID = "data.".genuid();
+    $paramsID = "parameters.".genuid();
+
+    startMessage($output, $msgID, "", "LSRegisterRequest", "", { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" });
+     startParameters($output, $paramsID);
+       addParameter($output, "lsTTL", $self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"});
+     endParameters($output);
+    createServiceMetadata($self, $mdID, "", $output);
+ 
+     for(my $x = 0; $x <= $#resultsString; $x++) { 
+       createData($output, "data.".genuid(), $mdID, $resultsString[$x], undef);
+     }
+    endMessage($output);
+
+   
+    if(callLS($self, $sender, $output->getValue())) {
       $logger->debug("LS Registration successful.");
+      return 0;
     }
-  }
-  else {
-    $logger->error("Unable to register data with LS.");
   }
 
-  return;
+  $logger->error("Unable to register data with LS.");
+
+  return -1;
 }
 
 sub register_withData {
@@ -248,41 +256,64 @@ sub register_withData {
   my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
   
   if(!$self->{"ALIVE"}) {
-    $self->{"ALIVE"} = $self->callLS($sender, createEchoRequest("ls"));
+    my $output = new perfSONAR_PS::XML::Document_string();
+    createEchoRequest($output);
+    $self->{"ALIVE"} = $self->callLS($sender, $output->getValue());
   }
-  
+    
   if($self->{"ALIVE"}) {
-    my $regParam = "";
-    $regParam .= "  <nmwg:parameters id=\"parameters.".genuid()."\">\n";
-    $regParam .= "    <nmwg:parameter name=\"lsTTL\">".$self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"}."</nmwg:parameter>\n";
-    $regParam .= "  </nmwg:parameters>\n";
+    my ($output, $msgID, $mdID, $dID, $paramsID); 
 
-    my $mdID = "metadata.".genuid();
-    my $regMetadata = $self->createKeyMetadata($mdID, "");
+    $output = new perfSONAR_PS::XML::Document_string();
+    $msgID = "message.".genuid();
+    $mdID = "metadata.".genuid();
+    $dID = "data.".genuid();
+    $paramsID = "parameters.".genuid();
 
-    my $regData = "";
-    foreach $data (@{ $data_ref }) {
-      $regData .= createData("data.".genuid(), $mdID, $data);
-    }
+    startMessage($output, $msgID, "", "LSRegisterRequest", "", { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" });
+     startParameters($output, $paramsID);
+       addParameter($output, "lsTTL", $self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"});
+     endParameters($output);
+     $self->createKeyMetadata($output, $mdID, "");
+ 
+     foreach my $data (@{ $data_ref }) { 
+       createData($output, "data.".genuid(), $mdID, $data, undef);
+     }
 
-    if(!$self->callLS($sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData,  {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
-      $regMetadata = createServiceMetadata($self, $mdID, "");
-      if(!$self->callLS($sender, getResultMessage("message.".genuid(), "", "LSRegisterRequest", $regParam.$regMetadata.$regData, {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"}))) {
-        $logger->error("Unable to register data with LS.");
-      }
-      else {
+    endMessage($output);
+
+    if (callLS($self, $sender, $output->getValue())) {
         $logger->debug("LS Registration successful.");
-      }
+        return 0;
     }
-    else {
+
+    $output = new perfSONAR_PS::XML::Document_string();
+    $msgID = "message.".genuid();
+    $mdID = "metadata.".genuid();
+    $dID = "data.".genuid();
+    $paramsID = "parameters.".genuid();
+
+    startMessage($output, $msgID, "", "LSRegisterRequest", "", { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" });
+     startParameters($output, $paramsID);
+       addParameter($output, "lsTTL", $self->{"CONF"}->{"LS_REGISTRATION_INTERVAL"});
+     endParameters($output);
+     $self->createServiceMetadata($output, $mdID, "");
+ 
+     foreach my $data (@{ $data_ref }) { 
+       createData($output, "data.".genuid(), $mdID, $data, undef);
+     }
+    endMessage($output);
+
+   
+    if (callLS($self, $sender, $output->getValue())) {
       $logger->debug("LS Registration successful.");
+      return 0;
     }
-  }
-  else {
-    $logger->error("Unable to register data with LS.");
   }
 
-  return;
+  $logger->error("Unable to register data with LS.");
+
+  return -1;
 }
 
 1;

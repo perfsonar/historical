@@ -2,183 +2,242 @@
 
 package perfSONAR_PS::Messages;
 
-use warnings;
+use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::Common;
 
 
-@ISA = ('Exporter');
-@EXPORT = ('getResultMessage', 'getResultCodeMessage', 'getResultCodeMetadata', 
-           'getResultCodeData', 'createMetadata', 'createData', 'createEchoRequest');
+our @ISA = ('Exporter');
+our @EXPORT = (
+		'startMessage',
+		'endMessage',
+		'startMetadata',
+		'endMetadata',
+		'startData',
+		'endData',
+		'startParameters',
+		'endParameters',
+		'addParameter',
+		'getResultCodeMessage',
+		'getResultCodeMetadata',
+		'getResultCodeData',
+		'statusReport',
+		'createMessage',
+		'createMetadata',
+		'createData',
+		'createEchoRequest',
+	      );
 
-sub getResultMessage {
-  my ($id, $messageIdRef, $type, $content, $namespaces, $escape_content) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Messages");
 
-  my $m = "<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-  if(defined $namespaces) {
-     foreach $ns (keys %{ $namespaces }) {
-       next if $ns eq "nmwg";
-       $m .= " xmlns:".$ns."=\"".$namespaces->{$ns}."\"";
+sub startMessage($$$$$$) {
+	my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
 
-     }
-  }
-  if(defined $id and $id ne "") {
-    $m = $m . " id=\"".$id."\"";
-  }
-  if(defined $messageIdRef and $messageIdRef ne "") {
-    $m = $m . " messageIdRef=\"".$messageIdRef."\"";
-  }
-  if(defined $type and $type ne "") {
-    $m = $m . " type=\"".$type."\"";
-  }        
-  $m = $m . ">\n  ";
-  if(defined $content and $content ne "") {    
-    if (defined $escape_content and $escape_content == 1) {
-      $content = escapeString($content);
-    }
+	my %attrs = ();
+	$attrs{"type"} = $type;
+	$attrs{"id"} = $id;
+	$attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef eq "");
 
-    $m = $m . $content;
-  }
-  else {
-    $logger->error("Missing argument.");
-    my $mdID = "metadata.".genuid();
-    $m = $m . getResultCodeMetadata($mdID, "", "failure.service");
-    $m = $m . getResultCodeData("data.".genuid(), $mdID, "Internal Service Error; content not created for message.");
-  }  
-  $m = $m . "</nmwg:message>\n";
-  $logger->debug("Result message created.");
-  return $m;
+	return $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "message", \%attrs, $namespaces, $content);
 }
 
+sub endMessage($) {
+	my ($output) = @_;
 
+	return $output->endElement("message");
+}
+
+sub startMetadata($$$$) {
+	my ($output, $id, $metadataIdRef, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	if (!defined $id or $id eq "") {
+		$logger->error("Missing argument(s).");
+		return -1;
+	}
+
+	my %attrs = ();
+	$attrs{"id"} = $id;
+	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+
+	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, $namespaces);
+}
+
+sub endMetadata($) {
+	my ($output) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	return $output->endElement("metadata");
+}
+
+sub startData($$$$) {
+	my ($output, $id, $metadataIdRef, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
+		$logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
+		return -1;
+	}
+
+	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, $namespaces);
+}
+
+sub endData($) {
+	my ($output) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	return $output->endElement("data");
+}
+
+sub startParameters($$) {
+	my ($output, $id) = @_;
+
+	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameters", { id=>$id }, undef);
+}
+
+sub endParameters($) {
+	my ($output) = @_;
+
+	return $output->endElement("parameters");
+}
+
+# XXX this should probably ensure that the parameters are being created inside a parameters block
+sub addParameter($$$) {
+	my ($output, $name, $value) = @_;
+	my $logger = get_logger("perfSONAR_PS::Messages");
+	my $n;
+
+	$logger->debug("addParameter($name, $value)");
+	$n = $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameter", {name=>$name}, undef, $value);
+	return $n if ($n != 0);
+
+	return $output->endElement("parameter");
+}
 
 sub getResultCodeMessage {
-  my ($id, $messageIdRef, $metadataIdRef, $type, $event, $description, $escape_content) = @_;   
-  my $logger = get_logger("perfSONAR_PS::Messages");
-  if((defined $event and $event ne "") and 
-     (defined $description and $description ne "")) {
-    my $metadataId = "metadata.".genuid();
-    my $dataId = "data.".genuid();
-    $logger->debug("Result code message created.");
-    return getResultMessage($id, $messageIdRef, $type, getResultCodeMetadata($metadataId, $metadataIdRef, $event).getResultCodeData($dataId, $metadataId, $description, $escape_content));
-  }
-  else {
-    $logger->error("Missing argument(s).");
-    
-  }
-  return "";
+	my ($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content) = @_;   
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	return 0;
 }
 
+sub getResultCodeMetadata($$$$) {
+	my ($output, $id, $metadataIdRef, $event) = @_; 
+	my $logger = get_logger("perfSONAR_PS::Messages");
 
-sub getResultCodeMetadata {
-  my ($id, $metadataIdRef, $event) = @_; 
-  my $logger = get_logger("perfSONAR_PS::Messages");
-
-  if((defined $id and $id ne "") and 
-     (defined $event and $event ne "")) {
-    my $md = "  <nmwg:metadata id=\"".$id."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" ";
-    if(defined $metadataIdRef and $metadataIdRef ne "") {
-      $md = $md . " metadataIdRef=\"".$metadataIdRef."\" >\n";
-    }
-    else {
-      $md = $md . ">\n";
-    } 
-    $md = $md . "    <nmwg:eventType>";
-    $md = $md . $event;
-    $md = $md . "</nmwg:eventType>\n";
-    $md = $md . "  </nmwg:metadata>\n";
-    $logger->debug("Result code metadata created.");
-    return $md;
-  }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
-}
-
-
-sub getResultCodeData {
-  my ($id, $metadataIdRef, $description, $escape_content) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Messages");
-
-  if((defined $id and $id ne "") and 
-     (defined $metadataIdRef and $metadataIdRef ne "") and 
-     (defined $description and $description ne "")) {
-
-    if (defined $escape_content and $escape_content == 1) {
-      $description = escapeString($description);
-    }
-
-    my $d = "  <nmwg:data id=\"".$id."\" metadataIdRef=\"".$metadataIdRef."\">\n";
-    $d = $d . "    <nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
-    $d = $d . $description;
-    $d = $d . "</nmwgr:datum>\n";  
-    $d = $d . "  </nmwg:data>\n";
-    $logger->debug("Result code data created.");
-    return $d;
-  }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
-}
-
-
-sub createMetadata {
-  my($id, $metadataIdRef, $content) = @_;
-  my $mdElement = "  <nmwg:metadata id=\"".$id."\" ";
-  if(defined $metadataIdRef and $metadataIdRef ne "") {
-    $mdElement = $mdElement . "metadataIdRef=\"".$metadataIdRef."\" ";
-  }
-  if(defined $content and $content ne "") {
-    $mdElement = $mdElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";  
-	  $mdElement = $mdElement . "    " . $content . "\n";
-	  $mdElement = $mdElement . "  </nmwg:metadata>\n";
-  }
-  else {
-    $mdElement = $mdElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" />\n"; 
-  }
-  return $mdElement;
-}
-
-
-sub createData {
-  my($dataId, $metadataId, $content) = @_;
-  my $dataElement = "  <nmwg:data id=\"".$dataId."\" ";
-  if(defined $metadataId and $metadataId ne "") {  
-    $dataElement = $dataElement . "metadataIdRef=\"".$metadataId."\" ";
+	if (!defined $id or $id eq "" or !defined $event or $event eq "") {
+		$logger->error("Missing argument(s).");
+		return -1;
 	}
-  if(defined $content and $content ne "") {
-    $dataElement = $dataElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";  
-	  $dataElement = $dataElement . "    " . $content . "\n";
-	  $dataElement = $dataElement . "  </nmwg:data>\n";
-  }
-  else {
-    $dataElement = $dataElement . "xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" />\n"; 
-  }
-  return $dataElement;
+
+	my %attrs = ();
+	$attrs{"id"} = $id;
+	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+
+	$output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, undef);
+	$output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "eventType", undef, undef, $event);
+	$output->endElement("eventType");
+	$output->endElement("metadata");
+
+	$logger->debug("Result code metadata created.");
+
+	return 0;
 }
 
+# Changes: adds an 'escape_content' parameter at the end
+sub getResultCodeData($$$$$) {
+	my ($output, $id, $metadataIdRef, $description, $escape_content) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "" or !defined $description or $description eq "") {
+		return -1;
+	}
+
+	if (defined $escape_content and $escape_content == 1) {
+		$description = escapeString($description);
+	}
+
+	$output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, undef);
+	$output->startElement_content("nmwgr", "http://ggf.org/ns/nmwg/result/2.0/", "datum", undef, undef, $description);
+	$output->endElement("datum");
+	$output->endElement("data");
+
+	return 0;
+}
+
+sub statusReport($$$$$$) {
+	my ($output, $mdId, $mdIdRef, $dId, $eventType, $msg) = @_;
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	my $n = getResultCodeMetadata($output, $mdId, $mdIdRef, $eventType);
+
+	return $n if ($n != 0);
+
+	return getResultCodeData($output, $dId, $mdId, $msg, 1); 
+}
+
+sub createMessage($$$$$$) {
+	my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	my $n = startMessage($output, $id, $messageIdRef, $type, $content, $namespaces);
+
+	return $n if ($n != 0);
+
+	return endMessage($output);
+}
+
+sub createMetadata($$$$$) {
+	my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	if (!defined $id or $id eq "") {
+		$logger->error("Missing argument(s).");
+		return -1;
+	}
+
+	my %attrs = ();
+	$attrs{"id"} = $id;
+	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+
+	my $n = $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, $namespaces, $content);
+	return $n if ($n != 0);
+	return $output->endElement("metadata");
+}
+
+sub createData($$$$$) {
+	my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
+		$logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
+		return -1;
+	}
+
+	$output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, $namespaces, $content);
+	$output->endElement("data");
+
+	return 0;
+}
 
 sub createEchoRequest($) {
-  my ($type) = @_;
+	my ($output) = @_; 
+	my $logger = get_logger("perfSONAR_PS::Messages");
 
-  if (defined $type and $type eq "ls") {
-    $eventType = "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0";
-  } else {
-    $eventType = "http://schemas.perfsonar.net/tools/admin/echo/2.0";
-  }
-  my $mdID = "metadata.".genuid();
-  my $echo = "<nmwg:message type=\"EchoRequest\" id=\"message.".genuid()."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-  $echo = $echo . "  <nmwg:metadata id=\"".$mdID."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-  $echo = $echo . "    <nmwg:eventType>$eventType</nmwg:eventType>\n";
-  $echo = $echo . "  </nmwg:metadata>\n";
-  $echo = $echo . "  <nmwg:data id=\"data.".genuid()."\" metadataIdRef=\"".$mdID."\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"/>\n";
-  $echo = $echo . "</nmwg:message>\n";
-  return $echo;
+	my $messageID = "message.".genuid();
+	my $mdID = "metadata.".genuid();
+	my $dID = "data.".genuid();
+	my $eventType = "http://schemas.perfsonar.net/tools/admin/echo/2.0";
+
+	startMessage($output, $messageID, undef, "EchoRequest", "", undef);
+	getResultCodeMetadata($output, $mdID, "", $eventType);
+	createData($output, $dID, $mdID, "", undef);
+	endMessage($output);
+
+	$logger->debug("Finished creating echo request");
+
+	return 0;
 }
 
 1;
@@ -259,7 +318,7 @@ $escape_description value is equal to 1, the description is XML escaped.
 
 Given an id, metadataIdRef and some content, create a metadata.
 
-=head2 createData($dataId, $metadataId, $content)
+=head2 createData($dataId, $metadataIdRef, $content)
 
 Given an id, metadataIdRef and some content, create a data.
 

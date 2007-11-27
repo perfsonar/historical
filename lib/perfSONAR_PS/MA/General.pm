@@ -451,42 +451,42 @@ sub getDataRRD {
   my($ma, $d, $mid, $did) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
-  my %result = ();
-  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1));
-  
-  $logger->debug("Creating connection to RRD \"".$file."\".");
-  my $datadb = new perfSONAR_PS::DB::RRD(
-    $ma->{CONF}->{"RRDTOOL"}, 
-    $file,
-    "",
-    1
-  );
-  $datadb->openDB();
-  
-  if(!$ma->{TIME}->{"CF"}) {
-    $ma->{TIME}->{"CF"} = "AVERAGE";
-  }
-  
-  my %rrd_result = $datadb->query(
-    $ma->{TIME}->{"CF"}, 
-    $ma->{TIME}->{"RESOLUTION"}, 
-    $ma->{TIME}->{"START"}, 
-    $ma->{TIME}->{"END"}
-  );
- 
-  if($datadb->getErrorMessage()) {
-    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
-    $logger->error($msg);
-    $result{"ERROR"} = getResultCodeData($did, $mid, $msg);
-    $logger->debug("Closing connection to RRD."); 
-    $datadb->closeDB();  
-    return %result;
-  }
-  else {
-    $datadb->closeDB();
-    $logger->debug("Closing connection to RRD.");  
-    return %rrd_result;
-  }
+#  my %result = ();
+#  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1));
+#  
+#  $logger->debug("Creating connection to RRD \"".$file."\".");
+#  my $datadb = new perfSONAR_PS::DB::RRD(
+#    $ma->{CONF}->{"RRDTOOL"}, 
+#    $file,
+#    "",
+#    1
+#  );
+#  $datadb->openDB();
+#  
+#  if(!$ma->{TIME}->{"CF"}) {
+#    $ma->{TIME}->{"CF"} = "AVERAGE";
+#  }
+#  
+#  my %rrd_result = $datadb->query(
+#    $ma->{TIME}->{"CF"}, 
+#    $ma->{TIME}->{"RESOLUTION"}, 
+#    $ma->{TIME}->{"START"}, 
+#    $ma->{TIME}->{"END"}
+#  );
+# 
+#  if($datadb->getErrorMessage()) {
+#    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
+#    $logger->error($msg);
+#    $result{"ERROR"} = getResultCodeData($did, $mid, $msg);
+#    $logger->debug("Closing connection to RRD."); 
+#    $datadb->closeDB();  
+#    return %result;
+#  }
+#  else {
+#    $datadb->closeDB();
+#    $logger->debug("Closing connection to RRD.");  
+#    return %rrd_result;
+#  }
 }
 
 

@@ -111,6 +111,31 @@ sub init {
 
 	$self->{CLIENT}->close;
 
+	if (!defined $self->{CONF}->{"status.endpoint"} or $self->{CONF}->{"status.endpoint"} eq "") {
+		$logger->error("No endpoint specified for status service");
+		return -1;
+	}
+
+	if (!defined $self->{CONF}->{"status.enable_registration"} or $self->{CONF}->{"status.enable_registration"} eq "") {
+		$self->{CONF}->{"status.enable_registration"} = 0;
+	}
+
+	if ($self->{CONF}->{"status.enable_registration"}) {
+		if (!defined $self->{CONF}->{"status.service_accesspoint"} or $self->{CONF}->{"status.service_accesspoint"} eq "") {
+			$logger->error("No access point specified for status service");
+			return -1;
+		}
+
+		if (!defined $self->{CONF}->{"status.registration_interval"} or $self->{CONF}->{"status.registration_interval"} eq "") {
+			if (!defined $self->{CONF}->{"default.registration_interval"} or $self->{CONF}->{"default.registration_interval"} eq "") {
+				$logger->error("No registration interval specified for status service");
+				return -1;
+			} else {
+				$self->{CONF}->{"status.registration_interval"} = $self->{CONF}->{"default.registration_interval"};
+			}
+		}
+	}
+
 	$handler->add($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 	$handler->add($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
 
@@ -136,8 +161,16 @@ sub registerLS {
 		SERVICE_NAME => $self->{CONF}->{"status.service_name"},
 		SERVICE_DESCRIPTION => $self->{CONF}->{"status.service_description"},
 		SERVICE_ACCESSPOINT => $self->{CONF}->{"status.service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"default.registration_interval"},
+		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status.registration_interval"},
 	);
+
+	if (defined $self->{CONF}->{"status.registration_interval"} and $self->{CONF}->{"status.registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status.registration_interval"};
+	} elsif (defined $self->{CONF}->{"default.registration_interval"} and $self->{CONF}->{"default.registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"default.registration_interval"};
+	} else {
+		$logger->error("No registraion interval specified");
+	}
 
 	$ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
 
@@ -177,7 +210,7 @@ sub registerLS {
 }
 
 sub handleEvent($$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my ($self, $output, $endpoint, $messageType, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	if ($messageType eq "MeasurementArchiveStoreRequest") {
@@ -186,15 +219,15 @@ sub handleEvent($$$$) {
 			return ("error.ma.no_event_type", "No event type specified for metadata id ".$md->getAttribute("id"));
 		}
 
-		return $self->handleStoreRequest($md, $d);
+		return $self->handleStoreRequest($output, $md, $d);
 	} else {
 		$logger->info("Calling handleQueryRequest");
-		return $self->handleQueryRequest($eventType, $md, $d);
+		return $self->handleQueryRequest($output, $eventType, $md, $d);
 	}
 }
 
-sub handleStoreRequest($$$) {
-	my ($self, $md, $d) = @_;
+sub handleStoreRequest($$$$) {
+	my ($self, $output, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	my ($status, $res);
@@ -254,13 +287,12 @@ sub handleStoreRequest($$$) {
 		return ($status, $res);
 	} else {
 		my $mdID = "metadata.".genuid();
-		my @ret_elements;
 
-		push @ret_elements, $md->toString;
-		push @ret_elements, getResultCodeMetadata($mdID, $md->getAttribute("id"), "success.ma.added");
-		push @ret_elements, getResultCodeData("data.".genuid(), $mdID, "new data element successfully added", 1);
+		#push @ret_elements, $md->toString;
+		getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.ma.added");
+		getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
 
-		return ("", \@ret_elements);
+		return ("", "");
 	}
 }
 
@@ -289,7 +321,7 @@ sub __handleStoreRequest($$$$$$) {
 }
 
 sub handleQueryRequest {
-	my ($self, $eventType, $md, $d) = @_;
+	my ($self, $output, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	my ($status, $res);
@@ -298,15 +330,15 @@ sub handleQueryRequest {
 		($status, $res) = $self->lookupAllRequest($md, $d);
 	} elsif ($eventType eq "Link.Status" or
 			$eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
-		($status, $res) = $self->lookupLinkStatusRequest($md, $d);
+		($status, $res) = $self->lookupLinkStatusRequest($output, $md, $d);
 	}
 
 	return ($status, $res);
 }
 
 
-sub lookupAllRequest($$$) {
-	my ($self, $md, $d) = @_;
+sub lookupAllRequest($$$$) {
+	my ($self, $output, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
@@ -329,10 +361,6 @@ sub lookupAllRequest($$$) {
 
 	my %links = %{ $res };
 
-	my @ret_elements = ();
-
-	push @ret_elements, $md->toString;
-
 	my $i = genuid();
 	foreach my $link_id (keys %links) {
 		my $mdID = "meta$i";
@@ -341,20 +369,20 @@ sub lookupAllRequest($$$) {
 		$md_content .= "<nmwg:subject id=\"sub$i\">\n";
 		$md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"$link_id\" />\n";
 		$md_content .= "</nmwg:subject>\n";
-		push @ret_elements, createMetadata($mdID, $md->getAttribute("id"), $md_content);
+		createMetadata($output, $mdID, $md->getAttribute("id"), $md_content, undef);
 		my $data_content = "";
 		foreach my $link (@{ $links{$link_id} }) {
 			$data_content .= $self->writeoutLinkState_range($link);
 		}
-		push @ret_elements, createData("data.".$i, $mdID, $data_content);
+		createData($output, "data.".$i, $mdID, $data_content, undef);
 		$i++;
 	}
 
-	return ("", \@ret_elements);
+	return ("", "");
 }
 
-sub lookupLinkStatusRequest($$$) {
-	my($self, $md, $d) = @_;
+sub lookupLinkStatusRequest($$$$) {
+	my($self, $output, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
@@ -392,9 +420,7 @@ sub lookupLinkStatusRequest($$$) {
 		return ("error.common.storage.fetch", $msg);
 	}
 
-	my @ret_elements = ();
-
-	push @ret_elements, $md->toString;
+#	push @ret_elements, $md->toString;
 
 	my $data_content = "";
 	foreach my $link (@{ $res->{$link_id} }) {
@@ -404,9 +430,9 @@ sub lookupLinkStatusRequest($$$) {
 			$data_content .= $self->writeoutLinkState($link, $time);
 		}
 	}
-	push @ret_elements, createData("data.".genuid(), $md->getAttribute("id"), $data_content);
+	createData($output, "data.".genuid(), $md->getAttribute("id"), $data_content, undef);
 
-	return ("", \@ret_elements);
+	return ("", "");
 }
 
 sub writeoutLinkState_range($$$) {
