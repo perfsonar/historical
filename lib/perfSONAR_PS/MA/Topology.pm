@@ -110,7 +110,6 @@ sub registerLS($) {
 	my @md_ids = ();
 
 	foreach my $info (@{ $res1 }) {
-		$logger->debug("ID: \"".$info->{type}.":".$info->{id}."\"");
 		my ($md, $md_id) = buildLSMetadata($info->{id}, $info->{type}, $info->{prefix}, $info->{uri});
 		push @mds, $md;
 	}
@@ -148,7 +147,7 @@ sub needLS() {
 }
 
 sub handleEvent($$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 
 	my $retMetadata;
 	my $retData;
@@ -156,20 +155,20 @@ sub handleEvent($$$$) {
 	my $msg = "The echo request has passed.";
 
 	if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
-		return $self->queryTopology($eventType, $md, $d);
+		return $self->queryTopology($output, $eventType, $md, $d);
 	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-		return $self->queryTopology($eventType, $md, $d);
+		return $self->queryTopology($output, $eventType, $md, $d);
 	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
-		return $self->changeTopology($eventType, $md, $d);
+		return $self->changeTopology($output, $eventType, $md, $d);
 	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
-		return $self->changeTopology($eventType, $md, $d);
+		return $self->changeTopology($output, $eventType, $md, $d);
 	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
-		return $self->changeTopology($eventType, $md, $d);
+		return $self->changeTopology($output, $eventType, $md, $d);
 	}
 }
 
 sub queryTopology($$) {
-	my ($self, $eventType, $m, $d) = @_;
+	my ($self, $output, $eventType, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my ($status, $res);
 
@@ -194,22 +193,21 @@ sub queryTopology($$) {
 		}
 	}
 
-	my (@ret_mds, @ret_data);
 	if ($status ne "") {
 		$logger->error("Couldn't handle requested metadata: $res");
 		my $mdID = "metadata.".genuid();
-		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-		push @ret_data, getResultCodeData("data.".genuid(), $mdID, $res, 1);
+		getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
+		getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
 	} else {
-		push @ret_mds, $m->toString;
-		push @ret_data, createData("data.".genuid(), $m->getAttribute("id"), $res);
+		$output->addExistingXMLElement($m);
+		createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
 	}
 
-	return ("", \@ret_mds, \@ret_data);
+	return ("", "");
 }
 
-sub changeTopology($$) {
-	my ($self, $eventType, $m, $d) = @_;
+sub changeTopology($$$$$) {
+	my ($self, $output, $eventType, $m, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my $changeType;
 
@@ -235,16 +233,13 @@ sub changeTopology($$) {
 		($status, $res) = $self->changeRequest($changeType, $topology);
 	}
 
-	my @ret_mds = ();
-	my @ret_data = ();
-
 	if ($status ne "") {
 		$logger->error("Couldn't handle requested metadata: $res");
 
 		my $mdID = "metadata.".genuid();
 
-		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), $status);
-		push @ret_data, getResultCodeData("data.".genuid(), $mdID, $res, 1);
+		getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
+		getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
 	} else {
 		my $changeDesc;
 		my $mdID = "metadata.".genuid();
@@ -257,12 +252,12 @@ sub changeTopology($$) {
 			$changeDesc = "updated";
 		}
 
-		push @ret_mds, $m->toString;
-		push @ret_mds, getResultCodeMetadata($mdID, $m->getAttribute("id"), "success.ma.".$changeDesc);
-		push @ret_data, getResultCodeData("data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
+		$output->addExistingXMLElement($m);
+		getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), "success.ma.".$changeDesc);
+		getResultCodeData($output, "data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
 	}
 
-	return ("", \@ret_mds, \@ret_data);
+	return ("", "");
 }
 
 sub changeRequest($$$) {

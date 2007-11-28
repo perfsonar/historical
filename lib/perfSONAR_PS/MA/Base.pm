@@ -88,55 +88,6 @@ sub init {
 }
 
 
-#
-# NOTE: (JZ - 7/30/07) This function is depricated
-# 
-
-sub keyRequest {
-  my($self, $metadatadb, $m, $localContent, $messageId, $messageIdRef) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
-  
-  my $queryString = "//nmwg:metadata[" . getMetadatXQuery($self, $m->getAttribute("id"), 0) . "]";
-  $logger->debug("Query string \"".$queryString."\" created."); 
-	my @resultsString = $metadatadb->query($queryString);
-
-	if($#resultsString != -1) {
-	  for(my $x = 0; $x <= $#resultsString; $x++) {
-      my $parser = XML::LibXML->new();
-      $doc = $parser->parse_string($resultsString[$x]);  
-      my $mdset = find($doc, "//nmwg:metadata");
-      my $md = $mdset->get_node(1); 
-
-      $logger->debug("Metadata \"".$md->toString()."\" found."); 
-      $localContent = $localContent . $md->toString;  
-      
-      $queryString = "//nmwg:data[\@metadataIdRef=\"".$md->getAttribute("id")."\"]"; 
-      $logger->debug("Query string \"".$queryString."\" created."); 
-	    my @dataResultsString = $metadatadb->query($queryString);	  
-	      	    
-	    if($#dataResultsString != -1) {    			  
-        for(my $y = 0; $y <= $#dataResultsString; $y++) {
-		      $logger->debug("Data \"".$dataResultsString[$y]."\" found."); 
-          $localContent = $localContent . $dataResultsString[$y]; 
-        } 
-        $self->{RESPONSE} = getResultMessage($messageId, $messageIdRef, "MetadataKeyResponse", $localContent);      
-	    }
-      else {
-	      my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_NAME"}."\" returned 0 results for search";
-        $logger->error($msg);
-        $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);
-      }  
-	  }
-	}
-	else {
-	  my $msg = "Database \"".$self->{CONF}->{"METADATA_DB_FILE"}."\" returned 0 results for search";
-    $logger->error($msg); 
-    $self->{RESPONSE} = getResultCodeMessage($messageId, $messageIdRef, "MetadataKeyResponse", "error.mp.snmp", $msg);	     
-	}
-  return $localContent;
-}
-
-
 1;
 
 

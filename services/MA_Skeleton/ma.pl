@@ -254,8 +254,15 @@ sub registerLS($) {
 	$logger->debug("Starting '".$$."' for LS registration");
 
 	while(1) {
-		$ma->registerLS;
-		sleep($conf{"default.ls_registration_interval"});
+		my $sleep_time;
+
+		$ma->registerLS(\$sleep_time);
+
+		if (!defined $sleep_time or $sleep_time eq "") {
+			$sleep_time = $conf{"default.ls_registration_interval"};
+		}
+
+		sleep($sleep_time);
 	}
 }
 
@@ -362,24 +369,26 @@ sub __handleRequest($$) {
 	my %message_parameters = ();
 
 	my $msgParams = find($message, "./nmwg:parameters", 1); 
-	foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
-		my ($name, $value);
+	if (defined $msgParams) {
+		foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
+			my ($name, $value);
 
-		$name = $p->getAttribute("name");
-		$value = extract($p);
+			$name = $p->getAttribute("name");
+			$value = extract($p);
 
-		if (!defined $name or $name eq "") {
-			next;
+			if (!defined $name or $name eq "") {
+				next;
+			}
+
+			$message_parameters{$name} = $value;
 		}
-
-		$message_parameters{$name} = $value;
 	}
 
 	my $found_pair = 0;
 
 	my $doc = new perfSONAR_PS::XML::Document_string();
 
-	$doc->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "message", { id=>$messageId, type=>$messageType, messageIdRef=>$messageIdReturn });
+	startMessage($doc, $messageIdReturn, $messageId, $messageType, "", undef);
 
 	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
 		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
@@ -406,7 +415,7 @@ sub __handleRequest($$) {
 		getResultCodeData($doc, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
 	}
 
-	$doc->endElement("message");
+	endMessage($doc);
 
 	$request->setResponse($doc->getValue());
 }

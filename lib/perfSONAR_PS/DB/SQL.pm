@@ -446,12 +446,12 @@ $Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
 Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
- 
-You should have received a copy of the Internet2 Intellectual Property Framework along
+
+You should have received a copy of the Internet2 Intellectual Property Framework along 
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
+
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.

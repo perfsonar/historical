@@ -134,6 +134,14 @@ sub init {
 				return -1;
 			}
 		}
+
+		if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
+			if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
+				$self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+			} else {
+				$self->{CONF}->{"status.ls_registration_interval"} = 600;
+			}
+		}
 	}
 
 	$handler->add($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
@@ -148,7 +156,7 @@ sub needLS() {
 }
 
 sub registerLS {
-	my ($self) = @_;
+	my ($self, $sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my ($status, $res);
 	my $ls;
@@ -206,7 +214,13 @@ sub registerLS {
 
 	$res = "";
 
-	return $ls->register_withData(\@link_mds);
+	my $n = $ls->register_withData(\@link_mds);
+
+	if (defined $sleep_time) {
+		$$sleep_time = $self->{"status.ls_registration_interval"};
+	}
+
+	return $n;
 }
 
 sub handleEvent($$$$$$$$$) {

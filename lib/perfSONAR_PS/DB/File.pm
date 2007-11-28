@@ -1,7 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 package perfSONAR_PS::DB::File;
 
+use warnings;
+use Exporter;
 use XML::LibXML;
 use Log::Log4perl qw(get_logger);
 
@@ -29,107 +31,146 @@ sub setFile {
 
 
 sub openDB {
-  my ($self) = @_;
+  my ($self, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{FILE}) {    
     my $parser = XML::LibXML->new();
     $self->{XML} = $parser->parse_file($self->{FILE});  
   }
   else {
-    $logger->error("Cannot open database, missing filename.");      
+    $logger->error("Cannot open database, missing filename."); 
+    $$error = $msg if (defined $error);     
     return -1;
-  }                  
+  }     
+  $$error = "" if (defined $error);             
   return 0;
 }
 
 
 sub closeDB {
-  my ($self) = @_;
+  my ($self, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{XML} and $self->{XML} ne "") {
-    if (defined open(FILE, ">".$self->{FILE})) {
+    if(defined open(FILE, ">".$self->{FILE})) {
       print FILE $self->{XML}->toString;
       close(FILE);
+      $$error = "" if (defined $error);
       return 0;
-    } else {
+    } 
+    else {
       $logger->error("Couldn't open output file \"".$self->{FILE}."\"");
+      $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
     $logger->error("LibXML DOM structure not defined.");  
+    $$error = $msg if (defined $error);
     return -1;
   }
 }
 
 
 sub query {
-  my ($self, $query) = @_;
+  my ($self, $query, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   my @results = ();
   if(defined $query and $query ne "") {
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
-      my $nodeset = find($self->{XML}, $query);
-      foreach my $node (@{$nodeset}) {            	    
+      my $nodeset = $self->{XML}->find($query);
+      foreach my $node (@{$nodeset}) {                  
         push @results, $node->toString;
       }
+      $$error = "" if (defined $error);
       return @results;
     }
     else {
       $logger->error("LibXML DOM structure not defined."); 
+      $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
     $logger->error("Missing argument.");
+    $$error = $msg if (defined $error);
+    return -1;
+  }  
+}
+
+
+sub querySet {
+  my ($self, $query, $error) = @_;
+  my $logger = get_logger("perfSONAR_PS::DB::File");
+  if(defined $query and $query ne "") {
+    $logger->debug("Query \"".$query."\" received.");
+    if(defined $self->{XML} and $self->{XML} ne "") {
+      $$error = "" if (defined $error);
+      return $self->{XML}->find($query);
+    }
+    else {
+      $logger->error("LibXML DOM structure not defined."); 
+      $$error = $msg if (defined $error);
+      return -1;
+    }
+  }
+  else {
+    $logger->error("Missing argument.");
+    $$error = $msg if (defined $error);
     return -1;
   }  
 }
 
 
 sub count {
-  my ($self, $query) = @_;
+  my ($self, $query, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $query and $query ne "") {    
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
-      my $nodeset = find($self->{XML}, $query);
+      my $nodeset = $self->{XML}->find($query);
+      $$error = "" if (defined $error);
       return $nodeset->size();  
     }
     else {
       $logger->error("LibXML DOM structure not defined."); 
+      $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
     $logger->error("Missing argument.");
+    $$error = $msg if (defined $error);
     return -1;
   } 
 }
 
 
 sub getDOM {
-  my ($self) = @_;
+  my ($self, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $self->{XML} and $self->{XML} ne "") {
     return $self->{XML};  
   }
   else {
-    $logger->error("LibXML DOM structure not defined."); 
+    $logger->error("LibXML DOM structure not defined.");
+    $$error = $msg if (defined $error); 
   }
+  $$error = "" if (defined $error);
   return ""; 
 }
 
 
 sub setDOM {
-  my($self, $dom) = @_;
+  my($self, $dom, $error) = @_;
   if(defined $dom and $dom ne "") {    
     $self->{XML} = $dom;
   }
   else {
     $logger->error("Missing argument.");
+    $$error = $msg if (defined $error);
   }   
+  $$error = "" if (defined $error);
   return;
 }
 
@@ -163,25 +204,26 @@ may then be invoked on the object for the specific database.
     # my $file = new perfSONAR_PS::DB::File;
     # $file->setFile("./store.xml");  
     
-    $file->openDB();
+    my $error = "";
+    $file->openDB($error);
 
-    print "There are " , $file->count("//nmwg:metadata") , " elements in the file.\n";
+    print "There are " , $file->count("//nmwg:metadata", $error) , " elements in the file.\n";
 
-    my @results = $file->query("//nmwg:metadata");
+    my @results = $file->query("//nmwg:metadata", $error);
     foreach my $r (@results) {
       print $r , "\n";
     }
 
-    $file->closeDB();
+    $file->closeDB($error);
     
     # If a DOM already exists...
     
     my $dom = XML::LibXML::Document->new("1.0", "UTF-8");
-    $file->setDOM($dom);
+    $file->setDOM($dom, $error);
     
     # or getting back the DOM...
     
-    my $dom2 = $file->getDOM();
+    my $dom2 = $file->getDOM($error);
     
 =head1 DETAILS
 
@@ -203,33 +245,37 @@ The only argument is a string representing the file to be opened.
 
 (Re-)Sets the name of the file to be used.
 
-=head2 openDB($self)  
+=head2 openDB($self, $error)          
 
 Opens the database, will return status of operation.
 
-=head2 closeDB($self)
+=head2 closeDB($self, $error)
 
 Close the database, will return status of operation.
 
-=head2 query($self, $query)
+=head2 query($self, $query, $error)
 
-Given a query, returns the results or nothing.  
+Given a query, returns the results or nothing.
+  
+=head2 querySet($self, $query, $error)
 
-=head2 count($self, $query)
+Given a query, returns the results (as a nodeset) or nothing.  
+  
+=head2 count($self, $query, $error)
 
-Counts the results of a query.  
+Counts the results of a query. 
 
-=head2 getDOM($self)
+=head2 getDOM($self, $error)
 
-Returns the internal XML::LibXML DOM object. Will return "" on error.
+Returns the internal XML::LibXML DOM object. Will return "" on error.  
 
-=head2 setDOM($self, $dom)
+=head2 setDOM($self, $dom, $error)
 
 Sets the DOM object.
   
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<Log::Log4perl>
+L<Exporter>, L<XML::LibXML>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -239,23 +285,26 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS 
   
-Questions and comments can be directed to the author, or the mailing list. 
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  https://bugs.internet2.edu/jira/browse/PSPS
 
 =head1 VERSION
 
-$Id: SNMP.pm 227 2007-06-13 12:25:52Z zurawski $
+$Id$
 
 =head1 AUTHOR
 
 Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
- 
-You should have received a copy of the Internet2 Intellectual Property Framework along
+
+You should have received a copy of the Internet2 Intellectual Property Framework along 
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
+
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.

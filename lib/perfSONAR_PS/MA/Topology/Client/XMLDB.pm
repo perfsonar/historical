@@ -51,9 +51,17 @@ sub open($) {
 		return (-1, $msg);
 	}
 
-	my $status = $self->{DATADB}->openDB;
+#	my $status = $self->{DATADB}->prep;
+#	if ($status == -1) {
+#		my $msg = "Couldn't open specified database";
+#		$logger->error($msg);
+#		return (-1, $msg);
+#	}
+
+	my $error;
+	my $status = $self->{DATADB}->openDB(undef, \$error);
 	if ($status == -1) {
-		my $msg = "Couldn't open specified database";
+		my $msg = "Couldn't open specified database: $error";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
@@ -108,7 +116,7 @@ sub xQuery($$) {
 
 	$xquery =~ s/\s{1}\// collection('CHANGEME')\//g;
 
-	my @queryResults = $self->{DATADB}->xQuery($xquery, \$error);
+	my @queryResults = $self->{DATADB}->query($xquery, undef, \$error);
 	if ($error ne "") {
 		$logger->error("Couldn't query database");
 		return (-1, "Couldn't query database: $error");
@@ -137,7 +145,7 @@ sub getAll {
 	}
 	$content .= ">";
 
-	@results = $self->{DATADB}->query("/*:domain", \$error);
+	@results = $self->{DATADB}->query("/*:domain", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of domains from database: $error";
 		$logger->error($msg);
@@ -146,7 +154,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:node", \$error);
+	@results = $self->{DATADB}->query("/*:node", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of nodes from database: $error";
 		$logger->error($msg);
@@ -155,7 +163,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:port", \$error);
+	@results = $self->{DATADB}->query("/*:port", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of ports from database: $error";
 		$logger->error($msg);
@@ -164,7 +172,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:link", \$error);
+	@results = $self->{DATADB}->query("/*:link", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of links from database: $error";
 		$logger->error($msg);
@@ -173,7 +181,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:network", \$error);
+	@results = $self->{DATADB}->query("/*:network", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of networks from database: $error";
 		$logger->error($msg);
@@ -182,7 +190,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:path", \$error);
+	@results = $self->{DATADB}->query("/*:path", undef, $error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of paths from database: $error";
 		$logger->error($msg);
@@ -602,7 +610,7 @@ sub lookupElement($$$) {
 		my $error;
 		$logger->debug("Parent: $parent_id Not Found");
 
-		my $doc = $self->{DATADB}->getDocumentByName($base_id, \$error);
+		my $doc = $self->{DATADB}->getDocumentByName($base_id, undef, \$error);
 		if ($error ne "") {
 			my $msg = "Element ".$base_id." not found";
 			$logger->error($msg);

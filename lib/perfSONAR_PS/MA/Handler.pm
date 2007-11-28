@@ -98,10 +98,10 @@ sub handleEvent($$$$$$$$$) {
 
 	$logger->debug("Handling event: $endpoint, $messageType, $eventType");
 
-	my ($valid_endpoint, $valid_messagetype, $valid_eventtype);
+	my ($valid_endpoint, $valid_messagetype);
 
-	my $valid_endpoint = defined $self->{VALIDENDPOINTS}->{$endpoint};
-	my $valid_messagetype = ($valid_endpoint and
+	$valid_endpoint = defined $self->{VALIDENDPOINTS}->{$endpoint};
+	$valid_messagetype = ($valid_endpoint and
 					(defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} or
 					 defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType} or
 					 defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType} or

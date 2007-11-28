@@ -33,6 +33,7 @@ our @EXPORT = (
 
 sub startMessage($$$$$$) {
 	my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
+	my $logger = get_logger("perfSONAR_PS::Messages");
 
 	my %attrs = ();
 	$attrs{"type"} = $type;
@@ -118,6 +119,19 @@ sub addParameter($$$) {
 sub getResultCodeMessage {
 	my ($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content) = @_;   
 	my $logger = get_logger("perfSONAR_PS::Messages");
+
+	my $n;
+
+	my $ret_mdid = "metadata.".genuid();
+	my $ret_did = "data.".genuid();
+
+	$n = startMessage($output, $id, $messageIdRef, $type, "", undef);
+	return $n if ($n != 0);
+	$n = getResultCodeMetadata($output, $ret_mdid, $metadataIdRef, $event);
+	return $n if ($n != 0);
+	$n = getResultCodeData($output, $ret_did, $ret_mdid, $description, $escape_content);
+	return $n if ($n != 0);
+	$n = endMessage($output);
 
 	return 0;
 }

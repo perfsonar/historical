@@ -2,6 +2,7 @@ package perfSONAR_PS::XML::Document_string;
 
 use Log::Log4perl qw(get_logger);
 use strict;
+use Data::Dumper;
 
 #our @ISA = qw(perSONAR_PS::XML::Document);
 
@@ -14,7 +15,7 @@ sub new($) {
 
 	$hash{"OPEN_TAGS"} = ();
 	$hash{"DEFINED_PREFIXES"} = ();
-	$hash{"STRING"} = ();
+	$hash{"STRING"} = "";
 
 	bless \%hash => $package;
 }
@@ -94,6 +95,8 @@ sub startElement($$$$$$) {
 
 	push @{ $self->{OPEN_TAGS} }, \%node_info;
 
+	$logger->debug("Values: " . Dumper($self));
+
 	return 0;
 }
 
@@ -109,6 +112,7 @@ sub createElement($$$$$$) {
 
 sub startElement_content($$$$$$) {
 	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces, $content) = @_;
+	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
 	my $n = $self->startElement($prefix, $namespace, $tag, $attributes, $extra_namespaces);
 
@@ -119,6 +123,8 @@ sub startElement_content($$$$$$) {
 	}
 
 	$self->{STRING} .= "\n" if ($pretty_print);
+
+	$logger->debug("Values: " . Dumper($self));
 
 	return 0;
 }
@@ -154,6 +160,8 @@ sub endElement($$) {
 		$self->{STRING} .= "\n";
 	}
 
+	$logger->debug("Values: " . Dumper($self));
+
 	return 0;
 }
 
@@ -163,12 +171,16 @@ sub addExistingXMLElement($$) {
 
 	$self->{STRING} .= $element->toString();
 
+	$logger->debug("Values: " . Dumper($self));
+
 	return 0;
 }
 
 sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
+
+	$logger->debug("Values: " . Dumper($self));
 
 	my @open_tags = @{ $self->{"OPEN_TAGS"} };
 

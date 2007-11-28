@@ -662,7 +662,7 @@ sub getDataRRD {
   if($datadb->getErrorMessage()) {
     my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
     $logger->error($msg);
-    $result{"ERROR"} = getResultCodeData($did, $mid, $msg);
+    $result{"ERROR"} = $msg;
     $datadb->closeDB();  
     return %result;
   }
