@@ -5,43 +5,62 @@ package perfSONAR_PS::MA::General;
 use warnings;
 use Exporter;
 use Log::Log4perl qw(get_logger);
-use Time::Local;
-
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
 @ISA = ('Exporter');
 @EXPORT = ('getMetadataXQuery', 'getDataXQuery', 'getTime', 
-           'getDataSQL', 'getDataRRD', 'adjustRRDTime', 
-           'getMetadatXQuery');
+           'getDataSQL', 'getDataRRD', 'adjustRRDTime');
 
 
 sub getMetadataXQuery {
-  my($node, $queryString) = @_;
-  my $query = getSPXQuery($node, "");
-  my $eventTypeQuery = getEventTypeXQuery($node, "");
-  if($eventTypeQuery) {
-    $query = $query . " and " . $eventTypeQuery . "]";
+  my($node, $queryString) = @_;   
+  my $logger = get_logger("perfSONAR_PS::MA::General");
+  if(defined $node and $node ne "") {
+    my $query = getSPXQuery($node, "");
+    my $eventTypeQuery = getEventTypeXQuery($node, "");
+    if($eventTypeQuery) {
+      if($query) {
+        $query = $query . " and ";
+      }
+      $query = $query . $eventTypeQuery . "]";
+    }
+    return $query;
   }
-  return $query;
+  else {
+    $logger->error("Missing argument.");
+  }  
+  return "";
 }
 
 
 sub getSPXQuery {
   my($node, $queryString) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
-  if(defined $node and $node ne "") {
+
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
+  }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
     my $queryCount = 0;
     if($node->nodeType != 3) {
       if(!($node->nodePath() =~ m/select:parameters\/nmwg:parameter/)) {
-        (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+        (my $path = $node->nodePath()) =~ s/\/nmwg:message//;
+        $path =~ s/\?//g;
+        $path =~ s/\/nmwg:metadata//;
+        $path =~ s/\/nmwg:data//;
         $path =~ s/\[\d+\]//g;
         $path =~ s/^\///g;    
+        $path =~ s/nmwg:subject/*[local-name()=\"subject\"]/;
+        
         if($path ne "nmwg:eventType" and !($path =~ m/parameters$/)) {
           ($queryCount, $queryString) = xQueryAttributes($node, $path, $queryCount, $queryString);
           if($node->hasChildNodes()) {          
             ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);
-            foreach my $c ($node->childNodes) {
+            foreach my $c ($node->childNodes) {            
               $queryString = getSPXQuery($c, $queryString);
             }
           }
@@ -53,21 +72,27 @@ sub getSPXQuery {
         }
       }
     }
-    return $queryString;
   }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
+  return $queryString;
 }
 
 
 sub getEventTypeXQuery {
   my($node, $queryString) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
-  if(defined $node and $node ne "") {
+
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
+  }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
     if($node->nodeType != 3) {
-      (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
+      (my $path = $node->nodePath()) =~ s/\/nmwg:message//;
+      $path =~ s/\?//g;
+      $path =~ s/\/nmwg:metadata//;
+      $path =~ s/\/nmwg:data//;
       $path =~ s/\[\d+\]//g;
       $path =~ s/^\///g;  
       if($path eq "nmwg:eventType") {
@@ -79,23 +104,28 @@ sub getEventTypeXQuery {
         $queryString = getEventTypeXQuery($c, $queryString);
       }        
     }
-    return $queryString;
   }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
+  return $queryString;
 }
 
 
 sub getDataXQuery {
   my($node, $queryString) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
-  if(defined $node and $node ne "") {
+
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
+  }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
     my $queryCount = 0;
     if($node->nodeType != 3) {
-      (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-      $path =~ s/\/nmwg:message\/nmwg:data//;
+      (my $path = $node->nodePath()) =~ s/\/nmwg:message//;
+      $path =~ s/\?//g;
+      $path =~ s/\/nmwg:metadata//;
+      $path =~ s/\/nmwg:data//;
       $path =~ s/\[\d+\]//g;
       $path =~ s/^\///g;    
 
@@ -113,8 +143,10 @@ sub getDataXQuery {
         if($node->hasChildNodes()) {
           ($queryCount, $queryString) = xQueryText($node, $path, $queryCount, $queryString);    
           foreach my $c ($node->childNodes) {
-            (my $path2 = $c->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-            $path2 =~ s/\/nmwg:message\/nmwg:data//;
+            (my $path2 = $c->nodePath()) =~ s/\/nmwg:message//;
+            $path =~ s/\?//g;
+            $path2 =~ s/\/nmwg:metadata//;
+            $path2 =~ s/\/nmwg:data//;            
             $path2 =~ s/\[\d+\]//g;
             $path2 =~ s/^\///g; 
             $queryString = getDataXQuery($c, $queryString);
@@ -122,179 +154,251 @@ sub getDataXQuery {
         }
       }
     }
-    return $queryString;  
   }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
+  return $queryString;
 }
 
 
 sub xQueryParameters {
   my($node, $path, $queryCount, $queryString) = @_;
-  my %paramHash = ();
-  if($node->hasChildNodes()) {  
-    my $last = "";
-    foreach my $c ($node->childNodes) {
-      (my $path2 = $c->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-      $path2 =~ s/\/nmwg:message\/nmwg:data//;
-      $path2 =~ s/\[\d+\]//g;
-      $path2 =~ s/^\///g; 
-      
-      if($path2 =~ m/nmwg:parameters\/nmwg:parameter$/ or 
-         $path2 =~ m/snmp:parameters\/nmwg:parameter$/ or 
-         $path2 =~ m/netutil:parameters\/nmwg:parameter$/ or 
-         $path2 =~ m/netdisc:parameters\/nmwg:parameter$/ or
-         $path2 =~ m/neterr:parameters\/nmwg:parameter$/) {
-        foreach my $attr ($c->attributes) {
-          if($attr->isa('XML::LibXML::Attr')) {
-            if($attr->getName eq "name") {
-              $last = "\@name=\"".$attr->getValue."\"";
-            }
-            else {
-              if(($last ne "\@name=\"startTime\"") and 
-                 ($last ne "\@name=\"endTime\"") and 
-                 ($last ne "\@name=\"time\"") and 
-                 ($last ne "\@name=\"resolution\"") and 
-                 ($last ne "\@name=\"consolidationFunction\"")) {
-                if($paramHash{$last}) {
-                  $paramHash{$last} .= " or ".$last."and \@".$attr->getName."=\"".$attr->getValue."\"";
-                  if($attr->getName eq "value") {
-                    $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
-                  }
-                }
-                else {
-                  $paramHash{$last} = $last."and \@".$attr->getName."=\"".$attr->getValue."\"";
-                  if($attr->getName eq "value") {
-                    $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
-                  }
-                }
-              }
-            }
-          }
-        }
-        
-        if(($last ne "\@name=\"startTime\"") and 
-           ($last ne "\@name=\"endTime\"") and 
-           ($last ne "\@name=\"time\"") and 
-           ($last ne "\@name=\"resolution\"") and 
-           ($last ne "\@name=\"consolidationFunction\"")) {      
-          if($c->childNodes->size() >= 1) {
-            if($c->firstChild->nodeType == 3) {        
-              (my $value = $c->firstChild->textContent) =~ s/\s*//g;
-              if($value) {
-                if($paramHash{$last}) {
-                  $paramHash{$last} .= " or ".$last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";               
-                }
-                else {
-                  $paramHash{$last} = $last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";  
-                }            
-              }
-            }
-          }
-        }    
-      }
-    }
-  }  
+  my $logger = get_logger("perfSONAR_PS::MA::General");
 
-  foreach my $key (sort keys %paramHash) {
-    if($queryString) {
-      $queryString = $queryString . " and ";
-    }
-    if($path eq "nmwg:parameters") {
-      $queryString = $queryString . "./*[local-name()=\"parameters\"]/nmwg:parameter[";
-    }
-    else {
-      $queryString = $queryString . $path . "/nmwg:parameter[";
-    }
-    $queryString = $queryString . $paramHash{$key} . "]";
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
   }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
+    my %paramHash = ();
+    if($node->hasChildNodes()) {  
+      my $last = "";
+      foreach my $c ($node->childNodes) {
+        (my $path2 = $c->nodePath()) =~ s/\/nmwg:message//;
+        $path =~ s/\?//g;
+        $path2 =~ s/\/nmwg:metadata//;
+        $path2 =~ s/\/nmwg:data//;        
+        $path2 =~ s/\[\d+\]//g;
+        $path2 =~ s/^\///g; 
+      
+        if($path2 =~ m/nmwg:parameters\/nmwg:parameter$/ or 
+           $path2 =~ m/snmp:parameters\/nmwg:parameter$/ or 
+           $path2 =~ m/netutil:parameters\/nmwg:parameter$/ or 
+           $path2 =~ m/netdisc:parameters\/nmwg:parameter$/ or
+           $path2 =~ m/neterr:parameters\/nmwg:parameter$/) {
+          foreach my $attr ($c->attributes) {
+            if($attr->isa('XML::LibXML::Attr')) {
+              if($attr->getName eq "name") {
+                $last = "\@name=\"".$attr->getValue."\"";
+              }
+              else {
+                if(($last ne "\@name=\"startTime\"") and 
+                   ($last ne "\@name=\"endTime\"") and 
+                   ($last ne "\@name=\"time\"") and 
+                   ($last ne "\@name=\"resolution\"") and 
+                   ($last ne "\@name=\"consolidationFunction\"")) {
+                  if($paramHash{$last}) {
+                    $paramHash{$last} .= " or ".$last."and \@".$attr->getName."=\"".$attr->getValue."\"";
+                    if($attr->getName eq "value") {
+                      $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
+                    }
+                  }
+                  else {
+                    $paramHash{$last} = $last."and \@".$attr->getName."=\"".$attr->getValue."\"";
+                    if($attr->getName eq "value") {
+                      $paramHash{$last} .= " or ".$last." and text()=\"".$attr->getValue."\"";
+                    }
+                  }
+                }
+              }
+            }
+          }
+        
+          if(($last ne "\@name=\"startTime\"") and 
+             ($last ne "\@name=\"endTime\"") and 
+             ($last ne "\@name=\"time\"") and 
+             ($last ne "\@name=\"resolution\"") and 
+             ($last ne "\@name=\"consolidationFunction\"")) {      
+            if($c->childNodes->size() >= 1) {
+              if($c->firstChild->nodeType == 3) {        
+                (my $value = $c->firstChild->textContent) =~ s/\s{2}//g;
+                if($value) {
+                  if($paramHash{$last}) {
+                    $paramHash{$last} .= " or ".$last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";               
+                  }
+                  else {
+                    $paramHash{$last} = $last." and \@value=\"".$value."\" or ".$last." and text()=\"".$value."\"";  
+                  }            
+                }
+              }
+            }
+          }    
+        }
+      }
+    }  
 
+    foreach my $key (sort keys %paramHash) {
+      if($queryString) {
+        $queryString = $queryString . " and ";
+      }
+      if($path eq "nmwg:parameters") {
+        $queryString = $queryString . "./*[local-name()=\"parameters\"]/nmwg:parameter[";
+      }
+      else {
+        $queryString = $queryString . $path . "/nmwg:parameter[";
+      }
+      $queryString = $queryString . $paramHash{$key} . "]";
+    } 
+  }
   return ($queryCount, $queryString);
 }
 
 
 sub xQueryAttributes {
   my($node, $path, $queryCount, $queryString) = @_;
+  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $counter = 0;
 
-  foreach my $attr ($node->attributes) {
-    if($attr->isa('XML::LibXML::Attr')) {
-      if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
-        if($queryCount == 0) {
-          if($queryString) {
-            $queryString = $queryString . " and ";
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
+  }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
+    foreach my $attr ($node->attributes) {
+      if($attr->isa('XML::LibXML::Attr')) {
+        if($path eq "" or $path =~ m/metadata$/ or $path =~ m/data$/ or
+           $path =~ m/subject$/ or $path =~ m/\*\[local-name\(\)=\"subject\"\]$/ or 
+           $path =~ m/parameters$/ or $path =~ m/key$/ or
+           $path =~ m/service$/ or $path =~ m/eventType$/) {
+          if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
+            if($queryCount == 0) {
+              if($queryString) {
+                $queryString = $queryString . " and ";
+              }
+              $queryString = $queryString . $path . "[";
+              $queryString = $queryString . "\@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+              $queryCount++;
+            }
+            else {
+              $queryString = $queryString . " and \@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+            }
+            $counter++;
           }
-          $queryString = $queryString . $path . "[";
-          $queryString = $queryString . "\@" . $attr->getName . "=\"" . $attr->getValue . "\"";
-          $queryCount++;
         }
         else {
-          $queryString = $queryString . " and \@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+          if($queryCount == 0) {
+            if($queryString) {
+              $queryString = $queryString . " and ";
+            }
+            $queryString = $queryString . $path . "[";
+            $queryString = $queryString . "\@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+            $queryCount++;
+          }
+          else {
+            $queryString = $queryString . " and \@" . $attr->getName . "=\"" . $attr->getValue . "\"";
+          }
+          $counter++;
         }
       }
-    }
+    } 
+    
+    if($counter) {
+      my @children = $node->childNodes;
+      if($#children == 0) {
+        if($node->firstChild->nodeType == 3) {        
+          (my $value = $node->firstChild->textContent) =~ s/\s{2}//g;
+          if(!$value) {
+            $queryString = $queryString . "]";
+          }
+        }
+      }
+      else {
+        $queryString = $queryString . "]";
+      }
+    } 
   }
   return ($queryCount, $queryString);
 }
 
+
 sub xQueryText {
   my($node, $path, $queryCount, $queryString) = @_;
-  my @children = $node->childNodes;
-  if($#children == 0) {
-    if($node->firstChild->nodeType == 3) {        
-      (my $value = $node->firstChild->textContent) =~ s/\s*//g;
-      if($value) {
-        if($queryCount == 0) {
-          if($queryString) {
-            $queryString = $queryString . " and ";
-          }
-          $queryString = $queryString . $path . "[";
-          $queryString = $queryString . "text()=\"" . $value . "\"";
-          $queryCount++;
-        }
-        else {
-          $queryString = $queryString . " and text()=\"" . $value . "\"";
-        }
-        if($queryCount) {
-          $queryString = $queryString . "]"
-        }                   
-        return ($queryCount, $queryString);
-      }        
-    }
+  my $logger = get_logger("perfSONAR_PS::MA::General");
+
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
   }
-  if($queryCount) {
-    $queryString = $queryString . "]"
-  }  
-  return ($queryCount, $queryString);
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
+    my @children = $node->childNodes;
+    if($#children == 0) {
+      if($node->firstChild->nodeType == 3) {        
+        (my $value = $node->firstChild->textContent) =~ s/\s{2}//g;
+        if($value) {
+          if($queryCount == 0) {
+            if($queryString) {
+              $queryString = $queryString . " and ";
+            }
+            $queryString = $queryString . $path . "[";
+            $queryString = $queryString . "text()=\"" . $value . "\"";
+            $queryCount++;
+          }
+          else {
+            $queryString = $queryString . " and text()=\"" . $value . "\"";
+          }
+          if($queryCount) {
+            $queryString = $queryString . "]";
+          }                   
+          return ($queryCount, $queryString);
+        }        
+      }
+    }
+    if($queryCount) {
+#      $queryString = $queryString . "]";
+    } 
+  } 
+  return ($queryCount, $queryString); 
 }
 
 
 sub xQueryEventType {
   my($node, $path, $queryString) = @_;
-  my @children = $node->childNodes;
-  if($#children == 0) {
-    if($node->firstChild->nodeType == 3) {        
-      (my $value = $node->firstChild->textContent) =~ s/\s*//g;
-      if($value) {
-        if($queryString) {
-          $queryString = $queryString . " or ";
-          $queryString = $queryString . "text()=\"" . $value . "\"";
-        }
-        else {
-          $queryString = $queryString . $path . "[";
-          $queryString = $queryString . "text()=\"" . $value . "\"";
-        }
-        return $queryString;
-      }        
-    }
+  my $logger = get_logger("perfSONAR_PS::MA::General");
+
+  if(!defined $node or $node eq "") {
+    $logger->error("Missing argument.");
   }
+  elsif($node->getType == 8) {
+    $logger->debug("Ignoring comment.");
+  }
+  else {
+    my @children = $node->childNodes;
+    if($#children == 0) {
+      if($node->firstChild->nodeType == 3) {        
+        (my $value = $node->firstChild->textContent) =~ s/\s{2}//g;
+        if($value) {  
+          if($queryString) {         
+            $queryString = $queryString . " or ";
+          }
+          else {  
+            $queryString = $queryString . $path . "[";
+          }  
+          $queryString = $queryString . "text()=\"" . $value . "\"";
+#          return $queryString;
+        }        
+      }
+    }
+  }   
   return $queryString;
 }
 
 
 sub getTime {
-  my($ma, $id) = @_;
+  my($request, $ma, $id) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
   undef $ma->{TIME};
@@ -302,52 +406,125 @@ sub getTime {
   if((defined $ma and $ma ne "") and
      (defined $id and $id ne "")) {
 
-    my $m = find($ma->{LISTENER}->getRequestDOM(), "//".$ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"}.":metadata[\@id=\"".$id."\"]", 1);
+    my $m = find($request->getRequestDOM(), "//".$request->getNamespaces()->{"http://ggf.org/ns/nmwg/base/2.0/"}.":metadata[\@id=\"".$id."\"]", 1);
 
     my $prefix = "";
-    my $nmwg = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    if($ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
-      $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
+    my $nmwg = $request->getNamespaces()->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    my $tm = $request->getNamespaces()->{"http://ggf.org/ns/nmwg/time/2.0/"};
+    if($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
+      $prefix = $request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
     }
     else {
-      $prefix = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
+      $prefix = $request->getNamespaces()->{"http://ggf.org/ns/nmwg/base/2.0/"};
     }
 
-    # look for time objects...
-    my $tm = $ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/time/2.0/"};
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]")) {
+      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]")) {
+      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]")) {
+      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
 
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")) {
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]")) {
+      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]")) {
+      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]")) {
+      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+    
+    if(!$ma->{TIME}->{"RESOLUTION"} or
+       !($ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/)) {
+      if($ma->{CONF}->{"DEFAULT_RESOLUTION"}) {
+        $ma->{TIME}->{"RESOLUTION"} = $ma->{CONF}->{"DEFAULT_RESOLUTION"};
+      }
+      else {
+        $ma->{TIME}->{"RESOLUTION"} = 1;
+      }
+    }
+        
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")) {
       $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")) {
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
+    }
+    
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]")) {
+      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")) {
       $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]")) {
+      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
+    }
+    
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
       $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
       $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
-      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+1);
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]")) {
+      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
-      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+1);
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]")) {
+      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]")) {
+      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
+      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
       $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
       $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]")) {
-      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1));
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]")) {
+      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
+      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
     }
-    if(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]")) {
-      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1));
-    }
+
     foreach my $t (keys %{$ma->{TIME}}) {
       $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
     }
-
+    
     if($ma->{TIME}->{"START"} and 
        $ma->{TIME}->{"END"} and 
        $ma->{TIME}->{"START"} > $ma->{TIME}->{"END"}) {
@@ -364,49 +541,55 @@ sub getTime {
 
 sub findTime {
   my($parameter, $timePrefix, $type) = @_;
-  if($timePrefix and find($parameter, "./".$timePrefix.":time")) {
-    my $timeElement = find($parameter, "./".$timePrefix.":time", 1);
-    if($timeElement->getAttribute("type") =~ m/ISO/i) {
-      return convertISO(extract($timeElement));
-    }
-    else {
-      return extract($timeElement);
-    }
-  }
-  elsif($timePrefix and $type and find($parameter, "./".$timePrefix.":".$type)) {
-    my $timeElement = find($parameter, "./".$timePrefix.":".$type, 1);
-    if($timeElement->getAttribute("type") =~ m/ISO/i) {
-      return convertISO(extract($timeElement));
-    }
-    else {
-      return extract($timeElement);
-    }    
-  }
-  elsif($parameter->hasChildNodes()) {
-    foreach my $p ($parameter->childNodes) {
-      if($p->nodeType == 3) {
-        (my $value = $p->textContent) =~ s/\s*//g;
-        if($value) {
-          return $value;
-        }
-        else {
-          return "";
-        }
+  if(defined $parameter and $parameter ne "") {
+    if($timePrefix and find($parameter, "./".$timePrefix.":time")) {
+      my $timeElement = find($parameter, "./".$timePrefix.":time", 1);
+      if($timeElement->getAttribute("type") =~ m/ISO/i) {
+        return convertISO(extract($timeElement, 1));
+      }
+      else {
+        return extract($timeElement, 0);
       }
     }
-    return "";  
-  }  
-  else {
-    return "";
+    elsif($timePrefix and $type and find($parameter, "./".$timePrefix.":".$type)) {
+      my $timeElement = find($parameter, "./".$timePrefix.":".$type, 1);
+      if($timeElement->getAttribute("type") =~ m/ISO/i) {
+        return convertISO(extract($timeElement, 1));
+      }
+      else {
+        return extract($timeElement, 1);
+      }    
+    }
+    elsif($parameter->hasChildNodes()) {
+      foreach my $p ($parameter->childNodes) {
+        if($p->nodeType == 3) {
+          (my $value = $p->textContent) =~ s/\s*//g;
+          if($value) {
+            return $value;
+          }
+        }
+      }
+    }  
   }
+  else {
+    $logger->error("Missing argument.");
+  }
+  return "";
 }
+
 
 sub getDataSQL {
   my($ma, $d, $dbSchema) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
-  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1));
-  my $table = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1));
+  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1), 1);
+  if(defined $ma->{DIRECTORY}) {
+    if(!($file =~ "^/")) {
+      $file = $ma->{DIRECTORY}."/".$file;
+    }
+  }
+  
+  my $table = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1), 1);
 
   my $query = "";
   if($ma->{TIME}->{"START"} or $ma->{TIME}->{"END"}) {
@@ -428,21 +611,17 @@ sub getDataSQL {
   else {
     $query = "select * from ".$table." where id=\"".$d->getAttribute("metadataIdRef")."\";";
   } 
-  $logger->debug("Query \"".$query."\" created.");
   
-  $logger->debug("Creating connection to SQL database \"".$file."\".");
   my $datadb = new perfSONAR_PS::DB::SQL(
     "DBI:SQLite:dbname=".$file,
     "", 
     "",
     \@dbSchema
   );
-		      
+          
   $datadb->openDB();  
   my $result = $datadb->query($query);
   $datadb->closeDB();
-  $logger->debug("Closing SQL database connection.");
-  
   return $result;
 }
 
@@ -451,158 +630,82 @@ sub getDataRRD {
   my($ma, $d, $mid, $did) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
-#  my %result = ();
-#  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1));
-#  
-#  $logger->debug("Creating connection to RRD \"".$file."\".");
-#  my $datadb = new perfSONAR_PS::DB::RRD(
-#    $ma->{CONF}->{"RRDTOOL"}, 
-#    $file,
-#    "",
-#    1
-#  );
-#  $datadb->openDB();
-#  
-#  if(!$ma->{TIME}->{"CF"}) {
-#    $ma->{TIME}->{"CF"} = "AVERAGE";
-#  }
-#  
-#  my %rrd_result = $datadb->query(
-#    $ma->{TIME}->{"CF"}, 
-#    $ma->{TIME}->{"RESOLUTION"}, 
-#    $ma->{TIME}->{"START"}, 
-#    $ma->{TIME}->{"END"}
-#  );
-# 
-#  if($datadb->getErrorMessage()) {
-#    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
-#    $logger->error($msg);
-#    $result{"ERROR"} = getResultCodeData($did, $mid, $msg);
-#    $logger->debug("Closing connection to RRD."); 
-#    $datadb->closeDB();  
-#    return %result;
-#  }
-#  else {
-#    $datadb->closeDB();
-#    $logger->debug("Closing connection to RRD.");  
-#    return %rrd_result;
-#  }
+  my %result = ();
+  my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1), 1);
+  if(defined $ma->{DIRECTORY}) {
+    if(!($file =~ "^/")) {
+      $file = $ma->{DIRECTORY}."/".$file;
+    }
+  }
+  
+  my $datadb = new perfSONAR_PS::DB::RRD(
+    $ma->{CONF}->{"RRDTOOL"}, 
+    $file,
+    "",
+    1
+  );
+  $datadb->openDB();
+  
+  if(!$ma->{TIME}->{"CF"} or 
+     ($ma->{TIME}->{"CF"} ne "AVERAGE" and $ma->{TIME}->{"CF"} ne "MIN" and 
+      $ma->{TIME}->{"CF"} ne "MAX" and $ma->{TIME}->{"CF"} ne "LAST")) {
+    $ma->{TIME}->{"CF"} = "AVERAGE";    
+  }
+
+  my %rrd_result = $datadb->query(
+    $ma->{TIME}->{"CF"}, 
+    $ma->{TIME}->{"RESOLUTION"}, 
+    $ma->{TIME}->{"START"}, 
+    $ma->{TIME}->{"END"}
+  );
+ 
+  if($datadb->getErrorMessage()) {
+    my $msg = "Query error \"".$datadb->getErrorMessage()."\"; query returned \"".$rrd_result{ANSWER}."\"";
+    $logger->error($msg);
+    $result{"ERROR"} = getResultCodeData($did, $mid, $msg);
+    $datadb->closeDB();  
+    return %result;
+  }
+  else {
+    $datadb->closeDB();
+    return %rrd_result;
+  }
 }
 
 
 sub adjustRRDTime {
   my($ma) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
+  my($sec, $frac) = Time::HiRes::gettimeofday;
+
   my $oldStart = $ma->{TIME}->{"START"};
   my $oldEnd = $ma->{TIME}->{"END"};
-  if($ma->{TIME}->{"RESOLUTION"}) {
+  if($ma->{TIME}->{"RESOLUTION"} and $ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/) {
     if($ma->{TIME}->{"START"} % $ma->{TIME}->{"RESOLUTION"}){
       $ma->{TIME}->{"START"} = int($ma->{TIME}->{"START"}/$ma->{TIME}->{"RESOLUTION"} + 1)*$ma->{TIME}->{"RESOLUTION"};
-      $logger->debug("New start time \"".$ma->{TIME}->{"START"}."\".");
     }
     if($ma->{TIME}->{"END"} % $ma->{TIME}->{"RESOLUTION"}){
       $ma->{TIME}->{"END"} = int($ma->{TIME}->{"END"}/$ma->{TIME}->{"RESOLUTION"})*$ma->{TIME}->{"RESOLUTION"};
-      $logger->debug("New end time \"".$ma->{TIME}->{"END"}."\".");
     }
   }  
-  if($ma->{TIME}->{"START"} and $ma->{TIME}->{"RESOLUTION"}) {
+  if($ma->{TIME}->{"START"} and $ma->{TIME}->{"RESOLUTION"} and $ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/) {
     $ma->{TIME}->{"START"} = $ma->{TIME}->{"START"} - $ma->{TIME}->{"RESOLUTION"};
   }
+
+  if($ma->{TIME}->{"START"} and $ma->{TIME}->{"START"} =~ m/^\d+$/ and 
+     $ma->{TIME}->{"RESOLUTION"} and $ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/) {
+    while($ma->{TIME}->{"START"} > ($sec-($ma->{TIME}->{"RESOLUTION"}*2))) {
+      $ma->{TIME}->{"START"} -= $ma->{TIME}->{"RESOLUTION"};
+    }
+  }
+
+  if($ma->{TIME}->{"END"} and $ma->{TIME}->{"END"} =~ m/^\d+$/ and 
+     $ma->{TIME}->{"RESOLUTION"} and $ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/) {
+    while($ma->{TIME}->{"END"} > ($sec-($ma->{TIME}->{"RESOLUTION"}*2))) {
+      $ma->{TIME}->{"END"} -= $ma->{TIME}->{"RESOLUTION"};
+    }
+  }
   return;
-}
-
-
-#
-# NOTE: (JZ - 7/30/07) The next two functions are depricated
-# 
-
-
-sub getMetadatXQuery {
-  my($ma, $id, $data) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
-     
-  if((defined $ma and $ma ne "") and
-     (defined $id and $id ne "")) {
-    my $m = find($ma->{LISTENER}->getRequestDOM(), "//".$ma->{REQUESTNAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"}.":metadata[\@id=\"".$id."\"]", 1);
-    if($data) {
-      getTime($ma, $id);
-    }
-    $queryString = subjectQuery($m, "");
-    return $queryString;  
-  }
-  else {
-    $logger->error("Missing argument(s).");
-  }
-  return "";
-}
-
-
-sub subjectQuery {
-  my($node, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
-
-  my $queryCount = 0;
-  if($node->nodeType != 3) {
-    if(!($node->nodePath() =~ m/select:parameters\/nmwg:parameter/)) {
-      (my $path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-      $path =~ s/\[\d+\]//g;
-      $path =~ s/^\///g;  
-    
-      foreach my $attr ($node->attributes) {
-        if($attr->isa('XML::LibXML::Attr')) {
-          if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
-            if($queryCount == 0) {
-              if($queryString) {
-                $queryString = $queryString . " and ";
-              }
-              $queryString = $queryString . $path . "[";
-              $queryString = $queryString . "\@" . $attr->getName . "=\"" . $attr->getValue . "\"";
-              $queryCount++;
-            }
-            else {
-              $queryString = $queryString . " and \@" . $attr->getName . "=\"" . $attr->getValue . "\"";
-            }
-          }
-        }
-      }
-   
-      if($node->hasChildNodes()) {
-        my @children = $node->childNodes;
-        if($#children == 0) {
-          if($node->firstChild->nodeType == 3) {        
-            (my $value = $node->firstChild->textContent) =~ s/\s*//g;
-            if($value) {
-              if($queryCount == 0) {
-                if($queryString) {
-                  $queryString = $queryString . " and ";
-                }
-                $queryString = $queryString . $path . "[";
-                $queryString = $queryString . "text()=\"" . $value . "\"";
-                $queryCount++;
-              }
-              else {
-                $queryString = $queryString . " and text()=\"" . $value . "\"";              
-              }
-              if($queryCount) {
-                $queryString = $queryString . "]"
-              }                   
-              return $queryString;
-            }        
-          }
-        }
-        if($queryCount) {
-          $queryString = $queryString . "]"
-        }
-        foreach my $c ($node->childNodes) {
-          $queryString = subjectQuery($c, $queryString);
-        }
-      }
-    }
-  }
-  if($queryCount) {
-    $queryString = $queryString . "]"
-  }
-  return $queryString;
 }
 
 
@@ -613,7 +716,7 @@ __END__
 =head1 NAME
 
 perfSONAR_PS::MA::General - A module that provides methods for general tasks that MAs need to 
-perform, such as querying for results and performing the common 'keyRequest'.
+perform, such as querying for results.
 
 =head1 DESCRIPTION
 
@@ -722,26 +825,51 @@ and utilized in this module.
 
 =head2 getMetadataXQuery($node, $queryString)
 
-Given a metadata node, constructs an XQuery statement.
+Given a metadata node, constructs and returns an XQuery statement.
+
+=head2 getSPXQuery($node, $queryString)
+
+Helper function for the subject and parameters portion of a metadata element.  Used
+by 'getMetadataXQuery', not to be called externally. 
+
+=head2 getEventTypeXQuery($node, $queryString)
+
+Helper function for the eventType portion of a metadata element.  Used
+by 'getMetadataXQuery', not to be called externally. 
 
 =head2 getDataXQuery($node, $queryString)
 
-Given a data node, constructs an XQuery statement.
+Given a data node, constructs and returns an XQuery statement.
+
+=head2 xQueryParameters($node, $path, $queryCount, $queryString)
+
+Helper function for the parameters portion of NMWG elements, not to 
+be called externally. 
 
 =head2 xQueryAttributes($node, $path, $queryCount, $queryString)
 
-Used to extract attributes from nodes when constructing an XQuery.  This 
-function should not be used externally.  
+Helper function for the attributes portion of NMWG elements, not to 
+be called externally. 
 
 =head2 xQueryText($node, $path, $queryCount, $queryString)
 
-Used to extract text elements when constructing an XQuery.  This function 
-should not be used externally.  
+Helper function for the text portion of NMWG elements, not to 
+be called externally.  
 
-=head2 getTime($ma, $id)
+=head2 xQueryEventType($node, $path, $queryString)
+
+Helper function for the eventTYpe portion of NMWG elements, not to 
+be called externally. 
+
+=head2 getTime($request, $ma, $id)
 
 Performs the task of extracting time/cf/resolution information from the
 request message. 
+
+=head2 findTime($parameter, $timePrefix, $type)
+
+Extracts the time values from the parameter elements, and converts formats
+if necessary.  
 
 =head2 getDataSQL($ma, $d, $dbSchema)
 
@@ -760,14 +888,6 @@ requesting data between 1 and 70 with a resolution of 60, RRD will default
 to a higher resolution becaues the boundaries are not exact).  We adjust
 the start/end times to better fit the requested resolution.
 
-=head2 getMetadatXQuery($ma, $id, $data)
-
-DEPRICATED
-
-=head2 subjectQuery($node, $queryString)
-
-DEPRICATED
-
 =head1 SEE ALSO
 
 L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>, 
@@ -781,25 +901,29 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS 
   
-Questions and comments can be directed to the author, or the mailing list. 
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+ https://bugs.internet2.edu/jira/browse/PSPS
 
 =head1 VERSION
 
-$Id: General.pm 532 2007-09-06 17:27:08Z aaron $
+$Id: General.pm 692 2007-11-02 12:36:04Z zurawski $
 
 =head1 AUTHOR
 
 Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
- 
-You should have received a copy of the Internet2 Intellectual Property Framework along
+
+You should have received a copy of the Internet2 Intellectual Property Framework along 
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
+
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.
 
 =cut
+
