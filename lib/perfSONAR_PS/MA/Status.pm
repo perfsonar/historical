@@ -210,7 +210,7 @@ sub registerLS {
 }
 
 sub handleEvent($$$$) {
-	my ($self, $output, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	if ($messageType eq "MeasurementArchiveStoreRequest") {
@@ -288,7 +288,7 @@ sub handleStoreRequest($$$$) {
 	} else {
 		my $mdID = "metadata.".genuid();
 
-		#push @ret_elements, $md->toString;
+		$output->addExistingXMLElement($md);
 		getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.ma.added");
 		getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
 
@@ -420,7 +420,7 @@ sub lookupLinkStatusRequest($$$$) {
 		return ("error.common.storage.fetch", $msg);
 	}
 
-#	push @ret_elements, $md->toString;
+	$output->addExistingXMLElement($md);
 
 	my $data_content = "";
 	foreach my $link (@{ $res->{$link_id} }) {

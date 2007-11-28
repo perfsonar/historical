@@ -41,7 +41,7 @@ sub needLS() {
 }
 
 sub handleEvent($$$$$) {
-	my ($self, $doc, $endpoint, $messageType, $eventType, $md, $d) = @_;
+	my ($self, $doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d) = @_;
 
 	my $retMetadata;
 	my $retData;

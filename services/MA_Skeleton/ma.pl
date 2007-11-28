@@ -7,6 +7,7 @@ use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
 use Log::Log4perl qw(get_logger :levels);
 use File::Basename;
+use Fcntl qw(:DEFAULT :flock);
 use POSIX ":sys_wait_h";
 use Cwd;
 use Config::Simple;
@@ -56,15 +57,17 @@ my $DEBUGFLAG = '';
 my $READ_ONLY = '';
 my $HELP = '';
 my $CONFIG_FILE  = '';
+my $PIDDIR = '';
 
 my $status = GetOptions (
 		'config=s' => \$CONFIG_FILE,
+		'piddir=s' => \$PIDDIR,
 		'verbose' => \$DEBUGFLAG,
 		'help' => \$HELP);
 
 if(!$status or $HELP) {
 	print "$0: starts the MA daemon.\n";
-	print "\t$0 [--config /path/to/config --verbose --help]\n";
+	print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir]\n";
 	exit(1);
 }
 
@@ -78,6 +81,10 @@ my %conf = ();
 if (!Config::Simple->import_from($CONFIG_FILE, \%conf)) {
 	$logger->error("Couldn't read in specified configuration file: $CONFIG_FILE");
 	exit(-1);
+}
+
+if (!defined $conf{"default.port"} or $conf{"default.port"} eq "") {
+	$conf{"default.port"} = 8080;
 }
 
 if (!defined $conf{"default.max_worker_lifetime"} or $conf{"default.max_worker_lifetime"} eq "") {
@@ -98,6 +105,14 @@ if (!defined $conf{"default.modules"} or $conf{"default.modules"} eq "") {
 	exit(-1);
 }
 
+if (!defined $PIDDIR or $PIDDIR eq "") {
+	if (defined $conf{"default.pid_dir"} and $conf{"default.pid_dir"} ne "") {
+		$PIDDIR = $conf{"default.pid_dir"};
+	} else {
+		$PIDDIR = "/var/run";
+	}
+}
+
 # set logging level
 if($DEBUGFLAG) {
 	$logger->level($DEBUG);
@@ -105,14 +120,16 @@ if($DEBUGFLAG) {
 	$logger->level($INFO);
 }
 
+managePID($conf{"default.port"}, $PIDDIR);
+
 $logger->debug("Starting '".$$."'");
 
 my $ma_handler = new perfSONAR_PS::MA::Handler();
 my @ls_modules;
 
+# if there is only a single element, the config thing returns it not as an
+# array, but as a single element.
 if (!ref($conf{"default.modules"}) or ref($conf{"default.modules"}) ne "ARRAY") {
-	$logger->info("Type: ".ref($conf{"default.modules"})."\n");
-
 	my @array = ();
 	push @array, $conf{"default.modules"};
 
@@ -253,6 +270,35 @@ sub daemonize {
 	umask 0;
 }
 
+sub managePID {
+	my($port, $piddir) = @_;  
+	die "Can't write pidfile to $piddir\n" unless -w $piddir;
+	my $pidfile = $piddir."/ma.".$port.".pid";
+	sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
+	flock(PIDFILE, LOCK_EX);
+	my $p_id = <PIDFILE>;
+	chomp($p_id);
+	if($p_id ne "") {
+		open(PSVIEW, "ps -p ".$p_id." |");
+		my @output = <PSVIEW>;
+		close(PSVIEW);
+		if(!$?) {
+			die "$0 already running: $p_id\n"; 
+		}
+		else {
+			truncate(PIDFILE, 0);
+			seek(PIDFILE, 0, 0);
+			print PIDFILE "$$\n";  
+		}
+	}
+	else {
+		print PIDFILE "$$\n";  
+	}
+	flock(PIDFILE, LOCK_UN);
+	close(PIDFILE);
+	return;
+}
+
 sub killChildren {
 	foreach my $pid (keys %child_pids) {
 		kill("SIGINT", $pid);
@@ -313,6 +359,22 @@ sub __handleRequest($$) {
 	my $messageType = $message->getAttribute("type");
 	my $messageIdReturn = genuid();
 
+	my %message_parameters = ();
+
+	my $msgParams = find($message, "./nmwg:parameters", 1); 
+	foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
+		my ($name, $value);
+
+		$name = $p->getAttribute("name");
+		$value = extract($p);
+
+		if (!defined $name or $name eq "") {
+			next;
+		}
+
+		$message_parameters{$name} = $value;
+	}
+
 	my $found_pair = 0;
 
 	my $doc = new perfSONAR_PS::XML::Document_string();
@@ -332,7 +394,7 @@ sub __handleRequest($$) {
 					$status = "error.ma.no_eventtype";
 					$res = "No event type specified for metadata: ".$m->getAttribute("id");
 				} else {
-					($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, $eventType, $m, $d);
+					($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d);
 				}
 
 				if ($status ne "") {

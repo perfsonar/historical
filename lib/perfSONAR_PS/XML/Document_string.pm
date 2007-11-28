@@ -157,6 +157,15 @@ sub endElement($$) {
 	return 0;
 }
 
+sub addExistingXMLElement($$) {
+	my ($self, $element) = @_;
+	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
+
+	$self->{STRING} .= $element->toString();
+
+	return 0;
+}
+
 sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
