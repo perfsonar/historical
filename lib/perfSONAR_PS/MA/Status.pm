@@ -122,16 +122,16 @@ sub init {
 
 	if ($self->{CONF}->{"status.enable_registration"}) {
 		if (!defined $self->{CONF}->{"status.service_accesspoint"} or $self->{CONF}->{"status.service_accesspoint"} eq "") {
-			$logger->error("No access point specified for status service");
+			$logger->error("No access point specified for SNMP service");
 			return -1;
 		}
 
-		if (!defined $self->{CONF}->{"status.registration_interval"} or $self->{CONF}->{"status.registration_interval"} eq "") {
-			if (!defined $self->{CONF}->{"default.registration_interval"} or $self->{CONF}->{"default.registration_interval"} eq "") {
-				$logger->error("No registration interval specified for status service");
-				return -1;
+		if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "") {
+			if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
+				$self->{CONF}->{"status.ls_instance"} = $self->{CONF}->{"default.ls_instance"};
 			} else {
-				$self->{CONF}->{"status.registration_interval"} = $self->{CONF}->{"default.registration_interval"};
+				$logger->error("No LS instance specified for SNMP service");
+				return -1;
 			}
 		}
 	}
@@ -153,10 +153,10 @@ sub registerLS {
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status.ls"} or $self->{CONF}->{"status.ls"} eq "");
+	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "");
 
 	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"status.ls"},
+		LS_INSTANCE => $self->{CONF}->{"status.ls_instance"},
 		SERVICE_TYPE => $self->{CONF}->{"status.service_type"},
 		SERVICE_NAME => $self->{CONF}->{"status.service_name"},
 		SERVICE_DESCRIPTION => $self->{CONF}->{"status.service_description"},
@@ -209,8 +209,8 @@ sub registerLS {
 	return $ls->register_withData(\@link_mds);
 }
 
-sub handleEvent($$$$) {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d) = @_;
+sub handleEvent($$$$$$$$$) {
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	if ($messageType eq "MeasurementArchiveStoreRequest") {

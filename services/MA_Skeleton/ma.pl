@@ -388,14 +388,7 @@ sub __handleRequest($$) {
 
 				$found_pair = 1;
 
-				my ($status, $res);
-
-				if (!defined $eventType or $eventType eq "") {
-					$status = "error.ma.no_eventtype";
-					$res = "No event type specified for metadata: ".$m->getAttribute("id");
-				} else {
-					($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d);
-				}
+				my ($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d, $message);
 
 				if ($status ne "") {
 					$logger->error("Couldn't handle requested metadata: $res");
