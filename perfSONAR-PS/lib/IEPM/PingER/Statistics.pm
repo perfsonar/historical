@@ -15,12 +15,13 @@ sub calculate
 {
   my $rtts = shift; # reference to list of rtts
   
-  $logger->debug("input: $rtts");
- 
   if ( ref($rtts) ne 'ARRAY' ) {
-    $logger->error( "Input needs to be a reference to an array of rtt values ($rtts).");
+    $logger->error( "Input needs to be a reference to an array of rtt values.");
     return ( undef, undef, undef, undef );
   }
+
+  $logger->debug("input: @$rtts");
+ 
   my $size = scalar @$rtts;
   $logger->debug( "Size: $size"); 
   
@@ -50,13 +51,13 @@ sub calculate
 {
   my $rtts = shift; # reference to list of rtts
   
-  $logger->debug("input: $rtts");
- 
   if ( ref($rtts) ne 'ARRAY') {
     $logger->error( "Input needs to be a reference to an array of latency values.");
     return ( undef, undef, undef, undef, undef );
   }
  
+  $logger->debug("input: @$rtts");
+   
   my $size = scalar @$rtts;
   $logger->debug( "Size: $size"); 
   
@@ -103,13 +104,17 @@ sub calculate
   my $recv = shift;
 
   my $seqs = shift;
-  $logger->debug( "input: sent $sent, recv $recv, seqs $seqs");
  
-  if ( ref($seqs) ne 'ARRAY') {
-    $logger->error( "Input needs to be a reference to an array of packet sequence values.");
+  # if no seqs are supplied, ie recv packets is zero, then we return undef undef as 
+  # it is not know whether ooo nor dups are true or not
+  if ( ! defined $seqs || ref($seqs) ne 'ARRAY') {
+    #$logger->error( "Input needs to be a reference to an array of packet sequence values.");
     return ( undef, undef );
   }
-   my $size = scalar @$seqs;
+
+  $logger->debug( "input: sent $sent, recv $recv, seqs $seqs");
+
+  my $size = scalar @$seqs;
   $logger->debug( "Size: $size"); 
   
   return ( undef, undef ) if $size < 2;
@@ -172,7 +177,7 @@ sub calculate
   my $sent = shift;
   my $recv = shift;
     
-  $recv  |=0;
+  $recv = 0 if ! defined $recv;
   $logger->debug("input: $sent / $recv");
   if (  !$sent ||   $sent < $recv ) {
     $logger->error( "Error in parsing loss with sent ($sent), recieved ($recv)");
@@ -205,14 +210,15 @@ sub calculate
   my $pktRcvd = shift;
   my $seqs = shift;
  
- 
-  my $stringified_arr =   join ",", @$seqs;
   ### check if $seqs a reference to array
   if ( ref($seqs) ne  'ARRAY') {
-      $logger->error( "Input should be list of sequence numbers $stringified_arr");
+      $logger->error( "Input should be list of sequence numbers.");
       return undef;
-  }  
-   my $size = scalar @$seqs;
+  }
+  
+  my $stringified_arr =   join ",", @$seqs;
+  my $size = scalar @$seqs;
+
   $logger->debug( "Size: $size"); 
     
   if ( $pktRcvd !=  $size ) {

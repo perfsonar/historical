@@ -85,6 +85,7 @@ use Log::Log4perl qw(get_logger :levels);
      
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MP::PingER;
+use perfSONAR_PS::XML::Namespace;
 
 # get the logging instance
 Log::Log4perl->init("logger.conf");
@@ -105,14 +106,16 @@ if(!$status or $HELP) {
   exit(1);
 }
 
-my %ns = (
-  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
-  nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
-  nmtl4 => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
-);
+#my %ns = (
+#  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+#  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+#  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+#  nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+#  nmtl4 => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
+#  select => "http://ggf.org/ns/nmwg/ops/select/2.0/"
+#);
+my $ns = perfSONAR_PS::XML::Namespace->new();
+
 
 # set logging level
 if($DEBUGFLAG) {
@@ -160,7 +163,7 @@ $mpThread->join();
 sub measurementPoint {
   $logger->debug("Starting '".threads->tid()."' as the MP.");
   
-  my $mp = new perfSONAR_PS::MP::PingER( \%conf, \%ns,);
+  my $mp = new perfSONAR_PS::MP::PingER( \%conf, $ns,);
   $mp->parseMetadata;
   $mp->prepareMetadata;
 
@@ -182,5 +185,6 @@ sub daemonize {
   setsid or die "Can't start a new session: $!";
   umask 0;
 }
+
 
 1;

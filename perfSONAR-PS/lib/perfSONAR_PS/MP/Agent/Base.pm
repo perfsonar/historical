@@ -143,9 +143,81 @@ sub parse
     
     $logger->logdie( "parse() is a virtual method, please override with inherited implementation.");
 
-
-
 	return -1;
+}
+
+
+
+
+=head2 destination( $string )
+
+accessor/mutator method to set the destination to ping to
+
+=cut
+sub source
+{
+	my $self = shift;
+	my $src = shift;
+	
+	if ( $src ) {
+		$self->{'OPTIONS'}->{source} = $src;
+	}
+
+	return $self->{'OPTIONS'}->{source};
+}
+
+=head2 destinationIp( $string )
+
+accessor/mutator method to set the destination ip to ping to
+
+=cut
+sub sourceIp
+{
+	my $self = shift;
+	my $src = shift;
+	
+	if ( $src ) {
+		$self->{'OPTIONS'}->{sourceIp} = $src;
+	}
+
+	return $self->{'OPTIONS'}->{sourceIp};
+}
+
+
+
+
+=head2 destination( $string )
+
+accessor/mutator method to set the destination to ping to
+
+=cut
+sub destination
+{
+	my $self = shift;
+	my $dest = shift;
+	
+	if ( $dest ) {
+		$self->{'OPTIONS'}->{destination} = $dest;
+	}
+
+	return $self->{'OPTIONS'}->{destination};
+}
+
+=head2 destinationIp( $string )
+
+accessor/mutator method to set the destination ip to ping to
+
+=cut
+sub destinationIp
+{
+	my $self = shift;
+	my $dest = shift;
+	
+	if ( $dest ) {
+		$self->{'OPTIONS'}->{destinationIp} = $dest;
+	}
+
+	return $self->{'OPTIONS'}->{destinationIp};
 }
 
 
@@ -166,13 +238,33 @@ sub results {
 }
 
 
-=head2 resultsXML( $namespace )
+=head2 fromDOM( )
+
+Accepts a DOM object and determines the relative paramters to create and use
+for the test
+
+=cut
+sub fromDOM()
+{
+	my $self = shift;
+	my $dom = shift;
+	
+	# check input
+	$logger->logdie("Input is not a dom object")
+		unless UNIVERSAL::can( $dom, 'isa' ) && $dom->isa( 'XML::LibXML::Document');
+		
+	$logger->logdie( "fromDOM() is virtual and should be overridden");
+	
+	return -1;
+}
+
+=head2 toDOM(  )
 
 Returns the full nmwg message (metadata and data elements) for the results 
 that have been collected. Output should be a XML::LibXML::Document object.
 
 =cut
-sub resultsXML
+sub toDOM
 {
   my $self = shift;
 
@@ -186,7 +278,7 @@ sub resultsXML
 Returns the relevant SQL insert or update statement for the results.
 
 =cut
-sub resultsSQL
+sub toSQL
 {	
   my $self = shift;
 
@@ -200,7 +292,7 @@ sub resultsSQL
 Returns the relevant RRD statement for the results.
 
 =cut
-sub resultsRRD {
+sub toRRD {
 	
   my $self = shift;
 

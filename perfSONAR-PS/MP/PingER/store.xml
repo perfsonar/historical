@@ -2,27 +2,24 @@
 <nmwg:store 
   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
   xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
-  xmlns:nmtopo="http://ggf.org/ns/nmwg/topology/base/3.0/"
-  xmlns:nmtl2="http://ggf.org/ns/nmwg/topology/l2/3.0/"
-  xmlns:nmtl3="http://ggf.org/ns/nmwg/topology/l3/3.0/"
-  xmlns:nmtl4="http://ggf.org/ns/nmwg/topology/l4/3.0/">
+  xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/base/3.0/" >
 
   <nmwg:metadata id="ping--iepm-resp.slac.stanford.edu--atlang-hstnng.abilene.ucaid.edu--100">
     <pinger:subject id="pingsubject--iepm-resp.slac.stanford.edu--atlang-hstnng.abilene.ucaid.edu">
-      <nmtl4:endPointPair>
-        <nmtl4:endPoint role="src" protocol="icpm">
-          <nmtl3:interface id="pinginterface--iepm-resp.slac.stanford.edu">
-            <nmtl3:ifHostName>iepm-resp.slac.stanford.edu</nmtl3:ifHostName>
-            <nmtl3:ipAddress type="ipv4">134.79.240.36</nmtl3:ipAddress>
-          </nmtl3:interface>
-        </nmtl4:endPoint>
-        <nmtl4:endPoint role="dst" protocol="icpm">
-          <nmtl3:interface id="pinginterface--atlang-hstnng.abilene.ucaid.edu">
-            <nmtl3:ifHostName>atlang-hstnng.abilene.ucaid.edu</nmtl3:ifHostName>
-            <nmtl3:ipAddress type="ipv4">198.32.8.34</nmtl3:ipAddress>
-          </nmtl3:interface>
-        </nmtl4:endPoint>
-      </nmtl4:endPointPair>
+      <nmwgt:endPointPair>
+        <nmwgt:endPoint role="src" protocol="icmp">
+          <nmwgt:interface id="pinginterface--iepm-resp.slac.stanford.edu">
+            <nmwgt:ifHostName>iepm-resp.slac.stanford.edu</nmwgt:ifHostName>
+            <nmwgt:ipAddress type="ipv4">134.79.240.36</nmwgt:ipAddress>
+          </nmwgt:interface>
+        </nmwgt:endPoint>
+        <nmwgt:endPoint role="dst" protocol="icmp">
+          <nmwgt:interface id="pinginterface--atlang-hstnng.abilene.ucaid.edu">
+            <nmwgt:ifHostName>atlang-hstnng.abilene.ucaid.edu</nmwgt:ifHostName>
+            <nmwgt:ipAddress type="ipv4">198.32.8.34</nmwgt:ipAddress>
+          </nmwgt:interface>
+        </nmwgt:endPoint>
+      </nmwgt:endPointPair>
     </pinger:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/pinger/2.0</nmwg:eventType>
     <pinger:parameters>
@@ -45,28 +42,28 @@
     </nmwg:key>
   </nmwg:data>
 
-  <nmwg:metadata id="ping--iepm-resp.slac.stanford.edu--mon.es.net--100">
-    <pinger:subject id="pingsubject--iepm-resp.slac.stanford.edu--mon.es.net">
-      <nmtl4:endPointPair>
-        <nmtl4:endPoint role="src" protocol="icpm">
-          <nmtl3:interface id="pinginterface--iepm-resp.slac.stanford.edu">
-            <nmtl3:ifHostName>iepm-resp.slac.stanford.edu</nmtl3:ifHostName>
-            <nmtl3:ipAddress type="ipv4">134.79.24.36</nmtl3:ipAddress>
-          </nmtl3:interface>
-        </nmtl4:endPoint>
-        <nmtl4:endPoint role="dst" protocol="icpm">
-          <nmtl3:interface id="pinginterface--mon.es.net">
-            <nmtl3:ifHostName>mon.es.net</nmtl3:ifHostName>
-            <nmtl3:ipAddress type="ipv4">198.32.8.34</nmtl3:ipAddress>
-          </nmtl3:interface>
-        </nmtl4:endPoint>
-      </nmtl4:endPointPair>
+  <nmwg:metadata id="ping--iepm-resp.slac.stanford.edu--iepm-bw.slac.stanford.edu--1000">
+    <pinger:subject id="pingsubject--iepm-resp.slac.stanford.edu--iepm-bw.slac.stanford.edu">
+      <nmwgt:endPointPair>
+        <nmwgt:endPoint role="src" protocol="icmp">
+          <nmwgt:interface id="pinginterface--iepm-resp.slac.stanford.edu">
+            <nmwgt:ifHostName>iepm-resp.slac.stanford.edu</nmwgt:ifHostName>
+            <nmwgt:ipAddress type="ipv4">134.79.240.36</nmwgt:ipAddress>
+          </nmwgt:interface>
+        </nmwgt:endPoint>
+        <nmwgt:endPoint role="dst" protocol="icmp">
+          <nmwgt:interface id="pinginterface--iepm-bw.slac.stanford.edu">
+            <nmwgt:ifHostName>iepm-bw.slac.stanford.edu</nmwgt:ifHostName>
+            <nmwgt:ipAddress type="ipv4">134.79.240.38</nmwgt:ipAddress>
+          </nmwgt:interface>
+        </nmwgt:endPoint>
+      </nmwgt:endPointPair>
     </pinger:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/pinger/2.0</nmwg:eventType>
     <pinger:parameters>
-      <nmwg:parameter name="count">10</nmwg:parameter>
+      <nmwg:parameter name="count">8</nmwg:parameter>
       <nmwg:parameter name="interval">1</nmwg:parameter>
-      <nmwg:parameter name="packetSize">100</nmwg:parameter>
+      <nmwg:parameter name="packetSize">1000</nmwg:parameter>
       <nmwg:parameter name="valueUnits">msec</nmwg:parameter>
       <nmwg:parameter name="ttl">64</nmwg:parameter>
       <nmwg:parameter name="testPeriod">30</nmwg:parameter>
@@ -74,11 +71,11 @@
       <nmwg:parameter name="testOffset">0</nmwg:parameter>
     </pinger:parameters>    
   </nmwg:metadata>
-  <nmwg:data id="pingdata--iepm-resp.slac.stanford.edu--mon.es.net--100" metadataIdRef="ping--iepm-resp.slac.stanford.edu--mon.es.net--100">
-    <nmwg:key id="pingkey--iepm-resp.slac.stanford.edu--mon.es.net">
+  <nmwg:data id="pingdata--iepm-resp.slac.stanford.edu--iepm-bw.slac.stanford.edu--1000" metadataIdRef="ping--iepm-resp.slac.stanford.edu--iepm-bw.slac.stanford.edu--1000">
+    <nmwg:key id="pingkey--iepm-resp.slac.stanford.edu--iepm-bw.slac.stanford.edu">
       <nmwg:parameters>
         <nmwg:parameter name="type">MA</nmwg:parameter>
-        <nmwg:parameter name="file">http://localhost:8080/</nmwg:parameter>
+        <nmwg:parameter name="file">http://localhost:8180/</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>
   </nmwg:data>

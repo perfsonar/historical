@@ -1,3 +1,6 @@
+use Net::Domain qw(hostfqdn);
+use Socket;
+
 package perfSONAR_PS::MP::Agent::CommandLine;
 
 
@@ -188,6 +191,13 @@ sub collectMeasurements
   	# clear the results
     undef $self->{RESULTS}; 
 
+	# work out dns and ip address of source (ie this host)
+	$self->source( Net::Domain::hostfqdn );
+	# TODO: check to make sure we pick up correct ip
+	$self->sourceIp( Socket::inet_ntoa(
+    	scalar gethostbyname( $self->source() || 'localhost' )
+    	) );
+    	
 	# get the time of test
     my($sec, $frac) = Time::HiRes::gettimeofday;
     my $time = eval( $sec.".".$frac );
@@ -209,9 +219,12 @@ sub collectMeasurements
     my @results = <CMD>;
     close(CMD);
     
+    ($sec, $frac) = Time::HiRes::gettimeofday;
+    my $endtime = eval( $sec.".".$frac );
+    
     # parse through the data; this method should be adapted for parsing of each tool
     # do i really want to do this here?
-	return $self->parse( \@results, $time, $self->commandString() );
+	return $self->parse( \@results, $time, $endtime, $self->commandString() );
         
   }
   else {
@@ -247,10 +260,11 @@ sub parse
 	my $self = shift;
 	my $array = shift;
 	my $time = shift;
+	my $endtime = shift;
 	my $commandLine = shift;
 		
 	# don't do anything too intelligent, just concat the string
-	$self->{'RESULTS'} =  "At '$time', command '$commandLine' resulted in ouput:\n @$array";
+	$self->{'RESULTS'} =  "At '$time', command '$commandLine' resulted in ouput (ended at '$endtime'):\n @$array";
 	return 0;
 }
 
