@@ -83,6 +83,9 @@ sub init {
 	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
 	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
 
+	$handler->setMessageResponseType($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "TopologyChangeResponse");
+	$handler->setMessageResponseType($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "SetupDataResponse");
+
 	return 0;
 }
 

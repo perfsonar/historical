@@ -14,6 +14,19 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::LS::Register;
 use perfSONAR_PS::MA::Status::Client::SQL;
 
+sub init($$);
+sub needLS($);
+sub registerLS($$);
+sub handleEvent($$$$$$$$$);
+sub handleStoreRequest($$$$);
+sub __handleStoreRequest($$$$$$);
+sub handleQueryRequest($$$$$);
+sub lookupAllRequest($$$$);
+sub lookupLinkStatusRequest($$$$);
+sub writeoutLinkState_range($$$);
+sub writeoutLinkState($$$);
+
+
 sub new {
 	my ($package, $conf, $directory) = @_;
 
@@ -33,6 +46,59 @@ sub new {
 sub init {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
+
+	if (!defined $self->{CONF}->{"status.endpoint"} or $self->{CONF}->{"status.endpoint"} eq "") {
+		$logger->error("No endpoint specified for status service");
+		return -1;
+	}
+
+	if (!defined $self->{CONF}->{"status.enable_registration"} or $self->{CONF}->{"status.enable_registration"} eq "") {
+		$self->{CONF}->{"status.enable_registration"} = 0;
+	}
+
+	if ($self->{CONF}->{"status.enable_registration"}) {
+		if (!defined $self->{CONF}->{"status.service_accesspoint"} or $self->{CONF}->{"status.service_accesspoint"} eq "") {
+			$logger->error("No access point specified for SNMP service");
+			return -1;
+		}
+
+		if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "") {
+			if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
+				$self->{CONF}->{"status.ls_instance"} = $self->{CONF}->{"default.ls_instance"};
+			} else {
+				$logger->error("No LS instance specified for SNMP service");
+				return -1;
+			}
+		}
+
+		if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
+			if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
+				$self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+			} else {
+				$logger->warn("Setting registration interval to 30 minutes");
+				$self->{CONF}->{"status.ls_registration_interval"} = 1800;
+			}
+		}
+
+		if(!defined $self->{CONF}->{"status.service_description"} or
+				$self->{CONF}->{"status.service_description"} eq "") {
+			$self->{CONF}->{"status.service_description"} = "perfSONAR_PS Status MA";
+			$logger->warn("Setting 'service_description' to 'perfSONAR_PS Status MA'.");
+		}
+
+		if(!defined $self->{CONF}->{"status.service_name"} or
+				$self->{CONF}->{"status.service_name"} eq "") {
+			$self->{CONF}->{"status.service_name"} = "Status MA";
+			$logger->warn("Setting 'service_name' to 'Status MA'.");
+		}
+
+		if(!defined $self->{CONF}->{"status.service_type"} or
+				$self->{CONF}->{"status.service_type"} eq "") {
+			$self->{CONF}->{"status.service_type"} = "MA";
+			$logger->warn("Setting 'service_type' to 'MA'.");
+		}
+	}
+
 
 	if (!defined $self->{CONF}->{"status.db_type"} or $self->{CONF}->{"status.db_type"} eq "") {
 		$logger->error("No database type specified");
@@ -111,46 +177,16 @@ sub init {
 
 	$self->{CLIENT}->close;
 
-	if (!defined $self->{CONF}->{"status.endpoint"} or $self->{CONF}->{"status.endpoint"} eq "") {
-		$logger->error("No endpoint specified for status service");
-		return -1;
-	}
-
-	if (!defined $self->{CONF}->{"status.enable_registration"} or $self->{CONF}->{"status.enable_registration"} eq "") {
-		$self->{CONF}->{"status.enable_registration"} = 0;
-	}
-
-	if ($self->{CONF}->{"status.enable_registration"}) {
-		if (!defined $self->{CONF}->{"status.service_accesspoint"} or $self->{CONF}->{"status.service_accesspoint"} eq "") {
-			$logger->error("No access point specified for SNMP service");
-			return -1;
-		}
-
-		if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "") {
-			if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
-				$self->{CONF}->{"status.ls_instance"} = $self->{CONF}->{"default.ls_instance"};
-			} else {
-				$logger->error("No LS instance specified for SNMP service");
-				return -1;
-			}
-		}
-
-		if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
-			if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
-				$self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
-			} else {
-				$self->{CONF}->{"status.ls_registration_interval"} = 600;
-			}
-		}
-	}
-
 	$handler->add($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 	$handler->add($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
+
+	$handler->setMessageResponseType($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "SetupDataResponse");
+	$handler->setMessageResponseType($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "MeasurementArchiveStoreResponse");
 
 	return 0;
 }
 
-sub needLS() {
+sub needLS($) {
 	my ($self) = @_;
 
 	return ($self->{CONF}->{"status.enable_registration"});

@@ -8,6 +8,26 @@ use strict;
 
 use perfSONAR_PS::Common;
 
+sub new($$$);
+sub setRequest($$);
+sub getEndpoint($);
+sub parse($$);
+sub remapRequest($$);
+sub getURI($);
+sub getRawRequest($);
+sub getRawRequestAsString($);
+sub getRequest($);
+sub getRequestAsXPath($);
+sub setResponse($$);
+sub setResponseAsXPath($$);
+sub getRequestDOM($);
+sub getResponse($);
+sub setNamespaces($$);
+sub getNamespaces($);
+sub setRequestDOM($$);
+sub finish($);
+
+
 sub new($$$) {
   my ($package, $call, $http_request) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
@@ -33,12 +53,12 @@ sub new($$$) {
   $hash{"RESPONSE"}->header('user-agent' => 'perfSONAR-PS/1.0b');
   $hash{"RESPONSE"}->code("200");
 
-  $hash{"START_TIME"} = time;
+  $hash{"START_TIME"} = [Time::HiRes::gettimeofday];
 
   bless \%hash => $package;
 }
 
-sub setRequest {
+sub setRequest($$) {
   my ($self, $request) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if(defined $request and $request ne "") {
@@ -96,7 +116,7 @@ sub parse($$) {
     return -1;
   }
 
-  my $messages = find($dom->getDocumentElement, ".//nmwg:message");
+  my $messages = find($dom->getDocumentElement, ".//nmwg:message", 0);
 
   if (!defined $messages or $messages->size() <= 0) {
     my $msg = "Couldn't find message element in request";
@@ -144,23 +164,23 @@ sub getURI($) {
   return $self->{REQUEST}->uri;
 }
 
-sub getRawRequest {
+sub getRawRequest($) {
   my ($self) = @_;
 
   return $self->{REQUEST};
 }
 
-sub getRawRequestAsString {
+sub getRawRequestAsString($) {
   my ($self) = @_;
 
   return $self->{REQUEST}->content;
 }
 
-sub getRequest {
+sub getRequest($) {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   my $xp = $self->getRequestAsXPath();
-  my $nodeset = find($xp, '//nmwg:message');
+  my $nodeset = find($xp, '//nmwg:message', 0);
   if($nodeset->size() <= 0) {
     $logger->error("Message element not found or in wrong namespace.");
   }
@@ -173,7 +193,7 @@ sub getRequest {
   return "";
 }
 
-sub getRequestAsXPath {
+sub getRequestAsXPath($) {
   my ($self) = @_;
   my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
   $xp->clear_namespaces();
@@ -182,7 +202,7 @@ sub getRequestAsXPath {
 }
 
 
-sub setResponse {
+sub setResponse($$) {
   my ($self, $content) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if(defined $content and $content ne "") {
@@ -196,7 +216,7 @@ sub setResponse {
   return;
 }
 
-sub setResponseAsXPath {
+sub setResponseAsXPath($$) {
   my ($self, $xpath) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   $logger->error("Missing argument.") unless defined $xpath;
@@ -204,7 +224,7 @@ sub setResponseAsXPath {
   return $self->setResponse( $content );
 }
 
-sub getRequestDOM {
+sub getRequestDOM($) {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if($self->{REQUESTDOM}) {
@@ -216,7 +236,7 @@ sub getRequestDOM {
   }
 }
 
-sub getResponse {
+sub getResponse($) {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if($self->{RESPONSEMESSAGE}) {
@@ -228,7 +248,7 @@ sub getResponse {
   }
 }
 
-sub setNamespaces {
+sub setNamespaces($$) {
   my ($self, $ns) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if(defined $ns and $ns ne "") {
@@ -241,7 +261,7 @@ sub setNamespaces {
 }
 
 
-sub getNamespaces {
+sub getNamespaces($) {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if($self->{NAMESPACES}) {
@@ -254,7 +274,7 @@ sub getNamespaces {
 }
 
 
-sub setRequestDOM {
+sub setRequestDOM($$) {
   my ($self, $dom) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if(defined $dom and $dom ne "") {
@@ -266,12 +286,13 @@ sub setRequestDOM {
   return;
 }
 
-sub finish {
+sub finish($) {
   my ($self) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
   if(defined $self->{CALL} and $self->{CALL} ne "") {
-    my $end_time = time;
-    $logger->info("Seconds required to handle request from ".$self->{CALL}->peerhost().": ".($end_time - $self->{START_TIME}));
+    my $end_time = [Time::HiRes::gettimeofday];
+    my $diff = Time::HiRes::tv_interval $self->{START_TIME}, $end_time;
+    $logger->info("Total service time for request from ".$self->{CALL}->peerhost().": ".$diff." seconds");
     $self->{CALL}->send_response($self->{RESPONSE});
     $self->{CALL}->close;
     delete $self->{CALL};

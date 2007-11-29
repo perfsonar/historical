@@ -32,6 +32,7 @@ sub init {
 	my $logger = get_logger("perfSONAR_PS::MA::Skeleton");
 
 	$handler->add("/perfSONAR_PS/services/skeleton", "SkeletonMessage", "SkeletonRequest", $self);
+	$handler->setMessageResponseType("", "SkeletonRequest", "SkeletonResponse");
 
 	return 0;
 }
@@ -40,8 +41,8 @@ sub needLS() {
 	return 0;
 }
 
-sub handleEvent($$$$$) {
-	my ($self, $doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d) = @_;
+sub handleEvent($$$$$$$$$) {
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 
 	my $retMetadata;
 	my $retData;
@@ -50,8 +51,8 @@ sub handleEvent($$$$$) {
 
 	my @ret_elements = ();
 
-	getResultCodeMetadata($doc, $mdID, $md->getAttribute("id"), "success.skeleton");
-	getResultCodeData($doc, "data.".genuid(), $mdID, $msg, 1);
+	getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.skeleton");
+	getResultCodeData($output, "data.".genuid(), $mdID, $msg, 1);
 
 	return ("", "");
 }

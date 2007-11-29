@@ -16,7 +16,30 @@ our @EXPORT = ('readXML','readConfiguration', 'chainMetadata',
             'find', 'findvalue', 'queryLS', 'escapeString', 'unescapeString',
              'makeEnvelope', 'mapNamespaces');
 
-sub find {
+
+sub find($$$);
+sub findvalue($$);
+sub makeEnvelope($);
+sub queryLS($$$$);
+sub readXML($);
+sub readConfiguration($);
+sub chainMetadata($$);
+sub metadataChaining($$);
+sub getPath($);
+sub elements($$$);
+sub attributes($$);
+sub exact($$);
+sub countRefs($$$$$);
+sub genuid();
+sub extract($$);
+sub mapNamespaces($$);
+sub reMap($$$);
+sub consultArchive($$$$);
+sub escapeString($);
+sub unescapeString($);
+sub convertISO($);
+
+sub find($$$) {
   my ($node, $query, $return_first) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   my $res;
@@ -54,7 +77,7 @@ sub findvalue($$) {
   return $found_node->textContent;
 }
 
-sub makeEnvelope {
+sub makeEnvelope($) {
   my($content) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   my $string = "<SOAP-ENV:Envelope xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\"\n"; 
@@ -139,7 +162,7 @@ sub queryLS($$$$) {
   return (0, \%ret_structure);
 }
 
-sub readXML {
+sub readXML($) {
   my ($file)  = @_;  
   my $logger = get_logger("perfSONAR_PS::Common");
   
@@ -166,38 +189,7 @@ sub readXML {
 }
 
 
-sub readConfiguration {
-  my ($file, $conf)  = @_;
-  my $logger = get_logger("perfSONAR_PS::Common");
-  
-  if((defined $file and $file ne "") and 
-     (defined $conf and $conf ne "")) {
-    my $CONF = new IO::File("<".$file);
-    if(defined $CONF) {
-      while (<$CONF>) {
-        if(!($_ =~ m/^#.*$/) and !($_ =~ m/^\s+/)) {
-          $_ =~ s/\n//;
-          my @values = split(/\?/,$_);
-          $conf->{$values[0]} = $values[1];
-          $logger->debug("Found ".$values[0]." = \"".$values[1]."\".");
-        }
-      }          
-      $CONF->close();
-      return 0;
-    }
-    else {
-      $logger->error("Cannot open file \"".$file."\".");
-      return -1;
-    }
-  }
-  else {
-    $logger->error("Missing argument(s).");
-    return -1;
-  }
-}
-
-
-sub chainMetadata {
+sub chainMetadata($$) {
   my($dom, $uri) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   
@@ -245,7 +237,7 @@ sub chainMetadata {
   return $dom;
 }
 
-sub metadataChaining {
+sub metadataChaining($$) {
   my($node, $original) = @_;
   if(!($node->getName eq "\#text")) {
     if($node->getName eq "nmwg:parameter") {
@@ -264,7 +256,7 @@ sub metadataChaining {
   return;
 }
 
-sub getPath {
+sub getPath($) {
   my($node) = @_;
   my $path = "";
   if($node->nodePath() =~ m/nmwg:store/) {
@@ -281,11 +273,11 @@ sub getPath {
 }
 
 
-sub elements {
+sub elements($$$) {
   my($node, $original, $extra) = @_;
   my $path = getPath($node);
   if($path) {
-    if(!(find($original, $path.$extra))) {
+    if(!(find($original, $path.$extra, 1))) {
       my $name = $node->nodeName;
       my $path2 = $path;
       $path2 =~ s/\/$name$//;    
@@ -300,14 +292,14 @@ sub elements {
   return;
 }
 
-sub attributes {
+sub attributes($$) {
   my($node, $original) = @_;
   my $path = getPath($node);
   foreach my $attr ($node->attributes) {
     if($attr->isa('XML::LibXML::Attr')) {
       if($attr->getName ne "id") {
         if($path) {
-          if(!(find($original, $path."[@".$attr->getName."]"))) {
+          if(!(find($original, $path."[@".$attr->getName."]", 1))) {
             if(find($original, $path, 1)) {      
               find($original, $path, 1)->setAttribute($attr->getName, $attr->getValue);
             }
@@ -319,7 +311,7 @@ sub attributes {
   return;
 }
 
-sub exact {
+sub exact($$) {
   my($node, $original) = @_;
   my $path = getPath($node);
 
@@ -345,7 +337,7 @@ sub exact {
   return;
 }
 
-sub countRefs {
+sub countRefs($$$$$) {
   my($id, $dom, $uri, $element, $attr) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   
@@ -370,29 +362,32 @@ sub countRefs {
 }
 
 
-sub genuid {
+sub genuid() {
   my $r = int(rand(16777216))+1048576;
   return $r;
 }
 
 
-sub extract {
-  my($node) = @_;
+sub extract($$) {
+  my($node, $clean) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
-  
   if(defined $node and $node ne "") {
     if($node->getAttribute("value")) {
       return $node->getAttribute("value");
     }
     else {
-      return $node->textContent;
+      my $value = $node->textContent;
+      if($clean) {
+        $value =~ s/\s*//g;
+      }
+      if($value) {
+        return $value;
+      }
     }  
-  }
-  else {
-    $logger->error("Missing argument.");
   }
   return "";
 }
+
 
 sub mapNamespaces($$) {
 	my ($node, $namespaces) = @_;
@@ -419,7 +414,7 @@ sub mapNamespaces($$) {
 	}
 }
 
-sub reMap {
+sub reMap($$$) {
   my($requestNamespaces, $namespaces, $node) = @_;  
   my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -506,7 +501,7 @@ sub consultArchive($$$$) {
 #  my $attr = $doc->createAttributeNS( '', 'dummy', '' );
 #  $doc->getDocumentElement()->setAttributeNodeNS( $attr );
 
-  my $nodeset = find($doc, "//nmwg:message");
+  my $nodeset = find($doc, "//nmwg:message", 0);
   if($nodeset->size <= 0) {
     my $msg = "Message element not found in response";
     $logger->error($msg);
@@ -546,7 +541,7 @@ sub unescapeString($) {
 	return $input;
 }
 
-sub convertISO {
+sub convertISO($) {
   my($iso) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   if(defined $iso and $iso ne "") {

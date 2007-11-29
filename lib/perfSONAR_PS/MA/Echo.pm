@@ -37,6 +37,8 @@ sub init {
 	$handler->add("", "EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
 	$handler->addRegex("", "EchoRequest", "^echo.*", $self);
 
+	$handler->setMessageResponseType("", "EchoRequest", "EchoResponse");
+
 	return 0;
 }
 
@@ -44,8 +46,8 @@ sub needLS() {
 	return 0;
 }
 
-sub handleEvent($$$$) {
-	my ($self, $doc, $endpoint, $messageType, $eventType, $md, $d) = @_;
+sub handleEvent($$$$$$$$$) {
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 
 	my $retMetadata;
 	my $retData;
@@ -54,8 +56,8 @@ sub handleEvent($$$$) {
 
 	my @ret_elements = ();
 
-	getResultCodeMetadata($doc, $mdID, $md->getAttribute("id"), "success.echo");
-	getResultCodeData($doc, "data.".genuid(), $mdID, $msg, 1);
+	getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.echo");
+	getResultCodeData($output, "data.".genuid(), $mdID, $msg, 1);
 
 	return ("", "");
 }

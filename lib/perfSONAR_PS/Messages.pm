@@ -38,7 +38,7 @@ sub startMessage($$$$$$) {
 	my %attrs = ();
 	$attrs{"type"} = $type;
 	$attrs{"id"} = $id;
-	$attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef eq "");
+	$attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef ne "");
 
 	return $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "message", \%attrs, $namespaces, $content);
 }

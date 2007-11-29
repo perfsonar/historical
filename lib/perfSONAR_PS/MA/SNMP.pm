@@ -6,8 +6,6 @@ use strict;
 use warnings;
 use Exporter;
 use Log::Log4perl qw(get_logger);
-use File::Temp qw(tempfile);
-use Time::HiRes qw(gettimeofday tv_interval);
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
@@ -114,31 +112,31 @@ sub init($$) {
   if(!defined $self->{CONF}->{"snmp.default_resolution"} or
      $self->{CONF}->{"snmp.default_resolution"} eq "") {
     $self->{CONF}->{"snmp.default_resolution"} = "300";
-    $logger->error("Setting 'default_resolution' to '300'.");
+    $logger->warn("Setting 'default_resolution' to '300'.");
   }
 
   if(!defined $self->{CONF}->{"snmp.service_accesspoint"} or
      $self->{CONF}->{"snmp.service_accesspoint"} eq "") {
     $self->{CONF}->{"snmp.service_accesspoint"} = "http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."";
-    $logger->error("Setting 'service_accesspoint' to 'http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."'.");
+    $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."'.");
   }
 
   if(!defined $self->{CONF}->{"snmp.service_description"} or
      $self->{CONF}->{"snmp.service_description"} eq "") {
     $self->{CONF}->{"snmp.service_description"} = "perfSONAR_PS SNMP MA";
-    $logger->error("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
+    $logger->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
   }
 
   if(!defined $self->{CONF}->{"snmp.service_name"} or
      $self->{CONF}->{"snmp.service_name"} eq "") {
     $self->{CONF}->{"snmp.service_name"} = "SNMP MA";
-    $logger->error("Setting 'service_name' to 'SNMP MA'.");
+    $logger->warn("Setting 'service_name' to 'SNMP MA'.");
   }
 
   if(!defined $self->{CONF}->{"snmp.service_type"} or
      $self->{CONF}->{"snmp.service_type"} eq "") {
     $self->{CONF}->{"snmp.service_type"} = "MA";
-    $logger->error("Setting 'service_type' to 'MA'.");
+    $logger->warn("Setting 'service_type' to 'MA'.");
   }
 
   if (!defined $self->{CONF}->{"snmp.enable_registration"} or $self->{CONF}->{"snmp.enable_registration"} eq "") {
@@ -159,10 +157,46 @@ sub init($$) {
 			  return -1;
 		  }
 	  }
+
+	  if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
+		  if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
+			  $self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+		  } else {
+			  $logger->warn("Setting registration interval to 30 minutes");
+			  $self->{CONF}->{"status.ls_registration_interval"} = 1800;
+		  }
+	  }
+
+	  if(!defined $self->{CONF}->{"snmp.service_accesspoint"} or
+			  $self->{CONF}->{"snmp.service_accesspoint"} eq "") {
+		  $self->{CONF}->{"snmp.service_accesspoint"} = "http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."";
+		  $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."'.");
+	  }
+
+	  if(!defined $self->{CONF}->{"snmp.service_description"} or
+			  $self->{CONF}->{"snmp.service_description"} eq "") {
+		  $self->{CONF}->{"snmp.service_description"} = "perfSONAR_PS SNMP MA";
+		  $logger->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
+	  }
+
+	  if(!defined $self->{CONF}->{"snmp.service_name"} or
+			  $self->{CONF}->{"snmp.service_name"} eq "") {
+		  $self->{CONF}->{"snmp.service_name"} = "SNMP MA";
+		  $logger->warn("Setting 'service_name' to 'SNMP MA'.");
+	  }
+
+	  if(!defined $self->{CONF}->{"snmp.service_type"} or
+			  $self->{CONF}->{"snmp.service_type"} eq "") {
+		  $self->{CONF}->{"snmp.service_type"} = "MA";
+		  $logger->warn("Setting 'service_type' to 'MA'.");
+	  }
   }
 
   $handler->add($self->{CONF}->{"snmp.endpoint"}, "SetupDataRequest", "", $self);
   $handler->add($self->{CONF}->{"snmp.endpoint"}, "MetadataKeyRequest", "", $self);
+
+  $handler->setMessageResponseType($self->{CONF}->{"snmp.endpoint"}, "SetupDataRequest", "SetupDataResponse");
+  $handler->setMessageResponseType($self->{CONF}->{"snmp.endpoint"}, "MetadataKeyRequest", "MetadataKeyResponse");
 
   return 0;
 }
@@ -241,16 +275,16 @@ sub maMetadataKeyRequest($$$$$) {
   #     N: do md/d queries against md return results
 
   if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp.default_resolution"})) {
-    if($md->find("./nmwg:key")) {
-      metadataKeyRetrieveKey(\%{$self}, $metadatadb, $md->find("./nmwg:key")->get_node(1), "", $md->getAttribute("id"), $request->getNamespaces(), $output);
+    if(find($md, "./nmwg:key", 1)) {
+      metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $request->getNamespaces(), $output);
     }
     else {
       if($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and
-         $md->find("./select:subject")) {
-        my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".$md->find("./select:subject")->get_node(1)->getAttribute("metadataIdRef")."\"]", 1);
+         find($md, "./select:subject", 1)) {
+        my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
         if($other_md) {
-          if($other_md->find("./nmwg:key")) {
-            metadataKeyRetrieveKey(\%{$self}, $metadatadb, $other_md->find("./nmwg:key")->get_node(1), $md, $md->getAttribute("id"), $request->getNamespaces(), $output);
+          if(find($other_md, "./nmwg:key", 1)) {
+            metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($other_md, "./nmwg:key", 1), $md, $md->getAttribute("id"), $request->getNamespaces(), $output);
           }
           else {
             metadataKeyRetrieveMetadataData(\%{$self}, $metadatadb, $other_md, $md, $md->getAttribute("id"), $request->getNamespaces(), $output);
@@ -287,7 +321,7 @@ sub metadataKeyRetrieveKey($$$$$$$) {
       if(defined $chain and $chain ne "") {
         if($request_namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
           foreach my $p (find($chain, "./select:parameters", 1)->childNodes) {
-            $key2->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
+            find($key2, ".//nmwg:parameters", 1)->addChild($p->cloneNode(1));
           }
         }
       }
@@ -321,16 +355,16 @@ sub metadataKeyRetrieveMetadataData($$$$$$$) {
   my $results = $metadatadb->querySet($queryString);
 
   my %et = ();
-  my $eventTypes = find($metadata, "./nmwg:eventType");
-  my $supportedEventTypes = find($metadata, ".//nmwg:parameter[\@name=\"supportedEventType\"]");
+  my $eventTypes = find($metadata, "./nmwg:eventType", 0);
+  my $supportedEventTypes = find($metadata, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0);
   foreach my $e ($eventTypes->get_nodelist) {
-    my $value = extract($e);
+    my $value = extract($e, 0);
     if($value) {
       $et{$value} = 1;
     }
   }
   foreach my $se ($supportedEventTypes->get_nodelist) {
-    my $value = extract($se);
+    my $value = extract($se, 0);
     if($value) {
       $et{$value} = 1;
     }
@@ -436,16 +470,16 @@ sub maSetupDataRequest($$$$$) {
   #     N: extract md, extract data
 
   if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp.default_resolution"})) {
-    if($md->find("./nmwg:key")) {
-      setupDataRetrieveKey(\%{$self}, $metadatadb, $md->find("./nmwg:key")->get_node(1), "", $md->getAttribute("id"), $message_parameters, $request->getNamespaces(), $output);
+    if(find($md, "./nmwg:key", 1)) {
+      setupDataRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $message_parameters, $request->getNamespaces(), $output);
     }
     else {
       if($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and
-         $md->find("./select:subject")) {
-        my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".$md->find("./select:subject")->get_node(1)->getAttribute("metadataIdRef")."\"]", 1);
+         find($md, "./select:subject", 1)) {
+        my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
         if($other_md) {
-          if($other_md->find("./nmwg:key")) {
-            setupDataRetrieveKey(\%{$self}, $metadatadb, $other_md->find("./nmwg:key")->get_node(1), $md, $md->getAttribute("id"), $message_parameters, $request->getNamespaces(), $output);
+          if(find($other_md, "./nmwg:key", 1)) {
+            setupDataRetrieveKey(\%{$self}, $metadatadb, find($other_md, "./nmwg:key", 1), $md, $md->getAttribute("id"), $message_parameters, $request->getNamespaces(), $output);
           }
           else {
             setupDataRetrieveMetadataData($self, $metadatadb, $other_md, $md->getAttribute("id"), $message_parameters, $output);
@@ -478,16 +512,16 @@ sub setupDataRetrieveMetadataData($$$$$$) {
   my $results = $metadatadb->querySet($queryString);
 
   my %et = ();
-  my $eventTypes = find($metadata, "./nmwg:eventType");
-  my $supportedEventTypes = find($metadata, ".//nmwg:parameter[\@name=\"supportedEventType\"]");
+  my $eventTypes = find($metadata, "./nmwg:eventType", 0);
+  my $supportedEventTypes = find($metadata, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0);
   foreach my $e ($eventTypes->get_nodelist) {
-    my $value = extract($e);
+    my $value = extract($e, 0);
     if($value) {
       $et{$value} = 1;
     }
   }
   foreach my $se ($supportedEventTypes->get_nodelist) {
-    my $value = extract($se);
+    my $value = extract($se, 0);
     if($value) {
       $et{$value} = 1;
     }
@@ -512,16 +546,16 @@ sub setupDataRetrieveMetadataData($$$$$$) {
     foreach my $md ($results->get_nodelist) {
 
       my %l_et = ();
-      my $l_eventTypes = find($md, "./nmwg:eventType");
-      my $l_supportedEventTypes = find($md, ".//nmwg:parameter[\@name=\"supportedEventType\"]");
+      my $l_eventTypes = find($md, "./nmwg:eventType", 0);
+      my $l_supportedEventTypes = find($md, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0);
       foreach my $e ($l_eventTypes->get_nodelist) {
-        my $value = extract($e);
+        my $value = extract($e, 0);
         if($value) {
           $l_et{$value} = 1;
         }
       }
       foreach my $se ($l_supportedEventTypes->get_nodelist) {
-        my $value = extract($se);
+        my $value = extract($se, 0);
         if($value) {
           $l_et{$value} = 1;
         }
@@ -574,9 +608,9 @@ sub setupDataRetrieveKey($$$$$$$$) {
     if($key) {
 
       my %l_et = ();
-      my $l_supportedEventTypes = find($key, ".//nmwg:parameter[\@name=\"supportedEventType\"]");
+      my $l_supportedEventTypes = find($key, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0);
       foreach my $se ($l_supportedEventTypes->get_nodelist) {
-        my $value = extract($se);
+        my $value = extract($se, 0);
         if($value) {
           $l_et{$value} = 1;
         }
@@ -587,7 +621,7 @@ sub setupDataRetrieveKey($$$$$$$$) {
       if(defined $chain and $chain ne "") {
         if($request_namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
           foreach my $p (find($chain, "./select:parameters", 1)->childNodes) {
-            $key->find(".//nmwg:parameters")->get_node(1)->addChild($p->cloneNode(1));
+            find($key, ".//nmwg:parameters", 1)->addChild($p->cloneNode(1));
           }
         }
         createMetadata($output, $mdId, $id, $key->toString, undef);
@@ -625,7 +659,7 @@ sub handleData($$$$$$) {
   undef $self->{RESULTS};
 
   $self->{RESULTS} = $data;
-  my $type = extract(find($data, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1));
+  my $type = extract(find($data, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1), 0);
   if($type eq "rrd") {
     retrieveRRD($self, $data, $id, $output, $et, $message_parameters);
   }
@@ -775,8 +809,8 @@ sub retrieveRRD($$$$$$) {
       }
     }
 
-    my $dataSource = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]", 1));
-    my $valueUnits = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]", 1));
+    my $dataSource = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"dataSource\"]", 1), 0);
+    my $valueUnits = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]", 1), 0);
 
     startData($output, $id, $mid, undef);
     foreach $a (sort(keys(%rrd_result))) {

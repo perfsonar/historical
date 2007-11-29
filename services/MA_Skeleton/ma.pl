@@ -14,6 +14,17 @@ use Config::Simple;
 use Module::Load;
 use Data::Dumper;
 
+
+sub measurementArchive($$);
+sub registerLS($);
+sub daemonize();
+sub managePID($$);
+sub killChildren();
+sub signalHandler();
+sub handleRequest($$$);
+sub __handleRequest($$$);
+
+
 # we need a fully-qualified directory name in case we daemonize so that we can
 # still access scripts or other files specified in configuration files in a
 # relative manner. Also, we need to know the location in reference to the
@@ -105,6 +116,43 @@ if (!defined $conf{"default.modules"} or $conf{"default.modules"} eq "") {
 	exit(-1);
 }
 
+# if there is only a single element, the config thing returns it not as an
+# array, but as a single element.
+if (!ref($conf{"default.modules"}) or ref($conf{"default.modules"}) ne "ARRAY") {
+	my @array = ();
+	push @array, $conf{"default.modules"};
+
+	$conf{"default.modules"} = \@array;
+}
+
+if (!defined $conf{"default.disable_echo"} or $conf{"default.disable_echo"} eq "") {
+	$conf{"default.disable_echo"} = 0;
+}
+
+if ($conf{"default.disable_echo"} == 0) {
+	push @{ $conf{"default.modules"} }, "perfSONAR_PS::MA::Echo";
+}
+
+# get rid of any duplicate modules
+my %tmp_modules = ();
+my @new_modules = ();
+
+foreach my $module (@{ $conf{"default.modules"} }) {
+	if (!defined $tmp_modules{$module}) {
+		$tmp_modules{$module} = 1;
+		push @new_modules, $module;
+	} else {
+		$logger->warn("Duplicate module load requested: $module");
+	}
+}
+
+# make sure the echo module is loaded unless they explicitly disable it for some reason
+if ($conf{"default.disable_echo"} == 0 and !defined $tmp_modules{"perfSONAR_PS::MA::Echo"}) {
+	push @new_modules, "perfSONAR_PS::MA::Echo";
+}
+
+$conf{"default.modules"} = \@new_modules;
+
 if (!defined $PIDDIR or $PIDDIR eq "") {
 	if (defined $conf{"default.pid_dir"} and $conf{"default.pid_dir"} ne "") {
 		$PIDDIR = $conf{"default.pid_dir"};
@@ -127,14 +175,7 @@ $logger->debug("Starting '".$$."'");
 my $ma_handler = new perfSONAR_PS::MA::Handler();
 my @ls_modules;
 
-# if there is only a single element, the config thing returns it not as an
-# array, but as a single element.
-if (!ref($conf{"default.modules"}) or ref($conf{"default.modules"}) ne "ARRAY") {
-	my @array = ();
-	push @array, $conf{"default.modules"};
 
-	$conf{"default.modules"} = \@array;
-}
 
 foreach my $module (@{ $conf{"default.modules"} }) {
 	load $module;
@@ -161,12 +202,12 @@ if ($listener->startDaemon() != 0) {
 if(!$DEBUGFLAG) {
 	# flush the buffer
 	$| = 1;
-	&daemonize;
+#	&daemonize;
 }
 
 my $ma_pid = fork();
 if ($ma_pid == 0) {
-	measurementArchive();
+	measurementArchive($ma_handler, \%conf);
 	exit(0);
 }
 
@@ -190,8 +231,8 @@ foreach my $pid (keys %child_pids) {
 	waitpid($pid, 0);
 }
 
-sub measurementArchive($) {
-	my ($conf) = @_;
+sub measurementArchive($$) {
+	my ($ma_handler, $conf) = @_;
 	my $outstanding_children = 0;
 
 	%child_pids = ();
@@ -223,17 +264,25 @@ sub measurementArchive($) {
 				$request->finish();
 			}
 		} elsif (defined $request) {
-			my $pid = fork();
-			if ($pid == 0) {
-				%child_pids = ();
-				handleRequest($request);
-				$request->finish();
-				exit(0);
-			} elsif ($pid < 0) {
-				$logger->error("Error spawning child");
+			if ($ma_handler->isValidEndpoint($request->getEndpoint())) {
+				my $pid = fork();
+				if ($pid == 0) {
+					%child_pids = ();
+					handleRequest($ma_handler, $conf, $request);
+					$request->finish();
+					exit(0);
+				} elsif ($pid < 0) {
+					$logger->error("Error spawning child");
+				} else {
+					$child_pids{$pid} = "";
+					$outstanding_children++;
+				}
 			} else {
-				$child_pids{$pid} = "";
-				$outstanding_children++;
+				my $doc = new perfSONAR_PS::XML::Document_string();
+				my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
+				getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
+				$request->setResponse($doc->getValue());
+				$request->finish();
 			}
 		}
 
@@ -266,7 +315,7 @@ sub registerLS($) {
 	}
 }
 
-sub daemonize {
+sub daemonize() {
 	chdir '/' or die "Can't chdir to /: $!";
 	open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
 	open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
@@ -277,8 +326,8 @@ sub daemonize {
 	umask 0;
 }
 
-sub managePID {
-	my($port, $piddir) = @_;  
+sub managePID($$) {
+	my($port, $piddir) = @_;
 	die "Can't write pidfile to $piddir\n" unless -w $piddir;
 	my $pidfile = $piddir."/ma.".$port.".pid";
 	sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
@@ -290,35 +339,35 @@ sub managePID {
 		my @output = <PSVIEW>;
 		close(PSVIEW);
 		if(!$?) {
-			die "$0 already running: $p_id\n"; 
+			die "$0 already running: $p_id\n";
 		}
 		else {
 			truncate(PIDFILE, 0);
 			seek(PIDFILE, 0, 0);
-			print PIDFILE "$$\n";  
+			print PIDFILE "$$\n";
 		}
 	}
 	else {
-		print PIDFILE "$$\n";  
+		print PIDFILE "$$\n";
 	}
 	flock(PIDFILE, LOCK_UN);
 	close(PIDFILE);
 	return;
 }
 
-sub killChildren {
+sub killChildren() {
 	foreach my $pid (keys %child_pids) {
 		kill("SIGINT", $pid);
 	}
 }
 
-sub signalHandler {
+sub signalHandler() {
 	killChildren();
 	exit(0);
 }
 
-sub handleRequest($$) {
-	my ($request) = @_;
+sub handleRequest($$$) {
+	my ($ma_handler, $conf, $request) = @_;
 
 	# This function is a wrapper around the __handleRequest function.  The
 	# purpose of the function is to handle the case where a crash occurs
@@ -328,7 +377,7 @@ sub handleRequest($$) {
 	eval {
  		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
 		alarm($conf{"default.max_worker_lifetime"}) if (defined $conf{"default.max_worker_lifetime"} and $conf{"default.max_worker_lifetime"} > 0);
-		__handleRequest($request);
+		__handleRequest($ma_handler, $conf, $request);
  	};
 
 	# disable the alarm after the eval is done
@@ -346,8 +395,8 @@ sub handleRequest($$) {
 	$request->finish;
 }
 
-sub __handleRequest($$) {
-	my ($request) = @_;
+sub __handleRequest($$$) {
+	my ($ma_handler, $conf, $request) = @_;
 
 	my $error;
 	my $localContent = "";
@@ -364,17 +413,29 @@ sub __handleRequest($$) {
 	my $message = $request->getRequestDOM()->getDocumentElement();;
 	my $messageId = $message->getAttribute("id");
 	my $messageType = $message->getAttribute("type");
-	my $messageIdReturn = genuid();
+	my $messageIdReturn = "message.".genuid();
+	my $messageTypeReturn = $messageType;
+
+	$messageTypeReturn = $ma_handler->getMessageResponseType($request->getEndpoint(), $messageType);
+	if (!defined $messageTypeReturn) {
+		$messageTypeReturn = $messageType;
+		$messageTypeReturn =~ s/Request/Response/;
+		if (!($messageTypeReturn =~ /Response/)) {
+			$messageTypeReturn .= "Response";
+		}
+
+		$logger->warn("No message response type for $messageType on endpoint ".$request->getEndpoint().". Using $messageTypeReturn as the response type");
+	}
 
 	my %message_parameters = ();
 
-	my $msgParams = find($message, "./nmwg:parameters", 1); 
+	my $msgParams = find($message, "./nmwg:parameters", 1);
 	if (defined $msgParams) {
 		foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
 			my ($name, $value);
 
 			$name = $p->getAttribute("name");
-			$value = extract($p);
+			$value = extract($p, 0);
 
 			if (!defined $name or $name eq "") {
 				next;
@@ -388,9 +449,11 @@ sub __handleRequest($$) {
 
 	my $doc = new perfSONAR_PS::XML::Document_string();
 
-	startMessage($doc, $messageIdReturn, $messageId, $messageType, "", undef);
+	startMessage($doc, $messageIdReturn, $messageId, $messageTypeReturn, "", undef);
 
 	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
+		my $found_md = 0;
+
 		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
 			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
 				my $eventType = findvalue($m, "./nmwg:eventType");
@@ -399,13 +462,24 @@ sub __handleRequest($$) {
 
 				my ($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d, $request);
 
-				if ($status ne "") {
+				if (defined $status and $status ne "") {
 					$logger->error("Couldn't handle requested metadata: $res");
 					my $mdID = "metadata.".genuid();
 					getResultCodeMetadata($doc, $mdID, $m->getAttribute("id"), $status);
 					getResultCodeData($doc, "data.".genuid(), $mdID, $res, 1);
 				}
+
+				$found_md = 1;
 			}
+		}
+
+		if ($found_md == 0) {
+			my $msg = "Data trigger with id \"".$d->getAttribute("id")."\" has no matching metadata";
+			my $mdId = "metadata.".genuid();
+			my $dId = "data.".genuid();
+			$logger->error($msg);
+			getResultCodeMetadata($doc, $mdId, $d->getAttribute("metadataIdRef"), "error.ma.structure");
+			getResultCodeData($doc, $dId, $mdId, $msg, 1);
 		}
 	}
 
