@@ -152,6 +152,7 @@ sub init {
 
 sub needLS() {
 	my ($self) = @_;
+
 	return ($self->{CONF}->{"status.enable_registration"});
 }
 

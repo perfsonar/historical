@@ -249,7 +249,7 @@ sub getNamespaces {
   }
   else {
     $logger->error("Request namespace object not found.");
-    return "";
+    return ();
   }
 }
 

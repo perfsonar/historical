@@ -397,7 +397,7 @@ sub __handleRequest($$) {
 
 				$found_pair = 1;
 
-				my ($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d, $message);
+				my ($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d, $request);
 
 				if ($status ne "") {
 					$logger->error("Couldn't handle requested metadata: $res");

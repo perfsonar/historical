@@ -2,11 +2,10 @@ package perfSONAR_PS::XML::Document_string;
 
 use Log::Log4perl qw(get_logger);
 use strict;
-use Data::Dumper;
 
 #our @ISA = qw(perSONAR_PS::XML::Document);
 
-my $pretty_print = 0;
+my $pretty_print = 1;
 
 sub new($) {
 	my ($package) = @_;
@@ -20,18 +19,34 @@ sub new($) {
 	bless \%hash => $package;
 }
 
+sub normalizeURI($) {
+	my ($uri) = @_;
+
+	# trim whitespace
+	$uri =~ s/^\s+//;
+	$uri =~ s/\s+$//;
+
+	if ($uri =~ /[^\/]$/) {
+		$uri .= "/";
+	}
+
+	return $uri;
+}
+
 sub startElement($$$$$$) {
 	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
 	$logger->debug("Starting tag: $tag");
 
+	$namespace = normalizeURI($namespace);
+
 	my %namespaces = ();
 	$namespaces{$prefix} = $namespace;
 
 	if (defined $extra_namespaces and $extra_namespaces ne "") {
 		foreach $prefix (keys %{ $extra_namespaces }) {
-			my $new_namespace = $extra_namespaces->{$prefix};
+			my $new_namespace = normalizeURI($extra_namespaces->{$prefix});
 
 			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
 				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
@@ -95,19 +110,92 @@ sub startElement($$$$$$) {
 
 	push @{ $self->{OPEN_TAGS} }, \%node_info;
 
-	$logger->debug("Values: " . Dumper($self));
-
 	return 0;
 }
 
 sub createElement($$$$$$) {
 	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces, $content) = @_;
+	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	my $n = $self->startElement_content($prefix, $namespace, $tag, $attributes, $extra_namespaces, $content);
+	$namespace = normalizeURI($namespace);
 
-	return $n if ($n != 0);
+	my %namespaces = ();
+	$namespaces{$prefix} = $namespace;
 
-	return $self->endElement($tag);
+	if (defined $extra_namespaces and $extra_namespaces ne "") {
+		foreach $prefix (keys %{ $extra_namespaces }) {
+			my $new_namespace = normalizeURI($extra_namespaces->{$prefix});
+
+			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
+				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
+				return -1;
+			}
+
+			$namespaces{$prefix} = $new_namespace;
+		}
+	}
+
+	if ($pretty_print) {
+		foreach my $node (@{ $self->{OPEN_TAGS} }) {
+			$self->{STRING} .= "  ";
+		}
+	}
+
+	$self->{STRING} .= "<$prefix:$tag";
+
+	foreach my $prefix (keys %namespaces) {
+		my $require_defintion = 0;
+
+		if (!defined $self->{DEFINED_PREFIXES}->{$prefix}) {
+			# it's the first time we've seen a prefix like this
+			$self->{DEFINED_PREFIXES}->{$prefix} = ();
+			$require_defintion = 1;
+		} else {
+			my @namespaces = @{ $self->{DEFINED_PREFIXES}->{$prefix} };
+
+			# if it's a new namespace for an existing prefix, write the definition (though we should probably complain)
+			if ($#namespaces == -1 or $namespaces[$#namespaces] ne $namespace) {
+				$require_defintion = 1;
+			}
+		}
+
+		if ($require_defintion) {
+			$self->{STRING} .= " xmlns:$prefix=\"".$namespaces{$prefix}."\"";
+		}
+	}
+
+	if (defined $attributes) {
+		for my $attr (keys %{ $attributes }) {
+			$self->{STRING} .= " ".$attr."=\"".$attributes->{$attr}."\"";
+		}
+	}
+
+	if (!defined $content or $content eq "") {
+		$self->{STRING} .= " />";
+	} else {
+		$self->{STRING} .= ">";
+
+		if ($pretty_print) {
+			$self->{STRING} .= "\n";
+		}
+
+		$self->{STRING} .= $content;
+
+		if ($pretty_print) {
+			$self->{STRING} .= "\n";
+			foreach my $node (@{ $self->{OPEN_TAGS} }) {
+				$self->{STRING} .= "  ";
+			}
+		}
+
+		$self->{STRING} .= "</".$prefix.":".$tag.">";
+	}
+
+	if ($pretty_print) {
+		$self->{STRING} .= "\n";
+	}
+
+	return 0;
 }
 
 sub startElement_content($$$$$$) {
@@ -123,8 +211,6 @@ sub startElement_content($$$$$$) {
 	}
 
 	$self->{STRING} .= "\n" if ($pretty_print);
-
-	$logger->debug("Values: " . Dumper($self));
 
 	return 0;
 }
@@ -160,8 +246,6 @@ sub endElement($$) {
 		$self->{STRING} .= "\n";
 	}
 
-	$logger->debug("Values: " . Dumper($self));
-
 	return 0;
 }
 
@@ -171,16 +255,12 @@ sub addExistingXMLElement($$) {
 
 	$self->{STRING} .= $element->toString();
 
-	$logger->debug("Values: " . Dumper($self));
-
 	return 0;
 }
 
 sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
-
-	$logger->debug("Values: " . Dumper($self));
 
 	my @open_tags = @{ $self->{"OPEN_TAGS"} };
 

@@ -398,7 +398,7 @@ sub xQueryEventType {
 
 
 sub getTime {
-  my($request, $ma, $id) = @_;
+  my($request, $ma, $id, $default_resolution) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
   undef $ma->{TIME};
@@ -440,8 +440,8 @@ sub getTime {
     
     if(!$ma->{TIME}->{"RESOLUTION"} or
        !($ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/)) {
-      if($ma->{CONF}->{"DEFAULT_RESOLUTION"}) {
-        $ma->{TIME}->{"RESOLUTION"} = $ma->{CONF}->{"DEFAULT_RESOLUTION"};
+      if(defined $default_resolution) {
+        $ma->{TIME}->{"RESOLUTION"} = $default_resolution;
       }
       else {
         $ma->{TIME}->{"RESOLUTION"} = 1;
@@ -524,7 +524,10 @@ sub getTime {
     foreach my $t (keys %{$ma->{TIME}}) {
       $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
     }
-    
+   
+    $logger->debug("Start Time: ".$ma->{TIME}->{"START"}); 
+    $logger->debug("End Time: ".$ma->{TIME}->{"END"}); 
+
     if($ma->{TIME}->{"START"} and 
        $ma->{TIME}->{"END"} and 
        $ma->{TIME}->{"START"} > $ma->{TIME}->{"END"}) {
@@ -627,7 +630,7 @@ sub getDataSQL {
 
 
 sub getDataRRD {
-  my($ma, $d, $mid, $did) = @_;
+  my($ma, $d, $mid, $rrdtool) = @_;
   my $logger = get_logger("perfSONAR_PS::MA::General");
   
   my %result = ();
@@ -639,7 +642,7 @@ sub getDataRRD {
   }
   
   my $datadb = new perfSONAR_PS::DB::RRD(
-    $ma->{CONF}->{"RRDTOOL"}, 
+    $rrdtool,
     $file,
     "",
     1
@@ -796,7 +799,7 @@ and the methods can be invoked directly (and sparingly).
 
     my $responseString = adjustRRDTime($ma);
     if(!$responseString) {
-      my %rrd_result = getDataRRD($ma, $d, $mid, $did);
+      my %rrd_result = getDataRRD($ma, $d, $mid);
       if($rrd_result{ERROR}) {
         # error
       }
@@ -861,7 +864,7 @@ be called externally.
 Helper function for the eventTYpe portion of NMWG elements, not to 
 be called externally. 
 
-=head2 getTime($request, $ma, $id)
+=head2 getTime($request, $ma, $id, $default_resolution)
 
 Performs the task of extracting time/cf/resolution information from the
 request message. 
@@ -875,7 +878,7 @@ if necessary.
 
 Returns either an error or the actual results of an SQL database query.
 
-=head2 getDataRRD($ma, $d, $mid, $did)
+=head2 getDataRRD($ma, $d, $mid)
 
 Returns either an error or the actual results of an RRD database query.
 
