@@ -14,11 +14,17 @@ use perfSONAR_PS::Datatypes::v2_0::nmtl4::Message::Metadata::Subject::EndPointPa
 use perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface;
 use perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface::IpAddress;
 
+# parameter lists
 use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter;
 
+# messages
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
+use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message;
+
+# to get the event types
+use perfSONAR_PS::Datatypes::EventTypes;
 
 use IEPM::PingER::Statistics;
 
@@ -98,6 +104,17 @@ inherited from parent classes. makes sure that the ping executable is existing.
 
 =cute
 
+=head2 deadline
+
+deadline is not supported in pinger
+
+=cut 
+sub deadline
+{
+	my $self = shift;
+	$logger->logdie( "Deadline is not supported in PingER");
+	return;
+}
 
 
 
@@ -300,11 +317,6 @@ sub toAPI
 					'name' => 'ttl' });
 	$param->text( $self->ttl() );
 	push @params, $param;
-	# deadline not supported
-	#$param = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({
-	#				'name' => 'deadline' });
-	#$param->text( $self->deadline() );
-	#push @params, $param;
 	
 	# add the params to the parameters
 	$parameters->parameter( @params );
@@ -315,9 +327,8 @@ sub toAPI
 	$metadata->subject( $subject );
 	$metadata->parameters( $parameters );
 	# add event type
-	my $eventType = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::EventType->new();
-	$eventType->text( 'http://ggf.org/ns/nmwg/tools/pinger/2.0' );
-	$metadata->eventType( $eventType );
+	my $eventType = perfSONAR_PS::Datatypes::EventTypes->new();
+	$metadata->eventType( $eventType->tools->pinger );
 	#$logger->fatal("META: " . $metadata->asString() );
 	
 	# create the data element

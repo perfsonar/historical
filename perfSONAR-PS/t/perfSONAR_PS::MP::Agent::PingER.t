@@ -33,11 +33,6 @@ my $interval = 1;
 $agent->interval( $interval );
 ok( $agent->interval() eq $interval, 'setup interval');
 
-# need to do something about this, so it doesn't add it 
-my $deadline = 10;
-$agent->deadline( $deadline );
-ok( $agent->deadline() eq $deadline, 'setup deadline');
-
 # do the measurement
 my $status = $agent->collectMeasurements();
 ok( $status eq 0 , 'collectMeasurements()' );
