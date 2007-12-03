@@ -49,7 +49,7 @@ use lib "$libdir";
 use perfSONAR_PS::Common;
 use perfSONAR_PS::SOAP_Daemon;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::MA::Handler;
+use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 
 Log::Log4perl->init("logger.conf");
@@ -172,7 +172,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
 		$logger->debug("Adding endpoint $endpoint to $port");
 
-                $handlers{$port}->{$endpoint} = perfSONAR_PS::MA::Handler->new();
+                $handlers{$port}->{$endpoint} = perfSONAR_PS::RequestHandler->new();
 
                 if (!defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq "") {
                         $logger->error("No module specified for $port:$endpoint");

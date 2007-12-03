@@ -1,4 +1,4 @@
-package perfSONAR_PS::MA::Handler;
+package perfSONAR_PS::RequestHandler;
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ sub new($) {
 
 sub addMessageHandler($$$) {
 	my ($self, $messageType, $service) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding message handler for $messageType");
 
@@ -39,7 +39,7 @@ sub addMessageHandler($$$) {
 
 sub addEventHandler($$$$) {
 	my ($self, $messageType, $eventType, $service) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding event handler for events of type $eventType on messages of $messageType");
 
@@ -64,7 +64,7 @@ sub addEventHandler($$$$) {
 
 sub addEventHandler_Regex($$$$) {
 	my ($self, $messageType, $eventRegex, $service) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding event handler for events matching $eventRegex on messages of $messageType");
 
@@ -118,7 +118,7 @@ sub messageEnd($$$$$$$$) {
 
 sub handleEvent($$$$$$$$$$) {
 	my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	if (defined $eventType and $eventType ne "") {
 		$logger->debug("Handling event: $messageType, $eventType");
@@ -191,7 +191,7 @@ sub hasMessageHandler($$) {
 
 sub handleRequest($$$$) {
 	my ($self, $request, $endpoint_conf, $full_conf) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	my $error;
 	my $localContent = "";
@@ -330,8 +330,8 @@ sub handleRequest($$$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Handler - A module that provides an object to register event
-and message handlers for an MA.
+perfSONAR_PS::RequestHandler - A module that provides an object to register event
+and message handlers for a perfSONAR Service.
 
 =head1 DESCRIPTION
 
@@ -351,8 +351,8 @@ This function allocates a new Handler object.
 
 =head2 add($self, $endpoint, $messageType, $eventType, $ma)
 
-This function is used to tell which message or event an MA is interested in.
-The 'handleEvent' function in the specified ma will be called for each
+This function is used to tell which message or event a pS service is interested
+in.  The 'handleEvent' function in the specified ma will be called for each
 metadata/data pair with the specified event type is found in a message of the
 specified type that came in on the specified endpoint. If no eventType is
 specified, then then handleEvent function is called for all metadata/data
@@ -362,11 +362,11 @@ the specified event type is located on any endpoint.
 
 =head2 addRegex($self, $endpoint, $messageType, $regex, $ma)
 
-This function is called by an MA to register its interest in any metadata/data
-pair containing an event type that matches the specified regular expression.
-Like the 'add' function, if the endpoint is unspecified, the 'handleEvent'
-function will be called when a matching metadata/data pair is found in the
-specified messageType on any endpoint.
+This function is called by a pS service to register its interest in any
+metadata/data pair containing an event type that matches the specified regular
+expression.  Like the 'add' function, if the endpoint is unspecified, the
+'handleEvent' function will be called when a matching metadata/data pair is
+found in the specified messageType on any endpoint.
 
 =head2 handleEvent($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_request)
 
