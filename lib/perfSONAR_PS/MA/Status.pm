@@ -12,7 +12,7 @@ use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::LS::Register;
-use perfSONAR_PS::MA::Status::Client::SQL;
+use perfSONAR_PS::Client::Status::SQL;
 
 sub init($$);
 sub needLS($);
@@ -28,7 +28,7 @@ sub writeoutLinkState($$$);
 
 
 sub new {
-	my ($package, $conf, $directory) = @_;
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
 	my %hash = ();
 
@@ -40,78 +40,81 @@ sub new {
 		$hash{"DIRECTORY"} = $directory;
 	}
 
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
+	}
+
 	bless \%hash => $package;
 }
 
-sub init {
+sub init($$) {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
-	if (!defined $self->{CONF}->{"status.endpoint"} or $self->{CONF}->{"status.endpoint"} eq "") {
-		$logger->error("No endpoint specified for status service");
-		return -1;
+	if (!defined $self->{CONF}->{"status"}->{"enable_registration"} or $self->{CONF}->{"status"}->{"enable_registration"} eq "") {
+		$self->{CONF}->{"status"}->{"enable_registration"} = 0;
 	}
 
-	if (!defined $self->{CONF}->{"status.enable_registration"} or $self->{CONF}->{"status.enable_registration"} eq "") {
-		$self->{CONF}->{"status.enable_registration"} = 0;
-	}
-
-	if ($self->{CONF}->{"status.enable_registration"}) {
-		if (!defined $self->{CONF}->{"status.service_accesspoint"} or $self->{CONF}->{"status.service_accesspoint"} eq "") {
+	if ($self->{CONF}->{"status"}->{"enable_registration"}) {
+		if (!defined $self->{CONF}->{"status"}->{"service_accesspoint"} or $self->{CONF}->{"status"}->{"service_accesspoint"} eq "") {
 			$logger->error("No access point specified for SNMP service");
 			return -1;
 		}
 
-		if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "") {
+		if (!defined $self->{CONF}->{"status"}->{"ls_instance"} or $self->{CONF}->{"status"}->{"ls_instance"} eq "") {
 			if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
-				$self->{CONF}->{"status.ls_instance"} = $self->{CONF}->{"default.ls_instance"};
+				$self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"default.ls_instance"};
 			} else {
 				$logger->error("No LS instance specified for SNMP service");
 				return -1;
 			}
 		}
 
-		if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
+		if (!defined $self->{CONF}->{"status"}->{"ls_registration_interval"} or $self->{CONF}->{"status"}->{"ls_registration_interval"} eq "") {
 			if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
-				$self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+				$self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
 			} else {
 				$logger->warn("Setting registration interval to 30 minutes");
-				$self->{CONF}->{"status.ls_registration_interval"} = 1800;
+				$self->{CONF}->{"status"}->{"ls_registration_interval"} = 1800;
 			}
 		}
 
-		if(!defined $self->{CONF}->{"status.service_description"} or
-				$self->{CONF}->{"status.service_description"} eq "") {
-			$self->{CONF}->{"status.service_description"} = "perfSONAR_PS Status MA";
+		if(!defined $self->{CONF}->{"status"}->{"service_description"} or
+				$self->{CONF}->{"status"}->{"service_description"} eq "") {
+			$self->{CONF}->{"status"}->{"service_description"} = "perfSONAR_PS Status MA";
 			$logger->warn("Setting 'service_description' to 'perfSONAR_PS Status MA'.");
 		}
 
-		if(!defined $self->{CONF}->{"status.service_name"} or
-				$self->{CONF}->{"status.service_name"} eq "") {
-			$self->{CONF}->{"status.service_name"} = "Status MA";
+		if(!defined $self->{CONF}->{"status"}->{"service_name"} or
+				$self->{CONF}->{"status"}->{"service_name"} eq "") {
+			$self->{CONF}->{"status"}->{"service_name"} = "Status MA";
 			$logger->warn("Setting 'service_name' to 'Status MA'.");
 		}
 
-		if(!defined $self->{CONF}->{"status.service_type"} or
-				$self->{CONF}->{"status.service_type"} eq "") {
-			$self->{CONF}->{"status.service_type"} = "MA";
+		if(!defined $self->{CONF}->{"status"}->{"service_type"} or
+				$self->{CONF}->{"status"}->{"service_type"} eq "") {
+			$self->{CONF}->{"status"}->{"service_type"} = "MA";
 			$logger->warn("Setting 'service_type' to 'MA'.");
 		}
 	}
 
 
-	if (!defined $self->{CONF}->{"status.db_type"} or $self->{CONF}->{"status.db_type"} eq "") {
+	if (!defined $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq "") {
 		$logger->error("No database type specified");
 		return -1;
 	}
 
-	if (lc($self->{CONF}->{"status.db_type"}) eq "sqlite") {
-		if (!defined $self->{CONF}->{"status.db_file"} or $self->{CONF}->{"status.db_file"} eq "") {
-			$logger->error("You specified a SQLite Database, but then did not specify a database file(status.db_file)");
+	if (lc($self->{CONF}->{"status"}->{"db_type"}) eq "sqlite") {
+		if (!defined $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(db_file)");
 			return -1;
 		}
 
-		my $file = $self->{CONF}->{"status.db_file"};
+		my $file = $self->{CONF}->{"status"}->{"db_file"};
 		if (defined $self->{DIRECTORY}) {
 			if (!($file =~ "^/")) {
 				$file = $self->{DIRECTORY}."/".$file;
@@ -120,44 +123,44 @@ sub init {
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"status.read_only"} and $self->{CONF}->{"status.read_only"} == 1) {
+		if (defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"status.db_table"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"status"}->{"db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "No database to dump";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
-	} elsif (lc($self->{CONF}->{"status.db_type"}) eq "mysql") {
+	} elsif (lc($self->{CONF}->{"status"}->{"db_type"}) eq "mysql") {
 		my $dbi_string = "dbi:mysql";
 
-		if (!defined $self->{CONF}->{"status.db_name"} or $self->{CONF}->{"status.db_name"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database (status.db_name)");
+		if (!defined $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database (db_name)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"status.db_name"};
+		$dbi_string .= ":".$self->{CONF}->{"status"}->{"db_name"};
 
-		if (!defined $self->{CONF}->{"status.db_host"} or $self->{CONF}->{"status.db_host"} eq "") {
-			$logger->error("You specified a MySQL Database, but did not specify the database host (status.db_host)");
+		if (!defined $self->{CONF}->{"status"}->{"db_host"} or $self->{CONF}->{"status"}->{"db_host"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database host (db_host)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"status.db_host"};
+		$dbi_string .= ":".$self->{CONF}->{"status"}->{"db_host"};
 
-		if (defined $self->{CONF}->{"status.db_port"} and $self->{CONF}->{"status.db_port"} ne "") {
-			$dbi_string .= ":".$self->{CONF}->{"status.db_port"};
+		if (defined $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne "") {
+			$dbi_string .= ":".$self->{CONF}->{"status"}->{"db_port"};
 		}
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"status.read_only"} and $self->{CONF}->{"status.read_only"} == 1) {
+		if (defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"status.db_username"}, $self->{CONF}->{"status.db_password"}, $self->{CONF}->{"status.db_table"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "Couldn't create SQL client";
 			$logger->error($msg);
@@ -177,11 +180,11 @@ sub init {
 
 	$self->{CLIENT}->close;
 
-	$handler->add($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-	$handler->add($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
+	$handler->add($self->{CONF}->{"status"}->{"endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
+	$handler->add($self->{CONF}->{"status"}->{"endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
 
-	$handler->setMessageResponseType($self->{CONF}->{"status.endpoint"}, "SetupDataRequest", "SetupDataResponse");
-	$handler->setMessageResponseType($self->{CONF}->{"status.endpoint"}, "MeasurementArchiveStoreRequest", "MeasurementArchiveStoreResponse");
+	$handler->setMessageResponseType($self->{CONF}->{"status"}->{"endpoint"}, "SetupDataRequest", "SetupDataResponse");
+	$handler->setMessageResponseType($self->{CONF}->{"status"}->{"endpoint"}, "MeasurementArchiveStoreRequest", "MeasurementArchiveStoreResponse");
 
 	return 0;
 }
@@ -189,30 +192,30 @@ sub init {
 sub needLS($) {
 	my ($self) = @_;
 
-	return ($self->{CONF}->{"status.enable_registration"});
+	return ($self->{CONF}->{"status"}->{"enable_registration"});
 }
 
-sub registerLS {
+sub registerLS($$) {
 	my ($self, $sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status.ls_instance"} or $self->{CONF}->{"status.ls_instance"} eq "");
+	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status"}->{"ls_instance"} or $self->{CONF}->{"status"}->{"ls_instance"} eq "");
 
 	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"status.ls_instance"},
-		SERVICE_TYPE => $self->{CONF}->{"status.service_type"},
-		SERVICE_NAME => $self->{CONF}->{"status.service_name"},
-		SERVICE_DESCRIPTION => $self->{CONF}->{"status.service_description"},
-		SERVICE_ACCESSPOINT => $self->{CONF}->{"status.service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status.registration_interval"},
+		LS_INSTANCE => $self->{CONF}->{"status"}->{"ls_instance"},
+		SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
+		SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
+		SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
+		SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
+		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status"}->{"registration_interval"},
 	);
 
-	if (defined $self->{CONF}->{"status.registration_interval"} and $self->{CONF}->{"status.registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status.registration_interval"};
-	} elsif (defined $self->{CONF}->{"default.registration_interval"} and $self->{CONF}->{"default.registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"default.registration_interval"};
+	if (defined $self->{CONF}->{"status"}->{"registration_interval"} and $self->{CONF}->{"status"}->{"registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status"}->{"registration_interval"};
+	} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
 	} else {
 		$logger->error("No registraion interval specified");
 	}
@@ -251,10 +254,10 @@ sub registerLS {
 
 	$res = "";
 
-	my $n = $ls->register_withData(\@link_mds);
+	my $n = $ls->register(\@link_mds);
 
 	if (defined $sleep_time) {
-		$$sleep_time = $self->{"status.ls_registration_interval"};
+		$$sleep_time = $self->{"status"}->{"ls_registration_interval"};
 	}
 
 	return $n;
@@ -371,7 +374,7 @@ sub __handleStoreRequest($$$$$$) {
 	return ("", "");
 }
 
-sub handleQueryRequest {
+sub handleQueryRequest($$$$$) {
 	my ($self, $output, $eventType, $md, $d) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 

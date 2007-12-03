@@ -1,8 +1,8 @@
-package perfSONAR_PS::MA::Status::Client::MA;
+package perfSONAR_PS::Client::Status::MA;
 
 use strict;
-use perfSONAR_PS::MA::Status::Link;
 use perfSONAR_PS::Common;
+use perfSONAR_PS::MA::Status::Link;
 use perfSONAR_PS::MA::Status::Common;
 use perfSONAR_PS::Transport;
 

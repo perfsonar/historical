@@ -1,4 +1,4 @@
-package perfSONAR_PS::MA::Status::Client::SQL;
+package perfSONAR_PS::Client::Status::SQL;
 
 use strict;
 use Log::Log4perl qw(get_logger);

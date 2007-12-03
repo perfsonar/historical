@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::Topology::Client::MA;
+package perfSONAR_PS::Client::Topology::MA;
 
 use strict;
 use Log::Log4perl qw(get_logger);

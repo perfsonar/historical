@@ -168,7 +168,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
         $handlers{$port} = ();
 
         foreach my $endpoint (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
-                my %endpoint_conf = %{ $conf{"port"}->{$port}->{"endpoint"}->{$endpoint} };
+                my %endpoint_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}->{"endpoint"}->{$endpoint}) };
 
 		$logger->debug("Adding endpoint $endpoint to $port");
 
@@ -184,8 +184,8 @@ foreach my $port (keys %{ $conf{"port"} }) {
                         $modules_loaded{$endpoint_conf{"module"}} = 1;
                 }
 
-                my $service = $endpoint_conf{"module"}->new();
-                if ($service->init($handlers{$port}->{$endpoint}, \%endpoint_conf, \%conf) != 0) {
+                my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $endpoint);
+                if ($service->init($handlers{$port}->{$endpoint}) != 0) {
                         $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$endpoint");
                         exit(-1);
                 }
@@ -206,8 +206,8 @@ foreach my $port (keys %{ $conf{"port"} }) {
                                 $modules_loaded{$echo_module} = 1;
                         }
 
-                        my $echo = $echo_module->new();
-                        if ($echo->init($handlers{$port}->{$endpoint}, \%endpoint_conf, \%conf) != 0) {
+                        my $echo = $echo_module->new(\%endpoint_conf, $port, $endpoint);
+                        if ($echo->init($handlers{$port}->{$endpoint}) != 0) {
                                 $logger->error("Failed to initialize echo module on $port:$endpoint");
                                 exit(-1);
                         }

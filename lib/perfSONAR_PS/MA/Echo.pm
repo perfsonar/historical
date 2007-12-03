@@ -10,7 +10,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
 sub new {
-	my ($package, $conf, $directory) = @_;
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
 	my %hash = ();
 
@@ -20,6 +20,14 @@ sub new {
 
 	if (defined $directory and $directory ne "") {
 		$hash{"DIRECTORY"} = $directory;
+	}
+
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
 	}
 
 	bless \%hash => $package;

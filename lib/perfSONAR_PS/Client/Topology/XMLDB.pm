@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::Topology::Client::XMLDB;
+package perfSONAR_PS::Client::Topology::XMLDB;
 
 use strict;
 use Log::Log4perl qw(get_logger);
@@ -145,7 +145,7 @@ sub getAll {
 	}
 	$content .= ">";
 
-	@results = $self->{DATADB}->query("/*:domain", undef, $error);
+	@results = $self->{DATADB}->query("/*:domain", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of domains from database: $error";
 		$logger->error($msg);
@@ -154,7 +154,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:node", undef, $error);
+	@results = $self->{DATADB}->query("/*:node", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of nodes from database: $error";
 		$logger->error($msg);
@@ -163,7 +163,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:port", undef, $error);
+	@results = $self->{DATADB}->query("/*:port", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of ports from database: $error";
 		$logger->error($msg);
@@ -172,7 +172,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:link", undef, $error);
+	@results = $self->{DATADB}->query("/*:link", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of links from database: $error";
 		$logger->error($msg);
@@ -181,7 +181,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:network", undef, $error);
+	@results = $self->{DATADB}->query("/*:network", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of networks from database: $error";
 		$logger->error($msg);
@@ -190,7 +190,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:path", undef, $error);
+	@results = $self->{DATADB}->query("/*:path", undef, \$error);
 	if ($error ne "") {
 		my $msg = "Couldn't get list of paths from database: $error";
 		$logger->error($msg);

@@ -15,7 +15,6 @@
 package SNMPWalk;
 
 use Net::SNMP v5.1.0 qw(:snmp DEBUG_ALL);
-use Getopt::Std;
 use Exporter;
 
 use warnings;

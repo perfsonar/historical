@@ -550,12 +550,12 @@ sub mergeConfig($$) {
 			port => 1,
 			endpoint => 1 );
 
-	$logger->debug("Base: ".Dumper($base));
-	$logger->debug("Specific: ".Dumper($specific));
+#	$logger->debug("Base: ".Dumper($base));
+#	$logger->debug("Specific: ".Dumper($specific));
 
 	my $ret_config = mergeHash($base, $specific, \%elements);
 
-	$logger->debug("Merged: ".Dumper($ret_config));
+#	$logger->debug("Merged: ".Dumper($ret_config));
 
 	return $ret_config;
 }

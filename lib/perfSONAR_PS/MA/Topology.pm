@@ -12,11 +12,12 @@ use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::MA::Topology::Topology;
-use perfSONAR_PS::MA::Topology::Client::XMLDB;
+use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::LS::Register;
 
+
 sub new {
-	my ($package, $conf, $directory) = @_;
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
 	my %hash = ();
 
@@ -28,30 +29,39 @@ sub new {
 		$hash{"DIRECTORY"} = $directory;
 	}
 
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
+	}
+
 	bless \%hash => $package;
 }
 
-sub init {
+
+sub init($$) {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 
-	if (!defined $self->{CONF}->{"topology.db_type"} or $self->{CONF}->{"topology.db_type"} eq "") {
+	if (!defined $self->{CONF}->{"topology"}->{"db_type"} or $self->{CONF}->{"topology"}->{"db_type"} eq "") {
 		$logger->error("No database type specified");
 		return -1;
 	}
 
-	if ($self->{CONF}->{"topology.db_type"} eq "XML") {
-		if (!defined $self->{CONF}->{"topology.db_file"} or $self->{CONF}->{"topology.db_file"} eq "") {
-			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file(topology.db_file)");
+	if (lc($self->{CONF}->{"topology"}->{"db_type"}) eq "xml") {
+		if (!defined $self->{CONF}->{"topology"}->{"db_file"} or $self->{CONF}->{"topology"}->{"db_file"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file (db_file)");
 			return -1;
 		}
 
-		if (!defined $self->{CONF}->{"topology.db_environment"} or $self->{CONF}->{"topology.db_environment"} eq "") {
-			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(topology.db_environment)");
+		if (!defined $self->{CONF}->{"topology"}->{"db_environment"} or $self->{CONF}->{"topology"}->{"db_environment"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name (db_environment)");
 			return -1;
 		}
 
-		my $environment = $self->{CONF}->{"topology.db_environment"};
+		my $environment = $self->{CONF}->{"topology"}->{"db_environment"};
 		if (defined $self->{DIRECTORY}) {
 			if (!($environment =~ "^/")) {
 				$environment = $self->{DIRECTORY}."/".$environment;
@@ -60,40 +70,57 @@ sub init {
 
 		my $read_only = 0;
 
-		if (defined $self->{CONF}->{"topology.read_only"} and $self->{CONF}->{"topology.read_only"} == 1) {
+		if (defined $self->{CONF}->{"topology"}->{"read_only"} and $self->{CONF}->{"topology"}->{"read_only"} == 1) {
 			$read_only = 1;
 		}
 
-		my $file = $self->{CONF}->{"topology.db_file"};
+		my $file = $self->{CONF}->{"topology"}->{"db_file"};
 		my %ns = getTopologyNamespaces();
 
-		$self->{CLIENT}= new perfSONAR_PS::MA::Topology::Client::XMLDB($environment, $file, \%ns, $read_only);
+		$self->{CLIENT}= new perfSONAR_PS::Client::Topology::XMLDB($environment, $file, \%ns, $read_only);
 	} else {
 		$logger->error("Invalid database type specified");
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"topology.endpoint"}) {
-		$self->{CONF}->{"topology.endpoint"} = "/perfSONAR_PS/services/topology";
-	}
-
-	$handler->add($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
-	$handler->add($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
-	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
-	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
-	$handler->add($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
-
-	$handler->setMessageResponseType($self->{CONF}->{"topology.endpoint"}, "TopologyChangeRequest", "TopologyChangeResponse");
-	$handler->setMessageResponseType($self->{CONF}->{"topology.endpoint"}, "SetupDataRequest", "SetupDataResponse");
+	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
+	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
+	$handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
+	$handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
+	$handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
 
 	return 0;
+}
+
+sub needLS($) {
+	my ($self) = @_;
+
+	return ($self->{CONF}->{"topology"}->{"enable_registration"});
 }
 
 sub registerLS($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
-	my $ls = new perfSONAR_PS::LS::Register($self->{CONF}, $self->{NAMESPACES});
 	my ($status, $res1);
+
+	my %ls_conf = (
+		LS_INSTANCE => $self->{CONF}->{"topology"}->{"ls_instance"},
+		SERVICE_TYPE => $self->{CONF}->{"topology"}->{"service_type"},
+		SERVICE_NAME => $self->{CONF}->{"topology"}->{"service_name"},
+		SERVICE_DESCRIPTION => $self->{CONF}->{"topology"}->{"service_description"},
+		SERVICE_ACCESSPOINT => $self->{CONF}->{"topology"}->{"service_accesspoint"},
+		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"topology"}->{"registration_interval"},
+	);
+
+	if (defined $self->{CONF}->{"topology"}->{"registration_interval"} and $self->{CONF}->{"topology"}->{"registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"topology"}->{"registration_interval"};
+	} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
+		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
+	} else {
+		$logger->error("No registraion interval specified");
+	}
+
+	my $ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
 
 	($status, $res1) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -119,7 +146,7 @@ sub registerLS($) {
 
 	$res1 = "";
 
-	return $ls->register_withData(\@mds);
+	return $ls->registerDynamic(\@mds);
 }
 
 sub buildLSMetadata($$$$) {
@@ -142,11 +169,6 @@ sub buildLSMetadata($$$$) {
 	$md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/update/20070809</nmwg:eventType>\n";
 	$md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/replace/20070809</nmwg:eventType>\n";
 	$md .= "</nmwg:metadata>\n";
-}
-
-sub needLS() {
-	my ($self) = @_;
-	return ($self->{CONF}->{"topology.enable_registration"});
 }
 
 sub handleEvent($$$$) {

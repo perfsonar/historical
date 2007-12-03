@@ -30,9 +30,8 @@ sub retrieveSQL($$$$$$);
 sub retrieveRRD($$$$$$);
 
 
-
 sub new {
-	my ($package, $conf, $directory) = @_;
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
 	my %hash = ();
 
@@ -44,6 +43,14 @@ sub new {
 		$hash{"DIRECTORY"} = $directory;
 	}
 
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
+	}
+
 	bless \%hash => $package;
 }
 
@@ -53,133 +60,124 @@ sub init($$) {
 
   # values that are deal breakers...
 
-  if(!defined $self->{CONF}->{"snmp.endpoint"} or
-     $self->{CONF}->{"snmp.endpoint"} eq "") {
-    $logger->error("Value for 'endpoint' is not set.");
-    return -1;
-  }
-
-  if(!defined $self->{CONF}->{"snmp.metadata_db_type"} or
-     $self->{CONF}->{"snmp.metadata_db_type"} eq "") {
+  if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_type"} or
+     $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "") {
     $logger->error("Value for 'metadata_db_type' is not set.");
     return -1;
   }
 
-  if($self->{CONF}->{"snmp.metadata_db_type"} eq "file") {
-    if(!defined $self->{CONF}->{"snmp.metadata_db_file"} or
-       $self->{CONF}->{"snmp.metadata_db_file"} eq "") {
+  if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
+    if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_file"} or
+       $self->{CONF}->{"snmp"}->{"metadata_db_file"} eq "") {
       $logger->error("Value for 'metadata_db_file' is not set.");
       return -1;
     }
     else {
       if(defined $self->{DIRECTORY}) {
-        if(!($self->{CONF}->{"snmp.metadata_db_file"} =~ "^/")) {
-          $self->{CONF}->{"snmp.metadata_db_file"} = $self->{DIRECTORY}."/".$self->{CONF}->{"snmp.metadata_db_file"};
+        if(!($self->{CONF}->{"snmp"}->{"metadata_db_file"} =~ "^/")) {
+          $self->{CONF}->{"snmp"}->{"metadata_db_file"} = $self->{DIRECTORY}."/".$self->{CONF}->{"snmp"}->{"metadata_db_file"};
         }
       }
     }
   }
-  elsif($self->{CONF}->{"snmp.metadata_db_type"} eq "xmldb") {
-    if(!defined $self->{CONF}->{"snmp.metadata_db_file"} or
-       $self->{CONF}->{"snmp.metadata_db_file"} eq "") {
-      $logger->error("Value for 'snmp.metadata_db_file' is not set.");
+  elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
+    if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_file"} or
+       $self->{CONF}->{"snmp"}->{"metadata_db_file"} eq "") {
+      $logger->error("Value for 'metadata_db_file' is not set.");
       return -1;
     }
-    if(!defined $self->{CONF}->{"snmp.metadata_db_name"} or
-       $self->{CONF}->{"snmp.metadata_db_name"} eq "") {
-      $logger->error("Value for 'snmp.metadata_db_name' is not set.");
+    if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_name"} or
+       $self->{CONF}->{"snmp"}->{"metadata_db_name"} eq "") {
+      $logger->error("Value for 'metadata_db_name' is not set.");
       return -1;
     }
     else {
       if(defined $self->{DIRECTORY}) {
-        if(!($self->{CONF}->{"snmp.metadata_db_name"} =~ "^/")) {
-          $self->{CONF}->{"snmp.metadata_db_name"} = $self->{DIRECTORY}."/".$self->{CONF}->{"snmp.metadata_db_name"};
+        if(!($self->{CONF}->{"snmp"}->{"metadata_db_name"} =~ "^/")) {
+          $self->{CONF}->{"snmp"}->{"metadata_db_name"} = $self->{DIRECTORY}."/".$self->{CONF}->{"snmp"}->{"metadata_db_name"};
         }
       }
     }
   }
   else {
-    $logger->error("Wrong value for 'snmp.metadata_db_type' set.");
+    $logger->error("Wrong value for 'metadata_db_type' set.");
     return -1;
   }
 
-  if(!defined $self->{CONF}->{"snmp.rrdtool"} or
-     $self->{CONF}->{"snmp.rrdtool"} eq "") {
-    $logger->error("Value for 'snmp.rrdtool' is not set.");
+  if(!defined $self->{CONF}->{"snmp"}->{"rrdtool"} or
+     $self->{CONF}->{"snmp"}->{"rrdtool"} eq "") {
+    $logger->error("Value for 'rrdtool' is not set.");
     return -1;
   }
 
-  if(!defined $self->{CONF}->{"snmp.default_resolution"} or
-     $self->{CONF}->{"snmp.default_resolution"} eq "") {
-    $self->{CONF}->{"snmp.default_resolution"} = "300";
+  if(!defined $self->{CONF}->{"snmp"}->{"default_resolution"} or
+     $self->{CONF}->{"snmp"}->{"default_resolution"} eq "") {
+    $self->{CONF}->{"snmp"}->{"default_resolution"} = "300";
     $logger->warn("Setting 'default_resolution' to '300'.");
   }
 
-  if (!defined $self->{CONF}->{"snmp.enable_registration"} or $self->{CONF}->{"snmp.enable_registration"} eq "") {
-	  $self->{CONF}->{"snmp.enable_registration"} = 0;
+  if (!defined $self->{CONF}->{"snmp"}->{"enable_registration"} or $self->{CONF}->{"snmp"}->{"enable_registration"} eq "") {
+	  $self->{CONF}->{"snmp"}->{"enable_registration"} = 0;
   }
 
-  if ($self->{CONF}->{"snmp.enable_registration"}) {
-	  if (!defined $self->{CONF}->{"snmp.service_accesspoint"} or $self->{CONF}->{"snmp.service_accesspoint"} eq "") {
+  if ($self->{CONF}->{"snmp"}->{"enable_registration"}) {
+	  if (!defined $self->{CONF}->{"snmp"}->{"service_accesspoint"} or $self->{CONF}->{"snmp"}->{"service_accesspoint"} eq "") {
 		  $logger->error("No access point specified for SNMP service");
 		  return -1;
 	  }
 
-	  if (!defined $self->{CONF}->{"snmp.ls_instance"} or $self->{CONF}->{"snmp.ls_instance"} eq "") {
-		  if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
-			  $self->{CONF}->{"snmp.ls_instance"} = $self->{CONF}->{"default.ls_instance"};
+	  if (!defined $self->{CONF}->{"snmp"}->{"ls_instance"} or $self->{CONF}->{"snmp"}->{"ls_instance"} eq "") {
+		  if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne "") {
+			  $self->{CONF}->{"snmp"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
 		  } else {
 			  $logger->error("No LS instance specified for SNMP service");
 			  return -1;
 		  }
 	  }
 
-	  if (!defined $self->{CONF}->{"snmp.ls_registration_interval"} or $self->{CONF}->{"snmp.ls_registration_interval"} eq "") {
-		  if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
-			  $self->{CONF}->{"snmp.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+	  if (!defined $self->{CONF}->{"snmp"}->{"ls_registration_interval"} or $self->{CONF}->{"snmp"}->{"ls_registration_interval"} eq "") {
+		  if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne "") {
+			  $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
 		  } else {
 			  $logger->warn("Setting registration interval to 30 minutes");
-			  $self->{CONF}->{"snmp.ls_registration_interval"} = 1800;
+			  $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 1800;
 		  }
 	  }
 
-	  if(!defined $self->{CONF}->{"snmp.service_accesspoint"} or
-			  $self->{CONF}->{"snmp.service_accesspoint"} eq "") {
-		  $self->{CONF}->{"snmp.service_accesspoint"} = "http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."";
-		  $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."'.");
+	  if(!defined $self->{CONF}->{"snmp"}->{"service_accesspoint"} or
+			  $self->{CONF}->{"snmp"}->{"service_accesspoint"} eq "") {
+		  $self->{CONF}->{"snmp"}->{"service_accesspoint"} = "http://localhost:".$self->{PORT}."/".$self->{ENDPOINT}."";
+		  $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{PORT}."/".$self->{ENDPOINT}."'.");
 	  }
 
-	  if(!defined $self->{CONF}->{"snmp.service_description"} or
-			  $self->{CONF}->{"snmp.service_description"} eq "") {
-		  $self->{CONF}->{"snmp.service_description"} = "perfSONAR_PS SNMP MA";
+	  if(!defined $self->{CONF}->{"snmp"}->{"service_description"} or
+			  $self->{CONF}->{"snmp"}->{"service_description"} eq "") {
+		  $self->{CONF}->{"snmp"}->{"service_description"} = "perfSONAR_PS SNMP MA";
 		  $logger->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
 	  }
 
-	  if(!defined $self->{CONF}->{"snmp.service_name"} or
-			  $self->{CONF}->{"snmp.service_name"} eq "") {
-		  $self->{CONF}->{"snmp.service_name"} = "SNMP MA";
+	  if(!defined $self->{CONF}->{"snmp"}->{"service_name"} or
+			  $self->{CONF}->{"snmp"}->{"service_name"} eq "") {
+		  $self->{CONF}->{"snmp"}->{"service_name"} = "SNMP MA";
 		  $logger->warn("Setting 'service_name' to 'SNMP MA'.");
 	  }
 
-	  if(!defined $self->{CONF}->{"snmp.service_type"} or
-			  $self->{CONF}->{"snmp.service_type"} eq "") {
-		  $self->{CONF}->{"snmp.service_type"} = "MA";
+	  if(!defined $self->{CONF}->{"snmp"}->{"service_type"} or
+			  $self->{CONF}->{"snmp"}->{"service_type"} eq "") {
+		  $self->{CONF}->{"snmp"}->{"service_type"} = "MA";
 		  $logger->warn("Setting 'service_type' to 'MA'.");
 	  }
   }
 
-  $handler->add($self->{CONF}->{"snmp.endpoint"}, "SetupDataRequest", "", $self);
-  $handler->add($self->{CONF}->{"snmp.endpoint"}, "MetadataKeyRequest", "", $self);
-
-  $handler->setMessageResponseType($self->{CONF}->{"snmp.endpoint"}, "SetupDataRequest", "SetupDataResponse");
-  $handler->setMessageResponseType($self->{CONF}->{"snmp.endpoint"}, "MetadataKeyRequest", "MetadataKeyResponse");
+  $handler->addMessageHandler("SetupDataRequest", "", $self);
+  $handler->addMessageHandler("MetadataKeyRequest", "", $self);
 
   return 0;
 }
 
 sub needLS($) {
 	my ($self) = @_;
-	return ($self->{CONF}->{"snmp.enable_registration"});
+	return ($self->{CONF}->{"snmp"}->{"enable_registration"});
 }
 
 sub registerLS($) {
@@ -188,23 +186,68 @@ sub registerLS($) {
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"snmp.ls_instance"} or $self->{CONF}->{"snmp.ls_instance"} eq "");
+	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"snmp"}->{"ls_instance"} or $self->{CONF}->{"snmp"}->{"ls_instance"} eq "");
 
 	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"snmp.ls_instance"},
-		SERVICE_TYPE => $self->{CONF}->{"snmp.service_type"},
-		SERVICE_NAME => $self->{CONF}->{"snmp.service_name"},
-		SERVICE_DESCRIPTION => $self->{CONF}->{"snmp.service_description"},
-		SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp.service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"snmp.registration_interval"},
-		METADATA_DB_TYPE => $self->{CONF}->{"snmp.metadata_db_type"},
-		METADATA_DB_FILE => $self->{CONF}->{"snmp.metadata_db_file"},
-		METADATA_DB_NAME => $self->{CONF}->{"snmp.metadata_db_name"},
+		LS_INSTANCE => $self->{CONF}->{"snmp"}->{"ls_instance"},
+		SERVICE_TYPE => $self->{CONF}->{"snmp"}->{"service_type"},
+		SERVICE_NAME => $self->{CONF}->{"snmp"}->{"service_name"},
+		SERVICE_DESCRIPTION => $self->{CONF}->{"snmp"}->{"service_description"},
+		SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp"}->{"service_accesspoint"},
+		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"snmp"}->{"registration_interval"},
+		METADATA_DB_TYPE => $self->{CONF}->{"snmp"}->{"metadata_db_type"},
+		METADATA_DB_FILE => $self->{CONF}->{"snmp"}->{"metadata_db_file"},
+		METADATA_DB_NAME => $self->{CONF}->{"snmp"}->{"metadata_db_name"},
 	);
 
 	$ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
 
-	return $ls->register();
+        my $queryString = "/nmwg:store/nmwg:metadata";
+        my $error = "";            
+        my $metadatadb;
+	my @resultsString;
+      
+	if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
+		$metadatadb = new perfSONAR_PS::DB::File( $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+		$metadatadb->openDB($error);
+		@resultsString = $metadatadb->query($queryString);            
+	} elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
+		my $dbTr = $metadatadb->getTransaction(\$error);
+		if($dbTr and !$error) {         
+			$metadatadb = new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"snmp"}->{"metadata_db_name"}, $self->{CONF}->{"snmp"}->{"metadata_db_file"}, $self->{NAMESPACES});
+			$metadatadb->openDB($dbTr, $error); 
+			@resultsString = $metadatadb->query($queryString, $dbTr, \$error);      
+
+			$metadatadb->commitTransaction($dbTr, \$error);
+			undef $dbTr;
+			if($error) {
+				$logger->error("Database Error: \"" . $error . "\".");                
+				$metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+				undef $dbTr;
+				return;
+			}    
+		}
+		else { 
+			$logger->error("Cound not start database transaction.");
+			$metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+			undef $dbTr;
+			return;
+		}                
+	}
+
+	return $ls->registerStatic(\@resultsString);
+}
+
+sub handleMessageBegin($$$$$$$$) {
+	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+
+	return 0;
+}
+
+sub handleMessageEnd($$$$$$$$) {
+	my ($self, $ret_message, $messageId);
+
+	return 0;
 }
 
 sub handleEvent($$$$$$$$$) {
@@ -226,15 +269,15 @@ sub maMetadataKeyRequest($$$$$) {
   my $dId = "";
 
   my $metadatadb;
-  if($self->{CONF}->{"snmp.metadata_db_type"} eq "file") {
+  if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
     $metadatadb = new perfSONAR_PS::DB::File(
-      $self->{CONF}->{"snmp.metadata_db_file"}
+      $self->{CONF}->{"snmp"}->{"metadata_db_file"}
     );
   }
-  elsif($self->{CONF}->{"snmp.metadata_db_type"} eq "xmldb") {
+  elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB(
-      $self->{CONF}->{"snmp.metadata_db_name"},
-      $self->{CONF}->{"snmp.metadata_db_file"},
+      $self->{CONF}->{"snmp"}->{"metadata_db_name"},
+      $self->{CONF}->{"snmp"}->{"metadata_db_file"},
       \%{$self->{NAMESPACES}}
     );
   }
@@ -250,7 +293,7 @@ sub maMetadataKeyRequest($$$$$) {
   #       N: do md/d queries against md return results with altered key
   #     N: do md/d queries against md return results
 
-  if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp.default_resolution"})) {
+  if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp"}->{"default_resolution"})) {
     if(find($md, "./nmwg:key", 1)) {
       metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $request->getNamespaces(), $output);
     }
@@ -394,7 +437,7 @@ sub metadataKeyRetrieveMetadataData($$$$$$$) {
     }
   }
   else {
-    my $msg = "Database \"".$self->{CONF}->{"snmp.metadata_db_file"}."\" returned 0 results for search";
+    my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
     $logger->error($msg);
     $mdId = "metadata.".genuid();
     $dId = "data.".genuid();
@@ -413,15 +456,15 @@ sub maSetupDataRequest($$$$$) {
   my $dId = "";
 
   my $metadatadb;
-  if($self->{CONF}->{"snmp.metadata_db_type"} eq "file") {
+  if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
     $metadatadb = new perfSONAR_PS::DB::File(
-      $self->{CONF}->{"snmp.metadata_db_file"}
+      $self->{CONF}->{"snmp"}->{"metadata_db_file"}
     );
   }
-  elsif($self->{CONF}->{"snmp.metadata_db_type"} eq "xmldb") {
+  elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB(
-      $self->{CONF}->{"snmp.metadata_db_name"},
-      $self->{CONF}->{"snmp.metadata_db_file"},
+      $self->{CONF}->{"snmp"}->{"metadata_db_name"},
+      $self->{CONF}->{"snmp"}->{"metadata_db_file"},
       \%{$self->{NAMESPACES}}
     );
   }
@@ -445,7 +488,7 @@ sub maSetupDataRequest($$$$$) {
   #       N: Error out
   #     N: extract md, extract data
 
-  if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp.default_resolution"})) {
+  if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp"}->{"default_resolution"})) {
     if(find($md, "./nmwg:key", 1)) {
       setupDataRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $message_parameters, $request->getNamespaces(), $output);
     }
@@ -558,7 +601,7 @@ sub setupDataRetrieveMetadataData($$$$$$) {
     }
   }
   else {
-    my $msg = "Database \"".$self->{CONF}->{"snmp.metadata_db_file"}."\" returned 0 results for search";
+    my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
     $logger->error($msg);
     $mdId = "metadata.".genuid();
     $dId = "data.".genuid();
@@ -756,7 +799,7 @@ sub retrieveRRD($$$$$$) {
 
   adjustRRDTime($self);
   my $id = "data.".genuid();
-  my %rrd_result = getDataRRD($self, $d, $mid, $self->{CONF}->{"snmp.rrdtool"});
+  my %rrd_result = getDataRRD($self, $d, $mid, $self->{CONF}->{"snmp"}->{"rrdtool"});
   if($rrd_result{ERROR}) {
     $logger->error("RRD error seen: ".$rrd_result{ERROR});
     getResultCodeData($output, $id, $mid, $rrd_result{ERROR}, 1);
@@ -835,9 +878,9 @@ related tasks of interacting with backend storage.
     use perfSONAR_PS::MA::SNMP;
 
     my %conf = ();
-    $conf{"snmp.metadata_db_type"} = "xmldb";
-    $conf{"snmp.metadata_db_name"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
-    $conf{"snmp.metadata_db_file"} = "snmpstore.dbxml";
+    $conf{"snmp"}->{"metadata_db_type"} = "xmldb";
+    $conf{"snmp"}->{"metadata_db_name"} = "/home/jason/perfSONAR-PS/MP/SNMP/xmldb";
+    $conf{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
 
     my %ns = (
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
