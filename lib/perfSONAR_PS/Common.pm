@@ -9,12 +9,13 @@ use IO::File;
 use XML::XPath;
 use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 our @ISA = ('Exporter');
 our @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'queryLS', 'escapeString', 'unescapeString',
-             'makeEnvelope', 'mapNamespaces');
+             'makeEnvelope', 'mapNamespaces', 'mergeConfig');
 
 
 sub find($$$);
@@ -539,6 +540,90 @@ sub unescapeString($) {
 	$input =~ s/&amp;/&/g;
 
 	return $input;
+}
+
+sub mergeConfig($$) {
+	my ($base, $specific) = @_;
+	my $logger = get_logger("perfSONAR_PS::Common");
+
+	my %elements = (
+			port => 1,
+			endpoint => 1 );
+
+	$logger->debug("Base: ".Dumper($base));
+	$logger->debug("Specific: ".Dumper($specific));
+
+	my $ret_config = mergeHash($base, $specific, \%elements);
+
+	$logger->debug("Merged: ".Dumper($ret_config));
+
+	return $ret_config;
+}
+
+sub mergeHash($) {
+	my ($base, $specific, $skip_elements) = @_;
+	my $logger = get_logger("perfSONAR_PS::Common");
+
+	my $new = duplicateHash($base, $skip_elements);
+
+	foreach my $key (keys %{ $specific }) {
+		if (defined $skip_elements->{$key}) {
+			next;
+		}
+
+		if (ref $specific->{$key} eq "HASH") {
+			if (!defined $new->{$key}) {
+				$new->{$key} = duplicateHash($specific->{$key}, $skip_elements);
+			} else {
+				$new->{$key} = mergeHash($new->{$key}, $specific->{$key}, $skip_elements);
+			}
+		} else {
+			$new->{$key} = $specific->{$key};
+		}
+	}
+
+	return $new;
+}
+
+sub duplicateHash($$) {
+	my ($hash, $skip_elements) = @_;
+	my $logger = get_logger("perfSONAR_PS::Common");
+
+	my %new = ();
+
+	foreach my $key (keys %{ $hash }) {
+		if (defined $skip_elements->{$key}) {
+			next;
+		}
+
+		if (ref $hash->{$key} eq "HASH") {
+			$new{$key} = duplicateHash($hash->{$key}, $skip_elements);
+		} elsif (ref $hash->{$key} eq "ARRAY") {
+			$new{$key} = duplicateArray($hash->{$key}, $skip_elements);
+		} else {
+			$new{$key} = $hash->{$key};
+		}
+	}
+
+	return \%new;
+}
+
+sub duplicateArray($) {
+	my ($array, $skip_elements) = @_;
+
+	my @old_array = @{ $array };
+	my @new = ();
+	for(my $i = 0; $i <= $#old_array; $i++) {
+		if (ref $old_array[$i] eq "ARRAY") {
+			$new[$i] = duplicateArray($old_array[$i], $skip_elements);
+		} elsif (ref $old_array[$i] eq "HASH") {
+			$new[$i] = duplicateHash($old_array[$i], $skip_elements);
+		} else {
+			$new[$i] = $old_array[$i];
+		}
+	}
+
+	return \@new;
 }
 
 sub convertISO($) {

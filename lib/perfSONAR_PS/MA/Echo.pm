@@ -26,7 +26,7 @@ sub new {
 }
 
 sub init($$$$) {
-	my ($self, $handler, $endpoint_config, $full_config) = @_;
+	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Echo");
 
 	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/2.0", $self);

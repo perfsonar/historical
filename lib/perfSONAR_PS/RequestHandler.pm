@@ -17,8 +17,25 @@ sub new($) {
 	$hash{"EV_HANDLERS"} = ();
 	$hash{"EV_REGEX_HANDLERS"} = ();
 	$hash{"MSG_HANDLERS"} = ();
+	$hash{"FULL_MSG_HANDLERS"} = ();
 
 	bless \%hash => $package;
+}
+
+sub addFullMessageHandler($$$) {
+	my ($self, $messageType, $service) = @_;
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+	$logger->debug("Adding message handler for $messageType");
+
+	if (defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
+		$logger->error("There already exists a handler for message $messageType");
+		return -1;
+	}
+
+	$self->{FULL_MSG_HANDLERS}->{$messageType} = $service;
+
+	return 0;
 }
 
 sub addMessageHandler($$$) {
@@ -52,11 +69,6 @@ sub addEventHandler($$$$) {
 		return -1;
 	}
 
-#	if (!defined $service->handleEvent) {
-#		$logger->error("Trying to add a handler that does not contain a handleEvent function");
-#		return -1;
-#	}
-
 	$self->{EV_HANDLERS}->{$messageType}->{$eventType} = $service;
 
 	return 0;
@@ -77,25 +89,25 @@ sub addEventHandler_Regex($$$$) {
 		return -1;
 	}
 
-#	if (!defined $service->handleEvent) {
-#		$logger->error("Trying to add a handler that does not contain a handleEvent function");
-#		return -1;
-#	}
-
 	$self->{EV_REGEX_HANDLERS}->{$messageType}->{$eventRegex} = $service;
 
 	return 0;
+}
 
+sub handleMessage($$$$) {
+	my ($self, $messageType, $message, $request) = @_;
+
+	if (defined $self->{FULL_MSG_HANDLERS}->{$message}) {
+
+	}
+
+	return ("error.ma.messages_type", "Message type \"$messageType\" not yet supported");
 }
 
 sub messageBegin($$$$$$$$) {
 	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces) = @_;
 
 	if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
-		return 0;
-	}
-
-	if (!defined $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin) {
 		return 0;
 	}
 
@@ -106,10 +118,6 @@ sub messageEnd($$$$$$$$) {
 	my ($self, $ret_message, $messageId, $messageType) = @_;
 
 	if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
-		return 0;
-	}
-
-	if (!defined $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd) {
 		return 0;
 	}
 
@@ -150,7 +158,8 @@ sub handleEvent($$$$$$$$$$) {
 sub isValidMessageType($$) {
 	my ($self, $messageType) = @_;
 
-	if (defined $self->{EV_HANDLERS}->{$messageType} or defined $self->{EV_REGEX_HANDLERS}->{$messageType} or defined $self->{MSG_HANDLERS}->{$messageType}) {
+	if (defined $self->{EV_HANDLERS}->{$messageType} or defined $self->{EV_REGEX_HANDLERS}->{$messageType}
+			or defined $self->{MSG_HANDLERS}->{$messageType} or defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
 		return 1;
 	}
 
@@ -174,6 +183,16 @@ sub isValidEventType($$$) {
 				return 1;
 			}
 		}
+	}
+
+	return 0;
+}
+
+sub hasFullMessageHandler($$) {
+	my ($self, $messageType) = @_;
+
+	if (defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
+		return 1;
 	}
 
 	return 0;
@@ -216,7 +235,7 @@ sub handleRequest($$$$) {
 	}
 
 	# The module will handle everything for this message type
-	if ($self->hasMessageHandler($messageType)) {
+	if ($self->hasFullMessageHandler($messageType)) {
 		return $self->handleMessage($messageType, $message, $request);
 	}
 
