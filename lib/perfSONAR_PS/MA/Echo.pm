@@ -4,11 +4,8 @@ package perfSONAR_PS::MA::Echo;
 
 use warnings;
 use strict;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 
-use perfSONAR_PS::MA::Base;
-use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
@@ -28,26 +25,35 @@ sub new {
 	bless \%hash => $package;
 }
 
-sub init {
-	my ($self, $handler) = @_;
+sub init($$$$) {
+	my ($self, $handler, $endpoint_config, $full_config) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Echo");
 
-	$handler->add("", "EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/2.0", $self);
-	$handler->add("", "EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0", $self);
-	$handler->add("", "EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
-	$handler->addRegex("", "EchoRequest", "^echo.*", $self);
-
-	$handler->setMessageResponseType("", "EchoRequest", "EchoResponse");
+	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/2.0", $self);
+	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0", $self);
+	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
+	$handler->addEventHandler_Regex("EchoRequest", "^echo.*", $self);
 
 	return 0;
 }
 
-sub needLS() {
+sub needLS($) {
+	my ($self) = @_;
+
 	return 0;
+}
+
+sub registerLS($$) {
+	my ($self, $ret_sleep_time) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Echo");
+
+	$logger->warn("Can't register an echo handler with an LS");
+
+	return -1;
 }
 
 sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 
 	my $retMetadata;
 	my $retData;
@@ -67,7 +73,7 @@ sub handleEvent($$$$$$$$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Skeleton - A skeleton of an MA module that can be modified as needed.
+perfSONAR_PS::MA::Echo - A skeleton of an MA module that can be modified as needed.
 
 =head1 DESCRIPTION
 
@@ -75,11 +81,11 @@ This module aims to be easily modifiable to support new and different MA types.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::Skeleton;
+use perfSONAR_PS::MA::Echo;
 
 my %conf;
 
-my $default_ma_conf = &perfSONAR_PS::MA::Skeleton::getDefaultConfig();
+my $default_ma_conf = &perfSONAR_PS::MA::Echo::getDefaultConfig();
 if (defined $default_ma_conf) {
 	foreach my $key (keys %{ $default_ma_conf }) {
 		$conf{$key} = $default_ma_conf->{$key};
@@ -97,10 +103,10 @@ my %ns = (
 		nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
 	 );
 
-my $ma = perfSONAR_PS::MA::Skeleton->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::MA::Echo->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::Skeleton->new;
+# $ma = perfSONAR_PS::MA::Echo->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 

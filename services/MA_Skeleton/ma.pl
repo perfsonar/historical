@@ -10,19 +10,19 @@ use File::Basename;
 use Fcntl qw(:DEFAULT :flock);
 use POSIX ":sys_wait_h";
 use Cwd;
-use Config::Simple;
+use Config::General;
 use Module::Load;
 use Data::Dumper;
 
 
-sub measurementArchive($$);
+sub psService($$$$);
 sub registerLS($);
 sub daemonize();
 sub managePID($$);
 sub killChildren();
 sub signalHandler();
-sub handleRequest($$$);
-sub __handleRequest($$$);
+sub handleRequest($$$$);
+sub __handleRequest($$$$);
 
 
 # we need a fully-qualified directory name in case we daemonize so that we can
@@ -69,16 +69,18 @@ my $READ_ONLY = '';
 my $HELP = '';
 my $CONFIG_FILE  = '';
 my $PIDDIR = '';
+my $PIDFILE = '';
 
 my $status = GetOptions (
 		'config=s' => \$CONFIG_FILE,
 		'piddir=s' => \$PIDDIR,
+		'pidfile=s' => \$PIDFILE,
 		'verbose' => \$DEBUGFLAG,
 		'help' => \$HELP);
 
 if(!$status or $HELP) {
 	print "$0: starts the MA daemon.\n";
-	print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir]\n";
+	print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
 	exit(1);
 }
 
@@ -87,77 +89,45 @@ if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
 }
 
 # Read in configuration information
-my %conf = ();
+my $config =  new Config::General($CONFIG_FILE);
+my %conf = $config->getall;
 
-if (!Config::Simple->import_from($CONFIG_FILE, \%conf)) {
-	$logger->error("Couldn't read in specified configuration file: $CONFIG_FILE");
-	exit(-1);
+if (!defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq "") {
+	$logger->warn("Setting maximum worker lifetime at 60 seconds");
+	$conf{"max_worker_lifetime"} = 60;
 }
 
-if (!defined $conf{"default.port"} or $conf{"default.port"} eq "") {
-	$conf{"default.port"} = 8080;
+if (!defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq "") {
+	$logger->warn("Setting maximum worker processes at 32");
+	$conf{"max_worker_processes"} = 32;
+}
+if (!defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq "") {
+	$logger->warn("Setting LS registration interval at 60 minutes");
+	$conf{"ls_registration_interval"} = 60;
 }
 
-if (!defined $conf{"default.max_worker_lifetime"} or $conf{"default.max_worker_lifetime"} eq "") {
-	$conf{"default.max_worker_lifetime"} = 0;
+# turn the interval from minutes to seconds
+$conf{"ls_registration_interval"} *= 60;
+
+if (!defined $conf{"disable_echo"} or $conf{"disable_echo"} eq "") {
+	$logger->warn("Enabling echo service for each endpoint unless specified otherwise");
+	$conf{"disable_echo"} = 0;
 }
 
-if (!defined $conf{"default.max_worker_processes"} or $conf{"default.max_worker_processes"} eq "") {
-	$conf{"default.max_worker_processes"} = 0;
-}
-if (!defined $conf{"default.ls_registration_interval"} or $conf{"default.ls_registration_interval"} eq "") {
-	$conf{"default.ls_registration_interval"} = 60;
-}
 
-$conf{"default.ls_registration_interval"} *= 60;
-
-if (!defined $conf{"default.modules"} or $conf{"default.modules"} eq "") {
-	$logger->error("No list of modules defined");
-	exit(-1);
-}
-
-# if there is only a single element, the config thing returns it not as an
-# array, but as a single element.
-if (!ref($conf{"default.modules"}) or ref($conf{"default.modules"}) ne "ARRAY") {
-	my @array = ();
-	push @array, $conf{"default.modules"};
-
-	$conf{"default.modules"} = \@array;
-}
-
-if (!defined $conf{"default.disable_echo"} or $conf{"default.disable_echo"} eq "") {
-	$conf{"default.disable_echo"} = 0;
-}
-
-if ($conf{"default.disable_echo"} == 0) {
-	push @{ $conf{"default.modules"} }, "perfSONAR_PS::MA::Echo";
-}
-
-# get rid of any duplicate modules
-my %tmp_modules = ();
-my @new_modules = ();
-
-foreach my $module (@{ $conf{"default.modules"} }) {
-	if (!defined $tmp_modules{$module}) {
-		$tmp_modules{$module} = 1;
-		push @new_modules, $module;
+if (!defined $PIDDIR or $PIDDIR eq "") {
+	if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
+		$PIDDIR = $conf{"pid_dir"};
 	} else {
-		$logger->warn("Duplicate module load requested: $module");
+		$PIDDIR = "/var/run";
 	}
 }
 
-# make sure the echo module is loaded unless they explicitly disable it for some reason
-if ($conf{"default.disable_echo"} == 0 and !defined $tmp_modules{"perfSONAR_PS::MA::Echo"}) {
-	push @new_modules, "perfSONAR_PS::MA::Echo";
-}
-
-$conf{"default.modules"} = \@new_modules;
-
-if (!defined $PIDDIR or $PIDDIR eq "") {
-	if (defined $conf{"default.pid_dir"} and $conf{"default.pid_dir"} ne "") {
-		$PIDDIR = $conf{"default.pid_dir"};
+if (!defined $PIDFILE or $PIDFILE eq "") {
+	if (defined $conf{"pid_file"} and $conf{"pid_file"} ne "") {
+		$PIDFILE = $conf{"pid_file"};
 	} else {
-		$PIDDIR = "/var/run";
+		$PIDFILE = "ps.pid";
 	}
 }
 
@@ -168,33 +138,81 @@ if($DEBUGFLAG) {
 	$logger->level($INFO);
 }
 
-managePID($conf{"default.port"}, $PIDDIR);
+managePID($PIDDIR, $PIDFILE);
 
 $logger->debug("Starting '".$$."'");
 
-my $ma_handler = new perfSONAR_PS::MA::Handler();
-my @ls_modules;
+my @ls_services;
 
+my %loaded_modules = ();
+my $echo_module = "perfSONAR_PS::MA::Echo";
 
+my %handlers = ();
+my %listeners = ();
+my %modules_loaded = ();
 
-foreach my $module (@{ $conf{"default.modules"} }) {
-	load $module;
-	my $ma = $module->new(\%conf);
+foreach my $port (keys %{ $conf{"port"} }) {
+        if (!defined $conf{"port"}->{$port}->{"endpoint"}) {
+                $logger->warn("No endpoints specified for port $port");
+                next;
+        }
 
-	if ($ma->init($ma_handler) != 0) {
-		$logger->error("Error initializing $module");
-		exit(-1);
-	}
+        my $listener = new perfSONAR_PS::SOAP_Daemon($port);
+        if ($listener->startDaemon() != 0) {
+                $logger->error("Couldn't start listener on port $port");
+                exit(-1);
+        }
 
-	if ($ma->needLS()) {
-		push @ls_modules, $ma;
-	}
-}
+        $listeners{$port} = $listener;
 
-my $listener = new perfSONAR_PS::SOAP_Daemon($conf{"default.port"});
-if ($listener->startDaemon() != 0) {
-	$logger->error("Couldn't start MA SOAP listener");
-	exit(-1);
+        $handlers{$port} = ();
+
+        foreach my $endpoint (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
+                my %endpoint_conf = %{ $conf{"port"}->{$port}->{"endpoint"}->{$endpoint} };
+
+		$logger->debug("Adding endpoint $endpoint to $port");
+
+                $handlers{$port}->{$endpoint} = perfSONAR_PS::MA::Handler->new();
+
+                if (!defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq "") {
+                        $logger->error("No module specified for $port:$endpoint");
+                        exit(-1);
+                } 
+
+                if (!defined $modules_loaded{$endpoint_conf{"module"}}) {
+                        load $endpoint_conf{"module"};
+                        $modules_loaded{$endpoint_conf{"module"}} = 1;
+                }
+
+                my $service = $endpoint_conf{"module"}->new();
+                if ($service->init($handlers{$port}->{$endpoint}, \%endpoint_conf, \%conf) != 0) {
+                        $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$endpoint");
+                        exit(-1);
+                }
+
+		if ($service->needLS()) {
+			my %ls_child_args = ();
+			$ls_child_args{"service"} = $service;
+			$ls_child_args{"endpoint_conf"} = \%endpoint_conf;
+			$ls_child_args{"full_conf"} = \%conf;
+			push @ls_services, \%ls_child_args;
+		}
+
+                # the echo module is loaded by default unless otherwise specified
+                if ((!defined $endpoint_conf{"disable_echo"} or $endpoint_conf{"disable_echo"} == 0) and
+			(!defined $conf{"disable_echo"} or $conf{"disable_echo"} == 0)) {
+                        if (!defined $modules_loaded{$echo_module}) {
+                                load $echo_module;
+                                $modules_loaded{$echo_module} = 1;
+                        }
+
+                        my $echo = $echo_module->new();
+                        if ($echo->init($handlers{$port}->{$endpoint}, \%endpoint_conf, \%conf) != 0) {
+                                $logger->error("Failed to initialize echo module on $port:$endpoint");
+                                exit(-1);
+                        }
+                }
+        }
 }
 
 # Daemonize if not in debug mode. This must be done before forking off children
@@ -205,18 +223,24 @@ if(!$DEBUGFLAG) {
 #	&daemonize;
 }
 
-my $ma_pid = fork();
-if ($ma_pid == 0) {
-	measurementArchive($ma_handler, \%conf);
-	exit(0);
+foreach my $port (keys %listeners) {
+	my $pid = fork();
+	if ($pid == 0) {
+		psService($listeners{$port}, $handlers{$port}, $conf{"port"}->{$port}, \%conf);
+		exit(0);
+	} elsif ($pid < 0) {
+		$logger->error("Couldn't spawn listener child");
+		killChildren();
+		exit(-1);
+	} else {
+		$child_pids{$pid} = "";
+	}
 }
 
-$child_pids{$ma_pid} = "";
-
-foreach my $ma (@ls_modules) {
+foreach my $ls_args (@ls_services) {
 	my $ls_pid = fork();
 	if ($ls_pid == 0) {
-		registerLS($ma);
+		registerLS($ls_args);
 		exit(0);
 	} elsif ($ls_pid < 0) {
 		$logger->error("Couldn't spawn LS");
@@ -231,17 +255,23 @@ foreach my $pid (keys %child_pids) {
 	waitpid($pid, 0);
 }
 
-sub measurementArchive($$) {
-	my ($ma_handler, $conf) = @_;
+sub psService($$$$) {
+	my ($listener, $handlers, $service_config, $full_config) = @_;
 	my $outstanding_children = 0;
+	my $max_worker_processes;
 
 	%child_pids = ();
 
 	$logger->debug("Starting '".$$."' as the MA.");
 
+	$max_worker_processes = $service_config->{"max_worker_processes"};
+	if (!defined $max_worker_processes or $max_worker_processes eq "") {
+		$max_worker_processes = $full_config->{"max_worker_processes"};
+	}
+
 	while(1) {
-		if (defined $conf{"default.max_worker_processes"} and $conf{"default.max_worker_processes"} > 0) {
-			while ($outstanding_children >= $conf{"default.max_worker_processes"}) {
+		if ($max_worker_processes > 0) {
+			while ($outstanding_children >= $max_worker_processes) {
 				$logger->debug("Waiting for a slot to open");
 				my $kid = waitpid(-1, 0);
 				if ($kid > 0) {
@@ -251,24 +281,30 @@ sub measurementArchive($$) {
 			}
 		}
 
-		my ($res, $request, $endpoint, $error);
+		my ($res, $request, $error);
 
 		$res = $listener->receive(\$request, \$error);
 
 		if ($res ne "") {
 			$logger->error("Receive failed: $error");
 			if (defined $request) {
-				my $doc = new perfSONAR_PS::XML::Document_string();
-				getResultCodeMessage($doc, "message.".genuid(), "", "", "response", $res, $error, undef, 1);
-				$request->setResponse($doc->getValue());
+				my $ret_message = new perfSONAR_PS::XML::Document_string();
+				getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", $res, $error, undef, 1);
+				$request->setResponse($ret_message->getValue());
 				$request->finish();
 			}
 		} elsif (defined $request) {
-			if ($ma_handler->isValidEndpoint($request->getEndpoint())) {
+			if (!defined $handlers->{$request->getEndpoint()}) {
+				my $ret_message = new perfSONAR_PS::XML::Document_string();
+				my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
+				getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
+				$request->setResponse($ret_message->getValue());
+				$request->finish();
+			} else {
 				my $pid = fork();
 				if ($pid == 0) {
 					%child_pids = ();
-					handleRequest($ma_handler, $conf, $request);
+					handleRequest($handlers->{$request->getEndpoint()}, $service_config->{"endpoint"}->{$request->getEndpoint()}, $full_config, $request);
 					$request->finish();
 					exit(0);
 				} elsif ($pid < 0) {
@@ -277,12 +313,6 @@ sub measurementArchive($$) {
 					$child_pids{$pid} = "";
 					$outstanding_children++;
 				}
-			} else {
-				my $doc = new perfSONAR_PS::XML::Document_string();
-				my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
-				getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
-				$request->setResponse($doc->getValue());
-				$request->finish();
 			}
 		}
 
@@ -296,23 +326,198 @@ sub measurementArchive($$) {
 }
 
 sub registerLS($) {
-	my ($ma) = @_;
+	my ($args) = @_;
 
 	%child_pids = ();
+
+	my $service = $args->{"service"};
+	my $default_interval = $args->{"endpoint_conf"}->{"ls_registration_interval"};
+	if (!defined $default_interval or $default_interval eq "") {
+		$default_interval = $args->{"endpoint_conf"}->{"ls_registration_interval"};
+	}
+
+	$default_interval *= 60;
 
 	$logger->debug("Starting '".$$."' for LS registration");
 
 	while(1) {
 		my $sleep_time;
 
-		$ma->registerLS(\$sleep_time);
+		$service->registerLS(\$sleep_time);
 
 		if (!defined $sleep_time or $sleep_time eq "") {
-			$sleep_time = $conf{"default.ls_registration_interval"};
+			$sleep_time = $default_interval;
 		}
 
 		sleep($sleep_time);
 	}
+}
+
+sub handleRequest($$$$) {
+	my ($handler, $endpoint_conf, $full_conf, $request) = @_;
+
+	# This function is a wrapper around the __handleRequest function.  The
+	# purpose of the function is to handle the case where a crash occurs
+	# while handling the request or the handling of the request runs for
+	# too long.
+
+	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
+	if (!defined $max_worker_lifetime or $max_worker_lifetime eq "") {
+		$max_worker_lifetime = $full_conf->{"max_worker_lifetime"};
+	}
+
+	eval {
+ 		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
+		alarm($max_worker_lifetime) if ($max_worker_lifetime > 0);
+		__handleRequest($handler, $endpoint_conf, $full_conf, $request);
+ 	};
+
+	# disable the alarm after the eval is done
+	alarm(0);
+
+	if ($@) {
+		my $msg = "Unhandled exception or crash: $@";
+		$logger->error($msg);
+
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+		$request->setResponse($ret_message->getValue());
+	}
+}
+
+sub __handleRequest($$$$) {
+	my ($handler, $endpoint_conf, $full_conf, $request) = @_;
+
+	my $error;
+	my $localContent = "";
+
+	$request->parse(\$error);
+
+	if (defined $error and $error ne "") {
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error", undef, 1);
+		$request->setResponse($ret_message->getValue());
+		return;
+	}
+
+	my $message = $request->getRequestDOM()->getDocumentElement();;
+	my $messageId = $message->getAttribute("id");
+	my $messageType = $message->getAttribute("type");
+
+	if (!defined $messageType or $messageType eq "") {
+		# error out
+	} elsif ($handler->isValidMessageType($messageType) == 0) {
+		# error out
+	}
+
+	# The module will handle everything for this message type
+	if ($handler->hasMessageHandler($messageType)) {
+		return $handler->handleMessage($messageType, $message, $request);
+	}
+
+	# Otherwise, since the message is valid, there must be some event types
+	# it accepts. We'll try those.
+	my %message_parameters = ();
+
+	my $msgParams = find($message, "./nmwg:parameters", 1);
+	if (defined $msgParams) {
+		foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
+			my ($name, $value);
+
+			$name = $p->getAttribute("name");
+			$value = extract($p, 0);
+
+			if (!defined $name or $name eq "") {
+				next;
+			}
+
+			$message_parameters{$name} = $value;
+		}
+	}
+
+	my $found_pair = 0;
+
+	my $ret_message = new perfSONAR_PS::XML::Document_string();
+
+	my ($retMessageType, $retMessageNamespaces);
+	my $n = $handler->messageBegin($ret_message, $messageId, $messageType, $msgParams, $request, \$retMessageType, \$retMessageNamespaces);
+	if ($n == 0) {
+		# if they return non-zero, it means the module began the message for us
+		# if they retutn zero, they expect us to start the message
+		my $retMessageId = "message.".genuid();
+
+		# we weren't given a return message type, so try to construct
+		# one by replacing Request with Response or sticking the term
+		# "Response" on the end of the type.
+		if (!defined $retMessageType or $retMessageType eq "") {
+			$retMessageType = $messageType;
+			$retMessageType =~ s/Request/Response/;
+			if (!($retMessageType =~ /Response/)) {
+				$retMessageType .= "Response";
+			}
+		}
+
+		startMessage($ret_message, $retMessageType, $messageId, $retMessageType, "", $retMessageNamespaces);
+	}
+
+	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
+		my $found_md = 0;
+
+		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				$found_pair = 1;
+				$found_md = 1;
+
+				my $eventType;
+				my $eventTypes = find($m, "./nmwg:eventType", 0);
+				foreach my $e ($eventTypes->get_nodelist) {
+					my $value = extract($e, 0);
+					if ($handler->isValidEventType($messageType, $value)) {
+						$eventType = $value;
+						last;
+					}
+				}
+
+				my ($status, $res);
+
+				if (!defined $eventType) {
+					$status = "error.ma.event_type";
+					$res = "No supported event types for message of type type \"$messageType\"";
+				} else {
+					($status, $res) = $handler->handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
+				}
+
+				if (defined $status and $status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+					my $mdID = "metadata.".genuid();
+					getResultCodeMetadata($ret_message, $mdID, $m->getAttribute("id"), $status);
+					getResultCodeData($ret_message, "data.".genuid(), $mdID, $res, 1);
+				}
+			}
+		}
+
+		if ($found_md == 0) {
+			my $msg = "Data trigger with id \"".$d->getAttribute("id")."\" has no matching metadata";
+			my $mdId = "metadata.".genuid();
+			my $dId = "data.".genuid();
+			$logger->error($msg);
+			getResultCodeMetadata($ret_message, $mdId, $d->getAttribute("metadataIdRef"), "error.ma.structure");
+			getResultCodeData($ret_message, $dId, $mdId, $msg, 1);
+		}
+	}
+
+	if ($found_pair == 0) {
+		my $mdID = "metadata.".genuid();
+		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.no_metadata_data_pair");
+		getResultCodeData($ret_message, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
+	}
+
+	$n = $handler->messageEnd($ret_message, $messageId, $messageType);
+	if ($n == 0) {
+		endMessage($ret_message);
+	}
+
+	$request->setResponse($ret_message->getValue());
 }
 
 sub daemonize() {
@@ -327,9 +532,9 @@ sub daemonize() {
 }
 
 sub managePID($$) {
-	my($port, $piddir) = @_;
-	die "Can't write pidfile to $piddir\n" unless -w $piddir;
-	my $pidfile = $piddir."/ma.".$port.".pid";
+	my($piddir, $pidfile) = @_;
+	die "Can't write pidfile: $pidfile\n" unless -w $piddir;
+	$pidfile = $piddir ."/".$pidfile;
 	sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
 	flock(PIDFILE, LOCK_EX);
 	my $p_id = <PIDFILE>;
@@ -366,134 +571,6 @@ sub signalHandler() {
 	exit(0);
 }
 
-sub handleRequest($$$) {
-	my ($ma_handler, $conf, $request) = @_;
-
-	# This function is a wrapper around the __handleRequest function.  The
-	# purpose of the function is to handle the case where a crash occurs
-	# while handling the request or the handling of the request runs for
-	# too long.
-
-	eval {
- 		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
-		alarm($conf{"default.max_worker_lifetime"}) if (defined $conf{"default.max_worker_lifetime"} and $conf{"default.max_worker_lifetime"} > 0);
-		__handleRequest($ma_handler, $conf, $request);
- 	};
-
-	# disable the alarm after the eval is done
-	alarm(0);
-
-	if ($@) {
-		my $msg = "Unhandled exception or crash: $@";
-		$logger->error($msg);
-
-		my $doc = new perfSONAR_PS::XML::Document_string();
-		getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
-		$request->setResponse($doc->getValue());
-	}
-
-	$request->finish;
-}
-
-sub __handleRequest($$$) {
-	my ($ma_handler, $conf, $request) = @_;
-
-	my $error;
-	my $localContent = "";
-
-	$request->parse(\$error);
-
-	if (defined $error and $error ne "") {
-		my $doc = new perfSONAR_PS::XML::Document_string();
-		getResultCodeMessage($doc, "message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error", undef, 1);
-		$request->setResponse($doc->getValue());
-		return;
-	}
-
-	my $message = $request->getRequestDOM()->getDocumentElement();;
-	my $messageId = $message->getAttribute("id");
-	my $messageType = $message->getAttribute("type");
-	my $messageIdReturn = "message.".genuid();
-	my $messageTypeReturn = $messageType;
-
-	$messageTypeReturn = $ma_handler->getMessageResponseType($request->getEndpoint(), $messageType);
-	if (!defined $messageTypeReturn) {
-		$messageTypeReturn = $messageType;
-		$messageTypeReturn =~ s/Request/Response/;
-		if (!($messageTypeReturn =~ /Response/)) {
-			$messageTypeReturn .= "Response";
-		}
-
-		$logger->warn("No message response type for $messageType on endpoint ".$request->getEndpoint().". Using $messageTypeReturn as the response type");
-	}
-
-	my %message_parameters = ();
-
-	my $msgParams = find($message, "./nmwg:parameters", 1);
-	if (defined $msgParams) {
-		foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
-			my ($name, $value);
-
-			$name = $p->getAttribute("name");
-			$value = extract($p, 0);
-
-			if (!defined $name or $name eq "") {
-				next;
-			}
-
-			$message_parameters{$name} = $value;
-		}
-	}
-
-	my $found_pair = 0;
-
-	my $doc = new perfSONAR_PS::XML::Document_string();
-
-	startMessage($doc, $messageIdReturn, $messageId, $messageTypeReturn, "", undef);
-
-	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
-		my $found_md = 0;
-
-		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
-			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my $eventType = findvalue($m, "./nmwg:eventType");
-
-				$found_pair = 1;
-
-				my ($status, $res) = $ma_handler->handleEvent($doc, $request->getEndpoint, $messageType, \%message_parameters, $eventType, $m, $d, $request);
-
-				if (defined $status and $status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
-					my $mdID = "metadata.".genuid();
-					getResultCodeMetadata($doc, $mdID, $m->getAttribute("id"), $status);
-					getResultCodeData($doc, "data.".genuid(), $mdID, $res, 1);
-				}
-
-				$found_md = 1;
-			}
-		}
-
-		if ($found_md == 0) {
-			my $msg = "Data trigger with id \"".$d->getAttribute("id")."\" has no matching metadata";
-			my $mdId = "metadata.".genuid();
-			my $dId = "data.".genuid();
-			$logger->error($msg);
-			getResultCodeMetadata($doc, $mdId, $d->getAttribute("metadataIdRef"), "error.ma.structure");
-			getResultCodeData($doc, $dId, $mdId, $msg, 1);
-		}
-	}
-
-	if ($found_pair == 0) {
-		my $mdID = "metadata.".genuid();
-		getResultCodeMetadata($doc, $mdID, "", "error.ma.no_metadata_data_pair");
-		getResultCodeData($doc, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
-	}
-
-	endMessage($doc);
-
-	$request->setResponse($doc->getValue());
-}
-
 =head1 NAME
 
 ma.pl - An basic MA (Measurement Archive) framework
@@ -513,14 +590,14 @@ omitted the service will run in daemon mode.
 
 The following functions are used within this script.
 
-=head2 measurementArchive
+=head2 psService
 
 This function, meant to be used in the context of a thread or process, will
 listen on an external port (specified in the conf file) and serve requests for
 data from outside entities.  The data and metadata are stored in various
 database structures.
 
-=head2 measurementArchiveQuery
+=head2 psServiceQuery
 
 This performs the semi-automic operations of the MA.
 

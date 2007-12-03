@@ -61,7 +61,7 @@ sub init($$) {
 
   if(!defined $self->{CONF}->{"snmp.metadata_db_type"} or
      $self->{CONF}->{"snmp.metadata_db_type"} eq "") {
-    $logger->error("Value for 'snmp.metadata_db_type' is not set.");
+    $logger->error("Value for 'metadata_db_type' is not set.");
     return -1;
   }
 
@@ -115,30 +115,6 @@ sub init($$) {
     $logger->warn("Setting 'default_resolution' to '300'.");
   }
 
-  if(!defined $self->{CONF}->{"snmp.service_accesspoint"} or
-     $self->{CONF}->{"snmp.service_accesspoint"} eq "") {
-    $self->{CONF}->{"snmp.service_accesspoint"} = "http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."";
-    $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{CONF}->{"default.port"}."/".$self->{CONF}->{"snmp.endpoint"}."'.");
-  }
-
-  if(!defined $self->{CONF}->{"snmp.service_description"} or
-     $self->{CONF}->{"snmp.service_description"} eq "") {
-    $self->{CONF}->{"snmp.service_description"} = "perfSONAR_PS SNMP MA";
-    $logger->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
-  }
-
-  if(!defined $self->{CONF}->{"snmp.service_name"} or
-     $self->{CONF}->{"snmp.service_name"} eq "") {
-    $self->{CONF}->{"snmp.service_name"} = "SNMP MA";
-    $logger->warn("Setting 'service_name' to 'SNMP MA'.");
-  }
-
-  if(!defined $self->{CONF}->{"snmp.service_type"} or
-     $self->{CONF}->{"snmp.service_type"} eq "") {
-    $self->{CONF}->{"snmp.service_type"} = "MA";
-    $logger->warn("Setting 'service_type' to 'MA'.");
-  }
-
   if (!defined $self->{CONF}->{"snmp.enable_registration"} or $self->{CONF}->{"snmp.enable_registration"} eq "") {
 	  $self->{CONF}->{"snmp.enable_registration"} = 0;
   }
@@ -158,12 +134,12 @@ sub init($$) {
 		  }
 	  }
 
-	  if (!defined $self->{CONF}->{"status.ls_registration_interval"} or $self->{CONF}->{"status.ls_registration_interval"} eq "") {
+	  if (!defined $self->{CONF}->{"snmp.ls_registration_interval"} or $self->{CONF}->{"snmp.ls_registration_interval"} eq "") {
 		  if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
-			  $self->{CONF}->{"status.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+			  $self->{CONF}->{"snmp.ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
 		  } else {
 			  $logger->warn("Setting registration interval to 30 minutes");
-			  $self->{CONF}->{"status.ls_registration_interval"} = 1800;
+			  $self->{CONF}->{"snmp.ls_registration_interval"} = 1800;
 		  }
 	  }
 

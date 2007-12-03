@@ -74,8 +74,7 @@ sub getEndpoint($) {
 	my ($self) = @_;
 	my $endpoint = $self->{REQUEST}->uri;
 
-	# lets strip out the first '/' to enable less stringent check on the endpoint
-	$endpoint =~ s/^(\/)+//g;
+	$endpoint =~ s/\/\//\//;
 
 	return $endpoint;
 }

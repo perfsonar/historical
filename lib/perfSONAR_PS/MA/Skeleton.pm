@@ -31,8 +31,7 @@ sub init {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Skeleton");
 
-	$handler->add("/perfSONAR_PS/services/skeleton", "SkeletonMessage", "SkeletonRequest", $self);
-	$handler->setMessageResponseType("", "SkeletonRequest", "SkeletonResponse");
+	$handler->addEventHandler("SkeletonMessage", "SkeletonRequest", $self);
 
 	return 0;
 }
@@ -42,7 +41,7 @@ sub needLS() {
 }
 
 sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 
 	my $retMetadata;
 	my $retData;

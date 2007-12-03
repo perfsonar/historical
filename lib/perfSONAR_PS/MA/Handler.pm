@@ -3,218 +3,176 @@ package perfSONAR_PS::MA::Handler;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use Log::Log4perl qw(get_logger);
 
 sub new($) {
 	my ($package) = @_;
 	my %hash = ();
 
-	$hash{"EP_EV_HANDLERS"} = ();
-	$hash{"ALL_EV_HANDLERS"} = ();
-	$hash{"EP_EV_HANDLERS_REGEX"} = ();
-	$hash{"ALL_EV_HANDLERS_REGEX"} = ();
-	$hash{"EP_MSG_HANDLERS"} = ();
-	$hash{"ALL_MSG_HANDLERS"} = ();
-	$hash{"EV_MSG_RESP_TYPES"} = ();
-	$hash{"VALIDENDPOINTS"} = ();
+	$hash{"EV_HANDLERS"} = ();
+	$hash{"EV_REGEX_HANDLERS"} = ();
+	$hash{"MSG_HANDLERS"} = ();
 
 	bless \%hash => $package;
 }
 
-sub add($$$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $ma) = @_;
+sub addMessageHandler($$$) {
+	my ($self, $messageType, $service) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Handler");
 
-	if ($endpoint eq "") {
-		if ($eventType eq "") {
-			$logger->debug("Adding message handler for message type $messageType on all endpoints.");
-		} else {
-			$logger->debug("Adding event handler for event type $eventType on messages of type $messageType on all endpoints.");
-		}
-	} else {
-		if ($eventType eq "") {
-			$logger->debug("Adding message handler for message type $messageType on endpoint $endpoint.");
-		} else {
-			$logger->debug("Adding event handler for event type $eventType on messages of type $messageType on endpoint $endpoint.");
-		}
+	$logger->debug("Adding message handler for $messageType");
+
+	if (defined $self->{MSG_HANDLERS}->{$messageType}) {
+		$logger->error("There already exists a handler for message $messageType");
+		return -1;
 	}
 
-	if ($endpoint eq "") {
-		if (!defined $self->{ALL_EV_HANDLERS}->{$messageType}) {
-			$self->{ALL_EV_HANDLERS}->{$messageType} = ();
-		}
-
-		if ($eventType eq "") {
-			$self->{ALL_MSG_HANDLERS}->{$messageType} = $ma;
-		} else {
-			$self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType} = $ma;
-		}
-	} else {
-		$endpoint =~ s/^(\/)+//g;
-
-		$self->{VALIDENDPOINTS}->{$endpoint} = "";
-
-		if ($eventType ne "") {
-			if (!defined $self->{EP_EV_HANDLERS}->{$endpoint}) {
-				$self->{EP_EV_HANDLERS}->{$endpoint} = ();
-			}
-
-			if (!defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}) {
-				$self->{EP_EV_HANDLERS}->{$endpoint}->{$endpoint}->{$messageType} = ();
-			}
-
-			$self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType} = $ma;
-		} else {
-			if (!defined $self->{EP_MSG_HANDLERS}->{$endpoint}) {
-				$self->{EP_MSG_HANDLERS}->{$endpoint} = ();
-			}
-
-			$self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType} = $ma;
-		}
-	}
+	$self->{MSG_HANDLERS}->{$messageType} = $service;
 
 	return 0;
 }
 
-sub addRegex($$$$$) {
-	my ($self, $endpoint, $messageType, $eventRegex, $ma) = @_;
+sub addEventHandler($$$$) {
+	my ($self, $messageType, $eventType, $service) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Handler");
 
-	$logger->debug("Adding handler for $endpoint, $messageType, $eventRegex");
+	$logger->debug("Adding event handler for events of type $eventType on messages of $messageType");
 
-	if ($endpoint eq "") {
-		if (!defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}) {
-			$self->{ALL_EV_HANDLERS_REGEX}->{$messageType} = ();
-		}
-
-		$self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$eventRegex} = $ma;
-	} else {
-		$endpoint =~ s/^(\/)+//g;
-
-		if (!defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}) {
-			$self->{EP_EV_HANDLERS_REGEX}->{$endpoint} = ();
-		}
-
-		if (!defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}) {
-			$self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType} = ();
-		}
-
-		$self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}->{$eventRegex} = $ma;
+	if (!defined $self->{EV_HANDLERS}->{$messageType}) {
+		$self->{EV_HANDLERS}->{$messageType} = ();
 	}
+
+	if (defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
+		$logger->error("There already exists a handler for events of type $eventType on messages of type $messageType");
+		return -1;
+	}
+
+#	if (!defined $service->handleEvent) {
+#		$logger->error("Trying to add a handler that does not contain a handleEvent function");
+#		return -1;
+#	}
+
+	$self->{EV_HANDLERS}->{$messageType}->{$eventType} = $service;
 
 	return 0;
 }
 
-sub handleEvent($$$$$$$$$) {
-	my ($self, $doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+sub addEventHandler_Regex($$$$) {
+	my ($self, $messageType, $eventRegex, $service) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+
+	$logger->debug("Adding event handler for events matching $eventRegex on messages of $messageType");
+
+	if (!defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
+		$self->{EV_REGEX_HANDLERS}->{$messageType} = ();
+	}
+
+	if (defined $self->{EV_REGEX_HANDLERS}->{$messageType}->{$eventRegex}) {
+		$logger->error("There already exists a handler for events of the form /$eventRegex\/ on messages of type $messageType");
+		return -1;
+	}
+
+#	if (!defined $service->handleEvent) {
+#		$logger->error("Trying to add a handler that does not contain a handleEvent function");
+#		return -1;
+#	}
+
+	$self->{EV_REGEX_HANDLERS}->{$messageType}->{$eventRegex} = $service;
+
+	return 0;
+
+}
+
+sub messageBegin($$$$$$$$) {
+	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces) = @_;
+
+	if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return 0;
+	}
+
+	if (!defined $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin) {
+		return 0;
+	}
+
+	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin($ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+}
+
+sub messageEnd($$$$$$$$) {
+	my ($self, $ret_message, $messageId, $messageType) = @_;
+
+	if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return 0;
+	}
+
+	if (!defined $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd) {
+		return 0;
+	}
+
+	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($ret_message, $messageId);
+}
+
+sub handleEvent($$$$$$$$$$) {
+	my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Handler");
 
 	if (defined $eventType and $eventType ne "") {
-		$logger->debug("Handling event: $endpoint, $messageType, $eventType");
+		$logger->debug("Handling event: $messageType, $eventType");
 	} else {
-		$logger->debug("Handling metadata/data pair: $endpoint, $messageType");
+		$logger->debug("Handling metadata/data pair: $messageType");
 	}
 
-	my ($valid_endpoint, $valid_messagetype);
-
-	$valid_endpoint = defined $self->{VALIDENDPOINTS}->{$endpoint};
-	$valid_messagetype = ($valid_endpoint and
-					(defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} or
-					 defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType} or
-					 defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType} or
-					 defined $self->{ALL_EV_HANDLERS}->{$messageType} or
-					 defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType} or
-					 defined $self->{ALL_MSG_HANDLERS}->{$messageType}));
-
-	if (!$valid_endpoint) {
-		return ("error.perfSONAR_PS.transport", "Received message with invalid endpoint: $endpoint");
+	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
+		return $self->{EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
 	}
 
-	if (!$valid_messagetype) {
-		return ("error.ma.message.type", "Message type \"".$messageType."\" is not yet supported");
-	}
-
-	if (defined $self->{EP_EV_HANDLERS}->{$endpoint} and
-			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType} and
-			defined $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}) {
-		return $self->{EP_EV_HANDLERS}->{$endpoint}->{$messageType}->{$eventType}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
-	}
-
-	if (defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint} and
-			defined $self->{EP_EV_HANDLERS_REGEX}->{$endpoint}->{$messageType}) {
-		foreach my $regex (keys %{$self->{EP_EV_HANDLERS_REGEX}->{$messageType}}) {
+	if (defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
+		$logger->debug("There exists regex's for this message type");
+		foreach my $regex (keys %{$self->{EV_REGEX_HANDLERS}->{$messageType}}) {
+			$logger->debug("Checking $eventType against $regex");
 			if ($eventType =~ /$regex/) {
-				return $self->{EP_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
+				return $self->{EV_REGEX_HANDLERS}->{$messageType}->{$regex}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
 			}
 		}
 	}
 
-	if (defined $self->{ALL_EV_HANDLERS}->{$messageType} and defined $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}) {
-		foreach my $valid_endpoint (keys %{ $self->{VALIDENDPOINTS} }) {
-			if ($valid_endpoint eq $endpoint) {
-				return $self->{ALL_EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
+	if (defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return $self->{MSG_HANDLERS}->{$messageType}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
+	}
+
+	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
+}
+
+sub isValidMessageType($$) {
+	my ($self, $messageType) = @_;
+
+	if (defined $self->{EV_HANDLERS}->{$messageType} or defined $self->{EV_REGEX_HANDLERS}->{$messageType} or defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return 1;
+	}
+
+	return 0;
+}
+
+sub isValidEventType($$$) {
+	my ($self, $messageType, $value) = @_;
+
+	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
+		return 1;
+	}
+
+	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{"*"}) {
+		return 1;
+	}
+
+	if (defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
+		foreach my $regex (keys %{$self->{EV_REGEX_HANDLERS}->{$messageType}}) {
+			if ($eventType =~ /$regex/) {
+				return 1;
 			}
 		}
 	}
 
-	if (defined $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}) {
-		foreach my $valid_endpoint (keys %{ $self->{VALIDENDPOINTS} }) {
-			if ($valid_endpoint eq $endpoint) {
-				foreach my $regex (keys %{$self->{ALL_EV_HANDLERS_REGEX}->{$messageType}}) {
-					if ($eventType =~ /$regex/) {
-						return $self->{ALL_EV_HANDLERS_REGEX}->{$messageType}->{$regex}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
-					}
-				}
-			}
-		}
-	}
-
-	if (defined $self->{EP_MSG_HANDLERS}->{$endpoint} and
-		defined $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}) {
-		return $self->{EP_MSG_HANDLERS}->{$endpoint}->{$messageType}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
-	}
-
-	if (defined $self->{ALL_MSG_HANDLERS}->{$messageType}) {
-		return $self->{ALL_MSG_HANDLERS}->{$messageType}->handleEvent($doc, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message);
-	}
-
-	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\" on endpoint \"$endpoint\"");
-}
-
-sub setMessageResponseType($$$$) {
-	my ($self, $endpoint, $requestType, $responseType) = @_;
-
-	if ($endpoint eq "") {
-		$self->{ALL_MSG_RESP_TYPES}->{$requestType} = $responseType;
-	} else {
-		if (!defined $self->{EV_MSG_RESP_TYPES}->{$endpoint}) {
-			$self->{EV_MSG_RESP_TYPES}->{$endpoint} = ();
-			$self->{VALIDENDPOINTS}->{$endpoint} = 1;
-		}
-
-		$self->{EV_MSG_RESP_TYPES}->{$endpoint}->{$requestType} = $responseType;
-	}
-}
-
-sub getMessageResponseType($$$) {
-	my ($self, $endpoint, $requestType) = @_;
-
-	if (defined $self->{EV_MSG_RESP_TYPES}->{$endpoint}) {
-		return $self->{EV_MSG_RESP_TYPES}->{$endpoint}->{$requestType};
-	} elsif (defined $self->{VALIDENDPOINTS}->{$endpoint} and
-			defined $self->{ALL_MSG_RESP_TYPES}->{$requestType}) {
-		return $self->{ALL_MSG_RESP_TYPES}->{$requestType};
-	} else {
-		return undef;
-	}
-}
-
-sub isValidEndpoint($$) {
-	my ($self, $endpoint) = @_;
-
-	$endpoint = "/".$endpoint if ($endpoint =~ /^[^\/]/);
-
-	return $self->{VALIDENDPOINTS}->{$endpoint};
+	return 0;
 }
 
 1;
@@ -267,7 +225,7 @@ message. $output contains the response document that being constructed.
 $endpoint contains the endpoint. $messageType contains the type of the message.
 $message_parameters is a reference to a hash containing the parameters.
 $eventType contains the event type (if it exists). $md contains the metadata.
-$d contains the data. $raw_message contains the raw request element.
+$d contains the data. $raw_request contains the raw request element.
 
 =head2 setMessageResponseType($self, $endpoint, $requestType, $responseType)
 
