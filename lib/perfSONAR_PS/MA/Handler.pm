@@ -6,6 +6,10 @@ use warnings;
 use Data::Dumper;
 use Log::Log4perl qw(get_logger);
 
+use perfSONAR_PS::Common;
+use perfSONAR_PS::XML::Document_string;
+use perfSONAR_PS::Messages;
+
 sub new($) {
 	my ($package) = @_;
 	my %hash = ();
@@ -154,7 +158,7 @@ sub isValidMessageType($$) {
 }
 
 sub isValidEventType($$$) {
-	my ($self, $messageType, $value) = @_;
+	my ($self, $messageType, $eventType, $value) = @_;
 
 	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
 		return 1;
@@ -173,6 +177,152 @@ sub isValidEventType($$$) {
 	}
 
 	return 0;
+}
+
+sub hasMessageHandler($$) {
+	my ($self, $messageType) = @_;
+
+	if (defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return 1;
+	}
+
+	return 0;
+}
+
+sub handleRequest($$$$) {
+	my ($self, $request, $endpoint_conf, $full_conf) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::Handler");
+
+	my $error;
+	my $localContent = "";
+
+	$request->parse(\$error);
+
+	if (defined $error and $error ne "") {
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error", undef, 1);
+		$request->setResponse($ret_message->getValue());
+		return;
+	}
+
+	my $message = $request->getRequestDOM()->getDocumentElement();;
+	my $messageId = $message->getAttribute("id");
+	my $messageType = $message->getAttribute("type");
+
+	if (!defined $messageType or $messageType eq "") {
+		# error out
+	} elsif ($self->isValidMessageType($messageType) == 0) {
+		# error out
+	}
+
+	# The module will handle everything for this message type
+	if ($self->hasMessageHandler($messageType)) {
+		return $self->handleMessage($messageType, $message, $request);
+	}
+
+	# Otherwise, since the message is valid, there must be some event types
+	# it accepts. We'll try those.
+	my %message_parameters = ();
+
+	my $msgParams = find($message, "./nmwg:parameters", 1);
+	if (defined $msgParams) {
+		foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
+			my ($name, $value);
+
+			$name = $p->getAttribute("name");
+			$value = extract($p, 0);
+
+			if (!defined $name or $name eq "") {
+				next;
+			}
+
+			$message_parameters{$name} = $value;
+		}
+	}
+
+	my $found_pair = 0;
+
+	my $ret_message = new perfSONAR_PS::XML::Document_string();
+
+	my ($retMessageType, $retMessageNamespaces);
+	my $n = $self->messageBegin($ret_message, $messageId, $messageType, $msgParams, $request, \$retMessageType, \$retMessageNamespaces);
+	if ($n == 0) {
+		# if they return non-zero, it means the module began the message for us
+		# if they retutn zero, they expect us to start the message
+		my $retMessageId = "message.".genuid();
+
+		# we weren't given a return message type, so try to construct
+		# one by replacing Request with Response or sticking the term
+		# "Response" on the end of the type.
+		if (!defined $retMessageType or $retMessageType eq "") {
+			$retMessageType = $messageType;
+			$retMessageType =~ s/Request/Response/;
+			if (!($retMessageType =~ /Response/)) {
+				$retMessageType .= "Response";
+			}
+		}
+
+		startMessage($ret_message, $retMessageType, $messageId, $retMessageType, "", $retMessageNamespaces);
+	}
+
+	foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
+		my $found_md = 0;
+
+		foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				$found_pair = 1;
+				$found_md = 1;
+
+				my $eventType;
+				my $eventTypes = find($m, "./nmwg:eventType", 0);
+				foreach my $e ($eventTypes->get_nodelist) {
+					my $value = extract($e, 0);
+					if ($self->isValidEventType($messageType, $value)) {
+						$eventType = $value;
+						last;
+					}
+				}
+
+				my ($status, $res);
+
+				if (!defined $eventType) {
+					$status = "error.ma.event_type";
+					$res = "No supported event types for message of type type \"$messageType\"";
+				} else {
+					($status, $res) = $self->handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
+				}
+
+				if (defined $status and $status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+					my $mdID = "metadata.".genuid();
+					getResultCodeMetadata($ret_message, $mdID, $m->getAttribute("id"), $status);
+					getResultCodeData($ret_message, "data.".genuid(), $mdID, $res, 1);
+				}
+			}
+		}
+
+		if ($found_md == 0) {
+			my $msg = "Data trigger with id \"".$d->getAttribute("id")."\" has no matching metadata";
+			my $mdId = "metadata.".genuid();
+			my $dId = "data.".genuid();
+			$logger->error($msg);
+			getResultCodeMetadata($ret_message, $mdId, $d->getAttribute("metadataIdRef"), "error.ma.structure");
+			getResultCodeData($ret_message, $dId, $mdId, $msg, 1);
+		}
+	}
+
+	if ($found_pair == 0) {
+		my $mdID = "metadata.".genuid();
+		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.no_metadata_data_pair");
+		getResultCodeData($ret_message, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
+	}
+
+	$n = $self->messageEnd($ret_message, $messageId, $messageType);
+	if ($n == 0) {
+		endMessage($ret_message);
+	}
+
+	$request->setResponse($ret_message->getValue());
 }
 
 1;
