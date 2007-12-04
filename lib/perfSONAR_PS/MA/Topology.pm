@@ -13,7 +13,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::MA::Topology::Topology;
 use perfSONAR_PS::Client::Topology::XMLDB;
-use perfSONAR_PS::LS::Register;
+use perfSONAR_PS::Client::LS::Remote;
 
 
 sub new {
@@ -50,6 +50,7 @@ sub init($$) {
 		return -1;
 	}
 
+
 	if (lc($self->{CONF}->{"topology"}->{"db_type"}) eq "xml") {
 		if (!defined $self->{CONF}->{"topology"}->{"db_file"} or $self->{CONF}->{"topology"}->{"db_file"} eq "") {
 			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file (db_file)");
@@ -83,6 +84,52 @@ sub init($$) {
 		return -1;
 	}
 
+	if ($self->{CONF}->{"topology"}->{"enable_registration"}) {
+		if (!defined $self->{CONF}->{"topology"}->{"service_accesspoint"} or $self->{CONF}->{"topology"}->{"service_accesspoint"} eq "") {
+			$logger->error("No access point specified for SNMP service");
+			return -1;
+		}
+
+		if (!defined $self->{CONF}->{"topology"}->{"ls_instance"} or $self->{CONF}->{"topology"}->{"ls_instance"} eq "") {
+			if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne "") {
+				$self->{CONF}->{"topology"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
+			} else {
+				$logger->error("No LS instance specified for SNMP service");
+				return -1;
+			}
+		}
+
+		if (!defined $self->{CONF}->{"topology"}->{"ls_registration_interval"} or $self->{CONF}->{"topology"}->{"ls_registration_interval"} eq "") {
+			if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne "") {
+				$self->{CONF}->{"topology"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+			} else {
+				$logger->warn("Setting registration interval to 30 minutes");
+				$self->{CONF}->{"topology"}->{"ls_registration_interval"} = 1800;
+			}
+		} else {
+			# turn the registration interval from minutes to seconds
+			$self->{CONF}->{"topology"}->{"ls_registration_interval"} *= 60;
+		}
+
+		if(!defined $self->{CONF}->{"topology"}->{"service_description"} or
+				$self->{CONF}->{"topology"}->{"service_description"} eq "") {
+			$self->{CONF}->{"topology"}->{"service_description"} = "perfSONAR_PS Topology MA";
+			$logger->warn("Setting 'service_description' to 'perfSONAR_PS Topology MA'.");
+		}
+
+		if(!defined $self->{CONF}->{"topology"}->{"service_name"} or
+				$self->{CONF}->{"topology"}->{"service_name"} eq "") {
+			$self->{CONF}->{"topology"}->{"service_name"} = "Topology MA";
+			$logger->warn("Setting 'service_name' to 'Topology MA'.");
+		}
+
+		if(!defined $self->{CONF}->{"topology"}->{"service_type"} or
+				$self->{CONF}->{"topology"}->{"service_type"} eq "") {
+			$self->{CONF}->{"topology"}->{"service_type"} = "MA";
+			$logger->warn("Setting 'service_type' to 'MA'.");
+		}
+	}
+
 	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
 	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
 	$handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
@@ -98,29 +145,27 @@ sub needLS($) {
 	return ($self->{CONF}->{"topology"}->{"enable_registration"});
 }
 
-sub registerLS($) {
-	my ($self) = @_;
+sub registerLS($$) {
+	my ($self, $sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::Topology");
 	my ($status, $res1);
+	my $ls;
 
-	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"topology"}->{"ls_instance"},
-		SERVICE_TYPE => $self->{CONF}->{"topology"}->{"service_type"},
-		SERVICE_NAME => $self->{CONF}->{"topology"}->{"service_name"},
-		SERVICE_DESCRIPTION => $self->{CONF}->{"topology"}->{"service_description"},
-		SERVICE_ACCESSPOINT => $self->{CONF}->{"topology"}->{"service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"topology"}->{"registration_interval"},
-	);
+	if (!defined $self->{LS_CLIENT}) {
+		my %ls_conf = (
+				LS_INSTANCE => $self->{CONF}->{"topology"}->{"ls_instance"},
+				SERVICE_TYPE => $self->{CONF}->{"topology"}->{"service_type"},
+				SERVICE_NAME => $self->{CONF}->{"topology"}->{"service_name"},
+				SERVICE_DESCRIPTION => $self->{CONF}->{"topology"}->{"service_description"},
+				SERVICE_ACCESSPOINT => $self->{CONF}->{"topology"}->{"service_accesspoint"},
+				LS_REGISTRATION_INTERVAL => $self->{CONF}->{"topology"}->{"registration_interval"},
+			      );
 
-	if (defined $self->{CONF}->{"topology"}->{"registration_interval"} and $self->{CONF}->{"topology"}->{"registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"topology"}->{"registration_interval"};
-	} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
-	} else {
-		$logger->error("No registraion interval specified");
+		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"topology"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES});
 	}
 
-	my $ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
+	$ls = $self->{LS_CLIENT};
+
 
 	($status, $res1) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -146,7 +191,13 @@ sub registerLS($) {
 
 	$res1 = "";
 
-	return $ls->registerDynamic(\@mds);
+	my $n = $ls->registerDynamic(\@mds);
+
+	if (defined $sleep_time) {
+		$$sleep_time = $self->{"topology"}->{"ls_registration_interval"};
+	}
+
+	return $n;
 }
 
 sub buildLSMetadata($$$$) {
@@ -454,7 +505,7 @@ The offered API is simple, but offers the key functions needed in a measurement 
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::LS::Register>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>
 
 
 To join the 'perfSONAR-PS' mailing list, please visit:

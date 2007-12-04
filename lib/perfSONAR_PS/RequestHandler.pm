@@ -208,8 +208,8 @@ sub hasMessageHandler($$) {
 	return 0;
 }
 
-sub handleRequest($$$$) {
-	my ($self, $request, $endpoint_conf, $full_conf) = @_;
+sub handleRequest($$) {
+	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	my $error;

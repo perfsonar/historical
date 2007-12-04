@@ -186,21 +186,18 @@ sub registerLS($) {
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"snmp"}->{"ls_instance"} or $self->{CONF}->{"snmp"}->{"ls_instance"} eq "");
+	if (!defined $self->{LS_CLIENT}) {
+		my %ls_conf = (
+				SERVICE_TYPE => $self->{CONF}->{"snmp"}->{"service_type"},
+				SERVICE_NAME => $self->{CONF}->{"snmp"}->{"service_name"},
+				SERVICE_DESCRIPTION => $self->{CONF}->{"snmp"}->{"service_description"},
+				SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp"}->{"service_accesspoint"},
+			      );
 
-	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"snmp"}->{"ls_instance"},
-		SERVICE_TYPE => $self->{CONF}->{"snmp"}->{"service_type"},
-		SERVICE_NAME => $self->{CONF}->{"snmp"}->{"service_name"},
-		SERVICE_DESCRIPTION => $self->{CONF}->{"snmp"}->{"service_description"},
-		SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp"}->{"service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"snmp"}->{"registration_interval"},
-		METADATA_DB_TYPE => $self->{CONF}->{"snmp"}->{"metadata_db_type"},
-		METADATA_DB_FILE => $self->{CONF}->{"snmp"}->{"metadata_db_file"},
-		METADATA_DB_NAME => $self->{CONF}->{"snmp"}->{"metadata_db_name"},
-	);
+		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"snmp"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES});
+	}
 
-	$ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
+	$ls = $self->{LS_CLIENT};
 
         my $queryString = "/nmwg:store/nmwg:metadata";
         my $error = "";            

@@ -15,14 +15,13 @@ use Module::Load;
 use Data::Dumper;
 
 
-sub psService($$$$);
+sub psService($$$);
 sub registerLS($);
 sub daemonize();
 sub managePID($$);
 sub killChildren();
 sub signalHandler();
-sub handleRequest($$$$);
-sub __handleRequest($$$$);
+sub handleRequest($$$);
 
 
 # we need a fully-qualified directory name in case we daemonize so that we can
@@ -101,6 +100,7 @@ if (!defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq "
 	$logger->warn("Setting maximum worker processes at 32");
 	$conf{"max_worker_processes"} = 32;
 }
+
 if (!defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq "") {
 	$logger->warn("Setting LS registration interval at 60 minutes");
 	$conf{"ls_registration_interval"} = 60;
@@ -177,7 +177,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
                 if (!defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq "") {
                         $logger->error("No module specified for $port:$endpoint");
                         exit(-1);
-                } 
+                }
 
                 if (!defined $modules_loaded{$endpoint_conf{"module"}}) {
                         load $endpoint_conf{"module"};
@@ -193,8 +193,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
 		if ($service->needLS()) {
 			my %ls_child_args = ();
 			$ls_child_args{"service"} = $service;
-			$ls_child_args{"endpoint_conf"} = \%endpoint_conf;
-			$ls_child_args{"full_conf"} = \%conf;
+			$ls_child_args{"conf"} = \%endpoint_conf;
 			push @ls_services, \%ls_child_args;
 		}
 
@@ -226,7 +225,7 @@ if(!$DEBUGFLAG) {
 foreach my $port (keys %listeners) {
 	my $pid = fork();
 	if ($pid == 0) {
-		psService($listeners{$port}, $handlers{$port}, $conf{"port"}->{$port}, \%conf);
+		psService($listeners{$port}, $handlers{$port}, mergeConfig(\%conf, $conf{"port"}->{$port}));
 		exit(0);
 	} elsif ($pid < 0) {
 		$logger->error("Couldn't spawn listener child");
@@ -255,8 +254,8 @@ foreach my $pid (keys %child_pids) {
 	waitpid($pid, 0);
 }
 
-sub psService($$$$) {
-	my ($listener, $handlers, $service_config, $full_config) = @_;
+sub psService($$$) {
+	my ($listener, $handlers, $service_config) = @_;
 	my $outstanding_children = 0;
 	my $max_worker_processes;
 
@@ -265,9 +264,6 @@ sub psService($$$$) {
 	$logger->debug("Starting '".$$."' as the MA.");
 
 	$max_worker_processes = $service_config->{"max_worker_processes"};
-	if (!defined $max_worker_processes or $max_worker_processes eq "") {
-		$max_worker_processes = $full_config->{"max_worker_processes"};
-	}
 
 	while(1) {
 		if ($max_worker_processes > 0) {
@@ -304,7 +300,7 @@ sub psService($$$$) {
 				my $pid = fork();
 				if ($pid == 0) {
 					%child_pids = ();
-					handleRequest($handlers->{$request->getEndpoint()}, $service_config->{"endpoint"}->{$request->getEndpoint()}, $full_config, $request);
+					handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
 					$request->finish();
 					exit(0);
 				} elsif ($pid < 0) {
@@ -331,12 +327,7 @@ sub registerLS($) {
 	%child_pids = ();
 
 	my $service = $args->{"service"};
-	my $default_interval = $args->{"endpoint_conf"}->{"ls_registration_interval"};
-	if (!defined $default_interval or $default_interval eq "") {
-		$default_interval = $args->{"endpoint_conf"}->{"ls_registration_interval"};
-	}
-
-	$default_interval *= 60;
+	my $default_interval = $args->{"conf"}->{"ls_registration_interval"};
 
 	$logger->debug("Starting '".$$."' for LS registration");
 
@@ -349,12 +340,14 @@ sub registerLS($) {
 			$sleep_time = $default_interval;
 		}
 
+		$logger->debug("Sleeping for $sleep_time");
+
 		sleep($sleep_time);
 	}
 }
 
-sub handleRequest($$$$) {
-	my ($handler, $endpoint_conf, $full_conf, $request) = @_;
+sub handleRequest($$$) {
+	my ($handler, $request, $endpoint_conf) = @_;
 
 	# This function is a wrapper around the __handleRequest function.  The
 	# purpose of the function is to handle the case where a crash occurs
@@ -362,14 +355,11 @@ sub handleRequest($$$$) {
 	# too long.
 
 	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
-	if (!defined $max_worker_lifetime or $max_worker_lifetime eq "") {
-		$max_worker_lifetime = $full_conf->{"max_worker_lifetime"};
-	}
 
 	eval {
  		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
 		alarm($max_worker_lifetime) if ($max_worker_lifetime > 0);
-		$handler->handleRequest($request, $endpoint_conf, $full_conf);
+		$handler->handleRequest($request, $endpoint_conf);
  	};
 
 	# disable the alarm after the eval is done

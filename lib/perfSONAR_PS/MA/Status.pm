@@ -11,7 +11,7 @@ use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::LS::Register;
+use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
 
 sub init($$);
@@ -56,6 +56,7 @@ sub init($$) {
 	my $logger = get_logger("perfSONAR_PS::MA::Status");
 
 	if (!defined $self->{CONF}->{"status"}->{"enable_registration"} or $self->{CONF}->{"status"}->{"enable_registration"} eq "") {
+		$logger->warn("Disabling LS registration");
 		$self->{CONF}->{"status"}->{"enable_registration"} = 0;
 	}
 
@@ -66,8 +67,8 @@ sub init($$) {
 		}
 
 		if (!defined $self->{CONF}->{"status"}->{"ls_instance"} or $self->{CONF}->{"status"}->{"ls_instance"} eq "") {
-			if (defined $self->{CONF}->{"default.ls_instance"} and $self->{CONF}->{"default.ls_instance"} ne "") {
-				$self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"default.ls_instance"};
+			if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne "") {
+				$self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
 			} else {
 				$logger->error("No LS instance specified for SNMP service");
 				return -1;
@@ -75,13 +76,18 @@ sub init($$) {
 		}
 
 		if (!defined $self->{CONF}->{"status"}->{"ls_registration_interval"} or $self->{CONF}->{"status"}->{"ls_registration_interval"} eq "") {
-			if (defined $self->{CONF}->{"default.ls_registration_interval"} and $self->{CONF}->{"default.ls_registration_interval"} ne "") {
-				$self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"default.ls_registration_interval"};
+			if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne "") {
+				$self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
 			} else {
 				$logger->warn("Setting registration interval to 30 minutes");
 				$self->{CONF}->{"status"}->{"ls_registration_interval"} = 1800;
 			}
+		} else {
+			# turn the registration interval from minutes to seconds
+			$self->{CONF}->{"status"}->{"ls_registration_interval"} *= 60;
 		}
+
+		$logger->debug("Registration interval: ".  $self->{CONF}->{"status"}->{"ls_registration_interval"});
 
 		if(!defined $self->{CONF}->{"status"}->{"service_description"} or
 				$self->{CONF}->{"status"}->{"service_description"} eq "") {
@@ -127,7 +133,7 @@ sub init($$) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"status"}->{"db_table"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::Client::Status::SQL("DBI:SQLite:dbname=".$file, "", "", $self->{CONF}->{"status"}->{"db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "No database to dump";
 			$logger->error($msg);
@@ -160,7 +166,7 @@ sub init($$) {
 			$read_only = 1;
 		}
 
-		$self->{CLIENT} = new perfSONAR_PS::MA::Status::Client::SQL($dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only);
+		$self->{CLIENT} = new perfSONAR_PS::Client::Status::SQL($dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only);
 		if (!defined $self->{CLIENT}) {
 			my $msg = "Couldn't create SQL client";
 			$logger->error($msg);
@@ -180,11 +186,8 @@ sub init($$) {
 
 	$self->{CLIENT}->close;
 
-	$handler->add($self->{CONF}->{"status"}->{"endpoint"}, "SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-	$handler->add($self->{CONF}->{"status"}->{"endpoint"}, "MeasurementArchiveStoreRequest", "", $self);
-
-	$handler->setMessageResponseType($self->{CONF}->{"status"}->{"endpoint"}, "SetupDataRequest", "SetupDataResponse");
-	$handler->setMessageResponseType($self->{CONF}->{"status"}->{"endpoint"}, "MeasurementArchiveStoreRequest", "MeasurementArchiveStoreResponse");
+	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
+	$handler->addMessageHandler("MeasurementArchiveStoreRequest", $self);
 
 	return 0;
 }
@@ -201,26 +204,27 @@ sub registerLS($$) {
 	my ($status, $res);
 	my $ls;
 
-	return (-1, "LS Registration unconfigured")  if (!defined $self->{CONF}->{"status"}->{"ls_instance"} or $self->{CONF}->{"status"}->{"ls_instance"} eq "");
+	if (!defined $self->{LS_CLIENT}) {
+		my %ls_conf = (
+				SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
+				SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
+				SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
+				SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
+				LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status"}->{"registration_interval"},
+			      );
 
-	my %ls_conf = (
-		LS_INSTANCE => $self->{CONF}->{"status"}->{"ls_instance"},
-		SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
-		SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
-		SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
-		SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
-		LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status"}->{"registration_interval"},
-	);
+		if (defined $self->{CONF}->{"status"}->{"registration_interval"} and $self->{CONF}->{"status"}->{"registration_interval"} ne "") {
+			$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status"}->{"registration_interval"};
+		} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
+			$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
+		} else {
+			$logger->error("No registraion interval specified");
+		}
 
-	if (defined $self->{CONF}->{"status"}->{"registration_interval"} and $self->{CONF}->{"status"}->{"registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status"}->{"registration_interval"};
-	} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
-		$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
-	} else {
-		$logger->error("No registraion interval specified");
+		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES});
 	}
 
-	$ls = new perfSONAR_PS::LS::Register(\%ls_conf, $self->{NAMESPACES});
+	$ls = $self->{LS_CLIENT};
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -254,13 +258,25 @@ sub registerLS($$) {
 
 	$res = "";
 
-	my $n = $ls->register(\@link_mds);
+	my $n = $ls->registerDynamic(\@link_mds);
 
 	if (defined $sleep_time) {
-		$$sleep_time = $self->{"status"}->{"ls_registration_interval"};
+		$$sleep_time = $self->{CONF}->{"status"}->{"ls_registration_interval"};
 	}
 
 	return $n;
+}
+
+sub handleMessageBegin($$$$$$$$) {
+	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+
+	return 0;
+}
+
+sub handleMessageEnd($$$$$$$$) {
+	my ($self, $ret_message, $messageId);
+
+	return 0;
 }
 
 sub handleEvent($$$$$$$$$) {
@@ -643,8 +659,8 @@ The offered API is simple, but offers the key functions we need in a measurement
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::LS::Register>,
-L<perfSONAR_PS::MA::Status::Client::SQL>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Client::Status::SQL>
 
 
 To join the 'perfSONAR-PS' mailing list, please visit:

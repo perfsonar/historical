@@ -14,14 +14,13 @@ use Data::Dumper;
 our @ISA = ('Exporter');
 our @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
-            'find', 'findvalue', 'queryLS', 'escapeString', 'unescapeString',
+            'find', 'findvalue', 'escapeString', 'unescapeString',
              'makeEnvelope', 'mapNamespaces', 'mergeConfig');
 
 
 sub find($$$);
 sub findvalue($$);
 sub makeEnvelope($);
-sub queryLS($$$$);
 sub readXML($);
 sub readConfiguration($);
 sub chainMetadata($$);
@@ -91,76 +90,6 @@ sub makeEnvelope($) {
   $string .= "  </SOAP-ENV:Body>\n";
   $string .= "</SOAP-ENV:Envelope>\n";
   return $string;
-}
-
-sub queryLS($$$$) {
-  my ($host, $port, $endpoint, $queries) = @_;
-  my $logger = get_logger("perfSONAR_PS::Common");
-
-  my $request = "";
-  $request .= "<nmwg:message type=\"LSQueryRequest\" id=\"msg1\"\n";
-  $request .= "     xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-  $request .= "     xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-  foreach my $query_id (keys %{ $queries }) {
-    $request .= "  <nmwg:metadata id=\"circuitstatus.meta.$query_id\">\n";
-    $request .= "    <xquery:subject id=\"sub1\">\n";
-    $request .= $queries->{$query_id};
-    $request .= "    </xquery:subject>\n";
-    $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $request .= "  <xquery:parameters id=\"params.1\">\n";
-    $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $request .= "  </xquery:parameters>\n";
-    $request .= "  </nmwg:metadata>\n";
-    $request .= "  <nmwg:data metadataIdRef=\"circuitstatus.meta.$query_id\" id=\"data.$query_id\"/>\n";
-  }
-  $request .= "</nmwg:message>\n";
-
-  my ($status, $res) = consultArchive($host, $port, $endpoint, $request);
-  if ($status != 0) {
-    my $msg = "Error consulting LS: $res";
-    $logger->error($msg);
-    return(-1, $msg);
-  }
-
-  $logger->debug("Response: ".$res->toString);
-
-  my %ret_structure = ();
-
-  foreach my $d ($res->getChildrenByTagName("nmwg:data")) {
-    foreach my $m ($res->getChildrenByTagName("nmwg:metadata")) {
-      my $md_id = $m->getAttribute("id");
-      my $md_idref = $m->getAttribute("metadataIdRef");
-      my $d_idref = $d->getAttribute("metadataIdRef");
-
-      if($md_id eq $d_idref) {
-        my $query_id;
-	my $eventType = findvalue($m, "nmwg:eventType");
-
-        if (defined $md_idref and $md_idref =~ /circuitstatus\.meta\.(.*)/) {
-          $query_id = $1;
-        } elsif ($md_id =~ /circuitstatus\.meta\.(.*)/) {
-          $query_id = $1;
-        } else {
-          my $msg = "Received unknown response: $md_id/$md_idref";
-          $logger->error($msg);
-          next;
-        }
-
-        my @retval;
-        if (defined $eventType and $eventType =~ /^error\./) {
-          my $error_msg = findvalue($d, "./nmwgr:datum");
-          $error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
-          @retval = (-1, $error_msg);
-        } else {
-          @retval = (0, $d);
-        }
-
-        $ret_structure{$query_id} = \@retval;
-      }
-    }
-  }
-
-  return (0, \%ret_structure);
 }
 
 sub readXML($) {
@@ -886,16 +815,6 @@ This function is analogous to the libxml "findvalue" function. However, it
 makes use of the 'find' function documented above. Unlike the libxml findvalue
 function, this function will only return the text contents of the first node
 found.
-
-=head2 queryLS($host, $port, $endpoint, $queries) 
-
-This function takes a host/port/endpoint for an LS and a set of queries. It
-sends the queries to the LS and returns the results. The queries are given as a
-hash table with each key/value pair being an identifier/a query. Each query
-gets executed and the returned value is a hash containing the same identifiers
-as keys, but instead of pointing to queries, they point to an array containing
-a status and a result. The status is either 0 or -1. If it's 0, the result is a
-pointer to the data element. If it's -1, the result is the error message.
 
 =head2 escapeString($string)
 
