@@ -150,8 +150,14 @@ my $echo_module = "perfSONAR_PS::MA::Echo";
 my %handlers = ();
 my %listeners = ();
 my %modules_loaded = ();
+my %port_configs = ();
+my %service_configs = ();
 
 foreach my $port (keys %{ $conf{"port"} }) {
+	my %port_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}) };
+
+	$service_configs{$port} = \%port_conf;
+
         if (!defined $conf{"port"}->{$port}->{"endpoint"}) {
                 $logger->warn("No endpoints specified for port $port");
                 next;
@@ -167,8 +173,12 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
         $handlers{$port} = ();
 
+	$service_configs{$port}->{"endpoint"} = ();
+
         foreach my $endpoint (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
-                my %endpoint_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}->{"endpoint"}->{$endpoint}) };
+                my %endpoint_conf = %{ mergeConfig(\%port_conf, $conf{"port"}->{$port}->{"endpoint"}->{$endpoint}) };
+
+		$service_configs{$port}->{"endpoint"}->{$endpoint} = \%endpoint_conf;
 
 		$logger->debug("Adding endpoint $endpoint to $port");
 
@@ -225,7 +235,7 @@ if(!$DEBUGFLAG) {
 foreach my $port (keys %listeners) {
 	my $pid = fork();
 	if ($pid == 0) {
-		psService($listeners{$port}, $handlers{$port}, mergeConfig(\%conf, $conf{"port"}->{$port}));
+		psService($listeners{$port}, $handlers{$port}, $service_configs{$port});
 		exit(0);
 	} elsif ($pid < 0) {
 		$logger->error("Couldn't spawn listener child");
@@ -349,10 +359,12 @@ sub registerLS($) {
 sub handleRequest($$$) {
 	my ($handler, $request, $endpoint_conf) = @_;
 
-	# This function is a wrapper around the __handleRequest function.  The
-	# purpose of the function is to handle the case where a crash occurs
-	# while handling the request or the handling of the request runs for
-	# too long.
+	# This function is a wrapper around the handler's handleRequest
+	# function.  The purpose of the function is to handle the case where a
+	# crash occurs while handling the request or the handling of the
+	# request runs for too long.
+
+	$logger->debug("Handle Request: ".Dumper($endpoint_conf));
 
 	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
 

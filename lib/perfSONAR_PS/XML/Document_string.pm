@@ -2,6 +2,7 @@ package perfSONAR_PS::XML::Document_string;
 
 use Log::Log4perl qw(get_logger);
 use strict;
+use Carp qw(cluck);
 
 #our @ISA = qw(perSONAR_PS::XML::Document);
 
@@ -262,16 +263,18 @@ sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	my @open_tags = @{ $self->{"OPEN_TAGS"} };
+	if (defined $self->{"OPEN_TAGS"}) {
+		my @open_tags = @{ $self->{"OPEN_TAGS"} };
 
-	if (scalar(@open_tags) != 0) {
-		my $msg = "Open tags still exist: ";
+		if (scalar(@open_tags) != 0) {
+			my $msg = "Open tags still exist: ";
 
-		for(my $x = $#open_tags; $x >= 0; $x--) {
-			$msg .= " -> ".$open_tags[$x];
+			for(my $x = $#open_tags; $x >= 0; $x--) {
+				$msg .= " -> ".$open_tags[$x];
+			}
+
+			$logger->warn($msg);
 		}
-
-                $logger->warn($msg);
 	}
 
 	$logger->debug("Construction Results: ".$self->{STRING});

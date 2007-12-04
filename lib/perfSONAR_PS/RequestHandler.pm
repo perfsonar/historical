@@ -94,14 +94,17 @@ sub addEventHandler_Regex($$$$) {
 	return 0;
 }
 
-sub handleMessage($$$$) {
-	my ($self, $messageType, $message, $request) = @_;
+sub handleMessage($$$$$) {
+	my ($self, $doc, $messageType, $message, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
-	if (defined $self->{FULL_MSG_HANDLERS}->{$message}) {
-
+	if (defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
+		return $self->{FULL_MSG_HANDLERS}->{$messageType}->handleMessage($doc, $messageType, $message, $request);
 	}
 
-	return ("error.ma.messages_type", "Message type \"$messageType\" not yet supported");
+	my $mdID = "metadata.".genuid();
+	getResultCodeMetadata($doc, $mdID, "", "error.ma.messages_type");
+	getResultCodeData($doc, "data.".genuid(), $mdID, "Message type \"$messageType\" not yet supported", 1);
 }
 
 sub messageBegin($$$$$$$$) {
@@ -157,6 +160,9 @@ sub handleEvent($$$$$$$$$$) {
 
 sub isValidMessageType($$) {
 	my ($self, $messageType) = @_;
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+	$logger->debug("Checking if messages of type $messageType are valid");
 
 	if (defined $self->{EV_HANDLERS}->{$messageType} or defined $self->{EV_REGEX_HANDLERS}->{$messageType}
 			or defined $self->{MSG_HANDLERS}->{$messageType} or defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
@@ -168,6 +174,9 @@ sub isValidMessageType($$) {
 
 sub isValidEventType($$$) {
 	my ($self, $messageType, $eventType, $value) = @_;
+	my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+	$logger->debug("Checking if $eventType is valid on messages of type $messageType");
 
 	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
 		return 1;
@@ -229,14 +238,27 @@ sub handleRequest($$) {
 	my $messageType = $message->getAttribute("type");
 
 	if (!defined $messageType or $messageType eq "") {
-		# error out
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		my $mdID = "metadata.".genuid();
+		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.no_message_type");
+		getResultCodeData($ret_message, "data.".genuid(), $mdID, "There was no message type specified", 1);
+		$request->setResponse($ret_message->getValue());
+		return;
 	} elsif ($self->isValidMessageType($messageType) == 0) {
-		# error out
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		my $mdID = "metadata.".genuid();
+		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.invalid_message_type");
+		getResultCodeData($ret_message, "data.".genuid(), $mdID, "Messages of type $messageType are unsupported", 1);
+		$request->setResponse($ret_message->getValue());
+		return;
 	}
 
 	# The module will handle everything for this message type
 	if ($self->hasFullMessageHandler($messageType)) {
-		return $self->handleMessage($messageType, $message, $request);
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		$self->handleMessage($ret_message, $messageType, $message, $request);
+		$request->setResponse($ret_message->getValue());
+		return;
 	}
 
 	# Otherwise, since the message is valid, there must be some event types
@@ -295,7 +317,7 @@ sub handleRequest($$) {
 				my $eventType;
 				my $eventTypes = find($m, "./nmwg:eventType", 0);
 				foreach my $e ($eventTypes->get_nodelist) {
-					my $value = extract($e, 0);
+					my $value = extract($e, 1);
 					if ($self->isValidEventType($messageType, $value)) {
 						$eventType = $value;
 						last;
