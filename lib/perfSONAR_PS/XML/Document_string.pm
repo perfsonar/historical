@@ -1,7 +1,7 @@
 package perfSONAR_PS::XML::Document_string;
 
-use Log::Log4perl qw(get_logger);
 use strict;
+use Log::Log4perl qw(get_logger);
 use Carp qw(cluck);
 
 #our @ISA = qw(perSONAR_PS::XML::Document);

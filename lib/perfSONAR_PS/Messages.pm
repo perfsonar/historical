@@ -27,7 +27,6 @@ our @EXPORT = (
 		'createMessage',
 		'createMetadata',
 		'createData',
-		'createEchoRequest',
 	      );
 
 
@@ -231,25 +230,6 @@ sub createData($$$$$) {
 
 	$output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, $namespaces, $content);
 	$output->endElement("data");
-
-	return 0;
-}
-
-sub createEchoRequest($) {
-	my ($output) = @_; 
-	my $logger = get_logger("perfSONAR_PS::Messages");
-
-	my $messageID = "message.".genuid();
-	my $mdID = "metadata.".genuid();
-	my $dID = "data.".genuid();
-	my $eventType = "http://schemas.perfsonar.net/tools/admin/echo/2.0";
-
-	startMessage($output, $messageID, undef, "EchoRequest", "", undef);
-	getResultCodeMetadata($output, $mdID, "", $eventType);
-	createData($output, $dID, $mdID, "", undef);
-	endMessage($output);
-
-	$logger->debug("Finished creating echo request");
 
 	return 0;
 }

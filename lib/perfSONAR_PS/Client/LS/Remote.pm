@@ -7,6 +7,7 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
+use perfSONAR_PS::Client::Echo;
 
 
 sub new {
@@ -207,17 +208,15 @@ sub registerStatic {
     return;
   }
 
-  my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
-  }
-
-  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
-
   if(!$self->{"ALIVE"}) {
-    my $doc = perfSONAR_PS::XML::Document_string->new();
-    createEchoRequest($doc);
-    $self->{"ALIVE"} = callLS($self, $sender, $doc->getValue());
+    my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
+    my ($status, $res) = $echo_service->ping();
+    if ($status == -1) {
+      $logger->error("Ping to ".$self->{URI}." failed: $res");
+      return;
+    }
+
+    $self->{"ALIVE"} = 1;
   }
 
   if(!$self->{"ALIVE"}) {
@@ -306,17 +305,15 @@ sub registerDynamic {
     return;
   }
 
-  my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
-  }
-
-  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
-
   if(!$self->{"ALIVE"}) {
-    my $doc = perfSONAR_PS::XML::Document_string->new();
-    createEchoRequest($doc);
-    $self->{"ALIVE"} = callLS($self, $sender, $doc->getValue());
+    my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
+    my ($status, $res) = $echo_service->ping();
+    if ($status == -1) {
+      $logger->error("Ping to ".$self->{URI}." failed: $res");
+      return;
+    }
+
+    $self->{"ALIVE"} = 1;
   }
 
   if (!$self->{"ALIVE"}) {
