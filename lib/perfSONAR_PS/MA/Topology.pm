@@ -194,7 +194,7 @@ sub registerLS($$) {
 	my $n = $ls->registerDynamic(\@mds);
 
 	if (defined $sleep_time) {
-		$$sleep_time = $self->{"topology"}->{"ls_registration_interval"};
+		$$sleep_time = $self->{CONF}->{"topology"}->{"ls_registration_interval"};
 	}
 
 	return $n;

@@ -140,14 +140,14 @@ sub handleMessageParameters {
     if($p->getAttribute("name") eq "lsTTL") {
       $logger->debug("Found TTL parameter.");
       my $time = extract($p, 0);
-      if($time < (int $self->{"CONF"}->{"LS_TTL"}/2) or $time > $self->{"CONF"}->{"LS_TTL"}) {
+      if($time < (int $self->{"CONF"}->{"ls"}->{"ls_ttl"}/2) or $time > $self->{"CONF"}->{"ls"}->{"ls_ttl"}) {
         if($p->getAttribute("value")) {
-          $p->setAttribute("value", $self->{"CONF"}->{"LS_TTL"});
+          $p->setAttribute("value", $self->{"CONF"}->{"ls"}->{"ls_ttl"});
         }
         elsif($p->childNodes) {
           if($p->firstChild->nodeType == 3) {
             my $oldChild = $p->removeChild($p->firstChild);
-            $p->appendTextNode($self->{"CONF"}->{"LS_TTL"});
+            $p->appendTextNode($self->{"CONF"}->{"ls"}->{"ls_ttl"});
           }
         }
       }
@@ -298,7 +298,7 @@ sub lsRegisterRequest {
                       $mdCopy->setAttribute("id", $accessPoint);
                       $metadatadb->insertIntoContainer(wrapStore($mdCopy->toString, "LSStore"), $accessPoint, $dbTr, \$error);
                       $logger->error($error) and $errorFlag = 1 if $error;
-                      $metadatadb->insertIntoContainer(createControlKey($accessPoint, ($sec+$self->{CONF}->{"LS_TTL"})), $accessPoint."-control", $dbTr, \$error);
+                      $metadatadb->insertIntoContainer(createControlKey($accessPoint, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $accessPoint."-control", $dbTr, \$error);
                       $logger->error($error) and $errorFlag = 1 if $error;
                     }
 
@@ -348,7 +348,7 @@ sub lsRegisterRequest {
                   # N: Update Control Info
                   if($keys{$mdKey} == 1) {
                     $logger->debug("Key already exists, updating control time information.");
-                    $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey."-control", $dbTr, \$error);
+                    $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
                     $keys{$mdKey} = 2;
                   }
 
@@ -436,7 +436,7 @@ sub lsRegisterRequest {
                 if($#resultsString >= 0) {
                   # We will let this slide, its the same stuff, update control info
                   $logger->debug("Key already exists, updating control time information.");
-                  $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey."-control", $dbTr, \$error);
+                  $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
                   $logger->error($error) and $errorFlag = 1 if $error;
                   $keys{$mdKey} = 2;
                 }
@@ -454,7 +454,7 @@ sub lsRegisterRequest {
                   $service->setAttribute("id", $mdKey);
                   $metadatadb->insertIntoContainer(wrapStore($service->toString, "LSStore"), $mdKey, $dbTr, \$error);
                   $logger->error($error) and $errorFlag = 1 if $error;
-                  $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey."-control", $dbTr, \$error);
+                  $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
                   $logger->error($error) and $errorFlag = 1 if $error;
                 }
 
@@ -743,7 +743,7 @@ sub lsKeepaliveRequest {
                 my $errorFlag = 0;
 
                 $logger->debug("Updating control time information.");
-                $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"LS_TTL"})), $mdKey."-control", $dbTr, \$error);
+                $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
                 $logger->error($error) and $errorFlag = 1 if $error;
 
                 $metadatadb->commitTransaction($dbTr, \$error);

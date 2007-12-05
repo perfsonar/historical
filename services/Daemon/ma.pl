@@ -311,7 +311,6 @@ sub psService($$$) {
 				if ($pid == 0) {
 					%child_pids = ();
 					handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
-					$request->finish();
 					exit(0);
 				} elsif ($pid < 0) {
 					$logger->error("Error spawning child");
@@ -368,23 +367,76 @@ sub handleRequest($$$) {
 
 	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
 
+	my $pid = fork();
+	if ($pid == 0) {
+		eval {
+			$handler->handleRequest($request, $endpoint_conf);
+		};
+
+		if ($@) {
+			my $msg = "Unhandled exception or crash: $@";
+			$logger->error($msg);
+
+			my $ret_message = new perfSONAR_PS::XML::Document_string();
+			getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+			$request->setResponse($ret_message->getValue());
+		}
+
+		$request->finish();
+
+		exit(0);
+	} else {
+		eval {
+			local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
+
+			alarm($max_worker_lifetime);
+
+			waitpid($pid, 0);
+		};
+
+		if ($@) {
+			my $msg = "Unhandled exception or crash: $@";
+			$logger->error($msg);
+			kill 9, $pid;
+			my $ret_message = new perfSONAR_PS::XML::Document_string();
+			getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+			$request->setResponse($ret_message->getValue());
+			$request->finish();
+		}
+	}
+}
+
+sub handleRequest_sigalrm($$$) {
+	my ($handler, $request, $endpoint_conf) = @_;
+
+	# This function is a wrapper around the handler's handleRequest
+	# function.  The purpose of the function is to handle the case where a
+	# crash occurs while handling the request or the handling of the
+	# request runs for too long.
+
+	$logger->debug("Handle Request: ".Dumper($endpoint_conf));
+
+	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
+
 	eval {
  		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
 		alarm($max_worker_lifetime) if ($max_worker_lifetime > 0);
 		$handler->handleRequest($request, $endpoint_conf);
  	};
-
+ 
 	# disable the alarm after the eval is done
 	alarm(0);
-
+ 
 	if ($@) {
 		my $msg = "Unhandled exception or crash: $@";
 		$logger->error($msg);
-
+ 
 		my $ret_message = new perfSONAR_PS::XML::Document_string();
 		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
 		$request->setResponse($ret_message->getValue());
-	}
+ 	}
+
+	$request->finish();
 }
 
 sub daemonize() {
