@@ -315,7 +315,13 @@ sub psService($$$) {
 				} elsif ($pid < 0) {
 					$logger->error("Error spawning child");
 				} else {
-					$child_pids{$pid} = "";
+					my $max_worker_lifetime =  $service_config->{"endpoint"}->{$request->getEndpoint()}->{"max_worker_lifetime"};
+					my %child_info = ();
+					$child_info{"request"} = $request;
+					$child_info{"endpoint"} = $request->getEndpoint();
+					$child_info{"timeout_time"} = time + $max_worker_lifetime;
+					$logger->info("Timeout: $max_worker_lifetime - ".$child_info{"timeout_time"});
+					$child_pids{$pid} = \%child_info;
 					$outstanding_children++;
 				}
 			}
@@ -323,9 +329,27 @@ sub psService($$$) {
 
 		$logger->debug("Reaping children");
 
+		# reap any children that have finished
 		while((my $kid = waitpid(-1, WNOHANG)) > 0) {
 			delete $child_pids{$kid};
 			$outstanding_children--;
+		}
+
+		# kill off any children that have outlived their alloted time
+		foreach my $pid (keys %child_pids) {
+			my $time = time;
+			if ($child_pids{$pid}->{"timeout_time"} <= $time) {
+				my $request = $child_pids{$pid}->{"request"};
+				$logger->error("Pid $pid timed out for request to endpoint ".$request->getEndpoint() ." $time <= ".$child_pids{$pid}->{"timeout_time"});
+				kill 9, $pid;
+
+				my $ret_message = new perfSONAR_PS::XML::Document_string();
+				getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+				$request->setResponse($ret_message->getValue());
+				$request->finish();
+
+				delete $child_pids{$pid};
+			}
 		}
 	}
 }
@@ -360,72 +384,11 @@ sub handleRequest($$$) {
 
 	# This function is a wrapper around the handler's handleRequest
 	# function.  The purpose of the function is to handle the case where a
-	# crash occurs while handling the request or the handling of the
-	# request runs for too long.
-
-	$logger->debug("Handle Request: ".Dumper($endpoint_conf));
-
-	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
-
-	my $pid = fork();
-	if ($pid == 0) {
-		eval {
-			$handler->handleRequest($request, $endpoint_conf);
-		};
-
-		if ($@) {
-			my $msg = "Unhandled exception or crash: $@";
-			$logger->error($msg);
-
-			my $ret_message = new perfSONAR_PS::XML::Document_string();
-			getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
-			$request->setResponse($ret_message->getValue());
-		}
-
-		$request->finish();
-
-		exit(0);
-	} else {
-		eval {
-			local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
-
-			alarm($max_worker_lifetime);
-
-			waitpid($pid, 0);
-		};
-
-		if ($@) {
-			my $msg = "Unhandled exception or crash: $@";
-			$logger->error($msg);
-			kill 9, $pid;
-			my $ret_message = new perfSONAR_PS::XML::Document_string();
-			getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
-			$request->setResponse($ret_message->getValue());
-			$request->finish();
-		}
-	}
-}
-
-sub handleRequest_sigalrm($$$) {
-	my ($handler, $request, $endpoint_conf) = @_;
-
-	# This function is a wrapper around the handler's handleRequest
-	# function.  The purpose of the function is to handle the case where a
-	# crash occurs while handling the request or the handling of the
-	# request runs for too long.
-
-	$logger->debug("Handle Request: ".Dumper($endpoint_conf));
-
-	my $max_worker_lifetime = $endpoint_conf->{"max_worker_lifetime"};
+	# crash occurs while handling the request.
 
 	eval {
- 		local $SIG{ALRM} = sub{ die "Request lasted too long\n" };
-		alarm($max_worker_lifetime) if ($max_worker_lifetime > 0);
 		$handler->handleRequest($request, $endpoint_conf);
  	};
- 
-	# disable the alarm after the eval is done
-	alarm(0);
  
 	if ($@) {
 		my $msg = "Unhandled exception or crash: $@";
