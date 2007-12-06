@@ -6,14 +6,21 @@ use warnings;
 use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger);
+use Module::Load;
+use Fcntl qw (:flock);
+use Fcntl;
 
 use perfSONAR_PS::MA::Base;
 use perfSONAR_PS::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
+use perfSONAR_PS::Transport;
+
+use perfSONAR_PS::Client::Status::MA;
+use perfSONAR_PS::Client::Topology::MA;
 
 sub new {
-	my ($package, $conf, $directory) = @_;
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
 	my %hash = ();
 
@@ -25,188 +32,196 @@ sub new {
 		$hash{"DIRECTORY"} = $directory;
 	}
 
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
+	}
+
 	bless \%hash => $package;
 }
 
-sub init {
-	my ($self) = @_;
+sub init($$) {
+	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
-	if (!defined $self->{CONF}->{"circuitstatus.status_ma_type"} or $self->{CONF}->{"circuitstatus.status_ma_type"} eq "") {
-		if (!defined $self->{CONF}->{"circuitstatus.ls"} or $self->{CONF}->{"circuitstatus.ls"} eq "") {
-			$logger->error("no ls nor status ma specified");
+	if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} eq "") {
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"ls_instance"} or $self->{CONF}->{"circuitstatus"}->{"ls_instance"} eq "") {
+			$logger->error("No LS nor Status MA specified");
 			return -1;
 		} else {
-			$self->{CONF}->{"circuitstatus.status_ma_type"} = "ls";
+			$self->{CONF}->{"circuitstatus"}->{"status_ma_type"} = "ls";
 		}
 	}
 
-	if (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "ls") {
-		($self->{ls_host}, $self->{ls_port}, $self->{ls_endpoint}) = &perfsonar_ps::transport::splituri($self->{CONF}->{"circuitstatus.ls"});
-		if (!defined $self->{ls_host} or !defined $self->{ls_port} or !defined $self->{ls_endpoint}) {
-			$logger->error("specified ls is not a uri: ".$self->{CONF}->{"circuitstatus.ls"});
+	if (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ls") {
+		($self->{LS_HOST}, $self->{LS_PORT}, $self->{LS_ENDPOINT}) = &perfSONAR_PS::Transport::splitURI($self->{CONF}->{"circuitstatus"}->{"ls_instance"});
+		if (!defined $self->{LS_HOST} or !defined $self->{LS_PORT} or !defined $self->{LS_ENDPOINT}) {
+			$logger->error("Specified LS is not a URI: ".$self->{CONF}->{"circuitstatus"}->{"ls_instance"});
 			return -1;
 		}
-	} elsif (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "ma") {
-		if (!defined $self->{CONF}->{"circuitstatus.status_ma_uri"} or $self->{CONF}->{"circuitstatus.status_ma_uri"} eq "") {
-			$logger->error("you specified an ma for the status, but did not specify the uri(circuitstatus.status_ma_uri)");
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ma") {
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_uri"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_uri"} eq "") {
+			$logger->error("You specified an MA for the status, but did not specify the URI(status_ma_uri)");
 			return -1;
 		}
-	} elsif (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "sqlite") {
-		load perfsonar_ps::ma::status::client::sql;
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "sqlite") {
+		load perfSONAR_PS::Client::Status::SQL;
 
-		if (!defined $self->{CONF}->{"circuitstatus.status_ma_file"} or $self->{CONF}->{"circuitstatus.status_ma_file"} eq "") {
-			$logger->error("you specified a sqlite database, but then did not specify a database file(circuitstatus.status_ma_file)");
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_file"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_file"} eq "") {
+			$logger->error("You specified a SQLite Database, but then did not specify a database file(status_ma_file)");
 			return -1;
 		}
 
-		my $file = $self->{CONF}->{"circuitstatus.status_ma_file"};
-		if (defined $self->{directory}) {
+		my $file = $self->{CONF}->{"circuitstatus"}->{"status_ma_file"};
+		if (defined $self->{DIRECTORY}) {
 			if (!($file =~ "^/")) {
-				$file = $self->{directory}."/".$file;
+				$file = $self->{DIRECTORY}."/".$file;
 			}
 		}
 
-		$self->{local_ma_client} = new perfsonar_ps::ma::status::client::sql("dbi:sqlite:dbname=".$file, $self->{CONF}->{"circuitstatus.status_ma_table"});
-		if (!defined $self->{local_ma_client}) {
-			my $msg = "no database to dump";
+		$self->{LOCAL_MA_CLIENT} = perfSONAR_PS::Client::Status::SQL->new("DBI:SQLite:dbname=".$file, $self->{CONF}->{"circuitstatus"}->{"status_ma_table"});
+		if (!defined $self->{LOCAL_MA_CLIENT}) {
+			my $msg = "No database to dump";
 			$logger->error($msg);
 			return (-1, $msg);
 		}
-	} elsif (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "mysql") {
-		load perfsonar_ps::ma::status::client::sql;
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "mysql") {
+		load perfSONAR_PS::Client::Status::SQL;
 
 		my $dbi_string = "dbi:mysql";
 
-		if (!defined $self->{CONF}->{"circuitstatus.status_ma_name"} or $self->{CONF}->{"circuitstatus.status_ma_name"} eq "") {
-			$logger->error("you specified a mysql database, but did not specify the database (status_ma_name)");
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_name"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_name"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database (status_ma_name)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"circuitstatus.status_ma_name"};
+		$dbi_string .= ":".$self->{CONF}->{"circuitstatus"}->{"status_ma_name"};
 
-		if (!defined $self->{CONF}->{"circuitstatus.status_ma_host"} or $self->{CONF}->{"circuitstatus.status_ma_host"} eq "") {
-			$logger->error("you specified a mysql database, but did not specify the database host (status_ma_host)");
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_host"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_host"} eq "") {
+			$logger->error("You specified a MySQL Database, but did not specify the database host (status_ma_host)");
 			return -1;
 		}
 
-		$dbi_string .= ":".$self->{CONF}->{"circuitstatus.status_ma_host"};
+		$dbi_string .= ":".$self->{CONF}->{"circuitstatus"}->{"status_ma_host"};
 
-		if (defined $self->{CONF}->{"circuitstatus.status_ma_port"} and $self->{CONF}->{"circuitstatus.status_ma_port"} ne "") {
-			$dbi_string .= ":".$self->{CONF}->{"circuitstatus.status_ma_port"};
+		if (defined $self->{CONF}->{"circuitstatus"}->{"status_ma_port"} and $self->{CONF}->{"circuitstatus"}->{"status_ma_port"} ne "") {
+			$dbi_string .= ":".$self->{CONF}->{"circuitstatus"}->{"status_ma_port"};
 		}
 
-		$self->{local_ma_client} = new perfsonar_ps::ma::status::client::sql($dbi_string, $self->{CONF}->{"circuitstatus.status_ma_username"}, $self->{CONF}->{"circuitstatus.status_ma_password"});
-		if (!defined $self->{local_ma_client}) {
-			my $msg = "couldn't create sql client";
+		$self->{LOCAL_MA_CLIENT} = perfSONAR_PS::Client::Status::SQL->new($dbi_string, $self->{CONF}->{"circuitstatus"}->{"status_ma_username"}, $self->{CONF}->{"circuitstatus"}->{"status_ma_password"});
+		if (!defined $self->{LOCAL_MA_CLIENT}) {
+			my $msg = "Couldn't create SQL client";
 			$logger->error($msg);
 			return -1;
 		}
 	} else {
-		$logger->error("invalid ma type specified");
+		$logger->error("Invalid MA type specified");
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"circuitstatus.topology_ma_type"} or $self->{CONF}->{"circuitstatus.topology_ma_type"} eq "") {
-		$logger->error("no topology ma type specified");
+	if (!defined $self->{CONF}->{"circuitstatus"}->{"topology_ma_type"} or $self->{CONF}->{"circuitstatus"}->{"topology_ma_type"} eq "") {
+		$logger->error("No topology MA type specified");
 		return -1;
-	} elsif (lc($self->{CONF}->{"circuitstatus.topology_ma_type"}) eq "xml") {
-		load perfsonar_ps::ma::topology::client::xmldb;
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) eq "xml") {
+		load perfSONAR_PS::Client::Topology::XMLDB;
 
-		if (!defined $self->{CONF}->{"circuitstatus.topology_ma_file"} or $self->{CONF}->{"circuitstatus.topology_ma_file"} eq "") {
-			$logger->error("you specified a sleepycat xml db database, but then did not specify a database file(topology_ma_file)");
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"topology_ma_file"} or $self->{CONF}->{"circuitstatus"}->{"topology_ma_file"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database file(topology_ma_file)");
 			return -1;
 		}
 
-		if (!defined $self->{CONF}->{"circuitstatus.topology_ma_environment"} or $self->{CONF}->{"circuitstatus.topology_ma_environment"} eq "") {
-			$logger->error("you specified a sleepycat xml db database, but then did not specify a database name(topology_ma_environment)");
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"topology_ma_environment"} or $self->{CONF}->{"circuitstatus"}->{"topology_ma_environment"} eq "") {
+			$logger->error("You specified a Sleepycat XML DB Database, but then did not specify a database name(topology_ma_environment)");
 			return -1;
 		}
 
-		my $environment = $self->{CONF}->{"circuitstatus.topology_ma_environment"};
-		if (defined $self->{directory}) {
+		my $environment = $self->{CONF}->{"circuitstatus"}->{"topology_ma_environment"};
+		if (defined $self->{DIRECTORY}) {
 			if (!($environment =~ "^/")) {
-				$environment = $self->{directory}."/".$environment;
+				$environment = $self->{DIRECTORY}."/".$environment;
 			}
 		}
 
-		my $file = $self->{CONF}->{"circuitstatus.topology_ma_file"};
-		my %ns = &perfsonar_ps::ma::topology::topology::gettopologynamespaces();
+		my $file = $self->{CONF}->{"circuitstatus"}->{"topology_ma_file"};
+		my %ns = &perfSONAR_PS::MA::Topology::Topology::getTopologyNamespaces();
 
-		$self->{topology_client} = new perfsonar_ps::ma::topology::client::xmldb($environment, $file, \%ns, 1);
-	} elsif (lc($self->{CONF}->{"circuitstatus.topology_ma_type"}) eq "none") {
-		$logger->warn("ignoring the topology ma. everything must be specified explicitly in the circuits.conf file");
-	} elsif (lc($self->{CONF}->{"circuitstatus.topology_ma_type"}) eq "ma") {
-		if (!defined $self->{CONF}->{"circuitstatus.topology_ma_uri"} or $self->{CONF}->{"circuitstatus.topology_ma_uri"} eq "") {
-			$logger->error("you specified that you want a topology ma, but did not specify the uri (topology_ma_uri)");
+		$self->{TOPOLOGY_CLIENT} = perfSONAR_PS::Client::Topology::XMLDB->new($environment, $file, \%ns, 1);
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) eq "none") {
+		$logger->warn("Ignoring the topology MA. Everything must be specified explicitly in the circuits.conf file");
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) eq "ma") {
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"topology_ma_uri"} or $self->{CONF}->{"circuitstatus"}->{"topology_ma_uri"} eq "") {
+			$logger->error("You specified that you want a Topology MA, but did not specify the URI (topology_ma_uri)");
 			return -1;
 		}
 
-		$self->{topology_client} = new perfsonar_ps::ma::topology::client::ma($self->{CONF}->{"circuitstatus.topology_ma_uri"});
+		$self->{TOPOLOGY_CLIENT} = perfSONAR_PS::Client::Topology::MA->new($self->{CONF}->{"circuitstatus"}->{"topology_ma_uri"});
 	} else {
-		$logger->error("invalid database type specified");
+		$logger->error("Invalid database type specified");
 		return -1;
 	}
 
-	if (!defined $self->{CONF}->{"circuitstatus.circuits_file_type"} or $self->{CONF}->{"circuitstatus.circuits_file_type"} eq "") {
-		$logger->error("no circuits file type specified");
+	if (!defined $self->{CONF}->{"circuitstatus"}->{"circuits_file_type"} or $self->{CONF}->{"circuitstatus"}->{"circuits_file_type"} eq "") {
+		$logger->error("No circuits file type specified");
 		return -1;
 	}
 
-	if($self->{CONF}->{"circuitstatus.circuits_file_type"} eq "file") {
-		if (!defined $self->{CONF}->{"circuitstatus.circuits_file"} or $self->{CONF}->{"circuitstatus.circuits_file"} eq "") {
-			$logger->error("no circuits file specified");
+	if($self->{CONF}->{"circuitstatus"}->{"circuits_file_type"} eq "file") {
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"circuits_file"} or $self->{CONF}->{"circuitstatus"}->{"circuits_file"} eq "") {
+			$logger->error("No circuits file specified");
 			return -1;
 		}
 
-		my ($status, $res1, $res2, $res3, $res4, $res5) = parsecircuitsfile($self->{CONF}->{"circuitstatus.circuits_file"});
+		my ($status, $res1, $res2, $res3, $res4, $res5) = parseCircuitsFile($self->{CONF}->{"circuitstatus"}->{"circuits_file"});
 		if ($status ne "") {
-			my $msg = "error parsing circuits file: $res1";
+			my $msg = "Error parsing circuits file: $res1";
 			$logger->error($msg);
 			return -1;
 		}
 
-		$self->{domain} = $res1;
-		$self->{circuits} = $res2;
-		$self->{incomplete_nodes} = $res3;
-		$self->{topology_links} = $res4;
-		$self->{nodes} = $res5;
+		$self->{DOMAIN} = $res1;
+		$self->{CIRCUITS} = $res2;
+		$self->{INCOMPLETE_NODES} = $res3;
+		$self->{TOPOLOGY_LINKS} = $res4;
+		$self->{NODES} = $res5;
 
 		my $have_keys = 0;
 		foreach my $key (keys %{ $res3 }) {
-			$logger->debug("key: $key");
+			$logger->debug("Key: $key");
 			$have_keys++;
 		}
-		if ($self->{"conf"}->{"circuitstatus.topology_ma_type"} eq "none" and scalar keys %{ $res3 } > 0) {
-			my $msg = "you specified no topology ma, but there are incomplete nodes";
+		if ($self->{"CONF"}->{"circuitstatus"}->{"topology_ma_type"} eq "none" and scalar keys %{ $res3 } > 0) {
+			my $msg = "You specified no topology MA, but there are incomplete nodes";
 			$logger->error($msg);
 			return -1;
 		}
 	} else {
-		$logger->error("invalid circuits file type specified: ".$self->{CONF}=>{"link_file_type"});
+		$logger->error("Invalid circuits file type specified: ".$self->{CONF}=>{"LINK_FILE_TYPE"});
 		return -1;
 	}
 
-	if (defined $self->{CONF}->{"circuitstatus.cache_length"} and $self->{CONF}->{"circuitstatus.cache_length"} > 0) {
-		if (!defined $self->{CONF}->{"circuitstatus.cache_file"} or $self->{CONF}->{"circuitstatus.cache_file"} eq "") {
-			my $msg = "if you specify a cache time period, you need to specify a file to cache to \"circuitstatus.cache_file\"";
+	if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0) {
+		if (!defined $self->{CONF}->{"circuitstatus"}->{"cache_file"} or $self->{CONF}->{"circuitstatus"}->{"cache_file"} eq "") {
+			my $msg = "If you specify a cache time period, you need to specify a file to cache to \"cache_file\"";
 			$logger->error($msg);
 			return -1;
 		}
 
-		my $file = $self->{CONF}->{"circuitstatus.cache_file"};
-		if (defined $self->{directory}) {
+		my $file = $self->{CONF}->{"circuitstatus"}->{"cache_file"};
+		if (defined $self->{DIRECTORY}) {
 			if (!($file =~ "^/")) {
-				$file = $self->{directory}."/".$file;
+				$file = $self->{DIRECTORY}."/".$file;
 			}
 		}
 
-		$self->{CONF}->{"circuitstatus.cache_file"} = $file;
+		$self->{CONF}->{"circuitstatus"}->{"cache_file"} = $file;
 
-		$logger->debug("using \"$file\" to cache current results");
+		$logger->debug("Using \"$file\" to cache current results");
 	}
 
-	$handler->add($self->{CONF}->{"circuitstatus.endpoint"}, "SetupDataRequest", "Path.Status", $self);
+	$handler->addFullMessageHandler("SetupDataRequest", $self);
 
 	return 0;
 }
@@ -215,33 +230,100 @@ sub needLS() {
 	return 0;
 }
 
-sub handleEvent($$$$) {
-	my ($self, $endpoint, $messageType, $eventType, $md, $d) = @_;
+sub handleMessage($$$$$) {
+	my ($self, $output, $messageType, $message, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
-	my $time = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="time"]');
+	my $localContent = "";
+
+	my $found_match = 0;
+	my %namespaces = (
+		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+		nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
+		nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+		nmtl2 => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
+		nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+	);
+
+	startMessage($output, "message.".genuid(), "", "E2E_Link_status_information", "", \%namespaces);
+	foreach my $d ($message->getElementsByLocalName("data")) {
+		foreach my $m ($message->getElementsByLocalName("metadata")) {
+			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
+				my $eventType = findvalue($m, "./nmwg:eventType");
+
+				$found_match = 1;
+
+				my ($status, $res);
+
+				if (!defined $eventType or $eventType eq "") {
+					$status = "error.ma.no_eventtype";
+					$res = "No event type specified for metadata: ".$m->getAttribute("id");
+				} elsif ($eventType eq "Path.Status") {
+					my $time = findvalue($m, './nmwg:parameters/nmwg:parameter[@name="time"]');
+
+					($status, $res) = $self->handlePathStatusRequest($output, $time);
+				} else {
+					$status = "error.ma.eventtype_not_supported";
+					$res = "Unknown event type: ".$eventType;
+					$logger->error($res);
+				}
+
+				if ($status ne "") {
+					$logger->error("Couldn't handle requested metadata: $res");
+
+					my $mdID = "metadata.".genuid();
+
+					getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
+					getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
+				}
+			}
+		}
+	}
+
+	if ($found_match == 0) {
+		my $status = "error.ma.no_metadata_data_pair";
+		my $res = "There was no data/metadata pair found";
+
+		my $mdID = "metadata.".genuid();
+
+		getResultCodeMetadata($output, $mdID, "", $status);
+		getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
+	}
+
+	endMessage($output);
+
+	return;
+}
+
+sub handlePathStatusRequest($$$) {
+	my ($self, $output, $time) = @_;
+	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my ($status, $res);
+
 	if (!defined $time or $time eq "now") {
 		$time = "";
 	}
 
-	if (defined $self->{CONF}->{"circuitstatus.cache_length"} and $self->{CONF}->{"circuitstatus.cache_length"} > 0 and $time eq "") {
-		my $mtime = (stat $self->{CONF}->{"circuitstatus.cache_file"})[9];
+	if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0 and $time eq "") {
+		my $mtime = (stat $self->{CONF}->{"circuitstatus"}->{"cache_file"})[9];
 
-		if (time - $mtime < $self->{CONF}->{"circuitstatus.cache_length"}) {
-			$logger->debug("Using cached results in ".$self->{CONF}->{"circuitstatus.cache_file"});
-			if (open(CACHEFILE, $self->{CONF}->{"circuitstatus.cache_file"})) {
+		if (time - $mtime < $self->{CONF}->{"circuitstatus"}->{"cache_length"}) {
+			$logger->debug("Using cached results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
+			if (open(CACHEFILE, $self->{CONF}->{"circuitstatus"}->{"cache_file"})) {
 				my $response;
 				local $/;
 				flock CACHEFILE, LOCK_SH;
 				$response = <CACHEFILE>;
 				close CACHEFILE;
-				return ("", $response);
+				$output->addOpaque($response);
 			} else {
-				$logger->warn("Unable to open cached results in ".$self->{CONF}->{"circuitstatus.cache_file"});
+				$logger->warn("Unable to open cached results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
 			}
 		}
 	}
 
-	if (lc($self->{CONF}->{"circuitstatus.topology_ma_type"}) ne "none") {
+	if (lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) ne "none") {
 		($status, $res) = $self->{TOPOLOGY_CLIENT}->open;
 		if ($status != 0) {
 			my $msg = "Problem opening topology MA: $res";
@@ -268,7 +350,7 @@ sub handleEvent($$$$) {
 
 	my %clients = ();
 
-	if (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "ma") {
+	if (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ma") {
 		my %client;
 		my @children;
 
@@ -276,17 +358,17 @@ sub handleEvent($$$$) {
 			push @children, $link_id;
 		}
 
-		$client{"CLIENT"} = new perfSONAR_PS::MA::Status::Client::MA($self->{CONF}->{"circuitstatus.status_ma_uri"});
+		$client{"CLIENT"} = perfSONAR_PS::Client::Status::MA->new($self->{CONF}->{"circuitstatus"}->{"status_ma_uri"});
 		$client{"LINKS"} = \@children;
 
 		my ($status, $res) = $client{"CLIENT"}->open;
 		if ($status != 0) {
-			my $msg = "Problem opening status MA ".$self->{CONF}->{"circuitstatus.status_ma_uri"}.": $res";
+			my $msg = "Problem opening status MA ".$self->{CONF}->{"circuitstatus"}->{"status_ma_uri"}.": $res";
 			$logger->warn($msg);
 		} else {
-			$clients{$self->{CONF}->{"circuitstatus.status_ma_uri"}} = \%client;
+			$clients{$self->{CONF}->{"circuitstatus"}->{"status_ma_uri"}} = \%client;
 		}
-	} elsif (lc($self->{CONF}->{"circuitstatus.status_ma_type"}) eq "ls") {
+	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ls") {
 		# Consult the LS to find the Status MA for each link
 
 		my %queries = ();
@@ -337,7 +419,7 @@ sub handleEvent($$$$) {
 
 					push @children, $link_id;
 
-					$client{"CLIENT"} = new perfSONAR_PS::MA::Status::Client::MA($accessPoint);
+					$client{"CLIENT"} = perfSONAR_PS::Client::Status::MA->new($accessPoint);
 					$client{"LINKS"} = \@children;
 
 					my ($status, $res) = $client{"CLIENT"}->open;
@@ -366,7 +448,7 @@ sub handleEvent($$$$) {
 
 		my ($status, $res) = $client{"CLIENT"}->open;
 		if ($status != 0) {
-			my $msg = "Problem opening status MA ".$self->{CONF}->{"circuitstatus.status_ma_uri"}.": $res";
+			my $msg = "Problem opening status MA ".$self->{CONF}->{"circuitstatus"}->{"status_ma_uri"}.": $res";
 			$logger->warn($msg);
 		} else {
 			$clients{"local"} = \%client;
@@ -400,7 +482,7 @@ sub handleEvent($$$$) {
 			$logger->warn($msg);
 
 			my $curr_time = time;
-			$self->{TOPOLOGY_LINKS}->{$link_id} = new perfSONAR_PS::MA::Status::Link($link_id, "full", $curr_time, $curr_time, "unknown", "unknown");
+			$self->{TOPOLOGY_LINKS}->{$link_id} = perfSONAR_PS::MA::Status::Link->new($link_id, "full", $curr_time, $curr_time, "unknown", "unknown");
 		}
 	}
 
@@ -465,10 +547,10 @@ sub handleEvent($$$$) {
 			}
 		}
 
-		if ($time eq "" and defined $self->{CONF}->{"circuitstatus.max_recent_age"} and $self->{CONF}->{"circuitstatus.max_recent_age"} ne "") {
+		if ($time eq "" and defined $self->{CONF}->{"circuitstatus"}->{"max_recent_age"} and $self->{CONF}->{"circuitstatus"}->{"max_recent_age"} ne "") {
 			my $curr_time = time;
 
-			if ($curr_time - $circuit_time > $self->{CONF}->{"circuitstatus.max_recent_age"}) {
+			if ($curr_time - $circuit_time > $self->{CONF}->{"circuitstatus"}->{"max_recent_age"}) {
 				$logger->info("Old link time: $circuit_time Current Time: ".$curr_time.": ".($curr_time - $circuit_time));
 				$circuit_time = $curr_time;
 				$circuit_oper_value = "unknown";
@@ -482,62 +564,44 @@ sub handleEvent($$$$) {
 		$circuit->{"type"} = $circuit_type;
 	}
 
-	my @ret_elements = ();
+	my $localContent = "";
+	$localContent .= "  <nmwg:parameters id=\"storeId\">\n";
+	$localContent .= "     <nmwg:parameter name=\"DomainName\">".$self->{DOMAIN}."</nmwg:parameter>\n";
+	$localContent .= "  </nmwg:parameters>\n";
+	$localContent .= outputNodes($self->{NODES});
+	$localContent .= outputCircuits($self->{CIRCUITS});
 
-	my $parameters = "";
-	$parameters .= "  <nmwg:parameters id=\"storeId\">\n";
-	$parameters .= "     <nmwg:parameter name=\"DomainName\">".$self->{DOMAIN}."</nmwg:parameter>\n";
-	$parameter .= "  </nmwg:parameters>\n";
+	if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0) {
+		$logger->debug("Caching results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
 
-	push @ret_elements, $parameters;
+		unlink($self->{CONF}->{"circuitstatus"}->{"cache_file"});
 
-	my ($mds, $data);
-	$mds = outputNodes($self->{NODES});
-	foreach $md (@{ $mds }) {
-		push @ret_elements, $md;
-	}
-
-	($mds, $data) = outputCircuits($self->{CIRCUITS});
-	foreach $md (@{ $mds }) {
-		push @ret_elements, $md;
-	}
-
-	foreach $datum (@{ $data }) {
-		push @ret_elements, $datum;
-	}
-
-	if (defined $self->{CONF}->{"circuitstatus.cache_length"} and $self->{CONF}->{"circuitstatus.cache_length"} > 0) {
-		$logger->debug("Caching results in ".$self->{CONF}->{"circuitstatus.cache_file"});
-
-		unlink($self->{CONF}->{"circuitstatus.cache_file"});
-
-		if (sysopen(CACHEFILE, $self->{CONF}->{"circuitstatus.cache_file"}, O_WRONLY | O_CREAT, 0600)) {
+		if (sysopen(CACHEFILE, $self->{CONF}->{"circuitstatus"}->{"cache_file"}, O_WRONLY | O_CREAT, 0600)) {
 			flock CACHEFILE, LOCK_EX;
-			foreach $element (@ret_elements) {
-				print CACHEFILE $element;
-			}
+			print CACHEFILE $localContent;
 			close CACHEFILE;
 		} else {
 			$logger->warn("Unable to cache results");
 		}
 	}
 
-	return ("", \@ret_elements);
+	$output->addOpaque($localContent);
+
+	return ("", "");
 }
 
 sub outputNodes($) {
 	my ($nodes) = @_;
 
-	my @mds = ();
+	my $content = "";
 
 	foreach my $id (keys %{ $nodes }) {
 		my $node = $nodes->{$id};
+		my $mdid = "metadata.".genuid();
 
 		next if (!defined $node->{"city"} and !defined $node->{"country"} and !defined $node->{"latitude"} and !defined $node->{"longitude"});
 
-		my $mdid = "metadata.".genuid();
-
-		my $content = "";
+		$content .= "<nmwg:metadata id=\"".$mdid."\">\n";
 		$content .= "  <nmwg:subject id=\"sub-".$node->{"name"}."\">\n";
 		$content .= "    <nmwgtopo3:node id=\"".$node->{"name"}."\">\n";
 		$content .= "      <nmwgtopo3:type>TopologyPoint</nmwgtopo3:type>\n";
@@ -560,9 +624,7 @@ sub outputNodes($) {
 
 		$content .= "    </nmwgtopo3:node>\n";
 		$content .= "  </nmwg:subject>\n";
-
-		
-		push @mds, createMetadata($mdID, "", $content);
+		$content .= "</nmwg:metadata>\n";
 	}
 
 	return $content;
@@ -572,43 +634,41 @@ sub outputCircuits($) {
 	my ($circuits) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 
+	my $content = "";
+
 	my $i = 0;
-	my @ret_mds;
-	my @ret_data;
+
 	foreach my $circuit (@{ $circuits }) {
-		my $content;
 		my $mdid = "metadata.".genuid();
 
-		$content = "";
-		$content .= "<nmwg:subject id=\"sub$i\">\n";
-		$content .= "  <nmtl2:link >\n";
-		$content .= "    <nmtl2:name type=\"logical\">".$circuit->{"name"}."</nmtl2:name>\n";
-		$content .= "    <nmtl2:globalName type=\"logical\">".$circuit->{"globalName"}."</nmtl2:globalName>\n";
-		$content .= "    <nmtl2:type>".$circuit->{"type"}."</nmtl2:type>\n";
+		$content .= "<nmwg:metadata id=\"$mdid\">\n";
+		$content .= "  <nmwg:subject id=\"sub$i\">\n";
+		$content .= "    <nmtl2:link >\n";
+		$content .= "      <nmtl2:name type=\"logical\">".$circuit->{"name"}."</nmtl2:name>\n";
+		$content .= "      <nmtl2:globalName type=\"logical\">".$circuit->{"globalName"}."</nmtl2:globalName>\n";
+		$content .= "      <nmtl2:type>".$circuit->{"type"}."</nmtl2:type>\n";
 		foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
 			$content .= "      <nmwgtopo3:node nodeIdRef=\"".$endpoint->{"node"}->{"name"}."\">\n";
 			$content .= "        <nmwgtopo3:role>".$endpoint->{"type"}."</nmwgtopo3:role>\n";
 			$content .= "      </nmwgtopo3:node>\n";
 		}
-		$content .= "  </nmtl2:link>\n";
-		$content .= "</nmwg:subject>\n";
-		$content .= "<nmwg:parameters>\n";
-		$content .= "  <nmwg:parameter name=\"supportedEventType\">Path.Status</nmwg:parameter>\n";
-		$content .= "</nmwg:parameters>\n";
+		$content .= "    </nmtl2:link>\n";
+		$content .= "  </nmwg:subject>\n";
+		$content .= "  <nmwg:parameters>\n";
+		$content .= "    <nmwg:parameter name=\"supportedEventType\">Path.Status</nmwg:parameter>\n";
+		$content .= "  </nmwg:parameters>\n";
+		$content .= "</nmwg:metadata>\n";
 
-		push @ret_mds, createMetadata($mdID, "", $content);
-
-		$content = "";
-		$content .= "<ifevt:datum timeType=\"unix\" timeValue=\"".$circuit->{"time"}."\">\n";
-		$content .= "  <ifevt:stateAdmin>".$circuit->{"adminState"}."</ifevt:stateAdmin>\n";
-		$content .= "  <ifevt:stateOper>".$circuit->{"operState"}."</ifevt:stateOper>\n";
-		$content .= "</ifevt:datum>\n";
-
-		push @ret_data, createData("data.".genuid(), $mdID, $content);
+		$content .= "<nmwg:data id=\"data$i\" metadataIdRef=\"$mdid\">\n";
+		$content .= "  <ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$circuit->{"time"}."\">\n";
+		$content .= "    <ifevt:stateAdmin>".$circuit->{"adminState"}."</ifevt:stateAdmin>\n";
+		$content .= "    <ifevt:stateOper>".$circuit->{"operState"}."</ifevt:stateOper>\n";
+		$content .= "  </ifevt:datum>\n";
+		$content .= "</nmwg:data>\n";
 		$i++;
 	}
 
-	return (\@ret_mds, \@ret_data);
+	return $content;
 }
 
 sub parseCircuitsFile($) {
@@ -855,46 +915,37 @@ sub parseTopology($$$) {
 	return ("", "");
 }
 
-
 1;
 
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Skeleton - A skeleton of an MA module that can be modified as needed.
+perfSONAR_PS::MA::CircuitStatus - A module that provides methods for an E2EMon Compatible MP.
 
 =head1 DESCRIPTION
 
-This module aims to be easily modifiable to support new and different MA types.
+This module aims to offer simple methods for dealing with requests for information, and the
+related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::Skeleton;
+use perfSONAR_PS::MA::CircuitStatus;
 
-my %conf;
-
-my $default_ma_conf = &perfSONAR_PS::MA::Skeleton::getDefaultConfig();
-if (defined $default_ma_conf) {
-	foreach my $key (keys %{ $default_ma_conf }) {
-		$conf{$key} = $default_ma_conf->{$key};
-	}
-}
-
-if (readConfiguration($CONFIG_FILE, \%conf) != 0) {
-	print "Couldn't read config file: $CONFIG_FILE\n";
-	exit(-1);
-}
+my %conf = readConfiguration();
 
 my %ns = (
 		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
 		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-		nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
+		nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
+		nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+		nmtl2 => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
+		nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
 	 );
 
-my $ma = perfSONAR_PS::MA::Skeleton->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::MA::CircuitStatus->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::Skeleton->new;
+# $ma = perfSONAR_PS::MA::CircuitStatus->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 
@@ -903,8 +954,6 @@ if ($ma->init != 0) {
 	exit(-1);
 }
 
-$ma->registerLS;
-
 while(1) {
 	my $request = $ma->receive;
 	$ma->handleRequest($request);
@@ -912,25 +961,12 @@ while(1) {
 
 =head1 API
 
-The offered API is simple, but offers the key functions needed in a measurement archive.
+The offered API is simple, but offers the key functions we need in a measurement archive.
 
-=head2 getDefaultConfig
+=head2 init 
 
-	Returns a reference to a hash containing default configuration options
-
-=head2 getDefaultNamespaces
-
-	Returns a reference to a hash containing the set of namespaces used by
-	the MA
-
-=head2 init
-
-       Initializes the MA and validates the entries in the
-       configuration file. Returns 0 on success and -1 on failure.
-
-=head2 registerLS($self)
-
-	Registers the data contained in the MA with the configured LS.
+       Initializes the MP and validates or fills in entries in the
+	configuration file. Returns 0 on success and -1 on failure.
 
 =head2 receive($self)
 
@@ -946,20 +982,53 @@ The offered API is simple, but offers the key functions needed in a measurement 
 
 	Validates that the message is one that we can handle, calls the
 	appropriate function for the message type and builds the response
-	message.
+	message. 
 
-=head2 handleMessage($self, $messageType, $message)
-	Handles the specific message. This should entail iterating through the
-	metadata/data pairs and handling each one.
+=head2 parseRequest($self, $request)
 
-=head2 handleMetadataPair($$$$) {
-	Handles a specific metadata/data request.
+	Goes through each metadata/data pair, extracting the eventType and
+	calling the function associated with that eventType.
 
+=head2 handlePathStatusRequest($self, $time) 
+
+	Performs the required steps to handle a path status message: contacts
+	the topology service to resolve node information, contacts the LS if
+	needed to find the link status service, contacts the link status
+	service and munges the results.
+
+=head2 outputNodes($nodes) 
+
+	Takes the set of nodes and outputs them in an E2EMon compatiable
+	format.
+
+=head2 outputCircuits($circuits) 
+
+	Takes the set of links and outputs them in an E2EMon compatiable
+	format.
+
+=head2 parseCircuitsFile($file) 
+
+	Parses the links configuration file. It returns an array containg up to
+	five values. The first value is the status and can be one of 0 or -1.
+	If it is -1, parsing the configuration file failed and the error
+	message is in the next value. If the status is 0, the next 4 values are
+	the domain name, a pointer to the set of links, a pointer to a hash
+	containg the set of nodes to lookup in the topology service and a
+	pointer to a hash containing the set of links to lookup in the status
+	service.
+	
+=head2 parseTopology($topology, $nodes, $domain_name)
+
+	Parses the output from the topology service and fills in the details
+	for the nodes. The domain name is passed so that when a node has no
+	name specified in the configuration file, it can be constructd based on
+	the domain name and the node's name in the topology service.
 
 =head1 SEE ALSO
 
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::LS::Register>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Transport>,
+L<perfSONAR_PS::Client::Status::MA>, L<perfSONAR_PS::Client::Topology::MA>
 
 
 To join the 'perfSONAR-PS' mailing list, please visit:
@@ -981,12 +1050,12 @@ $Id:$
 Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
-
+ 
 You should have received a copy of the Internet2 Intellectual Property Framework along
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
-
+ 
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.
