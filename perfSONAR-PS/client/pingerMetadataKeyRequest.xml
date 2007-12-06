@@ -3,16 +3,16 @@
               type="MetadataKeyRequest"
               xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
               xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
-              xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
   <nmwg:metadata id="meta1">
     <pinger:subject xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" id="subject1">
-      <topo:endPointPair xmlns:topo="http://ggf.org/ns/nmwg/topology/2.0/">
-        <topo:src type="ipv4" value="hepnrc.hep.net"/>
-        <topo:dst type="ipv4" value="teras.sara.nl"/>
-     </topo:endPointPair>
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:dst type="hostname" value="ping.desy.de"/> 
+     </nmwgt:endPointPair>
     </pinger:subject>
+   <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0/</nmwg:eventType>
   </nmwg:metadata>
   
   <nmwg:data id="data1" metadataIdRef="meta1"/>
