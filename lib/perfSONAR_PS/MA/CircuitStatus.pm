@@ -221,7 +221,7 @@ sub init($$) {
 		$logger->debug("Using \"$file\" to cache current results");
 	}
 
-	$handler->addFullMessageHandler("SetupDataRequest", $self);
+	$handler->addEventHandler("SetupDataRequest", "Path.Status", $self);
 
 	return 0;
 }
@@ -230,77 +230,12 @@ sub needLS() {
 	return 0;
 }
 
-sub handleMessage($$$$$) {
-	my ($self, $output, $messageType, $message, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
-
-	my $localContent = "";
-
-	my $found_match = 0;
-	my %namespaces = (
-		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-		ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-		nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
-		nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-		nmtl2 => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
-		nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
-	);
-
-	startMessage($output, "message.".genuid(), "", "E2E_Link_status_information", "", \%namespaces);
-	foreach my $d ($message->getElementsByLocalName("data")) {
-		foreach my $m ($message->getElementsByLocalName("metadata")) {
-			if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-				my $eventType = findvalue($m, "./nmwg:eventType");
-
-				$found_match = 1;
-
-				my ($status, $res);
-
-				if (!defined $eventType or $eventType eq "") {
-					$status = "error.ma.no_eventtype";
-					$res = "No event type specified for metadata: ".$m->getAttribute("id");
-				} elsif ($eventType eq "Path.Status") {
-					my $time = findvalue($m, './nmwg:parameters/nmwg:parameter[@name="time"]');
-
-					($status, $res) = $self->handlePathStatusRequest($output, $time);
-				} else {
-					$status = "error.ma.eventtype_not_supported";
-					$res = "Unknown event type: ".$eventType;
-					$logger->error($res);
-				}
-
-				if ($status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
-
-					my $mdID = "metadata.".genuid();
-
-					getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
-					getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
-				}
-			}
-		}
-	}
-
-	if ($found_match == 0) {
-		my $status = "error.ma.no_metadata_data_pair";
-		my $res = "There was no data/metadata pair found";
-
-		my $mdID = "metadata.".genuid();
-
-		getResultCodeMetadata($output, $mdID, "", $status);
-		getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
-	}
-
-	endMessage($output);
-
-	return;
-}
-
-sub handlePathStatusRequest($$$) {
-	my ($self, $output, $time) = @_;
+sub handleEvent($$$$$$$$$) {
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
 	my ($status, $res);
 
+	my $time = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="time"]');
 	if (!defined $time or $time eq "now") {
 		$time = "";
 	}
@@ -317,6 +252,7 @@ sub handlePathStatusRequest($$$) {
 				$response = <CACHEFILE>;
 				close CACHEFILE;
 				$output->addOpaque($response);
+				return;
 			} else {
 				$logger->warn("Unable to open cached results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
 			}
@@ -564,12 +500,13 @@ sub handlePathStatusRequest($$$) {
 		$circuit->{"type"} = $circuit_type;
 	}
 
-	my $localContent = "";
-	$localContent .= "  <nmwg:parameters id=\"storeId\">\n";
-	$localContent .= "     <nmwg:parameter name=\"DomainName\">".$self->{DOMAIN}."</nmwg:parameter>\n";
-	$localContent .= "  </nmwg:parameters>\n";
-	$localContent .= outputNodes($self->{NODES});
-	$localContent .= outputCircuits($self->{CIRCUITS});
+	my $doc = perfSONAR_PS::XML::Document_string->new();
+
+	startParameters($doc, "params.0");
+	 addParameter($doc, "DomainName", $self->{DOMAIN});
+	endParameters($doc);
+	outputNodes($doc, $self->{NODES});
+	outputCircuits($doc, $self->{CIRCUITS});
 
 	if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0) {
 		$logger->debug("Caching results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
@@ -578,22 +515,20 @@ sub handlePathStatusRequest($$$) {
 
 		if (sysopen(CACHEFILE, $self->{CONF}->{"circuitstatus"}->{"cache_file"}, O_WRONLY | O_CREAT, 0600)) {
 			flock CACHEFILE, LOCK_EX;
-			print CACHEFILE $localContent;
+			print CACHEFILE $doc->getValue();
 			close CACHEFILE;
 		} else {
 			$logger->warn("Unable to cache results");
 		}
 	}
 
-	$output->addOpaque($localContent);
+	$output->addOpaque($doc->getValue());
 
 	return ("", "");
 }
 
-sub outputNodes($) {
-	my ($nodes) = @_;
-
-	my $content = "";
+sub outputNodes($$) {
+	my ($output, $nodes) = @_;
 
 	foreach my $id (keys %{ $nodes }) {
 		my $node = $nodes->{$id};
@@ -601,75 +536,69 @@ sub outputNodes($) {
 
 		next if (!defined $node->{"city"} and !defined $node->{"country"} and !defined $node->{"latitude"} and !defined $node->{"longitude"});
 
-		$content .= "<nmwg:metadata id=\"".$mdid."\">\n";
-		$content .= "  <nmwg:subject id=\"sub-".$node->{"name"}."\">\n";
-		$content .= "    <nmwgtopo3:node id=\"".$node->{"name"}."\">\n";
-		$content .= "      <nmwgtopo3:type>TopologyPoint</nmwgtopo3:type>\n";
-		$content .= "      <nmwgtopo3:name type=\"logical\">".$node->{"name"}."</nmwgtopo3:name>\n";
-		if (defined $node->{"city"} and $node->{"city"} ne "") {
-		$content .= "      <nmwgtopo3:city>".$node->{"city"}."</nmwgtopo3:city>\n";
-		}
-		if (defined $node->{"country"} and $node->{"country"} ne "") {
-		$content .= "      <nmwgtopo3:country>".$node->{"country"}."</nmwgtopo3:country>\n";
-		}
-		if (defined $node->{"latitude"} and $node->{"latitude"} ne "") {
-		$content .= "      <nmwgtopo3:latitude>".$node->{"latitude"}."</nmwgtopo3:latitude>\n";
-		}
-		if (defined $node->{"longitude"} and $node->{"longitude"} ne "") {
-		$content .= "      <nmwgtopo3:longitude>".$node->{"longitude"}."</nmwgtopo3:longitude>\n";
-		}
-		if (defined $node->{"institution"} and $node->{"institution"} ne "") {
-		$content .= "      <nmwgtopo3:institution>".$node->{"institution"}."</nmwgtopo3:institution>\n";
-		}
-
-		$content .= "    </nmwgtopo3:node>\n";
-		$content .= "  </nmwg:subject>\n";
-		$content .= "</nmwg:metadata>\n";
+		startMetadata($output, $mdid, "", undef);
+		  $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub-".$node->{"name"} }, undef);
+		    $output->startElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "node", { id => $node->{"name"} }, undef);
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "type", { type => "logical" }, undef, "TopologyPoint");
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "name", { type => "logical" }, undef, $node->{"name"});
+		      if (defined $node->{"city"} and $node->{"city"} ne "") {
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "city", undef, undef, $node->{"city"});
+		      }
+		      if (defined $node->{"country"} and $node->{"country"} ne "") {
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "country", undef, undef, $node->{"country"});
+		      }
+		      if (defined $node->{"latitude"} and $node->{"latitude"} ne "") {
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "latitude", undef, undef, $node->{"latitude"});
+		      }
+		      if (defined $node->{"longitude"} and $node->{"longitude"} ne "") {
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "longitude", undef, undef, $node->{"longitude"});
+		      }
+		      if (defined $node->{"institution"} and $node->{"institution"} ne "") {
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "institution", undef, undef, $node->{"institution"});
+		      }
+		    $output->endElement("node");
+		  $output->endElement("subject");
+		endMetadata($output);
 	}
-
-	return $content;
 }
 
 sub outputCircuits($) {
-	my ($circuits) = @_;
+	my ($output, $circuits) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
-
-	my $content = "";
 
 	my $i = 0;
 
 	foreach my $circuit (@{ $circuits }) {
 		my $mdid = "metadata.".genuid();
 
-		$content .= "<nmwg:metadata id=\"$mdid\">\n";
-		$content .= "  <nmwg:subject id=\"sub$i\">\n";
-		$content .= "    <nmtl2:link >\n";
-		$content .= "      <nmtl2:name type=\"logical\">".$circuit->{"name"}."</nmtl2:name>\n";
-		$content .= "      <nmtl2:globalName type=\"logical\">".$circuit->{"globalName"}."</nmtl2:globalName>\n";
-		$content .= "      <nmtl2:type>".$circuit->{"type"}."</nmtl2:type>\n";
-		foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-			$content .= "      <nmwgtopo3:node nodeIdRef=\"".$endpoint->{"node"}->{"name"}."\">\n";
-			$content .= "        <nmwgtopo3:role>".$endpoint->{"type"}."</nmwgtopo3:role>\n";
-			$content .= "      </nmwgtopo3:node>\n";
-		}
-		$content .= "    </nmtl2:link>\n";
-		$content .= "  </nmwg:subject>\n";
-		$content .= "  <nmwg:parameters>\n";
-		$content .= "    <nmwg:parameter name=\"supportedEventType\">Path.Status</nmwg:parameter>\n";
-		$content .= "  </nmwg:parameters>\n";
-		$content .= "</nmwg:metadata>\n";
+		startMetadata($output, $mdid, "", undef);
+		  $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub$i" }, undef);
+		    $output->startElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "link", undef, undef);
+		      $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "name", { type => "logical" }, undef, $circuit->{"name"});
+		      $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "globalName", { type => "logical" }, undef, $circuit->{"globalName"});
+		      $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "type", undef, undef, $circuit->{"type"});
+		      foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
+		      $output->startElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "node", { nodeIdRef => $endpoint->{"node"}->{"name"} }, undef);
+		      $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "role", undef, undef, $endpoint->{"type"});
+		      $output->endElement("node");
+		      }
+		      startParameters($output, "params.$i");
+		        addParameter($output, "supportedEventType", "Path.Status");
+		      endParameters($output);
+		    $output->endElement("link");
+		  $output->endElement("subject");
+		endMetadata($output);
 
-		$content .= "<nmwg:data id=\"data$i\" metadataIdRef=\"$mdid\">\n";
-		$content .= "  <ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$circuit->{"time"}."\">\n";
-		$content .= "    <ifevt:stateAdmin>".$circuit->{"adminState"}."</ifevt:stateAdmin>\n";
-		$content .= "    <ifevt:stateOper>".$circuit->{"operState"}."</ifevt:stateOper>\n";
-		$content .= "  </ifevt:datum>\n";
-		$content .= "</nmwg:data>\n";
+		startData($output, "data$i", $mdid, undef);
+		  $output->startElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "datum", { timeType=>"unix", timeValue=>$circuit->{"time"} }, undef);
+		    $output->createElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "stateAdmin", undef, undef, $circuit->{"adminState"});
+		    $output->createElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "stateOper", undef, undef, $circuit->{"operState"});
+		  $output->endElement("datum");
+		endData($output);
 		$i++;
 	}
-
-	return $content;
 }
+
 
 sub parseCircuitsFile($) {
 	my ($file) = @_;

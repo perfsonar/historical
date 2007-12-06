@@ -259,6 +259,15 @@ sub addExistingXMLElement($$) {
 	return 0;
 }
 
+sub addOpaque($$) {
+	my ($self, $data) = @_;
+	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
+
+	$self->{STRING} .= $data;
+
+	return 0;
+}
+
 sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
