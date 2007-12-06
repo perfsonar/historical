@@ -182,16 +182,16 @@ sub isValidEventType($$$) {
 		return 1;
 	}
 
-	if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{"*"}) {
-		return 1;
-	}
-
 	if (defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
 		foreach my $regex (keys %{$self->{EV_REGEX_HANDLERS}->{$messageType}}) {
 			if ($eventType =~ /$regex/) {
 				return 1;
 			}
 		}
+	}
+
+	if (defined $self->{MSG_HANDLERS}->{$messageType}) {
+		return 1;
 	}
 
 	return 0;
