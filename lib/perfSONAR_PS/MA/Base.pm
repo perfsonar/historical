@@ -2,41 +2,34 @@
 
 package perfSONAR_PS::MA::Base;
 
+use strict;
 use warnings;
 use Exporter;
 use Log::Log4perl qw(get_logger);
 
-use perfSONAR_PS::Transport;
-use perfSONAR_PS::Messages;
-use perfSONAR_PS::MA::General;
-
-@ISA = ('Exporter');
-@EXPORT = ();
-
-
 sub new {
-  my ($package, $conf, $ns, $directory) = @_; 
-  my %hash = ();
-  $hash{"FILENAME"} = "perfSONAR_PS::MA::Base";
-  $hash{"FUNCTION"} = "\"new\"";
-  if(defined $conf and $conf ne "") {
-    $hash{"CONF"} = \%{$conf};
-  }
-  if(defined $ns and $ns ne "") {  
-    $hash{"NAMESPACES"} = \%{$ns};     
-  }     
-  if (defined $directory and $directory ne "") {
-    $hash{"DIRECTORY"} = $directory;
-  }
+	my ($package, $conf, $port, $endpoint, $directory) = @_;
 
-  $hash{"LISTENER"} = "";
-  $hash{"RESPONSE"} = "";    
-  %{$hash{"RESULTS"}} = ();  
-  %{$hash{"TIME"}} = ();
-    
-  bless \%hash => $package;
+	my %hash = ();
+
+	if(defined $conf and $conf ne "") {
+		$hash{"CONF"} = \%{$conf};
+	}
+
+	if (defined $directory and $directory ne "") {
+		$hash{"DIRECTORY"} = $directory;
+	}
+
+	if (defined $port and $port ne "") {
+		$hash{"PORT"} = $port;
+	}
+
+	if (defined $endpoint and $endpoint ne "") {
+		$hash{"ENDPOINT"} = $endpoint;
+	}
+
+	bless \%hash => $package;
 }
-
 
 sub setConf {
   my ($self, $conf) = @_;   
@@ -51,42 +44,44 @@ sub setConf {
   return;
 }
 
-
-sub setNamespaces {
-  my ($self, $ns) = @_;    
+sub setPort {
+  my ($self, $port) = @_;   
   my $logger = get_logger("perfSONAR_PS::MA::Base");
   
-  if(defined $namespaces and $namespaces ne "") {   
-    $self->{NAMESPACES} = \%{$ns};
+  if(defined $port and $port ne "") {
+    $self->{PORT} = $port;
   }
   else {
-    $logger->error("Missing argument.");       
+    $logger->error("Missing argument."); 
   }
   return;
 }
 
-
-sub init {
-  my($self) = @_;  
+sub setEndpoint {
+  my ($self, $endpoint) = @_;   
   my $logger = get_logger("perfSONAR_PS::MA::Base");
   
-  if(defined $self->{CONF} and $self->{CONF} ne "") {
-    $self->{LISTENER} = new perfSONAR_PS::Transport(
-      \%{$self->{NAMESPACES}},
-      $self->{CONF}->{"PORT"}, 
-      $self->{CONF}->{"ENDPOINT"}, 
-      "", 
-      "", 
-      "");  
-    return $self->{LISTENER}->startDaemon;
+  if(defined $endpoint and $endpoint ne "") {
+    $self->{ENDPOINT} = $endpoint;
   }
   else {
-    $logger->error("Missing 'conf' object."); 
-    return -1;
+    $logger->error("Missing argument."); 
   }
   return;
 }
 
+sub setDirectory {
+  my ($self, $directory) = @_;   
+  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  
+  if(defined $directory and $directory ne "") {
+    $self->{DIRECTORY} = $directory;
+  }
+  else {
+    $logger->error("Missing argument."); 
+  }
+  return;
+}
 
 1;
 
