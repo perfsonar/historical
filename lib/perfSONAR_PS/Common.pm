@@ -6,11 +6,10 @@ use warnings;
 use strict;
 use Exporter;
 use IO::File;
-use XML::XPath;
 use Time::HiRes qw( gettimeofday );
-use Log::Log4perl qw(get_logger);
-use Data::Dumper;
+use Log::Log4perl qw(get_logger :nowarn);
 
+our $VERSION = '0.01';
 our @ISA = ('Exporter');
 our @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
@@ -38,6 +37,10 @@ sub consultArchive($$$$);
 sub escapeString($);
 sub unescapeString($);
 sub convertISO($);
+sub mergeConfig($$);
+sub mergeHash($$$);
+sub duplicateHash($$);
+sub duplicateArray($$);
 
 sub find($$$) {
   my ($node, $query, $return_first) = @_;
@@ -479,17 +482,12 @@ sub mergeConfig($$) {
 			port => 1,
 			endpoint => 1 );
 
-#	$logger->debug("Base: ".Dumper($base));
-#	$logger->debug("Specific: ".Dumper($specific));
-
 	my $ret_config = mergeHash($base, $specific, \%elements);
-
-#	$logger->debug("Merged: ".Dumper($ret_config));
 
 	return $ret_config;
 }
 
-sub mergeHash($) {
+sub mergeHash($$$) {
 	my ($base, $specific, $skip_elements) = @_;
 	my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -537,7 +535,7 @@ sub duplicateHash($$) {
 	return \%new;
 }
 
-sub duplicateArray($) {
+sub duplicateArray($$) {
 	my ($array, $skip_elements) = @_;
 
 	my @old_array = @{ $array };
@@ -795,7 +793,7 @@ nmwg:message portion of the response. The return value an array of the form
 request and get a properly formed response and -1 on failure. $res contains the
 LibXML element on success and an error message on failure.
 
-=head convertISO($iso)
+=head2 convertISO($iso)
 
 Given the time in ISO format, conver to 'unix' epoch seconds.  
 

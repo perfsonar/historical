@@ -2,17 +2,17 @@
 
 package perfSONAR_PS::Transport;
 
+use strict;
 use warnings;
 use Exporter;
-use HTTP::Daemon;
 use LWP::UserAgent;
-use Log::Log4perl qw(get_logger);
+use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::Request;
 
-@ISA = ('Exporter');
-@EXPORT = ();
+our $VERSION = '0.01';
+our @ISA = ('Exporter');
+our @EXPORT = ();
 
 sub new {
   my ($package, $ns, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_; 

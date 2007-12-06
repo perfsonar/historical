@@ -1,7 +1,9 @@
 package perfSONAR_PS::Client::Echo;
 
+our $VERSION = 0.01;
+
 use strict;
-use Log::Log4perl qw(get_logger);
+use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
@@ -76,7 +78,7 @@ sub ping($) {
 
 	my ($status, $res) = consultArchive($host, $port, $endpoint, $doc->getValue());
 	if ($status != 0) {
-		my $msg = "Error consulting LS: $res";
+		my $msg = "Error contacting service: $res";
 		$logger->error($msg);
 		return(-1, $msg);
 	}

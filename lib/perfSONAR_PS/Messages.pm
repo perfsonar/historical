@@ -4,8 +4,9 @@ package perfSONAR_PS::Messages;
 
 use strict;
 use Exporter;
-use Log::Log4perl qw(get_logger);
+use Log::Log4perl qw(get_logger :nowarn);
 
+our $VERSION = '0.01';
 use perfSONAR_PS::Common;
 
 
@@ -106,13 +107,8 @@ sub endParameters($) {
 sub addParameter($$$) {
 	my ($output, $name, $value) = @_;
 	my $logger = get_logger("perfSONAR_PS::Messages");
-	my $n;
 
-	$logger->debug("addParameter($name, $value)");
-	$n = $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameter", {name=>$name}, undef, $value);
-	return $n if ($n != 0);
-
-	return $output->endElement("parameter");
+	return $output->createElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameter", {name=>$name}, undef, $value);
 }
 
 sub getResultCodeMessage {
