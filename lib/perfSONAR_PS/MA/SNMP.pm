@@ -1,17 +1,20 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::SNMP;
+package perfSONAR_PS::Services::MA::SNMP;
+
+our $VERSION = "0.01";
 
 use strict;
 use warnings;
 use Exporter;
 use Log::Log4perl qw(get_logger);
-use perfSONAR_PS::MA::Base;
-use perfSONAR_PS::MA::General;
+use perfSONAR_PS::Services::Base;
+use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
+use Module::Load;
+
 use perfSONAR_PS::DB::File;
-use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
@@ -29,30 +32,7 @@ sub handleData($$$$$$);
 sub retrieveSQL($$$$$$);
 sub retrieveRRD($$$$$$);
 
-
-sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
-
-	my %hash = ();
-
-	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
-	}
-
-	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
-	}
-
-	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
-	}
-
-	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
-	}
-
-	bless \%hash => $package;
-}
+our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
   my ($self, $handler) = @_;
@@ -81,6 +61,14 @@ sub init($$) {
     }
   }
   elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
+    eval {
+      load perfSONAR_PS::DB::XMLDB;
+    };
+    if ($@) {
+      $logger->error("Couldn't load perfSONAR_PS::DB::XMLDB: $@");
+      return -1;
+    }
+
     if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_file"} or
        $self->{CONF}->{"snmp"}->{"metadata_db_file"} eq "") {
       $logger->error("Value for 'metadata_db_file' is not set.");

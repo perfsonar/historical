@@ -2,12 +2,14 @@
 
 package perfSONAR_PS::DB::RRD;
 
+our $VERSION = "0.01";
+
+use strict;
 use warnings;
-use Exporter;
 use RRDp;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
-          
+
 sub new {
   my ($package, $path, $name, $dss, $error) = @_;   
   my %hash = ();
@@ -62,7 +64,7 @@ sub setVariables {
   my ($self, $dss) = @_;  
   my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $dss and $dss ne "") { 
-    $hash{"DATASOURCES"} = \%{$dss};
+    $self->{"DATASOURCES"} = \%{$dss};
   }
   else {
     $logger->error("Missing argument.");  
@@ -152,7 +154,7 @@ sub query {
   my %rrd_result = ();
   my @rrd_headings = ();  
   if(defined $cf and $cf ne "") {  
-    $cmd = "fetch " . $self->{NAME} . " " . $cf;
+    my $cmd = "fetch " . $self->{NAME} . " " . $cf;
     if(defined $resolution and $resolution ne "") {
       $cmd = $cmd . " -r " . $resolution;
     }    
@@ -257,7 +259,7 @@ sub insertCommit {
 sub firstValue {
   my ($self) = @_;
   RRDp::cmd "first " . $self->{NAME};
-  $answer = RRDp::read;   
+  my $answer = RRDp::read;   
   if(!$RRDp::error) {   
     return $$answer;
   }
@@ -268,7 +270,7 @@ sub firstValue {
 sub lastValue {
   my ($self) = @_;
   RRDp::cmd "last " . $self->{NAME};
-  $answer = RRDp::read;   
+  my $answer = RRDp::read;   
   if(!$RRDp::error) {   
     return $$answer;
   }
@@ -279,7 +281,7 @@ sub lastValue {
 sub lastTime {
   my ($self) = @_;
   RRDp::cmd "lastupdate " . $self->{NAME};
-  $answer = RRDp::read;
+  my $answer = RRDp::read;
   my @result = split(/\n/, $$answer);
   my @time = split(/:/, $result[$#result]);
   if(!$RRDp::error and $time[0]) {
@@ -465,7 +467,7 @@ Returns the last time the RRD was updated.
 
 =head1 SEE ALSO
 
-L<Exporter>, L<RRDp>, L<Log::Log4perl>, L<perfSONAR_PS::Common>
+L<RRDp>, L<Log::Log4perl>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

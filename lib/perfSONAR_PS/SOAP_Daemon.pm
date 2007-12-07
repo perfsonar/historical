@@ -2,10 +2,11 @@
 
 package perfSONAR_PS::SOAP_Daemon;
 
+our $VERSION = "0.01";
+
 use warnings;
 use Exporter;
 use HTTP::Daemon;
-use LWP::UserAgent;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -293,7 +294,7 @@ filled with "".
 
 =head1 SEE ALSO
 
-L<Exporter>, L<HTTP::Daemon>, L<LWP::UserAgent>, L<Log::Log4perl>, 
+L<Exporter>, L<HTTP::Daemon>, L<Log::Log4perl>, 
 L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

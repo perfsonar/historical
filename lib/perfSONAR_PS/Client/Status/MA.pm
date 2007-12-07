@@ -1,5 +1,7 @@
 package perfSONAR_PS::Client::Status::MA;
 
+our $VERSION="0.01";
+
 use strict;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::MA::Status::Link;

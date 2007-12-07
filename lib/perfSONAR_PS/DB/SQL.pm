@@ -2,6 +2,8 @@
 
 package perfSONAR_PS::DB::SQL;
 
+our $VERSION = "0.01";
+
 use DBI;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;

@@ -22,7 +22,7 @@ sub findvalue($$);
 sub makeEnvelope($);
 sub readXML($);
 sub readConfiguration($);
-sub chainMetadata($$);
+sub chainMetadata($);
 sub metadataChaining($$);
 sub getPath($);
 sub elements($$$);
@@ -122,8 +122,8 @@ sub readXML($) {
 }
 
 
-sub chainMetadata($$) {
-  my($dom, $uri) = @_;
+sub chainMetadata($) {
+  my($dom) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
   
 
@@ -188,6 +188,30 @@ sub metadataChaining($$) {
   }
   return;
 }
+
+#sub getResolvedMetadata($$) {
+#	my ($dom, $metadata) = @_;
+#
+#	my $currentMd = $metadata;
+#
+#	my $metadataIdRef = $metadata->getAttribute("metadataIdRef");
+#	while (defined $metadataIdRef and $metadataIdRef ne "") {
+#		my $above_md = find($dom, "./nmwg:metadata[\@id=\"".$d->getAttribute("metadataIdRef")."\"]", 1);
+#		if (!defined $m) {
+#			return undef;
+#		}
+#
+#		$currentMd = mergeMetadata($above_md, $currentMd);
+#
+#		$metadataIdRef = $above_md->getAttribute("metadataIdRef");
+#	}
+#
+#	return $currentMd;
+#}
+
+#sub mergeMetadata($$) {
+#	my ($md, $
+#}
 
 sub getPath($) {
   my($node) = @_;

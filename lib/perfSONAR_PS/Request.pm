@@ -1,10 +1,12 @@
 package perfSONAR_PS::Request;
 
+our $VERSION = "0.01";
+
+use strict;
+use warnings;
 use Log::Log4perl qw(get_logger);
 use XML::XPath;
 use XML::LibXML;
-use warnings;
-use strict;
 
 use perfSONAR_PS::Common;
 

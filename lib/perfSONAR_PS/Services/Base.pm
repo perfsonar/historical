@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::Base;
+package perfSONAR_PS::Services::Base;
 
 use strict;
 use warnings;
@@ -33,7 +33,7 @@ sub new {
 
 sub setConf {
   my ($self, $conf) = @_;   
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  my $logger = get_logger("perfSONAR_PS::Services::Base");
   
   if(defined $conf and $conf ne "") {
     $self->{CONF} = \%{$conf};
@@ -46,7 +46,7 @@ sub setConf {
 
 sub setPort {
   my ($self, $port) = @_;   
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  my $logger = get_logger("perfSONAR_PS::Services::Base");
   
   if(defined $port and $port ne "") {
     $self->{PORT} = $port;
@@ -59,7 +59,7 @@ sub setPort {
 
 sub setEndpoint {
   my ($self, $endpoint) = @_;   
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  my $logger = get_logger("perfSONAR_PS::Services::Base");
   
   if(defined $endpoint and $endpoint ne "") {
     $self->{ENDPOINT} = $endpoint;
@@ -72,7 +72,7 @@ sub setEndpoint {
 
 sub setDirectory {
   my ($self, $directory) = @_;   
-  my $logger = get_logger("perfSONAR_PS::MA::Base");
+  my $logger = get_logger("perfSONAR_PS::Services::Base");
   
   if(defined $directory and $directory ne "") {
     $self->{DIRECTORY} = $directory;
@@ -89,7 +89,7 @@ sub setDirectory {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Base - A module that provides basic methods for MAs.
+perfSONAR_PS::Services::Base - A module that provides basic methods for Servicess.
 
 =head1 DESCRIPTION
 
@@ -98,7 +98,7 @@ related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::MA::Base;
+    use perfSONAR_PS::Services::Base;
 
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
@@ -112,10 +112,10 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
     );
     
-    my $self = perfSONAR_PS::MA::Base->new(\%conf, \%ns);
+    my $self = perfSONAR_PS::Services::Base->new(\%conf, \%ns);
 
     # or
-    # $self = perfSONAR_PS::MA::Base->new;
+    # $self = perfSONAR_PS::Services::Base->new;
     # $self->setConf(\%conf);
     # $self->setNamespaces(\%ns);              
 
@@ -128,7 +128,7 @@ related tasks of interacting with backend storage.
 
 =head1 DETAILS
 
-This API is a work in progress, and still does not reflect the general access needed in an MA.
+This API is a work in progress, and still does not reflect the general access needed in an Services.
 Additional logic is needed to address issues such as different backend storage facilities.  
 
 =head1 API
@@ -159,7 +159,7 @@ DEPRICATED
 =head1 SEE ALSO
 
 L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Transport>, 
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::MA::General>
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Services::General>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

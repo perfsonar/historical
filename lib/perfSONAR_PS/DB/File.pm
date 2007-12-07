@@ -2,8 +2,10 @@
 
 package perfSONAR_PS::DB::File;
 
+our $VERSION = "0.01";
+
+use strict;
 use warnings;
-use Exporter;
 use XML::LibXML;
 use Log::Log4perl qw(get_logger);
 
@@ -38,7 +40,8 @@ sub openDB {
     $self->{XML} = $parser->parse_file($self->{FILE});  
   }
   else {
-    $logger->error("Cannot open database, missing filename."); 
+    my $msg = "Cannot open database, missing filename."; 
+    $logger->error($msg);
     $$error = $msg if (defined $error);     
     return -1;
   }     
@@ -58,13 +61,15 @@ sub closeDB {
       return 0;
     } 
     else {
-      $logger->error("Couldn't open output file \"".$self->{FILE}."\"");
+      my $msg = "Couldn't open output file \"".$self->{FILE}."\"";
+      $logger->error($msg);
       $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
-    $logger->error("LibXML DOM structure not defined.");  
+    my $msg = "LibXML DOM structure not defined.";  
+    $logger->error($msg);
     $$error = $msg if (defined $error);
     return -1;
   }
@@ -86,13 +91,15 @@ sub query {
       return @results;
     }
     else {
-      $logger->error("LibXML DOM structure not defined."); 
+      my $msg = "LibXML DOM structure not defined."; 
+      $logger->error($msg);
       $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
-    $logger->error("Missing argument.");
+    my $msg = "Missing argument.";
+    $logger->error($msg);
     $$error = $msg if (defined $error);
     return -1;
   }  
@@ -109,13 +116,15 @@ sub querySet {
       return $self->{XML}->find($query);
     }
     else {
-      $logger->error("LibXML DOM structure not defined."); 
+      my $msg = "LibXML DOM structure not defined."; 
+      $logger->error($msg);
       $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
-    $logger->error("Missing argument.");
+    my $msg = "Missing argument.";
+    $logger->error($msg);
     $$error = $msg if (defined $error);
     return -1;
   }  
@@ -133,13 +142,15 @@ sub count {
       return $nodeset->size();  
     }
     else {
-      $logger->error("LibXML DOM structure not defined."); 
+      my $msg = "LibXML DOM structure not defined."; 
+      $logger->error($msg);
       $$error = $msg if (defined $error);
       return -1;
     }
   }
   else {
-    $logger->error("Missing argument.");
+    my $msg = "Missing argument.";
+    $logger->error($msg);
     $$error = $msg if (defined $error);
     return -1;
   } 
@@ -153,7 +164,8 @@ sub getDOM {
     return $self->{XML};  
   }
   else {
-    $logger->error("LibXML DOM structure not defined.");
+    my $msg = "LibXML DOM structure not defined.";
+    $logger->error($msg);
     $$error = $msg if (defined $error); 
   }
   $$error = "" if (defined $error);
@@ -163,11 +175,13 @@ sub getDOM {
 
 sub setDOM {
   my($self, $dom, $error) = @_;
+  my $logger = get_logger("perfSONAR_PS::DB::File");
   if(defined $dom and $dom ne "") {    
     $self->{XML} = $dom;
   }
   else {
-    $logger->error("Missing argument.");
+    my $msg = "Missing argument.";
+    $logger->error($msg);
     $$error = $msg if (defined $error);
   }   
   $$error = "" if (defined $error);
@@ -275,7 +289,7 @@ Sets the DOM object.
   
 =head1 SEE ALSO
 
-L<Exporter>, L<XML::LibXML>, L<Log::Log4perl>
+L<XML::LibXML>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

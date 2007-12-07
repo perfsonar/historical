@@ -253,6 +253,8 @@ sub handleRequest($$) {
 		return;
 	}
 
+	chainMetadata($message);
+
 	# The module will handle everything for this message type
 	if ($self->hasFullMessageHandler($messageType)) {
 		my $ret_message = new perfSONAR_PS::XML::Document_string();
