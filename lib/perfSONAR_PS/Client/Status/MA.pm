@@ -4,8 +4,8 @@ our $VERSION="0.01";
 
 use strict;
 use perfSONAR_PS::Common;
-use perfSONAR_PS::MA::Status::Link;
-use perfSONAR_PS::MA::Status::Common;
+use perfSONAR_PS::Status::Link;
+use perfSONAR_PS::Status::Common;
 use perfSONAR_PS::Transport;
 
 sub new {
@@ -227,9 +227,9 @@ sub parseResponse($$$) {
 		my $new_link;
 
 		if (!defined $start_time) {
-		$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $knowledge, $time, $time, $operStatus, $adminStatus);
+		$new_link = new perfSONAR_PS::Status::Link($link_id, $knowledge, $time, $time, $operStatus, $adminStatus);
 		} else {
-		$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
+		$new_link = new perfSONAR_PS::Status::Link($link_id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
 		}
 
 		if (!defined $links->{$link_id}) {
@@ -324,7 +324,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MA::Status::Client::MA - A module that provides methods for
+perfSONAR_PS::Client::Status::MA - A module that provides methods for
 interacting with Status MA servers.
 
 =head1 DESCRIPTION
@@ -341,9 +341,9 @@ on the object for the specific database.
 
 =head1 SYNOPSIS
 
-	use perfSONAR_PS::MA::Status::Client::MA;
+	use perfSONAR_PS::Client::Status::MA;
 
-	my $status_client = new perfSONAR_PS::MA::Status::Client::MA("http://localhost:4801/axis/services/status");
+	my $status_client = new perfSONAR_PS::Client::Status::MA("http://localhost:4801/axis/services/status");
 	if (!defined $status_client) {
 		print "Problem creating client for status MA\n";
 		exit(-1);
@@ -410,9 +410,9 @@ on the object for the specific database.
 
 =head1 API
 
-The API os perfSONAR_PS::MA::Status::Client::MA is rather simple and greatly
+The API os perfSONAR_PS::Client::Status::MA is rather simple and greatly
 resembles the messages types received by the server. It is also identical to
-the perfSONAR_PS::MA::Status::Client::SQL API allowing easy construction of
+the perfSONAR_PS::Client::Status::SQL API allowing easy construction of
 programs that can interface via the MA server or directly with the database.
 
 =head2 new($package, $uri_string)
@@ -446,7 +446,7 @@ The getURIString function returns the current URI string
 
 The getAll function gets the full contents of the MA. It returns the results as
 a hash with the key being the link id. Each element of the hash is an array of
-perfSONAR_PS::MA::Status::Link structures containing a the status of the
+perfSONAR_PS::Status::Link structures containing a the status of the
 specified link at a certain point in time.
 
 =head2 getLinkHistory($self, $link_ids)
@@ -454,7 +454,7 @@ specified link at a certain point in time.
 The getLinkHistory function returns the complete history of a set of links. The
 $link_ids parameter is a reference to an array of link ids. It returns the
 results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified link at a certain point in time.
 
 =head2 getLinkStatus($self, $link_ids, $time)
@@ -464,7 +464,7 @@ $link_ids parameter is a reference to an array of link ids. $time is the time
 at which you'd like to know each link's status. If $time is an empty string, it
 returns the most recent information it has about each link. It returns the
 results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified link at a certain point in time.
 
 =head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
@@ -480,7 +480,7 @@ added have cover the second that the measurement occurred.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::MA::Status::Link>, L<perfSONAR_PS::MA::Status::Client::SQL>, L<Log::Log4perl>
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Status::Link>, L<perfSONAR_PS::Client::Status::SQL>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

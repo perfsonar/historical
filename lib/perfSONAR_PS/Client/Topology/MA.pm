@@ -9,7 +9,7 @@ use perfSONAR_PS::Transport;
 
 sub new {
 	my ($package, $uri_string) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::MA");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 
 	my %hash;
 
@@ -108,7 +108,7 @@ sub buildChangeTopologyRequest($$) {
 
 sub xQuery($$) {
 	my ($self, $xquery) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 	my $localContent = "";
 	my $error;
 	my ($status, $res, $request);
@@ -149,7 +149,7 @@ sub xQuery($$) {
 
 sub getAll {
 	my($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 	my @results;
 	my $error;
 	my ($status, $res);
@@ -190,7 +190,7 @@ sub getAll {
 
 sub changeTopology($$) {
 	my ($self, $type, $topology) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 	my @results;
 	my $error;
 	my ($status, $res);
@@ -239,7 +239,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MA::Topology::Client::MA - A module that provides methods for
+perfSONAR_PS::Client::Topology::MA - A module that provides methods for
 interacting with Topology MA servers.
 
 =head1 DESCRIPTION
@@ -260,9 +260,9 @@ on the object for the specific database.
 
 =head1 API
 
-The API for perfSONAR_PS::MA::Topology::Client::MA is rather simple and greatly
+The API for perfSONAR_PS::Client::Topology::MA is rather simple and greatly
 resembles the messages types received by the server. It is also identical to
-the perfSONAR_PS::MA::Topology::Client::SQL API allowing easy construction of
+the perfSONAR_PS::Client::Topology::SQL API allowing easy construction of
 programs that can interface via the MA server or directly with the database.
 
 =head2 new($package, $uri_string)
@@ -305,7 +305,7 @@ results as a string.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::MA::Topology::Client::XMLDB>, L<Log::Log4perl>
+L<perfSONAR_PS::Client::Topology::XMLDB>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

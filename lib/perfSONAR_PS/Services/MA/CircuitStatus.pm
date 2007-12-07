@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::CircuitStatus;
+package perfSONAR_PS::Services::MA::CircuitStatus;
+
+our $VERSION = "0.01";
 
 use warnings;
 use strict;
@@ -10,8 +12,8 @@ use Module::Load;
 use Fcntl qw (:flock);
 use Fcntl;
 
-use perfSONAR_PS::MA::Base;
-use perfSONAR_PS::MA::General;
+use perfSONAR_PS::Services::Base;
+use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Transport;
@@ -19,33 +21,11 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
 
-sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
-
-	my %hash = ();
-
-	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
-	}
-
-	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
-	}
-
-	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
-	}
-
-	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
-	}
-
-	bless \%hash => $package;
-}
+our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
 	my ($self, $handler) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
 	if (!defined $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} eq "") {
 		if (!defined $self->{CONF}->{"circuitstatus"}->{"ls_instance"} or $self->{CONF}->{"circuitstatus"}->{"ls_instance"} eq "") {
@@ -146,7 +126,7 @@ sub init($$) {
 		}
 
 		my $file = $self->{CONF}->{"circuitstatus"}->{"topology_ma_file"};
-		my %ns = &perfSONAR_PS::MA::Topology::Topology::getTopologyNamespaces();
+		my %ns = &perfSONAR_PS::Topology::Common::getTopologyNamespaces();
 
 		$self->{TOPOLOGY_CLIENT} = perfSONAR_PS::Client::Topology::XMLDB->new($environment, $file, \%ns, 1);
 	} elsif (lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) eq "none") {
@@ -232,7 +212,7 @@ sub needLS() {
 
 sub handleEvent($$$$$$$$$) {
 	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 	my ($status, $res);
 
 	my $time = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="time"]');
@@ -418,7 +398,7 @@ sub handleEvent($$$$$$$$$) {
 			$logger->warn($msg);
 
 			my $curr_time = time;
-			$self->{TOPOLOGY_LINKS}->{$link_id} = perfSONAR_PS::MA::Status::Link->new($link_id, "full", $curr_time, $curr_time, "unknown", "unknown");
+			$self->{TOPOLOGY_LINKS}->{$link_id} = perfSONAR_PS::Services::MA::Status::Link->new($link_id, "full", $curr_time, $curr_time, "unknown", "unknown");
 		}
 	}
 
@@ -564,7 +544,7 @@ sub outputNodes($$) {
 
 sub outputCircuits($) {
 	my ($output, $circuits) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
 	my $i = 0;
 
@@ -602,7 +582,7 @@ sub outputCircuits($) {
 
 sub parseCircuitsFile($) {
 	my ($file) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
 	my %nodes = ();
 	my %incomplete_nodes = ();
@@ -767,7 +747,7 @@ sub parseCircuitsFile($) {
 
 sub parseTopology($$$) {
 	my ($topology, $nodes, $domain_name) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::CircuitStatus");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 	my %ids = ();
 
 	foreach my $node ($topology->getElementsByLocalName("node")) {
@@ -849,7 +829,7 @@ sub parseTopology($$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::CircuitStatus - A module that provides methods for an E2EMon Compatible MP.
+perfSONAR_PS::Services::MA::CircuitStatus - A module that provides methods for an E2EMon Compatible MP.
 
 =head1 DESCRIPTION
 
@@ -858,7 +838,7 @@ related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::CircuitStatus;
+use perfSONAR_PS::Services::MA::CircuitStatus;
 
 my %conf = readConfiguration();
 
@@ -871,10 +851,10 @@ my %ns = (
 		nmtl3 => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
 	 );
 
-my $ma = perfSONAR_PS::MA::CircuitStatus->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::Services::MA::CircuitStatus->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::CircuitStatus->new;
+# $ma = perfSONAR_PS::Services::MA::CircuitStatus->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 
@@ -955,7 +935,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Transport>,
 L<perfSONAR_PS::Client::Status::MA>, L<perfSONAR_PS::Client::Topology::MA>
 

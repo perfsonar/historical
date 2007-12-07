@@ -1,6 +1,6 @@
-package perfSONAR_PS::MA::Topology::Topology;
+package perfSONAR_PS::Topology::Common;
 
-use perfSONAR_PS::MA::Topology::ID;
+use perfSONAR_PS::Topology::ID;
 use perfSONAR_PS::Common;
 use Data::Dumper;
 
@@ -46,7 +46,7 @@ sub getTopologyNamespaces() {
 
 sub mergeNodes_general($$$) {
 	my ($old_node, $new_node, $attrs) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	if ($old_node->getType != $new_node->getType) {
 		$logger->warn("Inconsistent node types, old ".$old_node->getType. " vs new ".$new_node->getType . ", simply replacing old with new");
@@ -157,7 +157,7 @@ sub mergeNodes_general($$$) {
 
 sub replaceChild($$$$) {
 	my ($parent, $type, $new_child, $fqid) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	foreach my $child ($parent->getChildrenByTagNameNS("*", $type)) {
 		my $id = $child->getAttribute($type."IdRef"); 
@@ -174,7 +174,7 @@ sub replaceChild($$$$) {
 
 sub topologyNormalize_links($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing links");
 
@@ -303,7 +303,7 @@ sub topologyNormalize_links($$$$) {
 
 sub topologyNormalize_ports($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing ports");
 
@@ -383,7 +383,7 @@ sub topologyNormalize_ports($$$$) {
 
 sub topologyNormalize_nodes($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing nodes");
 
@@ -462,7 +462,7 @@ sub topologyNormalize_nodes($$$$) {
 
 sub topologyNormalize_paths($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing paths");
 
@@ -542,7 +542,7 @@ sub topologyNormalize_paths($$$$) {
 
 sub topologyNormalize_networks($$$$) {
 	my ($root, $topology, $uri, $top_level) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing networks");
 
@@ -622,7 +622,7 @@ sub topologyNormalize_networks($$$$) {
 
 sub topologyNormalize_domains($$) {
 	my ($root, $topology) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing domains");
 
@@ -657,7 +657,7 @@ sub topologyNormalize_domains($$) {
 
 sub topologyNormalize($) {
 	my ($root) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Normalizing topology");
 
@@ -708,7 +708,7 @@ sub topologyNormalize($) {
 
 sub validateDomain($$) {
 	my ($domain, $domain_ids) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Validating domain");
 
@@ -762,7 +762,7 @@ sub validateDomain($$) {
 
 sub validateNode($$$) {
 	my ($node, $node_ids, $parent_id) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Validating node");
 
@@ -839,7 +839,7 @@ sub validateNode($$$) {
 
 sub validatePort($$$) {
 	my ($port, $port_ids, $parent_id) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Validating port");
 
@@ -917,7 +917,7 @@ sub validatePort($$$) {
 
 sub validateLink($$$) {
 	my ($link, $link_ids, $parent_id) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Topology");
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
 	$logger->debug("Validating link");
 
@@ -988,7 +988,7 @@ sub validateLink($$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Topology::Topology - A module that provides various utility functions for Topology structures.
+perfSONAR_PS::Topology::Common - A module that provides various utility functions for Topology structures.
 
 =head1 DESCRIPTION
 

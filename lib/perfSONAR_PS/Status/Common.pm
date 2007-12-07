@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package perfSONAR_PS::MA::Status::Common;
+package perfSONAR_PS::Status::Common;
 
 use warnings;
 use Exporter;

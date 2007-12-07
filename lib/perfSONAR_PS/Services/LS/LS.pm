@@ -1,19 +1,19 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::LS::LS;
+package perfSONAR_PS::Services::LS::LS;
 
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 use Time::HiRes qw(gettimeofday);
-use perfSONAR_PS::LS::Base;
-use perfSONAR_PS::MA::General;
-use perfSONAR_PS::LS::General;
+use perfSONAR_PS::Services::Base;
+use perfSONAR_PS::Services::MA::General;
+use perfSONAR_PS::Services::LS::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
 
-our @ISA = qw(perfSONAR_PS::LS::Base);
+our @ISA = qw(perfSONAR_PS::Services::Base);
 
 my %ls_namespaces = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",

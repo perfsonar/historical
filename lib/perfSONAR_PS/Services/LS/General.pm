@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::LS::General;
+package perfSONAR_PS::Services::LS::General;
+
+our $VERSION = "0.01";
 
 use warnings;
 use Exporter;
@@ -92,23 +94,24 @@ sub cleanLS {
     }
   }
 
+  my $error = "";
   my $metadatadb = new perfSONAR_PS::DB::XMLDB(
     $conf->{"METADATA_DB_NAME"}, 
     $conf->{"METADATA_DB_FILE"},
     \%{$ns}
   );    
   $metadatadb->openDB("", \$error); 
-  $logger->error($error) and $errorFlag = 1 if $error;
+  $logger->error($error) if $error;
   if($error) {
     return;
   }
 
   my($sec, $frac) = Time::HiRes::gettimeofday;
-  my $error = "";
   my $dbTr = $metadatadb->getTransaction(\$error);
   if($dbTr and !$error) {
     my $errorFlag = 0;
   
+    my $dbError;
     my @resultsString = $metadatadb->query("/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", $dbTr, \$dbError);   
     $logger->error($error) and $errorFlag = 1 if $error;
     if($#resultsString != -1) {

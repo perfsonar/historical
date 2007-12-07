@@ -1,4 +1,4 @@
-package perfSONAR_PS::MA::Topology::ID;
+package perfSONAR_PS::Topology::ID;
 
 use warnings;
 use Exporter;
@@ -364,7 +364,7 @@ sub idSplit($$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Topology::ID - A module that provides various utility functions for Topology IDs.
+perfSONAR_PS::Topology::ID - A module that provides various utility functions for Topology IDs.
 
 =head1 DESCRIPTION
 

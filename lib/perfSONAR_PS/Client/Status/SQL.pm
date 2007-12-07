@@ -3,8 +3,8 @@ package perfSONAR_PS::Client::Status::SQL;
 use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
-use perfSONAR_PS::MA::Status::Link;
-use perfSONAR_PS::MA::Status::Common;
+use perfSONAR_PS::Status::Link;
+use perfSONAR_PS::Status::Common;
 
 sub new {
 	my ($package, $dbi_string, $db_username, $db_password, $table, $read_only) = @_;
@@ -43,7 +43,7 @@ sub new {
 
 sub open($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (0, "") if ($self->{DB_OPEN} != 0);
 
@@ -72,7 +72,7 @@ sub open($) {
 
 sub close($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return 0 if ($self->{DB_OPEN} == 0);
 
@@ -103,7 +103,7 @@ sub getDBIString($) {
 
 sub getAll($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
@@ -127,7 +127,7 @@ sub getAll($) {
 		foreach my $state_ref (@{ $states }) {
 			my @state = @{ $state_ref };
 
-			my $new_link = new perfSONAR_PS::MA::Status::Link($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
+			my $new_link = new perfSONAR_PS::Status::Link($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
 			if (!defined $links{$link[0]}) {
 				$links{$link[0]} = ();
 			}
@@ -140,7 +140,7 @@ sub getAll($) {
 
 sub getUniqueIDs($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
@@ -162,7 +162,7 @@ sub getUniqueIDs($) {
 
 sub getLinkHistory($$$) {
 	my ($self, $link_ids, $time) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
@@ -200,7 +200,7 @@ sub getLinkHistory($$$) {
 	foreach my $state_ref (@{ $states }) {
 		my @state = @{ $state_ref };
 
-		my $new_link = new perfSONAR_PS::MA::Status::Link($state[0], $state[1], $state[2], $state[3], $state[4], $state[5]);
+		my $new_link = new perfSONAR_PS::Status::Link($state[0], $state[1], $state[2], $state[3], $state[4], $state[5]);
 		if (!defined $links{$state[0]}) {
 			$links{$state[0]} = ();
 		}
@@ -213,7 +213,7 @@ sub getLinkHistory($$$) {
 
 sub getLinkStatus($$$) {
 	my ($self, $link_ids, $time) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
@@ -245,7 +245,7 @@ sub getLinkStatus($$$) {
 			my @state = @{ $state_ref };
 			my $new_link;
 
-			$new_link = new perfSONAR_PS::MA::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
+			$new_link = new perfSONAR_PS::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
 
 			my @newa = ();
 			push @newa, $new_link;
@@ -259,7 +259,7 @@ sub getLinkStatus($$$) {
 
 sub updateLinkStatus($$$$$$$) {
 	my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 	my $prev_end_time;
 
 	$oper_value = lc($oper_value);
@@ -352,7 +352,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MA::Status::Client::SQL - A module that provides methods for
+perfSONAR_PS::Client::Status::SQL - A module that provides methods for
 interacting with a Status MA database directly.
 
 =head1 DESCRIPTION
@@ -369,9 +369,9 @@ on the object for the specific database.
 
 =head1 SYNOPSIS
 
-	use perfSONAR_PS::MA::Status::Client::SQL;
+	use perfSONAR_PS::Client::Status::SQL;
 
-	my $status_client = new perfSONAR_PS::MA::Status::Client::SQL("DBI:SQLite:dbname=status.db");
+	my $status_client = new perfSONAR_PS::Client::Status::SQL("DBI:SQLite:dbname=status.db");
 	if (!defined $status_client) {
 		print "Problem creating client for status MA\n";
 		exit(-1);
@@ -438,9 +438,9 @@ on the object for the specific database.
 
 =head1 API
 
-The API os perfSONAR_PS::MA::Status::Client::SQL is rather simple and greatly
+The API os perfSONAR_PS::Client::Status::SQL is rather simple and greatly
 resembles the messages types received by the server. It is also identical to
-the perfSONAR_PS::MA::Status::Client::MA API allowing easy construction of
+the perfSONAR_PS::Client::Status::MA API allowing easy construction of
 programs that can interface via the MA server or directly with the database.
 
 =head2 new($package, $dbi_string)
@@ -477,7 +477,7 @@ The getDBIString function returns the current DBI string
 
 The getAll function gets the full contents of the database. It returns the
 results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified link at a certain point in time.
 
 =head2 getLinkHistory($self, $link_ids)
@@ -485,7 +485,7 @@ of the specified link at a certain point in time.
 The getLinkHistory function returns the complete history of a set of links. The
 $link_ids parameter is a reference to an array of link ids. It returns the
 results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified link at a certain point in time.
 
 =head2 getLinkStatus($self, $link_ids, $time)
@@ -495,7 +495,7 @@ $link_ids parameter is a reference to an array of link ids. $time is the time
 at which you'd like to know each link's status. If $time is an empty string, it
 returns the most recent information it has about each link. It returns the
 results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::MA::Status::Link structures containing a the status
+an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified link at a certain point in time.
 
 =head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
@@ -520,7 +520,7 @@ the list of IDs to register with the LS.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::MA::Status::Link>,L<perfSONAR_PS::MA::Status::Client::MA>, L<Log::Log4perl>
+L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Status::Link>,L<perfSONAR_PS::Client::Status::MA>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

@@ -1,4 +1,4 @@
-package perfSONAR_PS::MA::Status::Link;
+package perfSONAR_PS::Status::Link;
 
 sub new {
 	my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;

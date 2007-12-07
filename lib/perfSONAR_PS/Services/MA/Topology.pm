@@ -1,49 +1,27 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::Topology;
+package perfSONAR_PS::Services::MA::Topology;
+
+our $VERSION = "0.01";
 
 use warnings;
 use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger);
 
-use perfSONAR_PS::MA::Base;
-use perfSONAR_PS::MA::General;
+use perfSONAR_PS::Services::Base;
+use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::MA::Topology::Topology;
+use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
 
-
-sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
-
-	my %hash = ();
-
-	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
-	}
-
-	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
-	}
-
-	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
-	}
-
-	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
-	}
-
-	bless \%hash => $package;
-}
-
+our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
 	my ($self, $handler) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 
 	if (!defined $self->{CONF}->{"topology"}->{"db_type"} or $self->{CONF}->{"topology"}->{"db_type"} eq "") {
 		$logger->error("No database type specified");
@@ -147,7 +125,7 @@ sub needLS($) {
 
 sub registerLS($$) {
 	my ($self, $sleep_time) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my ($status, $res1);
 	my $ls;
 
@@ -245,7 +223,7 @@ sub handleEvent($$$$) {
 
 sub queryTopology($$) {
 	my ($self, $output, $eventType, $m, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my ($status, $res);
 
 	($status, $res) = $self->{CLIENT}->open;
@@ -284,7 +262,7 @@ sub queryTopology($$) {
 
 sub changeTopology($$$$$) {
 	my ($self, $output, $eventType, $m, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my $changeType;
 
 	if ($changeType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
@@ -338,7 +316,7 @@ sub changeTopology($$$$$) {
 
 sub changeRequest($$$) {
 	my($self, $changeType, $topology) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my ($status, $res);
 	my $localContent = "";
 
@@ -360,7 +338,7 @@ sub changeRequest($$$) {
 sub queryAllRequest($) {
 	my ($self) = @_;
 	my ($status, $res);
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -382,7 +360,7 @@ sub queryAllRequest($) {
 sub queryXqueryRequest($$) {
 	my ($self, $xquery) = @_;
 	my ($status, $res);
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -504,7 +482,7 @@ The offered API is simple, but offers the key functions needed in a measurement 
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>
 
 

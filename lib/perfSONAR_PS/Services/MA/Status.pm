@@ -1,18 +1,20 @@
 #!/usr/bin/perl -w
 
-package perfSONAR_PS::MA::Status;
+package perfSONAR_PS::Services::MA::Status;
+
+our $VERSION = "0.01";
 
 use warnings;
 use strict;
 use Log::Log4perl qw(get_logger);
-use vars qw($VERSION);
 
-use perfSONAR_PS::MA::Base;
-use perfSONAR_PS::MA::General;
+use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
+
+our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$);
 sub needLS($);
@@ -53,7 +55,7 @@ sub new {
 
 sub init($$) {
 	my ($self, $handler) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	if (!defined $self->{CONF}->{"status"}->{"enable_registration"} or $self->{CONF}->{"status"}->{"enable_registration"} eq "") {
 		$logger->warn("Disabling LS registration");
@@ -200,7 +202,7 @@ sub needLS($) {
 
 sub registerLS($$) {
 	my ($self, $sleep_time) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 	my ($status, $res);
 	my $ls;
 
@@ -281,7 +283,7 @@ sub handleMessageEnd($$$$$$$$) {
 
 sub handleEvent($$$$$$$$$) {
 	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	if ($messageType eq "MeasurementArchiveStoreRequest") {
 		$logger->info("Calling handleStoreRequest");
@@ -298,7 +300,7 @@ sub handleEvent($$$$$$$$$) {
 
 sub handleStoreRequest($$$$) {
 	my ($self, $output, $md, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	my ($status, $res);
 	my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
@@ -368,7 +370,7 @@ sub handleStoreRequest($$$$) {
 
 sub __handleStoreRequest($$$$$$) {
 	my ($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 	my ($status, $res);
 
 	$logger->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update)");
@@ -392,7 +394,7 @@ sub __handleStoreRequest($$$$$$) {
 
 sub handleQueryRequest($$$$$) {
 	my ($self, $output, $eventType, $md, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	my ($status, $res);
 
@@ -409,7 +411,7 @@ sub handleQueryRequest($$$$$) {
 
 sub lookupAllRequest($$$$) {
 	my ($self, $output, $md, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
 
@@ -453,7 +455,7 @@ sub lookupAllRequest($$$$) {
 
 sub lookupLinkStatusRequest($$$$) {
 	my($self, $output, $md, $d) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 	my $localContent = "";
 	my ($status, $res);
 
@@ -507,7 +509,7 @@ sub lookupLinkStatusRequest($$$$) {
 
 sub writeoutLinkState_range($$$) {
 	my ($self, $link) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	return "" if (!defined $link);
 
@@ -524,7 +526,7 @@ sub writeoutLinkState_range($$$) {
 
 sub writeoutLinkState($$$) {
 	my ($self, $link, $time) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status");
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	return "" if (!defined $link);
 
@@ -547,7 +549,7 @@ sub writeoutLinkState($$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Status - A module that provides methods for the Status MA.
+perfSONAR_PS::Services::MA::Status - A module that provides methods for the Status MA.
 
 =head1 DESCRIPTION
 
@@ -556,7 +558,7 @@ related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::Status;
+use perfSONAR_PS::Services::MA::Status;
 
 my %conf = readConfiguration();
 
@@ -566,10 +568,10 @@ my %ns = (
 		nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
 	 );
 
-my $ma = perfSONAR_PS::MA::Status->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::Services::MA::Status->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::Status->new;
+# $ma = perfSONAR_PS::Services::MA::Status->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 
@@ -658,7 +660,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
 L<perfSONAR_PS::Client::Status::SQL>
 

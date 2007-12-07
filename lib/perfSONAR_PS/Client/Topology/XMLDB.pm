@@ -5,12 +5,12 @@ package perfSONAR_PS::Client::Topology::XMLDB;
 use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::XMLDB;
-use perfSONAR_PS::MA::Topology::Topology;
-use perfSONAR_PS::MA::Topology::ID;
+use perfSONAR_PS::Topology::Common;
+use perfSONAR_PS::Topology::ID;
 
 sub new {
 	my ($package, $db_container, $db_file, $ns, $read_only) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
 	my %hash;
 
@@ -40,7 +40,7 @@ sub new {
 
 sub open($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
 	return (0, "") if ($self->{DB_OPEN} != 0);
 
@@ -73,7 +73,7 @@ sub open($) {
 
 sub close($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Status::Client::SQL");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
 	return 0 if ($self->{DB_OPEN} == 0);
 
@@ -108,7 +108,7 @@ sub setDBNamespaces($$) {
 
 sub xQuery($$) {
 	my($self, $xquery) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 	my $localContent = "";
 	my $error;
 
@@ -131,7 +131,7 @@ sub xQuery($$) {
 
 sub getAll {
 	my($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 	my @results;
 	my $error;
 
@@ -219,7 +219,7 @@ sub getAll {
 
 sub getUniqueIDs($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 	my $error;
 	my (@domain_ids, @network_ids, @path_ids);
 
@@ -282,7 +282,7 @@ sub getUniqueIDs($) {
 
 sub changeTopology($$) {
 	my ($self, $type, $topology) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 	my ($status, $res);
 
 	return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
@@ -578,7 +578,7 @@ sub changeTopology($$) {
 
 sub lookupElement($$$) {
         my ($self, $id, $elements) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::Topology::Client::XMLDB");
+	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 
 	$logger->debug("Looking up element \"$id\"");
 
@@ -649,7 +649,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::MA::Topology::Client::XMLDB - A module that provides methods for
+perfSONAR_PS::Client::Topology::XMLDB - A module that provides methods for
 interacting with a Topology MA database directly.
 
 =head1 DESCRIPTION
@@ -671,9 +671,9 @@ on the object for the specific database.
 
 =head1 API
 
-The API for perfSONAR_PS::MA::Topology::Client::MA is rather simple and greatly
+The API for perfSONAR_PS::Client::Topology::MA is rather simple and greatly
 resembles the messages types received by the server. It is also identical to
-the perfSONAR_PS::MA::Topology::Client::SQL API allowing easy construction of
+the perfSONAR_PS::Client::Topology::SQL API allowing easy construction of
 programs that can interface via the MA server or directly with the database.
 
 =head2 new($package, $uri_string)
@@ -716,7 +716,7 @@ the results as a string.
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::MA::Topology::Client::MA>, L<Log::Log4perl>
+L<perfSONAR_PS::Client::Topology::MA>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
