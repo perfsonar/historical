@@ -1,5 +1,7 @@
 use ExtUtils::MakeMaker;
 
+my @exe_files = ( "psping.pl" );
+
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Client::Echo',
     'VERSION_FROM' => 'lib/perfSONAR_PS/Client/Echo.pm',
@@ -11,5 +13,7 @@ WriteMakefile(
 	"perfSONAR_PS::Messages" => 0.01,
 	"perfSONAR_PS::XML::Document_string" => 0.01,
 	"Log::Log4perl" => 1.00,
-    }
+    },
+
+    EXE_FILES => \@exe_files,
 );
