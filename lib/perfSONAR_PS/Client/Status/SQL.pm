@@ -1,10 +1,13 @@
 package perfSONAR_PS::Client::Status::SQL;
 
+our $VERSION = "0.01";
+
 use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
+use Data::Dumper;
 
 sub new {
 	my ($package, $dbi_string, $db_username, $db_password, $table, $read_only) = @_;
@@ -217,6 +220,8 @@ sub getLinkStatus($$$) {
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
+	$logger->debug("Time: ".Dumper($time));
+
 	my $status = $self->{DATADB}->openDB;
 	if ($status == -1) {
 		my $msg = "Couldn't open status database";
@@ -229,10 +234,10 @@ sub getLinkStatus($$$) {
 	foreach my $link_id (@{ $link_ids }) {
 		my $query;
 
-		if ($time eq "") {
+		if (!defined $time) {
 		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' order by end_time desc limit 1";
 		} else {
-		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' and start_time <= \'$time\' and end_time >= '$time'";
+		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' and start_time <= \'".$time->getEndTime()."\' and end_time >= \'".$time->getStartTime()."\'";
 		}
 
 		my $states = $self->{DATADB}->query($query);
@@ -244,6 +249,16 @@ sub getLinkStatus($$$) {
 		foreach my $state_ref (@{ $states }) {
 			my @state = @{ $state_ref };
 			my $new_link;
+
+			if (defined $time) {
+				if ($state[1] < $time->getStartTime()) {
+					$state[1] = $time->getStartTime();
+				}
+
+				if ($state[2] > $time->getEndTime()) {
+					$state[2] = $time->getEndTime();
+				}
+			}
 
 			$new_link = new perfSONAR_PS::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
 
