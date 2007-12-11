@@ -1,12 +1,12 @@
-#!/usr/bin/perl
-
 package perfSONAR_PS::Status::Common;
 
-use warnings;
-use Exporter;
+use version; our $VERSION = qv("0.01");
 
-@ISA = qw(Exporter);
-@EXPORT = ('isValidOperState', 'isValidAdminState');
+use strict;
+use warnings;
+use base 'Exporter';
+
+our @EXPORT = ('isValidOperState', 'isValidAdminState');
 
 my %valid_oper_states = (
 	up => '',

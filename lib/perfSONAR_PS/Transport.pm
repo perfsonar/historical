@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Transport;
 
 use strict;
@@ -10,7 +8,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
-our $VERSION = '0.01';
+use version; our $VERSION = qv("0.01");
 our @ISA = ('Exporter');
 our @EXPORT = ();
 

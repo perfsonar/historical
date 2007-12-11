@@ -1,8 +1,6 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::MA::General;
 
-our $VERSION = "0.01";
+use version; our $VERSION = qv("0.01");
 
 use warnings;
 use Exporter;

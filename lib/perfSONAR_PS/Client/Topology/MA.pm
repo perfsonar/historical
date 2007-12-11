@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Client::Topology::MA;
+
+use version; our $VERSION = qv("0.01");
 
 use strict;
 use Log::Log4perl qw(get_logger);

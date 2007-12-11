@@ -1,31 +1,37 @@
 package perfSONAR_PS::Status::Link;
 
+use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
+
+use version; our $VERSION = qv("0.01");
+
+use strict;
+
 sub new {
 	my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
 
-	my %hash = ();
+	my $self = fields::new($package);
 
 	if (defined $link_id and $link_id ne "") {
-		$hash{"ID"} = $link_id;
+		$self->{ID} = $link_id;
 	}
 
 	if (defined $knowledge and $knowledge ne "") {
-		$hash{"KNOWLEDGE"} = $knowledge;
+		$self->{KNOWLEDGE} = $knowledge;
 	}
-	if (defined $link_id and $link_id ne "") {
-		$hash{"START_TIME"} = $start_time;
+	if (defined $start_time and $start_time ne "") {
+		$self->{START_TIME} = $start_time;
 	}
-	if (defined $link_id and $link_id ne "") {
-		$hash{"END_TIME"} = $end_time;
+	if (defined $end_time and $end_time ne "") {
+		$self->{END_TIME} = $end_time;
 	}
-	if (defined $link_id and $link_id ne "") {
-		$hash{"OPER_STATUS"} = $oper_status;
+	if (defined $oper_status and $oper_status ne "") {
+		$self->{OPER_STATUS} = $oper_status;
 	}
-	if (defined $link_id and $link_id ne "") {
-		$hash{"ADMIN_STATUS"} = $admin_status;
+	if (defined $admin_status and $admin_status ne "") {
+		$self->{ADMIN_STATUS} = $admin_status;
 	}
 
-	bless \%hash => $package;
+	return $self;
 }
 
 sub setID($$) {

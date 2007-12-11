@@ -1,20 +1,19 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::MA::Status;
 
-our $VERSION = "0.01";
+use base 'perfSONAR_PS::Services::Base';
 
-use warnings;
+use fields 'LS_CLIENT', 'CLIENT';
+
+use version; our $VERSION = qv("0.01");
+
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger);
 
-use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
-
-our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$);
 sub needLS($);
@@ -28,30 +27,11 @@ sub lookupLinkStatusRequest($$$$);
 sub writeoutLinkState_range($$$);
 sub writeoutLinkState($$$);
 
-
-sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
-
-	my %hash = ();
-
-	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
-	}
-
-	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
-	}
-
-	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
-	}
-
-	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
-	}
-
-	bless \%hash => $package;
-}
+my %namespaces = (
+	select=>"http://ggf.org/ns/nmwg/ops/select/2.0/",
+	nmtopo=>"http://ogf.org/schema/network/topology/base/20070828/",
+	ifevt=>"http://ggf.org/ns/nmwg/event/status/base/2.0/",
+);
 
 sub init($$) {
 	my ($self, $handler) = @_;
@@ -108,6 +88,15 @@ sub init($$) {
 			$self->{CONF}->{"status"}->{"service_type"} = "MA";
 			$logger->warn("Setting 'service_type' to 'MA'.");
 		}
+
+		my %ls_conf = (
+				SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
+				SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
+				SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
+				SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
+			      );
+
+		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, \%namespaces);
 	}
 
 
@@ -189,7 +178,8 @@ sub init($$) {
 	$self->{CLIENT}->close;
 
 	$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-	$handler->addMessageHandler("MeasurementArchiveStoreRequest", $self);
+	$handler->addEventHandler_Regex("SetupDataRequest", ".*select.*", $self);
+	$handler->addEventHandler("MeasurementArchiveStoreRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 
 	return 0;
 }
@@ -204,29 +194,6 @@ sub registerLS($$) {
 	my ($self, $sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 	my ($status, $res);
-	my $ls;
-
-	if (!defined $self->{LS_CLIENT}) {
-		my %ls_conf = (
-				SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
-				SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
-				SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
-				SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
-				LS_REGISTRATION_INTERVAL => $self->{CONF}->{"status"}->{"registration_interval"},
-			      );
-
-		if (defined $self->{CONF}->{"status"}->{"registration_interval"} and $self->{CONF}->{"status"}->{"registration_interval"} ne "") {
-			$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"status"}->{"registration_interval"};
-		} elsif (defined $self->{CONF}->{"registration_interval"} and $self->{CONF}->{"registration_interval"} ne "") {
-			$ls_conf{"LS_REGISTRATION_INTERVAL"} = $self->{CONF}->{"registration_interval"};
-		} else {
-			$logger->error("No registraion interval specified");
-		}
-
-		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES});
-	}
-
-	$ls = $self->{LS_CLIENT};
 
 	($status, $res) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -260,7 +227,7 @@ sub registerLS($$) {
 
 	$res = "";
 
-	my $n = $ls->registerDynamic(\@link_mds);
+	my $n = $self->{LS_CLIENT}->registerDynamic(\@link_mds);
 
 	if (defined $sleep_time) {
 		$$sleep_time = $self->{CONF}->{"status"}->{"ls_registration_interval"};
@@ -269,32 +236,80 @@ sub registerLS($$) {
 	return $n;
 }
 
-sub handleMessageBegin($$$$$$$$) {
-	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
-
-	return 0;
-}
-
-sub handleMessageEnd($$$$$$$$) {
-	my ($self, $ret_message, $messageId);
-
-	return 0;
-}
-
 sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
 
 	if ($messageType eq "MeasurementArchiveStoreRequest") {
-		$logger->info("Calling handleStoreRequest");
-		if ($eventType ne "") {
-			return ("error.ma.no_event_type", "No event type specified for metadata id ".$md->getAttribute("id"));
+		return $self->handleStoreRequest($output, $md, $d);
+	} elsif ($messageType eq "SetupDataRequest") {
+		my ($status, $res1, $res2) = $self->resolveSelectChain($md, $raw_request);
+		if ($status ne "") {
+			return ($status, $res1);
 		}
 
-		return $self->handleStoreRequest($output, $md, $d);
+		my $selectTime = $res1;
+		my $subject_md = $res2;
+
+		return $self->handleQueryRequest($output, $subject_md, $selectTime);
+	}
+}
+
+sub resolveSelectChain($$$) {
+	my ($self, $md, $request) = @_;
+	my $logger = get_logger("perfSONAR_PS::Services::MA::Status");
+
+	if (!$request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
+		$logger->debug("No select namespace means there is no select chain");
+	}
+
+	if (!find($md, "./select:subject", 1)) {
+		$logger->debug("No select subject means there is no select chain");
+	}
+
+	if ($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and find($md, "./select:subject", 1)) {
+		my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
+		if(!$other_md) {
+			return ("error.ma.chaining", "Cannot resolve supposed subject chain in metadata.");
+		}
+
+		if (!find($md, "./select:subject/select:parameters", 1)) {
+			return ("error.ma.select", "No select parameters specified in given chain.");
+		}
+
+		my $time = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"time\"]");
+		my $startTime = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"startTime\"]");
+		my $endTime = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"endTime\"]");
+		my $duration = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"duration\"]");
+
+		if (defined $time and (defined $startTime or defined $endTime or defined $duration)) {
+			return ("error.ma.select", "Ambiguous select parameters");
+		}
+
+		if (defined $time) {
+			return ("", perfSONAR_PS::Time->new("point", $time), $other_md);
+		}
+
+		if (!defined $startTime) {
+			return ("error.ma.select", "No start time specified");
+		} elsif (!defined $endTime and !defined $duration) {
+			return ("error.ma.select", "No end time specified");
+		} elsif (defined $endTime) {
+			return ("", perfSONAR_PS::Time->new("range", $startTime, $endTime), $other_md);
+		} else {
+			return ("", perfSONAR_PS::Time->new("duration", $startTime, $duration), $other_md);
+		}
 	} else {
-		$logger->info("Calling handleQueryRequest");
-		return $self->handleQueryRequest($output, $eventType, $md, $d);
+		# No select subject means they didn't specify one which results in "now"
+		$logger->debug("No select chain");
+
+		my $ret_time;
+		my $time = findvalue($md, "./nmwg:parameters/nmwg:parameter[\@name=\"time\"]");
+		if (defined $time and lc($time) ne "now" and $time ne "") {
+			$ret_time = perfSONAR_PS::Time->new("point", $time);
+		}
+
+		return ("", $ret_time, $md);
 	}
 }
 
@@ -403,6 +418,9 @@ sub handleQueryRequest($$$$$) {
 	} elsif ($eventType eq "Link.Status" or
 			$eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
 		($status, $res) = $self->lookupLinkStatusRequest($output, $md, $d);
+	} else {
+		$status = "error.ma.event_type";
+		$res = "No supported event types";
 	}
 
 	return ($status, $res);

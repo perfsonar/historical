@@ -2,7 +2,22 @@
 
 package perfSONAR_PS::Services::MA::CircuitStatus;
 
-our $VERSION = "0.01";
+use base 'perfSONAR_PS::Services::Base';
+
+use fields
+    'LOCAL_MA_CLIENT',
+    'TOPOLOGY_CLIENT',
+    'STORE',
+    'LS_HOST',
+    'LS_PORT',
+    'LS_ENDPOINT',
+    'DOMAIN',
+    'CIRCUITS',
+    'INCOMPLETE_NODES',
+    'TOPOLOGY_LINKS',
+    'NODES';
+
+use version; our $VERSION = qv("0.01");
 
 use warnings;
 use strict;
@@ -22,8 +37,6 @@ use perfSONAR_PS::Time;
 
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
-
-our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
 	my ($self, $handler) = @_;
@@ -133,13 +146,14 @@ sub init($$) {
 			$logger->debug("Key: $key");
 			$have_keys++;
 		}
+
 		if ($self->{"CONF"}->{"circuitstatus"}->{"topology_ma_type"} eq "none" and scalar keys %{ $res3 } > 0) {
 			my $msg = "You specified no topology MA, but there are incomplete nodes";
 			$logger->error($msg);
 			return -1;
 		}
 	} else {
-		$logger->error("Invalid circuits file type specified: ".$self->{CONF}=>{"LINK_FILE_TYPE"});
+		$logger->error("Invalid circuits file type specified: ".$self->{CONF}->{"circuitstatus"}->{"link_file_type"});
 		return -1;
 	}
 
@@ -278,15 +292,67 @@ sub handleEvent($$$$$$$$$) {
 		return ("error.ma.event_type", "No supported event types for message of type \"$messageType\"");
 	}
 
-	if (find($subject_md, "./nmwg:key", 1)) {
-
-	} elsif (find($subject_md, "./nmwg:subject", 1)) {
-	
-	} else {
-		$self->handlePathStatusAll($output, $selectTime);
+	if (defined $selectTime and $selectTime->getType("point") and $selectTime->getTime() eq "now") {
+		$selectTime = undef;
 	}
 
+	my @circuits;
+	if (find($subject_md, "./nmwg:key", 1)) {
+		my $circuit_name = findvalue(find($subject_md, "./nmwg:key", 1), "./nmwg:parameters/nmwg:parameter[\@name=\"linkId\"]");
+
+		if (!defined $circuit_name or !defined $self->{CIRCUITS}->{$circuit_name}) {
+			my $msg = "The specified key is invalid";
+			$logger->error($msg);
+			return ("error.ma.invalid_key", "The specified key is invalid");
+		}
+
+		push @circuits, $circuit_name;
+	} elsif (find($subject_md, "./nmwg:subject", 1)) {
+		my ($status, $res) = $self->compatParseSubject(find($subject_md, "./nmwg:subject", 1));
+		if ($status ne "") {
+			return ($status, $res);
+		}
+
+		push @circuits, $res;
+	} else {
+		@circuits = keys %{ $self->{CIRCUITS} };
+	}
+
+	$self->handlePathStatus($output, \@circuits, $selectTime);
+
 	return ("", "");
+}
+
+sub compatParseSubject($$) {
+	my ($self, $subject) = @_;
+	my $circuit_name;
+
+	if (!find($subject, "./nmtl2:link", 1)) {
+		return ("error.ma.invalid_subject", "The specified subject does not contain a link element");
+	}
+
+	my $circuit_name = findvalue($subject, "./nmtl2:link/nmtl2:name");
+	if (defined $circuit_name and defined $self->{CIRCUITS}->{$circuit_name}) {
+		return ("", $circuit_name);
+	}
+
+	my $nodes = find($subject, "./nmtl2:link/nmwgtopo3:node", 0);
+	my $count = 0;
+	my ($node1, $node2);
+	foreach my $node ($nodes->get_nodelist) {
+		my $node_name = findvalue($node, "./nmwgtopo3:name");
+		if (!defined $node_name) {
+			return ("error.ma.invalid_subject", "The specified subject contains an unfinished node");
+		}
+	}
+
+	return ("", $circuit_name);
+}
+
+sub generateMDXpath($) {
+	my ($subject) = @_;
+
+	return "";
 }
 
 sub createMetadataStore($$$) {
@@ -506,15 +572,11 @@ sub getLinkStatus($$$) {
 	return ("", \%response);
 }
 
-sub handlePathStatusAll($$$) {
-	my ($self, $output, $time) = @_;
+sub handlePathStatus($$$$) {
+	my ($self, $output, $circuits, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 	my ($status, $res);
 	
-	if (defined $time and $time->getType("point") and $time->getTime() eq "now") {
-		$time = undef;
-	}
-
 	if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0 and !defined $time) {
 		my $mtime = (stat $self->{CONF}->{"circuitstatus"}->{"cache_file"})[9];
 
@@ -534,16 +596,23 @@ sub handlePathStatusAll($$$) {
 		}
 	}
 
-	my @links = ();
-	foreach my $link_id (keys %{ $self->{TOPOLOGY_LINKS} }) {
-		push @links, $link_id;
+	# get the list of topology link IDs to lookup	
+	my %link_ids = ();
+	foreach my $circuit_name (@{ $circuits }) {
+		my $circuit = $self->{CIRCUITS}->{$circuit_name};
+
+		foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
+			$link_ids{$sublink_id} = "";
+		}
 	}
 
-	my $results = ();
+	# Lookup the link status
+	my @links = keys %link_ids;
 
 	($status, $res) = $self->getLinkStatus(\@links, $time);
 
-	foreach my $link_id (keys %{ $self->{TOPOLOGY_LINKS} }) {
+	# Fill in any missing links
+	foreach my $link_id (@links) {
 		if (!defined $res->{$link_id}) {
 			my $msg = "Did not receive any information about link $link_id";
 			$logger->warn($msg);
@@ -560,17 +629,15 @@ sub handlePathStatusAll($$$) {
 		}
 	}
 
-	foreach my $circuit_id (keys %{ $self->{CIRCUITS} }) {
-		my $circuit = $self->{CIRCUITS}->{$circuit_id};
-		my $mdid = "metadata.".genuid();
+	my %circuit_status = ();
 
-		my $knowledge;
-		my $bidi_knowledge;
+	foreach my $circuit_name (@{ $circuits }) {
+		my $circuit = $self->{CIRCUITS}->{$circuit_name};
 
 		my @data_points = ();
 
 		if (defined $time and $time->getType() ne "point") {
-			foreach my $sublink_id (keys %{ $circuit->{"sublinks"} }) {
+			foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
 				foreach my $link_status (@{ $res->{$sublink_id} }) {
 					push @data_points, $link_status;
 				}
@@ -580,7 +647,7 @@ sub handlePathStatusAll($$$) {
 			my $circuit_oper_value = "unknown";
 			my $circuit_time;
 
-			foreach my $sublink_id (keys %{ $circuit->{"sublinks"} }) {
+			foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
 				foreach my $link_status (@{ $res->{$sublink_id} }) {
 					$logger->debug("Sublink: $sublink_id");
 					my $oper_value = $link_status->getOperStatus;
@@ -630,7 +697,7 @@ sub handlePathStatusAll($$$) {
 			push @data_points, $link;
 		}
 
-		$circuit->{"status"} = \@data_points;
+		$circuit_status{$circuit_name} = \@data_points;
 	}
 
 	my $doc = perfSONAR_PS::XML::Document_string->new();
@@ -638,8 +705,7 @@ sub handlePathStatusAll($$$) {
 	startParameters($doc, "params.0");
 	 addParameter($doc, "DomainName", $self->{DOMAIN});
 	endParameters($doc);
-	outputNodes($doc, $self->{NODES});
-	outputCircuits($doc, $self->{CIRCUITS});
+	$self->outputResults($doc, \%circuit_status, $time);
 
 	if (!defined $time and defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0) {
 		$logger->debug("Caching results in ".$self->{CONF}->{"circuitstatus"}->{"cache_file"});
@@ -660,46 +726,44 @@ sub handlePathStatusAll($$$) {
 	return ("", "");
 }
 
-sub outputNodes($$) {
-	my ($output, $nodes) = @_;
-
-	foreach my $id (keys %{ $nodes }) {
-		my $node = $nodes->{$id};
-		my $mdid = "metadata.".genuid();
-
-		next if (!defined $node->{"city"} and !defined $node->{"country"} and !defined $node->{"latitude"} and !defined $node->{"longitude"});
-
-		startMetadata($output, $mdid, "", undef);
-		  $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub-".$node->{"name"} }, undef);
-		  outputNodeElement($output, $node);
-		  $output->endElement("subject");
-		endMetadata($output);
-	}
-}
-
-sub outputCircuits($$) {
-	my ($output, $circuits) = @_;
+sub outputResults($$$) {
+	my ($self, $output, $results, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
+	my %output_endpoints = ();
 	my $i = 0;
 
-	foreach my $circuit_id (keys %{ $circuits }) {
-		my $circuit = $circuits->{$circuit_id};
+	foreach my $circuit_name (keys %{ $results }) {
+		my $circuit = $self->{CIRCUITS}->{$circuit_name};
+		foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
+			next if (!defined $self->{NODES}->{$endpoint->{name}});
+			next if (defined $output_endpoints{$endpoint->{name}});
+
+			startMetadata($output, "metadata.".genuid(), "", undef);
+			 $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub-".$endpoint->{name} }, undef);
+			  outputNodeElement($output, $self->{NODES}->{$endpoint->{name}});
+			 $output->endElement("subject");
+			endMetadata($output);
+
+			$output_endpoints{$endpoint->{name}} = 1;
+		}
+
 		my $mdid = "metadata.".genuid();
 
 		startMetadata($output, $mdid, "", undef);
-		  $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub$i" }, undef);
-		    outputCircuitElement($output, $circuit);
-		  $output->endElement("subject");
+		 $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub$i" }, undef);
+		  outputCircuitElement($output, $circuit);
+		 $output->endElement("subject");
 		endMetadata($output);
 
-		my @data = @{ $circuit->{"status"} };
-		startData($output, "data$i", $mdid, undef);
+		my @data = @{ $results->{$circuit_name} };
+		startData($output, "data.$i", $mdid, undef);
 		foreach my $datum (@data) {
 			my %attrs = ();
+
 			$attrs{"timeType"} = "unix";
 			$attrs{"timeValue"} = $datum->getEndTime();
-			if ($#data != 0) {
+			if (defined $time and $time ne "point") {
 				$attrs{"startTime"} = $datum->getStartTime();
 				$attrs{"endTime"} = $datum->getEndTime();
 			}
@@ -710,6 +774,7 @@ sub outputCircuits($$) {
 			$output->endElement("datum");
 		}
 		endData($output);
+
 		$i++;
 	}
 }
@@ -939,11 +1004,13 @@ sub parseCircuitsFile($) {
 			return ("error.configuration", $msg);
 		}
 
+		my @sublinks = keys %sublinks;
+
 		my %new_circuit = ();
 
 		$new_circuit{"globalName"} = $global_name;
 		$new_circuit{"name"} = $local_name;
-		$new_circuit{"sublinks"} = \%sublinks;
+		$new_circuit{"sublinks"} = \@sublinks;
 		$new_circuit{"endpoints"} = \@endpoints;
 		$new_circuit{"type"} = $circuit_type;
 

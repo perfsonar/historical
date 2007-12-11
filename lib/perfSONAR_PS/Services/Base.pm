@@ -1,34 +1,38 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::Base;
+
+use fields 'CONF',
+	'DIRECTORY',
+	'ENDPOINT',
+	'PORT';
+
+use version; our $VERSION = qv("0.01");
 
 use strict;
 use warnings;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 
 sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
+	my ($class, $conf, $port, $endpoint, $directory) = @_;
 
-	my %hash = ();
+	my $self = fields::new($class);
 
 	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
+		$self->{CONF} = \%{$conf};
 	}
 
 	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
+		$self->{DIRECTORY} = $directory;
 	}
 
 	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
+		$self->{PORT} = $port;
 	}
 
 	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
+		$self->{ENDPOINT} = $endpoint;
 	}
 
-	bless \%hash => $package;
+	return $self;
 }
 
 sub setConf {

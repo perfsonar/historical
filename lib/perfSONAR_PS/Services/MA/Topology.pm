@@ -1,23 +1,20 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::MA::Topology;
 
-our $VERSION = "0.01";
+use base 'perfSONAR_PS::Services::Base';
+
+use fields 'CLIENT', 'LS_CLIENT';
+
+use version; our $VERSION = qv("0.01");
 
 use warnings;
 use strict;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 
-use perfSONAR_PS::Services::Base;
-use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
-
-our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
 	my ($self, $handler) = @_;
@@ -127,7 +124,6 @@ sub registerLS($$) {
 	my ($self, $sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my ($status, $res1);
-	my $ls;
 
 	if (!defined $self->{LS_CLIENT}) {
 		my %ls_conf = (
@@ -139,11 +135,9 @@ sub registerLS($$) {
 				LS_REGISTRATION_INTERVAL => $self->{CONF}->{"topology"}->{"registration_interval"},
 			      );
 
-		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"topology"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES});
+		my %ns = getTopologyNamespaces();
+		$self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"topology"}->{"ls_instance"}, \%ls_conf, \%ns);
 	}
-
-	$ls = $self->{LS_CLIENT};
-
 
 	($status, $res1) = $self->{CLIENT}->open;
 	if ($status != 0) {
@@ -169,7 +163,7 @@ sub registerLS($$) {
 
 	$res1 = "";
 
-	my $n = $ls->registerDynamic(\@mds);
+	my $n = $self->{LS_CLIENT}->registerDynamic(\@mds);
 
 	if (defined $sleep_time) {
 		$$sleep_time = $self->{CONF}->{"topology"}->{"ls_registration_interval"};

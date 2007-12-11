@@ -1,8 +1,8 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::SOAP_Daemon;
 
-our $VERSION = "0.01";
+use fields 'PORT', 'DAEMON';
+
+use version; our $VERSION = qv("0.01");
 
 use warnings;
 use Exporter;
@@ -12,25 +12,15 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Request;
 
-@ISA = ('Exporter');
-@EXPORT = ();
-
 sub new {
   my ($package, $port) = @_; 
   
-  my %hash = ();
+  my $self = fields::new($package);
   if(defined $port and $port ne "") {
-    $hash{"PORT"} = $port;
+    $self->{PORT} = $port;
   }
 
-  $hash{"SOAP_ENV"} = "http://schemas.xmlsoap.org/soap/envelope/";
-  $hash{"SOAP_ENC"} = "http://schemas.xmlsoap.org/soap/encoding/";
-  $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
-  $hash{"XSI"} = "http://www.w3.org/2001/XMLSchema-instance";
-  $hash{"NAMESPACE"} = "http://ggf.org/ns/nmwg/base/2.0/";
-  $hash{"PREFIX"} = "nmwg";
-  
-  bless \%hash => $package;
+  return $self;
 }
 
 sub setPort {
@@ -105,7 +95,8 @@ sub receive {
     return ("error.perfSONAR_PS.transport");
   }
 
-  my $action = $http_request->headers->{"soapaction"} ^ $self->{NAMESPACE};    
+#  my $action = $http_request->headers->{"soapaction"} ^ $self->{NAMESPACE};    
+  my $action = $http_request->headers->{"soapaction"};
   if (!$action =~ m/^.*message\/$/) {
     $msg = "Received message with 'INVALID ACTION TYPE'.";
     $logger->error($msg);     

@@ -1,14 +1,13 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::MA::SNMP;
 
-our $VERSION = "0.01";
+use base 'perfSONAR_PS::Services::Base';
+
+use version; our $VERSION = qv("0.01");
 
 use strict;
 use warnings;
 use Exporter;
 use Log::Log4perl qw(get_logger);
-use perfSONAR_PS::Services::Base;
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -31,8 +30,6 @@ sub setupDataRetrieveKey($$$$$$$$);
 sub handleData($$$$$$);
 sub retrieveSQL($$$$$$);
 sub retrieveRRD($$$$$$);
-
-our @ISA = qw(perfSONAR_PS::Services::Base);
 
 sub init($$) {
   my ($self, $handler) = @_;
@@ -224,19 +221,19 @@ sub registerLS($) {
 }
 
 sub handleMessageBegin($$$$$$$$) {
-	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces) = @_;
 
 	return 0;
 }
 
-sub handleMessageEnd($$$$$$$$) {
-	my ($self, $ret_message, $messageId);
+sub handleMessageEnd($$$) {
+	my ($self, $ret_message, $messageId) = @_;
 
 	return 0;
 }
 
 sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
+	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::MA::SNMP");
 
 	if ($messageType eq "MetadataKeyRequest") {

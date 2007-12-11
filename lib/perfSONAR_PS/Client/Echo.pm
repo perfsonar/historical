@@ -1,6 +1,6 @@
 package perfSONAR_PS::Client::Echo;
 
-our $VERSION = 0.01;
+use version; our $VERSION = qv("0.01");
 
 use strict;
 use Log::Log4perl qw(get_logger :nowarn);
@@ -133,7 +133,7 @@ object for the specific endpoint.
 		exit(-1);
 	}
 
-	my ($status, $res) = $status_client->ping;
+	my ($status, $res) = $echo_client->ping;
 	if ($status != 0) {
 		print "Problem pinging service: $res\n";
 		exit(-1);

@@ -1,24 +1,28 @@
-#!/usr/bin/perl
-
 package perfSONAR_PS::DB::XMLDB;
 
+use fields 'ENVIRONMENT', 'CONTAINERFILE', 'NAMESPACES', 'ENV', 'MANAGER', 'CONTAINER', 'INDEX';
+
+use version; our $VERSION = qv("0.01");
+
+use strict;
+use warnings;
 use Sleepycat::DbXml 'simple';
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 
 sub new {
   my ($package, $env, $cont, $ns) = @_; 
-  my %hash = ();
+  my $self = fields::new($package);
   if(defined $env and $env ne "") {
-    $hash{"ENVIRONMENT"} = $env;
+    $self->{ENVIRONMENT} = $env;
   }
   if(defined $cont and $cont ne "") {
-    $hash{"CONTAINERFILE"} = $cont; 
+    $self->{CONTAINERFILE} = $cont; 
   }
   if(defined $ns and $ns ne "") {  
-    $hash{"NAMESPACES"} = \%{$ns};     
+    $self->{NAMESPACES} = \%{$ns};     
   }      
-  bless \%hash => $package;
+  return $self;
 }
 
 
@@ -51,7 +55,7 @@ sub setContainer {
 sub setNamespaces {
   my ($self, $ns) = @_;  
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
-  if(defined $namespaces and $namespaces ne "") {   
+  if(defined $ns and $ns ne "") {   
     $self->{NAMESPACES} = \%{$ns};
   }
   else {

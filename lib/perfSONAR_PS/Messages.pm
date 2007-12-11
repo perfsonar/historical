@@ -6,7 +6,7 @@ use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger :nowarn);
 
-our $VERSION = '0.01';
+use version; our $VERSION = qv("0.01");
 use perfSONAR_PS::Common;
 
 

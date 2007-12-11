@@ -1,8 +1,11 @@
 package perfSONAR_PS::Client::LS::Remote;
 
+use version; our $VERSION = qv("0.01");
+
+use fields 'URI', 'CONF', 'NAMESPACES', 'CHUNK', 'ALIVE', 'FIRST';
+
 use strict;
 use warnings;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
@@ -12,23 +15,24 @@ use perfSONAR_PS::Client::Echo;
 
 sub new {
   my ($package, $uri, $conf, $ns) = @_;
-  my %hash = ();
 
-  $hash{"URI"} = $uri;
+  my $self = fields::new($package);
+
+  $self->{URI} = $uri;
 
   if(defined $conf and $conf ne "") {
-    $hash{"CONF"} = \%{$conf};
+    $self->{CONF} = \%{$conf};
   }
   if(defined $ns and $ns ne "") {
-    $hash{"NAMESPACES"} = \%{$ns};
+    $self->{NAMESPACES} = \%{$ns};
   }
 
-  $hash{"CHUNK"} = 500;
+  $self->{CHUNK} = 500;
 
-  $hash{"ALIVE"} = 0;
-  $hash{"FIRST"} = 1;
+  $self->{ALIVE} = 0;
+  $self->{FIRST} = 1;
 
-  bless \%hash => $package;
+  return $self;
 }
 
 
@@ -82,7 +86,7 @@ sub createKey($$) {
   if (defined $lsKey and $lsKey ne "") {
   $key = $key . "        <nmwg:parameter name=\"lsKey\">".$lsKey."</nmwg:parameter>\n";
   } else {
-  $key = $key . "        <nmwg:parameter name=\"lsKey\">".$self->{"CONF"}->{"SERVICE_ACCESSPOINT"}."</nmwg:parameter>\n";
+  $key = $key . "        <nmwg:parameter name=\"lsKey\">".$self->{CONF}->{"SERVICE_ACCESSPOINT"}."</nmwg:parameter>\n";
   }
   $key = $key . "      </nmwg:parameters>\n";
   $key = $key . "    </nmwg:key>\n";
@@ -95,10 +99,10 @@ sub createService {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
   my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
   $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-  $service = $service . "        <psservice:serviceName>".$self->{"CONF"}->{"SERVICE_NAME"}."</psservice:serviceName>\n" if (defined $self->{"CONF"}->{"SERVICE_NAME"});
-  $service = $service . "        <psservice:accessPoint>".$self->{"CONF"}->{"SERVICE_ACCESSPOINT"}."</psservice:accessPoint>\n" if (defined $self->{"CONF"}->{"SERVICE_ACCESSPOINT"});
-  $service = $service . "        <psservice:serviceType>".$self->{"CONF"}->{"SERVICE_TYPE"}."</psservice:serviceType>\n" if (defined $self->{"CONF"}->{"SERVICE_TYPE"});
-  $service = $service . "        <psservice:serviceDescription>".$self->{"CONF"}->{"SERVICE_DESCRIPTION"}."</psservice:serviceDescription>\n" if (defined $self->{"CONF"}->{"SERVICE_DESCRIPTION"});
+  $service = $service . "        <psservice:serviceName>".$self->{CONF}->{"SERVICE_NAME"}."</psservice:serviceName>\n" if (defined $self->{CONF}->{"SERVICE_NAME"});
+  $service = $service . "        <psservice:accessPoint>".$self->{CONF}->{"SERVICE_ACCESSPOINT"}."</psservice:accessPoint>\n" if (defined $self->{CONF}->{"SERVICE_ACCESSPOINT"});
+  $service = $service . "        <psservice:serviceType>".$self->{CONF}->{"SERVICE_TYPE"}."</psservice:serviceType>\n" if (defined $self->{CONF}->{"SERVICE_TYPE"});
+  $service = $service . "        <psservice:serviceDescription>".$self->{CONF}->{"SERVICE_DESCRIPTION"}."</psservice:serviceDescription>\n" if (defined $self->{CONF}->{"SERVICE_DESCRIPTION"});
   $service = $service . "      </psservice:service>\n";
   $service = $service . "    </perfsonar:subject>\n";
   return $service;
@@ -208,7 +212,7 @@ sub registerStatic {
     return;
   }
 
-  if(!$self->{"ALIVE"}) {
+  if(!$self->{ALIVE}) {
     my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
@@ -216,14 +220,14 @@ sub registerStatic {
       return;
     }
 
-    $self->{"ALIVE"} = 1;
+    $self->{ALIVE} = 1;
   }
 
-  if(!$self->{"ALIVE"}) {
+  if(!$self->{ALIVE}) {
     return;
   }
 
-  if($self->{"FIRST"}) {
+  if($self->{FIRST}) {
     if ($self->sendDeregister($self->{CONF}->{"SERVICE_ACCESSPOINT"}) == 0) {
       $logger->debug("Nothing registered.");
     }
@@ -238,7 +242,7 @@ sub registerStatic {
     if($#resultsString != -1) {
       if ($self->__register(createService($self), $data_ref) == -1) {
           $logger->error("Unable to register data with LS.");
-          $self->{"ALIVE"} = 0;
+          $self->{ALIVE} = 0;
       }
     }
   }
@@ -251,13 +255,13 @@ sub registerStatic {
       if($#resultsString != -1) {
         if ($self->__register(createService($self), $data_ref) == -1) {
           $logger->error("Unable to register data with LS.");
-          $self->{"ALIVE"} = 0;
+          $self->{ALIVE} = 0;
         }
       }
     }
   }
 
-  $self->{"FIRST"} = 0 if $self->{"FIRST"};
+  $self->{FIRST} = 0 if $self->{FIRST};
 }
 
 sub __register($$$) {
@@ -276,7 +280,7 @@ sub __register($$$) {
   my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
 
   my @data = @{ $data_ref };
-  my $iterations = int((($#data+1)/$self->{"CHUNK"}));
+  my $iterations = int((($#data+1)/$self->{CHUNK}));
   my $x = 0;
 
   for(my $y = 1; $y <= ($iterations+1); $y++) {
@@ -284,7 +288,7 @@ sub __register($$$) {
     startMessage($doc, "message.".genuid(), "", "LSRegisterRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
     my $mdID = "metadata.".genuid();
     createMetadata($doc, $mdID, "", createService($self), undef);
-    for(; $x < ($y*$self->{"CHUNK"}) and $x <= $#data; $x++) {
+    for(; $x < ($y*$self->{CHUNK}) and $x <= $#data; $x++) {
       createData($doc, "data.".genuid(), $mdID, $data[$x], undef);
     }
     endMessage($doc);
@@ -305,7 +309,7 @@ sub registerDynamic {
     return;
   }
 
-  if(!$self->{"ALIVE"}) {
+  if(!$self->{ALIVE}) {
     my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
@@ -313,14 +317,14 @@ sub registerDynamic {
       return;
     }
 
-    $self->{"ALIVE"} = 1;
+    $self->{ALIVE} = 1;
   }
 
-  if (!$self->{"ALIVE"}) {
+  if (!$self->{ALIVE}) {
     return;
   }
 
-  if($self->{"FIRST"}) {
+  if($self->{FIRST}) {
     if ($self->sendDeregister($self->{CONF}->{"SERVICE_ACCESSPOINT"}) == 0) {
       $logger->debug("Nothing registered.");
     }
@@ -333,7 +337,7 @@ sub registerDynamic {
     if($#resultsString != -1) {
       if ($self->__register(createService($self), $data_ref) == -1) {
         $logger->error("Unable to register data with LS.");
-        $self->{"ALIVE"} = 0;
+        $self->{ALIVE} = 0;
       }
     }
   } else {
@@ -350,12 +354,12 @@ sub registerDynamic {
     if($#resultsString != -1) {
       if ($self->__register($subject, $data_ref) == -1) {
         $logger->error("Unable to register data with LS.");
-        $self->{"ALIVE"} = 0;
+        $self->{ALIVE} = 0;
       }
     }
   }
 
-  $self->{"FIRST"} = 0 if ($self->{"FIRST"});
+  $self->{FIRST} = 0 if ($self->{FIRST});
 }
 
 sub query($$$$) {

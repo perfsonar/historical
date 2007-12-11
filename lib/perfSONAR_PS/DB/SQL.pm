@@ -1,8 +1,8 @@
-#!/usr/bin/perl
-
 package perfSONAR_PS::DB::SQL;
 
-our $VERSION = "0.01";
+use fields 'NAME', 'USER', 'PASS', 'SCHEMA', 'HANDLE';
+
+use version; our $VERSION = qv("0.01");
 
 use DBI;
 use Log::Log4perl qw(get_logger);
@@ -10,20 +10,22 @@ use perfSONAR_PS::Common;
 
 sub new {
   my ($package, $name, $user, $pass, $schema) = @_;   
-  my %hash = ();
+
+  my $self = fields::new($package);
+
   if(defined $name and $name ne "") {
-    $hash{"NAME"} = $name;
+    $self->{NAME} = $name;
   }  
   if(defined $user and $user ne "") {
-    $hash{"USER"} = $user;
+    $self->{USER} = $user;
   }  
   if(defined $pass and $pass ne "") {
-    $hash{"PASS"} = $pass;
+    $self->{PASS} = $pass;
   }      
   if(defined $schema and $schema ne "") {
-    @{$hash{"SCHEMA"}} = @{$schema};
+    @{$self->{SCHEMA}} = @{$schema};
   } 
-  bless \%hash => $package;
+  return $self;
 }
 
 

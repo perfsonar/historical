@@ -8,10 +8,11 @@ use Exporter;
 use IO::File;
 use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger :nowarn);
+use XML::LibXML;
 
-our $VERSION = '0.01';
+use version; our $VERSION = qv("0.01");
 our @ISA = ('Exporter');
-our @EXPORT = ('readXML','readConfiguration', 'chainMetadata', 
+our @EXPORT = ('readXML','readConfiguration', 'chainMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'escapeString', 'unescapeString',
              'makeEnvelope', 'mapNamespaces', 'mergeConfig');
@@ -32,7 +33,7 @@ sub countRefs($$$$$);
 sub genuid();
 sub extract($$);
 sub mapNamespaces($$);
-sub reMap($$$);
+sub reMap($$$$);
 sub consultArchive($$$$);
 sub escapeString($);
 sub unescapeString($);
@@ -83,12 +84,12 @@ sub findvalue($$) {
 sub makeEnvelope($) {
   my($content) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
-  my $string = "<SOAP-ENV:Envelope xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\"\n"; 
+  my $string = "<SOAP-ENV:Envelope xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\"\n";
   $string .= "                   xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n";
   $string .= "                   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
   $string .= "                   xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\">\n";
   $string .= "  <SOAP-ENV:Header/>\n";
-  $string .= "  <SOAP-ENV:Body>\n";  
+  $string .= "  <SOAP-ENV:Body>\n";
   $string .= $content;
   $string .= "  </SOAP-ENV:Body>\n";
   $string .= "</SOAP-ENV:Envelope>\n";
@@ -96,9 +97,9 @@ sub makeEnvelope($) {
 }
 
 sub readXML($) {
-  my ($file)  = @_;  
+  my ($file)  = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
-  
+
   if(defined $file and $file ne "") {
     my $XML = new IO::File("<".$file);
     if(defined $XML) {
@@ -107,7 +108,7 @@ sub readXML($) {
         if(!($_ =~ m/^<\?xml.*/)) {
           $xmlstring .= $_;
         }
-      }          
+      }
       $XML->close();
       return $xmlstring;
     }
@@ -125,11 +126,11 @@ sub readXML($) {
 sub chainMetadata($) {
   my($dom) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
-  
+
 
   if(defined $dom and $dom ne "") {
     my %mdChains = ();
-  
+
     my $changes = 1;
     while($changes) {
       $changes = 0;
@@ -152,7 +153,7 @@ sub chainMetadata($) {
       foreach my $md ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
         if($md->getAttribute("id") eq $sorted[$x]){
           foreach my $md2 ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
-            if($md->getAttribute("metadataIdRef") and 
+            if($md->getAttribute("metadataIdRef") and
               $md2->getAttribute("id") eq $md->getAttribute("metadataIdRef")){
               metadataChaining($md2, $md);
               $md->removeAttribute("metadataIdRef");
@@ -219,13 +220,13 @@ sub getPath($) {
   if($node->nodePath() =~ m/nmwg:store/) {
     ($path = $node->nodePath()) =~ s/\/nmwg:store\/nmwg:metadata//;
     $path =~ s/\[\d+\]//g;
-    $path =~ s/^\///g;  
+    $path =~ s/^\///g;
   }
   elsif($node->nodePath() =~ m/nmwg:message/) {
     ($path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
     $path =~ s/\[\d+\]//g;
-    $path =~ s/^\///g;  
-  }  
+    $path =~ s/^\///g;
+  }
   return $path;
 }
 
@@ -237,15 +238,15 @@ sub elements($$$) {
     if(!(find($original, $path.$extra, 1))) {
       my $name = $node->nodeName;
       my $path2 = $path;
-      $path2 =~ s/\/$name$//;    
-      if(find($original, $path2, 1)) {      
-        find($original, $path2, 1)->addChild($node->cloneNode(1));   
+      $path2 =~ s/\/$name$//;
+      if(find($original, $path2, 1)) {
+        find($original, $path2, 1)->addChild($node->cloneNode(1));
       }
       else {
-        $original->addChild($node->cloneNode(1));   
-      } 
-    }   
-  } 
+        $original->addChild($node->cloneNode(1));
+      }
+    }
+  }
   return;
 }
 
@@ -257,11 +258,11 @@ sub attributes($$) {
       if($attr->getName ne "id") {
         if($path) {
           if(!(find($original, $path."[@".$attr->getName."]", 1))) {
-            if(find($original, $path, 1)) {      
+            if(find($original, $path, 1)) {
               find($original, $path, 1)->setAttribute($attr->getName, $attr->getValue);
             }
-          }              
-        }        
+          }
+        }
       }
     }
   }
@@ -277,7 +278,7 @@ sub exact($$) {
   foreach my $attr ($node->attributes) {
     if($attr->isa('XML::LibXML::Attr')) {
       if($attr->getName ne "id") {
-        if($counter == 0) {  
+        if($counter == 0) {
           $attrString = $attrString . "@" . $attr->getName . "=\"" . $attr->getValue . "\"";
         }
         else {
@@ -288,7 +289,7 @@ sub exact($$) {
     }
   }
   if($attrString) {
-    $attrString = "[".$attrString."]";      
+    $attrString = "[".$attrString."]";
   }
   elements($node, $original, $attrString);
   return;
@@ -297,11 +298,11 @@ sub exact($$) {
 sub countRefs($$$$$) {
   my($id, $dom, $uri, $element, $attr) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
-  
-  if((defined $id and $id ne "") and 
-     (defined $dom and $dom ne "") and 
-     (defined $uri and $uri ne "") and 
-     (defined $element and $element ne "") and 
+
+  if((defined $id and $id ne "") and
+     (defined $dom and $dom ne "") and
+     (defined $uri and $uri ne "") and
+     (defined $element and $element ne "") and
      (defined $attr and $attr ne "")) {
     my $flag = 0;
     foreach my $d ($dom->getElementsByTagNameNS($uri, $element)) {
@@ -315,7 +316,7 @@ sub countRefs($$$$$) {
     $logger->error("Missing argument(s).");
   }
   $logger->debug("0 Refernces Found");
-  return -1;  
+  return -1;
 }
 
 
@@ -340,7 +341,7 @@ sub extract($$) {
       if($value) {
         return $value;
       }
-    }  
+    }
   }
   return "";
 }
@@ -371,25 +372,29 @@ sub mapNamespaces($$) {
 	}
 }
 
-sub reMap($$$) {
-  my($requestNamespaces, $namespaces, $node) = @_;  
+sub reMap($$$$) {
+  my($requestNamespaces, $namespaces, $node, $set_owner_prefix) = @_;
   my $logger = get_logger("perfSONAR_PS::Common");
 
   if($node->prefix and $node->namespaceURI()) {
     if(!$requestNamespaces->{$node->namespaceURI()}) {
       $requestNamespaces->{$node->namespaceURI()} = $node->prefix;
-      $node->ownerDocument->getDocumentElement->setNamespace($node->namespaceURI(), $node->prefix, 0);
+      if ($set_owner_prefix) {
+        $node->ownerDocument->getDocumentElement->setNamespace($node->namespaceURI(), $node->prefix, 0);
+      }
       $logger->debug("Setting namespace \"".$node->namespaceURI()."\" with prefix \"".$node->prefix."\".");
     }
     if(!($namespaces->{$node->prefix})) {
       foreach my $ns (keys %{$namespaces}) {
         if($namespaces->{$ns} eq $node->namespaceURI()) {
           $node->setNamespace($namespaces->{$ns}, $ns, 1);
-          $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
+	  if ($set_owner_prefix) {
+            $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
+	  }
           $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
           last;
         }
-      }    
+      }
     }
   } elsif ((!defined $node->prefix or $node->prefix eq "") and defined $node->namespaceURI()) {
     if (defined $requestNamespaces->{$node->namespaceURI()}) {
@@ -398,18 +403,20 @@ sub reMap($$$) {
       foreach my $ns (keys %{$namespaces}) {
         if($namespaces->{$ns} eq $node->namespaceURI()) {
           $node->setNamespace($namespaces->{$ns}, $ns, 1);
-          $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
+	  if ($set_owner_prefix) {
+            $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
+	  }
           $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
           $requestNamespaces->{$node->namespaceURI()} = $ns;
           last;
         }
-      }    
+      }
     }
   }
   if($node->hasChildNodes()) {
     foreach my $c ($node->childNodes) {
       if($node->nodeType != 3) {
-        $requestNamespaces = reMap($requestNamespaces, $namespaces, $c);
+        $requestNamespaces = reMap($requestNamespaces, $namespaces, $c, $set_owner_prefix);
       }
     }
   }
@@ -446,7 +453,7 @@ sub consultArchive($$$$) {
   my $doc;
   eval {
     my $parser = XML::LibXML->new();
-    $doc = $parser->parse_string($response);  
+    $doc = $parser->parse_string($response);
   };
   if ($@) {
     my $msg = "Couldn't parse response: $@";
@@ -465,11 +472,11 @@ sub consultArchive($$$$) {
     return (-1, $msg);
   } elsif($nodeset->size > 1) {
     my $msg = "Too many message elements found in response";
-    $logger->error($msg); 
+    $logger->error($msg);
     return (-1, $msg);
   }
 
-  my $nmwg_msg = $nodeset->get_node(1); 
+  my $nmwg_msg = $nodeset->get_node(1);
 
   return (0, $nmwg_msg);
 }
@@ -608,31 +615,31 @@ sub convertISO($) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::Common - A module that provides common methods for performing simple, necessary actions 
-within the perfSONAR-PS framework.  
+perfSONAR_PS::Common - A module that provides common methods for performing simple, necessary actions
+within the perfSONAR-PS framework.
 
 =head1 DESCRIPTION
 
 This module is a catch all for common methods (for now) in the perfSONAR-PS framework.  As such there
 is no 'common thread' that each method shares.  This module IS NOT an object, and the methods
-can be invoked directly (and sparingly).  
+can be invoked directly (and sparingly).
 
 =head1 SYNOPSIS
 
     use perfSONAR_PS::Common;
     use XML::LibXML;
-    
+
     # NOTE: Individual methods can be extraced:
-    # 
+    #
     # use perfSONAR_PS::Common qw( readXML readConfiguration )
 
     my $xml = readXML("./store.xml");
 
     my %conf = ();
     readConfiguration("./db.conf", \%conf);
-    
+
     # To see the structure of the conf hash:
-    # 
+    #
     # use Data::Dumper;
     # print Dumper(%conf) , "\n";
 
@@ -640,23 +647,23 @@ can be invoked directly (and sparingly).
       nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
       netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
       nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"    
+      snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
     );
 
     my $parser = XML::LibXML->new();
-    $my $dom = $parser->parse_file($self->{CONF}->{"METADATA_DB_FILE"}); 
-    
+    $my $dom = $parser->parse_file($self->{CONF}->{"METADATA_DB_FILE"});
+
     $dom = chainMetadata($dom, $ns{"nmwg"});
-   
+
     foreach my $md ($dom->getElementsByTagNameNS($ns{"nmwg"}, "metadata")) {
       my $count = countRefs($md->getAttribute("id"), $dom, $ns{"nmwg"}, "data", "metadataIdRef");
       if($count == 0) {
         print $md->getAttribute("id") , " not found.\n";
-      } 
+      }
       else {
         print $md->getAttribute("id") , " found " , $count , " times.\n";
       }
-    }        
+    }
 
     print "A random id would look like this:\t'" , genuid() , "'\n";
 
@@ -668,32 +675,32 @@ can be invoked directly (and sparingly).
     #
     # 'value' would be returned for each of them
     #
-    my $value = extract($node);    
-    
+    my $value = extract($node);
+
     my %rns = ();
-    reMap(\%rns, \%ns, $DOM); 
-       
+    reMap(\%rns, \%ns, $DOM);
+
 =head1 DETAILS
 
-The API for this module aims to be simple; note that this is not an object and 
-each method does not have the 'self knowledge' of variables that may travel 
-between functions.  
+The API for this module aims to be simple; note that this is not an object and
+each method does not have the 'self knowledge' of variables that may travel
+between functions.
 
 =head1 API
 
-The API of perfSONAR_PS::Common offers simple calls to common activities in the 
-perfSONAR-PS framework.  
+The API of perfSONAR_PS::Common offers simple calls to common activities in the
+perfSONAR-PS framework.
 
 =head2 readXML($file)
 
-Reads the file specified in '$file' and returns the XML contents in string form.  
+Reads the file specified in '$file' and returns the XML contents in string form.
 The <xml> tag will be extracted from the final returned string.  Function will
-warn on error, and return an empty string.  
+warn on error, and return an empty string.
 
 =head2 readConfiguration($file, \%conf)
 
 Reads the file specified in '$file', and loads the hash reference '%conf' with the name/value
-paired items from a config file.  Note that the pairs use the '?' symbol as a separator.  For 
+paired items from a config file.  Note that the pairs use the '?' symbol as a separator.  For
 example the config file:
 
   METADATA_DB_TYPE?xmldb
@@ -702,14 +709,14 @@ example the config file:
 
 Would return a hash such as:
 
-  %conf = 
+  %conf =
     {
       METADATA_DB_TYPE => "xmldb",
       METADATA_DB_NAME => "/home/jason/perfSONAR-PS/MP/SNMP/xmldb",
-      METADATA_DB_FILE => "snmpstore.dbxml"      
+      METADATA_DB_FILE => "snmpstore.dbxml"
     }
 
-Function will warn on error.  
+Function will warn on error.
 
 =head2 chainMetadata($dom, $uri)
 
@@ -724,7 +731,7 @@ a 'chaining' operation to share values between metadata objects.  An example wou
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>
-  </nmwg:metadata>  
+  </nmwg:metadata>
 
   <nmwg:metadata id="2" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" metadataIdRef="1">
     <netutil:subject xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" id="2">
@@ -750,7 +757,7 @@ Which would then become:
       </nmwgt:interface>
     </netutil:subject>
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0/</nmwg:eventType>
-  </nmwg:metadata>  
+  </nmwg:metadata>
 
 This chaining is useful for 'factoring out' large chunks of XML.
 
@@ -758,20 +765,20 @@ This chaining is useful for 'factoring out' large chunks of XML.
 
 The auxilary function from chain metadata, this is called when we notice we
 have a merge chain.  It will be called recursively as we process the metadata
-block.  The arguments are the current node we are dealing with, and the 
-'original' block used for comparisons.  Note this function should not be called 
+block.  The arguments are the current node we are dealing with, and the
+'original' block used for comparisons.  Note this function should not be called
 externally.
 
 =head2 getPath($node)
 
-Cleans up the 'path' (XPath location) of a node by removing positional 
-notation, and the root elements.  This path is then returned.  Note this 
+Cleans up the 'path' (XPath location) of a node by removing positional
+notation, and the root elements.  This path is then returned.  Note this
 function should not be called externally.
 
 =head2 elements($node, $original, $extra)
 
-Given a node (and knowing what the original structure looks like) adds 
-'missing' elements when needed.  Note this function should not be called 
+Given a node (and knowing what the original structure looks like) adds
+'missing' elements when needed.  Note this function should not be called
 externally.
 
 =head2 attributes($node, $original)
@@ -781,15 +788,15 @@ Given a node (and knowing what the original structure looks like) adds
 
 =head2 exact($node, $original)
 
-Checks parameter nodes for 'exact' matches.  Note this function should not 
+Checks parameter nodes for 'exact' matches.  Note this function should not
 be called externally.
 
 =head2 countRefs($id, $dom, $uri, $element, $attr)
 
-Given a ID, and a series of 'struct' objects and a key 'value' to search on, this function 
-will return a 'count' of the number of times the id was seen as a reference to the objects.  
+Given a ID, and a series of 'struct' objects and a key 'value' to search on, this function
+will return a 'count' of the number of times the id was seen as a reference to the objects.
 This is useful for eliminating 'dead' blocks that may not contain a trigger.  The function
-will return -1 on error.  
+will return -1 on error.
 
 =head2 genuid()
 
@@ -797,12 +804,12 @@ Generates a random number.
 
 =head2 extract($node)
 
-Returns a 'value' from a xml element, either the value attribute or the 
+Returns a 'value' from a xml element, either the value attribute or the
 text field.
 
-=head2 reMap(\%{$rns}, \%{$ns}, $dom_node) 
+=head2 reMap(\%{$rns}, \%{$ns}, $dom_node)
 
-Re-map the nodes namespace prefixes to known prefixes (to not screw with the 
+Re-map the nodes namespace prefixes to known prefixes (to not screw with the
 XPath statements that will occur later).
 
 =head2 consultArchive($host, $port, $endpoint, $request)
@@ -819,7 +826,7 @@ LibXML element on success and an error message on failure.
 
 =head2 convertISO($iso)
 
-Given the time in ISO format, conver to 'unix' epoch seconds.  
+Given the time in ISO format, conver to 'unix' epoch seconds.
 
 =head2 find($node, $query, $return_first)
 
@@ -851,7 +858,7 @@ This function does some basic XML character escaping. Replacing &lt; with <,
 =head2 makeEnvelope($content)
 
 Makes a SOAP envelope for some content.
- 
+
 =head1 SEE ALSO
 
 L<Exporter>, L<IO::File>, L<XML::XPath>, L<Time::HiRes>, L<Log::Log4perl>
@@ -862,9 +869,9 @@ To join the 'perfSONAR-PS' mailing list, please visit:
 
 The perfSONAR-PS subversion repository is located at:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS 
-  
-Questions and comments can be directed to the author, or the mailing list. 
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
@@ -875,12 +882,12 @@ $Id$
 Aaron Brown <aaron@internet2.edu>, Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
- 
+
 You should have received a copy of the Internet2 Intellectual Property Framework along
 with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
- 
+
 Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
 All rights reserved.

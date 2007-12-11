@@ -2,6 +2,8 @@
 
 package perfSONAR_PS::Services::Echo;
 
+use base 'perfSONAR_PS::Services::Base';
+
 use warnings;
 use strict;
 use Log::Log4perl qw(get_logger);

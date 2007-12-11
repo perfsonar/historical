@@ -1,6 +1,8 @@
 package perfSONAR_PS::Request;
 
-our $VERSION = "0.01";
+use version; our $VERSION = qv("0.01");
+
+use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES';
 
 use strict;
 use warnings;
@@ -34,30 +36,25 @@ sub new($$$) {
   my ($package, $call, $http_request) = @_;
   my $logger = get_logger("perfSONAR_PS::Request");
 
-  my %hash = ();
+  my $self = fields::new($package);
 
-  $hash{"CALL"} = $call;
+  $self->{"CALL"} = $call;
   if (defined $http_request and $http_request ne "") {
-    $hash{"REQUEST"} = $http_request;
+    $self->{"REQUEST"} = $http_request;
   } else {
-    $hash{"REQUEST"} = $call->get_request;
+    $self->{"REQUEST"} = $call->get_request;
   }
   my %empty = ();
-  $hash{"NAMESPACES"} = \%empty;
-  $hash{"SOAP_ENV"} = "http://schemas.xmlsoap.org/soap/envelope/";
-  $hash{"SOAP_ENC"} = "http://schemas.xmlsoap.org/soap/encoding/";
-  $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
-  $hash{"XSI"} = "http://www.w3.org/2001/XMLSchema-instance";
-  $hash{"PREFIX"} = "nmwg";
+  $self->{"NAMESPACES"} = \%empty;
 
-  $hash{"RESPONSE"} = HTTP::Response->new();
-  $hash{"RESPONSE"}->header('Content-Type' => 'text/xml');
-  $hash{"RESPONSE"}->header('user-agent' => 'perfSONAR-PS/1.0b');
-  $hash{"RESPONSE"}->code("200");
+  $self->{"RESPONSE"} = HTTP::Response->new();
+  $self->{"RESPONSE"}->header('Content-Type' => 'text/xml');
+  $self->{"RESPONSE"}->header('user-agent' => 'perfSONAR-PS/1.0b');
+  $self->{"RESPONSE"}->code("200");
 
-  $hash{"START_TIME"} = [Time::HiRes::gettimeofday];
+  $self->{"START_TIME"} = [Time::HiRes::gettimeofday];
 
-  bless \%hash => $package;
+  return $self;
 }
 
 sub setRequest($$) {

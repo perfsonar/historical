@@ -1,6 +1,8 @@
 package perfSONAR_PS::XML::Document_string;
 
-our $VERSION = '0.01';
+use version; our $VERSION = qv("0.01");
+
+use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
 
 use strict;
 use Log::Log4perl qw(get_logger :nowarn);
@@ -10,13 +12,13 @@ my $pretty_print = 1;
 sub new($) {
 	my ($package) = @_;
 
-	my %hash = ();
+	my $self = fields::new($package);
 
-	$hash{"OPEN_TAGS"} = ();
-	$hash{"DEFINED_PREFIXES"} = ();
-	$hash{"STRING"} = "";
+	$self->{OPEN_TAGS} = ();
+	$self->{DEFINED_PREFIXES} = ();
+	$self->{STRING} = "";
 
-	bless \%hash => $package;
+	return $self;
 }
 
 sub normalizeURI($) {
@@ -223,7 +225,7 @@ sub endElement($$) {
 
 	$logger->debug("Ending tag: $tag");
 
-	my @tags = @{ $self->{"OPEN_TAGS"} };
+	my @tags = @{ $self->{OPEN_TAGS} };
 
 	if ($tags[$#tags]->{"tag"} ne $tag) {
                 $logger->debug("Tried to close tag $tag, but current open tag is \"".$tags[$#tags]->{"tag"}."\n");
@@ -234,7 +236,7 @@ sub endElement($$) {
 		pop @{ $self->{DEFINED_PREFIXES}->{$prefix} };
 	}
 
-	pop @{ $self->{"OPEN_TAGS" } };
+	pop @{ $self->{OPEN_TAGS} };
 
 	if ($pretty_print) {
 		foreach my $node (@{ $self->{OPEN_TAGS} }) {
@@ -273,8 +275,8 @@ sub getValue($) {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	if (defined $self->{"OPEN_TAGS"}) {
-		my @open_tags = @{ $self->{"OPEN_TAGS"} };
+	if (defined $self->{OPEN_TAGS}) {
+		my @open_tags = @{ $self->{OPEN_TAGS} };
 
 		if (scalar(@open_tags) != 0) {
 			my $msg = "Open tags still exist: ";

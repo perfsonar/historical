@@ -1,15 +1,16 @@
 package perfSONAR_PS::Topology::Common;
 
-use perfSONAR_PS::Topology::ID;
-use perfSONAR_PS::Common;
-use Data::Dumper;
-
+use strict;
 use warnings;
 use Log::Log4perl qw(get_logger :levels);
-use Exporter;
+use base 'Exporter';
 
-@ISA  = ('Exporter');
-@EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces', 'mergeNodes_general');
+use perfSONAR_PS::Topology::ID;
+use perfSONAR_PS::Common;
+
+use version; our $VERSION = qv("0.01");
+
+our @EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces', 'mergeNodes_general');
 
 sub mergeNodes_general($$$);
 sub replaceChild($$$$);
@@ -256,7 +257,7 @@ sub topologyNormalize_links($$$$) {
 				return (-1, $msg);
 			}
 
-			$parent_id = $root->getAttribute("id");
+			my $parent_id = $root->getAttribute("id");
 			$fqid = idAddLevel($parent_id, "link", $id);
 			$link->setAttribute("id", $fqid);
 		} else {
@@ -663,7 +664,7 @@ sub topologyNormalize($) {
 
 	my %ns = ();
 
-	reMap(\%ns, \%topology_namespaces, $root);
+	reMap(\%ns, \%topology_namespaces, $root, 1);
 
 	my %topology = ();
 	$topology{"domains"} = ();

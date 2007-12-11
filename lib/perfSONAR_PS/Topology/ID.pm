@@ -1,10 +1,12 @@
 package perfSONAR_PS::Topology::ID;
 
+use strict;
 use warnings;
-use Exporter;
+use base 'Exporter';
 
-@ISA  = ('Exporter');
-@EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare');
+use version; our $VERSION = qv("0.01");
+
+our @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare');
 
 sub idConstruct($$$$$$$$);
 sub idIsFQ($$);
@@ -160,6 +162,8 @@ sub idAddLevel($$$) {
 sub idRemoveLevel($$) {
 	my ($id, $ret_type) = @_;
 
+	my $ret_id;
+
 	if ($id =~ /(^urn:ogf:network.*):[^:]+$/) {
 		if ($1 eq "urn:ogf:network") {
 			$ret_id = "";
@@ -240,19 +244,19 @@ sub idDecode($) {
 sub idCompare($$$) {
 	my ($id1, $id2, $compare_to) = @_;
 
-	@results_id1 = idSplit($id1, 0, 1);
+	my @results_id1 = idSplit($id1, 0, 1);
 	if ($results_id1[0] == -1) {
 		my $msg = "ID \"$id1\" is not properly qualified";
 		return (-1, $msg);
 	}
 
-	@results_id2 = idSplit($id2, 0, 1);
+	my @results_id2 = idSplit($id2, 0, 1);
 	if ($results_id2[0] == -1) {
 		my $msg = "ID \"$id2\" is not properly qualified";
 		return (-1, $msg);
 	}
 
-	for($i = 2; $i <= $#results_id1; $i += 2) {
+	for(my $i = 2; $i <= $#results_id1; $i += 2) {
 		if (!defined $results_id2[$i]) {
 			return (-1, "ID element $compare_to not found");
 		}

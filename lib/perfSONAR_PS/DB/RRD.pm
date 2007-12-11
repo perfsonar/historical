@@ -1,8 +1,8 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::DB::RRD;
 
-our $VERSION = "0.01";
+use fields 'PATH', 'NAME', 'DATASOURCES';
+
+use version; our $VERSION = qv("0.01");
 
 use strict;
 use warnings;
@@ -12,15 +12,16 @@ use perfSONAR_PS::Common;
 
 sub new {
   my ($package, $path, $name, $dss, $error) = @_;   
-  my %hash = ();
+
+  my $self = fields::new($package);
   if(defined $path and $path ne "") {
-    $hash{"PATH"} = $path;
+    $self->{PATH} = $path;
   }
   if(defined $name and $name ne "") {
-    $hash{"NAME"} = $name;
+    $self->{NAME} = $name;
   }
   if(defined $dss and $dss ne "") {
-    $hash{"DATASOURCES"} = \%{$dss};  
+    $self->{DATASOURCES} = \%{$dss};  
   }  
   if(defined $error and $error ne "") {
     if($error == 1) {
@@ -64,7 +65,7 @@ sub setVariables {
   my ($self, $dss) = @_;  
   my $logger = get_logger("perfSONAR_PS::DB::RRD");
   if(defined $dss and $dss ne "") { 
-    $self->{"DATASOURCES"} = \%{$dss};
+    $self->{DATASOURCES} = \%{$dss};
   }
   else {
     $logger->error("Missing argument.");  

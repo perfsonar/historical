@@ -1,5 +1,7 @@
 package perfSONAR_PS::RequestHandler;
 
+use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLERS';
+
 use strict;
 use warnings;
 
@@ -12,17 +14,18 @@ use perfSONAR_PS::Messages;
 
 sub new($) {
 	my ($package) = @_;
-	my %hash = ();
 
-	$hash{"EV_HANDLERS"} = ();
-	$hash{"EV_REGEX_HANDLERS"} = ();
-	$hash{"MSG_HANDLERS"} = ();
-	$hash{"FULL_MSG_HANDLERS"} = ();
+	my $self = fields::new($package);
 
-	bless \%hash => $package;
+	$self->{"EV_HANDLERS"} = ();
+	$self->{"EV_REGEX_HANDLERS"} = ();
+	$self->{"MSG_HANDLERS"} = ();
+	$self->{"FULL_MSG_HANDLERS"} = ();
+
+	return $self;
 }
 
-sub addFullMessageHandler($$$) {
+sub addFullMessageHandler($$$$) {
 	my ($self, $messageType, $service) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
@@ -117,19 +120,22 @@ sub messageBegin($$$$$$$$) {
 	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin($ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
 }
 
-sub messageEnd($$$$$$$$) {
+sub messageEnd($$$$) {
 	my ($self, $ret_message, $messageId, $messageType) = @_;
 
 	if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
 		return 0;
 	}
 
-	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($ret_message, $messageId);
+	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($ret_message, $messageId, $messageType);
 }
 
 sub handleEvent($$$$$$$$$$) {
 	my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+	my $messageType = $args->{"messageType"};
+	my $eventType = $args->{"eventType"};
 
 	if (defined $eventType and $eventType ne "") {
 		$logger->debug("Handling event: $messageType, $eventType");
@@ -173,7 +179,7 @@ sub isValidMessageType($$) {
 }
 
 sub isValidEventType($$$) {
-	my ($self, $messageType, $eventType, $value) = @_;
+	my ($self, $messageType, $eventType) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Checking if $eventType is valid on messages of type $messageType");
@@ -330,7 +336,7 @@ sub handleRequest($$) {
 
 				if (!defined $eventType) {
 					$status = "error.ma.event_type";
-					$res = "No supported event types for message of type type \"$messageType\"";
+					$res = "No supported event types for message of type \"$messageType\"";
 				} else {
 					($status, $res) = $self->handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
 				}

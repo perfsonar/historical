@@ -1,8 +1,8 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::DB::File;
 
-our $VERSION = "0.01";
+use version; our $VERSION = qv("0.01");
+
+use fields 'FILE', 'XML';
 
 use strict;
 use warnings;
@@ -11,11 +11,11 @@ use Log::Log4perl qw(get_logger);
 
 sub new {
   my ($package, $file) = @_; 
-  my %hash = ();
+  my $self = fields::new($package);
   if(defined $file and $file ne "") {
-    $hash{"FILE"} = $file;
+    $self->{FILE} = $file;
   }  
-  bless \%hash => $package;
+  return $self;
 }
 
 
