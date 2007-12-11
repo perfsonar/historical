@@ -134,9 +134,6 @@ sub handleEvent($$$$$$$$$$) {
 	my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
-	my $messageType = $args->{"messageType"};
-	my $eventType = $args->{"eventType"};
-
 	if (defined $eventType and $eventType ne "") {
 		$logger->debug("Handling event: $messageType, $eventType");
 	} else {
