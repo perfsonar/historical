@@ -1,5 +1,18 @@
 package perfSONAR_PS::RequestHandler;
 
+=head1 NAME
+
+perfSONAR_PS::RequestHandler - A module that provides an object to register event
+and message handlers for a perfSONAR Service.
+
+=head1 DESCRIPTION
+
+This module is used by the daemon in the pS-PS Daemon architecture. The daemon
+creates a Handler object and passes it to each of the modules who, in turn,
+register which message types or event types they are interested in.
+
+=cut
+
 use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLERS';
 
 use strict;
@@ -7,11 +20,18 @@ use warnings;
 
 use Data::Dumper;
 use Log::Log4perl qw(get_logger);
+use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
 
+=head1 API
+=cut
+
+=head2 new($)
+	This function allocates a new Handler object.
+=cut
 sub new($) {
 	my ($package) = @_;
 
@@ -25,8 +45,21 @@ sub new($) {
 	return $self;
 }
 
+=head2 addFullMessageHandler($self, $messageType, $service)
+	This function is used by a pS service to specify that it would like to
+	handle the complete processing for messages of the specified type. If
+	called, the service must have a handleMessage function. This function
+	will be called when a message of the specified type is received. The
+	handleMessage function is then responsible for all handling of the
+	message.
+=cut
 sub addFullMessageHandler($$$$) {
-	my ($self, $messageType, $service) = @_;
+	my ($self, $messageType, $service) = validate_pos(@_,
+				1,
+				{ type => SCALAR },
+				{ can => 'handleMessage'},
+			);
+
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding message handler for $messageType");
@@ -41,8 +74,26 @@ sub addFullMessageHandler($$$$) {
 	return 0;
 }
 
+=head2 addMessageHandler($self, $messageType, $service)
+	This function is used by a pS service to specify that it would like to
+	be informed of all the metadata/data pairs for a given message. The
+	handler will also inform the module when a new message of the specified
+	type is received as well as when it has finished processing for the
+	message. If a message handler is registered, the following functions
+	must be defined in the $service specified: handleMessageBegin,
+	handleMessageEnd and handleEvent. handleMessageBegin will be called
+	when a new message of the specified type is received. handleEvent will
+	be called each time a metadata/data pair is found in the message.
+	handleMessageEnd will be called when all the metadata/data pairs have
+	been handled.
+=cut
 sub addMessageHandler($$$) {
-	my ($self, $messageType, $service) = @_;
+	my ($self, $messageType, $service) = validate_pos(@_,
+				1,
+				{ type => SCALAR },
+				{ can => [ 'handleMessageBegin', 'handleMessageEnd', 'handleEvent' ]}
+			);
+
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding message handler for $messageType");
@@ -57,8 +108,21 @@ sub addMessageHandler($$$) {
 	return 0;
 }
 
+=head2 addEventHandler($self, $messageType, $eventType, $service)
+	This function is used to tell which events a pS service is interested
+	in. If added, there must be a 'handleEvent' function defined in the
+	service module. The 'handleEvent' function in the specified service
+	will be called for each metadata/data pair with an event type of the
+	specified type found in a message of the specified type.
+=cut
 sub addEventHandler($$$$) {
-	my ($self, $messageType, $eventType, $service) = @_;
+	my ($self, $messageType, $eventType, $service) = validate_pos(@_,
+				1,
+				{ type => SCALAR },
+				{ type => SCALAR },
+				{ can => [ 'handleEvent' ]}
+			);
+
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding event handler for events of type $eventType on messages of $messageType");
@@ -77,8 +141,21 @@ sub addEventHandler($$$$) {
 	return 0;
 }
 
+=head2 addEventHandler_Regex($self, $messageType, $eventRegex, $service)
+	This function is used to tell which events a pS service is interested
+	in. If added, there must be a 'handleEvent' function defined in the
+	service module. The 'handleEvent' function in the specified service
+	will be called for each metadata/data pair with an event type matching
+	the specified regular expression found in a message of the specified
+	type.
+=cut
 sub addEventHandler_Regex($$$$) {
-	my ($self, $messageType, $eventRegex, $service) = @_;
+	my ($self, $messageType, $eventRegex, $service) = validate_pos(@_,
+				1,
+				{ type => SCALAR },
+				{ type => SCALAR },
+				{ can => [ 'handleEvent' ]}
+			);
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
 	$logger->debug("Adding event handler for events matching $eventRegex on messages of $messageType");
@@ -97,6 +174,10 @@ sub addEventHandler_Regex($$$$) {
 	return 0;
 }
 
+=head2 handleMessage ($self, $doc, $messageType, $message, $request);
+	The handleMessage function is called when a message is encountered that
+	has a full message handler.
+=cut
 sub handleMessage($$$$$) {
 	my ($self, $doc, $messageType, $message, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
@@ -110,6 +191,11 @@ sub handleMessage($$$$$) {
 	getResultCodeData($doc, "data.".genuid(), $mdID, "Message type \"$messageType\" not yet supported", 1);
 }
 
+
+=head2 messageBegin ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+	The messageBegin function is called when a new message is encountered
+	that has a message handler.
+=cut
 sub messageBegin($$$$$$$$) {
 	my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces) = @_;
 
@@ -120,6 +206,10 @@ sub messageBegin($$$$$$$$) {
 	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin($ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
 }
 
+=head2 messageEnd ($self, $ret_message, $messageId, $messageType);
+	The messageEnd function is called when all the metadata/data pairs in a
+	message have been handled.
+=cut
 sub messageEnd($$$$) {
 	my ($self, $ret_message, $messageId, $messageType) = @_;
 
@@ -130,6 +220,15 @@ sub messageEnd($$$$) {
 	return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($ret_message, $messageId, $messageType);
 }
 
+=head2 handleEvent ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
+	The handleEvent function is called when a metadata/data pair is found
+	in a message. $doc contains the response document that being
+	constructed. $messageId contains the identifier for the message.
+	$messageType contains the type of the message. $message_parameters is
+	a reference to a hash containing the message parameters. $eventType
+	contains the event type (if it exists). $md contains the metadata. $d
+	contains the data. $raw_request contains the raw request element.
+=cut
 sub handleEvent($$$$$$$$$$) {
 	my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
@@ -161,6 +260,12 @@ sub handleEvent($$$$$$$$$$) {
 	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
 }
 
+=head2 isValidMessageType($self, $messageType);
+	The isValidMessageType function can be used to check if a specific
+	message type can be handled by either a full message handler, a message
+	handler or an event type handler for events in that type of message. It
+	returns 0 if it's invalid and non-zero if it's valid.
+=cut
 sub isValidMessageType($$) {
 	my ($self, $messageType) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
@@ -175,6 +280,11 @@ sub isValidMessageType($$) {
 	return 0;
 }
 
+=head2 isValidEventType($self, $messageType, $eventType);
+	The isValidEventType function can be used to check if a specific
+	event type found in a specific message type can be handled. It returns
+	0 if it's invalid and non-zero if it's valid.
+=cut
 sub isValidEventType($$$) {
 	my ($self, $messageType, $eventType) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
@@ -200,6 +310,10 @@ sub isValidEventType($$$) {
 	return 0;
 }
 
+=head2 hasFullMessageHandler($self, $messageType);
+	The hasFullMessageHandler checks if there is a full message handler for
+	the specified message type.
+=cut
 sub hasFullMessageHandler($$) {
 	my ($self, $messageType) = @_;
 
@@ -210,6 +324,10 @@ sub hasFullMessageHandler($$) {
 	return 0;
 }
 
+=head2 hasMessageHandler($self, $messageType);
+	The hasMessageHandler checks if there is a message handler for
+	the specified message type.
+=cut
 sub hasMessageHandler($$) {
 	my ($self, $messageType) = @_;
 
@@ -220,6 +338,13 @@ sub hasMessageHandler($$) {
 	return 0;
 }
 
+=head2 handleRequest($self, $request);
+	The handleRequest function takes a perfSONAR_PS::Request element
+	containing an incoming SOAP request and handles that request by parsing
+	it, checking the message type, and either calling a full message
+	handler, or iterating through the message calling the handler for each
+	event type. This function sets the response for the request.
+=cut
 sub handleRequest($$) {
 	my ($self, $request) = @_;
 	my $logger = get_logger("perfSONAR_PS::RequestHandler");
@@ -374,75 +499,11 @@ sub handleRequest($$) {
 1;
 
 __END__
-=head1 NAME
-
-perfSONAR_PS::RequestHandler - A module that provides an object to register event
-and message handlers for a perfSONAR Service.
-
-=head1 DESCRIPTION
-
-This module is used by the daemon in the pS-PS Daemon architecture. The daemon
-creates a Handler object and passes it to each of the modules who, in turn,
-register which message types or event types they are interested in.
-
-=head1 SYNOPSIS
-
-=head1 DETAILS
-
-=head1 API
-
-=head2 new($)
-
-This function allocates a new Handler object.
-
-=head2 add($self, $endpoint, $messageType, $eventType, $ma)
-
-This function is used to tell which message or event a pS service is interested
-in.  The 'handleEvent' function in the specified ma will be called for each
-metadata/data pair with the specified event type is found in a message of the
-specified type that came in on the specified endpoint. If no eventType is
-specified, then then handleEvent function is called for all metadata/data
-pairs, no matter the event type. If the endpoint is unstated, the handler will
-be called when a matching metadata/data pair on the specified message type with
-the specified event type is located on any endpoint.
-
-=head2 addRegex($self, $endpoint, $messageType, $regex, $ma)
-
-This function is called by a pS service to register its interest in any
-metadata/data pair containing an event type that matches the specified regular
-expression.  Like the 'add' function, if the endpoint is unspecified, the
-'handleEvent' function will be called when a matching metadata/data pair is
-found in the specified messageType on any endpoint.
-
-=head2 handleEvent($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_request)
-
-This function is called by the daemon when a metadata/data pair is found in a
-message. $output contains the response document that being constructed.
-$endpoint contains the endpoint. $messageType contains the type of the message.
-$message_parameters is a reference to a hash containing the parameters.
-$eventType contains the event type (if it exists). $md contains the metadata.
-$d contains the data. $raw_request contains the raw request element.
-
-=head2 setMessageResponseType($self, $endpoint, $requestType, $responseType)
-
-This function is called by the MA to specify what the response type for a
-message on the specified endpoint should be. If the endpoint is left blank, it
-applies to all endpoints.
-
-=head2 getMessageResponseType($self, $endpoint, $requestType)
-
-This function is called by the MA to find what the proper response type is for
-a given message on a given endpoint.
-
-=head2 isValidEndpoint($self, $endpoint)
-
-This function is called by the daemon to verify that some Module is listening
-on a specific endpoint.
 
 =head1 SEE ALSO
 
-L<Exporter>, L<HTTP::Daemon>, L<Log::Log4perl>, L<perfSONAR_PS::Transport>
-L<XML::XPath>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>
+L<Log::Log4perl>, L<perfSONAR_PS::XML::Document_string>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

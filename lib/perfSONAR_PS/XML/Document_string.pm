@@ -6,6 +6,7 @@ use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
 
 use strict;
 use Log::Log4perl qw(get_logger :nowarn);
+use Params::Validate qw(:all);
 
 my $pretty_print = 1;
 
@@ -21,7 +22,7 @@ sub new($) {
 	return $self;
 }
 
-sub normalizeURI($) {
+sub getNormalizedURI($) {
 	my ($uri) = @_;
 
 	# trim whitespace
@@ -35,20 +36,37 @@ sub normalizeURI($) {
 	return $uri;
 }
 
-sub startElement($$$$$$) {
-	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces) = @_;
+sub startElement {
+	my $self = shift;
+	my $args = validate(@_, 
+			{
+				prefix => { type => SCALAR, regex => qr/^[a-z0-9]/ },
+				namespace => { type => SCALAR, regex => qr/^http/ },
+				tag => { type => SCALAR, regex => qr/^[a-z0-9]/ },
+				attributes => { type => HASHREF | UNDEF, optional => 1 },
+				extra_namespaces => { type => HASHREF | UNDEF, optional => 1 },
+				content => { type => SCALAR | UNDEF, optional => 1}
+			});
+
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
+
+	my $prefix = $args->{"prefix"};
+	my $namespace = $args->{"namespace"};
+	my $tag = $args->{"tag"};
+	my $attributes = $args->{"attributes"};
+	my $extra_namespaces = $args->{"extra_namespaces"};
+	my $content = $args->{"content"};
 
 	$logger->debug("Starting tag: $tag");
 
-	$namespace = normalizeURI($namespace);
+	$namespace = getNormalizedURI($namespace);
 
 	my %namespaces = ();
 	$namespaces{$prefix} = $namespace;
 
 	if (defined $extra_namespaces and $extra_namespaces ne "") {
 		foreach $prefix (keys %{ $extra_namespaces }) {
-			my $new_namespace = normalizeURI($extra_namespaces->{$prefix});
+			my $new_namespace = getNormalizedURI($extra_namespaces->{$prefix});
 
 			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
 				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
@@ -110,23 +128,46 @@ sub startElement($$$$$$) {
 		$self->{STRING} .= "\n";
 	}
 
+	if (defined $content and $content ne "") {
+		$self->{STRING} .= $content;
+		$self->{STRING} .= "\n";
+	}
+
+
 	push @{ $self->{OPEN_TAGS} }, \%node_info;
 
 	return 0;
 }
 
-sub createElement($$$$$$) {
-	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces, $content) = @_;
+sub createElement {
+	my $self = shift;
+	my $args = validate(@_, 
+			{
+				prefix => { type => SCALAR, regex => qr/^[a-z0-9]/ },
+				namespace => { type => SCALAR, regex => qr/^http/ },
+				tag => { type => SCALAR, regex => qr/^[a-z0-9]/ },
+				attributes => { type => HASHREF | UNDEF, optional => 1 },
+				extra_namespaces => { type => HASHREF | UNDEF, optional => 1 },
+				content => { type => SCALAR | UNDEF, optional => 1}
+			});
+
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	$namespace = normalizeURI($namespace);
+	my $prefix = $args->{"prefix"};
+	my $namespace = $args->{"namespace"};
+	my $tag = $args->{"tag"};
+	my $attributes = $args->{"attributes"};
+	my $extra_namespaces = $args->{"extra_namespaces"};
+	my $content = $args->{"content"};
+
+	$namespace = getNormalizedURI($namespace);
 
 	my %namespaces = ();
 	$namespaces{$prefix} = $namespace;
 
 	if (defined $extra_namespaces and $extra_namespaces ne "") {
 		foreach $prefix (keys %{ $extra_namespaces }) {
-			my $new_namespace = normalizeURI($extra_namespaces->{$prefix});
+			my $new_namespace = getNormalizedURI($extra_namespaces->{$prefix});
 
 			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
 				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
@@ -198,23 +239,6 @@ sub createElement($$$$$$) {
 	if ($pretty_print) {
 		$self->{STRING} .= "\n";
 	}
-
-	return 0;
-}
-
-sub startElement_content($$$$$$) {
-	my ($self, $prefix, $namespace, $tag, $attributes, $extra_namespaces, $content) = @_;
-	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
-
-	my $n = $self->startElement($prefix, $namespace, $tag, $attributes, $extra_namespaces);
-
-	return $n if ($n != 0);
-
-	if (defined $content and $content ne "") {
-		$self->{STRING} .= $content;
-	}
-
-	$self->{STRING} .= "\n" if ($pretty_print);
 
 	return 0;
 }

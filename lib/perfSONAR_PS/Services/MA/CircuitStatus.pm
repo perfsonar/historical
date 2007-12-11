@@ -361,7 +361,7 @@ sub createMetadataStore($$$) {
 
 	my $doc = perfSONAR_PS::XML::Document_string->new();
 
-	$doc->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "store", undef, undef);
+	$doc->startElement(prefix => "nmwg", tag => "store", namespace => "http://ggf.org/ns/nmwg/base/2.0/");
 	foreach my $node_id (keys %{ $nodes }) {
 		my $node = $nodes->{$node_id};
 
@@ -740,7 +740,7 @@ sub outputResults($$$) {
 			next if (defined $output_endpoints{$endpoint->{name}});
 
 			startMetadata($output, "metadata.".genuid(), "", undef);
-			 $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub-".$endpoint->{name} }, undef);
+			 $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-".$endpoint->{name} });
 			  outputNodeElement($output, $self->{NODES}->{$endpoint->{name}});
 			 $output->endElement("subject");
 			endMetadata($output);
@@ -751,7 +751,7 @@ sub outputResults($$$) {
 		my $mdid = "metadata.".genuid();
 
 		startMetadata($output, $mdid, "", undef);
-		 $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "subject", { id => "sub$i" }, undef);
+		 $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub$i" });
 		  outputCircuitElement($output, $circuit);
 		 $output->endElement("subject");
 		endMetadata($output);
@@ -768,9 +768,9 @@ sub outputResults($$$) {
 				$attrs{"endTime"} = $datum->getEndTime();
 			}
 
-			$output->startElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "datum", \%attrs);
-			$output->createElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "stateAdmin", undef, undef, $datum->getAdminStatus);
-			$output->createElement("ifevt", "http://ggf.org/ns/nmwg/event/status/base/2.0/", "stateOper", undef, undef, $datum->getOperStatus);
+			$output->startElement(prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs);
+			$output->createElement(prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $datum->getAdminStatus);
+			$output->createElement(prefix => "ifevt", tag => "stateOper", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $datum->getOperStatus);
 			$output->endElement("datum");
 		}
 		endData($output);
@@ -785,23 +785,23 @@ sub outputNodeElement($$) {
 
 	$logger->debug("Outputing Node Element: ".Dumper($node));
 
-	$output->startElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "node", undef, undef);
-	  $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "type", { type => "logical" }, undef, "TopologyPoint");
-	  $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "name", { type => "logical" }, undef, $node->{"name"});
+	$output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/");
+	  $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint");
+	  $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
 	if (defined $node->{"city"} and $node->{"city"} ne "") {
-		$output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "city", undef, undef, $node->{"city"});
+		$output->createElement(prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"});
 	}
 	if (defined $node->{"country"} and $node->{"country"} ne "") {
-		$output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "country", undef, undef, $node->{"country"});
+		$output->createElement(prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"});
 	}
 	if (defined $node->{"latitude"} and $node->{"latitude"} ne "") {
-		$output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "latitude", undef, undef, $node->{"latitude"});
+		$output->createElement(prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"});
 	}
 	if (defined $node->{"longitude"} and $node->{"longitude"} ne "") {
-		$output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "longitude", undef, undef, $node->{"longitude"});
+		$output->createElement(prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"});
 	}
 	if (defined $node->{"institution"} and $node->{"institution"} ne "") {
-		$output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "institution", undef, undef, $node->{"institution"});
+		$output->createElement(prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", , content => $node->{"institution"});
 	}
 	$output->endElement("node");
 }
@@ -810,13 +810,13 @@ sub outputCircuitElement($$) {
 	my ($output, $circuit) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
-	$output->startElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "link", undef, undef);
-	  $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "name", { type => "logical" }, undef, $circuit->{"name"});
-	  $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "globalName", { type => "logical" }, undef, $circuit->{"globalName"});
-	  $output->createElement("nmtl2", "http://ggf.org/ns/nmwg/topology/l2/3.0/", "type", undef, undef, $circuit->{"type"});
+	$output->startElement(prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/");
+	  $output->createElement(prefix => "nmtl2", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"name"});
+	  $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"globalName"});
+	  $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $circuit->{"type"});
 	  foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-	  $output->startElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "node", { nodeIdRef => $endpoint->{"name"} }, undef);
-	  $output->createElement("nmwgtopo3", "http://ggf.org/ns/nmwg/topology/base/3.0/", "role", undef, undef, $endpoint->{"type"});
+	  $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} });
+	  $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"});
 	  $output->endElement("node");
 	  }
 	  startParameters($output, "params.0");

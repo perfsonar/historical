@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Common;
 
 use warnings;
@@ -11,7 +9,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use XML::LibXML;
 
 use version; our $VERSION = qv("0.01");
-our @ISA = ('Exporter');
+use base 'Exporter';
 our @EXPORT = ('readXML','readConfiguration', 'chainMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'escapeString', 'unescapeString',

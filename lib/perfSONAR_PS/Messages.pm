@@ -40,7 +40,7 @@ sub startMessage($$$$$$) {
 	$attrs{"id"} = $id;
 	$attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef ne "");
 
-	return $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "message", \%attrs, $namespaces, $content);
+	return $output->startElement(prefix => "nmwg", tag => "message", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
 }
 
 sub endMessage($) {
@@ -62,7 +62,7 @@ sub startMetadata($$$$) {
 	$attrs{"id"} = $id;
 	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, $namespaces);
+	return $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces);
 }
 
 sub endMetadata($) {
@@ -81,7 +81,7 @@ sub startData($$$$) {
 		return -1;
 	}
 
-	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, $namespaces);
+	return $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces);
 }
 
 sub endData($) {
@@ -94,7 +94,7 @@ sub endData($) {
 sub startParameters($$) {
 	my ($output, $id) = @_;
 
-	return $output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameters", { id=>$id }, undef);
+	return $output->startElement(prefix => "nmwg", tag => "parameters", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id });
 }
 
 sub endParameters($) {
@@ -108,7 +108,7 @@ sub addParameter($$$) {
 	my ($output, $name, $value) = @_;
 	my $logger = get_logger("perfSONAR_PS::Messages");
 
-	return $output->createElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "parameter", {name=>$name}, undef, $value);
+	return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => {name=>$name}, content => $value);
 }
 
 sub getResultCodeMessage {
@@ -144,8 +144,8 @@ sub getResultCodeMetadata($$$$) {
 	$attrs{"id"} = $id;
 	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	$output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, undef);
-	$output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "eventType", undef, undef, $event);
+	$output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs);
+	$output->startElement(prefix => "nmwg", tag => "eventType", namespace => "http://ggf.org/ns/nmwg/base/2.0/", content => $event);
 	$output->endElement("eventType");
 	$output->endElement("metadata");
 
@@ -167,8 +167,8 @@ sub getResultCodeData($$$$$) {
 		$description = escapeString($description);
 	}
 
-	$output->startElement("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, undef);
-	$output->startElement_content("nmwgr", "http://ggf.org/ns/nmwg/result/2.0/", "datum", undef, undef, $description);
+	$output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef });
+	$output->startElement(prefix => "nmwgr", tag => "datum", namespace => "http://ggf.org/ns/nmwg/result/2.0/", content => $description);
 	$output->endElement("datum");
 	$output->endElement("data");
 
@@ -210,7 +210,7 @@ sub createMetadata($$$$$) {
 	$attrs{"id"} = $id;
 	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	my $n = $output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "metadata", \%attrs, $namespaces, $content);
+	my $n = $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
 	return $n if ($n != 0);
 	return $output->endElement("metadata");
 }
@@ -224,7 +224,7 @@ sub createData($$$$$) {
 		return -1;
 	}
 
-	$output->startElement_content("nmwg", "http://ggf.org/ns/nmwg/base/2.0/", "data", { id=>$id, metadataIdRef=>$metadataIdRef }, $namespaces, $content);
+	$output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces, content => $content);
 	$output->endElement("data");
 
 	return 0;
