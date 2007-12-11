@@ -25,6 +25,7 @@ use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
+use perfSONAR_PS::Error qw/:try/;
 
 =head1 API
 =cut
@@ -257,7 +258,7 @@ sub handleEvent($$$$$$$$$$) {
 		return $self->{MSG_HANDLERS}->{$messageType}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
 	}
 
-	return ("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
+	throw perfSONAR_PS::Error("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
 }
 
 =head2 isValidMessageType($self, $messageType);
@@ -355,10 +356,7 @@ sub handleRequest($$) {
 	$request->parse(\$error);
 
 	if (defined $error and $error ne "") {
-		my $ret_message = new perfSONAR_PS::XML::Document_string();
-		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.transport.parse_error", "Error parsing request: $error", undef, 1);
-		$request->setResponse($ret_message->getValue());
-		return;
+		throw perfSONAR_PS::Error("error.transport.parse_error", "Error parsing request: $error");
 	}
 
 	my $message = $request->getRequestDOM()->getDocumentElement();;
@@ -366,19 +364,9 @@ sub handleRequest($$) {
 	my $messageType = $message->getAttribute("type");
 
 	if (!defined $messageType or $messageType eq "") {
-		my $ret_message = new perfSONAR_PS::XML::Document_string();
-		my $mdID = "metadata.".genuid();
-		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.no_message_type");
-		getResultCodeData($ret_message, "data.".genuid(), $mdID, "There was no message type specified", 1);
-		$request->setResponse($ret_message->getValue());
-		return;
+		throw perfSONAR_PS::Error("error.ma.no_message_type", "There was no message type specified");
 	} elsif ($self->isValidMessageType($messageType) == 0) {
-		my $ret_message = new perfSONAR_PS::XML::Document_string();
-		my $mdID = "metadata.".genuid();
-		getResultCodeMetadata($ret_message, $mdID, "", "error.ma.invalid_message_type");
-		getResultCodeData($ret_message, "data.".genuid(), $mdID, "Messages of type $messageType are unsupported", 1);
-		$request->setResponse($ret_message->getValue());
-		return;
+		throw perfSONAR_PS::Error("error.ma.invalid_message_type", "Messages of type $messageType are unsupported", 1);
 	}
 
 	chainMetadata($message);
@@ -454,20 +442,33 @@ sub handleRequest($$) {
 					}
 				}
 
-				my ($status, $res);
-
+				my $errorEventType;
+				my $errorMessage;
 				if (!defined $eventType) {
-					$status = "error.ma.event_type";
-					$res = "No supported event types for message of type \"$messageType\"";
+					$errorEventType = "error.ma.event_type";
+					$errorMessage = "No supported event types for message of type \"$messageType\"";
 				} else {
-					($status, $res) = $self->handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
+					try {
+						$self->handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
+					}
+					catch perfSONAR_PS::Error with {
+						my $ex = shift;
+
+						$errorEventType = $ex->eventType;
+						$errorMessage = $ex->errorMessage;
+					} otherwise {
+						my $ex = shift;
+
+						$errorEventType = "error.ma.internal_error";
+						$errorMessage = "An internal error occurred while servicing this metadata/data block";
+					}
 				}
 
-				if (defined $status and $status ne "") {
-					$logger->error("Couldn't handle requested metadata: $res");
+				if (defined $errorEventType and $errorEventType ne "") {
+					$logger->error("Couldn't handle requested metadata: $errorMessage");
 					my $mdID = "metadata.".genuid();
-					getResultCodeMetadata($ret_message, $mdID, $m->getAttribute("id"), $status);
-					getResultCodeData($ret_message, "data.".genuid(), $mdID, $res, 1);
+					getResultCodeMetadata($ret_message, $mdID, $m->getAttribute("id"), $errorEventType);
+					getResultCodeData($ret_message, "data.".genuid(), $mdID, $errorMessage, 1);
 				}
 			}
 		}
@@ -538,3 +539,4 @@ Copyright (c) 2004-2007, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
+# vim: expandtab shiftwidth=4 tabstop=4

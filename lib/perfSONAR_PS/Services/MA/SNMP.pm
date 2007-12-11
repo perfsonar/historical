@@ -13,6 +13,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use Module::Load;
 
+use perfSONAR_PS::Error qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
@@ -154,8 +155,8 @@ sub init($$) {
 	  }
   }
 
-  $handler->addMessageHandler("SetupDataRequest", "", $self);
-  $handler->addMessageHandler("MetadataKeyRequest", "", $self);
+  $handler->addMessageHandler("SetupDataRequest", $self);
+  $handler->addMessageHandler("MetadataKeyRequest", $self);
 
   return 0;
 }
@@ -294,10 +295,7 @@ sub maMetadataKeyRequest($$$$$) {
         else {
           my $msg = "Cannot resolve supposed subject chain in metadata.";
           $logger->error($msg);
-          $mdId = "metadata.".genuid();
-          $dId = "data.".genuid();
-          getResultCodeMetadata($output, $mdId, $md->getAttribute("id"), "error.ma.chaining");
-          getResultCodeData($output, $dId, $mdId, $msg, 1);
+	  throw perfSONAR_PS::Error("error.ma.chaining", $msg);
         }
       }
       else {
@@ -332,15 +330,13 @@ sub metadataKeyRetrieveKey($$$$$$$) {
     else {
       my $msg = "Key error in metadata storage.";
       $logger->error($msg);
-      getResultCodeMetadata($output, $mdId, $id, "error.ma.storage.result");
-      getResultCodeData($output, $dId, $mdId, $msg, 1);
+      throw perfSONAR_PS::Error("error.ma.storage_result", $msg);
     }
   }
   else {
     my $msg = "Key error in metadata storage.";
     $logger->error($msg);
-    getResultCodeMetadata($output, $mdId, $id, "error.ma.storage.result");
-    getResultCodeData($output, $dId, $mdId, $msg, 1);
+    throw perfSONAR_PS::Error("error.ma.storage_result", $msg);
   }
   return;
 }
@@ -421,10 +417,7 @@ sub metadataKeyRetrieveMetadataData($$$$$$$) {
   else {
     my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
     $logger->error($msg);
-    $mdId = "metadata.".genuid();
-    $dId = "data.".genuid();
-    getResultCodeMetadata($output, $mdId, $id, "error.ma.storage");
-    getResultCodeData($output, $dId, $mdId, $msg, 1);
+    throw perfSONAR_PS::Error("error.ma.storage", $msg);
   }
   return;
 }
@@ -489,10 +482,7 @@ sub maSetupDataRequest($$$$$) {
         else {
           my $msg = "Cannot resolve subject chain in metadata.";
           $logger->error($msg);
-          $mdId = "metadata.".genuid();
-          $dId = "data.".genuid();
-          getResultCodeMetadata($output, $mdId, $md->getAttribute("id"), "error.ma.chaining");
-          getResultCodeData($output, $dId, $mdId, $msg, 1);
+	  throw perfSONAR_PS::Error("error.ma.chaining", $msg);
         }
       }
       else {
@@ -585,10 +575,7 @@ sub setupDataRetrieveMetadataData($$$$$$) {
   else {
     my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
     $logger->error($msg);
-    $mdId = "metadata.".genuid();
-    $dId = "data.".genuid();
-    getResultCodeMetadata($output, $mdId, $id, "error.ma.storage");
-    getResultCodeData($output, $dId, $mdId, $msg, 1);
+    throw perfSONAR_PS::Error("error.ma.storage", $msg);
   }
   return;
 }
@@ -636,19 +623,13 @@ sub setupDataRetrieveKey($$$$$$$$) {
     else {
       my $msg = "Key not found in metadata storage.";
       $logger->error($msg);
-      $mdId = "metadata.".genuid();
-      $dId = "data.".genuid();
-      getResultCodeMetadata($output, $mdId, $id, "error.ma.storage.result");
-      getResultCodeData($output, $dId, $mdId, $msg, 1);
+      throw perfSONAR_PS::Error("error.ma.storage.result", $msg);
     }
   }
   else {
     my $msg = "Keys error in metadata storage.";
     $logger->error($msg);
-    $mdId = "metadata.".genuid();
-    $dId = "data.".genuid();
-    getResultCodeMetadata($output, $mdId, $id, "error.ma.storage.result");
-    getResultCodeData($output, $dId, $mdId, $msg, 1);
+    throw perfSONAR_PS::Error("error.ma.storage.result", $msg);
   }
   return;
 }

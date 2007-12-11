@@ -242,10 +242,7 @@ sub queryTopology($$) {
 	}
 
 	if ($status ne "") {
-		$logger->error("Couldn't handle requested metadata: $res");
-		my $mdID = "metadata.".genuid();
-		getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
-		getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
+		throw perfSONAR_PS::Error($status, $res);
 	} else {
 		$output->addExistingXMLElement($m);
 		createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);

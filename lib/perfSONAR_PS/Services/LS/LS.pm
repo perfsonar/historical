@@ -181,7 +181,7 @@ sub prepareDatabases {
 }
 
 
-sub verifyKey {
+sub isValidKey {
   my($self, $metadatadb, $key) = @_;
   my $logger = get_logger("perfSONAR_PS::LS::LS");
   my $error = "";
@@ -240,7 +240,7 @@ sub lsRegisterRequest {
           if($mdKey) {
             # Y: Is Key in the DB?
             if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-              $keys{$mdKey} = verifyKey($self, $metadatadb, $mdKey);
+              $keys{$mdKey} = isValidKey($self, $metadatadb, $mdKey);
               $ids{$mdKey} = 0;
             }
 
@@ -417,7 +417,7 @@ sub lsRegisterRequest {
 
             # Y: Is key in the DB?
             if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-              $keys{$mdKey} = verifyKey($self, $metadatadb, $mdKey);
+              $keys{$mdKey} = isValidKey($self, $metadatadb, $mdKey);
               $ids{$mdKey} = 0;
             }
 
@@ -581,7 +581,7 @@ sub lsDeregisterRequest {
 
             # Y: Is Key in the DB?
             if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-              $keys{$mdKey} = verifyKey($self, $metadatadb, $mdKey);
+              $keys{$mdKey} = isValidKey($self, $metadatadb, $mdKey);
               $ids{$mdKey} = 0;
             }
 
@@ -731,7 +731,7 @@ sub lsKeepaliveRequest {
 
             # Y: Is Key in the DB?
             if(!$keys{$mdKey} or $keys{$mdKey} eq "") {
-              $keys{$mdKey} = verifyKey($self, $metadatadb, $mdKey);
+              $keys{$mdKey} = isValidKey($self, $metadatadb, $mdKey);
               $ids{$mdKey} = 0;
             }
 
@@ -1028,7 +1028,7 @@ used externally.
 
 Opens the databases, returns errors if applicable.  Not to be used externally.
 
-=head2 verifyKey($self, $metadatadb, $key)
+=head2 isValidKey($self, $metadatadb, $key)
 
 Given a key, check to see if it is in the database yet.
 

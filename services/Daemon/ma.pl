@@ -1,5 +1,23 @@
 #!/usr/bin/perl -w -I lib
 
+=head1 NAME
+
+ma.pl - An basic MA (Measurement Archive) framework
+
+=head1 DESCRIPTION
+
+This script shows how a script for a given service should look.
+
+=head1 SYNOPSIS
+
+./ma.pl [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
+
+The verbose flag allows lots of debug options to print to the screen.  If the option is
+omitted the service will run in daemon mode.
+=cut
+
+our $VERSION = "0.10";
+
 use warnings;
 use strict;
 use Getopt::Long;
@@ -13,7 +31,6 @@ use Cwd;
 use Config::General;
 use Module::Load;
 use Data::Dumper;
-
 
 sub psService($$$);
 sub registerLS($);
@@ -50,6 +67,7 @@ use perfSONAR_PS::SOAP_Daemon;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
+use perfSONAR_PS::Error qw/:try/;
 
 Log::Log4perl->init("logger.conf");
 my $logger = get_logger("perfSONAR_PS");
@@ -145,13 +163,18 @@ $logger->debug("Starting '".$$."'");
 my @ls_services;
 
 my %loaded_modules = ();
-my $echo_module = "perfSONAR_PS::MA::Echo";
+my $echo_module = "perfSONAR_PS::Services::Echo";
 
 my %handlers = ();
 my %listeners = ();
 my %modules_loaded = ();
 my %port_configs = ();
 my %service_configs = ();
+
+if (!defined $conf{"port"}) {
+	my $logger->error("No ports defined");
+	exit(-1);
+}
 
 foreach my $port (keys %{ $conf{"port"} }) {
 	my %port_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}) };
@@ -235,6 +258,7 @@ if(!$DEBUGFLAG) {
 foreach my $port (keys %listeners) {
 	my $pid = fork();
 	if ($pid == 0) {
+		%child_pids = ();
 		psService($listeners{$port}, $handlers{$port}, $service_configs{$port});
 		exit(0);
 	} elsif ($pid < 0) {
@@ -249,6 +273,7 @@ foreach my $port (keys %listeners) {
 foreach my $ls_args (@ls_services) {
 	my $ls_pid = fork();
 	if ($ls_pid == 0) {
+		%child_pids = ();
 		registerLS($ls_args);
 		exit(0);
 	} elsif ($ls_pid < 0) {
@@ -264,12 +289,17 @@ foreach my $pid (keys %child_pids) {
 	waitpid($pid, 0);
 }
 
+=head2 psService
+    This function will wait for requests using the specified listener. It
+    will then select the appropriate endpoint request handler, spawn a new
+    process to handle the request and pass the request to the request handler.
+    The function also tracks the processes spawned and kills them if they
+    go on for too long, responding to the request with an error.
+=cut
 sub psService($$$) {
 	my ($listener, $handlers, $service_config) = @_;
 	my $outstanding_children = 0;
 	my $max_worker_processes;
-
-	%child_pids = ();
 
 	$logger->debug("Starting '".$$."' as the MA.");
 
@@ -354,10 +384,13 @@ sub psService($$$) {
 	}
 }
 
+=head2 registerLS($args)
+    The registerLS function is called in a separate process or thread and
+    is responsible for calling the specified service's 'registerLS'
+    function regularly.
+=cut
 sub registerLS($) {
 	my ($args) = @_;
-
-	%child_pids = ();
 
 	my $service = $args->{"service"};
 	my $default_interval = $args->{"conf"}->{"ls_registration_interval"};
@@ -379,29 +412,44 @@ sub registerLS($) {
 	}
 }
 
+=head2 handleRequest($handler, $request, $endpoint_conf);
+    This function is a wrapper around the handler's handleRequest function.
+    It's purpose is to ensure that if a crash occurs or a perfSONAR_PS::Error
+    message is thrown, the client receives a proper response.
+=cut
 sub handleRequest($$$) {
 	my ($handler, $request, $endpoint_conf) = @_;
 
-	# This function is a wrapper around the handler's handleRequest
-	# function.  The purpose of the function is to handle the case where a
-	# crash occurs while handling the request.
-
-	eval {
+	try {
 		$handler->handleRequest($request, $endpoint_conf);
- 	};
+ 	}
+	catch perfSONAR_PS::Error with {
+		my $ex = shift;
+
+		my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
+		$logger->error($msg);
  
-	if ($@) {
-		my $msg = "Unhandled exception or crash: $@";
+
+		my $ret_message = new perfSONAR_PS::XML::Document_string();
+		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", $ex->eventType, $ex->errorMessage, undef, 1);
+		$request->setResponse($ret_message->getValue());
+	}
+	otherwise { 
+		my $ex = shift;
+		my $msg = "Unhandled exception or crash: $ex";
 		$logger->error($msg);
  
 		my $ret_message = new perfSONAR_PS::XML::Document_string();
 		getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
 		$request->setResponse($ret_message->getValue());
- 	}
+ 	};
 
 	$request->finish();
 }
 
+=head2 daemonize
+    Sends the program to the background by eliminating ties to the calling terminal.
+=cut
 sub daemonize() {
 	chdir '/' or die "Can't chdir to /: $!";
 	open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
@@ -413,6 +461,13 @@ sub daemonize() {
 	umask 0;
 }
 
+=head2 managePID($piddir, $pidfile);
+    The managePID function checks for the existence of the specified file in
+    the specified directory. If found, it checks to see if the process in the
+    file still exists. If there is no running process, it writes its pid to the
+    file. If there is, the function performs a die alerting the user that the
+    process is already running.
+=cut
 sub managePID($$) {
 	my($piddir, $pidfile) = @_;
 	die "Can't write pidfile: $pidfile\n" unless -w $piddir;
@@ -442,84 +497,60 @@ sub managePID($$) {
 	return;
 }
 
+=head2 killChildren
+    Kills all the children for this process off. It uses global variables
+    because this function is used by the signal handler to kill off all
+    child processes.
+=cut
 sub killChildren() {
 	foreach my $pid (keys %child_pids) {
 		kill("SIGINT", $pid);
 	}
 }
 
+=head2 signalHandler
+	Kills all the children for the process and then exits
+=cut
 sub signalHandler() {
 	killChildren();
 	exit(0);
 }
 
-=head1 NAME
+=head1 SEE ALSO
 
-ma.pl - An basic MA (Measurement Archive) framework
+L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Transport>,
+L<perfSONAR_PS::Client::Status::MA>, L<perfSONAR_PS::Client::Topology::MA>
 
-=head1 DESCRIPTION
+To join the 'perfSONAR-PS' mailing list, please visit:
 
-This script shows how a script for a given service should look.
+https://mail.internet2.edu/wws/info/i2-perfsonar
 
-=head1 SYNOPSIS
+The perfSONAR-PS subversion repository is located at:
 
-./ma.pl [--verbose | --help]
+https://svn.internet2.edu/svn/perfSONAR-PS
 
-The verbose flag allows lots of debug options to print to the screen.  If the option is
-omitted the service will run in daemon mode.
-
-=head1 FUNCTIONS
-
-The following functions are used within this script.
-
-=head2 psService
-
-This function, meant to be used in the context of a thread or process, will
-listen on an external port (specified in the conf file) and serve requests for
-data from outside entities.  The data and metadata are stored in various
-database structures.
-
-=head2 psServiceQuery
-
-This performs the semi-automic operations of the MA.
-
-=head2 daemonize
-
-Sends the program to the background by eliminating ties to the calling terminal.
-
-=head2 killChildren
-
-Kills all the children for this process off
-
-=head2 signalHandler
-
-Kills all the children for the process and then exits
-
-=head1 REQUIRES
-
-Getopt::Long;
-Time::HiRes qw( gettimeofday );
-POSIX qw( setsid )
-Log::Log4perl
-perfSONAR_PS::Common
-perfSONAR_PS::Transport
-perfSONAR_PS::MA::Echo
-
-=head1 AUTHOR
-
-Aaron Brown <aaron@internet2.edu>, Jason Zurawski <zurawski@internet2.edu>
+Questions and comments can be directed to the author, or the mailing list.
 
 =head1 VERSION
 
-$Id$
+$Id:$
 
-=head1 COPYRIGHT AND LICENSE
+=head1 AUTHOR
 
-Copyright (C) 2007 by Internet2
+Aaron Brown, aaron@internet2.edu
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
-at your option, any later version of Perl 5 you may have available.
+=head1 LICENSE
+ 
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
+=head1 COPYRIGHT
+ 
+Copyright (c) 2004-2007, Internet2 and the University of Delaware
+
+All rights reserved.
 
 =cut
+
+# vim: expandtab shiftwidth=4 tabstop=4
