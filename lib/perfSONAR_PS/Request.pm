@@ -132,7 +132,7 @@ sub parse($$) {
     my $new_dom;
     $new_dom = $parser->parse_string($messages->get_node(1)->toString);
 
-    $logger->info("To string: ".$new_dom->toString);
+    $logger->debug("Parsed incoming request: ".$new_dom->toString);
 
     $self->{REQUESTDOM} = $new_dom;
     $$error = "";

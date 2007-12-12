@@ -70,7 +70,7 @@ sub receive {
         return 0;
     }
 
-    $logger->info("Received call from:\t".$call->peerhost());
+    $logger->info("Received request from:\t".$call->peerhost());
 
     my $http_request = $call->get_request;
     if (!defined $http_request) {

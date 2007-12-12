@@ -677,7 +677,7 @@ sub handlePathStatus($$$$) {
 				my $curr_time = time;
 
 				if ($curr_time - $circuit_time > $self->{CONF}->{"circuitstatus"}->{"max_recent_age"}) {
-					$logger->info("Old link time: $circuit_time Current Time: ".$curr_time.": ".($curr_time - $circuit_time));
+					$logger->debug("Old link time: $circuit_time Current Time: ".$curr_time.": ".($curr_time - $circuit_time));
 					$circuit_time = $curr_time;
 					$circuit_oper_value = "unknown";
 					$circuit_admin_value = "unknown";
