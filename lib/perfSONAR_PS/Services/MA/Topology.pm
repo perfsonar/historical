@@ -242,7 +242,7 @@ sub queryTopology($$) {
 	}
 
 	if ($status ne "") {
-		throw perfSONAR_PS::Error($status, $res);
+		throw perfSONAR_PS::Error_compat($status, $res);
 	} else {
 		$output->addExistingXMLElement($m);
 		createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);

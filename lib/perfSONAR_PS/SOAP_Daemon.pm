@@ -13,100 +13,99 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Request;
 
 sub new {
-  my ($package, $port) = @_; 
-  
-  my $self = fields::new($package);
-  if(defined $port and $port ne "") {
-    $self->{PORT} = $port;
-  }
+    my ($package, $port) = @_; 
 
-  return $self;
+    my $self = fields::new($package);
+    if(defined $port and $port ne "") {
+        $self->{PORT} = $port;
+    }
+
+    return $self;
 }
 
 sub setPort {
-  my ($self, $port) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  if(defined $port) {
-    $self->{PORT} = $port;
-  }
-  else {
-    $logger->error("Missing argument.");  
-  }
-  return;
+    my ($self, $port) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Transport");
+    if(defined $port) {
+        $self->{PORT} = $port;
+    } else {
+        $logger->error("Missing argument.");  
+    }
+    return;
 }
 
 sub startDaemon {
-  my ($self) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  $logger->debug("Starting daemon."); 
-  $self->{DAEMON} = HTTP::Daemon->new(
-    LocalPort => $self->{PORT},
-    ReuseAddr => 1,
-    Timeout => 30,
-  ); 
+    my ($self) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Transport");
+    $logger->debug("Starting daemon."); 
+    $self->{DAEMON} = HTTP::Daemon->new(
+            LocalPort => $self->{PORT},
+            ReuseAddr => 1,
+            Timeout => 30,
+            ); 
 
-  if (!defined $self->{DAEMON}) {
-    $logger->error("Cannot start daemon.");
-    return -1;
-  }
+    if (!defined $self->{DAEMON}) {
+        $logger->error("Cannot start daemon.");
+        return -1;
+    }
 
-  $logger->info("Started daemon on port:\t".$self->{PORT});
+    $logger->info("Started daemon on port:\t".$self->{PORT});
 
-  return 0;
+    return 0;
 }
 
 sub receive {
-  my ($self, $ret_request, $error) = @_; 
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  my $error_msg;
-     
-  $$error = "" if (defined $error);
+    my ($self, $ret_request, $error) = @_; 
+    my $logger = get_logger("perfSONAR_PS::Transport");
+    my $error_msg;
 
-  $logger->debug("Accepting calls.");
+    $$error = "" if (defined $error);
 
-  my $call = $self->{DAEMON}->accept;
-  if (!defined $call) {
-    my $msg = "Accept returned nothing, likely a timeout occurred";
-    $logger->debug($msg);
-    return "";
-  }
+    $logger->debug("Accepting calls.");
 
-  $logger->info("Received call from:\t".$call->peerhost());
+    my $call = $self->{DAEMON}->accept;
+    if (!defined $call) {
+        my $msg = "Accept returned nothing, likely a timeout occurred";
+        $logger->debug($msg);
+        return 0;
+    }
 
-  my $http_request = $call->get_request;
-  if (!defined $http_request) {
-    my $msg = "No HTTP Request received from host:\t".$call->peerhost();
-    $logger->error($msg);
-    $$error = $msg;
-    $call->close;
-    return "error.perfSONAR_PS.transport";
-  }
+    $logger->info("Received call from:\t".$call->peerhost());
 
-  my $request = perfSONAR_PS::Request->new($call, $http_request);
+    my $http_request = $call->get_request;
+    if (!defined $http_request) {
+        my $msg = "No HTTP Request received from host:\t".$call->peerhost();
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        $call->close;
+        return -1;
+    }
 
-  $$ret_request = $request;
+    my $request = perfSONAR_PS::Request->new($call, $http_request);
 
-  my $msg = "";
-  
-  if($http_request->method ne "POST") {
-    $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
-    $logger->error($msg);     
-    $$error = $msg if (defined $error);
-    return ("error.perfSONAR_PS.transport");
-  }
+    $$ret_request = $request;
 
-#  my $action = $http_request->headers->{"soapaction"} ^ $self->{NAMESPACE};    
-  my $action = $http_request->headers->{"soapaction"};
-  if (!$action =~ m/^.*message\/$/) {
-    $msg = "Received message with 'INVALID ACTION TYPE'.";
-    $logger->error($msg);     
-    $$error = $msg if (defined $error);
-    return ("error.perfSONAR_PS.transport");
-  }
+    my $msg = "";
 
-  $logger->debug("Accepted call.");
+    if($http_request->method ne "POST") {
+        $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
+        $logger->error($msg);     
+        $$error = $msg if (defined $error);
+        return -1;
+    }
 
-  return "";  
+    #  my $action = $http_request->headers->{"soapaction"} ^ $self->{NAMESPACE};    
+    my $action = $http_request->headers->{"soapaction"};
+    if (!$action =~ m/^.*message\/$/) {
+        $msg = "Received message with 'INVALID ACTION TYPE'.";
+        $logger->error($msg);     
+        $$error = $msg if (defined $error);
+        return -1;
+    }
+
+    $logger->debug("Accepted call.");
+
+    return 0;  
 }
 
 1;

@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Messages;
 
 use strict;
@@ -12,222 +10,222 @@ use perfSONAR_PS::Common;
 
 our @ISA = ('Exporter');
 our @EXPORT = (
-		'startMessage',
-		'endMessage',
-		'startMetadata',
-		'endMetadata',
-		'startData',
-		'endData',
-		'startParameters',
-		'endParameters',
-		'addParameter',
-		'getResultCodeMessage',
-		'getResultCodeMetadata',
-		'getResultCodeData',
-		'statusReport',
-		'createMessage',
-		'createMetadata',
-		'createData',
-	      );
+        'startMessage',
+        'endMessage',
+        'startMetadata',
+        'endMetadata',
+        'startData',
+        'endData',
+        'startParameters',
+        'endParameters',
+        'addParameter',
+        'getResultCodeMessage',
+        'getResultCodeMetadata',
+        'getResultCodeData',
+        'statusReport',
+        'createMessage',
+        'createMetadata',
+        'createData',
+        );
 
 
 sub startMessage($$$$$$) {
-	my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	my %attrs = ();
-	$attrs{"type"} = $type;
-	$attrs{"id"} = $id;
-	$attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef ne "");
+    my %attrs = ();
+    $attrs{"type"} = $type;
+    $attrs{"id"} = $id;
+    $attrs{"messageIdRef"} = $messageIdRef if (defined $messageIdRef and $messageIdRef ne "");
 
-	return $output->startElement(prefix => "nmwg", tag => "message", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
+    return $output->startElement(prefix => "nmwg", tag => "message", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
 }
 
 sub endMessage($) {
-	my ($output) = @_;
+    my ($output) = @_;
 
-	return $output->endElement("message");
+    return $output->endElement("message");
 }
 
 sub startMetadata($$$$) {
-	my ($output, $id, $metadataIdRef, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "") {
-		$logger->error("Missing argument(s).");
-		return -1;
-	}
+    if (!defined $id or $id eq "") {
+        $logger->error("Missing argument(s).");
+        return -1;
+    }
 
-	my %attrs = ();
-	$attrs{"id"} = $id;
-	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+    my %attrs = ();
+    $attrs{"id"} = $id;
+    $attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	return $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces);
+    return $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces);
 }
 
 sub endMetadata($) {
-	my ($output) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	return $output->endElement("metadata");
+    return $output->endElement("metadata");
 }
 
 sub startData($$$$) {
-	my ($output, $id, $metadataIdRef, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
-		$logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
-		return -1;
-	}
+    if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
+        $logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
+        return -1;
+    }
 
-	return $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces);
+    return $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces);
 }
 
 sub endData($) {
-	my ($output) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	return $output->endElement("data");
+    return $output->endElement("data");
 }
 
 sub startParameters($$) {
-	my ($output, $id) = @_;
+    my ($output, $id) = @_;
 
-	return $output->startElement(prefix => "nmwg", tag => "parameters", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id });
+    return $output->startElement(prefix => "nmwg", tag => "parameters", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id });
 }
 
 sub endParameters($) {
-	my ($output) = @_;
+    my ($output) = @_;
 
-	return $output->endElement("parameters");
+    return $output->endElement("parameters");
 }
 
 # XXX this should probably ensure that the parameters are being created inside a parameters block
 sub addParameter($$$) {
-	my ($output, $name, $value) = @_;
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $name, $value) = @_;
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => {name=>$name}, content => $value);
+    return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => {name=>$name}, content => $value);
 }
 
 sub getResultCodeMessage {
-	my ($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content) = @_;   
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content) = @_;   
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	my $n;
+    my $n;
 
-	my $ret_mdid = "metadata.".genuid();
-	my $ret_did = "data.".genuid();
+    my $ret_mdid = "metadata.".genuid();
+    my $ret_did = "data.".genuid();
 
-	$n = startMessage($output, $id, $messageIdRef, $type, "", undef);
-	return $n if ($n != 0);
-	$n = getResultCodeMetadata($output, $ret_mdid, $metadataIdRef, $event);
-	return $n if ($n != 0);
-	$n = getResultCodeData($output, $ret_did, $ret_mdid, $description, $escape_content);
-	return $n if ($n != 0);
-	$n = endMessage($output);
+    $n = startMessage($output, $id, $messageIdRef, $type, "", undef);
+    return $n if ($n != 0);
+    $n = getResultCodeMetadata($output, $ret_mdid, $metadataIdRef, $event);
+    return $n if ($n != 0);
+    $n = getResultCodeData($output, $ret_did, $ret_mdid, $description, $escape_content);
+    return $n if ($n != 0);
+    $n = endMessage($output);
 
-	return 0;
+    return 0;
 }
 
 sub getResultCodeMetadata($$$$) {
-	my ($output, $id, $metadataIdRef, $event) = @_; 
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $event) = @_; 
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "" or !defined $event or $event eq "") {
-		$logger->error("Missing argument(s).");
-		return -1;
-	}
+    if (!defined $id or $id eq "" or !defined $event or $event eq "") {
+        $logger->error("Missing argument(s).");
+        return -1;
+    }
 
-	my %attrs = ();
-	$attrs{"id"} = $id;
-	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+    my %attrs = ();
+    $attrs{"id"} = $id;
+    $attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	$output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs);
-	$output->startElement(prefix => "nmwg", tag => "eventType", namespace => "http://ggf.org/ns/nmwg/base/2.0/", content => $event);
-	$output->endElement("eventType");
-	$output->endElement("metadata");
+    $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs);
+    $output->startElement(prefix => "nmwg", tag => "eventType", namespace => "http://ggf.org/ns/nmwg/base/2.0/", content => $event);
+    $output->endElement("eventType");
+    $output->endElement("metadata");
 
-	$logger->debug("Result code metadata created.");
+    $logger->debug("Result code metadata created.");
 
-	return 0;
+    return 0;
 }
 
 # Changes: adds an 'escape_content' parameter at the end
 sub getResultCodeData($$$$$) {
-	my ($output, $id, $metadataIdRef, $description, $escape_content) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $description, $escape_content) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "" or !defined $description or $description eq "") {
-		return -1;
-	}
+    if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "" or !defined $description or $description eq "") {
+        return -1;
+    }
 
-	if (defined $escape_content and $escape_content == 1) {
-		$description = escapeString($description);
-	}
+    if (defined $escape_content and $escape_content == 1) {
+        $description = escapeString($description);
+    }
 
-	$output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef });
-	$output->startElement(prefix => "nmwgr", tag => "datum", namespace => "http://ggf.org/ns/nmwg/result/2.0/", content => $description);
-	$output->endElement("datum");
-	$output->endElement("data");
+    $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef });
+    $output->startElement(prefix => "nmwgr", tag => "datum", namespace => "http://ggf.org/ns/nmwg/result/2.0/", content => $description);
+    $output->endElement("datum");
+    $output->endElement("data");
 
-	return 0;
+    return 0;
 }
 
 sub statusReport($$$$$$) {
-	my ($output, $mdId, $mdIdRef, $dId, $eventType, $msg) = @_;
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $mdId, $mdIdRef, $dId, $eventType, $msg) = @_;
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	my $n = getResultCodeMetadata($output, $mdId, $mdIdRef, $eventType);
+    my $n = getResultCodeMetadata($output, $mdId, $mdIdRef, $eventType);
 
-	return $n if ($n != 0);
+    return $n if ($n != 0);
 
-	return getResultCodeData($output, $dId, $mdId, $msg, 1); 
+    return getResultCodeData($output, $dId, $mdId, $msg, 1); 
 }
 
 sub createMessage($$$$$$) {
-	my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	my $n = startMessage($output, $id, $messageIdRef, $type, $content, $namespaces);
+    my $n = startMessage($output, $id, $messageIdRef, $type, $content, $namespaces);
 
-	return $n if ($n != 0);
+    return $n if ($n != 0);
 
-	return endMessage($output);
+    return endMessage($output);
 }
 
 sub createMetadata($$$$$) {
-	my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "") {
-		$logger->error("Missing argument(s).");
-		return -1;
-	}
+    if (!defined $id or $id eq "") {
+        $logger->error("Missing argument(s).");
+        return -1;
+    }
 
-	my %attrs = ();
-	$attrs{"id"} = $id;
-	$attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
+    my %attrs = ();
+    $attrs{"id"} = $id;
+    $attrs{"metadataIdRef"} = $metadataIdRef if (defined $metadataIdRef and $metadataIdRef ne "");
 
-	my $n = $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
-	return $n if ($n != 0);
-	return $output->endElement("metadata");
+    my $n = $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
+    return $n if ($n != 0);
+    return $output->endElement("metadata");
 }
 
 sub createData($$$$$) {
-	my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
-	my $logger = get_logger("perfSONAR_PS::Messages");
+    my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
+    my $logger = get_logger("perfSONAR_PS::Messages");
 
-	if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
-		$logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
-		return -1;
-	}
+    if (!defined $id or $id eq "" or !defined $metadataIdRef or $metadataIdRef eq "") {
+        $logger->debug("createData failed: \"$id\" \"$metadataIdRef\"");
+        return -1;
+    }
 
-	$output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces, content => $content);
-	$output->endElement("data");
+    $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces, content => $content);
+    $output->endElement("data");
 
-	return 0;
+    return 0;
 }
 
 1;

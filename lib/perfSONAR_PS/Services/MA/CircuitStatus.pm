@@ -34,7 +34,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Time;
-use perfSONAR_PS::Error qw/:try/;
+use perfSONAR_PS::Error_compat qw/:try/;
 
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
@@ -131,7 +131,7 @@ sub init($$) {
 
 		try {
 			($self->{DOMAIN}, $self->{CIRCUITS}, $self->{INCOMPLETE_NODES}, $self->{TOPOLOGY_LINKS}, $self->{NODES}) = parseCircuitsFile($self->{CONF}->{"circuitstatus"}->{"circuits_file"});
-		} catch perfSONAR_PS::Error with {
+		} catch perfSONAR_PS::Error_compat with {
 			my $ex = shift;
 			my $msg = "Error parsing circuits file: $ex";
 			$logger->error($msg);
@@ -278,7 +278,7 @@ sub handleEvent($$$$$$$$$) {
 	}
 
 	if (!defined $eventType) {
-		throw perfSONAR_PS::Error("error.ma.event_type", "No supported event types for message of type \"$messageType\"");
+		throw perfSONAR_PS::Error_compat("error.ma.event_type", "No supported event types for message of type \"$messageType\"");
 	}
 
 	if (defined $selectTime and $selectTime->getType("point") and $selectTime->getTime() eq "now") {
@@ -292,7 +292,7 @@ sub handleEvent($$$$$$$$$) {
 		if (!defined $circuit_name or !defined $self->{CIRCUITS}->{$circuit_name}) {
 			my $msg = "The specified key is invalid";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.ma.invalid_key", "The specified key is invalid");
+			throw perfSONAR_PS::Error_compat ("error.ma.invalid_key", "The specified key is invalid");
 		}
 
 		push @circuits, $circuit_name;
@@ -302,7 +302,7 @@ sub handleEvent($$$$$$$$$) {
 		my $circuit_name;
 		try {
 			$circuit_name  = $self->compatParseSubject(find($subject_md, "./nmwg:subject", 1));
-		} catch perfSONAR_PS::Error with {
+		} catch perfSONAR_PS::Error_compat with {
 			my $ex = shift;
 			$logger->error("Error parsing subject: ".$ex->errorMessage());
 			$ex->rethrow();
@@ -321,7 +321,7 @@ sub compatParseSubject($$) {
 	my $circuit_name;
 
 	if (!find($subject, "./nmtl2:link", 1)) {
-		throw perfSONAR_PS::Error("error.ma.invalid_subject", "The specified subject does not contain a link element");
+		throw perfSONAR_PS::Error_compat("error.ma.invalid_subject", "The specified subject does not contain a link element");
 	}
 
 	my $circuit_name = findvalue($subject, "./nmtl2:link/nmtl2:name");
@@ -335,7 +335,7 @@ sub compatParseSubject($$) {
 	foreach my $node ($nodes->get_nodelist) {
 		my $node_name = findvalue($node, "./nmwgtopo3:name");
 		if (!defined $node_name) {
-			throw perfSONAR_PS::Error("error.ma.invalid_subject", "The specified subject contains an unfinished node");
+			throw perfSONAR_PS::Error_compat("error.ma.invalid_subject", "The specified subject contains an unfinished node");
 		}
 	}
 
@@ -376,7 +376,7 @@ sub createMetadataStore($$$) {
 	if ($@ or !defined $xmlDoc) {
 		my $msg = "Couldn't parse metadata store: $@";
 		$logger->error($msg);
-		throw perfSONAR_PS::Error("error.configuration", $msg);
+		throw perfSONAR_PS::Error_compat("error.configuration", $msg);
 	}
 
 	return $xmlDoc->documentElement;
@@ -397,11 +397,11 @@ sub resolveSelectChain($$$) {
 	if ($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and find($md, "./select:subject", 1)) {
 		my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
 		if(!$other_md) {
-			throw perfSONAR_PS::Error("error.ma.chaining", "Cannot resolve supposed subject chain in metadata.");
+			throw perfSONAR_PS::Error_compat("error.ma.chaining", "Cannot resolve supposed subject chain in metadata.");
 		}
 
 		if (!find($md, "./select:subject/select:parameters", 1)) {
-			throw perfSONAR_PS::Error ("error.ma.select", "No select parameters specified in given chain.");
+			throw perfSONAR_PS::Error_compat ("error.ma.select", "No select parameters specified in given chain.");
 		}
 
 		my $time = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"time\"]");
@@ -410,7 +410,7 @@ sub resolveSelectChain($$$) {
 		my $duration = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"duration\"]");
 
 		if (defined $time and (defined $startTime or defined $endTime or defined $duration)) {
-			throw perfSONAR_PS::Error ("error.ma.select", "Ambiguous select parameters");
+			throw perfSONAR_PS::Error_compat ("error.ma.select", "Ambiguous select parameters");
 		}
 
 		if (defined $time) {
@@ -418,9 +418,9 @@ sub resolveSelectChain($$$) {
 		}
 
 		if (!defined $startTime) {
-			throw perfSONAR_PS::Error ("error.ma.select", "No start time specified");
+			throw perfSONAR_PS::Error_compat ("error.ma.select", "No start time specified");
 		} elsif (!defined $endTime and !defined $duration) {
-			throw perfSONAR_PS::Error ("error.ma.select", "No end time specified");
+			throw perfSONAR_PS::Error_compat ("error.ma.select", "No end time specified");
 		} elsif (defined $endTime) {
 			return (perfSONAR_PS::Time->new("range", $startTime, $endTime), $other_md);
 		} else {
@@ -833,7 +833,7 @@ sub parseCircuitsFile($) {
 	if ($@ or !defined $doc) {
 		my $msg = "Couldn't parse circuits file $file: $@";
 		$logger->error($msg);
-		throw perfSONAR_PS::Error ("error.configuration", $msg);
+		throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 	}
 
 	my $conf = $doc->documentElement;
@@ -842,7 +842,7 @@ sub parseCircuitsFile($) {
 	if (!defined $domain) {
 		my $msg = "No domain specified in configuration";
 		$logger->error($msg);
-		throw perfSONAR_PS::Error ("error.configuration", $msg);
+		throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 	}
 
 	foreach my $endpoint ($conf->getChildrenByLocalName("node")) {
@@ -858,25 +858,25 @@ sub parseCircuitsFile($) {
 		if (!defined $node_name or $node_name eq "") {
 			my $msg = "Node needs to have a name";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		if (defined $nodes{$node_name}) {
 			my $msg = "Multiple endpoints have the name \"$node_name\"";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		if (!defined $node_type or $node_type eq "") {
 			my $msg = "Node with unspecified type found";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
 			my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		my %tmp = ();
@@ -907,7 +907,7 @@ sub parseCircuitsFile($) {
 		if (!defined $global_name or $global_name eq "") {
 			my $msg = "Circuit has no global name";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		if (!defined $knowledge or $knowledge eq "") {
@@ -929,7 +929,7 @@ sub parseCircuitsFile($) {
 			if (defined $sublinks{$id}) {
 				my $msg = "Link $id appears multiple times in circuit $global_name";
 				$logger->error($msg);
-				throw perfSONAR_PS::Error ("error.configuration", $msg);
+				throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 			}
 
 			$sublinks{$id} = "";
@@ -949,19 +949,19 @@ sub parseCircuitsFile($) {
 			if (!defined $node_type or $node_type eq "") {
 				my $msg = "Node with unspecified type found";
 				$logger->error($msg);
-				throw perfSONAR_PS::Error ("error.configuration", $msg);
+				throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 			}
 
 			if (!defined $node_name or $node_name eq "") {
 				my $msg = "Endpint needs to specify a node name";
 				$logger->error($msg);
-				throw perfSONAR_PS::Error ("error.configuration", $msg);
+				throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 			}
 
 			if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
 				my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
 				$logger->error($msg);
-				throw perfSONAR_PS::Error ("error.configuration", $msg);
+				throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 			}
 
 			my ($domain, @junk) = split(/-/, $node_name);
@@ -992,7 +992,7 @@ sub parseCircuitsFile($) {
 		if ($num_endpoints != 2) {
 			my $msg = "Invalid number of endpoints, $num_endpoints, must be 2";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		}
 
 		my @sublinks = keys %sublinks;
@@ -1008,7 +1008,7 @@ sub parseCircuitsFile($) {
 		if (defined $circuits{$local_name}) {
 			my $msg = "Error: existing circuit of name $local_name";
 			$logger->error($msg);
-			throw perfSONAR_PS::Error ("error.configuration", $msg);
+			throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 		} else {
 			$circuits{$local_name} = \%new_circuit;
 		}

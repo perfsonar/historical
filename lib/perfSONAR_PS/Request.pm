@@ -33,273 +33,263 @@ sub finish($);
 
 
 sub new($$$) {
-  my ($package, $call, $http_request) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
+    my ($package, $call, $http_request) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
 
-  my $self = fields::new($package);
+    my $self = fields::new($package);
 
-  $self->{"CALL"} = $call;
-  if (defined $http_request and $http_request ne "") {
-    $self->{"REQUEST"} = $http_request;
-  } else {
-    $self->{"REQUEST"} = $call->get_request;
-  }
-  my %empty = ();
-  $self->{"NAMESPACES"} = \%empty;
+    $self->{"CALL"} = $call;
+    if (defined $http_request and $http_request ne "") {
+        $self->{"REQUEST"} = $http_request;
+    } else {
+        $self->{"REQUEST"} = $call->get_request;
+    }
+    my %empty = ();
+    $self->{"NAMESPACES"} = \%empty;
 
-  $self->{"RESPONSE"} = HTTP::Response->new();
-  $self->{"RESPONSE"}->header('Content-Type' => 'text/xml');
-  $self->{"RESPONSE"}->header('user-agent' => 'perfSONAR-PS/1.0b');
-  $self->{"RESPONSE"}->code("200");
+    $self->{"RESPONSE"} = HTTP::Response->new();
+    $self->{"RESPONSE"}->header('Content-Type' => 'text/xml');
+    $self->{"RESPONSE"}->header('user-agent' => 'perfSONAR-PS/1.0b');
+    $self->{"RESPONSE"}->code("200");
 
-  $self->{"START_TIME"} = [Time::HiRes::gettimeofday];
+    $self->{"START_TIME"} = [Time::HiRes::gettimeofday];
 
-  return $self;
+    return $self;
 }
 
 sub setRequest($$) {
-  my ($self, $request) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if(defined $request and $request ne "") {
-    $self->{REQUEST} = $request;
-  }
-  else {
-    $logger->error("Missing argument.");
-  }
-  return;
+    my ($self, $request) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if(defined $request and $request ne "") {
+        $self->{REQUEST} = $request;
+    } else {
+        $logger->error("Missing argument.");
+    }
+    return;
 }
 
 sub getEndpoint($) {
-	my ($self) = @_;
-	my $endpoint = $self->{REQUEST}->uri;
+    my ($self) = @_;
+    my $endpoint = $self->{REQUEST}->uri;
 
-	$endpoint =~ s/\/\//\//;
+    $endpoint =~ s/\/\//\//;
 
-	return $endpoint;
+    return $endpoint;
 }
 
 sub parse($$) {
-  my ($self, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
+    my ($self, $error) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
 
-  if (!defined $self->{REQUEST}) {
-    my $msg = "No request to parse";
-    $logger->error($msg);
-    $$error = $msg;
-    return -1;
-  }
+    if (!defined $self->{REQUEST}) {
+        my $msg = "No request to parse";
+        $logger->error($msg);
+        $$error = $msg;
+        return -1;
+    }
 
-  $logger->debug("Parsing request: ".$self->{REQUEST}->content); 
+    $logger->debug("Parsing request: ".$self->{REQUEST}->content); 
 
-  my $parser = XML::LibXML->new();
-  my $dom;
-  eval {
-	  $dom = $parser->parse_string($self->{REQUEST}->content);
-  };
-  if($@) {
-	  my $msg = escapeString("Parse failed: ".$@);
+    my $parser = XML::LibXML->new();
+    my $dom;
+    eval {
+        $dom = $parser->parse_string($self->{REQUEST}->content);
+    };
+    if($@) {
+        my $msg = escapeString("Parse failed: ".$@);
 
-	  $logger->error($msg);
-	  $$error = $msg if (defined $error);
-	  return -1;
-  }
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        return -1;
+    }
 
-  &perfSONAR_PS::Common::mapNamespaces($dom->getDocumentElement, $self->{NAMESPACES});
+    &perfSONAR_PS::Common::mapNamespaces($dom->getDocumentElement, $self->{NAMESPACES});
 
-  my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
-  if (!defined $nmwg_prefix) {
-    my $msg = "Received message with incorrect message URI";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
-    return -1;
-  }
+    my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    if (!defined $nmwg_prefix) {
+        my $msg = "Received message with incorrect message URI";
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        return -1;
+    }
 
-  my $messages = find($dom->getDocumentElement, ".//nmwg:message", 0);
+    my $messages = find($dom->getDocumentElement, ".//nmwg:message", 0);
 
-  if (!defined $messages or $messages->size() <= 0) {
-    my $msg = "Couldn't find message element in request";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
-    return -1;
-  }
+    if (!defined $messages or $messages->size() <= 0) {
+        my $msg = "Couldn't find message element in request";
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        return -1;
+    }
 
-  if($messages->size() > 1) {
-    my $msg = "Too many message elements found within request";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
-    return -1;
-  }
+    if($messages->size() > 1) {
+        my $msg = "Too many message elements found within request";
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        return -1;
+    }
 
-  my $new_dom;
-  $new_dom = $parser->parse_string($messages->get_node(1)->toString);
+    my $new_dom;
+    $new_dom = $parser->parse_string($messages->get_node(1)->toString);
 
-  $logger->info("To string: ".$new_dom->toString);
+    $logger->info("To string: ".$new_dom->toString);
 
-  $self->{REQUESTDOM} = $new_dom;
-  $$error = "";
-  return 0;
+    $self->{REQUESTDOM} = $new_dom;
+    $$error = "";
+    return 0;
 }
 
 sub remapRequest($$) {
-  my ($self, $ns) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
+    my ($self, $ns) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
 
-  if (!defined $self->{REQUESTDOM} or $self->{REQUESTDOM} eq "") {
-     $logger->error("Tried to remap an unparsed request");
-     return;
-  }
+    if (!defined $self->{REQUESTDOM} or $self->{REQUESTDOM} eq "") {
+        $logger->error("Tried to remap an unparsed request");
+        return;
+    }
 
-  $self->{NAMESPACES} = &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $ns, $self->{REQUESTDOM});
+    $self->{NAMESPACES} = &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $ns, $self->{REQUESTDOM});
 }
 
 sub getURI($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if (!defined $self->{REQUEST}) {
-    $logger->error("Tried to get URI with no request");
-    return "";
-  }
-  return $self->{REQUEST}->uri;
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if (!defined $self->{REQUEST}) {
+        $logger->error("Tried to get URI with no request");
+        return "";
+    }
+    return $self->{REQUEST}->uri;
 }
 
 sub getRawRequest($) {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  return $self->{REQUEST};
+    return $self->{REQUEST};
 }
 
 sub getRawRequestAsString($) {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  return $self->{REQUEST}->content;
+    return $self->{REQUEST}->content;
 }
 
 sub getRequest($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  my $xp = $self->getRequestAsXPath();
-  my $nodeset = find($xp, '//nmwg:message', 0);
-  if($nodeset->size() <= 0) {
-    $logger->error("Message element not found or in wrong namespace.");
-  }
-  elsif($nodeset->size() >= 2) {
-    $logger->error("Too many Message elements found.");
-  }
-  else {
-    return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
-  }
-  return "";
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    my $xp = $self->getRequestAsXPath();
+    my $nodeset = find($xp, '//nmwg:message', 0);
+    if($nodeset->size() <= 0) {
+        $logger->error("Message element not found or in wrong namespace.");
+    } elsif($nodeset->size() >= 2) {
+        $logger->error("Too many Message elements found.");
+    } else {
+        return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
+    }
+    return "";
 }
 
 sub getRequestAsXPath($) {
-  my ($self) = @_;
-  my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
-  $xp->clear_namespaces();
-  $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-  return $xp;
+    my ($self) = @_;
+    my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
+    $xp->clear_namespaces();
+    $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
+    return $xp;
 }
 
 
 sub setResponse($$) {
-  my ($self, $content) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if(defined $content and $content ne "") {
-    $self->{RESPONSE}->message("success");
-    $self->{RESPONSE}->content(makeEnvelope($content));
-    $self->{RESPONSEMESSAGE} = $content;
-  }
-  else {
-    $logger->error("Missing argument.");
-  }
-  return;
+    my ($self, $content) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if(defined $content and $content ne "") {
+        $self->{RESPONSE}->message("success");
+        $self->{RESPONSE}->content(makeEnvelope($content));
+        $self->{RESPONSEMESSAGE} = $content;
+    } else {
+        $logger->error("Missing argument.");
+    }
+    return;
 }
 
 sub setResponseAsXPath($$) {
-  my ($self, $xpath) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  $logger->error("Missing argument.") unless defined $xpath;
-  my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
-  return $self->setResponse( $content );
+    my ($self, $xpath) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    $logger->error("Missing argument.") unless defined $xpath;
+    my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
+    return $self->setResponse( $content );
 }
 
 sub getRequestDOM($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if($self->{REQUESTDOM}) {
-    return $self->{REQUESTDOM};
-  }
-  else {
-    $logger->error("Request DOM not found.");
-    return "";
-  }
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if($self->{REQUESTDOM}) {
+        return $self->{REQUESTDOM};
+    } else {
+        $logger->error("Request DOM not found.");
+        return "";
+    }
 }
 
 sub getResponse($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if($self->{RESPONSEMESSAGE}) {
-    return $self->{RESPONSEMESSAGE};
-  }
-  else {
-    $logger->error("Response not found.");
-    return "";
-  }
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if($self->{RESPONSEMESSAGE}) {
+        return $self->{RESPONSEMESSAGE};
+    } else {
+        $logger->error("Response not found.");
+        return "";
+    }
 }
 
 sub setNamespaces($$) {
-  my ($self, $ns) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if(defined $ns and $ns ne "") {
-    $self->{NAMESPACES} = $ns;
-  }
-  else {
-    $logger->error("Missing argument.");
-  }
-  return;
+    my ($self, $ns) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if(defined $ns and $ns ne "") {
+        $self->{NAMESPACES} = $ns;
+    } else {
+        $logger->error("Missing argument.");
+    }
+    return;
 }
 
 
 sub getNamespaces($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if($self->{NAMESPACES}) {
-    return $self->{NAMESPACES};
-  }
-  else {
-    $logger->error("Request namespace object not found.");
-    return ();
-  }
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if($self->{NAMESPACES}) {
+        return $self->{NAMESPACES};
+    } else {
+        $logger->error("Request namespace object not found.");
+        return ();
+    }
 }
 
 
 sub setRequestDOM($$) {
-  my ($self, $dom) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if(defined $dom and $dom ne "") {
-    $self->{REQUESTDOM} = $dom;
-  }
-  else {
-    $logger->error("Missing argument.");
-  }
-  return;
+    my ($self, $dom) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if(defined $dom and $dom ne "") {
+        $self->{REQUESTDOM} = $dom;
+    } else {
+        $logger->error("Missing argument.");
+    }
+    return;
 }
 
 sub finish($) {
-  my ($self) = @_;
-  my $logger = get_logger("perfSONAR_PS::Request");
-  if(defined $self->{CALL} and $self->{CALL} ne "") {
-    my $end_time = [Time::HiRes::gettimeofday];
-    my $diff = Time::HiRes::tv_interval $self->{START_TIME}, $end_time;
-    $logger->info("Total service time for request from ".$self->{CALL}->peerhost().": ".$diff." seconds");
-    $self->{CALL}->send_response($self->{RESPONSE});
-    $self->{CALL}->close;
-    delete $self->{CALL};
-    $logger->debug("Closing call.");
-  }
-  else {
-    $logger->error("Call not established.");
-  }
-  return;
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Request");
+    if(defined $self->{CALL} and $self->{CALL} ne "") {
+        my $end_time = [Time::HiRes::gettimeofday];
+        my $diff = Time::HiRes::tv_interval $self->{START_TIME}, $end_time;
+        $logger->info("Total service time for request from ".$self->{CALL}->peerhost().": ".$diff." seconds");
+        $self->{CALL}->send_response($self->{RESPONSE});
+        $self->{CALL}->close;
+        delete $self->{CALL};
+        $logger->debug("Closing call.");
+    } else {
+        $logger->error("Call not established.");
+    }
+    return;
 }
 
 1;

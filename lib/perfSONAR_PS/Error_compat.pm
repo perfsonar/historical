@@ -1,4 +1,4 @@
-package perfSONAR_PS::Error;
+package perfSONAR_PS::Error_compat;
 
 use base 'Error';
 

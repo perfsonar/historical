@@ -437,7 +437,7 @@ sub consultArchive($$$$) {
   $logger->debug("Time to make request: ".($end_time - $start_time));
 
   if ($error ne "") {
-    my $msg = "Error will sending request to server: $error";
+    my $msg = "Error while sending request to server: $error";
     $logger->error($msg);
     return (-1, $msg);
   }
