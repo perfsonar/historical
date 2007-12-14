@@ -31,6 +31,9 @@ use Cwd;
 use Config::General;
 use Module::Load;
 use Data::Dumper;
+use HTTP::Daemon;
+
+use Carp::Always;
 
 sub psService($$$);
 sub registerLS($);
@@ -63,8 +66,8 @@ BEGIN {
 use lib "$libdir";
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::SOAP_Daemon;
 use perfSONAR_PS::Messages;
+use perfSONAR_PS::Request;
 use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
@@ -132,6 +135,10 @@ if (!defined $conf{"disable_echo"} or $conf{"disable_echo"} eq "") {
     $conf{"disable_echo"} = 0;
 }
 
+if (!defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq "") {
+    $logger->warn("Setting reaper interval to 20 seconds");
+    $conf{"reaper_interval"} = 20;
+}
 
 if (!defined $PIDDIR or $PIDDIR eq "") {
     if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
@@ -186,9 +193,13 @@ foreach my $port (keys %{ $conf{"port"} }) {
         next;
     }
 
-    my $listener = new perfSONAR_PS::SOAP_Daemon($port);
-    if ($listener->startDaemon() != 0) {
-        $logger->error("Couldn't start listener on port $port");
+    my $listener = HTTP::Daemon->new(
+                        LocalPort => $port,
+                        ReuseAddr => 1,
+                        Timeout => $port_conf{"reaper_interval"},
+                    ); 
+    if (!defined $listener != 0) {
+        $logger->error("Couldn't start daemon on port $port");
         exit(-1);
     }
 
@@ -312,7 +323,6 @@ go on for too long, responding to the request with an error.
 =cut
 sub psService($$$) {
     my ($listener, $handlers, $service_config) = @_;
-    my $outstanding_children = 0;
     my $max_worker_processes;
 
     $logger->debug("Starting '".$$."' as the MA.");
@@ -321,83 +331,82 @@ sub psService($$$) {
 
     while(1) {
         if ($max_worker_processes > 0) {
-            while ($outstanding_children >= $max_worker_processes) {
+            while (%child_pids and scalar(keys %child_pids) >= $max_worker_processes) {
                 $logger->debug("Waiting for a slot to open");
                 my $kid = waitpid(-1, 0);
                 if ($kid > 0) {
                     delete $child_pids{$kid};
-                    $outstanding_children--;
                 }
             }
         }
 
-        my ($res, $request, $error);
-
-        $res = $listener->receive(\$request, \$error);
-
-        if ($res == -1) {
-            $logger->error("Receive failed: $error");
-            if (defined $request) {
-                my $ret_message = new perfSONAR_PS::XML::Document_string();
-                if (getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $error, undef, 1) != 0) {
-                    $logger->error("Writing result code message failed");
-                }
-                $request->setResponse($ret_message->getValue());
-                $request->finish();
-            }
-        } elsif (defined $request) {
-            if (!defined $handlers->{$request->getEndpoint()}) {
-                my $ret_message = new perfSONAR_PS::XML::Document_string();
-                my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
-                getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
-                $request->setResponse($ret_message->getValue());
-                $request->finish();
-            } else {
-                my $pid = fork();
-                if ($pid == 0) {
-                    %child_pids = ();
-                    handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
-                    exit(0);
-                } elsif ($pid < 0) {
-                    $logger->error("Error spawning child");
-                } else {
-                    my $max_worker_lifetime =  $service_config->{"endpoint"}->{$request->getEndpoint()}->{"max_worker_lifetime"};
-                    my %child_info = ();
-                    $child_info{"request"} = $request;
-                    $child_info{"endpoint"} = $request->getEndpoint();
-                    $child_info{"timeout_time"} = time + $max_worker_lifetime;
-                    $child_info{"child_timeout_length"} = $max_worker_lifetime;
-                    $logger->info("Timeout: $max_worker_lifetime - ".$child_info{"timeout_time"});
-                    $child_pids{$pid} = \%child_info;
-                    $outstanding_children++;
-                }
-            }
-        }
-
-        $logger->debug("Reaping children");
-
-        # reap any children that have finished
-        while((my $kid = waitpid(-1, WNOHANG)) > 0) {
-            delete $child_pids{$kid};
-            $outstanding_children--;
-        }
-
-        # kill off any children that have outlived their alloted time
-        foreach my $pid (keys %child_pids) {
+        if (%child_pids) {
             my $time = time;
-            if ($child_pids{$pid}->{"timeout_time"} <= $time) {
-                my $request = $child_pids{$pid}->{"request"};
-                $logger->error("Pid $pid timed out for request to endpoint ".$request->getEndpoint() ." $time <= ".$child_pids{$pid}->{"timeout_time"});
-                kill 9, $pid;
 
-                my $ret_message = new perfSONAR_PS::XML::Document_string();
-                my $msg = "Timeout occurred, current limit is ".$child_pids{$pid}->{"child_timeout_length"}." seconds. Try decreasing the breadth of your search if possible.";
-                getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", $msg, undef, 1);
-                $request->setResponse($ret_message->getValue());
-                $request->finish();
+            $logger->debug("Reaping children (total: " .scalar  (keys %child_pids) . ") at time " . $time );
 
-                delete $child_pids{$pid};
-                $outstanding_children--;
+            # reap any children that have finished or outlived their allotted time
+            foreach my $pid (keys %child_pids) {
+                if (waitpid($pid, WNOHANG))  {
+                    $logger->debug("Child $pid exited.");
+                    delete $child_pids{$pid};
+                } elsif ($child_pids{$pid}->{"timeout_time"} <= $time) {
+                    $logger->error("Pid $pid timed out.");
+                    kill 9, $pid;
+
+                    my $ret_message = new perfSONAR_PS::XML::Document_string();
+                    my $msg = "Timeout occurred, current limit is ".$child_pids{$pid}->{"child_timeout_length"}." seconds. Try decreasing the breadth of your search if possible.";
+                    getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", $msg, undef, 1);
+
+                    my $response = HTTP::Response->new();
+                    $response->message("success");
+                    $response->header('Content-Type' => 'text/xml');
+                    $response->header('user-agent' => 'perfSONAR-PS/1.0b');
+                    $response->content(makeEnvelope($ret_message->getValue()));
+                    $child_pids{$pid}->{"listener"}->send_response($response);
+                    $child_pids{$pid}->{"listener"}->close();
+                }
+            }
+        }
+
+        my $handle = $listener->accept;
+        if (!defined $handle) {
+            my $msg = "Accept returned nothing, likely a timeout occurred";
+            $logger->debug($msg);
+        } else {
+            $logger->info("Received incoming connection from:\t".$handle->peerhost());
+            my $pid = fork();
+            if ($pid == 0) {
+                %child_pids = ();
+
+                my $http_request = $handle->get_request;
+                if (!defined $http_request) {
+                    my $msg = "No HTTP Request received from host:\t".$handle->peerhost();
+                    $logger->error($msg);
+                    $handle->close;
+                    exit(-1);
+                }
+
+                my $request = perfSONAR_PS::Request->new($handle, $http_request);
+                if (!defined $handlers->{$request->getEndpoint()}) {
+                    my $ret_message = new perfSONAR_PS::XML::Document_string();
+                    my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
+                    getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
+                    $request->setResponse($ret_message->getValue());
+                    $request->finish();
+                } else {
+                    handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
+                }
+                exit(0);
+            } elsif ($pid < 0) {
+                $logger->error("Error spawning child");
+            } else {
+                my $max_worker_lifetime =  $service_config->{"max_worker_lifetime"};
+                my %child_info = ();
+                $child_info{"listener"} = $handle;
+                $child_info{"timeout_time"} = time + $max_worker_lifetime;
+                $child_info{"child_timeout_length"} = $max_worker_lifetime;
+                $child_pids{$pid} = \%child_info;
             }
         }
     }
@@ -441,8 +450,22 @@ sub handleRequest($$$) {
 
     my $messageId = "";
 
+
     try {
         my $error;
+
+        if($request->getRawRequest->method ne "POST") {
+            my $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
+            $logger->error($msg);     
+            throw perfSONAR_PS::Error_compat("error.perfSONAR_PS.MA", $msg);
+        }
+
+        my $action = $request->getRawRequest->headers->{"soapaction"};
+        if (!$action =~ m/^.*message\/$/) {
+            my $msg = "Received message with 'INVALID ACTION TYPE'.";
+            $logger->error($msg);     
+            throw perfSONAR_PS::Error_compat("error.perfSONAR_PS.MA", $msg);
+        }
 
         $request->parse(\$error);
         if (defined $error and $error ne "") {
