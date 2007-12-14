@@ -1,0 +1,12 @@
+Makefile.PL
+Changes
+MANIFEST
+README
+MANIFEST.SKIP
+lib/perfSONAR_PS/Time.pm
+lib/perfSONAR_PS/XML/Document_string.pm
+lib/perfSONAR_PS/Messages.pm
+lib/perfSONAR_PS/Transport.pm
+lib/perfSONAR_PS/Error_compat.pm
+lib/perfSONAR_PS/Common.pm
+META.yml                                 Module meta-data (added by MakeMaker)

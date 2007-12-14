@@ -1,0 +1,17 @@
+use ExtUtils::MakeMaker;
+
+WriteMakefile(
+    'NAME' => 'perfSONAR_PS::Base',
+    'VERSION' => 'v0.01',
+    'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
+    'PREREQ_PM' => {
+        "strict" => 0,
+	"warnings" => 0,
+	"Exporter" => 0,
+	"Log::Log4perl" => 1.00,
+	"Time::HiRes" => 1.9707,
+	"IO::File" => 0,
+	"XML::LibXML" => 1.60,
+	"LWP::UserAgent" => 2.032,
+    }
+);

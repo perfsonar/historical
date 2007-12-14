@@ -1,0 +1,6 @@
+Makefile.PL
+Changes
+MANIFEST
+README
+MANIFEST.SKIP
+lib/perfSONAR_PS/Services/MA/Status.pm
