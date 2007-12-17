@@ -2,9 +2,12 @@
 
 use strict;
 use Getopt::Long;
-use Log::Log4perl qw(get_logger :levels);
+use Log::Log4perl qw(:easy);
 use XML::LibXML;
 use File::Basename;
+
+sub dump($$);
+sub print_help();
 
 my $dirname;
 my $libdir;
@@ -21,14 +24,7 @@ use lib "$libdir";
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Common qw( readXML );
 
-Log::Log4perl->init($dirname."/logger.conf");
-my $logger = get_logger("perfSONAR_PS");
-
 our $DEBUGFLAG;
-our $HOST = "localhost";
-our $PORT = "4801";
-our $ENDPOINT = '/perfSONAR_PS/services/status';
-our $FILTER = '/';	# xpath query filter
 our %opts = ();
 
 our $help_needed;
@@ -44,21 +40,31 @@ my $ok = GetOptions (
 
 # help?
 if (not $ok or $help_needed) {
- 	print "$0: sends an xml file to the server on specified port.\n";
-  	print "    ./client.pl [--server=xxx.yyy.zzz --port=n --endpoint=ENDPOINT] [URI] FILENAME\n";
+	print_help();
   	exit(1);	
 }
+
+# setup logging
+our $level = $INFO;
+
+if ($DEBUGFLAG) {
+	$level = $DEBUG;    
+}
+
+Log::Log4perl->easy_init($level);
+my $logger = get_logger("perfSONAR_PS");
 
 # process two arguments
 my $host;
 my $port;
 my $endpoint;
-my $filter;
+my $filter = '/';
 my $file;
 if (scalar @ARGV eq 2) {
 	($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($ARGV[0]);
 
 	if (!defined $host && !defined $port && !defined $endpoint) {
+		print_help();
 		 die "Argument 1 must be a URI if more than one parameter used.\n";
 	}
 
@@ -66,6 +72,7 @@ if (scalar @ARGV eq 2) {
 } elsif (scalar @ARGV eq 1) {
 	$file = $ARGV[0];
 } else {
+	print_help();
 	die "Invalid number of parameters: must be 1 for just a file, or 2 for a uri and a file";
 }
 
@@ -87,19 +94,10 @@ if (defined $opts{FILTER}) {
 	$filter = $opts{FILTER};
 }
 
-if ($DEBUGFLAG) {
-	$logger->level($DEBUG);    
-} else {
-	$logger->level($INFO); 
+if (!defined $host or !defined $port or !defined $endpoint) {
+	print_help();
+	die "You must specify the host, port and endpoint as either a URI or via the command line switches";
 }
-
-# define the actual values
-$host = $HOST unless defined $host; 
-$port = $PORT unless defined $port;
-$endpoint = $ENDPOINT unless defined $endpoint; 
-$filter = $FILTER unless defined $filter;
- 
-print STDERR "HOST: $host, PORT: $port, ENDPOINT: $endpoint, FILE: $file\n" if $DEBUGFLAG;
 
 # start a transport agent
 my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
@@ -127,7 +125,7 @@ exit(0);
 ###
 # dumps the response to screen; using the xpath query filter if defined
 ###
-sub dump {
+sub dump($$) {
 	my $response = shift;
 	my $find = shift;
 
@@ -147,6 +145,11 @@ sub dump {
 	}
 
 	return;
+}
+
+sub print_help() {
+ 	print "$0: sends an xml file to the server on specified port.\n";
+  	print "    ./client.pl [--server=xxx.yyy.zzz --port=n --endpoint=ENDPOINT] [URI] FILENAME\n";
 }
 
 =head1 NAME
