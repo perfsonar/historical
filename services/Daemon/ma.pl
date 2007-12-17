@@ -23,7 +23,6 @@ use strict;
 use Getopt::Long;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
-use Log::Log4perl qw(get_logger :levels);
 use File::Basename;
 use Fcntl qw(:DEFAULT :flock);
 use POSIX ":sys_wait_h";
@@ -32,8 +31,6 @@ use Config::General;
 use Module::Load;
 use Data::Dumper;
 use HTTP::Daemon;
-
-use Carp::Always;
 
 sub psService($$$);
 sub registerLS($);
@@ -72,9 +69,6 @@ use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
 
-Log::Log4perl->init("logger.conf");
-my $logger = get_logger("perfSONAR_PS");
-
 $0 = "ma.pl  ($$)";
 
 my %child_pids = ();
@@ -88,11 +82,15 @@ my $DEBUGFLAG = '';
 my $READ_ONLY = '';
 my $HELP = '';
 my $CONFIG_FILE  = '';
+my $LOGGER_CONF  = '';
 my $PIDDIR = '';
 my $PIDFILE = '';
+my $LOGOUTPUT = '';
 
 my $status = GetOptions (
         'config=s' => \$CONFIG_FILE,
+        'logger=s' => \$LOGGER_CONF,
+        'output=s' => \$LOGOUTPUT,
         'piddir=s' => \$PIDDIR,
         'pidfile=s' => \$PIDFILE,
         'verbose' => \$DEBUGFLAG,
@@ -100,8 +98,41 @@ my $status = GetOptions (
 
 if(!$status or $HELP) {
     print "$0: starts the MA daemon.\n";
-    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
+    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf]\n";
     exit(1);
+}
+
+my $logger;
+if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
+    use Log::Log4perl qw(:easy);
+
+    my $output_level = $INFO;
+    if($DEBUGFLAG) {
+        $output_level = $DEBUG;
+    }
+
+    my %logger_opts = (
+        level => $output_level,
+        layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
+    );
+
+    if (defined $LOGOUTPUT and $LOGOUTPUT ne "") {
+        $logger_opts{file} = $LOGOUTPUT;
+    }
+
+    Log::Log4perl->easy_init( \%logger_opts );
+    $logger = get_logger("perfSONAR_PS");
+} else {
+    use Log::Log4perl qw(get_logger :levels);
+
+    my $output_level = $INFO;
+    if($DEBUGFLAG) {
+        $output_level = $DEBUG;
+    }
+ 
+    Log::Log4perl->init($LOGGER_CONF);
+    $logger = get_logger("perfSONAR_PS");
+    $logger->level($output_level);
 }
 
 if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
@@ -154,13 +185,6 @@ if (!defined $PIDFILE or $PIDFILE eq "") {
     } else {
         $PIDFILE = "ps.pid";
     }
-}
-
-# set logging level
-if($DEBUGFLAG) {
-    $logger->level($DEBUG);
-} else {
-    $logger->level($INFO);
 }
 
 managePID($PIDDIR, $PIDFILE);
