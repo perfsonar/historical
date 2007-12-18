@@ -4,3 +4,4 @@ MANIFEST
 README
 MANIFEST.SKIP
 lib/perfSONAR_PS/Client/Topology/XMLDB.pm
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -3,4 +3,6 @@ Changes
 MANIFEST
 README
 MANIFEST.SKIP
+psLoadTopology
 lib/perfSONAR_PS/Services/MA/Topology.pm
+META.yml                                 Module meta-data (added by MakeMaker)

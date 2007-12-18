@@ -7,8 +7,8 @@ WriteMakefile(
     'PREREQ_PM' => {
         "strict" => 0,
 	"Log::Log4perl" => 1.00,
-	"perfSONAR_PS::Topology::Common" => 0.01,
-	"perfSONAR_PS::Topology::ID" => 0.01,
-	"perfSONAR_PS::DB::XMLDB" => 0.01,
+	"perfSONAR_PS::Topology::Common" => "v0.01",
+	"perfSONAR_PS::Topology::ID" => "v0.01",
+	"perfSONAR_PS::DB::XMLDB" => "v0.01",
     }
 );

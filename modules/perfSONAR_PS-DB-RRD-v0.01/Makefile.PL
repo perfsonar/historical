@@ -8,7 +8,7 @@ WriteMakefile(
         "strict" => 0,
         "warnings" => 0,
 	"Log::Log4perl" => 1.00,
-	"perfSONAR_PS::Common" => 0.01,
+	"perfSONAR_PS::Common" => "v0.01",
 	"RRDp" => 1.20,
     }
 );

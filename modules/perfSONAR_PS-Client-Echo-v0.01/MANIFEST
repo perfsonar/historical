@@ -3,4 +3,6 @@ Changes
 MANIFEST
 README
 MANIFEST.SKIP
+psping
 lib/perfSONAR_PS/Client/Echo.pm
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -7,7 +7,7 @@ WriteMakefile(
     'PREREQ_PM' => {
         "warnings" => 0,
 	"Exporter" => 0,
-	"perfSONAR_PS::Common" => 0.01,
+	"perfSONAR_PS::Common" => "v0.01",
 	"Log::Log4perl" => 1.00,
     }
 );

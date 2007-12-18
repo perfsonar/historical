@@ -4,3 +4,4 @@ MANIFEST
 README
 MANIFEST.SKIP
 lib/perfSONAR_PS/Client/LS/Remote.pm
+META.yml                                 Module meta-data (added by MakeMaker)

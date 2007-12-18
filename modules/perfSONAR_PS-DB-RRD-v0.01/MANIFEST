@@ -4,3 +4,4 @@ MANIFEST
 README
 MANIFEST.SKIP
 lib/perfSONAR_PS/DB/RRD.pm
+META.yml                                 Module meta-data (added by MakeMaker)

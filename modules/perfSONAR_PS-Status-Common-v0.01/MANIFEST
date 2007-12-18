@@ -5,3 +5,4 @@ README
 MANIFEST.SKIP
 lib/perfSONAR_PS/Status/Link.pm
 lib/perfSONAR_PS/Status/Common.pm
+META.yml                                 Module meta-data (added by MakeMaker)

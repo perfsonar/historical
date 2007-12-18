@@ -7,8 +7,8 @@ WriteMakefile(
     'PREREQ_PM' => {
         "strict" => 0,
 	"Log::Log4perl" => 1.00,
-	"perfSONAR_PS::DB::SQL" => 0.01,
-	"perfSONAR_PS::Status::Link" => 0.01,
-	"perfSONAR_PS::Status::Common" => 0.01,
+	"perfSONAR_PS::DB::SQL" => "v0.01",
+	"perfSONAR_PS::Status::Link" => "v0.01",
+	"perfSONAR_PS::Status::Common" => "v0.01",
     }
 );

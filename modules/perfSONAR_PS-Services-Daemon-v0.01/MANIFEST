@@ -4,8 +4,10 @@ MANIFEST
 README
 MANIFEST.SKIP
 perfsonar.pl
+psConfigureDaemon
+logger.conf
 lib/perfSONAR_PS/Services/Base.pm
 lib/perfSONAR_PS/Services/Echo.pm
-lib/perfSONAR_PS/SOAP_Daemon.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Request.pm
+META.yml                                 Module meta-data (added by MakeMaker)

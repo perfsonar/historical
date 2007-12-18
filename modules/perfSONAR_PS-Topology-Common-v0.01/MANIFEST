@@ -5,3 +5,4 @@ README
 MANIFEST.SKIP
 lib/perfSONAR_PS/Topology/ID.pm
 lib/perfSONAR_PS/Topology/Common.pm
+META.yml                                 Module meta-data (added by MakeMaker)
