@@ -5,6 +5,7 @@ use version; our $VERSION = qv("0.01");
 use strict;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::XMLDB;
+use perfSONAR_PS::Common;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Topology::ID;
 
@@ -232,7 +233,11 @@ sub getUniqueIDs($) {
 
 	my @ids = ();
 
-	foreach my $node ($results->getChildrenByLocalName("domain")) {
+	my $find_res;
+
+	$find_res = find($results, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 		my $uri = $node->namespaceURI();
 		my $prefix = $node->prefix;
@@ -246,35 +251,42 @@ sub getUniqueIDs($) {
 
 		push @ids, \%info;
 	}
+	}
 
-	foreach my $node ($results->getChildrenByLocalName("network")) {
+	$find_res = find($results, "./*[local-name()='network']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 		my $uri = $node->namespaceURI();
 		my $prefix = $node->prefix;
 
 		my %info = (
-			type => 'network',
-			id => $id,
-			prefix => $prefix,
-			uri => $uri,
-		);
+				type => 'network',
+				id => $id,
+				prefix => $prefix,
+				uri => $uri,
+			   );
 
 		push @ids, \%info;
 	}
+	}
 
-	foreach my $node ($results->getChildrenByLocalName("path")) {
+	$find_res = find($results, "./*[local-name()='path']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 		my $uri = $node->namespaceURI();
 		my $prefix = $node->prefix;
 
 		my %info = (
-			type => 'path',
-			id => $id,
-			prefix => $prefix,
-			uri => $uri,
-		);
+				type => 'path',
+				id => $id,
+				prefix => $prefix,
+				uri => $uri,
+			   );
 
 		push @ids, \%info;
+	}
 	}
 
 	return (0, \@ids);
@@ -284,6 +296,8 @@ sub changeTopology($$) {
 	my ($self, $type, $topology) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
 	my ($status, $res);
+
+	$logger->debug("Topology: ".$topology->toString);
 
 	return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
 
@@ -309,8 +323,15 @@ sub changeTopology($$) {
 	my %elements = ();
 
 	my %domain_ids = ();
-	foreach my $domain ($topology->getChildrenByTagNameNS("*", "domain")) {
+
+	my $find_res;
+
+	$find_res = find($topology, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $id = $domain->getAttribute("id");
+
+		$logger->debug("Got a request for domain: $id");
 
 		if (!defined $id or $id eq "") {
 			my $msg = "Domain with no id found";
@@ -357,10 +378,13 @@ sub changeTopology($$) {
 
 		$elements{$id} = $new_domain;
 	}
+	}
 
 	my %node_ids = ();
 
-	foreach my $node ($topology->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($topology, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 
 		if (!defined $id or $id eq "") {
@@ -422,10 +446,13 @@ sub changeTopology($$) {
 
 		$elements{$id} = $new_node;
 	}
+	}
 
 	my %port_ids = ();
 
-	foreach my $port ($topology->getChildrenByTagNameNS("*", "port")) {
+	$find_res = find($topology, "./*[local-name()='port']", 0);
+	if ($find_res) {
+	foreach my $port ($find_res->get_nodelist) {
 		my $id = $port->getAttribute("id");
 
 		if (!defined $id or $id eq "") {
@@ -488,10 +515,13 @@ sub changeTopology($$) {
 
 		$elements{$id} = $new_port;
 	}
+	}
 
 	my %link_ids = ();
 
-	foreach my $link ($topology->getChildrenByTagNameNS("*", "link")) {
+	$find_res = find($topology, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $link ($find_res->get_nodelist) {
 		my $id = $link->getAttribute("id");
 		if (!defined $id or $id eq "") {
 			my $msg = "Link with no id found";
@@ -552,10 +582,13 @@ sub changeTopology($$) {
 
 		$elements{$id} = $new_link;
 	}
+	}
 
 	# update everything that is sitting at the top-level
 	foreach my $id (keys %elements) {
 		next if (defined $elements{$id}->parentNode->parentNode);
+
+		$logger->debug("Inserting $id");
 
 		# This is a hack to force the namespace declaration into the
 		# node we're going to insert. A better solution would be to
@@ -611,7 +644,7 @@ sub lookupElement($$$) {
 		$logger->debug("Parent: $parent_id Not Found");
 
 		my $doc = $self->{DATADB}->getDocumentByName($base_id, undef, \$error);
-		if ($error ne "") {
+		if ($error ne "" or $doc eq "") {
 			my $msg = "Element ".$base_id." not found";
 			$logger->error($msg);
 			return (-1, $msg);
@@ -627,12 +660,15 @@ sub lookupElement($$$) {
 	} else {
 		$logger->debug("Parent: $parent_id Found");
 
-		foreach my $curr_elm ($parent->getChildrenByTagNameNS("*", $base_type)) {
+		my $find_res = find($parent, "./*[local-name()='$base_type']", 0);
+		if ($find_res) {
+		foreach my $curr_elm ($find_res->get_nodelist) {
 			if ($curr_elm->getAttribute("id") eq $base_id) {
 				$elements->{$base_id} = $curr_elm;
 
 				return (0, $curr_elm);
 			}
+		}
 		}
 
 		my $msg = "Element ".$base_id." not found";

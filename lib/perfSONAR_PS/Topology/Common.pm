@@ -179,7 +179,11 @@ sub topologyNormalize_links($$$$) {
 
 	$logger->debug("Normalizing links");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $id = $domain->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_links($domain, $topology, $id, $top_level);
@@ -187,8 +191,11 @@ sub topologyNormalize_links($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $node ($root->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($root, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_links($node, $topology, $id, $top_level);
@@ -196,8 +203,11 @@ sub topologyNormalize_links($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $port ($root->getChildrenByTagNameNS("*", "port")) {
+	$find_res = find($root, "./*[local-name()='port']", 0);
+	if ($find_res) {
+	foreach my $port ($find_res->get_nodelist) {
 		my $id = $port->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_links($port, $topology, $id, $top_level);
@@ -205,8 +215,11 @@ sub topologyNormalize_links($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $link ($root->getChildrenByTagNameNS("*", "link")) {
+	$find_res = find($root, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $link ($find_res->get_nodelist) {
 		my $id = $link->getAttribute("id");
 		my $type = $link->getAttribute("type");
 		my $fqid;
@@ -300,6 +313,7 @@ sub topologyNormalize_links($$$$) {
 		$topology->{"links"}->{$fqid} = $link;
 		$link->setAttribute("id", $fqid);
 	}
+	}
 }
 
 sub topologyNormalize_ports($$$$) {
@@ -308,7 +322,11 @@ sub topologyNormalize_ports($$$$) {
 
 	$logger->debug("Normalizing ports");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $fqid = $domain->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_ports($domain, $topology, $fqid, $top_level);
@@ -316,8 +334,11 @@ sub topologyNormalize_ports($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $node ($root->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($root, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $fqid = $node->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_ports($node, $topology, $fqid, $top_level);
@@ -325,8 +346,11 @@ sub topologyNormalize_ports($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $port ($root->getChildrenByTagNameNS("*", "port")) {
+	$find_res = find($root, "./*[local-name()='port']", 0);
+	if ($find_res) {
+	foreach my $port ($find_res->get_nodelist) {
 		my $id = $port->getAttribute("id");
 		my $fqid;
 
@@ -380,6 +404,7 @@ sub topologyNormalize_ports($$$$) {
 		$topology->{"ports"}->{$fqid} = $port;
 		$port->setAttribute("id", $fqid);
 	}
+	}
 }
 
 sub topologyNormalize_nodes($$$$) {
@@ -388,7 +413,11 @@ sub topologyNormalize_nodes($$$$) {
 
 	$logger->debug("Normalizing nodes");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $fqid = $domain->getAttribute("id");
 
 		my ($status, $res) = topologyNormalize_nodes($domain, $topology, $fqid, $top_level);
@@ -396,8 +425,11 @@ sub topologyNormalize_nodes($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $node ($root->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($root, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $id = $node->getAttribute("id");
 		my $fqid;
 
@@ -459,6 +491,7 @@ sub topologyNormalize_nodes($$$$) {
 		$logger->debug("Adding $fqid");
 		$topology->{"nodes"}->{$fqid} = $node;
 	}
+	}
 }
 
 sub topologyNormalize_paths($$$$) {
@@ -467,7 +500,11 @@ sub topologyNormalize_paths($$$$) {
 
 	$logger->debug("Normalizing paths");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $fqid = $domain->getAttribute("id");
 		$logger->debug("Found domain: $fqid");
 		my ($status, $res) = topologyNormalize_paths($domain, $topology, $fqid, $top_level);
@@ -475,8 +512,11 @@ sub topologyNormalize_paths($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $path ($root->getChildrenByTagNameNS("*", "path")) {
+	$find_res = find($root, "./*[local-name()='path']", 0);
+	if ($find_res) {
+	foreach my $path ($find_res->get_nodelist) {
 		my $id = $path->getAttribute("id");
 		my $fqid;
 
@@ -539,6 +579,7 @@ sub topologyNormalize_paths($$$$) {
 		$logger->debug("Adding $fqid");
 		$topology->{"paths"}->{$fqid} = $path;
 	}
+	}
 }
 
 sub topologyNormalize_networks($$$$) {
@@ -547,7 +588,11 @@ sub topologyNormalize_networks($$$$) {
 
 	$logger->debug("Normalizing networks");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $fqid = $domain->getAttribute("id");
 		$logger->debug("Found domain: $fqid");
 		my ($status, $res) = topologyNormalize_networks($domain, $topology, $fqid, $top_level);
@@ -555,8 +600,11 @@ sub topologyNormalize_networks($$$$) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $network ($root->getChildrenByTagNameNS("*", "network")) {
+	$find_res = find($root, "./*[local-name()='network']", 0);
+	if ($find_res) {
+	foreach my $network ($find_res->get_nodelist) {
 		my $id = $network->getAttribute("id");
 		my $fqid;
 
@@ -619,6 +667,7 @@ sub topologyNormalize_networks($$$$) {
 		$logger->debug("Adding $fqid");
 		$topology->{"networks"}->{$fqid} = $network;
 	}
+	}
 }
 
 sub topologyNormalize_domains($$) {
@@ -627,7 +676,11 @@ sub topologyNormalize_domains($$) {
 
 	$logger->debug("Normalizing domains");
 
-	foreach my $domain ($root->getChildrenByTagNameNS("*", "domain")) {
+	my $find_res;
+
+	$find_res = find($root, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $id = $domain->getAttribute("id");
 		my $fqid;
 
@@ -651,6 +704,7 @@ sub topologyNormalize_domains($$) {
 		$logger->debug("Adding $id");
 
 		$topology->{"domains"}->{$id} = $domain;
+	}
 	}
 
 	return (0, "");
@@ -735,11 +789,16 @@ sub validateDomain($$) {
 	$domain_ids->{$id} = "";
 
 	my %node_ids = ();
-	foreach my $node ($domain->getChildrenByTagNameNS("*", "node")) {
+	my $find_res;
+
+	$find_res = find($domain, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my ($status, $res) = validateNode($node, \%node_ids, $id);
 		if ($status != 0) {
 			return ($status, $res);
 		}
+	}
 	}
 
 	foreach my $other_domain($domain->getChildrenByTagNameNS("*", "domain")) {
@@ -748,7 +807,9 @@ sub validateDomain($$) {
 		return (-1, $msg);
 	}
 
-	foreach my $link ($domain->getChildrenByTagNameNS("*", "link")) {
+	$find_res = find($domain, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $link ($find_res->get_nodelist) {
 		my $type = $link->getAttribute("type");
 
 		if (!defined $type or $type eq "unidirectional") {
@@ -756,6 +817,7 @@ sub validateDomain($$) {
 			$logger->error($msg);
 			return (-1, $msg);
 		}
+	}
 	}
 
 	return (0, "");
@@ -798,41 +860,61 @@ sub validateNode($$$) {
 
 	my %port_ids = ();
 
-	foreach my $port ($node->getChildrenByTagNameNS("*", "port")) {
+	my $find_res;
+
+	$find_res = find($node, "./*[local-name()='port']", 0);
+	if ($find_res) {
+	foreach my $port ($find_res->get_nodelist) {
 		my ($status, $res) = validatePort($port, \%port_ids, $id);
 		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $other_node ($node->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($node, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $other_node ($find_res->get_nodelist) {
 		my $msg = "Found node with node in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $link ($node->getChildrenByTagNameNS("*", "link")) {
+	$find_res = find($node, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $link ($find_res->get_nodelist) {
 		my $msg = "Found node with link in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $path ($node->getChildrenByTagNameNS("*", "path")) {
+	$find_res = find($node, "./*[local-name()='path']", 0);
+	if ($find_res) {
+	foreach my $path ($find_res->get_nodelist) {
 		my $msg = "Found node with path in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $network ($node->getChildrenByTagNameNS("*", "network")) {
+	$find_res = find($node, "./*[local-name()='network']", 0);
+	if ($find_res) {
+	foreach my $network ($find_res->get_nodelist) {
 		my $msg = "Found node with network in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $domain ($node->getChildrenByTagNameNS("*", "domain")) {
+	$find_res = find($node, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $msg = "Found node with domain in it";
 		$logger->error($msg);
 		return (-1, $msg);
+	}
 	}
 
 	return (0, "");
@@ -876,41 +958,61 @@ sub validatePort($$$) {
 
 	my %link_ids = ();
 
-	foreach my $link ($port->getChildrenByTagNameNS("*", "link")) {
+	my $find_res;
+
+	$find_res = find($port, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $link ($find_res->get_nodelist) {
 		my ($status, $res) = validateLink($link, \%link_ids, $id);
 		if ($status != 0) {
 			return ($status, $res);
 		}
 	}
+	}
 
-	foreach my $other_port ($port->getChildrenByTagNameNS("*", "port")) {
+	$find_res = find($port, "./*[local-name()='port']", 0);
+	if ($find_res) {
+	foreach my $other_port ($find_res->get_nodelist) {
 		my $msg = "Found port with port in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $node ($port->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($port, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $msg = "Found port with node in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $path ($port->getChildrenByTagNameNS("*", "path")) {
+	$find_res = find($port, "./*[local-name()='path']", 0);
+	if ($find_res) {
+	foreach my $path ($find_res->get_nodelist) {
 		my $msg = "Found port with path in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $network ($port->getChildrenByTagNameNS("*", "network")) {
+	$find_res = find($port, "./*[local-name()='network']", 0);
+	if ($find_res) {
+	foreach my $network ($find_res->get_nodelist) {
 		my $msg = "Found port with network in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $domain ($port->getChildrenByTagNameNS("*", "domain")) {
+	$find_res = find($port, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $msg = "Found port with domain in it";
 		$logger->error($msg);
 		return (-1, $msg);
+	}
 	}
 
 	return (0, "");
@@ -951,34 +1053,51 @@ sub validateLink($$$) {
 
 	$link_ids->{$id} = "";
 
-	foreach my $other_link ($link->getChildrenByTagNameNS("*", "link")) {
+	my $find_res;
+
+	$find_res = find($link, "./*[local-name()='link']", 0);
+	if ($find_res) {
+	foreach my $other_link ($find_res->get_nodelist) {
 		my $msg = "Found link with link in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $node ($link->getChildrenByTagNameNS("*", "node")) {
+	$find_res = find($link, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $node ($find_res->get_nodelist) {
 		my $msg = "Found link with node in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $path ($link->getChildrenByTagNameNS("*", "path")) {
+	$find_res = find($link, "./*[local-name()='path']", 0);
+	if ($find_res) {
+	foreach my $path ($find_res->get_nodelist) {
 		my $msg = "Found link with path in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $network ($link->getChildrenByTagNameNS("*", "network")) {
+	$find_res = find($link, "./*[local-name()='network']", 0);
+	if ($find_res) {
+	foreach my $network ($find_res->get_nodelist) {
 		my $msg = "Found link with network in it";
 		$logger->error($msg);
 		return (-1, $msg);
 	}
+	}
 
-	foreach my $domain ($link->getChildrenByTagNameNS("*", "domain")) {
+	$find_res = find($link, "./*[local-name()='domain']", 0);
+	if ($find_res) {
+	foreach my $domain ($find_res->get_nodelist) {
 		my $msg = "Found link with domain in it";
 		$logger->error($msg);
 		return (-1, $msg);
+	}
 	}
 
 	return (0, "");

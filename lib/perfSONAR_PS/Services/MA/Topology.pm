@@ -256,11 +256,11 @@ sub changeTopology($$$$$) {
 	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my $changeType;
 
-	if ($changeType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
+	if ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
 		$changeType = "add";
-	} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
 		$changeType = "update";
-	} elsif ($changeType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
+	} elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
 		$changeType = "replace";
 	}
 
@@ -310,6 +310,8 @@ sub changeRequest($$$) {
 	my $logger = get_logger("perfSONAR_PS::Services::MA::Topology");
 	my ($status, $res);
 	my $localContent = "";
+
+	$logger->debug("Topology: ".$topology->toString);
 
 	($status, $res) = topologyNormalize($topology);
 	if ($status != 0) {

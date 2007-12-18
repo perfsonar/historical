@@ -131,8 +131,8 @@ sub xQuery($$) {
 
 	my $topo_msg = $res;
 
-	foreach my $data ($topo_msg->getChildrenByLocalName("data")) {
-		foreach my $metadata ($topo_msg->getChildrenByLocalName("metadata")) {
+	foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
+		foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
 			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
 				my $topology = find($data, './nmtopo:topology', 1);
 				if (defined $topology) {
@@ -172,8 +172,8 @@ sub getAll {
 
 	my $topo_msg = $res;
 
-	foreach my $data ($topo_msg->getChildrenByLocalName("data")) {
-		foreach my $metadata ($topo_msg->getChildrenByLocalName("metadata")) {
+	foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
+		foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
 			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
 				my $topology = find($data, './nmtopo:topology', 1);
 				if (defined $topology) {
@@ -217,18 +217,27 @@ sub changeTopology($$) {
 
 	$logger->debug("Change Response: ".$topo_msg->toString);
 
-	foreach my $data ($topo_msg->getChildrenByLocalName("data")) {
-		foreach my $metadata ($topo_msg->getChildrenByLocalName("metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $topology = find($data, './nmtopo:topology', 1);
-				if (defined $topology) {
-					return (0, $topology);
-				} 
-			}
+	my $find_res;
+
+	$find_res = find($res, "./nmwg:data", 0);
+	if ($find_res) {
+	foreach my $data ($find_res->get_nodelist) {
+		my $metadata = find($res, "./nmwg:metadata[@id='".$data->getAttribute("metadataIdRef")."']", 1);
+		if (!defined $metadata) {
+			return (-1, "No metadata in response");
+		}
+
+		my $eventType = findvalue($metadata, "nmwg:eventType");
+		if (defined $eventType and $eventType =~ /^error\./) {
+			my $error_msg = findvalue($data, "./nmwgr:datum");
+			$error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
+			return (-1, $error_msg);
+		} elsif (defined $eventType and $eventType =~ /^success\./) {
+			return (0, "Success");
 		}
 	}
 
-	my $msg = "Response does not contain a topology";
+	my $msg = "Response does not contain status";
 	$logger->error($msg);
 	return (-1, $msg);
 }

@@ -375,7 +375,9 @@ sub handleMessage($$$) {
 
     my $msgParams = find($message, "./nmwg:parameters", 1);
     if (defined $msgParams) {
-        foreach my $p ($msgParams->getChildrenByLocalName("parameter")) {
+        my $find_res = find($msgParams, "./*[local-name()='parameter']", 0);
+        if ($find_res) {
+        foreach my $p ($find_res->get_nodelist) {
             my ($name, $value);
 
             $name = $p->getAttribute("name");
@@ -386,6 +388,7 @@ sub handleMessage($$$) {
             }
 
             $message_parameters{$name} = $value;
+        }
         }
     }
 

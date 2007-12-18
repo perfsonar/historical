@@ -303,20 +303,30 @@ sub updateLinkStatus($$$$$$$) {
 		return (-1, $msg);
 	}
 
-	foreach my $data ($res->getChildrenByLocalName("data")) {
-		foreach my $metadata ($res->getChildrenByLocalName("metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $eventType = findvalue($metadata, "nmwg:eventType");
-				if (defined $eventType and $eventType =~ /^error\./) {
-					my $error_msg = findvalue($data, "./nmwgr:datum");
-					$error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
-					return (-1, $error_msg);
-				}
-			}
+	my $find_res;
+
+	$find_res = find($res, "./nmwg:data", 0);
+	if ($find_res) {
+	foreach my $data ($find_res->get_nodelist) {
+		my $metadata = find($res, "./nmwg:metadata[@id='".$data->getAttribute("metadataIdRef")."']", 1);
+		if (!defined $metadata) {
+			return (-1, "No metadata in response");
+		}
+
+		my $eventType = findvalue($metadata, "nmwg:eventType");
+		if (defined $eventType and $eventType =~ /^error\./) {
+			my $error_msg = findvalue($data, "./nmwgr:datum");
+			$error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
+			return (-1, $error_msg);
+		} elsif (defined $eventType and $eventType =~ /^success\./) {
+			return (0, "Success");
 		}
 	}
+	}
 
-	return (0, "");
+	my $msg = "Response does not contain status";
+	$logger->error($msg);
+	return (-1, $msg);
 }
 
 1;

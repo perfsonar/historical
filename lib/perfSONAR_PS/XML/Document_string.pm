@@ -8,7 +8,7 @@ use strict;
 use Log::Log4perl qw(get_logger :nowarn);
 use Params::Validate qw(:all);
 
-my $pretty_print = 1;
+my $pretty_print = 0;
 
 sub new($) {
 	my ($package) = @_;
@@ -130,7 +130,7 @@ sub startElement {
 
 	if (defined $content and $content ne "") {
 		$self->{STRING} .= $content;
-		$self->{STRING} .= "\n";
+		$self->{STRING} .= "\n" if ($pretty_print);
 	}
 
 
@@ -251,8 +251,11 @@ sub endElement($$) {
 
 	my @tags = @{ $self->{OPEN_TAGS} };
 
-	if ($tags[$#tags]->{"tag"} ne $tag) {
-                $logger->debug("Tried to close tag $tag, but current open tag is \"".$tags[$#tags]->{"tag"}."\n");
+    if ($#tags == -1) {
+        $logger->error("Tried to close tag $tag but no current open tags");
+		return -1;
+	} elsif ($tags[$#tags]->{"tag"} ne $tag) {
+        $logger->error("Tried to close tag $tag, but current open tag is \"".$tags[$#tags]->{"tag"}."\n");
 		return -1;
 	}
 

@@ -845,7 +845,11 @@ sub parseCircuitsFile($) {
 		throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
 	}
 
-	foreach my $endpoint ($conf->getChildrenByLocalName("node")) {
+	my $find_res;
+
+	$find_res = find($conf, "./*[local-name()='node']", 0);
+	if ($find_res) {
+	foreach my $endpoint ($find_res->get_nodelist) {
 		my $node_id = $endpoint->getAttribute("id");
 		my $node_type = $endpoint->getAttribute("type");
 		my $node_name = $endpoint->getAttribute("name");
@@ -897,8 +901,11 @@ sub parseCircuitsFile($) {
 
 		$nodes{$node_name} = $new_node;
 	}
+	}
 
-	foreach my $circuit ($conf->getChildrenByLocalName("circuit")) {
+	$find_res = find($conf, "./*[local-name()='circuit']", 0);
+	if ($find_res) {
+	foreach my $circuit ($find_res->get_nodelist) {
 		my $global_name = findvalue($circuit, "globalName");
 		my $local_name = findvalue($circuit, "localName");
 		my $knowledge = $circuit->getAttribute("knowledge");
@@ -923,7 +930,9 @@ sub parseCircuitsFile($) {
 
 		my %sublinks = ();
 
-		foreach my $topo_id ($circuit->getChildrenByLocalName("linkID")) {
+		$find_res = find($circuit, "./*[local-name()='linkID']", 0);
+		if ($find_res) {
+		foreach my $topo_id ($find_res->get_nodelist) {
 			my $id = $topo_id->textContent;
 
 			if (defined $sublinks{$id}) {
@@ -935,6 +944,7 @@ sub parseCircuitsFile($) {
 			$sublinks{$id} = "";
 			$topology_links{$id} = "";
 		}
+		}
 
 		my @endpoints = ();
 
@@ -942,7 +952,9 @@ sub parseCircuitsFile($) {
 
 		my $prev_domain;
 
-		foreach my $endpoint ($circuit->getChildrenByLocalName("endpoint")) {
+		$find_res = find($circuit, "./*[local-name()='endpoint']", 0);
+		if ($find_res) {
+		foreach my $endpoint ($find_res->get_nodelist) {
 			my $node_type = $endpoint->getAttribute("type");
 			my $node_name = $endpoint->getAttribute("name");
 
@@ -988,6 +1000,7 @@ sub parseCircuitsFile($) {
 
 			$num_endpoints++;
 		}
+		}
 
 		if ($num_endpoints != 2) {
 			my $msg = "Invalid number of endpoints, $num_endpoints, must be 2";
@@ -1012,6 +1025,7 @@ sub parseCircuitsFile($) {
 		} else {
 			$circuits{$local_name} = \%new_circuit;
 		}
+	}
 	}
 
 	return ($domain, \%circuits, \%incomplete_nodes, \%topology_links, \%nodes);
