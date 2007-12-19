@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-ma.pl - An basic MA (Measurement Archive) framework
+perfsonar.pl - An basic MA (Measurement Archive) framework
 
 =head1 DESCRIPTION
 
@@ -10,7 +10,7 @@ This script shows how a script for a given service should look.
 
 =head1 SYNOPSIS
 
-./ma.pl [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
+./perfsonar.pl [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
 
 The verbose flag allows lots of debug options to print to the screen.  If the option is
 omitted the service will run in daemon mode.
@@ -40,24 +40,40 @@ sub killChildren();
 sub signalHandler();
 sub handleRequest($$$);
 
-
-# we need a fully-qualified directory name in case we daemonize so that we can
-# still access scripts or other files specified in configuration files in a
-# relative manner. Also, we need to know the location in reference to the
-# binary so that users can launch the daemon from wherever but specify scripts
-# and whatnot relative to the binary.
+# this value should be set by the installation scripts
+my $was_installed = 0;
 
 my $libdir;
-my $dirname = dirname($0);
+my $confdir;
+my $dirname;
 
-if (!($dirname =~ /^\//)) {
-    $dirname = getcwd . "/" . $dirname;
-}
+if ($was_installed) {
+    # XXX in this case, libdir needs to be set to the directory that the modules
+    # were installed to, and confdir needs to be set to the directory that
+    # logger.conf et al. were installed in.
+    $libdir = "";
+    $confdir = "";
+    $dirname = "";
+} else {
+    # we need a fully-qualified directory name in case we daemonize so that we
+    # can still access scripts or other files specified in configuration files
+    # in a relative manner. Also, we need to know the location in reference to
+    # the binary so that users can launch the daemon from wherever but specify
+    # scripts and whatnot relative to the binary.
 
-# we need to figure out what the library is at compile time so that "use lib"
-# doesn't fail. To do this, we enclose the calculation of it in a BEGIN block.
-BEGIN {
-    $libdir = dirname($0)."/../../lib";
+    $dirname = dirname($0);
+
+    if (!($dirname =~ /^\//)) {
+        $dirname = getcwd . "/" . $dirname;
+    }
+
+    $confdir = $dirname;
+
+    # we need to figure out what the library is at compile time so that "use lib"
+    # doesn't fail. To do this, we enclose the calculation of it in a BEGIN block.
+    BEGIN {
+        $libdir = dirname($0)."/../../lib";
+    }
 }
 
 use lib "$libdir";
@@ -69,7 +85,7 @@ use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
 
-$0 = "ma.pl  ($$)";
+$0 = "perfsonar.pl ($$)";
 
 my %child_pids = ();
 
@@ -136,7 +152,7 @@ if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
 }
 
 if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
-    $CONFIG_FILE = "./ma.conf";
+    $CONFIG_FILE = $confdir."/daemon.conf";
 }
 
 # Read in configuration information
@@ -256,7 +272,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
             $modules_loaded{$endpoint_conf{"module"}} = 1;
         }
 
-        my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $endpoint);
+        my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $endpoint, $dirname);
         if ($service->init($handlers{$port}->{$endpoint}) != 0) {
             $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$endpoint");
             exit(-1);
@@ -266,6 +282,8 @@ foreach my $port (keys %{ $conf{"port"} }) {
             my %ls_child_args = ();
             $ls_child_args{"service"} = $service;
             $ls_child_args{"conf"} = \%endpoint_conf;
+            $ls_child_args{"port"} = $port;
+            $ls_child_args{"endpoint"} = $endpoint;
             push @ls_services, \%ls_child_args;
         }
 
@@ -277,7 +295,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
                 $modules_loaded{$echo_module} = 1;
             }
 
-            my $echo = $echo_module->new(\%endpoint_conf, $port, $endpoint);
+            my $echo = $echo_module->new(\%endpoint_conf, $port, $endpoint, $dirname);
             if ($echo->init($handlers{$port}->{$endpoint}) != 0) {
                 $logger->error("Failed to initialize echo module on $port:$endpoint");
                 exit(-1);
@@ -308,6 +326,7 @@ foreach my $port (keys %listeners) {
     my $pid = fork();
     if ($pid == 0) {
         %child_pids = ();
+        $0 .= " - Listener ($port)";
         psService($listeners{$port}, $handlers{$port}, $service_configs{$port});
         exit(0);
     } elsif ($pid < 0) {
@@ -323,6 +342,7 @@ foreach my $ls_args (@ls_services) {
     my $ls_pid = fork();
     if ($ls_pid == 0) {
         %child_pids = ();
+        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";;
         registerLS($ls_args);
         exit(0);
     } elsif ($ls_pid < 0) {
@@ -403,6 +423,8 @@ sub psService($$$) {
             if ($pid == 0) {
                 %child_pids = ();
 
+                $0 .= " - ".$handle->peerhost();
+
                 my $http_request = $handle->get_request;
                 if (!defined $http_request) {
                     my $msg = "No HTTP Request received from host:\t".$handle->peerhost();
@@ -419,6 +441,7 @@ sub psService($$$) {
                     $request->setResponse($ret_message->getValue());
                     $request->finish();
                 } else {
+                    $0 .= " - ".$request->getEndpoint();
                     handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
                 }
                 exit(0);
