@@ -3,26 +3,49 @@ use package perfSONAR_PS::Error;
 
 =head1 NAME
 
-perfSONAR_PS::Error::MA - A module that provides the exceptions framework for perfSONAR PS
+perfSONAR_PS::Error::MP - A module that provides the measurement point 
+exceptions framework for perfSONAR PS
 
 =head1 DESCRIPTION
 
-This module provides the measurement archive exception types that will be presented.
+This module provides the measurement point exception objects
 
-head1 API
+=head1 API
 
 =cut
 
+=head2 perfSONAR_PS::Error::MP
+
+General exceptions for MP's; all following objects derive from this.
+
+=cut
 package perfSONAR_PS::Error::MP;
 use base "perfSONAR_PS::Error";
 
+=head2 perfSONAR_PS::Error::MP::Configuration
 
+Configuration errors for the MP, such as invalid configuration, unparseable 
+configuration etc.
+
+=cut
 package perfSONAR_PS::Error::MP::Configuration;
 use base "perfSONAR_PS::Error::Common::Configuration";
 
+=head2
+
+Scheduling errors for the MP, such as the inability to schedule a test, test
+schedule is not valid etc.
+
+=cut
 package perfSONAR_PS::Error::MP::Scheduler;
 use base "perfSONAR_PS::Error::MP";
 
+=head2 perfSONAR_PS::Error::MP::Agent
+
+Errors from the agents performing the test, typically low level system problems
+such as command not found, or unparseable output etc.
+
+=cut
 package perfSONAR_PS::Error::MP::Agent;
 use base "perfSONAR_PS::Error::MP";
 

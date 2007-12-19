@@ -2,13 +2,14 @@ use package perfSONAR_PS::Error;
 
 =head1 NAME
 
-perfSONAR_PS::Error::MA - A module that provides the exceptions framework for perfSONAR PS
+perfSONAR_PS::Error::MA - A module that provides the measurement archive 
+exceptions framework for perfSONAR PS
 
 =head1 DESCRIPTION
 
-This module provides the measurement archive exception types that will be presented.
+This module provides the measurement archive exception objects.
 
-head1 API
+=head1 API
 
 =cut
 
@@ -24,7 +25,8 @@ use base "perfSONAR_PS::Error::Common::Configuration";
 
 =cut
 
-# not sure about these
+# not sure about these as they are provided under Common
+
 package perfSONAR_PS::Error::MA::Query;
 use base "perfSONAR_PS::Error::Common::Storage::Query";
 
@@ -44,18 +46,14 @@ package perfSONAR_PS::Error::MA::Query::InvalidUpdateParamter;
 use base "perfSONAR_PS::Error::MA::Query";
 
 
-
-
 package perfSONAR_PS::Error::MA::Select;
 use base "perfSONAR_PS::Error::MA";
-
 
 package perfSONAR_PS::Error::MA::Status;
 use base "perfSONAR_PS::Error::MA";
 
 package perfSONAR_PS::Error::MA::Status::NoLinkId;
 use base "perfSONAR_PS::Error::MA::Status";
-
 
 package perfSONAR_PS::Error::MA::Storage;
 use base "perfSONAR_PS::Error::MA";
@@ -65,7 +63,6 @@ use base "perfSONAR_PS::Error::MA";
 
 package perfSONAR_PS::Error::MA::Storage::Result;
 use base "perfSONAR_PS::Error::MA::Storage";
-
 
 
 package perfSONAR_PS::Error::MA::Structure;

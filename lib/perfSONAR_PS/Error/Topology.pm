@@ -12,37 +12,56 @@ head1 API
 
 =cut
 
+=head2 perfSONAR_PS::Error::Topology
+
+Base error for topology from which all topology exceptions derive.
+
+=cut
 package perfSONAR_PS::Error::Topology;
 use base "perfSONAR_PS::Error::Base";
 
 
+=head2 perfSONAR_PS::Error::Topology::InvalidParameter
+
+invalid parameter error
+
+=cut
 package perfSONAR_PS::Error::Topology::InvalidParameter;
 use base "perfSONAR_PS::Error::Topology";
 
+=head2 perfSONAR_PS::Error::Topology
+
+dependency error
+
+=cut
 package perfSONAR_PS::Error::Topology::Dependency;
 use base "perfSONAR_PS::Error::Topology";
 
+=head2 perfSONAR_PS::Error::Topology
 
+invalid topology error
+
+=cut
 package perfSONAR_PS::Error::Topology::InvalidTopology;
 use base "perfSONAR_PS::Error::Topology";
 
 
-package perfSONAR_PS::Error::Topology::MA;
-use base "perfSONAR_PS::Error::Topology";
+# YTL: i think these should return the common::storage errors
+#package perfSONAR_PS::Error::Topology::MA;
+#use base "perfSONAR_PS::Error::Topology";
 
+# YTL: i reckon these should return teh common:query errors
+#package perfSONAR_PS::Error::Topology::Query;
+#use base "perfSONAR_PS::Error::Topology";
 
+#package perfSONAR_PS::Error::Topology::Query::QueryNotFound;
+#use base "perfSONAR_PS::Error::Topology::Query";
 
-package perfSONAR_PS::Error::Topology::Query;
-use base "perfSONAR_PS::Error::Topology";
+#package perfSONAR_PS::Error::Topology::Query::TopologyNotFound;
+#use base "perfSONAR_PS::Error::Topology::Query";
 
-package perfSONAR_PS::Error::Topology::Query::QueryNotFound;
-use base "perfSONAR_PS::Error::Topology::Query";
-
-package perfSONAR_PS::Error::Topology::Query::TopologyNotFound;
-use base "perfSONAR_PS::Error::Topology::Query";
-
-package perfSONAR_PS::Error::Topology::Query::InvalidKnowledgeLevel;
-use base "perfSONAR_PS::Error::Topology::Query";
+#package perfSONAR_PS::Error::Topology::Query::InvalidKnowledgeLevel;
+#use base "perfSONAR_PS::Error::Topology::Query";
 
 1;
 

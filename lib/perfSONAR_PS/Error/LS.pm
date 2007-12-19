@@ -2,13 +2,14 @@ use package perfSONAR_PS::Error;
 
 =head1 NAME
 
-perfSONAR_PS::Error::MA - A module that provides the exceptions framework for perfSONAR PS
+perfSONAR_PS::Error::LS - A module that provides the Lookup Service exceptions
+framework for perfSONAR PS
 
 =head1 DESCRIPTION
 
-This module provides the measurement archive exception types that will be presented.
+This module provides the Lookup Service exception objects.
 
-head1 API
+=head1 API
 
 =cut
 
@@ -37,7 +38,6 @@ use base "perfSONAR_PS::Error::LS";
 package perfSONAR_PS::Error::LS::NoEventType;
 use base "perfSONAR_PS::Error::LS";
 
-
 package perfSONAR_PS::Error::LS::EventTypeNotSupported;
 use base "perfSONAR_PS::Error::LS";
 
@@ -45,7 +45,7 @@ package perfSONAR_PS::Error::LS::NoKey;
 use base "perfSONAR_PS::Error::LS";
 
 
-
+# not sure about this one; it was from the EU project
 
 package perfSONAR_PS::Error::LS::NoScheduler;
 use base "perfSONAR_PS::Error::LS";
@@ -69,12 +69,11 @@ use base "perfSONAR_PS::Error::LS";
 
 # inserts/updates
 
-package perfSONAR_PS::Error::LS::CantReplaceData;
+package perfSONAR_PS::Error::LS::CannotReplaceData;
 use base "perfSONAR_PS::Error::LS";
 
 package perfSONAR_PS::Error::LS::NoStorageContent;
 use base "perfSONAR_PS::Error::LS";
-
 
 package perfSONAR_PS::Error::LS::Update;
 use base "perfSONAR_PS::Error::LS";

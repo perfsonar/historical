@@ -2,44 +2,101 @@ use package perfSONAR_PS::Error;
 
 =head1 NAME
 
-perfSONAR_PS::Error::MA - A module that provides the exceptions framework for perfSONAR PS
+perfSONAR_PS::Error::Message - A module that provides the message exceptions 
+framework for perfSONAR PS
 
 =head1 DESCRIPTION
 
-This module provides the message exception types that will be presented.
+This module provides the message exception objects.
 
-head1 API
+=head1 API
 
 =cut
 
+=head2 perfSONAR_PS::Error::Message
 
+Base exception class from which all following exception objects derive.
+
+=cut
 package perfSONAR_PS::Error::Message;
 use base "perfSONAR_PS::Error";
 
+=head2 perfSONAR_PS::Error::Message::InvalidXML
 
+The XML is invalid, either it is not well formed, or has other issues.
+
+=cut
+package perfSONAR_PS::Error::Message::InvalidXML;
+use base "perfSONAR_PS::Error::Message";
+
+
+=head2 perfSONAR_PS::Error::Message
+
+Chaining errors, such as invalid chaining defined, or chaining could not be resolved.
+
+=cut
 package perfSONAR_PS::Error::Message::Chaining;
 use base "perfSONAR_PS::Error::Message";
 
-package perfSONAR_PS::Error::Message::MessagesType
-use base "perfSONAR_PS::Error::Message";
 
+=head2 perfSONAR_PS::Error::Message::NoMessageType
+
+No message type was provided.
+
+=cut
 package perfSONAR_PS::Error::Message::NoMessageType;
 use base "perfSONAR_PS::Error::Message";
 
-package perfSONAR_PS::Error::Message::EventType;
-use base "perfSONAR_PS::Error::Message";
+=head2 perfSONAR_PS::Error::Message::InvalidMessageType
 
-package perfSONAR_PS::Error::Message::InvalidKey;
-use base "perfSONAR_PS::Error::Message";
+The message type provided is invalid, it is not supported.
 
+=cut
 package perfSONAR_PS::Error::Message::InvalidMessageType;
 use base "perfSONAR_PS::Error::Message";
 
+=head2 perfSONAR_PS::Error::Message::NoEventType
+
+No Event Type was provided.
+
+=cut
+package perfSONAR_PS::Error::Message::NoEventType;
+use base "perfSONAR_PS::Error::Message";
+
+=head2 perfSONAR_PS::Error::Message::InvalidEventType
+
+The event type is not supported or is invalid.
+
+=cut
+package perfSONAR_PS::Error::Message::InvalidEventType;
+use base "perfSONAR_PS::Error::Message";
+
+
+=head2 perfSONAR_PS::Error::Message::InvalidKey
+
+The provide key is invalid or cannot be resolved.
+
+=cut
+package perfSONAR_PS::Error::Message::InvalidKey;
+use base "perfSONAR_PS::Error::Message";
+
+=head2 perfSONAR_PS::Error::Message::InvalidSubject
+
+The provided subject was invalid.
+
+=cut
 package perfSONAR_PS::Error::Message::InvalidSubject;
 use base "perfSONAR_PS::Error::Message";
 
+=head2 perfSONAR_PS::Error::Message::NoMetaDataPair
+
+The metadata does not resolve to a data element.
+
+=cut
 package perfSONAR_PS::Error::Message::NoMetadataDataPair;
 use base "perfSONAR_PS::Error::Message";
+
+
 
 
 1;

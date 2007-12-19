@@ -13,11 +13,14 @@ This module provides the base object for all exception types that will be presen
   # first define the errors somewhere
   package Some::Error;
   use base "Error::Simple";
-
-
-  package DB;
-  use Some::Error;
+  1;
   
+
+  use Some::Error;
+
+  # you MUST import this, otherwise the try/catch blocks will fail
+  use Error qw(:try);  
+
   # if an error occurs, perfSONAR_PS objects should throw an error eg
   sub openDB {
     my $handle = undef;
@@ -33,7 +36,7 @@ This module provides the base object for all exception types that will be presen
   my $dbh = undef;
   try {
   
-    $dbh = &DB::openDB();
+    $dbh = &openDB();
   
   }
   catch Some::Error with {
@@ -62,7 +65,58 @@ This module provides the base object for all exception types that will be presen
 
 
 package perfSONAR_PS::Error;
-use base "Error::Simple";
+use base "Error";
+
+use strict;
+
+sub new
+{
+	my $self = shift;
+	my $text = "" . shift;
+	my @args = ();
+	
+	local $Error::Depth = $Error::Depth + 1;
+	local $Error::Debug = 1;
+	
+	$self->SUPER::new( -text => $text, @args );
+	
+}
+
+=head2 toEventType
+
+returns the perfsonar event type for this exception as a string, ensure that 
+you throw the appropriate inheritied exception object for automatic eventType
+creation.
+
+=cut
+sub eventType
+{
+	my $self = shift;
+	my $ex = ref $self;
+	# form the '.' notation for the exceptions
+
+	# ensure that camel cased words are separated
+	my $s = undef;
+	( $s = ref $self ) =~ s/([a-z])([A-Z])/$1_$2/g;
+
+	# remove perfSONAR_PS
+	my @str = split /\:\:/, lc $s;
+	shift @str;
+	
+	return join '.', @str;
+}
+
+=head2 errorMessage
+
+returns the error message itself (also the same as casting the object as a string)
+
+=cut
+sub errorMessage
+{
+	my $self = shift;
+	return $self->text();
+}
+
 
 1;
 

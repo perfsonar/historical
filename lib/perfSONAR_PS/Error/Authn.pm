@@ -1,8 +1,21 @@
-use perfSONAR_PS::Error::Base;
+use perfSONAR_PS::Error;
+
+=head1 NAME
+
+perfSONAR_PS::Error::Authn - A module that provides the exceptions for the
+authenicationframework for perfSONAR PS
+
+=head1 DESCRIPTION
+
+This module provides the authenication exception objects.
+
+head1 API
+
+=cut
 
 
 package perfSONAR_PS::Error::Authn;
-use base "perfSONAR_PS::Error::Base";
+use base "perfSONAR_PS::Error";
 
 
 package perfSONAR_PS::Error::Authn::WrongParams;
