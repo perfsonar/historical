@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::RRD;
 
-use fields 'PATH', 'NAME', 'DATASOURCES';
+use fields 'PATH', 'NAME', 'DATASOURCES', 'COMMIT';
 
 use version; our $VERSION = qv("0.01");
 
@@ -31,7 +31,7 @@ sub new {
       undef $RRDp::error_mode;
     }
   }  
-  bless \%hash => $package;
+  return $self;
 }
 
 
@@ -262,6 +262,7 @@ sub firstValue {
   RRDp::cmd "first " . $self->{NAME};
   my $answer = RRDp::read;   
   if(!$RRDp::error) {   
+    chomp($$answer);
     return $$answer;
   }
   return "";
@@ -273,6 +274,7 @@ sub lastValue {
   RRDp::cmd "last " . $self->{NAME};
   my $answer = RRDp::read;   
   if(!$RRDp::error) {   
+    chomp($$answer);
     return $$answer;
   }
   return "";

@@ -156,7 +156,7 @@ sub sendDeregister($$) {
     return;
   }
 
-  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+  my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
 
   my $doc = perfSONAR_PS::XML::Document_string->new();
@@ -186,7 +186,7 @@ sub sendKeepalive($$) {
     return;
   }
 
-  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+  my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
 
   my $doc = perfSONAR_PS::XML::Document_string->new();
@@ -209,7 +209,7 @@ sub registerStatic {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return;
+    return (-1, "No URI defined");
   }
 
   if(!$self->{ALIVE}) {
@@ -217,14 +217,10 @@ sub registerStatic {
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
       $logger->error("Ping to ".$self->{URI}." failed: $res");
-      return;
+      return (-1, "LS isn't alive");;
     }
 
     $self->{ALIVE} = 1;
-  }
-
-  if(!$self->{ALIVE}) {
-    return;
   }
 
   if($self->{FIRST}) {
@@ -256,12 +252,15 @@ sub registerStatic {
         if ($self->__register(createService($self), $data_ref) == -1) {
           $logger->error("Unable to register data with LS.");
           $self->{ALIVE} = 0;
+	  return (-1, "Unable to register data with LS");
         }
       }
     }
   }
 
   $self->{FIRST} = 0 if $self->{FIRST};
+
+  return (0, "");
 }
 
 sub __register($$$) {
@@ -269,15 +268,15 @@ sub __register($$$) {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return;
+    return (-1, "No URI Defined");
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
   if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
+    return (-1, "Invalid URI Specified");
   }
 
-  my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+  my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
   my @data = @{ $data_ref };
   my $iterations = int((($#data+1)/$self->{CHUNK}));
@@ -294,11 +293,11 @@ sub __register($$$) {
     endMessage($doc);
     if(!callLS($self, $sender, $doc->getValue())) {
       $logger->error("Unable to register data with LS.");
-      return -1;
+      return (-1, "Couldn't register data with LS");
     }
   }
 
-  return 0;
+  return (0, "");
 }
 
 sub registerDynamic {
@@ -306,7 +305,7 @@ sub registerDynamic {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return;
+    return (-1, "No URI Defined");
   }
 
   if(!$self->{ALIVE}) {
@@ -314,14 +313,10 @@ sub registerDynamic {
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
       $logger->error("Ping to ".$self->{URI}." failed: $res");
-      return;
+      return (-1, "LS isn't alive");;
     }
 
     $self->{ALIVE} = 1;
-  }
-
-  if (!$self->{ALIVE}) {
-    return;
   }
 
   if($self->{FIRST}) {
@@ -355,11 +350,14 @@ sub registerDynamic {
       if ($self->__register($subject, $data_ref) == -1) {
         $logger->error("Unable to register data with LS.");
         $self->{ALIVE} = 0;
+        return(-1, "Unable to register data with LS.");
       }
     }
   }
 
   $self->{FIRST} = 0 if ($self->{FIRST});
+
+  return(0, "");
 }
 
 sub query($$$$) {

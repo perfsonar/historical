@@ -533,7 +533,7 @@ sub consultArchive($$$$) {
     my $logger = get_logger("perfSONAR_PS::Common");
 
     # start a transport agent
-    my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+    my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
     my $envelope = makeEnvelope($request);
     my $error;

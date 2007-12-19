@@ -452,6 +452,8 @@ sub handleMessage($$$) {
                     } otherwise {
                         my $ex = shift;
 
+                        $logger->error("Error handling metadata/data block: $ex");
+
                         $errorEventType = "error.ma.internal_error";
                         $errorMessage = "An internal error occurred while servicing this metadata/data block";
                     }

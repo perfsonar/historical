@@ -13,19 +13,10 @@ our @ISA = ('Exporter');
 our @EXPORT = ();
 
 sub new {
-  my ($package, $ns, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_; 
-  
+  my ($package, $contactHost, $contactPort, $contactEndPoint) = @_; 
+ 
   my %hash = ();
-  if(defined $ns and $ns ne "") {  
-    $hash{"NAMESPACES"} = $ns;
-  }    
-  if(defined $port and $port ne "") {
-    $hash{"PORT"} = $port;
-  }
-  if(defined $listenEndPoint and $listenEndPoint ne "") {
-    $listenEndPoint =~ s/^(\/)+//g;
-    $hash{"LISTEN_ENDPOINT"} = $listenEndPoint;
-  } 
+ 
   if(defined $contactHost and $contactHost ne "") {
     $hash{"CONTACT_HOST"} = $contactHost;
   }
@@ -36,63 +27,14 @@ sub new {
     $hash{"CONTACT_ENDPOINT"} = $contactEndPoint;
   }  
     
-  $hash{"SOAP_ENV"} = "http://schemas.xmlsoap.org/soap/envelope/";
-  $hash{"SOAP_ENC"} = "http://schemas.xmlsoap.org/soap/encoding/";
-  $hash{"XSD"} = "http://www.w3.org/2001/XMLSchema";
-  $hash{"XSI"} = "http://www.w3.org/2001/XMLSchema-instance";
-  $hash{"NAMESPACE"} = "http://ggf.org/ns/nmwg/base/2.0/";
-  $hash{"PREFIX"} = "nmwg";
-  $hash{"REQUESTNAMESPACES"} = "";
-  
   bless \%hash => $package;
 }
-
-
-sub setNamespaces {
-  my ($self, $ns) = @_;    
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  if(defined $ns and $ns ne "") {   
-    $self->{NAMESPACES} = \%{$ns};
-  }
-  else {
-    $logger->error("Missing argument.");      
-  }
-  return;
-}
-
-
-sub setPort {
-  my ($self, $port) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  if(defined $port) {
-    $self->{PORT} = $port;
-  }
-  else {
-    $logger->error("Missing argument.");  
-  }
-  return;
-}
-
-
-sub setListenEndPoint {
-  my ($self, $listenEndPoint) = @_;  
-  my $logger = get_logger("perfSONAR_PS::Transport");
-  if(defined $listenEndPoint) {
-    $listenEndPoint =~ s/^(\/)+//g;
-    $self->{LISTEN_ENDPOINT} = $listenEndPoint;
-  }
-  else {
-    $logger->error("Missing argument.");
-  }
-  return;
-}
-
 
 sub setContactHost {
   my ($self, $contactHost) = @_;  
   my $logger = get_logger("perfSONAR_PS::Transport");
   if(defined $contactHost) {
-    $self->{HOST} = $contactHost;
+    $self->{CONTACT_HOST} = $contactHost;
   }
   else {
     $logger->error("Missing argument.");
@@ -105,7 +47,7 @@ sub setContactPort {
   my ($self, $contactPort) = @_;  
   my $logger = get_logger("perfSONAR_PS::Transport");
   if(defined $contactPort) {
-    $self->{PORT} = $contactPort;
+    $self->{CONTACT_PORT} = $contactPort;
   }
   else {
     $logger->error("Missing argument.");
@@ -116,7 +58,7 @@ sub setContactPort {
 
 sub splitURI {
 	my ($uri) = @_;
-  my $logger = get_logger("perfSONAR_PS::Transport");
+    my $logger = get_logger("perfSONAR_PS::Transport");
 	my $host = undef;
 	my $port= undef;
 	my $endpoint = undef;
@@ -140,7 +82,8 @@ sub getHttpURI {
 	my ($host, $port, $endpoint) = @_;
   my $logger = get_logger("perfSONAR_PS::Transport");
   $logger->debug("Created URI: http://" . $host . ":" . $port . "/" . $endpoint);
-	return 'http://' . $host . ':' . $port . '/' . $endpoint;
+    $endpoint = "/".$endpoint if ($endpoint =~ /^[^\/]/);
+	return 'http://' . $host . ':' . $port . $endpoint;
 }
 
 

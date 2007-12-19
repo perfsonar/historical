@@ -14,10 +14,11 @@ sub new {
 		$hash{TYPE} = "range";
 		$hash{STARTTIME} = $arg1;
 		$hash{ENDTIME} = $arg2;
+		$hash{DURATION} = $arg2 - $arg1;
 	} elsif ($type eq "duration") {
 		$hash{TYPE} = "duration";
 		$hash{STARTTIME} = $arg1;
-		$hash{DURATION} = $arg1 + $arg2;
+		$hash{DURATION} = $arg2;
 	} elsif ($type eq "point") {
 		$hash{TYPE} = "point";
 		$hash{TIME} = $arg1;

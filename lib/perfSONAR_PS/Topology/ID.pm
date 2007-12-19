@@ -16,6 +16,7 @@ sub idBaseLevel($$);
 sub idEncode($);
 sub idDecode($);
 sub idSplit($$$);
+sub idCompare($$$);
 
 sub idConstruct($$$$$$$$) {
 	my ($type1, $field1, $type2, $field2, $type3, $field3, $type4, $field4) = @_;
@@ -347,7 +348,7 @@ sub idSplit($$$) {
 		push @res, $field2 if defined $field2;
 		push @res, $type3 if defined $type3;
 		push @res, $field3 if defined $field3;
-		push @res, $type3 if defined $type4;
+		push @res, $type4 if defined $type4;
 		push @res, $field4 if defined $field4;
 	} else {
 		push @res, $type4 if defined $type4;

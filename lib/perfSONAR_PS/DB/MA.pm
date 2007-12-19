@@ -86,7 +86,7 @@ sub openDB {
   if(defined $self->{HOST} && defined $self->{PORT} && defined $self->{ENDPOINT}) {
   
     eval {
-	    $self->{"TRANSACTION"} = new perfSONAR_PS::Transport("", "", "", $self->{HOST}, $self->{PORT}, $self->{ENDPOINT});
+	    $self->{"TRANSACTION"} = new perfSONAR_PS::Transport($self->{HOST}, $self->{PORT}, $self->{ENDPOINT});
    		#$logger->debug( "SETUP: "  . $self->{"TRANSACTION"});
     };
     # mor specific error?

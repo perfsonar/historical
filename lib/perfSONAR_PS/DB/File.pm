@@ -7,7 +7,7 @@ use fields 'FILE', 'XML';
 use strict;
 use warnings;
 use XML::LibXML;
-use Log::Log4perl qw(get_logger);
+use Log::Log4perl qw(get_logger :nowarn);
 
 sub new {
   my ($package, $file) = @_; 

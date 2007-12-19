@@ -100,7 +100,7 @@ if (!defined $host or !defined $port or !defined $endpoint) {
 }
 
 # start a transport agent
-my $sender = new perfSONAR_PS::Transport("", "", "", $host, $port, $endpoint);
+my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
 # Read the source XML file
 my $xml = readXML($file);
