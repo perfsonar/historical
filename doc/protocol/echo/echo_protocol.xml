@@ -18,6 +18,7 @@
 
     <copyright>
       <year>2007</year>
+      <year>2008</year>
       <holder>Internet2</holder>
     </copyright>
 
@@ -48,6 +49,12 @@
             <entry>Initial Preparation</entry>
             <entry>J. Zurawski</entry>
           </row>
+          <row>
+            <entry>1.1</entry>
+            <entry>1/3/2008</entry>
+            <entry>Removal of perfSONAR language, addition of new URIs</entry>
+            <entry>J. Zurawski</entry>
+          </row>
         </tbody>
       </tgroup>
     </table>
@@ -59,36 +66,19 @@
     <title>Introduction</title>
     
     <para>
-      The <citation>perfSONAR</citation> software suite is an infrastructure 
-      for network performance monitoring, making it easier to solve end-to-end 
-      performance problems on paths crossing several networks.  This set of 
-      independent software services is focused on the task of delivering 
-      performance measurements within a <emphasis>federated</emphasis> 
-      environment. These services act as an intermediate layer, between the 
-      functions provided by the performance measurement tools and that of the 
-      diagnostic and visualization applications (i.e network 
-      <emphasis>weathermaps</emphasis>, <citation>perfSONAR-UI</citation>, etc.). 
-      The goal of this layer is making and exchanging performance measurements 
-      between networks, utilizing well-defined protocols.
-    </para>
-    
-    <para>
-      Orthogonal to the task of performing, storing, and exchanging network 
-      performance information are the more practical tasks related to the 
-      continued operations and maintenance of the framework.  The sole purpose
-      of certain <emphasis>perfSONAR</emphasis> services is to aid in the
-      discovery and protection of the enterprise.  The tasks undertaken by these
-      critical components also require sound communication protocols based on
-      the same <citation>XML</citation> formats used to exchange and store 
-      measurement data as defined by the <citation>NM-WG</citation> in the
+      This work describes a simple communication protocol used to determine the
+      validity and functionality of services within the
+      <citation>perfSONAR</citation> framework.  The sole purpose of certain
+      <emphasis>perfSONAR</emphasis> services is to aid in the discovery and
+      protection of the enterprise.  The tasks undertaken by these critical
+      components also require sound communication protocols based on the same
+      <citation>XML</citation> formats used to exchange and store measurement
+      data as defined by the <citation>NM-WG</citation> in the
       <citation>OGF</citation>.
     </para>
-    
+
     <para>
-      This work describes a simple communication protocol used to determine
-      the validity and functionality of services within the
-      <emphasis>perfSONAR</emphasis> framework.  The
-      <emphasis>Echo Protocol</emphasis> is currently used by client
+      The <emphasis>Echo Protocol</emphasis> is currently used by client
       applications as well as other services to ascertain the
       <emphasis>liveness</emphasis> of a given <emphasis>perfSONAR</emphasis>
       service instance.  A well formatted <command>EchoRequest</command>
@@ -102,35 +92,25 @@
     <para>  
       The remainder of this document will explain the origins of this command
       protocol in <xref linkend="architecture" />, detailed descriptions
-      regarding syntax and semantics in <xref linkend="protocol" /> and finally
-      points of extension will be discussed in
-      <xref linkend="protocol_extension" />.
+      regarding syntax and semantics in <xref linkend="protocol" />, an overview
+      of status in <xref linkend="result_codes" />, and finally points of
+      extension will be discussed in <xref linkend="protocol_extension" />.
     </para>
     
   </section>
 
   <section id="architecture" xreflabel="Architecture">
     <title>System Architecture</title>
-    
+      
     <para>
-      The <emphasis>perfSONAR</emphasis> framework is designed around a
-      paradigm known as Service Oriented Architecture (<xref linkend="SOA" />);
-      as such each independent service offers some ability to the infrastructure
-      as a whole, without any centralized control.  Service offerings are
-      varied, mostly revolving around the task of performing and storing network
-      measurements or otherwise helping to direct and manage communication.
-      With diversity in services, the ability to contact and communicate via a
-      common protocol is paramount.
-    </para>
-    
-    <para>
-      To ensure availability, each service <command>must</command> be able to
-      respond to simple queries regarding status.  Services that fail to answer
-      a direct question may be experiencing difficulty, and therefore may not
-      be able to complete interaction with interested parties.  Client 
-      applications, services, or external monitoring tools (such as 
-      <citation>SmokePing</citation>) can use this simple method to quickly 
-      come to conclusions regarding framework availability.  
+      To ensure availability, each <emphasis>perfSONAR</emphasis> service
+      <command>must</command> be able to respond to simple queries regarding
+      status.  Services that fail to answer a direct question may be
+      experiencing difficulty, and therefore may not be able to complete
+      interaction with interested parties.  Client applications, services, or
+      external monitoring tools (such as <citation>SmokePing</citation>) can
+      use this simple method to quickly come to conclusions regarding framework
+      availability.  
     </para>
     
     <para>
@@ -164,7 +144,7 @@
     <para>
       We present an overview of the messages used in this protocol, including
       both schematic designs and examples for the 
-      <xref linkend="request_message" /> and <xref linkend="request_message" />.  
+      <xref linkend="request_message" /> and <xref linkend="response_message" />.  
       We conclude with a brief description of where extensions are 
       possible followed by some current examples in 
       <xref linkend="protocol_extension" />.  
@@ -266,10 +246,25 @@
             can be used to track message state while the 
             <emphasis>type</emphasis> is used to route the message 
             through a service that is capable of handling several.  The 
-            <emphasis>type</emphasis> <command>must</command> always be 
-            <command>EchoRequest</command>.
+            <emphasis>type</emphasis> <command>should</command> be either the
+            simple string <command>EchoRequest</command> or the URI 
+            <command>http://schemas.perfsonar.net/messages/EchoRequest/1.0</command>.
+            The later is a new addition to this message type that will allow for
+            easier extension when the protocol requires backwards compatibility.
+            This type, when used in the message, will look like the following 
+            example.
           </para>       
-         
+
+          <programlisting>
+            <![CDATA[
+              <nmwg:message type="http://schemas.perfsonar.net/messages/EchoRequest/1.0"
+                            id="STRING"
+                            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                <!-- ... -->
+              </nmwg:message>
+            ]]>
+          </programlisting> 
+
           <para>
             Within the message element there <command>must</command> always be
             two enclosed elements, a <emphasis>metadata</emphasis> and a 
@@ -487,7 +482,10 @@
               start = 
                 element nmwg:message { 
                   attribute id { xsd:string } &
-                  attribute type { "EchoRequest" } &
+                  attribute type { 
+                    "EchoRequest" |
+                    "http://schemas.perfsonar.net/messages/EchoRequest/1.0"
+                  } &
                   element nmwg:metadata {
                     attribute id { xsd:string } &
                     element nmwg:eventType { 
@@ -533,6 +531,7 @@
                       <xs:simpleType>
                         <xs:restriction base="xs:token">
                           <xs:enumeration value="EchoRequest"/>
+                          <xs:enumeration value="http://schemas.perfsonar.net/messages/EchoRequest/1.0"/>
                         </xs:restriction>
                       </xs:simpleType>
                     </xs:attribute>
@@ -672,9 +671,26 @@
             <emphasis>messageIdRef</emphasis> is an optional attribute that
             should be annotated with the <emphasis>id</emphasis> value of the
             triggering <command>EchoRequest</command> message.  The 
-            <emphasis>type</emphasis> <command>must</command> always be 
-            <command>EchoResponse</command>.
+            <emphasis>type</emphasis> <command>should</command> be either the
+            simple string <command>EchoResponse</command> or the URI 
+            <command>http://schemas.perfsonar.net/messages/EchoResponse/1.0</command>.
+            The later is a new addition to this message type that will allow for
+            easier extension when the protocl requires backwards compatibility.
+            This type, when used in the message, will look like the following 
+            example.
           </para>       
+
+          <programlisting>
+            <![CDATA[
+              <nmwg:message type="http://schemas.perfsonar.net/messages/EchoResponse/1.0"
+                            id="STRING"
+                            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                <!-- ... -->
+              </nmwg:message>
+            ]]>
+          </programlisting>           
+          
+          
          
           <para>
             Much like <xref linkend="request_message" />, within the message
@@ -772,13 +788,10 @@
             the <emphasis>action</emphasis> of a response to an 
             <command>EchoRequest</command>.  There are no attributes permitted
             for this element, and only text can be used as a child, specifically
-            text reporting the status of the transaction.  An answer of 
-            <command>success.echo</command> is commonly used to indicate 
-            that the request was received and everything is fine internal to 
-            the service.  Various other responses, normally starting with 
-            <command>error</command> are also possible to potentially report
-            internal issues.  
-          </para>          
+            text reporting the status of the transaction. A complete list of
+            <emphasis>available</emphasis> status strings is availble in
+            <xref linkend="result_codes" />.
+          </para>  
          
         </section>        
         
@@ -903,7 +916,10 @@
                 element nmwg:message { 
                   attribute id { xsd:string } &
                   attribute messageIdRef { xsd:string }? &
-                  attribute type { "EchoResponse" } &
+                  attribute type { 
+                    "EchoResponse" |
+                    "http://schemas.perfsonar.net/messages/EchoResponse/1.0"
+                  } &
                   element nmwg:metadata {
                     attribute id { xsd:string } &
                     element nmwg:eventType { 
@@ -947,6 +963,7 @@
                       <xs:simpleType>
                         <xs:restriction base="xs:token">
                           <xs:enumeration value="EchoResponse"/>
+                          <xs:enumeration value="http://schemas.perfsonar.net/messages/EchoResponse/1.0"/>
                         </xs:restriction>
                       </xs:simpleType>
                     </xs:attribute>
@@ -985,6 +1002,83 @@
       </section>
 
     </section>
+
+
+    <section id="result_codes" xreflabel="Result Codes">
+      <title>Result Codes</title>
+      
+      <para>
+        There are currently two hierarchical systems in use to return status
+        information about services.  Each of these approaches takes into account
+        the facts that there are many diverse services as well as different
+        status messages that may be returned, but the newer of the approaches
+        also allows for versioning and backwards compatibility that the original
+        attempt did not consider.  The original system <command>must</command>
+        continue to be supported by all services for the foreseeable future, while
+        a slow phase in of the latest eventTypes is attempted.  
+      </para>
+
+      <para>
+        The original system, currently used by all
+        <emphasis>perfSONAR</emphasis> services and explained in
+        <citation>Result Codes</citation>, relies on a static tree of status
+        information that is branched first by general features (i.e. 
+        <emphasis>success</emphasis>, <emphasis>error</emphasis>) and later
+        by more specific characteristics such as service and error type.  This
+        hierarchy is however missing the ability to offer versions of different
+        codes that would have the ability to become forward or backwards
+        compatible and is not in the well known URI format used by other
+        eventTypes.
+      </para>        
+
+      <programlisting>
+        <![CDATA[
+          success.
+                  echo
+                  ls.
+                     something
+                     something_else
+          error.
+                  echo
+                  ma.
+                     something
+                     something_else                      
+        ]]>
+      </programlisting>  
+
+      <para>  
+        The most recent description of this status paradigm follows the URI
+        syntax already in use by other eventTypes and does allow version numbers
+        to be assigned to the various messages.  This will allow services to
+        pick and choose which versions they may support more readily.  
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          http://schemas.perfsonar.net/status/
+                                              success/
+                                                      echo/
+                                                           1.0
+                                                      ls/
+                                                         something/
+                                                                   1.0
+                                                         something_else/
+                                                                        1.0
+                                                                        1.1
+                                              error/
+                                                    echo/
+                                                         1.0
+                                                    ma/
+                                                       something/
+                                                                 1.0
+                                                                 1.1
+                                                       something_else/
+                                                                      1.0                                               
+        ]]>
+      </programlisting>  
+          
+    </section>
+
 
     <section id="protocol_extension" xreflabel="Extensions">
       <title>Extensions</title>
@@ -1081,7 +1175,10 @@
             start = 
               element nmwg:message { 
                 attribute id { xsd:string } &
-                attribute type { "EchoRequest" } &
+                attribute type {
+                  "EchoRequest" |
+                  "http://schemas.perfsonar.net/messages/EchoRequest/1.0"
+                } &
                 element nmwg:metadata {
                   attribute id { xsd:string } &
                   element nmwg:eventType { 
@@ -1111,7 +1208,7 @@
         <programlisting>
           <![CDATA[
             <?xml version="1.0" encoding="UTF-8"?>
-            <nmwg:message type="EchoRequest"
+            <nmwg:message type="http://schemas.perfsonar.net/messages/EchoRequest/1.0"
                           id="message.96587"
                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
  
@@ -1367,6 +1464,15 @@
 
   <bibliography id="bibliography">
     <title>References</title>
+
+
+
+    <biblioentry xreflabel="Result Codes">
+      <abbrev>Result Codes</abbrev>
+      <title>
+        <ulink url="http://wiki.perfsonar.net/jra1-wiki/index.php/Result_codes">Result Codes</ulink>
+      </title>
+    </biblioentry>
 
     <biblioentry xreflabel="Multi-Schema XML Validator">
       <abbrev>MSV</abbrev>
