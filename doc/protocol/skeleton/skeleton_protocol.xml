@@ -17,7 +17,7 @@
     </author>
 
     <copyright>
-      <year>2007</year>
+      <year>2008</year>
       <holder>XXX</holder>
     </copyright>
 
@@ -57,21 +57,11 @@
 
   <section id="introduction" xreflabel="Introduction">
     <title>Introduction</title>
-    
+
     <para>
-      The <citation>perfSONAR</citation> software suite is an infrastructure 
-      for network performance monitoring, making it easier to solve end-to-end 
-      performance problems on paths crossing several networks.  This set of 
-      independent software services is focused on the task of delivering 
-      performance measurements within a <emphasis>federated</emphasis> 
-      environment. These services act as an intermediate layer, between the 
-      functions provided by the performance measurement tools and that of the 
-      diagnostic and visualization applications (i.e network 
-      <emphasis>weathermaps</emphasis>, <citation>perfSONAR-UI</citation>, etc.). 
-      The goal of this layer is making and exchanging performance measurements 
-      between networks, utilizing well-defined protocols.
+      This work describes a blah blah blah...
     </para>
-    
+
     <para>
       ... Add some more introductory material about this particular protocol,
       the service it may use, and set the stage for what you hope to talk
@@ -79,13 +69,14 @@
     </para>
     
     <para>  
-      The remainder of this document will explain the origins of this protocol
-      in <xref linkend="architecture" />, detailed descriptions regarding syntax
-      and semantics in <xref linkend="protocol" /> and finally
-      points of extension will be discussed in 
-      <xref linkend="protocol_extension" />.
+      The remainder of this document will explain the origins of this command
+      protocol in <xref linkend="architecture" />, detailed descriptions
+      regarding syntax and semantics in <xref linkend="protocol" />, an overview
+      of status in <xref linkend="result_codes" />, and finally points of
+      extension will be discussed in <xref linkend="protocol_extension" />.
     </para>
-    
+
+
   </section>
 
   <section id="architecture" xreflabel="Architecture">
@@ -125,7 +116,7 @@
         <programlisting>
           <![CDATA[
             <?xml version="1.0" encoding="UTF-8"?>
-            <nmwg:message type="Request"
+            <nmwg:message type="http://schemas.perfsonar.net/messages/Request/1.0"
                           id="message.54957485"
                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
  
@@ -144,7 +135,7 @@
 
           <programlisting>
             <![CDATA[
-              <nmwg:message type="Request"
+              <nmwg:message type="http://schemas.perfsonar.net/messages/Request/1.0"
                             id="STRING"
                             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
@@ -203,7 +194,10 @@
               start = 
                 element nmwg:message { 
                   attribute id { xsd:string } &
-                  attribute type { "Request" } &
+                  attribute type {
+                    "Request" |
+                    "http://schemas.perfsonar.net/messages/Request/1.0"
+                  } &
                 }
             ]]>
           </programlisting>  
@@ -231,6 +225,7 @@
                       <xs:simpleType>
                         <xs:restriction base="xs:token">
                           <xs:enumeration value="Request"/>
+                          <xs:enumeration value="http://schemas.perfsonar.net/messages/Request/1.0"/>
                         </xs:restriction>
                       </xs:simpleType>
                     </xs:attribute>
@@ -262,7 +257,7 @@
         <programlisting>
           <![CDATA[
             <?xml version="1.0" encoding="UTF-8"?>
-            <nmwg:message type="Response"
+            <nmwg:message type="http://schemas.perfsonar.net/messages/Response/1.0"
                           id="message.54957485"
                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
  
@@ -281,7 +276,7 @@
 
           <programlisting>
             <![CDATA[
-              <nmwg:message type="Response"
+              <nmwg:message type="http://schemas.perfsonar.net/messages/Response/1.0"
                             id="STRING"
                             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
@@ -340,7 +335,10 @@
               start = 
                 element nmwg:message { 
                   attribute id { xsd:string } &
-                  attribute type { "Response" } &
+                  attribute type { 
+                    "Response" |
+                    "http://schemas.perfsonar.net/messages/Response/1.0"
+                  } &
                 }
             ]]>
           </programlisting>  
@@ -368,6 +366,7 @@
                       <xs:simpleType>
                         <xs:restriction base="xs:token">
                           <xs:enumeration value="Response"/>
+                          <xs:enumeration value="http://schemas.perfsonar.net/messages/Response/1.0"/>
                         </xs:restriction>
                       </xs:simpleType>
                     </xs:attribute>
@@ -381,6 +380,15 @@
         
       </section>
 
+    </section>
+
+    <section id="result_codes" xreflabel="Result Codes">
+      <title>Result Codes</title>
+      
+      <para>
+        Talk about the result codes, etc...
+      </para>
+          
     </section>
 
 
