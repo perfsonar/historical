@@ -308,7 +308,7 @@ sub updateLinkStatus($$$$$$$) {
 	$find_res = find($res, "./nmwg:data", 0);
 	if ($find_res) {
 	foreach my $data ($find_res->get_nodelist) {
-		my $metadata = find($res, "./nmwg:metadata[@id='".$data->getAttribute("metadataIdRef")."']", 1);
+		my $metadata = find($res, "./nmwg:metadata[\@id='".$data->getAttribute("metadataIdRef")."']", 1);
 		if (!defined $metadata) {
 			return (-1, "No metadata in response");
 		}
@@ -324,9 +324,7 @@ sub updateLinkStatus($$$$$$$) {
 	}
 	}
 
-	my $msg = "Response does not contain status";
-	$logger->error($msg);
-	return (-1, $msg);
+	return (-1, "Response message does not contain a valid response");
 }
 
 1;

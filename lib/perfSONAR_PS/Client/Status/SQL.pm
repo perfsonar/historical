@@ -302,7 +302,7 @@ sub updateLinkStatus($$$$$$$) {
 	if (defined $do_update and $do_update != 0) {
 		my @tmp_array = ( $link_id );
 
-		my ($status, $res) = $self->getLinkStatus(\@tmp_array, "");
+		my ($status, $res) = $self->getLinkStatus(\@tmp_array, undef);
 
 		if ($status != 0) {
 			my $msg = "No previous value for $link_id to update";
@@ -335,9 +335,10 @@ sub updateLinkStatus($$$$$$$) {
 			    );
 
 		if ($self->{DATADB}->update($self->{DB_TABLE}, \%where, \%updateValues) == -1) {
-			$logger->error("Couldn't update link status for link $link_id");
+			my $msg = "Couldn't update link status for link $link_id";
+			$logger->error($msg);
 			$self->{DATADB}->closeDB;
-			return -1;
+			return (-1, $msg);
 		}
 	} else {
 		my %insertValues = (
@@ -350,15 +351,17 @@ sub updateLinkStatus($$$$$$$) {
 				);
 
 		if ($self->{DATADB}->insert($self->{DB_TABLE}, \%insertValues) == -1) {
-			$logger->error("Couldn't update link status for link $link_id");
+			my $msg = "Couldn't update link status for link $link_id";
+
+			$logger->error($msg);
 			$self->{DATADB}->closeDB;
-			return -1;
+			return (-1, $msg);
 		}
 	}
 
 	$self->{DATADB}->closeDB;
 
-	return 0;
+	return (0, "");
 }
 
 1;

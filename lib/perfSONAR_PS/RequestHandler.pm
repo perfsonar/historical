@@ -449,7 +449,14 @@ sub handleMessage($$$) {
 
                         $errorEventType = $ex->eventType;
                         $errorMessage = $ex->errorMessage;
-                    } otherwise {
+                    }
+                    catch perfSONAR_PS::Error with {
+                        my $ex = shift;
+
+                        $errorEventType = $ex->eventType;
+                        $errorMessage = $ex->errorMessage;
+                    }
+                    otherwise {
                         my $ex = shift;
 
                         $logger->error("Error handling metadata/data block: $ex");

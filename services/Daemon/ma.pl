@@ -523,6 +523,17 @@ sub handleRequest($$$) {
         $messageId = $message->getAttribute("id");
         $handler->handleMessage($message, $request, $endpoint_conf);
     }
+    catch perfSONAR_PS::Error with {
+        my $ex = shift;
+
+        my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
+        $logger->error($msg);
+
+
+        my $ret_message = new perfSONAR_PS::XML::Document_string();
+        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, "", "response", $ex->eventType, $ex->errorMessage, undef, 1);
+        $request->setResponse($ret_message->getValue());
+    }
     catch perfSONAR_PS::Error_compat with {
         my $ex = shift;
 
