@@ -11,3 +11,4 @@ lib/perfSONAR_PS/Services/Echo.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Request.pm
 META.yml                                 Module meta-data (added by MakeMaker)
+LICENSE

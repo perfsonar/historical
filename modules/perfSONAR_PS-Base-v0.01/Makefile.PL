@@ -7,11 +7,13 @@ WriteMakefile(
     'PREREQ_PM' => {
         "strict" => 0,
 	"warnings" => 0,
+        "version" => 0.50,
 	"Exporter" => 0,
 	"Log::Log4perl" => 1.00,
 	"Time::HiRes" => 1.9707,
 	"IO::File" => 0,
 	"XML::LibXML" => 1.60,
 	"LWP::UserAgent" => 2.032,
+	"Params::Validate" => 0.70,
     }
 );

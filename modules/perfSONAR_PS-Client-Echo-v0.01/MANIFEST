@@ -5,4 +5,6 @@ README
 MANIFEST.SKIP
 psping
 lib/perfSONAR_PS/Client/Echo.pm
+t/perfSONAR_PS::Client::Echo.t
 META.yml                                 Module meta-data (added by MakeMaker)
+LICENSE

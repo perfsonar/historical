@@ -7,6 +7,7 @@ WriteMakefile(
     'PREREQ_PM' => {
         "warnings" => 0,
 	"Exporter" => 0,
+        "version" => 0.50,
 	"Log::Log4perl" => 1.00,
     }
 );

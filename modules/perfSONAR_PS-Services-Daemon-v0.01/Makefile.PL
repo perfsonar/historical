@@ -9,6 +9,7 @@ WriteMakefile(
     'PREREQ_PM' => {
         "strict" => 0,
         "warnings" => 0,
+        "version" => 0.50,
 	"Log::Log4perl" => 1.00,
 	"Getopt::Long" => 0,
 	"POSIX" => 0,

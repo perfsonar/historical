@@ -5,3 +5,4 @@ README
 MANIFEST.SKIP
 lib/perfSONAR_PS/Client/Status/MA.pm
 META.yml                                 Module meta-data (added by MakeMaker)
+LICENSE
