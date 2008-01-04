@@ -8,6 +8,7 @@ WriteMakefile(
         "strict" => 0,
         "version" => 0.50,
 	"Log::Log4perl" => 1.00,
+	"perfSONAR_PS::Common" => "v0.01",
 	"perfSONAR_PS::Topology::Common" => "v0.01",
 	"perfSONAR_PS::Topology::ID" => "v0.01",
 	"perfSONAR_PS::DB::XMLDB" => "v0.01",

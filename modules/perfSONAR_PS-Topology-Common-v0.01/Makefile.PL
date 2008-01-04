@@ -11,5 +11,6 @@ WriteMakefile(
 	"Exporter" => 0,
 	"perfSONAR_PS::Common" => "v0.01",
 	"Log::Log4perl" => 1.00,
+	"Test::More" => 0,
     }
 );

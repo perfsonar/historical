@@ -11,5 +11,7 @@ WriteMakefile(
         "version" => 0.50,
 	"perfSONAR_PS::Common" => "v0.01",
 	"RRDp" => 1.20,
+	"Data::Compare" => 0,
+	"Test::More" => 0,
     }
 );

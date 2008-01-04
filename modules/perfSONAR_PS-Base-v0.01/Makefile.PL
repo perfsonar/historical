@@ -15,5 +15,8 @@ WriteMakefile(
 	"XML::LibXML" => 1.60,
 	"LWP::UserAgent" => 2.032,
 	"Params::Validate" => 0.70,
+	"Data::Compare" => 0.09,
+	"Error::Simple" => 0,
+	"Test::More" => 0,
     }
 );
