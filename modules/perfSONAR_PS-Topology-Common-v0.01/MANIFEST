@@ -1,9 +1,10 @@
-Makefile.PL
 Changes
-MANIFEST
-README
-MANIFEST.SKIP
-lib/perfSONAR_PS/Topology/ID.pm
-lib/perfSONAR_PS/Topology/Common.pm
-META.yml                                 Module meta-data (added by MakeMaker)
 LICENSE
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+README
+lib/perfSONAR_PS/Topology/Common.pm
+lib/perfSONAR_PS/Topology/ID.pm
+t/perfSONAR_PS::Topology::ID.t
+META.yml                                 Module meta-data (added by MakeMaker)

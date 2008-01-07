@@ -15,7 +15,7 @@ WriteMakefile(
 	"perfSONAR_PS::XML::Document_string" => "v0.01",
 	"Log::Log4perl" => 1.00,
 	"Test::More" => 0,
-	"Time::HiRes" => 1.9707,
+	"Time::HiRes" => 1.85,
     },
 
     EXE_FILES => \@exe_files,

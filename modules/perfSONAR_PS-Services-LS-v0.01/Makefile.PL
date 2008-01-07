@@ -9,7 +9,7 @@ WriteMakefile(
         "warnings" => 0,
         "Exporter" => 0,
 	"Log::Log4perl" => 1.00,
-	"Time::HiRes" => 1.9707,
+	"Time::HiRes" => 1.85,
         "version" => 0.50,
 	"perfSONAR_PS::Common" => 'v0.01',
 	"perfSONAR_PS::Messages" => 'v0.01',

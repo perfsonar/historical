@@ -635,24 +635,24 @@ END
         delete $requires{perl};
     }
 
-    if ($build_requires{perl}) {
-        printf $spec "%-16s%s >= %s\n", "BuildRequires:", "perl",
-            (($build_requires{perl} lt "5.6.0" ? "0:" : "1:")
-            . $build_requires{perl});
-        delete $build_requires{perl};
-    }
+#    if ($build_requires{perl}) {
+#        printf $spec "%-16s%s >= %s\n", "BuildRequires:", "perl",
+#            (($build_requires{perl} lt "5.6.0" ? "0:" : "1:")
+#            . $build_requires{perl});
+#        delete $build_requires{perl};
+#    }
 
-    for my $module (keys(%requires)) {
-        $build_requires{$module}=$build_requires{$module} || $requires{$module};
-    }
+#    for my $module (keys(%requires)) {
+#        $build_requires{$module}=$build_requires{$module} || $requires{$module};
+#    }
 
-    for my $module (sort(keys(%build_requires))) {
-        next if (!$compat and exists($Module::CoreList::version{$]}{$module}));
-        printf $spec "%-16s%s", "BuildRequires:", "perl($module)";
-        print $spec (" >= " . $build_requires{$module})
-            if ($build_requires{$module});
-        print $spec "\n";
-    }
+#    for my $module (sort(keys(%build_requires))) {
+#        next if (!$compat and exists($Module::CoreList::version{$]}{$module}));
+#        printf $spec "%-16s%s", "BuildRequires:", "perl($module)";
+#        print $spec (" >= " . $build_requires{$module})
+#            if ($build_requires{$module});
+#        print $spec "\n";
+#    }
 
     for my $module (sort(keys(%requires))) {
         next if (!$compat and exists($Module::CoreList::version{$]}{$module}));

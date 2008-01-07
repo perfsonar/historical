@@ -1,9 +1,9 @@
-Makefile.PL
 Changes
+LICENSE
 MANIFEST
-README
 MANIFEST.SKIP
+Makefile.PL
+README
 lib/perfSONAR_PS/Services/LS/General.pm
 lib/perfSONAR_PS/Services/LS/LS.pm
 META.yml                                 Module meta-data (added by MakeMaker)
-LICENSE

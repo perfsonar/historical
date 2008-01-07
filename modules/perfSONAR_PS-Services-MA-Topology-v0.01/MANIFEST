@@ -1,9 +1,9 @@
-Makefile.PL
 Changes
-MANIFEST
-README
-MANIFEST.SKIP
-psLoadTopology
-lib/perfSONAR_PS/Services/MA/Topology.pm
-META.yml                                 Module meta-data (added by MakeMaker)
 LICENSE
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+README
+lib/perfSONAR_PS/Services/MA/Topology.pm
+psLoadTopology
+META.yml                                 Module meta-data (added by MakeMaker)

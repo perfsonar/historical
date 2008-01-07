@@ -1,9 +1,9 @@
 use ExtUtils::MakeMaker; 
-my @exe_files = ( "perfsonar-collector.pl" );
+my @exe_files = ( "perfsonar-collector" );
 
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Collectors::Daemon',
-    'VERSION_FROM' => 'perfsonar-collector.pl',
+    'VERSION_FROM' => 'perfsonar-collector',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
@@ -16,7 +16,7 @@ WriteMakefile(
 	"Cwd" => 0,
 	"File::Basename" => 0,
 	"Module::Load" => 0.10,
-	"Time::HiRes" => 1.9707,
+	"Time::HiRes" => 1.85,
 	"Config::General" => 2.30,
 	"perfSONAR_PS::Common" => "v0.01",
     },
@@ -45,4 +45,10 @@ install ::
 	else \
 	    echo "Old configuration file exists at $(sysconfdir)/perfsonar/logger.conf: not overwritten."; \
 	fi;
+
+	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar-collector
+	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
+	mv -f $(INSTALLBIN)/perfsonar-collector.new $(INSTALLBIN)/perfsonar-collector
+	awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
+	mv -f $(INSTALLBIN)/perfsonar-collector.new $(INSTALLBIN)/perfsonar-collector
 ';}

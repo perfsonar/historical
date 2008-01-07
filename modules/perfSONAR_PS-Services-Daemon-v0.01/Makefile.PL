@@ -1,10 +1,10 @@
 use ExtUtils::MakeMaker;
 
-my @exe_files = ( "perfsonar.pl", "psConfigureDaemon" );
+my @exe_files = ( "perfsonar", "psConfigureDaemon" );
 
 WriteMakefile(
-    'NAME' => 'perfSONAR_PS::Daemon',
-    'VERSION_FROM' => 'perfsonar.pl',
+    'NAME' => 'perfSONAR_PS::Services::Daemon',
+    'VERSION_FROM' => 'perfsonar',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
@@ -17,7 +17,7 @@ WriteMakefile(
 	"Cwd" => 0,
 	"File::Basename" => 0,
 	"Module::Load" => 0.10,
-	"Time::HiRes" => 1.9707,
+	"Time::HiRes" => 1.85,
 	"Config::General" => 2.30,
 	"perfSONAR_PS::Common" => "v0.01",
 	"perfSONAR_PS::Messages" => "v0.01",
@@ -36,12 +36,12 @@ package MY;
 
 sub postamble {'
 
-sysconfdir	= $(prefix)/etc
+sysconfdir	= $(PREFIX)/etc
 
 install ::
 
 	if [ ! -d $(sysconfdir)/perfsonar ]; then \
-	    mkdir $(sysconfdir)/perfsonar; \
+	    mkdir -p $(sysconfdir)/perfsonar; \
 	fi;
 
 	if [ ! -f $(sysconfdir)/perfsonar/daemon.conf ]; then \
@@ -53,4 +53,10 @@ install ::
 	else \
 	    echo "Old configuration file exists at $(sysconfdir)/perfsonar/logger.conf: not overwritten."; \
 	fi;
+
+	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar
+	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/perfsonar > $(INSTALLBIN)/perfsonar.new
+	mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar
+	awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)\"); print}" $(INSTALLBIN)/perfsonar > $(INSTALLBIN)/perfsonar.new
+	mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar
 ';}

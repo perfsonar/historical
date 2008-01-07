@@ -14,7 +14,7 @@ WriteMakefile(
 	"Exporter" => 0,
 	"Log::Log4perl" => 1.00,
 	"Net::SNMP" => "5.0.0",
-	"Time::HiRes" => 1.9707,
+	"Time::HiRes" => 1.85,
 	"perfSONAR_PS::Common" => "v0.01",
 	"perfSONAR_PS::DB::File" => "v0.01",
 	"perfSONAR_PS::Status::Common" => "v0.01",

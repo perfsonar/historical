@@ -1,5 +1,8 @@
 Changes
+MANIFEST
+MANIFEST.SKIP
 Makefile.PL
 README
 logger.conf
 perfsonar-collector.pl
+META.yml                                 Module meta-data (added by MakeMaker)

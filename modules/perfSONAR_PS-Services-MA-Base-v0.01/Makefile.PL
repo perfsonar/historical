@@ -1,7 +1,7 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    'NAME' => 'perfSONAR_PS::Services::MA_Base',
+    'NAME' => 'perfSONAR_PS::Services::MA::Base',
     'VERSION_FROM' => 'lib/perfSONAR_PS/Services/MA/General.pm',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
