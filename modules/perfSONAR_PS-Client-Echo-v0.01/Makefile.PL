@@ -20,3 +20,15 @@ WriteMakefile(
 
     EXE_FILES => \@exe_files,
 );
+
+package MY;
+
+sub postamble {'
+
+install ::
+
+	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psping
+	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/psping > $(INSTALLBIN)/psping.new
+	mv -f $(INSTALLBIN)/psping.new $(INSTALLBIN)/psping
+	chmod +x ($INSTALLBIN)/psping
+';}

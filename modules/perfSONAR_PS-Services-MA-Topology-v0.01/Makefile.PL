@@ -27,3 +27,15 @@ WriteMakefile(
 
     EXE_FILES => \@exe_files,
 );
+
+package MY;
+
+sub postamble {'
+
+install ::
+
+	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psLoadTopology
+	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/psLoadTopology > $(INSTALLBIN)/psLoadTopology.new
+	mv -f $(INSTALLBIN)/psLoadTopology.new $(INSTALLBIN)/psLoadTopology
+	chmod +x ($INSTALLBIN)/psLoadTopology
+';}

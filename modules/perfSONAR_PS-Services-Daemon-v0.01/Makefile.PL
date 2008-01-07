@@ -59,4 +59,5 @@ install ::
 	mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar
 	awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)\"); print}" $(INSTALLBIN)/perfsonar > $(INSTALLBIN)/perfsonar.new
 	mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar
+	chmod +x ($INSTALLBIN)/perfsonar
 ';}
