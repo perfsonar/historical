@@ -1,0 +1,2719 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>perfSONAR LS Protocol</title>
+
+    <author>
+      <firstname>J.</firstname>
+      <surname>Zurawski</surname>
+      <affiliation>
+        <orgname>Internet2</orgname>
+        <address>   
+          <email>zurawski@internet2.edu</email>
+        </address>
+      </affiliation>
+    </author>
+
+    <copyright>
+      <year>2007</year>
+      <year>2008</year>
+      <holder>Internet2</holder>
+    </copyright>
+
+  </articleinfo>
+
+  <section id="changes" xreflabel="Document Changes">
+    <title>Document Changes</title>
+
+    <table frame="all" align="center" halign="center" width="80%"  id="table.1">
+      <title>Change Log</title>
+      <tgroup cols="1" align="left" colsep="1" rowsep="1">
+        <colspec colnum="1" colname="c1" width="10%"/>
+        <colspec colnum="2" colname="c2" width="10%"/>
+        <colspec colnum="3" colname="c3" width="50%"/>
+        <colspec colnum="4" colname="c4" width="30%"/>
+        <thead>
+          <row>
+            <entry>Version</entry>
+            <entry>Date</entry>
+            <entry>Description</entry>
+            <entry>Author(s)</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>1.0</entry>
+            <entry>1/4/2008</entry>
+            <entry>Initial Preparation</entry>
+            <entry>J. Zurawski</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+   
+  </section>
+
+
+  <section id="introduction" xreflabel="Introduction">
+    <title>Introduction</title>
+    
+    <para>
+      This work describes the communication protocol used to 
+      <emphasis>register</emphasis>, <emphasis>de-register</emphasis>, 
+      and <emphasis>update</emphasis> with, as well as 
+      <emphasis>query</emphasis> for data in the <citation>perfSONAR</citation>
+      <command>Lookup Service</command>.  The <command>Lookup Service</command>
+      is an example of an <emphasis>infrastructure</emphasis> component of the
+      <emphasis>perfSONAR</emphasis> framework; the primary goal being to aid
+      in the discovery of datasets and to unburden otherwise busy
+      <command>Measurement Archive</command> and 
+      <command>Measurement Point</command> services from answering exhaustive 
+      queries from client software.  The tasks undertaken by this critical
+      component relies on communication protocols based on the same
+      <citation>XML</citation> formats used to exchange and store measurement
+      data as defined by the <citation>NM-WG</citation> in the
+      <citation>OGF</citation>.
+    </para>
+
+    <para>
+      Parts of the <emphasis>LS Protocol</emphasis> are currently used by client
+      applications as well as other services to register, maintain, and
+      ascertain the <emphasis>contents</emphasis> of an <command>LS</command>
+      service instance.  Each well formatted <emphasis>Request</emphasis> will 
+      trigger a response message detailing the results of the action.  Each
+      interaction will be presented in the context of working services.   
+    </para>
+    
+    <para>  
+      The remainder of this document will explain the origins of this command
+      protocol in <xref linkend="architecture" />, detailed descriptions
+      regarding syntax and semantics in <xref linkend="protocol" />, an overview
+      of status in <xref linkend="result_codes" />, and finally points of
+      extension will be discussed in <xref linkend="protocol_extension" />.
+    </para>
+    
+  </section>
+
+  <section id="architecture" xreflabel="Architecture">
+    <title>System Architecture</title>
+      
+    <para>
+      Locating resources within dynamic software deployments such as
+      <emphasis>perfSONAR</emphasis> is a challenging prospect.  Service
+      instances feature limited lifetime data, and themselves may join and
+      leave the framework without <emphasis>a priori</emphasis> notification to
+      other affiliated framework components.  The
+      <command>Lookup Service</command> was constructed to help mange this
+      discovery problem by offering a static location where service instances
+      may register and maintain data sets, and client applications and other
+      services may query a known location to find recent information.  
+    </para>
+    
+    <para>
+      There are four message types in the <command>LS</command> protocol, all
+      dealing with the management of data, albeit from potentially different
+      actors.  <emphasis>Registration</emphasis> is initiated by services that
+      manage data sets in the <emphasis>perfSONAR</emphasis> framework such as
+      <command>Measurement Archives</command>.  This message is generally sent
+      when a service first comes online and establishes itself within the
+      framework as the location of specific information.
+      <emphasis>Deregistration</emphasis> has the opposite effect, and lets the
+      <command>LS</command> know that a service is unavailable.
+      <emphasis>Keepalive</emphasis> messages are initiated by already running
+      services and involves <emphasis>refreshing</emphasis>
+      the data to signify that it is still valid.  The final message type is
+      <emphasis>Query</emphasis> which can be initiated by clients or other 
+      services to check the existence and location of data sets.
+    </para>
+      
+    <para>
+      The basic protocol as presented here can be extended to similar services
+      and extensions to that of the basic <command>LS</command>.  Services that
+      handle the registration and discovery of similar sets (such as the
+      <command>Topology Service</command>) may benefit from this protocol draft
+      as well as extension such as the
+      <command>distributed Lookup Service</command>.
+    </para>
+      
+  </section>
+
+
+
+  <section id="protocol" xreflabel="LS Protocol">
+    <title>LS Protocol</title>
+    
+    <para>
+      The core functionality of the <emphasis>LS Protocol</emphasis> is to 
+      provide a set of messages in (<emphasis>request</emphasis> and
+      <emphasis>response</emphasis> pairs) that drive the actions of data
+      management and discovery.  We present an overview of each of these
+      message sets used in this protocol, including both schematic designs and
+      examples for the <xref linkend="register_messages" />, 
+      <xref linkend="deregister_messages" />, 
+      <xref linkend="keepalive_messages" />, and 
+      <xref linkend="query_messages" />.  We conclude with brief descriptions
+      of where extensions are possible followed by some current examples in 
+      <xref linkend="protocol_extension" />.  
+    </para>
+    
+    <para>
+      All protocols used within <emphasis>perfSONAR</emphasis> are based on
+      recommendations from the <emphasis>OGF</emphasis>'s
+      <emphasis>NM-WG</emphasis>, and have been initially described
+      in <citation>Zurawski06Scalable</citation>.  The basic format described
+      in this work for measurements has been adapted as a template for use in
+      service communication as well, keeping the concept of 
+      <xref linkend="metadata" /> and <xref linkend="data" /> intact.  
+    </para>
+
+
+
+
+
+ 
+    <section id="register_messages" xreflabel="Registration Messages">
+      <title>Registration Messages</title>
+
+      <para>
+        The <emphasis>Registration</emphasis> messages are used by services to
+        register internal data sets with an <command>LS</command> instance.  The
+        <emphasis>request</emphasis> message typically consists of
+        identification information and an enumeration of the data set the
+        service contains.  The <emphasis>response</emphasis> must contain
+        result code information for each
+        <emphasis>metadata</emphasis>/<emphasis>data</emphasis> pair that was
+        sent in the <emphasis>request</emphasis> message.  The results codes, as
+        discussed in <xref linkend="result_codes" />, must report the success or
+        failure of the <emphasis>Registration</emphasis> message and will
+        reflect the current state of the <command>LS</command>.
+      </para>
+
+      <section id="register_request_message" xreflabel="LSRegisterRequest Message">
+        <title>LSRegisterRequest Message</title>
+
+        <para>
+          The message consists of at least two parts, the first being a single
+          <emphasis>metadata</emphasis> element the second being at least one
+          (potentially many) <emphasis>data</emphasis> elements.  The 
+          <emphasis>metadata</emphasis> must contain service identification
+          information that uniquely describes the submitting service while the 
+          <emphasis>data</emphasis> section(s) contain representative bits from
+          the services data set.  It is understood that these are the 
+          <emphasis>metadata</emphasis> from this service only.  It is possible
+          to offer either the complete representation exactly how it appears
+          in the service or a summarized version that may omit certain 
+          extraneous details.  
+        </para>
+
+        <section id="register_request_examples" xreflabel="LSRegisterRequest Examples">
+          <title>LSRegisterRequest Examples</title>
+
+          <para>
+            The following <command>LSRegisterRequest</command> message
+            illustrates the general accepted format that an
+            <command>LS</command> will be expecting.  The data section is left
+            blank to not mandate a specific metadata structure to be
+            submitted, this will different from service to service.  
+          </para>
+      
+          <programlisting>
+            <![CDATA[
+              <?xml version='1.0' encoding='UTF-8'?>
+              <nmwg:message type="LSRegisterRequest"
+                            id="msg1"
+                            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+                <nmwg:metadata id="serviceLookupInfo">
+                  <perfsonar:subject id="commonParameters" 
+                                     xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+                    <psservice:service id="serviceParameters" 
+                                       xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+                      <psservice:serviceName>My_test_MA</psservice:serviceName>
+                      <psservice:accessPoint>http://localhost:8080/axis/services/snmpMA</psservice:accessPoint>
+                      <psservice:serviceType>MA</psservice:serviceType>
+                      <psservice:serviceDescription>This is my testing MA</psservice:serviceDescription>
+                    </psservice:service>
+                  </perfsonar:subject>
+                </nmwg:metadata>
+    
+                <nmwg:data id="data" metadataIdRef="serviceLookupInfo">
+                  <!-- content -->
+                </nmwg:data>
+ 
+              </nmwg:message>
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSRegisterRequest</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="register_request_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:message type="LSRegisterRequest"
+                              id="STRING"
+                              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <nmwg:metadata />
+                  <nmwg:data />
+                </nmwg:message>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - message</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id, type</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - metadata, data</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>message</emphasis> element serves as a container that
+              all subsequent information of a communication must travel in.  There
+              are valuable attributes as well as enclosed elements that are
+              required for this particular message.
+            </para>
+          
+            <para>
+              There are only three acceptable attributes for a message in the 
+              <emphasis>LS Protocol</emphasis>, two of which are present in the
+              request message: <emphasis>id</emphasis> and 
+              <emphasis>type</emphasis>.  The <emphasis>id</emphasis> attribute 
+              can be used to track message state while the 
+              <emphasis>type</emphasis> is used to route the message 
+              through a service that is capable of handling several.  The 
+              <emphasis>type</emphasis> <command>should</command> be either the
+              simple string <command>LSRegisterRequest</command> or the URI 
+              <command>http://schemas.perfsonar.net/messages/LSRegisterRequest/1.0</command>.
+              The later is a new addition to this message type that will allow for
+              easier extension when the protocol requires backwards compatibility.
+              This type, when used in the message, will look like the following 
+              example.
+            </para>       
+
+            <programlisting>
+              <![CDATA[
+                <nmwg:message type="http://schemas.perfsonar.net/messages/LSRegisterRequest/1.0"
+                              id="STRING"
+                              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <!-- ... -->
+                </nmwg:message>
+              ]]>
+            </programlisting> 
+
+            <para>
+              Within the message element there <command>must</command> always be
+              two enclosed elements, a <emphasis>metadata</emphasis> and a 
+              <emphasis>data</emphasis>.  These elements, due to their complexity,
+              will be explained in <xref linkend="register_request_schema_metadata" /> and 
+              <xref linkend="register_request_schema_data" />.  
+            </para>
+
+          </section>
+
+
+          <section id="register_request_schema_metadata" xreflabel="Metadata Element">
+            <title>Metadata Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:metadata id="STRING"
+                               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" />
+                </nmwg:metadata>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - metadata</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - subject</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>metadata</emphasis> element normally contains the 
+              <emphasis>static</emphasis> information regarding measurements, and
+              in the case of the <emphasis>LS Protocol</emphasis> contains the
+              one static use: identification of a service by service description
+              or stored a stored key.  As with the message there are
+              specific pieces of information required for this element to be
+              effective.
+            </para>
+          
+            <para>
+              There is only one acceptable attribute: <emphasis>id</emphasis>.  
+              The id attribute can be used to track metadata state, and must
+              be utilized by the corresponding
+              <xref linkend="register_request_schema_data" />.  Inside of the
+              element there can only be an 
+              <xref linkend="register_request_schema_subject" />.
+            </para>       
+
+          </section>
+
+
+          <section id="register_request_schema_subject" xreflabel="Subject Element">
+            <title>Subject Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <perfsonar:subject id="STRING" 
+                                   xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+
+                  <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" />
+
+                </perfsonar:subject>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - subject</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - service</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The subject element normally is used to describe the 
+              <emphasis>noun</emphasis> of a measurement, the entity that is 
+              the source or destination of a specific measurement.  In this case
+              we are extending this notion to a <emphasis>service</emphasis>
+              that is registering information with an <command>LS</command>
+              instance.  
+            </para> 
+            
+            <para>
+              This element must contain an <emphasis>id</emphasis> attribute and
+              a nested <emphasis>service</emphasis> element as described in
+              <xref linkend="register_request_schema_service" />.
+            </para>
+
+          </section>
+
+          <section id="register_request_schema_service" xreflabel="Service Element">
+            <title>Service Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <psservice:service id="STRING" 
+                                   xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+                  <psservice:serviceName />
+                  <psservice:accessPoint />
+                  <psservice:serviceType />
+                  <psservice:serviceDescription />
+                </psservice:service>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - service</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - serviceName, accessPoint, serviceType, serviceDescription</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>service</emphasis> element consists of nested
+              elements that are capable of describing unique information about
+              a given <emphasis>perfSONAR</emphasis> service.  This element's
+              notation is not only seen when dealing with an 
+              <command>LS</command>, but may also be seen in other
+              infrastructure like services such as <emphasis>Topology</emphasis>
+              and <emphasis>Authentication</emphasis> to describe which service
+              we are interested in.
+            </para> 
+
+            <para>
+              This element must contain an <emphasis>id</emphasis> attribute and
+              the <emphasis>accessPoint</emphasis> and
+              <emphasis>serviceType</emphasis> elements.  It may contain the
+              <emphasis>serviceName</emphasis> and
+              <emphasis>serviceDescription</emphasis> elements as well.
+            </para>
+
+          </section>
+          
+
+          <section id="register_request_schema_serviceName" xreflabel="serviceName Element">
+            <title>serviceName Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <psservice:serviceName xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">STRING</psservice:serviceName>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - serviceName</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - N/A</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - no</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>serviceName</emphasis> element gives a textual
+              name to a specific service.  It should be noted that this name
+              should be as descriptive as possible and reflect reality, as it 
+              may become search criteria for interested parties.  This element 
+              must contain only a text description and nothing else. This element
+              is not required.
+            </para> 
+
+          </section>
+          
+          
+          <section id="register_request_schema_accessPoint" xreflabel="accessPoint Element">
+            <title>accessPoint Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <psservice:accessPoint xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">STRING</psservice:accessPoint> 
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - accessPoint</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - N/A</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>accessPoint</emphasis> element gives the
+              <emphasis>contact string</emphasis> or a particular service (URL).
+              This element must contain only a text description and nothing else.
+              This element is required, or the <command>LS</command> may reject
+              the message.
+            </para>  
+
+          </section>
+          
+          
+          <section id="register_request_schema_serviceType" xreflabel="serviceType Element">
+            <title>serviceType Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <psservice:serviceType xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">STRING</psservice:serviceType>               
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - serviceType</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - N/A</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>serviceType</emphasis> element gives a textual
+              description of the service, for instance <emphasis>MA</emphasis>
+              best describing how to classify the service in the whole of the
+              framework.  It should be noted that this type should be as
+              descriptive as possible and reflect reality, as it may become
+              search criteria for interested parties.  This element must contain
+              only a text description and nothing else. This element is 
+              required, omitting it may cause the <command>LS</command> to
+              reject the message.
+            </para> 
+
+          </section>
+          
+          
+          <section id="register_request_schema_serviceDescription" xreflabel="serviceDescription Element">
+            <title>serviceDescription Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <psservice:serviceDescription xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">STRING</psservice:serviceDescription>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - serviceDescription</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - N/A</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - no</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>serviceDescription</emphasis> element gives a
+              textual description for a specific service.  This element 
+              must contain only a text description and nothing else. This element
+              is not required.
+            </para> 
+
+          </section>
+          
+          
+          <section id="register_request_schema_data" xreflabel="Data Element">
+            <title>Data Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:data id="STRING"
+                           metadataIdRef="STRING"
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+                  <!-- contents -->
+
+                </nmwg:data>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - data</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id, metadataIdRef</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - yes</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>data</emphasis> element is reserved for the more 
+              <emphasis>dynamic</emphasis> aspects of measurements, namely 
+              <emphasis>time</emphasis> and <emphasis>value</emphasis> pairs.
+              Although we are not reporting a measurement in this case, we are
+              sending some form of <emphasis>data</emphasis> in the form of
+              <emphasis>metadata</emphasis> descriptions from a service.
+            </para>
+          
+            <para>
+              There are only two acceptable attributes for this element: 
+              <emphasis>id</emphasis> and <emphasis>metadataIdRef</emphasis>.  
+              These attributes can be used to track state information, particularly
+              <emphasis>metadataIdRef</emphasis> which is used in linking the 
+              <emphasis>metadata</emphasis> to the <emphasis>data</emphasis>.  
+              We are leaving out an exhaustive description of the possible
+              elements that may exist inside of this element due to the ever
+              changing nature of <emphasis>perfSONAR</emphasis>.  Any
+              <emphasis>metadata</emphasis> description that a service may be
+              taking care of should be accepted.
+            </para>    
+
+          </section>
+          
+        </section>
+     
+
+        <section id="register_request_schema" xreflabel="LSRegisterRequest Schema">
+          <title>LSRegisterRequest Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="register_request_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSRegisterRequest</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>LSRegisterRequest</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+                namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"
+                namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+              
+                start = 
+                  element nmwg:message { 
+                    attribute id { xsd:string } &
+                    attribute type { 
+                      "LSRegisterRequest" |
+                      "http://schemas.perfsonar.net/messages/LSRegisterRequest/1.0"
+                    } &
+                    element nmwg:metadata {
+                      attribute id { xsd:string } &
+                      element perfsonar:subject {
+                        attribute id { xsd:string } &
+                        element psservice:service {
+                          attribute id { xsd:string } &
+                          element psservice:serviceName { xsd:string }? &
+                          element psservice:accessPoint { xsd:string } &
+                          element psservice:serviceType { xsd:string } &
+                          element psservice:serviceDescription { xsd:string }?                        
+                        }
+                      }
+                    } &
+                    element nmwg:data {
+                      attribute id { xsd:string } &
+                      attribute metadataIdRef { xsd:string } &
+                      anyElement*
+                    }
+                  }
+
+                anyElement = 
+                  element * { 
+                    anyThing 
+                  }
+
+                anyAttribute = 
+                  attribute * { text }
+
+                anyThing = 
+                  ( 
+                    anyElement | 
+                    anyAttribute | 
+                    text 
+                  )*
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="register_request_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <para>
+              <command>register_request.xsd</command>:
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                           elementFormDefault="qualified" 
+                           targetNamespace="http://ggf.org/ns/nmwg/base/2.0/" 
+                           xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                           xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <xs:import namespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                             schemaLocation="perfsonar.xsd"/>
+                  <xs:import namespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                             schemaLocation="psservice.xsd"/>
+                  <xs:element name="message">
+                    <xs:complexType>
+                      <xs:all>
+                        <xs:element ref="nmwg:metadata"/>
+                        <xs:element ref="nmwg:data"/>
+                      </xs:all>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                      <xs:attribute name="type" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:token">
+                            <xs:enumeration value="LSRegisterRequest"/>
+                            <xs:enumeration value="http://schemas.perfsonar.net/messages/LSRegisterRequest/1.0"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="metadata">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="perfsonar:subject"/>
+                      </xs:sequence>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="data">
+                    <xs:complexType>
+                      <xs:group minOccurs="0" maxOccurs="unbounded" ref="nmwg:anyElement"/>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                      <xs:attribute name="metadataIdRef" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:group name="anyElement">
+                    <xs:sequence>
+                      <xs:any processContents="skip"/>
+                    </xs:sequence>
+                  </xs:group>
+                  <xs:attributeGroup name="anyAttribute">
+                    <xs:anyAttribute processContents="skip"/>
+                  </xs:attributeGroup>
+                  <xs:group name="anyThing">
+                    <xs:sequence>
+                      <xs:group minOccurs="0" maxOccurs="unbounded" ref="nmwg:anyElement"/>
+                    </xs:sequence>
+                  </xs:group>
+                  <xs:attributeGroup name="anyThing">
+                    <xs:attributeGroup ref="nmwg:anyAttribute"/>
+                  </xs:attributeGroup>
+                </xs:schema>
+              ]]>
+            </programlisting>  
+
+            <para>
+              <command>perfsonar.xsd</command>:
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                           elementFormDefault="qualified" 
+                           targetNamespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                           xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                           xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <xs:import namespace="http://ggf.org/ns/nmwg/base/2.0/" 
+                             schemaLocation="register_request.xsd"/>
+                  <xs:import namespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                             schemaLocation="psservice.xsd"/>
+                  <xs:element name="subject">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="psservice:service"/>
+                      </xs:sequence>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:schema>
+              ]]>
+            </programlisting>  
+
+            <para>
+              <command>psservice.xsd</command>:
+            </para>
+            
+            <programlisting>
+              <![CDATA[
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                           elementFormDefault="qualified" 
+                           targetNamespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                           xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+                           xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <xs:import namespace="http://ggf.org/ns/nmwg/base/2.0/" 
+                             schemaLocation="register_request.xsd"/>
+                  <xs:import namespace="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+                             schemaLocation="perfsonar.xsd"/>
+                  <xs:element name="service">
+                    <xs:complexType>
+                      <xs:all>
+                        <xs:element minOccurs="0" ref="psservice:serviceName"/>
+                        <xs:element ref="psservice:accessPoint"/>
+                        <xs:element ref="psservice:serviceType"/>
+                        <xs:element minOccurs="0" ref="psservice:serviceDescription"/>
+                      </xs:all>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="serviceName" type="xs:string"/>
+                  <xs:element name="accessPoint" type="xs:string"/>
+                  <xs:element name="serviceType" type="xs:string"/>
+                  <xs:element name="serviceDescription" type="xs:string"/>
+                </xs:schema>
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+      </section>    
+
+   
+     
+     
+      <section id="register_response_message" xreflabel="LSRegisterResponse Message">
+        <title>LSRegisterResponse Message</title>
+
+        <para>
+          The <command>LSRegisterResponse</command> message is a reply to a given
+          <command>LSRegisterRequest</command> message from a client application or
+          service.  As discussed in <xref linkend="register_response_message" />, 
+          this response message is also based on recommendations from the 
+          <emphasis>NM-WG</emphasis>.
+        </para>
+
+        <section id="register_response_examples" xreflabel="LSRegisterResponse Examples">
+          <title>LSRegisterResponse Examples</title>
+
+          <programlisting>
+            <![CDATA[
+              <?xml version="1.0"?>
+
+              <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                            id="message.10508492" 
+                            messageIdRef="msg1" 
+                            type="LSRegisterResponse">
+
+                <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                               id="metadata.8864627" 
+                               metadataIdRef="serviceLookupInfo">
+
+                  <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                            id="key.16862305">
+                    <nmwg:parameters id="param.5587477">
+                      <nmwg:parameter name="lsKey">
+                        http://localhost:8080/axis/services/snmpMA
+                      </nmwg:parameter>
+                    </nmwg:parameters>
+                  </nmwg:key>
+                  
+                  <nmwg:eventType>success.ls.register</nmwg:eventType>
+
+                </nmwg:metadata>
+              
+                <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                           id="data.12743213" 
+                           metadataIdRef="metadata.8864627">
+                  <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/"
+                         value="[1] Data elements have been registered with key [http://localhost:8080/axis/services/snmpMA]"/>
+                </nmwg:data>
+              
+              </nmwg:message>
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSRegisterResponse</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="register_response_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:message type="LSRegisterResponse"
+                              id="STRING"
+                              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <nmwg:metadata />
+                  <nmwg:data />
+                </nmwg:message>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - message</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id, messageIdRef, type</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - metadata, data</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>message</emphasis> element serves as a container that
+              all subsequent information of a communication must travel in.  There
+              are valuable attributes as well as enclosed elements that are
+              required for this particular message.
+            </para>
+          
+            <para>
+              There are only three acceptable attributes for a message in the 
+              <emphasis>LS Protocol</emphasis>, all of which are present in the
+              request message: <emphasis>id</emphasis>,
+              <emphasis>messageIdRef</emphasis>,  and 
+              <emphasis>type</emphasis>.  The <emphasis>id</emphasis> and 
+              <emphasis>messageIdRef</emphasis> attributes 
+              can be used to track message state while the 
+              <emphasis>type</emphasis> is used to route the message 
+              through a service that is capable of handling several.  The 
+              <emphasis>type</emphasis> <command>should</command> be either the
+              simple string <command>LSRegisterResponse</command> or the URI 
+              <command>http://schemas.perfsonar.net/messages/LSRegisterResponse/1.0</command>.
+              The later is a new addition to this message type that will allow for
+              easier extension when the protocol requires backwards compatibility.
+              This type, when used in the message, will look like the following 
+              example.
+            </para>       
+
+            <programlisting>
+              <![CDATA[
+                <nmwg:message type="http://schemas.perfsonar.net/messages/LSRegisterResponse/1.0"
+                              id="STRING"
+                              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <!-- ... -->
+                </nmwg:message>
+              ]]>
+            </programlisting> 
+
+            <para>
+              Within the message element there <command>must</command> always be
+              two enclosed elements, a <emphasis>metadata</emphasis> and a 
+              <emphasis>data</emphasis>.  These elements, due to their complexity,
+              will be explained in <xref linkend="register_response_schema_metadata" /> and 
+              <xref linkend="register_response_schema_data" />.  
+            </para>
+
+          </section>
+
+
+          <section id="register_response_schema_metadata" xreflabel="Metadata Element">
+            <title>Metadata Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:metadata id="STRING"
+                               metadatIdRef="STRING"
+                               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <nmwg:key />
+                  <nmwg:eventType />
+                </nmwg:metadata>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - metadata</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id, metadataIdRef</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - key, eventType</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>metadata</emphasis> element normally contains the 
+              <emphasis>static</emphasis> information regarding measurements, and
+              in the case of this protocol contains the one static use: results of
+              the execution of the <command>LSRegisterRequest</command>.  As with the
+              message there are specific pieces of information required for this
+              element to be effective.
+            </para>
+          
+            <para>
+              There is only one acceptable attribute: <emphasis>id</emphasis>.  
+              The id attribute can be used to track metadata state, and must
+              be utilized by the <xref linkend="register_response_schema_data" />.  Inside
+              of the element there can only be an
+              <xref linkend="register_response_schema_key" /> or an 
+              <xref linkend="register_response_schema_eventType" />.
+          </para>     
+
+          </section>
+
+
+
+          <section id="register_response_schema_key" xreflabel="Key Element">
+            <title>Key Element</title>
+
+            <programlisting>
+              <![CDATA[
+                <nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+                          id="STRING">
+                        
+                  <nmwg:parameters id="STRING" />
+
+                </nmwg:key> 
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - key</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - parameters</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>
+              The <command>key</command> element encloses a <command>parameters</command> 
+              structure that is used to describe the representative backend storage.  
+              The key does not serve an explicit purpose other than to offer a container for
+              the additional <emphasis>parameters</emphasis>.  The namespace of this 
+              object is always the same and the object <command>is</command> required.
+            </para>
+
+            <para>
+              The <xref linkend="register_response_schema_parameters" /> elements and 
+              <emphasis>id</emphasis> attribute are also required for this element.
+            </para>
+        
+          </section>           
+
+          <section id="register_response_schema_parameters" xreflabel="Parameters Element">
+            <title>Parameters Element</title>
+
+            <programlisting>
+              <![CDATA[
+                <nmwg:parameters id="STRING"
+                                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                               
+                  <nmwg:parameter name="STRING">STRING</nmwg:parameter>
+
+                </nmwg:parameters>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - parameters</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - parameter</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>
+              The <command>parameters</command> element encloses a series of 
+              <command>parameter</command> structures that are used to describe 
+              the representative backend storage.  The namespace of this object 
+              is always the same (unlike previous uses) and the object 
+              <command>is</command> required.
+            </para>
+
+            <para>
+              The <xref linkend="register_response_schema_parameter" /> elements and 
+              <emphasis>id</emphasis> attribute are also required for this element.
+            </para>
+        
+          </section>  
+        
+          <section id="register_response_schema_parameter" xreflabel="Parameter Element">
+            <title>Parameter Element</title>
+
+            <programlisting>
+              <![CDATA[
+
+                <nmwg:parameter name="STRING"
+                                xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  STRING
+                </nmwg:parameter>
+
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - parameter</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - name, value</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>
+
+            <para>
+              The <command>parameter</command> element is meant to describe
+              a physical aspect of the data storage in terms of both name
+              and value.  The value can be an attribute (appropriately named
+              <emphasis>value</emphasis>) or in the form of a text element.  
+            </para>
+
+            <para>
+              There is only one recognized values for the <emphasis>name</emphasis> 
+              attribute at the current time, although we leave the possibility
+              that other elements may be necessary in the future.  
+            </para>
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para>lsKey - Specifies the <emphasis>key</emphasis> value used
+                in identifying an <command>LS</command> instance, for now this
+                is simply the <emphasis>accessPoint</emphasis>.</para>
+              </listitem>
+            </itemizedlist>
+ 
+            <para>
+              The <emphasis>name</emphasis> attribute is required for this element, 
+              the <emphasis>value</emphasis> attribute is an option instead of using
+              a text element.  The namespace should always be the base.  
+            </para>        
+        
+          </section>   
+
+
+
+          <section id="register_response_schema_eventType" xreflabel="eventType Element">
+            <title>eventType Element</title>
+
+            <programlisting>
+              <![CDATA[
+                <nmwg:eventType xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  STRING
+                </nmwg:eventType>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - eventType</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - N/A</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>eventType</emphasis> element is normally used to
+              specify an action for a service or measurement.  We utilize it for
+              this role in the <emphasis>LS Protocol</emphasis> by specifying
+              the <emphasis>action</emphasis> of a response to an 
+              <command>LSRegisterRequest</command>.  There are no attributes permitted
+              for this element, and only text can be used as a child, specifically
+              text reporting the status of the transaction. A complete list of
+              <emphasis>available</emphasis> status strings is available in
+              <xref linkend="result_codes" />.
+            </para>  
+         
+          </section>            
+          
+          <section id="register_response_schema_data" xreflabel="Data Element">
+            <title>Data Element</title>
+            
+            <programlisting>
+              <![CDATA[
+                <nmwg:data id="STRING" 
+                           metadataIdRef="STRING"
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0" />
+                </nmwg:data>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - data</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - id, metadataIdRef</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - yes</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>data</emphasis> element is reserved for the more 
+              <emphasis>dynamic</emphasis> aspects of measurements, namely 
+              <emphasis>time</emphasis> and <emphasis>value</emphasis> pairs.
+              Although we are not reporting a measurement in this case, we are
+              sending back status information.  This information is delivered
+              in a <emphasis>response</emphasis> 
+              <xref linkend="register_response_schema_datum" />.
+            </para>
+          
+            <para>
+              There are only two acceptable attributes for this element: 
+              <emphasis>id</emphasis> and <emphasis>metadataIdRef</emphasis>.  
+              These attributes can be used to track state information, particularly
+              <emphasis>metadataIdRef</emphasis> which is used in linking the 
+              <emphasis>metadata</emphasis> to the <emphasis>data</emphasis>.  
+            </para>      
+
+          </section>
+
+
+          <section id="register_response_schema_datum" xreflabel="Datum Element">
+            <title>Datum Element</title>
+
+            <programlisting>
+              <![CDATA[
+                <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0">
+                  TEXT
+                </nmwgr:datum>
+              ]]>
+            </programlisting>  
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command>localname</command> - datum</para>
+              </listitem>
+              <listitem>
+                <para><command>namespace</command> - http://ggf.org/ns/nmwg/result/2.0/</para>
+              </listitem>
+              <listitem>
+                <para><command>attributes</command> - value</para>
+              </listitem>
+              <listitem>
+                <para><command>nested elements</command> - text</para>
+              </listitem>
+              <listitem>
+                <para><command>required</command> - yes</para>
+              </listitem>
+            </itemizedlist>   
+          
+            <para>
+              The <emphasis>datum</emphasis> element describes measurements in
+              most circumstances; the intent in the
+              <emphasis>LS Protocol</emphasis> is to report back a human
+              readable status message.  There is only one possible attribute
+              accepted for this element, <emphasis>value</emphasis>, and it may be
+              used in place of an enclosed text element.  The text could be
+              any message the service wishes to return.
+            </para>
+          
+          </section>    
+          
+
+        </section>
+     
+
+        <section id="register_response_schema" xreflabel="LSRegisterResponse Schema">
+          <title>LSRegisterResponse Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="register_response_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSRegisterResponse</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>...Response</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+                namespace nmwgr = "http://ggf.org/ns/nmwg/result/2.0/"
+              
+                start = 
+                  element nmwg:message { 
+                    attribute id { xsd:string } &
+                    attribute messageIdRef { xsd:string } &
+                    attribute type { 
+                      "LSRegisterResponse" |
+                      "http://schemas.perfsonar.net/messages/LSRegisterResponse/1.0"
+                    } &
+                    element nmwg:metadata {
+                      attribute id { xsd:string } &
+                      attribute metadataIdRef { xsd:string } &
+                      element nmwg:key {
+                        attribute id { xsd:string } &
+                        element nmwg:parameters {
+                          attribute id { xsd:string } &
+                          element nmwg:parameter {
+                            attribute name { "lsKey" } &
+                            (
+                              text |
+                              attribute value { xsd:string }
+                            )
+                          }
+                        }
+                      } &
+                      element nmwg:eventType { text }
+                    } &
+                    element nmwg:data {
+                      attribute id { xsd:string } &
+                      attribute metadataIdRef { xsd:string } &
+                      element nmwgr:datum {
+                        (
+                          text |
+                          attribute value { xsd:string }
+                        )
+                      }
+                    }
+                  }
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="register_response_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <para>
+              <command>register_response.xsd</command>:
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                           elementFormDefault="qualified" 
+                           targetNamespace="http://ggf.org/ns/nmwg/base/2.0/" 
+                           xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/" 
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <xs:import namespace="http://ggf.org/ns/nmwg/result/2.0/" 
+                             schemaLocation="nmwgr.xsd"/>
+                  <xs:element name="message">
+                    <xs:complexType>
+                      <xs:all>
+                        <xs:element ref="nmwg:metadata"/>
+                        <xs:element ref="nmwg:data"/>
+                      </xs:all>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                      <xs:attribute name="messageIdRef" use="required" type="xs:string"/>
+                      <xs:attribute name="type" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:token">
+                            <xs:enumeration value="LSRegisterResponse"/>
+                            <xs:enumeration value="http://schemas.perfsonar.net/messages/LSRegisterResponse/1.0"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="metadata">
+                    <xs:complexType>
+                      <xs:all>
+                        <xs:element ref="nmwg:key"/>
+                        <xs:element ref="nmwg:eventType"/>
+                      </xs:all>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                      <xs:attribute name="metadataIdRef" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="key">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="nmwg:parameters"/>
+                      </xs:sequence>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="parameters">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="nmwg:parameter"/>
+                      </xs:sequence>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="parameter">
+                    <xs:complexType mixed="true">
+                      <xs:attribute name="name" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:token">
+                            <xs:enumeration value="lsKey"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                      <xs:attribute name="value" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="eventType" type="xs:string"/>
+                  <xs:element name="data">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element ref="nmwgr:datum"/>
+                      </xs:sequence>
+                      <xs:attribute name="id" use="required" type="xs:string"/>
+                      <xs:attribute name="metadataIdRef" use="required" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:schema>
+              ]]>
+            </programlisting>  
+ 
+            <para>
+              <command>nmwgr.xsd</command>:
+            </para>
+
+            <programlisting>
+              <![CDATA[
+                <?xml version="1.0" encoding="UTF-8"?>
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                           elementFormDefault="qualified" 
+                           targetNamespace="http://ggf.org/ns/nmwg/result/2.0/" 
+                           xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/" 
+                           xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                  <xs:import namespace="http://ggf.org/ns/nmwg/base/2.0/" 
+                             schemaLocation="register_response.xsd"/>
+                  <xs:element name="datum">
+                    <xs:complexType mixed="true">
+                      <xs:attribute name="value" type="xs:string"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:schema>
+              ]]>
+            </programlisting>  
+
+
+ 
+          </section>
+        
+        </section>
+
+
+      </section> 
+    </section>       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    <section id="deregister_messages" xreflabel="Deregistration Messages">
+      <title>Deregistration Messages</title>
+
+      <para>
+        ...        
+      </para>
+
+
+      <section id="deregister_request_message" xreflabel="LSDeregisterRequest Message">
+        <title>LSDeregisterRequest Message</title>
+
+
+
+        <section id="deregister_request_examples" xreflabel="LSDeregisterRequest Examples">
+          <title>LSDeregisterRequest Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSDeregisterRequest</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="deregister_request_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="deregister_request_schema" xreflabel="LSDeregisterRequest Schema">
+          <title>LSDeregisterRequest Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="deregister_request_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSDeregisterRequest</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>LSDeregisterRequest</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="deregister_request_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+      </section>    
+
+   
+     
+      <section id="deregister_response_message" xreflabel="LSDeregisterResponse Message">
+        <title>LSDeregisterResponse Message</title>
+
+
+
+        <section id="deregister_response_examples" xreflabel="LSDeregisterResponse Examples">
+          <title>LSDeregisterResponse Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSDeregisterResponse</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="deregister_response_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="deregister_response_schema" xreflabel="LSDeregisterResponse Schema">
+          <title>LSDeregisterResponse Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="deregister_response_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSDeregisterResponse</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>...Response</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="deregister_response_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+
+      </section> 
+    </section>       
+
+
+
+
+
+
+
+
+
+
+    
+    <section id="keepalive_messages" xreflabel="Keepalive Messages">
+      <title>Keepalive Messages</title>
+
+      <para>
+        ...        
+      </para>
+
+      <section id="keepalive_request_message" xreflabel="LSKeepaliveRequest Message">
+        <title>LSKeepaliveRequest Message</title>
+
+
+
+        <section id="keepalive_request_examples" xreflabel="LSKeepaliveRequest Examples">
+          <title>LSKeepaliveRequest Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSKeepaliveRequest</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="keepalive_request_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="keepalive_request_schema" xreflabel="LSKeepaliveRequest Schema">
+          <title>LSKeepaliveRequest Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="keepalive_request_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSKeepaliveRequest</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>LSKeepaliveRequest</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="keepalive_request_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+      </section>    
+
+   
+   
+   
+   
+   
+   
+     
+      <section id="keepalive_response_message" xreflabel="LSKeepaliveResponse Message">
+        <title>LSKeepaliveResponse Message</title>
+
+
+
+        <section id="keepalive_response_examples" xreflabel="LSKeepaliveResponse Examples">
+          <title>LSKeepaliveResponse Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSKeepaliveResponse</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="keepalive_response_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="keepalive_response_schema" xreflabel="LSKeepaliveResponse Schema">
+          <title>LSKeepaliveResponse Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="keepalive_response_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSKeepaliveResponse</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>...Response</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="keepalive_response_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+
+      </section> 
+    </section>       
+
+
+    
+    
+
+
+
+
+    <section id="query_messages" xreflabel="Query Messages">
+      <title>Query Messages</title>
+
+      <para>
+        ...        
+      </para>
+
+      <section id="query_request_message" xreflabel="LSQueryRequest Message">
+        <title>LSQueryRequest Message</title>
+
+
+
+        <section id="query_request_examples" xreflabel="LSQueryRequest Examples">
+          <title>LSQueryRequest Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSQueryRequest</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="query_request_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="query_request_schema" xreflabel="LSQueryRequest Schema">
+          <title>LSQueryRequest Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="query_request_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSQueryRequest</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>LSQueryRequest</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="query_request_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+      </section>    
+
+   
+     
+      <section id="query_response_message" xreflabel="LSQueryResponse Message">
+        <title>LSQueryResponse Message</title>
+
+
+
+        <section id="query_response_examples" xreflabel="LSQueryResponse Examples">
+          <title>LSQueryResponse Examples</title>
+
+          <programlisting>
+            <![CDATA[
+
+            ]]>
+          </programlisting>  
+    
+          <para>
+            This example illustrates the most basic of 
+            <command>LSQueryResponse</command> messages.  All attributes and
+            elements, as listed, are required and in the proper namespaces.  A
+            description of each element, as well as related attributes follows.
+          </para>
+
+          <section id="query_response_schema_message" xreflabel="Message Element">
+            <title>Message Element</title>
+          
+            <para>
+              ...
+            </para>
+          
+          </section>
+
+        </section>
+     
+
+        <section id="query_response_schema" xreflabel="LSQueryResponse Schema">
+          <title>LSQueryResponse Schema</title>
+
+          <para>
+            An XML <xref linkend="schema" /> is typically used to describe 
+            the structure and internal content of a given XML instance.  This 
+            description can sometimes be expressed in XML itself.  This 
+            abstract is generally created to allow programmatic validation of 
+            XML instances and to protect a service from receiving a poorly 
+            constructed message.  
+          </para>
+        
+          <para>
+            Two schema definitions are presented here, the first being the native
+            form of all <emphasis>NM-WG</emphasis> schemata written in the
+            <citation>RELAX-NG</citation> language and the second being a derived
+            version written in <citation>XSD</citation>.
+          </para>
+
+          <section id="query_response_schema_relax" xreflabel="RELAX-NG">
+            <title>RELAX-NG</title>        
+
+            <para>
+              <emphasis>NM-WG</emphasis> schemata is always expressed in terms of
+              the RELAX-NG schema language.  This tool, unlike similar XML schema 
+              languages, does not utilize XML markup.  The syntax is similar 
+              to that of a regular language, and allows for a rather compact 
+              description.  The following describes the 
+              <command>LSQueryResponse</command> schema.  Note that this 
+              <command>will</command> only validate
+              <emphasis>...Response</emphasis> messages.  Other schemas can be
+              found in <citation>NMWG-Schema</citation>.
+            </para>
+
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>  
+
+          </section>
+
+          <section id="query_response_schema_xsd" xreflabel="XSD">
+            <title>XSD</title>        
+
+            <para>
+              This particular description was produced using tools such as 
+              <citation>MSV</citation> and <citation>Trang</citation> to 
+              programatically convert between schema languages.  XSD is a more
+              widely accepted schema format for validation, thus we present
+              this definition for use in <emphasis>perfSONAR</emphasis> services.  
+            </para>
+
+            <programlisting>
+              <![CDATA[
+ 
+              ]]>
+            </programlisting>  
+ 
+          </section>
+        
+        </section>
+
+
+      </section> 
+      
+      
+    </section>     
+
+
+
+
+
+
+
+
+
+    <section id="result_codes" xreflabel="Result Codes">
+      <title>Result Codes</title>
+      
+      <para>
+        There are currently two hierarchical systems in use to return status
+        information about services.  Each of these approaches takes into account
+        the facts that there are many diverse services as well as different
+        status messages that may be returned, but the newer of the approaches
+        also allows for versioning and backwards compatibility that the original
+        attempt did not consider.  The original system <command>must</command>
+        continue to be supported by all services for the foreseeable future, while
+        a slow phase in of the latest eventTypes is attempted.  
+      </para>
+
+      <para>
+        The original system, currently used by all
+        <emphasis>perfSONAR</emphasis> services and explained in
+        <citation>Result Codes</citation>, relies on a static tree of status
+        information that is branched first by general features (i.e. 
+        <emphasis>success</emphasis>, <emphasis>error</emphasis>) and later
+        by more specific characteristics such as service and error type.  This
+        hierarchy is however missing the ability to offer versions of different
+        codes that would have the ability to become forward or backwards
+        compatible and is not in the well known URI format used by other
+        eventTypes.
+      </para>        
+
+      <programlisting>
+        <![CDATA[
+          success.
+                  ls.
+                     register.
+                     deregister.
+                     keepalive.
+                     query.
+                  ma.
+                     something
+                     something_else
+          error.
+                ls.
+                   register.
+                   deregister.
+                   keepalive.
+                   query.
+                ma.
+                   something
+                   something_else                     
+        ]]>
+      </programlisting>  
+
+      <para>  
+        The most recent description of this status paradigm follows the URI
+        syntax already in use by other eventTypes and does allow version numbers
+        to be assigned to the various messages.  This will allow services to
+        pick and choose which versions they may support more readily.  
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          http://schemas.perfsonar.net/status/
+                                              success/
+                                                      ls/
+                                                         register/
+                                                                  1.0
+                                                         deregister/
+                                                                    1.0
+                                                         keepalive/
+                                                                   1.0
+                                                         query/
+                                                               1.0
+                                                      ma/
+                                                         something/
+                                                                   1.0
+                                                         something_else/
+                                                                        1.0
+                                                                        1.1
+                                              error/
+                                                    ls/
+                                                       register/
+                                                                1.0
+                                                       deregister/
+                                                                  1.0
+                                                       keepalive/
+                                                                 1.0
+                                                       query/
+                                                             1.0
+                                                    ma/
+                                                       something/
+                                                                 1.0
+                                                       something_else/
+                                                                      1.0
+                                                                      1.1                                             
+        ]]>
+      </programlisting>  
+          
+    </section>
+
+
+    <section id="protocol_extension" xreflabel="Extensions">
+      <title>Extensions</title>
+      
+      <para>
+        ...
+      </para>
+      
+    </section>  
+    
+  </section> 
+
+
+
+  <glossary id="glossary">
+    <title>Terms</title>
+
+    <glossdiv id="A">
+      <title>A</title>    
+    </glossdiv> 
+    
+    <glossdiv id="B">
+      <title>B</title>    
+    </glossdiv> 
+    
+    <glossdiv id="C">
+      <title>C</title>    
+      <glossentry id="characteristic" xreflabel="characteristics"><glossterm>characteristic</glossterm>
+        <glossdef>
+          <para>Taken on the context of networking, these describe the 
+          intrinsic properties of a portion of the network that are related 
+          to the performance and reliability of the network.  See 
+          <ulink url="http://www.ggf.org/documents/GFD.23.pdf">http://www.ggf.org/documents/GFD.23.pdf</ulink> 
+          for more information.</para>
+        </glossdef>
+      </glossentry> 
+      <glossentry id="chaining"><glossterm>chaining</glossterm>
+        <glossdef>
+          <para>
+            The process of linking together elements in the 
+            <xref linkend="NMWG" /> XML specification.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="filter_chaining">filter chaining</glossseealso>
+        <glossseealso otherterm="merge_chaining">merge chaining</glossseealso>
+      </glossentry>   
+    </glossdiv> 
+    
+    <glossdiv id="D">
+      <title>D</title> 
+      <glossentry id="data"><glossterm>data</glossterm>
+        <glossdef>
+          <para>An <xref linkend="NMWG" /> XML block used 
+          to store dynamic information, such as the results of a measurement.</para>
+        </glossdef>
+      </glossentry>        
+    </glossdiv> 
+    
+    <glossdiv id="E">
+      <title>E</title>    
+    </glossdiv> 
+    
+    <glossdiv id="F">
+      <title>F</title>  
+      <glossentry id="filter_chaining" xreflabel="filter chaining"><glossterm>filter chaining</glossterm>
+        <glossdef>
+          <para>
+            Chaining operation that is akin to performing advanced selection or 
+            aggregation on a dataset.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="chaining">chaining</glossseealso>
+        <glossseealso otherterm="merge_chaining">merge chaining</glossseealso>
+      </glossentry>        
+    </glossdiv> 
+    
+    <glossdiv id="G">
+      <title>G</title>    
+    </glossdiv> 
+    
+    <glossdiv id="H">
+      <title>H</title>           
+    </glossdiv> 
+    
+    <glossdiv id="I">
+      <title>I</title>          
+    </glossdiv> 
+    
+    <glossdiv id="J">
+      <title>J</title>    
+    </glossdiv> 
+    
+    <glossdiv id="K">
+      <title>K</title>    
+    </glossdiv> 
+    
+    <glossdiv id="L">
+      <title>L</title>    
+    </glossdiv> 
+    
+    <glossdiv id="M">
+      <title>M</title>     
+      <glossentry id="merge_chaining" xreflabel="merge chaining"><glossterm>merge chaining</glossterm>
+        <glossdef>
+          <para>
+            Chaining that combines linked metadata items into a new 
+            representation.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="filter_chaining">filter chaining</glossseealso>
+        <glossseealso otherterm="chaining">chaining</glossseealso>
+      </glossentry>   
+      <glossentry id="metadata"><glossterm>metadata</glossterm>
+        <glossdef>
+          <para>An <xref linkend="NMWG" /> XML block used 
+          to store static information, such as the specific parameters of a 
+          measurement.</para>
+        </glossdef>
+      </glossentry>     
+    </glossdiv> 
+    
+    <glossdiv id="N">
+      <title>N</title>  
+      <glossentry id="NMWG"><glossterm>NM-WG</glossterm>
+        <glossdef>
+          <para>The performance of most grid applications is dependent on the 
+          performance of the networks forming the grid. The Network 
+          Measurements Working Group (NMWG) identifies network metrics 
+          (aka <xref linkend="characteristic" />) useful to grid applications 
+          and middleware, and develops standard mechanisms to describe and 
+          publish these characteristics to the Grid.</para>
+        </glossdef>
+      </glossentry>   
+    </glossdiv> 
+    
+    <glossdiv id="O">
+      <title>O</title>    
+    </glossdiv> 
+    
+    <glossdiv id="P">
+      <title>P</title>        
+    </glossdiv>
+    
+    <glossdiv id="Q">
+      <title>Q</title>    
+    </glossdiv> 
+    
+    <glossdiv id="R">
+      <title>R</title>  
+    </glossdiv> 
+    
+    <glossdiv id="S">
+      <title>S</title>  
+      <glossentry id="schema"><glossterm>schema</glossterm>
+        <glossdef>
+          <para>XML specification, normally written in XML.</para>
+        </glossdef>
+        <glossseealso otherterm="schemata">schemata</glossseealso>
+      </glossentry>   
+      <glossentry id="schemata"><glossterm>schemata</glossterm>
+        <glossdef>
+          <para>Plural of schema.</para>
+        </glossdef>
+        <glossseealso otherterm="schema">schema</glossseealso>
+      </glossentry>         
+      <glossentry id="SOA"><glossterm>SOA</glossterm>
+        <glossdef>
+          <para>
+            Service Oriented Architecture (SOA) is a software architectural 
+            style that allows applications (services) to communicate and interact
+            regardless of the environment or implementation.  
+          </para>
+        </glossdef>
+      </glossentry>    
+    </glossdiv> 
+    
+    <glossdiv id="T">
+      <title>T</title>    
+    </glossdiv> 
+    
+    <glossdiv id="U">
+      <title>U</title>  
+    </glossdiv> 
+    
+    <glossdiv id="V">
+      <title>V</title>    
+    </glossdiv> 
+    
+    <glossdiv id="W">
+      <title>W</title>    
+    </glossdiv> 
+    
+    <glossdiv id="X">
+      <title>X</title>  
+    </glossdiv> 
+    
+    <glossdiv id="Y">
+      <title>Y</title>    
+    </glossdiv> 
+    
+    <glossdiv id="Z">
+      <title>Z</title>    
+    </glossdiv>
+     
+  </glossary>
+
+
+  <bibliography id="bibliography">
+    <title>References</title>
+
+    <biblioentry xreflabel="Result Codes">
+      <abbrev>Result Codes</abbrev>
+      <title>
+        <ulink url="http://wiki.perfsonar.net/jra1-wiki/index.php/Result_codes">Result Codes</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Multi-Schema XML Validator">
+      <abbrev>MSV</abbrev>
+      <title>
+        <ulink url="https://msv.dev.java.net/">Sun Multi-Schema XML Validator (MSV)</ulink>
+      </title>
+    </biblioentry>
+    
+    <biblioentry xreflabel="Trang">
+      <abbrev>Trang</abbrev>
+      <title>
+        <ulink url="http://www.thaiopensource.com/relaxng/trang.html">Multi-format schema converter based on RELAX NG</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="NM-WG Schema">
+      <abbrev>NMWG-Schema</abbrev>
+      <title>
+        <ulink url="http://nmwg.internet2.edu/nm-schema-base.html">NMWG Base Schema</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="RELAX-NG">
+      <abbrev>RELAX-NG</abbrev>
+      <title>
+        <ulink url="http://relaxng.org/">RELAX-NG Schema Language</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="NM-WG">
+      <abbrev>NM-WG</abbrev>
+      <title>
+        <ulink url="http://nmwg.internet2.edu">Network Measurements Working Group</ulink>
+      </title>
+    </biblioentry>
+    
+    <biblioentry xreflabel="perfSONAR">
+      <abbrev>perfSONAR</abbrev>
+      <title>
+        <ulink url="http://www.perfsonar.net">perfSONAR</ulink>
+      </title>
+    </biblioentry>  
+    
+    <biblioentry xreflabel="XML">
+      <abbrev>XML</abbrev>
+      <title>
+        <ulink url="http://www.w3.org/XML">Extensible Markup Language (XML)</ulink>
+      </title>
+    </biblioentry>
+    
+    <biblioentry xreflabel="OGF">
+      <abbrev>OGF</abbrev>
+      <title>
+        <ulink url="http://www.ogf.org/">(Global|Open) Grid Forum</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="perfSONAR-UI">
+      <abbrev>perfSONAR-UI</abbrev>
+      <title>
+        <ulink url="http://perfsonar.acad.bg/">perfSONAR-UI</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="A Scalable Framework for Representation and Exchange of Network Measurements">
+      <abbrev>Zurawski06Scalable</abbrev>
+      <title>A Scalable Framework for Representation and Exchange of Network Measurements</title>
+      <authorgroup>
+        <author><personname>
+          <firstname>J.</firstname><surname>Zurawski</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>M.</firstname><surname>Swany</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>D.</firstname><surname>Gunter</surname>
+        </personname></author>
+      </authorgroup>
+      <confgroup>
+        <confdates>March, 2006</confdates>
+        <conftitle>2nd International IEEE/Create-Net Conference on Testbeds and Research Infrastructures for the Development of Networks and Communities</conftitle>
+        <address>Barcelona, Spain</address>
+        <confsponsor>IEEE/Create-Net</confsponsor>
+      </confgroup>
+    </biblioentry>
+
+    <biblioentry xreflabel="XSD">
+      <abbrev>XSD</abbrev>
+      <title>
+        <ulink url="http://www.w3.org/XML/Schema">XML Schema</ulink>
+      </title>
+    </biblioentry> 
+
+  </bibliography>
+
+</article>
