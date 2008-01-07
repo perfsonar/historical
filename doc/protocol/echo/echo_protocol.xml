@@ -581,7 +581,7 @@
         <emphasis>perfSONAR</emphasis> services.  This simplicity does however
         allow for limited extension, as discussed in 
         <xref linkend="protocol_extension" />.  As discussed in 
-        <xref linkend="response_message" />, this response message is also 
+        <xref linkend="request_message" />, this response message is also 
         based on recommendations from the <emphasis>NM-WG</emphasis>.
       </para>
 
@@ -865,7 +865,7 @@
               <para><command>namespace</command> - http://ggf.org/ns/nmwg/result/2.0/</para>
             </listitem>
             <listitem>
-              <para><command>attributes</command> - N/A</para>
+              <para><command>attributes</command> - value</para>
             </listitem>
             <listitem>
               <para><command>nested elements</command> - text</para>
@@ -879,9 +879,10 @@
             The <emphasis>datum</emphasis> element describes measurements in
             most circumstances; the intent in the
             <emphasis>Echo Protocol</emphasis> is to report back a human
-            readable status message.  There are not attributes currently
-            accepted for this element, and only text may be contained.  The text
-            could be any message the service wishes to return.
+            readable status message.  There is only one possible attribute
+            accepted for this element, <emphasis>value</emphasis>, and it may be
+            used in place of an enclosed text element.  The text could be
+            any message the service wishes to return.
           </para>
           
         </section>
@@ -929,7 +930,10 @@
                   element nmwg:data {
                     attribute id { xsd:string } &
                     attribute metadataIdRef { xsd:string } &
-                    element nmwgr:datum { xsd:string }
+                    element nmwgr:datum {
+                      xsd:string |
+                      attribute value { xsd:string }
+                    }
                   }
                 }
             ]]>
@@ -944,6 +948,10 @@
             Similar to the <command>EchoRequest</command> XSD 
             description, this particular version was converted from 
             RELAX-NG into XSD.   
+          </para>
+
+          <para>
+            <command>echo.xsd</command>:
           </para>
 
           <programlisting>
@@ -988,15 +996,40 @@
                   </xs:complexType>
                 </xs:element>
               </xs:schema>
-              
-              <?xml version="1.0" encoding="UTF-8"?>
-              <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://ggf.org/ns/nmwg/result/2.0/" xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-                <xs:import namespace="http://ggf.org/ns/nmwg/base/2.0/" schemaLocation="test.xsd"/>
-                <xs:element name="datum" type="xs:string"/>
-              </xs:schema>
             ]]>
           </programlisting>  
 
+          <para>
+            <command>nmwgr.xsd</command>:
+          </para>
+
+          <programlisting>
+            <![CDATA[
+              <?xml version="1.0" encoding="UTF-8"?>
+              <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://ggf.org/ns/nmwg/result/2.0/" xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+                <xs:import namespace="http://ggf.org/ns/nmwg/base/2.0/" schemaLocation="echo.xsd"/>
+                <xs:element name="datum">
+                  <xs:complexType>
+                    <xs:simpleContent>
+                      <xs:restriction base="xs:anyType">
+                        <xs:simpleType>
+                          <xs:union memberTypes="xs:string">
+                            <xs:simpleType>
+                              <xs:restriction base="xs:token">
+                                <xs:length value="0"/>
+                              </xs:restriction>
+                            </xs:simpleType>
+                          </xs:union>
+                        </xs:simpleType>
+                        <xs:attribute name="value" type="xs:string"/>
+                      </xs:restriction>
+                    </xs:simpleContent>
+                  </xs:complexType>
+                </xs:element>
+              </xs:schema>
+            ]]>
+          </programlisting>
+          
         </section>
         
       </section>
