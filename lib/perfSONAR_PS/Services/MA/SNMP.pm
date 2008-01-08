@@ -6,7 +6,6 @@ use version; our $VERSION = qv("0.01");
 
 use strict;
 use warnings;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
@@ -943,7 +942,7 @@ Gathers data from the RR database and creates the necessary XML.
 
 =head1 SEE ALSO
 
-L<Exporter>, L<Log::Log4perl>, L<File::Temp>, L<Time::HiRes>,
+L<Log::Log4perl>, L<File::Temp>, L<Time::HiRes>,
 L<perfSONAR_PS::MA::Base>, L<perfSONAR_PS::MA::General>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::XMLDB>,
 L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>

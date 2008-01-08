@@ -378,29 +378,18 @@ sub queryXqueryRequest($$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::Skeleton - A skeleton of an MA module that can be modified as needed.
+perfSONAR_PS::Services::MA::Topology - A module that provides methods for the Topology MA.
 
 =head1 DESCRIPTION
 
-This module aims to be easily modifiable to support new and different MA types.
+This module aims to offer simple methods for dealing with requests for information, and the
+related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-use perfSONAR_PS::MA::Skeleton;
+use perfSONAR_PS::Services::MA::Topology;
 
-my %conf;
-
-my $default_ma_conf = &perfSONAR_PS::MA::Skeleton::getDefaultConfig();
-if (defined $default_ma_conf) {
-	foreach my $key (keys %{ $default_ma_conf }) {
-		$conf{$key} = $default_ma_conf->{$key};
-	}
-}
-
-if (readConfiguration($CONFIG_FILE, \%conf) != 0) {
-	print "Couldn't read config file: $CONFIG_FILE\n";
-	exit(-1);
-}
+my %conf = readConfiguration();
 
 my %ns = (
 		nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -408,10 +397,10 @@ my %ns = (
 		nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
 	 );
 
-my $ma = perfSONAR_PS::MA::Skeleton->new(\%conf, \%ns);
+my $ma = perfSONAR_PS::Services::MA::Topology->new(\%conf, \%ns);
 
 # or
-# $ma = perfSONAR_PS::MA::Skeleton->new;
+# $ma = perfSONAR_PS::Services::MA::Topology->new;
 # $ma->setConf(\%conf);
 # $ma->setNamespaces(\%ns);
 
@@ -431,15 +420,6 @@ while(1) {
 
 The offered API is simple, but offers the key functions needed in a measurement archive.
 
-=head2 getDefaultConfig
-
-	Returns a reference to a hash containing default configuration options
-
-=head2 getDefaultNamespaces
-
-	Returns a reference to a hash containing the set of namespaces used by
-	the MA
-
 =head2 init
 
        Initializes the MA and validates the entries in the
@@ -454,16 +434,6 @@ The offered API is simple, but offers the key functions needed in a measurement 
 	Grabs an incoming message from transport object to begin processing. It
 	completes the processing if the message was handled by a lower layer.
 	If not, it returns the Request structure.
-
-=head2 handleRequest($self, $request)
-
-	Handles the specified request returned from receive()
-
-=head2 __handleRequest($self)
-
-	Validates that the message is one that we can handle, calls the
-	appropriate function for the message type and builds the response
-	message.
 
 =head2 handleMessage($self, $messageType, $message)
 	Handles the specific message. This should entail iterating through the

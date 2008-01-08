@@ -16,7 +16,7 @@ use perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 
-use SNMPWalk;
+use perfSONAR_PS::SNMPWalk;
 
 use fields 'CONF', 'DIRECTORY', 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS';
 

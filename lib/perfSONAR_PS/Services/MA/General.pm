@@ -15,7 +15,7 @@ use perfSONAR_PS::Messages;
 
 sub getMetadataXQuery {
   my($node, $queryString) = @_;   
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   if(defined $node and $node ne "") {
     my $query = getSPXQuery($node, "");
     my $eventTypeQuery = getEventTypeXQuery($node, "");
@@ -36,7 +36,7 @@ sub getMetadataXQuery {
 
 sub getSPXQuery {
   my($node, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -79,7 +79,7 @@ sub getSPXQuery {
 
 sub getEventTypeXQuery {
   my($node, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -111,7 +111,7 @@ sub getEventTypeXQuery {
 
 sub getDataXQuery {
   my($node, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -161,7 +161,7 @@ sub getDataXQuery {
 
 sub xQueryParameters {
   my($node, $path, $queryCount, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -256,7 +256,7 @@ sub xQueryParameters {
 
 sub xQueryAttributes {
   my($node, $path, $queryCount, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   my $counter = 0;
 
   if(!defined $node or $node eq "") {
@@ -325,7 +325,7 @@ sub xQueryAttributes {
 
 sub xQueryText {
   my($node, $path, $queryCount, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -367,7 +367,7 @@ sub xQueryText {
 
 sub xQueryEventType {
   my($node, $path, $queryString) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
   if(!defined $node or $node eq "") {
     $logger->error("Missing argument.");
@@ -399,7 +399,7 @@ sub xQueryEventType {
 
 sub getTime {
   my($request, $ma, $id, $default_resolution) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   
   undef $ma->{TIME};
   
@@ -580,7 +580,7 @@ sub findTime {
 
 sub getDataSQL {
   my($ma, $d, $dbSchema) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   
   my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1), 1);
   if(defined $ma->{DIRECTORY}) {
@@ -628,7 +628,7 @@ sub getDataSQL {
 
 sub getDataRRD {
   my($ma, $d, $mid, $rrdtool) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   
   my %result = ();
   my $file = extract(find($d, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1), 1);
@@ -675,7 +675,7 @@ sub getDataRRD {
 
 sub adjustRRDTime {
   my($ma) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::General");
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
   my($sec, $frac) = Time::HiRes::gettimeofday;
 
   return if (!defined $ma->{TIME}->{"START"} and !defined $ma->{TIME}->{"END"});
@@ -717,7 +717,7 @@ sub adjustRRDTime {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::General - A module that provides methods for general tasks that MAs need to 
+perfSONAR_PS::Services::MA::General - A module that provides methods for general tasks that MAs need to 
 perform, such as querying for results.
 
 =head1 DESCRIPTION
@@ -728,7 +728,7 @@ and the methods can be invoked directly (and sparingly).
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::MA::General;
+    use perfSONAR_PS::Services::MA::General;
     use perfSONAR_PS::Common;
 
     # Consider this metadata:

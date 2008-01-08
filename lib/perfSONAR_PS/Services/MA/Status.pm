@@ -611,7 +611,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 =head2 init 
 
-       Initializes the MP and validates or fills in entries in the
+       Initializes the MA and validates or fills in entries in the
 	configuration file. Returns 0 on success and -1 on failure.
 
 =head2 registerLS($self)

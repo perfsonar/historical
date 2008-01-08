@@ -1,4 +1,4 @@
-use package perfSONAR_PS::Error;
+use perfSONAR_PS::Error;
 
 =head1 NAME
 

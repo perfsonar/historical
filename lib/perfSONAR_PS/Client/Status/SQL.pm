@@ -7,7 +7,6 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
-use Data::Dumper;
 
 sub new {
 	my ($package, $dbi_string, $db_username, $db_password, $table, $read_only) = @_;
@@ -219,8 +218,6 @@ sub getLinkStatus($$$) {
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
-
-	$logger->debug("Time: ".Dumper($time));
 
 	my $status = $self->{DATADB}->openDB;
 	if ($status == -1) {

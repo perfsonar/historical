@@ -1,5 +1,3 @@
-#! /usr/bin/perl
-
 # ============================================================================
 
 # $Id: snmpwalk.pl,v 2.5 2005/07/20 13:53:07 dtown Rel $
@@ -12,7 +10,7 @@
 
 # ============================================================================
 
-package SNMPWalk;
+package perfSONAR_PS::SNMPWalk;
 
 use Net::SNMP v5.1.0 qw(:snmp DEBUG_ALL);
 use Exporter;
