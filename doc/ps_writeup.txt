@@ -1,0 +1,63 @@
+perfSONAR-PS
+
+perfSONAR-PS is a set of independent software services that implement the perfSONAR protocols for network performance monitoring.  perfSONAR-PS services are designed to be compatible with all other perfSONAR software that implements the perfSONAR protocols. perfSONAR-PS is able to federate between deployments, particularly those that span multiple domains, making the job of solving end-to-end performance problems on paths crossing several networks much easier to address.  
+
+The perfSONAR-PS services provide Web Services (WS) based interfaces into already deployed network monitoring infrastructures and act as an intermediate layer, between the performance measurement tools and the diagnostic or visualization applications.  The targeted audience for these services is network Network Operation Centers (NOCs) at Universities and Regional networks, however these services are broadly useful to the general public at large.  
+
+The perfSONAR-PS software suite is developed entirely in the Perl programming language, taking full advantage of numerous language features and benefits including the Comprehensive Perl Archive Network (CPAN) distribution system.  This software manager makes perfSONAR-PS the ideal choice for integration into typical NOC environments.  
+
+This first major release of the perfSONAR-PS software package features several key and distinct services that will integrate within a new or existing perfSONAR deployment.
+
+  - SNMP Measurement Archive
+  - Lookup Service
+  - Topology Service
+  - Circuit Status Measurement Archive
+  - Status Measurement Archive
+  - perfSONARBOUY
+  - PingER Services
+
+Each service contains distinct features that add value to the perfSONAR framework, many integrating with existing measurement tools to provide a more comprehensive solution to network performance monitoring.
+
+SNMP Measurement Archive
+
+The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose  data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in Round Robin Databases (RRD) archives.  The measurements are collected through external means, normally through software such as MRTG, CACTI, or Cricket, and is commonly stored in RRD archives.  External access to commonly requested data items, remains challening due to physical and political boundaries.  
+
+The SNMP MA provides a simple interface that is cable of exposing these files after basic configuration for consummation by perfSONAR client applications and services alike.  The Web Service front end provides a uniform method of access using the perfSONAR XML protocols and delivers the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage.  
+
+
+
+Lookup Service
+
+The perfSONAR-PS Lookup Service (LS) addresses the always challenging problem of resource registration and discovery for the perfSONAR framework.  Service instances that manage datasets are only useful when they can be contacted by consumers.  Consumers can only function when there is data available.  To manage these problems in a dynamic environment such as perfSONAR, it is necessary to register, maintain, and query for the services that may contain interesting data.
+
+The perfSONAR-PS LS relies on an XML database, Oracle DB XML, to store service registration information in a native manner.  Using the power of the XPath and XQuery standards it is then possible for client applications and services alike to query for information in a uniform and powerful manner.  All perfSONAR services are capable of registering information with an LS instantiation, thus deploying this service within your framework is paramount.  
+
+
+
+Topology Service
+
+Aaron...
+
+
+
+Circuit Status Measurement Archive
+
+Aaron...
+
+
+
+Status Measurement Archive
+
+Aaron...
+
+
+
+perfSONARBOUY
+
+Jeff...
+
+
+
+PingER Services
+
+Yee/Maxim...
