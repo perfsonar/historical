@@ -1,0 +1,30 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         perfSONAR_PS-Services-Daemon
+version:      v0.01
+version_from: perfsonar
+installdirs:  site
+requires:
+    Config::General:               2.3
+    Cwd:                           0
+    Fcntl:                         0
+    File::Basename:                0
+    Getopt::Long:                  0
+    HTTP::Daemon:                  1.35
+    Log::Log4perl:                 1
+    Module::Load:                  0.1
+    Params::Validate:              0.7
+    perfSONAR_PS::Common:          v0.01
+    perfSONAR_PS::Error_compat:    v0.01
+    perfSONAR_PS::Messages:        v0.01
+    perfSONAR_PS::XML::Document_string: v0.01
+    POSIX:                         0
+    strict:                        0
+    Time::HiRes:                   1.85
+    version:                       0.5
+    warnings:                      0
+    XML::LibXML:                   1.6
+    XML::XPath:                    1.13
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

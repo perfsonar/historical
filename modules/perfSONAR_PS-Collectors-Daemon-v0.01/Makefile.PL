@@ -1,5 +1,6 @@
 use ExtUtils::MakeMaker; 
-my @exe_files = ( "perfsonar-collector" );
+
+my @exe_files = ( "perfsonar-collector", "psConfigureCollectors" );
 
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Collectors::Daemon',
@@ -28,12 +29,12 @@ package MY;
 
 sub postamble {'
 
-sysconfdir	= $(prefix)/etc
+sysconfdir	= $(PREFIX)/etc
 
 install ::
 
 	if [ ! -d $(sysconfdir)/perfsonar ]; then \
-	    mkdir $(sysconfdir)/perfsonar; \
+	    mkdir -p $(sysconfdir)/perfsonar; \
 	fi;
 
 	if [ ! -f $(sysconfdir)/perfsonar/collector.conf ]; then \
@@ -46,10 +47,22 @@ install ::
 	    echo "Old configuration file exists at $(sysconfdir)/perfsonar/logger.conf: not overwritten."; \
 	fi;
 
+	if [ ! -d $(sysconfdir)/init.d ]; then \
+	    mkdir $(sysconfdir)/init.d; \
+	fi;
+
+	install -c -D -m 0755 perfsonar-collector.init $(sysconfdir)/init.d/perfsonar-collector
+	awk "{gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-collector > $(sysconfdir)/init.d/perfsonar-collector.new
+	mv -f $(sysconfdir)/init.d/perfsonar-collector.new $(sysconfdir)/init.d/perfsonar-collector
+	chmod +x $(sysconfdir)/init.d/perfsonar-collector
+
 	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar-collector
-	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
+	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
 	mv -f $(INSTALLBIN)/perfsonar-collector.new $(INSTALLBIN)/perfsonar-collector
-	awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
-	mv -f $(INSTALLBIN)/perfsonar-collector.new $(INSTALLBIN)/perfsonar-collector
-	chmod +x ($INSTALLBIN)/perfsonar-collector
+	chmod +x $(INSTALLBIN)/perfsonar-collector
+
+	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psConfigureCollectors
+	awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/collector.conf\"); print}" $(INSTALLBIN)/psConfigureCollectors > $(INSTALLBIN)/psConfigureCollectors.new
+	mv -f $(INSTALLBIN)/psConfigureCollectors.new $(INSTALLBIN)/psConfigureCollectors
+	chmod +x $(INSTALLBIN)/psConfigureCollectors
 ';}

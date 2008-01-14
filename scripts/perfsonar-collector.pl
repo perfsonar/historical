@@ -37,38 +37,40 @@ sub killChildren();
 sub signalHandler();
 sub handleRequest($$$);
 
-# this value should be set by the installation scripts
-my $was_installed = 0;
-
 my $libdir;
 my $confdir;
 my $dirname;
 
-if ($was_installed) {
-    # XXX in this case, libdir needs to be set to the directory that the modules
-    # were installed to, and confdir needs to be set to the directory that
-    # logger.conf et al. were installed in.
-    $libdir = "";
-    $confdir = "";
-    $dirname = "";
-} else {
-    # we need a fully-qualified directory name in case we daemonize so that we
-    # can still access scripts or other files specified in configuration files
-    # in a relative manner. Also, we need to know the location in reference to
-    # the binary so that users can launch the daemon from wherever but specify
-    # scripts and whatnot relative to the binary.
+# In the non-installed case, we need to figure out what the library is at
+# compile time so that "use lib" doesn't fail. To do this, we enclose the
+# calculation of it in a BEGIN block.
+BEGIN {
+    # this value is set by the installation scripts
+    my $was_installed = 0;
 
-    $dirname = dirname($0);
+    if ($was_installed) {
+        # In this case, libdir needs to be set to the directory that the modules
+        # were installed to, and confdir needs to be set to the directory that
+        # logger.conf et al. were installed in. The installation script
+        # replaces the LIBDIR and CONFDIR portions with the actual directories
+        $libdir = "XXX_LIBDIR_XXX";
+        $confdir = "XXX_CONFDIR_XXX";
+        $dirname = "";
+    } else {
+        # we need a fully-qualified directory name in case we daemonize so that we
+        # can still access scripts or other files specified in configuration files
+        # in a relative manner. Also, we need to know the location in reference to
+        # the binary so that users can launch the daemon from wherever but specify
+        # scripts and whatnot relative to the binary.
 
-    if (!($dirname =~ /^\//)) {
-        $dirname = getcwd . "/" . $dirname;
-    }
+        $dirname = dirname($0);
 
-    $confdir = $dirname;
+        if (!($dirname =~ /^\//)) {
+            $dirname = getcwd . "/" . $dirname;
+        }
 
-    # we need to figure out what the library is at compile time so that "use lib"
-    # doesn't fail. To do this, we enclose the calculation of it in a BEGIN block.
-    BEGIN {
+        $confdir = $dirname;
+
         $libdir = dirname($0)."/../../lib";
     }
 }
@@ -94,6 +96,7 @@ my $LOGGER_CONF  = '';
 my $PIDDIR = '';
 my $PIDFILE = '';
 my $LOGOUTPUT = '';
+my $IGNORE_PID = '';
 
 my $status = GetOptions (
         'config=s' => \$CONFIG_FILE,
@@ -101,12 +104,13 @@ my $status = GetOptions (
         'output=s' => \$LOGOUTPUT,
         'piddir=s' => \$PIDDIR,
         'pidfile=s' => \$PIDFILE,
+        'ignorepid' => \$IGNORE_PID,
         'verbose' => \$DEBUGFLAG,
         'help' => \$HELP);
 
 if(!$status or $HELP) {
     print "$0: starts the collector daemon.\n";
-    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf]\n";
+    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --ignorepid]\n";
     exit(1);
 }
 
@@ -156,23 +160,25 @@ if (!defined $conf{"collection_interval"} or $conf{"collection_interval"} eq "")
     $conf{"collection_interval"} = 15;
 }
 
-if (!defined $PIDDIR or $PIDDIR eq "") {
-    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
-        $PIDDIR = $conf{"pid_dir"};
-    } else {
-        $PIDDIR = "/var/run";
+if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
+    if (!defined $PIDDIR or $PIDDIR eq "") {
+        if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
+            $PIDDIR = $conf{"pid_dir"};
+        } else {
+            $PIDDIR = "/var/run";
+        }
     }
-}
 
-if (!defined $PIDFILE or $PIDFILE eq "") {
-    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne "") {
-        $PIDFILE = $conf{"pid_file"};
-    } else {
-        $PIDFILE = "ps.pid";
+    if (!defined $PIDFILE or $PIDFILE eq "") {
+        if (defined $conf{"pid_file"} and $conf{"pid_file"} ne "") {
+            $PIDFILE = $conf{"pid_file"};
+        } else {
+            $PIDFILE = "ps.pid";
+        }
     }
-}
 
-managePID($PIDDIR, $PIDFILE);
+    managePID($PIDDIR, $PIDFILE);
+}
 
 $logger->debug("Starting '".$$."'");
 
@@ -223,7 +229,7 @@ foreach my $collector (@{ $conf{"collector"} }) {
 if(!$DEBUGFLAG) {
 # flush the buffer
     $| = 1;
-#	&daemonize;
+    &daemonize;
 }
 
 foreach my $collector_args (@collectors) {

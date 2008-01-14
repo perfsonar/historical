@@ -1,8 +1,11 @@
 Changes
 MANIFEST
 MANIFEST.SKIP
+META.yml
 Makefile.PL
 README
 logger.conf
-perfsonar-collector.pl
-META.yml                                 Module meta-data (added by MakeMaker)
+perfsonar-collector
+perfsonar-collector.init
+perl-perfSONAR_PS-Collectors-Daemon.spec
+psConfigureCollectors

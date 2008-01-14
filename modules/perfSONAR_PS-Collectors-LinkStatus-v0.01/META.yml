@@ -1,0 +1,22 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         perfSONAR_PS-Collectors-LinkStatus
+version:      v0.01
+version_from: lib/perfSONAR_PS/Collectors/LinkStatus.pm
+installdirs:  site
+requires:
+    Exporter:                      0
+    fields:                        0
+    Log::Log4perl:                 1
+    Net::SNMP:                     5.0.0
+    perfSONAR_PS::Client::Status::MA: v0.01
+    perfSONAR_PS::Common:          v0.01
+    perfSONAR_PS::DB::File:        v0.01
+    perfSONAR_PS::Status::Common:  v0.01
+    strict:                        0
+    Time::HiRes:                   1.85
+    version:                       0.5
+    warnings:                      0
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

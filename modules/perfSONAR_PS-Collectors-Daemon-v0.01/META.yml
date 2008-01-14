@@ -1,0 +1,23 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         perfSONAR_PS-Collectors-Daemon
+version:      v0.01
+version_from: perfsonar-collector.pl
+installdirs:  site
+requires:
+    Config::General:               2.3
+    Cwd:                           0
+    Fcntl:                         0
+    File::Basename:                0
+    Getopt::Long:                  0
+    Log::Log4perl:                 1
+    Module::Load:                  0.1
+    perfSONAR_PS::Common:          v0.01
+    POSIX:                         0
+    strict:                        0
+    Time::HiRes:                   1.85
+    version:                       0.5
+    warnings:                      0
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17
