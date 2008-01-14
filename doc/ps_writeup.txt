@@ -60,4 +60,13 @@ Jeff...
 
 PingER Services
 
-Yee/Maxim...
+ 
+The perfSONAR-PS PingER service is designed to make ping measurements available by webservice interface to any remote user or webservice client program.
+The measurements are collected by periodically running operational system specific ping facility and normally stored in the SQL database.
+The service was designed to be scalable enough in order to accomodate hundreds of monitored pairs of hosts and hundreds of thousands of measured Round Trip Times.  
+It is based on the infrastructure of original PingER project ( link here ) with more than 10 years of historical data of the ping measurements from all across the world.
+The PingER MA provides a simple interface that is able to present any combination of measured data for some requested time range to the perfSONAR client
+applications and services.  The PingER webservice interface is based on NMWG XML schema and conforms to the set of  perfSONAR XML protocols and implements
+application agnostic layer. The actual service implemenation supports all available relational database engines and portable to any operational system platform.
+
+
