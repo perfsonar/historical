@@ -6,7 +6,7 @@ The perfSONAR-PS services provide Web Services (WS) based interfaces into alread
 
 The perfSONAR-PS software suite is developed entirely in the Perl programming language, taking full advantage of numerous language features and benefits including the Comprehensive Perl Archive Network (CPAN) distribution system.  This software manager makes perfSONAR-PS the ideal choice for integration into typical NOC environments.  
 
-This first major release of the perfSONAR-PS software package features several key and distinct services that will integrate within a new or existing perfSONAR deployment.
+This first major release of the perfSONAR-PS software package features several key and distinct products that will integrate within a new or existing perfSONAR deployment.
 
   - SNMP Measurement Archive
   - Lookup Service
@@ -16,7 +16,7 @@ This first major release of the perfSONAR-PS software package features several k
   - perfSONARBOUY
   - PingER Services
 
-Each service contains distinct features that add value to the perfSONAR framework, many integrating with existing measurement tools to provide a more comprehensive solution to network performance monitoring.
+Each product contains distinct features that add value to the perfSONAR framework, many integrating with existing measurement tools to provide a more comprehensive solution to network performance monitoring.
 
 SNMP Measurement Archive
 
@@ -64,10 +64,16 @@ statistics. This Circuit Status service uses the Status Measurement Archive
 and can use the Topology Service to provide the complete domain status
 required by the E2EMon service.
 
-perfSONARBOUY
+perfSONARBUOY
 
-Jeff...
-
+The perfSONARBUOY service is used to expose an archive of active
+measurement data, making the results of regularly scheduled tests
+available using perfSONAR web services interfaces. I gives the administrator
+the ability to schedule a set of tests and expose all the data collected.
+perfSONARBUOY will only be available as a web accessible
+prototype in this release. OWAMP and BWCTL test results from active tests
+between network observatory systems on the Internet2 network will be
+featured in this prototype.
 
 
 PingER Services
