@@ -22,7 +22,7 @@ SNMP Measurement Archive
 
 The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose  data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in Round Robin Databases (RRD) archives.  The measurements are collected through external means, normally through software such as MRTG, CACTI, or Cricket, and is commonly stored in RRD archives.  External access to commonly requested data items, remains challening due to physical and political boundaries.  
 
-The SNMP MA provides a simple interface that is cable of exposing these files after basic configuration for consummation by perfSONAR client applications and services alike.  The Web Service front end provides a uniform method of access using the perfSONAR XML protocols and delivers the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage.  
+The SNMP MA provides a simple interface that is cable of exposing these files after basic configuration for consumption by perfSONAR client applications and services alike.  The Web Service front end provides a uniform method of access using the perfSONAR XML protocols and delivers the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage.  
 
 
 
@@ -60,13 +60,14 @@ Jeff...
 
 PingER Services
 
- 
-The perfSONAR-PS PingER service is designed to make ping measurements available by webservice interface to any remote user or webservice client program.
-The measurements are collected by periodically running operational system specific ping facility and normally stored in the SQL database.
-The service was designed to be scalable enough in order to accomodate hundreds of monitored pairs of hosts and hundreds of thousands of measured Round Trip Times.  
-It is based on the infrastructure of original PingER project ( link here ) with more than 10 years of historical data of the ping measurements from all across the world.
-The PingER MA provides a simple interface that is able to present any combination of measured data for some requested time range to the perfSONAR client
-applications and services.  The PingER webservice interface is based on NMWG XML schema and conforms to the set of  perfSONAR XML protocols and implements
-application agnostic layer. The actual service implemenation supports all available relational database engines and portable to any operational system platform.
+The perfSONAR-PS PingER service is an evolution of the PingER project (http://www-iepm.slac.stanford.edu/pinger/) with more than 10 years experience in collecting and analysising network performance across the world. 
+The perfSONAR-PS PingER service is composed of both a storage backend (MA) and measurement frontend (MP) to conduct and store ping measurements and to make available such data for consumption by interested parties.
+Network characteristics supported include availability, latency and jitter, which provide a broad spectrum of determining end-to-end network performance.
+
+perfSONAR-PS PingER is designed to be scalable enough in order to accommodate hundreds of monitored pairs of hosts and uses a relational database backend (MySQL, Postgres, SQLite) to efficiently store and retrieve such performance information.
+
+perfSONAR-PS PingER also supports the registration of data through perfSONAR LS's to faciliate the dynamic discovery and querying of unknown deployments.
+
+The MA provides a web service interface based on NMWG XML that allows queries on the PingER data and to be consumpted by perfSONAR client applications and services alike.
 
 
