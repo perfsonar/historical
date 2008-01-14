@@ -36,21 +36,33 @@ The perfSONAR-PS LS relies on an XML database, Oracle DB XML, to store service r
 
 Topology Service
 
-Aaron...
-
-
-
-Circuit Status Measurement Archive
-
-Aaron...
-
-
+The perfSONAR-PS Topology Service provides the ability for administrators to
+make topology information about their networks available to remote clients.
+Client applications and services can be written that use the Xquery language
+to perform arbitrarily complex queries against the data stored in the
+database. The Topology information returned by the topology service follows
+the perfSONAR Topology XML schema being developed in coordination with the the
+DICE Control Plane Working Group. The Topology Service stores the topology
+information in the Oracle Berkeley XML Database.
 
 Status Measurement Archive
 
-Aaron...
+The Status Measurement Archive provides a way for an administrator to provide
+layer2 link status information to remote clients. This information can be
+obtained via a polling service that can use SNMP, or scripts to collect the
+link status information, and stores it into a SQL database. The technique used
+to store the information helps minimize the storage requirements of rarely
+changing links.
 
+Circuit Status Service
 
+E2EMon is a commonly used service that provides a webpage containing status
+information about inter-domain circuits. In order to produce the webpage, the
+service requests the complete state of each domain in the circuits it has an
+interest in and then correlates this information to produce end-to-end
+statistics. This Circuit Status service uses the Status Measurement Archive
+and can use the Topology Service to provide the complete domain status
+required by the E2EMon service.
 
 perfSONARBOUY
 
