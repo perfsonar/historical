@@ -59,7 +59,7 @@
           <row>
             <entry>1.1</entry>
             <entry>01/09/2008</entry>
-            <entry>Conversion to DocBook, addition of configuration and instllation documentation. Addition of MP and LS interface descriptions</entry>
+            <entry>Conversion to DocBook, addition of configuration and installation documentation. Addition of MP and LS interface descriptions</entry>
             <entry>Yee-Ting Li</entry>
           </row>
         </tbody>
@@ -111,7 +111,7 @@
 	  </para>
 
     <para>
-      This document describes the details of the       <emphasis>perfSONAR-PS</emphasis>
+      This document describes the details of the <emphasis>perfSONAR-PS</emphasis>
       PingER service. In the following text the functionality of the PingER 
       Measurement Archive and Measurement Point will be described.
  			For detailed protocol specifications see "PingER service Protocol 
@@ -137,7 +137,7 @@
       systems.
       The results of these measurements are stored in Relational Databases 
       such as <citation>MySQL</citation>, <citation>Postgres</citation>, 
-      and <citation>sqlite</citation>, 
+      and <citation>sqlite</citation>.
     </para>  
     
     <para>
@@ -274,106 +274,103 @@
             <para><ulink url="http://search.cpan.org/~jhi/Time-HiRes-1.9708/HiRes.pm">Time::HiRes</ulink></para>
           </listitem>
           <listitem>
-            <para>Module::Load</para>
+            <para><ulink url="http://search.cpan.org/~kane/Module-Load-0.12/lib/Module/Load.pm">Module::Load</ulink></para>
           </listitem>
           <listitem>
-            <para>Pod::Coverage</para>
+            <para><ulink url="http://search.cpan.org/~rclamp/Pod-Coverage-0.19/lib/Pod/Coverage.pm">Pod::Coverage</ulink></para>
           </listitem>
           <listitem>
-            <para>Pod::Escapes</para>
+            <para><ulink url="http://search.cpan.org/~sburke/Pod-Escapes-1.04/lib/Pod/Escapes.pm">Pod::Escapes</ulink></para>
           </listitem>
           <listitem>
-            <para>Clone::PP</para>
+            <para><ulink url="http://search.cpan.org/author/EVO/Clone-PP-1.02/PP.pm">Clone::PP</ulink></para>
           </listitem>
           <listitem>
-            <para>DateTime::Locale</para>
+            <para><ulink url="http://search.cpan.org/author/DROLSKY/DateTime-Locale-0.35/lib/DateTime/Locale.pm">DateTime::Locale</ulink></para>
           </listitem>
           <listitem>
-            <para>Params::Validate</para>
+            <para><ulink url="http://search.cpan.org/author/DROLSKY/Params-Validate-0.89/lib/Params/Validate.pm">Params::Validate</ulink></para>
           </listitem>
           <listitem>
-            <para>Task::Weaken</para>
+            <para><ulink url="http://search.cpan.org/author/ADAMK/Task-Weaken-1.02/lib/Task/Weaken.pm">Task::Weaken</ulink></para>
           </listitem>
           <listitem>
-            <para>Rose::Object</para>
+            <para><ulink url="http://search.cpan.org/author/JSIRACUSA/Rose-Object-0.84/lib/Rose/Object.pm">Rose::Object</ulink></para>
           </listitem>
           <listitem>
-            <para>Sub::Uplevel</para>
+            <para><ulink url="http://search.cpan.org/author/DAGOLDEN/Sub-Uplevel-0.18/lib/Sub/Uplevel.pm">Sub::Uplevel</ulink></para>
           </listitem>
           <listitem>
-            <para>Bit::Vector</para>
+            <para><ulink url="http://search.cpan.org/author/STBEY/Bit-Vector-6.4/Vector.pod">Bit::Vector</ulink></para>
           </listitem>
           <listitem>
-            <para>Params::Util</para>
+            <para><ulink url="http://search.cpan.org/author/ADAMK/Params-Util-0.31/lib/Params/Util.pm">Params::Util</ulink></para>
           </listitem>
           <listitem>
-            <para>Sub::Install</para>
+            <para><ulink url="http://search.cpan.org/author/RJBS/Sub-Install-0.924/lib/Sub/Install.pm">Sub::Install</ulink></para>
           </listitem>
           <listitem>
-            <para>Time::Clock</para>
+            <para><ulink url="http://search.cpan.org/author/JSIRACUSA/Time-Clock-0.11/lib/Time/Clock.pm">Time::Clock</ulink></para>
           </listitem>
           <listitem>
-            <para>YAML:Syck</para>
+            <para><ulink url="http://search.cpan.org/author/AUDREYT/YAML-Syck-1.00/lib/YAML/Syck.pm">YAML::Syck</ulink></para>
           </listitem>
           <listitem>
-            <para>Clone</para>
+            <para><ulink url="http://search.cpan.org/author/RDF/Clone-0.28/Clone.pm">Clone</ulink></para>
           </listitem>
           <listitem>
-            <para>DateTime::Format::Strptime</para>
+            <para><ulink url="http://search.cpan.org/author/RICKM/DateTime-Format-Strptime-1.0702/lib/DateTime/Format/Strptime.pm">DateTime::Format::Strptime</ulink></para>
           </listitem>
           <listitem>
-            <para>Data::OptList</para>
+            <para><ulink url="http://search.cpan.org/author/RJBS/Data-OptList-0.103/lib/Data/OptList.pm">Data::OptList</ulink></para>
           </listitem>
           <listitem>
-            <para>Sub:Exporter</para>
+            <para><ulink url="http://search.cpan.org/author/RJBS/Sub-Exporter-0.978/lib/Sub/Exporter.pm">Sub::Exporter</ulink></para>
           </listitem>
           <listitem>
-            <para>SQL::ReservedWords</para>
+            <para><ulink url="http://search.cpan.org/author/CHANSEN/SQL-ReservedWords-0.7/lib/SQL/ReservedWords.pm">SQL::ReservedWords</ulink></para>
           </listitem>
           <listitem>
-            <para>Rose::DateTime</para>
+            <para><ulink url="http://search.cpan.org/author/JSIRACUSA/Rose-DateTime-0.532/lib/Rose/DateTime.pm">Rose::DateTime</ulink></para>
           </listitem>
           <listitem>
-            <para>List::MoreUtils</para>
+            <para><ulink url="http://search.cpan.org/author/VPARSEVAL/List-MoreUtils-0.22/lib/List/MoreUtils.pm">List::MoreUtils</ulink></para>
           </listitem>
           <listitem>
-            <para>DateTime</para>
+            <para><ulink url="http://search.cpan.org/author/DROLSKY/DateTime-0.41/lib/DateTime.pm">DateTime</ulink></para>
           </listitem>
           <listitem>
-            <para>DateTime::Format::Pg</para>
+            <para><ulink url="http://search.cpan.org/author/DMAKI/DateTime-Format-Pg-0.16001/lib/DateTime/Format/Pg.pm">DateTime::Format::Pg</ulink></para>
           </listitem>
           <listitem>
-            <para>DBI</para>
+            <para><ulink url="http://search.cpan.org/author/TIMB/DBI-1.601/DBI.pm">DBI</ulink></para>
           </listitem>
           <listitem>
-            <para>DBD::SQLite</para>
+            <para><ulink url="http://search.cpan.org/author/MSERGEANT/DBD-SQLite-1.14/lib/DBD/SQLite.pm">DBD::SQLite</ulink></para>
           </listitem>
           <listitem>
-            <para>DBD::mysql</para>
+            <para><ulink url="http://search.cpan.org/author/CAPTTOFU/DBD-mysql-4.006/lib/DBD/mysql.pm">DBD::mysql</ulink></para>
           </listitem>
           <listitem>
-            <para>Rose::DB</para>
+            <para><ulink url="http://search.cpan.org/author/JSIRACUSA/Rose-DB-0.737/lib/Rose/DB.pm">Rose::DB</ulink></para>
           </listitem>
           <listitem>
-            <para>Rose::DB::Object</para>
+            <para><ulink url="http://search.cpan.org/author/JSIRACUSA/Rose-DB-Object-0.766/lib/Rose/DB/Object.pm">Rose::DB::Object</ulink></para>
           </listitem>
           <listitem>
-            <para>version</para>
+            <para><ulink url="http://search.cpan.org/author/JPEACOCK/version-0.74/lib/version.pod">version</ulink></para>
           </listitem>
           <listitem>
-            <para>Carp:Assert</para>
+            <para><ulink url="http://search.cpan.org/author/MSCHWERN/Carp-Assert-0.20/lib/Carp/Assert.pm">Carp::Assert</ulink></para>
           </listitem>
           <listitem>
-            <para>Class::Fields</para>
+            <para><ulink url="http://search.cpan.org/author/MSCHWERN/Class-Fields-0.203/lib/Class/Fields.pm">Class::Fields</ulink></para>
           </listitem>
           <listitem>
-            <para>XML::LibXML</para>
+            <para><ulink url="http://search.cpan.org/author/GRANTM/XML-SAX-0.16/SAX.pm">XML::SAX</ulink></para>
           </listitem>
           <listitem>
-            <para>XML::SAX</para>
-          </listitem>
-          <listitem>
-            <para>Clone::Fast</para>
+            <para><ulink url="http://search.cpan.org/author/WAZZUTEKE/Clone-Fast-0.93/lib/Clone/Fast.pm">Clone::Fast</ulink></para>
           </listitem>
         </itemizedlist>
         
@@ -489,6 +486,9 @@
 
       <section id="post_installation" xreflabel="Post Installation Tasks">
         <title>Post Installation Tasks</title>
+
+<para>*****DATABASE STUFF*****</para>
+
       </section>
 
     </section>
@@ -574,6 +574,7 @@
           </para>
       </section>
 
+
       <section id="service_information_configuration" xreflabel="Service Configuration">
         <title>Service Configuration via pinger.conf</title>
         
@@ -584,26 +585,6 @@
             directives and their full meaning is available in
             <xref linkend="configuration_service" />.
           </para>
-
-					<para>
-						The PingER suite allows the MP and MA to run on separate physical
-						machines with the common factor between services being the 
-						definition of the SQL backend to be used.
-						The exclusion of the MA or MP service endpoint from this configuration
-						files will disable the particular service and therefore in 
-						combination with the above inclusion/exclusion from the 
-						configuration file and setting up common SQL backends will allow
-						PingER MP and PingER MA's to run on separate machines.
-					</para>
-
-					<para>
-						<emphasis>pinger.conf</emphasis> acts as a generic service
-						configuration for both the MP and MA PingER services. The 
-						exclusion of either of these descriptions from the configuration 
-						file will result in the non-running of the particular PingER
-						service element.
-					</para>
-
 
 					<para>need some input/reference to aaron's daemon code for this</para>
 
@@ -640,6 +621,16 @@
             providing questions regarding each value.        
           </para>
            
+					<para>
+						It is possible run the MP and MA on different physical machines.
+						This can be achieved by defining solely the MP or the MA on the relevant
+						machine - i.e. exclusion of a either service from <emphasis>pinger.conf</emphasis>
+						disables its functionality.
+						However, in order for the MP to insert the data into the database that
+						the MA uses, both configuration files must point to the same SQL 
+						engine.
+					</para>
+
       </section>
       
       <section id="mp_configuration" xreflabel="MP Configuration">
@@ -661,7 +652,9 @@
 					
 					<para>
 						The format of the <emphasis>pinger-landmarks.xml</emphasis> file is 
-						compatible with the <emphasis>perfSONAR-PS topology service</emphasis> which allows geographical locations of the sites in queston.
+						compatible with the <emphasis>perfSONAR-PS topology service</emphasis>
+						which allows geographical and administration information storage and querying
+						of the sites in question.
 					</para>
 					
           <para>
@@ -680,8 +673,10 @@
       <title>Post Installation Tests</title>
 
       <para>
-        The entire PingER suite can be run from a command line given the relevant configuration settings in <emphasis>pinger.conf</emphasis>.
-  			This assumes that you are running both the MP and MA from the same machine and that the SQL database is local to both services.
+        The entire PingER suite (both the MA and MP) can be run from a command line given the 
+				relevant configuration settings in <emphasis>pinger.conf</emphasis>.
+  			The following assumes that you are running both the MP and MA from the same 
+				machine and that the SQL database is local to both services.
      </para>
 
       <para>
@@ -735,7 +730,7 @@
 			</para>
 
 			<para>
-     		<emphasis>http://localhost:8081/perfSONAR_PS/services/snmpMA</emphasis>.
+     		<emphasis>http://localhost:8081/perfSONAR_PS/services/PingERMA</emphasis>.
       </para>
       
       <para>
@@ -760,11 +755,11 @@
       <programlisting>
         <![CDATA[
       2007/10/31 13:32:29 (32494) DEBUG> Transport.pm:145 perfSONAR_PS::Transport::getHttpURI - 
-        Created URI: http://localhost:8081//perfSONAR_PS/services/snmpMA
+        Created URI: http://localhost:8081//perfSONAR_PS/services/PingERMA
       2007/10/31 13:32:29 (32494) DEBUG> Transport.pm:346 perfSONAR_PS::Transport::sendReceive - 
-        Sending information to "http://localhost:8081//perfSONAR_PS/services/snmpMA".
+        Sending information to "http://localhost:8081//perfSONAR_PS/services/PingERMA".
       2007/10/31 13:32:29 (32494) DEBUG> Transport.pm:356 perfSONAR_PS::Transport::sendReceive - 
-        Send to "http://localhost:8081//perfSONAR_PS/services/snmpMA" failed.
+        Send to "http://localhost:8081//perfSONAR_PS/services/PingERMA" failed.
       Empty String at ./client.pl line 106
         ]]>
       </programlisting> 
@@ -822,7 +817,7 @@
     <title>Metadata and System Configuration</title>
     
 		<para>
-			--- This shoudl be the same as that for the general new daemon architecture documentation.
+			***** This shoudl be the same as that for the general new daemon architecture documentation. *****
 		</para>
 
     <para>
@@ -977,120 +972,11 @@
         in detail.  
       </para>
 
-      <itemizedlist mark='opencircle'>
-        <listitem>
-          <para>
-            <command>METADATA_DB_TYPE</command> - <emphasis>Type</emphasis>
-            of the metadata database, this should be <emphasis>file</emphasis>
-            (and only file) for this particular service.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>METADATA_DB_NAME</command> - Not to be used in this
-            service.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>METADATA_DB_FILE</command> - Location of the
-            <emphasis>store.xml</emphasis> file, 
-            the location of all metadata and key descriptions.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>RRDTOOL</command> - Path to the <emphasis>BINARY</emphasis>
-            for <emphasis>RRDtool</emphasis>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>PORT</command> - Listen port for the application.
-            This should be something that can be accessed from the outside
-            world (not blocked by firewall rules, etc.).
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>ENDPOINT</command> - An <emphasis>endPoint</emphasis> is a
-            contact string that a service is listening on.  This is used in
-            conjunction with the port and hostname:
-            <emphasis>http://HOST:PORT/end/Point/String</emphasis>
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>DEFAULT_RESOLUTION</command> - This is a value that
-            pertains to the <emphasis>resolution</emphasis> used in the
-            <emphasis>RRA</emphasis>s in an <emphasis>RRD</emphasis>.  It can
-            be left blank if unsure.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>LS_REGISTRATION_INTERVAL</command>  - The interval of time
-            (in seconds) that this service will contact the
-            <emphasis>LS_INSTANCE</emphasis> to register itself.  This value
-            can be <emphasis>0</emphasis> if you do not want to register with
-            an <command>LS</command>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>LS_INSTANCE</command> - The <command>LS</command> that
-            will be contacted to register this service.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>SERVICE_NAME</command> - String describing the
-            <emphasis>name</emphasis> of this <command>MA</command>.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>SERVICE_ACCESSPOINT</command> - String describing the 
-            <emphasis>accessPoint</emphasis> of this <command>MA</command>.
-            This string is how the service can be reached:
-            <emphasis>http://HOST:PORT/end/Point/String</emphasis>
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>SERVICE_TYPE</command> - String describing the
-            <emphasis>type</emphasis> of this <command>MA</command>, it can be
-            just <emphasis>MA</emphasis> or <emphasis>SNMP MA</emphasis>, etc.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>SERVICE_DESCRIPTION</command> - String describing this
-            <command>MA</command>, it can include location info, etc.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>MAX_WORKER_PROCESSES</command> - Maximum number of child
-            processes that can be spawned at a given time.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <command>MAX_WORKER_LIFETIME</command> - Maximum lifetime a child
-            has to do work (eliminates hung children)
-          </para>
-        </listitem>
-      </itemizedlist>
 
       <para>
-        Note that for the service to be useful, it must be configured
-        correctly, and sanely.  Items that may seem simple (such as the
-        <command>SERVICE_</command> based directives) will become propagated
-        through the system on registration to information services.  Please
-        take time to specify the information to make your service function
-        correctly and be useful to others.  
-      </para>
+				***** THIS SHOULD BE UPDATED WITH AARON's STUFF *****
+	    </para>
+
  
     </section>
       
@@ -1099,9 +985,15 @@
       <title>Detailed MP Configuration</title>
 
       <para>
-        The configuration of hosts to 'ping' is defined in the <command>mp_confugration</command> defined in the <emphasis>pinger.conf</emphasis> configuration file.
-				The default value of the MP configuration file is <emphasis>pinger-landmarks.xml</emphasis>.
+	      The MP has two configuration files; a service definition as defined in 
+	      <xref linkend="configuration_service"/> that uses <emphasis>pinger.conf</emphasis>,
+	      and a measurement configuration defined in the <emphasis>pinger.conf</emphasis> 
+	      that uses <emphasis>pinger-landmarks.xml</emphasis>.
+	      This section defines the schema and details of the latter and how to 
+	      customize PingER to perform the necessary measurements to a defined
+	      list of hosts.
 			</para>
+			
 			<para>
 				<emphasis>pinger-landmarks.xml</emphasis> is responsible for
         describing the list of end hosts to perform network measurements to,
@@ -1112,7 +1004,9 @@
 
       <para>
 				The format of <emphasis>pinger-landmarks.xml</emphasis> is such that
-				is it compatible with the <emphasis>perfSONAR-PS topology service</emphasis> and the configuration file can be directly used by the topology service to facilitate discovery and mapping of PingER landmarks.
+				is it compatible with the <emphasis>perfSONAR-PS topology service</emphasis> 
+				and the configuration file can be directly used by the topology service 
+				to facilitate discovery and mapping of PingER landmarks.
       </para>
 
 
@@ -1129,30 +1023,33 @@
         </para>
 
         <programlisting>
-          <![CDATA[
-					<pingertopo:topology xmlns:pingertopo="http://namespaces.slac.stanford.edu/schema/pinger/20071120"
-					xmlns:nmtl2="http://ogf.org/schema/network/topology/l2/20070707/" xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/"
-					xmlns:nmtl4="http://ogf.org/schema/network/topology/l4/20070707/" xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/">
-					  <nmtb:domain id="urn:ogf:network:domain=slac.stanford.edu">
-					    <nmtb:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
-					      <nmtb:name type="string">pinger</nmtb:name>
-					      <nmtb:hostName>pinger.slac.stanford.edu</nmtb:hostName>
-					      <nmtb:description></nmtb:description>
-					      <pingertopo:test>
-					        <pingertopo:packetSize>1000</pingertopo:packetSize>
-					        <pingertopo:count>10</pingertopo:count>
-					        <pingertopo:interval>1</pingertopo:interval>
-					        <pingertopo:ttl>32</pingertopo:ttl>
-					        <pingertopo:period>60</pingertopo:period>
-					        <pingertopo:offset>0</pingertopo:offset>
-					      </pingertopo:test>
-					      <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.18.163">
-					        <nmtl3:ipAddress type="IPv4">134.79.240.30</nmtl3:ipAddress>
-					      </nmtl3:port>
-					    </nmtb:node>
-					  </nmtb:domain>
-					</pingertopo:topology>
-          ]]>
+				<![CDATA[
+	<pingertopo:topology xmlns:pingertopo="http://namespaces.slac.stanford.edu/schema/pinger/20071120"
+		xmlns:nmtl2="http://ogf.org/schema/network/topology/l2/20070707/" 
+		xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/"
+		xmlns:nmtl4="http://ogf.org/schema/network/topology/l4/20070707/" 
+		xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/"
+		xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+		<nmtb:domain id="urn:ogf:network:domain=slac.stanford.edu">
+		  <nmtb:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
+		    <nmtb:name type="string">pinger</nmtb:name>
+		    <nmtb:hostName>pinger.slac.stanford.edu</nmtb:hostName>
+		    <nmtb:description></nmtb:description>
+		    <nmwg:parameters id="1000B">
+		      <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+		      <nmwg:parameter name="count">10</nmwg:parameter>
+		      <nmwg:parameter name="packetInterval">1</nmwg:parameter>
+		      <nmwg:parameter name="ttl">32</nmwg:parameter>
+		      <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
+		      <nmwg:parameter name="measurementOffset">0</nmwg:parameter>
+		    </nmwg:parameters>
+		    <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.18.163">
+		      <nmtl3:ipAddress type="IPv4">134.79.240.30</nmtl3:ipAddress>
+		    </nmtl3:port>
+		  </nmtb:node>
+		</nmtb:domain>
+	</pingertopo:topology>
+				]]>
         </programlisting>
    
         <section id="configuration_mp_domain" xreflabel="Domain">
@@ -1160,9 +1057,9 @@
 
           <programlisting>
             <![CDATA[
-							<nmtb:domain id="STRING">
-								<nmtb:node id="STRING"/>
-							</nmtb:domain>
+	<nmtb:domain id="STRING">
+		<nmtb:node id="STRING"/>
+	</nmtb:domain>
             ]]>
           </programlisting>
 
@@ -1185,7 +1082,6 @@
           </itemizedlist>
           
           <para>
-						
 						The domain element encloses all <emphasis>static</emphasis>
 						descriptors for a domain to be measured. As such, it contains a
 						list of <emphasis>node</emphasis> descriptors which define the 
@@ -1197,7 +1093,7 @@
           <para>
             There is only one required element that must be enclosed in a 
             <command>domain</command> description as well as one attribute.  
-						The <xref linkend="configuration_mp_node" /> element is required 
+						At least one <xref linkend="configuration_mp_node" /> element is required 
 						for this element. 
 						The <emphasis>id</emphasis> element is required and should contain
 						a unique identifier for the domain.
@@ -1210,13 +1106,13 @@
                  
           <programlisting>
             <![CDATA[
-				    <nmtb:node id="STRING">
-				      <nmtb:name type="string">STRING</nmtb:name>
-				      <nmtb:hostName>STRING</nmtb:hostName>
-				      <nmtb:description>STRING</nmtb:description>
-				      <pingertopo:test/>
-				      <nmtl3:port/>
-				    </nmtb:node>
+	<nmtb:node id="STRING">
+	  <nmtb:name type="string">STRING</nmtb:name>
+	  <nmtb:hostName>STRING</nmtb:hostName>
+	  <nmtb:description>STRING</nmtb:description>
+	  <nmwg:parameter/>
+	  <nmtl3:port/>
+	</nmtb:node>
 						]]>
           </programlisting>                 
                     
@@ -1231,7 +1127,7 @@
               <para><command>attributes</command> - id</para>
             </listitem>
             <listitem>
-              <para><command>nested elements</command> - name, hostName, description, test, port</para>
+              <para><command>nested elements</command> - name, hostName, description, parameters, port</para>
             </listitem>
             <listitem>
               <para><command>required</command> - yes</para>
@@ -1242,14 +1138,14 @@
             The <command>node</command> element encloses the description of
             the entity being measured.  For the <emphasis>PingER MP</emphasis> 
             the <command>node</command> MUST <command>always</command>
-            contain a hostName and tests element.
+            contain a <xref linkend="configuration_mp_hostName" /> and <xref linkend="configuration_mp_parameters" /> element.
 						The id attribute is also required and serves as a unique identification of the node for cross service lookup.
 						The other elements allow further administrative descriptions of
 						node and are not directly used by the PingER MP service.
           </para>
           
 					<para>
-						The inclusion of the <emphasis>port</emphasis> element will allow
+						The optional inclusion of the <xref linkend="configuration_mp_port" /> element will allow
 						the MP service to use the defined IP address rather than do a 
 						dynamic host lookup of the host.
 						This is particular useful in situations where the DNS reliability 
@@ -1257,12 +1153,52 @@
 					</para>
 		
         </section>
-        
+
+        <section id="configuration_mp_hostName" xreflabel="Parameters">
+          <title>hostName</title>
+          
+          <programlisting>
+            <![CDATA[
+	<nmtb:hostName>STRING</nmtb:hostName>
+            ]]>
+          </programlisting>          
+          
+          <itemizedlist mark='opencircle'>
+            <listitem>
+              <para><command>localname</command> - hostName</para>
+            </listitem>
+            <listitem>
+              <para><command>namespace</command> - http://ogf.org/schema/network/topology/base/20070707/</para>
+       			</listitem>
+            <listitem>
+              <para><command>attributes</command> - none</para>
+            </listitem>
+            <listitem>
+              <para><command>nested elements</command> - text</para>
+            </listitem>
+            <listitem>
+              <para><command>required</command> - flexible</para>
+            </listitem>
+          </itemizedlist>
+          
+          <para>
+            The <command>hostName</command> element MUST contain a valid
+						fully qualified host name for the host. It is important that the 
+						text entry within this element should be resolvable by  
+						registered DNS servers as it will be used by the PingER MP as the
+						destination address for ping measurements.
+						Optionally, the definition of a <xref linkend="configuration_mp_port"/>
+						allows the use of a fixed IP address to be used instead of the DNS
+						hostname.
+          </para>
+              
+        </section>        
+
         <section id="configuration_mp_name" xreflabel="MP Name">
           <title>name</title>
           <programlisting>
             <![CDATA[
-          	<nmtb:n ame>STRING</nmtb:name>
+	<nmtb:name>STRING</nmtb:name>
             ]]>
           </programlisting>          
           
@@ -1289,54 +1225,18 @@
             <emphasis>name</emphasis> of the node. This element can only be 
 						from the <emphasis>nmtb</emphasis> namespace, and should not have 
 						any attributes or elements.  It must contain text that describes
-						the host name.
+						the local (unqualified) host name.
           </para>
      
         </section>
         
-        <section id="configuration_mp_hostName" xreflabel="Parameters">
-          <title>hostName</title>
-          
-          <programlisting>
-            <![CDATA[
-			      <nmtb:hostName>STRING</nmtb:hostName>
-            ]]>
-          </programlisting>          
-          
-          <itemizedlist mark='opencircle'>
-            <listitem>
-              <para><command>localname</command> - hostName</para>
-            </listitem>
-            <listitem>
-              <para><command>namespace</command> - http://ogf.org/schema/network/topology/base/20070707/</para>
-       			</listitem>
-            <listitem>
-              <para><command>attributes</command> - none</para>
-            </listitem>
-            <listitem>
-              <para><command>nested elements</command> - text</para>
-            </listitem>
-            <listitem>
-              <para><command>required</command> - flexible</para>
-            </listitem>
-          </itemizedlist>
-          
-          <para>
-            The <command>hostName</command> element should contain a valid
-						fully qualified host name for the host. It is important that the 
-						text entry within this element should be resolvable by the 
-						registered DNS server for the MP host as it will be used to 
-						perform ping measurements.
-          </para>
-              
-        </section>
 
         <section id="configuration_mp_description" xreflabel="MP Description">
           <title>Description</title>
           
           <programlisting>
             <![CDATA[
-      			<nmtb:description>STRING</nmtb:description>
+	<nmtb:description>STRING</nmtb:description>
             ]]>
           </programlisting>          
           
@@ -1365,19 +1265,20 @@
                     
         </section>
  
-        <section id="configuration_mp_test" xreflabel="MP Test">
+        <section id="configuration_mp_parameters" xreflabel="MP Parameters">
 	        <title>Test</title>
           
           <programlisting>
             <![CDATA[
-			      <pingertopo:test>
-			        <pingertopo:packetSize/>
-			        <pingertopo:count/>
-			        <pingertopo:interval/>
-			        <pingertopo:ttl/>
-			        <pingertopo:period/>
-			        <pingertopo:offset/>
-			      </pingertopo:test>            ]]>
+	<nmwg:parameters id="REQUIRED">
+	  <nmwg:parameter name="packetSize"/>
+	  <nmwg:parameter name="count"/>
+	  <nmwg:parameter name="packetInterval"/>
+	  <nmwg:parameter name="ttl"/>
+	  <nmwg:parameter name="measurementPeriod"/>
+	  <nmwg:parameter name="measurementOffset"/>
+	</nmwg:parameters>            
+					]]>
           </programlisting>          
           
           <itemizedlist mark='opencircle'>
@@ -1385,13 +1286,13 @@
               <para><command>localname</command> - test</para>
             </listitem>
             <listitem>
-              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
             </listitem>
             <listitem>
               <para><command>attributes</command> - none</para>
             </listitem>
             <listitem>
-              <para><command>nested elements</command> - packetSize, count, interval, ttl, period, offset</para>
+              <para><command>nested elements</command> - packetSize, count, packetInterval, ttl, measurementPeriod, measurementOffset</para>
             </listitem>
             <listitem>
               <para><command>required</command> - flexible</para>
@@ -1399,16 +1300,18 @@
           </itemizedlist>
 
           <para>
-            The <command>test</command> element serves as a definition for a measurement to be taking by the MP for the parent <command>node</command>. As such, the nested content describes parameters and test scheduling information pertinent to the running of ping measurements.
+            The <command>parameters</command> element serves as a definition for a 
+            measurement to be taken by the MP for the parent <command>node</command> definition.
+            As such, the nested content describes parameters and test scheduling information pertinent to the running of ping measurements.
+            At least one <command>parameters</command> element MUST be present in a <xref linkend="configuration_mp_node"/> element.
           </para>
 
-					
-	        <section id="configuration_mp_test_packetsize" xreflabel="PacketSize">
+	        <section id="configuration_mp_parameters_packetsize" xreflabel="PacketSize">
 	          <title>PacketSize</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:packetSize>STRING</pingertopo:packetSize>
+	<nmwg:parameter name="packetSize">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1417,7 +1320,7 @@
 	              <para><command>localname</command> - packetSize</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1431,18 +1334,20 @@
 	          </itemizedlist>
           
 	          <para>
-	            The <emphasis>packetSize</emphasis> element is used to specify 
-							the ping packet size to use for the <command>test</command>. It does not requires any attributes.
+	            The <emphasis>packetSize</emphasis> attribute is used to specify 
+							the ping packet size to use for the <xref linkend="configuration_mp_parameters"/>.
+							It is part of the <emphasis>parameter</emphasis> element and must contain 
+							a <command>packetSize</command> attribute.
 	          </para>
 
 	        </section>
 
-	        <section id="configuration_mp_test_count" xreflabel="Count">
+	        <section id="configuration_mp_parameters_count" xreflabel="Count">
 	          <title>Count</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:count>STRING</pingertopo:count>
+	<nmwg:parameter name="count">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1451,7 +1356,7 @@
 	              <para><command>localname</command> - count</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1466,17 +1371,19 @@
           
 	          <para>
 	            The <emphasis>count</emphasis> element is used to specify 
-							the number of sequential ping packets to send for the <command>test</command>. It does not requires any attributes.
+							the number of sequential ping packets to send for the <xref linkend="configuration_mp_parameters"/>.
+							It is part of the <emphasis>parameter</emphasis> element and must contain 
+							a <command>count</command> attribute.
 	          </para>
 
 	        </section>
 
-	        <section id="configuration_mp_test_interval" xreflabel="Interval">
+	        <section id="configuration_mp_parameters_interval" xreflabel="Interval">
 	          <title>Interval</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:interval>STRING</pingertopo:interval>
+	<nmwg:parameter name="interval">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1485,7 +1392,7 @@
 	              <para><command>localname</command> - interval</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1499,17 +1406,20 @@
 	          </itemizedlist>
           
 	          <para>
-	            The <emphasis>interval</emphasis> element specifies the inter-packet time to wait between sending sequential ping packets for the <command>test</command>. The units are in seconds. It does not requires any attributes.
+	            The <emphasis>interval</emphasis> element specifies the inter-packet 
+							time to wait between sending sequential ping packets for the <xref linkend="configuration_mp_parameters"/>.
+							It is part of the <emphasis>parameter</emphasis> element and must contain 
+							a <command>count</command> attribute.
 	          </para>
 
 	        </section>
 
-	        <section id="configuration_mp_test_ttl" xreflabel="TTL">
+	        <section id="configuration_mp_parameters_ttl" xreflabel="TTL">
 	          <title>TTL</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:ttl>STRING</pingertopo:ttl>
+	<nmwg:parameter name="ttl">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1518,7 +1428,7 @@
 	              <para><command>localname</command> - ttl</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1533,17 +1443,19 @@
           
 	          <para>
 	            The <emphasis>ttl</emphasis> element is used to specify 
-							the time-to-live value of the ping packets sent for the <command>test</command>. It does not requires any attributes.
+							the time-to-live value of the ping packets sent for the <xref linkend="configuration_mp_parameters"/>.
+							It is part of the <emphasis>parameter</emphasis> element and must contain 
+							a <command>count</command> attribute.
 	          </para>
 
 	        </section>
 
-	        <section id="configuration_mp_test_period" xreflabel="Period">
+	        <section id="configuration_mp_parameters_period" xreflabel="Period">
 	          <title>Period</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:period>STRING</pingertopo:period>
+	<nmwg:parameter name="measurementPeriod">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1552,7 +1464,7 @@
 	              <para><command>localname</command> - packetSize</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1566,17 +1478,22 @@
 	          </itemizedlist>
           
 	          <para>
-	            The <emphasis>period</emphasis> element is used to schedule the time between subsequent measurements of the defined <command>test</command>. In conjunction with the <command>offset</command> element, it defines the time in seconds between measurements. It does not requires any attributes.
+	            The <emphasis>measurementPeriod</emphasis> element is used to 
+	            schedule the time between subsequent measurements of the defined <xref linkend="configuration_mp_parameters"/>.
+	            In conjunction with the <xref linkend="configuration_mp_parameters_offset"/> element, 
+							it defines the time in seconds between measurements.
+							It is part of the <emphasis>parameter</emphasis> element and must contain 
+							a <command>count</command> attribute.
 	          </para>
 
 	        </section>
 
-	        <section id="configuration_mp_test_offset" xreflabel="Offset">
+	        <section id="configuration_mp_parameters_offset" xreflabel="Offset">
 	          <title>Offset</title>
           
 	          <programlisting>
 	            <![CDATA[
-			        <pingertopo:offset>STRING</pingertopo:offset>
+	<nmwg:parameter name="offset">STRING</nmwg:parameter>
 							]]>
 	          </programlisting>          
           
@@ -1585,7 +1502,7 @@
 	              <para><command>localname</command> - offset</para>
 	            </listitem>
 	            <listitem>
-	              <para><command>namespace</command> - http://namespaces.slac.stanford.edu/schema/pinger/20071120/</para>
+	              <para><command>namespace</command> - http://ggf.org/ns/nmwg/base/2.0/</para>
 	            </listitem>
 	            <listitem>
 	              <para><command>attributes</command> - none</para>
@@ -1599,11 +1516,17 @@
 	          </itemizedlist>
           
 	          <para>
-	            The <emphasis>offset</emphasis> element is used to schedule the time between subsequent measurements of the defined <command>test</command>. In conjunction with the <command>period</command> element, it defines the time in seconds between measurements. In particular, a random number is generated with the maximum of the <command>offset</command> value which is used such that the next measurement time is equal to <command>period</command> plus/minus <command>rand( offset )</command>. This allows for statistically multiplexed results and will help prevent flooding of packets.
+	            The <emphasis>offset</emphasis> element is used to schedule the time between 
+							subsequent measurements of the defined <xref linkend="configuration_mp_parameters"/>. 
+							In conjunction with the <xref linkend="configuration_mp_parameters_period"/> element, 
+							it defines the time in seconds between measurements. 
+							In particular, a random number is generated with the maximum of the <command>offset</command> 
+							value which is used such that the next measurement time is equal to 
+							<command>period</command> plus/minus <command>rand( offset )</command>. 
+							This allows for statistically multiplexed results and will help prevent flooding of packets.
 	          </para>
 
 	        </section>
-
 
 	      </section>
 
@@ -1612,9 +1535,9 @@
           
           <programlisting>
             <![CDATA[
-			      <nmtl3:port id="STRING">
-			        <nmtl3:ipAddress/>
-			      </nmtl3:port>
+	<nmtl3:port id="STRING">
+	  <nmtl3:ipAddress type="STRING"/>
+	</nmtl3:port>
             ]]>
           </programlisting>          
           
@@ -1637,8 +1560,10 @@
           </itemizedlist>
           
           <para>
-            The <emphasis>port</emphasis> element is used to specify the IP address of the <command>host</command> so that upon measurement, a DNS lookup
-is <emphasis>not</emphasis> performed and the IP address defined in it's child element <command>ipAddress</command> is used.
+            The <emphasis>port</emphasis> element is used to specify the IP address 
+						of the <xref linkend="configuration_mp_node"/> so that upon measurement, a DNS lookup
+						is <emphasis>not</emphasis> performed and the IP address defined within it's 
+						child element <xref linkend="configuration_mp_port_ipAddress"/> is used instead.
 						A single attribute <command>id</command> is used to uniquely identify the ip address which should follow the URN conventions.
           </para>
         
@@ -1647,7 +1572,7 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
           
 	          <programlisting>
 	            <![CDATA[
-        			<nmtl3:ipAddress type="STRNG">STRING</nmtl3:ipAddress>	            
+	<nmtl3:ipAddress type="STRNG">STRING</nmtl3:ipAddress>	            
 							]]>
 	          </programlisting>          
           
@@ -1671,8 +1596,11 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
           
 	          <para>
 	            The <emphasis>ipAddress</emphasis> element is used to specify 
-							the IP Address of the parent <command>node</command>. 
-							This element is required if the parent element <command>port</command> is present. It must contain a single attribute <command>type</command> which defines the format of the text element enclosed. The two possible values are 'IPv4' and 'IPv6' and should represent the IP address format present in the text element.
+							the IP Address of the parent <xref linkend="configuration_mp_node"/>. 
+							This element is required if the parent element <xref linkend="configuration_mp_port"/> is present.
+							It must contain a single attribute <command>type</command> which 
+							defines the format of the text element enclosed. 
+							The two possible values are 'IPv4' and 'IPv6' and should represent the IP address format present within its text element.
 	          </para>
 
 	        </section>
@@ -1704,7 +1632,7 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
 
       <para>
         The following schema fragments validate the
-        <emphasis>store.xml</emphasis> file, note that these are self
+        <emphasis>pinger-landmarks.xml</emphasis> file, note that these are self
         contained fragments that should be viewed more as a useful supplement
         instead of functional code.  Those interested in a complete schema
         overview should consult the <emphasis>perfSONAR</emphasis> and
@@ -1720,12 +1648,96 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
           languages, does not utilize XML markup.  The syntax is similar 
           to that of a regular language, and allows for a rather compact 
           description.  Note that this <command>will</command> only validate
-          <emphasis>store.xml</emphasis> files used for this service.  Other
+          <emphasis>pinger-landmarks.xml</emphasis> files used for this service.  Other
           schemas can be found in <citation>NMWG-Schema</citation>.
         </para>
 
         <programlisting>
         <![CDATA[
+	namespace pingertopo =
+	  "http://ggf.org/ns/nmwg/tools/pinger-landmarks/1.0/"
+
+	# external schema files
+	include "topo/nmtypes.rnc"
+	include "topo/nmtopo_base.rnc"
+	include "topo/nmtopo_l3.rnc"
+
+	start |= Topology
+
+	Topology = element pingertopo:topology {
+	  Domain+
+	}
+
+	Domain = element pingertopo:domain {
+	  Identifier?
+	  & element nmtb:comments { xsd:string }?
+	  & Node+
+	}
+
+	Node = element pingertopo:node { BaseNodeContent }
+	BaseNodeContent =
+	  Identifier?
+	  & BaseName?
+	  & element nmtb:hostName { xsd:string }+
+	  & element nmtb:description { xsd:string }?
+	  & element nmtb:location { LocationContent }?
+	  & element nmtb:contact { ContactInformationContent }?
+	  & element nmtb:comments { xsd:string }?
+	  & PingERParameters+
+	  & Port*
+
+	PingERParameters = element nmwg:parameters { PingERParametersContent }
+	PingERParametersContent =
+	  Identifier?
+	  & element nmwg:parameter {
+	      attribute name { "packetSize" } &
+	      (
+	        attribute value { text } |
+	        text
+	      )
+	  & element nmwg:parameter {
+	      attribute name { "count" } &
+	      (
+	        attribute value { text } |
+	        text
+	      )
+	  & element nmwg:parameter {
+	      attribute name { "packetInterval" } &
+	      (
+	        attribute value { text } |
+	        text
+	      )
+	  & element nmwg:parameter {
+	     attribute name { "ttl" } &
+	     (
+	       attribute value { text } |
+	       text
+	     )
+	   & element nmwg:parameter {
+	      attribute name { "measurementPeriod" } &
+	      (
+	        attribute value { text } |
+	        text
+	      )
+	  & element nmwg:parameter {
+	     attribute name { "measurementOffset" } &
+	     (
+	       attribute value { text } |
+	       text
+	     )
+
+	BaseName =
+	  element nmtb:name {
+	    attribute type { xsd:string }?
+	    & xsd:string
+	  }
+
+	Port = element nmtl3:port { BasePortContent }
+	BasePortContent =
+	  Identifier?
+	  & element nmtl3:ipAddress {
+		                L3Address
+		        }
         ]]>
         </programlisting>              
         
@@ -1744,58 +1756,19 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
 
         <programlisting>
         <![CDATA[
+****TODO****
         ]]>
         </programlisting>  
 
-        <para>
-          <command>netdisc.xsd</command>
-        </para>
-
-        <programlisting>
-        <![CDATA[
-        ]]>
-        </programlisting>  
-
-        <para>
-          <command>neterr.xsd</command>
-        </para>
-
-        <programlisting>
-        <![CDATA[   
-        ]]>
-        </programlisting>  
-
-        <para>
-          <command>netutil.xsd</command>
-        </para>
-
-        <programlisting>
-        <![CDATA[   
-        ]]>
-        </programlisting>  
-
-        <para>
-          <command>snmp.xsd</command>
-        </para>
-
-        <programlisting>
-        <![CDATA[   
-        ]]>
-        </programlisting>  
-
-        <para>
-          <command>nmwgtopo.xsd</command>
-        </para>
-
-        <programlisting>
-        <![CDATA[   
-        ]]>
-        </programlisting>  
 
       </section>          
 
     </section>
 
+ß
+
+
+<!--
 
     <section id="configuration_ma" xreflabel="MA Configuration">
 	    <title>MA Configuration</title>
@@ -1817,7 +1790,7 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
 
         <programlisting>
           <![CDATA[
-          ]]>
+					]]>
         </programlisting>  
 
         <section id="configuration_store_data_data" xreflabel="Data">
@@ -2042,397 +2015,568 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
     
 
     </section>
-
+-->
 
   </section>
 
-  <section id="ma_interface" xreflabel="MA Interface Specification">
-    <title>Measurement Archive Interface</title>
-	
-		<section id="ma_interface_handle-metadata" xreflabel="MA Interface Specification - handle-metadata">
-		    <title>MA Functionality – Handle-metadata</title>
-
-		    <section id="ma_interface_handle-metadata_introduction" xreflabel="MA handle-metadata Introduction">
-		      <title>Introduction</title>
-
-		      <para>
-				The <emphasis>Handle-metadata</emphasis> functionality aims to allow users to perform searches on the metadata information stored within the installed service. With the help of such searches, the user can easily check what data can be retrieved via the service.
-				This functionality is made available to the users with the help of <emphasis>MetadataKeyRequest</emphasis> and <emphasis>MetadataKeyResponse</emphasis> messages. Whenever the user makes a <emphasis>MetadataKeyRequest</emphasis>, the response from the service is always a <emphasis>MetadataKeyResponse</emphasis> (not considering underlying transport protocol errors). If the service encountered one or more problems, they are reported using error codes. These error codes are contained within the <emphasis>MetadataKeyResponse</emphasis> as well. Currently MA service supports requests with metadata supporting only one eventType -  "http://ggf.org/ns/nmwg/tools/pinger/2.0/",  registered under pinger namespace.
-			    </para>
-			
-		      <para>
-				Number of request messages supported: 1
-				Number of possible error-free response message types: 1
-			    </para>
-	
-		    </section>  
-
-		    <section id="ma_interface_metadatakeyrequest" xreflabel="MA MetadataKeyRequest">
-		      <title>MetadataKeyRequest</title>
-
-		      <para>
-				The .rnc file for the request message can be found in Appendix I. This .rnc file is based on NMWG v2 (base 2) xml protocol definitions and completely describes request message. 
-		      </para>
-		      <para>
-				At a high level, the request message may consist of multiple metadata elements and mupltiple data elements where each data element must refer to the metadata element by <emphasis>metadataIdRef</emphasis>.  The data element with missing metadata element will be marked as orphaned and will be skipped in the message processing. The error code will be returned for such element. Multiple metadata elements may refer to each other and the complete metadata sections can be assembled by chaining. Chaining will work only for the metadata elements with the same <emphasis>evenType</emphasis> elements. The presence of the key element will result in the immediate query to the metadata storage engine.
-		      </para>
-			  <para>
-				The number of the data elements in response message might be limited by optional  message parameter from the nmwg:parameters namespace with name <emphasis>setLimit</emphasis>. Also, two types of time format are supported – "iso" and "unix" by setting <emphasis>timeType</emphasis> parameter for the whole message.  
-			  </para>
-	
-		    </section>
-
-		    <section id="ma_interface_metadatakeyresponse" xreflabel="MA MetadataKeyResponse">
-		      <title>MetadataKeyResponse</title>
-
-		      <para>
-				The .rnc file for the response message can be found in Appendix I. This .rnc file is based on NMWG v2   xml protocol definitions and completely describes response message. 
-		      </para>
-		      <para>
-				The MetadataKeyResponse message   will contain at least one metadata-data chain under all circumstances (apart from transport layer errors). Each chain will contain a metadata element and data element. There can be as many chains as there are matches for the given MetadataKeyRequest message. If the system error was encountered, there will be only one chain in the response and this chain will contain the error code.
-			    </para>
-		      <para>
-				The metadata element can also contain a key. This happens when a key was passed in the metadataKeyRequest. In such a case the original key will be passed back and the same key will be passed inside of the data element.
-			    </para>
-		      <para>
-				If a result code in the metadata element is passed back, it is contained in an eventType element directly in the metadata block. The data block will also contain a datum element (nmwgr namespace) and the datum element will provide more information about the error.
-			    </para>
-		      <para>
-				If no errors occurred and no error codes were passed back, the linked data block will contain a key. This key element contains a metaID primary key from the metaData table of the storage SQL database. This key might be encrypted by the server in the future.
-		      </para>
-		    
-		    </section>
-
-		    <section id="ma_interface_handle-metadata_examples" xreflabel="MA handle-metadata Examples">
-		      <title>Examples</title>
-		      <para>
-		A simple MetadataKeyRequest is in the first example below with partial subject for broader search criteria and setLimit parameter set to 10 
-		      </para>
-		      <programlisting>
-		        <![CDATA[
-						<nmwg:message id="message1"
-						              type="MetadataKeyRequest"
-						              xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
-						              xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
-						              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-						              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-
-						 <nmwg:parameters>
-						         <nmwg:parameter name=”setLimit” value=”10”/>
-						         <nmwg:parameter name=”timeType” value=”unix”/>
-						 </nmwg:parameters>
-						 <nmwg:metadata id="meta1">
-						    <pinger:subject  id="subject1">
-						      <nmwgt:endPointPair>
-						        <nmwgt:dst type="hostname" value="pinger.fnal.gov"/> 
-						     </nmwgt:endPointPair>
-						    </pinger:subject>
-						      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
-						  </nmwg:metadata>
-						  <nmwg:data id="data1" metadataIdRef="meta1"/>
-						</nmwg:message> 
-		        ]]>
-		      </programlisting>
-
-		      <para>
-		      A MetadataKeyResponse for the above request is in the example below:
-			    </para>
-		      <programlisting>
-          <![CDATA[
-					<nmwg:message type="MetadataKeyResponse" 
-					              id="message.2455708" 
-					              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"                  
-					              xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
-					              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" 
-					              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
-					<nmwg:parameters>
-					         <nmwg:parameter name=”setLimit” value=”10”/>
-					         <nmwg:parameter name=”timeType” value=”unix”/>
-					 </nmwg:parameters>
-					<nmwg:metadata id="meta1">
-					  <pinger:subject id="subj330229">
-					    <nmwgt:endPointPair>
-					        <nmwgt:src value="lhcopnmon1-mgm.fnal.gov" type="hostname"/>
-					        <nmwgt:dst value="pinger.fnal.gov" type="hostname"/>
-					    </nmwgt:endPointPair>
-					</pinger:subject>
-					<nmwg:key id="meta330229">
-					   <pinger:parameters id="params330229">
-					      <nmwg:parameter value="10" name="count"/>
-					      <nmwg:parameter value="1000" name="packetSize"/>
-					      <nmwg:parameter value="32" name="ttl"/>
-					      <nmwg:parameter value="ICMP" name="transport"/>
-					      <nmwg:parameter value="1" name="packetInterval"/>
-					   </pinger:parameters>
-					</nmwg:key>
-					<nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
-					</nmwg:metadata>
-					<nmwg:data metadataIdRef="meta1" id="data1">
-					   <nmwg:key id="330229"/>
-					</nmwg:data>
-					</nmwg:message>
-		      ]]>
-		      </programlisting>
-
-		    </section>
-
-	  </section>
 
 
-  	<section id="ma_interface_handle-data" xreflabel="MA Interface Specification - handle-data">
-	    <title>MA Functionality – Handle-data</title>
+  <section id="general_functional" xreflabel="General Functional Specification">
+	  <title>General Functional Specification</title>
+
+	  <section id="general_functional_introduction" xreflabel="General Functional Introduction">
+		  <title>Introduction</title>
+
+			<para>
+				Two general interfaces are provided with the <emphasis>PingER</emphasis> suite. The first,
+        an <xref linkend="general_functional_echo"/> service enables a client to determine the availability of
+        the service. The second and <xref linkend="general_functional_ls"/> service allows (de)registration of
+				service information to a Lookup Server for service discovery by perfSONAR
+        clients.
+			</para>
+
+		</section>
+
+    <section id="general_functional_echo" xreflabel="General Functional Echo">
+		  <title>Echo</title>
+
+			<para>
+        The <emphasis>Echo Protocol</emphasis> is a very simple 
+        <emphasis>request</emphasis> and <emphasis>response</emphasis>
+        exchange that is meant to allow any service to check on the
+        availability of some other service.  This available can be simple
+        (i.e. checking for responsiveness) or it may be more complex (i.e.
+        testing database connectivity).
+			</para>
+
+      <section id="functional_echo_success" xreflabel="Success">
+        <title>Success</title>
+
+        <para>
+          A successful <emphasis>Echo</emphasis> exchange involves reading the
+          <emphasis>response</emphasis> message for a given
+          <emphasis>request</emphasis> and being able to interpret the result
+          code as being successful.  See the <emphasis>Echo Protocol</emphasis>
+          document for hints on what is considered a success.
+        </para>
+
+			</section>
+
+      <section id="functional_echo_failure" xreflabel="Failure">
+        <title>Failure</title>
+
+        <para>
+          Failure for this operation is defined as receiving an error message
+          from the service indication that one of these conditions may be true: 
+        </para>       
+
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              The message was improperly formatted.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The service does not participate in this sort of exchange.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Internal service or system errors may have occurred.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The service is down, or otherwise unreachable.
+            </para>
+          </listitem>
+        </itemizedlist>
+
+      </section>
+
+      <section id="functional_echo_messages" xreflabel="Messages">
+        <title>Messages</title>
+
+        <para>
+           There is only one exchange that is available for, that has a single
+           request and response format.
+        </para>
+
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              EchoRequest
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              EchoResponse
+            </para>
+          </listitem>
+        </itemizedlist>
+
+      </section>
+
+		</section>
+
+    <section id="general_functional_ls" xreflabel="General Functional LS Interaction">
+		  <title>Lookup Service</title>
 
       <para>
-	    PingER MA provides the ability to retrieve and store data:
-	    </para>
+        The <command>Lookup Service</command> is a
+        <emphasis>perfSONAR</emphasis> infrastructure service that allows
+        for the registration of local data sets in an effort to draw away the
+        sometimes time consuming queries for data made by client applications as
+        well as related services.  The <command>LS</command> relies on 
+        services to have knowledge of it's existence, and then accepts messages
+        they initiate to insert, delete, and otherwise maintain records of
+        the time sensitive data sets.
+      </para>
 
-	    <section id="ma_interface_handle-data_introduction" xreflabel="MA handle-data Introduction">
-	      <title>Introduction</title>
+	  	<para>
+				The PingER service is capable of registering information about itself
+        and its capabilities with the Lookup Service. In order to do so, it
+        communicates with the LS (Lookup Service) by by
+        <emphasis>Registering</emphasis> information,
+        <emphasis>Deregistering</emphasis> information, and <emphasis>Keeping
+        Alive</emphasis> already registered information. All of these
+        interactions rely on the service's backend configuration as the
+        underlying data store, and some self knowledge of the service itself
+        to form an identity.
+			</para>
 
-	      <para>
-					The Handle Data functionality provides the capability to request the service for retrieval of measurement data stored in backend storage.  
-				</para>
-				<para>
-					There are many ways in which data can be retrieved. The service also supports bulk data retrievals wherein many requests can be put into one request whereby many overheads can be avoided. It also supports usage of ‘keys’ in requests. These keys would have to be retrieved previously using ‘handle-metadata’ functionality. Such measures when used will help in increasing the efficiency of the server and also increasing the speed with which data is available for consumption by the client. There is one interface message supported -  SetupDataRequest and it returns SetupDataResponse.
-				</para>
-				<para>
-					Currently MA service supports requests with metadata supporting only one eventType -  "http://ggf.org/ns/nmwg/tools/pinger/2.0/",  registered under pinger namespace.
-				</para>
-				<para>
-					If the service encountered one or more problems, they are reported using error codes. These error codes are contained within the SetupDataResponse as well. 
-		    </para>
-		
-	      <para>
-			Number of request messages supported: 1
-			Number of possible error-free response message types: 1
-		    </para>
+      <para>
+        All transactions must involve two major parts to a message: service
+        identification information (in the form of a
+        <emphasis>service</emphasis> description or an <command>LS</command>
+        issued <emphasis>key</emphasis>) and data (in the native form from
+        the <command>metaID</command> or an <command>LS</command>
+        issued <emphasis>key</emphasis>).  
+      </para>
 
-	    </section>  
-
-      <section id="ma_interface_retrievedata" xreflabel="MA Retrieve Data">
-	      <title>MA Retrieve Data</title>
-
-		    <section id="ma_interface_setupdatarequest" xreflabel="MA SetupDataRequest">
-		      <title>SetupDataRequest</title>
-
-		      <para>
-						The .rnc file for the request message can be found in Appendix II. This .rnc file is based on NMWG v2 (base 2) xml protocol definitions and completely describes request message. 
-					</para>
-					<para>
-						The set  of  rules from building MetaDataRequest applied here as well. The same metadata-data and multiple metadata  chaining is supported. Filter chaining is supported with additional  time range parameters - ‘startTime’ and ‘endTime’. 
-					</para>
-					<para>
-						There are several use cases considered for the requests. 
-					</para>
-					<para>
-						Requests without keys –   there is one metadata element and one data element. Time range select can be inserted as select parameters of the metadata. If time range will me missing then default time range is 24 hours past current time in UTC.  
-					</para>
-					<para>
-						Requests with keys – A simple request for data can also be made by providing a ‘key’ in the metadata section of the request with ‘id’ attribute set to the actual metaID   primary key of the particular metadata in the metadata storage. The usage of the keys is preferred in case of the bulk requests.
-					</para>
-					<para>
-						Requests with filters – both types of requests from above can be utilized with additional metadata element  and linked by metadataIdRef.  
-					</para>
-					<para>
-											A response for such filter chained request will contain the main metadata section with found metadata, requested time range in form of the linked  metadata element and linked data element with collection of nmwg:commonTime sub-elements identified by the unique timestamp.  
-					</para>
-					<para>
-																All requests can be extensively chained with unlimited depth by matching the same eventType in the chained metadata. In this case the same parameters from the metadata elements will be overwritten.
-					</para>
-					<para>
-											The number of either metadata or data elements in response message might be limited by optional  message parameter from the nmwg:parameters namespace with name setLimit. Also, two types of time format are supported – “iso” and “unix” by setting timeType parameter for the whole message.  
-	   		  </para>
-
-		    </section>
-
-		    <section id="ma_interface_setupdataresponse" xreflabel="MA SetupDataResponse">
-		      <title>SetupDataResponse</title>
-
-		      <para>The .rnc file for the request message can be found in Appendix II. This .rnc file is based on NMWG v2 (base 2) xml protocol definitions and completely describes response message. 
-			    </para>
-		      <para>
-					A Typical Response Message of type SetupDataResponse  may contain multiple metadata elements paired with data elements and actual measured data will be contained as multiple datums inside of nmwg:commonTime sub-elements. 
-			    </para>
-		      <para>
-					If a match for the given metadata was found on the service, the service will return all known metadata elements and will   fill up the data section with data values from the data table of the storage SQL database for the matched metadata. If data is unavailable for the given metadata or there is no metadata element in the request then an error code will be sent back in the response.  If no matching metadata  were found, a result error message will be sent back saying ‘no metadata found’. If service storage  does not contain datum  for requested metadata and time range then ‘no data found’ error message will be returned.  In both cases eventType of the metadata will signify the error nature of the result datum. 
-		      </para>
-	    
-		    </section>
-
-		    <section id="ma_interface_handle-data_examples" xreflabel="MA handle-data Examples">
-		      <title>Examples</title>
-		      <para>
-		  SetupDataRequest  with  additional setLimit parameter set to 10  and extra  filter chained  metadata with specified  time range select
-		      </para>
-		      <programlisting>
-		        <![CDATA[
-						<nmwg:message id="message1"
-						              type="SetupDataRequest"
-						              xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
-						              xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
-						              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-						              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-						              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
-						<nmwg:parameters>
-						         <nmwg:parameter name=”setLimit” value=”10”/>
-						         <nmwg:parameter name=”timeType” value=”unix”/>
-						 </nmwg:parameters>
-						   <nmwg:metadata id="meta426">
-						     <pinger:subject id="subject426">
-						       <nmwgt:endPointPair>
-						          <nmwgt:src type="hostname" value="pinger.ictp.it"/> 
-						          <nmwgt:dst type="hostname" value="foundation.bw"/> 
-						       </nmwgt:endPointPair>
-						       <pinger:parameters>
-						           <nmwg:parameter name="packetSize">1000</nmwg:parameter>
-						            <nmwg:parameter name="count">10</nmwg:parameter>
-						        </pinger:parameters>
-						     </pinger:subject>           
-						     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
-						   </nmwg:metadata>
-						  <nmwg:metadata id="meta427" metadataIdRef="meta426">
-						     <select:parameters id="param2c" >      
-						        <nmwg:parameter name="startTime">1193876292</nmwg:parameter>
-						        <nmwg:parameter name="endTime">1194045045</nmwg:parameter>
-						     </select:parameters>
-						     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
-						  </nmwg:metadata>
-						  <nmwg:data id="data426" metadataIdRef="meta427"/>
-						</nmwg:message>
-			      ]]>
-		      </programlisting>
-		      <para>
-	And corresponded  SetupDataResponse message:
-		      </para>
-		      <programlisting>
-		        <![CDATA[
-						<nmwg:message 
-						                     xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"         
-						                     xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" 
-						                     xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
-						                      xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
-						                     type="SetupDataResponse" id="message.2455708">
-						<nmwg:parameters>
-						         <nmwg:parameter name=”setLimit” value=”10”/>
-						         <nmwg:parameter name=”timeType” value=”unix”/>
-						 </nmwg:parameters>
-						<nmwg:metadata id="meta1">
-						     <select:subject id="subj1"/>
-						     <select:parameters id="params1">
-						              <nmwg:parameter value="1193876292" name="startTime"/>
-						              <nmwg:parameter value="1194045045" name="endTime"/>
-						    </select:parameters>              
-						    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0/</nmwg:eventType>
-						</nmwg:metadata>
-						<nmwg:metadata metadataIdRef="1" id="meta2">
-						     <pinger:subject id="subj25150">
-						         <nmwgt:endPointPair>
-						                <nmwgt:src value="pinger.ictp.it" type="hostname"/>
-						                <nmwgt:dst value="foundation.bw" type="hostname"/>
-						          </nmwgt:endPointPair>
-						     </pinger:subject>
-						      <nmwg:key id="meta25150">
-						              <pinger:parameters id="params25150">
-						                   <nmwg:parameter value="10" name="count"/>
-						                    <nmwg:parameter value="100" name="packetSize"/>
-						                    <nmwg:parameter value="ICMP" name="transport"/>
-						                   <nmwg:parameter value="1" name="packetInterval"/>
-						            </pinger:parameters>
-						      </nmwg:key>
-						      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
-						</nmwg:metadata>
-						 <nmwg:data metadataIdRef="meta2" id="data1">
-						     <nmwg:commonTime value="1193877091" type="unix">
-						               <pinger:datum value="315" name="minRtt"/>
-						               <pinger:datum value="323.9" name="maxRtt"/>
-						               <pinger:datum value="320" name="medianRtt"/>
-						               <pinger:datum value="339" name="meanRtt"/>
-						               <pinger:datum value="10" name="iqrIpd"/>
-						               <pinger:datum value="20" name="maxIpd"/>
-						               <pinger:datum value="1" name="minIpd"/>
-						               <pinger:datum value="7.88889" name="meanIpd"/>
-						       </nmwg:commonTime>
-						  </nmwg:data>
-						</nmwg:message>
-			      ]]>
-		      </programlisting>
-
-	      </section>
-
+			
+      <section id="general_functional_ls_success" xreflabel="Success">
+        <title>Success</title>
+        
+        <para>
+          Success for interacting with the <command>LS</command> involves
+          interpreting the result codes that are returned in each
+          <emphasis>response</emphasis> message for the triggering 
+          <emphasis>request</emphasis>.  If a non-successful error code is
+          seen the <emphasis>PingER</emphasis> service must be nimble enough to 
+          interpret the result and take the appropriate action.
+        </para>
+        
+        <para>
+          Successful results that are returned for any of the operations
+          indicate that the internal state of the <command>LS</command>
+          has been updated to reflect the reality of the
+          <emphasis>PingER </emphasis> service.
+        </para>
+        
       </section>
 
-      <section id="ma_interface_storedata" xreflabel="MA Store Data">
-	      <title>MA Store Data</title>
+      <section id="general_functional_ls_failure" xreflabel="Failure">
+        <title>Failure</title>
+        
+        <para>
+          Failure for this operation is defined as receiving an error message
+          from the service indication that one of these conditions may be true: 
+        </para>       
+        
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              The message was improperly formatted.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The backend storage is improperly configured.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The contacted <command>LS</command> does not participate in this
+              sort of exchange (or may be beyond your permissions to use).  
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              There is nothing matching a particular query.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Internal service or system errors may have occurred.
+            </para>
+          </listitem>
 
-				<para>
-					PingER MA does not currently support the storage of data. Data in the MA is currently read only.
-	      </para>
-
+        </itemizedlist>
+        
       </section>
 
-    </section>
+      <section id="functional_ls_messages" xreflabel="Messages">
+        <title>Messages</title>
+        
+        <para>
+          There are three major message types that are possible when
+          interacting with the <command>LS</command>, each with the 
+          appropriate <emphasis>request</emphasis>/<emphasis>response</emphasis>
+          pair.
+        </para>
+        
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              LSRegistrationRequest
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              LSRegistrationResponse
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              LSDeregistrationRequest
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              LSDeregistrationResponse
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              LSKeepaliveRequest
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              LSKeepalivResponse
+            </para>
+          </listitem>
+        </itemizedlist>
+        
+      </section>
 
+		</section>
 
   </section>
 
-  <section id="mp_interface" xreflabel="MP Interface Specification">
-	  <title>Measurement Point Interface</title>
-	
-	  <section id="mp_interface_introduction" xreflabel="MP Interface Introduction">
+
+
+
+  <section id="mp_functional" xreflabel="MP Functional Specification">
+    <title>Measurement Point Functional Specification</title>
+
+	  <section id="mp_functional_introduction" xreflabel="MP Functional Specification Introduction">
+		  <title>Introduction</title>
+	    <para>
+		    The PingER MP currently does not expose an external interface and hence 
+				has no functional specification.
+		  </para>
+		
+	  </section>
+
+  </section>
+
+  <section id="ma_functional" xreflabel="MA Functional Specification">
+    <title>Measurement Archive Functional Specification</title>
+
+	  <section id="ma_functional_introduction" xreflabel="MA Functional Specification Introduction">
 		  <title>Introduction</title>
 		
-		  <para>
-			  The <emphasis>PingER MP</emphasis> is designed to provide  interface to the ping facility, ie schedule ping measurements.
+	    <para>
+				This section focuses on the functionalities offered by the PingER MA,
+        namely in response to external requests in the form of messages but
+        also for periodic events the service performs.
+				The following sections
+        will discuss the broad concepts as well as the potential causes, and
+        outcomes that may occur for each. Note that this description does not
+        focus on the actions of particular functions in the source code, but
+        favors an expanded view at individual actions.
 			</para>
-		  <para>
-			The PingER MP currently provides no externally accessible interface. 
+			
+			<para>
+				This section should be compared with that of the <xref linkend="ma_interface"/> which
+				describes the service as a black box capable of receiving and responding two
+				external output. The messages and their respective outcomes will be described
+				there in greater detail.
 			</para>
 			
 		</section>
-	
-	</section>
-
-  <section id="general_interface" xreflabel="General Interface Specification">
-	  <title>General Interface</title>
-	
-	  <section id="general_interface_introduction" xreflabel="General Interface Introduction">
-		  <title>Introduction</title>
 		
-			<para>
-				Two general interfaces are provided with the PingER suite. The first, an "Echo Service" enables a client to determine the availability of the service. The second and "LS" (de)registration service publishes information to a Lookup Server for service discovery by perfSONAR clients.
+	  <section id="ma_functional_key" xreflabel="MA Functional Key Retrieval">
+		  <title>Key Retrieval</title>
+		
+	    <para>
+				The <emphasis>PingER MA</emphasis> relies on the backend SQL database
+				to map <emphasis>metadata</emphasis> to <emphasis>data</emphasis>.
+				This functionality allows processing metadata in order to determine
+        the <command>Key</command> of the metadata in the backend SQL store.
+ 				PingER metadata is described completely by the set of static
+        parameters associated with ping facility in order to provide Layer3
+        monitoring capabilities between two end nodes. 
+				The pair of end
+        nodes can be described by Layer3 or Layer4 topology elements. 
+				The <command>Key</command> returned is specifically the primary key in the
+<command>metaData</command> table of the SQL database. The service takes
+metadata from the request and based on the content of metadata entry in the metaData SQL table
+        returns the Key along with whole metadata.
+			</para>
+		
+		  <section id="ma_functional_key_success" xreflabel="MA Functional Key Retrieval Success">
+			  <title>Success</title>
+			
+			  <para>
+				The service returns the metaID Key when metadata provided in the
+        request is matched to some entry in the metaData table of the service
+        storage database.
+				</para>
+			
+			</section>
+		
+		  <section id="ma_functional_key_failure" xreflabel="MA Functional Key Retrieval Failure">
+			  <title>Failure</title>
+			
+			  <para>
+				Failure for this operation is defined as receiving an error message
+        from the service indication that one of these conditions may be true:
+				</para>
+				
+			  <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              The message was improperly formatted.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The backend storage is improperly configured.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              The service does not participate in this sort of exchange.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              There is nothing matching your query.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Resource limitations prevent the service from returning the
+              results of the query.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              Internal service or system errors may have occurred.
+            </para>
+          </listitem>
+        </itemizedlist>
+
+			</section>
+		
+		  <section id="ma_functional_key_messages" xreflabel="MA Functional Key Retrieval Messages">
+			  <title>Messages</title>
+			
+				<para>
+					There are only two messages that can initiate a key exchange, although it is possible for many messages to use keys in general
+				</para>
+				
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              MetadataKeyRequest
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              MetadataKeyResponse
+            </para>
+          </listitem>
+        </itemizedlist>
+			
+			</section>	
+		
+		</section>
+		
+		
+		
+	  <section id="ma_functional_data" xreflabel="MA Functional Data Retrieval">
+		  <title>Data Retrieval</title>
+		
+	    <para>
+				This functionality implements publishing of the PingER monitoring data
+        in form of the XML response message to the
+        <command>SetupDataRequest</command>. Similarly to <xref
+        linkend="ma_functional_key"/> the service will be posed a query
+        consisting of a partial or full <emphasis>metadata</emphasis> element
+        (potentially an already retrieved <emphasis>key</emphasis>) and should
+        return data from the backend storage that is related to this initial
+        request.
 			</para>
 
-	    <section id="general_interface_handleecho" xreflabel="General Interface Echo">
+			<para>
+				The PingER MA service can accept requests with <emphasis>metadata</emphasis>
+				<command>Key</command> or <xref linkend="chaining"/>
+        (filter or unfiltered) of the <emphasis>metadata</emphasis> elements and return all found
+        <emphasis>metadata</emphasis> elements and data chunks identified by found <command>metaID</command> of the
+        <emphasis>metadata</emphasis>elements for requested time range
+			</para>
+
+		
+		  <section id="ma_functional_data_success" xreflabel="MA Functional Key Retrieval Success">
+			  <title>Success</title>
+			
+			  <para>
+					The service returns data either when a Key is provided or metadata
+          is provided. The Key must correspond to existing metaID primary Key
+          in the metadata storage SQL database while metadata must describe
+          measurement parameters data in the way it is described in metaData
+          SQL table.
+				</para>
+			
+			</section>
+		
+		  <section id="ma_functional_data_failure" xreflabel="MA Functional Key Retrieval Failure">
+			  <title>Failure</title>
+			
+		        <para>
+		          Failure for this operation is defined as receiving an error message
+		          from the service indication that one of these conditions may be true: 
+		        </para>       
+
+		        <itemizedlist mark='opencircle'>
+		          <listitem>
+		            <para>
+		              The message was improperly formatted.
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              The backend storage (<emphasis>data</emphasis> or 
+		              <emphasis>metadata</emphasis>) is improperly configured.
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              The service does not participate in this sort of exchange.
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              There is nothing matching your query or key.
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              Resource limitations prevent the service from returning the
+		              results of the query.
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              Internal service or system errors may have occurred.
+		            </para>
+		          </listitem>
+		        </itemizedlist>
+
+		      </section>
+
+		      <section id="ma_functional_data_messages" xreflabel="Messages">
+		        <title>Messages</title>
+
+		        <para>
+		          There are only two messages that can initiate a 
+		          <emphasis>data</emphasis> exchange.  
+		        </para>
+
+		        <itemizedlist mark='opencircle'>
+		          <listitem>
+		            <para>
+		              SetupDataRequest
+		            </para>
+		          </listitem>
+		          <listitem>
+		            <para>
+		              SetupDataResponse
+		            </para>
+		          </listitem>
+		        </itemizedlist>
+
+		      </section>
+
+		
+		</section>
+
+	
+  </section>
+
+
+
+
+
+  <section id="general_interface" xreflabel="General Interface Specification">
+	  <title>General Interface Specification</title>
+
+	  <section id="general_interface_introduction" xreflabel="General Interface Introduction">
+		  <title>Introduction</title>
+
+			<para>
+				Two general interfaces are provided with the <emphasis>PingER</emphasis> suite. The first,
+        an <xref linkend="general_interface_echo"/> service enables a client to determine the availability of
+        the service. The second and <xref linkend="general_interface_ls"/> service allows (de)registration of
+				service information to a Lookup Server for service discovery by perfSONAR
+        clients.
+			</para>
+
+	    <section id="general_interface_echo" xreflabel="General Interface Echo">
 			  <title>Echo</title>
 
 				<para>
-					The PingER suite provides a "echo" feature with which clients and any other users interested in finding out the status of a service can send an echo message and get back a echo reply. Both the PingER MA and PingER MP service provide such functionality.
-					If no ‘success.echo’ reply was got back then the client/user can assume that the service is down (even though there might not be a 404 error response). Depending on the requested endpoint the service will return echo response for  MA or MP.
+					The PingER suite provides a "echo" feature with which clients and
+          any other users interested in finding out the status of a service
+          can send an echo message and get back a echo reply. Both the PingER
+          MA and PingER MP service provide such functionality.
+					If no ‘success.echo’ reply was got back then the client/user can
+          assume that the service is down (even though there might not be a
+          404 error response). Depending on the requested endpoint the service
+          will return echo response for MA or MP.
 				</para>
 
 				<para>
 					Please see the "Echo Service Specification" for further information.
 				</para>
 
-		    <section id="general_interface_echorequest" xreflabel="General Interface Echo Request">
+		    <section id="general_interface_echo_request" xreflabel="General Interface Echo Request">
 				  <title>Echo Request</title>
         </section>
 
-		    <section id="general_interface_echoresponse" xreflabel="General Interface Echo Response">
+		    <section id="general_interface_echo_response" xreflabel="General Interface Echo Response">
 				  <title>Echo Response</title>
         </section>
 
 			</section>
 
 
-	
-	    <section id="general_interface_handles" xreflabel="General Interface LS Interaction">
+
+	    <section id="general_interface_ls" xreflabel="General Interface LS Interaction">
 			  <title>LS Interaction</title>
-	
+
 		  	<para>
-				The PingER service is capable of registering information about itself and its capabilities with the Lookup Service. In order to do so, it communicates with the LS (Lookup Service) by sending messages of registration, de-registration, etc.
+					The PingER service is capable of registering information about itself and its
+capabilities with the Lookup Service. In order to do so, it communicates with
+the LS (Lookup Service) by sending messages of registration, de-registration,
+etc.
 				</para>
-	
+
 		    <section id="general_interface_registerls" xreflabel="General Interface LS Registration">
 				  <title>LS Registration</title>
 					<para>
@@ -2448,10 +2592,469 @@ is <emphasis>not</emphasis> performed and the IP address defined in it's child e
         </section>
 
 			</section>
+
+		</section>
+
+	</section>
+
+
+  <section id="mp_interface" xreflabel="MP Interface Specification">
+	  <title>Measurement Point Interface Specification</title>
+	
+	  <section id="mp_interface_introduction" xreflabel="MP Interface Introduction">
+		  <title>Introduction</title>
+		
+		  <para>
+			  The <emphasis>PingER MP</emphasis> is designed to provide interface to the ping facility in order to allow scheduling of ping measurements. 
+			The PingER MP currently provides no externally accessible interface. 
+			</para>
 			
 		</section>
 	
 	</section>
+	
+	
+  <section id="ma_interface" xreflabel="MA Interface Specification">
+    <title>Measurement Archive Interface Specification</title>
+	
+		<section id="ma_interface_key" xreflabel="MA Key Retrieval Interface Specification">
+		    <title>MA Key Retrieval</title>
+
+		    <section id="ma_interface_key_introduction" xreflabel="MA Key Retrieval Introduction">
+		      <title>Introduction</title>
+
+		      <para>
+						The <emphasis>Key Retrieval</emphasis> functionality aims to allow 
+						users to perform searches on the <emphasis>metadata</emphasis> information stored within 
+						the installed service. With the help of such searches, the user can 
+						easily check what data can be retrieved from the service.
+						This functionality is made available to the users via  
+						<emphasis>MetadataKeyRequest</emphasis> and <emphasis>MetadataKeyResponse</emphasis> 
+						messages. 
+						Whenever the user makes a <emphasis>MetadataKeyRequest</emphasis>, 
+						the response from the service is always a <emphasis>MetadataKeyResponse</emphasis> 
+						(not considering underlying transport protocol errors). 
+						If the service encountered one or more problems, they are reported using error codes. 
+						These error codes are contained within the <emphasis>MetadataKeyResponse</emphasis> as well. 
+						Currently, the PingER MA service supports requests with metadata supporting only one eventType -  
+						<command>http://ggf.org/ns/nmwg/tools/pinger/2.0/</command>,  registered under the "pinger" namespace.
+			    </para>
+			
+		      <para>
+						Number of request messages supported: 1
+			  	</para>
+					<para>
+						Number of possible error-free response message types: 1
+			    </para>
+	
+		    </section>  
+
+		    <section id="ma_interface_key_request" xreflabel="MA MetadataKeyRequest">
+		      <title>MetadataKeyRequest</title>
+
+		      <para>
+						The .rnc file for the request message can be found in Appendix I. 
+						This .rnc file is based on NMWG v2 (base 2) xml protocol definitions and completely describes request message. 
+		      </para>
+		      <para>
+						At a high level, the request message may consist of multiple metadata 
+						elements and multiple data elements where each data element must 
+						refer to the metadata element by <emphasis>metadataIdRef</emphasis>.
+						The data element with missing metadata element will be marked as 
+						orphaned and will be skipped in the message processing. 
+						The error code will be returned for such element. Multiple metadata
+						elements may refer to each other and the complete metadata sections
+						can be assembled by chaining. Chaining will work only for the metadata
+						elements with the same <emphasis>evenType</emphasis> elements. 
+						The presence of the key element will result in the immediate query to the metadata storage engine.
+		      </para>
+			  <para>
+					The number of the data elements in response message might be limited by 
+					optional  message parameter from the nmwg:parameters namespace with 
+					name <emphasis>setLimit</emphasis>. Also, two types of time format are 
+					supported – "iso" and "unix" by setting <emphasis>timeType</emphasis> 
+					parameter for the whole message.  
+			  </para>
+	
+		    </section>
+
+		    <section id="ma_interface_key_response" xreflabel="MA MetadataKeyResponse">
+		      <title>MetadataKeyResponse</title>
+
+		      <para>
+						The .rnc file for the response message can be found in Appendix I. This .rnc
+						file is based on NMWG v2 xml protocol definitions and completely describes
+						response message.
+		      </para>
+		      <para>
+						The MetadataKeyResponse message will contain at least one
+		        metadata-data chain under all circumstances (apart from transport
+		        layer errors). Each chain will contain a metadata element and data
+		        element. There can be as many chains as there are matches for the
+		        given MetadataKeyRequest message. If the system error was encountered,
+		        there will be only one chain in the response and this chain will
+		        contain the error code.
+			    </para>
+		      <para>
+							The metadata element can also contain a key. This happens when a
+              key was passed in the metadataKeyRequest. In such a case the
+              original key will be passed back and the same key will be passed
+              inside of the data element.
+					</para> 
+					<para>
+						 If a result code in the metadata element is passed back, it is
+             contained in an eventType element directly in the metadata block.
+             The data block will also contain a datum element (nmwgr
+             namespace) and the datum element will provide more information
+             about the error.
+					</para>
+					<para>
+						If no errors occurred and no error codes were passed back, the
+             linked data block will contain a key. This key element contains
+             a metaID primary key from the metaData table of the storage SQL
+             database. This key might be encrypted by the server in the
+             future.
+					</para>
+		    
+		    </section>
+
+		    <section id="ma_interface_key_examples" xreflabel="MA handle-metadata Examples">
+		      <title>Examples</title>
+		
+		      <para>
+						A simple MetadataKeyRequest is in the first example below with
+            partial subject for broader search criteria and setLimit parameter
+            set to 10
+		      </para>
+		
+		      <programlisting>
+		        <![CDATA[
+	<nmwg:message id="message1"
+		type="MetadataKeyRequest"
+		xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
+		xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+		xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+		xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+		<nmwg:parameters>
+			<nmwg:parameter name="setLimit" value="10"/>
+			<nmwg:parameter name="timeType" value="unix"/>
+		</nmwg:parameters>
+		<nmwg:metadata id="meta1">
+			<pinger:subject  id="subject1">
+			  <nmwgt:endPointPair>
+			    <nmwgt:dst type="hostname" value="pinger.fnal.gov"/> 
+			 </nmwgt:endPointPair>
+			</pinger:subject>
+			<nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+		 </nmwg:metadata>
+		 <nmwg:data id="data1" metadataIdRef="meta1"/>
+	</nmwg:message> 
+		        ]]>
+		      </programlisting>
+
+		      <para>
+		      	A MetadataKeyResponse for the above request is in the example below:
+			    </para>
+			
+		      <programlisting>
+          <![CDATA[
+	<nmwg:message type="MetadataKeyResponse" 
+	  id="message.2455708" 
+	  xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"                  
+	  xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+	  xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" 
+	  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+		<nmwg:parameters>
+		  <nmwg:parameter name=”setLimit” value=”10”/>
+		  <nmwg:parameter name=”timeType” value=”unix”/>
+		</nmwg:parameters>
+		<nmwg:metadata id="meta1">
+			<pinger:subject id="subj330229">
+				<nmwgt:endPointPair>
+					<nmwgt:src value="lhcopnmon1-mgm.fnal.gov" type="hostname"/>
+					<nmwgt:dst value="pinger.fnal.gov" type="hostname"/>
+				</nmwgt:endPointPair>
+			</pinger:subject>
+			<nmwg:key id="meta330229">
+			  <pinger:parameters id="params330229">
+			    <nmwg:parameter value="10" name="count"/>
+			    <nmwg:parameter value="1000" name="packetSize"/>
+			    <nmwg:parameter value="32" name="ttl"/>
+			    <nmwg:parameter value="ICMP" name="transport"/>
+			    <nmwg:parameter value="1" name="packetInterval"/>
+			  </pinger:parameters>
+			</nmwg:key>
+			<nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+		</nmwg:metadata>
+		<nmwg:data metadataIdRef="meta1" id="data1">
+			<nmwg:key id="330229"/>
+		</nmwg:data>
+	</nmwg:message>
+		      ]]>
+		      </programlisting>
+
+		    </section>
+
+	  </section>
+
+
+  	<section id="ma_interface_data" xreflabel="MA Data Interface Specification">
+	    <title>MA Data</title>
+
+      <para>
+	    PingER MA provides the ability to retrieve and store data:
+	    </para>
+
+	    <section id="ma_interface_data_introduction" xreflabel="MA Data Retrieval Introduction">
+	      <title>Introduction</title>
+
+	      <para>
+					The Handle Data functionality provides the capability to request the
+          service for retrieval of measurement data stored in backend storage.
+				</para>
+				<para>
+					There are many ways in which data can be retrieved. The service also
+          supports bulk data retrievals wherein many requests can be put into
+          one request whereby many overheads can be avoided. It also supports
+          usage of ‘keys’ in requests. These keys would have to be retrieved
+          previously using ‘handle-metadata’ functionality. Such measures when
+          used will help in increasing the efficiency of the server and also
+          increasing the speed with which data is available for consumption by
+          the client. There is one interface message supported -
+          SetupDataRequest and it returns SetupDataResponse.
+				</para>
+				<para>
+					Currently MA service supports requests with metadata supporting only
+          one eventType - "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+          registered under pinger namespace.
+				</para>
+				<para>
+					If the service encountered one or more problems, they are reported
+          using error codes. These error codes are contained within the
+          SetupDataResponse as well.
+		    </para>
+		
+	      <para>
+					Number of request messages supported: 1
+				</para>
+				<para>
+					Number of possible error-free response message types: 1
+		    </para>
+
+	    </section>  
+
+      <section id="ma_interface_data_retrieve" xreflabel="MA Retrieve Data">
+	      <title>MA Retrieve Data</title>
+
+		    <section id="ma_interface_data_retrieve_request" xreflabel="MA SetupDataRequest">
+		      <title>SetupDataRequest</title>
+
+		      <para>
+						The .rnc file for the request message can be found in Appendix II.
+            This .rnc file is based on NMWG v2 (base 2) xml protocol
+            definitions and completely describes request message.
+					</para>
+					<para>
+						The set of rules from building MetaDataRequest applied here as
+            well. The same metadata-data and multiple metadata chaining is
+            supported. Filter chaining is supported with additional time range
+            parameters - ‘startTime’ and ‘endTime’.
+					</para>
+					<para>
+						There are several use cases considered for the requests.
+					</para>
+					<para>
+						Requests without keys – there is one metadata element and one data
+            element. Time range select can be inserted as select parameters of
+            the metadata. If time range will me missing then default time
+            range is 24 hours past current time in UTC.
+					</para>
+					<para>
+						Requests with keys – A simple request for data can also be made by
+            providing a ‘key’ in the metadata section of the request with ‘id’
+            attribute set to the actual metaID primary key of the particular
+            metadata in the metadata storage. The usage of the keys is
+            preferred in case of the bulk requests.
+					</para>
+					<para>
+						Requests with filters – both types of requests from above can be
+            utilized with additional metadata element and linked by
+            metadataIdRef.
+					</para>
+					<para>
+						A response for such filter chained request will contain the main
+            metadata section with found metadata, requested time range in form
+            of the linked metadata element and linked data element with
+            collection of nmwg:commonTime sub-elements identified by the
+            unique timestamp.
+					</para>
+					<para>
+						All requests can be extensively chained with unlimited depth by
+            matching the same eventType in the chained metadata. In this case
+            the same parameters from the metadata elements will be
+            overwritten.
+					</para>
+					<para>
+						The number of either metadata or data elements in response message
+            might be limited by optional message parameter from the
+            nmwg:parameters namespace with name setLimit. Also, two types of
+            time format are supported – “iso” and “unix” by setting timeType
+            parameter for the whole message.
+	   		  </para>
+
+		    </section>
+
+		    <section id="ma_interface_data_retrieve_response" xreflabel="MA SetupDataResponse">
+		      <title>SetupDataResponse</title>
+
+		      <para>
+						The .rnc file for the request message can be found in Appendix II.
+            This .rnc file is based on NMWG v2 (base 2) xml protocol
+            definitions and completely describes response message.
+			    </para>
+			
+		      <para>
+						A Typical Response Message of type SetupDataResponse may contain
+	          multiple metadata elements paired with data elements and actual
+	          measured data will be contained as multiple datums inside of
+	          nmwg:commonTime sub-elements.
+			    </para>
+			
+		      <para>
+						If a match for the given metadata was found on the service, the
+            service will return all known metadata elements and will fill up
+            the data section with data values from the data table of the
+            storage SQL database for the matched metadata. If data is
+            unavailable for the given metadata or there is no metadata element
+            in the request then an error code will be sent back in the
+            response. If no matching metadata were found, a result error
+            message will be sent back saying ‘no metadata found’. If service
+            storage does not contain datum for requested metadata and time
+            range then ‘no data found’ error message will be returned. In both
+            cases eventType of the metadata will signify the error nature of
+            the result datum.
+		      </para>
+	    
+		    </section>
+
+		    <section id="ma_interface_data_retrieve_examples" xreflabel="MA Data Retrieval Examples">
+		      <title>Examples</title>
+		      <para>
+					  SetupDataRequest with additional setLimit parameter set to 10 and
+            extra filter chained metadata with specified time range select
+		      </para>
+		      <programlisting>
+		        <![CDATA[
+<nmwg:message id="message1"
+  type="SetupDataRequest"
+  xmlns="http://ggf.org/ns/nmwg/base/2.0/" 
+  xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+  xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+  xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/">
+	<nmwg:parameters>
+    <nmwg:parameter name=”setLimit” value=”10”/>
+    <nmwg:parameter name=”timeType” value=”unix”/>
+	</nmwg:parameters>
+   <nmwg:metadata id="meta426">
+     <pinger:subject id="subject426">
+       <nmwgt:endPointPair>
+         <nmwgt:src type="hostname" value="pinger.ictp.it"/> 
+         <nmwgt:dst type="hostname" value="foundation.bw"/> 
+       </nmwgt:endPointPair>
+       <pinger:parameters>
+         <nmwg:parameter name="packetSize">1000</nmwg:parameter>
+         <nmwg:parameter name="count">10</nmwg:parameter>
+       </pinger:parameters>
+     </pinger:subject>           
+     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+   </nmwg:metadata>
+  <nmwg:metadata id="meta427" metadataIdRef="meta426">
+     <select:parameters id="param2c" >      
+       <nmwg:parameter name="startTime">1193876292</nmwg:parameter>
+       <nmwg:parameter name="endTime">1194045045</nmwg:parameter>
+     </select:parameters>
+     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+  </nmwg:metadata>
+  <nmwg:data id="data426" metadataIdRef="meta427"/>
+</nmwg:message>
+			      ]]>
+		      </programlisting>
+		      <para>
+						And corresponded SetupDataResponse message:
+		      </para>
+		      <programlisting>
+		        <![CDATA[
+<nmwg:message 
+	xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"         
+	xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" 
+	xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+	xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+	type="SetupDataResponse" id="message.2455708">
+	<nmwg:parameters>
+	  <nmwg:parameter name=”setLimit” value=”10”/>
+	  <nmwg:parameter name=”timeType” value=”unix”/>
+	</nmwg:parameters>
+	<nmwg:metadata id="meta1">
+	  <select:subject id="subj1"/>
+	  <select:parameters id="params1">
+	    <nmwg:parameter value="1193876292" name="startTime"/>
+	    <nmwg:parameter value="1194045045" name="endTime"/>
+		</select:parameters>              
+		<nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0/</nmwg:eventType>
+	</nmwg:metadata>
+	<nmwg:metadata metadataIdRef="1" id="meta2">
+	<pinger:subject id="subj25150">
+		<nmwgt:endPointPair>
+		       <nmwgt:src value="pinger.ictp.it" type="hostname"/>
+		       <nmwgt:dst value="foundation.bw" type="hostname"/>
+		 </nmwgt:endPointPair>
+	</pinger:subject>
+	<nmwg:key id="meta25150">
+		     <pinger:parameters id="params25150">
+		          <nmwg:parameter value="10" name="count"/>
+		           <nmwg:parameter value="100" name="packetSize"/>
+		           <nmwg:parameter value="ICMP" name="transport"/>
+		          <nmwg:parameter value="1" name="packetInterval"/>
+		   </pinger:parameters>
+	</nmwg:key>
+	<nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+	</nmwg:metadata>
+	<nmwg:data metadataIdRef="meta2" id="data1">
+	  <nmwg:commonTime value="1193877091" type="unix">
+	    <pinger:datum value="315" name="minRtt"/>
+	    <pinger:datum value="323.9" name="maxRtt"/>
+	    <pinger:datum value="320" name="medianRtt"/>
+	    <pinger:datum value="339" name="meanRtt"/>
+	    <pinger:datum value="10" name="iqrIpd"/>
+	    <pinger:datum value="20" name="maxIpd"/>
+	    <pinger:datum value="1" name="minIpd"/>
+	    <pinger:datum value="7.88889" name="meanIpd"/>
+	    </nmwg:commonTime>
+	 </nmwg:data>
+	</nmwg:message>
+			      ]]>
+		      </programlisting>
+
+	      </section>
+
+      </section>
+
+      <section id="ma_interface_data_store" xreflabel="MA Store Data">
+	      <title>MA Store Data</title>
+
+				<para>
+					The PingER MA currently only implements a read-only interface. Therefore PingER MA does not currently support the storage of data. 
+	      </para>
+
+      </section>
+
+    </section>
+
+
+  </section>
+
 
 
   <glossary id="glossary">
