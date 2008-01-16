@@ -4,7 +4,7 @@ use base 'perfSONAR_PS::Services::Base';
 
 use fields 'CLIENT', 'LS_CLIENT';
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 use warnings;
 use strict;

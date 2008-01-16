@@ -2,7 +2,6 @@ package perfSONAR_PS::Collectors::LinkStatus;
 
 use strict;
 use warnings;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 use Time::HiRes qw( gettimeofday );
 use Module::Load;
@@ -18,48 +17,20 @@ use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 
 use perfSONAR_PS::SNMPWalk;
 
-use fields 'CONF', 'DIRECTORY', 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS';
+use base 'perfSONAR_PS::Collectors::Base';
 
-use version; our $VERSION = qv("0.01");
+use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS';
+
+our $VERSION = 0.02;
 
 my %link_prev_update_status = ();
 
-sub new($) {
-    my ($class, $conf, $directory) = @_;
+sub new {
+    my ($self, $conf, $directory) = @_;
 
-    my $self = fields::new($class);
-
-    if (defined $conf and $conf ne "") {
-        $self->{CONF} = \%{$conf};
-    }
-
-    if (defined $directory and $directory ne "") {
-        $self->{DIRECTORY} = $directory;
-    }
-
+    $self = fields::new($self) unless ref $self;
+    $self->SUPER::new($conf, $directory);
     return $self;
-}
-
-sub setConf {
-    my ($self, $conf) = @_;   
-    my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
-
-    if(defined $conf and $conf ne "") {
-        $self->{CONF} = \%{$conf};
-    } else {
-        $logger->error("Missing argument."); 
-    }
-}
-
-sub setDirectory {
-    my ($self, $directory) = @_;   
-    my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
-
-    if(defined $directory and $directory ne "") {
-        $self->{DIRECTORY} = $directory;
-    } else {
-        $logger->error("Missing argument."); 
-    }
 }
 
 sub init($) {

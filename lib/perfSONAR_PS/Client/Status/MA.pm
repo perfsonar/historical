@@ -1,6 +1,6 @@
 package perfSONAR_PS::Client::Status::MA;
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 use strict;
 use Log::Log4perl qw(get_logger);

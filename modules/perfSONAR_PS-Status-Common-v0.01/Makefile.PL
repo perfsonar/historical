@@ -8,7 +8,6 @@ WriteMakefile(
         "strict" => 0,
         "warnings" => 0,
 	"Exporter" => 0,
-        "version" => 0.50,
 	"Log::Log4perl" => 1.00,
 	"Test::More" => 0,
     }

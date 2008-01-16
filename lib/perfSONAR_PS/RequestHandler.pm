@@ -1,5 +1,7 @@
 package perfSONAR_PS::RequestHandler;
 
+our $VERSION = 0.02;
+
 =head1 NAME
 
 perfSONAR_PS::RequestHandler - A module that provides an object to register event

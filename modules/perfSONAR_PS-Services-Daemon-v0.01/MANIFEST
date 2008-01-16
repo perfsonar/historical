@@ -9,6 +9,6 @@ lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Services/Base.pm
 lib/perfSONAR_PS/Services/Echo.pm
 logger.conf
-perfsonar.pl
+perfsonar
 psConfigureDaemon
 META.yml                                 Module meta-data (added by MakeMaker)

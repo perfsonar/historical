@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::Echo;
+
+our $VERSION = 0.02;
 
 use base 'perfSONAR_PS::Services::Base';
 

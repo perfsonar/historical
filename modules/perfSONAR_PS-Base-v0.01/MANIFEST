@@ -18,6 +18,7 @@ lib/perfSONAR_PS/Messages.pm
 lib/perfSONAR_PS/Time.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/XML/Document_string.pm
+t/perfSONAR_PS::Error.t
 t/perfSONAR_PS::Common.t
 t/perfSONAR_PS::Time.t
 t/perfSONAR_PS::Transport.t

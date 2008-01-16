@@ -1,5 +1,7 @@
 package perfSONAR_PS::Error_compat;
 
+our $VERSION = 0.02;
+
 use base 'Error';
 
 my $debug = 0;

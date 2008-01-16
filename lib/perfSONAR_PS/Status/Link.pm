@@ -2,7 +2,7 @@ package perfSONAR_PS::Status::Link;
 
 use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 use strict;
 

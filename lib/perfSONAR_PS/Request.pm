@@ -1,6 +1,6 @@
 package perfSONAR_PS::Request;
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES';
 

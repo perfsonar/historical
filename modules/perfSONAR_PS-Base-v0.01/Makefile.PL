@@ -2,12 +2,11 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Base',
-    'VERSION' => 'v0.01',
+    'VERSION' => 0.02,
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
 	"warnings" => 0,
-        "version" => 0.50,
 	"Exporter" => 0,
 	"Log::Log4perl" => 1.00,
 	"Time::HiRes" => 1.85,

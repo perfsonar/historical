@@ -1,6 +1,6 @@
 package perfSONAR_PS::XML::Document_string;
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
 

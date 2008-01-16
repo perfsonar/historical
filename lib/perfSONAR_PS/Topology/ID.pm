@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use base 'Exporter';
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 our @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare');
 

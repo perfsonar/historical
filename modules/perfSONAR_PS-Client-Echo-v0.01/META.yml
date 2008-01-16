@@ -1,19 +1,18 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         perfSONAR_PS-Client-Echo
-version:      v0.01
+version:      0.02
 version_from: lib/perfSONAR_PS/Client/Echo.pm
 installdirs:  site
 requires:
     Log::Log4perl:                 1
-    perfSONAR_PS::Common:          v0.01
-    perfSONAR_PS::Messages:        v0.01
-    perfSONAR_PS::Transport:       v0.01
-    perfSONAR_PS::XML::Document_string: v0.01
+    perfSONAR_PS::Common:          0.02
+    perfSONAR_PS::Messages:        0.02
+    perfSONAR_PS::Transport:       0.02
+    perfSONAR_PS::XML::Document_string: 0.02
     strict:                        0
     Test::More:                    0
     Time::HiRes:                   1.85
-    version:                       0.5
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.17

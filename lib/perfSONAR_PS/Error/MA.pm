@@ -1,5 +1,7 @@
 use perfSONAR_PS::Error;
 
+our $VERSION = 0.02;
+
 =head1 NAME
 
 perfSONAR_PS::Error::MA - A module that provides the measurement archive 

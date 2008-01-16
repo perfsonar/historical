@@ -10,11 +10,10 @@ WriteMakefile(
         "Exporter" => 0,
 	"Log::Log4perl" => 1.00,
 	"Time::HiRes" => 1.85,
-        "version" => 0.50,
-	"perfSONAR_PS::Common" => 'v0.01',
-	"perfSONAR_PS::Messages" => 'v0.01',
-	"perfSONAR_PS::Services::Base" => 'v0.01',
-	"perfSONAR_PS::Services::MA::General" => 'v0.01',
-	"perfSONAR_PS::DB::XMLDB" => 'v0.01',
+	"perfSONAR_PS::Common" => 0.02,
+	"perfSONAR_PS::Messages" => 0.02,
+	"perfSONAR_PS::Services::Base" => 0.02,
+	"perfSONAR_PS::Services::MA::General" => 0.02,
+	"perfSONAR_PS::DB::XMLDB" => 0.02,
     }
 );

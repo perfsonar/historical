@@ -1,5 +1,7 @@
 use perfSONAR_PS::Error;
 
+our $VERSION = 0.02;
+
 =head1 NAME
 
 perfSONAR_PS::Error::LS - A module that provides the Lookup Service exceptions

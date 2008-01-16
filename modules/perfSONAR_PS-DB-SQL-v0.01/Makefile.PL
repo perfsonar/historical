@@ -6,7 +6,6 @@ WriteMakefile(
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
-        "version" => 0.50,
         "warnings" => 0,
 	"Log::Log4perl" => 1.00,
 	"DBI" => 1.40,

@@ -1,23 +1,23 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         perfSONAR_PS-Services-MA-SNMP
-version:      v0.01
+version:      0.02
 version_from: lib/perfSONAR_PS/Services/MA/SNMP.pm
 installdirs:  site
 requires:
     Log::Log4perl:                 1
     Module::Load:                  0.1
-    perfSONAR_PS::Common:          v0.01
-    perfSONAR_PS::DB::File:        v0.01
-    perfSONAR_PS::DB::RRD:         v0.01
-    perfSONAR_PS::DB::SQL:         v0.01
-    perfSONAR_PS::Error_compat:    v0.01
-    perfSONAR_PS::Messages:        v0.01
-    perfSONAR_PS::Services::MA::General: v0.01
-    perfSONAR_PS::Transport:       v0.01
-    perfSONAR_PS::XML::Document_string: v0.01
+    perfSONAR_PS::Common:          0.02
+    perfSONAR_PS::DB::File:        0.02
+    perfSONAR_PS::DB::RRD:         0.02
+    perfSONAR_PS::DB::SQL:         0.02
+    perfSONAR_PS::Error_compat:    0.02
+    perfSONAR_PS::Messages:        0.02
+    perfSONAR_PS::Services::Base:  0.02
+    perfSONAR_PS::Services::MA::General: 0.02
+    perfSONAR_PS::Transport:       0.02
+    perfSONAR_PS::XML::Document_string: 0.02
     strict:                        0
-    version:                       0.5
     warnings:                      0
 
 distribution_type: module

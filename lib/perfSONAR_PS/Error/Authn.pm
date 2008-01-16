@@ -1,5 +1,7 @@
 use perfSONAR_PS::Error;
 
+our $VERSION = 0.02;
+
 =head1 NAME
 
 perfSONAR_PS::Error::Authn - A module that provides the exceptions for the

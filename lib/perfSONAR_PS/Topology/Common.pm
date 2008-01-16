@@ -8,7 +8,7 @@ use base 'Exporter';
 use perfSONAR_PS::Topology::ID;
 use perfSONAR_PS::Common;
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 
 our @EXPORT = ('topologyNormalize', 'validateDomain', 'validateNode', 'validatePort', 'validateLink', 'domainReplaceChild', 'nodeReplaceChild', 'portReplaceChild', 'getTopologyNamespaces', 'mergeNodes_general');
 

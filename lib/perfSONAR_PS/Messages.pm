@@ -4,7 +4,7 @@ use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger :nowarn);
 
-use version; our $VERSION = qv("0.01");
+our $VERSION = 0.02;
 use perfSONAR_PS::Common;
 
 
