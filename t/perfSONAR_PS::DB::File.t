@@ -1,6 +1,9 @@
 use Test::More 'no_plan';
 use Data::Compare qw( Compare );
 
+use Cwd;
+$dir = cwd;
+print "Directory: $dir\n";
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 use_ok('perfSONAR_PS::DB::File');
@@ -41,11 +44,11 @@ $fileXML->openDB();
 
 @results = $fileXML->query("/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]");
 @expected = ("<charley>\n\t\t<dog europe=\"good\"/>\n\t</charley>", "<beta/>", "<england super=\"man\">\n\t\t\t\t\tFreaky\n\t\t\t\t</england>");
-ok(Compare(@results, @expected), "DB::File::query - XPath '/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]'");
+ok(Compare(\@results, \@expected), "DB::File::query - XPath '/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]'");
 
 @results = $fileXML->query("//madeup");
 @expected = ();
-ok(Compare(@results, @expected), "DB::File::query - XPath '//madeup'");
+ok(Compare(\@results, \@expected), "DB::File::query - XPath '//madeup'");
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::count

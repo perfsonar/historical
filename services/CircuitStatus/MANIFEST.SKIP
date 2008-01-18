@@ -1,6 +1,0 @@
-blib
-^Makefile$
-^Makefile.old$
-.svn
-doc
-MANIFEST.bak

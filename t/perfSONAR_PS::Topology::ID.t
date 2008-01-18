@@ -1,6 +1,4 @@
 use Test::More 'no_plan';
-use Data::Compare qw( Compare );
-use Data::Dumper;
 
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 

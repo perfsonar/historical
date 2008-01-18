@@ -14,7 +14,7 @@ sub config_circuitstatus_ma($$$);
 sub config_topology_ma($$$);
 
 my $was_installed = 0;
-my $DEFAULT_FILE 
+my $DEFAULT_FILE;
 
 if ($was_installed) {
 	$DEFAULT_FILE = "XXX_DEFAULT_XXX";

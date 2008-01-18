@@ -71,7 +71,7 @@ BEGIN {
 
         $confdir = $dirname;
 
-        $libdir = dirname($0)."/../../lib";
+        $libdir = dirname($0)."/lib";
     }
 }
 

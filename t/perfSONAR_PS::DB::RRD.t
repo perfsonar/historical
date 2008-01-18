@@ -1,15 +1,14 @@
 use Test::More 'no_plan';
 use Data::Compare qw( Compare );
-use XML::LibXML;
-use Data::Dumper;
 
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 use_ok('perfSONAR_PS::DB::RRD');
 use perfSONAR_PS::DB::RRD;
 
-$RRDEXE = "/usr/local/rrdtool/bin/rrdtool";
-%RRDVARIABLES = {"ds" => ""};
+$RRDEXE = `which rrdtool`;
+chomp($RRDEXE);
+%RRDVARIABLES = ("ds" => "");
 $RRDERROR = 1;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,7 +70,7 @@ $rrdb3->closeDB();
 
 %expectedResult1 = ("1000000001" => {"ds" => "1.3370000000e+03"}, "1000000002" => {"ds" => "3.1400000000e+00"}, "1000000003" => {"ds" => "2.7100000000e+00"}, "1000000004" => {"ds" => "4.2000000000e+01"}, "1000000005" => {"ds" => "8.9000000000e-01"});
 #%expectedResult2 = ("1000000002" => {"ds" => "6.7007000000e+02"}, "1000000004" => {"ds" => "2.2355000000e+01"}, "1000000006" => {"ds" => "nan"});
-%expectedResult2 = ("1000000002" => {"ds" => "6.7007000000e+02"}, "1000000004" => {"ds" => "2.2355000000e+01"}, "1000000006" => {"ds" => "8.9450000000e+00"});
+%expectedResult2 = ("1000000002" => {"ds" => "6.7007000000e+02"}, "1000000004" => {"ds" => "2.2355000000e+01"}, "1000000006" => {"ds" => "nan"});
 %expectedResult3 = ("2000000203" => {"ds" => "2.7100000000e+00"}, "2000000204" => {"ds" => "4.2000000000e+01"}, "2000000205" => {"ds" => "8.9000000000e-01"});
 ok(checkQuery(\%result1, \%expectedResult1), "DB::RRD::query - rrdb1");
 ok(checkQuery(\%result2, \%expectedResult2), "DB::RRD::query - rrdb2");
