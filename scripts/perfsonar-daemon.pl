@@ -221,7 +221,7 @@ my %port_configs = ();
 my %service_configs = ();
 
 if (!defined $conf{"port"}) {
-    my $logger->error("No ports defined");
+    $logger->error("No ports defined");
     exit(-1);
 }
 
@@ -583,7 +583,7 @@ process is already running.
 =cut
 sub managePID($$) {
     my($piddir, $pidfile) = @_;
-    die "Can't write pidfile: $pidfile\n" unless -w $piddir;
+    die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir ."/".$pidfile;
     sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
     flock(PIDFILE, LOCK_EX);
