@@ -2,7 +2,7 @@ package perfSONAR_PS::DB::RRD;
 
 use fields 'PATH', 'NAME', 'DATASOURCES', 'COMMIT';
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 use strict;
 use warnings;

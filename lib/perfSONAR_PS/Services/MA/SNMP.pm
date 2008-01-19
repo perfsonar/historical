@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 use strict;
 use warnings;

@@ -31,7 +31,7 @@ use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger :nowarn);
 use XML::LibXML;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 use base 'Exporter';
 our @EXPORT = ('readXML','chainMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',

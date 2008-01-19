@@ -8,7 +8,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 our @ISA = ('Exporter');
 our @EXPORT = ();
 

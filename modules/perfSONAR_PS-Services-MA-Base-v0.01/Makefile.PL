@@ -8,8 +8,8 @@ WriteMakefile(
         "strict" => 0,
         "warnings" => 0,
         "Exporter" => 0,
-	"perfSONAR_PS::Common" => 0.02,
-	"perfSONAR_PS::Messages" => 0.02,
+	"perfSONAR_PS::Common" => 0.03,
+	"perfSONAR_PS::Messages" => 0.03,
 	"Log::Log4perl" => 1.00,
     }
 );

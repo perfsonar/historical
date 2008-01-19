@@ -2,7 +2,7 @@ package perfSONAR_PS::DB::SQL;
 
 use fields 'NAME', 'USER', 'PASS', 'SCHEMA', 'HANDLE';
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 use DBI;
 use Log::Log4perl qw(get_logger);

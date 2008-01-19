@@ -16,7 +16,7 @@ The verbose flag allows lots of debug options to print to the screen.  If the op
 omitted the service will run in daemon mode.
 =cut
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 use warnings;
 use strict;

@@ -2,6 +2,7 @@ Changes
 LICENSE
 MANIFEST
 MANIFEST.SKIP
+META.yml
 Makefile.PL
 README
 lib/perfSONAR_PS/Common.pm
@@ -15,11 +16,13 @@ lib/perfSONAR_PS/Error/Message.pm
 lib/perfSONAR_PS/Error/Topology.pm
 lib/perfSONAR_PS/Error_compat.pm
 lib/perfSONAR_PS/Messages.pm
+lib/perfSONAR_PS/NetLogger.pm
 lib/perfSONAR_PS/Time.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/XML/Document_string.pm
-t/perfSONAR_PS::Error.t
+perl-perfSONAR_PS-Base.spec
 t/perfSONAR_PS::Common.t
+t/perfSONAR_PS::Error.t
 t/perfSONAR_PS::Time.t
 t/perfSONAR_PS::Transport.t
 t/perfSONAR_PS::XML::Document_string.t
@@ -27,4 +30,3 @@ t/testfiles/blank
 t/testfiles/blankXML
 t/testfiles/noXMLTagSmall
 t/testfiles/smallXML
-META.yml                                 Module meta-data (added by MakeMaker)

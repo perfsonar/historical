@@ -18,7 +18,7 @@ WriteMakefile(
 	"Module::Load" => 0.10,
 	"Time::HiRes" => 1.85,
 	"Config::General" => 2.30,
-	"perfSONAR_PS::Common" => 0.02,
+	"perfSONAR_PS::Common" => 0.03,
     },
 
     EXE_FILES => \@exe_files,
@@ -32,36 +32,71 @@ sysconfdir	= $(PREFIX)/etc
 
 install ::
 
-	if [ ! -d $(sysconfdir)/perfsonar ]; then \
-	    mkdir -p $(sysconfdir)/perfsonar; \
-	fi;
-
-	if [ ! -f $(sysconfdir)/perfsonar/collector.conf ]; then \
-	    touch $(sysconfdir)/perfsonar/collector.conf; \
-	fi;
-
-	if [ ! -f $(sysconfdir)/perfsonar/logger.conf ]; then \
-	    install -c -D -m 0644 logger.conf $(sysconfdir)/perfsonar/logger.conf; \
+	if [ "$(sysconfdir)" == "/usr/etc" ]; then \
+		if [ ! -d /etc/perfsonar ]; then \
+		    mkdir -p /etc/perfsonar; \
+		fi; \
+		\
+		if [ ! -f /etc/perfsonar/collector.conf ]; then \
+		    touch /etc/perfsonar/collector.conf; \
+		fi; \
+		\
+		if [ ! -f /etc/perfsonar/logger.conf ]; then \
+		    install -c -D -m 0644 logger.conf /etc/perfsonar/logger.conf; \
+		else \
+		    echo "Old configuration file exists at /etc/perfsonar/logger.conf: not overwritten."; \
+		fi; \
+		\
+		if [ -d /etc/init.d ]; then \
+		    mkdir -p /etc/init.d; \
+		fi; \
+		\
+		install -c -D -m 0755 perfsonar-collector.init /etc/init.d/perfsonar-collector; \
+		awk "{gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=/etc\"); print}" /etc/init.d/perfsonar-collector > /etc/init.d/perfsonar-collector.new; \
+		mv -f /etc/init.d/perfsonar-collector.new /etc/init.d/perfsonar-collector; \
+		chmod +x /etc/init.d/perfsonar-collector; \
+		\
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); gsub(/XXX_CONFDIR_XXX/,\"/etc/perfsonar\"); print}" $(INSTALLBIN)/perfsonar > $(INSTALLBIN)/perfsonar.new; \
+		mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar; \
+		chmod +x $(INSTALLBIN)/perfsonar; \
+		\
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psConfigureCollectors; \
+		awk "{gsub(/XXX_DEFAULT_XXX/,\"/etc/perfsonar/collector.conf\"); print}" $(INSTALLBIN)/psConfigureCollectors > $(INSTALLBIN)/psConfigureCollectors.new; \
+		mv -f $(INSTALLBIN)/psConfigureCollectors.new $(INSTALLBIN)/psConfigureCollectors; \
+		chmod +x $(INSTALLBIN)/psConfigureCollectors; \
 	else \
-	    echo "Old configuration file exists at $(sysconfdir)/perfsonar/logger.conf: not overwritten."; \
+		if [ ! -d $(sysconfdir)/perfsonar ]; then \
+		    mkdir -p $(sysconfdir)/perfsonar; \
+		fi; \
+		\
+		if [ ! -f $(sysconfdir)/perfsonar/collector.conf ]; then \
+		    touch $(sysconfdir)/perfsonar/collector.conf; \
+		fi; \
+		\
+		if [ ! -f $(sysconfdir)/perfsonar/logger.conf ]; then \
+		    install -c -D -m 0644 logger.conf $(sysconfdir)/perfsonar/logger.conf; \
+		else \
+		    echo "Old configuration file exists at $(sysconfdir)/perfsonar/logger.conf: not overwritten."; \
+		fi; \
+		\
+		if [ -d $(sysconfdir)/init.d ]; then \
+		    mkdir -p $(sysconfdir)/init.d; \
+		fi; \
+		\
+		install -c -D -m 0755 perfsonar-collector.init $(sysconfdir)/init.d/perfsonar-collector; \
+		awk "{gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-collector > $(sysconfdir)/init.d/perfsonar-collector.new; \
+		mv -f $(sysconfdir)/init.d/perfsonar-collector.new $(sysconfdir)/init.d/perfsonar-collector; \
+		chmod +x $(sysconfdir)/init.d/perfsonar-collector; \
+		\
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLBIN)/perfsonar > $(INSTALLBIN)/perfsonar.new; \
+		mv -f $(INSTALLBIN)/perfsonar.new $(INSTALLBIN)/perfsonar; \
+		chmod +x $(INSTALLBIN)/perfsonar; \
+		\
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psConfigureCollectors; \
+		awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/collector.conf\"); print}" $(INSTALLBIN)/psConfigureCollectors > $(INSTALLBIN)/psConfigureCollectors.new; \
+		mv -f $(INSTALLBIN)/psConfigureCollectors.new $(INSTALLBIN)/psConfigureCollectors; \
+		chmod +x $(INSTALLBIN)/psConfigureCollectors; \
 	fi;
-
-	if [ ! -d $(sysconfdir)/init.d ]; then \
-	    mkdir $(sysconfdir)/init.d; \
-	fi;
-
-	install -c -D -m 0755 perfsonar-collector.init $(sysconfdir)/init.d/perfsonar-collector
-	awk "{gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-collector > $(sysconfdir)/init.d/perfsonar-collector.new
-	mv -f $(sysconfdir)/init.d/perfsonar-collector.new $(sysconfdir)/init.d/perfsonar-collector
-	chmod +x $(sysconfdir)/init.d/perfsonar-collector
-
-	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/perfsonar-collector
-	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLBIN)/perfsonar-collector > $(INSTALLBIN)/perfsonar-collector.new
-	mv -f $(INSTALLBIN)/perfsonar-collector.new $(INSTALLBIN)/perfsonar-collector
-	chmod +x $(INSTALLBIN)/perfsonar-collector
-
-	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psConfigureCollectors
-	awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/collector.conf\"); print}" $(INSTALLBIN)/psConfigureCollectors > $(INSTALLBIN)/psConfigureCollectors.new
-	mv -f $(INSTALLBIN)/psConfigureCollectors.new $(INSTALLBIN)/psConfigureCollectors
-	chmod +x $(INSTALLBIN)/psConfigureCollectors
 ';}
