@@ -18,10 +18,10 @@ WriteMakefile(
 	"Module::Load" => 0.10,
 	"Time::HiRes" => 1.85,
 	"Config::General" => 2.30,
-	"perfSONAR_PS::Common" => 0.03,
-	"perfSONAR_PS::Messages" => 0.03,
-	"perfSONAR_PS::Error_compat" => 0.03,
-	"perfSONAR_PS::XML::Document_string" => 0.03,
+	"perfSONAR_PS::Common" => 0.04,
+	"perfSONAR_PS::Messages" => 0.04,
+	"perfSONAR_PS::Error_compat" => 0.04,
+	"perfSONAR_PS::XML::Document_string" => 0.04,
 	"HTTP::Daemon" => 1.35,
 	"Params::Validate" => 0.70,
 	"XML::LibXML" => 1.60,
@@ -39,7 +39,7 @@ sysconfdir	= $(PREFIX)/etc
 
 install ::
 
-	if [ "$(sysconfdir)" == "/usr/etc" ]; then \
+	if [ "$(sysconfdir)" = "/usr/etc" ]; then \
 		if [ ! -d /etc/perfsonar ]; then \
 		    mkdir -p /etc/perfsonar; \
 		fi; \

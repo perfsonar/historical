@@ -18,7 +18,7 @@ WriteMakefile(
 	"Module::Load" => 0.10,
 	"Time::HiRes" => 1.85,
 	"Config::General" => 2.30,
-	"perfSONAR_PS::Common" => 0.03,
+	"perfSONAR_PS::Common" => 0.04,
     },
 
     EXE_FILES => \@exe_files,
@@ -32,7 +32,7 @@ sysconfdir	= $(PREFIX)/etc
 
 install ::
 
-	if [ "$(sysconfdir)" == "/usr/etc" ]; then \
+	if [ "$(sysconfdir)" = "/usr/etc" ]; then \
 		if [ ! -d /etc/perfsonar ]; then \
 		    mkdir -p /etc/perfsonar; \
 		fi; \

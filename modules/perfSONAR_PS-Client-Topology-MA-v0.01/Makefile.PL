@@ -6,8 +6,8 @@ WriteMakefile(
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
-	"perfSONAR_PS::Common" => 0.03,
-	"perfSONAR_PS::Transport" => 0.03,
+	"perfSONAR_PS::Common" => 0.04,
+	"perfSONAR_PS::Transport" => 0.04,
 	"Log::Log4perl" => 1.00,
     }
 );

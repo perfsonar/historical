@@ -8,10 +8,10 @@ WriteMakefile(
         "strict" => 0,
         "warnings" => 0,
 	"Log::Log4perl" => 1.00,
-	"perfSONAR_PS::Common" => 0.03,
-	"perfSONAR_PS::Messages" => 0.03,
-	"perfSONAR_PS::Client::LS::Remote" => 0.03,
-	"perfSONAR_PS::Client::Status::SQL" => 0.03,
-        "perfSONAR_PS::Services::Base" => 0.03,
+	"perfSONAR_PS::Common" => 0.04,
+	"perfSONAR_PS::Messages" => 0.04,
+	"perfSONAR_PS::Client::LS::Remote" => 0.04,
+	"perfSONAR_PS::Client::Status::SQL" => 0.04,
+        "perfSONAR_PS::Services::Base" => 0.04,
     }
 );
