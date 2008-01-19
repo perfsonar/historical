@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use Module::Load;
 use Config::General qw(ParseConfig SaveConfig);
 use Sys::Hostname;
 
@@ -32,12 +31,14 @@ my $file = shift;
 $file = &ask("What file should I write the configuration to? ", "/etc/perfsonar/daemon.conf", undef, '.+');
 
 my $tmp;
-my $hostname = hostname();
+my $default_hostname = hostname();
+my $hostname;
 
 my %config = ();
 if (-f $file) {
 	%config = ParseConfig($file);
 }
+
 
 while (1) {
 	my $input;
@@ -56,26 +57,54 @@ while (1) {
 		}
 
 		SaveConfig($file, \%config);
+		print "\n";
 		print "Saved config to $file\n";
+		print "\n";
 	} elsif ($input == 2) {
 		$config{"max_worker_processes"} = &ask("Enter the maximum number of children processes (0 means infinite) ", "0", $config{"max_worker_processes"}, '^\d+$');
 		$config{"max_worker_lifetime"} = &ask("Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0", $config{"max_worker_lifetime"}, '^\d+$');
 		$config{"disable_echo"} = &ask("Disable echo by default ", 0, $config{"disable_echo"}, '^[01]$');
-		$config{"ls_instance"} = &ask("The LS for MAs to register with ", "", $config{"ls_instance"}, '^http');
+		$config{"ls_instance"} = &ask("The LS for MAs to register with ", "", $config{"ls_instance"}, '(^http|^$)');
 		$config{"ls_registration_interval"} = &ask("Interval between when LS registrations ", 60, $config{"ls_registration_interval"}, '^\d+$');
 		$config{"reaper_interval"} = &ask("Interval between when children are repeaed ", 20, $config{"reaper_interval"}, '^\d+$');
 		$config{"pid_dir"} = &ask("Enter pid dir location ", "/var/run", $config{"pid_dir"}, "");
 		$config{"pid_file"} = &ask("Enter pid filename ", "ps.pid", $config{"pid_file"}, "");
 	} elsif ($input == 1) {
-		$input = &ask("Enter endpoint in form 'port:endpoint/path'", "", undef, '^\d+:[^\/].*$');
+		my @endpoints = ();
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
+				push @endpoints, "$port:$endpoint";
+			}
+		}
+
+		if ($#endpoints > -1) {
+			print "\n";
+			print "Existing Endpoints: \n";
+			for(my $i = 0; $i <= $#endpoints; $i++) {
+				print " $i) $endpoints[$i]\n";
+			}
+			print "\n";
+		}
+
+		do {
+			$input = &ask("Enter endpoint in form 'port:endpoint/path' or select from a number from the above ", "", undef, '^(\d+:[^\/].*|\d+)$');
+			if ($input =~ /^\d+$/) {
+				$input = $endpoints[$input];
+			}
+		} while(!($input =~ /\d+:[^\/].*/));
+
 		my ($port, $endpoint) = split(":", $input);
 
 		if (!defined $config{"port"}) {
-			$config{"port"} = ();
+			my %hash = ();
+			$config{"port"} = \%hash;
+			print "Setting config{port} to a hash\n";
 		}
 
 		if (!defined $config{"port"}->{$port}) {
-			$config{"port"}->{$port} = ();
+			my %hash = ();
+			$config{"port"}->{$port} = \%hash;
 			$config{"port"}->{$port}->{"endpoint"} = ();
 		}
 
@@ -99,7 +128,6 @@ while (1) {
 			}
 		}
 
-
 		my %opts;
 		do {
 			$module = &ask("Enter endpoint module [snmp,ls,status,circuitstatus,topology] ", "", $module, '');
@@ -110,9 +138,12 @@ while (1) {
 			}
 		} while($valid_module == 0);
 
-		$hostname = &ask("Enter the external host or IP for this machine ", $hostname, undef, '.+');
+		if (!defined $hostname) {
+			$hostname = &ask("Enter the external host or IP for this machine ", $hostname, $default_hostname, '.+');
+		}
 
-		my $accesspoint = "http://$hostname:$port/$endpoint";
+		my $accesspoint = &ask("Enter the accesspoint for this service ", "http://$hostname:$port/$endpoint", undef, '^http');
+
 		if ($module eq "snmp") {
 			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::SNMP";
 			config_snmp_ma($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config);
