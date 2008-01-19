@@ -35,7 +35,8 @@ use HTTP::Daemon;
 sub psService($$$);
 sub registerLS($);
 sub daemonize();
-sub managePID($$);
+sub lockPIDFile($$);
+sub unlockPIDFile($);
 sub killChildren();
 sub signalHandler();
 sub handleRequest($$$);
@@ -86,8 +87,6 @@ use perfSONAR_PS::Request;
 use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
-
-$0 = "perfsonar.pl ($$)";
 
 my %child_pids = ();
 
@@ -205,7 +204,7 @@ if (!defined $PIDFILE or $PIDFILE eq "") {
     }
 }
 
-managePID($PIDDIR, $PIDFILE);
+my $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
 
 $logger->debug("Starting '".$$."'");
 
@@ -321,8 +320,10 @@ foreach my $port (keys %{ $conf{"port"} }) {
 if(!$DEBUGFLAG) {
 # flush the buffer
     $| = 1;
-#	&daemonize;
+	&daemonize;
 }
+
+$0 = "perfsonar.pl ($$)";
 
 foreach my $port (keys %listeners) {
     my $pid = fork();
@@ -355,6 +356,8 @@ foreach my $ls_args (@ls_services) {
 
     $child_pids{$ls_pid} = "";
 }
+
+unlockPIDFile($pidfile);
 
 foreach my $pid (keys %child_pids) {
     waitpid($pid, 0);
@@ -574,40 +577,48 @@ sub daemonize() {
     umask 0;
 }
 
-=head2 managePID($piddir, $pidfile);
-The managePID function checks for the existence of the specified file in
+=head2 lockPIDFile($piddir, $pidfile);
+The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
-file still exists. If there is no running process, it writes its pid to the
-file. If there is, the function performs a die alerting the user that the
-process is already running.
+file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
-sub managePID($$) {
+sub lockPIDFile($$) {
+    $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
     die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir ."/".$pidfile;
     sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
     flock(PIDFILE, LOCK_EX);
     my $p_id = <PIDFILE>;
-    chomp($p_id);
-    if($p_id ne "") {
+    chomp($p_id) if (defined $p_id);
+    if(defined $p_id and $p_id ne "") {
         open(PSVIEW, "ps -p ".$p_id." |");
         my @output = <PSVIEW>;
         close(PSVIEW);
         if(!$?) {
             die "$0 already running: $p_id\n";
         }
-        else {
-            truncate(PIDFILE, 0);
-            seek(PIDFILE, 0, 0);
-            print PIDFILE "$$\n";
-        }
     }
-    else {
-        print PIDFILE "$$\n";
-    }
-    flock(PIDFILE, LOCK_UN);
-    close(PIDFILE);
-    return;
+
+    $logger->debug("Locked pid file");
+
+    return *PIDFILE;
+}
+
+=head2 unlockPIDFile($)
+This file writes the pid of the call process to the filehandle passed in,
+unlocks the file and closes it.
+=cut
+sub unlockPIDFile($) {
+    my($filehandle) = @_;
+
+    truncate($filehandle, 0);
+    seek($filehandle, 0, 0);
+    print $filehandle "$$\n";
+    flock($filehandle, LOCK_UN);
+    close($filehandle);
+
+    $logger->debug("Unlocked pid file");
 }
 
 =head2 killChildren

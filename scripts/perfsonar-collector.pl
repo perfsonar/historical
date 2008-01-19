@@ -79,8 +79,6 @@ use lib "$libdir";
 
 use perfSONAR_PS::Common;
 
-$0 = "perfsonar-collector.pl ($$)";
-
 my %child_pids = ();
 
 $SIG{PIPE} = 'IGNORE';
@@ -160,6 +158,8 @@ if (!defined $conf{"collection_interval"} or $conf{"collection_interval"} eq "")
     $conf{"collection_interval"} = 15;
 }
 
+my $pidfile;
+
 if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
     if (!defined $PIDDIR or $PIDDIR eq "") {
         if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
@@ -177,7 +177,7 @@ if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
         }
     }
 
-    managePID($PIDDIR, $PIDFILE);
+    $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
 }
 
 $logger->debug("Starting '".$$."'");
@@ -232,6 +232,8 @@ if(!$DEBUGFLAG) {
     &daemonize;
 }
 
+$0 = "perfsonar-collector.pl ($$)";
+
 foreach my $collector_args (@collectors) {
     my $collector_pid = fork();
     if ($collector_pid == 0) {
@@ -245,6 +247,10 @@ foreach my $collector_args (@collectors) {
     }
 
     $child_pids{$collector_pid} = "";
+}
+
+if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
+    unlockPIDFile($pidfile);
 }
 
 foreach my $pid (keys %child_pids) {
@@ -298,21 +304,20 @@ sub daemonize() {
     umask 0;
 }
 
-=head2 managePID($piddir, $pidfile);
-The managePID function checks for the existence of the specified file in
+=head2 lockPIDFile($piddir, $pidfile);
+The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
-file still exists. If there is no running process, it writes its pid to the
-file. If there is, the function performs a die alerting the user that the
-process is already running.
+file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
-sub managePID($$) {
+sub lockPIDFile($$) {
+    $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
-    die "Can't write pidfile: $pidfile\n" unless -w $piddir;
+    die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir ."/".$pidfile;
     sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
     flock(PIDFILE, LOCK_EX);
     my $p_id = <PIDFILE>;
-    chomp($p_id) if defined ($p_id);
+    chomp($p_id) if (defined $p_id);
     if(defined $p_id and $p_id ne "") {
         open(PSVIEW, "ps -p ".$p_id." |");
         my @output = <PSVIEW>;
@@ -320,18 +325,27 @@ sub managePID($$) {
         if(!$?) {
             die "$0 already running: $p_id\n";
         }
-        else {
-            truncate(PIDFILE, 0);
-            seek(PIDFILE, 0, 0);
-            print PIDFILE "$$\n";
-        }
     }
-    else {
-        print PIDFILE "$$\n";
-    }
-    flock(PIDFILE, LOCK_UN);
-    close(PIDFILE);
-    return;
+
+    $logger->debug("Locked pid file");
+
+    return *PIDFILE;
+}
+
+=head2 unlockPIDFile($)
+This file writes the pid of the call process to the filehandle passed in,
+unlocks the file and closes it.
+=cut
+sub unlockPIDFile($) {
+    my($filehandle) = @_;
+
+    truncate($filehandle, 0);
+    seek($filehandle, 0, 0);
+    print $filehandle "$$\n";
+    flock($filehandle, LOCK_UN);
+    close($filehandle);
+
+    $logger->debug("Unlocked pid file");
 }
 
 =head2 killChildren

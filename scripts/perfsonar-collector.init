@@ -13,9 +13,9 @@ VARDIR=${PREFIX}/var/run
 
 COLLECTORCONF=${CONFDIR}/perfsonar/collector.conf
 LOGGERCONF=${CONFDIR}/perfsonar/logger.conf
-PIDFILE=${VARDIR}/perfsonar-collector.pid
+PIDFILE=perfsonar-collector.pid
 
-PERFSONAR="${BINDIR}/perfsonar-collector --config=${COLLECTORCONF} --logger=${LOGGERCONF} --ignorepid"
+PERFSONAR="${BINDIR}/perfsonar-collector --config=${COLLECTORCONF} --piddir=${VARDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} --ignorepid"
 
 ERROR=0
 ARGV="$@"
@@ -26,8 +26,8 @@ fi
 for ARG in $@ $ARGS
 do
     # check for pidfile
-    if [ -f $PIDFILE ] ; then
-	PID=`cat $PIDFILE`
+    if [ -f $VARDIR/$PIDFILE ] ; then
+	PID=`cat $VARDIR/$PIDFILE`
 	if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
 	    STATUS="perfsonar-collector (pid $PID) running"
 	    RUNNING=1

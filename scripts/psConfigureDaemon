@@ -198,7 +198,7 @@ sub config_status_ma($$$) {
 	$config->{"status"}->{"db_type"} = &ask("Enter the database type to read from ", "sqlite|mysql", $config->{"status"}->{"db_type"}, '(sqlite|mysql)');
 
 	if ($config->{"status"}->{"db_type"} eq "sqlite") {
-		$config->{"status"}->{"db_name"} = &ask("Enter the filename of the SQLite database ", "status.db", $config->{"status"}->{"db_name"}, '.+');
+		$config->{"status"}->{"db_file"} = &ask("Enter the filename of the SQLite database ", "status.db", $config->{"status"}->{"db_file"}, '.+');
 		$tmp = &ask("Enter the table in the database to use ", "link_status", $config->{"status"}->{"db_table"}, '.+');
 		$config->{"status"}->{"db_table"} = $tmp if ($tmp ne "");
 	} elsif ($config->{"status"}->{"db_type"} eq "mysql") {

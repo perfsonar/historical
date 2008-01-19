@@ -13,9 +13,9 @@ VARDIR=/var/run
 
 COLLECTORCONF=${CONFDIR}/perfsonar/daemon.conf
 LOGGERCONF=${CONFDIR}/perfsonar/logger.conf
-PIDFILE=${VARDIR}/perfsonar-daemon.pid
+PIDFILE=perfsonar-daemon.pid
 
-PERFSONAR="${BINDIR}/perfsonar-daemon --config ${COLLECTORCONF} --logger=${LOGGERCONF} --ignorepid"
+PERFSONAR="${BINDIR}/perfsonar-daemon --config ${COLLECTORCONF} --piddir=${VARDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} "
 
 ERROR=0
 ARGV="$@"
@@ -26,8 +26,8 @@ fi
 for ARG in $@ $ARGS
 do
     # check for pidfile
-    if [ -f $PIDFILE ] ; then
-	PID=`cat $PIDFILE`
+    if [ -f $VARDIR/$PIDFILE ] ; then
+	PID=`cat $VARDIR/$PIDFILE`
 	if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
 	    STATUS="perfsonar-daemon (pid $PID) running"
 	    RUNNING=1
