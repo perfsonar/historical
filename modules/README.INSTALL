@@ -1,0 +1,47 @@
+perfSONAR_PS CPAN Installation
+------------------------------
+
+ Installing the perfSONAR Services
+ ---------------------------------
+
+  1. Some services have prerequisites that must be installed before continuing. These are listed in "Service Specific Information".
+  2. From the command-line, run "cpan [perfSONAR Service Module]".
+  3. Choose yes to install any required modules
+  4. Once the installation process is finished, run "psConfigureDaemon"
+  5. Add a new endpoint for the service and answer the questions when prompted
+  6. Start the daemon using "/etc/init.d/perfsonar start"
+
+ perfSONAR Service Modules
+ -------------------------
+
+  LS - perfSONAR_PS::Services::LS::LS
+  SNMP MA - perfSONAR_PS::Services::MA::SNMP
+  Topology MA - perfSONAR_PS::Services::MA::Topology
+  Status MA - perfSONAR_PS::Services::MA::Status
+  CircuitStatus MA - perfSONAR_PS::Services::MA::CircuitStatus
+
+ Service Specific Information
+ ----------------------------
+
+  LS/Topology MA
+  --------------
+  Before installing the LS or Topology MAs, you must install the Oracle
+  Sleepycat XML Database. This database can be downloaded at
+  http://www.oracle.com/technology/products/berkeley-db/xml/index.html .
+  We have produced RPMs of Berkeley XML DB which can be obtained from
+  http://packrat.internet2.edu/~aaron/dbxml_rpms/ . They were compiled on
+  RHEL4, and are considered Beta.
+
+  SNMP MA
+  -------
+  RRDTool must be installed before the SNMP MA can be installed. RRDtool can be
+  downloaded from http://oss.oetiker.ch/rrdtool/ . RPMs of RRDTool are
+  available for RedHat, CentOS and Fedora from the DAG RPM repository at
+  http://oss.oetiker.ch/rrdtool/ .
+
+ Warning
+ -------
+  When doing a CPAN installation, if a module fails to install, CPAN will emit a
+  warning and continue installing the rest of the packages including any
+  packages that depend on the failed module. Thus, you will need to make sure
+  that all packages actually install.
