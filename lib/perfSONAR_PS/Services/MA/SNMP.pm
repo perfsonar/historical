@@ -2,6 +2,8 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
+use fields 'LS_CLIENT', 'TIME', 'NAMESPACES';
+
 our $VERSION = 0.03;
 
 use strict;
@@ -12,6 +14,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use Module::Load;
 
+use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
@@ -190,14 +193,14 @@ sub registerLS($) {
 	my @resultsString;
       
 	if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
-		$metadatadb = new perfSONAR_PS::DB::File( $self->{CONF}->{"snmp"}->{"metadata_db_file"});
-		$metadatadb->openDB($error);
+		$metadatadb = perfSONAR_PS::DB::File->new( $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+		$metadatadb->openDB(\$error);
 		@resultsString = $metadatadb->query($queryString);            
 	} elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
 		my $dbTr = $metadatadb->getTransaction(\$error);
 		if($dbTr and !$error) {         
-			$metadatadb = new perfSONAR_PS::DB::XMLDB($self->{CONF}->{"snmp"}->{"metadata_db_name"}, $self->{CONF}->{"snmp"}->{"metadata_db_file"}, $self->{NAMESPACES});
-			$metadatadb->openDB($dbTr, $error); 
+			$metadatadb = perfSONAR_PS::DB::XMLDB->new($self->{CONF}->{"snmp"}->{"metadata_db_name"}, $self->{CONF}->{"snmp"}->{"metadata_db_file"}, $self->{NAMESPACES});
+			$metadatadb->openDB($dbTr, \$error); 
 			@resultsString = $metadatadb->query($queryString, $dbTr, \$error);      
 
 			$metadatadb->commitTransaction($dbTr, \$error);

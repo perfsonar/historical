@@ -428,8 +428,10 @@ sub handleMessage($$$) {
                 $found_md = 1;
 
                 my $eventType;
+		my $found_event_type = 0;
                 my $eventTypes = find($m, "./nmwg:eventType", 0);
                 foreach my $e ($eventTypes->get_nodelist) {
+		    $found_event_type = 1;
                     my $value = extract($e, 1);
                     if ($self->isValidEventType($messageType, $value)) {
                         $eventType = $value;
@@ -439,7 +441,7 @@ sub handleMessage($$$) {
 
                 my $errorEventType;
                 my $errorMessage;
-                if (!defined $eventType) {
+                if (($found_event_type && !defined $eventType) or (!$self->isValidMessageType($messageType))) {
                     $errorEventType = "error.ma.event_type";
                     $errorMessage = "No supported event types for message of type \"$messageType\"";
                 } else {

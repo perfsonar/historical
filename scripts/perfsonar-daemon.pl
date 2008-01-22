@@ -87,6 +87,7 @@ use perfSONAR_PS::Request;
 use perfSONAR_PS::RequestHandler;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
+use perfSONAR_PS::Error;
 
 my %child_pids = ();
 

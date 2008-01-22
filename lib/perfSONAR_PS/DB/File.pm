@@ -9,6 +9,8 @@ use warnings;
 use XML::LibXML;
 use Log::Log4perl qw(get_logger :nowarn);
 
+use perfSONAR_PS::Common;
+
 sub new {
   my ($package, $file) = @_; 
   my $self = fields::new($package);
@@ -45,6 +47,7 @@ sub openDB {
     $$error = $msg if (defined $error);     
     return -1;
   }     
+
   $$error = "" if (defined $error);             
   return 0;
 }
@@ -83,6 +86,7 @@ sub query {
   if(defined $query and $query ne "") {
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
+#      my $nodeset = find($self->{XML}, $query, 0);
       my $nodeset = $self->{XML}->find($query);
       foreach my $node (@{$nodeset}) {                  
         push @results, $node->toString;
@@ -113,6 +117,7 @@ sub querySet {
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
       $$error = "" if (defined $error);
+#      return find($self->{XML}, $query, 0);
       return $self->{XML}->find($query);
     }
     else {
@@ -137,6 +142,7 @@ sub count {
   if(defined $query and $query ne "") {    
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
+      #my $nodeset = find($self->{XML}, $query, 0);
       my $nodeset = $self->{XML}->find($query);
       $$error = "" if (defined $error);
       return $nodeset->size();  
