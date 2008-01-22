@@ -78,8 +78,8 @@ sub getEndpoint($) {
     return $endpoint;
 }
 
-sub parse($$) {
-    my ($self, $error) = @_;
+sub parse($$$) {
+    my ($self, $namespace_map, $error) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
 
     if (!defined $self->{REQUEST}) {
@@ -105,6 +105,8 @@ sub parse($$) {
     }
 
     &perfSONAR_PS::Common::mapNamespaces($dom->getDocumentElement, $self->{NAMESPACES});
+
+    &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $namespace_map, $dom->getDocumentElement, 0);
 
     my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
     if (!defined $nmwg_prefix) {

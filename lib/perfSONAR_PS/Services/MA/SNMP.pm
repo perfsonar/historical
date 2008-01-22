@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'TIME', 'NAMESPACES';
+use fields 'LS_CLIENT', 'TIME', 'NAMESPACES', 'RESULTS';
 
 our $VERSION = 0.03;
 
@@ -258,6 +258,7 @@ sub maMetadataKeyRequest($$$$$) {
     $metadatadb = new perfSONAR_PS::DB::File(
       $self->{CONF}->{"snmp"}->{"metadata_db_file"}
     );
+    $logger->debug("MDDB: ".$self->{CONF}->{"snmp"}->{"metadata_db_file"});
   }
   elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -437,6 +438,7 @@ sub maSetupDataRequest($$$$$) {
     $metadatadb = new perfSONAR_PS::DB::File(
       $self->{CONF}->{"snmp"}->{"metadata_db_file"}
     );
+    $logger->debug("MD File: ".  $self->{CONF}->{"snmp"}->{"metadata_db_file"});
   }
   elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -734,7 +736,7 @@ sub retrieveSQL($$$$$$) {
         $attrs{$pair[0]} = $pair[1];
       }
 
-      $output->createElement($prefix, $uri, "datum", \%attrs, undef, "");
+      $output->createElement(prefix => $prefix, namespace => $uri, tag => "datum", attributes => \%attrs);
     }
     endData($output);
   }
@@ -814,7 +816,7 @@ sub retrieveRRD($$$$$$) {
             $attrs{"value"} = $rrd_result{$a}{$b};
             $attrs{"valueUnits"} = $valueUnits;
 
-            $output->createElement($prefix, $uri, "datum", \%attrs, undef, "");
+            $output->createElement(prefix => $prefix, namespace => $uri, tag => "datum", attributes => \%attrs);
           }
         }
       }

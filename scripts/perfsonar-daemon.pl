@@ -79,6 +79,37 @@ BEGIN {
     }
 }
 
+my %ns = (
+  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
+  nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
+  ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+  netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+  neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+  netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" ,
+  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+  perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+  psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+  xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
+  xpath => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/",
+  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
+  nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+  ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
+  CtrlPlane => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
+  ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
+  ethernet => "http://ogf.org/schema/network/topology/ethernet/20070828/",
+  ipv4 => "http://ogf.org/schema/network/topology/ipv4/20070828/",
+  ipv6 => "http://ogf.org/schema/network/topology/ipv6/20070828/",
+  nmtb => "http://ogf.org/schema/network/topology/base/20070828/",
+  nmtl2 => "http://ogf.org/schema/network/topology/l2/20070828/",
+  nmtl3 => "http://ogf.org/schema/network/topology/l3/20070828/",
+  nmtl4 => "http://ogf.org/schema/network/topology/l4/20070828/",
+  nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
+  sonet => "http://ogf.org/schema/network/topology/sonet/20070828/",
+  transport => "http://ogf.org/schema/network/topology/transport/20070828/",
+  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+);
+
 use lib "$libdir";
 
 use perfSONAR_PS::Common;
@@ -503,7 +534,6 @@ sub handleRequest($$$) {
 
     my $messageId = "";
 
-
     try {
         my $error;
 
@@ -520,7 +550,7 @@ sub handleRequest($$$) {
             throw perfSONAR_PS::Error_compat("error.perfSONAR_PS.MA", $msg);
         }
 
-        $request->parse(\$error);
+        $request->parse(\%ns, \$error);
         if (defined $error and $error ne "") {
             throw perfSONAR_PS::Error_compat("error.transport.parse_error", "Error parsing request: $error");
         }
