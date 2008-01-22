@@ -1,6 +1,6 @@
 package perfSONAR_PS::Request;
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES';
 
@@ -15,7 +15,7 @@ use perfSONAR_PS::Common;
 sub new($$$);
 sub setRequest($$);
 sub getEndpoint($);
-sub parse($$);
+sub parse($$$);
 sub remapRequest($$);
 sub getURI($);
 sub getRawRequest($);

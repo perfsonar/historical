@@ -16,7 +16,7 @@ The verbose flag allows lots of debug options to print to the screen.  If the op
 omitted the service will run in daemon mode.
 =cut
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 use warnings;
 use strict;
@@ -29,7 +29,6 @@ use POSIX ":sys_wait_h";
 use Cwd;
 use Config::General;
 use Module::Load;
-use Data::Dumper;
 use HTTP::Daemon;
 
 sub psService($$$);
@@ -625,7 +624,6 @@ sub lockPIDFile($$) {
     if(defined $p_id and $p_id ne "") {
         open(PSVIEW, "ps -p ".$p_id." |");
         my @output = <PSVIEW>;
-        close(PSVIEW);
         if(!$?) {
             die "$0 already running: $p_id\n";
         }

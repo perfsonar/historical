@@ -5,7 +5,7 @@ use fields 'CONF',
 	'ENDPOINT',
 	'PORT';
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 use strict;
 use warnings;

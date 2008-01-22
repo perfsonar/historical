@@ -1,15 +1,15 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         perfSONAR_PS-Client-LS-Remote
-version:      0.04
+version:      0.06
 version_from: lib/perfSONAR_PS/Client/LS/Remote.pm
 installdirs:  site
 requires:
     Log::Log4perl:                 1
-    perfSONAR_PS::Client::Echo:    0.04
-    perfSONAR_PS::Common:          0.04
-    perfSONAR_PS::Messages:        0.04
-    perfSONAR_PS::Transport:       0.04
+    perfSONAR_PS::Client::Echo:    0.06
+    perfSONAR_PS::Common:          0.06
+    perfSONAR_PS::Messages:        0.06
+    perfSONAR_PS::Transport:       0.06
     strict:                        0
     warnings:                      0
 

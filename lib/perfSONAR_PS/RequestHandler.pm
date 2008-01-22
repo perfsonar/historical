@@ -1,6 +1,6 @@
 package perfSONAR_PS::RequestHandler;
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 =head1 NAME
 
@@ -428,10 +428,10 @@ sub handleMessage($$$) {
                 $found_md = 1;
 
                 my $eventType;
-		my $found_event_type = 0;
                 my $eventTypes = find($m, "./nmwg:eventType", 0);
+                my $found_event_type = 0;
                 foreach my $e ($eventTypes->get_nodelist) {
-		    $found_event_type = 1;
+                    $found_event_type = 1;
                     my $value = extract($e, 1);
                     if ($self->isValidEventType($messageType, $value)) {
                         $eventType = $value;

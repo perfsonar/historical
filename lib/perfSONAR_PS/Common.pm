@@ -31,12 +31,12 @@ use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger :nowarn);
 use XML::LibXML;
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 use base 'Exporter';
 our @EXPORT = ('readXML','chainMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'escapeString', 'unescapeString',
-             'makeEnvelope', 'mapNamespaces', 'mergeConfig');
+             'makeEnvelope', 'mapNamespaces', 'mergeConfig', 'resolveMetadataChain');
 
 
 sub find($$$);
@@ -81,7 +81,8 @@ sub find($$$) {
     $logger->debug("Query(pre-process): $query");
     $query =~ s/\/([a-zA-Z_][a-zA-Z0-9\.\-\_]+:[a-zA-Z_][a-zA-Z0-9\.\-\_]+)\[/\/*[name()='$1' and /g;
     $query =~ s/\/([a-zA-Z_][a-zA-Z0-9\.\-\_]+:[a-zA-Z_][a-zA-Z0-9\.\-\_]+)/\/*[name()='$1']/g;
-    $query =~ s/^([a-zA-Z_][a-zA-Z0-9\.\-\_]+:[a-zA-Z_][a-zA-Z0-9\.\-\_]+)$/*[name()='$1']/g;
+    $query =~ s/^([a-zA-Z_][a-zA-Z0-9\.\-\_]+:[a-zA-Z_][a-zA-Z0-9\.\-\_]+)\[/*[name()='$1' and /g;
+    $query =~ s/^([a-zA-Z_][a-zA-Z0-9\.\-\_]+:[a-zA-Z_][a-zA-Z0-9\.\-\_]+)/*[name()='$1']/g;
     $logger->debug("Query(post-process): $query");
 
     eval {
@@ -165,6 +166,38 @@ sub readXML($) {
     return "";
 }
 
+=head2 resolveMetadataChain($metadata, $dom)
+  Given a metadata and a dom, this function will resolve the metadata chain and
+  merge the specified metadata with all its parent elements.
+=cut
+sub resolveMetadataChain($$) {
+    my ($metadata, $dom) = @_;
+
+    if (!defined $metadata->getAttribute("metadataIdRef")) {
+        return $metadata;
+    }
+
+    my %metadata = ();
+    foreach my $md ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
+        if ($md->getAttribute("id")) {
+            $metadata{$md->getAttribute("id")} = $md;
+        }
+    }
+
+    my $curr_md = $metadata;
+    while($curr_md->getAttribute("metadataIdRef")) {
+        if (!defined $metadata{$curr_md->getAttribute("metadataIdRef")}) {
+            return undef;
+        }
+
+        $curr_md = $metadata{$curr_md->getAttribute("metadataIdRef")};
+
+        metadataChaining($curr_md, $metadata);
+    }
+
+    return $metadata;
+}
+
 =head2 chainMetadata($dom)
     Given a dom of objects, this function will continuously loop through
     performing a 'chaining' operation to share values between metadata objects.
@@ -208,6 +241,7 @@ sub readXML($) {
 
     This chaining is useful for 'factoring out' large chunks of XML.
 =cut
+
 sub chainMetadata($) {
     my($dom) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");

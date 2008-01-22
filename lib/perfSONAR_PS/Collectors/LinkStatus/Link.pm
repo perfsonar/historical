@@ -1,6 +1,6 @@
 package perfSONAR_PS::Collectors::LinkStatus::Link;
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 use strict;
 use warnings;

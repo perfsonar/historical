@@ -15,7 +15,7 @@ COLLECTORCONF=${CONFDIR}/perfsonar/daemon.conf
 LOGGERCONF=${CONFDIR}/perfsonar/logger.conf
 PIDFILE=perfsonar-daemon.pid
 
-PERFSONAR="${BINDIR}/perfsonar-daemon --config ${COLLECTORCONF} --piddir=${VARDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} "
+PERFSONAR="${BINDIR}/perfsonar --config ${COLLECTORCONF} --piddir=${VARDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} "
 
 ERROR=0
 ARGV="$@"

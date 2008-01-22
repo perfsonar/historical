@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::File;
 
-our $VERSION = 0.03;
+our $VERSION = 0.06;
 
 use fields 'FILE', 'XML';
 

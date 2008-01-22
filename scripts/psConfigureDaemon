@@ -182,6 +182,7 @@ sub config_snmp_ma($$$) {
 	if ($rrdtool =~ /no rrdtool/) {
 		$rrdtool = "";
 	}
+	chomp($rrdtool);
 
 	$config->{"snmp"}->{"rrdtool"} = &ask("Enter the location of the RRD binary ", $rrdtool, $config->{"snmp"}->{"rrdtool"}, '.+');
 
