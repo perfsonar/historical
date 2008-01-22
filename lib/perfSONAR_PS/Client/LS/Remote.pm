@@ -236,7 +236,8 @@ sub registerStatic {
     @resultsString = @{$data_ref};
 
     if($#resultsString != -1) {
-      if ($self->__register(createService($self), $data_ref) == -1) {
+      my ($status, $res) = $self->__register(createService($self), $data_ref);
+      if ($status == -1) {
           $logger->error("Unable to register data with LS.");
           $self->{ALIVE} = 0;
       }
@@ -249,7 +250,8 @@ sub registerStatic {
       @resultsString = @{$data_ref};
 
       if($#resultsString != -1) {
-        if ($self->__register(createService($self), $data_ref) == -1) {
+        my ($status, $res) = $self->__register(createService($self), $data_ref);
+        if ($status == -1) {
           $logger->error("Unable to register data with LS.");
           $self->{ALIVE} = 0;
 	  return (-1, "Unable to register data with LS");
