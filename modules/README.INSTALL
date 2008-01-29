@@ -16,6 +16,7 @@ perfSONAR_PS CPAN Installation
 
   LS - perfSONAR_PS::Services::LS::LS
   SNMP MA - perfSONAR_PS::Services::MA::SNMP
+  perfSONARBOUY MA - perfSONAR_PS::Services::MA::perfSONARBOUY
   Topology MA - perfSONAR_PS::Services::MA::Topology
   Status MA - perfSONAR_PS::Services::MA::Status
   CircuitStatus MA - perfSONAR_PS::Services::MA::CircuitStatus
