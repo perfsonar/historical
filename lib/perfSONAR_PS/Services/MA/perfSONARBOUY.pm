@@ -878,6 +878,9 @@ sub retrieveSQL($$$$$$) {
       }
       
       startData($output, $id, $mid, undef);
+      
+      # note: ignoring ti for now...
+      
       for(my $a = 0; $a <= $#{$result}; $a++) {
         my %attrs = ();
         if($timeType eq "iso") {

@@ -36,20 +36,20 @@ sub retrieveRRD($$$$$$);
 
 sub init($$) {
   my ($self, $handler) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
+  $self->{CONF}->{"snmp"}->{"logger"} = get_logger("perfSONAR_PS::Services::MA::SNMP");
 
   # values that are deal breakers...
 
   if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_type"} or
      $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "") {
-    $logger->error("Value for 'metadata_db_type' is not set.");
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Value for 'metadata_db_type' is not set.");
     return -1;
   }
 
   if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
     if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_file"} or
        $self->{CONF}->{"snmp"}->{"metadata_db_file"} eq "") {
-      $logger->error("Value for 'metadata_db_file' is not set.");
+      $self->{CONF}->{"snmp"}->{"logger"}->error("Value for 'metadata_db_file' is not set.");
       return -1;
     }
     else {
@@ -65,18 +65,18 @@ sub init($$) {
       load perfSONAR_PS::DB::XMLDB;
     };
     if ($@) {
-      $logger->error("Couldn't load perfSONAR_PS::DB::XMLDB: $@");
+      $self->{CONF}->{"snmp"}->{"logger"}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $@");
       return -1;
     }
 
     if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_file"} or
        $self->{CONF}->{"snmp"}->{"metadata_db_file"} eq "") {
-      $logger->error("Value for 'metadata_db_file' is not set.");
+      $self->{CONF}->{"snmp"}->{"logger"}->error("Value for 'metadata_db_file' is not set.");
       return -1;
     }
     if(!defined $self->{CONF}->{"snmp"}->{"metadata_db_name"} or
        $self->{CONF}->{"snmp"}->{"metadata_db_name"} eq "") {
-      $logger->error("Value for 'metadata_db_name' is not set.");
+      $self->{CONF}->{"snmp"}->{"logger"}->error("Value for 'metadata_db_name' is not set.");
       return -1;
     }
     else {
@@ -88,20 +88,20 @@ sub init($$) {
     }
   }
   else {
-    $logger->error("Wrong value for 'metadata_db_type' set.");
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Wrong value for 'metadata_db_type' set.");
     return -1;
   }
 
   if(!defined $self->{CONF}->{"snmp"}->{"rrdtool"} or
      $self->{CONF}->{"snmp"}->{"rrdtool"} eq "") {
-    $logger->error("Value for 'rrdtool' is not set.");
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Value for 'rrdtool' is not set.");
     return -1;
   }
 
   if(!defined $self->{CONF}->{"snmp"}->{"default_resolution"} or
      $self->{CONF}->{"snmp"}->{"default_resolution"} eq "") {
     $self->{CONF}->{"snmp"}->{"default_resolution"} = "300";
-    $logger->warn("Setting 'default_resolution' to '300'.");
+    $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting 'default_resolution' to '300'.");
   }
 
   if (!defined $self->{CONF}->{"snmp"}->{"enable_registration"} or $self->{CONF}->{"snmp"}->{"enable_registration"} eq "") {
@@ -110,7 +110,7 @@ sub init($$) {
 
   if ($self->{CONF}->{"snmp"}->{"enable_registration"}) {
 	  if (!defined $self->{CONF}->{"snmp"}->{"service_accesspoint"} or $self->{CONF}->{"snmp"}->{"service_accesspoint"} eq "") {
-		  $logger->error("No access point specified for SNMP service");
+		  $self->{CONF}->{"snmp"}->{"logger"}->error("No access point specified for SNMP service");
 		  return -1;
 	  }
 
@@ -118,7 +118,7 @@ sub init($$) {
 		  if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne "") {
 			  $self->{CONF}->{"snmp"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
 		  } else {
-			  $logger->error("No LS instance specified for SNMP service");
+			  $self->{CONF}->{"snmp"}->{"logger"}->error("No LS instance specified for SNMP service");
 			  return -1;
 		  }
 	  }
@@ -127,7 +127,7 @@ sub init($$) {
 		  if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne "") {
 			  $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
 		  } else {
-			  $logger->warn("Setting registration interval to 30 minutes");
+			  $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting registration interval to 30 minutes");
 			  $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 1800;
 		  }
 	  }
@@ -135,25 +135,25 @@ sub init($$) {
 	  if(!defined $self->{CONF}->{"snmp"}->{"service_accesspoint"} or
 			  $self->{CONF}->{"snmp"}->{"service_accesspoint"} eq "") {
 		  $self->{CONF}->{"snmp"}->{"service_accesspoint"} = "http://localhost:".$self->{PORT}."/".$self->{ENDPOINT}."";
-		  $logger->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{PORT}."/".$self->{ENDPOINT}."'.");
+		  $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting 'service_accesspoint' to 'http://localhost:".$self->{PORT}."/".$self->{ENDPOINT}."'.");
 	  }
 
 	  if(!defined $self->{CONF}->{"snmp"}->{"service_description"} or
 			  $self->{CONF}->{"snmp"}->{"service_description"} eq "") {
 		  $self->{CONF}->{"snmp"}->{"service_description"} = "perfSONAR_PS SNMP MA";
-		  $logger->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
+		  $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
 	  }
 
 	  if(!defined $self->{CONF}->{"snmp"}->{"service_name"} or
 			  $self->{CONF}->{"snmp"}->{"service_name"} eq "") {
 		  $self->{CONF}->{"snmp"}->{"service_name"} = "SNMP MA";
-		  $logger->warn("Setting 'service_name' to 'SNMP MA'.");
+		  $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting 'service_name' to 'SNMP MA'.");
 	  }
 
 	  if(!defined $self->{CONF}->{"snmp"}->{"service_type"} or
 			  $self->{CONF}->{"snmp"}->{"service_type"} eq "") {
 		  $self->{CONF}->{"snmp"}->{"service_type"} = "MA";
-		  $logger->warn("Setting 'service_type' to 'MA'.");
+		  $self->{CONF}->{"snmp"}->{"logger"}->warn("Setting 'service_type' to 'MA'.");
 	  }
   }
 
@@ -167,7 +167,7 @@ sub init($$) {
   $metadatadb->openDB(\$error);
 
   if ($error) {
-    $logger->error("Couldn't initialize store file: $error");
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Couldn't initialize store file: $error");
     return -1;
   }
 
@@ -186,7 +186,6 @@ sub needLS($) {
 
 sub registerLS($) {
 	my ($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::SNMP");
 	my ($status, $res);
 	my $ls;
 
@@ -218,14 +217,14 @@ sub registerLS($) {
 			$metadatadb->commitTransaction($dbTr, \$error);
 			undef $dbTr;
 			if($error) {
-				$logger->error("Database Error: \"" . $error . "\".");                
+				$self->{CONF}->{"snmp"}->{"logger"}->error("Database Error: \"" . $error . "\".");                
 				$metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
 				undef $dbTr;
 				return;
 			}    
 		}
 		else { 
-			$logger->error("Cound not start database transaction.");
+			$self->{CONF}->{"snmp"}->{"logger"}->error("Cound not start database transaction.");
 			$metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
 			undef $dbTr;
 			return;
@@ -249,7 +248,6 @@ sub handleMessageEnd($$$) {
 
 sub handleEvent($$$$$$$$$) {
 	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
-	my $logger = get_logger("perfSONAR_PS::MA::SNMP");
 
 	if ($messageType eq "MetadataKeyRequest") {
 		return $self->maMetadataKeyRequest($output, $md, $raw_request, $message_parameters);
@@ -261,7 +259,6 @@ sub handleEvent($$$$$$$$$) {
 
 sub maMetadataKeyRequest($$$$$) {
   my($self, $output, $md, $request, $message_parameters) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "";
   my $dId = "";
 
@@ -295,7 +292,7 @@ sub maMetadataKeyRequest($$$$$) {
         }
         else {
           my $msg = "Cannot resolve supposed subject chain in metadata.";
-          $logger->error($msg);
+          $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
 	  throw perfSONAR_PS::Error_compat("error.ma.chaining", $msg);
         }
       }
@@ -309,7 +306,6 @@ sub maMetadataKeyRequest($$$$$) {
 
 sub metadataKeyRetrieveKey($$$$$$$) {
   my($self, $metadatadb, $key, $chain, $id, $request_namespaces, $output) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "metadata.".genuid();
   my $dId = "data.".genuid();
 
@@ -330,13 +326,13 @@ sub metadataKeyRetrieveKey($$$$$$$) {
     }
     else {
       my $msg = "Key error in metadata storage.";
-      $logger->error($msg);
+      $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
       throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
     }
   }
   else {
     my $msg = "Key error in metadata storage.";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
   }
   return;
@@ -345,7 +341,6 @@ sub metadataKeyRetrieveKey($$$$$$$) {
 
 sub metadataKeyRetrieveMetadataData($$$$$$$) {
   my($self, $metadatadb, $metadata, $chain, $id, $request_namespaces, $output) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "";
   my $dId = "";
 
@@ -417,7 +412,7 @@ sub metadataKeyRetrieveMetadataData($$$$$$$) {
   }
   else {
     my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     throw perfSONAR_PS::Error_compat("error.ma.storage", $msg);
   }
   return;
@@ -427,7 +422,6 @@ sub metadataKeyRetrieveMetadataData($$$$$$$) {
 
 sub maSetupDataRequest($$$$$) {
   my($self, $output, $md, $request, $message_parameters) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "";
   my $dId = "";
 
@@ -436,7 +430,7 @@ sub maSetupDataRequest($$$$$) {
     $metadatadb = new perfSONAR_PS::DB::File(
       $self->{CONF}->{"snmp"}->{"metadata_db_file"}
     );
-    $logger->debug("MD File: ".  $self->{CONF}->{"snmp"}->{"metadata_db_file"});
+    $self->{CONF}->{"snmp"}->{"logger"}->debug("MD File: ".  $self->{CONF}->{"snmp"}->{"metadata_db_file"});
   }
   elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -483,7 +477,7 @@ sub maSetupDataRequest($$$$$) {
         }
         else {
           my $msg = "Cannot resolve subject chain in metadata.";
-          $logger->error($msg);
+          $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
 	  throw perfSONAR_PS::Error_compat("error.ma.chaining", $msg);
         }
       }
@@ -497,7 +491,6 @@ sub maSetupDataRequest($$$$$) {
 
 sub setupDataRetrieveMetadataData($$$$$$) {
   my($self, $metadatadb, $metadata, $id, $message_parameters, $output) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "";
   my $dId = "";
 
@@ -576,7 +569,7 @@ sub setupDataRetrieveMetadataData($$$$$$) {
   }
   else {
     my $msg = "Database \"".$self->{CONF}->{"snmp"}->{"metadata_db_file"}."\" returned 0 results for search";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     throw perfSONAR_PS::Error_compat("error.ma.storage", $msg);
   }
   return;
@@ -585,7 +578,6 @@ sub setupDataRetrieveMetadataData($$$$$$) {
 
 sub setupDataRetrieveKey($$$$$$$$) {
   my($self, $metadatadb, $metadata, $chain, $id, $message_parameters, $request_namespaces, $output) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $mdId = "";
   my $dId = "";
 
@@ -624,13 +616,13 @@ sub setupDataRetrieveKey($$$$$$$$) {
     }
     else {
       my $msg = "Key not found in metadata storage.";
-      $logger->error($msg);
+      $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
       throw perfSONAR_PS::Error_compat("error.ma.storage.result", $msg);
     }
   }
   else {
     my $msg = "Keys error in metadata storage.";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     throw perfSONAR_PS::Error_compat("error.ma.storage.result", $msg);
   }
   return;
@@ -639,7 +631,6 @@ sub setupDataRetrieveKey($$$$$$$$) {
 
 sub handleData($$$$$$) {
   my($self, $id, $data, $output, $et, $message_parameters) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   undef $self->{RESULTS};
 
   $self->{RESULTS} = $data;
@@ -652,7 +643,7 @@ sub handleData($$$$$$) {
   }
   else {
     my $msg = "Database \"".$type."\" is not yet supported";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     getResultCodeData($output, "data.".genuid(), $id, $msg, 1);
   }
   return;
@@ -661,7 +652,6 @@ sub handleData($$$$$$) {
 
 sub retrieveSQL($$$$$$) {
   my($self, $d, $mid, $output, $et, $message_parameters) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my $datumns = 0;
   my $timeType = "";
 
@@ -684,7 +674,7 @@ sub retrieveSQL($$$$$$) {
 
   if($#{$result} == -1) {
     my $msg = "Query returned 0 results";
-    $logger->error($msg);
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
     getResultCodeData($output, $id, $mid, $msg, 1);
   }
   else {
@@ -714,8 +704,6 @@ sub retrieveSQL($$$$$$) {
 
     startData($output, $id, $mid, undef);
     for(my $a = 0; $a <= $#{$result}; $a++) {
-      print $output "    <".$prefix.":datum xmlns:".$prefix."=\"".$uri."/\" timeType=\"";
-
       my %attrs = ();
       if($timeType eq "iso") {
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($result->[$a][1]);
@@ -744,7 +732,6 @@ sub retrieveSQL($$$$$$) {
 
 sub retrieveRRD($$$$$$) {
   my($self, $d, $mid, $output, $et, $message_parameters) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
   my($sec, $frac) = Time::HiRes::gettimeofday;
   my $datumns = 0;
   my $timeType = "";
@@ -766,7 +753,7 @@ sub retrieveRRD($$$$$$) {
   my $id = "data.".genuid();
   my %rrd_result = getDataRRD($self, $d, $mid, $self->{CONF}->{"snmp"}->{"rrdtool"});
   if($rrd_result{ERROR}) {
-    $logger->error("RRD error seen: ".$rrd_result{ERROR});
+    $self->{CONF}->{"snmp"}->{"logger"}->error("RRD error seen: ".$rrd_result{ERROR});
     getResultCodeData($output, $id, $mid, $rrd_result{ERROR}, 1);
   }
   else {
@@ -831,7 +818,7 @@ sub retrieveRRD($$$$$$) {
 __END__
 =head1 NAME
 
-perfSONAR_PS::MA::SNMP - A module that provides methods for the SNMP MA.
+perfSONAR_PS::Services::MA::SNMP - A module that provides methods for the SNMP MA.
 
 =head1 DESCRIPTION
 
@@ -840,7 +827,7 @@ related tasks of interacting with backend storage.
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::MA::SNMP;
+    use perfSONAR_PS::Services::MA::SNMP;
 
     my %conf = ();
     $conf{"snmp"}->{"metadata_db_type"} = "xmldb";
@@ -854,14 +841,14 @@ related tasks of interacting with backend storage.
       snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/"
     );
 
-    my $ma = perfSONAR_PS::MA::SNMP->new(\%conf, \%ns, $dirname);
+    my $ma = perfSONAR_PS::Services::MA::SNMP->new(\%conf, \%ns, $dirname);
     if($ma->init != 0) {
       print "Couldn't initialize.\n";
       exit(-1);
     }
 
     # or
-    # $ma = perfSONAR_PS::MA::SNMP->new;
+    # $ma = perfSONAR_PS::Services::MA::SNMP->new;
     # $ma->setConf(\%conf);
     # $ma->setNamespaces(\%ns);
 

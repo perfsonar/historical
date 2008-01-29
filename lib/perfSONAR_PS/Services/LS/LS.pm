@@ -21,6 +21,8 @@ my %ls_namespaces = (
   nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
   ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
   snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+  iperf => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+  bwctl => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
   netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
   neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
   netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" ,
@@ -49,13 +51,13 @@ my %ls_namespaces = (
 
 sub init($$) {
   my ($self, $handler) = @_;
-  my $logger = get_logger("perfSONAR_PS::MA::SNMP");
+  $self->{CONF}->{"ls"}->{"logger"} = get_logger("perfSONAR_PS::Services::LS::LS");
 
   # values that are deal breakers...
 
   if(!defined $self->{CONF}->{"ls"}->{"metadata_db_name"} or
      $self->{CONF}->{"ls"}->{"metadata_db_name"} eq "") {
-    $logger->error("Value for 'metadata_db_name' is not set.");
+    $self->{CONF}->{"ls"}->{"logger"}->error("Value for 'metadata_db_name' is not set.");
     return -1;
   }
   else {
@@ -68,18 +70,18 @@ sub init($$) {
 
   if(!defined $self->{CONF}->{"ls"}->{"metadata_db_file"} or
      $self->{CONF}->{"ls"}->{"metadata_db_file"} eq "") {
-    $logger->warn("Setting 'metadata_db_file' to 'store.dbxml'");
+    $self->{CONF}->{"ls"}->{"logger"}->warn("Setting 'metadata_db_file' to 'store.dbxml'");
     $self->{CONF}->{"ls"}->{"metadata_db_file"} = "store.dbxml";
   }
 
   if (!defined $self->{CONF}->{"ls"}->{"ls_ttl"} or $self->{CONF}->{"ls"}->{"ls_ttl"} eq "") {
-    $logger->warn("Setting 'ls_ttl' to '3600'.");
+    $self->{CONF}->{"ls"}->{"logger"}->warn("Setting 'ls_ttl' to '3600'.");
     $self->{CONF}->{"ls"}->{"ls_ttl"} = 3600;
   }
 
   if (!defined $self->{CONF}->{"ls"}->{"ls_repear_interval"}
 		  or $self->{CONF}->{"ls"}->{"ls_repear_interval"} eq "") {
-    $logger->warn("Setting 'ls_repear_interval' to '0'.");
+    $self->{CONF}->{"ls"}->{"logger"}->warn("Setting 'ls_repear_interval' to '0'.");
     $self->{CONF}->{"ls"}->{"ls_repear_interval"} = 0;
   }
 
@@ -100,7 +102,6 @@ sub needLS($) {
 
 sub handleMessage($$$$$) {
 	my ($self, $doc, $messageType, $message, $request) = @_;
-	my $logger = get_logger("perfSONAR_PS::LS::LS");
 
 	my $messageId = $request->getRequestDOM()->getDocumentElement->getAttribute("id");
 	my $messageIdReturn = "message.".genuid();
@@ -115,15 +116,15 @@ sub handleMessage($$$$$) {
 	}
 
 	if($messageType eq "LSRegisterRequest") {
-		$logger->debug("Parsing LSRegister request.");
+		$self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSRegister request.");
 		lsRegisterRequest($self, $doc, $request);
 	}
 	elsif($messageType eq "LSDeregisterRequest") {
-		$logger->debug("Parsing LSDeregister request.");
+		$self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSDeregister request.");
 		lsDeregisterRequest($self, $doc, $request);
 	}
 	elsif($messageType eq "LSKeepaliveRequest") {
-		$logger->debug("Parsing LSKeepalive request.");
+		$self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSKeepalive request.");
 		lsKeepaliveRequest($self, $doc, $request);
 	}
 	elsif($messageType eq "LSQueryRequest" or
@@ -136,10 +137,9 @@ sub handleMessage($$$$$) {
 
 sub handleMessageParameters {
   my($self, $msgParams) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
   foreach my $p ($msgParams->getChildrenByTagNameNS($ls_namespaces{"nmwg"}, "parameter")) {
     if($p->getAttribute("name") eq "lsTTL") {
-      $logger->debug("Found TTL parameter.");
+      $self->{CONF}->{"ls"}->{"logger"}->debug("Found TTL parameter.");
       my $time = extract($p, 0);
       if($time < (int $self->{"CONF"}->{"ls"}->{"ls_ttl"}/2) or $time > $self->{"CONF"}->{"ls"}->{"ls_ttl"}) {
         if($p->getAttribute("value")) {
@@ -160,7 +160,6 @@ sub handleMessageParameters {
 
 sub prepareDatabases {
   my($self, $doc) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
   my $error = "";
 
   my $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -174,7 +173,7 @@ sub prepareDatabases {
     return $metadatadb;
   }
   else {
-    $logger->error("There was an error opening \"".$self->{CONF}->{"ls"}->{"metadata_db_name"}."/".$self->{CONF}->{"ls"}->{"metadata_db_file"}."\": ".$error);
+    $self->{CONF}->{"ls"}->{"logger"}->error("There was an error opening \"".$self->{CONF}->{"ls"}->{"metadata_db_name"}."/".$self->{CONF}->{"ls"}->{"metadata_db_file"}."\": ".$error);
     statusReport($doc, "metadata.".genuid(), "", "data.".genuid(), "error.ls.xmldb", $error);
     return "";
   }
@@ -183,22 +182,20 @@ sub prepareDatabases {
 
 sub isValidKey {
   my($self, $metadatadb, $key) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
   my $error = "";
   my $result = $metadatadb->queryByName($key, "", \$error);
-  $logger->error($error) if $error;
+  $self->{CONF}->{"ls"}->{"logger"}->error($error) if $error;
   if($result) {
-    $logger->debug("Key \"".$key."\" found in database.");
+    $self->{CONF}->{"ls"}->{"logger"}->debug("Key \"".$key."\" found in database.");
     return 1;
   }
-  $logger->debug("Key \"".$key."\" not found in database.");
+  $self->{CONF}->{"ls"}->{"logger"}->debug("Key \"".$key."\" not found in database.");
   return 0;
 }
 
 
 sub lsRegisterRequest {
   my($self, $doc, $request) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
 
   my $metadatadb = prepareDatabases(\%{$self}, $doc);
   if(defined $metadatadb and $metadatadb ne "") {
@@ -262,19 +259,19 @@ sub lsRegisterRequest {
 
                     if($keys{$mdKey} == 1) {
                       my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                       for(my $x = 0; $x <= $#resultsString; $x++) {
-                        $logger->debug("Removing data \"".$resultsString[$x]."\".");
+                        $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
                         $metadatadb->remove($resultsString[$x], $dbTr, \$error);
-                        $logger->error($error) and $errorFlag = 1 if $error;
+                        $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                       }
-                      $logger->debug("Removing control info \"".$mdKey."\".");
+                      $self->{CONF}->{"ls"}->{"logger"}->debug("Removing control info \"".$mdKey."\".");
                       $metadatadb->remove($mdKey."-control", $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
-                      $logger->debug("Removing service info \"".$mdKey."\".");
+                      $self->{CONF}->{"ls"}->{"logger"}->debug("Removing service info \"".$mdKey."\".");
                       $metadatadb->remove($mdKey, $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
                       # this key may be gone, but mark it as changed (in case we have
                       #  more stuff in the message)
@@ -293,14 +290,14 @@ sub lsRegisterRequest {
                     my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$accessPoint."\" and " . getMetadataXQuery($mdCopy, "") . "]";
 
                     my @resultsString = $metadatadb->query($queryString, $dbTr, \$error);
-                    $logger->error($error) and $errorFlag = 1 if $error;
+                    $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                     if($#resultsString == -1) {
-                      $logger->debug("New registration info, inserting service metadata and time information.");
+                      $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
                       $mdCopy->setAttribute("id", $accessPoint);
                       $metadatadb->insertIntoContainer(wrapStore($mdCopy->toString, "LSStore"), $accessPoint, $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                       $metadatadb->insertIntoContainer(createControlKey($accessPoint, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $accessPoint."-control", $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                     }
 
                     # add data (as long as we don't have it already)
@@ -308,11 +305,11 @@ sub lsRegisterRequest {
                     foreach my $d_content ($d->childNodes) {
                       if($d_content->getType != 3 and $d_content->getType != 8) {
                         my @dResultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$accessPoint."\"]/".$d_content->nodeName."[" . getMetadataXQuery($d_content, "") . "]", $dbTr, \$error);
-                        $logger->error($error) and $errorFlag = 1 if $error;
+                        $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                         if($#dResultsString == -1) {
                           $metadatadb->insertIntoContainer(createLSData($accessPoint."/".$sec."/".$ids{$accessPoint}, $accessPoint, $d_content->toString), $accessPoint."/".$sec."/".$ids{$accessPoint}, $dbTr, \$error);
-                          $logger->error($error) and $errorFlag = 1 if $error;
-                          $logger->debug("Inserting measurement metadata as \"".$accessPoint."/".$sec."/".$keys{$accessPoint}."\" for key \"".$accessPoint."\".");
+                          $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
+                          $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$accessPoint."/".$sec."/".$keys{$accessPoint}."\" for key \"".$accessPoint."\".");
                           $dCount++;
                           $ids{$accessPoint}++;
                         }
@@ -330,7 +327,7 @@ sub lsRegisterRequest {
                     }
                     else {
                       my $msg = "Database Error: \"" . $error . "\".";
-                      $logger->error($error);
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error);
                       statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                       $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                       undef $dbTr;
@@ -339,7 +336,7 @@ sub lsRegisterRequest {
                   else {
                     # N: Send 'error.ls.registration.access_point_missing' error
                     my $msg = "Cannont register data, accessPoint was not supplied.";
-                    $logger->error($msg);
+                    $self->{CONF}->{"ls"}->{"logger"}->error($msg);
                     statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.access_point_missing", $msg);
                     $metadatadb->commitTransaction($dbTr, \$error);
                     undef $dbTr;
@@ -348,7 +345,7 @@ sub lsRegisterRequest {
                 else {
                   # N: Update Control Info
                   if($keys{$mdKey} == 1) {
-                    $logger->debug("Key already exists, updating control time information.");
+                    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, updating control time information.");
                     $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
                     $keys{$mdKey} = 2;
                   }
@@ -362,7 +359,7 @@ sub lsRegisterRequest {
                       if($#resultsString == -1) {
                         $metadatadb->insertIntoContainer(createLSData($mdKey."/".$sec."/".$ids{$mdKey}, $mdKey, $d_content->toString), $mdKey."/".$sec."/".$ids{$mdKey}, $dbTr, \$error);
                         $errorFlag .= " and " . $error if $error;
-                        $logger->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
+                        $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
                         $dCount++;
                         $ids{$mdKey}++;
                       }
@@ -379,7 +376,7 @@ sub lsRegisterRequest {
                   }
                   else {
                     my $msg = "Database Error: \"" . $error . "\".";
-                    $logger->error($error);
+                    $self->{CONF}->{"ls"}->{"logger"}->error($error);
                     statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                     $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                     undef $dbTr;
@@ -388,7 +385,7 @@ sub lsRegisterRequest {
               }
               else {
                 my $msg = "Cound not start database transaction.";
-                $logger->error($error) if ($error);
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) if ($error);
                 statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                 $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                 undef $dbTr;
@@ -398,13 +395,13 @@ sub lsRegisterRequest {
               # N: Send 'error.ls.key_not_found' error
 
               my $msg = "Key not found in database, is key \"".$mdKey."\" registered?";
-              $logger->error($msg);
+              $self->{CONF}->{"ls"}->{"logger"}->error($msg);
               statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.key_not_found", $msg);
             }
           }
           else {
             my $msg = "lsKey Attribute not found in message.";
-            $logger->error($msg);
+            $self->{CONF}->{"ls"}->{"logger"}->error($msg);
             statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.key_not_found", $msg);
           }
 
@@ -433,12 +430,12 @@ sub lsRegisterRequest {
               if($keys{$mdKey} == 1) {
                 my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$mdKey."\" and " . getMetadataXQuery($m, "") . "]";
                 my @resultsString = $metadatadb->query($queryString, $dbTr, \$error);
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                 if($#resultsString >= 0) {
                   # We will let this slide, its the same stuff, update control info
-                  $logger->debug("Key already exists, updating control time information.");
+                  $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, updating control time information.");
                   $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                   $keys{$mdKey} = 2;
                 }
               }
@@ -450,13 +447,13 @@ sub lsRegisterRequest {
                   # set control info & mark us
                   $keys{$mdKey} = 2;
 
-                  $logger->debug("New registration info, inserting service metadata and time information.");
+                  $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
                   my $service = $m->cloneNode(1);
                   $service->setAttribute("id", $mdKey);
                   $metadatadb->insertIntoContainer(wrapStore($service->toString, "LSStore"), $mdKey, $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                   $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                 }
 
                 # deal with the data
@@ -465,11 +462,11 @@ sub lsRegisterRequest {
                   if($d_content->getType != 3 and $d_content->getType != 8) {
                     # only insert 'new' things
                     my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/".$d_content->nodeName."[" . getMetadataXQuery($d_content, "") . "]", $dbTr, \$error);
-                    $logger->error($error) and $errorFlag = 1 if $error;
+                    $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                     if($#resultsString == -1) {
                       $metadatadb->insertIntoContainer(createLSData($mdKey."/".$sec."/".$ids{$mdKey}, $mdKey, $d_content->toString), $mdKey."/".$sec."/".$ids{$mdKey}, $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
-                      $logger->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$keys{$mdKey}."\" for key \"".$mdKey."\".");
                       $dCount++;
                       $ids{$mdKey}++;
                     }
@@ -477,7 +474,7 @@ sub lsRegisterRequest {
                 }
 
                 $metadatadb->commitTransaction($dbTr, \$error);
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                 undef $dbTr;
                 if(!$errorFlag) {
                   $mdId = "metadata.".genuid();
@@ -487,7 +484,7 @@ sub lsRegisterRequest {
                 }
                 else {
                   my $msg = "Database Error: \"" . $error . "\".";
-                  $logger->error($error);
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error);
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                   $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                   undef $dbTr;
@@ -496,7 +493,7 @@ sub lsRegisterRequest {
               else {
                 # Y: Send 'error.ls.key_in_use' error
                 my $msg = "AccessPoint \"".$mdKey."\" is in use, please update with key.";
-                $logger->error($msg);
+                $self->{CONF}->{"ls"}->{"logger"}->error($msg);
                 statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.key_in_use", $msg);
                 $metadatadb->commitTransaction($dbTr, \$error);
                 undef $dbTr;
@@ -504,7 +501,7 @@ sub lsRegisterRequest {
             }
             else {
               my $msg = "Cound not start database transaction.";
-              $logger->error($error) if ($error);
+              $self->{CONF}->{"ls"}->{"logger"}->error($error) if ($error);
               statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
               $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
               undef $dbTr;
@@ -514,7 +511,7 @@ sub lsRegisterRequest {
           else {
             # N: Send 'error.ls.registration.access_point_missing' error
             my $msg = "Cannont register data, accessPoint was not supplied.";
-            $logger->error($msg);
+            $self->{CONF}->{"ls"}->{"logger"}->error($msg);
             statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.access_point_missing", $msg);
           }
         }
@@ -522,23 +519,23 @@ sub lsRegisterRequest {
       }
       else {
         my $msg = "Matching metadata not found for data trigger \"".$d->getAttribute("id")."\"";
-        $logger->error($msg);
+        $self->{CONF}->{"ls"}->{"logger"}->error($msg);
         statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.registration.data_trigger", $msg);
       }
     }
     if(!$counter) {
       my $msg = "No data triggers found in request.";
-      $logger->error($msg);
+      $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, "metadata.".genuid(), "", "data.".genuid(), "error.ls.registration.data_trigger_missing", $msg);
     }
     my $error;
     $metadatadb->closeDB(\$error);
     if($error) {
-      $logger->error($error);
+      $self->{CONF}->{"ls"}->{"logger"}->error($error);
     }
   }
   else {
-    $logger->error("Database could not be opened.");
+    $self->{CONF}->{"ls"}->{"logger"}->error("Database could not be opened.");
   }
   return;
 }
@@ -546,7 +543,6 @@ sub lsRegisterRequest {
 
 sub lsDeregisterRequest {
   my($self, $doc, $request) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
 
   my $metadatadb = prepareDatabases(\%{$self}, $doc);
   if(defined $metadatadb and $metadatadb ne "") {
@@ -593,38 +589,38 @@ sub lsDeregisterRequest {
               if($dbTr and !$error) {
                 my $errorFlag = 0;
                 my $result = $metadatadb->queryByName($mdKey, $dbTr, \$error);
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
                 my @deregs = $d->getElementsByTagNameNS($ls_namespaces{"nmwg"}, "metadata");
                 my @resultsString = ();
                 my $msg = "";
                 if($#deregs == -1) {
                   @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$result."\"]", $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                   for(my $x = 0; $x <= $#resultsString; $x++) {
-                    $logger->debug("Removing data \"".$resultsString[$x]."\".");
+                    $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
                     $metadatadb->remove($resultsString[$x], $dbTr, \$error);
-                    $logger->error($error) and $errorFlag = 1 if $error;
+                    $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                   }
 
-                  $logger->debug("Removing control info \"".$result."\".");
+                  $self->{CONF}->{"ls"}->{"logger"}->debug("Removing control info \"".$result."\".");
                   $metadatadb->remove($result."-control", $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
-                  $logger->debug("Removing service info \"".$result."\".");
+                  $self->{CONF}->{"ls"}->{"logger"}->debug("Removing service info \"".$result."\".");
                   $metadatadb->remove($result, $dbTr, \$error);
-                  $logger->error($error) and $errorFlag = 1 if $error;
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
                   $msg = "Removed [".($#resultsString+1)."] data elements and service info for key \"".$result."\".";
                 }
                 else {
                   foreach my $d_md (@deregs) {
                     @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$result."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, "") . "]", $dbTr, \$error);
-                    $logger->error($error) and $errorFlag = 1 if $error;
+                    $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                     for(my $x = 0; $x <= $#resultsString; $x++) {
-                      $logger->debug("Removing data \"".$resultsString[$x]."\".");
+                      $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
                       $metadatadb->remove($resultsString[$x], $dbTr, \$error);
-                      $logger->error($error) and $errorFlag = 1 if $error;
+                      $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                     }
                   }
                   $msg = "Removed [".($#resultsString+1)."] data elements for key \"".$result."\".";
@@ -632,13 +628,13 @@ sub lsDeregisterRequest {
 
                 $metadatadb->commitTransaction($dbTr, \$error);
                 undef $dbTr;
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                 if(!$errorFlag) {
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "success.ls.deregister", $msg);
                 }
                 else {
                   my $msg = "Database Error: \"" . $error . "\".";
-                  $logger->error($error);
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error);
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                   $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                   undef $dbTr;
@@ -646,7 +642,7 @@ sub lsDeregisterRequest {
               }
               else {
                 my $msg = "Cound not start database transaction.";
-                $logger->error($error) if ($error);
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) if ($error);
                 statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                 $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                 undef $dbTr;
@@ -656,42 +652,42 @@ sub lsDeregisterRequest {
               # N: Send 'error.ls.deregister.key_not_found' error
 
               my $msg = "Sent key \"".$mdKey."\" was not registered.";
-              $logger->error($msg);
+              $self->{CONF}->{"ls"}->{"logger"}->error($msg);
               statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.deregister.key_not_found", $msg);
             }
           }
           else {
             my $msg = "lsKey Attribute not found in message.";
-            $logger->error($msg);
+            $self->{CONF}->{"ls"}->{"logger"}->error($msg);
             statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.deregister.key_not_found", $msg);
           }
         }
         else {
           my $msg = "Key not found in sent metadata.";
-          $logger->error($msg);
+          $self->{CONF}->{"ls"}->{"logger"}->error($msg);
           statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.deregister.key_not_found", $msg);
         }
       }
       else {
         my $msg = "Matching metadata not found for data trigger \"".$d->getAttribute("id")."\"";
-        $logger->error($msg);
+        $self->{CONF}->{"ls"}->{"logger"}->error($msg);
         statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.deregister.data_trigger", $msg);
       }
     }
     if(!$counter) {
       my $msg = "No data triggers found in request.";
-      $logger->error($msg);
+      $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, "metadata.".genuid(), "", "data.".genuid(), "error.ls.deregister.data_trigger_missing", $msg);
     }
 
     my $error;
     $metadatadb->closeDB(\$error);
     if($error) {
-      $logger->error($error);
+      $self->{CONF}->{"ls"}->{"logger"}->error($error);
     }
   }
   else {
-    $logger->error("Database could not be opened.");
+    $self->{CONF}->{"ls"}->{"logger"}->error("Database could not be opened.");
   }
   return;
 }
@@ -699,7 +695,6 @@ sub lsDeregisterRequest {
 
 sub lsKeepaliveRequest {
   my($self, $doc, $request) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
 
   my $metadatadb = prepareDatabases(\%{$self}, $doc);
   if(defined $metadatadb and $metadatadb ne "") {
@@ -743,20 +738,20 @@ sub lsKeepaliveRequest {
               if($dbTr and !$error) {
                 my $errorFlag = 0;
 
-                $logger->debug("Updating control time information.");
+                $self->{CONF}->{"ls"}->{"logger"}->debug("Updating control time information.");
                 $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
 
                 $metadatadb->commitTransaction($dbTr, \$error);
                 undef $dbTr;
-                $logger->error($error) and $errorFlag = 1 if $error;
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) and $errorFlag = 1 if $error;
                 if(!$errorFlag) {
                   my $msg = "Key \"".$mdKey."\" was updated.";
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "success.ls.keepalive", $msg);
                 }
                 else {
                   my $msg = "Database Error: \"" . $error . "\".";
-                  $logger->error($error);
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error);
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                   $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                   undef $dbTr;
@@ -764,7 +759,7 @@ sub lsKeepaliveRequest {
               }
               else {
                 my $msg = "Cound not start database transaction.";
-                $logger->error($error) if ($error);
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) if ($error);
                 statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                 $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                 undef $dbTr;
@@ -774,41 +769,41 @@ sub lsKeepaliveRequest {
               # N: Send 'error.ls.keepalive.key_not_found' error
 
               my $msg = "Sent key \"".$mdKey."\" was not registered.";
-              $logger->error($msg);
+              $self->{CONF}->{"ls"}->{"logger"}->error($msg);
               statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.keepalive.key_not_found", $msg);
             }
           }
           else {
             my $msg = "lsKey Attribute not found in message.";
-            $logger->error($msg);
+            $self->{CONF}->{"ls"}->{"logger"}->error($msg);
             statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.keepalive.key_not_found", $msg);
           }
         }
         else {
           my $msg = "Key not found in sent metadata.";
-          $logger->error($msg);
+          $self->{CONF}->{"ls"}->{"logger"}->error($msg);
           statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.keepalive.key_not_found", $msg);
         }
       }
       else {
         my $msg = "Matching metadata not found for data trigger \"".$d->getAttribute("id")."\"";
-        $logger->error($msg);
+        $self->{CONF}->{"ls"}->{"logger"}->error($msg);
         statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.keepalive.data_trigger", $msg);
       }
     }
     if(!$counter) {
       my $msg = "No data triggers found in request.";
-      $logger->error($msg);
+      $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, "metadata.".genuid(), "", "data.".genuid(), "error.ls.keepalive.data_trigger_missing", $msg);
     }
     my $error;
     $metadatadb->closeDB(\$error);
     if($error) {
-      $logger->error($error);
+      $self->{CONF}->{"ls"}->{"logger"}->error($error);
     }
   }
   else {
-    $logger->error("Database could not be opened.");
+    $self->{CONF}->{"ls"}->{"logger"}->error("Database could not be opened.");
   }
   return;
 }
@@ -816,7 +811,6 @@ sub lsKeepaliveRequest {
 
 sub lsQueryRequest {
   my($self, $doc, $request) = @_;
-  my $logger = get_logger("perfSONAR_PS::LS::LS");
 
   my $metadatadb = prepareDatabases(\%{$self}, $doc);
   if(defined $metadatadb and $metadatadb ne "") {
@@ -889,7 +883,7 @@ sub lsQueryRequest {
                 }
                 else {
                   my $msg = "Database Error: \"" . $error . "\".";
-                  $logger->error($error);
+                  $self->{CONF}->{"ls"}->{"logger"}->error($error);
                   statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                   $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                   undef $dbTr;
@@ -897,7 +891,7 @@ sub lsQueryRequest {
               }
               else {
                 my $msg = "Cound not start database transaction.";
-                $logger->error($error) if ($error);
+                $self->{CONF}->{"ls"}->{"logger"}->error($error) if ($error);
                 statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.xmldb", $msg);
                 $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
                 undef $dbTr;
@@ -905,40 +899,40 @@ sub lsQueryRequest {
             }
             else {
               my $msg = "Given query type is not supported ";
-              $logger->error($msg);
+              $self->{CONF}->{"ls"}->{"logger"}->error($msg);
               statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.query.type_not_supported", $msg);
             }
           }
           else {
             my $msg = "No query type in message";
-            $logger->error($msg);
+            $self->{CONF}->{"ls"}->{"logger"}->error($msg);
             statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.query.no_querytype", $msg);
           }
         }
         else {
           my $msg = "Query not found in sent metadata.";
-          $logger->error($msg);
+          $self->{CONF}->{"ls"}->{"logger"}->error($msg);
           statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.query.query_not_found", $msg);
         }
       }
       else {
         my $msg = "Matching metadata not found for data trigger \"".$d->getAttribute("id")."\"";
-        $logger->error($msg);
+        $self->{CONF}->{"ls"}->{"logger"}->error($msg);
         statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.query.data_trigger", $msg);
       }
     }
     if(!$counter) {
       my $msg = "No data triggers found in request.";
-      $logger->error($msg);
+      $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, "metadata.".genuid(), "", "data.".genuid(), "error.ls.query.data_trigger_missing", $msg);
     }
     $metadatadb->closeDB(\$error);
     if($error) {
-      $logger->error($error);
+      $self->{CONF}->{"ls"}->{"logger"}->error($error);
     }
   }
   else {
-    $logger->error("Database could not be opened.");
+    $self->{CONF}->{"ls"}->{"logger"}->error("Database could not be opened.");
   }
   return;
 }
@@ -951,7 +945,7 @@ __END__
 
 =head1 NAME
 
-perfSONAR_PS::LS::LS - A module that provides methods for the single domain LS (sLS).
+perfSONAR_PS::Services::LS::LS - A module that provides methods for the single domain LS (sLS).
 
 =head1 DESCRIPTION
 
@@ -960,7 +954,7 @@ an XML Database to store and return various forms of XML based information.
 
 =head1 SYNOPSIS
 
-    use perfSONAR_PS::LS::LS;
+    use perfSONAR_PS::Services::LS::LS;
 
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
@@ -980,10 +974,10 @@ an XML Database to store and return various forms of XML based information.
       xpath => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/"
     );
 
-    my $ls = perfSONAR_PS::LS::LS->new(\%conf, \%ns);
+    my $ls = perfSONAR_PS::Services::LS::LS->new(\%conf, \%ns);
 
     # or
-    # $ls = perfSONAR_PS::LS::LS->new;
+    # $ls = perfSONAR_PS::Services::LS::LS->new;
     # $ls->setConf(\%conf);
     # $ls->setNamespaces(\%ns);
 
