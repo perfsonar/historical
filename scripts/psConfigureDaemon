@@ -8,6 +8,7 @@ use Sys::Hostname;
 sub note();
 sub ask($$$$);
 sub config_ls($$$);
+sub config_perfsonarbouy_ma($$$);
 sub config_snmp_ma($$$);
 sub config_status_ma($$$);
 sub config_circuitstatus_ma($$$);
@@ -125,15 +126,17 @@ while (1) {
 				$module = "topology";
 			} elsif ($module eq "perfSONAR_PS::Services::LS::LS") {
 				$module = "ls";
+			} elsif ($module eq "perfSONAR_PS::Services::MA::perfSONARBOUY") {
+				$module = "perfsonarbouy";
 			}
 		}
 
 		my %opts;
 		do {
-			$module = &ask("Enter endpoint module [snmp,ls,status,circuitstatus,topology] ", "", $module, '');
+			$module = &ask("Enter endpoint module [snmp,ls,status,circuitstatus,topology,perfsonarbouy] ", "", $module, '');
 			$module = lc($module);
 
-			if ($module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology") {
+			if ($module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology" or $module eq "perfsonarbouy") {
 				$valid_module = 1;
 			}
 		} while($valid_module == 0);
@@ -159,6 +162,9 @@ while (1) {
 		} elsif ($module eq "ls") {
 			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::LS";
 			config_ls($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config);
+		} elsif ($module eq "perfsonarbouy") {
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
+			config_perfsonarbouy_ma($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config);
 		}
 	}
 }
@@ -175,6 +181,39 @@ sub config_ls($$$) {
 	$config->{"ls"}->{"metadata_db_file"} = &ask("File in which to store registered metadata", "metadata.dbxml", $config->{"ls"}->{"metadata_db_file"}, '.+');
 }
 
+sub config_perfsonarbouy_ma($$$) {
+	my ($config, $accesspoint, $def_config) = @_;
+
+	$config->{"perfsonarbouy"}->{"metadata_db_type"} = &ask("Enter the database type to read from ", "file|xmldb", $config->{"perfsonarbouy"}->{"metadata_db_type"}, '(file|xmldb)');
+
+	if ($config->{"perfsonarbouy"}->{"metadata_db_type"} eq "file") {
+		$config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask("Enter the filename of the XML file ", "", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+');
+	} elsif ($config->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb") {
+		$config->{"perfsonarbouy"}->{"metadata_db_name"} = &ask("Enter the directory of the XML database ", "", $config->{"perfsonarbouy"}->{"metadata_db_name"}, '.+');
+		$config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask("Enter the filename of the XML database ", "", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+');
+	}
+
+	$config->{"perfsonarbouy"}->{"enable_registration"} = &ask("Will this service register with an LS ", "0|1", $config->{"perfsonarbouy"}->{"enable_registration"}, '^[01]$');
+
+	if($config->{"perfsonarbouy"}->{"enable_registration"} eq "1") {
+		my $registration_interval = $def_config->{"ls_registration_interval"};
+		$registration_interval = $config->{"perfsonarbouy"}->{"ls_registration_interval"} if (defined $config->{"perfsonarbouy"}->{"ls_registration_interval"});
+		$config->{"perfsonarbouy"}->{"ls_registration_interval"} = &ask("Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$');
+
+		my $ls_instance = $def_config->{"ls_instance"};
+		$ls_instance = $config->{"perfsonarbouy"}->{"ls_instance"} if (defined $config->{"perfsonarbouy"}->{"ls_instance"});
+		$config->{"perfsonarbouy"}->{"ls_instance"} = &ask("URL of an LS to register with ", "", $ls_instance, '^http:\/\/');
+
+		$config->{"perfsonarbouy"}->{"service_name"} = &ask("Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_name"}, '.+');
+
+		$config->{"perfsonarbouy"}->{"service_type"} = &ask("Enter the service type ", "MA", $config->{"perfsonarbouy"}->{"service_type"}, '.+');
+
+		$config->{"perfsonarbouy"}->{"service_description"} = &ask("Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_description"}, '.+');
+
+		$config->{"perfsonarbouy"}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{"perfsonarbouy"}->{"service_accesspoint"}, '^http:\/\/');
+	}
+}
+
 sub config_snmp_ma($$$) {
 	my ($config, $accesspoint, $def_config) = @_;
 
@@ -188,11 +227,11 @@ sub config_snmp_ma($$$) {
 
 	$config->{"snmp"}->{"default_resolution"} = &ask("Enter the default resolution of RRD queries ", $rrdtool, $config->{"snmp"}->{"rrdtool"}, '.+');
 
-	$config->{"snmp"}->{"metadata_db_type"} = &ask("Enter the database type to read from ", "sqlite|mysql", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)');
+	$config->{"snmp"}->{"metadata_db_type"} = &ask("Enter the database type to read from ", "file|xmldb", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)');
 
 	if ($config->{"snmp"}->{"metadata_db_type"} eq "file") {
-		$config->{"snmp"}->{"metadata_db_file"} = &ask("Enter the filename of the RRD database ", "", $config->{"snmp"}->{"metadata_db_file"}, '.+');
-	} elsif ($config->{"snmp"}->{"metadata_db_type"} eq "mysql") {
+		$config->{"snmp"}->{"metadata_db_file"} = &ask("Enter the filename of the XML file ", "", $config->{"snmp"}->{"metadata_db_file"}, '.+');
+	} elsif ($config->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
 		$config->{"snmp"}->{"metadata_db_name"} = &ask("Enter the directory of the XML database ", "", $config->{"snmp"}->{"metadata_db_name"}, '.+');
 		$config->{"snmp"}->{"metadata_db_file"} = &ask("Enter the filename of the XML database ", "", $config->{"snmp"}->{"metadata_db_file"}, '.+');
 	}
@@ -377,7 +416,7 @@ __END__
 
 =head1 NAME
 
-configure.pl - Ask a series of questions to generate a configuration file.
+psConfigureDaemon - Ask a series of questions to generate a configuration file.
 
 =head1 DESCRIPTION
 
@@ -405,6 +444,7 @@ $Id$
 =head1 AUTHOR
 
 Jason Zurawski, zurawski@internet2.edu
+Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
 
@@ -413,7 +453,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 
