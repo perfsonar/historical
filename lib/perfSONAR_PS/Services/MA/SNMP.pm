@@ -26,8 +26,8 @@ sub needLS($);
 sub registerLS($);
 sub handleEvent($$$$$$$$$);
 sub maMetadataKeyRequest($$$$$);
-sub metadataKeyRetrieveKey($$$$$$$$);
-sub metadataKeyRetrieveMetadataData($$$$$$$$);
+sub metadataKeyRetrieveKey($$$$$$$);
+sub metadataKeyRetrieveMetadataData($$$$$$$);
 sub maSetupDataRequest($$$$$);
 sub setupDataRetrieveMetadataData($$$$$$);
 sub setupDataRetrieveKey($$$$$$$$);
@@ -162,12 +162,13 @@ sub init($$) {
   my $error;
   if($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file") {
     $metadatadb = new perfSONAR_PS::DB::File($self->{CONF}->{"snmp"}->{"metadata_db_file"});
-  } elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
+  } 
+  elsif($self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb") {
     $metadatadb = new perfSONAR_PS::DB::XMLDB( $self->{CONF}->{"snmp"}->{"metadata_db_name"}, $self->{CONF}->{"snmp"}->{"metadata_db_file"}, \%{$self->{NAMESPACES}});
   }
   $metadatadb->openDB(\$error);
 
-  if ($error) {
+  if($error) {
     $self->{CONF}->{"snmp"}->{"logger"}->error("Couldn't initialize store file: $error");
     return -1;
   }
@@ -338,7 +339,7 @@ sub maMetadataKeyRequest($$$$$) {
 
   if(getTime($request, \%{$self}, $md->getAttribute("id"), $self->{CONF}->{"snmp"}->{"default_resolution"})) {
     if(find($md, "./nmwg:key", 1)) {
-      metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $request->getNamespaces(), $output, $message_parameters);
+      metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($md, "./nmwg:key", 1), "", $md->getAttribute("id"), $request->getNamespaces(), $output);
     }
     else {
       if($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and
@@ -346,10 +347,10 @@ sub maMetadataKeyRequest($$$$$) {
         my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
         if($other_md) {
           if(find($other_md, "./nmwg:key", 1)) {
-            metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($other_md, "./nmwg:key", 1), $md, $md->getAttribute("id"), $request->getNamespaces(), $output, $message_parameters);
+            metadataKeyRetrieveKey(\%{$self}, $metadatadb, find($other_md, "./nmwg:key", 1), $md, $md->getAttribute("id"), $request->getNamespaces(), $output);
           }
           else {
-            metadataKeyRetrieveMetadataData(\%{$self}, $metadatadb, $other_md, $md, $md->getAttribute("id"), $request->getNamespaces(), $output, $message_parameters);
+            metadataKeyRetrieveMetadataData(\%{$self}, $metadatadb, $other_md, $md, $md->getAttribute("id"), $request->getNamespaces(), $output);
           }
         }
         else {
@@ -359,24 +360,17 @@ sub maMetadataKeyRequest($$$$$) {
         }
       }
       else {
-        metadataKeyRetrieveMetadataData(\%{$self}, $metadatadb, $md, "", $md->getAttribute("id"), $request->getNamespaces(), $output, $message_parameters);
+        metadataKeyRetrieveMetadataData(\%{$self}, $metadatadb, $md, "", $md->getAttribute("id"), $request->getNamespaces(), $output);
       }
     }
   }
 }
 
 
-sub metadataKeyRetrieveKey($$$$$$$$) {
-  my($self, $metadatadb, $key, $chain, $id, $request_namespaces, $output, $message_parameters) = @_;
+sub metadataKeyRetrieveKey($$$$$$$) {
+  my($self, $metadatadb, $key, $chain, $id, $request_namespaces, $output) = @_;
   my $mdId = "metadata.".genuid();
   my $dId = "data.".genuid();
-
-  my $key2 = $key->cloneNode(1);
-  my $obfuscation = 0;
-  if(defined $message_parameters->{"obfuscatedKey"} and
-     $message_parameters->{"obfuscatedKey"} =~ m/^true$/i) {
-    $obfuscation = 1;
-  }
 
   my $hashKey = extract(find($key, ".//nmwg:parameter[\@name=\"maKey\"]", 1), 0);
   if($hashKey) {
@@ -397,56 +391,16 @@ sub metadataKeyRetrieveKey($$$$$$$$) {
     }
   }
   else {
-    my $results = $metadatadb->querySet("/nmwg:store/nmwg:data[" . getDataXQuery($key, "") . "]");
-    if($results->size() == 1) {
-
-      my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{find($results->get_node(1)->cloneNode(1), "./nmwg:key", 1)->getAttribute("id")};
-      if($obfuscation and $hashKey) {
-        $key2 = $key->cloneNode(1);
-        my $maKey = "";
-        foreach my $params (find($key2, ".//nmwg:parameters", 1)->childNodes) {
-          if($params->localname eq "parameter") {
-            $maKey = $params->cloneNode(1);
-            $maKey->setAttribute("name", "maKey");
-            $maKey->removeChildNodes();
-            if($maKey->getAttribute("value")) {
-              $maKey->setAttribute("value", $hashKey);
-            }
-            else {
-              $maKey->appendText($hashKey);
-            }
-            last;
-          }
-        }
-        if($maKey) {
-          foreach my $params (find($key2, ".//nmwg:parameters", 1)->childNodes) {
-            if($params->localname eq "parameter") {
-              if($params->getAttribute("name") ne "consolidationFunction" and
-                 $params->getAttribute("name") ne "resolution" and
-                 $params->getAttribute("name") ne "startTime" and
-                 $params->getAttribute("name") ne "endTime" and
-                 $params->getAttribute("name") ne "time") {
-                my $oldParam = find($key2, ".//nmwg:parameters", 1)->removeChild($params);
-                undef $oldParam;
-              }
-            }
-          }
-          find($key2, ".//nmwg:parameters", 1)->addChild($maKey);
-        }
-      }
-
-    }
-    else {
-      my $msg = "Key error in metadata storage.";
-      $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
-      throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
-      return;
-    }
+    my $msg = "Key error in metadata storage.";
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
+    throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
+    return;
   }
-  
+
   createMetadata($output, $mdId, $id, $key->toString, undef);
+
+  my $key2 = $key->cloneNode(1);
   if(defined $chain and $chain ne "") {
-    
     if($request_namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
       foreach my $p (find($chain, "./select:parameters", 1)->childNodes) {
         if($p->localname eq "parameter") {
@@ -464,24 +418,16 @@ sub metadataKeyRetrieveKey($$$$$$$$) {
         }
       }
     }
-
   }
   createData($output, $dId, $mdId, $key2->toString, undef);
-  
   return;
 }
 
 
-sub metadataKeyRetrieveMetadataData($$$$$$$$) {
-  my($self, $metadatadb, $metadata, $chain, $id, $request_namespaces, $output, $message_parameters) = @_;
+sub metadataKeyRetrieveMetadataData($$$$$$$) {
+  my($self, $metadatadb, $metadata, $chain, $id, $request_namespaces, $output) = @_;
   my $mdId = "";
   my $dId = "";
-
-  my $obfuscation = 0;
-  if(defined $message_parameters->{"obfuscatedKey"} and
-     $message_parameters->{"obfuscatedKey"} =~ m/^true$/i) {
-    $obfuscation = 1;
-  }
 
   my $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery($metadata, "") . "]";
   my $results = $metadatadb->querySet($queryString);
@@ -529,12 +475,9 @@ sub metadataKeyRetrieveMetadataData($$$$$$$$) {
             $dId = "data.".genuid();
             $mdId = "metadata.".genuid();
             
-            my $hashKey = "";
-            if($obfuscation) {
-              my $hashId = find($d, "./nmwg:key", 1)->getAttribute("id");
-              $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
-            }
-
+            my $hashId = find($d, "./nmwg:key", 1)->getAttribute("id");
+            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+            
             my $d_temp = $d->cloneNode(1);
             $d_temp->setAttribute("metadataIdRef", $mdId);
             $d_temp->setAttribute("id", $dId);
@@ -764,14 +707,6 @@ sub setupDataRetrieveKey($$$$$$$$) {
   my $dId = "";
   my $results = ""; 
 
-  my $obfuscation = 0;
-  if(defined $message_parameters->{"obfuscatedKey"} and
-     $message_parameters->{"obfuscatedKey"} =~ m/^true$/i) {
-    $obfuscation = 1;
-  }
-
-  my $sentKey = $metadata->cloneNode(1);
-
   my $hashKey = extract(find($metadata, ".//nmwg:parameter[\@name=\"maKey\"]", 1), 0);
   if($hashKey) {
     my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
@@ -792,62 +727,16 @@ sub setupDataRetrieveKey($$$$$$$$) {
     }
   }
   else {
-    $results = $metadatadb->querySet("/nmwg:store/nmwg:data[" . getDataXQuery($metadata, "") . "]");
-    if($results->size() == 1) {
-
-
-
-
-      my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{find($results->get_node(1)->cloneNode(1), "./nmwg:key", 1)->getAttribute("id")};
-      if($obfuscation and $hashKey) {
-        my $maKey = "";
-        foreach my $params (find($sentKey, ".//nmwg:parameters", 1)->childNodes) {
-          if($params->localname eq "parameter") {
-            $maKey = $params->cloneNode(1);
-            $maKey->setAttribute("name", "maKey");
-            $maKey->removeChildNodes();
-            if($maKey->getAttribute("value")) {
-              $maKey->setAttribute("value", $hashKey);
-            }
-            else {
-              $maKey->appendText($hashKey);
-            }
-            last;
-          }
-        }
-        if($maKey) {
-          foreach my $params (find($sentKey, ".//nmwg:parameters", 1)->childNodes) {
-            if($params->localname eq "parameter") {
-              if($params->getAttribute("name") ne "consolidationFunction" and
-                 $params->getAttribute("name") ne "resolution" and
-                 $params->getAttribute("name") ne "startTime" and
-                 $params->getAttribute("name") ne "endTime" and
-                 $params->getAttribute("name") ne "time") {
-                my $oldParam = find($sentKey, ".//nmwg:parameters", 1)->removeChild($params);
-                undef $oldParam;
-              }
-            }
-          }
-          find($sentKey, ".//nmwg:parameters", 1)->addChild($maKey);
-        }
-      }
-
-
-
-
-    }
-    else {
-      my $msg = "Key error in metadata storage.";
-      $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
-      throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
-      return;
-    }
+    my $msg = "Key error in metadata storage.";
+    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
+    throw perfSONAR_PS::Error_compat("error.ma.storage_result", $msg);
+    return;
   }
   
+  my $sentKey = $metadata->cloneNode(1);
   my $results_temp = $results->get_node(1)->cloneNode(1);
   my $storedKey = find($results_temp, "./nmwg:key", 1);
   
-
   my %l_et = ();
   my $l_supportedEventTypes = find($storedKey, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0);
   foreach my $se ($l_supportedEventTypes->get_nodelist) {
