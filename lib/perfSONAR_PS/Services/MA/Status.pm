@@ -383,13 +383,17 @@ sub handleStoreRequest {
 
     ($status, $res) = $self->__handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
 
-    if ($status eq q{}) {
-        my $mdID = "metadata.".genuid();
+    my $mdID = "metadata.".genuid();
 
-        $output->addExistingXMLElement($md);
-        getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.ma.added");
-        getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
-    }
+    my $subID = "sub0";
+    my $md_content = q{};
+    $md_content .= "<nmwg:subject id=\"$subID\">\n";
+    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
+    $md_content .= "</nmwg:subject>\n";
+    $md_content .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
+    createMetadata($output, $md->getAttribute("id"), "", $md_content, undef);
+    getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.ma.added");
+    getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
 
     return;
 }
@@ -515,7 +519,13 @@ sub lookupLinkStatusRequest {
         throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
     }
 
-    $output->addExistingXMLElement($md);
+    my $subID = "sub0";
+    my $md_content = q{};
+    $md_content .= "<nmwg:subject id=\"$subID\">\n";
+    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
+    $md_content .= "</nmwg:subject>\n";
+    $md_content .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
+    createMetadata($output, $md->getAttribute("id"), "", $md_content, undef);
 
     my $data_content = q{};
     foreach my $link (@{ $res->{$link_id} }) {

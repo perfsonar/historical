@@ -358,7 +358,7 @@ sub config_topology_ma($$$) {
 
 	$config->{"topology"}->{"read_only"} = &ask("Is this service read-only? ", "0|1", $config->{"topology"}->{"read_only"}, '^[01]$');
 
-	$config->{"topology"}->{"db_name"} = &ask("Enter the directory of the XML database ", "", $config->{"topology"}->{"db_name"}, '.+');
+	$config->{"topology"}->{"db_environment"} = &ask("Enter the directory of the XML database ", "", $config->{"topology"}->{"db_environment"}, '.+');
 
 	$config->{"topology"}->{"db_file"} = &ask("Enter the filename of the XML database ", "", $config->{"topology"}->{"db_file"}, '.+');
 

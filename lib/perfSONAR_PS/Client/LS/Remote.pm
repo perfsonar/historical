@@ -27,7 +27,7 @@ sub new {
     $self->{NAMESPACES} = \%{$ns};
   }
 
-  $self->{CHUNK} = 500;
+  $self->{CHUNK} = 25;
 
   $self->{ALIVE} = 0;
   $self->{FIRST} = 1;

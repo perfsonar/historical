@@ -37,7 +37,8 @@ sub getNormalizedURI($) {
 }
 
 sub startElement {
-	my $self = shift;
+	#my ($self, @params) = shift;
+    my $self = shift;
 	my $args = validate(@_, 
 			{
 				prefix => { type => SCALAR, regex => qr/^[a-z0-9]/ },

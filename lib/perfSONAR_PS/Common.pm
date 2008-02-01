@@ -90,7 +90,7 @@ sub find($$$) {
     };
     if ($@) {
         $logger->error("Error finding value($query): $@");
-        return undef;
+        return;
     }
 
     if (defined $return_first and $return_first == 1) {
@@ -113,7 +113,7 @@ sub findvalue($$) {
 
     $found_node = find($node, $xpath, 1);
 
-    return undef if (!defined $found_node);
+    return if (!defined $found_node);
 
     return $found_node->textContent;
 }
@@ -493,6 +493,8 @@ sub mapNamespaces($$) {
             }
         }
     }
+
+    return;
 }
 
 =head2 reMap(\%{$rns}, \%{$ns}, $dom_node)

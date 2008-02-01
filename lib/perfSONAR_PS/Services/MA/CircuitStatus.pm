@@ -42,7 +42,8 @@ our $VERSION = 0.06;
 
 sub init {
     my ($self, $handler) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
+
+    $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
     if (not defined $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_type"} eq q{}) {
         if (not defined $self->{CONF}->{"circuitstatus"}->{"ls_instance"} or $self->{CONF}->{"circuitstatus"}->{"ls_instance"} eq q{}) {
@@ -131,7 +132,7 @@ sub init {
         }
 
         try {
-            ($self->{DOMAIN}, $self->{CIRCUITS}, $self->{INCOMPLETE_NODES}, $self->{TOPOLOGY_LINKS}, $self->{NODES}) = parseCircuitsFile($self->{CONF}->{"circuitstatus"}->{"circuits_file"});
+            ($self->{DOMAIN}, $self->{CIRCUITS}, $self->{INCOMPLETE_NODES}, $self->{TOPOLOGY_LINKS}, $self->{NODES}) = $self->parseCircuitsFile($self->{CONF}->{"circuitstatus"}->{"circuits_file"});
         } catch perfSONAR_PS::Error_compat with {
             my $ex = shift;
             my $msg = "Error parsing circuits file: $ex";
@@ -190,7 +191,7 @@ sub init {
 
         $self->{TOPOLOGY_CLIENT} = perfSONAR_PS::Client::Topology::MA->new($self->{CONF}->{"circuitstatus"}->{"topology_ma_uri"});
     } else {
-        $self->{LOGGER}->error("Invalid database type specified");
+        $self->{LOGGER}->error("Invalid database type specified: ".lc($self->{CONF}->{"circuitstatus"}->{"topology_ma_type"}) );
         return -1;
     }
 
@@ -214,7 +215,7 @@ sub init {
 
         my $topology = $res;
 
-        ($status, $res) = parseTopology($topology, $self->{INCOMPLETE_NODES}, $self->{DOMAIN});
+        ($status, $res) = $self->parseTopology($topology, $self->{INCOMPLETE_NODES}, $self->{DOMAIN});
         if ($status ne q{}) {
             my $msg = "Error parsing topology: $res";
             $self->{LOGGER}->error($msg);
@@ -258,7 +259,6 @@ sub needLS {
 
 sub handleEvent {
     my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $request) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
     my ($status, $res1, $res2);
 
     # This could be wrapped in try/catch
@@ -327,7 +327,7 @@ sub compatParseSubject {
         throw perfSONAR_PS::Error_compat("error.ma.invalid_subject", "The specified subject does not contain a link element");
     }
 
-    my $circuit_name = findvalue($subject, "./nmtl2:link/nmtl2:name");
+    $circuit_name = findvalue($subject, "./nmtl2:link/nmtl2:name");
     if (defined $circuit_name and defined $self->{CIRCUITS}->{$circuit_name}) {
         return $circuit_name;
     }
@@ -353,7 +353,6 @@ sub generateMDXpath {
 
 sub createMetadataStore {
     my ($self, $nodes, $circuits) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
     my $doc = perfSONAR_PS::XML::Document_string->new();
 
@@ -361,13 +360,13 @@ sub createMetadataStore {
     foreach my $node_id (keys %{ $nodes }) {
         my $node = $nodes->{$node_id};
 
-        outputNodeElement($doc, $node);
+        $self->outputNodeElement($doc, $node);
     }
 
     foreach my $circuit_id (keys %{ $circuits }) {
         my $circuit = $circuits->{$circuit_id};
 
-        outputCircuitElement($doc, $circuit);
+        $self->outputCircuitElement($doc, $circuit);
     }
     $doc->endElement("store");
 
@@ -387,7 +386,6 @@ sub createMetadataStore {
 
 sub resolveSelectChain {
     my ($self, $md, $request) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
     if (!$request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
         $self->{LOGGER}->debug("No select namespace means there is no select chain");
@@ -445,7 +443,6 @@ sub resolveSelectChain {
 
 sub getLinkStatus {
     my ($self, $link_ids, $time) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
     my %clients = ();
 
@@ -570,7 +567,6 @@ sub getLinkStatus {
 
 sub handlePathStatus {
     my ($self, $output, $circuits, $time) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
     my ($status, $res);
     
     if (defined $self->{CONF}->{"circuitstatus"}->{"cache_length"} and $self->{CONF}->{"circuitstatus"}->{"cache_length"} > 0 and not defined $time) {
@@ -724,7 +720,6 @@ sub handlePathStatus {
 
 sub outputResults {
     my ($self, $output, $results, $time) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
 
     my %output_endpoints = ();
     my $i = 0;
@@ -737,7 +732,7 @@ sub outputResults {
 
             startMetadata($output, "metadata.".genuid(), q{}, undef);
              $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-".$endpoint->{name} });
-              outputNodeElement($output, $self->{NODES}->{$endpoint->{name}});
+              $self->outputNodeElement($output, $self->{NODES}->{$endpoint->{name}});
              $output->endElement("subject");
             endMetadata($output);
 
@@ -748,7 +743,7 @@ sub outputResults {
 
         startMetadata($output, $mdid, q{}, undef);
          $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub$i" });
-          outputCircuitElement($output, $circuit);
+          $self->outputCircuitElement($output, $circuit);
          $output->endElement("subject");
         endMetadata($output);
 
@@ -778,8 +773,7 @@ sub outputResults {
 }
 
 sub outputNodeElement {
-    my ($output, $node) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
+    my ($self, $output, $node) = @_;
 
     $self->{LOGGER}->debug("Outputing Node Element: ".Dumper($node));
 
@@ -807,8 +801,7 @@ sub outputNodeElement {
 }
 
 sub outputCircuitElement {
-    my ($output, $circuit) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
+    my ($self, $output, $circuit) = @_;
 
     $output->startElement(prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/");
       $output->createElement(prefix => "nmtl2", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"name"});
@@ -828,8 +821,7 @@ sub outputCircuitElement {
 }
 
 sub parseCircuitsFile {
-    my ($file) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
+    my ($self, $file) = @_;
 
     my %nodes = ();
     my %incomplete_nodes = ();
@@ -878,18 +870,6 @@ sub parseCircuitsFile {
 
         if (defined $nodes{$node_name}) {
             my $msg = "Multiple endpoints have the name \"$node_name\"";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
-        }
-
-        if (not defined $node_type or $node_type eq q{}) {
-            my $msg = "Node with unspecified type found";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
-        }
-
-        if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
-            my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
             $self->{LOGGER}->error($msg);
             throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
         }
@@ -1043,8 +1023,7 @@ sub parseCircuitsFile {
 }
 
 sub parseTopology {
-    my ($topology, $incomplete_nodes, $domain_name) = @_;
-    my $logger = get_logger("perfSONAR_PS::Services::MA::CircuitStatus");
+    my ($self, $topology, $incomplete_nodes, $domain_name) = @_;
     my %ids = ();
 
     foreach my $node ($topology->getElementsByLocalName("node")) {

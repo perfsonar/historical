@@ -626,6 +626,7 @@ sub lockPIDFile($$) {
     if(defined $p_id and $p_id ne "") {
         open(PSVIEW, "ps -p ".$p_id." |");
         my @output = <PSVIEW>;
+        close(PSVIEW);
         if(!$?) {
             die "$0 already running: $p_id\n";
         }
