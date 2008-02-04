@@ -374,8 +374,10 @@ our metadata database, we can contact the specified LS and register ourselves.
 =cut
 
 sub registerLS {
-    my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my ( $self, $sleep_time ) = validate_pos(@_,
+                1,
+                { type => SCALARREF },
+            );
 
     my ( $status, $res );
     my $ls = q{};
