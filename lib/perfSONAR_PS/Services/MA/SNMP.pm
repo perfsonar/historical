@@ -846,7 +846,7 @@ sub metadataKeyRetrieveMetadataData {
             foreach my $d ( $dataResults->get_nodelist ) {
                 $uc++;
                 next
-                  unless ( $used{ $uc - 1 } eq q{}
+                  unless ( $used{ $uc - 1 } == 0
                     and $d->getAttribute("metadataIdRef")
                     and $md_temp->getAttribute("id") eq
                     $d->getAttribute("metadataIdRef") );
@@ -866,7 +866,7 @@ sub metadataKeyRetrieveMetadataData {
                     foreach my $params (
                         find( $d_temp, ".//nmwg:parameters", 1 )->childNodes )
                     {
-                        next if $params->localname ne "parameter";
+                        next if (not defined $params->localname or $params->localname ne "parameter");
                         $maKey = $params->cloneNode(1);
                         $maKey->setAttribute( "name", "maKey" );
                         $maKey->removeChildNodes();
@@ -882,7 +882,9 @@ sub metadataKeyRetrieveMetadataData {
                             ->childNodes )
                         {
 
-                            if (    $params->localname eq "parameter"
+                            next if !(defined $params->localname and defined $params->getAttribute("name"));
+
+                            if ( $params->localname eq "parameter"
                                 and $params->getAttribute("name") ne
                                 "consolidationFunction"
                                 and $params->getAttribute("name") ne
@@ -1294,7 +1296,7 @@ sub setupDataRetrieveMetadataData {
             foreach my $d ( $dataResults->get_nodelist ) {
                 $uc++;
                 next
-                  unless ( $used{ $uc - 1 } eq q{}
+                  unless ( $used{ $uc - 1 } == 0
                     and $d->getAttribute("metadataIdRef")
                     and $md_temp->getAttribute("id") eq
                     $d->getAttribute("metadataIdRef") );
