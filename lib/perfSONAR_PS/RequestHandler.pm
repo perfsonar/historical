@@ -1,7 +1,5 @@
 package perfSONAR_PS::RequestHandler;
 
-our $VERSION = 0.06;
-
 =head1 NAME
 
 perfSONAR_PS::RequestHandler - A module that provides an object to register event
@@ -29,13 +27,15 @@ use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
 
+our $VERSION = 0.06;
+
 =head1 API
 =cut
 
-=head2 new($)
+=head2 new
     This function allocates a new Handler object.
 =cut
-sub new($) {
+sub new {
     my ($package) = @_;
 
     my $self = fields::new($package);
@@ -48,7 +48,7 @@ sub new($) {
     return $self;
 }
 
-=head2 addFullMessageHandler($self, $messageType, $service)
+=head2 registerFullMessageHandler($self, $messageType, $service)
     This function is used by a pS service to specify that it would like to
     handle the complete processing for messages of the specified type. If
     called, the service must have a handleMessage function. This function
@@ -56,7 +56,7 @@ sub new($) {
     handleMessage function is then responsible for all handling of the
     message.
 =cut
-sub addFullMessageHandler($$$$) {
+sub registerFullMessageHandler {
     my ($self, $messageType, $service) = validate_pos(@_,
                 1,
                 { type => SCALAR },
@@ -77,7 +77,7 @@ sub addFullMessageHandler($$$$) {
     return 0;
 }
 
-=head2 addMessageHandler($self, $messageType, $service)
+=head2 registerMessageHandler($self, $messageType, $service)
     This function is used by a pS service to specify that it would like to
     be informed of all the metadata/data pairs for a given message. The
     handler will also inform the module when a new message of the specified
@@ -90,7 +90,7 @@ sub addFullMessageHandler($$$$) {
     handleMessageEnd will be called when all the metadata/data pairs have
     been handled.
 =cut
-sub addMessageHandler($$$) {
+sub registerMessageHandler {
     my ($self, $messageType, $service) = validate_pos(@_,
                 1,
                 { type => SCALAR },
@@ -111,14 +111,14 @@ sub addMessageHandler($$$) {
     return 0;
 }
 
-=head2 addEventHandler($self, $messageType, $eventType, $service)
+=head2 registerEventHandler($self, $messageType, $eventType, $service)
     This function is used to tell which events a pS service is interested
     in. If added, there must be a 'handleEvent' function defined in the
     service module. The 'handleEvent' function in the specified service
     will be called for each metadata/data pair with an event type of the
     specified type found in a message of the specified type.
 =cut
-sub addEventHandler($$$$) {
+sub registerEventHandler {
     my ($self, $messageType, $eventType, $service) = validate_pos(@_,
                 1,
                 { type => SCALAR },
@@ -130,7 +130,7 @@ sub addEventHandler($$$$) {
 
     $logger->debug("Adding event handler for events of type $eventType on messages of $messageType");
 
-    if (!defined $self->{EV_HANDLERS}->{$messageType}) {
+    if (not defined $self->{EV_HANDLERS}->{$messageType}) {
         $self->{EV_HANDLERS}->{$messageType} = ();
     }
 
@@ -144,7 +144,7 @@ sub addEventHandler($$$$) {
     return 0;
 }
 
-=head2 addEventHandler_Regex($self, $messageType, $eventRegex, $service)
+=head2 registerEventHandler_Regex($self, $messageType, $eventRegex, $service)
     This function is used to tell which events a pS service is interested
     in. If added, there must be a 'handleEvent' function defined in the
     service module. The 'handleEvent' function in the specified service
@@ -152,7 +152,7 @@ sub addEventHandler($$$$) {
     the specified regular expression found in a message of the specified
     type.
 =cut
-sub addEventHandler_Regex($$$$) {
+sub registerEventHandler_Regex {
     my ($self, $messageType, $eventRegex, $service) = validate_pos(@_,
                 1,
                 { type => SCALAR },
@@ -163,7 +163,7 @@ sub addEventHandler_Regex($$$$) {
 
     $logger->debug("Adding event handler for events matching $eventRegex on messages of $messageType");
 
-    if (!defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
+    if (not defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
         $self->{EV_REGEX_HANDLERS}->{$messageType} = ();
     }
 
@@ -181,46 +181,76 @@ sub addEventHandler_Regex($$$$) {
     The __handleMessage function is called when a message is encountered that
     has a full message handler.
 =cut
-sub __handleMessage($$$$$) {
-    my ($self, $doc, $messageType, $message, $request) = @_;
+sub __handleMessage {
+    my $self = shift;
+	my $args = validate(@_, 
+			{
+				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+				messageId => { type => SCALAR },
+				messageType => { type => SCALAR },
+				message => { type => SCALARREF },
+				rawRequest => { type => ARRAYREF },
+			});
+
     my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
+    my $messageType = $args->{"messageType"};
+
     if (defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
-        return $self->{FULL_MSG_HANDLERS}->{$messageType}->handleMessage($doc, $messageType, $message, $request);
+        return $self->{FULL_MSG_HANDLERS}->{$messageType}->handleMessage($args);
     }
 
-    my $mdID = "metadata.".genuid();
-    getResultCodeMetadata($doc, $mdID, "", "error.ma.messages_type");
-    getResultCodeData($doc, "data.".genuid(), $mdID, "Message type \"$messageType\" not yet supported", 1);
+    throw perfSONAR_PS::Error_compat("error.ma.message_type", "Message type \"$messageType\" not yet supported", 1);
+
+    return;
 }
 
 
-=head2 __handleMessageBegin ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+=head2 __handleMessageBegin ($self, $ret_message, $messageId, $messageType, $msgParams, $request);
     The __handleMessageBegin function is called when a new message is encountered
     that has a message handler.
 =cut
-sub __handleMessageBegin($$$$$$$$) {
-    my ($self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces) = @_;
+sub __handleMessageBegin {
+    my $self = shift;
+	my $args = validate(@_, 
+			{
+				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+				messageId => { type => SCALAR | UNDEF },
+				messageType => { type => SCALAR },
+				messageParameters => { type => HASHREF | UNDEF },
+				message => { type => SCALARREF },
+				rawRequest => { type => ARRAYREF },
+			});
 
-    if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
-        return 0;
+    my $messageType = $args->{"messageType"};
+
+    if (not defined $self->{MSG_HANDLERS}->{$messageType}) {
+        return (0, undef, undef);
     }
 
-    return $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin($ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces);
+    return $self->{MSG_HANDLERS}->{$messageType}->handleMessageBegin($args);
 }
 
 =head2 __handleMessageEnd ($self, $ret_message, $messageId, $messageType);
     The __handleMessageEnd function is called when all the metadata/data pairs in a
     message have been handled.
 =cut
-sub __handleMessageEnd($$$$) {
-    my ($self, $ret_message, $messageId, $messageType) = @_;
+sub __handleMessageEnd {
+    my $self = shift;
+	my $args = validate(@_, 
+			{
+				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+				messageId => { type => SCALAR | UNDEF },
+				messageType => { type => SCALAR },
+			});
 
-    if (!defined $self->{MSG_HANDLERS}->{$messageType}) {
+    my $messageType = $args->{"messageType"};
+
+    if (not defined $self->{MSG_HANDLERS}->{$messageType}) {
         return 0;
     }
 
-    return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($ret_message, $messageId, $messageType);
+    return $self->{MSG_HANDLERS}->{$messageType}->handleMessageEnd($args);
 }
 
 =head2 handleEvent ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
@@ -232,9 +262,24 @@ sub __handleMessageEnd($$$$) {
     contains the event type (if it exists). $md contains the metadata. $d
     contains the data. $raw_request contains the raw request element.
 =cut
-sub __handleEvent($$$$$$$$$$) {
-    my ($self, $doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
+sub __handleEvent {
+    my $self = shift;
+	my $args = validate(@_, 
+			{
+				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+				messageId => { type => SCALAR | UNDEF },
+				messageType => { type => SCALAR },
+				messageParameters => { type => HASHREF | UNDEF },
+				eventType => { type => SCALAR | UNDEF },
+				mergeChain => { type => ARRAYREF },
+				filterChain => { type => ARRAYREF },
+				data => { type => SCALARREF },
+				rawRequest => { type => ARRAYREF },
+			});
     my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+    my $messageType = $args->{"messageType"};
+    my $eventType = $args->{"eventType"};
 
     if (defined $eventType and $eventType ne "") {
         $logger->debug("Handling event: $messageType, $eventType");
@@ -243,7 +288,7 @@ sub __handleEvent($$$$$$$$$$) {
     }
 
     if (defined $self->{EV_HANDLERS}->{$messageType} and defined $self->{EV_HANDLERS}->{$messageType}->{$eventType}) {
-        return $self->{EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
+        return $self->{EV_HANDLERS}->{$messageType}->{$eventType}->handleEvent($args);
     }
 
     if (defined $self->{EV_REGEX_HANDLERS}->{$messageType}) {
@@ -251,13 +296,13 @@ sub __handleEvent($$$$$$$$$$) {
         foreach my $regex (keys %{$self->{EV_REGEX_HANDLERS}->{$messageType}}) {
             $logger->debug("Checking $eventType against $regex");
             if ($eventType =~ /$regex/) {
-                return $self->{EV_REGEX_HANDLERS}->{$messageType}->{$regex}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
+                return $self->{EV_REGEX_HANDLERS}->{$messageType}->{$regex}->handleEvent($args);
             }
         }
     }
 
     if (defined $self->{MSG_HANDLERS}->{$messageType}) {
-        return $self->{MSG_HANDLERS}->{$messageType}->handleEvent($doc, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request);
+        return $self->{MSG_HANDLERS}->{$messageType}->handleEvent($args);
     }
 
     throw perfSONAR_PS::Error_compat("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
@@ -269,7 +314,7 @@ sub __handleEvent($$$$$$$$$$) {
     handler or an event type handler for events in that type of message. It
     returns 0 if it's invalid and non-zero if it's valid.
 =cut
-sub isValidMessageType($$) {
+sub isValidMessageType {
     my ($self, $messageType) = @_;
     my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
@@ -288,7 +333,7 @@ sub isValidMessageType($$) {
     event type found in a specific message type can be handled. It returns
     0 if it's invalid and non-zero if it's valid.
 =cut
-sub isValidEventType($$$) {
+sub isValidEventType {
     my ($self, $messageType, $eventType) = @_;
     my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
@@ -317,7 +362,7 @@ sub isValidEventType($$$) {
     The hasFullMessageHandler checks if there is a full message handler for
     the specified message type.
 =cut
-sub hasFullMessageHandler($$) {
+sub hasFullMessageHandler {
     my ($self, $messageType) = @_;
 
     if (defined $self->{FULL_MSG_HANDLERS}->{$messageType}) {
@@ -331,7 +376,7 @@ sub hasFullMessageHandler($$) {
     The hasMessageHandler checks if there is a message handler for
     the specified message type.
 =cut
-sub hasMessageHandler($$) {
+sub hasMessageHandler {
     my ($self, $messageType) = @_;
 
     if (defined $self->{MSG_HANDLERS}->{$messageType}) {
@@ -341,33 +386,75 @@ sub hasMessageHandler($$) {
     return 0;
 }
 
-=head2 handleRequest($self, $request);
+=head2 handleRequest($self, $raw_request);
     The handleRequest function takes a perfSONAR_PS::Request element
     containing an incoming SOAP request and handles that request by parsing
     it, checking the message type, and either calling a full message
     handler, or iterating through the message calling the handler for each
     event type. This function sets the response for the request.
 =cut
-sub handleMessage($$$) {
-    my ($self, $message, $request) = @_;
+sub handleMessage {
+    my ($self, $message, $raw_request) = @_;
     my $logger = get_logger("perfSONAR_PS::RequestHandler");
 
     my $messageId = $message->getAttribute("id");
     my $messageType = $message->getAttribute("type");
 
-    if (!defined $messageType or $messageType eq "") {
+    if (not defined $messageType or $messageType eq "") {
         throw perfSONAR_PS::Error_compat("error.ma.no_message_type", "There was no message type specified");
     } elsif ($self->isValidMessageType($messageType) == 0) {
         throw perfSONAR_PS::Error_compat("error.ma.invalid_message_type", "Messages of type $messageType are unsupported", 1);
     }
 
-    chainMetadata($message);
-
     # The module will handle everything for this message type
     if ($self->hasFullMessageHandler($messageType)) {
-        my $ret_message = new perfSONAR_PS::XML::Document_string();
-        $self->__handleMessage($ret_message, $messageType, $message, $request);
-        $request->setResponse($ret_message->getValue());
+        my ($errorEventType, $errorMessage);
+
+        try {
+            my $ret_message = new perfSONAR_PS::XML::Document_string();
+            $self->__handleMessage({ output => $ret_message, messageId => $messageId, messageType => $messageType, message => $message, rawRequest => $raw_request });
+            $raw_request->setResponse($ret_message->getValue());
+        }
+        catch perfSONAR_PS::Error_compat with {
+            my $ex = shift;
+
+            $errorEventType = $ex->eventType;
+            $errorMessage = $ex->errorMessage;
+        }
+        catch perfSONAR_PS::Error with {
+            my $ex = shift;
+
+            $errorEventType = $ex->eventType;
+            $errorMessage = $ex->errorMessage;
+        }
+        otherwise {
+            my $ex = shift;
+
+            $logger->error("Error handling message block: $ex");
+
+            $errorEventType = "error.ma.internal_error";
+            $errorMessage = "An internal error occurred while servicing this metadata/data block";
+        };
+
+        if (defined $errorEventType) {
+            my $ret_message = new perfSONAR_PS::XML::Document_string();
+            my $retMessageId = "message.".genuid();
+
+            # we weren't given a return message type, so try to construct
+            # one by replacing Request with Response or sticking the term
+            # "Response" on the end of the type.
+            my $retMessageType = $messageType;
+            $retMessageType =~ s/Request/Response/;
+            if (!($retMessageType =~ /Response/)) {
+                $retMessageType .= "Response";
+            }
+
+            $logger->error("Description: \'$errorMessage\'");
+            getResultCodeMessage($ret_message, $retMessageId, $messageId, "", $retMessageType, $errorEventType, $errorMessage, undef, 1);
+
+            $raw_request->setResponse($ret_message->getValue());
+        }
+
         return;
     }
 
@@ -385,7 +472,7 @@ sub handleMessage($$$) {
             $name = $p->getAttribute("name");
             $value = extract($p, 0);
 
-            if (!defined $name or $name eq "") {
+            if (not defined $name or $name eq "") {
                 next;
             }
 
@@ -394,12 +481,13 @@ sub handleMessage($$$) {
         }
     }
 
-    my $found_pair = 0;
+    my $ret_message = perfSONAR_PS::XML::Document_string->new();
 
-    my $ret_message = new perfSONAR_PS::XML::Document_string();
-
-    my ($retMessageType, $retMessageNamespaces);
-    my $n = $self->__handleMessageBegin($ret_message, $messageId, $messageType, $msgParams, $request, \$retMessageType, \$retMessageNamespaces);
+    my ($n, $retMessageType, $retMessageNamespaces) = $self->__handleMessageBegin({
+                                                                                    output => $ret_message, messageId => $messageId,
+                                                                                    messageType => $messageType, messageParameters => $msgParams,
+                                                                                    rawRequest => $raw_request, message => $message,
+                                                                                });
     if ($n == 0) {
         # if they return non-zero, it means the module began the message for us
         # if they retutn zero, they expect us to start the message
@@ -408,7 +496,7 @@ sub handleMessage($$$) {
         # we weren't given a return message type, so try to construct
         # one by replacing Request with Response or sticking the term
         # "Response" on the end of the type.
-        if (!defined $retMessageType or $retMessageType eq "") {
+        if (not defined $retMessageType or $retMessageType eq "") {
             $retMessageType = $messageType;
             $retMessageType =~ s/Request/Response/;
             if (!($retMessageType =~ /Response/)) {
@@ -419,89 +507,268 @@ sub handleMessage($$$) {
         startMessage($ret_message, $retMessageType, $messageId, $retMessageType, "", $retMessageNamespaces);
     }
 
-    foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
-        my $found_md = 0;
+    my $chains = $self->parseChains($ret_message, $message);
 
-        foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
-            if($d->getAttribute("metadataIdRef") eq $m->getAttribute("id")) {
-                $found_pair = 1;
-                $found_md = 1;
+    $logger->debug("Requests: ".Dumper($chains));
 
-                my $eventType;
-                my $eventTypes = find($m, "./nmwg:eventType", 0);
-                my $found_event_type = 0;
-                foreach my $e ($eventTypes->get_nodelist) {
-                    $found_event_type = 1;
-                    my $value = extract($e, 1);
-                    if ($self->isValidEventType($messageType, $value)) {
-                        $eventType = $value;
-                        last;
-                    }
-                }
+    foreach my $request (@{ $chains }) {
+        $logger->debug("Request: ".Dumper($request));
 
-                my $errorEventType;
-                my $errorMessage;
-                if (($found_event_type && !defined $eventType) or (!$self->isValidMessageType($messageType))) {
-                    $errorEventType = "error.ma.event_type";
-                    $errorMessage = "No supported event types for message of type \"$messageType\"";
-                } else {
-                    try {
-                        $self->__handleEvent($ret_message, $messageId, $messageType, \%message_parameters, $eventType, $m, $d, $request);
-                    }
-                    catch perfSONAR_PS::Error_compat with {
-                        my $ex = shift;
+        my $filter_chain = $request->{"filter"};
+        my $merge_chain = $request->{"merge"};
+        my $data = $request->{"data"};
 
-                        $errorEventType = $ex->eventType;
-                        $errorMessage = $ex->errorMessage;
-                    }
-                    catch perfSONAR_PS::Error with {
-                        my $ex = shift;
-
-                        $errorEventType = $ex->eventType;
-                        $errorMessage = $ex->errorMessage;
-                    }
-                    otherwise {
-                        my $ex = shift;
-
-                        $logger->error("Error handling metadata/data block: $ex");
-
-                        $errorEventType = "error.ma.internal_error";
-                        $errorMessage = "An internal error occurred while servicing this metadata/data block";
-                    }
-                }
-
-                if (defined $errorEventType and $errorEventType ne "") {
-                    $logger->error("Couldn't handle requested metadata: $errorMessage");
-                    my $mdID = "metadata.".genuid();
-                    getResultCodeMetadata($ret_message, $mdID, $m->getAttribute("id"), $errorEventType);
-                    getResultCodeData($ret_message, "data.".genuid(), $mdID, $errorMessage, 1);
+        my $eventType;
+        my $found_event_type = 0;
+        foreach my $md (@{ $merge_chain }) {
+            my $eventTypes = find($md, "./nmwg:eventType", 0);
+            foreach my $e ($eventTypes->get_nodelist) {
+                $found_event_type = 1;
+                my $value = extract($e, 1);
+                if ($self->isValidEventType($messageType, $value)) {
+                    $eventType = $value;
+                    last;
                 }
             }
         }
 
-        if ($found_md == 0) {
-            my $msg = "Data trigger with id \"".$d->getAttribute("id")."\" has no matching metadata";
-            my $mdId = "metadata.".genuid();
-            my $dId = "data.".genuid();
-            $logger->error($msg);
-            getResultCodeMetadata($ret_message, $mdId, $d->getAttribute("metadataIdRef"), "error.ma.structure");
-            getResultCodeData($ret_message, $dId, $mdId, $msg, 1);
+        my $errorEventType;
+        my $errorMessage;
+        if (($found_event_type and not defined $eventType) or (not $self->isValidMessageType($messageType))) {
+            $errorEventType = "error.ma.event_type";
+            $errorMessage = "No supported event types for message of type \"$messageType\"";
+        } else {
+            try {
+                $self->__handleEvent({
+                                        output => $ret_message, messageId => $messageId, messageType => $messageType,
+                                        messageParameters => \%message_parameters, eventType => $eventType,
+                                        mergeChain => $merge_chain, filterChain => $filter_chain, data => $data,
+                                        rawRequest => $raw_request
+                                        });
+            }
+            catch perfSONAR_PS::Error_compat with {
+                my $ex = shift;
+
+                $errorEventType = $ex->eventType;
+                $errorMessage = $ex->errorMessage;
+            }
+            catch perfSONAR_PS::Error with {
+                my $ex = shift;
+
+                $errorEventType = $ex->eventType;
+                $errorMessage = $ex->errorMessage;
+            }
+            otherwise {
+                my $ex = shift;
+
+                $logger->error("Error handling metadata/data block: $ex");
+
+                $errorEventType = "error.ma.internal_error";
+                $errorMessage = "An internal error occurred while servicing this metadata/data block";
+            }
+        }
+
+        if (defined $errorEventType and $errorEventType ne "") {
+            $logger->error("Couldn't handle requested metadata: $errorMessage");
+            my $mdID = "metadata.".genuid();
+            getResultCodeMetadata($ret_message, $mdID, $data->getAttribute("metadataIdRef"), $errorEventType);
+            getResultCodeData($ret_message, "data.".genuid(), $mdID, $errorMessage, 1);
         }
     }
 
-    if ($found_pair == 0) {
-        my $mdID = "metadata.".genuid();
-        getResultCodeMetadata($ret_message, $mdID, "", "error.ma.no_metadata_data_pair");
-        getResultCodeData($ret_message, "data.".genuid(), $mdID, "There was no data/metadata pair found", 1);
-    }
-
-    $n = $self->__handleMessageEnd($ret_message, $messageId, $messageType);
+    $n = $self->__handleMessageEnd({ output => $ret_message, messageId => $messageId, messageType => $messageType });
     if ($n == 0) {
         endMessage($ret_message);
     }
 
-    $request->setResponse($ret_message->getValue());
+    $raw_request->setResponse($ret_message->getValue());
+
+    return;
 }
+
+sub parseChains {
+    my ($self, $output, $message) = @_;
+    my $logger = get_logger("perfSONAR_PS::RequestHandler");
+
+    my %message_metadata = ();
+    foreach my $m ($message->getChildrenByTagName("nmwg:metadata")) {
+        my $md_id = $m->getAttribute("id");
+
+        if (not defined $md_id  or $md_id eq "") {
+            $logger->error("Metadata has no identifier");
+            next;
+        }
+
+        if (exists $message_metadata{$md_id}) {
+            $logger->error("Duplicate metadata: ".$md_id);
+            next;
+        }
+
+        $message_metadata{$md_id} = $m;
+    }
+
+    my @chains = ();
+
+    # construct the set of chains
+    foreach my $d ($message->getChildrenByTagName("nmwg:data")) {
+        my $found_md = 0;
+        my $d_idRef = $d->getAttribute("metadataIdRef");
+
+        my $errorEventType;
+        my $errorMessage;
+
+        if (not defined $d_idRef or $d_idRef eq "") {
+            $errorEventType = "error.ma.structure";
+            $errorMessage = "Data trigger with id \"".$d_idRef."\" has no metadataIdRef";
+        } elsif (not exists $message_metadata{$d_idRef}) {
+            $errorEventType = "error.ma.structure";
+            $errorMessage = "Data trigger with id \"".$d_idRef."\" has no matching metadata";
+        } else {
+            try {
+                my ($mergeChain, $filterChain) = $self->parseChain(\%message_metadata, $d_idRef);
+
+                my %mdChains = ();
+
+                $mdChains{"filter"} = $filterChain;
+                $mdChains{"merge"} = $mergeChain;
+                $mdChains{"data"} = $d;
+
+                push @chains, \%mdChains;
+            }
+            catch perfSONAR_PS::Error_compat with {
+                my $ex = shift;
+
+                $errorEventType = $ex->eventType;
+                $errorMessage = $ex->errorMessage;
+            }
+            catch perfSONAR_PS::Error with {
+                my $ex = shift;
+
+                $errorEventType = $ex->eventType;
+                $errorMessage = $ex->errorMessage;
+            }
+            otherwise {
+                my $ex = shift;
+
+                $logger->error("Error parsing metadata/data block: $ex");
+
+                $errorEventType = "error.ma.internal_error";
+                $errorMessage = "An internal error occurred while parsing this metadata/data block";
+            }
+        }
+
+        if ($errorEventType) {
+            my $mdId = "metadata.".genuid();
+            my $dId = "data.".genuid();
+            $logger->error($errorMessage);
+            getResultCodeMetadata($output, $mdId, $d_idRef, $errorEventType);
+            getResultCodeData($output, $dId, $mdId, $errorMessage, 1);
+            next;
+        }
+    }
+
+    return \@chains;
+}
+
+sub mergeMetadataChain {
+    my ($self, $message_metadata, $baseId) = @_;
+
+    my %used_mds = ();
+    my @mds = ();
+    my $nextMdId = $baseId;
+
+    do {
+        if (not exists $message_metadata->{$nextMdId}) {
+            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId does not exist");
+        } elsif (exists $used_mds{$nextMdId}) {
+            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId appears multiple times in the chain");
+        }
+
+        $used_mds{$nextMdId} = 1;
+
+        my $m = $message_metadata->{$nextMdId};
+
+        push @mds, $m;
+
+        $nextMdId = $m->getAttribute("metadataIdRef");
+    } while(defined $nextMdId);
+
+    my @ret_mds = ();
+
+    my $prev_md;
+    foreach my $curr_md (reverse @mds) {
+        if (not defined $prev_md) {
+            $prev_md = $curr_md;
+            next;
+        }
+
+        metadataChaining($prev_md, $curr_md);
+        $curr_md->removeAttribute("metadataIdRef");
+        $prev_md = $curr_md;
+    }
+
+    push @ret_mds, $prev_md;
+
+    return \@ret_mds;
+}
+
+sub parseChain {
+    my ($self, $message_metadata, $baseId) = @_;
+
+    my $chained_mds;
+    my @filter_mds = ();
+    my %used_mds = ();
+
+    my $nextMdId = $baseId;
+
+    # populate the arrays with the filters/chain metadata
+    do {
+        if (not exists $message_metadata->{$nextMdId}) {
+            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId does not exist");
+        } elsif (exists $used_mds{$nextMdId}) {
+            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId appears multiple times in the chain");
+        }
+
+        $used_mds{$nextMdId} = 1;
+
+        my $m = $message_metadata->{$nextMdId};
+
+        my $md_idRef = $m->getAttribute("metadataIdRef");
+
+        my $mergeChain_currMd;
+
+        if ($md_idRef) {
+            $mergeChain_currMd = $self->mergeMetadataChain($message_metadata, $nextMdId);
+        } else {
+            my @mergeChain_currMd = ();
+            push @mergeChain_currMd, $message_metadata->{$nextMdId};
+            $mergeChain_currMd = \@mergeChain_currMd;
+        }
+
+        my $subject_idRef;
+        foreach my $md ( @{ $mergeChain_currMd } ) {
+            my $curr_subject_idRef = findvalue($m, './*[local-name()=\'subject\'/@metadataIdRef');
+
+            next if (not defined $curr_subject_idRef);
+
+            $curr_subject_idRef = $subject_idRef if (not defined $subject_idRef);
+
+            if ($curr_subject_idRef ne $subject_idRef) {
+                thrown perfSONAR_PS::Error_compat("error.ma.structure", "Merged metadata from chain beginning at $baseId have multiple, inconsistent subject metadataIdRefs");
+            }
+        }
+
+        if ($subject_idRef) {
+            push @filter_mds, $mergeChain_currMd;
+            $nextMdId = $subject_idRef;
+        } else {
+            $chained_mds = $mergeChain_currMd;
+        }
+    } while(not defined $chained_mds);
+
+    return ($chained_mds, \@filter_mds);
+}
+
 
 1;
 

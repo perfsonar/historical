@@ -7,6 +7,7 @@ use fields 'CLIENT', 'LS_CLIENT', 'LOGGER';
 use warnings;
 use strict;
 use Log::Log4perl qw(get_logger);
+use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -106,11 +107,11 @@ sub init {
         }
     }
 
-    $handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
-    $handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
-    $handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
-    $handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
-    $handler->addEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
+    $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
+    $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
+    $handler->registerEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/add/20070809", $self);
+    $handler->registerEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/update/20070809", $self);
+    $handler->registerEventHandler("TopologyChangeRequest", "http://ggf.org/ns/nmwg/topology/change/replace/20070809", $self);
 
     return 0;
 }
@@ -197,7 +198,28 @@ sub buildLSMetadata {
 }
 
 sub handleEvent {
-    my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+    my ($self, @args) = @_;
+      my $parameters = validate(@args,
+    		{
+    			output => 1,
+    			messageId => 1,
+    			messageType => 1,
+    			messageParameters => 1,
+    			eventType => 1,
+    			mergeChain => 1,
+    			filterChain => 1,
+    			data => 1,
+    			rawRequest => 1
+    		});
+
+    my $output = $parameters->{"output"};
+    my $messageId = $parameters->{"messageId"};
+    my $messageType = $parameters->{"messageType"};
+    my $message_parameters = $parameters->{"messageParameters"};
+    my $eventType = $parameters->{"eventType"};
+    my $d = $parameters->{"data"};
+    my $raw_request = $parameters->{"rawRequest"};
+    my $md = shift(@{ $parameters->{"mergeChain"} });
 
     my $retMetadata;
     my $retData;

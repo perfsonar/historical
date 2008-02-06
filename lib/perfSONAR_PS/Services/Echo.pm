@@ -7,6 +7,7 @@ use base 'perfSONAR_PS::Services::Base';
 use warnings;
 use strict;
 use Log::Log4perl qw(get_logger);
+use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -39,10 +40,10 @@ sub init($$$$) {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::Echo");
 
-	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/2.0", $self);
-	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0", $self);
-	$handler->addEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
-	$handler->addEventHandler_Regex("EchoRequest", "^echo.*", $self);
+	$handler->registerEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/2.0", $self);
+	$handler->registerEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0", $self);
+	$handler->registerEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
+	$handler->registerEventHandler_Regex("EchoRequest", "^echo.*", $self);
 
 	return 0;
 }
@@ -62,8 +63,29 @@ sub registerLS($$) {
 	return -1;
 }
 
-sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_message) = @_;
+sub handleEvent {
+	my ($self, @args) = @_;
+	my $parameters = validate(@args,
+			{
+			output => 1,
+			messageId => 1,
+			messageType => 1,
+			messageParameters => 1,
+			eventType => 1,
+			mergeChain => 1,
+			filterChain => 1,
+			data => 1,
+			rawRequest => 1
+			});
+
+	my $output = $parameters->{"output"};
+	my $messageId = $parameters->{"messageId"};
+	my $messageType = $parameters->{"messageType"};
+	my $message_parameters = $parameters->{"messageParameters"};
+	my $eventType = $parameters->{"eventType"};
+	my $d = $parameters->{"data"};
+	my $raw_request = $parameters->{"rawRequest"};
+	my $md = shift(@{ $parameters->{"mergeChain"} });
 
 	my $retMetadata;
 	my $retData;

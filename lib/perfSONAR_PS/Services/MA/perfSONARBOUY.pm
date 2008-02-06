@@ -170,8 +170,8 @@ sub init($$) {
 
   $self->{METADATADB} = $metadatadb;
 
-  $handler->addMessageHandler("SetupDataRequest", $self);
-  $handler->addMessageHandler("MetadataKeyRequest", $self);
+  $handler->registerMessageHandler("SetupDataRequest", $self);
+  $handler->registerMessageHandler("MetadataKeyRequest", $self);
 
   return 0;
 }
@@ -385,8 +385,29 @@ sub handleMessageEnd($$$) {
 }
 
 
-sub handleEvent($$$$$$$$$) {
-	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
+sub handleEvent {
+	my ($self, @args) = @_;
+	my $parameters = validate(@args,
+			{
+			output => 1,
+			messageId => 1,
+			messageType => 1,
+			messageParameters => 1,
+			eventType => 1,
+			mergeChain => 1,
+			filterChain => 1,
+			data => 1,
+			rawRequest => 1
+			});
+
+	my $output = $parameters->{"output"};
+	my $messageId = $parameters->{"messageId"};
+	my $messageType = $parameters->{"messageType"};
+	my $message_parameters = $parameters->{"messageParameters"};
+	my $eventType = $parameters->{"eventType"};
+	my $d = $parameters->{"data"};
+	my $raw_request = $parameters->{"rawRequest"};
+	my $md = shift(@{ $parameters->{"mergeChain"} });
 
 	if ($messageType eq "MetadataKeyRequest") {
 		return $self->maMetadataKeyRequest($output, $md, $raw_request, $message_parameters);

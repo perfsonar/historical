@@ -15,6 +15,7 @@ use perfSONAR_PS::Services::LS::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
+use Params::Validate qw(:all);
 
 my %ls_namespaces = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -85,11 +86,11 @@ sub init($$) {
     $self->{CONF}->{"ls"}->{"ls_repear_interval"} = 0;
   }
 
-  $handler->addFullMessageHandler("LSRegisterRequest", $self);
-  $handler->addFullMessageHandler("LSDeregisterRequest", $self);
-  $handler->addFullMessageHandler("LSKeepaliveRequest", $self);
-  $handler->addFullMessageHandler("LSQueryRequest", $self);
-  $handler->addFullMessageHandler("LSLookupRequest", $self);
+  $handler->registerFullMessageHandler("LSRegisterRequest", $self);
+  $handler->registerFullMessageHandler("LSDeregisterRequest", $self);
+  $handler->registerFullMessageHandler("LSKeepaliveRequest", $self);
+  $handler->registerFullMessageHandler("LSQueryRequest", $self);
+  $handler->registerFullMessageHandler("LSLookupRequest", $self);
 
   return 0;
 }
@@ -101,9 +102,22 @@ sub needLS($) {
 }
 
 sub handleMessage($$$$$) {
-	my ($self, $doc, $messageType, $message, $request) = @_;
+	my $self = shift;
+	my $args = validate(@_, 
+			{
+				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+				messageId => { type => SCALAR | UNDEF },
+				messageType => { type => SCALAR },
+				message => { type => SCALARREF },
+				rawRequest => { type => ARRAYREF },
+			});
 
-	my $messageId = $request->getRequestDOM()->getDocumentElement->getAttribute("id");
+	my $doc = $args->{"output"};
+	my $messageType = $args->{"messageType"};
+	my $messageId = $args->{"messageId"};
+	my $message = $args->{"message"};
+	my $request = $args->{"rawRequest"};
+
 	my $messageIdReturn = "message.".genuid();
 	(my $messageTypeReturn = $messageType) =~ s/Request/Response/;
 

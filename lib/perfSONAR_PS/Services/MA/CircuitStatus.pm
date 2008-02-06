@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::Services::MA::CircuitStatus;
 
 use base 'perfSONAR_PS::Services::Base';
@@ -26,6 +24,7 @@ use Module::Load;
 use Fcntl qw (:flock);
 use Fcntl;
 use Data::Dumper;
+use Params::Validate qw(:all);
 
 use perfSONAR_PS::Services::Base;
 use perfSONAR_PS::Services::MA::General;
@@ -246,9 +245,9 @@ sub init {
         $self->{LOGGER}->debug("Using \"$file\" to cache current results");
     }
 
-    $handler->addEventHandler("SetupDataRequest", "Path.Status", $self);
-    $handler->addEventHandler_Regex("SetupDataRequest", ".*select.*", $self);
-    $handler->addEventHandler("MetadataKeyRequest", "Path.Status", $self);
+    $handler->registerEventHandler("SetupDataRequest", "Path.Status", $self);
+    $handler->registerEventHandler_Regex("SetupDataRequest", ".*select.*", $self);
+    $handler->registerEventHandler("MetadataKeyRequest", "Path.Status", $self);
 
     return 0;
 }
@@ -258,7 +257,29 @@ sub needLS {
 }
 
 sub handleEvent {
-    my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $request) = @_;
+    my ($self, @args) = @_;
+      my $parameters = validate(@args,
+    		{
+    			output => 1,
+    			messageId => 1,
+    			messageType => 1,
+    			messageParameters => 1,
+    			eventType => 1,
+    			mergeChain => 1,
+    			filterChain => 1,
+    			data => 1,
+    			rawRequest => 1
+    		});
+
+    my $output = $parameters->{"output"};
+    my $messageId = $parameters->{"messageId"};
+    my $messageType = $parameters->{"messageType"};
+    my $message_parameters = $parameters->{"messageParameters"};
+    my $eventType = $parameters->{"eventType"};
+    my $d = $parameters->{"data"};
+    my $raw_request = $parameters->{"rawRequest"};
+    my $md = shift(@{ $parameters->{"mergeChain"} });
+
     my ($status, $res1, $res2);
 
     # This could be wrapped in try/catch

@@ -262,8 +262,8 @@ sub init {
 
     $self->buildHashedKeys;
 
-    $handler->addMessageHandler( "SetupDataRequest",   $self );
-    $handler->addMessageHandler( "MetadataKeyRequest", $self );
+    $handler->registerMessageHandler( "SetupDataRequest",   $self );
+    $handler->registerMessageHandler( "MetadataKeyRequest", $self );
 
     return 0;
 }
@@ -494,30 +494,36 @@ future releases.
 =cut
 
 sub handleEvent {
-    my (
-        $self,        $output,             $messageId,
-        $messageType, $message_parameters, $eventType,
-        $md,          $d,                  $raw_request
-    ) = @_;
+    my ($self, @args) = @_;
+      my $parameters = validate(@args,
+    		{
+    			output => 1,
+    			messageId => 1,
+    			messageType => 1,
+    			messageParameters => 1,
+    			eventType => 1,
+    			mergeChain => 1,
+    			filterChain => 1,
+    			data => 1,
+    			rawRequest => 1
+    		});
 
-    #   my ($self, @args) = @_;
-    #	  my $parameters = validate(@args,
-    #			{
-    #				output => 1,
-    #				messageId => 1,
-    #				messageType => 1,
-    #				message_parameters => 1,
-    #				eventType => 1,
-    #				md => 1,
-    #				d => 1,
-    #				raw_request => 1
-    #			});
+    my $output = $parameters->{"output"};
+    my $messageId = $parameters->{"messageId"};
+    my $messageType = $parameters->{"messageType"};
+    my $message_parameters = $parameters->{"messageParameters"};
+    my $eventType = $parameters->{"eventType"};
+    my $d = $parameters->{"data"};
+    my $raw_request = $parameters->{"rawRequest"};
+    my $md = shift(@{ $parameters->{"mergeChain"} });
+    my $filter_chain = shift(@{ $parameters->{"mergeChain"} });
 
     if ( $messageType eq "MetadataKeyRequest" ) {
         return $self->maMetadataKeyRequest(
             {
                 output             => $output,
                 md                 => $md,
+		filter_chain       => $filter_chain,
                 request            => $raw_request,
                 message_parameters => $message_parameters
             }
@@ -528,6 +534,7 @@ sub handleEvent {
             {
                 output             => $output,
                 md                 => $md,
+		filter_chain       => $filter_chain,
                 request            => $raw_request,
                 message_parameters => $message_parameters
             }
@@ -562,6 +569,7 @@ sub maMetadataKeyRequest {
         {
             output             => 1,
             md                 => 1,
+            filter_chain       => 1,
             request            => 1,
             message_parameters => 1
         }
@@ -968,10 +976,16 @@ sub maSetupDataRequest {
         {
             output             => 1,
             md                 => 1,
+            filter_chain       => 1,
             request            => 1,
             message_parameters => 1
         }
     );
+
+    my @filters = @{ $parameters->{filter_chain} };
+    if ($#filters != -1) {
+        # XXX we need to check for select filters
+    }
 
     my $mdId = q{};
     my $dId  = q{};
