@@ -16,8 +16,6 @@ The verbose flag allows lots of debug options to print to the screen.  If the op
 omitted the service will run in daemon mode.
 =cut
 
-our $VERSION = 0.06;
-
 use warnings;
 use strict;
 use Getopt::Long;
@@ -31,14 +29,7 @@ use Config::General;
 use Module::Load;
 use HTTP::Daemon;
 
-sub psService($$$);
-sub registerLS($);
-sub daemonize();
-sub lockPIDFile($$);
-sub unlockPIDFile($);
-sub killChildren();
-sub signalHandler();
-sub handleRequest($$$);
+our $VERSION = 0.06;
 
 my $libdir;
 my $confdir;
@@ -128,14 +119,14 @@ $SIG{ALRM} = 'IGNORE';
 $SIG{INT} = \&signalHandler;
 $SIG{TERM} = \&signalHandler;
 
-my $DEBUGFLAG = '';
-my $READ_ONLY = '';
-my $HELP = '';
-my $CONFIG_FILE  = '';
-my $LOGGER_CONF  = '';
-my $PIDDIR = '';
-my $PIDFILE = '';
-my $LOGOUTPUT = '';
+my $DEBUGFLAG = q{};
+my $READ_ONLY = q{};
+my $HELP = q{};
+my $CONFIG_FILE  = q{};
+my $LOGGER_CONF  = q{};
+my $PIDDIR = q{};
+my $PIDFILE = q{};
+my $LOGOUTPUT = q{};
 
 my $status = GetOptions (
         'config=s' => \$CONFIG_FILE,
@@ -146,14 +137,14 @@ my $status = GetOptions (
         'verbose' => \$DEBUGFLAG,
         'help' => \$HELP);
 
-if(!$status or $HELP) {
+if(not $status or $HELP) {
     print "$0: starts the MA daemon.\n";
     print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf]\n";
     exit(1);
 }
 
 my $logger;
-if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
+if (not defined $LOGGER_CONF or $LOGGER_CONF eq q{}) {
     use Log::Log4perl qw(:easy);
 
     my $output_level = $INFO;
@@ -166,7 +157,7 @@ if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
         layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
     );
 
-    if (defined $LOGOUTPUT and $LOGOUTPUT ne "") {
+    if (defined $LOGOUTPUT and $LOGOUTPUT ne q{}) {
         $logger_opts{file} = $LOGOUTPUT;
     }
 
@@ -185,7 +176,7 @@ if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
     $logger->level($output_level);
 }
 
-if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
+if (not defined $CONFIG_FILE or $CONFIG_FILE eq q{}) {
     $CONFIG_FILE = $confdir."/daemon.conf";
 }
 
@@ -193,17 +184,17 @@ if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
 my $config =  new Config::General($CONFIG_FILE);
 my %conf = $config->getall;
 
-if (!defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq "") {
+if (not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{}) {
     $logger->warn("Setting maximum worker lifetime at 60 seconds");
     $conf{"max_worker_lifetime"} = 60;
 }
 
-if (!defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq "") {
+if (not defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq q{}) {
     $logger->warn("Setting maximum worker processes at 32");
     $conf{"max_worker_processes"} = 32;
 }
 
-if (!defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq "") {
+if (not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq q{}) {
     $logger->warn("Setting LS registration interval at 60 minutes");
     $conf{"ls_registration_interval"} = 60;
 }
@@ -211,26 +202,26 @@ if (!defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interva
 # turn the interval from minutes to seconds
 $conf{"ls_registration_interval"} *= 60;
 
-if (!defined $conf{"disable_echo"} or $conf{"disable_echo"} eq "") {
+if (not defined $conf{"disable_echo"} or $conf{"disable_echo"} eq q{}) {
     $logger->warn("Enabling echo service for each endpoint unless specified otherwise");
     $conf{"disable_echo"} = 0;
 }
 
-if (!defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq "") {
+if (not defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq q{}) {
     $logger->warn("Setting reaper interval to 20 seconds");
     $conf{"reaper_interval"} = 20;
 }
 
-if (!defined $PIDDIR or $PIDDIR eq "") {
-    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
+if (not defined $PIDDIR or $PIDDIR eq q{}) {
+    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne q{}) {
         $PIDDIR = $conf{"pid_dir"};
     } else {
         $PIDDIR = "/var/run";
     }
 }
 
-if (!defined $PIDFILE or $PIDFILE eq "") {
-    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne "") {
+if (not defined $PIDFILE or $PIDFILE eq q{}) {
+    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne q{}) {
         $PIDFILE = $conf{"pid_file"};
     } else {
         $PIDFILE = "ps.pid";
@@ -252,7 +243,7 @@ my %modules_loaded = ();
 my %port_configs = ();
 my %service_configs = ();
 
-if (!defined $conf{"port"}) {
+if (not defined $conf{"port"}) {
     $logger->error("No ports defined");
     exit(-1);
 }
@@ -260,9 +251,11 @@ if (!defined $conf{"port"}) {
 foreach my $port (keys %{ $conf{"port"} }) {
     my %port_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}) };
 
+    next if (defined $port_conf{"disabled"} and $port_conf{"disabled"} == 1);
+
     $service_configs{$port} = \%port_conf;
 
-    if (!defined $conf{"port"}->{$port}->{"endpoint"}) {
+    if (not defined $conf{"port"}->{$port}->{"endpoint"}) {
         $logger->warn("No endpoints specified for port $port");
         next;
     }
@@ -272,7 +265,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
                         ReuseAddr => 1,
                         Timeout => $port_conf{"reaper_interval"},
                     ); 
-    if (!defined $listener != 0) {
+    if (not defined $listener != 0) {
         $logger->error("Couldn't start daemon on port $port");
         exit(-1);
     }
@@ -296,12 +289,12 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
         $handlers{$port}->{$endpoint} = perfSONAR_PS::RequestHandler->new();
 
-        if (!defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq "") {
+        if (not defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq q{}) {
             $logger->error("No module specified for $port:$endpoint");
             exit(-1);
         }
 
-        if (!defined $modules_loaded{$endpoint_conf{"module"}}) {
+        if (not defined $modules_loaded{$endpoint_conf{"module"}}) {
             load $endpoint_conf{"module"};
             $modules_loaded{$endpoint_conf{"module"}} = 1;
         }
@@ -322,9 +315,9 @@ foreach my $port (keys %{ $conf{"port"} }) {
         }
 
         # the echo module is loaded by default unless otherwise specified
-        if ((!defined $endpoint_conf{"disable_echo"} or $endpoint_conf{"disable_echo"} == 0) and
-                (!defined $conf{"disable_echo"} or $conf{"disable_echo"} == 0)) {
-            if (!defined $modules_loaded{$echo_module}) {
+        if ((not defined $endpoint_conf{"disable_echo"} or $endpoint_conf{"disable_echo"} == 0) and
+                (not defined $conf{"disable_echo"} or $conf{"disable_echo"} == 0)) {
+            if (not defined $modules_loaded{$echo_module}) {
                 load $echo_module;
                 $modules_loaded{$echo_module} = 1;
             }
@@ -348,9 +341,14 @@ foreach my $port (keys %{ $conf{"port"} }) {
     }
 }
 
+if (scalar(keys %listeners) == 0) {
+    $logger->error("No ports enabled");
+    exit(-1);
+}
+
 # Daemonize if not in debug mode. This must be done before forking off children
 # so that the children are daemonized as well.
-if(!$DEBUGFLAG) {
+if(not $DEBUGFLAG) {
 # flush the buffer
     $| = 1;
 	&daemonize;
@@ -364,13 +362,13 @@ foreach my $port (keys %listeners) {
         %child_pids = ();
         $0 .= " - Listener ($port)";
         psService($listeners{$port}, $handlers{$port}, $service_configs{$port});
-        exit(0);
+         exit(0);
     } elsif ($pid < 0) {
         $logger->error("Couldn't spawn listener child");
         killChildren();
         exit(-1);
     } else {
-        $child_pids{$pid} = "";
+        $child_pids{$pid} = q{};
     }
 }
 
@@ -387,7 +385,7 @@ foreach my $ls_args (@ls_services) {
         exit(-1);
     }
 
-    $child_pids{$ls_pid} = "";
+    $child_pids{$ls_pid} = q{};
 }
 
 unlockPIDFile($pidfile);
@@ -403,7 +401,7 @@ process to handle the request and pass the request to the request handler.
 The function also tracks the processes spawned and kills them if they
 go on for too long, responding to the request with an error.
 =cut
-sub psService($$$) {
+sub psService {
     my ($listener, $handlers, $service_config) = @_;
     my $max_worker_processes;
 
@@ -438,7 +436,7 @@ sub psService($$$) {
 
                     my $ret_message = new perfSONAR_PS::XML::Document_string();
                     my $msg = "Timeout occurred, current limit is ".$child_pids{$pid}->{"child_timeout_length"}." seconds. Try decreasing the breadth of your search if possible.";
-                    getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.MA", $msg, undef, 1);
+                    getResultCodeMessage($ret_message, "message.".genuid(), q{}, q{}, "response", "error.perfSONAR_PS.MA", $msg, undef, 1);
 
                     my $response = HTTP::Response->new();
                     $response->message("success");
@@ -452,7 +450,7 @@ sub psService($$$) {
         }
 
         my $handle = $listener->accept;
-        if (!defined $handle) {
+        if (not defined $handle) {
             my $msg = "Accept returned nothing, likely a timeout occurred";
             $logger->debug($msg);
         } else {
@@ -464,7 +462,7 @@ sub psService($$$) {
                 $0 .= " - ".$handle->peerhost();
 
                 my $http_request = $handle->get_request;
-                if (!defined $http_request) {
+                if (not defined $http_request) {
                     my $msg = "No HTTP Request received from host:\t".$handle->peerhost();
                     $logger->error($msg);
                     $handle->close;
@@ -472,10 +470,10 @@ sub psService($$$) {
                 }
 
                 my $request = perfSONAR_PS::Request->new($handle, $http_request);
-                if (!defined $handlers->{$request->getEndpoint()}) {
+                if (not defined $handlers->{$request->getEndpoint()}) {
                     my $ret_message = new perfSONAR_PS::XML::Document_string();
                     my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
-                    getResultCodeMessage($ret_message, "message.".genuid(), "", "", "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
+                    getResultCodeMessage($ret_message, "message.".genuid(), q{}, q{}, "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
                     $request->setResponse($ret_message->getValue());
                     $request->finish();
                 } else {
@@ -495,6 +493,8 @@ sub psService($$$) {
             }
         }
     }
+
+    return;
 }
 
 =head2 registerLS($args)
@@ -502,7 +502,7 @@ sub psService($$$) {
     is responsible for calling the specified service's 'registerLS'
     function regularly.
 =cut
-sub registerLS($) {
+sub registerLS {
     my ($args) = @_;
 
     my $service = $args->{"service"};
@@ -513,9 +513,15 @@ sub registerLS($) {
     while(1) {
         my $sleep_time;
 
-        $service->registerLS(\$sleep_time);
+        eval {
+            $service->registerLS(\$sleep_time);
+        };
+        if ($@) {
+            $logger->error("Problem running register LS: $@");
+            $sleep_time = undef;
+        }
 
-        if (!defined $sleep_time or $sleep_time eq "") {
+        if (not defined $sleep_time or $sleep_time eq q{}) {
             $sleep_time = $default_interval;
         }
 
@@ -523,6 +529,8 @@ sub registerLS($) {
 
         sleep($sleep_time);
     }
+
+    return;
 }
 
 =head2 handleRequest($handler, $request, $endpoint_conf);
@@ -530,10 +538,10 @@ This function is a wrapper around the handler's handleRequest function.
 It's purpose is to ensure that if a crash occurs or a perfSONAR_PS::Error_compat
 message is thrown, the client receives a proper response.
 =cut
-sub handleRequest($$$) {
+sub handleRequest {
     my ($handler, $request, $endpoint_conf) = @_;
 
-    my $messageId = "";
+    my $messageId = q{};
 
     try {
         my $error;
@@ -552,7 +560,7 @@ sub handleRequest($$$) {
         }
 
         $request->parse(\%ns, \$error);
-        if (defined $error and $error ne "") {
+        if (defined $error and $error ne q{}) {
             throw perfSONAR_PS::Error_compat("error.transport.parse_error", "Error parsing request: $error");
         }
 
@@ -568,7 +576,7 @@ sub handleRequest($$$) {
 
 
         my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, "", "response", $ex->eventType, $ex->errorMessage, undef, 1);
+        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", $ex->eventType, $ex->errorMessage, undef, 1);
         $request->setResponse($ret_message->getValue());
     }
     catch perfSONAR_PS::Error_compat with {
@@ -579,7 +587,7 @@ sub handleRequest($$$) {
 
 
         my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, "", "response", $ex->eventType, $ex->errorMessage, undef, 1);
+        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", $ex->eventType, $ex->errorMessage, undef, 1);
         $request->setResponse($ret_message->getValue());
     }
     otherwise { 
@@ -588,17 +596,19 @@ sub handleRequest($$$) {
         $logger->error($msg);
 
         my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, "", "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
+        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
         $request->setResponse($ret_message->getValue());
     };
 
     $request->finish();
+
+    return;
 }
 
 =head2 daemonize
 Sends the program to the background by eliminating ties to the calling terminal.
 =cut
-sub daemonize() {
+sub daemonize {
     chdir '/' or die "Can't chdir to /: $!";
     open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
     open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
@@ -607,6 +617,7 @@ sub daemonize() {
     exit if $pid;
     setsid or die "Can't start a new session: $!";
     umask 0;
+    return;
 }
 
 =head2 lockPIDFile($piddir, $pidfile);
@@ -614,7 +625,7 @@ The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
-sub lockPIDFile($$) {
+sub lockPIDFile {
     $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
     die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
@@ -623,7 +634,7 @@ sub lockPIDFile($$) {
     flock(PIDFILE, LOCK_EX);
     my $p_id = <PIDFILE>;
     chomp($p_id) if (defined $p_id);
-    if(defined $p_id and $p_id ne "") {
+    if(defined $p_id and $p_id ne q{}) {
         open(PSVIEW, "ps -p ".$p_id." |");
         my @output = <PSVIEW>;
         close(PSVIEW);
@@ -637,11 +648,11 @@ sub lockPIDFile($$) {
     return *PIDFILE;
 }
 
-=head2 unlockPIDFile($)
+=head2 unlockPIDFile
 This file writes the pid of the call process to the filehandle passed in,
 unlocks the file and closes it.
 =cut
-sub unlockPIDFile($) {
+sub unlockPIDFile {
     my($filehandle) = @_;
 
     truncate($filehandle, 0);
@@ -651,6 +662,8 @@ sub unlockPIDFile($) {
     close($filehandle);
 
     $logger->debug("Unlocked pid file");
+
+    return;
 }
 
 =head2 killChildren
@@ -658,17 +671,19 @@ Kills all the children for this process off. It uses global variables
 because this function is used by the signal handler to kill off all
 child processes.
 =cut
-sub killChildren() {
+sub killChildren {
     foreach my $pid (keys %child_pids) {
         kill("SIGINT", $pid);
     }
+
+    return;
 }
 
 =head2 signalHandler
 Kills all the children for the process and then exits
 =cut
-sub signalHandler() {
-    killChildren();
+sub signalHandler {
+    killChildren;
     exit(0);
 }
 

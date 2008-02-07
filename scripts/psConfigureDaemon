@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Config::General qw(ParseConfig SaveConfig);
 use Sys::Hostname;
+use Data::Dumper;
 
 sub note();
 sub ask($$$$);
@@ -45,23 +46,24 @@ while (1) {
 	my $input;
 
 	print "1) Add/Edit endpoint\n";
-	print "2) Set global values\n";
-	print "3) Save configuration\n";
-	print "4) Exit\n";
-	$input = &ask("? ", "", undef, '[1234]');
+	print "2) Enable/Disable port/endpoint\n";
+	print "3) Set global values\n";
+	print "4) Save configuration\n";
+	print "5) Exit\n";
+	$input = &ask("? ", "", undef, '[12345]');
 
-	if ($input == 4) {
+	if ($input == 5) {
 		exit(0);
-	} elsif ($input == 3) {
+	} elsif ($input == 4) {
 		if (-f $file) {
 			system("mv $file $file~");
 		}
 
-		SaveConfig($file, \%config);
+		SaveConfig_mine($file, \%config);
 		print "\n";
 		print "Saved config to $file\n";
 		print "\n";
-	} elsif ($input == 2) {
+	} elsif ($input == 3) {
 		$config{"max_worker_processes"} = &ask("Enter the maximum number of children processes (0 means infinite) ", "0", $config{"max_worker_processes"}, '^\d+$');
 		$config{"max_worker_lifetime"} = &ask("Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0", $config{"max_worker_lifetime"}, '^\d+$');
 		$config{"disable_echo"} = &ask("Disable echo by default ", 0, $config{"disable_echo"}, '^[01]$');
@@ -70,6 +72,70 @@ while (1) {
 		$config{"reaper_interval"} = &ask("Interval between when children are repeaed ", 20, $config{"reaper_interval"}, '^\d+$');
 		$config{"pid_dir"} = &ask("Enter pid dir location ", "/var/run", $config{"pid_dir"}, "");
 		$config{"pid_file"} = &ask("Enter pid filename ", "ps.pid", $config{"pid_file"}, "");
+	} elsif ($input == 2) {
+		my @elements = ();
+		my %status = ();
+
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			push @elements, $port;
+
+			if (defined $config{"port"}->{$port}->{"disabled"} and  $config{"port"}->{$port}->{"disabled"} == 1) {
+				$status{$port} = 1;
+			}
+		}
+
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
+				push @elements, "$port:$endpoint";
+				if (defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} and
+						$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} == 1) {
+					$status{"$port:$endpoint"} = 1;
+				}
+			}
+		}
+
+		if ($#elements > -1) {
+			print "\n";
+			print "Select element to enable/disable: \n";
+			for(my $i = 0; $i <= $#elements; $i++) {
+				print " $i) $elements[$i] ";
+				print " *" if (defined $status{$elements[$i]});
+				print "\n";
+			}
+			print "\n";
+			print " * element is disabled\n";
+			print "\n";
+
+			do {
+				$input = &ask("Select a number from the above ", "", undef, '^\d+$');
+			} while ($input > $#elements);
+
+			my $new_status;
+
+			if (defined $status{$elements[$input]}) {
+				$new_status = 0;
+			} else {
+				$new_status = 1;
+			}
+
+			print "\n";
+			if ($new_status) {
+				print "Disabling";
+			} else {
+				print "Enabling";
+			}
+
+			if ($elements[$input] =~ /^(\d+):(.*)$/) {
+				print " endpoint ".$elements[$input]."\n";
+				$config{"port"}->{$1}->{"endpoint"}->{$2}->{"disabled"} = $new_status;
+			} elsif ($elements[$input] =~ /^(\d+)$/) {
+				print " port ".$elements[$input]."\n";
+				$config{"port"}->{$1}->{"disabled"} = $new_status;
+			}
+			print "\n";
+		}
 	} elsif ($input == 1) {
 		my @endpoints = ();
 		foreach my $port (sort keys %{ $config{"port"} }) {
@@ -410,6 +476,82 @@ sub ask($$$$) {
   } while ($regex ne '' and !($result =~ /$regex/));
 
   return $result;
+}
+
+sub SaveConfig_mine {
+	my ($file, $hash) = @_;
+
+	my $fh;
+
+	open($fh, ">$file");
+	printValue($fh, "", $hash, -4);
+	close($fh);
+}
+
+sub printSpaces {
+	my ($fh, $count) = @_;
+	while($count > 0) {
+		print $fh " ";
+		$count--;
+	}
+}
+
+sub printScalar {
+	my ($fileHandle, $name, $value, $depth) = @_;
+
+	printSpaces($fileHandle, $depth);
+	if ($value =~ /\n/) {
+		my @lines = split($value, '\n');
+		print $fileHandle "$name     <<EOF\n";
+		foreach my $line (@lines) {
+			printSpaces($fileHandle, $depth);
+			print $fileHandle $line."\n";
+		}
+		printSpaces($fileHandle, $depth);
+		print $fileHandle "EOF\n";
+	} else {
+		print $fileHandle "$name     ".$value."\n";
+	}
+}
+
+sub printValue {
+	my ($fileHandle, $name, $value, $depth) = @_;
+
+	if (ref $value  eq "") {
+		printScalar($fileHandle, $name, $value, $depth);
+
+		return;
+	} elsif (ref $value eq "ARRAY") {
+		foreach my $elm (@{ $value }) {
+			printValue($fileHandle, $name, $elm, $depth);
+		}
+
+		return;
+	} elsif (ref $value eq "HASH") {
+		if ($name eq "endpoint" or $name eq "port") {
+			foreach my $elm (keys %{ $value }) {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "<$name $elm>\n";
+				printValue($fileHandle, "", $value->{$elm}, $depth+4);
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "</$name>\n";
+			}
+		} else {
+			if ($name ne "") {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "<$name>\n";
+			}
+			foreach my $elm (keys %{ $value }) {
+				printValue($fileHandle, $elm, $value->{$elm}, $depth+4);
+			}
+			if ($name ne "") {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "</$name>\n";
+			}
+		}
+
+		return;
+	}
 }
 
 __END__
