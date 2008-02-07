@@ -33,35 +33,10 @@ use XML::LibXML;
 
 our $VERSION = 0.06;
 use base 'Exporter';
-our @EXPORT = ('readXML','chainMetadata',
+our @EXPORT = ('readXML','defaultMergeMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'escapeString', 'unescapeString',
-             'makeEnvelope', 'mapNamespaces', 'mergeConfig', 'resolveMetadataChain');
-
-
-sub find($$$);
-sub findvalue($$);
-sub makeEnvelope($);
-sub readXML($);
-sub chainMetadata($);
-sub metadataChaining($$);
-sub getPath($);
-sub elements($$$);
-sub attributes($$);
-sub exact($$);
-sub countRefs($$$$$);
-sub genuid();
-sub extract($$);
-sub mapNamespaces($$);
-sub reMap($$$$);
-sub consultArchive($$$$);
-sub escapeString($);
-sub unescapeString($);
-sub convertISO($);
-sub mergeConfig($$);
-sub mergeHash($$$);
-sub duplicateHash($$);
-sub duplicateArray($$);
+             'makeEnvelope', 'mapNamespaces', 'mergeConfig');
 
 
 =head2 find($node, $query, $return_first)
@@ -73,7 +48,7 @@ sub duplicateArray($$);
     'undef' if ->find throws an errors. If the $return_first is set to one, the
     function returns only the first node from the nodes found.
 =cut
-sub find($$$) {
+sub find {
     my ($node, $query, $return_first) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
     my $res;
@@ -106,7 +81,7 @@ sub find($$$) {
     findvalue function, this function will only return the text contents of the
     first node found.
 =cut
-sub findvalue($$) {
+sub findvalue {
     my ($node, $xpath) = @_;
 
     my $found_node;
@@ -121,7 +96,7 @@ sub findvalue($$) {
 =head2 makeEnvelope($content)
    Wraps the specified content in a soap envelope and returns it as a string.
 =cut
-sub makeEnvelope($) {
+sub makeEnvelope {
     my($content) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
     my $string = "<SOAP-ENV:Envelope xmlns:SOAP-ENC=\"http://schemas.xmlsoap.org/soap/encoding/\"\n";
@@ -141,7 +116,7 @@ sub makeEnvelope($) {
     form.  The <xml> tag will be extracted from the final returned string.
     Function will warn on error, and return an empty string.
 =cut
-sub readXML($) {
+sub readXML {
     my ($file)  = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -164,38 +139,6 @@ sub readXML($) {
     }
 
     return "";
-}
-
-=head2 resolveMetadataChain($metadata, $dom)
-  Given a metadata and a dom, this function will resolve the metadata chain and
-  merge the specified metadata with all its parent elements.
-=cut
-sub resolveMetadataChain($$) {
-    my ($metadata, $dom) = @_;
-
-    if (!defined $metadata->getAttribute("metadataIdRef")) {
-        return $metadata;
-    }
-
-    my %metadata = ();
-    foreach my $md ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
-        if ($md->getAttribute("id")) {
-            $metadata{$md->getAttribute("id")} = $md;
-        }
-    }
-
-    my $curr_md = $metadata;
-    while($curr_md->getAttribute("metadataIdRef")) {
-        if (!defined $metadata{$curr_md->getAttribute("metadataIdRef")}) {
-            return undef;
-        }
-
-        $curr_md = $metadata{$curr_md->getAttribute("metadataIdRef")};
-
-        metadataChaining($curr_md, $metadata);
-    }
-
-    return $metadata;
 }
 
 =head2 chainMetadata($dom)
@@ -242,7 +185,7 @@ sub resolveMetadataChain($$) {
     This chaining is useful for 'factoring out' large chunks of XML.
 =cut
 
-sub chainMetadata($) {
+sub chainMetadata {
     my($dom) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -274,7 +217,7 @@ sub chainMetadata($) {
                     foreach my $md2 ($dom->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
                         if($md->getAttribute("metadataIdRef") and
                                 $md2->getAttribute("id") eq $md->getAttribute("metadataIdRef")){
-                            metadataChaining($md2, $md);
+                            defaultMergeMetadata($md2, $md);
                             $md->removeAttribute("metadataIdRef");
                             last;
                         }
@@ -290,7 +233,7 @@ sub chainMetadata($) {
     return $dom;
 }
 
-sub metadataChaining($$) {
+sub defaultMergeMetadata {
     my($node, $original) = @_;
     if(!($node->getName eq "\#text")) {
         if($node->getName eq "nmwg:parameter") {
@@ -302,7 +245,7 @@ sub metadataChaining($$) {
 
         if($node->hasChildNodes()) {
             foreach my $c ($node->childNodes) {
-                metadataChaining($c, $original);
+                defaultMergeMetadata($c, $original);
             }
         }
     }
@@ -315,7 +258,7 @@ sub metadataChaining($$) {
     notation, and the root elements.  This path is then returned.  Note this
     function should not be called externally.
 =cut 
-sub getPath($) {
+sub getPath {
     my($node) = @_;
     my $path = "";
 
@@ -337,7 +280,7 @@ sub getPath($) {
     'missing' elements when needed.  Note this function should not be called
     externally.
 =cut 
-sub elements($$$) {
+sub elements {
     my($node, $original, $extra) = @_;
     my $path = getPath($node);
     if($path) {
@@ -359,7 +302,7 @@ sub elements($$$) {
     Given a node (and knowing what the original structure looks like) adds
     'missing' attributes.  Note this function should not be called externally.
 =cut 
-sub attributes($$) {
+sub attributes {
     my($node, $original) = @_;
     my $path = getPath($node);
     foreach my $attr ($node->attributes) {
@@ -382,7 +325,7 @@ sub attributes($$) {
     Checks parameter nodes for 'exact' matches.  Note this function should not
     be called externally.
 =cut 
-sub exact($$) {
+sub exact {
     my($node, $original) = @_;
     my $path = getPath($node);
 
@@ -413,7 +356,7 @@ sub exact($$) {
     to the objects.  This is useful for eliminating 'dead' blocks that may not
     contain a trigger. The function will return -1 on error.
 =cut 
-sub countRefs($$$$$) {
+sub countRefs {
     my($id, $dom, $uri, $element, $attr) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -439,7 +382,7 @@ sub countRefs($$$$$) {
 =head2 genuid()
     Generates a random number.
 =cut
-sub genuid() {
+sub genuid {
     my $r = int(rand(16777216))+1048576;
     return $r;
 }
@@ -448,7 +391,7 @@ sub genuid() {
     Returns a 'value' from a xml element, either the value attribute or the
     text field.
 =cut
-sub extract($$) {
+sub extract {
     my($node, $clean) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
     if(defined $node and $node ne "") {
@@ -470,7 +413,7 @@ sub extract($$) {
 =head2 mapNamespaces($node, \%namespaces)
     Fills in a uri -> prefix mapping of the namespaces.
 =cut
-sub mapNamespaces($$) {
+sub mapNamespaces {
     my ($node, $namespaces) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -501,7 +444,7 @@ sub mapNamespaces($$) {
     Re-map the nodes namespace prefixes to known prefixes (to not screw with
     the XPath statements that will occur later).
 =cut
-sub reMap($$$$) {
+sub reMap {
     my($requestNamespaces, $namespaces, $node, $set_owner_prefix) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -564,7 +507,7 @@ sub reMap($$$$) {
     failure. $res contains the LibXML element on success and an error message
     on failure.
 =cut
-sub consultArchive($$$$) {
+sub consultArchive {
     my ($host, $port, $endpoint, $request) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -622,7 +565,7 @@ sub consultArchive($$$$) {
     This function does some basic XML character escaping. Replacing < with
     &lt;, & with &amp;, etc.
 =cut
-sub escapeString($) {
+sub escapeString {
     my ($input) = @_;
 
     $input =~ s/&/&amp;/g;
@@ -638,7 +581,7 @@ sub escapeString($) {
     This function does some basic XML character escaping. Replacing &lt; with
     <, &amp; with &, etc.
 =cut
-sub unescapeString($) {
+sub unescapeString {
     my ($input) = @_;
 
     $input =~ s/&lt;/</g;
@@ -653,7 +596,7 @@ sub unescapeString($) {
 =head2 mergeConfig($base, $specific)
     Merges the configurations in $base and $specific.
 =cut
-sub mergeConfig($$) {
+sub mergeConfig {
     my ($base, $specific) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -671,7 +614,7 @@ sub mergeConfig($$) {
 #   elements from the $specific hash will be used whenever a collision occurs.
 #   $skip_elements is a hash containing the set of keys whose values should be
 #   ignored.
-sub mergeHash($$$) {
+sub mergeHash {
 	my ($base, $specific, $skip_elements) = @_;
 	my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -699,7 +642,7 @@ sub mergeHash($$$) {
 # duplicateArray($array, $skip_elements)
 #   Internal function that duplicates the specified hash. It ignores hash
 #   elements with the keys specified in the $skip_elements.
-sub duplicateHash($$) {
+sub duplicateHash {
 	my ($hash, $skip_elements) = @_;
 	my $logger = get_logger("perfSONAR_PS::Common");
 
@@ -726,7 +669,7 @@ sub duplicateHash($$) {
 #   Internal function that duplicates the specified array. When duplicating
 #   hash elements in the array, the elements specified in skip_elements will be
 #   skipped.
-sub duplicateArray($$) {
+sub duplicateArray {
 	my ($array, $skip_elements) = @_;
 
 	my @old_array = @{ $array };
@@ -747,7 +690,7 @@ sub duplicateArray($$) {
 =head2 convertISO($iso)
     Given the time in ISO format, conver to 'unix' epoch seconds.
 =cut
-sub convertISO($) {
+sub convertISO {
     my($iso) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
     if(defined $iso and $iso ne "") {
