@@ -29,7 +29,8 @@ sub lookupLinkStatusRequest;
 sub writeoutLinkState_range;
 sub writeoutLinkState;
 
-my %namespaces = (
+my %status_namespaces = (
+    nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
     select=>"http://ggf.org/ns/nmwg/ops/select/2.0/",
     nmtopo=>"http://ogf.org/schema/network/topology/base/20070828/",
     ifevt=>"http://ggf.org/ns/nmwg/event/status/base/2.0/",
@@ -99,7 +100,7 @@ sub init {
                 SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
                   );
 
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, \%namespaces);
+        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, \%status_namespaces);
     }
 
 
@@ -266,73 +267,96 @@ sub handleEvent {
     if ($messageType eq "MeasurementArchiveStoreRequest") {
         return $self->handleStoreRequest($output, $md, $d);
     } elsif ($messageType eq "SetupDataRequest") {
-        my ($res1, $res2) = $self->resolveSelectChain($md, $raw_request);
+        my $selectTime;
 
-        my $selectTime = $res1;
-        my $subject_md = $res2;
+        my $metadataId;
+        my @filter = @{ $parameters->{filterChain} };
+        if ($#filter > -1) {
+            $selectTime = $self->resolveSelectChain($parameters->{filterChain});
+            my $curr_md = shift(@{ $filter[$#filter] });
+            $self->{LOGGER}->debug("MD: ".$curr_md->toString);
+            $metadataId = $curr_md->getAttribute("id");
+        } else {
+            $selectTime = $self->resolveCompatTime($md);
+            $metadataId = $md->getAttribute("id");
+        }
 
-        return $self->handleQueryRequest($output, $subject_md, $selectTime);
+        return $self->handleQueryRequest($output, $metadataId, $md, $selectTime);
     }
 }
 
+sub resolveCompatTime {
+    my ($self, $md) = @_;
+
+    my $ret_time;
+    my $time = findvalue($md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+    if (defined $time) {
+        if (lc($time) eq "all") {
+            $ret_time = perfSONAR_PS::Time->new("point", -1);
+        } elsif (lc($time) ne "now" and $time ne q{}) {
+            $ret_time = perfSONAR_PS::Time->new("point", $time);
+        }
+    }
+
+    return $ret_time;
+}
+
 sub resolveSelectChain {
-    my ($self, $md, $request) = @_;
+    my ($self, $filterChain) = @_;
 
-    if (!$request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
-        $self->{LOGGER}->debug("No select namespace means there is no select chain");
+    my ($time, $startTime, $endTime, $duration);
+
+    foreach my $filter_arr (@{ $filterChain }) {
+        my @filters = @{ $filter_arr };
+        my $filter = $filters[$#filters];
+        my $select_subject = find($filter, "./*[local-name()='subject' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
+
+        if (not defined $select_subject) {
+            # we definitely have a subject in this message, we just don't understand it
+            throw perfSONAR_PS::Error_compat("error.ma.unsupported_filter_type", "This Status MA only supports select filters and metadata ".$filter->getAttribute("id")." does not contain a select subject");
+        }
+
+        $self->{LOGGER}->debug("Filter: ".$filter->toString);
+
+        my $select_parameters = find($select_subject, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
+        
+        next if (not defined $select_parameters);
+    
+        my $curr_time = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"time\"]");
+        my $curr_startTime = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"startTime\"]");
+        my $curr_endTime = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"endTime\"]");
+        my $curr_duration = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"duration\"]");
+
+        $time = $curr_time if ($curr_time);
+        $duration = $curr_duration if ($curr_duration);
+        if ($curr_startTime) {
+            $startTime = $curr_startTime if (not defined $startTime or $curr_startTime > $startTime);
+        }
+
+        if ($curr_endTime) {
+            $endTime = $curr_endTime if (not defined $endTime or $curr_endTime > $endTime);
+        }
     }
 
-    if (!find($md, "./select:subject", 1)) {
-        $self->{LOGGER}->debug("No select subject means there is no select chain");
+    if (defined $time and (defined $startTime or defined $endTime or defined $duration)) {
+        throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters");
     }
 
-    if ($request->getNamespaces()->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} and find($md, "./select:subject", 1)) {
-        my $other_md = find($request->getRequestDOM(), "//nmwg:metadata[\@id=\"".find($md, "./select:subject", 1)->getAttribute("metadataIdRef")."\"]", 1);
-        if(!$other_md) {
-            throw perfSONAR_PS::Error_compat("error.ma.chaining", "Cannot resolve supposed subject chain in metadata.");
+    if (defined $time) {
+        if (lc($time) eq "now") {
+            return undef;
         }
+        return perfSONAR_PS::Time->new("point", $time);
+    }
 
-        if (!find($md, "./select:subject/select:parameters", 1)) {
-            throw perfSONAR_PS::Error_compat("error.ma.select", "No select parameters specified in given chain.");
-        }
-
-        my $time = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"time\"]");
-        my $startTime = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"startTime\"]");
-        my $endTime = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"endTime\"]");
-        my $duration = findvalue($md, "./select:subject/select:parameters/select:parameter[\@name=\"duration\"]");
-
-        if (defined $time and (defined $startTime or defined $endTime or defined $duration)) {
-            throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters");
-        }
-
-        if (defined $time) {
-            return (perfSONAR_PS::Time->new("point", $time), $other_md);
-        }
-
-        if (not defined $startTime) {
-            throw perfSONAR_PS::Error_compat("error.ma.select", "No start time specified");
-        } elsif (not defined $endTime and not defined $duration) {
-            throw perfSONAR_PS::Error_compat("error.ma.select", "No end time specified");
-        } elsif (defined $endTime) {
-            return (perfSONAR_PS::Time->new("range", $startTime, $endTime), $other_md);
-        } else {
-            return (perfSONAR_PS::Time->new("duration", $startTime, $duration), $other_md);
-        }
+    if (not defined $startTime) {
+        throw perfSONAR_PS::Error_compat("error.ma.select", "No start time specified");
+    } elsif (not defined $endTime and not defined $duration) {
+        throw perfSONAR_PS::Error_compat("error.ma.select", "No end time specified");
+    } elsif (defined $endTime) {
+        return perfSONAR_PS::Time->new("range", $startTime, $endTime);
     } else {
-        # No select subject means they didn't specify one which results in "now"
-        $self->{LOGGER}->debug("No select chain");
-
-        my $ret_time;
-        my $time = findvalue($md, "./nmwg:parameters/nmwg:parameter[\@name=\"time\"]");
-        if (defined $time) {
-            if (lc($time) eq "all") {
-                $ret_time = perfSONAR_PS::Time->new("point", -1);
-            } elsif (lc($time) ne "now" and $time ne q{}) {
-                $ret_time = perfSONAR_PS::Time->new("point", $time);
-            }
-        }
-
-        return ($ret_time, $md);
+        return perfSONAR_PS::Time->new("duration", $startTime, $duration);
     }
 }
 
@@ -444,16 +468,16 @@ sub __handleStoreRequest {
 }
 
 sub handleQueryRequest {
-    my ($self, $output, $subject_md, $time) = @_;
+    my ($self, $output, $metadataId, $subject_md, $time) = @_;
     my ($status, $res);
 
     my $eventType = findvalue($subject_md, "./nmwg:eventType");
 
     if ($eventType eq "Database.Dump") {
-        $self->lookupAllRequest($output, $subject_md);
+        $self->lookupAllRequest($output, $metadataId, $subject_md);
     } elsif ($eventType eq "Link.Status" or
             $eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
-        $self->lookupLinkStatusRequest($output, $subject_md, $time);
+        $self->lookupLinkStatusRequest($output, $metadataId, $subject_md, $time);
     } else {
         throw perfSONAR_PS::Error_compat("error.ma.event_type", "\'$eventType\' is not supported");
     }
@@ -463,7 +487,7 @@ sub handleQueryRequest {
 
 
 sub lookupAllRequest {
-    my ($self, $output, $subject_md) = @_;
+    my ($self, $output, $metadataId, $subject_md) = @_;
     my $localContent = q{};
     my ($status, $res);
 
@@ -495,7 +519,7 @@ sub lookupAllRequest {
         $md_content .= "<nmwg:subject id=\"sub$i\">\n";
         $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
         $md_content .= "</nmwg:subject>\n";
-        createMetadata($output, $mdID, $subject_md->getAttribute("id"), $md_content, undef);
+        createMetadata($output, $mdID, $metadataId, $md_content, undef);
         my $data_content = q{};
         foreach my $link (@{ $links{$link_id} }) {
             $data_content .= $self->writeoutLinkState_range($link);
@@ -508,7 +532,7 @@ sub lookupAllRequest {
 }
 
 sub lookupLinkStatusRequest {
-    my($self, $output, $md, $time) = @_;
+    my($self, $output, $metadataId, $md, $time) = @_;
     my ($status, $res);
 
     $self->{LOGGER}->debug("lookupLinkStatusRequest()");
@@ -540,19 +564,15 @@ sub lookupLinkStatusRequest {
         throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
     }
 
-    my $subID = "sub0";
-    my $md_content = q{};
-    $md_content .= "<nmwg:subject id=\"$subID\">\n";
-    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
-    $md_content .= "</nmwg:subject>\n";
-    $md_content .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
-    createMetadata($output, $md->getAttribute("id"), "", $md_content, undef);
-
     my $data_content = q{};
     foreach my $link (@{ $res->{$link_id} }) {
-        $data_content .= $self->writeoutLinkState_range($link);
+        if (defined $time and $time->getType() eq "point" and $time->getTime() != -1) {
+            $data_content .= $self->writeoutLinkState($link);
+        } else {
+            $data_content .= $self->writeoutLinkState_range($link);
+        }
     }
-    createData($output, "data.".genuid(), $md->getAttribute("id"), $data_content, undef);
+    createData($output, "data.".genuid(), $metadataId, $data_content, undef);
 
     return;
 }

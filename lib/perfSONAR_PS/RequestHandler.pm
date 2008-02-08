@@ -477,7 +477,7 @@ sub handleMessage {
     # it accepts. We'll try those.
     my %message_parameters = ();
 
-    my $msgParams = find($message, "./nmwg:parameters", 1);
+    my $msgParams = find($message, "./*[local-name()='parameters' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 1);
     if (defined $msgParams) {
         my $find_res = find($msgParams, "./*[local-name()='parameter']", 0);
         if ($find_res) {
@@ -524,6 +524,29 @@ sub handleMessage {
 
     my $chains = $self->parseChains($ret_message, $message);
 
+    my %outputMetadata = ();
+
+    foreach my $request (@{ $chains }) {
+        my $filter_chain = $request->{"filter"};
+        my $merge_chain = $request->{"merge"};
+
+        foreach my $md (@{ $merge_chain }) {
+            if (not defined $outputMetadata{$md->getAttribute("id")}) {
+                $ret_message->addExistingXMLElement($md);
+                $outputMetadata{$md->getAttribute("id")} = 1;
+            }
+        }
+
+        foreach my $mds (@{ $filter_chain }) {
+            foreach my $md (@{ $mds }) {
+                if (not defined $outputMetadata{$md->getAttribute("id")}) {
+                    $ret_message->addExistingXMLElement($md);
+                    $outputMetadata{$md->getAttribute("id")} = 1;
+                }
+            }
+        }
+    }
+
     foreach my $request (@{ $chains }) {
 
         my $filter_chain = $request->{"filter"};
@@ -533,7 +556,7 @@ sub handleMessage {
         my $eventType;
         my $found_event_type = 0;
         foreach my $md (@{ $merge_chain }) {
-            my $eventTypes = find($md, "./nmwg:eventType", 0);
+            my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
             foreach my $e ($eventTypes->get_nodelist) {
                 $found_event_type = 1;
                 my $value = extract($e, 1);
@@ -551,6 +574,8 @@ sub handleMessage {
             $errorMessage = "No supported event types for message of type \"$messageType\"";
         } else {
             try {
+                $self->{LOGGER}->debug("MD: ".$merge_chain->[0]->toString);
+
                 $self->__handleEvent({
                                         output => $ret_message, messageId => $messageId, messageType => $messageType,
                                         messageParameters => \%message_parameters, eventType => $eventType,
@@ -610,7 +635,7 @@ sub parseChains {
     my $messageType = $message->getAttribute("type");
 
     my %message_metadata = ();
-    foreach my $m ($message->getChildrenByTagName("nmwg:metadata")) {
+    foreach my $m ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "metadata")) {
         my $md_id = $m->getAttribute("id");
 
         if (not defined $md_id  or $md_id eq "") {
@@ -631,7 +656,7 @@ sub parseChains {
     my $found_pair = 0;
 
     # construct the set of chains
-    foreach my $d ($message->getChildrenByTagName("nmwg:data")) {
+    foreach my $d ($message->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
         my $d_idRef = $d->getAttribute("metadataIdRef");
 
         my $errorEventType;
@@ -750,13 +775,13 @@ sub __mergeMetadata {
 
     foreach my $md (( $prev_md, $curr_md )) {
         $self->{LOGGER}->debug("Prev MD: ".Dumper($md));
-        my $eventTypes = find($md, "./nmwg:eventType", 0);
+        my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
         foreach my $e ($eventTypes->get_nodelist) {
             my $value = extract($e, 1);
 
             if (exists $self->{MERGE_HANDLERS}->{$message_type} and
-                exists $self->{MERGE_HANDLERS}->{$message_type}->{$e}) {
-                return $self->{MERGE_HANDLERS}->{$message_type}->{$e}->mergeMetadata({ messageType => $message_type, eventType => $e, parentMd => $prev_md, childMd => $curr_md });
+                exists $self->{MERGE_HANDLERS}->{$message_type}->{$value}) {
+                return $self->{MERGE_HANDLERS}->{$message_type}->{$value}->mergeMetadata({ messageType => $message_type, eventType => $e, parentMd => $prev_md, childMd => $curr_md });
             }
         }
     }
@@ -812,7 +837,7 @@ sub parseChain {
 
             next if (not defined $curr_subject_idRef);
 
-            $curr_subject_idRef = $subject_idRef if (not defined $subject_idRef);
+            $subject_idRef = $curr_subject_idRef if (not defined $subject_idRef);
 
             if ($curr_subject_idRef ne $subject_idRef) {
                 thrown perfSONAR_PS::Error_compat("error.ma.structure", "Merged metadata from chain beginning at $baseId have multiple, inconsistent subject metadataIdRefs");
