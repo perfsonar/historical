@@ -288,7 +288,10 @@ sub addExistingXMLElement($$) {
 	my ($self, $element) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	print { $self->{FILE} }  $element->toString();
+    my $elm = $element->cloneNode(1);
+    $elm->unbindNode();
+ 
+	print { $self->{FILE} }  $elm->toString();
 
 	return 0;
 }

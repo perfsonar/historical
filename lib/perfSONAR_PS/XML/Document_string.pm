@@ -285,7 +285,10 @@ sub addExistingXMLElement($$) {
 	my ($self, $element) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
-	$self->{STRING} .= $element->toString();
+    my $elm = $element->cloneNode(1);
+    $elm->unbindNode();
+
+	$self->{STRING} .= $elm->toString();
 
 	return 0;
 }
@@ -310,7 +313,7 @@ sub getValue($) {
 			my $msg = "Open tags still exist: ";
 
 			for(my $x = $#open_tags; $x >= 0; $x--) {
-				$msg .= " -> ".$open_tags[$x];
+				$msg .= " -> ".$open_tags[$x]->{tag};
 			}
 
 			$logger->warn($msg);
