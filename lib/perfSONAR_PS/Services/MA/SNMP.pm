@@ -2,10 +2,11 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'TIME', 'NAMESPACES', 'RESULTS', 'METADATADB';
+use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB';
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 our $VERSION = 0.07;
 
@@ -316,6 +317,7 @@ sub buildHashedKeys {
                       $key->getAttribute("id");
                     $self->{CONF}->{"snmp"}->{"idToHash"}
                       ->{ $key->getAttribute("id") } = $hash;
+                    $self->{CONF}->{"snmp"}->{"logger"}->debug("Key id $hash maps to data element ".$key->getAttribute("id"));
                 }
             }
         }
@@ -449,16 +451,16 @@ sub handleMessageBegin {
       = @_;
 
     #   my ($self, @args) = @_;
-    #	  my $parameters = validate(@args,
-    #			{
-    #				ret_message => 1,
-    #				messageId => 1,
-    #				messageType => 1,
-    #				msgParams => 1,
-    #				request => 1,
-    #				retMessageType => 1,
-    #				retMessageNamespaces => 1
-    #			});
+    #      my $parameters = validate(@args,
+    #            {
+    #                ret_message => 1,
+    #                messageId => 1,
+    #                messageType => 1,
+    #                msgParams => 1,
+    #                request => 1,
+    #                retMessageType => 1,
+    #                retMessageNamespaces => 1
+    #            });
 
     return 0;
 }
@@ -474,11 +476,11 @@ sub handleMessageEnd {
     my ( $self, $ret_message, $messageId ) = @_;
 
     #   my ($self, @args) = @_;
-    #	  my $parameters = validate(@args,
-    #			{
-    #				ret_message => 1,
-    #				messageId => 1
-    #			});
+    #      my $parameters = validate(@args,
+    #            {
+    #                ret_message => 1,
+    #                messageId => 1
+    #            });
 
     return 0;
 }
@@ -496,17 +498,18 @@ future releases.
 sub handleEvent {
     my ($self, @args) = @_;
       my $parameters = validate(@args,
-    		{
-    			output => 1,
-    			messageId => 1,
-    			messageType => 1,
-    			messageParameters => 1,
-    			eventType => 1,
-    			mergeChain => 1,
-    			filterChain => 1,
-    			data => 1,
-    			rawRequest => 1
-    		});
+            {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                mergeChain => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
+            });
 
     my $output = $parameters->{"output"};
     my $messageId = $parameters->{"messageId"};
@@ -516,14 +519,73 @@ sub handleEvent {
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
     my $md = shift(@{ $parameters->{"mergeChain"} });
-    my $filter_chain = shift(@{ $parameters->{"mergeChain"} });
+    my $filter_chain = $parameters->{"filterChain"};
+
+    my $doOutputMetadata = $parameters->{"doOutputMetadata"};
+
+
+    # this module outputs its own metadata so it needs to turn off the daemon's
+    # metadata output routines.
+    ${$doOutputMetadata} = 0;
+
+    my %timeSettings = ();
+
+    # go through the main subject and select filters looking for parameters.
+    my $new_timeSettings = $self->getFilterParameters($md, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"});
+
+    $timeSettings{"CF"} = $new_timeSettings->{"CF"} if (defined $new_timeSettings->{"CF"});
+    $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"});
+    $timeSettings{"START"} = $new_timeSettings->{"START"} if (defined $new_timeSettings->{"START"});
+    $timeSettings{"END"} = $new_timeSettings->{"END"} if (defined $new_timeSettings->{"END"});
+
+    my @filters = @{ $filter_chain };
+    if ($#filters > -1) {
+        foreach my $filter_arr (@filters) {
+            my @filters = @{ $filter_arr };
+            my $filter = $filters[$#filters];
+
+            $new_timeSettings = $self->getFilterParameters($filter, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"});
+
+            $timeSettings{"CF"} = $new_timeSettings->{"CF"} if (defined $new_timeSettings->{"CF"});
+            $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"});
+
+            # we conditionally replace the START/END settings since under the theory of
+            # filter, if a later element specifies an earlier start time, the later
+            # start time that appears higher in the filter chain would have filtered
+            # out all times earlier than itself leaving nothing to exist between the
+            # earlier start time and the later start time. XXX I'm not sure how
+            # the resolution and the consolidation function should work in this
+            # context.
+
+            if (defined $new_timeSettings->{"START"} and (not defined $timeSettings{"START"} or $new_timeSettings->{"START"} > $timeSettings{"START"})) {
+                $timeSettings{"START"} = $new_timeSettings->{"START"};
+            }
+
+            if (defined $new_timeSettings->{"END"} and (not defined $timeSettings{"END"} or $new_timeSettings->{"END"} < $timeSettings{"END"})) {
+                $timeSettings{"END"} = $new_timeSettings->{"END"};
+            }
+        }
+    }
+
+    my $cf = "";
+    my $resolution = "";
+    my $start = "";
+    my $end = "";
+
+    $cf = $timeSettings{"CF"} if ($timeSettings{"CF"});
+    $resolution =$timeSettings{"RESOLUTION"} if ($timeSettings{"RESOLUTION"});
+    $start = $timeSettings{"START"} if ($timeSettings{"START"});
+    $end = $timeSettings{"END"} if ($timeSettings{"END"});
+
+    $self->{CONF}->{"snmp"}->{"logger"}->debug("Request filter parameters: cf: $cf resolution: $resolution start: $start end: $end");
 
     if ( $messageType eq "MetadataKeyRequest" ) {
         return $self->maMetadataKeyRequest(
             {
                 output             => $output,
-                md                 => $md,
-		filter_chain       => $filter_chain,
+                metadata           => $md,
+                filters            => \@filters,
+                time_settings      => \%timeSettings,
                 request            => $raw_request,
                 message_parameters => $message_parameters
             }
@@ -533,8 +595,9 @@ sub handleEvent {
         return $self->maSetupDataRequest(
             {
                 output             => $output,
-                md                 => $md,
-		filter_chain       => $filter_chain,
+                metadata           => $md,
+                filters            => \@filters,
+                time_settings      => \%timeSettings,
                 request            => $raw_request,
                 message_parameters => $message_parameters
             }
@@ -568,8 +631,9 @@ sub maMetadataKeyRequest {
         @args,
         {
             output             => 1,
-            md                 => 1,
-            filter_chain       => 1,
+            metadata           => 1,
+            time_settings      => 1,
+            filters            => 1,
             request            => 1,
             message_parameters => 1
         }
@@ -580,96 +644,32 @@ sub maMetadataKeyRequest {
 
     my $metadatadb = $self->{METADATADB};
 
-    if (
-        getTime(
-            $parameters->{request},
-            \%{$self},
-            $parameters->{md}->getAttribute("id"),
-            $self->{CONF}->{"snmp"}->{"default_resolution"}
-        )
-      )
-    {
-        if ( find( $parameters->{md}, "./nmwg:key", 1 ) ) {
-            $self->metadataKeyRetrieveKey(
+    if ( find( $parameters->{metadata}, "./nmwg:key", 1 ) ) {
+        $self->metadataKeyRetrieveKey(
                 {
-                    metadatadb => $self->{METADATADB},
-                    key        => find( $parameters->{md}, "./nmwg:key", 1 ),
-                    chain      => q{},
-                    id         => $parameters->{md}->getAttribute("id"),
-                    request_namespaces =>
-                      $parameters->{request}->getNamespaces(),
+                    metadatadb    => $self->{METADATADB},
+                    time_settings => $parameters->{time_settings},
+                    key           => find( $parameters->{metadata}, "./nmwg:key", 1 ),
+                    metadata      => $parameters->{metadata},
+                    filters       => $parameters->{filters},
+                    request_namespaces => $parameters->{request}->getNamespaces(),
                     output => $parameters->{output}
                 }
-            );
-        }
-        else {
-            if ( $parameters->{request}->getNamespaces()
-                ->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}
-                and find( $parameters->{md}, "./select:subject", 1 ) )
-            {
-                my $other_md = find(
-                    $parameters->{request}->getRequestDOM(),
-                    "//nmwg:metadata[\@id=\""
-                      . find( $parameters->{md}, "./select:subject", 1 )
-                      ->getAttribute("metadataIdRef") . "\"]",
-                    1
                 );
-                if ($other_md) {
-                    if ( find( $other_md, "./nmwg:key", 1 ) ) {
-                        $self->metadataKeyRetrieveKey(
-                            {
-                                metadatadb => $self->{METADATADB},
-                                key   => find( $other_md, "./nmwg:key", 1 ),
-                                chain => $parameters->{md},
-                                id    => $parameters->{md}->getAttribute("id"),
-                                request_namespaces =>
-                                  $parameters->{request}->getNamespaces(),
-                                output => $parameters->{output}
-                            }
-                        );
-
-                    }
-                    else {
-
-                        $self->metadataKeyRetrieveMetadataData(
-                            {
-                                metadatadb => $self->{METADATADB},
-                                metadata   => $other_md,
-                                chain      => $parameters->{md},
-                                id => $parameters->{md}->getAttribute("id"),
-                                request_namespaces =>
-                                  $parameters->{request}->getNamespaces(),
-                                output => $parameters->{output}
-                            }
-                        );
-
-                    }
+    } else {
+        $self->metadataKeyRetrieveMetadataData(
+                {
+                    metadatadb    => $self->{METADATADB},
+                    time_settings => $parameters->{time_settings},
+                    metadata      => $parameters->{metadata},
+                    filters       => $parameters->{filters},
+                    request_namespaces => $parameters->{request}->getNamespaces(),
+                    output => $parameters->{output}
                 }
-                else {
-                    my $msg =
-                      "Cannot resolve supposed subject chain in metadata.";
-                    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
-                    throw perfSONAR_PS::Error_compat( "error.ma.chaining",
-                        $msg );
-                }
-            }
-            else {
-
-                $self->metadataKeyRetrieveMetadataData(
-                    {
-                        metadatadb => $self->{METADATADB},
-                        metadata   => $parameters->{md},
-                        chain      => q{},
-                        id         => $parameters->{md}->getAttribute("id"),
-                        request_namespaces =>
-                          $parameters->{request}->getNamespaces(),
-                        output => $parameters->{output}
-                    }
                 );
 
-            }
-        }
     }
+
     return;
 }
 
@@ -691,8 +691,9 @@ sub metadataKeyRetrieveKey {
         {
             metadatadb         => 1,
             key                => 1,
-            chain              => 1,
-            id                 => 1,
+            time_settings      => 1,
+            metadata           => 1,
+            filters            => 1,
             request_namespaces => 1,
             output             => 1
         }
@@ -736,44 +737,72 @@ sub metadataKeyRetrieveKey {
         return;
     }
 
-    createMetadata( $parameters->{output}, $mdId, $parameters->{id},
-        $parameters->{key}->toString, undef );
+    my $mdIdRef;
+
+    my @filters = @{ $parameters->{filters} };
+    if ($#filters > -1) {
+        $mdIdRef = $filters[$#filters][0]->getAttribute("id");
+    } else {
+        $mdIdRef = $parameters->{metadata}->getAttribute("id");
+    }
+
+    # Generate 
+    createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
 
     my $key2 = $parameters->{key}->cloneNode(1);
-    if (    defined $parameters->{chain}
-        and $parameters->{chain}
-        and $parameters->{request_namespaces}
-        ->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} )
-    {
 
-        foreach my $p (
-            find( $parameters->{chain}, "./select:parameters", 1 )->childNodes )
+    my $params = find($key2, ".//nmwg:parameters", 1);
+
+    $self->addSelectParameters({ parameter_block => $params, filters => $parameters->{filters} });
+
+    createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+
+    return;
+}
+
+sub addSelectParameters {
+    my ( $self, @args ) = @_;
+    my $parameters = validate(
+        @args,
         {
-            if ( $p->localname eq "parameter" ) {
-                my $addFlag = 1;
-                foreach my $params (
-                    find( $key2, ".//nmwg:parameters", 1 )->childNodes )
-                {
-                    if (    $params->localname eq "parameter"
-                        and $params->getAttribute("name") eq
-                        $p->getAttribute("name") )
-                    {
+            parameter_block    => 1,
+            filters            => 1,
+        }
+    );
 
-                        find( $key2, ".//nmwg:parameters", 1 )
-                          ->replaceChild( $p->cloneNode(1), $params );
-                        $addFlag = 0;
-                        last;
+    my $params = $parameters->{parameter_block};
+    my @filters = @{ $parameters->{filters} };
+    my %paramsByName = ();
+
+    foreach my $p ($params->childNodes) {
+        if ($p->localname and $p->localname eq "parameter" and $p->getAttribute("name")) {
+            $paramsByName{$p->getAttribute("name")} = $p;
+        }
+    }
+
+    foreach my $filter_arr (@filters) {
+        my @filters = @{ $filter_arr };
+        my $filter = $filters[$#filters];
+
+        $self->{CONF}->{"snmp"}->{"logger"}->debug("Filter: ".$filter->toString);
+
+        my $select_params = find($filter, "./select:parameters", 1);
+        if ($select_params) {
+            foreach my $p ($select_params->childNodes) {
+                if ($p->localname and $p->localname eq "parameter" and $p->getAttribute("name")) {
+                    my $newChild = $p->cloneNode(1);
+
+                    if ($paramsByName{$p->getAttribute("name")}) {
+                        $params->replaceChild($newChild, $paramsByName{$p->getAttribute("name")});
+                    } else {
+                        $params->addChild($newChild);
                     }
+
+                    $paramsByName{$p->getAttribute("name")} = $newChild;
                 }
-                find( $key2, ".//nmwg:parameters", 1 )
-                  ->addChild( $p->cloneNode(1) )
-                  if $addFlag;
             }
         }
-
     }
-    createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
-    return;
 }
 
 =head2 metadataKeyRetrieveMetadataData($self, $metadatadb, $metadata, $chain,
@@ -793,9 +822,9 @@ sub metadataKeyRetrieveMetadataData {
         @args,
         {
             metadatadb         => 1,
+            time_settings      => 1,
             metadata           => 1,
-            chain              => 1,
-            id                 => 1,
+            filters            => 1,
             request_namespaces => 1,
             output             => 1
         }
@@ -871,72 +900,57 @@ sub metadataKeyRetrieveMetadataData {
 
                 if ($hashKey) {
                     my $maKey = q{};
-                    foreach my $params (
-                        find( $d_temp, ".//nmwg:parameters", 1 )->childNodes )
+                    foreach my $params (find( $d_temp, ".//nmwg:parameters", 1 )->childNodes)
                     {
                         next if (not defined $params->localname or $params->localname ne "parameter");
                         $maKey = $params->cloneNode(1);
                         $maKey->setAttribute( "name", "maKey" );
                         $maKey->removeChildNodes();
-                        $maKey->setAttribute( "value", $hashKey )
-                          if $maKey->getAttribute("value");
-                        $maKey->appendText($hashKey)
-                          if not $maKey->getAttribute("value");
+                        $maKey->setAttribute( "value", $hashKey) if $maKey->getAttribute("value");
+                        $maKey->appendText($hashKey) if not $maKey->getAttribute("value");
                         last;
                     }
                     if ($maKey) {
-                        foreach
-                          my $params ( find( $d_temp, ".//nmwg:parameters", 1 )
-                            ->childNodes )
+                        foreach my $params (find( $d_temp, ".//nmwg:parameters", 1 )->childNodes)
                         {
 
                             next if !(defined $params->localname and defined $params->getAttribute("name"));
 
+                            # Remove any unknown parameters from the metadata
                             if ( $params->localname eq "parameter"
-                                and $params->getAttribute("name") ne
-                                "consolidationFunction"
-                                and $params->getAttribute("name") ne
-                                "resolution"
+                                and $params->getAttribute("name") ne "consolidationFunction"
+                                and $params->getAttribute("name") ne "resolution"
                                 and $params->getAttribute("name") ne "startTime"
                                 and $params->getAttribute("name") ne "endTime"
                                 and $params->getAttribute("name") ne "time" )
                             {
-                                my $oldParam =
-                                  find( $d_temp, ".//nmwg:parameters", 1 )
-                                  ->removeChild($params);
+                                my $oldParam = find( $d_temp, ".//nmwg:parameters", 1 )->removeChild($params);
                                 undef $oldParam;
                             }
 
                         }
-                        find( $d_temp, ".//nmwg:parameters", 1 )
-                          ->addChild($maKey);
+
+                        # Add the ma parameter
+                        find( $d_temp, ".//nmwg:parameters", 1 )->addChild($maKey);
                     }
                 }
 
-                if (    defined $parameters->{chain}
-                    and $parameters->{chain}
-                    and $parameters->{request_namespaces}
-                    ->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} )
-                {
+                $self->addSelectParameters({ parameter_block => find($d_temp, ".//nmwg:parameters", 1), filters => $parameters->{filters} });
 
-                    foreach my $p (
-                        find( $parameters->{chain}, "./select:parameters", 1 )
-                        ->childNodes )
-                    {
-                        find( $d_temp, ".//nmwg:parameters", 1 )
-                          ->addChild( $p->cloneNode(1) );
-                    }
+                my $mdIdRef = $parameters->{metadata}->getAttribute("id");
 
+                my @filters = @{ $parameters->{filters} };
+                if ($#filters > -1) {
+                    $mdIdRef = $filters[$#filters][0]->getAttribute("id");
                 }
-                $md_temp->setAttribute( "metadataIdRef", $parameters->{id} );
+
+                $md_temp->setAttribute( "metadataIdRef", $mdIdRef );
                 $md_temp->setAttribute( "id",            $mdId );
                 $parameters->{output}->addExistingXMLElement($md_temp);
                 $parameters->{output}->addExistingXMLElement($d_temp);
                 $used{ $uc - 1 }++;
                 last;
-
             }
-
         }
     }
     else {
@@ -972,113 +986,48 @@ with the database of choice (i.e. rrdtool, mysql, sqlite).
 sub maSetupDataRequest {
     my ( $self, @args ) = @_;
     my $parameters = validate(
-        @args,
-        {
+            @args,
+            {
             output             => 1,
-            md                 => 1,
-            filter_chain       => 1,
+            metadata           => 1,
+            filters            => 1,
+            time_settings      => 1,
             request            => 1,
             message_parameters => 1
-        }
-    );
-
-    my @filters = @{ $parameters->{filter_chain} };
-    if ($#filters != -1) {
-        # XXX we need to check for select filters
-    }
+            }
+            );
 
     my $mdId = q{};
     my $dId  = q{};
 
     my $metadatadb = $self->{METADATADB};
 
-    if (
-        getTime(
-            $parameters->{request},
-            \%{$self},
-            $parameters->{md}->getAttribute("id"),
-            $self->{CONF}->{"snmp"}->{"default_resolution"}
-        )
-      )
-    {
-        if ( find( $parameters->{md}, "./nmwg:key", 1 ) ) {
-            $self->setupDataRetrieveKey(
+    if ( find( $parameters->{metadata}, "./nmwg:key", 1 ) ) {
+        $self->setupDataRetrieveKey(
                 {
                     metadatadb => $metadatadb,
-                    metadata   => find( $parameters->{md}, "./nmwg:key", 1 ),
-                    chain      => q{},
-                    id         => $parameters->{md}->getAttribute("id"),
+                    metadata   => find( $parameters->{metadata}, "./nmwg:key", 1 ),
+                    filters    => $parameters->{filters},
                     message_parameters => $parameters->{message_parameters},
-                    request_namespaces =>
-                      $parameters->{request}->getNamespaces(),
+                    time_settings => $parameters->{time_settings},
+                    request_namespaces => $parameters->{request}->getNamespaces(),
                     output => $parameters->{output}
                 }
-            );
-        }
-        else {
-            if ( $parameters->{request}->getNamespaces()
-                ->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}
-                and find( $parameters->{md}, "./select:subject", 1 ) )
-            {
-                my $other_md = find(
-                    $parameters->{request}->getRequestDOM(),
-                    "//nmwg:metadata[\@id=\""
-                      . find( $parameters->{md}, "./select:subject", 1 )
-                      ->getAttribute("metadataIdRef") . "\"]",
-                    1
                 );
-                if ($other_md) {
-                    if ( find( $other_md, "./nmwg:key", 1 ) ) {
-
-                        $self->setupDataRetrieveKey(
-                            {
-                                metadatadb => $metadatadb,
-                                metadata => find( $other_md, "./nmwg:key", 1 ),
-                                chain    => $parameters->{md},
-                                id => $parameters->{md}->getAttribute("id"),
-                                message_parameters =>
-                                  $parameters->{message_parameters},
-                                request_namespaces =>
-                                  $parameters->{request}->getNamespaces(),
-                                output => $parameters->{output}
-                            }
-                        );
-
-                    }
-                    else {
-                        $self->setupDataRetrieveMetadataData(
-                            {
-                                metadatadb => $metadatadb,
-                                metadata   => $other_md,
-                                id => $parameters->{md}->getAttribute("id"),
-                                message_parameters =>
-                                  $parameters->{message_parameters},
-                                output => $parameters->{output}
-                            }
-                        );
-                    }
-                }
-                else {
-                    my $msg = "Cannot resolve subject chain in metadata.";
-                    $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
-                    throw perfSONAR_PS::Error_compat( "error.ma.chaining",
-                        $msg );
-                }
-            }
-            else {
-                $self->setupDataRetrieveMetadataData(
-
-                    {
-                        metadatadb => $metadatadb,
-                        metadata   => $parameters->{md},
-                        id         => $parameters->{md}->getAttribute("id"),
-                        message_parameters => $parameters->{message_parameters},
-                        output             => $parameters->{output}
-                    }
-                );
-            }
-        }
     }
+    else {
+        $self->setupDataRetrieveMetadataData(
+                {
+                    metadatadb => $metadatadb,
+                    metadata   => $parameters->{metadata},
+                    filters    => $parameters->{filters},
+                    time_settings => $parameters->{time_settings},
+                    message_parameters => $parameters->{message_parameters},
+                    output             => $parameters->{output}
+                }
+                );
+    }
+
     return;
 }
 
@@ -1102,8 +1051,8 @@ sub setupDataRetrieveKey {
         {
             metadatadb         => 1,
             metadata           => 1,
-            chain              => 1,
-            id                 => 1,
+            filters            => 1,
+            time_settings      => 1,
             message_parameters => 1,
             request_namespaces => 1,
             output             => 1
@@ -1123,6 +1072,7 @@ sub setupDataRetrieveKey {
     );
     if ($hashKey) {
         my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
+        $self->{CONF}->{"snmp"}->{"logger"}->debug("Received hash key $hashKey which maps to $hashId");
         if ($hashId) {
             $results =
               $parameters->{metadatadb}->querySet(
@@ -1165,46 +1115,24 @@ sub setupDataRetrieveKey {
 
     $mdId = "metadata." . genuid();
     $dId  = "data." . genuid();
-    if (    defined $parameters->{chain}
-        and $parameters->{chain}
-        and $parameters->{request_namespaces}
-        ->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} )
-    {
 
-        foreach my $p (
-            find( $parameters->{chain}, "./select:parameters", 1 )->childNodes )
-        {
-            if ( $p->localname eq "parameter" ) {
-                my $addFlag = 1;
-                foreach my $params (
-                    find( $sentKey, ".//nmwg:parameters", 1 )->childNodes )
-                {
-                    if (    $params->localname eq "parameter"
-                        and $params->getAttribute("name") eq
-                        $p->getAttribute("name") )
-                    {
+    my $mdIdRef = $parameters->{metadata}->getAttribute("id");
 
-                        find( $sentKey, ".//nmwg:parameters", 1 )
-                          ->replaceChild( $p->cloneNode(1), $params );
-                        $addFlag = 0;
-                        last;
+    my @filters = @{ $parameters->{filters} };
 
-                    }
-                }
-                find( $sentKey, ".//nmwg:parameters", 1 )
-                  ->addChild( $p->cloneNode(1) )
-                  if $addFlag;
-            }
-        }
+    if ($#filters > -1) {
+        $self->addSelectParameters({ parameter_block => find($sentKey, ".//nmwg:parameters", 1), filters => \@filters });
 
+        $mdIdRef = $filters[$#filters][0]->getAttribute("id");
     }
-    createMetadata( $parameters->{output}, $mdId, $parameters->{id},
-        $sentKey->toString, undef );
+
+    createMetadata( $parameters->{output}, $mdId, $mdIdRef, $sentKey->toString, undef );
     $self->handleData(
         {
             id                 => $mdId,
             data               => $results_temp,
             output             => $parameters->{output},
+            time_settings      => $parameters->{time_settings},
             et                 => \%l_et,
             message_parameters => $parameters->{message_parameters}
         }
@@ -1231,7 +1159,8 @@ sub setupDataRetrieveMetadataData {
         {
             metadatadb         => 1,
             metadata           => 1,
-            id                 => 1,
+            filters            => 1,
+            time_settings      => 1,
             message_parameters => 1,
             output             => 1
         }
@@ -1282,6 +1211,14 @@ sub setupDataRetrieveMetadataData {
         $used{$x} = 0;
     }
 
+    my $base_id = $parameters->{metadata}->getAttribute("id");
+    my @filters = @{ $parameters->{filters} };
+    if ($#filters > -1) {
+        my @filter_arr = @{ $filters[$#filters] };
+
+        $base_id = $filter_arr[0]->getAttribute("id");
+    }
+
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
         foreach my $md ( $results->get_nodelist ) {
 
@@ -1317,7 +1254,7 @@ sub setupDataRetrieveMetadataData {
 
                 my $d_temp = $d->cloneNode(1);
                 $mdId = "metadata." . genuid();
-                $md_temp->setAttribute( "metadataIdRef", $parameters->{id} );
+                $md_temp->setAttribute( "metadataIdRef", $base_id );
                 $md_temp->setAttribute( "id",            $mdId );
                 $parameters->{output}->addExistingXMLElement($md_temp);
                 $self->handleData(
@@ -1325,6 +1262,7 @@ sub setupDataRetrieveMetadataData {
                         id                 => $mdId,
                         data               => $d_temp,
                         output             => $parameters->{output},
+                        time_settings      => $parameters->{time_settings},
                         et                 => \%l_et,
                         message_parameters => $parameters->{message_parameters}
                     }
@@ -1365,13 +1303,11 @@ sub handleData {
             data               => 1,
             output             => 1,
             et                 => 1,
+            time_settings      => 1,
             message_parameters => 1
         }
     );
 
-    undef $self->{RESULTS};
-
-    $self->{RESULTS} = $parameters->{data};
     my $type = extract(
         find(
             $parameters->{data},
@@ -1385,6 +1321,7 @@ sub handleData {
                 d                  => $parameters->{data},
                 mid                => $parameters->{id},
                 output             => $parameters->{output},
+                time_settings      => $parameters->{time_settings},
                 et                 => $parameters->{et},
                 message_parameters => $parameters->{et}
             }
@@ -1398,6 +1335,7 @@ sub handleData {
                 d                  => $parameters->{data},
                 mid                => $parameters->{id},
                 output             => $parameters->{output},
+                time_settings      => $parameters->{time_settings},
                 et                 => $parameters->{et},
                 message_parameters => $parameters->{et}
             }
@@ -1428,6 +1366,7 @@ sub retrieveSQL {
         {
             d                  => 1,
             mid                => 1,
+            time_settings      => 1,
             output             => 1,
             et                 => 1,
             message_parameters => 1
@@ -1458,8 +1397,18 @@ sub retrieveSQL {
         }
     }
 
+    $self->{CONF}->{"snmp"}->{"logger"}->error("No data element") if (not defined $parameters->{d});
+
+    my $file = extract(find($parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1), 1);
+    my $table = extract(find($parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1), 1);
+
+    if (not defined $file or not defined $table) {
+        $self->{CONF}->{"snmp"}->{"logger"}->error("Data element ".$parameters->{d}->getAttribute("id")." is missing some SQL elements");
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database");
+    }
+
     my @dbSchema = ( "id", "time", "value", "eventtype", "misc" );
-    my $result = getDataSQL( $self, $parameters->{d}, \@dbSchema );
+    my $result = getDataSQL($self->{DIRECTORY}, $file, $table, $parameters->{time_settings}, \@dbSchema);
     my $id = "data." . genuid();
 
     if ( $#{$result} == -1 ) {
@@ -1547,11 +1496,14 @@ sub retrieveRRD {
         {
             d                  => 1,
             mid                => 1,
+            time_settings      => 1,
             output             => 1,
             et                 => 1,
             message_parameters => 1
         }
     );
+
+    my $timeSettings = $parameters->{time_settings};
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $datumns  = 0;
@@ -1578,11 +1530,22 @@ sub retrieveRRD {
         }
     }
 
-    adjustRRDTime($self);
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Params: ".Dumper($parameters->{d}));
+
+    my $file_element = find($parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1);
+
+    $self->{CONF}->{"snmp"}->{"logger"}->error("Params: ".Dumper($file_element));
+
+    my $rrd_file = extract($file_element, 1);
+
+    if (not $rrd_file) {
+        $self->{CONF}->{"snmp"}->{"logger"}->error("Data element ".$parameters->{d}->getAttribute("id")." is missing some RRD file");
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated RRD file");
+    }
+
+    adjustRRDTime($timeSettings);
     my $id = "data." . genuid();
-    my %rrd_result =
-      getDataRRD( $self, $parameters->{d}, $parameters->{mid},
-        $self->{CONF}->{"snmp"}->{"rrdtool"} );
+    my %rrd_result = getDataRRD($self->{DIRECTORY}, $rrd_file, $timeSettings, $self->{CONF}->{"snmp"}->{"rrdtool"} );
     if ( $rrd_result{ERROR} ) {
         $self->{CONF}->{"snmp"}->{"logger"}
           ->error( "RRD error seen: " . $rrd_result{ERROR} );
@@ -1667,6 +1630,178 @@ sub retrieveRRD {
     return;
 }
 
+sub getFilterParameters {
+    my($self, $m, $namespaces, $default_resolution) = @_;
+
+    my %time;
+
+    my $prefix = "";
+    my $nmwg = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    my $tm = $namespaces->{"http://ggf.org/ns/nmwg/time/2.0/"};
+    if($namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
+        $prefix = $namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
+    }
+    else {
+        $prefix = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]", 1)) {
+        $time{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1)) {
+        $time{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1)) {
+        $time{"CF"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]", 1)) {
+        $time{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1)) {
+        $time{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1)) {
+        $time{"RESOLUTION"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
+    }
+
+    if(!$time{"RESOLUTION"} or
+            !($time{"RESOLUTION"} =~ m/^\d+$/)) {
+        if(defined $default_resolution) {
+            $time{"RESOLUTION"} = $default_resolution;
+        }
+        else {
+            $time{"RESOLUTION"} = 1;
+        }
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
+        $time{"END"} = parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
+        $time{"START"} = eval(parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$time{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
+        $time{"START"} = eval(parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$time{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
+        $time{"START"} = eval(parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$time{"RESOLUTION"});
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
+        $time{"END"} = eval(parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$time{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
+        $time{"END"} = eval(parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$time{"RESOLUTION"});
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
+        $time{"END"} = eval(parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$time{"RESOLUTION"});
+    }
+
+    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
+        $time{"END"} = $time{"START"};
+    }
+    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
+        $time{"END"} = $time{"START"};
+    }
+    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
+        $time{"START"} = parseTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
+        $time{"END"} = $time{"START"};
+    }
+
+    foreach my $t (keys %time) {
+        $time{$t} =~ s/(\n)|(\s+)//g;
+    }
+
+    if($time{"START"} and 
+            $time{"END"} and 
+            $time{"START"} > $time{"END"}) {
+        return undef;
+    }
+
+    return \%time;
+}
+
+sub parseTime {
+  my($parameter, $timePrefix, $type) = @_;
+  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
+
+  if(defined $parameter and $parameter ne "") {
+    if($timePrefix and find($parameter, "./".$timePrefix.":time", 1)) {
+      my $timeElement = find($parameter, "./".$timePrefix.":time", 1);
+      if($timeElement->getAttribute("type") =~ m/ISO/i) {
+        return convertISO(extract($timeElement, 1));
+      }
+      else {
+        return extract($timeElement, 0);
+      }
+    }
+    elsif($timePrefix and $type and find($parameter, "./".$timePrefix.":".$type, 1)) {
+      my $timeElement = find($parameter, "./".$timePrefix.":".$type, 1);
+      if($timeElement->getAttribute("type") =~ m/ISO/i) {
+        return convertISO(extract($timeElement, 1));
+      }
+      else {
+        return extract($timeElement, 1);
+      }    
+    }
+    elsif($parameter->hasChildNodes()) {
+      foreach my $p ($parameter->childNodes) {
+        if($p->nodeType == 3) {
+          (my $value = $p->textContent) =~ s/\s*//g;
+          if($value) {
+            return $value;
+          }
+        }
+      }
+    }  
+  }
+  else {
+    $logger->error("Missing argument.");
+  }
+  return "";
+}
+
+
 1;
 
 __END__
@@ -1714,3 +1849,4 @@ All rights reserved.
 
 =cut
 
+# vim: expandtab shiftwidth=4 tabstop=4

@@ -204,14 +204,14 @@ sub registerEventHandler_Regex {
 =cut
 sub __handleMessage {
     my $self = shift;
-	my $args = validate(@_, 
-			{
-				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
-				messageId => { type => SCALAR },
-				messageType => { type => SCALAR },
-				message => { type => SCALARREF },
-				rawRequest => { type => ARRAYREF },
-			});
+    my $args = validate(@_, 
+            {
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                messageId => { type => SCALAR },
+                messageType => { type => SCALAR },
+                message => { type => SCALARREF },
+                rawRequest => { type => ARRAYREF },
+            });
 
     my $messageType = $args->{"messageType"};
 
@@ -231,15 +231,20 @@ sub __handleMessage {
 =cut
 sub __handleMessageBegin {
     my $self = shift;
-	my $args = validate(@_, 
-			{
-				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
-				messageId => { type => SCALAR | UNDEF },
-				messageType => { type => SCALAR },
-				messageParameters => { type => HASHREF | UNDEF },
-				message => { type => SCALARREF },
-				rawRequest => { type => ARRAYREF },
-			});
+    my $args = validate(@_, 
+            {
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                messageId => { type => SCALAR | UNDEF },
+                messageType => { type => SCALAR },
+                messageParameters => { type => HASHREF | UNDEF },
+                message => { type => SCALARREF },
+                rawRequest => { type => ARRAYREF },
+                doOutputMessageHeader => { type => SCALARREF },
+                doOutputMetadata => { type => SCALARREF },
+                outputMessageType => { type => SCALARREF },
+                outputNamespaces => { type => HASHREF },
+                outputMessageId => { type => SCALARREF },
+            });
 
     my $messageType = $args->{"messageType"};
 
@@ -256,12 +261,13 @@ sub __handleMessageBegin {
 =cut
 sub __handleMessageEnd {
     my $self = shift;
-	my $args = validate(@_, 
-			{
-				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
-				messageId => { type => SCALAR | UNDEF },
-				messageType => { type => SCALAR },
-			});
+    my $args = validate(@_, 
+            {
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                messageId => { type => SCALAR | UNDEF },
+                messageType => { type => SCALAR },
+                doOutputMessageFooter => { type => SCALARREF },
+            });
 
     my $messageType = $args->{"messageType"};
 
@@ -283,18 +289,19 @@ sub __handleMessageEnd {
 =cut
 sub __handleEvent {
     my $self = shift;
-	my $args = validate(@_, 
-			{
-				output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
-				messageId => { type => SCALAR | UNDEF },
-				messageType => { type => SCALAR },
-				messageParameters => { type => HASHREF | UNDEF },
-				eventType => { type => SCALAR | UNDEF },
-				mergeChain => { type => ARRAYREF },
-				filterChain => { type => ARRAYREF },
-				data => { type => SCALARREF },
-				rawRequest => { type => ARRAYREF },
-			});
+    my $args = validate(@_, 
+            {
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                messageId => { type => SCALAR | UNDEF },
+                messageType => { type => SCALAR },
+                messageParameters => { type => HASHREF | UNDEF },
+                eventType => { type => SCALAR | UNDEF },
+                mergeChain => { type => ARRAYREF },
+                filterChain => { type => ARRAYREF },
+                data => { type => SCALARREF },
+                rawRequest => { type => ARRAYREF },
+                doOutputMetadata => { type => SCALARREF },
+            });
 
     my $messageType = $args->{"messageType"};
     my $eventType = $args->{"eventType"};
@@ -498,50 +505,53 @@ sub handleMessage {
 
     my $ret_message = perfSONAR_PS::XML::Document_string->new();
 
-    my ($n, $retMessageType, $retMessageNamespaces) = $self->__handleMessageBegin({
-                                                                                    output => $ret_message, messageId => $messageId,
-                                                                                    messageType => $messageType, messageParameters => $msgParams,
-                                                                                    rawRequest => $raw_request, message => $message,
-                                                                                });
-    if ($n == 0) {
-        # if they return non-zero, it means the module began the message for us
-        # if they retutn zero, they expect us to start the message
-        my $retMessageId = "message.".genuid();
+    my $doOutputMessageHeader = 1;
+    my $doOutputMetadata = 0;
+    my %outputNamespaces = ();
+    my $outputMessageType;
+    my $outputMessageId = "message.".genuid();
 
-        # we weren't given a return message type, so try to construct
-        # one by replacing Request with Response or sticking the term
-        # "Response" on the end of the type.
-        if (not defined $retMessageType or $retMessageType eq "") {
-            $retMessageType = $messageType;
-            $retMessageType =~ s/Request/Response/;
-            if (!($retMessageType =~ /Response/)) {
-                $retMessageType .= "Response";
-            }
-        }
+    $outputMessageType = $messageType;
+    $outputMessageType =~ s/Request/Response/;
+    if (!($outputMessageType =~ /Response/)) {
+        $outputMessageType .= "Response";
+    }
 
-        startMessage($ret_message, $retMessageType, $messageId, $retMessageType, "", $retMessageNamespaces);
+    $self->__handleMessageBegin({
+                output => $ret_message, messageId => $messageId,
+                messageType => $messageType, messageParameters => $msgParams,
+                rawRequest => $raw_request, message => $message,
+                doOutputMessageHeader => \$doOutputMessageHeader, doOutputMetadata => \$doOutputMetadata,
+                outputMessageType => \$outputMessageType, outputNamespaces => \%outputNamespaces,
+                outputMessageId => \$outputMessageId
+            });
+
+    if ($doOutputMessageHeader) {
+        startMessage($ret_message, $outputMessageType, $outputMessageId, $outputMessageType, "", \%outputNamespaces);
     }
 
     my $chains = $self->parseChains($ret_message, $message);
 
     my %outputMetadata = ();
 
-    foreach my $request (@{ $chains }) {
-        my $filter_chain = $request->{"filter"};
-        my $merge_chain = $request->{"merge"};
+    if ($doOutputMetadata) {
+        foreach my $request (@{ $chains }) {
+            my $filter_chain = $request->{"filter"};
+            my $merge_chain = $request->{"merge"};
 
-        foreach my $md (@{ $merge_chain }) {
-            if (not defined $outputMetadata{$md->getAttribute("id")}) {
-                $ret_message->addExistingXMLElement($md);
-                $outputMetadata{$md->getAttribute("id")} = 1;
-            }
-        }
-
-        foreach my $mds (@{ $filter_chain }) {
-            foreach my $md (@{ $mds }) {
+            foreach my $md (@{ $merge_chain }) {
                 if (not defined $outputMetadata{$md->getAttribute("id")}) {
                     $ret_message->addExistingXMLElement($md);
                     $outputMetadata{$md->getAttribute("id")} = 1;
+                }
+            }
+
+            foreach my $mds (@{ $filter_chain }) {
+                foreach my $md (@{ $mds }) {
+                    if (not defined $outputMetadata{$md->getAttribute("id")}) {
+                        $ret_message->addExistingXMLElement($md);
+                        $outputMetadata{$md->getAttribute("id")} = 1;
+                    }
                 }
             }
         }
@@ -569,18 +579,17 @@ sub handleMessage {
 
         my $errorEventType;
         my $errorMessage;
+        my $doOutputMetadata = 1;
         if (($found_event_type and not defined $eventType) or (not $self->isValidMessageType($messageType))) {
             $errorEventType = "error.ma.event_type";
             $errorMessage = "No supported event types for message of type \"$messageType\"";
         } else {
             try {
-                $self->{LOGGER}->debug("MD: ".$merge_chain->[0]->toString);
-
                 $self->__handleEvent({
                                         output => $ret_message, messageId => $messageId, messageType => $messageType,
                                         messageParameters => \%message_parameters, eventType => $eventType,
                                         mergeChain => $merge_chain, filterChain => $filter_chain, data => $data,
-                                        rawRequest => $raw_request
+                                        rawRequest => $raw_request, doOutputMetadata => \$doOutputMetadata
                                         });
             }
             catch perfSONAR_PS::Error_compat with {
@@ -605,6 +614,24 @@ sub handleMessage {
             }
         }
 
+        if ($doOutputMetadata) {
+            foreach my $md (@{ $merge_chain }) {
+                if (not defined $outputMetadata{$md->getAttribute("id")}) {
+                    $ret_message->addExistingXMLElement($md);
+                    $outputMetadata{$md->getAttribute("id")} = 1;
+                }
+            }
+
+            foreach my $mds (@{ $filter_chain }) {
+                foreach my $md (@{ $mds }) {
+                    if (not defined $outputMetadata{$md->getAttribute("id")}) {
+                        $ret_message->addExistingXMLElement($md);
+                        $outputMetadata{$md->getAttribute("id")} = 1;
+                    }
+                }
+            }
+        }
+
         if (defined $errorEventType and $errorEventType ne "") {
             $self->{LOGGER}->error("Couldn't handle requested metadata: $errorMessage");
             my $mdID = "metadata.".genuid();
@@ -613,8 +640,9 @@ sub handleMessage {
         }
     }
 
-    $n = $self->__handleMessageEnd({ output => $ret_message, messageId => $messageId, messageType => $messageType });
-    if ($n == 0) {
+    my $doOutputMessageFooter = 1;
+    $self->__handleMessageEnd({ output => $ret_message, messageId => $messageId, messageType => $messageType, doOutputMessageFooter => \$doOutputMessageFooter  });
+    if ($doOutputMessageFooter) {
         endMessage($ret_message);
     }
 
