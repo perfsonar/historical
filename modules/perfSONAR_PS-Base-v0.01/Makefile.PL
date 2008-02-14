@@ -15,7 +15,7 @@ WriteMakefile(
 	"LWP::UserAgent" => 2.032,
 	"Params::Validate" => 0.70,
 	"Data::Compare" => 0.09,
-	"Error::Simple" => 0,
+	"Error" => 0,
 	"Test::More" => 0,
     }
 );
