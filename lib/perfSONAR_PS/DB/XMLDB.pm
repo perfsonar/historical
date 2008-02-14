@@ -2,7 +2,7 @@ package perfSONAR_PS::DB::XMLDB;
 
 use fields 'ENVIRONMENT', 'CONTAINERFILE', 'NAMESPACES', 'ENV', 'MANAGER', 'CONTAINER', 'INDEX';
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 use strict;
 use warnings;
@@ -31,11 +31,12 @@ sub setEnvironment {
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $env and $env ne "") {
     $self->{ENVIRONMENT} = $env;
+    return 0;
   }
   else {
     $logger->error("Missing argument.");    
+    return -1;
   }
-  return;
 }
 
 
@@ -44,11 +45,12 @@ sub setContainer {
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $cont and $cont ne "") {
     $self->{CONTAINERFILE} = $cont;
+    return 0;
   }
   else {
     $logger->error("Missing argument.");
+    return -1;
   }
-  return;
 }
 
 
@@ -57,11 +59,12 @@ sub setNamespaces {
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   if(defined $ns and $ns ne "") {   
     $self->{NAMESPACES} = \%{$ns};
+    return 0;
   }
   else {
     $logger->error("Missing argument.");    
+    return -1;
   }
-  return;
 }
 
 
@@ -105,13 +108,14 @@ sub prep {
         $dbUC
       ); 
     }   
-    
-    $dbTr->commit if $atomic; 
-    undef $dbTr if $atomic; 
+    if($atomic) {
+      $dbTr->commit;
+      undef $dbTr;
+    }
   };
  
   $dbTr->abort if($dbTr and $atomic);
-  undef $dbTr if $atomic;
+  undef $dbTr;
   
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
@@ -138,7 +142,7 @@ sub prep {
     return -1;
   }  
   $$error = "" if (defined $error);
-  return 1;
+  return 0;
 }
 
 
@@ -182,13 +186,14 @@ sub openDB {
         $dbUC
       ); 
     }
-    
-    $dbTr->commit if $atomic;
-    undef $dbTr if $atomic;
+    if($atomic) {
+      $dbTr->commit;
+      undef $dbTr;
+    }
   };
  
   $dbTr->abort if($dbTr and $atomic);
-  undef $dbTr if $atomic;
+  undef $dbTr;
   
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
@@ -241,12 +246,14 @@ sub indexDB {
         $dbUC
       );
     }
-    $dbTr->commit if $atomic;
-    undef $dbTr if $atomic;
+    if($atomic) {
+      $dbTr->commit;
+      undef $dbTr;
+    }
   };
  
   $dbTr->abort if($dbTr and $atomic);
-  undef $dbTr if $atomic;
+  undef $dbTr;
   
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
@@ -300,12 +307,14 @@ sub deIndexDB {
         $dbUC
       );
     }
-    $dbTr->commit if $atomic;
-    undef $dbTr if $atomic;
+    if($atomic) {
+      $dbTr->commit;
+      undef $dbTr;
+    }
   };
  
   $dbTr->abort if($dbTr and $atomic);
-  undef $dbTr if $atomic;
+  undef $dbTr;
   
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
@@ -351,6 +360,7 @@ sub getTransaction {
     $msg = escapeString($msg);
     $logger->error($msg);
     $$error = $msg if (defined $error);
+    return undef;
   }
   elsif($e = catch DbException) {
     my $msg = "Error \"".$e->what()."\".";
@@ -358,6 +368,7 @@ sub getTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
+    return undef;
   }        
   elsif($@) {
     my $msg = "Error \"".$@."\".";
@@ -365,6 +376,7 @@ sub getTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
+    return undef;
   }  
   $$error = "" if (defined $error);
   return $dbTr;
@@ -375,18 +387,16 @@ sub commitTransaction {
   my ($self, $dbTr, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   eval {
-    if($dbTr and $dbTr ne "") {
-      $dbTr->commit();
-      undef $dbTr;   
-    }
+    $dbTr->commit() if $dbTr and $dbTr ne q{};
   };
+  undef $dbTr;     
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
     $msg =~ s/(\n+|\s+)/ /g;
     $msg = escapeString($msg);
     $logger->error($msg);
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }
   elsif($e = catch DbException) {
     my $msg = "Error \"".$e->what()."\".";
@@ -394,7 +404,7 @@ sub commitTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }        
   elsif($@) {
     my $msg = "Error \"".$@."\".";
@@ -402,10 +412,10 @@ sub commitTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }  
   $$error = "" if (defined $error);
-  return 1;
+  return 0;
 }
 
 
@@ -413,18 +423,16 @@ sub abortTransaction {
   my ($self, $dbTr, $error) = @_;
   my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
   eval {
-    if($dbTr and $dbTr ne "") {
-      $dbTr->abort();
-      undef $dbTr;   
-    }
+    $dbTr->abort() if $dbTr and $dbTr ne q{};
   };
+  undef $dbTr;   
   if(my $e = catch std::exception) {
     my $msg = "Error \"".$e->what()."\".";
     $msg =~ s/(\n+|\s+)/ /g;
     $msg = escapeString($msg);
     $logger->error($msg);
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }
   elsif($e = catch DbException) {
     my $msg = "Error \"".$e->what()."\".";
@@ -432,7 +440,7 @@ sub abortTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }        
   elsif($@) {
     my $msg = "Error \"".$@."\".";
@@ -440,10 +448,10 @@ sub abortTransaction {
     $msg = escapeString($msg);
     $logger->error($msg); 
     $$error = $msg if (defined $error);
-    return 0;
+    return -1;
   }  
   $$error = "" if (defined $error);
-  return 1;
+  return 0;
 }
 
 
@@ -492,12 +500,14 @@ sub query {
         push @resString, $value."\n";
         undef $value;
       }  
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -505,7 +515,7 @@ sub query {
       $msg = escapeString($msg);
       $logger->error($msg);
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }
     elsif($e = catch DbException) {
       my $msg = "Error \"".$e->what()."\".";
@@ -513,7 +523,7 @@ sub query {
       $msg = escapeString($msg);
       $logger->error($msg); 
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }        
     elsif($@) {
       my $msg = "Error \"".$@."\".";
@@ -521,14 +531,14 @@ sub query {
       $msg = escapeString($msg);
       $logger->error($msg); 
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }  
   }     
   else {
     my $msg = "Missing argument.";
     $logger->error("Missing argument"); 
     $$error = $msg if (defined $error); 
-    return -1;
+    return undef;
   }   
   $$error = "" if (defined $error);
   return @resString; 
@@ -582,12 +592,14 @@ sub queryForName {
       }
       undef $doc;
       undef $results;
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -595,7 +607,7 @@ sub queryForName {
       $msg = escapeString($msg);
       $logger->error($msg);
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }
     elsif($e = catch DbException) {
       my $msg = "Error \"".$e->what()."\".";
@@ -603,7 +615,7 @@ sub queryForName {
       $msg = escapeString($msg);  
       $logger->error($msg); 
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }        
     elsif($@) {
       my $msg = "Error \"".$@."\".";
@@ -611,14 +623,14 @@ sub queryForName {
       $msg = escapeString($msg);  
       $logger->error($msg); 
       $$error = $msg if (defined $error);
-      return -1;
+      return undef;
     }  
   }     
   else {
     my $msg = "Missing argument.";
     $logger->error("Missing argument"); 
     $$error = $msg if (defined $error); 
-    return -1;
+    return undef;
   }   
   $$error = "" if (defined $error);
   return @resString; 
@@ -644,12 +656,14 @@ sub queryByName {
       my $document = $self->{CONTAINER}->getDocument($dbTr, $name);
       $content = $document->getName;
       $logger->debug("Document found.");
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       if($e->getExceptionCode() == 11) {
@@ -661,6 +675,7 @@ sub queryByName {
         $msg = escapeString($msg);
         $logger->error($msg);
         $$error = $msg if (defined $error);
+        return undef;
       }
     }
     elsif($e = catch DbException) {
@@ -669,6 +684,7 @@ sub queryByName {
       $msg = escapeString($msg);    
       $logger->error($msg);    
       $$error = $msg if (defined $error);
+      return undef;
     }        
     elsif($@) {
       my $msg = "Error \"".$@."\".";
@@ -676,12 +692,14 @@ sub queryByName {
       $msg = escapeString($msg);  
       $logger->error($msg);  
       $$error = $msg if (defined $error);    
+      return undef;
     }   
   }
   else {
     my $msg = "Missing argument.";
     $logger->error($msg); 
     $$error = $msg if (defined $error);  
+    return undef;
   }  
   $$error = "" if (defined $error);
   return $content; 
@@ -707,18 +725,21 @@ sub getDocumentByName {
       my $document = $self->{CONTAINER}->getDocument($dbTr, $name);
       $content = $document->getContent;
       $logger->debug("Document found.");
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       if($e->getExceptionCode() == 11) {
         my $msg = "Document not found";
         $logger->debug($msg);
         $$error = $msg if defined $error;
+        return undef;
       }
       else {
         my $msg = "Error \"".$e->what()."\".";
@@ -726,6 +747,7 @@ sub getDocumentByName {
         $msg = escapeString($msg);
         $logger->error($msg);
         $$error = $msg if defined $error;
+        return undef;
       }
     }
     elsif($e = catch DbException) {
@@ -734,6 +756,7 @@ sub getDocumentByName {
       $msg = escapeString($msg);     
       $logger->error($msg);
       $$error = $msg if defined $error;
+      return undef;
     }
     elsif($@) {
       my $msg = "Error \"".$@."\".";
@@ -741,12 +764,14 @@ sub getDocumentByName {
       $msg = escapeString($msg);  
       $logger->error($msg);
       $$error = $msg if defined $error;
+      return undef;
     }
   }
   else {
     my $msg = "Missing argument";
     $logger->error($msg);
     $$error = $msg if defined $error;
+    return undef;
   }
   $$error = "" if defined $error;
   return $content;
@@ -775,12 +800,14 @@ sub updateByName {
       $dbTr = $self->{MANAGER}->createTransaction() if $atomic;    
       my $dbUC = $self->{MANAGER}->createUpdateContext();       
       $self->{CONTAINER}->updateDocument($dbTr, $myXMLDoc, $dbUC);
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
     
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
     
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -849,12 +876,14 @@ sub count {
       $dbTr = $self->{MANAGER}->createTransaction() if $atomic;      
       $results = $self->{MANAGER}->query($dbTr, $fullQuery, $dbQC);  
       $size = $results->size();
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -862,6 +891,7 @@ sub count {
       $msg = escapeString($msg);      
       $logger->error($msg);
       $$error = $msg if (defined $error);
+      return undef;
     }
     elsif($e = catch DbException) {
       my $msg = "Error \"".$e->what()."\".";
@@ -869,6 +899,7 @@ sub count {
       $msg = escapeString($msg);  
       $logger->error($msg); 
       $$error = $msg if (defined $error);
+      return undef;
     }        
     elsif($@) {
       my $msg = "Error \"".$@."\".";
@@ -876,12 +907,14 @@ sub count {
       $msg = escapeString($msg);  
       $logger->error($msg); 
       $$error = $msg if (defined $error);
+      return undef;
     }  
   }
   else {
     my $msg = "Missing argument.";
     $logger->error($msg);   
     $$error = $msg if (defined $error); 
+    return undef;
   } 
   $$error = "" if (defined $error);
   return $size;
@@ -910,12 +943,14 @@ sub insertIntoContainer {
       $dbTr = $self->{MANAGER}->createTransaction() if $atomic; 
       my $dbUC = $self->{MANAGER}->createUpdateContext();       
       $self->{CONTAINER}->putDocument($dbTr, $myXMLDoc, $dbUC, 0);
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -980,12 +1015,14 @@ sub insertElement {
       $myXMLMod->addAppendStep($myXMLQueryExpr, $myXMLMod->Element, "", $content, -1);
       my $dbUC = $self->{MANAGER}->createUpdateContext();       
       $myXMLMod->execute($dbTr, $results, $dbQC, $dbUC);
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
@@ -1040,12 +1077,14 @@ sub remove {
       $dbTr = $self->{MANAGER}->createTransaction() if $atomic;  
       my $dbUC = $self->{MANAGER}->createUpdateContext();     
       $self->{CONTAINER}->deleteDocument($dbTr, $name, $dbUC);
-      $dbTr->commit() if $atomic;
-      undef $dbTr if $atomic;
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
     };
 
     $dbTr->abort if($dbTr and $atomic);
-    undef $dbTr if $atomic;
+    undef $dbTr;
 
     if(my $e = catch std::exception) {
       my $msg = "Error \"".$e->what()."\".";
