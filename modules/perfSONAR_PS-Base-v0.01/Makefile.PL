@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Base',
-    'VERSION' => 0.06,
+    'VERSION' => 0.07,
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
