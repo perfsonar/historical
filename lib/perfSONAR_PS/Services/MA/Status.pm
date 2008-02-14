@@ -183,7 +183,6 @@ sub init {
 
     $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
     $handler->registerEventHandler("SetupDataRequest", "Database.Dump", $self);
-    $handler->registerEventHandler_Regex("SetupDataRequest", ".*select.*", $self);
     $handler->registerEventHandler("MeasurementArchiveStoreRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 
     return 0;
@@ -243,17 +242,18 @@ sub registerLS {
 sub handleEvent {
     my ($self, @args) = @_;
       my $parameters = validate(@args,
-    		{
-    			output => 1,
-    			messageId => 1,
-    			messageType => 1,
-    			messageParameters => 1,
-    			eventType => 1,
-    			mergeChain => 1,
-    			filterChain => 1,
-    			data => 1,
-    			rawRequest => 1
-    		});
+            {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                subject => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
+            });
 
     my $output = $parameters->{"output"};
     my $messageId = $parameters->{"messageId"};
@@ -262,7 +262,9 @@ sub handleEvent {
     my $eventType = $parameters->{"eventType"};
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
-    my $md = shift(@{ $parameters->{"mergeChain"} });
+    my @subjects = @{ $parameters->{"subject"} });
+
+    my $md = $subjects[0];
 
     if ($messageType eq "MeasurementArchiveStoreRequest") {
         return $self->handleStoreRequest($output, $md, $d);
@@ -273,15 +275,14 @@ sub handleEvent {
         my @filter = @{ $parameters->{filterChain} };
         if ($#filter > -1) {
             $selectTime = $self->resolveSelectChain($parameters->{filterChain});
-            my $curr_md = shift(@{ $filter[$#filter] });
-            $self->{LOGGER}->debug("MD: ".$curr_md->toString);
+            my $curr_md = $filter[$#filter][0];
             $metadataId = $curr_md->getAttribute("id");
         } else {
             $selectTime = $self->resolveCompatTime($md);
             $metadataId = $md->getAttribute("id");
         }
 
-        return $self->handleQueryRequest($output, $metadataId, $md, $selectTime);
+        $self->handleQueryRequest($output, $metadataId, $md, $selectTime);
     }
 }
 
@@ -289,7 +290,9 @@ sub resolveCompatTime {
     my ($self, $md) = @_;
 
     my $ret_time;
-    my $time = findvalue($md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+    my $parameters = find($md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    return if (not defined $parameters);
+    my $time = findvalue($parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
     if (defined $time) {
         if (lc($time) eq "all") {
             $ret_time = perfSONAR_PS::Time->new("point", -1);
@@ -315,8 +318,6 @@ sub resolveSelectChain {
             # we definitely have a subject in this message, we just don't understand it
             throw perfSONAR_PS::Error_compat("error.ma.unsupported_filter_type", "This Status MA only supports select filters and metadata ".$filter->getAttribute("id")." does not contain a select subject");
         }
-
-        $self->{LOGGER}->debug("Filter: ".$filter->toString);
 
         my $select_parameters = find($select_subject, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
         
@@ -389,45 +390,40 @@ sub handleStoreRequest {
     }
 
     if (not defined $link_id or $link_id eq q{}) {
-        $status = "error.ma.query.incomplete_metadata";
-        $res = "Metadata ".$md->getAttribute("id")." is missing the link id";
-        $self->{LOGGER}->error($res);
-        throw perfSONAR_PS::Error_compat($status, $res);
+        my $msg = "Metadata ".$md->getAttribute("id")." is missing the link id";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_metadata", $msg);
     }
 
     if ($knowledge ne "full" and $knowledge ne "partial") {
-        $status = "error.ma.query.invalid_knowledge_level";
-        $res = "Invalid knowledge level specified, \"$knowledge\", must be either 'full' or 'partial'";
-        $self->{LOGGER}->error($res);
-        throw perfSONAR_PS::Error_compat($status, $res);
+        my $msg = "Invalid knowledge level specified, \"$knowledge\", must be either 'full' or 'partial'";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_knowledge_level", $msg);
     }
 
     if (not defined $time or $time eq q{} or not defined $time_type or $time_type eq q{} or not defined $adminState or $adminState eq q{} or not defined $operState or $operState eq q{}) {
-        $status = "error.ma.query.incomplete_data";
-        $res = "Data block is missing:";
-        $res .= " 'time'" if (not defined $time or $time eq q{});
-        $res .= " 'time type'" if (not defined $time_type or $time_type eq q{});
-        $res .= " 'administrative state'" if (not defined $adminState or $adminState eq q{});
-        $res .= " 'operational state'" if (not defined $operState or $operState eq q{});
-        $self->{LOGGER}->error($res);
-        throw perfSONAR_PS::Error_compat($status, $res);
+        my $msg = "Data block is missing:";
+        $msg .= " 'time'" if (not defined $time or $time eq q{});
+        $msg .= " 'time type'" if (not defined $time_type or $time_type eq q{});
+        $msg .= " 'administrative state'" if (not defined $adminState or $adminState eq q{});
+        $msg .= " 'operational state'" if (not defined $operState or $operState eq q{});
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_data", $msg);
     }
 
     if ($time_type ne "unix") {
-        $status = "error.ma.query.invalid_timestamp_type";
-        $res = "Time type must be 'unix'";
-        $self->{LOGGER}->error($res);
-        throw perfSONAR_PS::Error_compat($status, $res);
+        my $msg = "Time type must be 'unix'";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_timestamp_type", $msg);
     }
 
     if (not defined $do_update) {
-        $status = "error.ma.query.invalid_update_parameter";
-        $res = "The update parameter, if included, must be 'yes' or 'no', not '$do_update'";
-        $self->{LOGGER}->error($res);
-        throw perfSONAR_PS::Error_compat($status, $res);
+        my $msg = "The update parameter, if included, must be 'yes' or 'no', not '$do_update'";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_update_parameter", $msg);
     }
 
-    ($status, $res) = $self->__handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
+    $self->__handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
 
     my $mdID = "metadata.".genuid();
 
@@ -491,8 +487,6 @@ sub lookupAllRequest {
     my $localContent = q{};
     my ($status, $res);
 
-    $self->{LOGGER}->debug("lookupAllRequest()");
-
     my $mdID = $subject_md->getAttribute("id");
 
     ($status, $res) = $self->{CLIENT}->open;
@@ -534,8 +528,6 @@ sub lookupAllRequest {
 sub lookupLinkStatusRequest {
     my($self, $output, $metadataId, $md, $time) = @_;
     my ($status, $res);
-
-    $self->{LOGGER}->debug("lookupLinkStatusRequest()");
 
     my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
 

@@ -266,6 +266,7 @@ sub __handleMessageEnd {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
+                message => { type => SCALARREF },
                 doOutputMessageFooter => { type => SCALARREF },
             });
 
@@ -296,7 +297,7 @@ sub __handleEvent {
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
                 eventType => { type => SCALAR | UNDEF },
-                mergeChain => { type => ARRAYREF },
+                subject => { type => ARRAYREF },
                 filterChain => { type => ARRAYREF },
                 data => { type => SCALARREF },
                 rawRequest => { type => ARRAYREF },
@@ -527,7 +528,7 @@ sub handleMessage {
             });
 
     if ($doOutputMessageHeader) {
-        startMessage($ret_message, $outputMessageType, $outputMessageId, $outputMessageType, "", \%outputNamespaces);
+        startMessage($ret_message, $outputMessageId, $messageId, $outputMessageType, "", \%outputNamespaces);
     }
 
     my $chains = $self->parseChains($ret_message, $message);
@@ -584,11 +585,12 @@ sub handleMessage {
             $errorEventType = "error.ma.event_type";
             $errorMessage = "No supported event types for message of type \"$messageType\"";
         } else {
+
             try {
                 $self->__handleEvent({
                                         output => $ret_message, messageId => $messageId, messageType => $messageType,
                                         messageParameters => \%message_parameters, eventType => $eventType,
-                                        mergeChain => $merge_chain, filterChain => $filter_chain, data => $data,
+                                        subject => $merge_chain, filterChain => $filter_chain, data => $data,
                                         rawRequest => $raw_request, doOutputMetadata => \$doOutputMetadata
                                         });
             }
@@ -641,7 +643,7 @@ sub handleMessage {
     }
 
     my $doOutputMessageFooter = 1;
-    $self->__handleMessageEnd({ output => $ret_message, messageId => $messageId, messageType => $messageType, doOutputMessageFooter => \$doOutputMessageFooter  });
+    $self->__handleMessageEnd({ output => $ret_message, messageId => $messageId, messageType => $messageType, message => $message, doOutputMessageFooter => \$doOutputMessageFooter  });
     if ($doOutputMessageFooter) {
         endMessage($ret_message);
     }
@@ -802,7 +804,6 @@ sub __mergeMetadata {
     my %eventTypes = ();
 
     foreach my $md (( $prev_md, $curr_md )) {
-        $self->{LOGGER}->debug("Prev MD: ".Dumper($md));
         my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
         foreach my $e ($eventTypes->get_nodelist) {
             my $value = extract($e, 1);

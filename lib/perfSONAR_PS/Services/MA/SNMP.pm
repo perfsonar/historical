@@ -504,7 +504,7 @@ sub handleEvent {
                 messageType => 1,
                 messageParameters => 1,
                 eventType => 1,
-                mergeChain => 1,
+                subject => 1,
                 filterChain => 1,
                 data => 1,
                 rawRequest => 1,
@@ -518,8 +518,10 @@ sub handleEvent {
     my $eventType = $parameters->{"eventType"};
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
-    my $md = shift(@{ $parameters->{"mergeChain"} });
-    my $filter_chain = $parameters->{"filterChain"};
+    my @subjects = @{ $parameters->{"subject"} };
+    my @filters = @{ $parameters->{"filterChain"} };
+
+    my $md = $subjects[0];
 
     my $doOutputMetadata = $parameters->{"doOutputMetadata"};
 
@@ -538,7 +540,6 @@ sub handleEvent {
     $timeSettings{"START"} = $new_timeSettings->{"START"} if (defined $new_timeSettings->{"START"});
     $timeSettings{"END"} = $new_timeSettings->{"END"} if (defined $new_timeSettings->{"END"});
 
-    my @filters = @{ $filter_chain };
     if ($#filters > -1) {
         foreach my $filter_arr (@filters) {
             my @filters = @{ $filter_arr };

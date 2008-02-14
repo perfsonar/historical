@@ -144,14 +144,14 @@ sub registerLS {
     if ($status != 0) {
         my $msg = "Couldn't open from database: $res1";
         $self->{LOGGER}->error($msg);
-        exit(-1);
+        return -1;
     }
 
     ($status, $res1) = $self->{CLIENT}->getUniqueIDs;
     if ($status != 0) {
         my $msg = "Couldn't get link nformation from database: $res1";
         $self->{LOGGER}->error($msg);
-        exit(-1);
+        return -1;
     }
 
     my @mds = ();
@@ -200,17 +200,18 @@ sub buildLSMetadata {
 sub handleEvent {
     my ($self, @args) = @_;
       my $parameters = validate(@args,
-    		{
-    			output => 1,
-    			messageId => 1,
-    			messageType => 1,
-    			messageParameters => 1,
-    			eventType => 1,
-    			mergeChain => 1,
-    			filterChain => 1,
-    			data => 1,
-    			rawRequest => 1
-    		});
+            {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                subject => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
+            });
 
     my $output = $parameters->{"output"};
     my $messageId = $parameters->{"messageId"};
@@ -219,24 +220,21 @@ sub handleEvent {
     my $eventType = $parameters->{"eventType"};
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
-    my $md = shift(@{ $parameters->{"mergeChain"} });
-
-    my $retMetadata;
-    my $retData;
-    my $mdID = "metadata.".genuid();
-    my $msg = "The echo request has passed.";
+    my $md = shift(@{ $parameters->{"subject"} });
 
     if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
-        return $self->queryTopology($output, $eventType, $md, $d);
+        $self->queryTopology($output, $eventType, $md, $d);
     } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-        return $self->queryTopology($output, $eventType, $md, $d);
+        $self->queryTopology($output, $eventType, $md, $d);
     } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
-        return $self->changeTopology($output, $eventType, $md, $d);
+        $self->changeTopology($output, $eventType, $md, $d);
     } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
-        return $self->changeTopology($output, $eventType, $md, $d);
+        $self->changeTopology($output, $eventType, $md, $d);
     } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
-        return $self->changeTopology($output, $eventType, $md, $d);
+        $self->changeTopology($output, $eventType, $md, $d);
     }
+
+    return;
 }
 
 sub queryTopology {
@@ -245,33 +243,28 @@ sub queryTopology {
 
     ($status, $res) = $self->{CLIENT}->open;
     if ($status != 0) {
-        my ($status, $res);
-        $status = "error.topology.ma";
-        $res = "Couldn't open database";
-        $self->{LOGGER}->error($res);
-    } else {
-        if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-            ($status, $res) = $self->queryAllRequest();
-        } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
-            my $query = findvalue($m, "./xquery:subject");
-    
-            if (not defined $query or $query eq q{}) {
-                $status = "error.topology.query.query_not_found";
-                $res =  "No query given in request";
-            } else {
-                ($status, $res) = $self->queryXqueryRequest($query);
-            }
+        my $msg = "Couldn't open database: $res";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.topology.ma", $msg);
+    }
+
+    if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
+        $self->queryAllRequest();
+    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
+        my $query = findvalue($m, "./xquery:subject");
+
+        if (not defined $query or $query eq q{}) {
+            my $msg = "No query given in request";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat("error.topology.query.query_not_found", $msg);
         }
+
+        $self->queryXqueryRequest($query);
     }
 
-    if ($status ne q{}) {
-        throw perfSONAR_PS::Error_compat($status, $res);
-    } else {
-        $output->addExistingXMLElement($m);
-        createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
-    }
+    createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
 
-    return (q{}, q{});
+    return;
 }
 
 sub changeTopology {
@@ -290,41 +283,34 @@ sub changeTopology {
 
     my ($status, $res) = $self->{CLIENT}->open;
     if ($status != 0) {
-        my ($status, $res);
-        $status = "error.topology.ma";
-        $res = "Couldn't open database";
-    } elsif (not defined $topology) {
-        $status = "error.topology.query.topology_not_found";
-        $res = "No topology defined in change topology request for metadata: ".$m->getAttribute("id");
-    } else {
-        ($status, $res) = $self->changeRequest($changeType, $topology);
+        my $msg = "Couldn't open database";
+        $self->{LOGGER}->error("Error changing topology: $res");
+        throw perfSONAR_PS::Error_compat("error.topology.ma", $msg);
+    } 
+
+    if (not defined $topology) {
+        my $msg = "No topology defined in change topology request for metadata: ".$m->getAttribute("id");
+        $self->{LOGGER}->error("Error changing topology: $res");
+        throw perfSONAR_PS::Error_compat("error.topology.query.topology_not_found", $msg);
     }
 
-    if ($status ne q{}) {
-        $self->{LOGGER}->error("Couldn't handle requested metadata: $res");
+    $self->changeRequest($changeType, $topology);
 
-        my $mdID = "metadata.".genuid();
+    my $changeDesc;
+    my $mdID = "metadata.".genuid();
 
-        getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), $status);
-        getResultCodeData($output, "data.".genuid(), $mdID, $res, 1);
-    } else {
-        my $changeDesc;
-        my $mdID = "metadata.".genuid();
-
-        if ($changeType eq "add") {
-            $changeDesc = "added";
-        } elsif ($changeType eq "replace") {
-            $changeDesc = "replaced";
-        } elsif ($changeType eq "update") {
-            $changeDesc = "updated";
-        }
-
-        $output->addExistingXMLElement($m);
-        getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), "success.ma.".$changeDesc);
-        getResultCodeData($output, "data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
+    if ($changeType eq "add") {
+        $changeDesc = "added";
+    } elsif ($changeType eq "replace") {
+        $changeDesc = "replaced";
+    } elsif ($changeType eq "update") {
+        $changeDesc = "updated";
     }
 
-    return (q{}, q{});
+    getResultCodeMetadata($output, $mdID, $m->getAttribute("id"), "success.ma.".$changeDesc);
+    getResultCodeData($output, "data.".genuid(), $mdID, "data element(s) successfully $changeDesc", 1);
+
+    return;
 }
 
 sub changeRequest {
@@ -337,16 +323,16 @@ sub changeRequest {
     ($status, $res) = topologyNormalize($topology);
     if ($status != 0) {
         $self->{LOGGER}->error("Couldn't normalize topology");
-        return ("error.topology.invalid_topology", $res);
+        throw perfSONAR_PS::Error_compat("error.topology.invalid_topology", $res);
     }
 
     ($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
     if ($status != 0) {
         $self->{LOGGER}->error("Error handling topology request");
-        return ("error.topology.ma", $res);
+        throw perfSONAR_PS::Error_compat("error.topology.ma", $res);
     }
 
-    return (q{}, q{});
+    return;
 }
 
 sub queryAllRequest {
@@ -357,17 +343,17 @@ sub queryAllRequest {
     if ($status != 0) {
         my $msg = "Couldn't open connection to database: $res";
         $self->{LOGGER}->error($msg);
-        return ("error.common.storage.open", $msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
     ($status, $res) = $self->{CLIENT}->getAll;
     if ($status != 0) {
         my $msg = "Database dump failed: $res";
         $self->{LOGGER}->error($msg);
-        return ("error.common.storage.fetch", $msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
     }
 
-    return (q{}, $res->toString);
+    return;
 }
 
 sub queryXqueryRequest {
@@ -378,17 +364,17 @@ sub queryXqueryRequest {
     if ($status != 0) {
         my $msg = "Couldn't open connection to database: $res";
         $self->{LOGGER}->error($msg);
-        return ("error.common.storage.open", $msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
     ($status, $res) = $self->{CLIENT}->xQuery($xquery);
     if ($status != 0) {
         my $msg = "Database query failed: $res";
         $self->{LOGGER}->error($msg);
-        return ("error.common.storage.query", $msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
     }
 
-    return (q{}, $res);
+    return;
 }
 
 
