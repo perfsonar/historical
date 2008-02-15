@@ -874,7 +874,7 @@ sub parseChain {
         }
 
         if ($subject_idRef) {
-            push @filter_mds, $mergeChain_currMd;
+            unshift @filter_mds, $mergeChain_currMd;
             $nextMdId = $subject_idRef;
         } else {
             $chained_mds = $mergeChain_currMd;
