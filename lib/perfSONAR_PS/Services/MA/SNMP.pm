@@ -6,7 +6,6 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB';
 
 use strict;
 use warnings;
-use Data::Dumper;
 
 our $VERSION = 0.07;
 
@@ -513,7 +512,8 @@ sub handleEvent {
     my $new_timeSettings = $self->getFilterParameters($md, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"});
 
     $timeSettings{"CF"} = $new_timeSettings->{"CF"} if (defined $new_timeSettings->{"CF"});
-    $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"});
+    $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"} and $timeSettings{"RESOLUTION_SPECIFIED"});
+    $timeSettings{"RESOLUTION_SPECIFIED"} = $new_timeSettings->{"RESOLUTION_SPECIFIED"} if ($new_timeSettings->{"RESOLUTION_SPECIFIED"});
     $timeSettings{"START"} = $new_timeSettings->{"START"} if (defined $new_timeSettings->{"START"});
     $timeSettings{"END"} = $new_timeSettings->{"END"} if (defined $new_timeSettings->{"END"});
 
@@ -525,7 +525,8 @@ sub handleEvent {
             $new_timeSettings = $self->getFilterParameters($filter, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"});
 
             $timeSettings{"CF"} = $new_timeSettings->{"CF"} if (defined $new_timeSettings->{"CF"});
-            $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"});
+            $timeSettings{"RESOLUTION"} = $new_timeSettings->{"RESOLUTION"} if (defined $new_timeSettings->{"RESOLUTION"} and $new_timeSettings->{"RESOLUTION_SPECIFIED"});
+            $timeSettings{"RESOLUTION_SPECIFIED"} = $new_timeSettings->{"RESOLUTION_SPECIFIED"} if ($new_timeSettings->{"RESOLUTION_SPECIFIED"});
 
             # we conditionally replace the START/END settings since under the theory of
             # filter, if a later element specifies an earlier start time, the later
@@ -543,6 +544,12 @@ sub handleEvent {
                 $timeSettings{"END"} = $new_timeSettings->{"END"};
             }
         }
+    }
+
+    # If no resolution was listed in the filters, go with the default
+    if (not defined $timeSettings{"RESOLUTION"}) {
+        $timeSettings{"RESOLUTION"} = $self->{CONF}->{"snmp"}->{"default_resolution"};
+        $timeSettings{"RESOLUTION_SPECIFIED"} = 0;
     }
 
     my $cf = "";
@@ -881,7 +888,7 @@ sub metadataKeyRetrieveMetadataData {
                         addParameter($parameters->{output}, "maKey", $hashKey);
                         addParameter($parameters->{output}, "startTime", $parameters->{time_settings}->{"START"}) if (defined $parameters->{time_settings}->{"START"});
                         addParameter($parameters->{output}, "endTime", $parameters->{time_settings}->{"END"}) if (defined $parameters->{time_settings}->{"END"});
-                        if (defined $parameters->{time_settings}->{"RESOLUTION"} and not defined $parameters->{time_settings}->{"RESOLUTION_NOT_SPECIFIED"}) {
+                        if (defined $parameters->{time_settings}->{"RESOLUTION"} and $parameters->{time_settings}->{"RESOLUTION_SPECIFIED"}) {
                         addParameter($parameters->{output}, "resolution", $parameters->{time_settings}->{"RESOLUTION"});
                         }
                         addParameter($parameters->{output}, "consolidationFunction", $parameters->{time_settings}->{"CF"}) if (defined $parameters->{time_settings}->{"CF"});
@@ -1592,16 +1599,17 @@ sub getFilterParameters {
         $time{"RESOLUTION"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
     }
 
+    $time{"RESOLUTION_SPECIFIED"} = 0;
     if(!$time{"RESOLUTION"} or
             !($time{"RESOLUTION"} =~ m/^\d+$/)) {
         if(defined $default_resolution) {
             $time{"RESOLUTION"} = $default_resolution;
-            $time{"RESOLUTION_NOT_SPECIFIED"} = 1
         }
         else {
             $time{"RESOLUTION"} = 1;
-            $time{"RESOLUTION_NOT_SPECIFIED"} = 1
         }
+    } else {
+        $time{"RESOLUTION_SPECIFIED"} = 1;
     }
 
     if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1)) {
