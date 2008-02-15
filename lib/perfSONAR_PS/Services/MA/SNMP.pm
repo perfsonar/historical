@@ -282,19 +282,19 @@ sub buildHashedKeys {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, {} );
 
-    my $queryString = "/nmwg:store/nmwg:data/nmwg:key";
+    my $queryString = "/nmwg:store/nmwg:data";
     my $error       = q{};
     my $metadatadb  = $self->{METADATADB};
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         my $results = $metadatadb->querySet($queryString);
         if ( $results->size() > 0 ) {
-            foreach my $key ( $results->get_nodelist ) {
-                if ( $key->getAttribute("id") ) {
-                    my $hash = md5_hex( $key->toString );
-                    $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} = $key->getAttribute("id");
-                    $self->{CONF}->{"snmp"}->{"idToHash"}->{ $key->getAttribute("id") } = $hash;
-                    $self->{CONF}->{"snmp"}->{"logger"}->debug("Key id $hash maps to data element ".$key->getAttribute("id"));
+            foreach my $data ( $results->get_nodelist ) {
+                if ( $data->getAttribute("id") ) {
+                    my $hash = md5_hex( $data->toString );
+                    $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} = $data->getAttribute("id");
+                    $self->{CONF}->{"snmp"}->{"idToHash"}->{ $data->getAttribute("id") } = $hash;
+                    $self->{CONF}->{"snmp"}->{"logger"}->debug("Key id $hash maps to data element ".$data->getAttribute("id"));
                 }
             }
         }
@@ -690,8 +690,7 @@ sub metadataKeyRetrieveKey {
         if ($hashId) {
             if (
                 $parameters->{metadatadb}->count(
-                    "/nmwg:store/nmwg:data[./nmwg:key[\@id=\"" 
-                      . $hashId . "\"]]"
+                    "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]"
                 ) != 1
               )
             {
@@ -862,73 +861,33 @@ sub metadataKeyRetrieveMetadataData {
             next if (not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef});
             my $curr_md = $mds{$curr_d_mdIdRef};
 
-            $dId  = "data." . genuid();
-            $mdId = "metadata." . genuid();
-
-            my $hashId = find( $d, "./nmwg:key", 1 )->getAttribute("id");
-            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
-
-            my $d_temp = $d->cloneNode(1);
-            $d_temp->setAttribute( "metadataIdRef", $mdId );
-            $d_temp->setAttribute( "id",            $dId );
-
-            my $nmwg_parameters = find($d_temp, ".//nmwg:parameters", 1);
-
-            if ($hashKey) {
-                my $maKey = q{};
-                foreach my $params ($nmwg_parameters->childNodes)
-                {
-                    next if (not defined $params->localname or $params->localname ne "parameter");
-                    $maKey = $params->cloneNode(1);
-                    $maKey->setAttribute( "name", "maKey" );
-                    $maKey->removeChildNodes();
-                    if ($maKey->getAttribute("value")) {
-                        $maKey->setAttribute( "value", $hashKey )
-                    } else {
-                        $maKey->appendText($hashKey)
-                    }
-                    last;
-                }
-                if ($maKey) {
-                    foreach my $params ($nmwg_parameters->childNodes)
-                    {
-
-                        next if !(defined $params->localname and defined $params->getAttribute("name"));
-
-                        # Remove any unknown parameters from the metadata
-                        if ( $params->localname eq "parameter"
-                                and $params->getAttribute("name") ne "consolidationFunction"
-                                and $params->getAttribute("name") ne "resolution"
-                                and $params->getAttribute("name") ne "startTime"
-                                and $params->getAttribute("name") ne "endTime"
-                                and $params->getAttribute("name") ne "time" )
-                        {
-                            my $oldParam = $nmwg_parameters->removeChild($params);
-                            undef $oldParam;
-                        }
-
-                    }
-
-                    # Add the ma parameter
-                    $nmwg_parameters->addChild($maKey);
-                }
-            }
-
-            $self->addSelectParameters({ parameter_block => $nmwg_parameters, filters => $parameters->{filters} });
-
-            my $mdIdRef = $parameters->{metadata}->getAttribute("id");
-
-            my @filters = @{ $parameters->{filters} };
-            if ($#filters > -1) {
-                $mdIdRef = $filters[$#filters][0]->getAttribute("id");
-            }
+            my $dId  = "data." . genuid();
+            my $mdId = "metadata." . genuid();
 
             my $md_temp = $curr_md->cloneNode(1);
-            $md_temp->setAttribute( "metadataIdRef", $mdIdRef );
+            $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
             $md_temp->setAttribute( "id",            $mdId );
 
             $parameters->{output}->addExistingXMLElement($md_temp);
-            $parameters->{output}->addExistingXMLElement($d_temp);
+
+            my $hashId = $d->getAttribute("id");
+            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+
+            next if (not defined $hashKey);
+
+            startData($parameters->{output}, $dId, $mdId, undef);
+                $parameters->{output}->startElement({ prefix => "nmwg", tag => "key", namespace => "http://ggf.org/ns/nmwg/base/2.0/" });
+                    startParameters($parameters->{output}, "params.0");
+                        addParameter($parameters->{output}, "maKey", $hashKey);
+                        addParameter($parameters->{output}, "startTime", $parameters->{time_settings}->{"START"}) if (defined $parameters->{time_settings}->{"START"});
+                        addParameter($parameters->{output}, "endTime", $parameters->{time_settings}->{"END"}) if (defined $parameters->{time_settings}->{"END"});
+                        if (defined $parameters->{time_settings}->{"RESOLUTION"} and not defined $parameters->{time_settings}->{"RESOLUTION_NOT_SPECIFIED"}) {
+                        addParameter($parameters->{output}, "resolution", $parameters->{time_settings}->{"RESOLUTION"});
+                        }
+                        addParameter($parameters->{output}, "consolidationFunction", $parameters->{time_settings}->{"CF"}) if (defined $parameters->{time_settings}->{"CF"});
+                    endParameters($parameters->{output});
+                $parameters->{output}->endElement("key");
+            endData($parameters->{output});
         }
     }
     else {
@@ -1055,7 +1014,7 @@ sub setupDataRetrieveKey {
         if ($hashId) {
             $results =
               $parameters->{metadatadb}->querySet(
-                "/nmwg:store/nmwg:data[./nmwg:key[\@id=\"" . $hashId . "\"]]" );
+                "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]" );
             if ( $results->size() != 1 ) {
                 my $msg = "Key error in metadata storage.";
                 $self->{CONF}->{"snmp"}->{"logger"}->error($msg);
@@ -1637,9 +1596,11 @@ sub getFilterParameters {
             !($time{"RESOLUTION"} =~ m/^\d+$/)) {
         if(defined $default_resolution) {
             $time{"RESOLUTION"} = $default_resolution;
+            $time{"RESOLUTION_NOT_SPECIFIED"} = 1
         }
         else {
             $time{"RESOLUTION"} = 1;
+            $time{"RESOLUTION_NOT_SPECIFIED"} = 1
         }
     }
 
