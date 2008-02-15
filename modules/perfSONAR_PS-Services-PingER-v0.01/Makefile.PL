@@ -11,6 +11,7 @@
 #	Description:	
 #		Build for perfSONAR-PS
 #
+use lib 'inc';
 use inc::Module::Install;
 
 name             'perfSONAR_PS-Services-PingER';
@@ -21,27 +22,17 @@ version          '1.0';
 perl_version     '5.008';
 all_from 	 'lib/perfSONAR_PS/';
 
-# perfsonar dependencies
-requires 'perfSONAR_PS::Common' => 0.06;
-requires 'perfSONAR_PS::Transport' => 0.06;
-requires 'perfSONAR_PS::Messages' => 0.06;
-requires 'perfSONAR_PS::DB::SQL' => 0.06;
-requires 'perfSONAR_PS::DB::File' => 0.06;
-requires 'perfSONAR_PS::DB::RRD' => 0.06;
-requires 'perfSONAR_PS::Services::Base' => 0.06;
-requires 'perfSONAR_PS::Services::MA::General' => 0.06;
-requires 'perfSONAR_PS::XML::Document_string' => 0.06;
-requires 'perfSONAR_PS::Error_compat' => 0.06;
-
-requires  'Module::Load' => 0; 
-requires  'Module::Build' => 0; 
-requires  'DateTime' => 0;
-requires  'DateTime::Format' => 0;
+#requires  'Module::Load' => 0; 
+#requires  'Module::Build' => 0; 
+requires  'DateTime' => '0.41';
+#requires  'DateTime::Format' => 0;
+#requires  'DateTime::Duration' => 0;
 requires  'DateTime::Format::Builder' => 0;
-requires  'Object::Deadly' => 0;
+build_requires  'Object::Deadly' => 0;
 
 requires  'Bit::Vector' => 0;
 requires  'Test::Exception' => 0;
+requires  'Error' => 0;
 
 requires  'Carp' => 0;
 requires  'Carp::Clan' => 0;
@@ -70,6 +61,18 @@ requires  'Data::Compare'  => 0;
 requires  'Crypt::CBC'  => '2'; 
 requires  'FreezeThaw' => 0;
 requires  'Readonly' => 0;
+
+# perfsonar dependencies
+requires 'perfSONAR_PS::Common' => 0.06;
+requires 'perfSONAR_PS::Transport' => 0.06;
+requires 'perfSONAR_PS::Messages' => 0.06;
+requires 'perfSONAR_PS::DB::SQL' => 0.06;
+requires 'perfSONAR_PS::DB::File' => 0.06;
+requires 'perfSONAR_PS::DB::RRD' => 0.06;
+requires 'perfSONAR_PS::Services::Base' => 0.06;
+requires 'perfSONAR_PS::Services::MA::General' => 0.06;
+requires 'perfSONAR_PS::XML::Document_string' => 0.06;
+requires 'perfSONAR_PS::Error_compat' => 0.06;
 
 ###requires_external_bin 'mysql';
 requires_external_bin 'sqlite3';
