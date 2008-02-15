@@ -101,18 +101,6 @@ lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Metadata/Parameters.pm
 lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Metadata/Subject.pm
 lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Parameters.pm
 lib/perfSONAR_PS/DB/PingER.pm
-lib/perfSONAR_PS/Service/MA/PingER.pm
-lib/perfSONAR_PS/Service/MP/Agent/Base.pm
-lib/perfSONAR_PS/Service/MP/Agent/CommandLine.pm
-lib/perfSONAR_PS/Service/MP/Agent/ConstantValue.pm
-lib/perfSONAR_PS/Service/MP/Agent/Ping.pm
-lib/perfSONAR_PS/Service/MP/Agent/PingER.pm
-lib/perfSONAR_PS/Service/MP/Agent/Script.pm
-lib/perfSONAR_PS/Service/MP/Agent/SNMP.pm
-lib/perfSONAR_PS/Service/MP/Config/PingER.pm
-lib/perfSONAR_PS/Service/MP/Config/Schedule.pm
-lib/perfSONAR_PS/Service/MP/PingER.pm
-lib/perfSONAR_PS/Service/MP/Scheduler.pm
 lib/perfSONAR_PS/Services/MA/PingER.pm
 lib/perfSONAR_PS/Services/MP/Agent/Base.pm
 lib/perfSONAR_PS/Services/MP/Agent/CommandLine.pm
@@ -126,7 +114,6 @@ lib/perfSONAR_PS/Services/MP/Config/Schedule.pm
 lib/perfSONAR_PS/Services/MP/PingER.pm
 lib/perfSONAR_PS/Services/MP/Scheduler.pm
 LICENSE
-link-modules.pl
 Makefile.PL
 MANIFEST
 META.yml			Module meta-data (added by MakeMaker)
