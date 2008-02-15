@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::LS::LS;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields;
+use fields 'STATE';
 
 use strict;
 use warnings;
@@ -43,6 +43,7 @@ DB XML, a native XML database.
 use Log::Log4perl qw(get_logger);
 use Time::HiRes qw(gettimeofday);
 use Params::Validate qw(:all);
+use Digest::MD5 qw(md5_hex);
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
 use perfSONAR_PS::Common;
@@ -100,7 +101,8 @@ this function.
 sub init {
   my ($self, $handler) = @_;
   $self->{CONF}->{"ls"}->{"logger"} = get_logger("perfSONAR_PS::Services::LS::LS");
-
+  $self->{STATE} = ();
+  
   unless(exists $self->{CONF}->{"ls"}->{"metadata_db_name"} and
          $self->{CONF}->{"ls"}->{"metadata_db_name"}) {
     $self->{CONF}->{"ls"}->{"logger"}->error("Value for 'metadata_db_name' is not set.");
@@ -199,6 +201,9 @@ sub handleMessage {
 		$msgParams = $self->handleMessageParameters({ msgParams => $msgParams});
 		$doc->addExistingXMLElement($msgParams);
 	}
+
+  # maintain key state
+  $self->{STATE}->{"messageKeys"} = ();
 
 	if($messageType eq "LSRegisterRequest") {
 		$self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSRegister request.");
@@ -350,12 +355,10 @@ sub lsRegisterRequest {
   my $metadatadb = $self->prepareDatabases({ doc => $doc });
   unless($metadatadb) {
     my $msg = "Database could not be opened.";
-    $self->{CONF}->{"ls"}->{"logger"}->error($msg);
     statusReport($doc, "metadata.".genuid(), q{}, "data.".genuid(), "error.ls.xmldb", $msg);   
     return;
   }
   
-  my %keys = ();
   my $error = q{};
   my $counter = 0;
   my($sec, $frac) = Time::HiRes::gettimeofday;
@@ -381,11 +384,11 @@ sub lsRegisterRequest {
 
     my $mdKey = extract(find($m, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1), 0);
     if($mdKey) {
-      unless(exists $keys{$mdKey}) {
-        $keys{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
+      unless(exists $self->{STATE}->{"messageKeys"}->{$mdKey}) {
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
       }
 
-      unless($keys{$mdKey}) {
+      unless($self->{STATE}->{"messageKeys"}->{$mdKey}) {
         my $msg = "Sent key \"".$mdKey."\" was not registered.";
         $self->{CONF}->{"ls"}->{"logger"}->error($msg);
         statusReport($doc, "metadata.".genuid(), $m->getAttribute("id"), "data.".genuid(), "error.ls.register.key_not_found", $msg);
@@ -444,44 +447,56 @@ sub lsRegisterRequestUpdateNew {
     return;
   }
 
+  my $mdKeyStorage = md5_hex($accessPoint);
+
   my $error = q{};
   my $errorFlag = 0;
 
-  my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", $dbTr, \$error);
+  my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", q{}, \$error);
   my $len = $#resultsString;
   $self->{CONF}->{"ls"}->{"logger"}->debug("Removing all info for \"".$mdKey."\".");
   for my $x (0..$len) {
-    $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
     $metadatadb->remove($resultsString[$x], $dbTr, \$error);
   }
   $metadatadb->remove($mdKey."-control", $dbTr, \$error);
   $metadatadb->remove($mdKey, $dbTr, \$error);
 
+# XXX: jason - 2/14
+# could we do an update instead of removing above and inserting here? (special case, does it matter)
+
   my $mdCopy = $m->cloneNode(1);
   my $deadKey = $mdCopy->removeChild(find($mdCopy, "./nmwg:key", 1));
-  my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$accessPoint."\" and " . getMetadataXQuery($mdCopy, q{}) . "]";
-  my @resultsString = $metadatadb->query($queryString, $dbTr, \$error);
+  my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$mdKeyStorage."\" and " . getMetadataXQuery($mdCopy, q{}) . "]";
+  @resultsString = $metadatadb->query($queryString, $dbTr, \$error);
   if($#resultsString == -1) {
     $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
-    $mdCopy->setAttribute("id", $accessPoint);
-    $metadatadb->insertIntoContainer(wrapStore($mdCopy->toString, "LSStore"), $accessPoint, $dbTr, \$error);
-    $metadatadb->insertIntoContainer(createControlKey($accessPoint, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $accessPoint."-control", $dbTr, \$error);
+    $mdCopy->setAttribute("id", $mdKeyStorage);
+    $metadatadb->insertIntoContainer(wrapStore($mdCopy->toString, "LSStore"), $mdKeyStorage, $dbTr, \$error);
+    $metadatadb->insertIntoContainer(createControlKey($mdKeyStorage, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKeyStorage."-control", $dbTr, \$error);
+    $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} = 1;
+  }
+  else {
+    # its in there already
+    if($self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 1) {
+      $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
+      $metadatadb->updateByName(createControlKey($mdKeyStorage, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKeyStorage."-control", $dbTr, \$error);
+      $errorFlag++ if $error;
+      $self->{STATE}->{"messageKeys"}->{$mdKeyStorage}++;
+    }
+    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists and was already updated in this message, skipping.");
   }
 
   my $dCount = 0;
   foreach my $d_content ($d->childNodes) {
     my($sec2, $frac2) = Time::HiRes::gettimeofday;
     if($d_content->getType != 3 and $d_content->getType != 8) {
-      my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/".$d_content->nodeName."[" . getMetadataXQuery($d_content, q{}) . "]", $dbTr, \$error);
-      if($#resultsString == -1) {
-        $metadatadb->insertIntoContainer(createLSData($accessPoint."/".$sec."/".$sec2.$frac2.$dCount, $accessPoint, $d_content->toString), $accessPoint."/".$sec."/".$sec2.$frac2.$dCount, $dbTr, \$error);
-        $errorFlag++ if $error;
-        $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$accessPoint."/".$sec."/".$sec2.$frac2.$dCount."\" for key \"".$accessPoint."\".");
-        $dCount++;
-      }
+      my $hash = md5_hex($d_content->toString);
+      my $insRes = $metadatadb->insertIntoContainer(createLSData($mdKeyStorage."/".$hash, $mdKeyStorage, $d_content->toString), $mdKeyStorage."/".$hash, $dbTr, \$error);
+      $errorFlag++ if $error;
+      $dCount++ if $insRes == 0;
     }
   }
-
+  
   if($errorFlag) {
     statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database errors prevented the transaction from completing.");
     $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
@@ -489,8 +504,8 @@ sub lsRegisterRequestUpdateNew {
   else {  
     my $status = $metadatadb->commitTransaction($dbTr, \$error);
     if($status == 0) {
-      createMetadata($doc, $mdId, $m->getAttribute("id"), createLSKey($accessPoint, "success.ls.register"), undef);
-      createData($doc, $dId, $mdId, "      <nmwg:datum value=\"[".$dCount."] Data elements have been registered with key [".$accessPoint."]\" />\n", undef);      
+      createMetadata($doc, $mdId, $m->getAttribute("id"), createLSKey($mdKeyStorage, "success.ls.register"), undef);
+      createData($doc, $dId, $mdId, "      <nmwg:datum value=\"[".$dCount."] Data elements have been registered with key [".$mdKeyStorage."]\" />\n", undef);      
     }
     else {
       statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
@@ -519,21 +534,22 @@ sub lsRegisterRequestUpdate {
   my $error = q{};
   my $errorFlag = 0;
   
-  $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, updating control time information.");
-  $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-  $errorFlag++ if $error;
-       
+  if($self->{STATE}->{"messageKeys"}->{$mdKey} == 1) {
+    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
+    $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
+    $errorFlag++ if $error;
+    $self->{STATE}->{"messageKeys"}->{$mdKey}++;
+  }
+  $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists and was already updated in this message, skipping.");
+  
   my $dCount = 0;
   foreach my $d_content ($d->childNodes) {
     my($sec2, $frac2) = Time::HiRes::gettimeofday;
     if($d_content->getType != 3 and $d_content->getType != 8) {
-      my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/".$d_content->nodeName."[" . getMetadataXQuery($d_content, q{}) . "]", $dbTr, \$error);
-      if($#resultsString == -1) {
-        $metadatadb->insertIntoContainer(createLSData($mdKey."/".$sec."/".$sec2.$frac2.$dCount, $mdKey, $d_content->toString), $mdKey."/".$sec."/".$sec2.$frac2.$dCount, $dbTr, \$error);
-        $errorFlag++ if $error;
-        $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$sec2.$frac2.$dCount."\" for key \"".$mdKey."\".");
-        $dCount++;
-      }
+      my $hash = md5_hex($d_content->toString);
+      my $insRes = $metadatadb->insertIntoContainer(createLSData($mdKey."/".$hash, $mdKey, $d_content->toString), $mdKey."/".$hash, $dbTr, \$error);
+      $errorFlag++ if $error;
+      $dCount++ if $insRes == 0;
     }
   }
 
@@ -580,18 +596,27 @@ sub lsRegisterRequestNew {
   my $mdId = "metadata.".genuid();
   my $dId = "data.".genuid();
   
-  my $mdKey = extract(find($m, "./perfsonar:subject/psservice:service/psservice:accessPoint", 1), 0);
-  unless($mdKey) {
+  my $accessPoint = extract(find($m, "./perfsonar:subject/psservice:service/psservice:accessPoint", 1), 0);
+  unless($accessPoint) {
     my $msg = "Cannont register data, accessPoint was not supplied.";
     $self->{CONF}->{"ls"}->{"logger"}->error($msg);
     statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.registration.access_point_missing", $msg);
     return;
   }
 
+  my $mdKey = md5_hex($accessPoint);
+
+  unless(exists $self->{STATE}->{"messageKeys"}->{$mdKey}) {
+    $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
+  }
+
   my $error = q{};
   my $errorFlag = 0;
-    
-  if($self->isValidKey({ metadatadb => $metadatadb, key => $mdKey})) {
+
+# XXX: jason - 2/14
+# just do an update by name without doing a query?
+
+  if($self->{STATE}->{"messageKeys"}->{$mdKey}) {
     my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$mdKey."\" and " . getMetadataXQuery($m, q{}) . "]";
     my @resultsString = $metadatadb->query($queryString, q{}, \$error);
     if($#resultsString == -1) {
@@ -600,9 +625,13 @@ sub lsRegisterRequestNew {
       statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.registration.key_in_use", $msg);
       return;            
     }
-    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
-    $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-    $errorFlag++ if $error;
+    if($self->{STATE}->{"messageKeys"}->{$mdKey} == 1) {
+      $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
+      $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
+      $errorFlag++ if $error;
+      $self->{STATE}->{"messageKeys"}->{$mdKey}++;
+    }
+    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists and was already updated in this message, skipping.");
   }
   else {
     $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
@@ -612,19 +641,17 @@ sub lsRegisterRequestNew {
     $errorFlag++ if $error;
     $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
     $errorFlag++ if $error;
+    $self->{STATE}->{"messageKeys"}->{$mdKey}++;
   }
-  
+
   my $dCount = 0;
   foreach my $d_content ($d->childNodes) {
     my($sec2, $frac2) = Time::HiRes::gettimeofday;
     if($d_content->getType != 3 and $d_content->getType != 8) {
-      my @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/".$d_content->nodeName."[" . getMetadataXQuery($d_content, q{}) . "]", $dbTr, \$error);
-      if($#resultsString == -1) {
-        $metadatadb->insertIntoContainer(createLSData($mdKey."/".$sec."/".$sec2.$frac2.$dCount, $mdKey, $d_content->toString), $mdKey."/".$sec."/".$sec2.$frac2.$dCount, $dbTr, \$error);
-        $errorFlag++ if $error;
-        $self->{CONF}->{"ls"}->{"logger"}->debug("Inserting measurement metadata as \"".$mdKey."/".$sec."/".$sec2.$frac2.$dCount."\" for key \"".$mdKey."\".");
-        $dCount++;
-      }
+      my $hash = md5_hex($d_content->toString);
+      my $insRes = $metadatadb->insertIntoContainer(createLSData($mdKey."/".$hash, $mdKey, $d_content->toString), $mdKey."/".$hash, $dbTr, \$error);
+      $errorFlag++ if $error;
+      $dCount++ if $insRes == 0;
     }
   }
 
@@ -646,6 +673,7 @@ sub lsRegisterRequestNew {
   undef $dbTr;
   return;
 }
+
 
 =head2 lsDeregisterRequest($self, $doc, $request)
 
@@ -673,12 +701,10 @@ sub lsDeregisterRequest {
   my $metadatadb = $self->prepareDatabases({ doc => $doc });
   unless($metadatadb) {
     my $msg = "Database could not be opened.";
-    $self->{CONF}->{"ls"}->{"logger"}->error($msg);
     statusReport($doc, "metadata.".genuid(), q{}, "data.".genuid(), "error.ls.xmldb", $msg);   
     return;
   }
   
-  my %keys = ();
   my $error = q{};
   my $counter = 0;
   foreach my $d ($request->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS($ls_namespaces{"nmwg"}, "data")) {
@@ -706,12 +732,12 @@ sub lsDeregisterRequest {
     }
 
     # see if we verified this key yet (we dont want to run the validator that often)
-    unless(exists $keys{$mdKey}) {
-      $keys{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
+    unless(exists $self->{STATE}->{"messageKeys"}->{$mdKey}) {
+      $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
     }
 
     # if it's invalid, then we can't do much
-    unless($keys{$mdKey}) {
+    unless($self->{STATE}->{"messageKeys"}->{$mdKey}) {
       $msg = "Sent key \"".$mdKey."\" was not registered.";
       $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.deregister.key_not_found", $msg);
@@ -733,11 +759,14 @@ sub lsDeregisterRequest {
     my $errorFlag = 0;
     my @deregs = $d->getElementsByTagNameNS($ls_namespaces{"nmwg"}, "metadata");
     if($#deregs == -1) {
+
+# XXX: jason - 2/14
+# can we do anything here?
+
       $self->{CONF}->{"ls"}->{"logger"}->debug("Removing all info for \"".$mdKey."\".");
       @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", q{}, \$error);
       my $len = $#resultsString;
       for my $x (0..$len) {
-        $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
         $metadatadb->remove($resultsString[$x], $dbTr, \$error);
         $errorFlag++ if $error;
       }
@@ -748,12 +777,15 @@ sub lsDeregisterRequest {
       $msg = "Removed [".($#resultsString+1)."] data elements and service info for key \"".$mdKey."\".";
     }
     else {
+
+# XXX: jason - 2/14
+# can we do anything here?
+
       $self->{CONF}->{"ls"}->{"logger"}->debug("Removing selected info for \"".$mdKey."\", keeping record.");
       foreach my $d_md (@deregs) {
-        @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, q{}) . "]", $dbTr, \$error);
+        @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, q{}) . "]", q{}, \$error);
         my $len = $#resultsString;
         for my $x (0..$len) {
-          $self->{CONF}->{"ls"}->{"logger"}->debug("Removing data \"".$resultsString[$x]."\".");
           $metadatadb->remove($resultsString[$x], $dbTr, \$error);
           $errorFlag++ if $error;
         }
@@ -813,12 +845,10 @@ sub lsKeepaliveRequest {
   my $metadatadb = $self->prepareDatabases({ doc => $doc });
   unless($metadatadb) {
     my $msg = "Database could not be opened.";
-    $self->{CONF}->{"ls"}->{"logger"}->error($msg);
     statusReport($doc, "metadata.".genuid(), q{}, "data.".genuid(), "error.ls.xmldb", $msg);   
     return;
   }
   
-  my %keys = ();
   my $error = q{};
   my $counter = 0;
   my($sec, $frac) = Time::HiRes::gettimeofday;
@@ -846,49 +876,53 @@ sub lsKeepaliveRequest {
     }
 
     # see if we verified this key yet (we dont want to run the validator that often)
-    unless(exists $keys{$mdKey}) {
-      $keys{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
+    unless(exists $self->{STATE}->{"messageKeys"}->{$mdKey}) {
+      $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey({ metadatadb => $metadatadb, key => $mdKey});
     }
 
     # if it's invalid, then we can't do much
-    unless($keys{$mdKey}) {
+    unless($self->{STATE}->{"messageKeys"}->{$mdKey}) {
       my $msg = "Sent key \"".$mdKey."\" was not registered.";
       $self->{CONF}->{"ls"}->{"logger"}->error($msg);
       statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.keepalive.key_not_found", $msg);
       next;
     }
 
-    # grab a DB transaction so we can roll back if need be
-    my $dbTr = $metadatadb->getTransaction(\$error);
-    unless($dbTr) {
-      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Cound not start database transaction, database responded with \"".$error."\".");
-      $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
-      undef $dbTr;
-      next;
-    }
-    
     # update the key
+    if($self->{STATE}->{"messageKeys"}->{$mdKey} == 1) {
+      my $dbTr = $metadatadb->getTransaction(\$error);
+      unless($dbTr) {
+        statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Cound not start database transaction, database responded with \"".$error."\".");
+        $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+        undef $dbTr;
+        next;
+      }
     
-    $self->{CONF}->{"ls"}->{"logger"}->debug("Updating control time information.");
-    my $status = $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);    
-    unless($status == 0) {
-      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
-      $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+      $self->{CONF}->{"ls"}->{"logger"}->debug("Updating control time information.");
+      my $status = $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);    
+
+      unless($status == 0) {
+        statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
+        $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+        undef $dbTr;
+        next;
+      }
+
+      # commit the transaction, or error if there are problems
+      $status = $metadatadb->commitTransaction($dbTr, \$error);
+      if($status == 0) {
+        statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "success.ls.keepalive", "Key \"".$mdKey."\" was updated.");      
+        $self->{STATE}->{"messageKeys"}->{$mdKey}++;
+      }
+      else {
+        statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
+        $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;    
+      }
       undef $dbTr;
-      next;
-    }
-
-    # commit the transaction, or error if there are problems
-
-    my $status = $metadatadb->commitTransaction($dbTr, \$error);
-    if($status == 0) {
-      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "success.ls.keepalive", "Key \"".$mdKey."\" was updated.");
     }
     else {
-      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
-      $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;    
+      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "success.ls.keepalive", "Key \"".$mdKey."\" was already updated in this exchange, skipping.");
     }
-    undef $dbTr;
   }
   
   unless($counter) {

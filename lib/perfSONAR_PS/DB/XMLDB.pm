@@ -953,12 +953,19 @@ sub insertIntoContainer {
     undef $dbTr;
 
     if(my $e = catch std::exception) {
-      my $msg = "Error \"".$e->what()."\".";
-      $msg =~ s/(\n+|\s+)/ /g;
-      $msg = escapeString($msg);      
-      $logger->error($msg);
-      $$error = $msg if (defined $error);
-      return -1;
+      if($e->getExceptionCode() == 19) {
+        $logger->debug("Object exists, skipping insertion.");
+        $$error = "" if (defined $error);
+        return -1;
+      }
+      else {
+        my $msg = "Error \"".$e->what()."\".";
+        $msg =~ s/(\n+|\s+)/ /g;
+        $msg = escapeString($msg);      
+        $logger->error($msg);
+        $$error = $msg if (defined $error);
+        return -1;
+      }
     }
     elsif($e = catch DbException) {
       my $msg = "Error \"".$e->what()."\".";
