@@ -7,7 +7,6 @@ use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME',
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
-use XML::XPath;
 use XML::LibXML;
 
 use perfSONAR_PS::Common;
