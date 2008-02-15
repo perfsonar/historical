@@ -291,32 +291,9 @@ sub buildHashedKeys {
         if ( $results->size() > 0 ) {
             foreach my $key ( $results->get_nodelist ) {
                 if ( $key->getAttribute("id") ) {
-                    my $type =
-                      extract(
-                        find( $key, ".//nmwg:parameter[\@name=\"type\"]", 1 ),
-                        0 );
-                    my $file =
-                      extract(
-                        find( $key, ".//nmwg:parameter[\@name=\"file\"]", 1 ),
-                        0 );
-                    my $dataSource = extract(
-                        find(
-                            $key, ".//nmwg:parameter[\@name=\"dataSource\"]", 1
-                        ),
-                        0
-                    );
-                    my $valueUnits = extract(
-                        find(
-                            $key, ".//nmwg:parameter[\@name=\"valueUnits\"]", 1
-                        ),
-                        0
-                    );
-                    my $hash =
-                      md5_hex( $type, $file, $dataSource, $valueUnits );
-                    $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} =
-                      $key->getAttribute("id");
-                    $self->{CONF}->{"snmp"}->{"idToHash"}
-                      ->{ $key->getAttribute("id") } = $hash;
+                    my $hash = md5_hex( $key->toString );
+                    $self->{CONF}->{"snmp"}->{"hashToId"}->{$hash} = $key->getAttribute("id");
+                    $self->{CONF}->{"snmp"}->{"idToHash"}->{ $key->getAttribute("id") } = $hash;
                     $self->{CONF}->{"snmp"}->{"logger"}->debug("Key id $hash maps to data element ".$key->getAttribute("id"));
                 }
             }
@@ -645,12 +622,13 @@ sub maMetadataKeyRequest {
 
     my $metadatadb = $self->{METADATADB};
 
-    if ( find( $parameters->{metadata}, "./nmwg:key", 1 ) ) {
+    my $nmwg_key = find( $parameters->{metadata}, "./nmwg:key", 1 );
+    if ( $nmwg_key ) {
         $self->metadataKeyRetrieveKey(
                 {
                     metadatadb    => $self->{METADATADB},
                     time_settings => $parameters->{time_settings},
-                    key           => find( $parameters->{metadata}, "./nmwg:key", 1 ),
+                    key           => $nmwg_key,
                     metadata      => $parameters->{metadata},
                     filters       => $parameters->{filters},
                     request_namespaces => $parameters->{request}->getNamespaces(),
@@ -840,8 +818,7 @@ sub metadataKeyRetrieveMetadataData {
 
     my %et = ();
     my $eventTypes = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata},
-        ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
+    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
     foreach my $e ( $eventTypes->get_nodelist ) {
         my $value = extract( $e, 0 );
         if ($value) {
@@ -871,87 +848,87 @@ sub metadataKeyRetrieveMetadataData {
     }
     my $dataResults = $parameters->{metadatadb}->querySet($queryString);
 
-    my %used = ();
-    for my $x ( 0 .. $dataResults->size() ) {
-        $used{$x} = 0;
-    }
-
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
-        foreach my $md ( $results->get_nodelist ) {
-            next if not $md->getAttribute("id");
-            my $md_temp = $md->cloneNode(1);
-            my $uc      = 0;
-            foreach my $d ( $dataResults->get_nodelist ) {
-                $uc++;
-                next
-                  unless ( $used{ $uc - 1 } == 0
-                    and $d->getAttribute("metadataIdRef")
-                    and $md_temp->getAttribute("id") eq
-                    $d->getAttribute("metadataIdRef") );
+        my %mds = ();
+        foreach my $md ($results->get_nodelist) {
+            my $curr_md_id = $md->getAttribute("id");
+            next if not $curr_md_id;
 
-                $dId  = "data." . genuid();
-                $mdId = "metadata." . genuid();
+            $mds{$curr_md_id} = $md;
+        }
 
-                my $hashId = find( $d, "./nmwg:key", 1 )->getAttribute("id");
-                my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+        foreach my $d ( $dataResults->get_nodelist ) {
+            my $curr_d_mdIdRef = $d->getAttribute("metadataIdRef");
+            next if (not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef});
+            my $curr_md = $mds{$curr_d_mdIdRef};
 
-                my $d_temp = $d->cloneNode(1);
-                $d_temp->setAttribute( "metadataIdRef", $mdId );
-                $d_temp->setAttribute( "id",            $dId );
+            $dId  = "data." . genuid();
+            $mdId = "metadata." . genuid();
 
-                if ($hashKey) {
-                    my $maKey = q{};
-                    foreach my $params (find( $d_temp, ".//nmwg:parameters", 1 )->childNodes)
-                    {
-                        next if (not defined $params->localname or $params->localname ne "parameter");
-                        $maKey = $params->cloneNode(1);
-                        $maKey->setAttribute( "name", "maKey" );
-                        $maKey->removeChildNodes();
-                        $maKey->setAttribute( "value", $hashKey) if $maKey->getAttribute("value");
-                        $maKey->appendText($hashKey) if not $maKey->getAttribute("value");
-                        last;
+            my $hashId = find( $d, "./nmwg:key", 1 )->getAttribute("id");
+            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+
+            my $d_temp = $d->cloneNode(1);
+            $d_temp->setAttribute( "metadataIdRef", $mdId );
+            $d_temp->setAttribute( "id",            $dId );
+
+            my $nmwg_parameters = find($d_temp, ".//nmwg:parameters", 1);
+
+            if ($hashKey) {
+                my $maKey = q{};
+                foreach my $params ($nmwg_parameters->childNodes)
+                {
+                    next if (not defined $params->localname or $params->localname ne "parameter");
+                    $maKey = $params->cloneNode(1);
+                    $maKey->setAttribute( "name", "maKey" );
+                    $maKey->removeChildNodes();
+                    if ($maKey->getAttribute("value")) {
+                        $maKey->setAttribute( "value", $hashKey )
+                    } else {
+                        $maKey->appendText($hashKey)
                     }
-                    if ($maKey) {
-                        foreach my $params (find( $d_temp, ".//nmwg:parameters", 1 )->childNodes)
-                        {
+                    last;
+                }
+                if ($maKey) {
+                    foreach my $params ($nmwg_parameters->childNodes)
+                    {
 
-                            next if !(defined $params->localname and defined $params->getAttribute("name"));
+                        next if !(defined $params->localname and defined $params->getAttribute("name"));
 
-                            # Remove any unknown parameters from the metadata
-                            if ( $params->localname eq "parameter"
+                        # Remove any unknown parameters from the metadata
+                        if ( $params->localname eq "parameter"
                                 and $params->getAttribute("name") ne "consolidationFunction"
                                 and $params->getAttribute("name") ne "resolution"
                                 and $params->getAttribute("name") ne "startTime"
                                 and $params->getAttribute("name") ne "endTime"
                                 and $params->getAttribute("name") ne "time" )
-                            {
-                                my $oldParam = find( $d_temp, ".//nmwg:parameters", 1 )->removeChild($params);
-                                undef $oldParam;
-                            }
-
+                        {
+                            my $oldParam = $nmwg_parameters->removeChild($params);
+                            undef $oldParam;
                         }
 
-                        # Add the ma parameter
-                        find( $d_temp, ".//nmwg:parameters", 1 )->addChild($maKey);
                     }
+
+                    # Add the ma parameter
+                    $nmwg_parameters->addChild($maKey);
                 }
-
-                $self->addSelectParameters({ parameter_block => find($d_temp, ".//nmwg:parameters", 1), filters => $parameters->{filters} });
-
-                my $mdIdRef = $parameters->{metadata}->getAttribute("id");
-
-                my @filters = @{ $parameters->{filters} };
-                if ($#filters > -1) {
-                    $mdIdRef = $filters[$#filters][0]->getAttribute("id");
-                }
-
-                $md_temp->setAttribute( "metadataIdRef", $mdIdRef );
-                $md_temp->setAttribute( "id",            $mdId );
-                $parameters->{output}->addExistingXMLElement($md_temp);
-                $parameters->{output}->addExistingXMLElement($d_temp);
-                $used{ $uc - 1 }++;
-                last;
             }
+
+            $self->addSelectParameters({ parameter_block => $nmwg_parameters, filters => $parameters->{filters} });
+
+            my $mdIdRef = $parameters->{metadata}->getAttribute("id");
+
+            my @filters = @{ $parameters->{filters} };
+            if ($#filters > -1) {
+                $mdIdRef = $filters[$#filters][0]->getAttribute("id");
+            }
+
+            my $md_temp = $curr_md->cloneNode(1);
+            $md_temp->setAttribute( "metadataIdRef", $mdIdRef );
+            $md_temp->setAttribute( "id",            $mdId );
+
+            $parameters->{output}->addExistingXMLElement($md_temp);
+            $parameters->{output}->addExistingXMLElement($d_temp);
         }
     }
     else {
@@ -1003,11 +980,12 @@ sub maSetupDataRequest {
 
     my $metadatadb = $self->{METADATADB};
 
-    if ( find( $parameters->{metadata}, "./nmwg:key", 1 ) ) {
+    my $nmwg_key = find( $parameters->{metadata}, "./nmwg:key", 1 );
+    if ( $nmwg_key ) {
         $self->setupDataRetrieveKey(
                 {
                     metadatadb => $metadatadb,
-                    metadata   => find( $parameters->{metadata}, "./nmwg:key", 1 ),
+                    metadata   => $nmwg_key,
                     filters    => $parameters->{filters},
                     message_parameters => $parameters->{message_parameters},
                     time_settings => $parameters->{time_settings},
@@ -1221,13 +1199,13 @@ sub setupDataRetrieveMetadataData {
     }
 
     if ( $results->size() > 0 and $dataResults->size() > 0 ) {
+        my %mds = ();
         foreach my $md ( $results->get_nodelist ) {
+            next if not $md->getAttribute("id");
 
             my %l_et = ();
             my $l_eventTypes = find( $md, "./nmwg:eventType", 0 );
-            my $l_supportedEventTypes =
-              find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\"]",
-                0 );
+            my $l_supportedEventTypes = find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
             foreach my $e ( $l_eventTypes->get_nodelist ) {
                 my $value = extract( $e, 0 );
                 if ($value) {
@@ -1241,39 +1219,32 @@ sub setupDataRetrieveMetadataData {
                 }
             }
 
-            next if not $md->getAttribute("id");
+            my %hash = ();
+            $hash{"md"} = $md;
+            $hash{"et"} = \%l_et;
+            $mds{$md->getAttribute("id")} = \%hash;
+        }
 
-            my $md_temp = $md->cloneNode(1);
-            my $uc      = 0;
-            foreach my $d ( $dataResults->get_nodelist ) {
-                $uc++;
-                next
-                  unless ( $used{ $uc - 1 } == 0
-                    and $d->getAttribute("metadataIdRef")
-                    and $md_temp->getAttribute("id") eq
-                    $d->getAttribute("metadataIdRef") );
+        foreach my $d ( $dataResults->get_nodelist ) {
+            my $idRef = $d->getAttribute("metadataIdRef");
 
-                my $d_temp = $d->cloneNode(1);
-                $mdId = "metadata." . genuid();
-                $md_temp->setAttribute( "metadataIdRef", $base_id );
-                $md_temp->setAttribute( "id",            $mdId );
-                $parameters->{output}->addExistingXMLElement($md_temp);
-                $self->handleData(
+            next if (not defined $idRef or not defined $mds{$idRef});
+
+            my $md_temp = $mds{$idRef}->{"md"}->cloneNode(1);
+            my $d_temp = $d->cloneNode(1);
+            $mdId = "metadata." . genuid();
+            $md_temp->setAttribute( "metadataIdRef", $base_id );
+            $md_temp->setAttribute( "id",            $mdId );
+            $parameters->{output}->addExistingXMLElement($md_temp);
+            $self->handleData(
                     {
                         id                 => $mdId,
                         data               => $d_temp,
                         output             => $parameters->{output},
                         time_settings      => $parameters->{time_settings},
-                        et                 => \%l_et,
+                        et                 => $mds{$idRef}->{"et"},
                         message_parameters => $parameters->{message_parameters}
-                    }
-                );
-
-                $used{ $uc - 1 }++;
-                last;
-
-            }
-
+                    });
         }
     }
     else {
@@ -1531,11 +1502,7 @@ sub retrieveRRD {
         }
     }
 
-    $self->{CONF}->{"snmp"}->{"logger"}->error("Params: ".Dumper($parameters->{d}));
-
     my $file_element = find($parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]", 1);
-
-    $self->{CONF}->{"snmp"}->{"logger"}->error("Params: ".Dumper($file_element));
 
     my $rrd_file = extract($file_element, 1);
 
