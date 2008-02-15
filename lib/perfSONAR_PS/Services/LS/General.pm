@@ -68,7 +68,7 @@ sub createLSData {
 sub extractQuery {
   my($node) = @_;
   my $query = "";
-  if($node->hasChildNodes()) {
+  if($node and $node->hasChildNodes()) {
     foreach my $c ($node->childNodes) {
       if($c->nodeType == 3) {
         $query = $query . $c->textContent;

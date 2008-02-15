@@ -140,17 +140,12 @@ sub init {
   $handler->registerFullMessageHandler("LSLookupRequest", $self);
 
   my $error = q{};
-  my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-    $self->{CONF}->{"ls"}->{"metadata_db_name"},
-    $self->{CONF}->{"ls"}->{"metadata_db_file"},
-    \%ls_namespaces,
-  );
-  unless($metadatadb->openDB(q{}, \$error) == 0) {
+  my $metadatadb = $self->prepareDatabases;
+  unless($metadatadb) {
     $self->{CONF}->{"ls"}->{"logger"}->error("There was an error opening \"".$self->{CONF}->{"ls"}->{"metadata_db_name"}."/".$self->{CONF}->{"ls"}->{"metadata_db_file"}."\": ".$error);
     return -1;
   }
   $metadatadb->closeDB(\$error);
-
   return 0;
 }
 
@@ -285,7 +280,7 @@ sub prepareDatabases {
   my $parameters = validate(
       @args,
       {
-          doc             => 1
+          doc             => 0
       }
   );
   
@@ -297,7 +292,7 @@ sub prepareDatabases {
   );
   unless($metadatadb->openDB(q{}, \$error) == 0) {
     $self->{CONF}->{"ls"}->{"logger"}->error("There was an error opening \"".$self->{CONF}->{"ls"}->{"metadata_db_name"}."/".$self->{CONF}->{"ls"}->{"metadata_db_file"}."\": ".$error);
-    statusReport($parameters->{doc}, "metadata.".genuid(), q{}, "data.".genuid(), "error.ls.xmldb", $error);
+    statusReport($parameters->{doc}, "metadata.".genuid(), q{}, "data.".genuid(), "error.ls.xmldb", $error) if $parameters->{doc};
     return;
   }
   return $metadatadb;
@@ -395,7 +390,7 @@ sub lsRegisterRequest {
         next;
       }      
       
-      my $service = extract(find($m, "./perfsonar:subject/psservice:service", 1), 0);
+      my $service = find($m, "./perfsonar:subject/psservice:service", 1);
       if($service) {
         $self->lsRegisterRequestUpdateNew($doc, $request, $metadatadb, $dbTr, $m, $d, $mdKey, $service, $sec);
       }
@@ -439,7 +434,7 @@ sub lsRegisterRequestUpdateNew {
   my $mdId = "metadata.".genuid();
   my $dId = "data.".genuid();
 
-  my $accessPoint = extract(find($m, "./perfsonar:subject/psservice:service/psservice:accessPoint", 1), 0);
+  my $accessPoint = extract(find($service, "./psservice:accessPoint", 1), 0);
   unless($accessPoint) {
     my $msg = "Cannont register data, accessPoint was not supplied.";
     $self->{CONF}->{"ls"}->{"logger"}->error($msg);
@@ -461,29 +456,19 @@ sub lsRegisterRequestUpdateNew {
   $metadatadb->remove($mdKey."-control", $dbTr, \$error);
   $metadatadb->remove($mdKey, $dbTr, \$error);
 
-# XXX: jason - 2/14
-# could we do an update instead of removing above and inserting here? (special case, does it matter)
-
-  my $mdCopy = $m->cloneNode(1);
-  my $deadKey = $mdCopy->removeChild(find($mdCopy, "./nmwg:key", 1));
-  my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$mdKeyStorage."\" and " . getMetadataXQuery($mdCopy, q{}) . "]";
-  @resultsString = $metadatadb->query($queryString, $dbTr, \$error);
-  if($#resultsString == -1) {
-    $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
-    $mdCopy->setAttribute("id", $mdKeyStorage);
-    $metadatadb->insertIntoContainer(wrapStore($mdCopy->toString, "LSStore"), $mdKeyStorage, $dbTr, \$error);
-    $metadatadb->insertIntoContainer(createControlKey($mdKeyStorage, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKeyStorage."-control", $dbTr, \$error);
-    $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} = 1;
-  }
-  else {
-    # its in there already
-    if($self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 1) {
+  unless($self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2) {
+    if($self->{STATE}->{"messageKeys"}->{$mdKeyStorage}) {
       $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
       $metadatadb->updateByName(createControlKey($mdKeyStorage, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKeyStorage."-control", $dbTr, \$error);
       $errorFlag++ if $error;
-      $self->{STATE}->{"messageKeys"}->{$mdKeyStorage}++;
     }
-    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists and was already updated in this message, skipping.");
+    else {
+      $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
+      my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$mdKeyStorage."\">".$service->toString."</nmwg:metadata>\n";
+      $metadatadb->insertIntoContainer(wrapStore($mdCopy, "LSStore"), $mdKeyStorage, $dbTr, \$error);
+      $metadatadb->insertIntoContainer(createControlKey($mdKeyStorage, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKeyStorage."-control", $dbTr, \$error);
+    }
+    $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} = 2;
   }
 
   my $dCount = 0;
@@ -613,36 +598,23 @@ sub lsRegisterRequestNew {
   my $error = q{};
   my $errorFlag = 0;
 
-# XXX: jason - 2/14
-# just do an update by name without doing a query?
-
-  if($self->{STATE}->{"messageKeys"}->{$mdKey}) {
-    my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$mdKey."\" and " . getMetadataXQuery($m, q{}) . "]";
-    my @resultsString = $metadatadb->query($queryString, q{}, \$error);
-    if($#resultsString == -1) {
-      my $msg = "AccessPoint \"".$mdKey."\" is in use by another service, try updating with the lsKey.";
-      $self->{CONF}->{"ls"}->{"logger"}->error($msg);
-      statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.registration.key_in_use", $msg);
-      return;            
-    }
-    if($self->{STATE}->{"messageKeys"}->{$mdKey} == 1) {
+  unless($self->{STATE}->{"messageKeys"}->{$mdKey} == 2) {
+    if($self->{STATE}->{"messageKeys"}->{$mdKey}) {
       $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists, but updating control time information anyway.");
       $metadatadb->updateByName(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
       $errorFlag++ if $error;
-      $self->{STATE}->{"messageKeys"}->{$mdKey}++;
     }
-    $self->{CONF}->{"ls"}->{"logger"}->debug("Key already exists and was already updated in this message, skipping.");
-  }
-  else {
-    $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
-    my $service = $m->cloneNode(1);
-    $service->setAttribute("id", $mdKey);
-    $metadatadb->insertIntoContainer(wrapStore($service->toString, "LSStore"), $mdKey, $dbTr, \$error);
-    $errorFlag++ if $error;
-    $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
-    $errorFlag++ if $error;
-    $self->{STATE}->{"messageKeys"}->{$mdKey}++;
-  }
+    else {
+      $self->{CONF}->{"ls"}->{"logger"}->debug("New registration info, inserting service metadata and time information.");
+      my $service = $m->cloneNode(1);
+      $service->setAttribute("id", $mdKey);
+      $metadatadb->insertIntoContainer(wrapStore($service->toString, "LSStore"), $mdKey, $dbTr, \$error);
+      $errorFlag++ if $error;
+      $metadatadb->insertIntoContainer(createControlKey($mdKey, ($sec+$self->{CONF}->{"ls"}->{"ls_ttl"})), $mdKey."-control", $dbTr, \$error);
+      $errorFlag++ if $error;
+    }
+    $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
+  }    
 
   my $dCount = 0;
   foreach my $d_content ($d->childNodes) {
@@ -760,9 +732,6 @@ sub lsDeregisterRequest {
     my @deregs = $d->getElementsByTagNameNS($ls_namespaces{"nmwg"}, "metadata");
     if($#deregs == -1) {
 
-# XXX: jason - 2/14
-# can we do anything here?
-
       $self->{CONF}->{"ls"}->{"logger"}->debug("Removing all info for \"".$mdKey."\".");
       @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", q{}, \$error);
       my $len = $#resultsString;
@@ -777,10 +746,6 @@ sub lsDeregisterRequest {
       $msg = "Removed [".($#resultsString+1)."] data elements and service info for key \"".$mdKey."\".";
     }
     else {
-
-# XXX: jason - 2/14
-# can we do anything here?
-
       $self->{CONF}->{"ls"}->{"logger"}->debug("Removing selected info for \"".$mdKey."\", keeping record.");
       foreach my $d_md (@deregs) {
         @resultsString = $metadatadb->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, q{}) . "]", q{}, \$error);
@@ -1004,7 +969,7 @@ sub lsQueryRequest {
     # the query is legit, send it to the DB
 
     my @resultsString = $metadatadb->query($query, q{}, \$error);
-    if($#resultsString == -1) {
+    if($error) {
       statusReport($doc, $mdId, $m->getAttribute("id"), $dId, "error.ls.xmldb", "Database Error: \"" . $error . "\".");
       next;
     }
@@ -1024,12 +989,11 @@ sub lsQueryRequest {
     
     createMetadata($doc, $mdId, $m->getAttribute("id"), q{}, undef);
     my $parameters = q{};
-    if(find($m, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1)) {
-      $parameters = extractQuery(find($m, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1));
-    }
-    if((not $parameters) and find($m, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1)) {
+    $parameters = extractQuery(find($m, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1));
+    if(not $parameters) {
       $parameters = extractQuery(find($m, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1));
     } 
+
     if($parameters eq "native") {
       createData($doc, $dId, $mdId, "      <psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">".$dataString."</psservice:datum>\n", undef);
     }
