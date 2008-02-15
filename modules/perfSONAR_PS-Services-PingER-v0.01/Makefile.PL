@@ -11,7 +11,6 @@
 #	Description:	
 #		Build for perfSONAR-PS
 #
-use lib 'inc';
 use inc::Module::Install;
 
 name             'perfSONAR_PS-Services-PingER';
@@ -22,20 +21,17 @@ version          '1.0';
 perl_version     '5.008';
 all_from 	 'lib/perfSONAR_PS/';
 
-#requires  'Module::Load' => 0; 
-#requires  'Module::Build' => 0; 
+requires  'YAML' => '0.60';
 requires  'DateTime' => '0.41';
-#requires  'DateTime::Format' => 0;
-#requires  'DateTime::Duration' => 0;
 requires  'DateTime::Format::Builder' => 0;
-build_requires  'Object::Deadly' => 0;
 
 requires  'Bit::Vector' => 0;
 requires  'Test::Exception' => 0;
 requires  'Error' => 0;
 
 requires  'Carp' => 0;
-requires  'Carp::Clan' => 0;
+build_requires  'Object::Deadly' => 0;
+build_requires  'Carp::Clan' => 0;
 requires  'XML::LibXML' => '1.60';
 requires  'XML::NamespaceSupport' => 0;
 requires  'XML::LibXML::Common'  => '0.13';
@@ -49,9 +45,6 @@ requires  'DBI'  => '1.5';
 requires  'DBD::SQLite'  => 0;
 requires  'DBD::mysql'  => 0;  
 
-requires  'Rose::DB'  => 0; 
-requires  'Rose::DB::Object'  => 0; 
-
 requires  'base'  => 0; 
 requires  'version'  => 0; 
 requires  'fields'  => 0; 
@@ -61,6 +54,9 @@ requires  'Data::Compare'  => 0;
 requires  'Crypt::CBC'  => '2'; 
 requires  'FreezeThaw' => 0;
 requires  'Readonly' => 0;
+
+requires  'Rose::DB'  => 0; 
+requires  'Rose::DB::Object'  => 0; 
 
 # perfsonar dependencies
 requires 'perfSONAR_PS::Common' => 0.06;

@@ -12,3 +12,6 @@ CVS/.*
 ^pm_to_blib$
 ^tmp/
 ~$
+MANIFEST\.SKIP$
+\.author$
+link-modules\.pl$
