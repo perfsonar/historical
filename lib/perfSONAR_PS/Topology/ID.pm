@@ -6,7 +6,7 @@ use base 'Exporter';
 
 our $VERSION = 0.06;
 
-our @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare');
+our @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare', 'idMatch', 'idIsAmbiguous');
 
 sub idConstruct($$$$$$$$);
 sub idIsFQ($$);
@@ -270,6 +270,78 @@ sub idCompare($$$) {
 	}
 
 	return (-1, "ID element $compare_to not found");
+}
+
+sub idIsAmbiguous($) {
+	my ($id) = @_;
+
+	return ($id =~ /(=\*:|:\*$|=\*$)/);
+}
+
+sub idMatch($$) {
+	my ($ids, $idExp) = @_;
+
+	my @idExpFields = split(/:/, $idExp);
+
+	my @fields = ();
+	my $finished = 0;
+	for(my $i = 0; $i <= $#idExpFields; $i++) {
+		if ($finished) {
+			return undef;
+		}
+
+		if ($idExpFields[$i] =~ /([^=]*)=(.*)/) {
+			$fields[$i][0] = $1;
+			$fields[$i][1] = $2;
+		} elsif ($idExpFields[$i] eq "*") {
+			$fields[$i][0] = '*';
+			$finished = 1;
+		}
+	}
+
+	my @matchingIds = ();
+	foreach my $id (@{ $ids }) {
+		my @idFields = split(/:/, $id);
+		for(my $i = 3; $i <= $#idFields; $i++) {
+			# if we get here, we're being asked to match a value,
+			# we haven't encountered a ":*" and we've hit the end
+			# of the id expression so we've got a mismatch.
+			last if ($i > $#fields);
+
+			if ($idFields[$i] =~ /([^=]*)=(.*)/) {
+				# if we've hit a :* portion of the id, then the
+				# rest of the id matches.
+				if ($fields[$i][0] eq "*") {
+#					print "Found a '*' operator: $1\n";
+					push @matchingIds, $id;
+					last;
+				}
+
+				# if the field name of the id doesn't match the
+				# field name in the id expression.
+				if ($fields[$i][0] ne $1) {
+#					print "Field name mismatch: ".$fields[$i][0]." != $1\n";
+					last;
+				}
+
+				# if the expression field value isn't the 'any
+				# value' and it's not what the user specified,
+				# quit checking.
+				if ($fields[$i][1] ne "*" and $fields[$i][1] ne $2) {
+#					print "Field value mismatch: ".$fields[$i][1]." != $2\n";
+					last;
+				}
+
+				# if we've hit the end of both sets of fields
+				# and we haven't had an error, its a match.
+				if ($i == $#idFields and $i == $#fields) {
+					push @matchingIds, $id;
+				}
+			}
+		}
+	}
+
+	return \@matchingIds;
 }
 
 sub idSplit($$$) {

@@ -8,12 +8,14 @@ use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
+use Data::Dumper;
 
 use perfSONAR_PS::Time;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
+use perfSONAR_PS::Topology::ID;
 
 our $VERSION = 0.06;
 
@@ -181,8 +183,8 @@ sub init {
 
     $self->{CLIENT}->close;
 
+    $handler->registerEventHandler("MetadataKeyRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
     $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-    $handler->registerEventHandler("SetupDataRequest", "Database.Dump", $self);
     $handler->registerEventHandler("MeasurementArchiveStoreRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 
     return 0;
@@ -202,14 +204,14 @@ sub registerLS {
     if ($status != 0) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error($msg);
-        exit(-1);
+        return -1;
     }
 
     ($status, $res) = $self->{CLIENT}->getUniqueIDs;
     if ($status != 0) {
         my $msg = "Couldn't get link nformation from database: $res";
         $self->{LOGGER}->error($msg);
-        exit(-1);
+        return -1;
     }
 
     my @link_mds = ();
@@ -241,7 +243,7 @@ sub registerLS {
 
 sub handleEvent {
     my ($self, @args) = @_;
-      my $parameters = validate(@args,
+    my $parameters = validate(@args,
             {
                 output => 1,
                 messageId => 1,
@@ -262,9 +264,11 @@ sub handleEvent {
     my $eventType = $parameters->{"eventType"};
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
-    my @subjects = @{ $parameters->{"subject"} });
+    my @subjects = @{ $parameters->{"subject"} };
 
     my $md = $subjects[0];
+
+    $self->{LOGGER}->debug("Subject MD: ".$md->toString);
 
     if ($messageType eq "MeasurementArchiveStoreRequest") {
         return $self->handleStoreRequest($output, $md, $d);
@@ -272,61 +276,78 @@ sub handleEvent {
         my $selectTime;
 
         my $metadataId;
-        my @filter = @{ $parameters->{filterChain} };
-        if ($#filter > -1) {
-            $selectTime = $self->resolveSelectChain($parameters->{filterChain});
-            my $curr_md = $filter[$#filter][0];
-            $metadataId = $curr_md->getAttribute("id");
+        my @filters = @{ $parameters->{filterChain} };
+        $selectTime = $self->resolveSelectChain($md, $parameters->{filterChain});
+        if ($#filters > -1) {
+            $metadataId = $filters[$#filters][0]->getAttribute("id");
         } else {
-            $selectTime = $self->resolveCompatTime($md);
             $metadataId = $md->getAttribute("id");
         }
 
         $self->handleQueryRequest($output, $metadataId, $md, $selectTime);
-    }
-}
+    } elsif ($messageType eq "MetadataKeyRequest") {
+        my $selectTime;
 
-sub resolveCompatTime {
-    my ($self, $md) = @_;
-
-    my $ret_time;
-    my $parameters = find($md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    return if (not defined $parameters);
-    my $time = findvalue($parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
-    if (defined $time) {
-        if (lc($time) eq "all") {
-            $ret_time = perfSONAR_PS::Time->new("point", -1);
-        } elsif (lc($time) ne "now" and $time ne q{}) {
-            $ret_time = perfSONAR_PS::Time->new("point", $time);
+        my $metadataId;
+        my @filters = @{ $parameters->{filterChain} };
+        $selectTime = $self->resolveSelectChain($md, $parameters->{filterChain});
+        if ($#filters > -1) {
+            $metadataId = $filters[$#filters][0]->getAttribute("id");
+        } else {
+            $metadataId = $md->getAttribute("id");
         }
-    }
 
-    return $ret_time;
+        $self->handleMetadataKeyRequest($output, $metadataId, $md, $selectTime);
+    }
 }
 
 sub resolveSelectChain {
-    my ($self, $filterChain) = @_;
+    my ($self, $subject_md, $filterChain) = @_;
 
     my ($time, $startTime, $endTime, $duration);
+    my @filters = @{ $filterChain };
 
-    foreach my $filter_arr (@{ $filterChain }) {
-        my @filters = @{ $filter_arr };
-        my $filter = $filters[$#filters];
-        my $select_subject = find($filter, "./*[local-name()='subject' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
-
-        if (not defined $select_subject) {
-            # we definitely have a subject in this message, we just don't understand it
-            throw perfSONAR_PS::Error_compat("error.ma.unsupported_filter_type", "This Status MA only supports select filters and metadata ".$filter->getAttribute("id")." does not contain a select subject");
+    # look for any time parameters specified in the key
+    my $nmwg_key = find($subject_md, "./*[local-name()='key' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    if ($nmwg_key) {
+        my $key_params = find($nmwg_key, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+        if ($key_params) {
+            $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+            $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
+            $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
+            $duration = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"duration\"]");
         }
+    }
 
-        my $select_parameters = find($select_subject, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
+    # look for any time parameters specified in the parameters of the subject (DEPRECATED)
+    my $parameters = find($subject_md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    if (defined $parameters) {
+        my $curr_time = findvalue($parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+        if ($curr_time and $time) {
+            throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters");
+        }
+    }
+
+    # got through the filters and load any parameters with an eye toward
+    # producing data as though it had gone through a set of filters.
+    foreach my $filter_arr (@filters) {
+        my @filter_set = @{ $filter_arr };
+        my $filter = $filter_set[$#filter_set];
+
+        $self->{LOGGER}->debug("Filter: ".$filter->toString);
+
+        my $select_parameters = find($filter, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
         
         next if (not defined $select_parameters);
     
-        my $curr_time = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"time\"]");
-        my $curr_startTime = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"startTime\"]");
-        my $curr_endTime = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"endTime\"]");
-        my $curr_duration = findvalue($select_parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"select"}."' and \@name=\"duration\"]");
+        my $curr_time = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"time\"]");
+        my $curr_startTime = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"startTime\"]");
+        my $curr_endTime = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"endTime\"]");
+        my $curr_duration = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"duration\"]");
+
+        if ($curr_time and $time) {
+            throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters");
+        }
 
         $time = $curr_time if ($curr_time);
         $duration = $curr_duration if ($curr_duration);
@@ -335,26 +356,53 @@ sub resolveSelectChain {
         }
 
         if ($curr_endTime) {
-            $endTime = $curr_endTime if (not defined $endTime or $curr_endTime > $endTime);
+            $endTime = $curr_endTime if (not defined $endTime or $curr_endTime < $endTime);
         }
+    }
+
+    if (not defined $time and not defined $startTime and not defined $endTime and not defined $duration) {
+        return;
+    }
+
+    if (defined $time) {
+        if (defined $startTime and defined $duration) {
+            if ($time >= $startTime and $time <= ($startTime + $duration)) {
+                return perfSONAR_PS::Time->new("point", $time);
+            } else {
+                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: point in time specified, but it fell outside constraints");
+            }
+        }
+
+        if (defined $startTime and defined $endTime) {
+            if ($time >= $startTime and $time <= $endTime) {
+                return perfSONAR_PS::Time->new("point", $time);
+            } else {
+                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: point in time specified, but it fell outside constraints");
+            }
+        }
+
+        if (lc($time) eq "now" and not defined $startTime and not defined $endTime and not defined $duration) {
+            return undef;
+        } elsif (lc($time) eq "now") {
+            throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: point in time (now) specified, but it fell outside constraints");
+        }
+
+        return perfSONAR_PS::Time->new("point", $time);
     }
 
     if (defined $time and (defined $startTime or defined $endTime or defined $duration)) {
         throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters");
     }
 
-    if (defined $time) {
-        if (lc($time) eq "now") {
-            return undef;
-        }
-        return perfSONAR_PS::Time->new("point", $time);
-    }
-
     if (not defined $startTime) {
         throw perfSONAR_PS::Error_compat("error.ma.select", "No start time specified");
-    } elsif (not defined $endTime and not defined $duration) {
+    } 
+
+    if (not defined $endTime and not defined $duration) {
         throw perfSONAR_PS::Error_compat("error.ma.select", "No end time specified");
-    } elsif (defined $endTime) {
+    } 
+
+    if (defined $endTime) {
         return perfSONAR_PS::Time->new("range", $startTime, $endTime);
     } else {
         return perfSONAR_PS::Time->new("duration", $startTime, $duration);
@@ -366,12 +414,21 @@ sub handleStoreRequest {
 
     my ($status, $res);
     my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
+    my $key = findvalue($md, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"maKey\"]");
     my $knowledge = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="knowledge"]');
     my $do_update = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="update"]');
     my $time = findvalue($d, './ifevt:datum/@timeValue');
     my $time_type = findvalue($d, './ifevt:datum/@timeType');
     my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
     my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
+
+    if (defined $link_id and defined $key) {
+        my $msg = "Ambiguous subject";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    } elsif (defined $key) {
+        $link_id = $key;
+    }
 
     if (not defined $knowledge or $knowledge eq q{}) {
         $knowledge = "full";
@@ -463,108 +520,213 @@ sub __handleStoreRequest {
     return;
 }
 
-sub handleQueryRequest {
+sub handleMetadataKeyRequest {
     my ($self, $output, $metadataId, $subject_md, $time) = @_;
-    my ($status, $res);
 
-    my $eventType = findvalue($subject_md, "./nmwg:eventType");
-
-    if ($eventType eq "Database.Dump") {
-        $self->lookupAllRequest($output, $metadataId, $subject_md);
-    } elsif ($eventType eq "Link.Status" or
-            $eventType eq "http://ggf.org/ns/nmwg/characteristic/link/status/20070809") {
-        $self->lookupLinkStatusRequest($output, $metadataId, $subject_md, $time);
-    } else {
-        throw perfSONAR_PS::Error_compat("error.ma.event_type", "\'$eventType\' is not supported");
-    }
-
-    return;
-}
-
-
-sub lookupAllRequest {
-    my ($self, $output, $metadataId, $subject_md) = @_;
-    my $localContent = q{};
-    my ($status, $res);
-
-    my $mdID = $subject_md->getAttribute("id");
-
-    ($status, $res) = $self->{CLIENT}->open;
+    my ($status, $res) = $self->{CLIENT}->open;
     if ($status != 0) {
         my $msg = "Couldn't open connection to database: $res";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
-    ($status, $res) = $self->{CLIENT}->getAll;
-    if ($status != 0) {
-        my $msg = "Couldn't get information from database: $res";
+    # check for a key
+    my $key = findvalue($subject_md, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"maKey\"]");
+    if ($key and idIsAmbiguous($key)) {
+        my $msg = "Invalid key: $key";
         $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
     }
 
-    my %links = %{ $res };
+    # check for a link expression
+    my $link_exp = findvalue($subject_md, './topoid:subject');
+
+    # check for a link id
+    my $link_id = findvalue($subject_md, './nmwg:subject/*[local-name()=\'link\']/@id');
+
+    if (($key and $link_exp) or ($key and $link_id) or ($link_id and $link_exp)) {
+        my $msg = "Ambiguous subject";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    $link_exp = $link_id if ($link_id);
+    $link_exp = $key if ($key);
+
+    $link_exp = unescapeString($link_exp);
+
+    my $link_ids;
+
+    if (not $link_exp) {
+        # This is the "match anything" identifier
+        $link_exp = "urn:ogf:network:*";
+    }
+
+    if (idIsAmbiguous($link_exp)) {
+        # we've got an ambiguous identifier, so we need to match it with the
+        # known set
+
+        # now we have to look up all the values it could be
+        ($status, $res) = $self->{CLIENT}->getUniqueIDs;
+        if ($status != 0) {
+            my $msg = "Couldn't get link information from database: $res";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+        }
+
+        $link_ids = idMatch($res, $link_exp);
+
+        if (not defined $link_ids) {
+            my $msg = "No links match expression: $link_exp";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+        }
+    } else {
+        # it's a non-ambiguous identifier so it could only match one element
+        my @tmp = ( $link_exp );
+        $link_ids = \@tmp;
+    }
 
     my $i = genuid();
-    foreach my $link_id (keys %links) {
+    foreach my $link_id (@{ $link_ids }) {
         my $mdID = "meta$i";
-        my $subID = "sub$i";
+        my $dID = "data$i";
         my $md_content = q{};
-        $md_content .= "<nmwg:subject id=\"sub$i\">\n";
+        $i++;
+        $md_content .= "<nmwg:subject id=\"sub0\">\n";
         $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
         $md_content .= "</nmwg:subject>\n";
         createMetadata($output, $mdID, $metadataId, $md_content, undef);
-        my $data_content = q{};
-        foreach my $link (@{ $links{$link_id} }) {
-            $data_content .= $self->writeoutLinkState_range($link);
-        }
-        createData($output, "data.".$i, $mdID, $data_content, undef);
-        $i++;
+
+        startData($output, $dID, $mdID, undef);
+            $output->startElement({ prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} });
+                startParameters($output, "params.0");
+                    addParameter($output, "maKey", escapeString($link_id));
+                    if ($time) {
+                        if ($time->getType eq "range") {
+                            addParameter($output, "startTime", $time->getStartTime);
+                            addParameter($output, "endTime", $time->getEndTime);
+                        } elsif ($time->getType eq "duration") { 
+                            addParameter($output, "startTime", $time->getStartTime);
+                            addParameter($output, "duration", $time->getDuration);
+                        } elsif ($time->getType eq "point") { 
+                            addParameter($output, "time", $time->getTime);
+                        }
+                    }
+                endParameters($output);
+            $output->endElement("key");
+        endData($output);
     }
 
     return;
 }
 
-sub lookupLinkStatusRequest {
-    my($self, $output, $metadataId, $md, $time) = @_;
-    my ($status, $res);
+sub handleQueryRequest {
+    my ($self, $output, $metadataId, $subject_md, $time) = @_;
 
-    my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
-
-    if (not defined $link_id or $link_id eq q{}) {
-        throw perfSONAR_PS::Error_compat("error.ma.status.no_link_id", "No link id specified in request");
-    }
-
-    ($status, $res) = $self->{CLIENT}->open;
+    my ($status, $res) = $self->{CLIENT}->open;
     if ($status != 0) {
         my $msg = "Couldn't open connection to database: $res";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
-    my @tmp_array = ( $link_id );
+    # check for a key
+    my $key = findvalue($subject_md, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"maKey\"]");
+
+    # check for a link expression
+    my $link_exp = findvalue($subject_md, './topoid:subject');
+
+    # check for a link id
+    my $link_id = findvalue($subject_md, './nmwg:subject/*[local-name()=\'link\']/@id');
+
+    if (($key and $link_exp) or ($key and $link_id) or ($link_id and $link_exp)) {
+        my $msg = "Ambiguous subject";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    $link_exp = $link_id if ($link_id);
+    $link_exp = $key if ($key);
+
+    $link_exp = unescapeString($link_exp);
+
+    my $link_ids;
+
+    if (not $link_exp) {
+        # This is the "match anything" identifier
+        $link_exp = "urn:ogf:network:*";
+    }
+
+    if (idIsAmbiguous($link_exp)) {
+        # we've got an ambiguous identifier, so we need to match it with the
+        # known set
+
+        # now we have to look up all the values it could be
+        ($status, $res) = $self->{CLIENT}->getUniqueIDs;
+        if ($status != 0) {
+            my $msg = "Couldn't get link information from database: $res";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+        }
+
+        $link_ids = idMatch($res, $link_exp);
+
+        if (not defined $link_ids) {
+            my $msg = "No links match expression: $link_exp";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+        }
+    } else {
+        # it's a non-ambiguous identifier so it could only match one element
+        my @tmp = ( $link_exp );
+        $link_ids = \@tmp;
+    }
+
+    $self->lookupLinkStatusRequest($output, $metadataId, $link_ids, $time);
+
+    return;
+}
+
+
+sub lookupLinkStatusRequest {
+    my($self, $output, $metadataId, $linkIds, $time) = @_;
+    my ($status, $res);
 
     if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
-        ($status, $res) = $self->{CLIENT}->getLinkHistory(\@tmp_array);
+        ($status, $res) = $self->{CLIENT}->getLinkHistory($linkIds);
     } else {
-        ($status, $res) = $self->{CLIENT}->getLinkStatus(\@tmp_array, $time);
+        ($status, $res) = $self->{CLIENT}->getLinkStatus($linkIds, $time);
     }
 
     if ($status != 0) {
-        my $msg = "Couldn't get information about link $link_id from database: $res";
+        my $msg = "Couldn't get information about links from database: $res";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
     }
 
     my $data_content = q{};
-    foreach my $link (@{ $res->{$link_id} }) {
-        if (defined $time and $time->getType() eq "point" and $time->getTime() != -1) {
-            $data_content .= $self->writeoutLinkState($link);
-        } else {
-            $data_content .= $self->writeoutLinkState_range($link);
+    my $i = genuid();
+    foreach my $link_id (@{ $linkIds }) {
+        $i++;
+        my $mdID = "meta$i";
+        my $md_content = q{};
+        $md_content .= "<nmwg:subject id=\"sub0\">\n";
+        $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
+        $md_content .= "</nmwg:subject>\n";
+        createMetadata($output, $mdID, $metadataId, $md_content, undef);
+
+        if (defined $res->{$link_id}) {
+            foreach my $link (@{ $res->{$link_id} }) {
+                if (defined $time and $time->getType() eq "point" and $time->getTime() != -1) {
+                    $data_content .= $self->writeoutLinkState($link);
+                } else {
+                    $data_content .= $self->writeoutLinkState_range($link);
+                }
+            }
         }
+        createData($output, "data.".genuid(), $metadataId, $data_content, undef);
     }
-    createData($output, "data.".genuid(), $metadataId, $data_content, undef);
 
     return;
 }
