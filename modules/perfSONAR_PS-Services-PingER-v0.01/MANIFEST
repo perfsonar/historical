@@ -3,7 +3,6 @@ bin/logger.conf
 bin/pinger-landmarks.xml
 bin/pinger.conf
 bin/pinger.pl
-Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
