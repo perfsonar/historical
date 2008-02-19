@@ -2,6 +2,7 @@ use warnings;
 use strict;    
 use Test::More 'no_plan';
 use Data::Dumper;
+use English qw( -no_match_vars);
 use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
 use_ok('perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node');
@@ -9,7 +10,7 @@ use    perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node;
 use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name;
 use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node::Test;
 use perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port;
-Log::Log4perl->init("/home/netadmin/LHCOPN/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/lib/perfSONAR_PS/logger.conf"); 
+Log::Log4perl->init("logger.conf"); 
 
 my $obj1 = undef;
 #2

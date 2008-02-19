@@ -2,6 +2,7 @@ use warnings;
 use strict;    
 use Test::More 'no_plan';
 use Data::Dumper;
+use English qw( -no_match_vars);
 use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
 use_ok('perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::CommonTime');
@@ -9,7 +10,7 @@ use    perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::CommonTime;
 use perfSONAR_PS::Datatypes::v2_0::nmtm::Message::Data::CommonTime::Start;
 use perfSONAR_PS::Datatypes::v2_0::nmtm::Message::Data::CommonTime::End;
 use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::CommonTime::Datum;
-Log::Log4perl->init("/home/netadmin/LHCOPN/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/lib/perfSONAR_PS/logger.conf"); 
+Log::Log4perl->init("logger.conf"); 
 
 my $obj1 = undef;
 #2
