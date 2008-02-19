@@ -199,29 +199,33 @@ if (ref $conf{"collector"} ne "ARRAY") {
     $conf{"collector"} = \@conf_collectors;
 }
 
-foreach my $collector (@{ $conf{"collector"} }) {
-    my %collector_conf = %{ mergeConfig(\%conf, $collector) };
+foreach my $collectors (@{ $conf{"collector"} }) {
+    foreach my $id (keys %{ $collectors }) {
+        my $collector = $collectors->{$id};
 
-    if (!defined $collector_conf{"module"} or $collector_conf{"module"} eq "") {
-        $logger->error("No module specified for collector");
-        exit(-1);
+        my %collector_conf = %{ mergeConfig(\%conf, $collector) };
+
+        if (!defined $collector_conf{"module"} or $collector_conf{"module"} eq "") {
+            $logger->error("No module specified for collector: ".Dumper(\%collector_conf));
+            exit(-1);
+        }
+
+        if (!defined $modules_loaded{$collector_conf{"module"}}) {
+            load $collector_conf{"module"};
+            $modules_loaded{$collector_conf{"module"}} = 1;
+        }
+
+        my $collector_obj = $collector_conf{"module"}->new(\%collector_conf, $dirname);
+        if ($collector_obj->init() != 0) {
+            $logger->error("Failed to initialize module ".$collector_conf{"module"});
+            exit(-1);
+        }
+
+        my %collector_info = ();
+        $collector_info{"collector"} = $collector_obj;
+        $collector_info{"config"} = \%collector_conf;
+        push @collectors, \%collector_info;
     }
-
-    if (!defined $modules_loaded{$collector_conf{"module"}}) {
-        load $collector_conf{"module"};
-        $modules_loaded{$collector_conf{"module"}} = 1;
-    }
-
-    my $collector_obj = $collector_conf{"module"}->new(\%collector_conf, $dirname);
-    if ($collector_obj->init() != 0) {
-        $logger->error("Failed to initialize module ".$collector_conf{"module"});
-        exit(-1);
-    }
-
-    my %collector_info = ();
-    $collector_info{"collector"} = $collector_obj;
-    $collector_info{"config"} = \%collector_conf;
-    push @collectors, \%collector_info;
 }
 
 # Daemonize if not in debug mode. This must be done before forking off children

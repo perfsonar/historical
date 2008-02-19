@@ -12,6 +12,7 @@ use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Status::Common;
 use perfSONAR_PS::Collectors::LinkStatus::Link;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 
@@ -19,7 +20,7 @@ use perfSONAR_PS::SNMPWalk;
 
 use base 'perfSONAR_PS::Collectors::Base';
 
-use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS';
+use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS', 'TL1AGENTS';
 
 our $VERSION = 0.06;
 
@@ -433,6 +434,66 @@ sub parseAgentElement($$$) {
         }
 
         $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP->new($status_type, $hostname, $ifIndex, $version, $community, $oid, $old_agent);
+    } elsif ($type eq "tl1") {
+        my $type = $agent->findvalue("type");
+        my $address = $agent->findvalue('address');
+        my $port = $agent->findvalue('port');
+        my $physPort = $agent->findvalue('physPort');
+        my $username = $agent->findvalue('username');
+        my $password = $agent->findvalue('password');
+        my $check_sonet = $agent->findvalue('check_sonet');
+        my $check_opticals = $agent->findvalue('check_optical');
+        my $check_ethernet = $agent->findvalue('check_ethernet');
+
+        if (not $address or not $port or not $type or not $username or not $password) {
+            my $msg = "Agent of type 'TL1' is missing elements to access the host. Required: type, address, port, username, password";
+            $logger->error($msg);
+            return (-1, $msg);
+        }
+
+        if (not $physPort) {
+            my $msg = "Agent of type 'TL1' is missing element physPort to specify which port to check the status of.";
+            $logger->error($msg);
+            return (-1, $msg);
+        }
+
+        if (not defined $check_sonet) {
+            $check_sonet = 1;
+        }
+
+        if (not defined $check_sonet) {
+            $check_opticals = 1;
+        }
+
+        if (not defined $check_sonet) {
+            $check_ethernet = 1;
+        }
+
+        my $tl1agent;
+
+        my $key = $address."|".$port."|".$username."|".$password;
+
+        if (defined $self->{TL1AGENTS}->{$key}) {
+            $tl1agent = $self->{TL1AGENTS}->{$key};
+        }
+
+        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::TL1->new(
+                        type => $status_type,
+                        hostType => $type,
+                        address => $address,
+                        port => $port,
+                        username => $username,
+                        password => $password,
+                        agent => $tl1agent,
+                        check_sonet => $check_sonet,
+                        check_ethernet => $check_ethernet,
+                        check_optical => $check_opticals,
+                        physPort => $physPort,
+                     );
+
+        if (not defined $tl1agent) {
+            $self->{TL1AGENTS}->{$key} = $new_agent->getAgent;
+        }
     } else {
         my $msg = "Unknown agent type: \"$type\"";
         $logger->error($msg);
