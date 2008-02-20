@@ -11,9 +11,9 @@
 
     <nmwg:key>
       <nmwg:parameters id="param1">
-        <nmwg:parameter name="lsKey">http://localhost:8080/axis/services/snmpMA</nmwg:parameter>
+        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
       </nmwg:parameters>
-    </nmwg:key>      
+    </nmwg:key>        
                                              
     <perfsonar:subject id="commonParameters" xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
       <psservice:service id="serviceParameters" xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">

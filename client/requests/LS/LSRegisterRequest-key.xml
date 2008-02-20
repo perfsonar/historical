@@ -14,7 +14,7 @@
   <nmwg:metadata id="serviceLookupInfo">
     <nmwg:key>
       <nmwg:parameters id="param1">
-        <nmwg:parameter name="lsKey">http://localhost:8080/axis/services/snmpMA</nmwg:parameter>
+        <nmwg:parameter name="lsKey">5cfb07ea7a5b840ce4f8f48b842ac9c0</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:key>  
   </nmwg:metadata>
