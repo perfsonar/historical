@@ -1,1 +1,1 @@
-../../../..//../../lib//perfSONAR_PS/Datatypes/EventTypes/Characteristics.pm
+../../../../../../lib/perfSONAR_PS/Datatypes/EventTypes/Characteristics.pm
