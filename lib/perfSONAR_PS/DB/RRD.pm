@@ -166,6 +166,7 @@ sub query {
       $cmd = $cmd . " -e " . $end;
     }
 
+    $logger->debug("Calling rrdtool with command: ".$cmd); 
     RRDp::cmd $cmd;    
     my $answer = RRDp::read;      
     if($RRDp::error) {   
