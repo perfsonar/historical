@@ -817,7 +817,7 @@ sub __mergeMetadata {
 
     # This could either error out, or do default merging. For the time being I'll do default merging
 
-    defaultMergeMetadata($prev_md, $curr_md);
+    return defaultMergeMetadata($prev_md, $curr_md);
 }
 
 # parseChain ($self, \%message_metadata, $baseId)

@@ -51,16 +51,16 @@ sub mergeNodes_general($$$) {
 
 	if ($old_node->getType != $new_node->getType) {
 		$logger->warn("Inconsistent node types, old ".$old_node->getType. " vs new ".$new_node->getType . ", simply replacing old with new");
-		return $new_node;
+		return $new_node->cloneNode(1);
 	}
 
 	if ($new_node->getType == 3) { # text node
-		return $new_node;
+		return $new_node->cloneNode(1);
 	}
 
 	if ($new_node->getType != 1) {
 		$logger->warn("Received unknown node type: ".$new_node->getType.", returning new node");
-		return $new_node;
+		return $new_node->cloneNode(1);
 	}
 
 	if ($new_node->localname ne $old_node->localname) {
@@ -314,6 +314,8 @@ sub topologyNormalize_links($$$$) {
 		$link->setAttribute("id", $fqid);
 	}
 	}
+
+	return (0, "");
 }
 
 sub topologyNormalize_ports($$$$) {
@@ -405,6 +407,8 @@ sub topologyNormalize_ports($$$$) {
 		$port->setAttribute("id", $fqid);
 	}
 	}
+
+	return (0, "");
 }
 
 sub topologyNormalize_nodes($$$$) {
@@ -492,6 +496,8 @@ sub topologyNormalize_nodes($$$$) {
 		$topology->{"nodes"}->{$fqid} = $node;
 	}
 	}
+
+	return (0, "");
 }
 
 sub topologyNormalize_paths($$$$) {
@@ -580,6 +586,8 @@ sub topologyNormalize_paths($$$$) {
 		$topology->{"paths"}->{$fqid} = $path;
 	}
 	}
+
+	return (0, "");
 }
 
 sub topologyNormalize_networks($$$$) {
@@ -668,6 +676,8 @@ sub topologyNormalize_networks($$$$) {
 		$topology->{"networks"}->{$fqid} = $network;
 	}
 	}
+
+	return (0, "");
 }
 
 sub topologyNormalize_domains($$) {
