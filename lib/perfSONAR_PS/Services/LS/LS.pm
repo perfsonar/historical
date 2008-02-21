@@ -164,7 +164,8 @@ currently disabled.
 =cut
 
 sub needLS {
-	my ($self) = @_;
+  my ( $self, @args ) = @_;
+  my $parameters = validate( @args, {} );
 
 	return 0;
 }
@@ -290,22 +291,18 @@ sub handleMessage {
 	    if($parameters->{messageType} eq "LSRegisterRequest") {
 		    $self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSRegister request.");
 		    $self->lsRegisterRequest({ doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, metadatadb => $metadatadb });
-        next;
 	    }
 	    if($parameters->{messageType} eq "LSDeregisterRequest") {
 	    	$self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSDeregister request.");
 	    	$self->lsDeregisterRequest({ doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, metadatadb => $metadatadb });
-        next;
 	    }
 	    if($parameters->{messageType} eq "LSKeepaliveRequest") {
 		    $self->{CONF}->{"ls"}->{"logger"}->debug("Parsing LSKeepalive request.");
 		    $self->lsKeepaliveRequest({ doc => $parameters->{output}, request =>$parameters->{rawRequest}, m => $m, metadatadb => $metadatadb });
-        next;
 	    }
 	    if($parameters->{messageType} eq "LSQueryRequest" or
 	    	 $parameters->{messageType} eq "LSLookupRequest") {
 	    	$self->lsQueryRequest({ doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb });
-        next;
 	    }
       throw perfSONAR_PS::Error_compat("error.ls.messages", "Unrecognized message type");
     }
