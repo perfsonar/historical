@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::Status;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'CLIENT', 'LOGGER', 'MDOUTPUT', 'LINKSBYID', 'NODESBYNAME';
+use fields 'LS_CLIENT', 'CLIENT', 'LOGGER', 'MDOUTPUT', 'LINKSBYID', 'NODESBYNAME', 'ENABLE_COMPAT';
 
 use strict;
 use warnings;
@@ -107,15 +107,26 @@ sub init {
         $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, \%status_namespaces);
     }
 
-    if ($self->{CONF}->{"status"}->{"link_description_file"}) {
-        my $file = $self->{CONF}->{"status"}->{"link_description_file"};
-        if (defined $self->{DIRECTORY}) {
-            if (!($file =~ "^/")) {
-                $file = $self->{DIRECTORY}."/".$file;
-            }
-        }
+    $self->{ENABLE_COMPAT} = 1;
 
-        $self->parseLinkDefinitionsFile($file);
+    if ($self->{CONF}->{"status"}->{"disable_compat_protocol"}) {
+        $self->{ENABLE_COMPAT} = 0;
+    }
+
+    if ($self->{ENABLE_COMPAT}) {
+        if ($self->{CONF}->{"status"}->{"link_description_file"}) {
+            my $file = $self->{CONF}->{"status"}->{"link_description_file"};
+            if (defined $self->{DIRECTORY}) {
+                if (!($file =~ "^/")) {
+                    $file = $self->{DIRECTORY}."/".$file;
+                }
+            }
+
+            $self->parseLinkDefinitionsFile($file);
+        } else {
+            $self->{LOGGER}->warn("No link description file, disabling compatibility with the SQLMA L2 Status MA");
+            $self->{ENABLE_COMPAT} = 0;
+        }
     }
 
     if (not defined $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq q{}) {
@@ -287,10 +298,6 @@ sub handleEvent {
         throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
-    if ($messageType eq "MeasurementArchiveStoreRequest") {
-        return $self->handleStoreRequest($output, $md, $d);
-    } 
-
     my ($link_ids, $selectTime, $responseType)  = $self->parseSubject($md);
 
     my $metadataId;
@@ -306,57 +313,56 @@ sub handleEvent {
         $self->handleLinkStatusRequest($output, $metadataId, $link_ids, $selectTime, $responseType);
     } elsif ($messageType eq "MetadataKeyRequest") {
         $self->handleMetadataKeyRequest($output, $metadataId, $link_ids, $selectTime, $responseType);
+    } elsif ($messageType eq "MeasurementArchiveStoreRequest") {
+        if ($#filters > -1) {
+            throw perfSONAR_PS::Error_compat("error.ma.select", "Can't have a store with select parameters");
+        }
+
+        my @link_ids = @{ $link_ids };
+        if ($#link_ids > 0) {
+            throw perfSONAR_PS::Error_compat("error.ma.subject", "Can't have a store with multiple subject links");
+        }
+
+        my $knowledge = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="knowledge"]');
+
+        if (not defined $knowledge or $knowledge eq q{}) {
+            $knowledge = "full";
+        } else {
+            $knowledge = lc($knowledge);
+        }
+
+        if ($knowledge ne "full" and $knowledge ne "partial") {
+            throw perfSONAR_PS::Error_compat("error.ma.parameters", "Knowledge must be either 'full' or 'partial'");
+        }
+ 
+        my $do_update = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="update"]');
+        if (defined $do_update and $do_update ne q{}) {
+            if (lc($do_update) eq "yes") {
+                $do_update = 1;
+            } elsif (lc($do_update) eq "no") {
+                $do_update = 0;
+            } else {
+                throw perfSONAR_PS::Error_compat("error.ma.parameters", "Update parameter must be either 'yes' or 'no'");
+            }
+        } else {
+            $do_update = 0;
+        }
+
+        $self->handleStoreRequest($output, $metadataId, $link_ids[0], $responseType, $knowledge, $do_update, $d);
     }
+
+    return;
 }
 
 sub handleStoreRequest {
-    my ($self, $output, $md, $d) = @_;
+    my ($self, $output, $metadataId, $link_id, $responseType, $knowledge, $do_update, $d) = @_;
 
-    my ($status, $res);
-    my $link_id = findvalue($md, './nmwg:subject/*[local-name()=\'link\']/@id');
-    my $key = findvalue($md, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"maKey\"]");
-    my $knowledge = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="knowledge"]');
-    my $do_update = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="update"]');
     my $time = findvalue($d, './ifevt:datum/@timeValue');
     my $time_type = findvalue($d, './ifevt:datum/@timeType');
     my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
     my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
 
-    if (defined $link_id and defined $key) {
-        my $msg = "Ambiguous subject";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    } elsif (defined $key) {
-        $link_id = $key;
-    }
-
-    if (not defined $knowledge or $knowledge eq q{}) {
-        $knowledge = "full";
-    } else {
-        $knowledge = lc($knowledge);
-    }
-
-    if (defined $do_update and $do_update ne q{}) {
-        if (lc($do_update) eq "yes") {
-            $do_update = 1;
-        } elsif (lc($do_update) eq "no") {
-            $do_update = 0;
-        }
-    } else {
-        $do_update = 0;
-    }
-
-    if (not defined $link_id or $link_id eq q{}) {
-        my $msg = "Metadata ".$md->getAttribute("id")." is missing the link id";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_metadata", $msg);
-    }
-
-    if ($knowledge ne "full" and $knowledge ne "partial") {
-        my $msg = "Invalid knowledge level specified, \"$knowledge\", must be either 'full' or 'partial'";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_knowledge_level", $msg);
-    }
+    my ($status, $res);
 
     if (not defined $time or $time eq q{} or not defined $time_type or $time_type eq q{} or not defined $adminState or $adminState eq q{} or not defined $operState or $operState eq q{}) {
         my $msg = "Data block is missing:";
@@ -374,31 +380,22 @@ sub handleStoreRequest {
         throw perfSONAR_PS::Error_compat("error.ma.query.invalid_timestamp_type", $msg);
     }
 
-    if (not defined $do_update) {
-        my $msg = "The update parameter, if included, must be 'yes' or 'no', not '$do_update'";
+    ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, $do_update);
+    if ($status != 0) {
+        my $msg = "Database update failed: $res";
         $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_update_parameter", $msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.update", $msg);
     }
 
-    $self->__handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update);
-
     my $mdID = "metadata.".genuid();
-
-    my $subID = "sub0";
-    my $md_content = q{};
-    $md_content .= "<nmwg:subject id=\"$subID\">\n";
-    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
-    $md_content .= "</nmwg:subject>\n";
-    $md_content .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
-    createMetadata($output, $md->getAttribute("id"), "", $md_content, undef);
-    getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.ma.added");
+    getResultCodeMetadata($output, $mdID, $metadataId, "success.ma.added");
     getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
 
     return;
 }
 
 sub handleLinkStatusRequest {
-    my($self, $output, $metadataId, $linkIds, $time, $responseType) = @_;
+    my ($self, $output, $metadataId, $linkIds, $time, $responseType) = @_;
     my ($status, $res);
 
     if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
@@ -413,13 +410,9 @@ sub handleLinkStatusRequest {
         throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
     }
 
-    $self->{LOGGER}->debug("Links: ".Dumper($linkIds));
-
-    my $data_content = q{};
-    my $i = genuid();
     foreach my $link_id (@{ $linkIds }) {
-        $i++;
         my $mdID = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        my $data_content = q{};
 
         if (defined $res->{$link_id}) {
             foreach my $link (@{ $res->{$link_id} }) {
@@ -431,29 +424,6 @@ sub handleLinkStatusRequest {
             }
         }
         createData($output, "data.".genuid(), $mdID, $data_content, undef);
-    }
-
-    return;
-}
-
-sub __handleStoreRequest {
-    my ($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update) = @_;
-    my ($status, $res);
-
-    $self->{LOGGER}->debug("handleStoreRequest($link_id, $knowledge, $time, $operState, $adminState, $do_update)");
-
-    ($status, $res) = $self->{CLIENT}->open;
-    if ($status != 0) {
-        my $msg = "Couldn't open connection to database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
-    }
-
-    ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, $do_update);
-    if ($status != 0) {
-        my $msg = "Database update failed: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.update", $msg);
     }
 
     return;
@@ -595,14 +565,12 @@ sub parseSubject {
         # check for a link expression
         my $link_ids = $self->lookupLinkIDs($topoid_subj->textContent);
 
-        $self->{LOGGER}->debug("link ids: ".Dumper($link_ids));
-
         return ($link_ids, undef, "topoid");
     } elsif ($nmwg_subj) {
         # we've got a compat subject
         my $compat_subj = find($nmwg_subj, "./*[local-name()='link' and namespace-uri()='".$status_namespaces{"nmtl2"}."']", 1);
         if ($compat_subj) {
-            if (not $self->{LINKSBYID}) {
+            unless ($self->{ENABLE_COMPAT}) {
                 throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
             }
 
@@ -618,7 +586,7 @@ sub parseSubject {
         }
 
     } elsif (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
-        if (not $self->{LINKSBYID}) {
+        unless ($self->{ENABLE_COMPAT}) {
             throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
         }
 
@@ -718,6 +686,215 @@ sub lookupLinkIDs {
     }
 
     return $link_ids;
+}
+
+sub handleMetadataKeyRequest {
+    my ($self, $output, $metadataId, $link_ids, $time, $responseType) = @_;
+
+    my $i = genuid();
+    foreach my $link_id (@{ $link_ids }) {
+        my $mdID = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+
+        my $dID = "data$i";
+        startData($output, $dID, $mdID, undef);
+            $self->createKey($output, $link_id, $time, $responseType);
+        endData($output);
+    }
+
+    return;
+}
+
+sub outputMetadata {
+    my ($self, $output, $link_id, $parentMdId, $responseType) = @_;
+
+    if ($responseType eq "linkid") {
+        return $self->outputLinkIDMetadata($output, $link_id, $parentMdId);
+    } elsif ($responseType eq "topoid") {
+        return $self->outputTopoIDMetadata($output, $link_id, $parentMdId);
+    } elsif ($responseType eq "compat") {
+        return $self->outputCompatMetadata($output, $link_id, $parentMdId);
+    }
+}
+
+sub outputLinkIDMetadata {
+    my ($self, $output, $link_id, $parentMdId) = @_;
+
+    my $md_content = q{};
+    $md_content .= "<nmwg:subject id=\"sub0\">\n";
+    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"".$status_namespaces{"nmtopo"}."\" id=\"".escapeString($link_id)."\" />\n";
+    $md_content .= "</nmwg:subject>\n";
+
+    my $mdID = "metadata.".genuid();
+
+    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
+
+    return $mdID;
+}
+
+sub outputTopoIDMetadata {
+    my ($self, $output, $link_id, $parentMdId) = @_;
+
+    my $md_content = "<topoid:subject xmlns:topoid=\"".$status_namespaces{"topoid"}."\">".escapeString($link_id)."</topoid:subject>";
+
+    my $mdID = "metadata.".genuid();
+
+    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
+
+    return $mdID;
+}
+
+sub outputCompatMetadata {
+    my ($self, $output, $link_id, $parentMdId) = @_;
+
+    $self->{LOGGER}->debug("Link ID($link_id): ".Dumper($self->{LINKSBYID}));
+    $self->{LOGGER}->debug("Nodes: ".Dumper($self->{NODESBYNAME}));
+
+    return "" if (not defined $self->{LINKSBYID}->{$link_id});
+
+    my $link = $self->{LINKSBYID}->{$link_id};
+    my $nodeA = $self->{NODESBYNAME}->{$link->{'nodeA'}->{'name'}};
+    my $nodeB = $self->{NODESBYNAME}->{$link->{'nodeB'}->{'name'}};
+
+    my $link_mdId = $link->{'metadataId'};
+    my $nodeA_mdId = $nodeA->{'metadataId'} if (defined $nodeA);
+    my $nodeB_mdId = $nodeB->{'metadataId'} if (defined $nodeB);
+
+    if (not defined $self->{MDOUTPUT}) {
+        my %hash = ();
+        $self->{MDOUTPUT} = \%hash;
+    }
+
+    if (defined $nodeA and not defined $self->{MDOUTPUT}->{$nodeA_mdId}) {
+        startMetadata($output, $nodeA_mdId, "", undef);
+          $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => 'sub-'.$nodeA->{'name'} });
+            $self->outputNodeElement($output, $nodeA);
+          $output->endElement("subject");
+        endMetadata($output);
+        $self->{MDOUTPUT}->{$nodeA_mdId} = 1;
+    }
+
+    if (defined $nodeB and not defined $self->{MDOUTPUT}->{$nodeB_mdId}) {
+        startMetadata($output, $nodeB_mdId, "", undef);
+          $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => 'sub-'.$nodeB->{'name'} });
+            $self->outputNodeElement($output, $nodeB);
+          $output->endElement("subject");
+        endMetadata($output);
+        $self->{MDOUTPUT}->{$nodeB_mdId} = 1;
+    }
+
+    if (not defined $self->{MDOUTPUT}->{$link_mdId}) {
+        startMetadata($output, $link_mdId, "", undef);
+          $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => 'sub-'.$link->{'name'} });
+            $self->outputLinkElement($output, $link);
+          $output->endElement("subject");
+        endMetadata($output);
+        $self->{MDOUTPUT}->{$link_mdId} = 1;
+    }
+
+    return $link_mdId;
+}
+
+sub outputNodeElement {
+    my ($self, $output, $node) = @_;
+
+    $self->{LOGGER}->debug("Outputing node: ".Dumper($node));
+
+    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $node->{'name'} });
+      $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => "TopologyPoint");
+      $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
+    if (defined $node->{"city"} and $node->{"city"} ne q{}) {
+        $output->createElement(prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"});
+    }
+    if (defined $node->{"country"} and $node->{"country"} ne q{}) {
+        $output->createElement(prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"});
+    }
+    if (defined $node->{"latitude"} and $node->{"latitude"} ne q{}) {
+        $output->createElement(prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"});
+    }
+    if (defined $node->{"longitude"} and $node->{"longitude"} ne q{}) {
+        $output->createElement(prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"});
+    }
+    if (defined $node->{"institution"} and $node->{"institution"} ne q{}) {
+        $output->createElement(prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", , content => $node->{"institution"});
+    }
+    $output->endElement("node");
+
+    return;
+}
+
+sub outputLinkElement {
+    my ($self, $output, $link) = @_;
+
+    $output->startElement(prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { id => $link->{'name'} });
+      $output->createElement(prefix => "nmtl2", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"});
+      $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"});
+      $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"});
+      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $link->{'nodeA'}->{"name"} });
+      $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $link->{'nodeA'}->{"type"});
+      $output->endElement("node");
+      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $link->{'nodeB'}->{"name"} });
+      $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $link->{'nodeB'}->{"type"});
+      $output->endElement("node");
+      startParameters($output, "params.0");
+        addParameter($output, "supportedEventType", "Path.Status");
+      endParameters($output);
+    $output->endElement("link");
+
+    return;
+}
+
+sub createKey {
+    my ($self, $output, $link_id, $time, $responseType) = @_;
+
+    $output->startElement({ prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} });
+        startParameters($output, "params.0");
+            addParameter($output, "maKey", escapeString($link_id));
+            addParameter($output, "responseFormat", $responseType);
+            if ($time) {
+                if ($time->getType eq "range") {
+                    addParameter($output, "startTime", $time->getStartTime);
+                    addParameter($output, "endTime", $time->getEndTime);
+                } elsif ($time->getType eq "point") { 
+                    addParameter($output, "time", $time->getTime);
+                }
+            }
+        endParameters($output);
+    $output->endElement("key");
+}
+
+sub writeoutLinkState_range {
+    my ($self, $link) = @_;
+
+    return q{} if (not defined $link);
+
+    my $localContent = q{};
+
+    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
+    $localContent .= "    startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
+    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
+    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
+    $localContent .= "</ifevt:datum>\n";
+
+    return $localContent;
+}
+
+sub writeoutLinkState {
+    my ($self, $link, $time) = @_;
+
+    return q{} if (not defined $link);
+
+    my $localContent = q{};
+
+    if (not defined $time or $time eq q{}) {
+    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
+    } else {
+    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
+    }
+    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
+    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
+    $localContent .= "</ifevt:datum>\n";
+
+    return $localContent;
 }
 
 sub parseLinkDefinitionsFile {
@@ -887,209 +1064,6 @@ sub parseLinkDefinitionsFile {
     $self->{LINKSBYID} = \%links;
 
     return 0;
-}
-
-sub handleMetadataKeyRequest {
-    my ($self, $output, $metadataId, $link_ids, $time, $responseType) = @_;
-
-    my $i = genuid();
-    foreach my $link_id (@{ $link_ids }) {
-        my $mdID = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
-
-        my $dID = "data$i";
-        startData($output, $dID, $mdID, undef);
-            $self->createKey($output, $link_id, $time, $responseType);
-        endData($output);
-    }
-
-    return;
-}
-
-sub outputMetadata {
-    my ($self, $output, $link_id, $parentMdId, $responseType) = @_;
-
-    if ($responseType eq "linkid") {
-        return $self->outputLinkIDMetadata($output, $link_id, $parentMdId);
-    } elsif ($responseType eq "topoid") {
-        return $self->outputTopoIDMetadata($output, $link_id, $parentMdId);
-    } elsif ($responseType eq "compat") {
-        return $self->outputCompatMetadata($output, $link_id, $parentMdId);
-    }
-}
-
-sub outputLinkIDMetadata {
-    my ($self, $output, $link_id, $parentMdId) = @_;
-
-    my $md_content = q{};
-    $md_content .= "<nmwg:subject id=\"sub0\">\n";
-    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"".$status_namespaces{"nmtopo"}."\" id=\"".escapeString($link_id)."\" />\n";
-    $md_content .= "</nmwg:subject>\n";
-
-    my $mdID = "metadata.".genuid();
-
-    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
-
-    return $mdID;
-}
-
-sub outputTopoIDMetadata {
-    my ($self, $output, $link_id, $parentMdId) = @_;
-
-    my $md_content = "<topoid:subject xmlns:topoid=\"".$status_namespaces{"topoid"}."\">".escapeString($link_id)."</topoid:subject>";
-
-    my $mdID = "metadata.".genuid();
-
-    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
-
-    return $mdID;
-}
-
-sub outputCompatMetadata {
-    my ($self, $output, $link_id, $parentMdId) = @_;
-
-    $self->{LOGGER}->debug("Link ID($link_id): ".Dumper($self->{LINKSBYID}));
-    $self->{LOGGER}->debug("Nodes: ".Dumper($self->{NODESBYNAME}));
-
-    return "" if (not defined $self->{LINKSBYID}->{$link_id});
-
-    my $link = $self->{LINKSBYID}->{$link_id};
-    my $nodeA = $self->{NODESBYNAME}->{$link->{'nodeA'}->{'name'}};
-    my $nodeB = $self->{NODESBYNAME}->{$link->{'nodeB'}->{'name'}};
-
-    my $link_mdId = $link->{'metadataId'};
-    my $nodeA_mdId = $nodeA->{'metadataId'};
-    my $nodeB_mdId = $nodeB->{'metadataId'};
-
-    if (not defined $self->{MDOUTPUT}) {
-        my %hash = ();
-        $self->{MDOUTPUT} = \%hash;
-    }
-
-    if (not defined $self->{MDOUTPUT}->{$nodeA_mdId}) {
-        startMetadata($output, $nodeA_mdId, "", undef);
-          $self->outputNodeElement($output, $nodeA);
-        endMetadata($output);
-        $self->{MDOUTPUT}->{$nodeA_mdId} = 1;
-    }
-
-    if (not defined $self->{MDOUTPUT}->{$nodeB_mdId}) {
-        startMetadata($output, $nodeB_mdId, "", undef);
-          $self->outputNodeElement($output, $nodeB);
-        endMetadata($output);
-        $self->{MDOUTPUT}->{$nodeB_mdId} = 1;
-    }
-
-    if (not defined $self->{MDOUTPUT}->{$link_mdId}) {
-        startMetadata($output, $link_mdId, "", undef);
-          $self->outputLinkElement($output, $self->{LINKSBYID}->{$link_id});
-        endMetadata($output);
-        $self->{MDOUTPUT}->{$link_mdId} = 1;
-    }
-
-    return $link_mdId;
-}
-
-sub outputNodeElement {
-    my ($self, $output, $node) = @_;
-
-    $self->{LOGGER}->debug("Outputing node: ".Dumper($node));
-
-    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/");
-      $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => "TopologyPoint");
-      $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
-    if (defined $node->{"city"} and $node->{"city"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"});
-    }
-    if (defined $node->{"country"} and $node->{"country"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"});
-    }
-    if (defined $node->{"latitude"} and $node->{"latitude"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"});
-    }
-    if (defined $node->{"longitude"} and $node->{"longitude"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"});
-    }
-    if (defined $node->{"institution"} and $node->{"institution"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", , content => $node->{"institution"});
-    }
-    $output->endElement("node");
-
-    return;
-}
-
-sub outputLinkElement {
-    my ($self, $output, $link) = @_;
-
-    $output->startElement(prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/");
-      $output->createElement(prefix => "nmtl2", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"});
-      $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"});
-      $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $link->{"type"});
-      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $link->{'nodeA'}->{"name"} });
-      $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $link->{'nodeA'}->{"type"});
-      $output->endElement("node");
-      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $link->{'nodeB'}->{"name"} });
-      $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $link->{'nodeB'}->{"type"});
-      $output->endElement("node");
-      startParameters($output, "params.0");
-        addParameter($output, "supportedEventType", "Path.Status");
-      endParameters($output);
-    $output->endElement("link");
-
-    return;
-}
-
-sub createKey {
-    my ($self, $output, $link_id, $time, $responseType) = @_;
-
-    $output->startElement({ prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} });
-        startParameters($output, "params.0");
-            addParameter($output, "maKey", escapeString($link_id));
-            addParameter($output, "responseFormat", $responseType);
-            if ($time) {
-                if ($time->getType eq "range") {
-                    addParameter($output, "startTime", $time->getStartTime);
-                    addParameter($output, "endTime", $time->getEndTime);
-                } elsif ($time->getType eq "point") { 
-                    addParameter($output, "time", $time->getTime);
-                }
-            }
-        endParameters($output);
-    $output->endElement("key");
-}
-
-sub writeoutLinkState_range {
-    my ($self, $link) = @_;
-
-    return q{} if (not defined $link);
-
-    my $localContent = q{};
-
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\" knowledge=\"".$link->getKnowledge."\"\n";
-    $localContent .= "    startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
-    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
-    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
-    $localContent .= "</ifevt:datum>\n";
-
-    return $localContent;
-}
-
-sub writeoutLinkState {
-    my ($self, $link, $time) = @_;
-
-    return q{} if (not defined $link);
-
-    my $localContent = q{};
-
-    if (not defined $time or $time eq q{}) {
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
-    } else {
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" knowledge=\"".$link->getKnowledge."\" timeType=\"unix\" timeValue=\"$time\">\n";
-    }
-    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
-    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
-    $localContent .= "</ifevt:datum>\n";
-
-    return $localContent;
 }
 
 1;
