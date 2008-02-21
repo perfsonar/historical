@@ -1,0 +1,403 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use Config::General qw(ParseConfig SaveConfig);
+use Sys::Hostname;
+use Data::Dumper;
+
+sub note();
+sub ask($$$$);
+sub config_pinger($$$$);
+
+my $was_installed = 0;
+my $DEFAULT_FILE;
+
+if ($was_installed) {
+	$DEFAULT_FILE = "XXX_DEFAULT_XXX";
+} else {
+	$DEFAULT_FILE = "/etc/perfsonar/pinger.conf";
+}
+
+
+print " -- perfSONAR-PS Daemon Configuration --\n";
+print " - [press enter for the default choice] -\n\n";
+
+my $file = shift;
+
+$file = &ask("What file should I write the configuration to? ", "$DEFAULT_FILE", undef, '.+');
+
+my $tmp;
+my $default_hostname = hostname();
+my $hostname;
+
+my %config = ();
+if (-f $file) {
+	%config = ParseConfig($file);
+}
+
+while (1) {
+	my $input;
+
+	print "1) Add/Edit endpoint\n";
+	print "2) Enable/Disable port/endpoint\n";
+	print "3) Set global values\n";
+	print "4) Save configuration\n";
+	print "5) Exit\n";
+	$input = &ask("? ", "", undef, '[12345]');
+
+	if ($input == 5) {
+		exit(0);
+	} elsif ($input == 4) {
+		if (-f $file) {
+			system("mv $file $file~");
+		}
+
+		SaveConfig_mine($file, \%config);
+		print "\n";
+		print "Saved config to $file\n";
+		print "\n";
+	} elsif ($input == 3) {
+		$config{"max_worker_processes"} = &ask("Enter the maximum number of children processes (0 means infinite) ", "7", $config{"max_worker_processes"}, '^\d+$');
+		$config{"max_worker_lifetime"} = &ask("Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300", $config{"max_worker_lifetime"}, '^\d+$');
+		$config{"disable_echo"} = &ask("Disable echo by default ", 0, $config{"disable_echo"}, '^[01]$');
+		$config{"ls_registration_interval"} = &ask("Interval between when LS registrations ", 60, $config{"ls_registration_interval"}, '^\d+$');
+		$config{"reaper_interval"} = &ask("Interval between when children are repeaed ", 20, $config{"reaper_interval"}, '^\d+$');
+		$config{"pid_dir"} = &ask("Enter pid dir location ", "/var/run", $config{"pid_dir"}, "");
+		$config{"pid_file"} = &ask("Enter pid filename ", "ps.pid", $config{"pid_file"}, "");
+	} elsif ($input == 2) {
+		my @elements = ();
+		my %status = ();
+
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			push @elements, $port;
+
+			if (defined $config{"port"}->{$port}->{"disabled"} and  $config{"port"}->{$port}->{"disabled"} == 1) {
+				$status{$port} = 1;
+			}
+		}
+
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
+				push @elements, "$port:$endpoint";
+				if (defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} and
+						$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} == 1) {
+					$status{"$port:$endpoint"} = 1;
+				}
+			}
+		}
+
+		if ($#elements > -1) {
+			print "\n";
+			print "Select element to enable/disable: \n";
+			for(my $i = 0; $i <= $#elements; $i++) {
+				print " $i) $elements[$i] ";
+				print " *" if (defined $status{$elements[$i]});
+				print "\n";
+			}
+			print "\n";
+			print " * element is disabled\n";
+			print "\n";
+
+			do {
+				$input = &ask("Select a number from the above ", "", undef, '^\d+$');
+			} while ($input > $#elements);
+
+			my $new_status;
+
+			if (defined $status{$elements[$input]}) {
+				$new_status = 0;
+			} else {
+				$new_status = 1;
+			}
+
+			print "\n";
+			if ($new_status) {
+				print "Disabling";
+			} else {
+				print "Enabling";
+			}
+
+			if ($elements[$input] =~ /^(\d+):(.*)$/) {
+				print " endpoint ".$elements[$input]."\n";
+				$config{"port"}->{$1}->{"endpoint"}->{$2}->{"disabled"} = $new_status;
+			} elsif ($elements[$input] =~ /^(\d+)$/) {
+				print " port ".$elements[$input]."\n";
+				$config{"port"}->{$1}->{"disabled"} = $new_status;
+			}
+			print "\n";
+		}
+	} elsif ($input == 1) {
+		my @endpoints = ();
+		foreach my $port (sort keys %{ $config{"port"} }) {
+			next if (!defined $config{"port"}->{$port}->{"endpoint"});
+			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
+				push @endpoints, "$port:$endpoint";
+			}
+		}
+
+		if ($#endpoints > -1) {
+			print "\n";
+			print "Existing Endpoints: \n";
+			for(my $i = 0; $i <= $#endpoints; $i++) {
+				print " $i) $endpoints[$i]\n";
+			}
+			print "\n";
+		}
+
+		do {
+			$input = &ask("Enter endpoint in form 'port:endpoint/path' or select from a number from the above ", "", undef, '^(\d+:[^\/].*|\d+)$');
+			if ($input =~ /^\d+$/) {
+				$input = $endpoints[$input];
+			}
+		} while(!($input =~ /\d+:[^\/].*/));
+
+		my ($port, $endpoint) = split(":", $input);
+
+		if (!defined $config{"port"}) {
+			my %hash = ();
+			$config{"port"} = \%hash;
+			print "Setting config{port} to a hash\n";
+		}
+
+		if (!defined $config{"port"}->{$port}) {
+			my %hash = ();
+			$config{"port"}->{$port} = \%hash;
+			$config{"port"}->{$port}->{"endpoint"} = ();
+		}
+
+		if (!defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint}) {
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint} = ();
+		}
+
+		my $valid_module = 0;
+		my $module = $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"};
+		if (defined $module) {
+			if ($module eq "perfSONAR_PS::Services::MA::PingER") {
+				$module = "pingerma";
+			} elsif ($module eq "perfSONAR_PS::Services::MP::PingER") {
+				$module = "pingermp";
+			}
+		}
+
+		my %opts;
+		do {
+			$module = &ask("Enter endpoint module (pingerma,pingermp) ", "", $module, '');
+			$module = lc($module);
+
+			if ($module eq "pingerma" or $module eq "pingermp") {
+				$valid_module = 1;
+			}
+		} while($valid_module == 0);
+
+		if (!defined $hostname) {
+			$hostname = &ask("Enter the external host or IP for this machine ", $hostname, $default_hostname, '.+');
+		}
+
+		my $accesspoint = &ask("Enter the accesspoint for this service ", "http://$hostname:$port/$endpoint", undef, '^http');
+
+		if ($module eq "pingerma") {
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::PingER";
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MA";
+			config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingerma");
+		} elsif ($module eq "pingermp") {
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MP::PingER";
+			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MP";
+			config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingermp");
+		}
+	}
+}
+
+sub config_pinger($$$$) {
+	my ($config, $accesspoint, $def_config, $modulename) = @_;
+	my $moduletype = ($modulename =~ /ma$/ ? "MA" : "MP");
+
+	$config->{$modulename}->{"db_type"} = &ask("Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$');
+
+	if ($config->{$modulename}->{"db_type"} eq "sqlite") {
+		$config->{$modulename}->{"db_file"} = &ask("Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+');
+	} elsif ($config->{$modulename}->{"db_type"} eq "mysql") {
+		$config->{$modulename}->{"db_name"} = &ask("Enter the name of the MySQL database ", "", $config->{$modulename}->{"db_name"}, '.+');
+		$config->{$modulename}->{"db_host"} = &ask("Enter the host for the MySQL database ", "localhost", $config->{$modulename}->{"db_host"}, '.+');
+		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ", "", $config->{$modulename}->{"db_port"}, '^\d*$');
+		$config->{$modulename}->{"db_port"} = $tmp if ($tmp ne "");
+		$tmp = &ask("Enter the username for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_username"}, '');
+		$config->{$modulename}->{"db_username"} = $tmp if ($tmp ne "");
+		$tmp  = &ask("Enter the password for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_password"}, '');
+		$config->{$modulename}->{"db_password"} = $tmp if ($tmp ne "");
+	}
+
+	if($modulename eq "pingerma") {
+		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "/etc/perfsonar/pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
+	}
+
+	$config->{$modulename}->{"enable_registration"} = &ask("Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$');
+
+	if($config->{$modulename}->{"enable_registration"} eq "1") {
+		my $registration_interval = $def_config->{"ls_registration_interval"};
+		$registration_interval = $config->{$modulename}->{"ls_registration_interval"} if (defined $config->{$modulename}->{"ls_registration_interval"});
+		$config->{$modulename}->{"ls_registration_interval"} = &ask("Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$');
+
+		$config->{$modulename}->{"service_name"} = &ask("Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+');
+
+#		$config->{$modulename}->{"service_type"} = &ask("Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+');
+
+		$config->{$modulename}->{"service_description"} = &ask("Enter a service description ", "PingER $moduletype", $config->{$modulename}->{"service_description"}, '.+');
+
+		$config->{$modulename}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/');
+	}
+}
+
+sub ask($$$$) {
+  my($prompt,$value,$prev_value,$regex) = @_;
+
+  my $result;
+  do {
+    print $prompt;
+    if (defined $prev_value) {
+      print  "[", $prev_value, "]";
+    } elsif (defined $value) {
+      print  "[", $value, "]";
+    }
+    print ": ";
+    $| = 1;
+    $_ = <STDIN>;
+    chomp;
+    if(defined $_ and $_ ne "") {
+      $result = $_;
+    } elsif (defined $prev_value) {
+      $result = $prev_value;
+    } elsif (defined $value) {
+      $result = $value;
+    } else {
+      $result = '';
+    }
+  } while ($regex ne '' and !($result =~ /$regex/));
+
+  return $result;
+}
+
+sub SaveConfig_mine {
+	my ($file, $hash) = @_;
+
+	my $fh;
+
+	open($fh, ">$file");
+	printValue($fh, "", $hash, -4);
+	close($fh);
+}
+
+sub printSpaces {
+	my ($fh, $count) = @_;
+	while($count > 0) {
+		print $fh " ";
+		$count--;
+	}
+}
+
+sub printScalar {
+	my ($fileHandle, $name, $value, $depth) = @_;
+
+	printSpaces($fileHandle, $depth);
+	if ($value =~ /\n/) {
+		my @lines = split($value, '\n');
+		print $fileHandle "$name     <<EOF\n";
+		foreach my $line (@lines) {
+			printSpaces($fileHandle, $depth);
+			print $fileHandle $line."\n";
+		}
+		printSpaces($fileHandle, $depth);
+		print $fileHandle "EOF\n";
+	} else {
+		print $fileHandle "$name     ".$value."\n";
+	}
+}
+
+sub printValue {
+	my ($fileHandle, $name, $value, $depth) = @_;
+
+	if (ref $value  eq "") {
+		printScalar($fileHandle, $name, $value, $depth);
+
+		return;
+	} elsif (ref $value eq "ARRAY") {
+		foreach my $elm (@{ $value }) {
+			printValue($fileHandle, $name, $elm, $depth);
+		}
+
+		return;
+	} elsif (ref $value eq "HASH") {
+		if ($name eq "endpoint" or $name eq "port") {
+			foreach my $elm (keys %{ $value }) {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "<$name $elm>\n";
+				printValue($fileHandle, "", $value->{$elm}, $depth+4);
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "</$name>\n";
+			}
+		} else {
+			if ($name ne "") {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "<$name>\n";
+			}
+			foreach my $elm (keys %{ $value }) {
+				printValue($fileHandle, $elm, $value->{$elm}, $depth+4);
+			}
+			if ($name ne "") {
+				printSpaces($fileHandle, $depth);
+				print $fileHandle "</$name>\n";
+			}
+		}
+
+		return;
+	}
+}
+
+__END__
+
+=head1 NAME
+
+psConfigurePinger - Ask a series of questions to generate a configuration file.
+
+=head1 DESCRIPTION
+
+Ask questions based on a service to generate a configuration file.
+	
+=head1 SEE ALSO
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+https://bugs.internet2.edu/jira/browse/PSPS
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jason Zurawski, zurawski@internet2.edu
+Aaron Brown, aaron@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
+
+All rights reserved.
+
+=cut
