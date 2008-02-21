@@ -24,7 +24,6 @@ sub needLS;
 sub registerLS;
 sub handleEvent;
 sub handleStoreRequest;
-sub __handleStoreRequest;
 sub handleQueryRequest;
 sub lookupAllRequest;
 sub lookupLinkStatusRequest;
@@ -288,6 +287,7 @@ sub handleEvent {
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
     my @subjects = @{ $parameters->{"subject"} };
+    my $doOutputMetadata = $parameters->{doOutputMetadata};
 
     my $md = $subjects[0];
 
@@ -298,7 +298,13 @@ sub handleEvent {
         throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
     }
 
-    my ($link_ids, $selectTime, $responseType)  = $self->parseSubject($md);
+    my ($link_ids, $selectTime, $responseType, $was_key)  = $self->parseSubject($md);
+
+    # In the compatability mode, if it's not a key, the module will handle all
+    # the output since it needs to output the node and link element metadata
+    if ($responseType eq "compat" and not $was_key) {
+        ${ $doOutputMetadata } = 0;
+    }
 
     my $metadataId;
     my @filters = @{ $parameters->{filterChain} };
@@ -310,9 +316,9 @@ sub handleEvent {
     }
 
     if ($messageType eq "SetupDataRequest") {
-        $self->handleLinkStatusRequest($output, $metadataId, $link_ids, $selectTime, $responseType);
+        $self->handleLinkStatusRequest($output, $metadataId, $link_ids, $selectTime, $responseType, $was_key);
     } elsif ($messageType eq "MetadataKeyRequest") {
-        $self->handleMetadataKeyRequest($output, $metadataId, $link_ids, $selectTime, $responseType);
+        $self->handleMetadataKeyRequest($output, $metadataId, $link_ids, $selectTime, $responseType, $was_key);
     } elsif ($messageType eq "MeasurementArchiveStoreRequest") {
         if ($#filters > -1) {
             throw perfSONAR_PS::Error_compat("error.ma.select", "Can't have a store with select parameters");
@@ -395,7 +401,7 @@ sub handleStoreRequest {
 }
 
 sub handleLinkStatusRequest {
-    my ($self, $output, $metadataId, $linkIds, $time, $responseType) = @_;
+    my ($self, $output, $metadataId, $linkIds, $time, $responseType, $was_key) = @_;
     my ($status, $res);
 
     if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
@@ -411,7 +417,13 @@ sub handleLinkStatusRequest {
     }
 
     foreach my $link_id (@{ $linkIds }) {
-        my $mdID = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        my $mdID;
+        if ($was_key) {
+            $mdID = $metadataId;
+        } else {
+            $mdID  = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        }
+
         my $data_content = q{};
 
         if (defined $res->{$link_id}) {
@@ -482,6 +494,11 @@ sub resolveSelectChain {
         my $curr_endTime = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"endTime\"]");
         my $curr_duration = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"duration\"]");
 
+        $self->{LOGGER}->debug("Time: $curr_time") if ($curr_time);
+        $self->{LOGGER}->debug("Start Time: $curr_startTime") if ($curr_startTime);
+        $self->{LOGGER}->debug("End Time: $curr_endTime") if ($curr_endTime);
+        $self->{LOGGER}->debug("Duration: $curr_duration") if ($curr_duration);
+
         if ($curr_time) {
             if (lc($curr_time) eq "now") {
                 if ($startTime or $endTime) {
@@ -510,7 +527,7 @@ sub resolveSelectChain {
                 throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: both endTime and duration specified");
             }
 
-            if ($curr_startTime >= $startTime) {
+            if (not defined $startTime or $curr_startTime >= $startTime) {
                 $startTime = $curr_startTime;
             }
 
@@ -518,7 +535,7 @@ sub resolveSelectChain {
                 $curr_endTime = $curr_startTime + $curr_duration;
             }
 
-            if ($curr_endTime < $endTime) {
+            if (not defined $endTime or $curr_endTime < $endTime) {
                 $endTime = $curr_endTime;
             }
         }
@@ -531,6 +548,8 @@ sub resolveSelectChain {
     if (not defined $startTime and not defined $endTime) {
         return;
     }
+
+    $self->{LOGGER}->debug("Start Time: $startTime End Time: $endTime");
 
     if ($startTime == $endTime) {
         return perfSONAR_PS::Time->new("point", $startTime);
@@ -560,12 +579,12 @@ sub parseSubject {
         my ($link_id, $time, $responseType) = $self->parseKey($nmwg_key);
 
         my @tmp = ( "$link_id" );
-        return (\@tmp, $time, $responseType);
+        return (\@tmp, $time, $responseType, 1);
     } elsif ($topoid_subj) {
         # check for a link expression
         my $link_ids = $self->lookupLinkIDs($topoid_subj->textContent);
 
-        return ($link_ids, undef, "topoid");
+        return ($link_ids, undef, "topoid", 0);
     } elsif ($nmwg_subj) {
         # we've got a compat subject
         my $compat_subj = find($nmwg_subj, "./*[local-name()='link' and namespace-uri()='".$status_namespaces{"nmtl2"}."']", 1);
@@ -575,14 +594,14 @@ sub parseSubject {
             }
 
             my $link_ids = $self->parseCompatSubject($compat_subj);
-            return ($link_ids, undef, "compat");
+            return ($link_ids, undef, "compat", 0);
         }
 
         # we've got the nmwg subject
         my $link_id = findvalue($nmwg_subj, './*[local-name()=\'link\']/@id');
         if ($link_id) {
             my @tmp = ( "$link_id" );
-            return (\@tmp, $time, "linkid");
+            return (\@tmp, $time, "linkid", 0);
         }
 
     } elsif (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
@@ -593,7 +612,7 @@ sub parseSubject {
         # This is the "match anything" identifier
         my $link_ids = $self->lookupLinkIDs("urn:ogf:network:*");
 
-        return ($link_ids, undef, "compat");
+        return ($link_ids, undef, "compat", 0);
     } else {
         throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
     }
@@ -651,12 +670,18 @@ sub parseKey {
     return (undef, undef, undef);
 }
 
+sub parseCompatSubject {
+    my ($compat_subj) = @_;
+    # currently, unimpelemented
+    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+}
+
 sub lookupLinkIDs {
     my ($self, $topo_exp) = @_;
 
     my $link_ids;
 
-    $self->{LOGGER}->debug("Topo_exp: '".$topo_exp."'");
+    $self->{LOGGER}->debug("lookupLinkIDs: '".$topo_exp."'");
 
     if (idIsAmbiguous($topo_exp)) {
         # we've got an ambiguous identifier, so we need to match it with the
@@ -689,11 +714,16 @@ sub lookupLinkIDs {
 }
 
 sub handleMetadataKeyRequest {
-    my ($self, $output, $metadataId, $link_ids, $time, $responseType) = @_;
+    my ($self, $output, $metadataId, $link_ids, $time, $responseType, $was_key) = @_;
 
     my $i = genuid();
     foreach my $link_id (@{ $link_ids }) {
-        my $mdID = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        my $mdID;
+        if ($was_key) {
+            $mdID = $metadataId;
+        } else {
+            $mdID  = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        }
 
         my $dID = "data$i";
         startData($output, $dID, $mdID, undef);
