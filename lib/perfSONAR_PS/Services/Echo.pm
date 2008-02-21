@@ -72,10 +72,11 @@ sub handleEvent {
 			messageType => 1,
 			messageParameters => 1,
 			eventType => 1,
-			mergeChain => 1,
+			subject => 1,
 			filterChain => 1,
 			data => 1,
-			rawRequest => 1
+			rawRequest => 1,
+			doOutputMetadata => 1,
 			});
 
 	my $output = $parameters->{"output"};
@@ -85,19 +86,16 @@ sub handleEvent {
 	my $eventType = $parameters->{"eventType"};
 	my $d = $parameters->{"data"};
 	my $raw_request = $parameters->{"rawRequest"};
-	my $md = shift(@{ $parameters->{"mergeChain"} });
+	my @subjects = @{ $parameters->{'subject'} };
+	my $md = $subjects[0];
 
-	my $retMetadata;
-	my $retData;
 	my $mdID = "metadata.".genuid();
 	my $msg = "The echo request has passed.";
-
-	my @ret_elements = ();
 
 	getResultCodeMetadata($output, $mdID, $md->getAttribute("id"), "success.echo");
 	getResultCodeData($output, "data.".genuid(), $mdID, $msg, 1);
 
-	return ("", "");
+	return;
 }
 
 1;
