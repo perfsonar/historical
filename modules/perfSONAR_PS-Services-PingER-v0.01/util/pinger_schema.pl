@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
- use lib qw(/home/netadmin/LHCOPN/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/lib);
+ use lib qw(../lib);
  use warnings;
  use strict; 
  use File::Path;
@@ -9,7 +9,7 @@
  
  BEGIN {
     use Log::Log4perl qw(get_logger);   
-    Log::Log4perl->init("logger.conf"); 
+    Log::Log4perl->init("../bin/logger.conf"); 
  };
  use   version;
      
