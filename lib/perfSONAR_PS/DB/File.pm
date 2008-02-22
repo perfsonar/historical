@@ -86,7 +86,6 @@ sub query {
   if(defined $query and $query ne "") {
     $logger->debug("Query \"".$query."\" received.");
     if(defined $self->{XML} and $self->{XML} ne "") {
-#      my $nodeset = find($self->{XML}, $query, 0);
       my $nodeset = $self->{XML}->find($query);
       foreach my $node (@{$nodeset}) {                  
         push @results, $node->toString;

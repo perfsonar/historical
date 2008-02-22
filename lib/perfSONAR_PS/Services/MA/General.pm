@@ -9,8 +9,8 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
 @ISA = ('Exporter');
-@EXPORT = ('getMetadataXQuery', 'getDataXQuery', 'getTime', 
-           'getDataSQL', 'getDataRRD', 'adjustRRDTime');
+@EXPORT = ('getMetadataXQuery', 'getDataXQuery', 'getDataSQL', 'getDataRRD', 
+           'adjustRRDTime', 'parseTime');
 
 
 sub getMetadataXQuery {
@@ -397,145 +397,6 @@ sub xQueryEventType {
 }
 
 
-#sub getTime {
-#  my($ma, $m, $namespaces, $default_resolution) = @_;
-#  my $logger = get_logger("perfSONAR_PS::Services::MA::General");
-#  
-#  undef $ma->{TIME};
-#  
-#  if((defined $ma and $ma ne "") and
-#     (defined $id and $id ne "")) {
-#
-#    my $prefix = "";
-#    my $nmwg = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
-#    my $tm = $namespaces->{"http://ggf.org/ns/nmwg/time/2.0/"};
-#    if($namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"}) {
-#      $prefix = $namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
-#    }
-#    else {
-#      $prefix = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]", 1)) {
-#      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1)) {
-#      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1)) {
-#      $ma->{TIME}->{"CF"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"consolidationFunction\"]", 1), 1);
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]", 1)) {
-#      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"resolution\"]", 1), 1);
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1)) {
-#      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1)) {
-#      $ma->{TIME}->{"RESOLUTION"} = extract(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"resolution\"]", 1), 1);
-#    }
-#    
-#    if(!$ma->{TIME}->{"RESOLUTION"} or
-#       !($ma->{TIME}->{"RESOLUTION"} =~ m/^\d+$/)) {
-#      if(defined $default_resolution) {
-#        $ma->{TIME}->{"RESOLUTION"} = $default_resolution;
-#      }
-#      else {
-#        $ma->{TIME}->{"RESOLUTION"} = 1;
-#      }
-#    }
-#        
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"startTime\"]", 1), $tm, "start");
-#    }
-#    
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"endTime\"]", 1), $tm, "end");
-#    }
-#    
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1), $tm, "start");
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1)) {
-#      $ma->{TIME}->{"END"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1), $tm, "end");    
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
-#      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
-#      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1)) {
-#      $ma->{TIME}->{"START"} = eval(findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1), $tm, "start")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
-#      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
-#      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1)) {
-#      $ma->{TIME}->{"END"} = eval(findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1), $tm, "end")+$ma->{TIME}->{"RESOLUTION"});
-#    }
-#
-#    if(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$prefix.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
-#      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
-#    }
-#    elsif(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$prefix.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
-#      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
-#    }
-#    elsif(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1)) {
-#      $ma->{TIME}->{"START"} = findTime(find($m, ".//".$nmwg.":parameters/".$nmwg.":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1), $tm, "");
-#      $ma->{TIME}->{"END"} = $ma->{TIME}->{"START"};
-#    }
-#
-#    foreach my $t (keys %{$ma->{TIME}}) {
-#      $ma->{TIME}->{$t} =~ s/(\n)|(\s+)//g;
-#    }
-#   
-#    if($ma->{TIME}->{"START"} and 
-#       $ma->{TIME}->{"END"} and 
-#       $ma->{TIME}->{"START"} > $ma->{TIME}->{"END"}) {
-#      return 0;
-#    }    
-#  }
-#  else {
-#    $logger->error("Missing argument(s).");
-#    return 0;
-#  }
-#  return 1;
-#}
-
 sub getDataSQL {
   my($directory, $file, $table, $timeSettings, $dbSchema) = @_;
   my $logger = get_logger("perfSONAR_PS::Services::MA::General");
@@ -664,6 +525,45 @@ sub adjustRRDTime {
   return;
 }
 
+sub parseTime {
+    my ( $parameter, $timePrefix, $type ) = @_;
+    my $logger = get_logger("perfSONAR_PS::Services::MA::General");
+
+    if ( defined $parameter and $parameter ne "" ) {
+        if ( $timePrefix and find( $parameter, "./" . $timePrefix . ":time", 1 ) ) {
+            my $timeElement = find( $parameter, "./" . $timePrefix . ":time", 1 );
+            if ( $timeElement->getAttribute("type") =~ m/ISO/i ) {
+                return convertISO( extract( $timeElement, 1 ) );
+            }
+            else {
+                return extract( $timeElement, 0 );
+            }
+        }
+        elsif ( $timePrefix and $type and find( $parameter, "./" . $timePrefix . ":" . $type, 1 ) ) {
+            my $timeElement = find( $parameter, "./" . $timePrefix . ":" . $type, 1 );
+            if ( $timeElement->getAttribute("type") =~ m/ISO/i ) {
+                return convertISO( extract( $timeElement, 1 ) );
+            }
+            else {
+                return extract( $timeElement, 1 );
+            }
+        }
+        elsif ( $parameter->hasChildNodes() ) {
+            foreach my $p ( $parameter->childNodes ) {
+                if ( $p->nodeType == 3 ) {
+                    ( my $value = $p->textContent ) =~ s/\s*//g;
+                    if ($value) {
+                        return $value;
+                    }
+                }
+            }
+        }
+    }
+    else {
+        $logger->error("Missing argument.");
+    }
+    return "";
+}
 
 1;
 

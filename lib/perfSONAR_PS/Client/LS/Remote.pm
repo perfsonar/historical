@@ -27,7 +27,7 @@ sub new {
     $self->{NAMESPACES} = \%{$ns};
   }
 
-  $self->{CHUNK} = 25;
+  $self->{CHUNK} = 50;
 
   $self->{ALIVE} = 0;
   $self->{FIRST} = 1;
@@ -116,7 +116,7 @@ sub callLS {
   my $responseContent = $sender->sendReceive(makeEnvelope($message), "", \$error);
   if($error ne "") {
     $logger->error("sendReceive failed: $error");
-    return 0;
+    return -1;
   }
   my $parser = XML::LibXML->new();
   if(defined $responseContent and $responseContent ne "" and
@@ -127,20 +127,19 @@ sub callLS {
     };
     if($@) {
       $logger->error("Parser failed: ".$@);
-      return 0;
+      return -1;
     }
     else {
       my $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
       if($msg) {
         my $eventType = findvalue($msg, "./nmwg:metadata/nmwg:eventType");
         if(defined $eventType and $eventType =~ m/success/) {
-          return 1;
+          return 0;
         }
       }
     }
   }
-  $logger->error("Request failed.");
-  return 0;
+  return -1;
 }
 
 
@@ -148,12 +147,12 @@ sub sendDeregister($$) {
   my ($self, $key) = @_;
 
   if (!defined $self->{URI}) {
-    return;
+    return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
   if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
+    return -1;
   }
 
   my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
@@ -167,23 +166,19 @@ sub sendDeregister($$) {
   createData($doc, "data.".genuid(), $mdID, "", undef);
   endMessage($doc);
 
-  if(!callLS($self, $sender, $doc->getValue())) {
-    return -1;
-  }
-
-  return 0;
+  return callLS($self, $sender, $doc->getValue());
 }
 
 sub sendKeepalive($$) {
   my ($self, $key) = @_;
 
   if (!defined $self->{URI}) {
-    return;
+    return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
   if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
+    return -1;
   }
 
   my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
@@ -197,11 +192,7 @@ sub sendKeepalive($$) {
   createData($doc, "data.".genuid(), $mdID, "", undef);
   endMessage($doc);
 
-  if(!callLS($self, $sender, $doc->getValue())) {
-    return -1;
-  }
-
-  return 0;
+  return callLS($self, $sender, $doc->getValue());
 }
 
 sub registerStatic {
@@ -209,7 +200,7 @@ sub registerStatic {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return (-1, "No URI defined");
+    return -1;
   }
 
   if(!$self->{ALIVE}) {
@@ -217,9 +208,8 @@ sub registerStatic {
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
       $logger->error("Ping to ".$self->{URI}." failed: $res");
-      return (-1, "LS isn't alive");;
+      return -1;
     }
-
     $self->{ALIVE} = 1;
   }
 
@@ -254,15 +244,14 @@ sub registerStatic {
         if ($status == -1) {
           $logger->error("Unable to register data with LS.");
           $self->{ALIVE} = 0;
-	  return (-1, "Unable to register data with LS");
+          return -1;
         }
       }
     }
   }
 
   $self->{FIRST} = 0 if $self->{FIRST};
-
-  return (0, "");
+  return 0;
 }
 
 sub __register($$$) {
@@ -270,12 +259,12 @@ sub __register($$$) {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return (-1, "No URI Defined");
+    return -1
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
   if (!defined $host && !defined $port && !defined $endpoint) {
-    return (-1, "Invalid URI Specified");
+    return -1
   }
 
   my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
@@ -293,13 +282,13 @@ sub __register($$$) {
       createData($doc, "data.".genuid(), $mdID, $data[$x], undef);
     }
     endMessage($doc);
-    if(!callLS($self, $sender, $doc->getValue())) {
+    unless(callLS($self, $sender, $doc->getValue()) == 0) {
       $logger->error("Unable to register data with LS.");
-      return (-1, "Couldn't register data with LS");
+      return -1;
     }
   }
 
-  return (0, "");
+  return 0;
 }
 
 sub registerDynamic {
@@ -307,7 +296,7 @@ sub registerDynamic {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return (-1, "No URI Defined");
+    return -1;
   }
 
   if(!$self->{ALIVE}) {
@@ -315,7 +304,7 @@ sub registerDynamic {
     my ($status, $res) = $echo_service->ping();
     if ($status == -1) {
       $logger->error("Ping to ".$self->{URI}." failed: $res");
-      return (-1, "LS isn't alive");;
+      return -1;
     }
 
     $self->{ALIVE} = 1;
@@ -352,14 +341,14 @@ sub registerDynamic {
       if ($self->__register($subject, $data_ref) == -1) {
         $logger->error("Unable to register data with LS.");
         $self->{ALIVE} = 0;
-        return(-1, "Unable to register data with LS.");
+        return -1;
       }
     }
   }
 
   $self->{FIRST} = 0 if ($self->{FIRST});
 
-  return(0, "");
+  return 0;
 }
 
 sub query($$$$) {
@@ -367,12 +356,12 @@ sub query($$$$) {
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
   if (!defined $self->{URI}) {
-    return (-1, "Invalid URI specified \"\"");
+    return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
   if (!defined $host && !defined $port && !defined $endpoint) {
-    return (-1, "Invalid URI specified \"".$self->{URI}."\"");
+    return -1;
   }
 
   my $request = "";
@@ -397,7 +386,7 @@ sub query($$$$) {
   if ($status != 0) {
     my $msg = "Error consulting LS: $res";
     $logger->error($msg);
-    return(-1, $msg);
+    return -1;
   }
 
   $logger->debug("Response: ".$res->toString);
@@ -412,7 +401,7 @@ sub query($$$$) {
 
       if($md_id eq $d_idref) {
         my $query_id;
-	my $eventType = findvalue($m, "nmwg:eventType");
+        my $eventType = findvalue($m, "nmwg:eventType");
 
         if (defined $md_idref and $md_idref =~ /perfsonar_ps\.meta\.(.*)/) {
           $query_id = $1;
@@ -438,7 +427,7 @@ sub query($$$$) {
     }
   }
 
-  return (0, \%ret_structure);
+  return 0;
 }
 
 

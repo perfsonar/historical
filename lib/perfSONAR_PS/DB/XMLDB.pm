@@ -8,6 +8,7 @@ use strict;
 use warnings;
 use Sleepycat::DbXml 'simple';
 use Log::Log4perl qw(get_logger);
+use XML::LibXML;
 use perfSONAR_PS::Common;
 
 sub new {
@@ -497,7 +498,7 @@ sub query {
       $dbTr = $self->{MANAGER}->createTransaction() if $atomic;      
       $results = $self->{MANAGER}->query($dbTr, $fullQuery, $dbQC);
       while($results->next($value)) {
-        push @resString, $value."\n";
+        push @resString, $value;
         undef $value;
       }  
       if($atomic) {
@@ -544,6 +545,97 @@ sub query {
   return @resString; 
 }
 
+sub querySet {
+  my ($self, $query, $txn, $error) = @_; 
+  my $logger = get_logger("perfSONAR_PS::DB::XMLDB");
+  my $res = new XML::LibXML::NodeList;
+
+  my $dbTr = "";
+  my $atomic = 1;
+  if(defined $txn and $txn ne "") {
+    $dbTr = $txn;
+    $atomic = 0;
+  }
+  
+  if(defined $query and $query ne "") {
+    my $results = "";
+    my $value = "";
+    my $fullQuery = "";
+    eval {
+      my $contName = $self->{CONTAINER}->getName();
+      
+      # make sure the query is clean
+      $query =~ s/&/&amp;/g;
+      $query =~ s/</&lt;/g;
+      $query =~ s/>/&gt;/g;      
+      
+      if($query =~ m/collection\(/) {  
+        $query =~ s/CHANGEME/$contName/g;
+        $fullQuery = $query;
+      }
+      else {
+        $fullQuery = "collection('".$contName."')$query";
+      }
+
+      $logger->debug("Query \"".$fullQuery."\" received.");
+      
+      my $dbQC = $self->{MANAGER}->createQueryContext();
+      foreach my $prefix (keys %{$self->{NAMESPACES}}) {
+        $dbQC->setNamespace($prefix, $self->{NAMESPACES}->{$prefix});
+      }          
+      
+      $dbTr = $self->{MANAGER}->createTransaction() if $atomic;      
+      $results = $self->{MANAGER}->query($dbTr, $fullQuery, $dbQC);
+      my $parser = XML::LibXML->new();
+      while($results->next($value)) {
+        my $node = $parser->parse_string($value); 
+        $res->push($node->getDocumentElement);
+        undef $value;
+        undef $node;
+      }  
+      if($atomic) {
+        $dbTr->commit;
+        undef $dbTr;
+      }
+    };
+
+    $dbTr->abort if($dbTr and $atomic);
+    undef $dbTr;
+
+    if(my $e = catch std::exception) {
+      my $msg = "Error \"".$e->what()."\".";
+      $msg =~ s/(\n+|\s+)/ /g;
+      $msg = escapeString($msg);
+      $logger->error($msg);
+      $$error = $msg if (defined $error);
+      return;
+    }
+    elsif($e = catch DbException) {
+      my $msg = "Error \"".$e->what()."\".";
+      $msg =~ s/(\n+|\s+)/ /g;
+      $msg = escapeString($msg);
+      $logger->error($msg); 
+      $$error = $msg if (defined $error);
+      return;
+    }        
+    elsif($@) {
+      my $msg = "Error \"".$@."\".";
+      $msg =~ s/(\n+|\s+)/ /g;
+      $msg = escapeString($msg);
+      $logger->error($msg); 
+      $$error = $msg if (defined $error);
+      return;
+    }  
+  }     
+  else {
+    my $msg = "Missing argument.";
+    $logger->error("Missing argument"); 
+    $$error = $msg if (defined $error); 
+    return;
+  }   
+  $$error = "" if (defined $error);
+  return $res; 
+}
 
 sub queryForName {
   my ($self, $query, $txn, $error) = @_; 
