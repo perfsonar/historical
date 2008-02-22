@@ -27,9 +27,7 @@ related tasks of intializing the backend storage.
 
     use perfSONAR_PS::Services::MA::PingER;
     
-    use perfSONAR_PS::SimpleConfig;
     
-   
     my %conf = ();
     $conf{"METADATA_DB_TYPE"} = "xmldb";
     $conf{"METADATA_DB_NAME"} = "/home/netadmin/LHCOPN/perfSONAR-PS/MP/Ping/xmldb";
@@ -85,7 +83,7 @@ use Log::Log4perl qw(get_logger);
 our $logger = get_logger( CLASSPATH );
 
 # name of configuraiotn elements to pick up
-our $basename = 'PingERMA';
+our $basename = 'pingerma';
 
 our $processName = 'perfSONAR-PS PingER MA';
 
@@ -120,13 +118,13 @@ sub init {
     	$self->configureConf( 'service_description', $processName . ' Service', $self->getConf('service_description') );
     	$self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
     	
-    	$self->configureConf( 'metadata_db_host', undef, $self->getConf('metadata_db_host') );
-		$self->configureConf( 'metadata_db_port', undef, $self->getConf('metadata_db_port') );
-	    $self->configureConf( 'metadata_db_type', 'SQLite', $self->getConf('metadata_db_type') );
-    	$self->configureConf( 'metadata_db_name', 'pingerMA.sqlite3', $self->getConf('metadata_db_name') );
+    	$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
+		$self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+	    $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+    	$self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
 
-    	$self->configureConf( 'metadata_db_user', undef, $self->getConf( 'metadata_db_user') );
-    	$self->configureConf( 'metadata_db_pass', undef, $self->getConf( 'metadata_db_pass') );
+    	$self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
+    	$self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
 
     	# other
     	
@@ -144,29 +142,30 @@ sub init {
 
     if ( $handler ) {
 	    $logger->debug("Setting up message handlers");
-  		$handler->addMessageHandler("SetupDataRequest", $self);
-  		$handler->addMessageHandler("MetadataKeyRequest", $self);
-  		$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/tools/pinger/2.0/", $self);
+		$handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/tools/pinger/2.0/", $self);    
+  		$handler->registerMessageHandler("SetupDataRequest", $self);
+  		$handler->registerMessageHandler("MetadataKeyRequest", $self);
+  	
 #  		$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/ops/select/2.0", $self);
 
     }
     
 	# setup database  
-  	$logger->debug( "initializing database " . $self->getConf("metadata_db_type") );
+  	$logger->debug( "initializing database " . $self->getConf("db_type") );
   
-	if( $self->getConf("metadata_db_type") eq "SQLite" || "mysql") {
+	if( $self->getConf("db_type") eq "SQLite" || "mysql") {
 		
 		# setup rose object
 		eval {
 			perfSONAR_PS::DB::PingER->register_db(
 				domain	=> 'default',
 				type	=> 'default',
-				driver	=> $self->getConf( "metadata_db_type" ),
-				database => $self->getConf( "metadata_db_name" ),
-				host	=> $self->getConf( "metadata_db_host"),
-				port	=> $self->getConf( "metadata_db_port"),
-				username	=> $self->getConf( "metadata_db_user" ),
-				password	=> $self->getConf( "metadata_db_pass" ),
+				driver	=> $self->getConf( "db_type" ),
+				database => $self->getConf( "db_name" ),
+				host	=> $self->getConf( "db_host"),
+				port	=> $self->getConf( "db_port"),
+				username	=> $self->getConf( "db_username" ),
+				password	=> $self->getConf( "db_password" ),
 			);
 			# try to opent eh db
 			my $db = perfSONAR_PS::DB::PingER->new_or_cached();
@@ -174,13 +173,13 @@ sub init {
 			$db->openDB();
 		};
 		if ( $@ ) {
-			$logger->logdie( "Could not open database '" . $self->getConf( 'metadata_db_type') . "' for '"
-				. $self->getConf( 'metadata_db_name') 
-				. "' using '" . $self->getConf( 'metadata_db_user') ."'" );
+			$logger->logdie( "Could not open database '" . $self->getConf( 'db_type') . "' for '"
+				. $self->getConf( 'db_name') 
+				. "' using '" . $self->getConf( 'db_username') ."'" );
 		}
 			
 	} else {
-		$logger->logdie( "Database type '" .  $self->getConf("metadata_db_type") . "' is not supported.");
+		$logger->logdie( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
 		return -1;
 	}
 	
@@ -411,7 +410,7 @@ sub __handleEvent {
 
  	$logger->info( "\n\nDOM:\n" . $doc->toString );
 
-	$logger->debug("Unmarshalling into PingER object");
+	$logger->info("Unmarshalling into PingER object");
 	my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new( $doc->documentElement() );
 	my $error_msg = '';
 	my $type = $pingerRequest->type;
