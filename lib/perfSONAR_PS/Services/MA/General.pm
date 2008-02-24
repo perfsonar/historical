@@ -505,9 +505,13 @@ sub adjustRRDTime {
       $timeSettings->{"END"} = int($timeSettings->{"END"}/$timeSettings->{"RESOLUTION"})*$timeSettings->{"RESOLUTION"};
     }
   }  
-  if($timeSettings->{"START"} and $timeSettings->{"RESOLUTION"} and $timeSettings->{"RESOLUTION"} =~ m/^\d+$/) {
-    $timeSettings->{"START"} = $timeSettings->{"START"} - $timeSettings->{"RESOLUTION"};
-  }
+
+# XXX: Jason 2/24
+# When run over and over this will alter the START time for an RRD range.
+#
+#  if($timeSettings->{"START"} and $timeSettings->{"RESOLUTION"} and $timeSettings->{"RESOLUTION"} =~ m/^\d+$/) {
+#    $timeSettings->{"START"} = $timeSettings->{"START"} - $timeSettings->{"RESOLUTION"};
+#  }
 
   if($timeSettings->{"START"} and $timeSettings->{"START"} =~ m/^\d+$/ and 
      $timeSettings->{"RESOLUTION"} and $timeSettings->{"RESOLUTION"} =~ m/^\d+$/) {
