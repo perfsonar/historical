@@ -114,7 +114,7 @@ sub callLS {
 
     my $msg    = q{};
     my $parser = XML::LibXML->new();
-    if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/mx ) ) {
+    if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
         my $doc = q{};
         eval { $doc = $parser->parse_string($responseContent); };
         if ($EVAL_ERROR) {
@@ -172,7 +172,6 @@ sub getTopologyKey {
 
     my $key = find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 0 );
     if ($key) {
-        $self->{LS_KEY} = $key;
         return $key;
     }
     return;
@@ -210,7 +209,7 @@ sub getDomainKey {
     if ($ds) {
         foreach my $d ( $ds->get_nodelist ) {
             my $value = $d->getAttribute("id");
-            $value =~ s/urn:ogf:network:domain=//mx;
+            $value =~ s/urn:ogf:network:domain=//xm;
             push @domains, $value if $value;
         }
     }
@@ -260,7 +259,7 @@ sub getDomainService {
     if ($ds) {
         foreach my $d ( $ds->get_nodelist ) {
             my $value = $d->getAttribute("id");
-            $value =~ s/urn:ogf:network:domain=//mx;
+            $value =~ s/urn:ogf:network:domain=//xm;
             push @domains, $value if $value;
         }
     }
@@ -366,12 +365,12 @@ sub insert {
 
     my $code  = extract( find( $msg, "./nmwg:metadata/nmwg:eventType",        1 ), 0 );
     my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
-    if ( defined $code and $code =~ m/success/mx ) {
+    if ( defined $code and $code =~ m/success/xm ) {
         $self->{LOGGER}->info($datum) if $datum;
-        if ( $datum =~ m/^\[\d+\] Data/mx ) {
+        if ( $datum =~ m/^\s*\[\d+\] Data elements/m ) {
             my $num = $datum;
-            $num =~ s/^\[//mx;
-            $num =~ s/\].*//mx;
+            $num =~ s/^\[//xm;
+            $num =~ s/\].*//xm;
             if ( $num > 0 ) {
                 return 0;
             }
@@ -392,6 +391,11 @@ sub remove {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, { id => 0, name => 0 } );
 
+    unless ( $parameters->{id} or $parameters->{name} ) {
+        $self->{LOGGER}->error("Must supply either a name or id.");
+        return -1;
+    }
+
     unless ( $self->{LS_KEY} ) {
         $self->{LS_KEY} = $self->getLSKey;
     }
@@ -405,12 +409,12 @@ sub remove {
 
         my $code  = extract( find( $msg, "./nmwg:metadata/nmwg:eventType",        1 ), 0 );
         my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
-        if ( defined $code and $code =~ m/success/mx ) {
+        if ( defined $code and $code =~ m/success/xm ) {
             $self->{LOGGER}->info($datum) if $datum;
-            if ( $datum =~ m/^Removed/mx ) {
+            if ( $datum =~ m/^Removed/xm ) {
                 my $num = $datum;
-                $num =~ s/^Removed\s{1}\[//mx;
-                $num =~ s/\].*//mx;
+                $num =~ s/^Removed\s{1}\[//xm;
+                $num =~ s/\].*//xm;
                 if ( $num > 0 ) {
                     return 0;
                 }
@@ -486,14 +490,21 @@ Construct a node given an id and a name.
 
 sub createNode {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 1, name => 1 } );
+    my $parameters = validate( @args, { id => 0, name => 0 } );
+
+    unless ( $parameters->{id} or $parameters->{name} ) {
+        $self->{LOGGER}->error("Must supply either a name or id.");
+        return -1;
+    }
 
     my $id   = md5_hex( $parameters->{name} . $parameters->{id} );
     my $node = "<nmtb:node xmlns:nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"node." . $id . "\">\n";
-    $node .= "  <nmtb:address type=\"hostname\">" . $parameters->{name} . "</nmtb:address>\n";
-    $node .= "  <nmtb:relation type=\"connectionLink\">\n";
-    $node .= "    <nmtb:linkIdRef>" . $parameters->{id} . "</nmtb:linkIdRef>\n";
-    $node .= "  </nmtb:relation>\n";
+    $node .= "  <nmtb:address type=\"hostname\">" . $parameters->{name} . "</nmtb:address>\n" if ( $parameters->{name} );
+    if ( $parameters->{id} ) {
+        $node .= "  <nmtb:relation type=\"connectionLink\">\n";
+        $node .= "    <nmtb:linkIdRef>" . $parameters->{id} . "</nmtb:linkIdRef>\n";
+        $node .= "  </nmtb:relation>\n";
+    }
     $node .= "</nmtb:node>\n";
 
     return $node;
@@ -539,7 +550,12 @@ the information to remove.
 
 sub createDeregisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 1, name => 1 } );
+    my $parameters = validate( @args, { id => 0, name => 0 } );
+
+    unless ( $parameters->{id} or $parameters->{name} ) {
+        $self->{LOGGER}->error("Must supply either a name or id.");
+        return -1;
+    }
 
     unless ( $self->{LS_KEY} ) {
         $self->{LS_KEY} = $self->getLSKey;
@@ -628,6 +644,68 @@ sub createKeyRequest {
 
 __END__
 
+=head1 SYNOPSIS
+
+    #!/usr/bin/perl -w
+
+    use perfSONAR_PS::Client::DCN;
+    my $name = "some.hostname.edu";
+    my $id = "urn:ogf:network:domain=some.info.about.this.link"
+ 
+    # Get link id values given a host name
+    # 
+    my $ids = $dcn->nameToId({ name => $name });
+    foreach my $i (@$ids) {
+      print $name , "\t=\t" , $i , "\n";
+    }
+    
+    # Get host names given link id values
+    #
+    my $names = $dcn->idToName( { id => $id } );
+    foreach my $n (@$names) {
+      print $id , "\t=\t" , $n , "\n";
+    }
+  
+    # The DCN module has associated 'registration' info to make it act like
+    # a service.  This info will be registered with an LS, and will have a key
+    # associated with it.  This call will get that key from the LS.
+    # 
+    my $key = $dcn->getLSKey;
+    print "The DCN registration key is \"" , $key , "\".\n" if($key);
+
+    # Like the previous call, get us the key for some other service.
+    # 
+    $key = $dcn->getTopologyKey({ accessPoint => "http://some.topology.service.edu:8080/perfSONAR_PS/services/topology" });
+    print "Found key \"" , $key , "\" for topology service.\n" if($key);
+    
+    # Remove an entry from the LS given the host name and link id
+    # 
+    my $code = $dcn->remove({ name => $name, id => $id });
+    print "Removal of \"".$name."\" and \"".$id."\" failed.\n" if($code == -1);
+    
+    # Insert a new entry into the LS given a host name and link id
+    # 
+    $code = $dcn->insert({ name => $name, id => $id });
+    print "Insert of \"".$name."\" and \"".$id."\" failed.\n" if($code == -1);
+
+    # Get the domain a particular topology service is responsible for given
+    # the LS key that corresponds to the service
+    # 
+    my $domains = $dcn->getDomainKey({ key => "$key" });
+    foreach my $d (@$domains) {
+      print "Domain:\t" , $d , "\n";
+    }
+
+    # Get the domain a particular topology service is responsible for given
+    # the service information of the service
+    # 
+    $domains = $dcn->getDomainService({ accessPoint => "http://some.topology.service.edu:8080/perfSONAR_PS/services/topology", serviceType => "MA" });
+    foreach my $d (@$domains) {
+      print "Domain:\t" , $d , "\n";
+    }
+
+    exit(1);
+    
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Params::Validate>, L<Digest::MD5>, L<XML::LibXML>,
