@@ -51,7 +51,9 @@ sub createLSKey {
   $keyElement = $keyElement . "            <nmwg:parameter name=\"lsKey\">".$key."</nmwg:parameter>\n";
   $keyElement = $keyElement . "          </nmwg:parameters>\n";
   $keyElement = $keyElement . "        </nmwg:key>\n";
-  $keyElement = $keyElement . "        <nmwg:eventType>".$eventType."</nmwg:eventType>\n";
+  if(defined $eventType and $eventType ne "") {
+    $keyElement = $keyElement . "        <nmwg:eventType>".$eventType."</nmwg:eventType>\n";
+  }
   return $keyElement;
 }
 

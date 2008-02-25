@@ -145,6 +145,7 @@ sub init {
   $handler->registerFullMessageHandler("LSKeepaliveRequest", $self);
   $handler->registerFullMessageHandler("LSQueryRequest", $self);
   $handler->registerFullMessageHandler("LSLookupRequest", $self);
+  $handler->registerFullMessageHandler("LSKeyRequest", $self);
 
   my $error = q{};
   my $metadatadb = $self->prepareDatabases;
@@ -304,9 +305,12 @@ sub handleMessage {
 	    	 $parameters->{messageType} eq "LSLookupRequest") {
 	    	$self->lsQueryRequest({ doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb });
 	    }
-            else {
-      throw perfSONAR_PS::Error_compat("error.ls.messages", "Unrecognized message type");
-            }
+	    elsif($parameters->{messageType} eq "LSKeyRequest") {
+	    	$self->lsKeyRequest({ doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb });
+	    }
+      else {
+        throw perfSONAR_PS::Error_compat("error.ls.messages", "Unrecognized message type");
+      }
     }
     catch perfSONAR_PS::Error_compat with {
       my $ex = shift;
@@ -875,6 +879,51 @@ sub lsQueryRequest {
   }
   else {  
     createData($parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">".escapeString($dataString)."</psservice:datum>\n", undef);  
+  }
+  return;
+}
+
+=head2 lsKeyRequest($self, { doc request metadatadb })
+
+The LSKeyRequest message contains service information of a potentially
+registered service.  If this service is registered, the lsKey will be returned
+otherwise an error will be returned.
+
+Any database errors will cause the given metadata/data pair to fail.
+
+=cut
+
+sub lsKeyRequest {
+  my ($self, @args) = @_;
+  my $parameters = validate(@args, { doc => 1, request => 1, m => 1, metadatadb => 1 });
+
+  my $error = q{};
+  my $service = find($parameters->{m}, "./perfsonar:subject/psservice:service", 1);
+  if($service) {
+    my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( $parameters->{m}, q{} ) . "]";
+    my @resultsString = $parameters->{metadatadb}->query($queryString, q{}, \$error);
+    if($error) {
+      throw perfSONAR_PS::Error_compat("error.ls.xmldb", $error);
+    }
+
+    unless($#resultsString == 0) {
+      throw perfSONAR_PS::Error_compat("error.ls.key.not_registered", "Service was not registered in this LS.");
+    }
+
+    my $parser = XML::LibXML->new();
+    my $metadata = $parser->parse_string($resultsString[0]);    
+    if($metadata and $metadata->getDocumentElement->getAttribute("id")) {
+      my $mdId = "metadata.".genuid();
+      my $dId = "data.".genuid();
+      createMetadata($parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $service->toString, undef);
+      createData($parameters->{doc}, $dId, $mdId, createLSKey($metadata->getDocumentElement->getAttribute("id"), ""), undef);      
+    }
+    else {
+      throw perfSONAR_PS::Error_compat("error.ls.key.not_registered", "Service was not registered in this LS.");
+    }
+  }
+  else {
+    throw perfSONAR_PS::Error_compat("error.ls.key.service_missing", "Cannont find data, service element was not found.");
   }
   return;
 }
