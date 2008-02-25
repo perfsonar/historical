@@ -152,6 +152,100 @@ sub getLSKey {
   return;
 }
 
+=head2 getDomainKey($self { key })
+
+Get the domain for a topology service given a key.
+
+=cut
+
+sub getDomainKey {
+  my ( $self, @args ) = @_;
+  my $parameters = validate(@args, { key => 1 }); 
+  my @domains = ();
+  
+  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+  $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+  $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+
+  $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+  $query .= "  let \$metadata_id := \$metadata/\@id\n";
+  $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+  $query .= "  where \$metadata_id=\"".$parameters->{key}."\"\n";
+  $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
+
+  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
+  unless($msg) {
+    $self->{LOGGER}->error("Message element not found in return.");
+    return;
+  }
+
+  my $ds = find($msg, "./nmwg:data/psservice:datum/nmtb:domain", 0);
+  if($ds) {
+    foreach my $d ($ds->get_nodelist) {
+      my $value = $d->getAttribute("id");
+      $value =~ s/urn:ogf:network:domain=//mx;
+      push @domains, $value if $value;
+    }
+  }
+  else {
+    $self->{LOGGER}->error("No domain elements found in return.");
+    return;
+  }
+
+  return \@domains;
+}
+
+=head2 getDomainService($self { accessPoint, serviceName, serviceType })
+
+Get the domain of a topology service given service information
+
+=cut
+
+sub getDomainService {
+  my ( $self, @args ) = @_;
+  my $parameters = validate(@args, { accessPoint => 1, serviceName => 0, serviceType => 0 }); 
+  my @domains = ();
+  
+  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+  $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+  $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n\n";
+  
+  $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+  $query .= "  let \$metadata_id := \$metadata/\@id\n";
+  $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+  $query .= "  where \$metadata/perfsonar:subject/psservice:service/psservice:accessPoint[text()=\"".$parameters->{accessPoint}."\"]\n";
+  if($parameters->{serviceType}) {
+    $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceType[text()=\"".$parameters->{serviceType}."\"]\n";
+  }
+  if($parameters->{serviceName}) {
+    $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceName[text()=\"".$parameters->{serviceName}."\"]\n";
+  }
+  $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
+
+  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
+  unless($msg) {
+    $self->{LOGGER}->error("Message element not found in return.");
+    return;
+  }
+
+  my $ds = find($msg, "./nmwg:data/psservice:datum/nmtb:domain", 0);
+  if($ds) {
+    foreach my $d ($ds->get_nodelist) {
+      my $value = $d->getAttribute("id");
+      $value =~ s/urn:ogf:network:domain=//mx;
+      push @domains, $value if $value;
+    }
+  }
+  else {
+    $self->{LOGGER}->error("No domain elements found in return.");
+    return;
+  }
+
+  return \@domains;
+}
+
 =head2 nameToId
 
 Given a name (i.e. DNS 'hostname') return any matching link ids.
