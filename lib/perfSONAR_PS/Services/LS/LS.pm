@@ -693,6 +693,12 @@ sub lsDeregisterRequest {
   my @resultsString = ();
   my $errorFlag = 0;
   my @deregs = $parameters->{d}->getElementsByTagNameNS($ls_namespaces{"nmwg"}, "metadata");
+  my $mdFlag = 1;
+  if($#deregs == -1) {
+    $mdFlag = 0;
+    @deregs = $parameters->{d}->getElementsByTagNameNS($ls_namespaces{"nmtopo"}, "node");
+  }
+
   if($#deregs == -1) {
     $self->{CONF}->{"ls"}->{"logger"}->debug("Removing all info for \"".$mdKey."\".");
     @resultsString = $parameters->{metadatadb}->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]", q{}, \$error);
@@ -710,7 +716,14 @@ sub lsDeregisterRequest {
   else {
     $self->{CONF}->{"ls"}->{"logger"}->debug("Removing selected info for \"".$mdKey."\", keeping record.");
     foreach my $d_md (@deregs) {
-      @resultsString = $parameters->{metadatadb}->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, q{}) . "]", q{}, \$error);
+      
+      my $removeQuery = q{};
+      if($mdFlag) {
+        @resultsString = $parameters->{metadatadb}->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmwg:metadata[" . getMetadataXQuery($d_md, q{}) . "]", q{}, \$error);
+      }
+      else {
+        @resultsString = $parameters->{metadatadb}->queryForName("/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$mdKey."\"]/nmtopo:node[" . getMetadataXQuery($d_md, q{}) . "]", q{}, \$error);
+      }
       my $len = $#resultsString;
       for my $x (0..$len) {
         $parameters->{metadatadb}->remove($resultsString[$x], $dbTr, \$error);

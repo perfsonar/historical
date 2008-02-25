@@ -52,6 +52,9 @@ sub getSPXQuery {
         $path =~ s/\?//g;
         $path =~ s/\/nmwg:metadata//;
         $path =~ s/\/nmwg:data//;
+# XXX Jason 2/25/06
+# Would this be required elsewhere?
+        $path =~ s/\/.*:node//;
         $path =~ s/\[\d+\]//g;
         $path =~ s/^\///g;    
         $path =~ s/nmwg:subject/*[local-name()=\"subject\"]/;
@@ -271,7 +274,8 @@ sub xQueryAttributes {
         if($path eq "" or $path =~ m/metadata$/ or $path =~ m/data$/ or
            $path =~ m/subject$/ or $path =~ m/\*\[local-name\(\)=\"subject\"\]$/ or 
            $path =~ m/parameters$/ or $path =~ m/key$/ or
-           $path =~ m/service$/ or $path =~ m/eventType$/) {
+           $path =~ m/service$/ or $path =~ m/eventType$/ or
+           $path =~ m/node$/) {
           if($attr->getName ne "id" and !($attr->getName =~ m/.*IdRef$/)) {
             if($queryCount == 0) {
               if($queryString) {
