@@ -19,8 +19,10 @@ software may implement to receive information from perfSONAR deployments.
 
 =cut
 
-use Log::Log4perl qw(get_logger);
-use Params::Validate qw(:all);
+use Log::Log4perl qw( get_logger );
+use Params::Validate qw( :all );
+use Digest::MD5 qw( md5_hex );
+use English qw( -no_match_vars );
 
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract );
 use perfSONAR_PS::Transport;
@@ -34,24 +36,24 @@ to be contacted for queries.  This can also be set via 'setInstance'.
 =cut
 
 sub new {
-  my ( $package, @args ) = @_;
-  my $parameters = validate(@args, { instance => 0 });
+    my ( $package, @args ) = @_;
+    my $parameters = validate( @args, { instance => 0 } );
 
-  my $self = fields::new($package);
+    my $self = fields::new($package);
 
-  $self->{CONF} = ();
-  $self->{CONF}->{SERVICE_TYPE} =  "MA";
-  $self->{CONF}->{SERVICE_NAME} =  "DCN LS";
-  $self->{CONF}->{SERVICE_DESCRIPTION} =  "Provides DCN Topology Information Mapping";
-  
-  $self->{LOGGER} = get_logger("perfSONAR_PS::Client::DCN");
-  if(exists $parameters->{"instance"} and $parameters->{"instance"} ne "") {
-    $self->{INSTANCE} = $parameters->{"instance"};
-    $self->{CONF}->{SERVICE_ACCESSPOINT} =  $parameters->{"instance"};
-    $self->{LS_KEY} = $self->getLSKey;
-  }
+    $self->{CONF}                        = ();
+    $self->{CONF}->{SERVICE_TYPE}        = "MA";
+    $self->{CONF}->{SERVICE_NAME}        = "DCN LS";
+    $self->{CONF}->{SERVICE_DESCRIPTION} = "Provides DCN Topology Information Mapping";
 
-  return $self;
+    $self->{LOGGER} = get_logger("perfSONAR_PS::Client::DCN");
+    if ( exists $parameters->{"instance"} and $parameters->{"instance"} ) {
+        $self->{INSTANCE}                    = $parameters->{"instance"};
+        $self->{CONF}->{SERVICE_ACCESSPOINT} = $parameters->{"instance"};
+        $self->{LS_KEY}                      = $self->getLSKey;
+    }
+
+    return $self;
 }
 
 =head2 setInstance($self { instance })
@@ -61,95 +63,119 @@ Required argument 'instance' is the LS instance to be contacted for queries.
 =cut
 
 sub setInstance {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { instance => 1 });
-  $self->{INSTANCE} = $parameters->{"instance"};
-  $self->{CONF}->{SERVICE_ACCESSPOINT} =  $parameters->{"instance"};
-  $self->{LS_KEY} = $self->getLSKey;
-  return;
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { instance => 1 } );
+
+    $self->{INSTANCE}                    = $parameters->{"instance"};
+    $self->{CONF}->{SERVICE_ACCESSPOINT} = $parameters->{"instance"};
+    $self->{LS_KEY}                      = $self->getLSKey;
+
+    return;
 }
 
-=head2 callLS($self { query })
+=head2 callLS($self { message })
 
-Calls the LS instance and returns the response message (if any). 
+Calls the LS instance with the sent message and returns the response (if any). 
 
 =cut
 
 sub callLS {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { message => 1 });
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { message => 1 } );
 
-  unless($self->{INSTANCE}) {
-    $self->{LOGGER}->error("Instance not defined.");
-    return;
-  }
-
-  my $echo_service = perfSONAR_PS::Client::Echo->new($self->{INSTANCE});
-  my ($status, $res) = $echo_service->ping();
-  if($status == -1) {
-    $self->{LOGGER}->error("Ping to ".$self->{INSTANCE}." failed: $res");
-    return;
-  }
-  
-  my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{INSTANCE});
-  if (!defined $host && !defined $port && !defined $endpoint) {
-    return;
-  }
-  my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
-  unless($sender) {
-    $self->{LOGGER}->error("LS could not be contaced.");
-    return;
-  }
-
-  my $error = q{};
-  my $responseContent = $sender->sendReceive(makeEnvelope($parameters->{message}), q{}, \$error);
-  if($error ne "") {
-    $self->{LOGGER}->error("sendReceive failed: $error");
-    return;
-  }
-  
-  my $msg = q{};
-  my $parser = XML::LibXML->new();
-  if(defined $responseContent and $responseContent ne "" and
-     !($responseContent =~ m/^\d+/)) {
-    my $doc = q{};
-    eval {
-      $doc = $parser->parse_string($responseContent);
-    };
-    if($@) {
-      $self->{LOGGER}->error("Parser failed: ".$@);
-      return;
+    unless ( $self->{INSTANCE} ) {
+        $self->{LOGGER}->error("Instance not defined.");
+        return;
     }
-    else {
-      $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
+
+    my $echo_service = perfSONAR_PS::Client::Echo->new( $self->{INSTANCE} );
+    my ( $status, $res ) = $echo_service->ping();
+    if ( $status == -1 ) {
+        $self->{LOGGER}->error( "Ping to " . $self->{INSTANCE} . " failed: $res" );
+        return;
     }
-  }
-  return $msg;
+
+    my ( $host, $port, $endpoint ) = perfSONAR_PS::Transport::splitURI( $self->{INSTANCE} );
+    unless ( defined $host and defined $port and defined $endpoint ) {
+        return;
+    }
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    unless ($sender) {
+        $self->{LOGGER}->error("LS could not be contaced.");
+        return;
+    }
+
+    my $error = q{};
+    my $responseContent = $sender->sendReceive( makeEnvelope( $parameters->{message} ), q{}, \$error );
+    if ($error) {
+        $self->{LOGGER}->error("sendReceive failed: $error");
+        return;
+    }
+
+    my $msg    = q{};
+    my $parser = XML::LibXML->new();
+    if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/mx ) ) {
+        my $doc = q{};
+        eval { $doc = $parser->parse_string($responseContent); };
+        if ($EVAL_ERROR) {
+            $self->{LOGGER}->error( "Parser failed: " . $EVAL_ERROR );
+        }
+        else {
+            $msg = $doc->getDocumentElement->getElementsByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "message" )->get_node(1);
+        }
+    }
+    return $msg;
 }
 
 =head2 getLSKey($self { })
 
 Send an LSKeyRequest to the service to retrive the actual key value for the
-registration
+registration of the 'DCN' service.
 
 =cut
 
 sub getLSKey {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, {} );
 
-  my $msg = $self->callLS({ message => $self->createKeyRequest({  }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
+    my $msg = $self->callLS( { message => $self->createKeyRequest( {} ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $key = find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 0 );
+    if ($key) {
+        $self->{LS_KEY} = $key;
+        return $key;
+    }
     return;
-  }
+}
 
-  my $key = find($msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 0);
-  if($key) {
-    $self->{LS_KEY} = $key;
-    return $key;
-  }
-  return;
+=head2 getTopologyKey($self { accessPoint serviceName serviceType serviceDescription })
+
+Send an LSKeyRequest to the LS with some service information reguarding a
+topology service.  The goal is to get a key, nothing will be returned on
+failure.
+
+=cut
+
+sub getTopologyKey {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { accessPoint => 1, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
+
+    my $msg = $self->callLS( { message => $self->createKeyRequest( { accessPoint => $parameters->{accessPoint}, serviceName => $parameters->{serviceName}, serviceType => $parameters->{serviceType}, serviceDescription => $parameters->{serviceDescription} } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $key = find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 0 );
+    if ($key) {
+        $self->{LS_KEY} = $key;
+        return $key;
+    }
+    return;
 }
 
 =head2 getDomainKey($self { key })
@@ -159,41 +185,41 @@ Get the domain for a topology service given a key.
 =cut
 
 sub getDomainKey {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { key => 1 }); 
-  my @domains = ();
-  
-  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-  $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
-  $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
-  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { key => 1 } );
+    my @domains = ();
 
-  $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
-  $query .= "  let \$metadata_id := \$metadata/\@id\n";
-  $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
-  $query .= "  where \$metadata_id=\"".$parameters->{key}."\"\n";
-  $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
 
-  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
-    return;
-  }
+    $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+    $query .= "  let \$metadata_id := \$metadata/\@id\n";
+    $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+    $query .= "  where \$metadata_id=\"" . $parameters->{key} . "\"\n";
+    $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
 
-  my $ds = find($msg, "./nmwg:data/psservice:datum/nmtb:domain", 0);
-  if($ds) {
-    foreach my $d ($ds->get_nodelist) {
-      my $value = $d->getAttribute("id");
-      $value =~ s/urn:ogf:network:domain=//mx;
-      push @domains, $value if $value;
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
     }
-  }
-  else {
-    $self->{LOGGER}->error("No domain elements found in return.");
-    return;
-  }
 
-  return \@domains;
+    my $ds = find( $msg, "./nmwg:data/psservice:datum/nmtb:domain", 0 );
+    if ($ds) {
+        foreach my $d ( $ds->get_nodelist ) {
+            my $value = $d->getAttribute("id");
+            $value =~ s/urn:ogf:network:domain=//mx;
+            push @domains, $value if $value;
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No domain elements found in return.");
+        return;
+    }
+
+    return \@domains;
 }
 
 =head2 getDomainService($self { accessPoint, serviceName, serviceType })
@@ -203,47 +229,47 @@ Get the domain of a topology service given service information
 =cut
 
 sub getDomainService {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { accessPoint => 1, serviceName => 0, serviceType => 0 }); 
-  my @domains = ();
-  
-  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-  $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
-  $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
-  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n\n";
-  
-  $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
-  $query .= "  let \$metadata_id := \$metadata/\@id\n";
-  $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
-  $query .= "  where \$metadata/perfsonar:subject/psservice:service/psservice:accessPoint[text()=\"".$parameters->{accessPoint}."\"]\n";
-  if($parameters->{serviceType}) {
-    $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceType[text()=\"".$parameters->{serviceType}."\"]\n";
-  }
-  if($parameters->{serviceName}) {
-    $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceName[text()=\"".$parameters->{serviceName}."\"]\n";
-  }
-  $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { accessPoint => 1, serviceName => 0, serviceType => 0 } );
+    my @domains = ();
 
-  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
-    return;
-  }
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n\n";
 
-  my $ds = find($msg, "./nmwg:data/psservice:datum/nmtb:domain", 0);
-  if($ds) {
-    foreach my $d ($ds->get_nodelist) {
-      my $value = $d->getAttribute("id");
-      $value =~ s/urn:ogf:network:domain=//mx;
-      push @domains, $value if $value;
+    $query .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+    $query .= "  let \$metadata_id := \$metadata/\@id\n";
+    $query .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+    $query .= "  where \$metadata/perfsonar:subject/psservice:service/psservice:accessPoint[text()=\"" . $parameters->{accessPoint} . "\"]\n";
+    if ( $parameters->{serviceType} ) {
+        $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceType[text()=\"" . $parameters->{serviceType} . "\"]\n";
     }
-  }
-  else {
-    $self->{LOGGER}->error("No domain elements found in return.");
-    return;
-  }
+    if ( $parameters->{serviceName} ) {
+        $query .= "        and \$metadata/perfsonar:subject/psservice:service/psservice:serviceName[text()=\"" . $parameters->{serviceName} . "\"]\n";
+    }
+    $query .= "  return \$data/nmwg:metadata/nmwg:subject/nmtb:domain\n\n";
 
-  return \@domains;
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $ds = find( $msg, "./nmwg:data/psservice:datum/nmtb:domain", 0 );
+    if ($ds) {
+        foreach my $d ( $ds->get_nodelist ) {
+            my $value = $d->getAttribute("id");
+            $value =~ s/urn:ogf:network:domain=//mx;
+            push @domains, $value if $value;
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No domain elements found in return.");
+        return;
+    }
+
+    return \@domains;
 }
 
 =head2 nameToId
@@ -253,33 +279,33 @@ Given a name (i.e. DNS 'hostname') return any matching link ids.
 =cut
 
 sub nameToId {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { name => 1 });
-  my @ids = ();
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { name => 1 } );
+    my @ids = ();
 
-  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-  $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmtb:node[nmtb:address/text()=\"".$parameters->{name}."\"]\n";   
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmtb:node[nmtb:address/text()=\"" . $parameters->{name} . "\"]\n";
 
-  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
-    return;
-  }
-      
-  my $links = find($msg, ".//psservice:datum/nmtb:node/nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef", 0);
-  if($links) {
-    foreach my $l ($links->get_nodelist) {
-      my $value = extract( $l, 0 );
-      push @ids, $value if $value;
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
     }
-  }
-  else {
-    $self->{LOGGER}->error("No link elements found in return.");
-    return;
-  }
 
-  return \@ids;
+    my $links = find( $msg, ".//psservice:datum/nmtb:node/nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef", 0 );
+    if ($links) {
+        foreach my $l ( $links->get_nodelist ) {
+            my $value = extract( $l, 0 );
+            push @ids, $value if $value;
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No link elements found in return.");
+        return;
+    }
+
+    return \@ids;
 }
 
 =head2 idToName
@@ -289,33 +315,33 @@ Given a link id return any matching names (i.e. DNS 'hostname').
 =cut
 
 sub idToName {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 1 });
-  my @names = ();
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 1 } );
+    my @names = ();
 
-  my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-  $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-  $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmtb:node[nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef[text()=\"".$parameters->{id}."\"]]\n";
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmtb:node[nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef[text()=\"" . $parameters->{id} . "\"]]\n";
 
-  my $msg = $self->callLS({ message => $self->createQueryRequest({ query => $query }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
-    return;
-  }
-
-  my $hostnames = find($msg, ".//psservice:datum/nmtb:node/nmtb:address[\@type=\"hostname\"]", 0);
-  if($hostnames) {
-    foreach my $hn ($hostnames->get_nodelist) {
-      my $value = extract( $hn, 0 );
-      push @names, $value if $value;
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
     }
-  }
-  else {
-    $self->{LOGGER}->error("No name elements found in return.");
-    return;
-  }
 
-  return \@names;
+    my $hostnames = find( $msg, ".//psservice:datum/nmtb:node/nmtb:address[\@type=\"hostname\"]", 0 );
+    if ($hostnames) {
+        foreach my $hn ( $hostnames->get_nodelist ) {
+            my $value = extract( $hn, 0 );
+            push @names, $value if $value;
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No name elements found in return.");
+        return;
+    }
+
+    return \@names;
 }
 
 =head2 insert($self { id name })
@@ -325,27 +351,35 @@ Given an id AND a name, register this infomration to the LS instance.
 =cut
 
 sub insert {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 1, name => 1 }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 1, name => 1 } );
 
-  unless($self->{LS_KEY}) {
-    $self->{LS_KEY} = $self->getLSKey;
-  }
-  
-  my $msg = $self->callLS({ message => $self->createRegisterRequest({ id => $parameters->{id}, name => $parameters->{name} }) });
-  unless($msg) {
-    $self->{LOGGER}->error("Message element not found in return.");
+    unless ( $self->{LS_KEY} ) {
+        $self->{LS_KEY} = $self->getLSKey;
+    }
+
+    my $msg = $self->callLS( { message => $self->createRegisterRequest( { id => $parameters->{id}, name => $parameters->{name} } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return -1;
+    }
+
+    my $code  = extract( find( $msg, "./nmwg:metadata/nmwg:eventType",        1 ), 0 );
+    my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
+    if ( defined $code and $code =~ m/success/mx ) {
+        $self->{LOGGER}->info($datum) if $datum;
+        if ( $datum =~ m/^\[\d+\] Data/mx ) {
+            my $num = $datum;
+            $num =~ s/^\[//mx;
+            $num =~ s/\].*//mx;
+            if ( $num > 0 ) {
+                return 0;
+            }
+        }
+        return -1;
+    }
+    $self->{LOGGER}->error($datum) if $datum;
     return -1;
-  }
-
-  my $code = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
-  my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
-  if(defined $code and $code =~ m/success/) {
-    $self->{LOGGER}->info($datum) if $datum;
-    return 0;
-  }
-  $self->{LOGGER}->error($datum) if $datum;
-  return -1;
 }
 
 =head2 remove($self { id name })
@@ -355,33 +389,41 @@ Given an id or a name, delete this specific info from the LS instance.
 =cut
 
 sub remove {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 0, name => 0 }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 0, name => 0 } );
 
-  unless($self->{LS_KEY}) {
-    $self->{LS_KEY} = $self->getLSKey;
-  }
-  
-  if($self->{LS_KEY}) {
-    my $msg = $self->callLS({ message => $self->createDeregisterRequest({ id => $parameters->{id}, name => $parameters->{name} }) });
-    unless($msg) {
-      $self->{LOGGER}->error("Message element not found in return.");
-      return -1;
+    unless ( $self->{LS_KEY} ) {
+        $self->{LS_KEY} = $self->getLSKey;
     }
 
-    my $code = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
-    my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
-    if(defined $code and $code =~ m/success/) {
-      $self->{LOGGER}->info($datum) if $datum;
-      return 0;
+    if ( $self->{LS_KEY} ) {
+        my $msg = $self->callLS( { message => $self->createDeregisterRequest( { id => $parameters->{id}, name => $parameters->{name} } ) } );
+        unless ($msg) {
+            $self->{LOGGER}->error("Message element not found in return.");
+            return -1;
+        }
+
+        my $code  = extract( find( $msg, "./nmwg:metadata/nmwg:eventType",        1 ), 0 );
+        my $datum = extract( find( $msg, "./nmwg:data/*[local-name()=\"datum\"]", 1 ), 0 );
+        if ( defined $code and $code =~ m/success/mx ) {
+            $self->{LOGGER}->info($datum) if $datum;
+            if ( $datum =~ m/^Removed/mx ) {
+                my $num = $datum;
+                $num =~ s/^Removed\s{1}\[//mx;
+                $num =~ s/\].*//mx;
+                if ( $num > 0 ) {
+                    return 0;
+                }
+            }
+            return -1;
+        }
+        else {
+            $self->{LOGGER}->error($datum) if $datum;
+            return -1;
+        }
     }
-    else {
-      $self->{LOGGER}->error($datum) if $datum;
-      return -1;
-    }
-  }
-  
-  return -1;
+
+    return -1;
 }
 
 =head2 createService($self { })
@@ -391,18 +433,30 @@ Construct the service metadata given the default values for this module.
 =cut
 
 sub createService {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
-  my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
-  $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-  $service = $service . "        <psservice:serviceName>".$self->{CONF}->{SERVICE_NAME}."</psservice:serviceName>\n" if (defined $self->{CONF}->{"SERVICE_NAME"});
-  $service = $service . "        <psservice:accessPoint>".$self->{CONF}->{SERVICE_ACCESSPOINT}."</psservice:accessPoint>\n" if (defined $self->{CONF}->{"SERVICE_ACCESSPOINT"});
-  $service = $service . "        <psservice:serviceType>".$self->{CONF}->{SERVICE_TYPE}."</psservice:serviceType>\n" if (defined $self->{CONF}->{"SERVICE_TYPE"});
-  $service = $service . "        <psservice:serviceDescription>".$self->{CONF}->{SERVICE_DESCRIPTION}."</psservice:serviceDescription>\n" if (defined $self->{CONF}->{"SERVICE_DESCRIPTION"});
-  $service = $service . "      </psservice:service>\n";
-  $service = $service . "    </perfsonar:subject>\n";
-  return $service;
+    my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
+    $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
+    if (   $parameters->{accessPoint}
+        or $parameters->{serviceName}
+        or $parameters->{serviceType}
+        or $parameters->{serviceDescription} )
+    {
+        $service = $service . "        <psservice:serviceName>" . $parameters->{serviceName} . "</psservice:serviceName>\n"                      if ( defined $parameters->{serviceName} );
+        $service = $service . "        <psservice:accessPoint>" . $parameters->{accessPoint} . "</psservice:accessPoint>\n"                      if ( defined $parameters->{accessPoint} );
+        $service = $service . "        <psservice:serviceType>" . $parameters->{serviceType} . "</psservice:serviceType>\n"                      if ( defined $parameters->{serviceType} );
+        $service = $service . "        <psservice:serviceDescription>" . $parameters->{serviceDescription} . "</psservice:serviceDescription>\n" if ( defined $parameters->{serviceDescription} );
+    }
+    else {
+        $service = $service . "        <psservice:serviceName>" . $self->{CONF}->{SERVICE_NAME} . "</psservice:serviceName>\n"                      if ( defined $self->{CONF}->{"SERVICE_NAME"} );
+        $service = $service . "        <psservice:accessPoint>" . $self->{CONF}->{SERVICE_ACCESSPOINT} . "</psservice:accessPoint>\n"               if ( defined $self->{CONF}->{"SERVICE_ACCESSPOINT"} );
+        $service = $service . "        <psservice:serviceType>" . $self->{CONF}->{SERVICE_TYPE} . "</psservice:serviceType>\n"                      if ( defined $self->{CONF}->{"SERVICE_TYPE"} );
+        $service = $service . "        <psservice:serviceDescription>" . $self->{CONF}->{SERVICE_DESCRIPTION} . "</psservice:serviceDescription>\n" if ( defined $self->{CONF}->{"SERVICE_DESCRIPTION"} );
+    }
+    $service = $service . "      </psservice:service>\n";
+    $service = $service . "    </perfsonar:subject>\n";
+    return $service;
 }
 
 =head2 createKey($self { })
@@ -412,15 +466,16 @@ Construct the key metadata given the default values for this module.
 =cut
 
 sub createKey {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, {} );
 
-  my $key = "    <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key.".genuid()."\">\n";
-  $key .= "      <nmwg:parameters id=\"parameters.".genuid()."\">\n";
-  $key .= "        <nmwg:parameter name=\"lsKey\">".$self->{LS_KEY}."</nmwg:parameter>\n";
-  $key .= "      </nmwg:parameters>\n";
-  $key .= "    </nmwg:key>\n";
-  return $key;
+    my $key = "    <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
+    $key .= "      <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
+    $key .= "        <nmwg:parameter name=\"lsKey\">" . $self->{LS_KEY} . "</nmwg:parameter>\n";
+    $key .= "      </nmwg:parameters>\n";
+    $key .= "    </nmwg:key>\n";
+
+    return $key;
 }
 
 =head2 createNode($self { id name })
@@ -430,17 +485,18 @@ Construct a node given an id and a name.
 =cut
 
 sub createNode {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 1, name => 1 }); 
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 1, name => 1 } );
 
-  my $node = "<nmtb:node xmlns:nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"node.".genuid()."\">\n";
-  $node .= "  <nmtb:address type=\"hostname\">".$parameters->{name}."</nmtb:address>\n";
-  $node .= "  <nmtb:relation type=\"connectionLink\">\n";
-  $node .= "    <nmtb:linkIdRef>".$parameters->{id}."</nmtb:linkIdRef>\n";
-  $node .= "  </nmtb:relation>\n";
-  $node .= "</nmtb:node>\n";
+    my $id   = md5_hex( $parameters->{name} . $parameters->{id} );
+    my $node = "<nmtb:node xmlns:nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"node." . $id . "\">\n";
+    $node .= "  <nmtb:address type=\"hostname\">" . $parameters->{name} . "</nmtb:address>\n";
+    $node .= "  <nmtb:relation type=\"connectionLink\">\n";
+    $node .= "    <nmtb:linkIdRef>" . $parameters->{id} . "</nmtb:linkIdRef>\n";
+    $node .= "  </nmtb:relation>\n";
+    $node .= "</nmtb:node>\n";
 
-  return $node;
+    return $node;
 }
 
 =head2 createQueryRequest($self { query })
@@ -451,27 +507,27 @@ this function.
 =cut
 
 sub createQueryRequest {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { query => 1 });  
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { query => 1 } );
 
-  my $request = q{};
-  my $mdId = "metadata.".genuid();
-  $request .= "<nmwg:message type=\"LSQueryRequest\" id=\"message.".genuid()."\"\n";
-  $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-  $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-  $request .= "  <nmwg:metadata id=\"".$mdId."\">\n";
-  $request .= "    <xquery:subject id=\"subject.".genuid()."\">\n";
-  $request .= $parameters->{query};
-  $request .= "    </xquery:subject>\n";
-  $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-  $request .= "  <xquery:parameters id=\"parameters.".genuid()."\">\n";
-  $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-  $request .= "  </xquery:parameters>\n";
-  $request .= "  </nmwg:metadata>\n";
-  $request .= "  <nmwg:data metadataIdRef=\"".$mdId."\" id=\"data.".genuid()."\"/>\n";
-  $request .= "</nmwg:message>\n";
+    my $request = q{};
+    my $mdId    = "metadata." . genuid();
+    $request .= "<nmwg:message type=\"LSQueryRequest\" id=\"message." . genuid() . "\"\n";
+    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
+    $request .= "    <xquery:subject id=\"subject." . genuid() . "\">\n";
+    $request .= $parameters->{query};
+    $request .= "    </xquery:subject>\n";
+    $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+    $request .= "  <xquery:parameters id=\"parameters." . genuid() . "\">\n";
+    $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
+    $request .= "  </xquery:parameters>\n";
+    $request .= "  </nmwg:metadata>\n";
+    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\"/>\n";
+    $request .= "</nmwg:message>\n";
 
-  return $request;
+    return $request;
 }
 
 =head2 createDeregisterRequest($self {  })
@@ -482,28 +538,29 @@ the information to remove.
 =cut
 
 sub createDeregisterRequest {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 1, name => 1 });  
-  
-  unless($self->{LS_KEY}) {
-    $self->{LS_KEY} = $self->getLSKey;
-  }
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 1, name => 1 } );
 
-  my $request = q{};
-  if($self->{LS_KEY}) {
-    my $mdId = "metadata.".genuid();
-    $request .= "<nmwg:message type=\"LSDeregisterRequest\" id=\"message.".genuid()."\"\n";
-    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $request .= "  <nmwg:metadata id=\"".$mdId."\">\n";
-    $request .= $self->createKey;
-    $request .= "  </nmwg:metadata>\n";
-    $request .= "  <nmwg:data metadataIdRef=\"".$mdId."\" id=\"data.".genuid()."\">\n";
-    $request .= $self->createNode({ id => $parameters->{id}, name => $parameters->{name} });
-    $request .= "  </nmwg:data>\n";
-    $request .= "</nmwg:message>\n";
-  }
-  return $request;
+    unless ( $self->{LS_KEY} ) {
+        $self->{LS_KEY} = $self->getLSKey;
+    }
+
+    my $request = q{};
+    if ( $self->{LS_KEY} ) {
+        my $mdId = "metadata." . genuid();
+        $request .= "<nmwg:message type=\"LSDeregisterRequest\" id=\"message." . genuid() . "\"\n";
+        $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+        $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+        $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
+        $request .= $self->createKey;
+        $request .= "  </nmwg:metadata>\n";
+        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
+        $request .= $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } );
+        $request .= "  </nmwg:data>\n";
+        $request .= "</nmwg:message>\n";
+    }
+
+    return $request;
 }
 
 =head2 createRegisterRequest($self {  })
@@ -514,32 +571,32 @@ mapping to register.
 =cut
 
 sub createRegisterRequest {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, { id => 1, name => 1 });  
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { id => 1, name => 1 } );
 
-  unless($self->{LS_KEY}) {
-    $self->{LS_KEY} = $self->getLSKey;
-  }
+    unless ( $self->{LS_KEY} ) {
+        $self->{LS_KEY} = $self->getLSKey;
+    }
 
-  my $request = q{};
-  my $mdId = "metadata.".genuid();
-  $request .= "<nmwg:message type=\"LSRegisterRequest\" id=\"message.".genuid()."\"\n";
-  $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-  $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-  $request .= "  <nmwg:metadata id=\"".$mdId."\">\n";
-  if($self->{LS_KEY}) {
-    $request .= $self->createKey;
-  }
-  else {
-    $request .= $self->createService;
-  }
-  $request .= "  </nmwg:metadata>\n";
-  $request .= "  <nmwg:data metadataIdRef=\"".$mdId."\" id=\"data.".genuid()."\">\n";
-  $request .= $self->createNode({ id => $parameters->{id}, name => $parameters->{name} });
-  $request .= "  </nmwg:data>\n";
-  $request .= "</nmwg:message>\n";
+    my $request = q{};
+    my $mdId    = "metadata." . genuid();
+    $request .= "<nmwg:message type=\"LSRegisterRequest\" id=\"message." . genuid() . "\"\n";
+    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
+    if ( $self->{LS_KEY} ) {
+        $request .= $self->createKey;
+    }
+    else {
+        $request .= $self->createService;
+    }
+    $request .= "  </nmwg:metadata>\n";
+    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
+    $request .= $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } );
+    $request .= "  </nmwg:data>\n";
+    $request .= "</nmwg:message>\n";
 
-  return $request;
+    return $request;
 }
 
 =head2 createRegisterRequest($self {  })
@@ -550,21 +607,21 @@ mapping to register.
 =cut
 
 sub createKeyRequest {
-  my ( $self, @args ) = @_;
-  my $parameters = validate(@args, {  });  
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
-  my $request = q{};
-  my $mdId = "metadata.".genuid();
-  $request .= "<nmwg:message type=\"LSKeyRequest\" id=\"message.".genuid()."\"\n";
-  $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-  $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-  $request .= "  <nmwg:metadata id=\"".$mdId."\">\n";
-  $request .= $self->createService;
-  $request .= "  </nmwg:metadata>\n";
-  $request .= "  <nmwg:data metadataIdRef=\"".$mdId."\" id=\"data.".genuid()."\"/>\n";
-  $request .= "</nmwg:message>\n";
+    my $request = q{};
+    my $mdId    = "metadata." . genuid();
+    $request .= "<nmwg:message type=\"LSKeyRequest\" id=\"message." . genuid() . "\"\n";
+    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
+    $request .= $self->createService( { accessPoint => $parameters->{accessPoint}, serviceName => $parameters->{serviceName}, serviceType => $parameters->{serviceType}, serviceDescription => $parameters->{serviceDescription} } );
+    $request .= "  </nmwg:metadata>\n";
+    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\"/>\n";
+    $request .= "</nmwg:message>\n";
 
-  return $request;
+    return $request;
 }
 
 1;
@@ -573,8 +630,9 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Client::Echo>
+L<Log::Log4perl>, L<Params::Validate>, L<Digest::MD5>, L<XML::LibXML>,
+L<English>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>,
+L<perfSONAR_PS::Client::Echo>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
