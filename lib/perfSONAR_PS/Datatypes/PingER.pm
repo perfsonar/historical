@@ -42,6 +42,7 @@ package perfSONAR_PS::Datatypes::PingER;
 
 use strict;
 use warnings;
+use English qw( -no_match_vars);
 use Log::Log4perl qw(get_logger); 
 use POSIX qw(strftime);
 use Data::Dumper;
@@ -90,11 +91,7 @@ sub DESTROY {
     my $self = shift;
     $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
 }
-#
-#  no shortcuts !
-#
-sub AUTOLOAD {}    
-
+ 
 =head2 handle 
 
    dispatch method. accepts type of request,response object and MA config hashref as parameters, returns fully built response object,
@@ -123,8 +120,8 @@ sub handle {
 
 =head2   MetadataKeyRequest
 
-      method for MetadataKey request, accepts response Message object 
-      returns filled response  
+      method for MetadataKey request,  works per event ( single pre-merged md  and data pair)
+      returns filled response message object 
 
   ###############################  From Jason's SNMP MA code ################################### 
   # MA MetadataKeyRequest Steps
@@ -150,7 +147,7 @@ sub  MetadataKeyRequest {
     #  eval{
     #   require perfSONAR_PS::DB::PingER_DB::MetaData::Manager; 
     #  };
-    #  if($@) {
+    #  if($EVAL_ERROR) {
     #     $logger->error("Failed to load PingER backend DB");
     #     die " System error, store failed";
     #  }
@@ -165,89 +162,68 @@ sub  MetadataKeyRequest {
     #### setting status URI for response 
     $self->eventTypes->status->operation('metadatakey');
     $logger->error(" Please supply  array of metadata and not: " . $self->metadata ) unless $self->metadata && ref($self->metadata) eq 'ARRAY';
-    foreach my   $data  (@{$self->data}) { 
-           
-        my $requestmd =  $self->getMetadataById($data->metadataIdRef);
-	unless(  $requestmd  ) {
-            $logger->debug("Orphaned data   - no  metadata found for metadataRefid:" . $data->metadataIdRef );
-            next; 
-        } else {
-	    $logger->debug("Found metadata in request id=" .  $requestmd->id . " data=" . $data->asString );
-	}
-	unless($requestmd->eventType  eq  $self->eventTypes->tools->pinger) {
-            $logger->error("Unsupported evenType by this service"); 
-            $response->addResultResponse({ md => $requestmd, message => 'Unsupported evenType by this service: ' . $requestmd->eventType ,  eventType => $self->eventTypes->status->failure});	
-            next;   
-        }
-       
-        my  $objects  = undef;### iterator returned by backend query
-        if($requestmd->key  &&  $requestmd->key->id) {
-            $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
-                            query =>  [ metaId => {eq =>  $requestmd->key->id}] 
+    my $data  =   $self->data->[0];
+    my $requestmd =  $self->metadata->[0];
+    $logger->debug(" MD  =" . Dumper $requestmd );
+    my  $objects  = undef;### iterator returned by backend query
+    if($requestmd->key  &&  $requestmd->key->id) {
+        $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
+                         query =>  [ metaId => {eq =>  $requestmd->key->id}] 
                         );
-	    $logger->debug(" Found Key =" . $requestmd->key->id);	       
-        } else {
-            my $newmd  = $self->getChain($requestmd); # chain it 
-            $logger->debug(" Chained ..........\n" . $newmd->asString ) ;	
-            # check key  
-            if( $newmd->key  && $newmd->key->id) {
-                $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
-                               query =>  [ metaId => {eq => $newmd->key->id}] 
-                           );
-	        $logger->debug(" Found Key in Chained MD =" . $newmd->key->id);	 	  
-		
-	    }  elsif(($newmd->subject) ||  ($newmd->parameters)) { 
-                my $query =  $self->buildQuery('eq', $newmd );
-		    	
-	        $logger->debug(" Will query = " . Dumper $query);	 	
-	        unless($query && $query->{query_metaData} && ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} > 0) {
-	            $logger->warn(" Nothing to query about for md=" . $requestmd->id);
-		    $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
-                    next;
-	        }
-	        eval {
-	            $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
-                                    query =>    $query->{query_metaData},
-		                    sort_by => 'metaID',
-				    limit => _mdSetLimit($query->{query_limit})
-                                );
-	        };
-	        if($@) {
-	            $logger->logdie("PingER backend  Query failed: " . $@);
-		}
-		      
-	    }  else {
-	        $logger->warn(" Nothing to query about (no key or parameters supplied) for md=" . $requestmd->id);   
-	        $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
-                next;	     
-	    }
-        } 
-        if($objects &&   ref($objects) eq 'ARRAY' &&   @{$objects} ) {
-            foreach my $md_sql (@{$objects}) {
-	        my $metaid = (ref($md_sql->metaID) eq 'Math::BigInt')?$md_sql->metaID->bstr:$md_sql->metaID;
-	        $logger->debug( "Found metaID " .  $metaid  );
-	        my $md =   $self->_ressurectMd({ md_row => $md_sql });  
-	        my $md_id = $response->addIDMetadata($md, $self->eventTypes->tools->pinger);
-                $logger->debug(" MD created: \n " .  $md->asString);
-	        my $key =   perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key->new({id => $metaid });
-	        $logger->debug(" KEY  created: \n " .  $key->asString );
-	        my $data  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new({ id => "data" . $response->dataID, metadataIdRef => "meta$md_id" , key => $key  });
-	        $logger->debug(" DATA created: \n " .  $data->asString);
-	        $response->addData($data); ## 
-	        $logger->debug(" DATA added");
-	        $response->add_dataID;
-	    }    
-        } else {           
-            $response->addResultResponse({ md =>  $requestmd, message => ' no metadata found ', eventType => $self->eventTypes->status->failure});
-        }
+	$logger->debug(" Found Key =" . $requestmd->key->id);	       
+    }  elsif(($requestmd->subject) ||  ($requestmd->parameters)) { 
+        my $query =  $self->buildQuery('eq', $requestmd );
+
+	$logger->debug(" Will query = " . Dumper $query);	 	
+	unless($query && $query->{query_metaData} && ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} > 0) {
+	    $logger->warn(" Nothing to query about for md=" . $requestmd->id);
+	    $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
+            next;
+	}
+	eval {
+	    $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
+                            query =>    $query->{query_metaData},
+		            sort_by => 'metaID',
+			    limit => _mdSetLimit($query->{query_limit})
+                        );
+	};
+	if($EVAL_ERROR) {
+	    $logger->logdie("PingER backend  Query failed: " . $EVAL_ERROR);
+	}
+
+    }  else {
+	$logger->warn(" Nothing to query about (no key or parameters supplied) for md=" . $requestmd->id);   
+	$response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
+        next;	     
     }
+     
+    if($objects &&   ref($objects) eq 'ARRAY' &&   @{$objects} ) {
+	foreach my $md_sql (@{$objects}) {
+	    my $metaid = (ref($md_sql->metaID) eq 'Math::BigInt')?$md_sql->metaID->bstr:$md_sql->metaID;
+	    $logger->debug( "Found metaID " .  $metaid  );
+	    my $md =   $self->_ressurectMd({ md_row => $md_sql });  
+	    my $md_id = $response->addIDMetadata($md, $self->eventTypes->tools->pinger);
+            $logger->debug(" MD created: \n " .  $md->asString);
+	    my $key =   perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key->new({id => $metaid });
+	    $logger->debug(" KEY  created: \n " .  $key->asString );
+	    my $data  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new({ id => "data" . $response->dataID, metadataIdRef => "meta$md_id" , key => $key  });
+	    $logger->debug(" DATA created: \n " .  $data->asString);
+	    $response->addData($data); ## 
+	    $logger->debug(" DATA added");
+	    $response->add_dataID;
+	}    
+    } else {           
+        $response->addResultResponse({ md =>  $requestmd, message => ' no metadata found ', eventType => $self->eventTypes->status->failure});
+    }
+    
     return  0;
 }
 
 
 =head2   SetupDataRequest
 
-   SetupData request,  accepts response Message object 
+   SetupData request,    works per event ( single pre-merged md  and data pair)
+      returns filled response message object 
       returns filled response  
   ###############################  From Jason's SNMP MA code ################################### 
   # MA SetupdataRequest Steps
@@ -295,14 +271,15 @@ sub  MetadataKeyRequest {
 sub  SetupDataRequest  {
     my $self = shift;
     my $response = shift;
+    
     my $logger  = get_logger( CLASSPATH ); 
     $logger->debug("SetupdataKeyRequest  ..."); 
    # commented by YTL and MPG, because extra require breaks @INC
    #   eval{
    #        require perfSONAR_PS::DB::PingER_DB::MetaData::Manager; 
    #   };
-   #   if($@) {
-   #      $logger->fatal("Failed to load PingER backend DB ". $@);
+   #   if($EVAL_ERROR) {
+   #      $logger->fatal("Failed to load PingER backend DB ". $EVAL_ERROR);
    #      die " System error, store failed ";
    #   }
     unless($response && blessed  $response &&   $response->can("getDOM")) {
@@ -322,65 +299,46 @@ sub  SetupDataRequest  {
     ###  chained to the response metadata with pinger key (to re-use time range selects from request)
     my  $time_selects = {}; 
     $logger->debug(" Whole message : " . $self->asString);
-    foreach my  $data (@{$self->data}) {
-        my $requestmd =  $self->getMetadataById($data->metadataIdRef);
-	unless(  $requestmd  ) {
-            $logger->debug("Orphaned data   - no  metadata found for metadataRefid:" . $data->metadataIdRef );
-            next; 
-        } else {
-	    $logger->debug("Found metadata in request id=" .  $requestmd->id . " metadata=" . $requestmd->asString );
-	}
-	unless($requestmd->eventType  eq  $self->eventTypes->tools->pinger) {
-            $logger->error("Unsupported evenType by this service"); 
-            $response->addResultResponse({ md => $requestmd, message => 'Unsupported evenType by this service: ' . $requestmd->eventType ,  eventType => $self->eventTypes->status->failure});	
-            next;   
-        }
-	my $data =  $self->getDataByMetadataIdRef($requestmd->id);
-         
-	### objects hashref  returned by backend query with metaID as key
-        my  $objects_hashref  = {};
+    ### single data only ( per event ) set filters array as well
+    my  $data  = $self->data->[0];
+    my $requestmd =  $self->metadata->[0];
+    my @filters = $self->filters?@{$self->filters}:();
+     
+    unless(  $requestmd  ) {
+        $logger->error("Orphaned data   - no  metadata found for metadataRefid:" . $data->metadataIdRef );
+        return; 
+    } else {
+       $logger->debug("Found metadata in request id=" .  $requestmd->id . " metadata=" . $requestmd->asString );
+    }
+    ### objects hashref  returned by backend query with metaID as key
+    my  $objects_hashref  = {};
 	# if there is a Key, then get data arrayref
-        if($requestmd->key  && $requestmd->key->id) {      
+     if($requestmd->key  && $requestmd->key->id) {      
 	    if($self->_retriveDataByKey({md => $requestmd , datas => $objects_hashref,  timeselects => $time_selects, metaids => $metaids, response => $response})) {
 	        $response->addResultResponse({md => $requestmd, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
-	        next;
+	        return $response;
 	    }
-        }  else {
-            my $newmd  = $self->getChain($requestmd);           # chain it 
-	    $logger->debug(" Look for query in  = " .  $newmd->asString);   
-            $data =  $self->getDataByMetadataIdRef($newmd->id);
-            unless($data) {
-                $logger->error("Orphaned metadata - no data found"); 
-	        $response->addResultResponse({md => $requestmd, message => ' Orphaned metadata - no data found ',  eventType => $self->eventTypes->status->failure});	
-                next;
-            } 
-            # check key if got one and query for data
-            if($newmd->key  && $newmd->key->id) {
-                if($self->_retriveDataByKey({md =>  $newmd, datas => $objects_hashref, metaids => $metaids, timeselects => $time_selects, response => $response}) ) {
-	            $response->addResultResponse({md => $newmd, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
-	            next;
-	        }
-	    ## no key,then go for select  
-	    } elsif($newmd->subject) {
-	        my $query = []; 
+     }   elsif($requestmd->subject) {
+	        my $query = {}; 
 	        my  $md_objects = undef;
 	        eval {
-	           
-		    $query =  $self->buildQuery('eq', $newmd );
+		   foreach my $supplied_md ( $requestmd, @filters)  {
+	             %{$query} =  (%{$query} , %{$self->buildQuery('eq',  $supplied_md)});
 		    
-		    $logger->debug(" Will query = " . Dumper $query);
-	            unless($query && $query->{query_metaData} &&  ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} >= 1) {
-	                $logger->warn(" Nothing to query about for md=" . $newmd->id);
-		        $response->addResultResponse({ md => $newmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
-                        next;
+		   }  
+		     $logger->debug(" Will query = " . Dumper $query);
+	             unless($query && $query->{query_metaData} &&  ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} >= 1) {
+	                $logger->warn(" Nothing to query about for md=" . $requestmd->id);
+		        $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
+                        return $response;
 	            }
                     $md_objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
                                        query =>    $query->{query_metaData},
 				       sort_by => 'metaID',
 				       limit =>   _mdSetLimit($query->{query_limit}));
 	        };
-	        if($@) {
-	            $logger->fatal("PingER backend  Query failed: " . $@);
+	        if($EVAL_ERROR) {
+	            $logger->fatal("PingER backend  Query failed: " . $EVAL_ERROR);
 		    die " System error, store failed";
 	        }
 	        my $timequery =  $self->processTime({timehash => $query->{time}});
@@ -393,7 +351,7 @@ sub  SetupDataRequest  {
 		        if($self->_retriveDataByKey({key =>  $metaid,   tables =>  $data_tables, timequery => $timequery, timeselects => $time_selects,
 			                             metaids => $metaids, datas => $objects_hashref, response => $response}) ){
 			    $response->addResultResponse({md => $md, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
-	                    next;
+	                    return $response;
 	                }
 		    }		     
 	        } else {
@@ -402,11 +360,10 @@ sub  SetupDataRequest  {
             } else {
 	        $response->addResultResponse({md =>$requestmd,  message => 'no key and no select in metadata  submitted',  eventType => $self->eventTypes->status->failure});    
 	    }   
-        }
-      
+    
         if($objects_hashref && ref($objects_hashref) eq 'HASH') {
 	    ############################################################   here add all those found data elements
-            require Data::Dumper;
+           
             foreach my $metaid (keys %{$objects_hashref}) {     
 	        if(@{$objects_hashref->{$metaid}}) { 
 	            my $data  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new({id => "data". $response->dataID, metadataIdRef => "meta" . $metaids->{$metaid}});
@@ -430,8 +387,8 @@ sub  SetupDataRequest  {
             } 
         }  
       
-   }
-   return  0;
+   
+   return  $response;
 
 }
 #  auxiliary private function
@@ -499,8 +456,8 @@ sub _ressurectMd {
                                      query =>  [ 'metaID' , {'eq' => $params->{metaID}}],
 		                   )}
         };
-	if($@)  {
-	  $logger->logdie(" Fatal error while calling Rose::DB object query". $@);
+	if($EVAL_ERROR)  {
+	  $logger->logdie(" Fatal error while calling Rose::DB object query". $EVAL_ERROR);
 	}
     } 
   
@@ -615,8 +572,8 @@ sub _retriveDataByKey {
 	        $logger->debug(" ...............No  objects .....from $table  ......: "  );	
 	    }
         };
-        if($@) {
-            $logger->logdie(" Fatal error in DB query pinger data from  table $table, due " . $@);
+        if($EVAL_ERROR) {
+            $logger->logdie(" Fatal error in DB query pinger data from  table $table, due " . $EVAL_ERROR);
 	    return -1;
         }
     }

@@ -72,7 +72,7 @@ use perfSONAR_PS::Datatypes::Element qw(getElement);
 use perfSONAR_PS::Datatypes::NSMap;
 use perfSONAR_PS::Datatypes::EventTypes;
 use base qw(perfSONAR_PS::Datatypes::v2_0::nmwg::Message);   
-use fields qw( eventTypes mdID dataID);
+use fields qw( eventTypes mdID dataID filters);
 use constant  CLASSPATH =>  'perfSONAR_PS::Datatypes::Message';
 use constant  LOCALNAME => 'message';
   
@@ -135,19 +135,56 @@ sub new {
     }  
     return   $self ;
 }
-#
-#  no shortcuts !
-#
-sub AUTOLOAD {} 
+ 
+=head2 filters 
+
+    add another filter object ( md ) or return array of filters
+
+=cut
+
+
+sub addFilter {
+    my $self = shift;
+    my $arg = shift;
+    if($arg) {
+        return push @{$self->{filters}},  $arg;
+    } else {
+        return $self->{filters}; 
+    }
+} 
+
+=head2 filters 
+
+    set filters array or return it
+
+=cut
+
+
+sub filters {
+    my $self = shift;
+    my $arg = shift;
+    if($arg) {
+        return  $self->{filters} = $arg;
+    } else {
+        return $self->{filters}; 
+    }
+} 
+
+=head2 eventTypes
+
+    set or return eventType 
+
+=cut
+
 
 
 sub eventTypes {
     my $self = shift;
     my $arg = shift;
     if($arg) {
-        return $self->{eventTypes} = $arg
+        return $self->{eventTypes} = $arg;
     } else {
-        return $self->{eventTypes} 
+        return $self->{eventTypes}; 
     }
 } 
 
