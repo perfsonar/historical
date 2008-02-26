@@ -430,6 +430,42 @@ sub remove {
     return -1;
 }
 
+=head2 getMappings($self, { })
+
+Return all link id to hostname mappings in the LS.
+
+=cut
+
+sub getMappings {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, {} );
+    my @lookup = ();
+
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmtb:node\n";
+
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $datum = find( $msg, ".//psservice:datum", 0 )->get_node(1);
+    unless ($datum) {
+        $self->{LOGGER}->error("No name elements found in return.");
+        return;
+    }
+
+    foreach my $n ( $datum->getChildrenByTagNameNS( "http://ogf.org/schema/network/topology/base/20070828/", "node" ) ) {
+        my $address = extract( find( $n, "./nmtb:address", 1 ), 0 );
+        my $link = extract( find( $n, "./nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef", 1 ), 0 );
+        push @lookup, [ $address, $link ];
+    }
+
+    return \@lookup;
+}
+
 =head2 createService($self { })
 
 Construct the service metadata given the default values for this module. 
@@ -649,6 +685,11 @@ __END__
     #!/usr/bin/perl -w
 
     use perfSONAR_PS::Client::DCN;
+
+    my $dcn = new perfSONAR_PS::Client::DCN(
+      { instance => "http://some.host.edu/perfSONAR_PS/services/LS"}
+    );
+
     my $name = "some.hostname.edu";
     my $id = "urn:ogf:network:domain=some.info.about.this.link"
  
@@ -702,6 +743,17 @@ __END__
     $domains = $dcn->getDomainService({ accessPoint => "http://some.topology.service.edu:8080/perfSONAR_PS/services/topology", serviceType => "MA" });
     foreach my $d (@$domains) {
       print "Domain:\t" , $d , "\n";
+    }
+
+    # Dump all of the nodes from the LS, returns a matrix in host name/link id
+    # format.
+    # 
+    my $map = $dcn->getMappings;
+    foreach my $m (@$map) {
+      foreach my $value (@$m) {
+        print $value , "\t";
+      }
+      print "\n";
     }
 
     exit(1);

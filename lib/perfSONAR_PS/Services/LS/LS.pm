@@ -80,6 +80,7 @@ my %ls_namespaces = (
   nmtl3 => "http://ogf.org/schema/network/topology/l3/20070828/",
   nmtl4 => "http://ogf.org/schema/network/topology/l4/20070828/",
   nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
+  nmtb => "http://ogf.org/schema/network/topology/base/20070828/",
   sonet => "http://ogf.org/schema/network/topology/sonet/20070828/",
   transport => "http://ogf.org/schema/network/topology/transport/20070828/",
   pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
