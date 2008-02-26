@@ -1,14 +1,3 @@
-use perfSONAR_PS::Common;
-use perfSONAR_PS::Messages;
- 
-use perfSONAR_PS::Client::LS::Remote;
-use perfSONAR_PS::Services::MA::General; 
-
-use perfSONAR_PS::Datatypes::Namespace;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message; 
-use perfSONAR_PS::Datatypes::Message;
-use perfSONAR_PS::Datatypes::PingER;
-use perfSONAR_PS::DB::PingER;
 
 package perfSONAR_PS::Services::MA::PingER;
 
@@ -64,13 +53,29 @@ Additional logic is needed to address issues such as different backend storage f
 The offered API is simple, but offers the key functions we need in a measurement archive. 
 
 =cut
+use perfSONAR_PS::Common;
+use perfSONAR_PS::Messages;
+ 
+use perfSONAR_PS::Client::LS::Remote;
+use perfSONAR_PS::Services::MA::General; 
+
+use perfSONAR_PS::Datatypes::Namespace;
+use perfSONAR_PS::Datatypes::EventTypes;
+use perfSONAR_PS::Datatypes::v2_0::nmwg::Message; 
+use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
+use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
+use perfSONAR_PS::Datatypes::Message;
+use perfSONAR_PS::Datatypes::PingER;
+use perfSONAR_PS::DB::PingER;
 
 use perfSONAR_PS::Services::Base;
 use base 'perfSONAR_PS::Services::Base';
+use Data::Dumper;
 
-use fields qw( DATABASE LS_CLIENT );
+use fields qw( DATABASE LS_CLIENT eventTypes);
 use warnings;
 use Exporter;
+use Params::Validate qw(:all);
 
 use POSIX qw(strftime);
 
@@ -98,7 +103,7 @@ sub new {
 	my $self = $package->SUPER::new( @_ );
 	$self->{'DATABASE'} = undef;
 	$self->{'LS_CLIENT'} = undef;
-
+        $self->{eventTypes} =  perfSONAR_PS::Datatypes::EventTypes->new(); 
 	return $self;
 }
 
@@ -119,15 +124,15 @@ sub init {
     	$self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
     	
     	$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
-		$self->configureConf( 'db_port', undef, $self->getConf('db_port') );
-	    $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+	$self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+	$self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
     	$self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
 
     	$self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
     	$self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
-
     	# other
     	
+        $self->configureConf( 'query_size_limit', undef, $self->getConf('query_size_limit') );
     	# ls stuff
     	$self->configureConf( 'enable_registration', undef, $self->getConf( 'enable_registration') );
 
@@ -142,12 +147,16 @@ sub init {
 
     if ( $handler ) {
 	    $logger->debug("Setting up message handlers");
-		$handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/tools/pinger/2.0/", $self);    
-  		$handler->registerMessageHandler("SetupDataRequest", $self);
-  		$handler->registerMessageHandler("MetadataKeyRequest", $self);
-  	
-#  		$handler->addEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/ops/select/2.0", $self);
-
+		$handler->registerEventHandler("SetupDataRequest", $self->{eventTypes}->tools->pinger, $self);    
+		$handler->registerEventHandler("MetadataKeyRequest",  $self->{eventTypes}->tools->pinger, $self);    
+  	        $handler->registerEventHandler("SetupDataRequest", $self->{eventTypes}->ops->select, $self);    
+		$handler->registerEventHandler("MetadataKeyRequest",  $self->{eventTypes}->ops->select, $self);    
+  	 
+	 
+  	        my @eventTypes = (  $self->{eventTypes}->tools->pinger, $self->{eventTypes}->ops->select  );
+                $handler->registerMergeHandler("MetadataKeyRequest", \@eventTypes, $self);
+	        $handler->registerMergeHandler("SetupDataRequest", \@eventTypes, $self);
+  
     }
     
 	# setup database  
@@ -371,7 +380,7 @@ sub handleMessageBegin($$$$$$$$) {
 	return 1;
 }
 
-sub handleMessageEnd($$$$$$$$) {
+sub handleMessageEnd($$$) {
 	my ($self, $ret_message, $messageId);
 	return 1;
 }
@@ -383,14 +392,32 @@ main access into MA from Daemon Architecture
 =cut
 sub handleEvent()
 {
-	my ($self, $output, $messageId, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
-	
+    my ($self, @args) = @_;
+    my $parameters = validate(@args,
+            {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                subject => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
+            });
+	 
 	# shoudl do some validation on the eventType
+	 ${ $parameters->{"doOutputMetadata"} } = 0;
+	 
+	my $response = $self->__handleEvent( $parameters->{"messageType"},  $parameters->{"rawRequest"}, \@{ $parameters->{"subject"}},  $parameters->{"data"},  $parameters->{"filterChain"}->[0]  ,  $parameters->{"messageParameters"} );
 	
-	my $response = $self->__handleEvent( $raw_request );
-	$output->addExistingXMLElement( $response->getDOM() );
-
-	return ( "", "" );
+	##### $response is  
+	foreach my $element (@{$response->metadata}, @{$response->data}) {
+	  $parameters->{"output"}->addExistingXMLElement( $element->getDOM());
+        }
+	
+	return ;
 }
 
 =head2 __handleEvent( $request )
@@ -400,24 +427,31 @@ actually do something the incoming $request message.
 =cut
 sub __handleEvent {
  	
-	my( $self, $request ) = @_;
+	my( $self, $messageType, $raw_request, $mds, $data, $filters,  $message_parameters ) = @_;
   	
-#  	use Data::Dumper;
-#	$logger->info( "\n\n\nRequest:\n" . Dumper $request );
-
-#	$self->{REQUESTNAMESPACES} =  $request->getNamespaces();
-	my $doc = $request->getRequestDOM();
+ 	 
+ 	$logger->debug( "\n\n\nRequest:\n" .  Dumper $raw_request );
+	
+        $logger->debug( "  Type= $messageType md = " . $mds->[0]->toString  . " Data=" . $data->toString  . " filters= " .   (Dumper  $filters) . "  mparams= " .  (Dumper $message_parameters ) );
+ 	
+	my $doc = $raw_request->getRequestDOM();
 
  	$logger->info( "\n\nDOM:\n" . $doc->toString );
-
+	my $arr_filters = [];
+        if($filters && ref($filters) eq 'ARRAY') {
+	     foreach my $filter (@{$filters}) {
+	       $logger->debug( " Filter .... " .   $filter->toString);
+	        push @{$arr_filters}, perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new( $filter );
+	     }
+	}
 	$logger->info("Unmarshalling into PingER object");
-	my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new( $doc->documentElement() );
+	my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new( {metadata => [perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new($mds->[0])],
+	                                                           data => [perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new($data)],
+								   filters =>  $arr_filters});
 	my $error_msg = '';
-	my $type = $pingerRequest->type;
+	my $type =  $messageType;
 
-#	foreach my $field ($pingerRequest->show_fields('Public')) {
-#		$logger->debug("Pinger Request:: $field= " . $pingerRequest->{$field});
-#	}
+ 
   
 	my $messageIdReturn = "message." . perfSONAR_PS::Common::genuid(); 
 	(my $responseType = $type ) =~ s/Request/Response/;
@@ -444,14 +478,46 @@ sub __handleEvent {
 	### 
    	 
 	my $evt = $pingerRequest->eventTypes;
-  	my $errorMessage = $pingerRequest->handle($type, $pingerResponse, $self->{'CONF'}->{'PingERMA'});
+  	my $errorMessage = $pingerRequest->handle($type, $pingerResponse, $self->{'CONF'}->{'pingerma'});
 
 	$logger->debug( "PINGER RESPONSE: $errorMessage\n" . $pingerResponse->asString() );
    
-	return $pingerResponse;
+	return  $pingerResponse;
 }
  
-  
+=head2 mergeMetadata
+    This function is called by the daemon if the module has registered a merge
+    handler and a md is found that needs to be merged with another md and has
+    an eventType that matches what's been registered with the daemon.
+
+     messageType: The type of the message where the merging is occurring
+     eventType: The event type in at least one of the md that caused this handler to be chosen
+     parentMd: The metadata that was metadataIdRef'd by the childMd
+     childMd: The metadata that needs to be merged with its parent
+
+=cut
+
+sub mergeMetadata {
+	my ($self, @args) = @_;
+	my $parameters = validate(@args,
+    		{
+    			messageType => 1,
+    			eventType => 1,
+    			parentMd => 1,
+    			childMd => 1,
+    		});
+
+    my $parent_md = $parameters->{parentMd};
+    my $child_md = $parameters->{childMd};
+
+    $logger->debug("mergeMetadata called");
+
+    # Just use the default merge routine for now
+    defaultMergeMetadata($parent_md, $child_md);
+
+    return;
+}
+ 
 
 
 1;
