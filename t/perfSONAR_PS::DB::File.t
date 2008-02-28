@@ -12,10 +12,10 @@ use perfSONAR_PS::DB::File;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::new tests
 
-$fileBlank = perfSONAR_PS::DB::File->new('./t/testfiles/blank');
-$fileNotExist = perfSONAR_PS::DB::File->new('./t/testfiles/doesnotexist');
-$fileXML = perfSONAR_PS::DB::File->new('./t/testfiles/simpleXML');
-$fileGarbage = perfSONAR_PS::DB::File->new('./t/testfiles/garbage0');
+$fileBlank = perfSONAR_PS::DB::File->new( { file => './t/testfiles/blank' } );
+$fileNotExist = perfSONAR_PS::DB::File->new( { file => './t/testfiles/doesnotexist' } );
+$fileXML = perfSONAR_PS::DB::File->new( { file => './t/testfiles/simpleXML' } );
+$fileGarbage = perfSONAR_PS::DB::File->new( { file => './t/testfiles/garbage0' } );
 $fileXMLNoTag = perfSONAR_PS::DB::File->new;
 ok(defined $fileBlank, "DB::File::new - Blank file");
 ok(defined $fileNotExist, "DB::File::new - Non-existant file");
@@ -26,7 +26,7 @@ ok(defined $fileXMLNoTag, "DB::File::new - Small XML no tag file");
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::setFile
 
-$fileXMLNoTag->setFile('./t/testfiles/simpleXMLNotag');
+$fileXMLNoTag->setFile( { file => './t/testfiles/simpleXMLNotag' } );
 is ($fileXMLNoTag->{FILE}, './t/testfiles/simpleXMLNotag');
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,49 +42,49 @@ $fileXML->openDB();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::query
 
-@results = $fileXML->query("/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]");
+@results = $fileXML->query( { query => "/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]" } );
 @expected = ("<charley>\n\t\t<dog europe=\"good\"/>\n\t</charley>", "<beta/>", "<england super=\"man\">\n\t\t\t\t\tFreaky\n\t\t\t\t</england>");
 ok(Compare(\@results, \@expected), "DB::File::query - XPath '/alpha/charley | /alpha/beta/charley/done/england | /alpha/beta[2]'");
 
-@results = $fileXML->query("//madeup");
+@results = $fileXML->query( { query => "//madeup" } );
 @expected = ();
 ok(Compare(\@results, \@expected), "DB::File::query - XPath '//madeup'");
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::count
 
-$cnt = $fileXML->count("/alpha/beta");
+$cnt = $fileXML->count( { query => "/alpha/beta" } );
 is($cnt, 3, "DB::File::count - XPath '/alpha/beta'");
-$cnt = $fileXML->count("/alpha/beta/charley");
+$cnt = $fileXML->count( { query => "/alpha/beta/charley" } );
 is($cnt, 2, "DB::File::count - XPath '/alpha/beta/charley'");
-$cnt = $fileXML->count("//*");
+$cnt = $fileXML->count( { query => "//*" } );
 is($cnt, 10, "DB::File::count - XPath '//*'");
-$cnt = $fileXML->count("//charley");
+$cnt = $fileXML->count( { query => "//charley" } );
 is($cnt, 3, "DB::File::count - XPath '//charley'");
-$cnt = $fileXML->count("//@*");
+$cnt = $fileXML->count( { query => "//@*" } );
 is($cnt, 3, "DB::File::count - XPath '//@*'");
-$cnt = $fileXML->count("//madeup");
+$cnt = $fileXML->count( { query => "//madeup" } );
 is($cnt, 0, "DB::File::count - XPath '//madeup'");
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::getDOM
 
-$originalDOM = $fileXML->getDOM();
+$originalDOM = $fileXML->getDOM;
 is($originalDOM->version, "1.0", "DB::File::getDOM - version number is correct");
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::setDOM
 
-$fileXML->setDOM(XML::LibXML::Document->new("1.234", "UTF-8"));
+$fileXML->setDOM( { dom => XML::LibXML::Document->new("1.234", "UTF-8") } );
 is($fileXML->getDOM()->version, "1.234", "DB::File::setDOM - altered version number is correct");
-$fileXML->setDOM($originalDOM);
+$fileXML->setDOM( { dom => $originalDOM } );
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #DB::File::closeDB
 
-$fileXML->closeDB();
+$fileXML->closeDB;
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
