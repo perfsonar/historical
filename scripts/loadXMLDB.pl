@@ -93,12 +93,12 @@ my %ns = (
 );
 
 my $error = q{};
-my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-  $XMLDBENV, 
-  $XMLDBCONT,
-  \%ns
-);
-my $status = $metadatadb->openDB(q{}, \$error);
+my $metadatadb = new perfSONAR_PS::DB::XMLDB({
+  env => $XMLDBENV, 
+  cont => $XMLDBCONT,
+  ns => \%ns
+});
+my $status = $metadatadb->openDB({ txn => q{}, error => \$error });
 unless($status == 0) {
   print "There was an error opening \"".$XMLDBENV."/".$XMLDBCONT."\": ".$error;
   exit(1);
@@ -107,9 +107,9 @@ unless($status == 0) {
 my $parser = XML::LibXML->new();
 my $dom = $parser->parse_file($XMLFILE);
 
-my $dbTr = $metadatadb->getTransaction(\$error);
+my $dbTr = $metadatadb->getTransaction({ error => \$error });
 unless($dbTr) {
-  $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;
+  $metadatadb->abortTransaction({ txn => $dbTr, error => \$error }) if $dbTr;
   undef $dbTr;
   print "There was an error creating a transaction for \"".$XMLDBENV."/".$XMLDBCONT."\": ".$error."\n";
   exit(1);
@@ -119,20 +119,20 @@ foreach my $data ($dom->getDocumentElement->getChildrenByTagNameNS($ns{"nmwg"}, 
   my $metadata = $dom->getDocumentElement->find("./nmwg:metadata[\@id=\"".$data->getAttribute("metadataIdRef")."\"]")->get_node(1); 
   my $dHash = md5_hex($data->toString);
   my $mdHash = md5_hex($metadata->toString);
-  $metadatadb->insertIntoContainer(wrapStore($data->toString, "MAStore"), $dHash, $dbTr, \$error);
-  $metadatadb->insertIntoContainer(wrapStore($metadata->toString, "MAStore"), $mdHash, $dbTr, \$error);
+  $metadatadb->insertIntoContainer({ content => wrapStore($data->toString, "MAStore"), name => $dHash, txn => $dbTr, error => \$error });
+  $metadatadb->insertIntoContainer({ content => wrapStore($metadata->toString, "MAStore"), name => $mdHash, txn => $dbTr, error => \$error });
 }
 
-$status = $metadatadb->commitTransaction($dbTr, \$error);
+$status = $metadatadb->commitTransaction({ txn => $dbTr, error => \$error });
 if($status == 0) {
   print "Operation completed.\n";
 }
 else {
   print "There was an error commiting transaction for \"".$XMLDBENV."/".$XMLDBCONT."\": ".$error."\n";
-  $metadatadb->abortTransaction($dbTr, \$error) if $dbTr;      
+  $metadatadb->abortTransaction({ txn => $dbTr, error => \$error }) if $dbTr;      
 }   
 undef $dbTr;
-$metadatadb->closeDB(\$error);
+$metadatadb->closeDB({ error => \$error });
 
 exit(1);
 

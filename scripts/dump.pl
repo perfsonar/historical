@@ -82,12 +82,12 @@ my %ns = (
 );
 
 my $error = q{};
-my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-  $XMLDBENV, 
-  $XMLDBCONT,
-  \%ns
-);
-unless($metadatadb->openDB(q{}, \$error) == 0) {
+my $metadatadb = new perfSONAR_PS::DB::XMLDB({
+  env => $XMLDBENV, 
+  cont => $XMLDBCONT,
+  ns => \%ns
+});
+unless($metadatadb->openDB({ txn => q{}, error => \$error }) == 0) {
   print "There was an error opening \"".$XMLDBENV."/".$XMLDBCONT."\": ".$error;
   exit(1);
 }
@@ -96,7 +96,7 @@ my $query = " /nmwg:store/nmwg:metadata";
 $query =~ s/\s+\// collection('CHANGEME')\//gmx;
 print "QUERY:\t" , $query , "\n" if $DEBUG;
 
-my @resultsString = $metadatadb->query($query, q{}, \$error);
+my @resultsString = $metadatadb->query({ query => $query, txn => q{}, error => \$error });
 
 my $len = $#resultsString;
 for my $x (0..$len) {
@@ -110,7 +110,7 @@ $query = "/nmwg:store/nmwg:data";
 $query =~ s/\s+\// collection('CHANGEME')\//gmx;
 print "QUERY:\t" , $query , "\n" if $DEBUG;  
 
-@resultsString = $metadatadb->query($query, q{}, \$error);
+@resultsString = $metadatadb->query({ query => $query, txn => q{}, error => \$error });
 
 $len = $#resultsString;
 for my $y (0..$len) {
