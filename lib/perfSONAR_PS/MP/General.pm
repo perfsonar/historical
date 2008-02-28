@@ -124,9 +124,9 @@ sub removeReferences {
 sub parseFile {
   my($mp) = @_; 
   my $logger = get_logger("perfSONAR_PS::MP::General");   
-  my $filedb = new perfSONAR_PS::DB::File(
-    $mp->{CONF}->{"METADATA_DB_FILE"}
-  );  
+  my $filedb = new perfSONAR_PS::DB::File({
+    file => $mp->{CONF}->{"METADATA_DB_FILE"}
+  });  
   $filedb->openDB;   
   $logger->debug("Connecting to file database \"".$mp->{CONF}->{"METADATA_DB_FILE"}."\".");
   
@@ -153,11 +153,11 @@ sub parseXMLDB {
   my($mp) = @_;  
   my $logger = get_logger("perfSONAR_PS::MP::General");   
   
-  my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-    $mp->{CONF}->{"METADATA_DB_NAME"}, 
-    $mp->{CONF}->{"METADATA_DB_FILE"},
-    \%{$mp->{NAMESPACES}}
-  );
+  my $metadatadb = new perfSONAR_PS::DB::XMLDB({
+    env => $mp->{CONF}->{"METADATA_DB_NAME"}, 
+    cont => $mp->{CONF}->{"METADATA_DB_FILE"},
+    ns => \%{$mp->{NAMESPACES}}
+  });
   $metadatadb->openDB;
   $logger->debug("Connecting to XMLDB database \"".$mp->{CONF}->{"METADATA_DB_NAME"}."\".");
 
@@ -171,7 +171,7 @@ sub parseXMLDB {
  
   for(my $y = 0; $y <= 1; $y++) {
     $logger->debug("Query \"".$query[$y]."\" created.");
-    my @resultsString = $metadatadb->query($query[$y]);   
+    my @resultsString = $metadatadb->query({ query => $query[$y] });   
         
     if($#resultsString != -1) {   
       for(my $x = 0; $x <= $#resultsString; $x++) {     	

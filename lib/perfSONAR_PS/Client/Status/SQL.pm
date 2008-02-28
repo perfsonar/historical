@@ -53,7 +53,7 @@ sub open($) {
 
 	$logger->debug("Table: ".$self->{DB_TABLE});
 
-	$self->{DATADB} = new perfSONAR_PS::DB::SQL($self->{DBI_STRING}, $self->{DB_USERNAME}, $self->{DB_PASSWORD}, \@dbSchema);
+	$self->{DATADB} = new perfSONAR_PS::DB::SQL({ name => $self->{DBI_STRING}, user => $self->{DB_USERNAME}, pass => $self->{DB_PASSWORD}, schema => \@dbSchema });
 	if (!defined $self->{DATADB}) {
 		my $msg = "Couldn't open specified database";
 		$logger->error($msg);
@@ -109,7 +109,7 @@ sub getAll($) {
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
-	my $links = $self->{DATADB}->query("select distinct link_id from ".$self->{DB_TABLE});
+	my $links = $self->{DATADB}->query({ query => "select distinct link_id from ".$self->{DB_TABLE} });
 	if ($links == -1) {
 		$logger->error("Couldn't grab list of links");
 		return (-1, "Couldn't grab list of links");
@@ -120,7 +120,7 @@ sub getAll($) {
 	foreach my $link_ref (@{ $links }) {
 		my @link = @{ $link_ref };
 
-		my $states = $self->{DATADB}->query("select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link[0]."\' order by end_time");
+		my $states = $self->{DATADB}->query({ query => "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link[0]."\' order by end_time" });
 		if ($states == -1) {
 			$logger->error("Couldn't grab information for link ".$link[0]);
 			return (-1, "Couldn't grab information for link ".$link[0]);
@@ -146,7 +146,7 @@ sub getUniqueIDs($) {
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
 
-	my $links = $self->{DATADB}->query("select distinct link_id from ".$self->{DB_TABLE});
+	my $links = $self->{DATADB}->query({ query => "select distinct link_id from ".$self->{DB_TABLE} });
 	if ($links == -1) {
 		$logger->error("Couldn't grab list of links");
 		return (-1, "Couldn't grab list of links");
@@ -191,7 +191,7 @@ sub getLinkHistory($$$) {
 		return (-1, $msg);
 	}
 
-	my $states = $self->{DATADB}->query($query);
+	my $states = $self->{DATADB}->query( { query => $query });
 	if ($states == -1) {
 		$logger->error("Couldn't grab link history information");
 		return (-1, "Couldn't grab link history information");
@@ -237,7 +237,7 @@ sub getLinkStatus($$$) {
 		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' and start_time <= \'".$time->getEndTime()."\' and end_time >= \'".$time->getStartTime()."\'";
 		}
 
-		my $states = $self->{DATADB}->query($query);
+		my $states = $self->{DATADB}->query({ query => $query });
 		if ($states == -1) {
 			$logger->error("Couldn't grab information for node ".$link_id);
 			return (-1, "Couldn't grab information for node ".$link_id);
@@ -331,7 +331,7 @@ sub updateLinkStatus($$$$$$$) {
 				end_time => $prev_end_time,
 			    );
 
-		if ($self->{DATADB}->update($self->{DB_TABLE}, \%where, \%updateValues) == -1) {
+		if ($self->{DATADB}->update({ table => $self->{DB_TABLE}, wherevalues => \%where, whatvalues => \%updateValues }) == -1) {
 			my $msg = "Couldn't update link status for link $link_id";
 			$logger->error($msg);
 			$self->{DATADB}->closeDB;
@@ -347,7 +347,7 @@ sub updateLinkStatus($$$$$$$) {
 				link_knowledge => $knowledge_level,
 				);
 
-		if ($self->{DATADB}->insert($self->{DB_TABLE}, \%insertValues) == -1) {
+		if ($self->{DATADB}->insert({ table => $self->{DB_TABLE}, argvalues => \%insertValues }) == -1) {
 			my $msg = "Couldn't update link status for link $link_id";
 
 			$logger->error($msg);

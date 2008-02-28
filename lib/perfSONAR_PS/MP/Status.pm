@@ -178,7 +178,7 @@ sub parseLinkFile($) {
 		}
 
 
-		my $filedb = new perfSONAR_PS::DB::File($file);
+		my $filedb = new perfSONAR_PS::DB::File( { file => $file });
 		$filedb->openDB;
 		$links_config = $filedb->getDOM();
 	} else {

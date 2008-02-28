@@ -45,7 +45,7 @@ sub open($) {
 
 	return (0, "") if ($self->{DB_OPEN} != 0);
 
-	$self->{DATADB} = new perfSONAR_PS::DB::XMLDB($self->{DB_CONTAINER}, $self->{DB_FILE}, $self->{DB_NAMESPACES});
+	$self->{DATADB} = new perfSONAR_PS::DB::XMLDB({  env => $self->{DB_CONTAINER}, cont => $self->{DB_FILE}, ns => $self->{DB_NAMESPACES} });
 	if (!defined $self->{DATADB}) {
 		my $msg = "Couldn't open specified database";
 		$logger->error($msg);
@@ -60,7 +60,7 @@ sub open($) {
 #	}
 
 	my $error;
-	my $status = $self->{DATADB}->openDB(undef, \$error);
+	my $status = $self->{DATADB}->openDB({ txn => undef, error => \$error });
 	if ($status == -1) {
 		my $msg = "Couldn't open specified database: $error";
 		$logger->error($msg);
@@ -103,7 +103,7 @@ sub setDBNamespaces($$) {
 	$self->{DB_NAMESPACES} = $namespaces;
 
 	if ($self->{DB_OPEN}) {
-		$self->{DATADB}->setNamespaces($namespaces);
+		$self->{DATADB}->setNamespaces({ ns => $namespaces });
 	}
 }
 
@@ -117,7 +117,7 @@ sub xQuery($$) {
 
 	$xquery =~ s/\s{1}\// collection('CHANGEME')\//g;
 
-	my @queryResults = $self->{DATADB}->query($xquery, undef, \$error);
+	my @queryResults = $self->{DATADB}->query({ query => $xquery, txn => undef, error => \$error });
 	if ($error ne "") {
 		$logger->error("Couldn't query database");
 		return (-1, "Couldn't query database: $error");
@@ -146,7 +146,7 @@ sub getAll {
 	}
 	$content .= ">";
 
-	@results = $self->{DATADB}->query("/*:domain", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:domain", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of domains from database: $error";
 		$logger->error($msg);
@@ -155,7 +155,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:node", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:node", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of nodes from database: $error";
 		$logger->error($msg);
@@ -164,7 +164,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:port", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:port", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of ports from database: $error";
 		$logger->error($msg);
@@ -173,7 +173,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:link", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:link", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of links from database: $error";
 		$logger->error($msg);
@@ -182,7 +182,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:network", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:network", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of networks from database: $error";
 		$logger->error($msg);
@@ -191,7 +191,7 @@ sub getAll {
 
 	$content .= join("", @results);
 
-	@results = $self->{DATADB}->query("/*:path", undef, \$error);
+	@results = $self->{DATADB}->query({ query => "/*:path", txn => undef, error => \$error });
 	if ($error ne "") {
 		my $msg = "Couldn't get list of paths from database: $error";
 		$logger->error($msg);
@@ -597,9 +597,9 @@ sub changeTopology($$) {
 		$elements{$id}->unbindNode;
 		$elements{$id}->setNamespace($elements{$id}->namespaceURI(), $elements{$id}->prefix, 1);
 
-		$self->{DATADB}->remove($id);
+		$self->{DATADB}->remove({ name => $id });
 
-		if ($self->{DATADB}->insertIntoContainer($elements{$id}->toString, $id) != 0) {
+		if ($self->{DATADB}->insertIntoContainer({ content => $elements{$id}->toString, name => $id }) != 0) {
 			my $msg = "Error updating $id";
 			$logger->error($msg);
 			return (-1, $msg);
@@ -643,7 +643,7 @@ sub lookupElement($$$) {
 		my $error;
 		$logger->debug("Parent: $parent_id Not Found");
 
-		my $doc = $self->{DATADB}->getDocumentByName($base_id, undef, \$error);
+		my $doc = $self->{DATADB}->getDocumentByName({ name => $base_id, txn => undef, error => \$error });
 		if ($error ne "" or $doc eq "") {
 			my $msg = "Element ".$base_id." not found";
 			$logger->error($msg);

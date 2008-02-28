@@ -1,214 +1,267 @@
 package perfSONAR_PS::DB::File;
 
-our $VERSION = 0.06;
-
-use fields 'FILE', 'XML';
+use fields 'FILE', 'XML', 'LOGGER';
 
 use strict;
 use warnings;
+
+our $VERSION = 0.07;
+
+=head1 NAME
+
+perfSONAR_PS::DB::File - A module that provides methods for adding 'database
+like' functions to files that contain XML markup.
+
+=head1 DESCRIPTION
+
+This purpose of this module is to ease the burden for someone who simply wishes
+to use a flat file as an XML database.  It should be known that this is not
+recommended as performance will no doubt suffer, but the ability to do so can
+be valuable.  The module is to be treated as an object, where each instance of
+the object represents a direct connection to a file.  Each method may then be
+invoked on the object for the specific database.  
+
+=cut
+
 use XML::LibXML;
 use Log::Log4perl qw(get_logger :nowarn);
+use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
 
+=head2 new($package, { file })
+
+The only argument is a string representing the file to be opened.
+
+=cut 
+
 sub new {
-  my ($package, $file) = @_; 
-  my $self = fields::new($package);
-  if(defined $file and $file ne "") {
-    $self->{FILE} = $file;
-  }  
-  return $self;
+    my ( $package, @args ) = @_;
+    my $parameters = validate( @args, { file => 0 } );
+
+    my $self = fields::new($package);
+    $self->{LOGGER} = get_logger("perfSONAR_PS::DB::File");
+    if ( defined $parameters->{file} and $parameters->{file} ) {
+        $self->{FILE} = $parameters->{file};
+    }
+    return $self;
 }
 
+=head2 setFile($self, { file })
+
+(Re-)Sets the name of the file to be used.
+
+=cut 
 
 sub setFile {
-  my ($self, $file) = @_;  
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $file and $file ne "") {
-    $self->{FILE} = $file;
-  }
-  else {
-    $logger->error("Missing argument.");  
-  }
-  return;
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { file => 1 } );
+
+    if ( $parameters->{file} =~ m/\.xml$/mx ) {
+        $self->{FILE} = $parameters->{file};
+        return 0;
+    }
+    $self->{LOGGER}->error("Cannot set filename.");
+    return -1;
 }
 
+=head2 openDB($self, { error })          
+
+Opens the database, will return status of operation.
+
+=cut 
 
 sub openDB {
-  my ($self, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $self->{FILE}) {    
-    my $parser = XML::LibXML->new();
-    $self->{XML} = $parser->parse_file($self->{FILE});  
-  }
-  else {
-    my $msg = "Cannot open database, missing filename."; 
-    $logger->error($msg);
-    $$error = $msg if (defined $error);     
-    return -1;
-  }     
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { error => 0 } );
 
-  $$error = "" if (defined $error);             
-  return 0;
+    if ( defined $self->{FILE} ) {
+        my $parser = XML::LibXML->new();
+        $self->{XML} = $parser->parse_file( $self->{FILE} );
+        ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+        return 0;
+    }
+    my $msg = "Cannot open database, missing filename.";
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+    return -1;
 }
 
+=head2 closeDB($self, { error })
+
+Close the database, will return status of operation.
+
+=cut 
 
 sub closeDB {
-  my ($self, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $self->{XML} and $self->{XML} ne "") {
-    if(defined open(FILE, ">".$self->{FILE})) {
-      print FILE $self->{XML}->toString;
-      close(FILE);
-      $$error = "" if (defined $error);
-      return 0;
-    } 
-    else {
-      my $msg = "Couldn't open output file \"".$self->{FILE}."\"";
-      $logger->error($msg);
-      $$error = $msg if (defined $error);
-      return -1;
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { error => 0 } );
+
+    if ( defined $self->{XML} and $self->{XML} ) {
+        if ( defined open( FILE, ">", $self->{FILE} ) ) {
+            print FILE $self->{XML}->toString;
+            my $status = close(FILE);
+            if ( $status == 0 ) {
+                ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+                return 0;
+            }
+            else {
+                my $msg = "File close failed.";
+                $self->{LOGGER}->error($msg);
+                ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+                return -1;
+            }
+        }
+        else {
+            my $msg = "Couldn't open output file \"" . $self->{FILE} . "\"";
+            $self->{LOGGER}->error($msg);
+            ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+            return -1;
+        }
     }
-  }
-  else {
-    my $msg = "LibXML DOM structure not defined.";  
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
+    my $msg = "LibXML DOM structure not defined.";
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
     return -1;
-  }
 }
 
+=head2 query($self, { query, error } )
+
+Given a query, returns the results or nothing.
+
+=cut 
 
 sub query {
-  my ($self, $query, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  my @results = ();
-  if(defined $query and $query ne "") {
-    $logger->debug("Query \"".$query."\" received.");
-    if(defined $self->{XML} and $self->{XML} ne "") {
-      my $nodeset = $self->{XML}->find($query);
-      foreach my $node (@{$nodeset}) {                  
-        push @results, $node->toString;
-      }
-      $$error = "" if (defined $error);
-      return @results;
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { query => 1, error => 0 } );
+
+    my @results = ();
+    if ( $parameters->{query} ) {
+        $self->{LOGGER}->debug( "Query \"" . $parameters->{query} . "\" received." );
+        if ( defined $self->{XML} and $self->{XML} ) {
+            my $nodeset = $self->{XML}->find( $parameters->{query} );
+            foreach my $node ( @{$nodeset} ) {
+                push @results, $node->toString;
+            }
+            ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+            return @results;
+        }
+        else {
+            my $msg = "LibXML DOM structure not defined.";
+            $self->{LOGGER}->error($msg);
+            ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+            return -1;
+        }
     }
-    else {
-      my $msg = "LibXML DOM structure not defined."; 
-      $logger->error($msg);
-      $$error = $msg if (defined $error);
-      return -1;
-    }
-  }
-  else {
     my $msg = "Missing argument.";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
     return -1;
-  }  
 }
 
+=head2 querySet($self, { query error } )
+
+Given a query, returns the results (as a nodeset) or nothing.  
+
+=cut 
 
 sub querySet {
-  my ($self, $query, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $query and $query ne "") {
-    $logger->debug("Query \"".$query."\" received.");
-    if(defined $self->{XML} and $self->{XML} ne "") {
-      $$error = "" if (defined $error);
-#      return find($self->{XML}, $query, 0);
-      return $self->{XML}->find($query);
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { query => 1, error => 0 } );
+
+    if ( $parameters->{query} ) {
+        $self->{LOGGER}->debug( "Query \"" . $parameters->{query} . "\" received." );
+        if ( defined $self->{XML} and $self->{XML} ) {
+            ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+            return $self->{XML}->find( $parameters->{query} );
+        }
+        else {
+            my $msg = "LibXML DOM structure not defined.";
+            $self->{LOGGER}->error($msg);
+            ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+            return -1;
+        }
     }
-    else {
-      my $msg = "LibXML DOM structure not defined."; 
-      $logger->error($msg);
-      $$error = $msg if (defined $error);
-      return -1;
-    }
-  }
-  else {
     my $msg = "Missing argument.";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
     return -1;
-  }  
 }
 
+=head2 count($self, { query error } )
+
+Counts the results of a query. 
+
+=cut 
 
 sub count {
-  my ($self, $query, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $query and $query ne "") {    
-    $logger->debug("Query \"".$query."\" received.");
-    if(defined $self->{XML} and $self->{XML} ne "") {
-      #my $nodeset = find($self->{XML}, $query, 0);
-      my $nodeset = $self->{XML}->find($query);
-      $$error = "" if (defined $error);
-      return $nodeset->size();  
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { query => 1, error => 0 } );
+
+    if ( $parameters->{query} ) {
+        $self->{LOGGER}->debug( "Query \"" . $parameters->{query} . "\" received." );
+        if ( defined $self->{XML} and $self->{XML} ) {
+            my $nodeset = $self->{XML}->find( $parameters->{query} );
+            ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+            return $nodeset->size();
+        }
+        else {
+            my $msg = "LibXML DOM structure not defined.";
+            $self->{LOGGER}->error($msg);
+            ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+            return -1;
+        }
     }
-    else {
-      my $msg = "LibXML DOM structure not defined."; 
-      $logger->error($msg);
-      $$error = $msg if (defined $error);
-      return -1;
-    }
-  }
-  else {
     my $msg = "Missing argument.";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
     return -1;
-  } 
 }
 
+=head2 getDOM($self, { error } )
+
+Returns the internal XML::LibXML DOM object. Will return "" on error.  
+
+=cut 
 
 sub getDOM {
-  my ($self, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $self->{XML} and $self->{XML} ne "") {
-    return $self->{XML};  
-  }
-  else {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { error => 0 } );
+
+    if ( defined $self->{XML} and $self->{XML} ) {
+        ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+        return $self->{XML};
+    }
     my $msg = "LibXML DOM structure not defined.";
-    $logger->error($msg);
-    $$error = $msg if (defined $error); 
-  }
-  $$error = "" if (defined $error);
-  return ""; 
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+    return -1;
 }
 
+=head2 setDOM($self, { dom, error } )
+
+Sets the DOM object.
+
+=cut
 
 sub setDOM {
-  my($self, $dom, $error) = @_;
-  my $logger = get_logger("perfSONAR_PS::DB::File");
-  if(defined $dom and $dom ne "") {    
-    $self->{XML} = $dom;
-  }
-  else {
-    my $msg = "Missing argument.";
-    $logger->error($msg);
-    $$error = $msg if (defined $error);
-  }   
-  $$error = "" if (defined $error);
-  return;
-}
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { dom => 1, error => 0 } );
 
+    if ( $parameters->{dom} ) {
+        $self->{XML} = $parameters->{dom};
+        ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+        return 0;
+    }
+    my $msg = "Missing argument.";
+    $self->{LOGGER}->error($msg);
+    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+    return -1;
+}
 
 1;
 
 __END__
-=head1 NAME
-
-perfSONAR_PS::DB::File - A module that provides methods for adding 'database like' functions to files 
-that contain XML markup.
-
-=head1 DESCRIPTION
-
-This purpose of this module is to ease the burden for someone who simply wishes to use a flat
-file as an XML database.  It should be known that this is not recommended as performance will
-no doubt suffer, but the ability to do so can be valuable.  The module is to be treated as an 
-object, where each instance of the object represents a direct connection to a file.  Each method 
-may then be invoked on the object for the specific database.  
 
 =head1 SYNOPSIS
 
@@ -223,78 +276,30 @@ may then be invoked on the object for the specific database.
     # my $file = new perfSONAR_PS::DB::File;
     # $file->setFile("./store.xml");  
     
-    my $error = "";
-    $file->openDB($error);
+    my $parameters->{error} = "";
+    $file->openDB($parameters->{error});
 
-    print "There are " , $file->count("//nmwg:metadata", $error) , " elements in the file.\n";
+    print "There are " , $file->count("//nmwg:metadata", $parameters->{error}) , " elements in the file.\n";
 
-    my @results = $file->query("//nmwg:metadata", $error);
+    my @results = $file->query("//nmwg:metadata", $parameters->{error});
     foreach my $r (@results) {
       print $r , "\n";
     }
 
-    $file->closeDB($error);
+    $file->closeDB($parameters->{error});
     
     # If a DOM already exists...
     
     my $dom = XML::LibXML::Document->new("1.0", "UTF-8");
-    $file->setDOM($dom, $error);
+    $file->setDOM($dom, $parameters->{error});
     
     # or getting back the DOM...
     
-    my $dom2 = $file->getDOM($error);
+    my $dom2 = $file->getDOM($parameters->{error});
     
-=head1 DETAILS
-
-The API is very simple for now, and does not offer things like insert or delete.  At this time
-the necessary tooling for XML (XPath, DOM, SAX, etc) does not provide an efficient or prudent
-solution to these tasks, so they will probably not be added to this module.  If you wish to 
-edit your XML file, do so out of band.   
-
-=head1 API
-
-The API of perfSONAR_PS::DB::File is rather simple, and attempts to mirror the API of 
-the other perfSONAR_PS::DB::* modules.  
-
-=head2 new($package, $file)
-
-The only argument is a string representing the file to be opened.
-
-=head2 setFile($self, $file)
-
-(Re-)Sets the name of the file to be used.
-
-=head2 openDB($self, $error)          
-
-Opens the database, will return status of operation.
-
-=head2 closeDB($self, $error)
-
-Close the database, will return status of operation.
-
-=head2 query($self, $query, $error)
-
-Given a query, returns the results or nothing.
-  
-=head2 querySet($self, $query, $error)
-
-Given a query, returns the results (as a nodeset) or nothing.  
-  
-=head2 count($self, $query, $error)
-
-Counts the results of a query. 
-
-=head2 getDOM($self, $error)
-
-Returns the internal XML::LibXML DOM object. Will return "" on error.  
-
-=head2 setDOM($self, $dom, $error)
-
-Sets the DOM object.
-  
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<Log::Log4perl>
+L<XML::LibXML>, L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -304,8 +309,8 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS 
   
-Questions and comments can be directed to the author, or the mailing list.  Bugs,
-feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
 
   https://bugs.internet2.edu/jira/browse/PSPS
 
@@ -319,12 +324,13 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework along 
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 
