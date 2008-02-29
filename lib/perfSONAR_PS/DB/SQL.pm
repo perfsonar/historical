@@ -74,11 +74,12 @@ sub setName {
 
     if ( $parameters->{name} ) {
         $self->{NAME} = $parameters->{name};
+        return 0;
     }
     else {
         $self->{LOGGER}->error("Cannot set name.");
+        return -1
     }
-    return;
 }
 
 =head2 setUser($self, { user })
@@ -93,11 +94,12 @@ sub setUser {
 
     if ( $parameters->{user} ) {
         $self->{USER} = $parameters->{user};
+        return 0;
     }
     else {
         $self->{LOGGER}->error("Cannot set username.");
+        return -1;
     }
-    return;
 }
 
 =head2 setPass($self, { pass })
@@ -112,11 +114,12 @@ sub setPass {
 
     if ( $parameters->{pass} ) {
         $self->{PASS} = $parameters->{pass};
+        return 0;
     }
     else {
         $self->{LOGGER}->error("Cannot set password.");
+        return -1;
     }
-    return;
 }
 
 =head2 setSchema($self, { schema })
@@ -131,11 +134,12 @@ sub setSchema {
 
     if ( $parameters->{schema} ) {
         @{ $self->{SCHEMA} } = @{ $parameters->{schema} };
+        return 0;
     }
     else {
         $self->{LOGGER}->error("Cannot set schema array.");
+        return -1;
     }
-    return;
 }
 
 =head2 openDB($self)
@@ -169,7 +173,9 @@ sub closeDB {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, {} );
 
-    eval { $self->{HANDLE}->disconnect; };
+    eval { 
+        $self->{HANDLE}->disconnect;
+    };
     if ($EVAL_ERROR) {
         $self->{LOGGER}->error( "Close error \"" . $EVAL_ERROR . "\"." );
         return -1;
@@ -194,15 +200,18 @@ sub query {
             my $sth = $self->{HANDLE}->prepare( $parameters->{query} );
             $sth->execute() or $self->{LOGGER}->error( "Query error on statement \"" . $parameters->{query} . "\"." );
             $results = $sth->fetchall_arrayref;
-            return $results;
+            
         };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Query error \"" . $EVAL_ERROR . "\" on statement \"" . $parameters->{query} . "\"." );
             return -1;
         }
     }
-    $self->{LOGGER}->error("Query not found.");
-    return -1;
+    else {
+      $self->{LOGGER}->error("Query not found.");
+      return -1;
+    }
+    return $results;
 }
 
 =head2 count($self, { query })
@@ -222,15 +231,17 @@ sub count {
             my $sth = $self->{HANDLE}->prepare( $parameters->{query} );
             $sth->execute() or $self->{LOGGER}->error( "Query error on statement \"" . $parameters->{query} . "\"." );
             $results = $sth->fetchall_arrayref;
-            return $#{$results} + 1;
         };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Query error \"" . $EVAL_ERROR . "\" on statement \"" . $parameters->{query} . "\"." );
             return -1;
         }
     }
-    $self->{LOGGER}->error("Query not found.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Query not found.");
+        return -1;
+    }
+    return $#{$results} + 1;
 }
 
 =head2 insert($self, { table, argvalues })
@@ -275,15 +286,17 @@ sub insert {
                 $sth->bind_param( $x + 1, $values{ $self->{SCHEMA}->[$x] } );
             }
             $sth->execute() or $self->{LOGGER}->error( "Insert error on statement \"" . $insert . "\"." );
-            return 0;
         };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Insert error \"" . $EVAL_ERROR . "\" on statement \"" . $insert . "\"." );
             return -1;
         }
     }
-    $self->{LOGGER}->error("Missing argument.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+        return -1;
+    }
+    return 0;
 }
 
 =head2 update($self, { table, wherevalues, updatevalues })
@@ -318,15 +331,17 @@ sub update {
         eval {
             my $sth = $self->{HANDLE}->prepare($sql);
             $sth->execute() or $self->{LOGGER}->error( "Update error on statement \"" . $sql . "\"." );
-            return 0;
         };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Update error \"" . $EVAL_ERROR . "\" on statement \"" . $sql . "\"." );
             return -1;
         }
     }
-    $self->{LOGGER}->error("Missing argument.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+        return -1;
+    }
+    return 0;
 }
 
 =head2 remove($self, { delete })
@@ -344,15 +359,17 @@ sub remove {
         eval {
             my $sth = $self->{HANDLE}->prepare( $parameters->{delete} );
             $sth->execute() or $self->{LOGGER}->error( "Remove error on statement \"" . $parameters->{delete} . "\"." );
-            return 0;
         };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Remove error \"" . $EVAL_ERROR . "\" on statement \"" . $parameters->{delete} . "\"." );
             return -1;
         }
     }
-    $self->{LOGGER}->error("Missing argument.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+        return -1;
+    }
+    return 0;
 }
 
 1;

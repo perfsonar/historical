@@ -61,8 +61,10 @@ sub setFile {
         $self->{FILE} = $parameters->{file};
         return 0;
     }
-    $self->{LOGGER}->error("Cannot set filename.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Cannot set filename.");
+        return -1;
+    }
 }
 
 =head2 openDB($self, { error })          
@@ -81,10 +83,12 @@ sub openDB {
         ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
         return 0;
     }
-    my $msg = "Cannot open database, missing filename.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "Cannot open database, missing filename.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 closeDB($self, { error })
@@ -101,7 +105,7 @@ sub closeDB {
         if ( defined open( FILE, ">", $self->{FILE} ) ) {
             print FILE $self->{XML}->toString;
             my $status = close(FILE);
-            if ( $status == 0 ) {
+            if ( $status  ) {
                 ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
                 return 0;
             }
@@ -119,10 +123,12 @@ sub closeDB {
             return -1;
         }
     }
-    my $msg = "LibXML DOM structure not defined.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "LibXML DOM structure not defined.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 query($self, { query, error } )
@@ -153,10 +159,12 @@ sub query {
             return -1;
         }
     }
-    my $msg = "Missing argument.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "Missing argument.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 querySet($self, { query error } )
@@ -182,10 +190,12 @@ sub querySet {
             return -1;
         }
     }
-    my $msg = "Missing argument.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "Missing argument.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 count($self, { query error } )
@@ -212,10 +222,12 @@ sub count {
             return -1;
         }
     }
-    my $msg = "Missing argument.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "Missing argument.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 getDOM($self, { error } )
@@ -232,10 +244,12 @@ sub getDOM {
         ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
         return $self->{XML};
     }
-    my $msg = "LibXML DOM structure not defined.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "LibXML DOM structure not defined.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 =head2 setDOM($self, { dom, error } )
@@ -253,10 +267,12 @@ sub setDOM {
         ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
         return 0;
     }
-    my $msg = "Missing argument.";
-    $self->{LOGGER}->error($msg);
-    ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
-    return -1;
+    else {
+        my $msg = "Missing argument.";
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
 }
 
 1;

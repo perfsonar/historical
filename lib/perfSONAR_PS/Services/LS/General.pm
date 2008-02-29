@@ -40,7 +40,7 @@ sub wrapStore {
     if ( defined $type and $type ) {
         $store = $store . " type=\"" . $type . "\" ";
     }
-    if ( defined $content and $content ne ) {
+    if ( defined $content and $content ) {
         $store = $store . ">\n";
         $store = $store . $content;
         $store = $store . "</nmwg:store>\n";

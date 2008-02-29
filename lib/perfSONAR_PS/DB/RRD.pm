@@ -186,8 +186,10 @@ sub openDB {
         RRDp::start $self->{PATH};
         return 0;
     }
-    $self->{LOGGER}->error("Missing path or name in object.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("Missing path or name in object.");
+        return -1;
+    }
 }
 
 =head2 closeDB($self, { })
@@ -208,8 +210,10 @@ sub closeDB {
         }
         return 0;
     }
-    $self->{LOGGER}->error("RRD file not open.");
-    return -1;
+    else {
+        $self->{LOGGER}->error("RRD file not open.");
+        return -1;
+    }
 }
 
 =head2 query($self, { cf, resolution, start, end })

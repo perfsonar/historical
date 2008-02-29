@@ -49,18 +49,25 @@ use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
 my %ma_namespaces = (
-    nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
-    snmp      => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-    netutil   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-    neterr    => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
-    netdisc   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    nmwgt     => "http://ggf.org/ns/nmwg/topology/2.0/",
-    nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-    nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtl2     => "http://ogf.org/schema/network/topology/l2/20070828/",
-    nmtl3     => "http://ogf.org/schema/network/topology/l3/20070828/",
-    nmtl4     => "http://ogf.org/schema/network/topology/l4/20070828/",
-    nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/"
+    nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
+    nmtm          => "http://ggf.org/ns/nmwg/time/2.0/",
+    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+    netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+    neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+    netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
+    select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+    psservice     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+    nmwgt         => "http://ggf.org/ns/nmwg/topology/2.0/",
+    nmwgtopo3     => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtl2         => "http://ogf.org/schema/network/topology/l2/20070828/",
+    nmtl3         => "http://ogf.org/schema/network/topology/l3/20070828/",
+    nmtl4         => "http://ogf.org/schema/network/topology/l4/20070828/",
+    nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmwgr         => "http://ggf.org/ns/nmwg/result/2.0/"
 );
 
 =head1 API
@@ -1287,10 +1294,14 @@ sub retrieveSQL {
 
     my $file  = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]",  1 ), 1 );
     my $table = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
-
-    if ( not defined $file or not defined $table ) {
+    
+    unless ( $file and $table ) {
         $self->{LOGGER}->error( "Data element " . $parameters->{d}->getAttribute("id") . " is missing some SQL elements" );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
+    }
+  
+    unless ( $file =~ m/^DBI:SQLite:dbname=/mx ) {
+        $file .= "DBI:SQLite:dbname=".$file;
     }
 
     my @dbSchema = ( "id", "time", "value", "eventtype", "misc" );
