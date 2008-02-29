@@ -72,7 +72,6 @@ sub getEndpoint($) {
     my $endpoint = $self->{REQUEST}->uri;
 
     $endpoint =~ s/\/\//\//;
-    $endpoint =~ s/^\///;
 
     return $endpoint;
 }

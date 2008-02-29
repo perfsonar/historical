@@ -278,19 +278,22 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
     my $num_endpoints = 0;
 
-    foreach my $endpoint (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
-        my %endpoint_conf = %{ mergeConfig(\%port_conf, $conf{"port"}->{$port}->{"endpoint"}->{$endpoint}) };
+    foreach my $key (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
+        my $fixed_endpoint = $key;
+        $fixed_endpoint = "/".$key if ($key =~ /^[^\/]/);
 
-        $service_configs{$port}->{"endpoint"}->{$endpoint} = \%endpoint_conf;
+        my %endpoint_conf = %{ mergeConfig(\%port_conf, $conf{"port"}->{$port}->{"endpoint"}->{$key}) };
+
+        $service_configs{$port}->{"endpoint"}->{$fixed_endpoint} = \%endpoint_conf;
 
         next if (defined $endpoint_conf{"disabled"} and $endpoint_conf{"disabled"} == 1);
 
-        $logger->debug("Adding endpoint $endpoint to $port");
+        $logger->debug("Adding endpoint $fixed_endpoint to $port");
 
-        $handlers{$port}->{$endpoint} = perfSONAR_PS::RequestHandler->new();
+        $handlers{$port}->{$fixed_endpoint} = perfSONAR_PS::RequestHandler->new();
 
         if (not defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq q{}) {
-            $logger->error("No module specified for $port:$endpoint");
+            $logger->error("No module specified for $port:$fixed_endpoint");
             exit(-1);
         }
 
@@ -299,9 +302,9 @@ foreach my $port (keys %{ $conf{"port"} }) {
             $modules_loaded{$endpoint_conf{"module"}} = 1;
         }
 
-        my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $endpoint, $dirname);
-        if ($service->init($handlers{$port}->{$endpoint}) != 0) {
-            $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$endpoint");
+        my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
+        if ($service->init($handlers{$port}->{$fixed_endpoint}) != 0) {
+            $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$fixed_endpoint");
             exit(-1);
         }
 
@@ -310,7 +313,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
             $ls_child_args{"service"} = $service;
             $ls_child_args{"conf"} = \%endpoint_conf;
             $ls_child_args{"port"} = $port;
-            $ls_child_args{"endpoint"} = $endpoint;
+            $ls_child_args{"endpoint"} = $fixed_endpoint;
             push @ls_services, \%ls_child_args;
         }
 
@@ -322,9 +325,9 @@ foreach my $port (keys %{ $conf{"port"} }) {
                 $modules_loaded{$echo_module} = 1;
             }
 
-            my $echo = $echo_module->new(\%endpoint_conf, $port, $endpoint, $dirname);
-            if ($echo->init($handlers{$port}->{$endpoint}) != 0) {
-                $logger->error("Failed to initialize echo module on $port:$endpoint");
+            my $echo = $echo_module->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
+            if ($echo->init($handlers{$port}->{$fixed_endpoint}) != 0) {
+                $logger->error("Failed to initialize echo module on $port:$fixed_endpoint");
                 exit(-1);
             }
         }
@@ -430,7 +433,7 @@ sub psService {
                 if (waitpid($pid, WNOHANG))  {
                     $logger->debug("Child $pid exited.");
                     delete $child_pids{$pid};
-                } elsif ($child_pids{$pid}->{"timeout_time"} <= $time) {
+                } elsif ($child_pids{$pid}->{"timeout_time"} <= $time and $child_pids{$pid}->{"child_timeout_length"} > 0) {
                     $logger->error("Pid $pid timed out.");
                     kill 9, $pid;
 

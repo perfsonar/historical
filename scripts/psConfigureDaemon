@@ -30,7 +30,9 @@ print " - [press enter for the default choice] -\n\n";
 
 my $file = shift;
 
-$file = &ask("What file should I write the configuration to? ", "/etc/perfsonar/daemon.conf", undef, '.+');
+if (not $file) {
+	$file = &ask("What file should I write the configuration to? ", "/etc/perfsonar/daemon.conf", undef, '.+');
+}
 
 my $tmp;
 my $default_hostname = hostname();
@@ -41,6 +43,25 @@ if (-f $file) {
 	%config = ParseConfig($file);
 }
 
+# make sure all the endpoints start with a "/".
+if (defined $config{"port"}) {
+	foreach my $port (keys %{ $config{"port"} }) {
+		if (defined $config{"port"}->{$port}->{"endpoint"}) {
+			foreach my $endpoint (keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
+				my $new_endpoint = $endpoint;
+
+				if ($endpoint =~ /^[^\/]/) {
+					$new_endpoint = "/".$endpoint;
+				}
+
+				if ($endpoint ne $new_endpoint) {
+					$config{"port"}->{$port}->{"endpoint"}->{$new_endpoint} = $config{"port"}->{$port}->{"endpoint"}->{$endpoint};
+					delete($config{"port"}->{$port}->{"endpoint"}->{$endpoint});
+				}
+			}
+		}
+	}
+}
 
 while (1) {
 	my $input;
@@ -88,10 +109,10 @@ while (1) {
 		foreach my $port (sort keys %{ $config{"port"} }) {
 			next if (!defined $config{"port"}->{$port}->{"endpoint"});
 			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
-				push @elements, "$port:$endpoint";
+				push @elements, "$port$endpoint";
 				if (defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} and
 						$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} == 1) {
-					$status{"$port:$endpoint"} = 1;
+					$status{"$port$endpoint"} = 1;
 				}
 			}
 		}
@@ -127,7 +148,7 @@ while (1) {
 				print "Enabling";
 			}
 
-			if ($elements[$input] =~ /^(\d+):(.*)$/) {
+			if ($elements[$input] =~ /^(\d+)(\/.*)$/) {
 				print " endpoint ".$elements[$input]."\n";
 				$config{"port"}->{$1}->{"endpoint"}->{$2}->{"disabled"} = $new_status;
 			} elsif ($elements[$input] =~ /^(\d+)$/) {
@@ -141,7 +162,7 @@ while (1) {
 		foreach my $port (sort keys %{ $config{"port"} }) {
 			next if (!defined $config{"port"}->{$port}->{"endpoint"});
 			foreach my $endpoint (sort keys %{ $config{"port"}->{$port}->{"endpoint"} }) {
-				push @endpoints, "$port:$endpoint";
+				push @endpoints, "$port$endpoint";
 			}
 		}
 
@@ -155,18 +176,21 @@ while (1) {
 		}
 
 		do {
-			$input = &ask("Enter endpoint in form 'port:endpoint/path' or select from a number from the above ", "", undef, '^(\d+:[^\/].*|\d+)$');
+			$input = &ask("Enter endpoint in form 'port/endpoint_path' (e.g. 8080/perfSONAR/services/MA) or select from a number from the above ", "", undef, '^(\d+[\/].*|\d+)$');
 			if ($input =~ /^\d+$/) {
 				$input = $endpoints[$input];
 			}
-		} while(!($input =~ /\d+:[^\/].*/));
+		} while(!($input =~ /\d+[\/].*/));
 
-		my ($port, $endpoint) = split(":", $input);
+		my ($port, $endpoint);
+		if ($input =~ /(\d+)([\/].*)/) {
+			$port = $1;
+			$endpoint = $2;
+		}
 
 		if (!defined $config{"port"}) {
 			my %hash = ();
 			$config{"port"} = \%hash;
-			print "Setting config{port} to a hash\n";
 		}
 
 		if (!defined $config{"port"}->{$port}) {
@@ -211,7 +235,7 @@ while (1) {
 			$hostname = &ask("Enter the external host or IP for this machine ", $hostname, $default_hostname, '.+');
 		}
 
-		my $accesspoint = &ask("Enter the accesspoint for this service ", "http://$hostname:$port/$endpoint", undef, '^http');
+		my $accesspoint = &ask("Enter the accesspoint for this service ", "http://$hostname:$port$endpoint", undef, '^http');
 
 		if ($module eq "snmp") {
 			$config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::SNMP";
