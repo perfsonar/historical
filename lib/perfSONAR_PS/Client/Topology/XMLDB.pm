@@ -3,7 +3,9 @@ package perfSONAR_PS::Client::Topology::XMLDB;
 our $VERSION = 0.06;
 
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger);
+
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Topology::Common;
@@ -641,7 +643,11 @@ sub lookupElement($$$) {
 
 	if (!defined $parent_id or !defined $parent) {
 		my $error;
-		$logger->debug("Parent: $parent_id Not Found");
+		if (not defined $parent_id) {
+			$logger->debug("Parent not found");
+		} else {
+			$logger->debug("Parent '$parent_id' Not Found");
+		}
 
 		my $doc = $self->{DATADB}->getDocumentByName({ name => $base_id, txn => undef, error => \$error });
 		if ($error ne "" or $doc eq "") {

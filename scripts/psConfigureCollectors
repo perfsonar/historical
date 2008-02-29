@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 use Config::General qw(ParseConfig SaveConfig);
-use Data::Dumper;
 
 sub note();
 sub ask($$$$);
@@ -85,8 +84,6 @@ while (1) {
 
 sub config_linkstatus($$) {
 	my ($config, $def_config) = @_;
-
-	print "Dumper: ".Dumper($config)."\n";
 
 	$config->{"collection_interval"} = &ask("Enter the number of seconds between status collections ", "60", $config->{"collection_interval"}, '^\d+$');
 

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Config::General qw(ParseConfig SaveConfig);
 use Sys::Hostname;
-use Data::Dumper;
 
 =head1 NAME
 

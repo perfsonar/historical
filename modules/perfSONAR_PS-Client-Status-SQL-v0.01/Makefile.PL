@@ -5,10 +5,10 @@ WriteMakefile(
     'VERSION_FROM' => 'lib/perfSONAR_PS/Client/Status/SQL.pm',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
-        "strict" => 0,
 	"Log::Log4perl" => 1.00,
-	"perfSONAR_PS::DB::SQL" => 0.06,
-	"perfSONAR_PS::Status::Link" => 0.06,
-	"perfSONAR_PS::Status::Common" => 0.06,
+	"perfSONAR_PS::DB::SQL" => 0.08,
+	"perfSONAR_PS::Status::Common" => 0.08,
+	"perfSONAR_PS::Status::Link" => 0.08,
+        "strict" => 0,
     }
 );

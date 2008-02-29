@@ -27,6 +27,8 @@ foreach my $file (sort @files) {
 		goto SKIP if ($file =~ /$regex/)
 	}
 
+	goto SKIP if ($file =~ /META.yml/);
+
 	print MANIFEST $file;
 SKIP:
 }

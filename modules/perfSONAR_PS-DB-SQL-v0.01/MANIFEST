@@ -5,4 +5,4 @@ MANIFEST.SKIP
 Makefile.PL
 README
 lib/perfSONAR_PS/DB/SQL.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+perl-perfSONAR_PS-DB-SQL.spec

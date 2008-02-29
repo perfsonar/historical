@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Init file for perfSONAR Collector Daemon
+# Init file for perfSONAR Services Daemon
 #
 # chkconfig: 2345 60 20
-# description: perfSONAR Collector Daemon
+# description: perfSONAR Services Daemon
 #
 
 PREFIX=../

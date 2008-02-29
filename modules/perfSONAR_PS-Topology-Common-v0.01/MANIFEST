@@ -6,5 +6,5 @@ Makefile.PL
 README
 lib/perfSONAR_PS/Topology/Common.pm
 lib/perfSONAR_PS/Topology/ID.pm
+perl-perfSONAR_PS-Topology-Common.spec
 t/perfSONAR_PS::Topology::ID.t
-META.yml                                 Module meta-data (added by MakeMaker)

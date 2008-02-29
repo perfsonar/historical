@@ -19,10 +19,7 @@ sub remapRequest($$);
 sub getURI($);
 sub getRawRequest($);
 sub getRawRequestAsString($);
-sub getRequest($);
-sub getRequestAsXPath($);
 sub setResponse($$);
-sub setResponseAsXPath($$);
 sub getRequestDOM($);
 sub getResponse($);
 sub setNamespaces($$);
@@ -174,30 +171,6 @@ sub getRawRequestAsString($) {
     return $self->{REQUEST}->content;
 }
 
-sub getRequest($) {
-    my ($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Request");
-    my $xp = $self->getRequestAsXPath();
-    my $nodeset = find($xp, '//nmwg:message', 0);
-    if($nodeset->size() <= 0) {
-        $logger->error("Message element not found or in wrong namespace.");
-    } elsif($nodeset->size() >= 2) {
-        $logger->error("Too many Message elements found.");
-    } else {
-        return XML::XPath::XMLParser::as_string($nodeset->get_node(1));
-    }
-    return "";
-}
-
-sub getRequestAsXPath($) {
-    my ($self) = @_;
-    my $xp = XML::XPath->new( xml => $self->{REQUEST}->content );
-    $xp->clear_namespaces();
-    $xp->set_namespace('nmwg', 'http://ggf.org/ns/nmwg/base/2.0/');
-    return $xp;
-}
-
-
 sub setResponse($$) {
     my ($self, $content) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
@@ -209,14 +182,6 @@ sub setResponse($$) {
         $logger->error("Missing argument.");
     }
     return;
-}
-
-sub setResponseAsXPath($$) {
-    my ($self, $xpath) = @_;
-    my $logger = get_logger("perfSONAR_PS::Request");
-    $logger->error("Missing argument.") unless defined $xpath;
-    my $content = XML::XPath::XMLParser::as_string( $xpath->findnodes( '/') );
-    return $self->setResponse( $content );
 }
 
 sub getRequestDOM($) {
@@ -338,15 +303,6 @@ Returns the URI for the specified request.
 Returns the request as it was given to the object(i.e. the underlying
 HTTP::Daemon::ClientConn object).
 
-=head2 getRequest($self)
-
-Returns the request from the client as a DOM tree rooted at the 'nmwg:message'
-element.
-
-=head2 getRequestAsXPath($self)
-
-Gets and returns the request as an XPath object.
-
 =head2 getRequestDOM($self)
 
 Gets and returns the contents of the request as a DOM object.
@@ -354,10 +310,6 @@ Gets and returns the contents of the request as a DOM object.
 =head2 setResponse($self, $content)
 
 Sets the response to the content.
-
-=head2 setResponseAsXPath($self, $xpath)
-
-Sets the response as an XPath object.
 
 =head2 getResponse($self)
 

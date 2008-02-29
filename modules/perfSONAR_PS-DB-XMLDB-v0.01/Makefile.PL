@@ -5,10 +5,14 @@ WriteMakefile(
     'VERSION_FROM' => 'lib/perfSONAR_PS/DB/XMLDB.pm',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
+	"English" => 0,
+	"fields" => 0,
+	"Log::Log4perl" => 1.00,
+	"Params::Validate" => 0.64,
+	"perfSONAR_PS::Common" => 0.08,
+	"Sleepycat::DbXml" => 2.00,
         "strict" => 0,
         "warnings" => 0,
-	"perfSONAR_PS::Common" => 0.06,
-	"Log::Log4perl" => 1.00,
-	"Sleepycat::DbXml" => 2.00,
+	"XML::LibXML" => 1.60,
     }
 );

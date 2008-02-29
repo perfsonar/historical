@@ -427,7 +427,7 @@ sub query($$$$) {
     }
   }
 
-  return 0;
+  return (0, \%ret_structure);
 }
 
 

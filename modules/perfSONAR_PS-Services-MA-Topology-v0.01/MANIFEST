@@ -5,5 +5,5 @@ MANIFEST.SKIP
 Makefile.PL
 README
 lib/perfSONAR_PS/Services/MA/Topology.pm
+perl-perfSONAR_PS-Services-MA-Topology.spec
 psLoadTopology
-META.yml                                 Module meta-data (added by MakeMaker)

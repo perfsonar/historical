@@ -12,4 +12,5 @@ lib/perfSONAR_PS/Collectors/LinkStatus/Agent/Script.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Link.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Status.pm
 lib/perfSONAR_PS/SNMPWalk.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+modules
+perl-perfSONAR_PS-Collectors-LinkStatus.spec

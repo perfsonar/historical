@@ -28,7 +28,6 @@ use POSIX ":sys_wait_h";
 use Cwd;
 use Config::General;
 use Module::Load;
-use Data::Dumper;
 
 sub handleCollector($);
 sub daemonize();
@@ -206,7 +205,7 @@ foreach my $collectors (@{ $conf{"collector"} }) {
         my %collector_conf = %{ mergeConfig(\%conf, $collector) };
 
         if (!defined $collector_conf{"module"} or $collector_conf{"module"} eq "") {
-            $logger->error("No module specified for collector: ".Dumper(\%collector_conf));
+            $logger->error("No module specified for collector");
             exit(-1);
         }
 
