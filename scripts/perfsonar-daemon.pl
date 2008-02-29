@@ -73,15 +73,17 @@ my %ns = (
   nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
   nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
   ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
   iperf => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
   bwctl => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+  owamp => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
   netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
   neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
   netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" ,
+  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
   select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
   perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
   psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+  nmwgr => "http://ggf.org/ns/nmwg/result/2.0/",
   xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
   xpath => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/",
   nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
@@ -99,7 +101,10 @@ my %ns = (
   nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
   sonet => "http://ogf.org/schema/network/topology/sonet/20070828/",
   transport => "http://ogf.org/schema/network/topology/transport/20070828/",
-  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/"
+  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+  traceroute => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
+  tracepath => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
+  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/"
 );
 
 use lib "$libdir";
@@ -233,6 +238,7 @@ my $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
 $logger->debug("Starting '".$$."'");
 
 my @ls_services;
+my @ls_reaper;
 
 my %loaded_modules = ();
 my $echo_module = "perfSONAR_PS::Services::Echo";
@@ -317,6 +323,13 @@ foreach my $port (keys %{ $conf{"port"} }) {
             push @ls_services, \%ls_child_args;
         }
 
+        if ($service->can("cleanLS")) {
+            my %ls_reaper_args = ();
+            $ls_reaper_args{"service"} = $service;
+            $ls_reaper_args{"sleep"} = 0;
+            push @ls_reaper, \%ls_reaper_args;
+        }
+        
         # the echo module is loaded by default unless otherwise specified
         if ((not defined $endpoint_conf{"disable_echo"} or $endpoint_conf{"disable_echo"} == 0) and
                 (not defined $conf{"disable_echo"} or $conf{"disable_echo"} == 0)) {
@@ -379,7 +392,7 @@ foreach my $ls_args (@ls_services) {
     my $ls_pid = fork();
     if ($ls_pid == 0) {
         %child_pids = ();
-        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";;
+        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";
         registerLS($ls_args);
         exit(0);
     } elsif ($ls_pid < 0) {
@@ -389,6 +402,21 @@ foreach my $ls_args (@ls_services) {
     }
 
     $child_pids{$ls_pid} = q{};
+}
+
+foreach my $ls_reaper_args (@ls_reaper) {
+    my $ls_reaper_pid = fork();
+    if ($ls_reaper_pid == 0) {
+        %child_pids = ();
+        $0 .= " - LS Reaper";
+        cleanLS($ls_reaper_args);
+        exit(0);
+    } elsif ($ls_reaper_pid < 0) {
+        $logger->error("Couldn't spawn LS Reaper");
+        killChildren();
+        exit(-1);
+    }
+    $child_pids{$ls_reaper_pid} = q{};
 }
 
 unlockPIDFile($pidfile);
@@ -534,6 +562,41 @@ sub registerLS {
     }
 
     return;
+}
+
+=head2 cleanLS($args)
+    The cleanLS function is (only by the LS) to periodically clean out the 
+    LS database.
+=cut
+sub cleanLS {
+    my ($args) = @_;
+    
+    my $service = $args->{"service"};
+    my $sleep_time = $args->{"conf"}->{"ls"}->{"repear_interval"};
+    my $error = q{};
+
+    unless ( $sleep_time ) {
+      return -1;
+    }
+
+    while(1) {
+        my $status = q{};
+        eval {
+            $status = $service->cleanLS( { error => \$error } );
+        };
+        if ($@) {
+            $logger->error("Problem cleaning LS: $@");
+        }
+        elsif ( $status == -1 ) {
+            $logger->error("Error returned: $error");        
+        }
+        
+        $logger->debug("Sleeping for $sleep_time");
+
+        sleep($sleep_time);
+    }
+
+    return 0;
 }
 
 =head2 handleRequest($handler, $request, $endpoint_conf);
