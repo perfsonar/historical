@@ -4,10 +4,6 @@ use strict;
 use warnings;
 use Config::General qw(ParseConfig SaveConfig);
 
-sub note();
-sub ask($$$$);
-sub config_linkstatus($$);
-
 my $was_installed = 0;
 my $DEFAULT_FILE;
 
@@ -82,7 +78,7 @@ while (1) {
 	}
 }
 
-sub config_linkstatus($$) {
+sub config_linkstatus {
 	my ($config, $def_config) = @_;
 
 	$config->{"collection_interval"} = &ask("Enter the number of seconds between status collections ", "60", $config->{"collection_interval"}, '^\d+$');
@@ -111,35 +107,41 @@ sub config_linkstatus($$) {
 	} else {
 		$config->{"ma_uri"} = &ask("URL for the MA to store to ", "", $config->{"ma_uri"}, '^http:\/\/');
 	}
+
+	return;
 }
 
-sub ask($$$$) {
-  my($prompt,$value,$prev_value,$regex) = @_;
+sub ask {
+    my ( $prompt, $value, $prev_value, $regex ) = @_;
 
-  my $result;
-  do {
-    print $prompt;
-    if (defined $prev_value) {
-      print  "[", $prev_value, "]";
-    } elsif (defined $value) {
-      print  "[", $value, "]";
-    }
-    print ": ";
-    $| = 1;
-    $_ = <STDIN>;
-    chomp;
-    if(defined $_ and $_ ne "") {
-      $result = $_;
-    } elsif (defined $prev_value) {
-      $result = $prev_value;
-    } elsif (defined $value) {
-      $result = $value;
-    } else {
-      $result = '';
-    }
-  } while ($regex ne '' and !($result =~ /$regex/));
+    my $result;
+    do {
+        print $prompt;
+        if ( defined $prev_value ) {
+            print "[", $prev_value, "]";
+        }
+        elsif ( defined $value ) {
+            print "[", $value, "]";
+        }
+        print ": ";
+        local $| = 1;
+        local $_ = <STDIN>;
+        chomp;
+        if ( defined $_ and $_ ne q{} ) {
+            $result = $_;
+        }
+        elsif ( defined $prev_value ) {
+            $result = $prev_value;
+        }
+        elsif ( defined $value ) {
+            $result = $value;
+        }
+        else {
+            $result = q{};
+        }
+    } while ( $regex and ( not $result =~ /$regex/mx ) );
 
-  return $result;
+    return $result;
 }
 
 __END__

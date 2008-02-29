@@ -1,7 +1,5 @@
 package perfSONAR_PS::Request;
 
-our $VERSION = 0.06;
-
 use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES';
 
 use strict;
@@ -11,24 +9,9 @@ use XML::LibXML;
 
 use perfSONAR_PS::Common;
 
-sub new($$$);
-sub setRequest($$);
-sub getEndpoint($);
-sub parse($$$);
-sub remapRequest($$);
-sub getURI($);
-sub getRawRequest($);
-sub getRawRequestAsString($);
-sub setResponse($$);
-sub getRequestDOM($);
-sub getResponse($);
-sub setNamespaces($$);
-sub getNamespaces($);
-sub setRequestDOM($$);
-sub finish($);
+our $VERSION = 0.06;
 
-
-sub new($$$) {
+sub new {
     my ($package, $call, $http_request) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
 
@@ -53,7 +36,7 @@ sub new($$$) {
     return $self;
 }
 
-sub setRequest($$) {
+sub setRequest {
     my ($self, $request) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if(defined $request and $request ne "") {
@@ -64,7 +47,7 @@ sub setRequest($$) {
     return;
 }
 
-sub getEndpoint($) {
+sub getEndpoint {
     my ($self) = @_;
     my $endpoint = $self->{REQUEST}->uri;
 
@@ -73,7 +56,7 @@ sub getEndpoint($) {
     return $endpoint;
 }
 
-sub parse($$$) {
+sub parse {
     my ($self, $namespace_map, $error) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
 
@@ -113,7 +96,7 @@ sub parse($$$) {
 
     my $messages = find($dom->getDocumentElement, ".//nmwg:message", 0);
 
-    if (!defined $messages or $messages->size() <= 0) {
+    if (not defined $messages or $messages->size() <= 0) {
         my $msg = "Couldn't find message element in request";
         $logger->error($msg);
         $$error = $msg if (defined $error);
@@ -137,19 +120,21 @@ sub parse($$$) {
     return 0;
 }
 
-sub remapRequest($$) {
+sub remapRequest {
     my ($self, $ns) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
 
-    if (!defined $self->{REQUESTDOM} or $self->{REQUESTDOM} eq "") {
+    if (not defined $self->{REQUESTDOM} or $self->{REQUESTDOM} eq "") {
         $logger->error("Tried to remap an unparsed request");
         return;
     }
 
     $self->{NAMESPACES} = &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $ns, $self->{REQUESTDOM});
+
+    return;
 }
 
-sub getURI($) {
+sub getURI {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if (!defined $self->{REQUEST}) {
@@ -159,19 +144,19 @@ sub getURI($) {
     return $self->{REQUEST}->uri;
 }
 
-sub getRawRequest($) {
+sub getRawRequest {
     my ($self) = @_;
 
     return $self->{REQUEST};
 }
 
-sub getRawRequestAsString($) {
+sub getRawRequestAsString {
     my ($self) = @_;
 
     return $self->{REQUEST}->content;
 }
 
-sub setResponse($$) {
+sub setResponse {
     my ($self, $content) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if(defined $content and $content ne "") {
@@ -184,7 +169,7 @@ sub setResponse($$) {
     return;
 }
 
-sub getRequestDOM($) {
+sub getRequestDOM {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if($self->{REQUESTDOM}) {
@@ -195,7 +180,7 @@ sub getRequestDOM($) {
     }
 }
 
-sub getResponse($) {
+sub getResponse {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if($self->{RESPONSEMESSAGE}) {
@@ -206,7 +191,7 @@ sub getResponse($) {
     }
 }
 
-sub setNamespaces($$) {
+sub setNamespaces {
     my ($self, $ns) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if(defined $ns and $ns ne "") {
@@ -218,7 +203,7 @@ sub setNamespaces($$) {
 }
 
 
-sub getNamespaces($) {
+sub getNamespaces {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if($self->{NAMESPACES}) {
@@ -230,7 +215,7 @@ sub getNamespaces($) {
 }
 
 
-sub setRequestDOM($$) {
+sub setRequestDOM {
     my ($self, $dom) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if(defined $dom and $dom ne "") {
@@ -241,7 +226,7 @@ sub setRequestDOM($$) {
     return;
 }
 
-sub finish($) {
+sub finish {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
     if(defined $self->{CALL} and $self->{CALL} ne "") {

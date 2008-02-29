@@ -991,15 +991,13 @@ sub parseCircuitsFile {
             my ($domain, @junk) = split(/-/, $node_name);
             if (not defined $prev_domain) {
                 $prev_domain = $domain;
-            } else {
-                if ($domain eq $prev_domain) {
+            } elsif ($domain eq $prev_domain) {
                     $circuit_type = "DOMAIN_Link";
+            } else {
+                if ($knowledge eq "full") {
+                    $circuit_type = "ID_Link";
                 } else {
-                    if ($knowledge eq "full") {
-                        $circuit_type = "ID_Link";
-                    } else {
-                        $circuit_type = "ID_LinkPartialInfo";
-                    }
+                    $circuit_type = "ID_LinkPartialInfo";
                 }
             }
 

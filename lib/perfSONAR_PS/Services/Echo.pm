@@ -1,7 +1,5 @@
 package perfSONAR_PS::Services::Echo;
 
-our $VERSION = 0.06;
-
 use base 'perfSONAR_PS::Services::Base';
 
 use warnings;
@@ -12,31 +10,9 @@ use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
-sub new {
-	my ($package, $conf, $port, $endpoint, $directory) = @_;
+our $VERSION = 0.06;
 
-	my %hash = ();
-
-	if(defined $conf and $conf ne "") {
-		$hash{"CONF"} = \%{$conf};
-	}
-
-	if (defined $directory and $directory ne "") {
-		$hash{"DIRECTORY"} = $directory;
-	}
-
-	if (defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
-	}
-
-	if (defined $endpoint and $endpoint ne "") {
-		$hash{"ENDPOINT"} = $endpoint;
-	}
-
-	bless \%hash => $package;
-}
-
-sub init($$$$) {
+sub init {
 	my ($self, $handler) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::Echo");
 
@@ -48,13 +24,13 @@ sub init($$$$) {
 	return 0;
 }
 
-sub needLS($) {
+sub needLS {
 	my ($self) = @_;
 
 	return 0;
 }
 
-sub registerLS($$) {
+sub registerLS {
 	my ($self, $ret_sleep_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Services::Echo");
 

@@ -89,7 +89,7 @@ while (1) {
     elsif ( $input == 3 ) {
         $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "0",                                                          $config{"max_worker_processes"},     '^\d+$' );
         $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0",                                                          $config{"max_worker_lifetime"},      '^\d+$' );
-        $config{"disable_echo"}             = &ask( "Disable echo by default ",                                                             0,                                                            $config{"disable_echo"},             '^[01]$' );
+        $config{"disable_echo"}             = &ask( "Disable echo by default (0 for yes, 1 for now) ",                                      0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations ",                                              60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
         $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed ",                                          20,                                                           $config{"reaper_interval"},          '^\d+$' );
@@ -312,7 +312,7 @@ sub config_perfsonarbouy_ma {
 
     $config->{"perfsonarbouy"}->{"conf"} = &ask( "Enter the location of the 'owmesh.conf' file: ", q{}, $config->{"perfsonarbouy"}->{"metadata_db_type"}, '.+' );
 
-    $config->{"perfsonarbouy"}->{"enable_registration"} = &ask( "Will this service register with an LS ", "0|1", $config->{"perfsonarbouy"}->{"enable_registration"}, '^[01]$' );
+    $config->{"perfsonarbouy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbouy"}->{"enable_registration"}, '^[01]$' );
 
     if ( $config->{"perfsonarbouy"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
@@ -390,7 +390,7 @@ sub config_snmp_ma {
 sub config_status_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
-    $config->{"status"}->{"read_only"} = &ask( "Is this service read-only? ", "0|1", $config->{"status"}->{"read_only"}, '^[01]$' );
+    $config->{"status"}->{"read_only"} = &ask( "Is this service read-only  (0 for no, 1 for yes) ", "0", $config->{"status"}->{"read_only"}, '^[01]$' );
 
     $config->{"status"}->{"db_type"} = &ask( "Enter the database type to read from ", "sqlite|mysql", $config->{"status"}->{"db_type"}, '(sqlite|mysql)' );
 
@@ -412,7 +412,7 @@ sub config_status_ma {
         $config->{"status"}->{"db_table"} = $tmp if ($tmp);
     }
 
-    $config->{"status"}->{"enable_registration"} = &ask( "Will this service register with an LS ", "0|1", $config->{"status"}->{"enable_registration"}, '^[01]$' );
+    $config->{"status"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"status"}->{"enable_registration"}, '^[01]$' );
 
     if ( $config->{"status"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
@@ -493,13 +493,13 @@ sub config_topology_ma {
 
     $config->{"topology"}->{"db_type"} = "xml";
 
-    $config->{"topology"}->{"read_only"} = &ask( "Is this service read-only? ", "0|1", $config->{"topology"}->{"read_only"}, '^[01]$' );
+    $config->{"topology"}->{"read_only"} = &ask( "Is this service read-only (0 for no, 1 for yes) ", "1", $config->{"topology"}->{"read_only"}, '^[01]$' );
 
     $config->{"topology"}->{"db_environment"} = &ask( "Enter the directory of the XML database ", q{}, $config->{"topology"}->{"db_environment"}, '.+' );
 
     $config->{"topology"}->{"db_file"} = &ask( "Enter the filename of the XML database ", q{}, $config->{"topology"}->{"db_file"}, '.+' );
 
-    $config->{"topology"}->{"enable_registration"} = &ask( "Will this service register with an LS ", "0|1", $config->{"topology"}->{"enable_registration"}, '^[01]$' );
+    $config->{"topology"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"topology"}->{"enable_registration"}, '^[01]$' );
 
     if ( $config->{"topology"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
@@ -537,7 +537,7 @@ sub ask {
         local $| = 1;
         local $_ = <STDIN>;
         chomp;
-        if ( defined $_ and $_ ) {
+        if ( defined $_ and $_ ne q{}) {
             $result = $_;
         }
         elsif ( defined $prev_value ) {

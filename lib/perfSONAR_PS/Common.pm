@@ -88,7 +88,7 @@ sub findvalue {
 
     $found_node = find($node, $xpath, 1);
 
-    return if (!defined $found_node);
+    return if (not defined $found_node);
 
     return $found_node->textContent;
 }
@@ -420,11 +420,11 @@ sub mapNamespaces {
     my $uri = $node->namespaceURI();
     my $prefix = $node->prefix();
     if(defined $prefix and $prefix ne "" and $uri) {
-        if(!defined $namespaces->{$uri}) {
+        if(not defined $namespaces->{$uri}) {
             $namespaces->{$uri} = $prefix;
             $node->ownerDocument->getDocumentElement->setNamespace($uri, $prefix, 0);
         }
-    } elsif ((!defined $prefix or $prefix eq "") and defined $uri) {
+    } elsif ((not defined $prefix or $prefix eq "") and defined $uri) {
         if (defined $namespaces->{$uri}) {
             $node->setNamespace($uri, $namespaces->{$uri}, 1);
         }
@@ -468,7 +468,7 @@ sub reMap {
                 }
             }
         }
-    } elsif ((!defined $node->prefix or $node->prefix eq "") and defined $node->namespaceURI()) {
+    } elsif ((not defined $node->prefix or $node->prefix eq "") and defined $node->namespaceURI()) {
         if (defined $requestNamespaces->{$node->namespaceURI()}) {
             $node->setNamespace($node->namespaceURI(), $requestNamespaces->{$node->namespaceURI()}, 1);
         } else {
@@ -528,7 +528,7 @@ sub consultArchive {
         return (-1, $msg);
     }
 
-    if (!defined $response or $response eq "") {
+    if (not defined $response or $response eq "") {
         my $msg = "No response received from status service";
         $logger->error($msg);
         return (-1, $msg);
@@ -626,7 +626,7 @@ sub mergeHash {
 		}
 
 		if (ref $specific->{$key} eq "HASH") {
-			if (!defined $new->{$key}) {
+			if (not defined $new->{$key}) {
 				$new->{$key} = duplicateHash($specific->{$key}, $skip_elements);
 			} else {
 				$new->{$key} = mergeHash($new->{$key}, $specific->{$key}, $skip_elements);
@@ -694,9 +694,9 @@ sub convertISO {
     my($iso) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
     if(defined $iso and $iso ne "") {
-        my($first, $second) = split(/T/, $iso);
-        my($year, $mon, $day) = split(/-/, $first);
-        my($hour, $min, $sec) = split(/:/, $second);
+        my ($date_portion, $time_portion) = split(/T/, $iso);
+        my($year, $mon, $day) = split(/-/, $date_portion);
+        my($hour, $min, $sec) = split(/:/, $time_portion);
         my $frac = "";
         ($sec, $frac) = split(/\./, $sec);
         my $zone = $frac;

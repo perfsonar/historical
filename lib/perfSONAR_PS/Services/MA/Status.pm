@@ -310,7 +310,7 @@ sub handleEvent {
     my @filters = @{ $parameters->{filterChain} };
     $selectTime = $self->resolveSelectChain($md, $parameters->{filterChain}, $selectTime);
     if ($#filters > -1) {
-        $metadataId = $filters[$#filters][0]->getAttribute("id");
+        $metadataId = $filters[-1][0]->getAttribute("id");
     } else {
         $metadataId = $md->getAttribute("id");
     }
@@ -483,7 +483,7 @@ sub resolveSelectChain {
     # producing data as though it had gone through a set of filters.
     foreach my $filter_arr (@filters) {
         my @filter_set = @{ $filter_arr };
-        my $filter = $filter_set[$#filter_set];
+        my $filter = $filter_set[0];
 
         my $select_parameters = find($filter, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
         
@@ -580,12 +580,16 @@ sub parseSubject {
 
         my @tmp = ( "$link_id" );
         return (\@tmp, $time, $responseType, 1);
-    } elsif ($topoid_subj) {
+    }
+
+    if ($topoid_subj) {
         # check for a link expression
         my $link_ids = $self->lookupLinkIDs($topoid_subj->textContent);
 
         return ($link_ids, undef, "topoid", 0);
-    } elsif ($nmwg_subj) {
+    }
+
+    if ($nmwg_subj) {
         # we've got a compat subject
         my $compat_subj = find($nmwg_subj, "./*[local-name()='link' and namespace-uri()='".$status_namespaces{"nmtl2"}."']", 1);
         if ($compat_subj) {
@@ -603,19 +607,19 @@ sub parseSubject {
             my @tmp = ( "$link_id" );
             return (\@tmp, $time, "linkid", 0);
         }
+    }
 
-    } elsif (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
+    if (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
         unless ($self->{ENABLE_COMPAT}) {
             throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
         }
 
-        # This is the "match anything" identifier
-        my $link_ids = $self->lookupLinkIDs("urn:ogf:network:*");
+        my @link_ids = keys %{ $self->{LINKSBYID} };
 
-        return ($link_ids, undef, "compat", 0);
-    } else {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+        return (\@link_ids, undef, "compat", 0);
     }
+
+    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
 }
 
 sub parseKey {
@@ -785,9 +789,11 @@ sub outputCompatMetadata {
     my $nodeA = $self->{NODESBYNAME}->{$link->{'nodeA'}->{'name'}};
     my $nodeB = $self->{NODESBYNAME}->{$link->{'nodeB'}->{'name'}};
 
-    my $link_mdId = $link->{'metadataId'};
-    my $nodeA_mdId = $nodeA->{'metadataId'} if (defined $nodeA);
-    my $nodeB_mdId = $nodeB->{'metadataId'} if (defined $nodeB);
+    my ($link_mdId, $nodeA_mdId, $nodeB_mdId);
+
+    $link_mdId = $link->{'metadataId'};
+    $nodeA_mdId = $nodeA->{'metadataId'} if (defined $nodeA);
+    $nodeB_mdId = $nodeB->{'metadataId'} if (defined $nodeB);
 
     if (not defined $self->{MDOUTPUT}) {
         my %hash = ();
@@ -890,6 +896,8 @@ sub createKey {
             }
         endParameters($output);
     $output->endElement("key");
+
+    return;
 }
 
 sub writeoutLinkState_range {
@@ -1041,15 +1049,13 @@ sub parseLinkDefinitionsFile {
             my ($domain, @junk) = split(/-/, $node_name);
             if (not defined $prev_domain) {
                 $prev_domain = $domain;
+            } elsif ($domain eq $prev_domain) {
+                $link_type = "DOMAIN_Link";
             } else {
-                if ($domain eq $prev_domain) {
-                    $link_type = "DOMAIN_Link";
+                if ($knowledge eq "full") {
+                    $link_type = "ID_Link";
                 } else {
-                    if ($knowledge eq "full") {
-                        $link_type = "ID_Link";
-                    } else {
-                        $link_type = "ID_LinkPartialInfo";
-                    }
+                    $link_type = "ID_LinkPartialInfo";
                 }
             }
 

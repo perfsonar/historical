@@ -12,20 +12,21 @@
 
 package perfSONAR_PS::SNMPWalk;
 
-our $VERSION = 0.06;
-
-use Net::SNMP v5.1.0 qw(:snmp DEBUG_ALL);
+use Net::SNMP qw(:snmp DEBUG_ALL);
 use Exporter;
 
+use strict;
 use warnings;
 
-@ISA = ('Exporter');
-@EXPORT = ('snmpwalk');
+our $VERSION = 0.06;
 
-sub snmpwalk($$$$$) {
+use base 'Exporter';
+our @EXPORT = ('snmpwalk');
+
+sub snmpwalk {
     my ($host, $port, $oid, $community, $version) = @_;
 
-    if (!defined $host or $host eq "") {
+    if (not $host) {
         return (-1, "No host specified");
     }
 
