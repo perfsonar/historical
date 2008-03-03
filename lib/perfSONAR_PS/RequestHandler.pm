@@ -13,7 +13,7 @@ register which message types or event types they are interested in.
 
 =cut
 
-use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLERS', 'MERGE_HANDLERS', 'LOGGER';
+use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLERS', 'MERGE_HANDLERS', 'EVENTEQUIVALENCECHECKERS', 'LOGGER';
 
 use strict;
 use warnings;
@@ -25,6 +25,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
+use perfSONAR_PS::EventTypeEquivalenceHandler;
 
 our $VERSION = 0.08;
 
@@ -46,6 +47,8 @@ sub new {
     $self->{MSG_HANDLERS} = ();
     $self->{FULL_MSG_HANDLERS} = ();
     $self->{MERGE_HANDLERS} = ();
+    #$self->{EVENTEQUIVALENCECHECKER} = perfSONAR_PS::EventTypeEquivalenceHandler->new();
+    $self->{EVENTEQUIVALENCECHECKERS} = ();
 
     return $self;
 }
@@ -71,6 +74,23 @@ sub registerMergeHandler {
     foreach my $ev (@{ $eventTypes }) {
         $self->{MERGE_HANDLERS}->{$messageType}->{$ev} = $service;
     }
+
+    return 0;
+}
+
+=head2 registerEventEquivalence 
+    Allows registration of equivalent eventTypes. This is a necessary step in
+    merging to find out whether two metadata elements with differing eventTypes
+    can be merged.
+=cut
+sub registerEventEquivalence {
+    my ($self, $messageType, $eventType1, $eventType2) = @_;
+
+    if (not defined $self->{EVENTEQUIVALENCECHECKERS}->{$messageType}) {
+        $self->{EVENTEQUIVALENCECHECKERS}->{$messageType} = perfSONAR_PS::EventTypeEquivalenceHandler->new();
+    }
+
+    $self->{EVENTEQUIVALENCECHECKERS}->{$messageType}->addEquivalence($eventType1, $eventType2);
 
     return 0;
 }
@@ -801,20 +821,26 @@ sub __mergeMetadata {
     my %eventTypes = ();
 
     foreach my $md (( $prev_md, $curr_md )) {
-        my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
-        foreach my $e ($eventTypes->get_nodelist) {
-            my $value = extract($e, 1);
+        foreach my $ev ($md->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "eventType")) {
+            my $eventType = $ev->textContent;
+            $eventType =~ s/^\s+//;
+            $eventType =~ s/\s+$//;
 
             if (exists $self->{MERGE_HANDLERS}->{$message_type} and
-                exists $self->{MERGE_HANDLERS}->{$message_type}->{$value}) {
-                return $self->{MERGE_HANDLERS}->{$message_type}->{$value}->mergeMetadata({ messageType => $message_type, eventType => $e, parentMd => $prev_md, childMd => $curr_md });
+                exists $self->{MERGE_HANDLERS}->{$message_type}->{$eventType}) {
+                return $self->{MERGE_HANDLERS}->{$message_type}->{$eventType}->mergeMetadata({ messageType => $message_type, eventType => $eventType, parentMd => $prev_md, childMd => $curr_md });
             }
         }
     }
 
-    # This could either error out, or do default merging. For the time being I'll do default merging
+    my $ev_handler;
+    if (defined $self->{EVENTEQUIVALENCECHECKERS}->{$message_type}) {
+        $ev_handler = $self->{EVENTEQUIVALENCECHECKERS}->{$message_type};
+    } elsif (defined $self->{EVENTEQUIVALENCECHECKERS}->{'*'}) {
+        $ev_handler = $self->{EVENTEQUIVALENCECHECKERS}->{'*'};
+    }
 
-    return defaultMergeMetadata($prev_md, $curr_md);
+    return defaultMergeMetadata($prev_md, $curr_md, $ev_handler);
 }
 
 # parseChain ($self, \%message_metadata, $baseId)

@@ -303,45 +303,55 @@ foreach my $port (keys %{ $conf{"port"} }) {
             exit(-1);
         }
 
-        if (not defined $modules_loaded{$endpoint_conf{"module"}}) {
-            load $endpoint_conf{"module"};
-            $modules_loaded{$endpoint_conf{"module"}} = 1;
+        my @endpoint_modules = ();
+
+        if (ref $endpoint_conf{"module"} eq "ARRAY") {
+            @endpoint_modules = @{ $endpoint_conf{"module"} };
+        } else {
+            $logger->debug("Modules is not an array: ".ref($endpoint_conf{"module"}));
+            push @endpoint_modules, $endpoint_conf{"module"};
         }
 
-        my $service = $endpoint_conf{"module"}->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
-        if ($service->init($handlers{$port}->{$fixed_endpoint}) != 0) {
-            $logger->error("Failed to initialize module ".$endpoint_conf{"module"}." on $port:$fixed_endpoint");
-            exit(-1);
-        }
-
-        if ($service->needLS()) {
-            my %ls_child_args = ();
-            $ls_child_args{"service"} = $service;
-            $ls_child_args{"conf"} = \%endpoint_conf;
-            $ls_child_args{"port"} = $port;
-            $ls_child_args{"endpoint"} = $fixed_endpoint;
-            push @ls_services, \%ls_child_args;
-        }
-
-        if ($service->can("cleanLS")) {
-            my %ls_reaper_args = ();
-            $ls_reaper_args{"service"} = $service;
-            $ls_reaper_args{"sleep"} = 0;
-            push @ls_reaper, \%ls_reaper_args;
-        }
-        
         # the echo module is loaded by default unless otherwise specified
-        if ((not defined $endpoint_conf{"disable_echo"} or $endpoint_conf{"disable_echo"} == 0) and
-                (not defined $conf{"disable_echo"} or $conf{"disable_echo"} == 0)) {
-            if (not defined $modules_loaded{$echo_module}) {
-                load $echo_module;
-                $modules_loaded{$echo_module} = 1;
+        if (not $endpoint_conf{"disable_echo"} and not $conf{"disable_echo"}) {
+            my $do_load = 1;
+            foreach my $curr_module (@endpoint_modules) {
+                if ($curr_module eq $echo_module) {
+                    $do_load = 0;
+                }
             }
 
-            my $echo = $echo_module->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
-            if ($echo->init($handlers{$port}->{$fixed_endpoint}) != 0) {
-                $logger->error("Failed to initialize echo module on $port:$fixed_endpoint");
+            if ($do_load) {
+                push @endpoint_modules, $echo_module;
+            }
+        }
+
+        foreach my $module (@endpoint_modules) {
+            if (not defined $modules_loaded{$module}) {
+                load $module;
+                $modules_loaded{$module} = 1;
+            }
+
+            my $service = $module->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
+            if ($service->init($handlers{$port}->{$fixed_endpoint}) != 0) {
+                $logger->error("Failed to initialize module ".$module." on $port:$fixed_endpoint");
                 exit(-1);
+            }
+
+            if ($service->needLS()) {
+                my %ls_child_args = ();
+                $ls_child_args{"service"} = $service;
+                $ls_child_args{"conf"} = \%endpoint_conf;
+                $ls_child_args{"port"} = $port;
+                $ls_child_args{"endpoint"} = $fixed_endpoint;
+                push @ls_services, \%ls_child_args;
+            }
+
+            if ($service->can("cleanLS")) {
+                my %ls_reaper_args = ();
+                $ls_reaper_args{"service"} = $service;
+                $ls_reaper_args{"sleep"} = 0;
+                push @ls_reaper, \%ls_reaper_args;
             }
         }
 

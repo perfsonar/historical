@@ -240,8 +240,10 @@ sub chainMetadata {
     parameters blocks from the parent into the child.
 =cut
 sub defaultMergeMetadata {
-    my ($parent, $child) = @_;
+    my ($parent, $child, $eventTypeEquivalenceHandler) = @_;
 	my $logger = get_logger("perfSONAR_PS::Topology::Common");
+
+    $logger->debug("Merging ".$parent->getAttribute("id")." with ".$child->getAttribute("id"));
 
     # verify that it's not a 'key' value
     if (defined find($parent, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
@@ -282,26 +284,69 @@ sub defaultMergeMetadata {
     }
 
     # Copy over the event types
-    my %eventTypes = ();
+    my %parent_eventTypes = ();
+    my %child_eventTypes = ();
 
     foreach my $ev ($parent->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "eventType")) {
         my $eventType = $ev->textContent;
         $eventType =~ s/^\s+//;
         $eventType =~ s/\s+$//;
-        $eventTypes{$eventType} = $ev;
-        $logger->debug("Found eventType $eventType in parent");
+        $parent_eventTypes{$eventType} = $ev;
+        $logger->debug("Found eventType $eventType in child");
     }
 
     foreach my $ev ($child->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "eventType")) {
         my $eventType = $ev->textContent;
         $eventType =~ s/^\s+//;
         $eventType =~ s/\s+$//;
-        delete $eventTypes{$eventType} if (defined $eventTypes{$eventType});
+        $child_eventTypes{$eventType} = $ev;
         $logger->debug("Found eventType $eventType in child");
     }
 
-    foreach my $ev (keys %eventTypes) {
-        $child->addChild($eventTypes{$ev}->cloneNode(1));
+    if (defined $eventTypeEquivalenceHandler) {
+        my @parent_evs = keys %parent_eventTypes;
+        my @child_evs = keys %child_eventTypes;
+
+        my $common_evs = $eventTypeEquivalenceHandler->matchEventTypes(\@parent_evs, \@child_evs);
+
+        foreach my $ev (keys %child_eventTypes) {
+            my $old_ev = $child->removeChild($child_eventTypes{$ev});
+            $child_eventTypes{$ev} = $old_ev;
+        }
+
+        foreach my $ev (@{ $common_evs }) {
+            if (not defined $child_eventTypes{$ev}) {
+                $child->addChild($parent_eventTypes{$ev}->cloneNode(1));
+            } else {
+                $child->addChild($child_eventTypes{$ev});
+            }
+        }
+    } else {
+        if (scalar(keys %parent_eventTypes) > 0 or scalar(keys %child_eventTypes) > 0) {
+            # if we have a child metadata with nothing in it and a parent with
+            # something in it, copy all the parent's over.
+            if (scalar(keys %child_eventTypes) == 0) {
+                foreach my $ev (keys %parent_eventTypes) {
+                    $child->addChild($parent_eventTypes{$ev}->cloneNode(1));
+                }
+            }
+            # both the child and the parent have eventTypes so only save the ones in common
+            elsif (scalar(keys %parent_eventTypes) > 0) {
+                my $in_common = 0;
+
+                foreach my $ev (keys %child_eventTypes) {
+                    if (not defined $parent_eventTypes{$ev}) {
+                        $child->removeChild($child_eventTypes{$ev});
+                    } else {
+                        $in_common = 1;
+                    }
+                }
+
+                if (not $in_common) {
+                    throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata ".$child->getAttribute("id")." and ".$parent->getAttribute("id")." have no eventTypes in common");
+                }
+            }
+        }
     }
 
     # Copy over any parameter blocks
@@ -419,7 +464,7 @@ sub defaultMergeParameters {
 		link => ( id => '' );
 	);
 =cut
-sub mergeNodes_general($$$) {
+sub mergeNodes_general {
 	my ($old_node, $new_node, $comparison_attrs) = @_;
 	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
