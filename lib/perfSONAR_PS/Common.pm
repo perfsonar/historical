@@ -31,7 +31,7 @@ use Time::HiRes qw( gettimeofday );
 use Log::Log4perl qw(get_logger :nowarn);
 use XML::LibXML;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 use base 'Exporter';
 our @EXPORT = ('readXML','defaultMergeMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
@@ -233,121 +233,309 @@ sub chainMetadata {
     return $dom;
 }
 
+=head2 defaultMergeMetadata ($parent, $child)
+    This function will try to merge the specified parent metadata into the
+    child metadata. It will do this by first merging their subjects, then copying
+    all the eventTypes from the parent into the child and then merging all the
+    parameters blocks from the parent into the child.
+=cut
 sub defaultMergeMetadata {
-    my($node, $original) = @_;
-    if(!($node->getName eq "\#text")) {
-        if($node->getName eq "nmwg:parameter") {
-            exact($node, $original);
+    my ($parent, $child) = @_;
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
+
+    # verify that it's not a 'key' value
+    if (defined find($parent, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
+        throw perfSONAR_PS::Error_compat("error.ma.merge", "Merging with a key metadata is invalid");
+    }
+
+    if (defined find($child, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
+        throw perfSONAR_PS::Error_compat("error.ma.merge", "Merging with a key metadata is invalid");
+    }
+
+    # verify that the subject elements are the same namespace
+    my $parent_subjects = find($parent, "./*[local-name()='subject']", 0);
+    if ($parent_subjects->size() > 1) {
+        throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$parent->getAttribute("id")." has multiple subjects");
+    }
+    my $parent_subject = find($parent, "./*[local-name()='subject']", 1);
+
+    my $child_subjects = find($child, "./*[local-name()='subject']", 0);
+    if ($child_subjects->size() > 1) {
+        throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$child->getAttribute("id")." has multiple subjects");
+    }
+    my $child_subject = find($child, "./*[local-name()='subject']", 1);
+
+    if (not defined $child_subject and not defined $parent_subject) {
+        $logger->debug("No subject in parent or child: ".$child->toString);
+    }
+
+    if (defined $child_subject and defined $parent_subject) {
+        if ($child_subject->namespaceURI ne $parent_subject->namespaceURI) {
+            throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$child->getAttribute("id")." and ".$parent->getAttribute("id")." have subjects with different namespaces.");
+        }
+
+        # Merge the subjects
+        defaultMergeSubject($parent_subject, $child_subject);
+    } elsif (defined $parent_subject) {
+        # if the parent has a subject, but not the child, simply copy the subject from the parent
+        $child->addChild($parent_subject->cloneNode(1));
+    }
+
+    # Copy over the event types
+    my %eventTypes = ();
+
+    foreach my $ev ($parent->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "eventType")) {
+        my $eventType = $ev->textContent;
+        $eventType =~ s/^\s+//;
+        $eventType =~ s/\s+$//;
+        $eventTypes{$eventType} = $ev;
+        $logger->debug("Found eventType $eventType in parent");
+    }
+
+    foreach my $ev ($child->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "eventType")) {
+        my $eventType = $ev->textContent;
+        $eventType =~ s/^\s+//;
+        $eventType =~ s/\s+$//;
+        delete $eventTypes{$eventType} if (defined $eventTypes{$eventType});
+        $logger->debug("Found eventType $eventType in child");
+    }
+
+    foreach my $ev (keys %eventTypes) {
+        $child->addChild($eventTypes{$ev}->cloneNode(1));
+    }
+
+    # Copy over any parameter blocks
+    my %params = ();
+    foreach my $params_elm ($child->getChildrenByTagNameNS("*", "parameters")) {
+        $params{$params_elm->namespaceURI} = $params_elm;
+    }
+
+    foreach my $params_elm ($parent->getChildrenByTagNameNS("*", "parameters")) {
+        if (defined $params{$params_elm->namespaceURI}) {
+            defaultMergeParameters($params_elm, $params{$params_elm->namespaceURI});
         } else {
-            elements($node, $original, "");
-            attributes($node, $original);
-        }
-
-        if($node->hasChildNodes()) {
-            foreach my $c ($node->childNodes) {
-                defaultMergeMetadata($c, $original);
-            }
+            $child->addChild($params_elm->cloneNode(1));
         }
     }
 
     return;
 }
 
-=head2 getPath($node)
-    Cleans up the 'path' (XPath location) of a node by removing positional
-    notation, and the root elements.  This path is then returned.  Note this
-    function should not be called externally.
-=cut 
-sub getPath {
-    my($node) = @_;
-    my $path = "";
+=head2 defaultMergeParameters($parent, $child)
+    This function simply does a simple merge of the parent and child subject
+    element. If an element exists in the parent and not the child, it will be
+    added. If an element exists in both, an attempt will be made to merge them.
+    The only special case elements are parameter elements where the 'name'
+    attribute is checked to verify the equivalence. In all other case, the
+    elements name and namespace will be compared and if they're the same, the
+    function assumes that the child's should supercede the parent's.
+=cut
+sub defaultMergeSubject {
+    my ($subject_parent, $subject_child) = @_;
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
 
-    if($node->nodePath() =~ m/nmwg:store/) {
-        ($path = $node->nodePath()) =~ s/\/nmwg:store\/nmwg:metadata//;
-        $path =~ s/\[\d+\]//g;
-        $path =~ s/^\///g;
-    } elsif($node->nodePath() =~ m/nmwg:message/) {
-        ($path = $node->nodePath()) =~ s/\/nmwg:message\/nmwg:metadata//;
-        $path =~ s/\[\d+\]//g;
-        $path =~ s/^\///g;
-    }
+	my %comparison_attrs = (
+		parameter => ( name => '' ),
+	);
 
-    return $path;
-}
+    my $new_subj = mergeNodes_general($subject_parent, $subject_child);
 
-=head2 elements($node, $original, $extra)
-    Given a node (and knowing what the original structure looks like) adds
-    'missing' elements when needed.  Note this function should not be called
-    externally.
-=cut 
-sub elements {
-    my($node, $original, $extra) = @_;
-    my $path = getPath($node);
-    if($path) {
-        if(!(find($original, $path.$extra, 1))) {
-            my $name = $node->nodeName;
-            my $path2 = $path;
-            $path2 =~ s/\/$name$//;
-            if(find($original, $path2, 1)) {
-                find($original, $path2, 1)->addChild($node->cloneNode(1));
-            } else {
-                $original->addChild($node->cloneNode(1));
-            }
-        }
-    }
+    $subject_child->replaceNode($new_subj);
+
     return;
 }
 
-=head2 attributes($node, $original)
-    Given a node (and knowing what the original structure looks like) adds
-    'missing' attributes.  Note this function should not be called externally.
-=cut 
-sub attributes {
-    my($node, $original) = @_;
-    my $path = getPath($node);
-    foreach my $attr ($node->attributes) {
-        if($attr->isa('XML::LibXML::Attr')) {
-            if($attr->getName ne "id") {
-                if($path) {
-                    if(!(find($original, $path."[@".$attr->getName."]", 1))) {
-                        if(find($original, $path, 1)) {
-                            find($original, $path, 1)->setAttribute($attr->getName, $attr->getValue);
+=head2 defaultMergeParameters($parent, $child)
+    This function takes parent and child parameter blocks and adds each
+    parameter element from the parent into the child. If a parameter by the
+    same name and namespace already exists in the child, the function will
+    merge the two parameters. In the case of a parameter with only a 'value'
+    attribute and no body, the child's will simply replace the parent. In the
+    case that elements exist as children below the parameter, the parameters
+    will be merged.
+=cut
+sub defaultMergeParameters {
+    my ($params_parent, $params_child) = @_;
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
+
+    my %params = ();
+
+    # look up all the parameters in the parent block
+    foreach my $param ($params_parent->getChildrenByTagNameNS("*", "parameter")) {
+        my $name = $param->getAttribute("name");
+        my $ns = $param->namespaceURI;
+
+        $logger->debug("Found parameter $name in namespace $ns in parent");
+
+        if (not $name) {
+            throw perfSONAR_PS::Error_compat("error.ma.merge", "Attempting to merge a parameter with a missing 'name' attribute");
+        }
+
+        $params{$ns} = () if (not defined $params{$ns});
+        $params{$ns}->{$name} = $param;
+    }
+
+    # go through the set of parameters in the child block, merging parameter
+    # elements if they exist in both the child and the parent
+    foreach my $param ($params_child->getChildrenByTagNameNS("*", "parameter")) {
+        my $name = $param->getAttribute("name");
+        my $ns = $param->namespaceURI;
+
+        $logger->debug("Found parameter $name in namespace $ns in child");
+
+        if (not $name) {
+            throw perfSONAR_PS::Error_compat("error.ma.merge", "Attempting to merge a parameter with a missing 'name' attribute");
+        }
+
+        if (defined $params{$ns}->{$name}) {
+            $logger->debug("Merging parameter $name in namespace $ns with parameter in parent");
+
+            $params{$ns} = () if (not defined $params{$ns});
+            my $new_param = mergeNodes_general($params{$ns}{$name}, $param);
+            $param->replaceNode($new_param);
+            delete $params{$ns}->{$name};
+        }
+    }
+
+    # add any parameters that exist in the parent and not in the child
+    foreach my $ns (keys %params) {
+        foreach my $name (keys %{ $params{$ns} }) {
+            $params_child->addChild($params{$ns}->{$name}->cloneNode(1));
+        }
+    }
+}
+
+=head2 mergeNodes_general($old_node, $new_node, $attrs)
+
+	Takes two LibXML nodes containing structures and merges them together.
+	The $attrs variable is a pointer to a hash describing which attributes
+    on an element node should be compared to define equality. If an element's
+    name is not defined in the hash, the element is simply replaced if one of
+    the same name and namespace is found.
+
+	To have links compared based on their 'id' attribute, you would specify $attrs as such:
+
+	my %attrs = (
+		link => ( id => '' );
+	);
+=cut
+sub mergeNodes_general($$$) {
+	my ($old_node, $new_node, $comparison_attrs) = @_;
+	my $logger = get_logger("perfSONAR_PS::Topology::Common");
+
+	if ($old_node->getType != $new_node->getType) {
+		$logger->warn("Inconsistent node types, old ".$old_node->getType. " vs new ".$new_node->getType . ", simply replacing old with new");
+		return $new_node->cloneNode(1);
+	}
+
+	if ($new_node->getType == 3) { # text node
+		return $new_node->cloneNode(1);
+	}
+
+	if ($new_node->getType != 1) {
+		$logger->warn("Received unknown node type: ".$new_node->getType.", returning new node");
+		return $new_node->cloneNode(1);
+	}
+
+	if ($new_node->localname ne $old_node->localname) {
+		$logger->warn("Received inconsistent node names: ".$old_node->localname." and ".$new_node->getType.", returning new node");
+		return $new_node;
+	}
+
+	my $ret_node = $old_node->cloneNode(1);
+
+	my @new_attributes = $new_node->getAttributes();
+
+	foreach my $attribute (@new_attributes) {
+		if ($attribute->getType == 2) {
+			$ret_node->setAttribute($attribute->getName, $attribute->getValue);
+		} else {
+			$logger->warn("Unknown attribute type, ".$attribute->getType.", skipping");
+		}
+	}
+
+	my %elements = ();
+
+	foreach my $elem ($ret_node->getChildNodes) {
+		next if (!defined $elem->localname);
+		$elements{$elem->localname} = () if (!defined $elements{$elem->localname});
+		push @{ $elements{$elem->localname} }, $elem;
+	}
+
+	foreach my $elem ($new_node->getChildNodes) {
+		my $is_equal;
+
+		if ($elem->getType == 3) {
+			# Since we don't know which text node it is, we have to
+			# remove all of them... sigh...
+			foreach my $tn ($ret_node->getChildNodes) {
+				if ($tn->getType == 3) {
+					$ret_node->removeChild($tn);
+				}
+			}
+
+			$ret_node->addChild($elem->cloneNode(1));
+		}
+
+		next if (!defined $elem->localname);
+
+		my $old_elem;
+		if (defined $comparison_attrs->{$elem->localname} and defined $elements{$elem->localname}) {
+			my $i = 0;
+
+			foreach my $tmp_elem (@{ $elements{$elem->localname} }) {
+
+                # skip elements from different namespaces
+                next if ($elem->namespaceURI ne $tmp_elem->namespaceURI);
+
+				$is_equal = 1;
+
+                $logger->debug("Comparison attributes: ".Dumper($comparison_attrs->{$elem->localname}));
+
+                if (not defined $comparison_attrs->{$elem->localname}->{'*'}) {
+                    foreach my $attr (keys %{ $comparison_attrs->{$elem->localname} }) {
+                        my $old_attr = $tmp_elem->getAttributes($attr);
+                        my $new_attr = $elem->getAttributes($attr);
+
+                        if (defined $old_attr and defined $new_attr) {
+                            # if the attribute exists in both the old node and the new node, compare them
+                            if ($old_attr->getValue ne $new_attr->getValue) {
+                                $is_equal = 0;
+                            }
+                        } elsif (defined $old_attr or defined $new_attr) {
+                            # if the attribute exists in one or the other, obviously they cannot be equal
+                            $is_equal = 0;
                         }
                     }
                 }
-            }
-        }
-    }
-    return;
-}
 
-=head2 exact($node, $original)
-    Checks parameter nodes for 'exact' matches.  Note this function should not
-    be called externally.
-=cut 
-sub exact {
-    my($node, $original) = @_;
-    my $path = getPath($node);
+				if ($is_equal) {
+					$old_elem = $tmp_elem;
+					splice(@{ $elements{$elem->localname} }, $i, 1);
+					last;
+				}
 
-    my $attrString = "";
-    my $counter = 0;
-    foreach my $attr ($node->attributes) {
-        if($attr->isa('XML::LibXML::Attr')) {
-            if($attr->getName ne "id") {
-                if($counter == 0) {
-                    $attrString = $attrString . "@" . $attr->getName . "=\"" . $attr->getValue . "\"";
-                } else {
-                    $attrString = $attrString . " and @" . $attr->getName . "=\"" . $attr->getValue . "\"";
-                }
-                $counter++;
-            }
-        }
-    }
-    if($attrString) {
-        $attrString = "[".$attrString."]";
-    }
-    elements($node, $original, $attrString);
-    return;
+				$i++;
+			}
+		} elsif (defined $elements{$elem->localname}) {
+			$old_elem = pop(@{ $elements{$elem->localname} });
+		}
+
+		my $new_child;
+
+		if (defined $old_elem) {
+			$new_child = mergeNodes_general($old_elem, $elem, $comparison_attrs);
+			$ret_node->removeChild($old_elem);
+		} else {
+			$new_child = $elem->cloneNode(1);
+		}
+
+		$ret_node->appendChild($new_child);
+	}
+
+	$logger->debug("Merged Node: ".$ret_node->toString);
+
+	return $ret_node;
 }
 
 =head2 countRefs($id, $dom, $uri, $element, $attr)
