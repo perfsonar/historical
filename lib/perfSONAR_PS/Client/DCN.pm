@@ -5,7 +5,7 @@ use fields 'INSTANCE', 'LOGGER', 'CONF', 'LS_KEY';
 use strict;
 use warnings;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -269,6 +269,57 @@ sub getDomainService {
     }
 
     return \@domains;
+}
+
+=head2 getServiceForDomain($self { domain })
+
+Get the topology service that services a particular domain.
+
+=cut
+
+sub getServiceForDomain {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { domain => 1 } );
+    my %services = ();
+
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+
+    $query .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/nmwg:subject/nmtb:domain[\@id=\"urn:ogf:network:domain=".$parameters->{domain}."\"]]\n";
+    $query .= " let \$metadataidref := \$data/\@metadataIdRef\n";
+    $query .= " let \$metadata := /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\$metadataidref]\n";
+    $query .= " return \$metadata/perfsonar:subject/psservice:service\n\n";
+
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $ss = find( $msg, "./nmwg:data/psservice:datum/psservice:service", 0 );
+    if ($ss) {
+        foreach my $s ( $ss->get_nodelist ) {
+            my $t1 = extract ( find( $s, "./psservice:accessPoint", 1 ), 0);
+            if( $t1 ) {
+                my %temp = ();
+                my $t2 = extract ( find( $s, "./psservice:serviceType", 1 ), 0 );
+                my $t3 = extract ( find( $s, "./psservice:serviceName", 1 ), 0 );
+                my $t4 = extract ( find( $s, "./psservice:serviceDescription", 1 ), 0 );
+                $temp{"serviceType"} = $t2 if $t2;
+                $temp{"serviceName"} = $t3 if $t3;
+                $temp{"serviceDescription"} = $t4 if $t4; 
+                $services{$t1} = \%temp;
+            }
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No domain elements found in return.");
+        return;
+    }
+
+    return \%services;
 }
 
 =head2 nameToId
@@ -743,6 +794,18 @@ __END__
     $domains = $dcn->getDomainService({ accessPoint => "http://some.topology.service.edu:8080/perfSONAR_PS/services/topology", serviceType => "MA" });
     foreach my $d (@$domains) {
       print "Domain:\t" , $d , "\n";
+    }
+
+    # Get the services that are responsible for a particular domain.  Returns
+    # a hash reference to the structure.
+    # 
+    my $services = $dcn->getServiceForDomain({ domain => "I2" });
+    foreach my $s (sort keys %$services) {
+      print $s , "\n";
+      foreach my $s2 (sort keys %{$services->{$s}}) {
+        print "\t" , $s2 , " - " , $services->{$s}->{$s2} , "\n";
+      }
+      print "\n";
     }
 
     # Dump all of the nodes from the LS, returns a matrix in host name/link id
