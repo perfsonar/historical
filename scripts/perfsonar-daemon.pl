@@ -29,7 +29,7 @@ use Config::General;
 use Module::Load;
 use HTTP::Daemon;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 my $libdir;
 my $confdir;
@@ -113,12 +113,12 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Request;
 use perfSONAR_PS::RequestHandler;
-use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::Error;
 
 my %child_pids = ();
 
+$SIG{CHLD} = \&REAPER;
 $SIG{PIPE} = 'IGNORE';
 $SIG{ALRM} = 'IGNORE';
 $SIG{INT} = \&signalHandler;
@@ -370,6 +370,8 @@ if(not $DEBUGFLAG) {
 	&daemonize;
 }
 
+$SIG{CHLD} = \&REAPER;
+
 $0 = "perfsonar.pl ($$)";
 
 foreach my $port (keys %listeners) {
@@ -465,15 +467,13 @@ sub psService {
                     $logger->error("Pid $pid timed out.");
                     kill 9, $pid;
 
-                    my $ret_message = new perfSONAR_PS::XML::Document_string();
                     my $msg = "Timeout occurred, current limit is ".$child_pids{$pid}->{"child_timeout_length"}." seconds. Try decreasing the breadth of your search if possible.";
-                    getResultCodeMessage($ret_message, "message.".genuid(), q{}, q{}, "response", "error.perfSONAR_PS.MA", $msg, undef, 1);
-
+                    my $resMsg = getErrorResponseMessage(eventType => "error.common.timeout", description => $msg);
                     my $response = HTTP::Response->new();
                     $response->message("success");
                     $response->header('Content-Type' => 'text/xml');
                     $response->header('user-agent' => 'perfSONAR-PS/1.0b');
-                    $response->content(makeEnvelope($ret_message->getValue()));
+                    $response->content(makeEnvelope($resMsg));
                     $child_pids{$pid}->{"listener"}->send_response($response);
                     $child_pids{$pid}->{"listener"}->close();
                 }
@@ -482,7 +482,7 @@ sub psService {
 
         my $handle = $listener->accept;
         if (not defined $handle) {
-            my $msg = "Accept returned nothing, likely a timeout occurred";
+            my $msg = "Accept returned nothing, likely a timeout occurred or a child exited";
             $logger->debug($msg);
         } else {
             $logger->info("Received incoming connection from:\t".$handle->peerhost());
@@ -502,10 +502,8 @@ sub psService {
 
                 my $request = perfSONAR_PS::Request->new($handle, $http_request);
                 if (not defined $handlers->{$request->getEndpoint()}) {
-                    my $ret_message = new perfSONAR_PS::XML::Document_string();
                     my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
-                    getResultCodeMessage($ret_message, "message.".genuid(), q{}, q{}, "response", "error.perfSONAR_PS.transport", $msg, undef, 1);
-                    $request->setResponse($ret_message->getValue());
+                    $request->setResponse(getErrorResponseMessage(eventType => "error.common.transport", description => $msg));
                     $request->finish();
                 } else {
                     $0 .= " - ".$request->getEndpoint();
@@ -613,16 +611,16 @@ sub handleRequest {
         my $error;
 
         if($request->getRawRequest->method ne "POST") {
-            my $msg = "Received message with 'INVALID REQUEST', are you using a web browser?";
+            my $msg = "Received message with an invalid HTTP request, are you using a web browser?";
             $logger->error($msg);     
-            throw perfSONAR_PS::Error_compat("error.perfSONAR_PS.MA", $msg);
+            throw perfSONAR_PS::Error_compat("error.common.transport", $msg);
         }
 
         my $action = $request->getRawRequest->headers->{"soapaction"};
         if (!$action =~ m/^.*message\/$/) {
-            my $msg = "Received message with 'INVALID ACTION TYPE'.";
+            my $msg = "Received message with an invalid soap action type.";
             $logger->error($msg);     
-            throw perfSONAR_PS::Error_compat("error.perfSONAR_PS.MA", $msg);
+            throw perfSONAR_PS::Error_compat("error.common.transport", $msg);
         }
 
         $request->parse(\%ns, \$error);
@@ -640,10 +638,7 @@ sub handleRequest {
         my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
         $logger->error($msg);
 
-
-        my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", $ex->eventType, $ex->errorMessage, undef, 1);
-        $request->setResponse($ret_message->getValue());
+        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage));
     }
     catch perfSONAR_PS::Error_compat with {
         my $ex = shift;
@@ -651,19 +646,14 @@ sub handleRequest {
         my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
         $logger->error($msg);
 
-
-        my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", $ex->eventType, $ex->errorMessage, undef, 1);
-        $request->setResponse($ret_message->getValue());
+        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage));
     }
     otherwise { 
         my $ex = shift;
         my $msg = "Unhandled exception or crash: $ex";
         $logger->error($msg);
 
-        my $ret_message = new perfSONAR_PS::XML::Document_string();
-        getResultCodeMessage($ret_message, "message.".genuid(), $messageId, q{}, "response", "error.perfSONAR_PS.MA", "An internal error occurred", undef, 1);
-        $request->setResponse($ret_message->getValue());
+        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => "error.common.internal_error", description => "An internal error occurred"));
     };
 
     $request->finish();
@@ -751,6 +741,18 @@ Kills all the children for the process and then exits
 sub signalHandler {
     killChildren;
     exit(0);
+}
+
+sub REAPER {
+    # We have to get the signal when children exit so that we can close our
+    # reference to that child's socket. Otherwise, the TCP connection will
+    # remain open until the accept call times out and the reaper kicks in.
+    # We could have the reaper clean up the processes, but by handling the
+    # SIGCHLD, it will cause the accept call to return, triggering a process
+    # cleanup. Since this process cleanup must exist (to handle timeouts), we
+    # may as well reuse it to clean up the exiting children as well.
+
+    $SIG{CHLD} = \&REAPER;
 }
 
 =head1 SEE ALSO

@@ -4,9 +4,10 @@ use strict;
 use Exporter;
 use Log::Log4perl qw(get_logger :nowarn);
 
-our $VERSION = 0.06;
 use perfSONAR_PS::Common;
+use Params::Validate qw(:all);
 
+our $VERSION = 0.08;
 
 our @ISA = ('Exporter');
 our @EXPORT = (
@@ -26,6 +27,7 @@ our @EXPORT = (
         'createMessage',
         'createMetadata',
         'createData',
+        'getErrorResponseMessage',
         );
 
 
@@ -226,6 +228,43 @@ sub createData($$$$$) {
     $output->endElement("data");
 
     return 0;
+}
+
+sub getErrorResponseMessage {
+	my $args = validate(@_, 
+			{
+				output => { optional => 1 },
+				id => { type => SCALAR | UNDEF, optional => 1 },
+				messageIdRef => { type => SCALAR | UNDEF, optional => 1 },
+				metadataIdRef => { type => SCALAR | UNDEF, optional => 1 },
+				eventType => { type => SCALAR },
+				description => { type => SCALAR },
+			});
+
+    my $logger = get_logger("perfSONAR_PS::Messages");
+
+    my $output = $args->{output};
+    my $id = $args->{id};
+    my $messageIdRef = $args->{messageIdRef};
+    my $metadataIdRef = $args->{messageIdRef};
+    my $eventType = $args->{eventType};
+    my $description = $args->{description};
+
+    if (not defined $args->{id}) {
+        $id = "message.".genuid();
+    }
+
+    if (not defined $args->{output}) {
+        $output = new perfSONAR_PS::XML::Document_string();
+    }
+
+    my $n = getResultCodeMessage($output, $id, $messageIdRef, $metadataIdRef, "ErrorResponse", $eventType, $description, undef, 0);
+
+    if (not defined $args->{output}) {
+        return $output->getValue;
+    } else {
+        return 0;
+    }
 }
 
 1;

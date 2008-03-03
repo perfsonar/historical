@@ -26,7 +26,7 @@ use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 =head1 API
 =cut
@@ -218,8 +218,6 @@ sub __handleMessage {
         return $self->{FULL_MSG_HANDLERS}->{$messageType}->handleMessage($args);
     }
 
-    throw perfSONAR_PS::Error_compat("error.ma.message_type", "Message type \"$messageType\" not yet supported", 1);
-
     return;
 }
 
@@ -330,7 +328,7 @@ sub __handleEvent {
         return $self->{MSG_HANDLERS}->{$messageType}->handleEvent($args);
     }
 
-    throw perfSONAR_PS::Error_compat("error.ma.event_type", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
+    throw perfSONAR_PS::Error_compat("error.common.event_type_not_supported", "Event type \"$eventType\" is not yet supported for messages with type \"$messageType\"");
 }
 
 =head2 isValidMessageType($self, $messageType);
@@ -423,9 +421,9 @@ sub handleMessage {
     my $messageType = $message->getAttribute("type");
 
     if (not defined $messageType or $messageType eq "") {
-        throw perfSONAR_PS::Error_compat("error.ma.no_message_type", "There was no message type specified");
+        throw perfSONAR_PS::Error_compat("error.common.action_not_supported", "No message type specified");
     } elsif ($self->isValidMessageType($messageType) == 0) {
-        throw perfSONAR_PS::Error_compat("error.ma.invalid_message_type", "Messages of type $messageType are unsupported", 1);
+        throw perfSONAR_PS::Error_compat("error.common.action_not_supported", "Messages of type $messageType are unsupported");
     }
 
     # The module will handle everything for this message type
@@ -454,7 +452,7 @@ sub handleMessage {
 
             $self->{LOGGER}->error("Error handling message block: $ex");
 
-            $errorEventType = "error.ma.internal_error";
+            $errorEventType = "error.common.internal_error";
             $errorMessage = "An internal error occurred while servicing this metadata/data block";
         };
 
@@ -581,7 +579,7 @@ sub handleMessage {
         my $errorMessage;
         my $doOutputMetadata = 1;
         if (($found_event_type and not defined $eventType) or (not $self->isValidMessageType($messageType))) {
-            $errorEventType = "error.ma.event_type";
+            $errorEventType = "error.common.event_type_not_supported";
             $errorMessage = "No supported event types for message of type \"$messageType\"";
         } else {
 
@@ -610,7 +608,7 @@ sub handleMessage {
 
                 $self->{LOGGER}->error("Error handling metadata/data block: $ex");
 
-                $errorEventType = "error.ma.internal_error";
+                $errorEventType = "error.common.internal_error";
                 $errorMessage = "An internal error occurred while servicing this metadata/data block";
             }
         }
@@ -692,10 +690,10 @@ sub parseChains {
         my $errorMessage;
 
         if (not defined $d_idRef or $d_idRef eq "") {
-            $errorEventType = "error.ma.structure";
+            $errorEventType = "error.common.structure";
             $errorMessage = "Data trigger with id \"".$d_idRef."\" has no metadataIdRef";
         } elsif (not exists $message_metadata{$d_idRef}) {
-            $errorEventType = "error.ma.structure";
+            $errorEventType = "error.common.structure";
             $errorMessage = "Data trigger with id \"".$d_idRef."\" has no matching metadata";
         } else {
             $found_pair = 1;
@@ -728,7 +726,7 @@ sub parseChains {
 
                 $self->{LOGGER}->error("Error parsing metadata/data block: $ex");
 
-                $errorEventType = "error.ma.internal_error";
+                $errorEventType = "error.common.internal_error";
                 $errorMessage = "An internal error occurred while parsing this metadata/data block";
             }
         }
@@ -743,7 +741,7 @@ sub parseChains {
     }
 
     if (not $found_pair) {
-        throw perfSONAR_PS::Error_compat("error.ma.no_metadata_data_pair", "There were no metadata/data pairs found in the message");
+        throw perfSONAR_PS::Error_compat("error.common.no_metadata_data_pair", "There were no metadata/data pairs found in the message");
     }
 
     return \@chains;
@@ -764,9 +762,9 @@ sub mergeMetadataChain {
 
     do {
         if (not exists $message_metadata->{$nextMdId}) {
-            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId does not exist");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata $nextMdId does not exist");
         } elsif (exists $used_mds{$nextMdId}) {
-            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId appears multiple times in the chain");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata $nextMdId appears multiple times in the chain");
         }
 
         $used_mds{$nextMdId} = 1;
@@ -837,9 +835,9 @@ sub parseChain {
     # populate the arrays with the filters/chain metadata
     do {
         if (not exists $message_metadata->{$nextMdId}) {
-            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId does not exist");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata $nextMdId does not exist");
         } elsif (exists $used_mds{$nextMdId}) {
-            throw perfSONAR_PS::Error_compat("error.ma.structure", "Metadata $nextMdId appears multiple times in the chain");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata $nextMdId appears multiple times in the chain");
         }
 
         # fill in a hash to see which metadata are in the chain so far
@@ -868,7 +866,7 @@ sub parseChain {
             $subject_idRef = $curr_subject_idRef if (not defined $subject_idRef);
 
             if ($curr_subject_idRef ne $subject_idRef) {
-                thrown perfSONAR_PS::Error_compat("error.ma.structure", "Merged metadata from chain beginning at $baseId have multiple, inconsistent subject metadataIdRefs");
+                thrown perfSONAR_PS::Error_compat("error.common.merge", "Merged metadata from chain beginning at $baseId have multiple, inconsistent subject metadataIdRefs");
             }
         }
 

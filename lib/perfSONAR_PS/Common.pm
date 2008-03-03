@@ -245,23 +245,23 @@ sub defaultMergeMetadata {
 
     # verify that it's not a 'key' value
     if (defined find($parent, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
-        throw perfSONAR_PS::Error_compat("error.ma.merge", "Merging with a key metadata is invalid");
+        throw perfSONAR_PS::Error_compat("error.common.merge", "Merging with a key metadata is invalid");
     }
 
     if (defined find($child, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
-        throw perfSONAR_PS::Error_compat("error.ma.merge", "Merging with a key metadata is invalid");
+        throw perfSONAR_PS::Error_compat("error.common.merge", "Merging with a key metadata is invalid");
     }
 
     # verify that the subject elements are the same namespace
     my $parent_subjects = find($parent, "./*[local-name()='subject']", 0);
     if ($parent_subjects->size() > 1) {
-        throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$parent->getAttribute("id")." has multiple subjects");
+        throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata ".$parent->getAttribute("id")." has multiple subjects");
     }
     my $parent_subject = find($parent, "./*[local-name()='subject']", 1);
 
     my $child_subjects = find($child, "./*[local-name()='subject']", 0);
     if ($child_subjects->size() > 1) {
-        throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$child->getAttribute("id")." has multiple subjects");
+        throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata ".$child->getAttribute("id")." has multiple subjects");
     }
     my $child_subject = find($child, "./*[local-name()='subject']", 1);
 
@@ -271,7 +271,7 @@ sub defaultMergeMetadata {
 
     if (defined $child_subject and defined $parent_subject) {
         if ($child_subject->namespaceURI ne $parent_subject->namespaceURI) {
-            throw perfSONAR_PS::Error_compat("error.ma.merge", "Metadata ".$child->getAttribute("id")." and ".$parent->getAttribute("id")." have subjects with different namespaces.");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Metadata ".$child->getAttribute("id")." and ".$parent->getAttribute("id")." have subjects with different namespaces.");
         }
 
         # Merge the subjects
@@ -368,7 +368,7 @@ sub defaultMergeParameters {
         $logger->debug("Found parameter $name in namespace $ns in parent");
 
         if (not $name) {
-            throw perfSONAR_PS::Error_compat("error.ma.merge", "Attempting to merge a parameter with a missing 'name' attribute");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Attempting to merge a parameter with a missing 'name' attribute");
         }
 
         $params{$ns} = () if (not defined $params{$ns});
@@ -384,7 +384,7 @@ sub defaultMergeParameters {
         $logger->debug("Found parameter $name in namespace $ns in child");
 
         if (not $name) {
-            throw perfSONAR_PS::Error_compat("error.ma.merge", "Attempting to merge a parameter with a missing 'name' attribute");
+            throw perfSONAR_PS::Error_compat("error.common.merge", "Attempting to merge a parameter with a missing 'name' attribute");
         }
 
         if (defined $params{$ns}->{$name}) {
