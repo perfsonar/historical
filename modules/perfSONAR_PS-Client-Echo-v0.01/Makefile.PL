@@ -27,8 +27,20 @@ sub postamble {'
 
 install ::
 
-	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psping
-	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/psping > $(INSTALLBIN)/psping.new
-	mv -f $(INSTALLBIN)/psping.new $(INSTALLBIN)/psping
-	chmod +x ($INSTALLBIN)/psping
+	if [ -f $(INSTALLBIN)/psping ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psping; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLPRIVLIB)\"); print}" $(INSTALLBIN)/psping > $(INSTALLBIN)/psping.new; \
+		mv -f $(INSTALLBIN)/psping.new $(INSTALLBIN)/psping; \
+		chmod +x $(INSTALLBIN)/psping; \
+	elif [ -f $(INSTALLSITEBIN)/psping ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLSITEBIN)/psping; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLSITEBIN)/psping > $(INSTALLSITEBIN)/psping.new; \
+		mv -f $(INSTALLSITEBIN)/psping.new $(INSTALLSITEBIN)/psping; \
+		chmod +x $(INSTALLSITEBIN)/psping; \
+	elif [ -f $(INSTALLVENDORBIN)/psping ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLVENDORBIN)/psping; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLVENDORLIB)\"); print}" $(INSTALLVENDORBIN)/psping > $(INSTALLVENDORBIN)/psping.new; \
+		mv -f $(INSTALLVENDORBIN)/psping.new $(INSTALLVENDORBIN)/psping; \
+		chmod +x $(INSTALLVENDORBIN)/psping; \
+	fi;
 ';}

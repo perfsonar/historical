@@ -37,8 +37,20 @@ sub postamble {'
 
 install ::
 
-	perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psLoadTopology
-	awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/psLoadTopology > $(INSTALLBIN)/psLoadTopology.new
-	mv -f $(INSTALLBIN)/psLoadTopology.new $(INSTALLBIN)/psLoadTopology
-	chmod +x ($INSTALLBIN)/psLoadTopology
+	if [ -f $(INSTALLBIN)/psLoadTopology ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psLoadTopology; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLPRIVLIB)\"); print}" $(INSTALLBIN)/psLoadTopology > $(INSTALLBIN)/psLoadTopology.new; \
+		mv -f $(INSTALLBIN)/psLoadTopology.new $(INSTALLBIN)/psLoadTopology; \
+		chmod +x $(INSTALLBIN)/psLoadTopology; \
+	elif [ -f $(INSTALLSITEBIN)/psLoadTopology ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psLoadTopology; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLSITELIB)\"); print}" $(INSTALLBIN)/psLoadTopology > $(INSTALLBIN)/psLoadTopology.new; \
+		mv -f $(INSTALLBIN)/psLoadTopology.new $(INSTALLBIN)/psLoadTopology; \
+		chmod +x $(INSTALLBIN)/psLoadTopology; \
+	elif [ -f $(INSTALLVENDORBIN)/psLoadTopology ]; then \
+		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psLoadTopology; \
+		awk "{gsub(/XXX_LIBDIR_XXX/,\"$(INSTALLVENDORLIB)\"); print}" $(INSTALLBIN)/psLoadTopology > $(INSTALLBIN)/psLoadTopology.new; \
+		mv -f $(INSTALLBIN)/psLoadTopology.new $(INSTALLBIN)/psLoadTopology; \
+		chmod +x $(INSTALLBIN)/psLoadTopology; \
+	fi;
 ';}
