@@ -164,7 +164,6 @@ sub  MetadataKeyRequest {
     $logger->error(" Please supply  array of metadata and not: " . $self->metadata ) unless $self->metadata && ref($self->metadata) eq 'ARRAY';
     my $data  =   $self->data->[0];
     my $requestmd =  $self->metadata->[0];
-    $logger->debug(" MD  =" . Dumper $requestmd );
     my  $objects  = undef;### iterator returned by backend query
     if($requestmd->key  &&  $requestmd->key->id) {
         $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
@@ -173,12 +172,11 @@ sub  MetadataKeyRequest {
 	$logger->debug(" Found Key =" . $requestmd->key->id);	       
     }  elsif(($requestmd->subject) ||  ($requestmd->parameters)) { 
         my $query =  $self->buildQuery('eq', $requestmd );
-
 	$logger->debug(" Will query = " . Dumper $query);	 	
 	unless($query && $query->{query_metaData} && ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} > 0) {
-	    $logger->warn(" Nothing to query about for md=" . $requestmd->id);
-	    $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
-            next;
+	    $logger->warn(" Empty or malformed request, md=" . $requestmd->id);
+	    $response->addResultResponse({ md => $requestmd, message => 'Empty or malformed request',  eventType => $self->eventTypes->status->failure});	
+            return;
 	}
 	eval {
 	    $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
@@ -192,9 +190,9 @@ sub  MetadataKeyRequest {
 	}
 
     }  else {
-	$logger->warn(" Nothing to query about (no key or parameters supplied) for md=" . $requestmd->id);   
-	$response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
-        next;	     
+	$logger->warn("Malformed request or missing key or parameters, md=" . $requestmd->id);   
+	$response->addResultResponse({ md => $requestmd, message => 'Malformed request or missing key or parameters',  eventType => $self->eventTypes->status->failure});	
+        return;     
     }
      
     if($objects &&   ref($objects) eq 'ARRAY' &&   @{$objects} ) {

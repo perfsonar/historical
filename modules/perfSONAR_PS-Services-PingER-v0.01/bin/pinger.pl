@@ -123,7 +123,7 @@ my $logger;
 if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
     use Log::Log4perl qw(:easy);
 
-    my $output_level = $INFO;
+    my $output_level = $DEBUG;
     if($DEBUGFLAG) {
         $output_level = $DEBUG;
     }

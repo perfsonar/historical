@@ -870,7 +870,7 @@ print $fh <<EOJ;
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim\@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim\@fnal.gov
 
 =cut 
 
@@ -882,7 +882,7 @@ close $fh;
 return; 
 } 
 #    auxiliary private function 
-#    build test file for current class  
+#    build test file for the class  
 #
 sub buildTest {
   my ($elementnodes, $attributes, $className, $name, $element) = @_; 
