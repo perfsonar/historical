@@ -584,13 +584,40 @@ sub handleMessage {
         my $eventType;
         my $found_event_type = 0;
         foreach my $md (@{ $merge_chain }) {
-            my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
-            foreach my $e ($eventTypes->get_nodelist) {
-                $found_event_type = 1;
-                my $value = extract($e, 1);
-                if ($self->isValidEventType($messageType, $value)) {
-                    $eventType = $value;
-                    last;
+            my $key = find($md, "./*[local-name()='key' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 1);
+            if ($key) {
+                $self->{LOGGER}->debug("Found a key");
+                my $key_params = find($key, "./*[local-name()='parameters']", 0);
+                foreach my $params_list ($key_params->get_nodelist) {
+                    $self->{LOGGER}->debug("Found a parameters block: ".$params_list->toString);
+                    my $keyEventType = findvalue($params_list, "./*[local-name()='parameter' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/' and \@name='eventType']");
+                    if ($keyEventType) {
+                        $keyEventType =~ s/^\s*//;
+                        $keyEventType =~ s/\s*$//;
+
+                        $found_event_type = 1;
+
+                        $self->{LOGGER}->debug("Found event type: $keyEventType");
+
+                        if ($self->isValidEventType($messageType, $keyEventType)) {
+                            $eventType = $keyEventType;
+                            last;
+                        } else {
+                            throw perfSONAR_PS::Error_compat("error.common.event_type_not_supported", "Event type $keyEventType not supported for message of type \"$messageType\"");
+                        }
+                    }
+                }
+            }
+
+            if (not $eventType) {
+                my $eventTypes = find($md, "./*[local-name()='eventType' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 0);
+                foreach my $e ($eventTypes->get_nodelist) {
+                    $found_event_type = 1;
+                    my $value = extract($e, 1);
+                    if ($self->isValidEventType($messageType, $value)) {
+                        $eventType = $value;
+                        last;
+                    }
                 }
             }
         }

@@ -885,6 +885,7 @@ sub createKey {
     $output->startElement({ prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} });
         startParameters($output, "params.0");
             addParameter($output, "maKey", escapeString($link_id));
+            addParameter($output, "eventType", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809");
             addParameter($output, "responseFormat", $responseType);
             if ($time) {
                 if ($time->getType eq "range") {
