@@ -43,12 +43,12 @@ if PSHOME == None:
 
 # location of client.pl
 client_script = PSHOME+"/client/client.pl "
-requestDir = PSHOME+"/testing/requests"
 
 # log files for this program go here
 logdir = "/tmp/"
 
 defaultService = "http://localhost:8081/"
+requestDir = "/test_harness/requests/"
 
 # request to get list of all interfaces in the MA
 getAllRequest = ""   # get this from config file
@@ -68,7 +68,7 @@ verbose = 0
 def getOptions():
     """ add Comment here
     """
-    global verbose
+    global verbose, PSHOME
     parser = OptionParser()
     parser.add_option("-u", "--url", action="store", type="string", dest="PS_url",
                   default=defaultService,
@@ -94,6 +94,8 @@ def getOptions():
 	verbose = 1
         print "\nUsing the following Settings: "
         print "   url: ", options.PS_url
+        print "   MA_url: ", options.MA_url
+        print "   LS_url: ", options.LS_url
         print "   Requests: ", options.requestDir
         print "   verbose: ", options.verbose
         print "\n"
@@ -105,6 +107,8 @@ def getOptions():
 def loadTestConfigFile(filename):
     """ add Comment here
     """
+    global requestDir
+
     inputFile = []
     testDescription = []
     expectedOutput = []
@@ -120,9 +124,10 @@ def loadTestConfigFile(filename):
 
     e = tree.find("//requestDir")
     try:
-        requestDir = e.text
+        requestDir = PSHOME + "/" + e.text
     except:
         print "requestDir not found in config file, Using default value for requestDir"
+        requestDir = PSHOME + requestDir
 
     for e in tree.findall("//test"):
         found_tag = 0
@@ -269,7 +274,7 @@ def timeIt(*args):
 
 def main():
 
-    global verbose
+    global verbose, requestDir
     options = getOptions()
     inputFile, testDescription, expectedOutput, getAllRequest = loadTestConfigFile(options.configFile)
     #print inputFile
@@ -289,6 +294,13 @@ def main():
 	MA_service = options.PS_url + "/perfSONAR_PS/services/snmpMA"
     else:
 	MA_service = options.MA_url
+
+    if options.MA_url != None:
+	# assume that if user specifies MA_url, they *only* want to test the MA
+	LS_service = None
+    if options.LS_url != None:
+	MA_service = None
+
 
     # 1st get list of interfaces
     rf = requestDir + "/" + getAllRequest
@@ -347,6 +359,8 @@ def main():
         else:
 	    service = MA_service
 
+	if service == None:
+	     break;
         data = timeIt(runClient,fd,logfname, service, testFile)
         #print "Got reply: %d lines " % len(data)
         # save results to file
