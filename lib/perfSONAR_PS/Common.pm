@@ -246,11 +246,11 @@ sub defaultMergeMetadata {
     $logger->debug("Merging ".$parent->getAttribute("id")." with ".$child->getAttribute("id"));
 
     # verify that it's not a 'key' value
-    if (defined find($parent, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
+    if (defined find($parent, "./*[local-name()='key' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
         throw perfSONAR_PS::Error_compat("error.common.merge", "Merging with a key metadata is invalid");
     }
 
-    if (defined find($child, "./*[local-name()='key' and namespaceURI='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
+    if (defined find($child, "./*[local-name()='key' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 1)) {
         throw perfSONAR_PS::Error_compat("error.common.merge", "Merging with a key metadata is invalid");
     }
 

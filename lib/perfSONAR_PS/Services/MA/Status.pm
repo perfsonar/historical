@@ -626,52 +626,61 @@ sub parseKey {
     my ($self, $key) = @_;
 
     my $key_params = find($key, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    if ($key_params) {
-        # check for a key
-        my $link_id = findvalue($key_params, "./nmwg:parameter[\@name=\"maKey\"]");
-        if ($link_id and idIsAmbiguous($link_id)) {
-            my $msg = "Invalid key";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-        }
-
-        my $responseFormat = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"responseFormat\"]");
-        if (not $responseFormat or ($responseFormat ne "topoid" and $responseFormat ne "linkid" and $responseFormat ne "compat")) {
-            my $msg = "Invalid key";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-        }
-
-        my $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
-        my $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
-        my $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
-
-        $link_id = unescapeString($link_id);
-    
-        unless (defined $time or defined $startTime or defined $endTime) {
-            return ($link_id, undef, $responseFormat);
-        }
-
-        if (defined $time and (defined $startTime or defined $endTime)) {
-            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-        } 
-
-        if (defined $time) {
-            return ($link_id, perfSONAR_PS::Time->new("point", $time), $responseFormat);
-        }
-
-        if (not defined $startTime) {
-            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-        } 
-
-        if (not defined $endTime) {
-            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-        } 
-
-        return ($link_id, perfSONAR_PS::Time->new("range", $startTime, $endTime), $responseFormat);
+    if (not $key_params) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
     }
 
-    return (undef, undef, undef);
+    my $link_id = findvalue($key_params, "./nmwg:parameter[\@name=\"maKey\"]");
+    $self->{LOGGER}->error("LINK ID: '$link_id'");
+
+    if (not $link_id) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    if (idIsAmbiguous($link_id)) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    my $responseFormat = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"responseFormat\"]");
+    if (not $responseFormat or ($responseFormat ne "topoid" and $responseFormat ne "linkid" and $responseFormat ne "compat")) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    my $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+    my $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
+    my $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
+
+    $link_id = unescapeString($link_id);
+
+    unless (defined $time or defined $startTime or defined $endTime) {
+        return ($link_id, undef, $responseFormat);
+    }
+
+    if (defined $time and (defined $startTime or defined $endTime)) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    if (defined $time) {
+        return ($link_id, perfSONAR_PS::Time->new("point", $time), $responseFormat);
+    }
+
+    if (not defined $startTime) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    if (not defined $endTime) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    return ($link_id, perfSONAR_PS::Time->new("range", $startTime, $endTime), $responseFormat);
 }
 
 sub parseCompatSubject {
