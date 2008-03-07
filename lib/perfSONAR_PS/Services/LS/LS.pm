@@ -489,11 +489,19 @@ sub lsRegisterRequestUpdateNew {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $hash = md5_hex( $d_content->toString );
-            my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKeyStorage . "/" . $hash, $mdKeyStorage, $d_content->toString ), name => $mdKeyStorage . "/" . $hash, txn => $parameters->{dbTr}, error => \$error } );
+            my $cleanNode = $d_content->cloneNode( 1 );
+            $cleanNode->removeAttribute("id");
+            my $cleanHash = md5_hex( $cleanNode->toString );
+
+            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKeyStorage."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            $dCount++ if $insRes == 0;
-        }
+            unless ( $success ) {
+                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKeyStorage . "/" . $cleanHash, $mdKeyStorage, $d_content->toString ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+                $errorFlag++ if $error;
+                $dCount++ if $insRes == 0;
+            }
+        }       
+        
     }
 
     if ($errorFlag) {
@@ -547,10 +555,17 @@ sub lsRegisterRequestUpdate {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $hash = md5_hex( $d_content->toString );
-            my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $parameters->{mdKey} . "/" . $hash, $parameters->{mdKey}, $d_content->toString ), name => $parameters->{mdKey} . "/" . $hash, txn => $parameters->{dbTr}, error => \$error } );
+            my $cleanNode = $d_content->cloneNode( 1 );
+            $cleanNode->removeAttribute("id");
+            my $cleanHash = md5_hex( $cleanNode->toString );
+
+            my $success = $parameters->{metadatadb}->queryByName( { name => $parameters->{mdKey}."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            $dCount++ if $insRes == 0;
+            unless ( $success ) {
+                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $parameters->{mdKey} . "/" . $cleanHash, $parameters->{mdKey}, $d_content->toString ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+                $errorFlag++ if $error;
+                $dCount++ if $insRes == 0;
+            }
         }
     }
 
@@ -634,10 +649,16 @@ sub lsRegisterRequestNew {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $hash = md5_hex( $d_content->toString );
-            my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKey . "/" . $hash, $mdKey, $d_content->toString ), name => $mdKey . "/" . $hash, txn => $parameters->{dbTr}, error => \$error } );
+            my $cleanNode = $d_content->cloneNode( 1 );
+            $cleanNode->removeAttribute("id");
+            my $cleanHash = md5_hex( $cleanNode->toString );
+            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKey."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            $dCount++ if $insRes == 0;
+            unless ( $success ) {
+                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKey . "/" . $cleanHash, $mdKey, $d_content->toString ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+                $errorFlag++ if $error;
+                $dCount++ if $insRes == 0;
+            }
         }
     }
 
