@@ -929,7 +929,9 @@ sub maMetadataKeyRequest {
         );
 
     }
-    $self->{METADATADB}->closeDB( { error => \$error } );
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB}->closeDB( { error => \$error } );
+    }
     return;
 }
 
@@ -1212,8 +1214,9 @@ sub maSetupDataRequest {
             }
         );
     }
-
-    $self->{METADATADB}->closeDB( { error => \$error } );
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB}->closeDB( { error => \$error } );
+    }    
     return;
 }
 

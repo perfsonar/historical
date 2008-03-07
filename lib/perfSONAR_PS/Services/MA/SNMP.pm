@@ -48,6 +48,7 @@ use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::Services::LS::General qw ( wrapStore );
 
 my %ma_namespaces = (
     nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -259,6 +260,12 @@ sub init {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
         }
+
+        if ( $self->{CONF}->{"snmp"}->{"db_autoload"} and $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} ) {
+            my $status  = $self->loadXMLDB( { metadatadb => $metadatadb } );
+            return -1 if $status == -1;
+        }
+        
         $metadatadb->closeDB( { error => \$error } );
         $self->{METADATADB} = q{};
     }
@@ -294,6 +301,76 @@ sub prepareDatabases {
         return;
     }
     return $metadatadb;
+}
+
+=head2 loadXMLDB( { metadatadb } ) 
+
+If the deployment has an existing store file, but would like to utilize an XML
+DB instance, this function will load the old data into an existing XML DB.  This
+operation is non-destructive.
+
+=cut
+
+sub loadXMLDB {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { metadatadb => 1 } );
+
+    my $sourceError = q{};
+    my $sourceDB = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} } );
+    $sourceDB->openDB( { error => \$sourceError } );
+    unless ( $sourceDB ) {
+        $self->{LOGGER}->error("Couldn't initialize store file: $sourceError");
+        return -1;
+    }
+
+    my $dom = $sourceDB->getDOM;
+    if ( $dom ) {
+        my $error     = q{};
+        my $errorFlag = 0;
+        my $dbTr      = q{};
+        $dbTr = $parameters->{metadatadb}->getTransaction( { error => \$error } );
+        unless ($dbTr) {
+            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+            return -1;
+        }    
+    
+        foreach my $data ($dom->getDocumentElement->getChildrenByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "data")) {
+            my $dHash = md5_hex($data->toString);
+            $parameters->{metadatadb}->insertIntoContainer({ content => wrapStore($data->toString, "MAStore"), name => $dHash, txn => $dbTr, error => \$error });
+            $self->{LOGGER}->debug( "Inserting \"".$data->toString."\" as \"".$dHash."\"." );
+
+            my $metadata = $dom->getDocumentElement->find("./nmwg:metadata[\@id=\"".$data->getAttribute("metadataIdRef")."\"]")->get_node(1); 
+            my $mdHash = md5_hex($metadata->toString);
+            $parameters->{metadatadb}->insertIntoContainer({ content => wrapStore($metadata->toString, "MAStore"), name => $mdHash, txn => $dbTr, error => \$error });
+            $self->{LOGGER}->debug( "Inserting \"".$metadata->toString."\" as \"".$mdHash."\"." );
+        }
+        
+        if ($errorFlag) {
+            $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+            return -1;
+        }
+        else {
+            my $status = $parameters->{metadatadb}->commitTransaction( { txn => $dbTr, error => \$error } );
+            if ( $status == 0 ) {
+                undef $dbTr;
+            }
+            else {
+                $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+                undef $dbTr;
+                $self->{LOGGER}->error( "Database error: \"" . $error . "\", aborting." );
+                return -1;
+            }
+        }        
+    }
+    else {
+        $self->{LOGGER}->error( "Source file \"" . $self->{CONF}->{"snmp"}->{"autoload_metadata_db_file"} . "\" error, aborting." );
+        return -1;        
+    }
+    return 0;
 }
 
 =head2 buildHashedKeys($self {})
@@ -722,7 +799,9 @@ sub maMetadataKeyRequest {
         );
 
     }
-    $self->{METADATADB}->closeDB( { error => \$error } );
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB}->closeDB( { error => \$error } );
+    }
     return;
 }
 
@@ -1000,8 +1079,9 @@ sub maSetupDataRequest {
             }
         );
     }
-
-    $self->{METADATADB}->closeDB( { error => \$error } );
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB}->closeDB( { error => \$error } );
+    }
     return;
 }
 
@@ -1653,7 +1733,8 @@ L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>, 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>,
+L<perfSONAR_PS::Services::LS::General>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
