@@ -26,7 +26,7 @@ use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::Common;
 
-our @EXPORT = ( 'wrapStore', 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery', 'cleanLS' );
+our @EXPORT = ( 'wrapStore', 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery');
 
 =head2 wrapStore($content, $type)
 
@@ -125,98 +125,6 @@ sub extractQuery {
         }
     }
     return $query;
-}
-
-=head2 cleanLS($conf, $ns, $dirname)
-
-Performs an LS cleaning.  
-
-=cut
-
-sub cleanLS {
-    my ( $conf, $ns, $dirname ) = @_;
-    my $logger = get_logger("perfSONAR_PS::LS::LS");
-
-    if ( defined $dirname ) {
-        if ( !( $conf->{"METADATA_DB_NAME"} =~ "^/" ) ) {
-            $conf->{"METADATA_DB_NAME"} = $dirname . "/" . $conf->{"METADATA_DB_NAME"};
-        }
-    }
-
-    my $error      = q{};
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB(
-        {
-            env  => $conf->{"METADATA_DB_NAME"},
-            cont => $conf->{"METADATA_DB_FILE"},
-            ns   => \%{$ns}
-        }
-    );
-    $metadatadb->openDB( { txn => q{}, error => \$error } );
-    $logger->error($error) if $error;
-    if ($error) {
-        return;
-    }
-
-    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
-    my $dbTr = $metadatadb->getTransaction( { txn => \$error } );
-    if ( $dbTr and ( not $error ) ) {
-        my $errorFlag = 0;
-
-        my $dbError;
-        my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$dbError } );
-        $logger->error($error) and $errorFlag = 1 if $error;
-        if ( $#resultsString != -1 ) {
-            my $len = $#resultsString;
-            for my $x ( 0 .. $len ) {
-                my $parser = XML::LibXML->new();
-                my $doc    = $parser->parse_string( $resultsString[$x] );
-
-                my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
-                if ( $time =~ m/^\d+$/mx ) {
-                    my $key = $doc->getDocumentElement->getAttribute("id");
-                    $key =~ s/-control$//mx;
-                    if ( $time and $key and $sec >= $time ) {
-                        my @resultsString2 = $metadatadb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
-                        $logger->error($error) and $errorFlag = 1 if $error;
-                        my $len2 = $#resultsString2;
-                        for my $z ( 0 .. $len2 ) {
-                            $logger->debug( "Removing data \"" . $resultsString2[$z] . "\"." );
-                            $metadatadb->remove( { name => $resultsString2[$z], txn => $dbTr, error => \$error } );
-                            $logger->error($error) and $errorFlag = 1 if $error;
-                        }
-                        $logger->debug( "Removing control info \"" . $key . "-control\"." );
-                        $metadatadb->remove( { name => $key . "-control", txn => $dbTr, error => \$error } );
-                        $logger->error($error) and $errorFlag = 1 if $error;
-
-                        $logger->debug( "Removing service info \"" . $key . "\"." );
-                        $metadatadb->remove( { name => $key, txn => $dbTr, error => \$dbError } );
-                        $logger->error($error) and $errorFlag = 1 if $error;
-                    }
-                }
-                else {
-                    $logger->error("Time value not found in control metadata.");
-                }
-            }
-        }
-
-        $metadatadb->commitTransaction( { txn => $dbTr, error => \$error } );
-        undef $dbTr;
-        if ($errorFlag) {
-            $logger->error( "Database Error: \"" . $error . "\"." );
-            $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-        }
-        else {
-            $logger->debug("Finishing Reaper.");
-        }
-    }
-    else {
-        $logger->error("Cound not start database transaction.");
-        $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-        undef $dbTr;
-    }
-
-    return;
 }
 
 1;

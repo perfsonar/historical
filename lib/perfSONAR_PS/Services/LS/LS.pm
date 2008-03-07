@@ -175,6 +175,20 @@ sub needLS {
     return 0;
 }
 
+=head2 cleanLS($self)
+
+...
+
+=cut
+
+sub cleanLS {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { error => 0 } );
+
+
+    return 0;
+}
+
 =head2 handleMessageParameters($self, $msgParams)
 
 Looks in the mesage for any parameters and sets appropriate variables if
@@ -726,10 +740,10 @@ sub lsDeregisterRequest {
 
             my $removeQuery = q{};
             if ($mdFlag) {
-                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmwg:metadata[" . getMetadataXQuery( $d_md, q{} ) . "]", txn => q{}, error => \$error } );
+                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmwg:metadata[" . getMetadataXQuery( { node => $d_md } ) . "]", txn => q{}, error => \$error } );
             }
             else {
-                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmtopo:node[" . getMetadataXQuery( $d_md, q{} ) . "]", txn => q{}, error => \$error } );
+                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmtopo:node[" . getMetadataXQuery( { node => $d_md }  ) . "]", txn => q{}, error => \$error } );
             }
             my $len = $#resultsString;
             for my $x ( 0 .. $len ) {
@@ -921,7 +935,7 @@ sub lsKeyRequest {
     my $error = q{};
     my $service = find( $parameters->{m}, "./perfsonar:subject/psservice:service", 1 );
     if ($service) {
-        my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( $parameters->{m}, q{} ) . "]";
+        my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
         my @resultsString = $parameters->{metadatadb}->query( { query => $queryString, txn => q{}, error => \$error } );
         if ($error) {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
