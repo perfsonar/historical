@@ -17,14 +17,16 @@ Ask questions based on a service to generate a configuration file.
 
 my $was_installed = 0;
 my $DEFAULT_FILE;
-my $confdir = "/etc/perfsonar";
+my $confdir;
 
 if ($was_installed) {
-    $DEFAULT_FILE = "XXX_DEFAULT_XXX";
+    $confdir = "XXX_CONFDIR_XXX";
 }
 else {
-    $DEFAULT_FILE = "/etc/perfsonar/daemon.conf";
+    $confdir = "."
 }
+
+$DEFAULT_FILE = $confdir . "/daemon.conf";
 
 print " -- perfSONAR-PS Daemon Configuration --\n";
 print " - [press enter for the default choice] -\n\n";
@@ -32,7 +34,7 @@ print " - [press enter for the default choice] -\n\n";
 my $file = shift;
 
 if ( not $file ) {
-    $file = &ask( "What file should I write the configuration to? ", "/etc/perfsonar/daemon.conf", undef, '.+' );
+    $file = &ask( "What file should I write the configuration to? ", $DEFAULT_FILE, undef, '.+' );
 }
 
 my $tmp;
@@ -639,7 +641,7 @@ sub printValue {
     }
     elsif ( ref $value eq "HASH" ) {
         if ( $name eq "endpoint" or $name eq "port" ) {
-            foreach my $elm ( keys %{$value} ) {
+            foreach my $elm ( sort keys %{$value} ) {
                 printSpaces( $fileHandle, $depth );
                 print $fileHandle "<$name $elm>\n";
                 printValue( $fileHandle, q{}, $value->{$elm}, $depth + 4 );
@@ -652,7 +654,7 @@ sub printValue {
                 printSpaces( $fileHandle, $depth );
                 print $fileHandle "<$name>\n";
             }
-            foreach my $elm ( keys %{$value} ) {
+            foreach my $elm ( sort keys %{$value} ) {
                 printValue( $fileHandle, $elm, $value->{$elm}, $depth + 4 );
             }
             if ($name) {

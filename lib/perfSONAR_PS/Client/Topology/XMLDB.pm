@@ -3,6 +3,7 @@ package perfSONAR_PS::Client::Topology::XMLDB;
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Common;
@@ -35,6 +36,9 @@ sub new {
 
     if (defined $ns and $ns ne "") {
         $self->{"DB_NAMESPACES"} = $ns;
+    } else {
+        my %ns = getTopologyNamespaces();
+        $self->{"DB_NAMESPACES"} = \%ns;
     }
 
     $self->{"DB_OPEN"} = 0;
@@ -85,6 +89,12 @@ sub close {
     $self->{DB_OPEN} = 0;
 
     return $self->{DATADB}->closeDB;
+}
+
+sub dbIsOpen {
+    my ($self) = @_;
+
+    return $self->{DB_OPEN};
 }
 
 sub setDBContainer {
@@ -384,6 +394,8 @@ sub changeTopology {
                     $logger->error($msg);
                     return (-1, $msg);
                 }
+
+                $new_domain = $domain->cloneNode(1);
             }
 
             $elements{$id} = $new_domain;
@@ -594,16 +606,18 @@ sub changeTopology {
         }
     }
 
-# update everything that is sitting at the top-level
+    $logger->debug("Elements: ".Dumper(\%elements));
+
+    # update everything that is sitting at the top-level
     foreach my $id (keys %elements) {
         next if (defined $elements{$id}->parentNode->parentNode);
 
         $logger->debug("Inserting $id");
 
-# This is a hack to force the namespace declaration into the
-# node we're going to insert. A better solution would be to
-# have each node declare its namespace, but I'm not sure how to
-# finagle libxml into doing that.
+    # This is a hack to force the namespace declaration into the
+    # node we're going to insert. A better solution would be to
+    # have each node declare its namespace, but I'm not sure how to
+    # finagle libxml into doing that.
         $elements{$id}->unbindNode;
         $elements{$id}->setNamespace($elements{$id}->namespaceURI(), $elements{$id}->prefix, 1);
 

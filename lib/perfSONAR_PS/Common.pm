@@ -36,7 +36,7 @@ use base 'Exporter';
 our @EXPORT = ('readXML','defaultMergeMetadata',
            'countRefs', 'genuid', 'extract', 'reMap', 'consultArchive',
             'find', 'findvalue', 'escapeString', 'unescapeString',
-             'makeEnvelope', 'mapNamespaces', 'mergeConfig');
+             'makeEnvelope', 'mapNamespaces', 'mergeConfig', 'mergeNodes_general');
 
 
 =head2 find($node, $query, $return_first)

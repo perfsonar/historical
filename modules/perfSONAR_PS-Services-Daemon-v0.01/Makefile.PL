@@ -118,17 +118,17 @@ install ::
 
 	if [ -f $(INSTALLBIN)/psConfigureDaemon ]; then \
 		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLBIN)/psConfigureDaemon; \
-		awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/daemon.conf\"); print}" $(INSTALLBIN)/psConfigureDaemon > $(INSTALLBIN)/psConfigureDaemon.new; \
+		awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLBIN)/psConfigureDaemon > $(INSTALLBIN)/psConfigureDaemon.new; \
 		mv -f $(INSTALLBIN)/psConfigureDaemon.new $(INSTALLBIN)/psConfigureDaemon; \
 		chmod +x $(INSTALLBIN)/psConfigureDaemon; \
 	elif [ -f $(INSTALLSITEBIN)/psConfigureDaemon ]; then \
 		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLSITEBIN)/psConfigureDaemon; \
-		awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/daemon.conf\"); print}" $(INSTALLSITEBIN)/psConfigureDaemon > $(INSTALLSITEBIN)/psConfigureDaemon.new; \
+		awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLSITEBIN)/psConfigureDaemon > $(INSTALLSITEBIN)/psConfigureDaemon.new; \
 		mv -f $(INSTALLSITEBIN)/psConfigureDaemon.new $(INSTALLSITEBIN)/psConfigureDaemon; \
 		chmod +x $(INSTALLSITEBIN)/psConfigureDaemon; \
 	elif [ -f $(INSTALLVENDORBIN)/psConfigureDaemon ]; then \
 		perl -i -p -e "s/was_installed = 0/was_installed = 1/" $(INSTALLVENDORBIN)/psConfigureDaemon; \
-		awk "{gsub(/XXX_DEFAULT_XXX/,\"$(sysconfdir)/perfsonar/daemon.conf\"); print}" $(INSTALLVENDORBIN)/psConfigureDaemon > $(INSTALLVENDORBIN)/psConfigureDaemon.new; \
+		awk "{gsub(/XXX_CONFDIR_XXX/,\"$(sysconfdir)/perfsonar\"); print}" $(INSTALLVENDORBIN)/psConfigureDaemon > $(INSTALLVENDORBIN)/psConfigureDaemon.new; \
 		mv -f $(INSTALLVENDORBIN)/psConfigureDaemon.new $(INSTALLVENDORBIN)/psConfigureDaemon; \
 		chmod +x $(INSTALLVENDORBIN)/psConfigureDaemon; \
 	fi;

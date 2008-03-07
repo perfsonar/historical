@@ -108,7 +108,7 @@ sub buildChangeTopologyRequest {
     $request .= "</nmwg:data>\n";
     $request .= "</nmwg:message>\n";
 
-    return;
+    return $request;
 }
 
 sub xQuery {
