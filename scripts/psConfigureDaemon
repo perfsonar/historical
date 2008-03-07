@@ -17,6 +17,7 @@ Ask questions based on a service to generate a configuration file.
 
 my $was_installed = 0;
 my $DEFAULT_FILE;
+my $confdir = "/etc/perfsonar";
 
 if ($was_installed) {
     $DEFAULT_FILE = "XXX_DEFAULT_XXX";
@@ -91,8 +92,8 @@ while (1) {
         $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0",                                                          $config{"max_worker_lifetime"},      '^\d+$' );
         $config{"disable_echo"}             = &ask( "Disable echo by default (0 for yes, 1 for now) ",                                      0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
-        $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations ",                                              60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
-        $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed ",                                          20,                                                           $config{"reaper_interval"},          '^\d+$' );
+        $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
+        $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed [in seconds] ",                             20,                                                           $config{"reaper_interval"},          '^\d+$' );
         $config{"pid_dir"}                  = &ask( "Enter pid dir location ",                                                              "/var/run",                                                   $config{"pid_dir"},                  q{} );
         $config{"pid_file"}                 = &ask( "Enter pid filename ",                                                                  "ps.pid",                                                     $config{"pid_file"},                 q{} );
     }
@@ -186,7 +187,7 @@ while (1) {
         }
 
         do {
-            $input = &ask( "Enter endpoint in form 'port/endpoint_path' (e.g. 8080/perfSONAR/services/MA) or select from a number from the above ", q{}, undef, '^(\d+[\/].*|\d+)$' );
+            $input = &ask( "Enter endpoint in form 'port/endpoint_path' (e.g. 8080/perfSONAR_PS/services/SERVICE_NAME) or select from a number from the above ", q{}, undef, '^(\d+[\/].*|\d+)$' );
             if ( $input =~ /^\d+$/mx ) {
                 $input = $endpoints[$input];
             }
@@ -286,13 +287,21 @@ sub config_ls {
         $config->{"ls"} = ();
     }
 
-    $config->{"ls"}->{"ls_ttl"}           = &ask( "Enter default TTL (in seconds) for registered data ",                                   "3600",                 $config->{"ls"}->{"ls_ttl"},           '\d+' );
-    $config->{"ls"}->{"metadata_db_name"} = &ask( "Directory in which to store registered metadata",                                       "/etc/perfsonar/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
-    $config->{"ls"}->{"metadata_db_file"} = &ask( "File in which to store registered metadata",                                            "store.dbxml",          $config->{"ls"}->{"metadata_db_file"}, '.+' );
-    $config->{"ls"}->{"reaper_interval"}  = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0",                    $config->{"ls"}->{"reaper_interval"},  '^[01]$' );
+    $config->{"ls"}->{"ls_ttl"}           = &ask( "Enter default TTL for registered data [in minutes] ",                                   "60",                $config->{"ls"}->{"ls_ttl"},           '\d+' );
+    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ",                                              $confdir . "/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"ls"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ",                           "store.dbxml",       $config->{"ls"}->{"metadata_db_file"}, '.+' );
+    $config->{"ls"}->{"reaper_interval"}  = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0",                 $config->{"ls"}->{"reaper_interval"},  '^[01]$' );
     if ( $config->{"ls"}->{"reaper_interval"} ) {
-        $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the number of minutes between LS removal ", "30", "30", '^\d+$' );
+        $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
     }
+
+    $config->{"ls"}->{"service_name"} = &ask( "Enter a name for this service ", "Lookup Service", $config->{"ls"}->{"service_name"}, '.+' );
+
+    $config->{"ls"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"ls"}->{"service_type"}, '.+' );
+
+    $config->{"ls"}->{"service_description"} = &ask( "Enter a service description ", "Lookup Service", $config->{"ls"}->{"service_description"}, '.+' );
+
+    $config->{"ls"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"ls"}->{"service_accesspoint"}, '^http:\/\/' );
 
     return;
 }
@@ -300,37 +309,43 @@ sub config_ls {
 sub config_perfsonarbouy_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
-    $config->{"perfsonarbouy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from ", "file|xmldb", $config->{"perfsonarbouy"}->{"metadata_db_type"}, '(file|xmldb)' );
+    my $amiconfdir = $confdir;
+
+    $config->{"perfsonarbouy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbouy"}->{"owmesh"}, '.+' );
+    $amiconfdir = $config->{"perfsonarbouy"}->{"owmesh"};
+
+    $config->{"perfsonarbouy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbouy"}->{"metadata_db_type"}, '(file|xmldb)' );
 
     if ( $config->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", q{}, $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+' );
+        delete $config->{"perfsonarbouy"}->{"metadata_db_file"} if $config->{"perfsonarbouy"}->{"metadata_db_file"} and $config->{"perfsonarbouy"}->{"metadata_db_file"} =~ m/dbxml$/mx;
+        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/store.xml", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '\.xml$' );
     }
     elsif ( $config->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"perfsonarbouy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", q{}, $config->{"perfsonarbouy"}->{"metadata_db_name"}, '.+' );
-        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML database ",  q{}, $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+' );
+        $config->{"perfsonarbouy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/xmldb", $config->{"perfsonarbouy"}->{"metadata_db_name"}, '.+' );
+        delete $config->{"perfsonarbouy"}->{"metadata_db_file"} if $config->{"perfsonarbouy"}->{"metadata_db_file"} and $config->{"perfsonarbouy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
+        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+' );
     }
-
-    $config->{"perfsonarbouy"}->{"conf"} = &ask( "Enter the location of the 'owmesh.conf' file: ", q{}, $config->{"perfsonarbouy"}->{"metadata_db_type"}, '.+' );
 
     $config->{"perfsonarbouy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbouy"}->{"enable_registration"}, '^[01]$' );
 
     if ( $config->{"perfsonarbouy"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
         $registration_interval = $config->{"perfsonarbouy"}->{"ls_registration_interval"} if ( defined $config->{"perfsonarbouy"}->{"ls_registration_interval"} );
-        $config->{"perfsonarbouy"}->{"ls_registration_interval"} = &ask( "Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$' );
+        $config->{"perfsonarbouy"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
 
         my $ls_instance = $def_config->{"ls_instance"};
         $ls_instance = $config->{"perfsonarbouy"}->{"ls_instance"} if ( defined $config->{"perfsonarbouy"}->{"ls_instance"} );
         $config->{"perfsonarbouy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-
-        $config->{"perfsonarbouy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_name"}, '.+' );
-
-        $config->{"perfsonarbouy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbouy"}->{"service_type"}, '.+' );
-
-        $config->{"perfsonarbouy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_description"}, '.+' );
-
-        $config->{"perfsonarbouy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbouy"}->{"service_accesspoint"}, '^http:\/\/' );
     }
+
+    $config->{"perfsonarbouy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_name"}, '.+' );
+
+    $config->{"perfsonarbouy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbouy"}->{"service_type"}, '.+' );
+
+    $config->{"perfsonarbouy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_description"}, '.+' );
+
+    $config->{"perfsonarbouy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbouy"}->{"service_accesspoint"}, '^http:\/\/' );
+
     return;
 }
 
@@ -338,7 +353,7 @@ sub config_snmp_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
     my $rrdtool = q{};
-    if ( open( RRDTOOL, "whereis rrdtool |" ) ) {
+    if ( open( RRDTOOL, "which rrdtool |" ) ) {
         $rrdtool = <RRDTOOL>;
         $rrdtool =~ s/rrdtool:\s+//mx;
         $rrdtool =~ s/\n//gmx;
@@ -358,11 +373,20 @@ sub config_snmp_ma {
     $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
 
     if ( $config->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", "store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
+        delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/dbxml$/mx;
+        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $confdir . "/store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
+        delete $config->{"snmp"}->{"db_autoload"}               if $config->{"snmp"}->{"db_autoload"};
+        delete $config->{"snmp"}->{"autoload_metadata_db_file"} if $config->{"snmp"}->{"autoload_metadata_db_file"};
+        delete $config->{"snmp"}->{"metadata_db_name"}          if $config->{"snmp"}->{"metadata_db_name"};
     }
     elsif ( $config->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", "/etc/perfsonar/xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
-        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML database ",  "store.dbxml",          $config->{"snmp"}->{"metadata_db_file"}, '.+' );
+        $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
+        delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/\.xml$/mx;
+        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"snmp"}->{"metadata_db_file"}, '.+' );
+        $config->{"snmp"}->{"db_autoload"} = &ask( "Would you like to auto-load the database [non-destructive] ? (0 for no, 1 for yes) ", "1", $config->{"snmp"}->{"db_autoload"}, '^[01]$' );
+        if ( $config->{"snmp"}->{"db_autoload"} eq "1" ) {
+            $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
+        }
     }
 
     $config->{"snmp"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"snmp"}->{"enable_registration"}, '^[01]$' );
@@ -370,20 +394,21 @@ sub config_snmp_ma {
     if ( $config->{"snmp"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
         $registration_interval = $config->{"snmp"}->{"ls_registration_interval"} if ( defined $config->{"snmp"}->{"ls_registration_interval"} );
-        $config->{"snmp"}->{"ls_registration_interval"} = &ask( "Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$' );
+        $config->{"snmp"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
 
         my $ls_instance = $def_config->{"ls_instance"};
         $ls_instance = $config->{"snmp"}->{"ls_instance"} if ( defined $config->{"snmp"}->{"ls_instance"} );
         $config->{"snmp"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
-
-        $config->{"snmp"}->{"service_name"} = &ask( "Enter a name for this service ", "SNMP MA", $config->{"snmp"}->{"service_name"}, '.+' );
-
-        $config->{"snmp"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"snmp"}->{"service_type"}, '.+' );
-
-        $config->{"snmp"}->{"service_description"} = &ask( "Enter a service description ", "SNMP MA", $config->{"snmp"}->{"service_description"}, '.+' );
-
-        $config->{"snmp"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"snmp"}->{"service_accesspoint"}, '^http:\/\/' );
     }
+
+    $config->{"snmp"}->{"service_name"} = &ask( "Enter a name for this service ", "SNMP MA", $config->{"snmp"}->{"service_name"}, '.+' );
+
+    $config->{"snmp"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"snmp"}->{"service_type"}, '.+' );
+
+    $config->{"snmp"}->{"service_description"} = &ask( "Enter a service description ", "SNMP MA", $config->{"snmp"}->{"service_description"}, '.+' );
+
+    $config->{"snmp"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"snmp"}->{"service_accesspoint"}, '^http:\/\/' );
+
     return;
 }
 
@@ -417,7 +442,7 @@ sub config_status_ma {
     if ( $config->{"status"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
         $registration_interval = $config->{"status"}->{"ls_registration_interval"} if ( defined $config->{"status"}->{"ls_registration_interval"} );
-        $config->{"status"}->{"ls_registration_interval"} = &ask( "Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$' );
+        $config->{"status"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
 
         my $ls_instance = $def_config->{"ls_instance"};
         $ls_instance = $config->{"status"}->{"ls_instance"} if ( defined $config->{"status"}->{"ls_instance"} );
@@ -504,7 +529,7 @@ sub config_topology_ma {
     if ( $config->{"topology"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
         $registration_interval = $config->{"topology"}->{"ls_registration_interval"} if ( defined $config->{"topology"}->{"ls_registration_interval"} );
-        $config->{"topology"}->{"ls_registration_interval"} = &ask( "Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$' );
+        $config->{"topology"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
 
         my $ls_instance = $def_config->{"ls_instance"};
         $ls_instance = $config->{"topology"}->{"ls_instance"} if ( defined $config->{"topology"}->{"ls_instance"} );
@@ -537,7 +562,7 @@ sub ask {
         local $| = 1;
         local $_ = <STDIN>;
         chomp;
-        if ( defined $_ and $_ ne q{}) {
+        if ( defined $_ and $_ ne q{} ) {
             $result = $_;
         }
         elsif ( defined $prev_value ) {
