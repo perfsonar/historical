@@ -1,10 +1,11 @@
 package perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
+
+our $VERSION = 0.08;
 
 use fields 'AGENT', 'PHYSPORT', 'TYPE', 'LOGGER';
 
@@ -27,10 +28,10 @@ my %stateMappings = (
 	"oos-ma" => 'maintenance',
 );
 
-sub new($$$$$$$$$) {
-	my $class = shift;
+sub new {
+	my ($class, @params) = @_;
 
-	my $parameters = validate(@_,
+	my $parameters = validate(@params,
             {
 		type => 1,
                 hostType => 0,
@@ -56,7 +57,7 @@ sub new($$$$$$$$$) {
 			 not $parameters->{username} or
 			 not $parameters->{password})
 	   ) {
-		return undef;
+		return;
 	}
 
 	if (not defined $parameters->{agent}) {
@@ -80,13 +81,13 @@ sub new($$$$$$$$$) {
 	$self->{TYPE} = $parameters->{type};
 
 	if ($self->{TYPE} ne "admin" and $self->{TYPE} ne "oper") {
-		return undef;
+		return;
 	}
 
 	return $self;
 }
 
-sub run($) {
+sub run {
 	my ($self) = @_;
 
 	my ($signalState, $portState) = $self->{AGENT}->getPortStatus($self->{PHYSPORT});
@@ -114,37 +115,43 @@ sub run($) {
 	}
 }
 
-sub getType($) {
+sub getType {
 	my ($self) = @_;
 
 	return $self->{TYPE};
 }
 
-sub setType($$) {
+sub setType {
 	my ($self, $type) = @_;
 
 	$self->{TYPE} = $type;
+
+	return;
 }
 
-sub setPhysPort($$) {
+sub setPhysPort {
 	my ($self, $physPort) = @_;
 
 	$self->{PHYSPORT} = $physPort;
+
+	return;
 }
 
-sub getPhysPort($) {
+sub getPhysPort {
 	my ($self) = @_;
 	
 	return $self->{PHYSPORT};
 }
 
-sub setAgent($$) {
+sub setAgent {
 	my ($self, $agent) = @_;
 	
 	$self->{AGENT} = $agent;
+
+	return;
 }
 
-sub getAgent($) {
+sub getAgent {
 	my ($self) = @_;
 	
 	return $self->{AGENT};
@@ -161,10 +168,10 @@ use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT',
 'OPTICAL', 'SONET', 'ETHERNET', 'CACHE_TIME', 'CHECK_OPTICAL',
 'CHECK_SONET', 'CHECK_ETHERNET', 'TIME', 'LOGGER';
 
-sub new($$$$$$$$$) {
-	my $class = shift;
+sub new {
+	my ($class, @params) = @_;
 
-	my $parameters = validate(@_,
+	my $parameters = validate(@params,
             {
                 type => 1,
                 address => 1,
@@ -181,7 +188,7 @@ sub new($$$$$$$$$) {
 	if (not defined $parameters->{type} and not defined $parameters->{address} and
 		not defined $parameters->{port} and not defined $parameters->{username} and
 		not defined $parameters->{password}) {
-		return undef;
+		return;
 	}
 
 	my $self = fields::new($class);
@@ -220,68 +227,78 @@ sub new($$$$$$$$$) {
 	return $self;
 }
 
-sub getType($) {
+sub getType {
 	my ($self) = @_;
 
 	return $self->{TYPE};
 }
 
-sub setType($$) {
+sub setType {
 	my ($self, $type) = @_;
 
 	$self->{TYPE} = $type;
+
+	return;
 }
 
-sub setUsername($$) {
+sub setUsername {
 	my ($self, $username) = @_;
 
 	$self->{USERNAME} = $username;
+
+	return;
 }
 
-sub getUsername($) {
+sub getUsername {
 	my ($self) = @_;
 
 	return $self->{USERNAME};
 }
 
-sub setPassword($$) {
+sub setPassword {
 	my ($self, $password) = @_;
 
 	$self->{PASSWORD} = $password;
+
+	return;
 }
 
-sub getPassword($) {
+sub getPassword {
 	my ($self) = @_;
 
 	return $self->{PASSWORD};
 }
 
-sub setAddress($$) {
+sub setAddress {
 	my ($self, $address) = @_;
 
 	$self->{ADDRESS} = $address;
+
+	return;
 }
 
-sub getAddress($) {
+sub getAddress {
 	my ($self) = @_;
 
 	return $self->{ADDRESS};
 }
 
-sub setAgent($$) {
+sub setAgent {
 	my ($self, $agent) = @_;
 	
 	$self->{TL1AGENT} = $agent;
+
+	return;
 }
 
-sub getAgent($) {
+sub getAgent {
 	my ($self) = @_;
 	
 	return $self->{TL1AGENT};
 }
 
 
-sub getPortStatus($$) {
+sub getPortStatus {
 	my ($self, $physPort) = @_;
 
 	my $time = time;
@@ -332,6 +349,8 @@ sub getCurrentData {
 	$self->{TL1AGENT}->disconnect();
 
 	$self->{TIME} = time;
+
+	return;
 }
 
 1;

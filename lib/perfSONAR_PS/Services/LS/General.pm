@@ -2,9 +2,10 @@ package perfSONAR_PS::Services::LS::General;
 
 use base 'Exporter';
 
+use strict;
 use warnings;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -25,7 +26,7 @@ use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::Common;
 
-@EXPORT = ( 'wrapStore', 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery', 'cleanLS' );
+our @EXPORT = ( 'wrapStore', 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery', 'cleanLS' );
 
 =head2 wrapStore($content, $type)
 

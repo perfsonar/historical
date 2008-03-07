@@ -6,9 +6,9 @@ use Log::Log4perl qw(get_logger);
 
 use fields 'CONF', 'DIRECTORY';
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
-sub new($) {
+sub new {
     my ($self, $conf, $directory) = @_;
 
     $self = fields::new($self) unless ref $self;
@@ -33,6 +33,8 @@ sub setConf {
     } else {
         $logger->error("Missing argument."); 
     }
+
+    return;
 }
 
 sub setDirectory {
@@ -44,9 +46,11 @@ sub setDirectory {
     } else {
         $logger->error("Missing argument."); 
     }
+
+    return;
 }
 
-sub init($) {
+sub init {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::Base");
 
@@ -55,7 +59,7 @@ sub init($) {
     return -1;
 }
 
-sub collectMeasurements($$) {
+sub collectMeasurements {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::Base");
 

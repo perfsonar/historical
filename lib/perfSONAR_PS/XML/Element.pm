@@ -5,7 +5,7 @@ use Carp qw( croak );
 @ISA = ('Exporter');
 @EXPORT = ();
            
-our $VERSION = '0.01';
+our $VERSION = 0.08;
 
 #use overload '""' => 'print';
 

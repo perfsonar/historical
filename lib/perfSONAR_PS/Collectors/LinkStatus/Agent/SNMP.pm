@@ -1,109 +1,127 @@
 package perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 
-sub new($$$$$$$$$) {
-	my ($package, $type, $hostname, $ifIndex, $version, $community, $oid, $agent) = @_;
+use fields 'TYPE', 'HOSTNAME', 'IFINDEX', 'COMMUNITY', 'VERSION', 'OID';
 
-	my %hash = ();
+
+our $VERSION = 0.08;
+
+sub new {
+	my ($class, $type, $hostname, $ifIndex, $version, $community, $oid, $agent) = @_;
+
+	my $self = fields::new($class);
 
 	if ($agent ne "") {
-		$hash{"AGENT"} = $agent;
+		$self->{"AGENT"} = $agent;
 	} else {
-		$hash{"AGENT"} = new perfSONAR_PS::Collectors::LinkStatus::SNMPAgent( $hostname, "" , $version, $community, "");
+		$self->{"AGENT"} = new perfSONAR_PS::Collectors::LinkStatus::SNMPAgent( $hostname, "" , $version, $community, "");
 	}
 
-	$hash{"TYPE"} = $type;
-	$hash{"HOSTNAME"} = $hostname;
-	$hash{"IFINDEX"} = $ifIndex;
-	$hash{"COMMUNITY"} = $community;
-	$hash{"VERSION"} = $version;
-	$hash{"OID"} = $oid;
+	$self->{"TYPE"} = $type;
+	$self->{"HOSTNAME"} = $hostname;
+	$self->{"IFINDEX"} = $ifIndex;
+	$self->{"COMMUNITY"} = $community;
+	$self->{"VERSION"} = $version;
+	$self->{"OID"} = $oid;
 
-	bless \%hash => $package;
+	return $self;
 }
 
-sub getType($) {
+sub getType {
 	my ($self) = @_;
 
 	return $self->{TYPE};
 }
 
-sub setType($$) {
+sub setType {
 	my ($self, $type) = @_;
 
 	$self->{TYPE} = $type;
+
+	return;
 }
 
-sub setHostname($$) {
+sub setHostname {
 	my ($self, $hostname) = @_;
 
 	$self->{HOSTNAME} = $hostname;
+
+	return;
 }
 
-sub getHostname($) {
+sub getHostname {
 	my ($self) = @_;
 
 	return $self->{HOSTNAME};
 }
 
-sub setifIndex($$) {
+sub setifIndex {
 	my ($self, $ifIndex) = @_;
 
 	$self->{IFINDEX} = $ifIndex;
+
+	return;
 }
 
-sub getifIndex($) {
+sub getifIndex {
 	my ($self) = @_;
 
 	return $self->{IFINDEX};
 }
 
-sub setCommunity($$) {
+sub setCommunity {
 	my ($self, $community) = @_;
 	
 	$self->{COMMUNITY} = $community;
+
+	return;
 }
 
-sub getCommunity($) {
+sub getCommunity {
 	my ($self) = @_;
 	
 	return $self->{COMMUNITY};
 }
 
-sub setVersion($$) {
+sub setVersion {
 	my ($self, $version) = @_;
 	
 	$self->{VERSION} = $version;
+
+	return;
 }
 
-sub getVersion($) {
+sub getVersion {
 	my ($self) = @_;
 	
 	return $self->{VERSION};
 }
 
-sub setOID($$) {
+sub setOID {
 	my ($self, $oid) = @_;
 	
 	$self->{OID} = $oid;
+
+	return;
 }
 
-sub getOID($) {
+sub getOID {
 	my ($self) = @_;
 	
 	return $self->{OID};
 }
 
-sub setAgent($$) {
+sub setAgent {
 	my ($self, $agent) = @_;
 	
 	$self->{AGENT} = $agent;
+
+	return;
 }
 
-sub getAgent($) {
+sub getAgent {
 	my ($self) = @_;
 	
 	return $self->{AGENT};
@@ -153,39 +171,42 @@ use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::Common;
 
+use fields 'HOST', 'PORT','VERSION', 'COMMUNITY', 'VARIABLES', 'CACHED_TIME', 'CACHE_LENGTH', 'HOSTTICKS';
+
 sub new {
-	my ($package, $host, $port, $ver, $comm, $vars, $cache_length) = @_;
-	my %hash = ();
+	my ($class, $host, $port, $ver, $comm, $vars, $cache_length) = @_;
+
+	my $self = fields::new($class);
 
 	if(defined $host and $host ne "") {
-		$hash{"HOST"} = $host;
+		$self->{"HOST"} = $host;
 	}
 	if(defined $port and $port ne "") {
-		$hash{"PORT"} = $port;
+		$self->{"PORT"} = $port;
 	} else {
-		$hash{"PORT"} = 161;
+		$self->{"PORT"} = 161;
 	}
 	if(defined $ver and $ver ne "") {
-		$hash{"VERSION"} = $ver;
+		$self->{"VERSION"} = $ver;
 	}
 	if(defined $comm and $comm ne "") {
-		$hash{"COMMUNITY"} = $comm;
+		$self->{"COMMUNITY"} = $comm;
 	}
 	if(defined $vars and $vars ne "") {
-		$hash{"VARIABLES"} = \%{$vars};
+		$self->{"VARIABLES"} = \%{$vars};
 	} else {
-		$hash{"VARIABLES"} = ();
+		$self->{"VARIABLES"} = ();
 	}
 	if (defined $cache_length and $cache_length ne "") {
-		$hash{"CACHE_LENGTH"} = $cache_length;
+		$self->{"CACHE_LENGTH"} = $cache_length;
 	} else {
-		$hash{"CACHE_LENGTH"} = 1;
+		$self->{"CACHE_LENGTH"} = 1;
 	}
 
-	$hash{"VARIABLES"}->{"1.3.6.1.2.1.1.3.0"} = ""; # add the host ticks so we can track it
-	$hash{"HOSTTICKS"} = 0;
+	$self->{"VARIABLES"}->{"1.3.6.1.2.1.1.3.0"} = ""; # add the host ticks so we can track it
+	$self->{"HOSTTICKS"} = 0;
 
-	bless \%hash => $package;
+	return $self;
 }
 
 sub setHost {
@@ -253,19 +274,20 @@ sub setVariables {
 	return;
 }
 
-sub setCacheLength($$) {
+sub setCacheLength {
 	my ($self, $cache_length) = @_;
 
 	if (defined $cache_length and $cache_length ne "") {
 		$self->{"CACHE_LENGTH"} = $cache_length;
 	}
+	return;
 }
 
 sub addVariable {
 	my ($self, $var) = @_;
 	my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus::SNMPAgent");
 
-	if(!defined $var or $var eq "") {
+	if(not defined $var or $var eq "") {
 		$logger->error("Missing argument.");
 	} else {
 		$self->{VARIABLES}->{$var} = "";
@@ -277,17 +299,17 @@ sub getVar {
 	my ($self, $var) = @_;
 	my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus::SNMPAgent");
 
-	if(!defined $var or $var eq "") {
+	if(not defined $var or $var eq "") {
 		$logger->error("Missing argument.");
-		return undef;
+		return;
 	} 
 
-	if (!defined $self->{VARIABLES}->{$var} || !defined $self->{CACHED_TIME} || time() - $self->{CACHED_TIME} > $self->{CACHE_LENGTH}) {
+	if (not defined $self->{VARIABLES}->{$var} or not defined $self->{CACHED_TIME} or time() - $self->{CACHED_TIME} > $self->{CACHE_LENGTH}) {
 		$self->{VARIABLES}->{$var} = "";
 
 		my ($status, $res) = $self->collectVariables();
 		if ($status != 0) {
-			return undef;
+			return;
 		}
 
 		my %results = %{ $res };
@@ -316,6 +338,8 @@ sub refreshVariables {
 
 	$self->{CACHED} = \%results;
 	$self->{CACHED_TIME} = time();
+
+	return;
 }
 
 sub getVariableCount {
@@ -369,7 +393,7 @@ sub setSession {
 									-timeticks => 0x0
 									]) or $logger->error("Couldn't open SNMP session to \"".$self->{HOST}."\".");
 
-		if(!defined($self->{SESSION})) {
+		if(not defined($self->{SESSION})) {
 			$logger->error("SNMP error: ".$self->{ERROR});
 		}
 	}
@@ -404,7 +428,7 @@ sub collectVariables {
 
 		my $res = $self->{SESSION}->get_request(-varbindlist => \@oids) or $logger->error("SNMP error.");
 
-		if(!defined($res)) {
+		if(not defined($res)) {
 			my $msg = "SNMP error: ".$self->{SESSION}->error;
 			$logger->error($msg);
 			return (-1, $msg);
@@ -413,7 +437,7 @@ sub collectVariables {
 
 			%results = %{ $res };
 
-			if (!defined $results{"1.3.6.1.2.1.1.3.0"}) {
+			if (not defined $results{"1.3.6.1.2.1.1.3.0"}) {
 				$logger->warn("No time values, getTime may be screwy");
 			} else {
 				my $new_ticks = $results{"1.3.6.1.2.1.1.3.0"} / 100;
@@ -444,7 +468,7 @@ sub collect {
 	if(defined $var and $var ne "") {
 		if(defined $self->{SESSION}) {
 			my $results = $self->{SESSION}->get_request(-varbindlist => [$var]) or $logger->error("SNMP error: \"".$self->{ERROR}."\".");
-			if(!defined($results)) {
+			if(not defined($results)) {
 				$logger->error("SNMP error: \"".$self->{ERROR}."\".");
 				return -1;
 			} else {

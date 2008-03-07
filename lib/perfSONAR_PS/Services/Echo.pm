@@ -10,7 +10,7 @@ use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 sub init {
 	my ($self, $handler) = @_;
@@ -20,6 +20,10 @@ sub init {
 	$handler->registerEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0", $self);
 	$handler->registerEventHandler("EchoRequest", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0", $self);
 	$handler->registerEventHandler_Regex("EchoRequest", "^echo.*", $self);
+
+	$handler->registerEventEquivalence("EchoRequest", "echo.ma", "http://schemas.perfsonar.net/tools/admin/echo/2.0");
+	$handler->registerEventEquivalence("EchoRequest", "echo.ma", "http://schemas.perfsonar.net/tools/admin/echo/ma/2.0");
+	$handler->registerEventEquivalence("EchoRequest", "echo.ma", "http://schemas.perfsonar.net/tools/admin/echo/ls/2.0");
 
 	return 0;
 }

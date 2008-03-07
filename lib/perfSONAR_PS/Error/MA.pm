@@ -1,6 +1,7 @@
 use perfSONAR_PS::Error;
+use perfSONAR_PS::Error::Common;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 =head1 NAME
 

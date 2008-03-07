@@ -16,7 +16,6 @@ The verbose flag allows lots of debug options to print to the screen.  If the op
 omitted the service will run in daemon mode.
 =cut
 
-our $VERSION = 0.06;
 use warnings;
 use strict;
 use Getopt::Long;
@@ -28,6 +27,8 @@ use POSIX ":sys_wait_h";
 use Cwd;
 use Config::General;
 use Module::Load;
+
+our $VERSION = 0.08;
 
 sub handleCollector($);
 sub daemonize();

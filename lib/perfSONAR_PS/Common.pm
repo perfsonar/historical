@@ -448,6 +448,8 @@ sub defaultMergeParameters {
             $params_child->addChild($params{$ns}->{$name}->cloneNode(1));
         }
     }
+
+    return;
 }
 
 =head2 mergeNodes_general($old_node, $new_node, $attrs)

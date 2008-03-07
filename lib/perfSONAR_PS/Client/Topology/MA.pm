@@ -1,246 +1,251 @@
 package perfSONAR_PS::Client::Topology::MA;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 
+use fields 'URI_STRING';
+
+our $VERSION = 0.08;
+
 sub new {
-	my ($package, $uri_string) = @_;
-	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
+    my ($package, $uri_string) = @_;
+    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
 
-	my %hash;
+    my $self = fields::new($package);
 
-	if (defined $uri_string and $uri_string ne "") { 
-		$hash{"URI_STRING"} = $uri_string;
+    if (defined $uri_string and $uri_string ne "") { 
+        $self->{"URI_STRING"} = $uri_string;
 
-	}
+    }
 
-	$hash{"DATA_MA"} = "";
-
-	bless \%hash => $package;
+    return $self;
 }
 
-sub open($) {
-	my ($self) = @_;
+sub open {
+    my ($self) = @_;
 
-	return (0, "");
+    return (0, "");
 }
 
-sub close($) {
-	my ($self) = @_;
+sub close {
+    my ($self) = @_;
 
-	return 0;
+    return 0;
 }
 
-sub setURIString($$) {
-	my ($self, $uri_string) = @_;
+sub setURIString {
+    my ($self, $uri_string) = @_;
 
-	$self->{URI_STRING} = $uri_string;
+    $self->{URI_STRING} = $uri_string;
+
+    return;
 }
 
-sub dbIsOpen($) {
-	return 1;
+sub dbIsOpen {
+    return 1;
 }
 
-sub getURIString($$) {
-	my ($self) = @_;
+sub getURIString {
+    my ($self) = @_;
 
-	return $self->{URI_STRING};
+    return $self->{URI_STRING};
 }
 
-sub buildGetAllRequest() {
-	my $request = "";
+sub buildGetAllRequest {
+    my $request = "";
 
-	$request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-	$request .= "<nmwg:metadata id=\"meta0\">\n";
-	$request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/all/20070809</nmwg:eventType>\n";
-	$request .= "</nmwg:metadata>\n";
-	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
-	$request .= "</nmwg:message>\n";
+    $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+    $request .= "<nmwg:metadata id=\"meta0\">\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/all/20070809</nmwg:eventType>\n";
+    $request .= "</nmwg:metadata>\n";
+    $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
+    $request .= "</nmwg:message>\n";
 
-	return ("", $request);
+    return ("", $request);
 }
 
-sub buildXqueryRequest($) {
-	my ($xquery) = @_;
-	my $request = "";
+sub buildXqueryRequest {
+    my ($xquery) = @_;
+    my $request = "";
 
-	$request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-	$request .= "<nmwg:metadata id=\"meta0\">\n";
-	$request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/xquery/20070809</nmwg:eventType>\n";
-	$request .= "  <xquery:subject id=\"sub1\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-	$request .= $xquery;
-	$request .= "  </xquery:subject>\n";
-	$request .= "</nmwg:metadata>\n";
-	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
-	$request .= "</nmwg:message>\n";
+    $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+    $request .= "<nmwg:metadata id=\"meta0\">\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/xquery/20070809</nmwg:eventType>\n";
+    $request .= "  <xquery:subject id=\"sub1\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $request .= $xquery;
+    $request .= "  </xquery:subject>\n";
+    $request .= "</nmwg:metadata>\n";
+    $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
+    $request .= "</nmwg:message>\n";
 
-	return ("", $request);
+    return ("", $request);
 
 }
 
-sub buildChangeTopologyRequest($$) {
-	my ($type, $topology) = @_;
-	my $eventType;
+sub buildChangeTopologyRequest {
+    my ($type, $topology) = @_;
+    my $eventType;
 
-	if ($type eq "add") {
-		$eventType = "http://ggf.org/ns/nmwg/topology/change/add/20070809";
-	} elsif ($type eq "update") {
-		$eventType = "http://ggf.org/ns/nmwg/topology/change/update/20070809";
-	} elsif ($type eq "replace") {
-		$eventType = "http://ggf.org/ns/nmwg/topology/change/replace/20070809";
-	}
+    if ($type eq "add") {
+        $eventType = "http://ggf.org/ns/nmwg/topology/change/add/20070809";
+    } elsif ($type eq "update") {
+        $eventType = "http://ggf.org/ns/nmwg/topology/change/update/20070809";
+    } elsif ($type eq "replace") {
+        $eventType = "http://ggf.org/ns/nmwg/topology/change/replace/20070809";
+    }
 
-	my $request = "";
+    my $request = "";
 
-	$request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-	$request .= "<nmwg:metadata id=\"meta0\">\n";
-	$request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
-	$request .= "</nmwg:metadata>\n";
-	$request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
-	$request .= $topology->toString;
-	$request .= "</nmwg:data>\n";
-	$request .= "</nmwg:message>\n";
+    $request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+    $request .= "<nmwg:metadata id=\"meta0\">\n";
+    $request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+    $request .= "</nmwg:metadata>\n";
+    $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
+    $request .= $topology->toString;
+    $request .= "</nmwg:data>\n";
+    $request .= "</nmwg:message>\n";
+
+    return;
 }
 
-sub xQuery($$) {
-	my ($self, $xquery) = @_;
-	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
-	my $localContent = "";
-	my $error;
-	my ($status, $res, $request);
+sub xQuery {
+    my ($self, $xquery) = @_;
+    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
+    my $localContent = "";
+    my $error;
+    my ($status, $res, $request);
 
-	($status, $request) = buildXqueryRequest($xquery);
+    ($status, $request) = buildXqueryRequest($xquery);
 
-	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
-	if (!defined $host && !defined $port && !defined $endpoint) {
-		my $msg = "Specified argument is not a URI";
-		my $logger->error($msg);
-		return (-1, $msg);
-	}
+    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
+    if (not defined $host and not defined $port and not defined $endpoint) {
+        my $msg = "Specified argument is not a URI";
+        my $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	($status, $res) = consultArchive($host, $port, $endpoint, $request);
-	if ($status != 0) {
-		my $msg = "Error consulting archive: $res";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
+    ($status, $res) = consultArchive($host, $port, $endpoint, $request);
+    if ($status != 0) {
+        my $msg = "Error consulting archive: $res";
+        $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	my $topo_msg = $res;
+    my $topo_msg = $res;
 
-	foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
-		foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $topology = find($data, './nmtopo:topology', 1);
-				if (defined $topology) {
-					return (0, $topology->toString);
-				} 
-			}
-		}
-	}
+    foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
+        foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
+            if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
+                my $topology = find($data, './nmtopo:topology', 1);
+                if (defined $topology) {
+                    return (0, $topology->toString);
+                } 
+            }
+        }
+    }
 
-	my $msg = "Response does not contain a topology";
-	$logger->error($msg);
-	return (-1, $msg);
+    my $msg = "Response does not contain a topology";
+    $logger->error($msg);
+    return (-1, $msg);
 }
 
 sub getAll {
-	my($self) = @_;
-	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
-	my @results;
-	my $error;
-	my ($status, $res);
+    my($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
+    my @results;
+    my $error;
+    my ($status, $res);
 
-	my $request = buildGetAllRequest();
+    my $request = buildGetAllRequest();
 
-	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
-	if (!defined $host && !defined $port && !defined $endpoint) {
-		my $msg = "Specified argument is not a URI";
-		my $logger->error($msg);
-		return (-1, $msg);
-	}
+    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
+    if (not defined $host and not defined $port and not defined $endpoint) {
+        my $msg = "Specified argument is not a URI";
+        my $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	($status, $res) = consultArchive($host, $port, $endpoint, $request);
-	if ($status != 0) {
-		my $msg = "Error consulting archive: $res";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
+    ($status, $res) = consultArchive($host, $port, $endpoint, $request);
+    if ($status != 0) {
+        my $msg = "Error consulting archive: $res";
+        $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	my $topo_msg = $res;
+    my $topo_msg = $res;
 
-	foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
-		foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
-			if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-				my $topology = find($data, './nmtopo:topology', 1);
-				if (defined $topology) {
-					return (0, $topology);
-				} 
-			}
-		}
-	}
+    foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
+        foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
+            if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
+                my $topology = find($data, './nmtopo:topology', 1);
+                if (defined $topology) {
+                    return (0, $topology);
+                } 
+            }
+        }
+    }
 
-	my $msg = "Response does not contain a topology";
-	$logger->error($msg);
-	return (-1, $msg);
+    my $msg = "Response does not contain a topology";
+    $logger->error($msg);
+    return (-1, $msg);
 }
 
-sub changeTopology($$) {
-	my ($self, $type, $topology) = @_;
-	my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
-	my @results;
-	my $error;
-	my ($status, $res);
+sub changeTopology {
+    my ($self, $type, $topology) = @_;
+    my $logger = get_logger("perfSONAR_PS::Client::Topology::MA");
+    my @results;
+    my $error;
+    my ($status, $res);
 
-	my $request = buildChangeTopologyRequest($type, $topology);
+    my $request = buildChangeTopologyRequest($type, $topology);
 
-	$logger->debug("Change Request: ".$request);
+    $logger->debug("Change Request: ".$request);
 
-	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
-	if (!defined $host && !defined $port && !defined $endpoint) {
-		my $msg = "Specified argument is not a URI";
-		my $logger->error($msg);
-		return (-1, $msg);
-	}
+    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
+    if (not defined $host and not defined $port and not defined $endpoint) {
+        my $msg = "Specified argument is not a URI";
+        my $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	($status, $res) = consultArchive($host, $port, $endpoint, $request);
-	if ($status != 0) {
-		my $msg = "Error consulting archive: $res";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
+    ($status, $res) = consultArchive($host, $port, $endpoint, $request);
+    if ($status != 0) {
+        my $msg = "Error consulting archive: $res";
+        $logger->error($msg);
+        return (-1, $msg);
+    }
 
-	my $topo_msg = $res;
+    my $topo_msg = $res;
 
-	$logger->debug("Change Response: ".$topo_msg->toString);
+    $logger->debug("Change Response: ".$topo_msg->toString);
 
-	my $find_res;
+    my $find_res;
 
-	$find_res = find($res, "./nmwg:data", 0);
-	if ($find_res) {
-	foreach my $data ($find_res->get_nodelist) {
-		my $metadata = find($res, "./nmwg:metadata[\@id='".$data->getAttribute("metadataIdRef")."']", 1);
-		if (!defined $metadata) {
-			return (-1, "No metadata in response");
-		}
+    $find_res = find($res, "./nmwg:data", 0);
+    if ($find_res) {
+        foreach my $data ($find_res->get_nodelist) {
+            my $metadata = find($res, "./nmwg:metadata[\@id='".$data->getAttribute("metadataIdRef")."']", 1);
+            if (not defined $metadata) {
+                return (-1, "No metadata in response");
+            }
 
-		my $eventType = findvalue($metadata, "nmwg:eventType");
-		if (defined $eventType and $eventType =~ /^error\./) {
-			my $error_msg = findvalue($data, "./nmwgr:datum");
-			$error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
-			return (-1, $error_msg);
-		} elsif (defined $eventType and $eventType =~ /^success\./) {
-			return (0, "Success");
-		}
-	}
-	}
+            my $eventType = findvalue($metadata, "nmwg:eventType");
+            if (defined $eventType and $eventType =~ /^error\./x) {
+                my $error_msg = findvalue($data, "./nmwgr:datum");
+                $error_msg = "Unknown error" if (not defined $error_msg or $error_msg eq "");
+                return (-1, $error_msg);
+            } elsif (defined $eventType and $eventType =~ /^success\./x) {
+                return (0, "Success");
+            }
+        }
+    }
 
-	my $msg = "Response does not contain status";
-	$logger->error($msg);
-	return (-1, $msg);
+    my $msg = "Response does not contain status";
+    $logger->error($msg);
+    return (-1, $msg);
 }
 
 1;
@@ -277,73 +282,75 @@ programs that can interface via the MA server or directly with the database.
 
 =head2 new($package, $uri_string)
 
-The new function takes a URI connection string as its first argument. This
-specifies which MA to interact with.
+    The new function takes a URI connection string as its first argument. This
+    specifies which MA to interact with.
 
 =head2 open($self)
 
-The open function could be used to open a persistent connection to the MA.
-However, currently, it is simply a stub function.
+    The open function could be used to open a persistent connection to the MA.
+    However, currently, it is simply a stub function.
 
 =head2 close($self)
 
-The close function could close a persistent connection to the MA. However,
-currently, it is simply a stub function.
+    The close function could close a persistent connection to the MA. However,
+    currently, it is simply a stub function.
 
 =head2 setURIString($self, $uri_string)
 
-The setURIString function changes the MA that the instance uses.
+    The setURIString function changes the MA that the instance uses.
 
 =head2 dbIsOpen($self)
 
-This function is a stub function that always returns 1.
+    This function is a stub function that always returns 1.
 
 =head2 getURIString($)
 
-The getURIString function returns the current URI string
+    The getURIString function returns the current URI string
 
 =head2 getAll($self)
 
-The getAll function gets the full contents of the MA. It returns the results as
-a ref to a LibXML element pointing to the <nmtopo:topology> structure
-containing the contents of the MA's database. 
+    The getAll function gets the full contents of the MA. It returns the results as
+    a ref to a LibXML element pointing to the <nmtopo:topology> structure
+    containing the contents of the MA's database. 
 
 =head2 xQuery($self, $xquery)
 
-The xQuery function performs an xquery on the specified MA. It returns the
-results as a string.
+    The xQuery function performs an xquery on the specified MA. It returns the
+    results as a string.
 
-=head1 SEE ALSO
+    =head1 SEE ALSO
 
-L<perfSONAR_PS::Client::Topology::XMLDB>, L<Log::Log4perl>
+    L<perfSONAR_PS::Client::Topology::XMLDB>, L<Log::Log4perl>
 
-To join the 'perfSONAR-PS' mailing list, please visit:
+    To join the 'perfSONAR-PS' mailing list, please visit:
 
-  https://mail.internet2.edu/wws/info/i2-perfsonar
+    https://mail.internet2.edu/wws/info/i2-perfsonar
 
-The perfSONAR-PS subversion repository is located at:
+    The perfSONAR-PS subversion repository is located at:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS 
-  
-Questions and comments can be directed to the author, or the mailing list. 
+    https://svn.internet2.edu/svn/perfSONAR-PS 
 
-=head1 VERSION
+    Questions and comments can be directed to the author, or the mailing list. 
 
-$Id$
+    =head1 VERSION
 
-=head1 AUTHOR
+    $Id$
 
-Aaron Brown, aaron@internet2.edu
+    =head1 AUTHOR
 
-=head1 LICENSE
- 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+    Aaron Brown, aaron@internet2.edu
 
-=head1 COPYRIGHT
- 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+    =head1 LICENSE
 
-All rights reserved.
+    You should have received a copy of the Internet2 Intellectual Property Framework along
+    with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
-=cut
+    =head1 COPYRIGHT
+
+    Copyright (c) 2004-2007, Internet2 and the University of Delaware
+
+    All rights reserved.
+
+    =cut
+
+# vim: expandtab shiftwidth=4 tabstop=4

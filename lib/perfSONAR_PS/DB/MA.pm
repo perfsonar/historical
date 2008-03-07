@@ -1,6 +1,7 @@
-#!/usr/bin/perl -w
-
 package perfSONAR_PS::DB::MA;
+
+use strict;
+use warnings;
 
 use XML::LibXML;
 use perfSONAR_PS::Transport;
@@ -95,7 +96,7 @@ sub openDB {
     }
   }
   else {
-  	$looger->error( "Connection settings missing: ". $self->{HOST} . ':' . $self->{PORT} . '/' . $self->{ENDPOINT} . "."  );
+  	$logger->error( "Connection settings missing: ". $self->{HOST} . ':' . $self->{PORT} . '/' . $self->{ENDPOINT} . "."  );
   }                  
   return;
 }

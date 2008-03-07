@@ -15,7 +15,7 @@ use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 sub init {
     my ($self, $handler) = @_;
@@ -106,6 +106,12 @@ sub init {
             $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
         }
     }
+
+    $handler->registerEventHandler("QueryRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self);
+#    $handler->registerEventHandler("KeepaliveRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self);
+#    $handler->registerEventHandler("AddRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self);
+#    $handler->registerEventHandler("UpdateRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self);
+#    $handler->registerEventHandler("RemoveRequest", "http://ggf.org/ns/nmwg/topology/20070809", $self);
 
     $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/xquery/20070809", $self);
     $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/topology/query/all/20070809", $self);
@@ -223,6 +229,11 @@ sub handleEvent {
     my @subjects = @{ $parameters->{"subject"} };
     my $md = $subjects[0];
 
+    my @filters = @{ $parameters->{"filterChain"} };
+    if ($#filters > -1) {
+        throw perfSONAR_PS::Error_compat("error.ma.select", "Topology Service does not yet support filtering");
+    }
+
     my ($status, $res) = $self->{CLIENT}->open;
     if ($status != 0) {
         my $msg = "Couldn't open database";
@@ -230,19 +241,53 @@ sub handleEvent {
         throw perfSONAR_PS::Error_compat("error.topology.ma", $msg);
     } 
 
-    if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
+    if ($messageType eq "SetupDataRequest") {
         $self->queryTopology($output, $eventType, $md, $d);
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-        $self->queryTopology($output, $eventType, $md, $d);
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
+    } elsif ($messageType eq "TopologyChangeRequest") {
         $self->changeTopology($output, $eventType, $md, $d);
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/update/20070809") {
-        $self->changeTopology($output, $eventType, $md, $d);
-    } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/change/replace/20070809") {
-        $self->changeTopology($output, $eventType, $md, $d);
+    } elsif ($messageType eq "QueryRequest") {
+        $self->handleQueryRequest($output, $eventType, $md, $d);
+#    } elsif ($messageType eq "AddRequest") {
+#        $self->handleChangeTopologyRequest($output, "add", $m, $d);
+#    } elsif ($messageType eq "UpdateRequest") {
+#        $self->handleChangeTopologyRequest($output, "update", $m, $d);
+#    } elsif ($messageType eq "RemoveRequest") {
+#        $self->handleChangeTopologyRequest($output, "remove", $m, $d);
     }
 
     return;
+}
+
+sub handleQueryRequest {
+#    my ($self, $output, $eventType, $m, $d) = @_;
+#    my $res;
+#
+#    my $subjects = find($m, "./*[local-name()='subject']", 0);
+#    if ($subjects->size() > 1) {
+#        # XXX error out
+#    }
+#
+#    my $xquery;
+#    my $xquery_subject = find($m, "./*[local-name()='subject' and namespace='".$topology_namespaces{'xquery'}."']", 1);
+#    if ($xquery_subject) {
+#        $xquery = $xquery_subject->textContent;
+#    } elsif ($subjects->size() == 0) {
+#        # no subject is the query all request
+#        $xquery = "//*";
+#    } else {
+#        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+#    }
+#
+#    my ($status, $res) = $self->{CLIENT}->xQuery($xquery);
+#    if ($status != 0) {
+#        my $msg = "Database query failed: $res";
+#        $self->{LOGGER}->error($msg);
+#        throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
+#    }
+#
+#    createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
+#    
+#    return;
 }
 
 sub queryTopology {

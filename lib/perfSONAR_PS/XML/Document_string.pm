@@ -1,16 +1,17 @@
 package perfSONAR_PS::XML::Document_string;
 
-our $VERSION = 0.06;
-
-use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
-
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger :nowarn);
 use Params::Validate qw(:all);
 
+our $VERSION = 0.08;
+
+use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
+
 my $pretty_print = 0;
 
-sub new($) {
+sub new {
 	my ($package) = @_;
 
 	my $self = fields::new($package);
@@ -22,7 +23,7 @@ sub new($) {
 	return $self;
 }
 
-sub getNormalizedURI($) {
+sub getNormalizedURI {
 	my ($uri) = @_;
 
 	# trim whitespace
@@ -66,15 +67,15 @@ sub startElement {
 	$namespaces{$prefix} = $namespace;
 
 	if (defined $extra_namespaces and $extra_namespaces ne "") {
-		foreach $prefix (keys %{ $extra_namespaces }) {
-			my $new_namespace = getNormalizedURI($extra_namespaces->{$prefix});
+		foreach my $curr_prefix (keys %{ $extra_namespaces }) {
+			my $new_namespace = getNormalizedURI($extra_namespaces->{$curr_prefix});
 
-			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
-				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
+			if (defined $namespaces{$curr_prefix} and $namespaces{$curr_prefix} ne $new_namespace) {
+				$logger->error("Tried to redefine prefix $curr_prefix from ".$namespaces{$curr_prefix}." to ".$new_namespace);
 				return -1;
 			}
 
-			$namespaces{$prefix} = $new_namespace;
+			$namespaces{$curr_prefix} = $new_namespace;
 		}
 	}
 
@@ -95,7 +96,7 @@ sub startElement {
 	foreach my $prefix (keys %namespaces) {
 		my $require_defintion = 0;
 
-		if (!defined $self->{DEFINED_PREFIXES}->{$prefix}) {
+		if (not defined $self->{DEFINED_PREFIXES}->{$prefix}) {
 			# it's the first time we've seen a prefix like this
 			$self->{DEFINED_PREFIXES}->{$prefix} = ();
 			push @{ $self->{DEFINED_PREFIXES}->{$prefix} }, $namespaces{$prefix};
@@ -104,7 +105,7 @@ sub startElement {
 			my @namespaces = @{ $self->{DEFINED_PREFIXES}->{$prefix} };
 
 			# if it's a new namespace for an existing prefix, write the definition (though we should probably complain)
-			if ($#namespaces == -1 or $namespaces[$#namespaces] ne $namespace) {
+			if ($#namespaces == -1 or $namespaces[-1] ne $namespace) {
 				push @{ $self->{DEFINED_PREFIXES}->{$prefix} }, $namespaces{$prefix};
 
 				$require_defintion = 1;
@@ -167,15 +168,15 @@ sub createElement {
 	$namespaces{$prefix} = $namespace;
 
 	if (defined $extra_namespaces and $extra_namespaces ne "") {
-		foreach $prefix (keys %{ $extra_namespaces }) {
-			my $new_namespace = getNormalizedURI($extra_namespaces->{$prefix});
+		foreach my $curr_prefix (keys %{ $extra_namespaces }) {
+			my $new_namespace = getNormalizedURI($extra_namespaces->{$curr_prefix});
 
-			if (defined $namespaces{$prefix} and $namespaces{$prefix} ne $new_namespace) {
-				$logger->error("Tried to redefine prefix $prefix from ".$namespaces{$prefix}." to ".$new_namespace);
+			if (defined $namespaces{$curr_prefix} and $namespaces{$curr_prefix} ne $new_namespace) {
+				$logger->error("Tried to redefine prefix $curr_prefix from ".$namespaces{$curr_prefix}." to ".$new_namespace);
 				return -1;
 			}
 
-			$namespaces{$prefix} = $new_namespace;
+			$namespaces{$curr_prefix} = $new_namespace;
 		}
 	}
 
@@ -190,7 +191,7 @@ sub createElement {
 	foreach my $prefix (keys %namespaces) {
 		my $require_defintion = 0;
 
-		if (!defined $self->{DEFINED_PREFIXES}->{$prefix}) {
+		if (not defined $self->{DEFINED_PREFIXES}->{$prefix}) {
 			# it's the first time we've seen a prefix like this
 			$self->{DEFINED_PREFIXES}->{$prefix} = ();
 			$require_defintion = 1;
@@ -198,7 +199,7 @@ sub createElement {
 			my @namespaces = @{ $self->{DEFINED_PREFIXES}->{$prefix} };
 
 			# if it's a new namespace for an existing prefix, write the definition (though we should probably complain)
-			if ($#namespaces == -1 or $namespaces[$#namespaces] ne $namespace) {
+			if ($#namespaces == -1 or $namespaces[-1] ne $namespace) {
 				$require_defintion = 1;
 			}
 		}
@@ -214,7 +215,7 @@ sub createElement {
 		}
 	}
 
-	if (!defined $content or $content eq "") {
+	if (not defined $content or $content eq "") {
 		$self->{STRING} .= " />";
 	} else {
 		$self->{STRING} .= ">";
@@ -244,7 +245,7 @@ sub createElement {
 	return 0;
 }
 
-sub endElement($$) {
+sub endElement {
 	my ($self, $tag) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -255,12 +256,12 @@ sub endElement($$) {
     if ($#tags == -1) {
         $logger->error("Tried to close tag $tag but no current open tags");
 		return -1;
-	} elsif ($tags[$#tags]->{"tag"} ne $tag) {
-        $logger->error("Tried to close tag $tag, but current open tag is \"".$tags[$#tags]->{"tag"}."\n");
+	} elsif ($tags[-1]->{"tag"} ne $tag) {
+        $logger->error("Tried to close tag $tag, but current open tag is \"".$tags[-1]->{"tag"}."\n");
 		return -1;
 	}
 
-	foreach my $prefix (@{ $tags[$#tags]->{"defined_prefixes"} }) {
+	foreach my $prefix (@{ $tags[-1]->{"defined_prefixes"} }) {
 		pop @{ $self->{DEFINED_PREFIXES}->{$prefix} };
 	}
 
@@ -272,7 +273,7 @@ sub endElement($$) {
 		}
 	}
 
-	$self->{STRING} .= "</".$tags[$#tags]->{"prefix"}.":".$tag.">";
+	$self->{STRING} .= "</".$tags[-1]->{"prefix"}.":".$tag.">";
 
 	if ($pretty_print) {
 		$self->{STRING} .= "\n";
@@ -281,7 +282,7 @@ sub endElement($$) {
 	return 0;
 }
 
-sub addExistingXMLElement($$) {
+sub addExistingXMLElement {
 	my ($self, $element) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -293,7 +294,7 @@ sub addExistingXMLElement($$) {
 	return 0;
 }
 
-sub addOpaque($$) {
+sub addOpaque {
 	my ($self, $data) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -302,7 +303,7 @@ sub addOpaque($$) {
 	return 0;
 }
 
-sub getValue($) {
+sub getValue {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 

@@ -1,53 +1,62 @@
 package perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
-use Log::Log4perl qw(get_logger);
-
-our $VERSION = 0.06;
 
 use strict;
+use warnings;
+use Log::Log4perl qw(get_logger);
 
-sub new($$$$) {
-	my ($package, $type, $script, $parameters) = @_;
+our $VERSION = 0.08;
 
-	my %hash = ();
+use fields 'TYPE', 'SCRIPT','PARAMETERS';
 
-	$hash{"TYPE"} = $type;
-	$hash{"SCRIPT"} = $script;
-	$hash{"PARAMETERS"} = $parameters;
+sub new {
+	my ($class, $type, $script, $parameters) = @_;
 
-	bless \%hash => $package;
+	my $self = fields::new($class);
+
+	$self->{"TYPE"} = $type;
+	$self->{"SCRIPT"} = $script;
+	$self->{"PARAMETERS"} = $parameters;
+
+	return $self;
 }
 
-sub getType($) {
+sub getType {
 	my ($self) = @_;
 
 	return $self->{TYPE};
 }
 
-sub setType($$) {
+sub setType {
 	my ($self, $type) = @_;
 
 	$self->{TYPE} = $type;
+
+	return;
 }
 
-sub setScript($$) {
+sub setScript {
 	my ($self, $script) = @_;
 
 	$self->{SCRIPT} = $script;
+
+	return;
 }
 
-sub getScript($) {
+sub getScript {
 	my ($self) = @_;
 
 	return $self->{SCRIPT};
 }
 
-sub setParameters($$) {
+sub setParameters {
 	my ($self, $parameters) = @_;
 	
 	$self->{PARAMETERS} = $parameters;
+
+	return;
 }
 
-sub getParameters($$) {
+sub getParameters {
 	my ($self) = @_;
 	
 	return $self->{PARAMETERS};
@@ -65,9 +74,9 @@ sub run {
 
 	$logger->debug("Command to run: $cmd");
 
-	open(SCRIPT, $cmd . " |");
-	my @lines = <SCRIPT>;
-	close(SCRIPT);
+	open my $SCRIPT, "-|", $cmd or return (-1, "Couldn't execute cmd: $cmd");
+	my @lines = <$SCRIPT>;
+	close($SCRIPT);
 
 	if ($#lines < 0) {
 		my $msg = "script returned no output";
@@ -84,12 +93,12 @@ sub run {
 	chomp($lines[0]);
 	my ($measurement_time, $measurement_value) = split(',', $lines[0]);
 
-	if (!defined $measurement_time or $measurement_time eq "") {
+	if (not defined $measurement_time or $measurement_time eq "") {
 		my $msg = "script returned invalid output: does not contain measurement time";
 		return (-1, $msg);
 	}
 
-	if (!defined $measurement_value or $measurement_value eq "") {
+	if (not defined $measurement_value or $measurement_value eq "") {
 		my $msg = "script returned invalid output: does not contain link status";
 		return (-1, $msg);
 	}

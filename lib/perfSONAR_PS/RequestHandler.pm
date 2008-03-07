@@ -222,8 +222,8 @@ sub registerEventHandler_Regex {
     has a full message handler.
 =cut
 sub __handleMessage {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR },
@@ -247,8 +247,8 @@ sub __handleMessage {
     that has a message handler.
 =cut
 sub __handleMessageBegin {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },
@@ -277,8 +277,8 @@ sub __handleMessageBegin {
     message have been handled.
 =cut
 sub __handleMessageEnd {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },
@@ -306,8 +306,8 @@ sub __handleMessageEnd {
     contains the data. $raw_request contains the raw request element.
 =cut
 sub __handleEvent {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },

@@ -1,10 +1,11 @@
 package perfSONAR_PS::Status::Link;
 
-use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
-
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
+
+our $VERSION = 0.08;
+
+use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
 
 sub new {
 	my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
@@ -34,73 +35,85 @@ sub new {
 	return $self;
 }
 
-sub setID($$) {
+sub setID {
 	my ($self, $id) = @_;
 
 	$self->{ID} = $id;
+
+	return;
 }
 
-sub setKnowledge($$) {
+sub setKnowledge {
 	my ($self, $knowledge) = @_;
 
 	$self->{KNOWLEDGE} = $knowledge;
+
+	return;
 }
 
-sub setStartTime($$) {
+sub setStartTime {
 	my ($self, $starttime) = @_;
 
 	$self->{START_TIME} = $starttime;
+
+	return;
 }
 
-sub setEndTime($$) {
+sub setEndTime {
 	my ($self, $endtime) = @_;
 
 	$self->{END_TIME} = $endtime;
+
+	return;
 }
 
-sub setOperStatus($$) {
+sub setOperStatus {
 	my ($self, $oper_status) = @_;
 
 	$self->{OPER_STATUS} = $oper_status;
+
+	return;
 }
 
-sub setAdminStatus($$) {
+sub setAdminStatus {
 	my ($self, $admin_status) = @_;
 
 	$self->{ADMIN_STATUS} = $admin_status;
+
+	return;
 }
 
-sub getID($) {
+sub getID {
 	my ($self) = @_;
 
 	return $self->{ID};
 }
 
-sub getKnowledge($) {
+sub getKnowledge {
 	my ($self) = @_;
 
 	return $self->{KNOWLEDGE};
 }
 
-sub getStartTime($) {
+sub getStartTime {
 	my ($self) = @_;
 
 	return $self->{START_TIME};
 }
 
-sub getEndTime($) {
+sub getEndTime {
 	my ($self) = @_;
 
 	return $self->{END_TIME};
 }
 
-sub getOperStatus($) {
+sub getOperStatus {
 	my ($self) = @_;
 
 	return $self->{OPER_STATUS};
 }
 
-sub getAdminStatus($) {
+sub getAdminStatus {
 	my ($self) = @_;
 
 	return $self->{ADMIN_STATUS};

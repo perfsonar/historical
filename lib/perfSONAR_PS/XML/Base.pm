@@ -24,6 +24,7 @@ use Log::Log4perl qw(get_logger);
 @EXPORT = ('createEndPointL4', 'createSubjectL4', 'createSubjectL3', 
            'createParameters' );
 
+our $VERSION = 0.08;
 
 our $logger = &get_logger( "perfSONAR_PS::XML::Base");
 

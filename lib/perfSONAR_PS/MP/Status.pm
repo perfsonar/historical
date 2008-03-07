@@ -12,10 +12,10 @@ use perfSONAR_PS::MP::Base;
 use perfSONAR_PS::MP::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
-use perfSONAR_PS::MA::Status::Client::MA;
-use perfSONAR_PS::MA::Status::Common;
+use perfSONAR_PS::Client::Status::MA;
+use perfSONAR_PS::Status::Common;
 
-use SNMPWalk;
+use perfSONAR_PS::SNMPWalk;
 
 our @ISA = qw(perfSONAR_PS::MP::Base);
 

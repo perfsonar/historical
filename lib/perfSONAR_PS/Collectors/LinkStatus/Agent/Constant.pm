@@ -1,39 +1,46 @@
 package perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 
-sub new($$$$) {
-	my ($package, $type, $constant) = @_;
+our $VERSION = 0.08;
 
-	my %hash = ();
+use fields 'TYPE', 'CONSTANT';
 
-	$hash{"TYPE"} = $type;
-	$hash{"CONSTANT"} = $constant;
+sub new {
+	my ($class, $type, $constant) = @_;
 
-	bless \%hash => $package;
+	my $self = fields::new($class);
+
+	$self->{"TYPE"} = $type;
+	$self->{"CONSTANT"} = $constant;
+
+	return $self;
 }
 
-sub getType($) {
+sub getType {
 	my ($self) = @_;
 
 	return $self->{TYPE};
 }
 
-sub setType($$) {
+sub setType {
 	my ($self, $type) = @_;
 
 	$self->{TYPE} = $type;
+
+	return;
 }
 
-sub setConstant($$) {
+sub setConstant {
 	my ($self, $constant) = @_;
 
 	$self->{CONSTANT} = $constant;
+
+	return;
 }
 
-sub getConstant($) {
+sub getConstant {
 	my ($self) = @_;
 
 	return $self->{CONSTANT};
@@ -44,7 +51,7 @@ sub run {
 
 	my $time = time;
 
-	if (!defined $self->{CONSTANT} or $self->{CONSTANT} eq "") {
+	if (not defined $self->{CONSTANT} or $self->{CONSTANT} eq "") {
 		my $msg = "no constant defined";
 		return (-1, $msg);
 	}

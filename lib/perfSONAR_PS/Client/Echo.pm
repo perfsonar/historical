@@ -1,48 +1,55 @@
 package perfSONAR_PS::Client::Echo;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::XML::Document_string;
 
+our $VERSION = 0.08;
+
+use fields 'URI', 'EVENT_TYPE';
+
 sub new {
 	my ($package, $uri_string, $eventType) = @_;
 
-	my %hash;
+    my $self = fields::new($package);
 
 	if (defined $uri_string and $uri_string ne "") { 
-		$hash{"URI"} = $uri_string;
+		$self->{"URI"} = $uri_string;
 
 	}
 
-	if (!defined $eventType or $eventType eq "") {
+	if (not defined $eventType or $eventType eq "") {
 		$eventType = "http://schemas.perfsonar.net/tools/admin/echo/2.0";
 	}
 
-	$hash{"EVENT_TYPE"} = $eventType;
+	$self->{"EVENT_TYPE"} = $eventType;
 
-	bless \%hash => $package;
+	return $self;
 }
 
-sub setEventType($$) {
+sub setEventType {
 	my ($self, $eventType) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Echo");
 
 	$self->{EVENT_TYPE} = $eventType;
+
+    return;
 }
 
-sub setURIString($$) {
+sub setURIString {
 	my ($self, $uri_string) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Echo");
 
 	$self->{URI} = $uri_string;
+
+    return;
 }
 
-sub createEchoRequest($$) {
+sub createEchoRequest {
 	my ($self, $output) = @_; 
 	my $logger = get_logger("perfSONAR_PS::Client::Echo");
 
@@ -60,16 +67,16 @@ sub createEchoRequest($$) {
 	return 0;
 }
 
-sub ping($) {
+sub ping {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Echo");
 
-	if (!defined $self->{URI}) {
+	if (not defined $self->{URI}) {
 		return (-1, "Invalid URI specified \"\"");
 	}
 
 	my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-	if (!defined $host && !defined $port && !defined $endpoint) {
+	if (not defined $host and not defined $port and not defined $endpoint) {
 		return (-1, "Invalid URI specified \"".$self->{URI}."\"");
 	}
 
@@ -128,7 +135,7 @@ object for the specific endpoint.
 	use perfSONAR_PS::Client::Echo;
 
 	my $echo_client = new perfSONAR_PS::Client::Echo("http://localhost:4801/axis/services/status");
-	if (!defined $echo_client) {
+	if (not defined $echo_client) {
 		print "Problem creating echo client for service\n";
 		exit(-1);
 	}

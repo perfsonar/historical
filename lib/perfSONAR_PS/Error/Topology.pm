@@ -1,6 +1,7 @@
 use perfSONAR_PS::Error;
+use perfSONAR_PS::Error;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -20,7 +21,7 @@ Base error for topology from which all topology exceptions derive.
 
 =cut
 package perfSONAR_PS::Error::Topology;
-use base "perfSONAR_PS::Error::Base";
+use base "perfSONAR_PS::Error";
 
 
 =head2 perfSONAR_PS::Error::Topology::InvalidParameter

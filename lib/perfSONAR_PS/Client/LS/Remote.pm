@@ -1,7 +1,5 @@
 package perfSONAR_PS::Client::LS::Remote;
 
-our $VERSION = 0.06;
-
 use fields 'URI', 'CONF', 'NAMESPACES', 'CHUNK', 'ALIVE', 'FIRST';
 
 use strict;
@@ -12,6 +10,7 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::Echo;
 
+our $VERSION = 0.08;
 
 sub new {
   my ($package, $uri, $conf, $ns) = @_;
@@ -36,7 +35,7 @@ sub new {
 }
 
 
-sub setURI($$) {
+sub setURI {
   my ($self, $uri) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
@@ -51,7 +50,7 @@ sub setURI($$) {
 }
 
 
-sub setConf($$) {
+sub setConf {
   my ($self, $conf) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
@@ -65,7 +64,7 @@ sub setConf($$) {
 }
 
 
-sub setNamespaces($$) {
+sub setNamespaces {
   my ($self, $namespaces) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
@@ -79,7 +78,7 @@ sub setNamespaces($$) {
 }
 
 
-sub createKey($$) {
+sub createKey {
   my($self, $lsKey) = @_;
   my $key = "    <nmwg:key id=\"key.".genuid()."\">\n";
   $key = $key . "      <nmwg:parameters id=\"parameters.".genuid()."\">\n";
@@ -120,7 +119,7 @@ sub callLS {
   }
   my $parser = XML::LibXML->new();
   if(defined $responseContent and $responseContent ne "" and
-     !($responseContent =~ m/^\d+/)) {
+     not ($responseContent =~ m/^\d+/x)) {
     my $doc = "";
     eval {
       $doc = $parser->parse_string($responseContent);
@@ -133,7 +132,7 @@ sub callLS {
       my $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
       if($msg) {
         my $eventType = findvalue($msg, "./nmwg:metadata/nmwg:eventType");
-        if(defined $eventType and $eventType =~ m/success/) {
+        if(defined $eventType and $eventType =~ m/success/x) {
           return 0;
         }
       }
@@ -143,15 +142,15 @@ sub callLS {
 }
 
 
-sub sendDeregister($$) {
+sub sendDeregister {
   my ($self, $key) = @_;
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
+  if (not defined $host and not defined $port and not defined $endpoint) {
     return -1;
   }
 
@@ -169,15 +168,15 @@ sub sendDeregister($$) {
   return callLS($self, $sender, $doc->getValue());
 }
 
-sub sendKeepalive($$) {
+sub sendKeepalive {
   my ($self, $key) = @_;
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
+  if (not defined $host and not defined $port and not defined $endpoint) {
     return -1;
   }
 
@@ -199,7 +198,7 @@ sub registerStatic {
   my($self, $data_ref) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1;
   }
 
@@ -254,16 +253,16 @@ sub registerStatic {
   return 0;
 }
 
-sub __register($$$) {
+sub __register {
   my ($self, $subject, $data_ref) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
+  if (not defined $host and not defined $port and not defined $endpoint) {
     return -1
   }
 
@@ -295,7 +294,7 @@ sub registerDynamic {
   my($self, $data_ref) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1;
   }
 
@@ -351,16 +350,16 @@ sub registerDynamic {
   return 0;
 }
 
-sub query($$$$) {
+sub query {
   my ($self, $queries) = @_;
   my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
 
-  if (!defined $self->{URI}) {
+  if (not defined $self->{URI}) {
     return -1;
   }
 
   my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-  if (!defined $host && !defined $port && !defined $endpoint) {
+  if (not defined $host and not defined $port and not defined $endpoint) {
     return -1;
   }
 
@@ -403,9 +402,9 @@ sub query($$$$) {
         my $query_id;
         my $eventType = findvalue($m, "nmwg:eventType");
 
-        if (defined $md_idref and $md_idref =~ /perfsonar_ps\.meta\.(.*)/) {
+        if (defined $md_idref and $md_idref =~ /perfsonar_ps\.meta\.(.*)/x) {
           $query_id = $1;
-        } elsif ($md_id =~ /perfsonar_ps\.meta\.(.*)/) {
+        } elsif ($md_id =~ /perfsonar_ps\.meta\.(.*)/x) {
           $query_id = $1;
         } else {
           my $msg = "Received unknown response: $md_id/$md_idref";
@@ -414,9 +413,9 @@ sub query($$$$) {
         }
 
         my @retval;
-        if (defined $eventType and $eventType =~ /^error\./) {
+        if (defined $eventType and $eventType =~ /^error\./x) {
           my $error_msg = findvalue($d, "./nmwgr:datum");
-          $error_msg = "Unknown error" if (!defined $error_msg or $error_msg eq "");
+          $error_msg = "Unknown error" if (not defined $error_msg or $error_msg eq "");
           @retval = (-1, $error_msg);
         } else {
           @retval = (0, $d);
@@ -491,7 +490,7 @@ related tasks of interacting with backend storage.
     $queries{"req2"} .= " return /nmwg:store/nmwg:metadata[\@id=\$metadata_id]\n";
 
     my ($status, $res) = $ls_client2->query(\%queries);
-    if ($status != 0 or !defined $res{"req1"} or !defined $res{"req2"}) {
+    if ($status != 0 or not defined $res{"req1"} or not defined $res{"req2"}) {
       print "Error: querying $ls2 failed\n";
       exit(-1);
     }

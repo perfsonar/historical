@@ -2,6 +2,7 @@ package perfSONAR_PS::Services::MA::General;
 
 use base 'Exporter';
 
+use strict;
 use warnings;
 
 our $VERSION = 0.08;
@@ -26,7 +27,7 @@ use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
-@EXPORT = ( 'getMetadataXQuery', 'getDataXQuery', 'getDataRRD', 'adjustRRDTime', 'getFilterParameters', 'extractTime', 'complexTime' );
+our @EXPORT = ( 'getMetadataXQuery', 'getDataXQuery', 'getDataRRD', 'adjustRRDTime', 'getFilterParameters', 'extractTime', 'complexTime' );
 
 =head2 getMetadataXQuery( { node } )
 
@@ -556,7 +557,7 @@ sub getFilterParameters {
         $time{"CF"} = extract( $temp, 1 );
     }
 
-    $temp = find( $m, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"resolution\"]", 1 );
+    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"resolution\"]", 1 );
     if ($temp) {
         $time{"RESOLUTION"} = extract( $temp, 1 );
     }

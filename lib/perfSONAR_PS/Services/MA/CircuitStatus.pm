@@ -37,7 +37,7 @@ use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 sub init {
     my ($self, $handler) = @_;
@@ -283,7 +283,7 @@ sub handleEvent {
     my ($status, $res1, $res2);
 
     # This could be wrapped in try/catch
-    ($res1, $res2) = $self->resolveSelectChain($md, $request);
+    ($res1, $res2) = $self->resolveSelectChain($md, $raw_request);
 
     my $selectTime = $res1;
     my $subject_md = $res2;

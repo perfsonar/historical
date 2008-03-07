@@ -7,7 +7,7 @@ use Data::Dumper;
 
 use fields 'TYPE', 'STARTTIME', 'ENDTIME', 'DURATION', 'TIME';
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 sub new {
 	my ($package, $type, $arg1, $arg2) = @_;

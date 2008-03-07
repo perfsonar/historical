@@ -1,6 +1,9 @@
 package perfSONAR_PS::Error_compat;
 
-our $VERSION = 0.06;
+use strict;
+use warnings;
+
+our $VERSION = 0.08;
 
 use base 'Error';
 
@@ -26,13 +29,13 @@ sub new {
 	return $obj;
 }
 
-sub eventType($) {
+sub eventType {
 	my $self = shift;
 
 	return $self->{EVENT_TYPE};
 }
 
-sub errorMessage($) {
+sub errorMessage {
 	my $self = shift;
 
 	return $self->text();

@@ -4,21 +4,11 @@ use strict;
 use warnings;
 use base 'Exporter';
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 our @EXPORT = ('idConstruct', 'idIsFQ', 'idAddLevel', 'idRemoveLevel', 'idBaseLevel', 'idEncode', 'idDecode', 'idSplit', 'idCompare', 'idMatch', 'idIsAmbiguous');
 
-sub idConstruct($$$$$$$$);
-sub idIsFQ($$);
-sub idAddLevel($$$);
-sub idRemoveLevel($$);
-sub idBaseLevel($$);
-sub idEncode($);
-sub idDecode($);
-sub idSplit($$$);
-sub idCompare($$$);
-
-sub idConstruct($$$$$$$$) {
+sub idConstruct {
 	my ($type1, $field1, $type2, $field2, $type3, $field3, $type4, $field4) = @_;
 
 	my $id = "";
@@ -44,7 +34,7 @@ sub idConstruct($$$$$$$$) {
 	return $id;
 }
 
-sub idIsFQ($$) {
+sub idIsFQ {
 	my ($id, $type) = @_;
 
 	my ($new_type, $value);
@@ -58,24 +48,24 @@ sub idIsFQ($$) {
 	if ($type eq "domain") {
 		($new_type, $value) = split("=", $fields[3]);
 
-		return -1 if ($new_type ne "domain" or !defined $value);
+		return -1 if ($new_type ne "domain" or not defined $value);
 
 		return 1;
 	} elsif ($type eq "path" or $type eq "network") {
 		if ($#fields == 3) {
 			($new_type, $value) = split("=", $fields[3]);
 
-			return -1 if ($new_type ne $type or !defined $value);
+			return -1 if ($new_type ne $type or not defined $value);
 
 			return 1;
 		} elsif ($#fields == 4) {
 			($new_type, $value) = split("=", $fields[3]);
 
-			return -1 if ($new_type ne "domain" or !defined $value);
+			return -1 if ($new_type ne "domain" or not defined $value);
 
 			($new_type, $value) = split("=", $fields[4]);
 
-			return -1 if ($new_type ne $type or !defined $value);
+			return -1 if ($new_type ne $type or not defined $value);
 
 			return 1;
 		} else {
@@ -86,11 +76,11 @@ sub idIsFQ($$) {
 
 		($type, $value) = split("=", $fields[3]);
 
-		return -1 if ($type ne "domain" or !defined $value);
+		return -1 if ($type ne "domain" or not defined $value);
 
 		($type, $value) = split("=", $fields[4]);
 
-		return -1 if ($type ne "node" or !defined $value);
+		return -1 if ($type ne "node" or not defined $value);
 
 		return 1;
 	} elsif ($type eq "port") {
@@ -98,44 +88,44 @@ sub idIsFQ($$) {
 
 		($type, $value) = split("=", $fields[3]);
 
-		return -1 if ($type ne "domain" or !defined $value);
+		return -1 if ($type ne "domain" or not defined $value);
 
 		($type, $value) = split("=", $fields[4]);
 
-		return -1 if ($type ne "node" or !defined $value);
+		return -1 if ($type ne "node" or not defined $value);
 
 		($type, $value) = split("=", $fields[5]);
 
-		return -1 if ($type ne "port" or !defined $value);
+		return -1 if ($type ne "port" or not defined $value);
 
 		return 1;
 	} elsif ($type eq "link") {
 		if ($#fields == 4) {
 			($type, $value) = split("=", $fields[3]);
 
-			return -1 if ($type ne "domain" or !defined $value);
+			return -1 if ($type ne "domain" or not defined $value);
 
 			($type, $value) = split("=", $fields[4]);
 
-			return -1 if ($type ne "link" or !defined $value);
+			return -1 if ($type ne "link" or not defined $value);
 
 			return 1;
 		} elsif ($#fields == 6) {
 			($type, $value) = split("=", $fields[3]);
 
-			return -1 if ($type ne "domain" or !defined $value);
+			return -1 if ($type ne "domain" or not defined $value);
 
 			($type, $value) = split("=", $fields[4]);
 
-			return -1 if ($type ne "node" or !defined $value);
+			return -1 if ($type ne "node" or not defined $value);
 
 			($type, $value) = split("=", $fields[5]);
 
-			return -1 if ($type ne "port" or !defined $value);
+			return -1 if ($type ne "port" or not defined $value);
 
 			($type, $value) = split("=", $fields[6]);
 
-			return -1 if ($type ne "link" or !defined $value);
+			return -1 if ($type ne "link" or not defined $value);
 
 			return 1;
 		} else {
@@ -146,7 +136,7 @@ sub idIsFQ($$) {
 	}
 }
 
-sub idAddLevel($$$) {
+sub idAddLevel {
 	my ($id, $new_type, $new_level) = @_;
 
 	$new_level = idEncode($new_level);
@@ -160,7 +150,7 @@ sub idAddLevel($$$) {
 	return $id;
 }
 
-sub idRemoveLevel($$) {
+sub idRemoveLevel {
 	my ($id, $ret_type) = @_;
 
 	my $ret_id;
@@ -190,7 +180,7 @@ sub idRemoveLevel($$) {
 	return $ret_id;
 }
 
-sub idBaseLevel($$) {
+sub idBaseLevel {
 	my ($id, $ret_type) = @_;
 
 	my $ret_id;
@@ -218,7 +208,7 @@ sub idBaseLevel($$) {
 	return idDecode($value);
 }
 
-sub idEncode($) {
+sub idEncode {
 	my ($id) = @_;
 
 	$id =~ s/%/%25/g;
@@ -230,7 +220,7 @@ sub idEncode($) {
 	return $id;
 }
 
-sub idDecode($) {
+sub idDecode {
 	my ($id) = @_;
 
 	$id =~ s/%3A/:/g;
@@ -242,7 +232,7 @@ sub idDecode($) {
 	return $id;
 }
 
-sub idCompare($$$) {
+sub idCompare {
 	my ($id1, $id2, $compare_to) = @_;
 
 	my @results_id1 = idSplit($id1, 0, 1);
@@ -258,7 +248,7 @@ sub idCompare($$$) {
 	}
 
 	for(my $i = 2; $i <= $#results_id1; $i += 2) {
-		if (!defined $results_id2[$i]) {
+		if (not defined $results_id2[$i]) {
 			return (-1, "ID element $compare_to not found");
 		}
 
@@ -272,13 +262,13 @@ sub idCompare($$$) {
 	return (-1, "ID element $compare_to not found");
 }
 
-sub idIsAmbiguous($) {
+sub idIsAmbiguous {
 	my ($id) = @_;
 
 	return ($id =~ /(=\*:|:\*$|=\*$)/);
 }
 
-sub idMatch($$) {
+sub idMatch {
 	my ($ids, $idExp) = @_;
 
 	my @idExpFields = split(/:/, $idExp);
@@ -287,7 +277,7 @@ sub idMatch($$) {
 	my $finished = 0;
 	for(my $i = 0; $i <= $#idExpFields; $i++) {
 		if ($finished) {
-			return undef;
+			return;
 		}
 
 		if ($idExpFields[$i] =~ /([^=]*)=(.*)/) {
@@ -344,7 +334,7 @@ sub idMatch($$) {
 	return \@matchingIds;
 }
 
-sub idSplit($$$) {
+sub idSplit {
 	my ($id, $fq, $top_down) = @_;
 
 	if (idIsFQ($id, "") == 0) {
@@ -359,10 +349,15 @@ sub idSplit($$$) {
 		return (-1, $msg);
 	}
 
-	my ($type1, $field1) = split('=', $fields[3]) if defined $fields[3];
-	my ($type2, $field2) = split('=', $fields[4]) if defined $fields[4];
-	my ($type3, $field3) = split('=', $fields[5]) if defined $fields[5];
-	my ($type4, $field4) = split('=', $fields[6]) if defined $fields[6];
+	my ($type1, $field1);
+	my ($type2, $field2);
+	my ($type3, $field3);
+	my ($type4, $field4);
+
+	($type1, $field1) = split('=', $fields[3]) if defined $fields[3];
+	($type2, $field2) = split('=', $fields[4]) if defined $fields[4];
+	($type3, $field3) = split('=', $fields[5]) if defined $fields[5];
+	($type4, $field4) = split('=', $fields[6]) if defined $fields[6];
 
 	my $id_type;
 

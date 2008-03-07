@@ -5,10 +5,10 @@ use warnings;
 require 5.002;
 use Time::HiRes;
   
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 # initialize Global GUID
-$GUID = `/usr/bin/uuidgen`;
+my $GUID = `/usr/bin/uuidgen`;
 
 sub format {
   my($evnt, $data) = @_;
@@ -17,7 +17,7 @@ sub format {
     $str = "ts=$data->{ 'ts' } ";
   }
   else {
-    $dt = date();
+    my $dt = date();
     $str = "ts=$dt ";
   }
   $str .= "event=$evnt ";

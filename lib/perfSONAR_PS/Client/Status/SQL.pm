@@ -1,49 +1,52 @@
 package perfSONAR_PS::Client::Status::SQL;
 
-our $VERSION = 0.06;
-
 use strict;
+use warnings;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
 
+our $VERSION = 0.08;
+
+use fields "READ_ONLY", "DBI_STRING", "DB_USERNAME", "DB_PASSWORD", "DB_TABLE", "DB_OPEN", "DATADB";
+
 sub new {
 	my ($package, $dbi_string, $db_username, $db_password, $table, $read_only) = @_;
 
-	my %hash;
+	my $self = fields::new($package);
 
 	if ($read_only) {
-		$hash{"READ_ONLY"} = 1;
+		$self->{"READ_ONLY"} = 1;
 	} else {
-		$hash{"READ_ONLY"} = 0;
+		$self->{"READ_ONLY"} = 0;
 	}
 
 	if (defined $dbi_string and $dbi_string ne "") { 
-		$hash{"DBI_STRING"} = $dbi_string;
+		$self->{"DBI_STRING"} = $dbi_string;
 	}
 
 	if (defined $db_username and $db_username ne "") { 
-		$hash{"DB_USERNAME"} = $db_username;
+		$self->{"DB_USERNAME"} = $db_username;
 	}
 
 	if (defined $db_password and $db_password ne "") { 
-		$hash{"DB_PASSWORD"} = $db_password;
+		$self->{"DB_PASSWORD"} = $db_password;
 	}
 
 	if (defined $table and $table ne "") { 
-		$hash{"DB_TABLE"} = $table;
+		$self->{"DB_TABLE"} = $table;
 	} else {
-		$hash{"DB_TABLE"} = "link_status";
+		$self->{"DB_TABLE"} = "link_status";
 	}
 
-	$hash{"DB_OPEN"} = 0;
-	$hash{"DATADB"} = "";
+	$self->{"DB_OPEN"} = 0;
+	$self->{"DATADB"} = "";
 
-	bless \%hash => $package;
+	return $self;
 }
 
-sub open($) {
+sub open {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -54,7 +57,7 @@ sub open($) {
 	$logger->debug("Table: ".$self->{DB_TABLE});
 
 	$self->{DATADB} = new perfSONAR_PS::DB::SQL({ name => $self->{DBI_STRING}, user => $self->{DB_USERNAME}, pass => $self->{DB_PASSWORD}, schema => \@dbSchema });
-	if (!defined $self->{DATADB}) {
+	if (not defined $self->{DATADB}) {
 		my $msg = "Couldn't open specified database";
 		$logger->error($msg);
 		return (-1, $msg);
@@ -72,7 +75,7 @@ sub open($) {
 	return (0, "");
 }
 
-sub close($) {
+sub close {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -83,27 +86,29 @@ sub close($) {
 	return $self->{DATADB}->closeDB;
 }
 
-sub setDBIString($$) {
+sub setDBIString {
 	my ($self, $dbi_string) = @_;
 
 	$self->close();
 
 	$self->{DB_OPEN} = 0;
 	$self->{DBI_STRING} = $dbi_string;
+
+    return;
 }
 
-sub dbIsOpen($) {
+sub dbIsOpen {
 	my ($self) = @_;
 	return $self->{DB_OPEN};
 }
 
-sub getDBIString($) {
+sub getDBIString {
 	my ($self) = @_;
 
 	return $self->{DBI_STRING};
 }
 
-sub getAll($) {
+sub getAll {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -130,7 +135,7 @@ sub getAll($) {
 			my @state = @{ $state_ref };
 
 			my $new_link = new perfSONAR_PS::Status::Link($link[0], $state[0], $state[1], $state[2], $state[3], $state[4]);
-			if (!defined $links{$link[0]}) {
+			if (not defined $links{$link[0]}) {
 				$links{$link[0]} = ();
 			}
 			push @{ $links{$link[0]} }, $new_link;
@@ -140,7 +145,7 @@ sub getAll($) {
 	return (0, \%links);
 }
 
-sub getUniqueIDs($) {
+sub getUniqueIDs {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -162,7 +167,7 @@ sub getUniqueIDs($) {
 	return (0, \@link_ids);
 }
 
-sub getLinkHistory($$$) {
+sub getLinkHistory {
 	my ($self, $link_ids, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -203,7 +208,7 @@ sub getLinkHistory($$$) {
 		my @state = @{ $state_ref };
 
 		my $new_link = new perfSONAR_PS::Status::Link($state[0], $state[1], $state[2], $state[3], $state[4], $state[5]);
-		if (!defined $links{$state[0]}) {
+		if (not defined $links{$state[0]}) {
 			$links{$state[0]} = ();
 		}
 
@@ -213,7 +218,7 @@ sub getLinkHistory($$$) {
 	return (0, \%links);
 }
 
-sub getLinkStatus($$$) {
+sub getLinkStatus {
 	my ($self, $link_ids, $time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
@@ -231,7 +236,7 @@ sub getLinkStatus($$$) {
 	foreach my $link_id (@{ $link_ids }) {
 		my $query;
 
-		if (!defined $time) {
+		if (not defined $time) {
 		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' order by end_time desc limit 1";
 		} else {
 		$query = "select link_knowledge, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where link_id=\'".$link_id."\' and start_time <= \'".$time->getEndTime()."\' and end_time >= \'".$time->getStartTime()."\'";
@@ -269,7 +274,7 @@ sub getLinkStatus($$$) {
 	return (0, \%links);
 }
 
-sub updateLinkStatus($$$$$$$) {
+sub updateLinkStatus {
 	my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 	my $prev_end_time;
@@ -309,7 +314,7 @@ sub updateLinkStatus($$$$$$$) {
 
 		my $link = pop(@{ $res->{$link_id} });
 
-		if (!defined $link or $link->getOperStatus ne $oper_value or $link->getAdminStatus ne $admin_value) {
+		if (not defined $link or $link->getOperStatus ne $oper_value or $link->getAdminStatus ne $admin_value) {
 			$logger->debug("Something changed on link $link_id");
 			$do_update = 0;
 		} else {
@@ -387,7 +392,7 @@ on the object for the specific database.
 	use perfSONAR_PS::Client::Status::SQL;
 
 	my $status_client = new perfSONAR_PS::Client::Status::SQL("DBI:SQLite:dbname=status.db");
-	if (!defined $status_client) {
+	if (not defined $status_client) {
 		print "Problem creating client for status MA\n";
 		exit(-1);
 	}
@@ -567,3 +572,4 @@ Copyright (c) 2004-2007, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
+# vim: expandtab shiftwidth=4 tabstop=4

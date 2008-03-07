@@ -24,7 +24,7 @@ use Params::Validate qw(:all);
 
 use fields 'LOGGER';
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -35,7 +35,7 @@ use perfSONAR_PS::Messages;
     any default values. The function should return 0 if the configuration
     is valid, and -1 if an error is found.
 =cut
-sub init($$) {
+sub init {
     my ($self, $handler) = @_;
 
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::Skeleton");
@@ -43,14 +43,14 @@ sub init($$) {
     # Check the configuration and set some default values
 
     # If they haven't specified whether or not to perform LS registration, set it to false
-    if (!defined $self->{CONF}->{"skeleton"}->{"enable_registration"} or
+    if (not defined $self->{CONF}->{"skeleton"}->{"enable_registration"} or
         $self->{CONF}->{"skeleton"}->{"enable_registration"} eq "") {
         $self->{LOGGER}->warn("Disabling registration since its use is unspecified");
         $self->{CONF}->{"skeleton"}->{"enable_registration"} = 0;
     }
 
     if ($self->{CONF}->{"skeleton"}->{"enable_registration"}) {
-        if (!defined $self->{CONF}->{"skeleton"}->{"service_accesspoint"} or $self->{CONF}->{"skeleton"}->{"service_accesspoint"} eq "") {
+        if (not defined $self->{CONF}->{"skeleton"}->{"service_accesspoint"} or $self->{CONF}->{"skeleton"}->{"service_accesspoint"} eq "") {
             $self->{LOGGER}->error("No access point specified for SNMP service");
             return -1;
         }
@@ -58,7 +58,7 @@ sub init($$) {
         # Verify an LS instance exists. If no ls is set specifically
         # for the skeleton MA, check if a global ls_instance exists. If
         # so, set it to be the skeleton MA's ls_instance.
-        if (!defined $self->{CONF}->{"skeleton"}->{"ls_instance"} or $self->{CONF}->{"skeleton"}->{"ls_instance"} eq "") {
+        if (not defined $self->{CONF}->{"skeleton"}->{"ls_instance"} or $self->{CONF}->{"skeleton"}->{"ls_instance"} eq "") {
             if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne "") {
                 $self->{CONF}->{"skeleton"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             } else {
@@ -71,7 +71,7 @@ sub init($$) {
         # exists, check to see if one was globally set. If not, set it
         # to a default of 30 minutes. If one does exist, change the
         # registration interval from minutes to seconds.
-        if (!defined $self->{CONF}->{"skeleton"}->{"ls_registration_interval"} or $self->{CONF}->{"skeleton"}->{"ls_registration_interval"} eq "") {
+        if (not defined $self->{CONF}->{"skeleton"}->{"ls_registration_interval"} or $self->{CONF}->{"skeleton"}->{"ls_registration_interval"} eq "") {
             if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne "") {
                 $self->{CONF}->{"skeleton"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             } else {
@@ -84,21 +84,21 @@ sub init($$) {
         }
 
         # set a default service description
-        if(!defined $self->{CONF}->{"skeleton"}->{"service_description"} or
+        if(not defined $self->{CONF}->{"skeleton"}->{"service_description"} or
                 $self->{CONF}->{"skeleton"}->{"service_description"} eq "") {
             $self->{CONF}->{"skeleton"}->{"service_description"} = "perfSONAR_PS Skeleton MA";
             $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS Skeleton MA'.");
         }
 
         # set a default service name
-        if(!defined $self->{CONF}->{"skeleton"}->{"service_name"} or
+        if(not defined $self->{CONF}->{"skeleton"}->{"service_name"} or
                 $self->{CONF}->{"skeleton"}->{"service_name"} eq "") {
             $self->{CONF}->{"skeleton"}->{"service_name"} = "Skeleton MA";
             $self->{LOGGER}->warn("Setting 'service_name' to 'Skeleton MA'.");
         }
 
         # set a default service type
-        if(!defined $self->{CONF}->{"skeleton"}->{"service_type"} or
+        if(not defined $self->{CONF}->{"skeleton"}->{"service_type"} or
                 $self->{CONF}->{"skeleton"}->{"service_type"} eq "") {
             $self->{CONF}->{"skeleton"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
@@ -137,7 +137,7 @@ sub init($$) {
     process. It returns 0 if none is needed and non-zero if one is needed.
     If non-zero is returned, the function registerLS must be defined.
 =cut
-sub needLS($) {
+sub needLS {
     my ($self) = @_;
 
     return $self->{CONF}->{"skeleton"}->{"enable_registration"};
@@ -150,7 +150,7 @@ sub needLS($) {
     variable is a reference that can be used to return how long the process
     should sleep for before calling the registerLS function again.
 =cut
-sub registerLS($$) {
+sub registerLS {
     my ( $self, $sleep_time ) = validate_pos(@_,
             1,
             { type => SCALARREF },
@@ -167,6 +167,8 @@ sub registerLS($$) {
     if (defined $sleep_time) {
         $$sleep_time = $self->{CONF}->{"status"}->{"ls_registration_interval"};
     }
+
+    return;
 }
 
 =head2 handleMessage 
@@ -181,9 +183,9 @@ sub registerLS($$) {
      rawRequest: The raw request received
 
 =cut
-sub handleMessage($$$$$) {
-    my $self = shift;
-    my $args = validate(@_, 
+sub handleMessage {
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => 1,
                 messageId => 1,
@@ -228,8 +230,8 @@ sub handleMessage($$$$$) {
 
 =cut
 sub handleMessageBegin {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => 1,
                 messageId => 1, 
@@ -262,8 +264,8 @@ sub handleMessageBegin {
 
 =cut
 sub handleMessageEnd {
-    my $self = shift;
-    my $args = validate(@_, 
+    my ($self, @args) = @_;
+    my $args = validate(@args, 
             {
                 output => 1,
                 messageId => 1,

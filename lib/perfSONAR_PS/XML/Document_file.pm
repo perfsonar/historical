@@ -7,11 +7,11 @@ use File::Temp qw(tempfile);
 use Log::Log4perl qw(get_logger :nowarn);
 use Params::Validate qw(:all);
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 my $pretty_print = 0;
 
-sub new($) {
+sub new {
 	my ($package) = @_;
 
 	my $self = fields::new($package);
@@ -26,7 +26,7 @@ sub new($) {
 	return $self;
 }
 
-sub getNormalizedURI($) {
+sub getNormalizedURI {
 	my ($uri) = @_;
 
 	# trim whitespace
@@ -247,7 +247,7 @@ sub createElement {
 	return 0;
 }
 
-sub endElement($$) {
+sub endElement {
 	my ($self, $tag) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -284,7 +284,7 @@ sub endElement($$) {
 	return 0;
 }
 
-sub addExistingXMLElement($$) {
+sub addExistingXMLElement {
 	my ($self, $element) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -296,7 +296,7 @@ sub addExistingXMLElement($$) {
 	return 0;
 }
 
-sub addOpaque($$) {
+sub addOpaque {
 	my ($self, $data) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 
@@ -305,7 +305,7 @@ sub addOpaque($$) {
 	return 0;
 }
 
-sub getValue($) {
+sub getValue {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
 

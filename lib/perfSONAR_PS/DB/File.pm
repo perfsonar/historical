@@ -5,7 +5,7 @@ use fields 'FILE', 'XML', 'LOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -102,9 +102,9 @@ sub closeDB {
     my $parameters = validate( @args, { error => 0 } );
 
     if ( defined $self->{XML} and $self->{XML} ) {
-        if ( defined open( FILE, ">", $self->{FILE} ) ) {
-            print FILE $self->{XML}->toString;
-            my $status = close(FILE);
+        if ( defined open( my $FILE, ">", $self->{FILE} ) ) {
+            print $FILE $self->{XML}->toString;
+            my $status = close($FILE);
             if ( $status  ) {
                 ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
                 return 0;

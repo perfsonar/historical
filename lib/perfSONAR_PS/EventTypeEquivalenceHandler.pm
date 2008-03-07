@@ -95,6 +95,8 @@ sub addEquivalence {
             $self->{EVENT_TYPES}->{$ev} = \%new_class;
         }
     }
+
+    return;
 }
 
 =head2 matchEventTypes ($self, \@eventTypes1, \@eventTypes2)

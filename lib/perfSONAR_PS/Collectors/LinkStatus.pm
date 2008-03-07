@@ -22,7 +22,7 @@ use base 'perfSONAR_PS::Collectors::Base';
 
 use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS', 'TL1AGENTS';
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 my %link_prev_update_status = ();
 
@@ -34,13 +34,13 @@ sub new {
     return $self;
 }
 
-sub init($) {
+sub init {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
 
     $logger->debug("init()");
 
-    if (!defined $self->{CONF}->{"link_file_type"} or $self->{CONF}->{"link_file_type"} eq "") {
+    if (not defined $self->{CONF}->{"link_file_type"} or $self->{CONF}->{"link_file_type"} eq "") {
         $logger->error("no link file type specified");
         return -1;
     }
@@ -59,7 +59,7 @@ sub init($) {
         if (lc($self->{CONF}->{"ma_type"}) eq "sqlite") {
             load perfSONAR_PS::Client::Status::SQL;
 
-            if (!defined $self->{CONF}->{"ma_file"} or $self->{CONF}->{"ma_file"} eq "") {
+            if (not defined $self->{CONF}->{"ma_file"} or $self->{CONF}->{"ma_file"} eq "") {
                 $logger->error("You specified a SQLite Database, but then did not specify a database file(ma_file)");
                 return -1;
             }
@@ -73,7 +73,7 @@ sub init($) {
 
             $self->{CLIENT} = perfSONAR_PS::Client::Status::SQL->new("DBI:SQLite:dbname=".$file, $self->{CONF}->{"ma_table"});
         } elsif (lc($self->{CONF}->{"ma_type"}) eq "ma") {
-            if (!defined $self->{CONF}->{"ma_uri"} or $self->{CONF}->{"ma_uri"} eq "") {
+            if (not defined $self->{CONF}->{"ma_uri"} or $self->{CONF}->{"ma_uri"} eq "") {
                 $logger->error("You specified to use an MA, but did not specify which one(ma_uri)");
                 return -1;
             }
@@ -84,14 +84,14 @@ sub init($) {
 
             my $dbi_string = "dbi:mysql";
 
-            if (!defined $self->{CONF}->{"ma_name"} or $self->{CONF}->{"ma_name"} eq "") {
+            if (not defined $self->{CONF}->{"ma_name"} or $self->{CONF}->{"ma_name"} eq "") {
                 $logger->error("You specified a MySQL Database, but did not specify the database (ma_name)");
                 return -1;
             }
 
             $dbi_string .= ":".$self->{CONF}->{"ma_name"};
 
-            if (!defined $self->{CONF}->{"ma_host"} or $self->{CONF}->{"ma_host"} eq "") {
+            if (not defined $self->{CONF}->{"ma_host"} or $self->{CONF}->{"ma_host"} eq "") {
                 $logger->error("You specified a MySQL Database, but did not specify the database host (ma_host)");
                 return -1;
             }
@@ -103,7 +103,7 @@ sub init($) {
             }
 
             $self->{CLIENT} = perfSONAR_PS::Client::Status::SQL->new($dbi_string, $self->{CONF}->{"ma_username"}, $self->{CONF}->{"ma_password"});
-            if (!defined $self->{CLIENT}) {
+            if (not defined $self->{CLIENT}) {
                 my $msg = "Couldn't create SQL client";
                 $logger->error($msg);
                 return (-1, $msg);
@@ -126,7 +126,7 @@ sub init($) {
     return 0;
 }
 
-sub parseLinkFile($$$) {
+sub parseLinkFile {
     my($self, $file, $type) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
     my $links_config;
@@ -168,14 +168,14 @@ sub parseLinkFile($$$) {
     return 0;
 }
 
-sub parseLinkElement($$) {
+sub parseLinkElement {
     my ($self, $link_desc) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
 
     my $link = perfSONAR_PS::Collectors::LinkStatus::Link->new();
 
     my $knowledge = $link_desc->getAttribute("knowledge");
-    if (!defined $knowledge) {
+    if (not defined $knowledge) {
         my $msg = "It is not stated whether or knowledge is full or partial";
         $logger->error($msg);
         return -1;
@@ -293,7 +293,7 @@ sub parseLinkElement($$) {
     return (0, $link);
 }
 
-sub parseAgentElement($$$) {
+sub parseAgentElement {
     my ($self, $agent, $status_type) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
 
@@ -301,7 +301,7 @@ sub parseAgentElement($$$) {
 
     if ($status_type eq "") {
         $status_type = $agent->getAttribute("status_type");
-        if (!defined $status_type) {
+        if (not defined $status_type) {
             my $msg = "Agent does not contain a status_type attribute stating which status (operational or administrative) it returns";
             $logger->error($msg);
             return (-1, $msg);
@@ -315,7 +315,7 @@ sub parseAgentElement($$$) {
     }
 
     my $type = $agent->getAttribute("type");
-    if (!defined $type or $type eq "") {
+    if (not defined $type or $type eq "") {
         my $msg = "Agent has no type information";
         $logger->debug($msg);
         return (-1, $msg);
@@ -323,7 +323,7 @@ sub parseAgentElement($$$) {
 
     if ($type eq "script") {
         my $script_name = $agent->findvalue("script_name");
-        if (!defined $script_name or $script_name eq "") {
+        if (not defined $script_name or $script_name eq "") {
             my $msg = "Agent of type 'script' has no script name defined";
             $logger->debug($msg);
             return (-1, $msg);
@@ -346,7 +346,7 @@ sub parseAgentElement($$$) {
         $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::Script->new($status_type, $script_name, $script_params);
     } elsif ($type eq "constant") {
         my $value = $agent->findvalue("constant");
-        if (!defined $value or $value eq "") {
+        if (not defined $value or $value eq "") {
             my $msg = "Agent of type 'constant' has no value defined";
             $logger->debug($msg);
             return (-1, $msg);
@@ -355,7 +355,7 @@ sub parseAgentElement($$$) {
         $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::Constant->new($status_type, $value);
     } elsif ($type eq "snmp") {
         my $oid = $agent->findvalue("oid");
-        if (!defined $oid or $oid eq "") {
+        if (not defined $oid or $oid eq "") {
             if ($status_type eq "oper") {
                 $oid = "1.3.6.1.2.1.2.2.1.8";
             } elsif ($status_type eq "admin") {
@@ -364,7 +364,7 @@ sub parseAgentElement($$$) {
         }
 
         my $hostname = $agent->findvalue('hostname');
-        if (!defined $hostname or $hostname eq "") {
+        if (not defined $hostname or $hostname eq "") {
             my $msg = "Agent of type 'SNMP' has no hostname";
             $logger->error($msg);
             return (-1, $msg);
@@ -373,31 +373,31 @@ sub parseAgentElement($$$) {
         my $ifName = $agent->findvalue('ifName');
         my $ifIndex = $agent->findvalue('ifIndex');
 
-        if ((!defined $ifIndex or $ifIndex eq "") and (!defined $ifName or $ifName eq "")) {
+        if ((not defined $ifIndex or $ifIndex eq "") and (not defined $ifName or $ifName eq "")) {
             my $msg = "Agent of type 'SNMP' has no name or index specified";
             $logger->error($msg);
             return (-1, $msg);
         }
 
         my $version = $agent->findvalue("version");
-        if (!defined $version or $version eq "") {
+        if (not defined $version or $version eq "") {
             my $msg = "Agent of type 'SNMP' has no snmp version";
             $logger->error($msg);
             return (-1, $msg);
         }
 
         my $community = $agent->findvalue("community");
-        if (!defined $community or $community eq "") {
+        if (not defined $community or $community eq "") {
             my $msg = "Agent of type 'SNMP' has no community string";
             $logger->error($msg);
             return (-1, $msg);
         }
 
-        if (!defined $self->{SNMPAGENTS}->{$hostname}) {
+        if (not defined $self->{SNMPAGENTS}->{$hostname}) {
             $self->{SNMPAGENTS}->{$hostname} = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP::Host->new( $hostname, "" , $version, $community, "");
         }
 
-        if (!defined $ifIndex or $ifIndex eq "") {
+        if (not defined $ifIndex or $ifIndex eq "") {
             $logger->debug("Looking up $ifName from $hostname");
 
             my ($status, $res) = snmpwalk($hostname, undef, "1.3.6.1.2.1.31.1.1.1.1", $community, $version);
@@ -414,13 +414,13 @@ sub parseAgentElement($$$) {
 
                 $logger->debug("$oid = $type: $value($ifName)");
                 if ($value eq $ifName) {
-                    if ($oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/) {
+                    if ($oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x) {
                         $ifIndex = $1;
                     }
                 }
             }
 
-            if (!defined $ifIndex or $ifIndex eq "") {
+            if (not defined $ifIndex or $ifIndex eq "") {
                 my $msg = "Didn't find ifName $ifName in host $hostname";
                 $logger->error($msg);
                 return (-1, $msg);
@@ -506,7 +506,7 @@ sub parseAgentElement($$$) {
     return (0, $new_agent);
 }
 
-sub collectMeasurements($$) {
+sub collectMeasurements {
     my($self, $sleeptime) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
     my ($status, $res);
@@ -561,6 +561,8 @@ sub collectMeasurements($$) {
     if ($sleeptime) {
         $sleeptime = $self->{CONF}->{"collection_interval"};
     }
+
+    return;
 }
 
 1;
