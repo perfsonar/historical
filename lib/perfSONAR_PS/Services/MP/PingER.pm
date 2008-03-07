@@ -1,14 +1,3 @@
-# db storage
-use perfSONAR_PS::DB::PingER;
-
-# agent class for pinger
-use perfSONAR_PS::Services::MP::Agent::PingER;
-
-# config and schedulign
-use perfSONAR_PS::Services::MP::Config::PingER;
-
-use perfSONAR_PS::Client::LS::Remote;
-
 
 package perfSONAR_PS::Services::MP::PingER;
 
@@ -55,18 +44,30 @@ file.
 
 =cut
 
+# db storage
+use perfSONAR_PS::DB::PingER;
+
+# agent class for pinger
+use perfSONAR_PS::Services::MP::Agent::PingER;
+
+# config and schedulign
+use perfSONAR_PS::Services::MP::Config::PingER;
+
+use perfSONAR_PS::Client::LS::Remote;
+
+
 
 # inherit from the the scheduler class to enable random waits between tests
 use perfSONAR_PS::Services::MP::Scheduler;
 use base 'perfSONAR_PS::Services::MP::Scheduler';
 
-use fields qw( DATABASE LS_CLIENT );
+use fields qw( DATABASE LS_CLIENT eventTypes);
 
 use Log::Log4perl qw(get_logger);
 our $logger = get_logger("perfSONAR_PS::Services::MP::PingER");
 
 # use this to identify the configuration element to pick up
-our $basename = 'PingERMP';
+our $basename = 'pingermp';
 
 our $processName = 'perfSONAR-PS PingER MP';
 
@@ -80,7 +81,8 @@ sub new {
 	my $package = shift;
 	my $self = $package->SUPER::new( @_ );
 	$self->{'DATABASE'} = undef;
-	$self->{'LS_CLIENT'} = undef;
+	$self->{'LS_CLIENT'} = undef; 
+	$self->{eventTypes} =  perfSONAR_PS::Datatypes::EventTypes->new(); 
 	return $self;
 }
 
@@ -105,17 +107,16 @@ sub init
 		$self->configureConf( 'service_name', $processName, $self->getConf('service_name') );
 		$self->configureConf( 'service_type', 'MP', $self->getConf('service_type') );
 		$self->configureConf( 'service_description', $processName . ' Service', $self->getConf('service_description') );
-    	$self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
+    	        $self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
 
-		# database stuff
-		$self->configureConf( 'metadata_db_host', undef, $self->getConf('metadata_db_host') );
-		$self->configureConf( 'metadata_db_port', undef, $self->getConf('metadata_db_port') );
-	    $self->configureConf( 'metadata_db_type', 'SQLite', $self->getConf('metadata_db_type') );
-		$self->configureConf( 'metadata_db_name', 'pingerMA.sqlite3', $self->getConf('metadata_db_name') );
+		$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
+	        $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+	        $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+    	        $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
 
-		$self->configureConf( 'metadata_db_user', undef, $self->getConf( 'metadata_db_user') );
-		$self->configureConf( 'metadata_db_pass', undef, $self->getConf( 'metadata_db_pass') );
-
+    	        $self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
+    	        $self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
+    
 		# die if we don't have the confi file
 		$self->configureConf( 'configuration_file', undef, $self->getConf('configuration_file'), 1 );
 
@@ -139,7 +140,7 @@ sub init
     my $config = perfSONAR_PS::Services::MP::Config::PingER->new();
 	$config->load( $self->getConf( 'configuration_file' ) );
 	
-    # set up the schedule with the list of tests
+       # set up the schedule with the list of tests
 	$self->addTestSchedule( $config );
 		
 	# do not add any handlers as we do not want to support on-demand
@@ -348,12 +349,12 @@ sub setupDatabase
 		perfSONAR_PS::DB::PingER->register_db(
 			domain	=> 'default',
 			type	=> 'default',
-			driver	=> $self->getConf( "metadata_db_type" ),
-			database => $self->getConf( "metadata_db_name" ),
-			host	=> $self->getConf( "metadata_db_host"),
-			port	=> $self->getConf( "metadata_db_port"),
-			username	=> $self->getConf( "metadata_db_user" ),
-			password	=> $self->getConf( "metadata_db_pass" ),
+			driver	=> $self->getConf( "db_type" ),
+			database => $self->getConf( "db_name" ),
+			host	=> $self->getConf( "db_host"),
+			port	=> $self->getConf( "db_port"),
+			username	=> $self->getConf( "db_username" ),
+			password	=> $self->getConf( "db_password" ),
 		);
 		# try to opent eh db
 		my $db = perfSONAR_PS::DB::PingER->new_or_cached();
@@ -361,9 +362,9 @@ sub setupDatabase
 		$db->openDB();
 	};
 	if ( $@ ) {
-		my $type = $self->getConf( 'metadata_db_type') || '';
-		my $dbname = $self->getConf( 'metadata_db_name') || '';
-		my $user = $self->getConf( 'metadata_db_user') || '';
+		my $type = $self->getConf( 'db_type') || '';
+		my $dbname = $self->getConf( 'db_name') || '';
+		my $user = $self->getConf( 'db_username') || '';
 		$logger->logdie( "Could not open database '$type' for '$dbname' as user '$user'" );
 		return -1;
 	}
@@ -543,11 +544,26 @@ deal with on-demand measurements through here
 =cut
 sub handleEvent($$$$$$$$$)
 {
-	my ($self, $output, $endpoint, $messageType, $message_parameters, $eventType, $md, $d, $raw_request) = @_;
-
+    my ($self, @args) = @_;
+    my $parameters = validate(@args,
+            {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                subject => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
+            }); 
+	 # shoudl do some validation on the eventType
+	 ${ $parameters->{"doOutputMetadata"} } = 0;
+	
 	# shoudl do some validation on the eventType
-	$logger->debug( "\n\n\nOUTPUT: $output / $raw_request" );
-	if ($messageType eq "MetadataKeyRequest") {
+	$logger->debug( "\n\n\nOUTPUT: " . $parameters->{"output"} . " / " . $parameters->{"rawRequest"});
+	if ( $parameters->{"messageType"} eq "MetadataKeyRequest") {
 		#return $self->maMetadataKeyRequest($output, $md, $raw_request, $message_parameters);
 	} else {
 		#return $self->maSetupDataRequest($output, $md, $raw_request, $message_parameters);
@@ -557,9 +573,9 @@ sub handleEvent($$$$$$$$$)
 	my $db = $self->getDB();	
 	$db->openDB();
 	
-	$logger->debug( 'handle event ' . $raw_request );
-	my $response = $self->handleRequest( $raw_request );
-	$output->addExistingXMLElement( $response->getDOM() );
+	$logger->debug( 'handle event ' .   $parameters->{"rawRequest"});
+	my $response = $self->handleRequest( $parameters->{"rawRequest"} );
+	$parameters->{"output"}->addExistingXMLElement( $response->getDOM() );
 
 	return 0;
 }

@@ -186,9 +186,9 @@ sub getTestPeriodById
 		unless defined $testid;
 
 	$logger->fatal( "unique test with id '$testid' does not define a test period.")
-		unless exists $self->config()->{$testid}->{'measurementPeriod'};
+		unless exists $self->config()->{$testid}->{'period'};
 
-	return $self->config()->{$testid}->{'measurementPeriod'};
+	return $self->config()->{$testid}->{'period'};
 }
 
 =head2 getTestOffsetById( $testid )

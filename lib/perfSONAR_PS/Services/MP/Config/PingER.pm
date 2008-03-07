@@ -133,7 +133,7 @@ sub load
 	# get the dest host s
 	my $xpath = '//' . $ns->{pingertopo} . ':topology/' . $ns->{nmtb} . ':domain/' . $ns->{nmtb} . ':node';
 	# make sure that it has children with tests
-	$xpath .= '[child::' . $ns->{nmwg} . ':parameters/' . $ns->{nmwg} . ":parameter[\@name='measurementPeriod']]";
+	$xpath .= '[child::' . $ns->{pingertopo} . ':test/' . $ns->{pingertopo} . ":period]";
 
 	# place to store al tests
 	my $config = {};
@@ -168,7 +168,7 @@ sub load
 		}
 		
 		# get the tests and populat datastructure
-		foreach my $test ( $node->getChildrenByLocalName( 'parameters') )
+		foreach my $test ( $node->getChildrenByLocalName( 'test') )
 		{
 			#$logger->debug( "Found: " . $test->toString() );
 			$logger->debug( "Found new test");
@@ -177,32 +177,27 @@ sub load
 			foreach my $param ( $test->childNodes )
 			{
 				my $tag = $param->localname();
-				next unless defined $tag && 
-					$tag eq 'parameter';
-					
-				my $attr = $param->getAttribute( 'name' );
-				if ( defined $attr 
-					&& ( $attr eq 'packetSize'
-						|| $attr eq 'count'
-						|| $attr eq 'packetInterval'
-						|| $attr eq 'ttl' 
-						|| $attr eq 'measurementPeriod' 
-						|| $attr eq 'measurementOffset' ) 
+			        if ( defined  $tag 
+					&& (  $tag  eq 'packetSize'
+						|| $tag  eq 'count'
+						|| $tag  eq 'interval'
+						|| $tag  eq 'ttl' 
+						|| $tag  eq 'period' 
+						|| $tag  eq 'offset' ) 
 				) {
 					my $value = $param->textContent;
 					chomp( $value );
-					$logger->debug( "Found: '$attr' with value '$value'" );
+					$logger->debug( "Found:  $tag with value '$value'" );
 					# agents use 'interval' rather than packetinterval
-					$attr = 'interval'
-						if $attr eq 'packetInterval';
-					$hash->{$attr} = $value;												
+					 
+					$hash->{$tag} = $value;												
 				}
 
 			}
 			
 			# don't bother if we don't have a period to use
 			next
-				if ! exists $hash->{measurementPeriod};
+				if ! exists $hash->{period};
 			
 			# create a special id to identify the test
 			my $id = 'packetSize=' . $hash->{'packetSize'} 
