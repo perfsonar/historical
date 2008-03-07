@@ -107,10 +107,17 @@ sub endParameters {
 
 # XXX this should probably ensure that the parameters are being created inside a parameters block
 sub addParameter {
-    my ($output, $name, $value) = @_;
+    my ($output, $name, $value, $args) = @_;
     my $logger = get_logger("perfSONAR_PS::Messages");
-
-    return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => {name=>$name}, content => $value);
+    
+    # XXX jason 3/6/08 - Fix the parameters hack after conversion to new argument types
+    my %attrs = ();
+    if(defined $args) {
+      %attrs = %{$args};
+    }
+    $attrs{"name"} = $name;
+    
+    return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, content => $value);
 }
 
 sub getResultCodeMessage {
