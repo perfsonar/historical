@@ -7,7 +7,7 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 =head1 NAME
 
@@ -38,6 +38,7 @@ use Module::Load;
 use Digest::MD5 qw(md5_hex);
 use English qw( -no_match_vars );
 use Params::Validate qw(:all);
+use Date::Manip;
 
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
@@ -49,25 +50,25 @@ use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 
 my %ma_namespaces = (
-    nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
-    nmtm          => "http://ggf.org/ns/nmwg/time/2.0/",
-    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-    netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-    neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
-    netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-    average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
-    perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-    psservice     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
-    nmwgt         => "http://ggf.org/ns/nmwg/topology/2.0/",
-    nmwgtopo3     => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtl2         => "http://ogf.org/schema/network/topology/l2/20070828/",
-    nmtl3         => "http://ogf.org/schema/network/topology/l3/20070828/",
-    nmtl4         => "http://ogf.org/schema/network/topology/l4/20070828/",
-    nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmwgr         => "http://ggf.org/ns/nmwg/result/2.0/"
+    nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
+    nmtm      => "http://ggf.org/ns/nmwg/time/2.0/",
+    snmp      => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
+    netutil   => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+    neterr    => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+    netdisc   => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
+    select    => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    average   => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+    psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+    nmwgt     => "http://ggf.org/ns/nmwg/topology/2.0/",
+    nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtl2     => "http://ogf.org/schema/network/topology/l2/20070828/",
+    nmtl3     => "http://ogf.org/schema/network/topology/l3/20070828/",
+    nmtl4     => "http://ogf.org/schema/network/topology/l4/20070828/",
+    nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/"
 );
 
 =head1 API
@@ -410,7 +411,7 @@ sub registerLS {
             return -1;
         }
         @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
-        $metadatadb->close( { error => \$error } );
+        $metadatadb->closeDB( { error => \$error } );
     }
     else {
         $self->{LOGGER}->error("Wrong value for 'metadata_db_type' set.");
@@ -508,38 +509,92 @@ sub handleEvent {
     my %timeSettings = ();
 
     # go through the main subject and select filters looking for parameters.
-    my $new_timeSettings = $self->getFilterParameters( $md, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"} );
+    my $new_timeSettings = getFilterParameters( { m => $md, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"snmp"}->{"default_resolution"} } );
 
     $timeSettings{"CF"}                   = $new_timeSettings->{"CF"}                   if ( defined $new_timeSettings->{"CF"} );
     $timeSettings{"RESOLUTION"}           = $new_timeSettings->{"RESOLUTION"}           if ( defined $new_timeSettings->{"RESOLUTION"} and $timeSettings{"RESOLUTION_SPECIFIED"} );
     $timeSettings{"RESOLUTION_SPECIFIED"} = $new_timeSettings->{"RESOLUTION_SPECIFIED"} if ( $new_timeSettings->{"RESOLUTION_SPECIFIED"} );
-    $timeSettings{"START"}                = $new_timeSettings->{"START"}                if ( defined $new_timeSettings->{"START"} );
-    $timeSettings{"END"}                  = $new_timeSettings->{"END"}                  if ( defined $new_timeSettings->{"END"} );
+
+    if ( exists $new_timeSettings->{"START"}->{"value"} ) {
+        if ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "unix" ) {
+            $new_timeSettings->{"START"}->{"internal"} = $new_timeSettings->{"START"}->{"value"};
+        }
+        elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "iso" ) {
+            $new_timeSettings->{"START"}->{"internal"} = UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" );
+        }
+        else {
+            $new_timeSettings->{"START"}->{"internal"} = $new_timeSettings->{"START"}->{"value"};
+        }
+    }
+    $timeSettings{"START"} = $new_timeSettings->{"START"};
+
+    if ( exists $new_timeSettings->{"END"}->{"value"} ) {
+        if ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "unix" ) {
+            $new_timeSettings->{"END"}->{"internal"} = $new_timeSettings->{"END"}->{"value"};
+        }
+        elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "iso" ) {
+            $new_timeSettings->{"END"}->{"internal"} = UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" );
+        }
+        else {
+            $new_timeSettings->{"END"}->{"internal"} = $new_timeSettings->{"END"}->{"value"};
+        }
+    }
+    $timeSettings{"END"} = $new_timeSettings->{"END"};
 
     if ( $#filters > -1 ) {
         foreach my $filter_arr (@filters) {
             my @filters = @{$filter_arr};
             my $filter  = $filters[-1];
 
-            $new_timeSettings = $self->getFilterParameters( $filter, $parameters->{rawRequest}->getNamespaces(), $self->{CONF}->{"snmp"}->{"default_resolution"} );
+            $new_timeSettings = getFilterParameters( { m => $filter, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"snmp"}->{"default_resolution"} } );
 
             $timeSettings{"CF"}                   = $new_timeSettings->{"CF"}                   if ( defined $new_timeSettings->{"CF"} );
             $timeSettings{"RESOLUTION"}           = $new_timeSettings->{"RESOLUTION"}           if ( defined $new_timeSettings->{"RESOLUTION"} and $new_timeSettings->{"RESOLUTION_SPECIFIED"} );
             $timeSettings{"RESOLUTION_SPECIFIED"} = $new_timeSettings->{"RESOLUTION_SPECIFIED"} if ( $new_timeSettings->{"RESOLUTION_SPECIFIED"} );
 
-            # we conditionally replace the START/END settings since under the theory of
-            # filter, if a later element specifies an earlier start time, the later
-            # start time that appears higher in the filter chain would have filtered
-            # out all times earlier than itself leaving nothing to exist between the
-            # earlier start time and the later start time. XXX I'm not sure how
-            # the resolution and the consolidation function should work in this
-            # context.
+            if ( exists $new_timeSettings->{"START"}->{"value"} ) {
+                if ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "unix" ) {
+                    $new_timeSettings->{"START"}->{"internal"} = $new_timeSettings->{"START"}->{"value"};
+                }
+                elsif ( exists $new_timeSettings->{"START"}->{"type"} and lc( $new_timeSettings->{"START"}->{"type"} ) eq "iso" ) {
+                    $new_timeSettings->{"START"}->{"internal"} = UnixDate( $new_timeSettings->{"START"}->{"value"}, "%s" );
+                }
+                else {
+                    $new_timeSettings->{"START"}->{"internal"} = $new_timeSettings->{"START"}->{"value"};
+                }
+            }
+            else {
+                $new_timeSettings->{"START"}->{"internal"} = q{};
+            }
 
-            if ( defined $new_timeSettings->{"START"} and ( not defined $timeSettings{"START"} or $new_timeSettings->{"START"} > $timeSettings{"START"} ) ) {
+            if ( exists $new_timeSettings->{"END"}->{"value"} ) {
+                if ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "unix" ) {
+                    $new_timeSettings->{"END"}->{"internal"} = $new_timeSettings->{"END"}->{"value"};
+                }
+                elsif ( exists $new_timeSettings->{"END"}->{"type"} and lc( $new_timeSettings->{"END"}->{"type"} ) eq "iso" ) {
+                    $new_timeSettings->{"END"}->{"internal"} = UnixDate( $new_timeSettings->{"END"}->{"value"}, "%s" );
+                }
+                else {
+                    $new_timeSettings->{"END"}->{"internal"} = $new_timeSettings->{"END"}->{"value"};
+                }
+            }
+            else {
+                $new_timeSettings->{"END"}->{"internal"} = q{};
+            }
+
+            # we conditionally replace the START/END settings since under the
+            # theory of filter, if a later element specifies an earlier start
+            # time, the later start time that appears higher in the filter chain
+            # would have filtered out all times earlier than itself leaving
+            # nothing to exist between the earlier start time and the later
+            # start time. XXX I'm not sure how the resolution and the
+            # consolidation function should work in this context.
+
+            if ( exists $new_timeSettings->{"START"}->{"internal"} and ( ( not exists $timeSettings{"START"}->{"internal"} ) or $new_timeSettings->{"START"}->{"internal"} > $timeSettings{"START"}->{"internal"} ) ) {
                 $timeSettings{"START"} = $new_timeSettings->{"START"};
             }
 
-            if ( defined $new_timeSettings->{"END"} and ( not defined $timeSettings{"END"} or $new_timeSettings->{"END"} < $timeSettings{"END"} ) ) {
+            if ( exists $new_timeSettings->{"END"}->{"internal"} and ( ( not exists $timeSettings{"END"}->{"internal"} ) or $new_timeSettings->{"END"}->{"internal"} < $timeSettings{"END"}->{"internal"} ) ) {
                 $timeSettings{"END"} = $new_timeSettings->{"END"};
             }
         }
@@ -556,10 +611,10 @@ sub handleEvent {
     my $start      = q{};
     my $end        = q{};
 
-    $cf         = $timeSettings{"CF"}         if ( $timeSettings{"CF"} );
-    $resolution = $timeSettings{"RESOLUTION"} if ( $timeSettings{"RESOLUTION"} );
-    $start      = $timeSettings{"START"}      if ( $timeSettings{"START"} );
-    $end        = $timeSettings{"END"}        if ( $timeSettings{"END"} );
+    $cf         = $timeSettings{"CF"}                  if ( $timeSettings{"CF"} );
+    $resolution = $timeSettings{"RESOLUTION"}          if ( $timeSettings{"RESOLUTION"} );
+    $start      = $timeSettings{"START"}->{"internal"} if ( $timeSettings{"START"}->{"internal"} );
+    $end        = $timeSettings{"END"}->{"internal"}   if ( $timeSettings{"END"}->{"internal"} );
 
     $self->{LOGGER}->debug("Request filter parameters: cf: $cf resolution: $resolution start: $start end: $end");
 
@@ -646,7 +701,6 @@ sub maMetadataKeyRequest {
         $self->metadataKeyRetrieveKey(
             {
                 metadatadb         => $self->{METADATADB},
-                time_settings      => $parameters->{time_settings},
                 key                => $nmwg_key,
                 metadata           => $parameters->{metadata},
                 filters            => $parameters->{filters},
@@ -672,7 +726,7 @@ sub maMetadataKeyRequest {
     return;
 }
 
-=head2 metadataKeyRetrieveKey($self, { metadatadb, key, time_settings, metadata, filters, request_namespaces, output })
+=head2 metadataKeyRetrieveKey($self, { metadatadb, key, metadata, filters, request_namespaces, output })
 
 Because the request entered with a key, we must handle it in this particular
 function.  We first attempt to extract the 'maKey' hash and check for validity.
@@ -689,7 +743,6 @@ sub metadataKeyRetrieveKey {
         {
             metadatadb         => 1,
             key                => 1,
-            time_settings      => 1,
             metadata           => 1,
             filters            => 1,
             request_namespaces => 1,
@@ -776,16 +829,16 @@ sub metadataKeyRetrieveMetadataData {
     my $dId         = q{};
     my $queryString = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( $parameters->{metadata}, q{} ) . "]";
+        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( $parameters->{metadata}, q{} ) . "]";
+        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
 
     my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
     my %et                  = ();
     my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
+    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $e ( $eventTypes->get_nodelist ) {
         my $value = extract( $e, 0 );
         if ($value) {
@@ -807,9 +860,9 @@ sub metadataKeyRetrieveMetadataData {
     }
 
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
-        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"supportedEventType\"";
+        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
         foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " and \@value=\"" . $e . "\" or text()=\"" . $e . "\"";
+            $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
         }
         $queryString = $queryString . "]]";
     }
@@ -844,9 +897,16 @@ sub metadataKeyRetrieveMetadataData {
             startData( $parameters->{output}, $dId, $mdId, undef );
             $parameters->{output}->startElement( { prefix => "nmwg", tag => "key", namespace => "http://ggf.org/ns/nmwg/base/2.0/" } );
             startParameters( $parameters->{output}, "params.0" );
-            addParameter( $parameters->{output}, "maKey",     $hashKey );
-            addParameter( $parameters->{output}, "startTime", $parameters->{time_settings}->{"START"} ) if ( defined $parameters->{time_settings}->{"START"} );
-            addParameter( $parameters->{output}, "endTime",   $parameters->{time_settings}->{"END"} ) if ( defined $parameters->{time_settings}->{"END"} );
+            addParameter( $parameters->{output}, "maKey", $hashKey );
+
+            my %attrs = ();
+            $attrs{"type"} = $parameters->{time_settings}->{"START"}->{"type"} if $parameters->{time_settings}->{"START"}->{"type"};
+            addParameter( $parameters->{output}, "startTime", $parameters->{time_settings}->{"START"}->{"value"}, \%attrs ) if ( defined $parameters->{time_settings}->{"START"}->{"value"} );
+
+            %attrs = ();
+            $attrs{"type"} = $parameters->{time_settings}->{"END"}->{"type"} if $parameters->{time_settings}->{"END"}->{"type"};
+            addParameter( $parameters->{output}, "endTime", $parameters->{time_settings}->{"END"}->{"value"}, \%attrs ) if ( defined $parameters->{time_settings}->{"END"}->{"value"} );
+
             if ( defined $parameters->{time_settings}->{"RESOLUTION"} and $parameters->{time_settings}->{"RESOLUTION_SPECIFIED"} ) {
                 addParameter( $parameters->{output}, "resolution", $parameters->{time_settings}->{"RESOLUTION"} );
             }
@@ -1015,7 +1075,7 @@ sub setupDataRetrieveKey {
     my $storedKey    = find( $results_temp, "./nmwg:key", 1 );
 
     my %l_et = ();
-    my $l_supportedEventTypes = find( $storedKey, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
+    my $l_supportedEventTypes = find( $storedKey, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
         my $value = extract( $se, 0 );
         if ($value) {
@@ -1081,17 +1141,17 @@ sub setupDataRetrieveMetadataData {
 
     my $queryString = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( $parameters->{metadata}, q{} ) . "]";
+        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( $parameters->{metadata}, q{} ) . "]";
+        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
 
     my $results = $parameters->{metadatadb}->querySet( { query => $queryString } );
 
     my %et                  = ();
     my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
-    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
+    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
     foreach my $e ( $eventTypes->get_nodelist ) {
         my $value = extract( $e, 0 );
         if ($value) {
@@ -1113,9 +1173,9 @@ sub setupDataRetrieveMetadataData {
     }
 
     if ( $eventTypes->size() or $supportedEventTypes->size() ) {
-        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"supportedEventType\"";
+        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
         foreach my $e ( sort keys %et ) {
-            $queryString = $queryString . " and \@value=\"" . $e . "\" or text()=\"" . $e . "\"";
+            $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
         }
         $queryString = $queryString . "]]";
     }
@@ -1141,7 +1201,7 @@ sub setupDataRetrieveMetadataData {
 
             my %l_et                  = ();
             my $l_eventTypes          = find( $md, "./nmwg:eventType", 0 );
-            my $l_supportedEventTypes = find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\"]", 0 );
+            my $l_supportedEventTypes = find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
             foreach my $e ( $l_eventTypes->get_nodelist ) {
                 my $value = extract( $e, 0 );
                 if ($value) {
@@ -1292,22 +1352,60 @@ sub retrieveSQL {
 
     $self->{LOGGER}->error("No data element") if ( not defined $parameters->{d} );
 
-    my $file  = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]",  1 ), 1 );
-    my $table = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
-    
+    my $file   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"file\"]",  1 ), 1 );
+    my $table  = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
+    my $dbuser = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",  1 ), 1 );
+    my $dbpass = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",  1 ), 1 );
+
     unless ( $file and $table ) {
         $self->{LOGGER}->error( "Data element " . $parameters->{d}->getAttribute("id") . " is missing some SQL elements" );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
     }
-  
-    unless ( $file =~ m/^DBI:SQLite:dbname=/mx ) {
-        $file .= "DBI:SQLite:dbname=".$file;
+
+    print "\n\nFILE: ", $file, "\n\n";
+
+    my $backup = $file;
+    if ( $backup =~ m/^DBI:SQLite:dbname=/mx ) {
+        $backup =~ s/^DBI:SQLite:dbname=//mx;
+    }
+    if ( $self->{DIRECTORY} ) {
+        if ( !( $backup =~ "^/" ) ) {
+            $backup = $self->{DIRECTORY} . "/" . $backup;
+        }
+    }
+    $file = "dbi:SQLite:dbname=" . $backup;
+
+    print "\n\nFILE: ", $file, "\n\n";
+
+    my $query = {};
+    if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+        $query = "select * from " . $table . " where id=\"" . $parameters->{d}->getAttribute("metadataIdRef") . "\" and";
+        my $queryCount = 0;
+        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+            $query = $query . " time > " . $parameters->{time_settings}->{"START"}->{"internal"};
+            $queryCount++;
+        }
+        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+            if ($queryCount) {
+                $query = $query . " and time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+            }
+            else {
+                $query = $query . " time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+            }
+        }
+    }
+    else {
+        $query = "select * from " . $table . " where id=\"" . $parameters->{d}->getAttribute("metadataIdRef") . "\";";
     }
 
     my @dbSchema = ( "id", "time", "value", "eventtype", "misc" );
-    my $result = getDataSQL( $self->{DIRECTORY}, $file, $table, $parameters->{time_settings}, \@dbSchema );
-    my $id = "data." . genuid();
+    my $datadb = new perfSONAR_PS::DB::SQL( { name => $file, schema => \@dbSchema, user => $dbuser, pass => $dbpass } );
 
+    $datadb->openDB;
+    my $result = $datadb->query( { query => $query } );
+    $datadb->closeDB;
+
+    my $id = "data." . genuid();
     if ( $#{$result} == -1 ) {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error($msg);
@@ -1424,9 +1522,9 @@ sub retrieveRRD {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated RRD file" );
     }
 
-    adjustRRDTime($timeSettings);
+    adjustRRDTime( { timeSettings => $timeSettings } );
     my $id = "data." . genuid();
-    my %rrd_result = getDataRRD( $self->{DIRECTORY}, $rrd_file, $timeSettings, $self->{CONF}->{"snmp"}->{"rrdtool"} );
+    my %rrd_result = getDataRRD( { directory => $self->{DIRECTORY}, file => $rrd_file, timeSettings => $timeSettings, rrdtool => $self->{CONF}->{"snmp"}->{"rrdtool"} } );
     if ( $rrd_result{ERROR} ) {
         $self->{LOGGER}->error( "RRD error seen: " . $rrd_result{ERROR} );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $rrd_result{ERROR}, 1 );
@@ -1545,149 +1643,6 @@ sub addSelectParameters {
     return;
 }
 
-=head2 getFilterParameters( $self, $m, $namespaces, $default_resolution )
-
-Extract the filter parameters from the filter metadata block.
-
-=cut
-
-sub getFilterParameters {
-    my ( $self, $m, $namespaces, $default_resolution ) = @_;
-
-    my %time;
-
-    my $prefix = q{};
-    my $nmwg   = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    my $tm     = $namespaces->{"http://ggf.org/ns/nmwg/time/2.0/"};
-    if ( $namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"} ) {
-        $prefix = $namespaces->{"http://ggf.org/ns/nmwg/ops/select/2.0/"};
-    }
-    else {
-        $prefix = $namespaces->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"consolidationFunction\"]", 1 ) ) {
-        $time{"CF"} = extract( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"consolidationFunction\"]", 1 ), 1 );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"consolidationFunction\"]", 1 ) ) {
-        $time{"CF"} = extract( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"consolidationFunction\"]", 1 ), 1 );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"consolidationFunction\"]", 1 ) ) {
-        $time{"CF"} = extract( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"consolidationFunction\"]", 1 ), 1 );
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"resolution\"]", 1 ) ) {
-        $time{"RESOLUTION"} = extract( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"resolution\"]", 1 ), 1 );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"resolution\"]", 1 ) ) {
-        $time{"RESOLUTION"} = extract( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"resolution\"]", 1 ), 1 );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"resolution\"]", 1 ) ) {
-        $time{"RESOLUTION"} = extract( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"resolution\"]", 1 ), 1 );
-    }
-
-    $time{"RESOLUTION_SPECIFIED"} = 0;
-    if (   ( not $time{"RESOLUTION"} )
-        or ( not $time{"RESOLUTION"} =~ m/^\d+$/mx ) )
-    {
-        if ( defined $default_resolution ) {
-            $time{"RESOLUTION"} = $default_resolution;
-        }
-        else {
-            $time{"RESOLUTION"} = 1;
-        }
-    }
-    else {
-        $time{"RESOLUTION_SPECIFIED"} = 1;
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"startTime\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"startTime\"]", 1 ), $tm, "start" );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"startTime\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"startTime\"]", 1 ), $tm, "start" );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"startTime\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"startTime\"]", 1 ), $tm, "start" );
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"endTime\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"endTime\"]", 1 ), $tm, "end" );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"endTime\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"endTime\"]", 1 ), $tm, "end" );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"endTime\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"endTime\"]", 1 ), $tm, "end" );
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ), $tm, "start" );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ), $tm, "start" );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gte\"]", 1 ), $tm, "start" );
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ), $tm, "end" );
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ), $tm, "end" );
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ) ) {
-        $time{"END"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lte\"]", 1 ), $tm, "end" );
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ) ) {
-        eval { $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ), $tm, "start" ) + $time{"RESOLUTION"}; };
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ) ) {
-        eval { $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ), $tm, "start" ) + $time{"RESOLUTION"}; };
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ) ) {
-        eval { $time{"START"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"gt\"]", 1 ), $tm, "start" ) + $time{"RESOLUTION"}; };
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ) ) {
-        eval { $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ), $tm, "end" ) + $time{"RESOLUTION"}; };
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ) ) {
-        eval { $time{"END"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ), $tm, "end" ) + $time{"RESOLUTION"}; };
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ) ) {
-        eval { $time{"END"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"lt\"]", 1 ), $tm, "end" ) + $time{"RESOLUTION"}; };
-    }
-
-    if ( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $prefix . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ), $tm, q{} );
-        $time{"END"} = $time{"START"};
-    }
-    elsif ( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $prefix . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ), $tm, q{} );
-        $time{"END"} = $time{"START"};
-    }
-    elsif ( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ) ) {
-        $time{"START"} = parseTime( find( $m, ".//" . $nmwg . ":parameters/" . $nmwg . ":parameter[\@name=\"time\" and \@operator=\"eq\"]", 1 ), $tm, q{} );
-        $time{"END"} = $time{"START"};
-    }
-
-    foreach my $t ( keys %time ) {
-        $time{$t} =~ s/(\n)|(\s+)//gmx;
-    }
-
-    if (    $time{"START"}
-        and $time{"END"}
-        and $time{"START"} > $time{"END"} )
-    {
-        return;
-    }
-
-    return \%time;
-}
-
 1;
 
 __END__
@@ -1695,8 +1650,8 @@ __END__
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
-L<Params::Validate>, L<perfSONAR_PS::Services::MA::General>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, 
+L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>, 
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
 L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>
 
@@ -1735,4 +1690,3 @@ All rights reserved.
 
 =cut
 
-# vim: expandtab shiftwidth=4 tabstop=4
