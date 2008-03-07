@@ -739,7 +739,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>, 
+L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Messages>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

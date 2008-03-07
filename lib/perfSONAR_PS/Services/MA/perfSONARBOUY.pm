@@ -52,7 +52,6 @@ use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
-use perfSONAR_PS::Services::LS::General qw( wrapStore );
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::SQL;
@@ -473,9 +472,9 @@ sub createStorage {
                 if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
                     my $dHash  = md5_hex($data);
                     my $mdHash = md5_hex($metadata);
-                    $parameters->{metadatadb}->insertIntoContainer( { content => wrapStore( $metadata, "MAStore" ), name => $mdHash, txn => $dbTr, error => \$error } );
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
-                    $parameters->{metadatadb}->insertIntoContainer( { content => wrapStore( $data, "MAStore" ), name => $dHash, txn => $dbTr, error => \$error } );
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
 
                     $self->{CONF}->{"perfsonarbouy"}->{"hashToId"}->{$dHash} = "data-" . $id;
@@ -1216,7 +1215,7 @@ sub maSetupDataRequest {
     }
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB}->closeDB( { error => \$error } );
-    }    
+    }
     return;
 }
 
@@ -1688,9 +1687,8 @@ L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
 L<Math::BigInt>, L<OWP>, L<OWP::Utils>, L<perfSONAR_PS::Services::MA::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Services::LS::General>,
-L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::DB::File>,
-L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

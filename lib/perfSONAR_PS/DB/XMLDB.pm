@@ -1385,6 +1385,32 @@ sub closeDB {
     return;
 }
 
+=head2 wrapStore( { content, type } )
+
+Adds 'store' tags around some content.  This is to mimic the way eXist deals
+with storing XML data.  The 'type' argument is used to type the store file.
+
+=cut
+
+sub wrapStore {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { content => 0, type => 0 } );
+
+    my $store = "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
+    if ( exists $parameters->{type} and $parameters->{type} ) {
+        $store = $store . " type=\"" . $parameters->{type} . "\" ";
+    }
+    if ( exists $parameters->{content} and $parameters->{content} ) {
+        $store = $store . ">\n";
+        $store = $store . $parameters->{content};
+        $store = $store . "</nmwg:store>\n";
+    }
+    else {
+        $store = $store . "/>\n";
+    }
+    return $store;
+}
+
 1;
 
 __END__

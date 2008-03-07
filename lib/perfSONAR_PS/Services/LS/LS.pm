@@ -44,6 +44,7 @@ use Log::Log4perl qw(get_logger);
 use Time::HiRes qw(gettimeofday);
 use Params::Validate qw(:all);
 use Digest::MD5 qw(md5_hex);
+
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
 use perfSONAR_PS::Common;
@@ -133,7 +134,7 @@ sub init {
     }
 
     if ( exists $self->{CONF}->{"ls"}->{"ls_ttl"} and $self->{CONF}->{"ls"}->{"ls_ttl"} ) {
-        $self->{CONF}->{"ls"}->{"ls_ttl"} *= 60
+        $self->{CONF}->{"ls"}->{"ls_ttl"} *= 60;
     }
     else {
         $self->{LOGGER}->warn("Setting 'ls_ttl' to '24hrs'.");
@@ -192,16 +193,16 @@ sub cleanLS {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, { error => 0 } );
 
-    my $error      = q{};
-    my $errorFlag  = 0;
+    my $error     = q{};
+    my $errorFlag = 0;
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
-    
+
     my $metadatadb = $self->prepareDatabases;
     unless ($metadatadb) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
-    
+
     my $dbTr = $metadatadb->getTransaction( { error => \$error } );
     unless ($dbTr) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
@@ -239,13 +240,13 @@ sub cleanLS {
         }
     }
     else {
-        $self->{LOGGER}->error( "Nothing Registered, cannot clean at this time." );
+        $self->{LOGGER}->error("Nothing Registered, cannot clean at this time.");
     }
 
     if ($errorFlag) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        $self->{LOGGER}->error( "Database errors prevented the transaction from completing." );
+        $self->{LOGGER}->error("Database errors prevented the transaction from completing.");
         return -1;
     }
     else {
@@ -281,13 +282,13 @@ sub handleMessageParameters {
             my $units = $p->getAttribute("units");
             $units = "seconds" unless $units;
             my $time = extract( $p, 0 );
-            $time *= 60 if $units eq "minutes";
+            $time *= 60   if $units eq "minutes";
             $time *= 3600 if $units eq "hours";
 
             if ( $time < ( int $self->{"CONF"}->{"ls"}->{"ls_ttl"} / 2 ) or $time > $self->{"CONF"}->{"ls"}->{"ls_ttl"} ) {
                 $p->setAttribute( "units", "seconds" );
                 if ( $p->getAttribute("value") ) {
-                    $p->setAttribute( "value", $self->{"CONF"}->{"ls"}->{"ls_ttl"} );    
+                    $p->setAttribute( "value", $self->{"CONF"}->{"ls"}->{"ls_ttl"} );
                 }
                 elsif ( $p->childNodes ) {
                     if ( $p->firstChild->nodeType == 3 ) {
@@ -555,14 +556,14 @@ sub lsRegisterRequestUpdateNew {
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2 ) {
         if ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} ) {
             $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-            $parameters->{metadatadb}->updateByName( { content => createControlKey( $mdKeyStorage, ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->updateByName( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
         }
         else {
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
             my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">" . $parameters->{service}->toString . "</nmwg:metadata>\n";
-            $parameters->{metadatadb}->insertIntoContainer( { content => wrapStore( $mdCopy, "LSStore" ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$error } );
-            $parameters->{metadatadb}->insertIntoContainer( { content => createControlKey( $mdKeyStorage, ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $mdCopy, type => "LSStore" } ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
         }
         $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} = 2;
     }
@@ -570,19 +571,20 @@ sub lsRegisterRequestUpdateNew {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $cleanNode = $d_content->cloneNode( 1 );
+            my $cleanNode = $d_content->cloneNode(1);
             $cleanNode->removeAttribute("id");
             my $cleanHash = md5_hex( $cleanNode->toString );
 
-            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKeyStorage."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            unless ( $success ) {
-                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKeyStorage . "/" . $cleanHash, $mdKeyStorage, $d_content->toString ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            unless ($success) {
+                my $insRes
+                    = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( { dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
                 $dCount++ if $insRes == 0;
             }
-        }       
-        
+        }
+
     }
 
     if ($errorFlag) {
@@ -593,7 +595,7 @@ sub lsRegisterRequestUpdateNew {
     else {
         my $status = $parameters->{metadatadb}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } );
         if ( $status == 0 ) {
-            createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( $mdKeyStorage, "success.ls.register" ), undef );
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( { key => $mdKeyStorage, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKeyStorage . "]\" />\n", undef );
             undef $parameters->{dbTr};
         }
@@ -627,7 +629,7 @@ sub lsRegisterRequestUpdate {
 
     if ( $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } == 1 ) {
         $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-        $parameters->{metadatadb}->updateByName( { content => createControlKey( $parameters->{mdKey}, ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
+        $parameters->{metadatadb}->updateByName( { content => createControlKey( { key => $parameters->{mdKey}, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
         $errorFlag++ if $error;
         $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} }++;
     }
@@ -636,14 +638,15 @@ sub lsRegisterRequestUpdate {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $cleanNode = $d_content->cloneNode( 1 );
+            my $cleanNode = $d_content->cloneNode(1);
             $cleanNode->removeAttribute("id");
             my $cleanHash = md5_hex( $cleanNode->toString );
 
-            my $success = $parameters->{metadatadb}->queryByName( { name => $parameters->{mdKey}."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            my $success = $parameters->{metadatadb}->queryByName( { name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            unless ( $success ) {
-                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $parameters->{mdKey} . "/" . $cleanHash, $parameters->{mdKey}, $d_content->toString ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            unless ($success) {
+                my $insRes = $parameters->{metadatadb}
+                    ->insertIntoContainer( { content => createLSData( { dataId => $parameters->{mdKey} . "/" . $cleanHash, metadataId => $parameters->{mdKey}, data => $d_content->toString } ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
                 $dCount++ if $insRes == 0;
             }
@@ -658,7 +661,7 @@ sub lsRegisterRequestUpdate {
     else {
         my $status = $parameters->{metadatadb}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } );
         if ( $status == 0 ) {
-            createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( $parameters->{mdKey}, "success.ls.register" ), undef );
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( { key => $parameters->{mdKey}, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been updated with key [" . $parameters->{mdKey} . "]\" />\n", undef );
             undef $parameters->{dbTr};
         }
@@ -712,16 +715,16 @@ sub lsRegisterRequestNew {
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
         if ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
             $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-            $parameters->{metadatadb}->updateByName( { content => createControlKey( $mdKey, ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->updateByName( { content => createControlKey( { key => $mdKey, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
         }
         else {
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
             my $service = $parameters->{m}->cloneNode(1);
             $service->setAttribute( "id", $mdKey );
-            $parameters->{metadatadb}->insertIntoContainer( { content => wrapStore( $service->toString, "LSStore" ), name => $mdKey, txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $service->toString, type => "LSStore" } ), name => $mdKey, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            $parameters->{metadatadb}->insertIntoContainer( { content => createControlKey( $mdKey, ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$error } );
+            $parameters->{metadatadb}->insertIntoContainer( { content => createControlKey( { key => $mdKey, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
         }
         $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
@@ -730,13 +733,13 @@ sub lsRegisterRequestNew {
     my $dCount = 0;
     foreach my $d_content ( $parameters->{d}->childNodes ) {
         if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
-            my $cleanNode = $d_content->cloneNode( 1 );
+            my $cleanNode = $d_content->cloneNode(1);
             $cleanNode->removeAttribute("id");
             my $cleanHash = md5_hex( $cleanNode->toString );
-            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKey."/".$cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            my $success = $parameters->{metadatadb}->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
-            unless ( $success ) {
-                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( $mdKey . "/" . $cleanHash, $mdKey, $d_content->toString ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
+            unless ($success) {
+                my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( { dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
                 $dCount++ if $insRes == 0;
             }
@@ -751,7 +754,7 @@ sub lsRegisterRequestNew {
     else {
         my $status = $parameters->{metadatadb}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } );
         if ( $status == 0 ) {
-            createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), createLSKey( $mdKey, "success.ls.register" ), undef );
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), createLSKey( { key => $mdKey, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKey . "]\" />\n", undef );
             undef $parameters->{dbTr};
         }
@@ -845,7 +848,7 @@ sub lsDeregisterRequest {
                 @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmwg:metadata[" . getMetadataXQuery( { node => $d_md } ) . "]", txn => q{}, error => \$error } );
             }
             else {
-                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmtopo:node[" . getMetadataXQuery( { node => $d_md }  ) . "]", txn => q{}, error => \$error } );
+                @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmtopo:node[" . getMetadataXQuery( { node => $d_md } ) . "]", txn => q{}, error => \$error } );
             }
             my $len = $#resultsString;
             for my $x ( 0 .. $len ) {
@@ -924,7 +927,7 @@ sub lsKeepaliveRequest {
         }
 
         $self->{LOGGER}->debug("Updating control time information.");
-        my $status = $parameters->{metadatadb}->updateByName( { content => createControlKey( $mdKey, ( $sec + $self->{CONF}->{"ls"}->{"ls_ttl"} ) ), name => $mdKey . "-control", txn => $dbTr, error => \$error } );
+        my $status = $parameters->{metadatadb}->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKey . "-control", txn => $dbTr, error => \$error } );
 
         unless ( $status == 0 ) {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
@@ -984,7 +987,7 @@ sub lsQueryRequest {
         throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Given query type is missing or not supported." );
     }
 
-    my $query = extractQuery( find( $parameters->{m}, "./xquery:subject", 1 ) );
+    my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
     unless ($query) {
         throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
     }
@@ -1006,9 +1009,9 @@ sub lsQueryRequest {
 
     createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), q{}, undef );
     my $mdPparameters = q{};
-    $mdPparameters = extractQuery( find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) );
+    $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
     if ( not $mdPparameters ) {
-        $mdPparameters = extractQuery( find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) );
+        $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
     }
 
     if ( $mdPparameters eq "native" ) {
@@ -1053,7 +1056,7 @@ sub lsKeyRequest {
             my $mdId = "metadata." . genuid();
             my $dId  = "data." . genuid();
             createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $service->toString, undef );
-            createData( $parameters->{doc}, $dId, $mdId, createLSKey( $metadata->getDocumentElement->getAttribute("id"), q{} ), undef );
+            createData( $parameters->{doc}, $dId, $mdId, createLSKey( { key => $metadata->getDocumentElement->getAttribute("id") } ), undef );
         }
         else {
             throw perfSONAR_PS::Error_compat( "error.ls.key.not_registered", "Service was not registered in this LS." );
@@ -1071,10 +1074,10 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
-L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::DB::XMLDB>, L<perfSONAR_PS::Error_compat qw/:try/>
+L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>, 
+L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>, 
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>,
+L<perfSONAR_PS::Error_compat>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

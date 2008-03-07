@@ -14,7 +14,7 @@ that LSs need to perform.
 
 =head1 DESCRIPTION
 
-This module is a catch all for common methods (for now) of :Ss in the
+This module is a catch all for common methods (for now) of LSs in the
 perfSONAR-PS framework.  As such there is no 'common thread' that each method
 shares.  This module IS NOT an object, and the methods can be invoked directly
 (and sparingly). 
@@ -22,35 +22,10 @@ shares.  This module IS NOT an object, and the methods can be invoked directly
 =cut
 
 use Exporter;
-use Log::Log4perl qw(get_logger);
-
+use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
 
-our @EXPORT = ( 'wrapStore', 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery');
-
-=head2 wrapStore($content, $type)
-
-Adds 'store' tags around some content.  This is to mimic the way eXist deals
-with storing XML data.  The 'type' argument is used to type the store file.
-
-=cut
-
-sub wrapStore {
-    my ( $content, $type ) = @_;
-    my $store = "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
-    if ( defined $type and $type ) {
-        $store = $store . " type=\"" . $type . "\" ";
-    }
-    if ( defined $content and $content ) {
-        $store = $store . ">\n";
-        $store = $store . $content;
-        $store = $store . "</nmwg:store>\n";
-    }
-    else {
-        $store = $store . "/>\n";
-    }
-    return $store;
-}
+our @EXPORT = ( 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery' );
 
 =head2 createControlKey($key, $time)
 
@@ -59,15 +34,17 @@ Creates a 'control' key for the control database that keeps track of time.
 =cut
 
 sub createControlKey {
-    my ( $key, $time ) = @_;
-    my $keyElement = "  <nmwg:metadata id=\"" . $key . "-control\" metadataIdRef=\"" . $key . "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+    my (@args) = @_;
+    my $parameters = validate( @args, { key => 1, time => 1 } );
+
+    my $keyElement = "  <nmwg:metadata id=\"" . $parameters->{key} . "-control\" metadataIdRef=\"" . $parameters->{key} . "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $keyElement = $keyElement . "    <nmwg:parameters id=\"control-parameters\">\n";
     $keyElement = $keyElement . "      <nmwg:parameter name=\"timestamp\">\n";
-    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $time . "</nmtm:time>\n";
+    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $parameters->{time} . "</nmtm:time>\n";
     $keyElement = $keyElement . "      </nmwg:parameter>\n";
     $keyElement = $keyElement . "    </nmwg:parameters>\n";
     $keyElement = $keyElement . "  </nmwg:metadata>\n";
-    return wrapStore( $keyElement, "LSStore-control" );
+    return wrapStore( { content => $keyElement, type => "LSStore-control" } );
 }
 
 =head2 createLSKey($key, $eventType)
@@ -77,15 +54,17 @@ Creates the 'internals' of the metadata that will be returned w/ a key.
 =cut
 
 sub createLSKey {
-    my ( $key, $eventType ) = @_;
+    my (@args) = @_;
+    my $parameters = validate( @args, { key => 1, eventType => 0 } );
+
     my $keyElement = q{};
     $keyElement = $keyElement . "      <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
     $keyElement = $keyElement . "          <nmwg:parameters id=\"param." . genuid() . "\">\n";
-    $keyElement = $keyElement . "            <nmwg:parameter name=\"lsKey\">" . $key . "</nmwg:parameter>\n";
+    $keyElement = $keyElement . "            <nmwg:parameter name=\"lsKey\">" . $parameters->{key} . "</nmwg:parameter>\n";
     $keyElement = $keyElement . "          </nmwg:parameters>\n";
     $keyElement = $keyElement . "        </nmwg:key>\n";
-    if ( defined $eventType and $eventType ) {
-        $keyElement = $keyElement . "        <nmwg:eventType>" . $eventType . "</nmwg:eventType>\n";
+    if ( $parameters->{eventType} ) {
+        $keyElement = $keyElement . "        <nmwg:eventType>" . $parameters->{eventType} . "</nmwg:eventType>\n";
     }
     return $keyElement;
 }
@@ -97,11 +76,13 @@ Creates a 'data' block that is stored in the backend storage.
 =cut
 
 sub createLSData {
-    my ( $dataId, $metadataId, $data ) = @_;
-    my $dataElement = "    <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $dataId . "\" metadataIdRef=\"" . $metadataId . "\">\n";
-    $dataElement = $dataElement . "      " . $data . "\n";
+    my (@args) = @_;
+    my $parameters = validate( @args, { dataId => 1, metadataId => 1, data => 1 } );
+
+    my $dataElement = "    <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $parameters->{dataId} . "\" metadataIdRef=\"" . $parameters->{metadataId} . "\">\n";
+    $dataElement = $dataElement . "      " . $parameters->{data} . "\n";
     $dataElement = $dataElement . "    </nmwg:data>\n";
-    return wrapStore( $dataElement, "LSStore" );
+    return wrapStore( { content => $dataElement, type => "LSStore" } );
 }
 
 =head2 extractQuery($node)
@@ -112,10 +93,12 @@ elements.
 =cut
 
 sub extractQuery {
-    my ($node) = @_;
+    my (@args) = @_;
+    my $parameters = validate( @args, { node => 1 } );
+
     my $query = q{};
-    if ( $node and $node->hasChildNodes() ) {
-        foreach my $c ( $node->childNodes ) {
+    if ( $parameters->{node}->hasChildNodes() ) {
+        foreach my $c ( $parameters->{node}->childNodes ) {
             if ( $c->nodeType == 3 ) {
                 $query = $query . $c->textContent;
             }
@@ -127,49 +110,41 @@ sub extractQuery {
     return $query;
 }
 
+=head2 wrapStore($content, $type)
+
+Adds 'store' tags around some content.  This is to mimic the way eXist deals
+with storing XML data.  The 'type' argument is used to type the store file.
+
+NOT FOR EXTERNAL USE
+
+=cut
+
+sub wrapStore {
+    my (@args) = @_;
+    my $parameters = validate( @args, { content => 0, type => 0 } );
+
+    my $store = "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
+    if ( exists $parameters->{type} and $parameters->{type} ) {
+        $store = $store . " type=\"" . $parameters->{type} . "\" ";
+    }
+    if ( exists $parameters->{content} and $parameters->{content} ) {
+        $store = $store . ">\n";
+        $store = $store . $parameters->{content};
+        $store = $store . "</nmwg:store>\n";
+    }
+    else {
+        $store = $store . "/>\n";
+    }
+    return $store;
+}
+
 1;
 
 __END__
 
-=head1 SYNOPSIS
-
-    use perfSONAR_PS::LS::General;
-    use Time::HiRes qw(gettimeofday tv_interval);
-    
-    my $type = "LSStore";
-    my $store = wrapStore("<nmwg:data />", $type);
-
-    my $t0 = [Time::HiRes::gettimeofday];  
-    my $key = "http://localhost:8080/perfSONAR_PS/services/LS";
-    my $controlKey = createControlKey($key, $t0->[0].".".$t0->[1]);
-
-    my $lsKey = createLSKey($key, "success.ls.registration");
-
-    my $lsData = createLSData($dataId, $metadataId, $data);
-        
-    # Let $node be an XML::LibXML Node:
-    #
-    #  <xquery:subject id="sub2">
-    #    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
-    #    declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";
-    #    declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";
-    #    declare namespace xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/";
-    #    for $metadata in /nmwg:store/nmwg:metadata
-    #      let $metadata_id := $metadata/@id
-    #      let $data := /nmwg:store/nmwg:data[@metadataIdRef=$metadata_id]
-    #      where $metadata//psservice:accessPoint[
-    #        text()="http://localhost:8181/axis/services/snmpMA" or
-    #        @value="http://localhost:8181/axis/services/snmpMA"]
-    #        return <nmwg:stuff>{$metadata} {$data}</nmwg:stuff>
-    #  </xquery:subject>
-    
-    my $query = extractQuery($node);
-    
-    cleanLS(\%conf, \%ns);
-
 =head1 SEE ALSO
 
-L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>
+L<Params::Validate>, L<perfSONAR_PS::Common>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
