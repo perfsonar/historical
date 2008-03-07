@@ -132,16 +132,19 @@ sub init {
         $self->{CONF}->{"ls"}->{"metadata_db_file"} = "store.dbxml";
     }
 
-    unless ( exists $self->{CONF}->{"ls"}->{"ls_ttl"} and $self->{CONF}->{"ls"}->{"ls_ttl"} ) {
-        $self->{LOGGER}->warn("Setting 'ls_ttl' to '3600'.");
-        $self->{CONF}->{"ls"}->{"ls_ttl"} = 3600;
+    if ( exists $self->{CONF}->{"ls"}->{"ls_ttl"} and $self->{CONF}->{"ls"}->{"ls_ttl"} ) {
+        $self->{CONF}->{"ls"}->{"ls_ttl"} *= 60
+    }
+    else {
+        $self->{LOGGER}->warn("Setting 'ls_ttl' to '24hrs'.");
+        $self->{CONF}->{"ls"}->{"ls_ttl"} = 86400;
     }
 
-    unless ( exists $self->{CONF}->{"ls"}->{"ls_repear_interval"}
-        and $self->{CONF}->{"ls"}->{"ls_repear_interval"} )
+    unless ( exists $self->{CONF}->{"ls"}->{"reaper_interval"}
+        and $self->{CONF}->{"ls"}->{"reaper_interval"} )
     {
-        $self->{LOGGER}->warn("Setting 'ls_repear_interval' to '0'.");
-        $self->{CONF}->{"ls"}->{"ls_repear_interval"} = 0;
+        $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
+        $self->{CONF}->{"ls"}->{"reaper_interval"} = 0;
     }
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",   $self );
@@ -177,7 +180,11 @@ sub needLS {
 
 =head2 cleanLS($self)
 
-...
+On some schedule the daemon will kick off a process to clean the LS (or any
+other service that happens to implement this function, i.e. dLS).  This process
+will connect to the database, and check the timestamps of all registered data.
+Anything that is 'expired', i.e. hasn't been updated in the TTL for the data
+will be removed.
 
 =cut
 
@@ -185,7 +192,74 @@ sub cleanLS {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, { error => 0 } );
 
+    my $error      = q{};
+    my $errorFlag  = 0;
+    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
+    
+    my $metadatadb = $self->prepareDatabases;
+    unless ($metadatadb) {
+        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+        return -1;
+    }
+    
+    my $dbTr = $metadatadb->getTransaction( { error => \$error } );
+    unless ($dbTr) {
+        $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        undef $dbTr;
+        $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+    }
 
+    my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    $errorFlag++ if $error;
+    if ( $#resultsString != -1 ) {
+        my $len = $#resultsString;
+        for my $x ( 0 .. $len ) {
+            my $parser = XML::LibXML->new();
+            my $doc    = $parser->parse_string( $resultsString[$x] );
+
+            my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
+            if ( $time =~ m/^\d+$/mx ) {
+                my $key = $doc->getDocumentElement->getAttribute("id");
+                $key =~ s/-control$//mx;
+                if ( $time and $key and $sec >= $time ) {
+                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\"." );
+                    @resultsString = $metadatadb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => q{}, error => \$error } );
+                    my $len = $#resultsString;
+                    for my $x ( 0 .. $len ) {
+                        $metadatadb->remove( { name => $resultsString[$x], txn => $dbTr, error => \$error } );
+                        $errorFlag++ if $error;
+                    }
+                    $metadatadb->remove( { name => $key . "-control", txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    $metadatadb->remove( { name => $key, txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
+                }
+            }
+        }
+    }
+    else {
+        $self->{LOGGER}->error( "Nothing Registered, cannot clean at this time." );
+    }
+
+    if ($errorFlag) {
+        $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        undef $dbTr;
+        $self->{LOGGER}->error( "Database errors prevented the transaction from completing." );
+        return -1;
+    }
+    else {
+        my $status = $metadatadb->commitTransaction( { txn => $dbTr, error => \$error } );
+        if ( $status == 0 ) {
+            undef $dbTr;
+        }
+        else {
+            $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            $self->{LOGGER}->error( "Database Error: \"" . $error . "\"." );
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -203,10 +277,17 @@ sub handleMessageParameters {
     foreach my $p ( $parameters->{msgParams}->getChildrenByTagNameNS( $ls_namespaces{"nmwg"}, "parameter" ) ) {
         if ( $p->getAttribute("name") eq "lsTTL" ) {
             $self->{LOGGER}->debug("Found TTL parameter.");
+
+            my $units = $p->getAttribute("units");
+            $units = "seconds" unless $units;
             my $time = extract( $p, 0 );
+            $time *= 60 if $units eq "minutes";
+            $time *= 3600 if $units eq "hours";
+
             if ( $time < ( int $self->{"CONF"}->{"ls"}->{"ls_ttl"} / 2 ) or $time > $self->{"CONF"}->{"ls"}->{"ls_ttl"} ) {
+                $p->setAttribute( "units", "seconds" );
                 if ( $p->getAttribute("value") ) {
-                    $p->setAttribute( "value", $self->{"CONF"}->{"ls"}->{"ls_ttl"} );
+                    $p->setAttribute( "value", $self->{"CONF"}->{"ls"}->{"ls_ttl"} );    
                 }
                 elsif ( $p->childNodes ) {
                     if ( $p->firstChild->nodeType == 3 ) {

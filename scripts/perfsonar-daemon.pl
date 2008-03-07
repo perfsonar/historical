@@ -350,7 +350,7 @@ foreach my $port (keys %{ $conf{"port"} }) {
             if ($service->can("cleanLS")) {
                 my %ls_reaper_args = ();
                 $ls_reaper_args{"service"} = $service;
-                $ls_reaper_args{"sleep"} = 0;
+                $ls_reaper_args{"conf"} = \%endpoint_conf;
                 push @ls_reaper, \%ls_reaper_args;
             }
         }
@@ -421,7 +421,7 @@ foreach my $ls_reaper_args (@ls_reaper) {
     if ($ls_reaper_pid == 0) {
         %child_pids = ();
         $0 .= " - LS Reaper";
-        cleanLS($ls_reaper_args);
+        cleanLS( $ls_reaper_args );
         exit(0);
     } elsif ($ls_reaper_pid < 0) {
         $logger->error("Couldn't spawn LS Reaper");
@@ -576,11 +576,12 @@ sub registerLS {
     The cleanLS function is (only by the LS) to periodically clean out the 
     LS database.
 =cut
+
 sub cleanLS {
     my ($args) = @_;
-    
+
     my $service = $args->{"service"};
-    my $sleep_time = $args->{"conf"}->{"ls"}->{"repear_interval"};
+    my $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"} * 60;
     my $error = q{};
 
     unless ( $sleep_time ) {
@@ -603,7 +604,6 @@ sub cleanLS {
 
         sleep($sleep_time);
     }
-
     return 0;
 }
 
