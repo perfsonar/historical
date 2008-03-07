@@ -233,6 +233,10 @@ sub getLinkStatus {
 
 	my %links;
 
+    if ($time) {
+        $logger->debug("Time: ".$time->getStartTime()."-".$time->getEndTime());
+    }
+
 	foreach my $link_id (@{ $link_ids }) {
 		my $query;
 
@@ -264,10 +268,12 @@ sub getLinkStatus {
 
 			$new_link = new perfSONAR_PS::Status::Link($link_id, $state[0], $state[1], $state[2], $state[3], $state[4]);
 
-			my @newa = ();
-			push @newa, $new_link;
+            if (not defined $links{$link_id}) {
+                my @newa = ();
+                $links{$link_id} = \@newa;
+            }
 
-			$links{$link_id} = \@newa;
+			push @{ $links{$link_id} }, $new_link;
 		}
 	}
 
@@ -301,7 +307,7 @@ sub updateLinkStatus {
 		return (-1, $msg);
 	}
 
-	if (defined $do_update and $do_update != 0) {
+	if ($do_update) {
 		my @tmp_array = ( $link_id );
 
 		my ($status, $res) = $self->getLinkStatus(\@tmp_array, undef);
@@ -314,6 +320,12 @@ sub updateLinkStatus {
 
 		my $link = pop(@{ $res->{$link_id} });
 
+        if (defined $link and $link->getEndTime > $time) {
+			my $msg = "Update in the past for $link_id: most recent data was obtained for ".$link->getEndTime;
+			$logger->error($msg);
+			return (-1, $msg);
+        }
+
 		if (not defined $link or $link->getOperStatus ne $oper_value or $link->getAdminStatus ne $admin_value) {
 			$logger->debug("Something changed on link $link_id");
 			$do_update = 0;
@@ -322,6 +334,18 @@ sub updateLinkStatus {
 		}
 	} else {
 		$do_update = 0;
+
+		my @tmp_array = ( $link_id );
+        my $time_elm = perfSONAR_PS::Time->new("point", $time);
+
+		my ($status, $res) = $self->getLinkStatus(\@tmp_array, $time_elm);
+
+        if (defined $res->{$link_id} and defined $res->{$link_id}->[0]) {
+            my $state = $res->{$link_id}->[0];
+			my $msg = "Already have information on $link_id at $time";
+			$logger->error($msg);
+			return (-1, $msg);
+        }
 	}
 
 	if ($do_update != 0) {
@@ -336,7 +360,7 @@ sub updateLinkStatus {
 				end_time => $prev_end_time,
 			    );
 
-		if ($self->{DATADB}->update({ table => $self->{DB_TABLE}, wherevalues => \%where, whatvalues => \%updateValues }) == -1) {
+		if ($self->{DATADB}->update({ table => $self->{DB_TABLE}, wherevalues => \%where, updatevalues => \%updateValues }) == -1) {
 			my $msg = "Couldn't update link status for link $link_id";
 			$logger->error($msg);
 			$self->{DATADB}->closeDB;

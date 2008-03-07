@@ -1,4 +1,16 @@
 package perfSONAR_PS::Services::MA::Status;
+=head1 NAME
+
+perfSONAR_PS::Services::MA::Status - A module that provides methods for the Status MA.
+
+=head1 DESCRIPTION
+
+This module aims to offer simple methods for dealing with requests for information, and the
+related tasks of interacting with backend storage.
+
+=head1 API
+
+=cut
 
 use base 'perfSONAR_PS::Services::Base';
 
@@ -19,17 +31,6 @@ use perfSONAR_PS::Topology::ID;
 
 our $VERSION = 0.06;
 
-sub init;
-sub needLS;
-sub registerLS;
-sub handleEvent;
-sub handleStoreRequest;
-sub handleQueryRequest;
-sub lookupAllRequest;
-sub lookupLinkStatusRequest;
-sub writeoutLinkState_range;
-sub writeoutLinkState;
-
 my %status_namespaces = (
     nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
     select=>"http://ggf.org/ns/nmwg/ops/select/2.0/",
@@ -39,6 +40,10 @@ my %status_namespaces = (
     nmtl2=>"http://ggf.org/ns/nmwg/topology/l2/3.0/",
 );
 
+=head2 init 
+    Initializes the MA and validates or fills in entries in the
+    configuration file. Returns 0 on success and -1 on failure.
+=cut
 sub init {
     my ($self, $handler) = @_;
     
@@ -212,12 +217,20 @@ sub init {
     return 0;
 }
 
+=head2 needLS
+    returns true of false depending on whether or not this instance needs to
+    register with a lookup service.
+=cut
 sub needLS {
     my ($self) = @_;
 
     return ($self->{CONF}->{"status"}->{"enable_registration"});
 }
 
+=head2 registerLS
+    This function reads in the list of link ids from the SQL backend and
+    registers them with the lookup service.
+=cut
 sub registerLS {
     my ($self, $sleep_time) = @_;
     my ($status, $res);
@@ -263,6 +276,13 @@ sub registerLS {
     return $n;
 }
 
+=head2 handleEvent
+    This function is called by the daemon whenever there is a metadata/data
+    pair for this instance to handle. This function calls the subject parsing
+    routines that are common to all requests, calls the filter chaining parsing
+    routines which are common to all requests and then passes the results onto
+    the specific function depending on the request.
+=cut
 sub handleEvent {
     my ($self, @args) = @_;
     my $parameters = validate(@args,
@@ -360,87 +380,192 @@ sub handleEvent {
     return;
 }
 
-sub handleStoreRequest {
-    my ($self, $output, $metadataId, $link_id, $responseType, $knowledge, $do_update, $d) = @_;
+=head2 parseSubject  ($self, $subject_md)
+    There are five possible subject types that are acceptable depending on the
+    context: an nmwg key, a topoid subject, an nmwg subject with 'compat'
+    subject information in it, an nmwg subject with the old style link IDs in
+    them (deprecated) and an empty subject. This function calls the relevant
+    parsing function depending on the content of the subject metadata.
+=cut
+sub parseSubject {
+    my ($self, $subject_md) = @_;
 
-    my $time = findvalue($d, './ifevt:datum/@timeValue');
-    my $time_type = findvalue($d, './ifevt:datum/@timeType');
-    my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
-    my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
+    my $key;
+    my $time;
 
-    my ($status, $res);
+    # look for any time parameters specified in the key
+    my $nmwg_key = find($subject_md, "./*[local-name()='key' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    my $nmwg_subj = find($subject_md, "./*[local-name()='subject' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    my $topoid_subj = find($subject_md, './topoid:subject', 1);
 
-    if (not defined $time or $time eq q{} or not defined $time_type or $time_type eq q{} or not defined $adminState or $adminState eq q{} or not defined $operState or $operState eq q{}) {
-        my $msg = "Data block is missing:";
-        $msg .= " 'time'" if (not defined $time or $time eq q{});
-        $msg .= " 'time type'" if (not defined $time_type or $time_type eq q{});
-        $msg .= " 'administrative state'" if (not defined $adminState or $adminState eq q{});
-        $msg .= " 'operational state'" if (not defined $operState or $operState eq q{});
+    if (($nmwg_key and $nmwg_subj) or ($topoid_subj and $nmwg_subj) or ($nmwg_key and $topoid_subj)) {
+        my $msg = "Ambiguous subject";
         $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_data", $msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
     }
 
-    if ($time_type ne "unix") {
-        my $msg = "Time type must be 'unix'";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_timestamp_type", $msg);
+    if ($nmwg_key) {
+        my ($link_id, $time, $responseType) = $self->parseKey($nmwg_key);
+
+        my @tmp = ( "$link_id" );
+        return (\@tmp, $time, $responseType, 1);
     }
 
-    ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, $do_update);
-    if ($status != 0) {
-        my $msg = "Database update failed: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.update", $msg);
+    if ($topoid_subj) {
+        # check for a link expression
+        my $link_ids = $self->lookupLinkIDs($topoid_subj->textContent);
+
+        return ($link_ids, undef, "topoid", 0);
     }
 
-    my $mdID = "metadata.".genuid();
-    getResultCodeMetadata($output, $mdID, $metadataId, "success.ma.added");
-    getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
-
-    return;
-}
-
-sub handleLinkStatusRequest {
-    my ($self, $output, $metadataId, $linkIds, $time, $responseType, $was_key) = @_;
-    my ($status, $res);
-
-    if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
-        ($status, $res) = $self->{CLIENT}->getLinkHistory($linkIds);
-    } else {
-        ($status, $res) = $self->{CLIENT}->getLinkStatus($linkIds, $time);
-    }
-
-    if ($status != 0) {
-        my $msg = "Couldn't get information about links from database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
-    }
-
-    foreach my $link_id (@{ $linkIds }) {
-        my $mdID;
-        if ($was_key) {
-            $mdID = $metadataId;
-        } else {
-            $mdID  = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
-        }
-
-        my $data_content = q{};
-
-        if (defined $res->{$link_id}) {
-            foreach my $link (@{ $res->{$link_id} }) {
-                if (defined $time and $time->getType() eq "point" and $time->getTime() != -1) {
-                    $data_content .= $self->writeoutLinkState($link);
-                } else {
-                    $data_content .= $self->writeoutLinkState_range($link);
-                }
+    if ($nmwg_subj) {
+        # we've got a compat subject
+        my $compat_subj = find($nmwg_subj, "./*[local-name()='link' and namespace-uri()='".$status_namespaces{"nmtl2"}."']", 1);
+        if ($compat_subj) {
+            unless ($self->{ENABLE_COMPAT}) {
+                throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
             }
+
+            my $link_ids = $self->parseCompatSubject($compat_subj);
+            return ($link_ids, undef, "compat", 0);
         }
-        createData($output, "data.".genuid(), $mdID, $data_content, undef);
+
+        # we've got the nmwg subject
+        my $link_id = findvalue($nmwg_subj, './*[local-name()=\'link\']/@id');
+        if ($link_id) {
+            my @tmp = ( "$link_id" );
+            return (\@tmp, $time, "linkid", 0);
+        }
     }
 
-    return;
+    if (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
+        unless ($self->{ENABLE_COMPAT}) {
+            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+        }
+
+        my @link_ids = keys %{ $self->{LINKSBYID} };
+
+        return (\@link_ids, undef, "compat", 0);
+    }
+
+    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
 }
 
+=head2 parseKey ($self, $key)
+    Parses the nmwg keys that we generate and hand off to the users.
+=cut
+sub parseKey {
+    my ($self, $key) = @_;
+
+    my $key_params = find($key, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
+    if (not $key_params) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    my $link_id = findvalue($key_params, "./nmwg:parameter[\@name=\"maKey\"]");
+    $self->{LOGGER}->error("LINK ID: '$link_id'");
+
+    if (not $link_id) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    if (idIsAmbiguous($link_id)) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    my $responseFormat = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"responseFormat\"]");
+    if (not $responseFormat or ($responseFormat ne "topoid" and $responseFormat ne "linkid" and $responseFormat ne "compat")) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+    }
+
+    my $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
+    my $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
+    my $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
+
+    $link_id = unescapeString($link_id);
+
+    unless (defined $time or defined $startTime or defined $endTime) {
+        return ($link_id, undef, $responseFormat);
+    }
+
+    if (defined $time and (defined $startTime or defined $endTime)) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    if (defined $time) {
+        return ($link_id, perfSONAR_PS::Time->new("point", $time), $responseFormat);
+    }
+
+    if (not defined $startTime) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    if (not defined $endTime) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
+    } 
+
+    return ($link_id, perfSONAR_PS::Time->new("range", $startTime, $endTime), $responseFormat);
+}
+
+=head2 parseCompatSubject ($self, $compat_subj)
+    Stub function that throws an error for now. Will eventually parse the
+    subjects in the form that the SQLMA expects.
+=cut
+sub parseCompatSubject {
+    my ($self, $compat_subj) = @_;
+    # currently, unimpelemented
+    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+}
+
+=head2 lookupLinkIDs ($self, $topo_exp)
+    Takes a topology id expression and matches it with the identifiers in the
+    SQL backend.
+=cut
+sub lookupLinkIDs {
+    my ($self, $topo_exp) = @_;
+
+    my $link_ids;
+
+    $self->{LOGGER}->debug("lookupLinkIDs: '".$topo_exp."'");
+
+    # now we have to look up all the values it could be
+    my ($status, $res) = $self->{CLIENT}->getUniqueIDs;
+    if ($status != 0) {
+        my $msg = "Couldn't get link information from database: $res";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+
+    $self->{LOGGER}->debug("Links: ".Dumper($res));
+
+    $link_ids = idMatch($res, $topo_exp);
+
+    if (not defined $link_ids) {
+        my $msg = "No links match expression: $topo_exp";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+
+    return $link_ids;
+}
+
+=head2 resolveSelectChain ($self, $subject_md, $filterChain, $selectTime)
+    This function takes the filter chain and tries to resolve it down to a
+    single point in or range of time. It takes the subject metadata since some
+    of the protocol options would take parameters from there, the filter chain
+    itself and a $selectTime that is undef in all cases other than keys. In the
+    case of a key, it may correspond to a specific time range and in that case,
+    $selectTime will have a perfSONAR_PS::Time element with the time
+    point/range for the key.
+=cut
 sub resolveSelectChain {
     my ($self, $subject_md, $filterChain, $selectTime) = @_;
 
@@ -507,7 +632,7 @@ sub resolveSelectChain {
 
                 $now_flag = 1;
             } else {
-                if ($curr_time < $startTime or $curr_time > $endTime) {
+                if (($startTime and $curr_time < $startTime) or ($endTime and $curr_time > $endTime)) {
                     throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: time specified is out of range previously specified");
                 } else {
                     $startTime = $curr_time;
@@ -540,7 +665,7 @@ sub resolveSelectChain {
             }
         }
 
-        if ($startTime > $endTime) {
+        if ($startTime and $endTime and $startTime > $endTime) {
                 throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: startTime > endTime");
         }
     }
@@ -558,174 +683,111 @@ sub resolveSelectChain {
     }
 }
 
-sub parseSubject {
-    my ($self, $subject_md) = @_;
+=head2 handleStoreRequest ($self, $output, $metadataId, $link_id, $responseType, $knowledge, $do_update, $data)
+    This function handles a store request. It pulls the updated information to
+    store from the data element, making sure that all the relevant data is
+    there.  After that, it updates the link state in the database and then adds
+    a metadata/data pair to show that the store request was handled properly.
+=cut
+sub handleStoreRequest {
+    my ($self, $output, $metadataId, $link_id, $responseType, $knowledge, $do_update, $d) = @_;
 
-    my $key;
-    my $time;
+    my $time = findvalue($d, './ifevt:datum/@timeValue');
+    my $time_type = findvalue($d, './ifevt:datum/@timeType');
+    my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
+    my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
 
-    # look for any time parameters specified in the key
-    my $nmwg_key = find($subject_md, "./*[local-name()='key' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    my $nmwg_subj = find($subject_md, "./*[local-name()='subject' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    my $topoid_subj = find($subject_md, './topoid:subject', 1);
+    my ($status, $res);
 
-    if (($nmwg_key and $nmwg_subj) or ($topoid_subj and $nmwg_subj) or ($nmwg_key and $topoid_subj)) {
-        my $msg = "Ambiguous subject";
+    if (not defined $time or $time eq q{} or not defined $time_type or $time_type eq q{} or not defined $adminState or $adminState eq q{} or not defined $operState or $operState eq q{}) {
+        my $msg = "Data block is missing:";
+        $msg .= " 'time'" if (not defined $time or $time eq q{});
+        $msg .= " 'time type'" if (not defined $time_type or $time_type eq q{});
+        $msg .= " 'administrative state'" if (not defined $adminState or $adminState eq q{});
+        $msg .= " 'operational state'" if (not defined $operState or $operState eq q{});
         $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_data", $msg);
     }
 
-    if ($nmwg_key) {
-        my ($link_id, $time, $responseType) = $self->parseKey($nmwg_key);
-
-        my @tmp = ( "$link_id" );
-        return (\@tmp, $time, $responseType, 1);
+    if ($time_type ne "unix") {
+        my $msg = "Time type must be 'unix'";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_timestamp_type", $msg);
     }
 
-    if ($topoid_subj) {
-        # check for a link expression
-        my $link_ids = $self->lookupLinkIDs($topoid_subj->textContent);
-
-        return ($link_ids, undef, "topoid", 0);
+    ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $link_id, $knowledge, $operState, $adminState, $do_update);
+    if ($status != 0) {
+        my $msg = "Database update failed: $res";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.update", $msg);
     }
 
-    if ($nmwg_subj) {
-        # we've got a compat subject
-        my $compat_subj = find($nmwg_subj, "./*[local-name()='link' and namespace-uri()='".$status_namespaces{"nmtl2"}."']", 1);
-        if ($compat_subj) {
-            unless ($self->{ENABLE_COMPAT}) {
-                throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
-            }
+    my $mdID = "metadata.".genuid();
+    getResultCodeMetadata($output, $mdID, $metadataId, "success.ma.added");
+    getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
 
-            my $link_ids = $self->parseCompatSubject($compat_subj);
-            return ($link_ids, undef, "compat", 0);
-        }
-
-        # we've got the nmwg subject
-        my $link_id = findvalue($nmwg_subj, './*[local-name()=\'link\']/@id');
-        if ($link_id) {
-            my @tmp = ( "$link_id" );
-            return (\@tmp, $time, "linkid", 0);
-        }
-    }
-
-    if (not defined find($subject_md, './*[local-name()=\'subject\']', 1)) {
-        unless ($self->{ENABLE_COMPAT}) {
-            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
-        }
-
-        my @link_ids = keys %{ $self->{LINKSBYID} };
-
-        return (\@link_ids, undef, "compat", 0);
-    }
-
-    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+    return;
 }
 
-sub parseKey {
-    my ($self, $key) = @_;
+=head2 handleLinkStatusRequest ($self, $output, $metadataId, $linkIds, $time, $responseType, $was_key)
+    This function handles a link status request. First, it checks whether the
+    history of a link should be retrieved or the just the specified
+    point/range, calling the appropriate function for each. Next, it must
+    output the data. Key requests never have the specific link element output,
+    just the key. Since the daemon will handle outputting the key for us, we
+    can safely not output the metadata in that case. In all other cases, we
+    must output the appropriate link information. Thus, we check whether the
+    incoming request was a key, if so we do nothing, if not, we output the
+    appropriate MD depending on the format of the incoming response. Once we've
+    done that, we go through and output the resulting link status.
+=cut
+sub handleLinkStatusRequest {
+    my ($self, $output, $metadataId, $linkIds, $time, $responseType, $was_key) = @_;
+    my ($status, $res);
 
-    my $key_params = find($key, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    if (not $key_params) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $link_id = findvalue($key_params, "./nmwg:parameter[\@name=\"maKey\"]");
-    $self->{LOGGER}->error("LINK ID: '$link_id'");
-
-    if (not $link_id) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    if (idIsAmbiguous($link_id)) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $responseFormat = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"responseFormat\"]");
-    if (not $responseFormat or ($responseFormat ne "topoid" and $responseFormat ne "linkid" and $responseFormat ne "compat")) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
-    my $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
-    my $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
-
-    $link_id = unescapeString($link_id);
-
-    unless (defined $time or defined $startTime or defined $endTime) {
-        return ($link_id, undef, $responseFormat);
-    }
-
-    if (defined $time and (defined $startTime or defined $endTime)) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    if (defined $time) {
-        return ($link_id, perfSONAR_PS::Time->new("point", $time), $responseFormat);
-    }
-
-    if (not defined $startTime) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    if (not defined $endTime) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    return ($link_id, perfSONAR_PS::Time->new("range", $startTime, $endTime), $responseFormat);
-}
-
-sub parseCompatSubject {
-    my ($compat_subj) = @_;
-    # currently, unimpelemented
-    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
-}
-
-sub lookupLinkIDs {
-    my ($self, $topo_exp) = @_;
-
-    my $link_ids;
-
-    $self->{LOGGER}->debug("lookupLinkIDs: '".$topo_exp."'");
-
-    if (idIsAmbiguous($topo_exp)) {
-        # we've got an ambiguous identifier, so we need to match it with the
-        # known set
-
-        # now we have to look up all the values it could be
-        my ($status, $res) = $self->{CLIENT}->getUniqueIDs;
-        if ($status != 0) {
-            my $msg = "Couldn't get link information from database: $res";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
-        }
-
-        $self->{LOGGER}->debug("Links: ".Dumper($res));
-
-        $link_ids = idMatch($res, $topo_exp);
-
-        if (not defined $link_ids) {
-            my $msg = "No links match expression: $topo_exp";
-            $self->{LOGGER}->error($msg);
-            throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
-        }
+    if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
+        ($status, $res) = $self->{CLIENT}->getLinkHistory($linkIds);
     } else {
-        # it's a non-ambiguous identifier so it could only match one element
-        my @tmp = ( $topo_exp );
-        $link_ids = \@tmp;
+        ($status, $res) = $self->{CLIENT}->getLinkStatus($linkIds, $time);
     }
 
-    return $link_ids;
+    if ($status != 0) {
+        my $msg = "Couldn't get information about links from database: $res";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
+    }
+
+    foreach my $link_id (@{ $linkIds }) {
+        my $mdID;
+        if ($was_key) {
+            $mdID = $metadataId;
+        } else {
+            $mdID  = $self->outputMetadata($output, $link_id, $metadataId, $responseType);
+        }
+
+        my $data_content = q{};
+
+        if (defined $res->{$link_id}) {
+            foreach my $link (@{ $res->{$link_id} }) {
+                if (not defined $time or ($time->getType() eq "point" and $time->getTime() != -1)) {
+                    $data_content .= $self->writeoutLinkState($link);
+                } else {
+                    $data_content .= $self->writeoutLinkState_range($link);
+                }
+            }
+        }
+        createData($output, "data.".genuid(), $mdID, $data_content, undef);
+    }
+
+    return;
 }
 
+=head2 handleMetadataKeyRequest ($self, $output, $metadataId, $link_ids, $time, $responseType, $was_key)
+    This function takes the relevant link ids and generates output containing
+    the keys associated with those link ids. The function is almost identical
+    to the handleLinkStatusRequest in its output. It just outputs the key for a
+    link instead its associated data.
+=cut
 sub handleMetadataKeyRequest {
     my ($self, $output, $metadataId, $link_ids, $time, $responseType, $was_key) = @_;
 
@@ -747,6 +809,13 @@ sub handleMetadataKeyRequest {
     return;
 }
 
+=head2 outputMetadata ($self, $output, $link_id, $parentMdId, $responseType)
+    There are 3 different formats that the metadata in a response can take. The
+    'linkid' format is deprecated and kept around for existing software out
+    there. However, there are two other formats available: topoid and compat.
+    Topoid outputs a topoid subject containing the link identifier. Compat
+    outputs in format compatible with the SQLMA.
+=cut
 sub outputMetadata {
     my ($self, $output, $link_id, $parentMdId, $responseType) = @_;
 
@@ -759,6 +828,10 @@ sub outputMetadata {
     }
 }
 
+=head2 outputLinkIDMetadata ($self, $output, $link_id, $parentMdId)
+    Outputs a metadata containing the specified link id in the format expected
+    by legacy pS-PS Status MA applications.
+=cut
 sub outputLinkIDMetadata {
     my ($self, $output, $link_id, $parentMdId) = @_;
 
@@ -774,6 +847,10 @@ sub outputLinkIDMetadata {
     return $mdID;
 }
 
+=head2 outputTopoIDMetadata ($self, $output, $link_id, $parentMdId)
+    Outputs a metadata containing the specified link id in the new topoid
+    format.
+=cut
 sub outputTopoIDMetadata {
     my ($self, $output, $link_id, $parentMdId) = @_;
 
@@ -786,6 +863,10 @@ sub outputTopoIDMetadata {
     return $mdID;
 }
 
+=head2 outputCompatMetadata ($self, $output, $link_id, $parentMdId)
+    Outputs the metadata for the given link id in the format expected by
+    applications compatible with the SQLMA L2 Status MA.
+=cut
 sub outputCompatMetadata {
     my ($self, $output, $link_id, $parentMdId) = @_;
 
@@ -839,6 +920,10 @@ sub outputCompatMetadata {
     return $link_mdId;
 }
 
+=head2 outputNodeElement ($self, $output, $node)
+    Outputs a node element in the format expected by applications compatible
+    with the SQLMA L2 Status MA
+=cut
 sub outputNodeElement {
     my ($self, $output, $node) = @_;
 
@@ -867,6 +952,10 @@ sub outputNodeElement {
     return;
 }
 
+=head2 outputLinkElement ($self, $output, $link)
+    Outputs a link element in the format expected by applications compatible
+    with the SQLMA L2 Status MA
+=cut
 sub outputLinkElement {
     my ($self, $output, $link) = @_;
 
@@ -888,6 +977,10 @@ sub outputLinkElement {
     return;
 }
 
+=head2 createKey ($self, $output, $link_id, $time, $responseType)
+    Outputs a key with the relevant time, responseFormat and link id so that a
+    client can simply return that key and get the information associated with it.
+=cut
 sub createKey {
     my ($self, $output, $link_id, $time, $responseType) = @_;
 
@@ -910,6 +1003,13 @@ sub createKey {
     return;
 }
 
+=head2 writeoutLinkState_range ($self, $link)
+    Writes out the specified perfSONAR_PS::Status::Link element in a format
+    backwards compatible with the ifevt standard. It adds four attributes
+    to the standard ifevt datum: startTime, startTimeType, endTime and
+    endTimeType. These added attributes give the range during which the link
+    had the specified state.
+=cut
 sub writeoutLinkState_range {
     my ($self, $link) = @_;
 
@@ -926,6 +1026,10 @@ sub writeoutLinkState_range {
     return $localContent;
 }
 
+=head2 writeoutLinkState_range ($self, $link)
+    Writes out the specified perfSONAR_PS::Status::Link element in a format
+    compatible with the ifevt standard.
+=cut
 sub writeoutLinkState {
     my ($self, $link, $time) = @_;
 
@@ -945,6 +1049,34 @@ sub writeoutLinkState {
     return $localContent;
 }
 
+=head2 parseLinkDefinitionsFile ($self, $file)
+    Parses a file containing link definition information that is used for compatibility with the SQLMA L2 Status MA. The format of the file is similar to:
+
+<config>
+        <node name="node0">
+                <city>Bobville</city>
+                <country>USA</country>
+                <institution>Monkey House</institution>
+                <latitude>0</latitude>
+                <longitude>0</longitude>
+        </node>
+        <node name="node1">
+                <city>Bobville</city>
+                <country>USA</country>
+                <institution>Monkey House</institution>
+                <latitude>0</latitude>
+                <longitude>0</longitude>
+        </node>
+
+        <link knowledge="full">
+                <globalName>SOME-LINK</globalName>
+                <localName>SOME-LINK-LOCAL1</localName>
+                <linkID>urn:ogf:network:domain=internet2.edu:host=149.165.129.17:port=1-A-1-1:link=1</linkID>
+                <endpoint type="demarcpoint" name="node0" />
+                <endpoint type="endpoint" name="node1" />
+        </link>
+</config>
+=cut
 sub parseLinkDefinitionsFile {
     my ($self, $file) = @_;
 
@@ -1115,122 +1247,10 @@ sub parseLinkDefinitionsFile {
 1;
 
 __END__
-=head1 NAME
-
-perfSONAR_PS::Services::MA::Status - A module that provides methods for the Status MA.
-
-=head1 DESCRIPTION
-
-This module aims to offer simple methods for dealing with requests for information, and the
-related tasks of interacting with backend storage.
-
-=head1 SYNOPSIS
-
-use perfSONAR_PS::Services::MA::Status;
-
-my %conf = readConfiguration();
-
-my %ns = (
-        nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-        ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-        nmtopo => "http://ogf.org/schema/network/topology/base/20070707/",
-     );
-
-my $ma = perfSONAR_PS::Services::MA::Status->new(\%conf, \%ns);
-
-# or
-# $ma = perfSONAR_PS::Services::MA::Status->new;
-# $ma->setConf(\%conf);
-# $ma->setNamespaces(\%ns);
-
-if ($ma->init != 0) {
-    print "Error: couldn't initialize measurement archive\n";
-    exit(-1);
-}
-
-$ma->registerLS;
-
-while(1) {
-    my $request = $ma->receive;
-    $ma->handleRequest($request);
-}
-
-=head1 API
-
-The offered API is simple, but offers the key functions we need in a measurement archive.
-
-=head2 init 
-
-       Initializes the MA and validates or fills in entries in the
-    configuration file. Returns 0 on success and -1 on failure.
-
-=head2 registerLS($self)
-
-    Reads the information contained in the database and registers it with
-    the specified LS.
-
-=head2 receive($self)
-
-    Grabs an incoming message from transport object to begin processing. It
-    completes the processing if the message was handled by a lower layer.
-    If not, it returns the Request structure.
-
-=head2 handleRequest($self, $request)
-
-    Handles the specified request returned from receive()
-
-=head2 __handleRequest($self)
-
-    Validates that the message is one that we can handle, calls the
-    appropriate function for the message type and builds the response
-    message. 
-
-=head2 parseStoreRequest($self, $request)
-
-    Goes through each metadata/data pair, extracting the eventType and
-    calling the function associated with that eventType.
-
-=head2 handleStoreRequest($self, $link_id, $knowledge, $time, $operState, $adminState, $do_update)
-
-    Stores the new link information into the database. If an update is to
-    be performed, the function reads in the most recent data for the
-    specified link and updates it.
-
-=head2 parseQueryRequest($self, $request)
-
-    Goes through each metadata/data pair, extracting the eventType and
-    any other relevant information calling the function associated with
-    that eventType.
-
-=head2 lookupAllRequest($self, $metadata, $data)
-
-    Reads all link information from the database and constructs the
-    metadata/data pairs for the response.
-
-=head2 lookupLinkStatusRequest($self, $link_id, $time)
-
-    Looks up the requested link information from the database and
-    returns the results.
-
-=head2 writeoutLinkState_range($self, $link)
-
-    Writes out the requested link in a format slightly different than the
-    normal ifevt. The ifevt schema has only the concept of events at a
-    single point in time. This output is compatible with applications
-    expecting the normal ifevt output, but also contains a start time and
-    an end time during which the status was the same.
-
-=head2 writeoutLinkState($self, $link, $time)
-
-    Writes out the requested link according to the ifevt schema. If time is
-    empty, it simply uses the end time of the given range as the time for
-    the event.
-
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
-L<perfSONAR_PS::Client::Status::SQL>
+L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Time>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Client::Status::SQL>, L<perfSONAR_PS::Topology::ID>
 
 
 To join the 'perfSONAR-PS' mailing list, please visit:
@@ -1258,7 +1278,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
  
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 

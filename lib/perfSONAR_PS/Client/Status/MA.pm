@@ -7,6 +7,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
 use perfSONAR_PS::Transport;
+use perfSONAR_PS::Time;
 
 our $VERSION = 0.08;
 
@@ -60,7 +61,8 @@ sub buildGetAllRequest {
 
     $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $request .= "<nmwg:metadata id=\"meta0\">\n";
-    $request .= "  <nmwg:eventType>Database.Dump</nmwg:eventType>\n";
+    $request .= "  <topoid:subject xmlns:topoid=\"http://ogf.org/schema/network/topology/id/20070828/\">urn:ogf:network:domain=*:node=*:port=*:link=*</topoid:subject>\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
     $request .= "</nmwg:metadata>\n";
     $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
     $request .= "</nmwg:message>\n";
@@ -86,7 +88,7 @@ sub buildLinkRequest {
         $request .= "  </nmwg:subject>\n";
         if (defined $time and $time ne "") {
             $request .= "  <nmwg:parameters>\n";
-            $request .= "    <nmwg:parameter name=\"time\">$time</nmwg:parameter>\n";
+            $request .= "    <nmwg:parameter name=\"time\">".$time->getTime."</nmwg:parameter>\n";
             $request .= "  </nmwg:parameters>\n";
         }
         $request .= "</nmwg:metadata>\n";
@@ -113,6 +115,7 @@ sub buildUpdateRequest {
     $request .= "  <nmwg:subject id=\"sub0\">\n";
     $request .= "    <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
     $request .= "  </nmwg:subject>\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
     $request .= "  <nmwg:parameters>\n";
     $request .= "    <nmwg:parameter name=\"knowledge\">$knowledge_level</nmwg:parameter>\n";
     if ($do_update != 0) {
@@ -164,7 +167,7 @@ sub getStatusArchive {
                 my $link_id;
 
                 if (not defined $meta_ids) {
-                    $link_id = findvalue($metadata, './nmwg:subject/nmtopo:link/@id');
+                    $link_id = findvalue($metadata, './topoid:subject');
                 } else {
                     $link_id = $meta_ids->{$mdid};
                     if (not defined $link_id and defined $mdidref) {
@@ -259,7 +262,7 @@ sub getAll {
 sub getLinkHistory {
     my ($self, $link_ids) = @_;
 
-    my ($request, $metas) = buildLinkRequest($link_ids, "all");
+    my ($request, $metas) = buildLinkRequest($link_ids, perfSONAR_PS::Time->new("point", -1));
 
     my ($status, $res) = $self->getStatusArchive($request, $metas);
 
