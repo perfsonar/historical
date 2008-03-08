@@ -582,7 +582,10 @@ sub handleEvent($$$$$$$$$)
 
 	# get db
 	my $db = $self->getDB();	
-	$db->openDB();
+	my $status = $db->openDB();
+	if ( $status == -1  ) {
+		$logger->logdie( "Could not open database. Please check configuration.");
+	}
 	
 	$logger->debug( 'handle event ' .   $parameters->{"rawRequest"});
 	my $response = $self->handleRequest( $parameters->{"rawRequest"} );

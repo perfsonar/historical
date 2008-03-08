@@ -175,7 +175,7 @@ sub openDB {
 		} 
 	}
 	
-	return $err ? -1 : 0;
+	return ( $err > 0 ? -1 : 0 );
 }
 
 =head2 closeDB

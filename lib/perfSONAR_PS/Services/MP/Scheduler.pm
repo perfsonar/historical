@@ -414,7 +414,7 @@ sub run
 						  #$logger->fatal( "SOMETHING");
 						  foreach my $pid ( keys %CHILD ){
 							#$logger->fatal( "killing $pid ");
-							kill( "TERM", $pid );
+							kill( "TERM", -$$ );
 						  } 
 						};
 
