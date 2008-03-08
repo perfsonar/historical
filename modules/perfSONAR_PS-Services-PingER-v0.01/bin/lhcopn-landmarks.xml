@@ -12,8 +12,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=asgc.net:node=cern-1:port=192.16.166.2">
         <nmtl3:ipAddress type="IPv4">192.16.166.2</nmtl3:ipAddress>
@@ -27,8 +27,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=asgc.net:node=cern-bk:port=192.16.166.98">
         <nmtl3:ipAddress type="IPv4">192.16.166.98</nmtl3:ipAddress>
@@ -44,8 +44,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-166-6:port=192.16.166.6">
         <nmtl3:ipAddress type="IPv4">192.16.166.6</nmtl3:ipAddress>
@@ -59,8 +59,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-bnl:port=192.16.166.10">
         <nmtl3:ipAddress type="IPv4">192.16.166.10</nmtl3:ipAddress>
@@ -74,8 +74,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-fnal-bu:port=192.16.166.30">
         <nmtl3:ipAddress type="IPv4">192.16.166.30</nmtl3:ipAddress>
@@ -89,8 +89,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-pic:port=192.16.166.58">
         <nmtl3:ipAddress type="IPv4">192.16.166.58</nmtl3:ipAddress>
@@ -104,8 +104,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-ral:port=192.16.166.66">
         <nmtl3:ipAddress type="IPv4">192.16.166.66</nmtl3:ipAddress>
@@ -119,8 +119,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-triumf:port=192.16.166.82">
         <nmtl3:ipAddress type="IPv4">192.16.166.82</nmtl3:ipAddress>
@@ -134,8 +134,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-bnl-bu:port=192.16.166.14">
         <nmtl3:ipAddress type="IPv4">192.16.166.14</nmtl3:ipAddress>
@@ -149,8 +149,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-cnaf:port=192.16.166.18">
         <nmtl3:ipAddress type="IPv4">192.16.166.18</nmtl3:ipAddress>
@@ -164,8 +164,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-fnal:port=192.16.166.26">
         <nmtl3:ipAddress type="IPv4">192.16.166.26</nmtl3:ipAddress>
@@ -179,8 +179,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-in2p3:port=192.16.166.42">
         <nmtl3:ipAddress type="IPv4">192.16.166.42</nmtl3:ipAddress>
@@ -194,8 +194,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=lhcopn-triumf-bu:port=192.16.166.86">
         <nmtl3:ipAddress type="IPv4">192.16.166.86</nmtl3:ipAddress>
@@ -211,8 +211,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=gridka.de:node=r-inet-gis-i-b7-2-cern:port=192.16.166.34">
         <nmtl3:ipAddress type="IPv4">192.16.166.34</nmtl3:ipAddress>
@@ -228,8 +228,8 @@
         <pingertopo:count>10</pingertopo:count>
         <pingertopo:interval>300</pingertopo:interval>
         <pingertopo:ttl>255</pingertopo:ttl>
-        <pingertopo:period>10</pingertopo:period>
-        <pingertopo:offset>30</pingertopo:offset>
+        <pingertopo:measurementPeriod>10</pingertopo:measurementPeriod>
+        <pingertopo:measurementOffset>30</pingertopo:measurementOffset>
       </pingertopo:test>
       <nmtl3:port id="urn:ogf:network:domain=sara.nl:node=te3-4:port=192.16.166.74">
         <nmtl3:ipAddress type="IPv4">192.16.166.74</nmtl3:ipAddress>
