@@ -186,9 +186,9 @@ sub getTestPeriodById
 		unless defined $testid;
 
 	$logger->fatal( "unique test with id '$testid' does not define a test period.")
-		unless exists $self->config()->{$testid}->{'period'};
+		unless exists $self->config()->{$testid}->{'measurementPeriod'};
 
-	return $self->config()->{$testid}->{'period'};
+	return $self->config()->{$testid}->{'measurementPeriod'};
 }
 
 =head2 getTestOffsetById( $testid )
@@ -205,11 +205,11 @@ sub getTestOffsetById
 		unless defined $testid;
 
 	# return zero if there is no offset defined
-	if( ! exists $self->config()->{$testid}->{'offset'} ) {
+	if( ! exists $self->config()->{$testid}->{'measurementOffset'} ) {
 		return 0;
 	}
 	# otherwise return the value
-	return $self->config()->{$testid}->{'offset'};
+	return $self->config()->{$testid}->{'measurementOffset'};
 }
 
 =head2 getTestOffsetTypeById( $testid )
@@ -226,12 +226,12 @@ sub getTestOffsetTypeById
 		unless defined $testid;
 
 	# return zero if there is no offset defined
-	if( ! exists $self->config()->{$testid}->{'offsetType'} ) {
+	if( ! exists $self->config()->{$testid}->{'measurementOffsetType'} ) {
 		return 'Flat';
 	}
 	# otherwise return the value
 	# TODO: Validate, enumerate types (Flat, Gaussian etc)
-	return $self->config()->{$testid}->{'offsetType'};
+	return $self->config()->{$testid}->{'measurementOffsetType'};
 }
 
 

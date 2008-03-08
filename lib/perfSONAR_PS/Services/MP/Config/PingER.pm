@@ -133,7 +133,7 @@ sub load
 	# get the dest host s
 	my $xpath = '//' . $ns->{pingertopo} . ':topology/' . $ns->{nmtb} . ':domain/' . $ns->{nmtb} . ':node';
 	# make sure that it has children with tests
-	$xpath .= '[child::' . $ns->{pingertopo} . ':test/' . $ns->{pingertopo} . ":period]";
+	$xpath .= '[child::' . $ns->{pingertopo} . ':test/' . $ns->{pingertopo} . ":measurementPeriod]";
 
 	# place to store al tests
 	my $config = {};
@@ -182,8 +182,8 @@ sub load
 						|| $tag  eq 'count'
 						|| $tag  eq 'interval'
 						|| $tag  eq 'ttl' 
-						|| $tag  eq 'period' 
-						|| $tag  eq 'offset' ) 
+						|| $tag  eq 'measurementPeriod' 
+						|| $tag  eq 'measurementOffset' ) 
 				) {
 					my $value = $param->textContent;
 					chomp( $value );
@@ -197,7 +197,7 @@ sub load
 			
 			# don't bother if we don't have a period to use
 			next
-				if ! exists $hash->{period};
+				if ! exists $hash->{measurementPeriod};
 			
 			# create a special id to identify the test
 			my $id = 'packetSize=' . $hash->{'packetSize'} 
@@ -239,8 +239,8 @@ $hash->{$testid}->{count} = n (packets)
 $hash->{$testid}->{ttl} = n (hops)
 $hash->{$testid}->{interval} = n (secs)
 $hash->{$testid}->{offset} = n (secs)
-$hash->{$testid}->{period} = n (secs)
-$hash->{$testid}->{offset} = n (secs)
+$hash->{$testid}->{measurementPeriod} = n (secs)
+$hash->{$testid}->{measurementOffset} = n (secs)
 
 =cut
 sub getTestById
