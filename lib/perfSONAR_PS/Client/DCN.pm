@@ -322,6 +322,52 @@ sub getServiceForDomain {
     return \%services;
 }
 
+=head2 getTopologyServices($self { })
+
+Get the topology service that are registered with the LS instance.
+
+=cut
+
+sub getTopologyServices {
+    my ( $self, @args ) = @_;
+    my $parameters = validate( @args, { } );
+    my %services = ();
+
+    my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/perfsonar:subject/psservice:service[./psservice:serviceType[text()=\"TS\" or text()=\"ts\" or text()=\"Topology\" or text()=\"topology\" or text()=\"Topo\" or text()=\"topo\" or text()=\"Topology Service\" or text()=\"topology service\" or text()=\"topology Service\" or text()=\"Topology service\"]]\n";
+
+    my $msg = $self->callLS( { message => $self->createQueryRequest( { query => $query } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my $ss = find( $msg, "./nmwg:data/psservice:datum/psservice:service", 0 );
+    if ($ss) {
+        foreach my $s ( $ss->get_nodelist ) {
+            my $t1 = extract ( find( $s, "./psservice:accessPoint", 1 ), 0);
+            if( $t1 ) {
+                my %temp = ();
+                my $t2 = extract ( find( $s, "./psservice:serviceType", 1 ), 0 );
+                my $t3 = extract ( find( $s, "./psservice:serviceName", 1 ), 0 );
+                my $t4 = extract ( find( $s, "./psservice:serviceDescription", 1 ), 0 );
+                $temp{"serviceType"} = $t2 if $t2;
+                $temp{"serviceName"} = $t3 if $t3;
+                $temp{"serviceDescription"} = $t4 if $t4; 
+                $services{$t1} = \%temp;
+            }
+        }
+    }
+    else {
+        $self->{LOGGER}->error("No domain elements found in return.");
+        return;
+    }
+
+    return \%services;
+}
+
 =head2 nameToId
 
 Given a name (i.e. DNS 'hostname') return any matching link ids.
