@@ -424,12 +424,17 @@ sub storeData
 
 	# store results
 	my $src = $self->database()->soi_host( $agent->source(), $agent->sourceIp() );
-	return -1
-		if ! defined $src;
+	unless($src) {
+	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->source() . "  " . $agent->sourceIp() );
+	    return -1;
+	}	 
 		
 	my $dst = $self->database()->soi_host( $agent->destination(), $agent->destinationIp() );
-	return -1
-		if ! defined $dst;
+	 
+	 unless($dst) {
+	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() );
+	    return -1;
+	}	  
 
 	my $md = $self->database()->soi_metadata( $src, $dst, {
 					'transport'	  => 'ICMP',
@@ -438,8 +443,11 @@ sub storeData
 					'packetInterval' => $agent->interval(),
 					'ttl'		  => $agent->ttl(),
 				});
-	return -1
-		if ! defined $md;
+	 
+	  unless($md) {
+	    $logger->error(  "Failed to find or insert  soi_metadata:  ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl());
+	    return -1;
+	}	   
 	
 	my $data = $self->database()->insert_data( $md, {
 	
@@ -473,9 +481,12 @@ sub storeData
 					'seqs'	=> $seqs,
 					
 				});
-	return -1
-		if ! defined $data;
-	
+	unless($data){
+	   
+	   $logger->error(  "Failed to find or insert  soi_data:  " . $agent->results()->{'startTime'} . "  " .  $agent->results()->{'meanRtt'}  );
+	    return -1;
+	 
+	}
 	return 0;
 }
 
