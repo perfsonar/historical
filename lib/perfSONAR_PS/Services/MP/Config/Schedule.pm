@@ -269,7 +269,7 @@ sub getTestNextTimeFromNowById
 
 
     # to determine the next time that a testid should be run
-	$logger->debug( "OFFSET: " . $testing_offset_type . " " . $testing_offset );
+    # $logger->debug( "OFFSET: " . $testing_offset_type . " " . $testing_offset );
     my $offset = undef;
     if ( $testing_offset_type eq 'Gausssian' ) {
 	

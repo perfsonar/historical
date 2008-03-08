@@ -133,7 +133,7 @@ sub load
 	# get the dest host s
 	my $xpath = '//' . $ns->{pingertopo} . ':topology/' . $ns->{nmtb} . ':domain/' . $ns->{nmtb} . ':node';
 	# make sure that it has children with tests
-	$xpath .= '[child::' . $ns->{pingertopo} . ':test/' . $ns->{pingertopo} . ":measurementPeriod]";
+	$xpath .= '[child::' . $ns->{nmwg} . ':parameters/' . $ns->{nmwg} . ":parameter[\@name='measurementPeriod']]";
 
 	# place to store al tests
 	my $config = {};
@@ -159,7 +159,6 @@ sub load
 				chomp( $ipAddress );
 			}
 		}	
-				
 		# get the destination name (hostName)
 		my $destination = undef;
 		foreach my $tag ( $node->getChildrenByLocalName( 'hostName') ) {
@@ -168,7 +167,7 @@ sub load
 		}
 		
 		# get the tests and populat datastructure
-		foreach my $test ( $node->getChildrenByLocalName( 'test') )
+		foreach my $test ( $node->getChildrenByLocalName( 'parameters') )
 		{
 			#$logger->debug( "Found: " . $test->toString() );
 			$logger->debug( "Found new test");
@@ -177,20 +176,22 @@ sub load
 			foreach my $param ( $test->childNodes )
 			{
 				my $tag = $param->localname();
-			        if ( defined  $tag 
-					&& (  $tag  eq 'packetSize'
-						|| $tag  eq 'count'
-						|| $tag  eq 'interval'
-						|| $tag  eq 'ttl' 
-						|| $tag  eq 'measurementPeriod' 
-						|| $tag  eq 'measurementOffset' ) 
+				next unless defined $tag && 
+					$tag eq 'parameter';
+					
+				my $attr = $param->getAttribute( 'name' );
+				if ( defined $attr 
+					&& ( $attr eq 'packetSize'
+						|| $attr eq 'count'
+						|| $attr eq 'packetInterval'
+						|| $attr eq 'ttl' 
+						|| $attr eq 'measurementPeriod' 
+						|| $attr eq 'measurementOffset' ) 
 				) {
 					my $value = $param->textContent;
 					chomp( $value );
-					$logger->debug( "Found:  $tag with value '$value'" );
-					# agents use 'interval' rather than packetinterval
-					 
-					$hash->{$tag} = $value;												
+					$logger->debug( "Found: '$attr' with value '$value'" );
+					$hash->{$attr} = $value;												
 				}
 
 			}
@@ -202,7 +203,7 @@ sub load
 			# create a special id to identify the test
 			my $id = 'packetSize=' . $hash->{'packetSize'} 
 				. ':count=' . $hash->{count} 
-				. ':interval=' . $hash->{interval} 
+				. ':interval=' . $hash->{'packetInterval'} 
 				. ':ttl=' . $hash->{ttl};
 				
 			# add the destination details
@@ -228,7 +229,6 @@ sub load
 	}
 }
 
-
 =head2 getTestById( $testid )
 
 Returns the test information for $testid. Datastructure is a hash of the
@@ -237,7 +237,7 @@ following format
 $hash->{$testid}->{packetSize} = n (bytes)
 $hash->{$testid}->{count} = n (packets)
 $hash->{$testid}->{ttl} = n (hops)
-$hash->{$testid}->{interval} = n (secs)
+$hash->{$testid}->{packetInterval} = n (secs)
 $hash->{$testid}->{offset} = n (secs)
 $hash->{$testid}->{measurementPeriod} = n (secs)
 $hash->{$testid}->{measurementOffset} = n (secs)
