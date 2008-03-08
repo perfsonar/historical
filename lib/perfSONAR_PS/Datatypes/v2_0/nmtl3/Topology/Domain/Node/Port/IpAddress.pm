@@ -316,7 +316,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 

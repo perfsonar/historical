@@ -11,7 +11,6 @@ use version; our $VERSION = qv('v2.0');
 
    Object representation of the port element.
    Object fields are:
-    Scalar:     metadataIdRef, 
     Scalar:     id, 
     Object reference:   ipAddress => type HASH,
    
@@ -40,7 +39,7 @@ use perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port::IpAddres
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
-use fields qw(nsmap idmap refidmap metadataIdRef id ipAddress  );
+use fields qw(nsmap idmap refidmap id ipAddress  );
 
 perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port->mk_accessors(perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port->show_fields('Public'));
   
@@ -48,7 +47,6 @@ perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port->mk_accessors
    
       creates   object, accepts DOM with  element tree or hashref to the list of
       keyd parameters
-         metadataIdRef   => undef, 
          id   => undef, 
          ipAddress => HASH,
 
@@ -122,7 +120,6 @@ sub getDOM {
     my $port = getElement({name =>   $LOCALNAME, parent => $parent , ns => [$self->nsmap->mapname( $LOCALNAME )],
                              attributes => [
 
-                                               ['metadataIdRef' =>  $self->metadataIdRef],
                                                ['id' =>  $self->id],
                                            ],
                          }); 
@@ -321,8 +318,6 @@ sub fromDOM {
     my $logger  = get_logger( $CLASSPATH ); 
     my $dom = shift;
      
-    $self->metadataIdRef($dom->getAttribute('metadataIdRef')) if($dom->getAttribute('metadataIdRef'));
-    $logger->debug(" Attribute metadataIdRef= ". $self->metadataIdRef) if $self->metadataIdRef; 
     $self->id($dom->getAttribute('id')) if($dom->getAttribute('id'));
     $logger->debug(" Attribute id= ". $self->id) if $self->id; 
     foreach my $childnode ($dom->childNodes) { 
@@ -354,7 +349,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 
