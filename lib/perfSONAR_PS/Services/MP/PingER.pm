@@ -344,6 +344,7 @@ sub setupDatabase
 {
 	my $self = shift;
 	
+	my $err = 0;
 	# setup rose object
 	eval {
 		perfSONAR_PS::DB::PingER->register_db(
@@ -359,9 +360,11 @@ sub setupDatabase
 		# try to opent eh db
 		my $db = perfSONAR_PS::DB::PingER->new_or_cached();
 		$self->database( $db );
-		$db->openDB();
+		if( $db->openDB() == -1 ){
+			$err = 1;
+		}
 	};
-	if ( $@ ) {
+	if ( $@ || $err == 1 ) {
 		my $type = $self->getConf( 'db_type') || '';
 		my $dbname = $self->getConf( 'db_name') || '';
 		my $user = $self->getConf( 'db_username') || '';
