@@ -284,7 +284,7 @@ sub toAPI
 	my $parameters = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters->new();
 	my @params = ();
 	no strict 'refs';
-	foreach my $p ( qw/ count packetSize packetInterval ttl / ) {
+	foreach my $p ( qw/ count packetSize interval ttl / ) {
 		my $param = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({
 					'name' => $p });
 		$param->text( $self->$p() );

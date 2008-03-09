@@ -131,7 +131,7 @@ sub load
 	};
 
 	# get the dest host s
-	my $xpath = '//' . $ns->{pingertopo} . ':topology/' . $ns->{nmtb} . ':domain/' . $ns->{nmtb} . ':node';
+	my $xpath = '//' . $ns->{pingertopo} . ':topology/' . $ns->{pingertopo} . ':domain/' . $ns->{pingertopo} . ':node';
 	# make sure that it has children with tests
 	$xpath .= '[child::' . $ns->{nmwg} . ':parameters/' . $ns->{nmwg} . ":parameter[\@name='measurementPeriod']]";
 
@@ -190,6 +190,8 @@ sub load
 				) {
 					my $value = $param->textContent;
 					chomp( $value );
+					# remap the packetinterval into interval so the agent can use it
+					$attr = 'interval' if $attr eq 'packetInterval';
 					$logger->debug( "Found: '$attr' with value '$value'" );
 					$hash->{$attr} = $value;												
 				}
@@ -237,7 +239,7 @@ following format
 $hash->{$testid}->{packetSize} = n (bytes)
 $hash->{$testid}->{count} = n (packets)
 $hash->{$testid}->{ttl} = n (hops)
-$hash->{$testid}->{packetInterval} = n (secs)
+$hash->{$testid}->{interval} = n (secs)
 $hash->{$testid}->{offset} = n (secs)
 $hash->{$testid}->{measurementPeriod} = n (secs)
 $hash->{$testid}->{measurementOffset} = n (secs)
