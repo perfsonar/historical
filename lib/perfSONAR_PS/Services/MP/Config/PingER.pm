@@ -205,7 +205,7 @@ sub load
 			# create a special id to identify the test
 			my $id = 'packetSize=' . $hash->{'packetSize'} 
 				. ':count=' . $hash->{count} 
-				. ':interval=' . $hash->{'packetInterval'} 
+				. ':interval=' . $hash->{'interval'} 
 				. ':ttl=' . $hash->{ttl};
 				
 			# add the destination details
