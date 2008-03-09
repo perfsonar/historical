@@ -289,8 +289,8 @@ sub getTopologyServices {
     $query .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
     $query .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
 
-    if( $parameters->{domain} ) {
-        $query .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/nmwg:subject/nmtb:domain[\@id=\"urn:ogf:network:domain=".$parameters->{domain}."\"]]\n";
+    if ( $parameters->{domain} ) {
+        $query .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/nmwg:subject/nmtb:domain[\@id=\"urn:ogf:network:domain=" . $parameters->{domain} . "\"]]\n";
     }
     else {
         $query .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/nmwg:subject/nmtb:domain]\n";
@@ -309,16 +309,16 @@ sub getTopologyServices {
     my $ss = find( $msg, "./nmwg:data/psservice:datum/psservice:service", 0 );
     if ($ss) {
         foreach my $s ( $ss->get_nodelist ) {
-            my $t1 = extract ( find( $s, "./psservice:accessPoint", 1 ), 0);
-            if( $t1 ) {
+            my $t1 = extract( find( $s, "./psservice:accessPoint", 1 ), 0 );
+            if ($t1) {
                 my %temp = ();
-                my $t2 = extract ( find( $s, "./psservice:serviceType", 1 ), 0 );
-                my $t3 = extract ( find( $s, "./psservice:serviceName", 1 ), 0 );
-                my $t4 = extract ( find( $s, "./psservice:serviceDescription", 1 ), 0 );
-                $temp{"serviceType"} = $t2 if $t2;
-                $temp{"serviceName"} = $t3 if $t3;
-                $temp{"serviceDescription"} = $t4 if $t4; 
-                $services{$t1} = \%temp;
+                my $t2   = extract( find( $s, "./psservice:serviceType", 1 ), 0 );
+                my $t3   = extract( find( $s, "./psservice:serviceName", 1 ), 0 );
+                my $t4   = extract( find( $s, "./psservice:serviceDescription", 1 ), 0 );
+                $temp{"serviceType"}        = $t2 if $t2;
+                $temp{"serviceName"}        = $t3 if $t3;
+                $temp{"serviceDescription"} = $t4 if $t4;
+                $services{$t1}              = \%temp;
             }
         }
     }
@@ -805,9 +805,12 @@ __END__
     }
 
     # Get the services that are responsible for a particular domain.  Returns
-    # a hash reference to the structure.
+    # a hash reference to the structure.  Omit the 'domain' argument to simply
+    # get ALL of the topology services in this LS.
     # 
-    my $services = $dcn->getServiceForDomain({ domain => "I2" });
+    my $all_my_services = $dcn->getTopologyServices;
+
+    my $services = $dcn->getTopologyServices({ domain => "I2" });
     foreach my $s (sort keys %$services) {
       print $s , "\n";
       foreach my $s2 (sort keys %{$services->{$s}}) {
@@ -843,8 +846,8 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.  Bugs,
-feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
 
   https://bugs.internet2.edu/jira/browse/PSPS
 
@@ -858,8 +861,9 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
