@@ -56,27 +56,27 @@ BEGIN {
         @EXPORT     = qw( );
         
       
-        @EXPORT_OK   =qw($pingertopo $port $pingerTest $basename   $node $domain);
+        @EXPORT_OK   =qw($pingertopo $port $parameters $location $contact $parameter $basename   $node $domain);
 }
 use version;
 our @EXPORT_OK ;
-our ($pingertopo, $port,$pingerTest,$basename,  $node ,$domain  );  
+our ($pingertopo, $port,$parameters, $parameter,$location, $contact ,$basename,  $node ,$domain  );  
 use   perfSONAR_PS::DataModels::DataModel   2.0 qw($addressL3);
  
-  $port = {'attrs'  => {id => 'scalar',  metadataIdRef => 'scalar', xmlns => 'nmtl3'},
+  $port = {'attrs'  => {id => 'scalar', xmlns => 'nmtl3'},
  	       elements => [
  			      [ipAddress=>  $addressL3],
 			     
 			  ], 
  	      }; 
-  $pingerTest = {'attrs'  => {id => 'scalar',   xmlns => 'pingertopo'},
+	      
+   $parameter	=  {'attrs'  => {name => 'enum:count,packetInterval,packetSize,ttl,measurementPeriod,measurementOffset',  value => 'scalar', xmlns => 'nmwg'},
+                     elements => [],
+			      text => 'unless:value',
+	         };      
+  $parameters = {'attrs'  => {id => 'scalar',   xmlns => 'nmwg'},
  	       elements => [
- 			      [packetSize =>  'text'],
-			      [count =>       'text'],
-			      [interval =>    'text'],
-			      [ttl =>         'text'],
-			      [period =>      'text'],
-			      [offset =>      'text'],
+ 			      [parameter =>  [$parameter]],			    
 			  ], 
  	      }; 
 	      
@@ -84,18 +84,47 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($addressL3);
                    elements => [], 
 		   text => 'scalar',
 	       };
-         
+  $location =  { 'attrs' => {xmlns => 'nmtb'},
+                  elements => [
+                         [continent => 'text'],
+			 [country => 'text'],
+                         [zipcode   => 'text'],
+                         [state   => 'text'],
+                         [institution   => 'text'],
+                         [city   => 'text'],
+                         [streetAddress  => 'text'],
+                         [floor   => 'text'],
+                         [room   => 'text'],
+                         [cage   => 'text'],
+                         [rack  => 'text'], 
+                         [shelf  => 'text'], 
+                         [latitude => 'text'], 
+                         [longitude   => 'text'],
+                              ],
+               };
+  
+  $contact =  { 'attrs' => {xmlns => 'nmtb'},
+                  elements => [
+                         [email => 'text'],
+			 [phoneNumber => 'text'],
+                         [administrator   => 'text'],
+                         [institution   => 'text'],
+                        
+                              ],
+               };   
   $node =  {  'attrs'  => { id => 'scalar', metadataIdRef => 'scalar', xmlns => 'nmtb'}, 
                    elements => [ 
 		     [name =>  $basename],
 		     [hostName =>  'text' ],
 		     [description =>  'text' ],
-		     [test =>  $pingerTest], 
+		     [location => $location ],
+		     [contact =>  $contact], 
+		     [parameters =>  $parameters], 
 		     [port => $port],
 		     ], 
 	       };
    
-  $domain =    {  'attrs'  => {id => 'scalar', metadataIdRef => 'scalar',xmlns => 'nmtb'}, 
+  $domain =    {  'attrs'  => {id => 'scalar', xmlns => 'nmtb'}, 
                   elements => [ 
 		                 [ comments =>  'text'], 
 				 [ node => [$node]], 
