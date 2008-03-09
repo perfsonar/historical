@@ -1,18 +1,18 @@
-package  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain;
+package  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
 use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
- perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain  - A base class, implements  'domain'  element from the perfSONAR_PS RelaxNG schema
+ perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain  - A base class, implements  'domain'  element from the perfSONAR_PS RelaxNG schema
   
 =head1 DESCRIPTION
 
    Object representation of the domain element.
    Object fields are:
     Scalar:     id, 
-    Object reference:   comments => type ,
+    Object reference:   comments => type HASH,
     Object reference:   node => type ARRAY,
    
    The constructor accepts only single parameter, it could be a hashref to parameters hash  or DOM with  'domain' element 
@@ -20,9 +20,9 @@ use version; our $VERSION = qv('v2.0');
     
 =head1 SYNOPSIS
 
-              use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain;
+              use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
           
-          my $el =  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain->new($DOM_Obj);
+          my $el =  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain->new($DOM_Obj);
  
 =head1   METHODS
 
@@ -36,24 +36,26 @@ use perfSONAR_PS::Datatypes::Element qw(getElement);
 use perfSONAR_PS::Datatypes::Namespace;
 use perfSONAR_PS::Datatypes::NSMap;
 use Readonly;
-use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node;
+use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Comments;
+use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node;
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
-use fields qw(nsmap idmap refidmap id node comments );
+use fields qw(nsmap idmap refidmap id comments node  );
 
-perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain->mk_accessors(perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain->show_fields('Public'));
+perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain->mk_accessors(perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain->show_fields('Public'));
   
 =head2 new( )
    
       creates   object, accepts DOM with  element tree or hashref to the list of
       keyd parameters
          id   => undef, 
+         comments => HASH,
          node => ARRAY,
 
 =cut
 Readonly::Scalar our $COLUMN_SEPARATOR => ':';
-Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain';
+Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain';
 Readonly::Scalar our $LOCALNAME => 'domain';
             
 sub new { 
@@ -64,7 +66,7 @@ sub new {
     my $class = ref($that) || $that;
     my $self =  fields::new($class );
     $self->nsmap(perfSONAR_PS::Datatypes::NSMap->new()); 
-    $self->nsmap->mapname( $LOCALNAME, 'nmtb');
+    $self->nsmap->mapname( $LOCALNAME, 'pingertopo');
     
     if($param) {
         if(blessed $param && $param->can('getName')  && ($param->getName =~ m/$LOCALNAME$/xm) ) {
@@ -124,6 +126,10 @@ sub getDOM {
                                                ['id' =>  $self->id],
                                            ],
                          }); 
+   if($self->comments  && blessed $self->comments  && $self->comments->can("getDOM")) {
+        my  $commentsDOM = $self->comments->getDOM($domain);
+       $commentsDOM?$domain->appendChild($commentsDOM):$logger->error("Failed to append  comments  with value: " .  $commentsDOM->toString ); 
+   }
     if($self->node && ref($self->node) eq 'ARRAY' ) {
         foreach my $subel (@{$self->node}) { 
             if(blessed  $subel  &&  $subel->can("getDOM")) { 
@@ -132,14 +138,6 @@ sub getDOM {
             }
          }
     }
-   foreach my $textnode (qw/comments /) {
-       if($self->{$textnode}) { 
-            my  $domtext  =  getElement({name =>   $textnode, parent => $domain , ns => [$self->nsmap->mapname($LOCALNAME)],
-                                          text => $self->{$textnode},
-                                 });
-            $domtext?$domain->appendChild($domtext):$logger->error("Failed to append new text element $textnode  to  domain   ");
-        } 
-   } 
     return $domain;
 }
   
@@ -251,7 +249,7 @@ sub  querySQL {
     my $query = shift; ### undef at first and then will be hash ref
     my $logger  = get_logger( $CLASSPATH );
      
-    foreach my $subname (qw/node/) {
+    foreach my $subname (qw/comments node/) {
         if($self->{$subname} && (ref($self->{$subname}) eq 'ARRAY' ||  blessed $self->{$subname}))   {
             my @array = ref($self->{$subname}) eq 'ARRAY'?@{$self->{$subname}}:($self->{$subname});
         foreach my $el  (@array) {
@@ -334,7 +332,7 @@ sub  buildIdMap {
     my $self = shift;
     my $map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/node/) {
+    foreach my $field (qw/comments node/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -357,7 +355,7 @@ sub  buildRefIdMap {
     my $self = shift;
     my %map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/node/) {
+    foreach my $field (qw/comments node/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -398,7 +396,7 @@ sub registerNamespaces {
     }  else {
         %{$nsids} = ( %{$local_nss},  %{$nsids});
     }
-    foreach my $field (qw/node/) {
+    foreach my $field (qw/comments node/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         foreach my $el ( @array)  {
             if(blessed $el &&   $el->can("registerNamespaces") )  { 
@@ -432,19 +430,27 @@ sub fromDOM {
         unless($nsid && $tagname) {   
             next;
         }
-        if ($tagname eq  'node' && $nsid eq 'nmtb' && $self->can($tagname)) { 
+        if ($tagname eq  'comments' && $nsid eq 'nmtb' && $self->can($tagname)) { 
            my $element = undef;
            eval {
-               $element = perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->new($childnode) 
+               $element = perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Comments->new($childnode) 
+           };
+           if($EVAL_ERROR || !($element  && blessed $element)) {
+               $logger->error(" Failed to load and add  Comments : " . $dom->toString . " error: " . $EVAL_ERROR);
+               return;
+           }
+           $self->comments($element); ### add another comments  
+        }  elsif ($tagname eq  'node' && $nsid eq 'pingertopo' && $self->can($tagname)) { 
+           my $element = undef;
+           eval {
+               $element = perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node->new($childnode) 
            };
            if($EVAL_ERROR || !($element  && blessed $element)) {
                $logger->error(" Failed to load and add  Node : " . $dom->toString . " error: " . $EVAL_ERROR);
                return;
            }
            ($self->node && ref($self->node) eq 'ARRAY')?push @{$self->node}, $element:$self->node([$element]);; ### add another node  
-        }  elsif ($childnode->textContent && $self->can("$tagname")) { 
-           $self->{$tagname} =  $childnode->textContent; ## text node 
-        }       ###  $dom->removeChild($childnode); ##remove processed element from the current DOM so subclass can deal with remaining elements
+        }      ###  $dom->removeChild($childnode); ##remove processed element from the current DOM so subclass can deal with remaining elements
     }
   $self->buildIdMap;
  $self->buildRefIdMap;

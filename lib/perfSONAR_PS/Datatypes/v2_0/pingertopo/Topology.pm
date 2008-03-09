@@ -34,7 +34,7 @@ use perfSONAR_PS::Datatypes::Element qw(getElement);
 use perfSONAR_PS::Datatypes::Namespace;
 use perfSONAR_PS::Datatypes::NSMap;
 use Readonly;
-use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain;
+use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
@@ -418,10 +418,10 @@ sub fromDOM {
         unless($nsid && $tagname) {   
             next;
         }
-        if ($tagname eq  'domain' && $nsid eq 'nmtb' && $self->can($tagname)) { 
+        if ($tagname eq  'domain' && $nsid eq 'pingertopo' && $self->can($tagname)) { 
            my $element = undef;
            eval {
-               $element = perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain->new($childnode) 
+               $element = perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain->new($childnode) 
            };
            if($EVAL_ERROR || !($element  && blessed $element)) {
                $logger->error(" Failed to load and add  Domain : " . $dom->toString . " error: " . $EVAL_ERROR);

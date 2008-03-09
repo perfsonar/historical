@@ -1,11 +1,11 @@
-package  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node;
+package  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
 use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
- perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node  - A base class, implements  'node'  element from the perfSONAR_PS RelaxNG schema
+ perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node  - A base class, implements  'node'  element from the perfSONAR_PS RelaxNG schema
   
 =head1 DESCRIPTION
 
@@ -14,8 +14,8 @@ use version; our $VERSION = qv('v2.0');
     Scalar:     metadataIdRef, 
     Scalar:     id, 
     Object reference:   name => type HASH,
-    Object reference:   hostName => type ,
-    Object reference:   description => type ,
+    Object reference:   hostName => type HASH,
+    Object reference:   description => type HASH,
     Object reference:   location => type HASH,
     Object reference:   contact => type HASH,
     Object reference:   parameters => type HASH,
@@ -26,9 +26,9 @@ use version; our $VERSION = qv('v2.0');
     
 =head1 SYNOPSIS
 
-              use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node;
+              use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node;
           
-          my $el =  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->new($DOM_Obj);
+          my $el =  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node->new($DOM_Obj);
  
 =head1   METHODS
 
@@ -43,6 +43,8 @@ use perfSONAR_PS::Datatypes::Namespace;
 use perfSONAR_PS::Datatypes::NSMap;
 use Readonly;
 use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name;
+use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::HostName;
+use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Description;
 use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Location;
 use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Contact;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Topology::Domain::Node::Parameters;
@@ -50,9 +52,9 @@ use perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port;
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
-use fields qw(nsmap idmap refidmap metadataIdRef id name location contact parameters port hostName description );
+use fields qw(nsmap idmap refidmap metadataIdRef id name hostName description location contact parameters port  );
 
-perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->mk_accessors(perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->show_fields('Public'));
+perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node->mk_accessors(perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node->show_fields('Public'));
   
 =head2 new( )
    
@@ -61,6 +63,8 @@ perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->mk_accessors(perfSO
          metadataIdRef   => undef, 
          id   => undef, 
          name => HASH,
+         hostName => HASH,
+         description => HASH,
          location => HASH,
          contact => HASH,
          parameters => HASH,
@@ -68,7 +72,7 @@ perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node->mk_accessors(perfSO
 
 =cut
 Readonly::Scalar our $COLUMN_SEPARATOR => ':';
-Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node';
+Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node';
 Readonly::Scalar our $LOCALNAME => 'node';
             
 sub new { 
@@ -79,7 +83,7 @@ sub new {
     my $class = ref($that) || $that;
     my $self =  fields::new($class );
     $self->nsmap(perfSONAR_PS::Datatypes::NSMap->new()); 
-    $self->nsmap->mapname( $LOCALNAME, 'nmtb');
+    $self->nsmap->mapname( $LOCALNAME, 'pingertopo');
     
     if($param) {
         if(blessed $param && $param->can('getName')  && ($param->getName =~ m/$LOCALNAME$/xm) ) {
@@ -144,6 +148,14 @@ sub getDOM {
         my  $nameDOM = $self->name->getDOM($node);
        $nameDOM?$node->appendChild($nameDOM):$logger->error("Failed to append  name  with value: " .  $nameDOM->toString ); 
    }
+   if($self->hostName  && blessed $self->hostName  && $self->hostName->can("getDOM")) {
+        my  $hostNameDOM = $self->hostName->getDOM($node);
+       $hostNameDOM?$node->appendChild($hostNameDOM):$logger->error("Failed to append  hostName  with value: " .  $hostNameDOM->toString ); 
+   }
+   if($self->description  && blessed $self->description  && $self->description->can("getDOM")) {
+        my  $descriptionDOM = $self->description->getDOM($node);
+       $descriptionDOM?$node->appendChild($descriptionDOM):$logger->error("Failed to append  description  with value: " .  $descriptionDOM->toString ); 
+   }
    if($self->location  && blessed $self->location  && $self->location->can("getDOM")) {
         my  $locationDOM = $self->location->getDOM($node);
        $locationDOM?$node->appendChild($locationDOM):$logger->error("Failed to append  location  with value: " .  $locationDOM->toString ); 
@@ -160,14 +172,6 @@ sub getDOM {
         my  $portDOM = $self->port->getDOM($node);
        $portDOM?$node->appendChild($portDOM):$logger->error("Failed to append  port  with value: " .  $portDOM->toString ); 
    }
-   foreach my $textnode (qw/hostName description /) {
-       if($self->{$textnode}) { 
-            my  $domtext  =  getElement({name =>   $textnode, parent => $node , ns => [$self->nsmap->mapname($LOCALNAME)],
-                                          text => $self->{$textnode},
-                                 });
-            $domtext?$node->appendChild($domtext):$logger->error("Failed to append new text element $textnode  to  node   ");
-        } 
-   } 
     return $node;
 }
 
@@ -186,7 +190,7 @@ sub  querySQL {
     my $query = shift; ### undef at first and then will be hash ref
     my $logger  = get_logger( $CLASSPATH );
      
-    foreach my $subname (qw/name location contact parameters port/) {
+    foreach my $subname (qw/name hostName description location contact parameters port/) {
         if($self->{$subname} && (ref($self->{$subname}) eq 'ARRAY' ||  blessed $self->{$subname}))   {
             my @array = ref($self->{$subname}) eq 'ARRAY'?@{$self->{$subname}}:($self->{$subname});
         foreach my $el  (@array) {
@@ -269,7 +273,7 @@ sub  buildIdMap {
     my $self = shift;
     my $map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/name location contact parameters port/) {
+    foreach my $field (qw/name hostName description location contact parameters port/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -292,7 +296,7 @@ sub  buildRefIdMap {
     my $self = shift;
     my %map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/name location contact parameters port/) {
+    foreach my $field (qw/name hostName description location contact parameters port/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -333,7 +337,7 @@ sub registerNamespaces {
     }  else {
         %{$nsids} = ( %{$local_nss},  %{$nsids});
     }
-    foreach my $field (qw/name location contact parameters port/) {
+    foreach my $field (qw/name hostName description location contact parameters port/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         foreach my $el ( @array)  {
             if(blessed $el &&   $el->can("registerNamespaces") )  { 
@@ -379,6 +383,26 @@ sub fromDOM {
                return;
            }
            $self->name($element); ### add another name  
+        }  elsif ($tagname eq  'hostName' && $nsid eq 'nmtb' && $self->can($tagname)) { 
+           my $element = undef;
+           eval {
+               $element = perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::HostName->new($childnode) 
+           };
+           if($EVAL_ERROR || !($element  && blessed $element)) {
+               $logger->error(" Failed to load and add  HostName : " . $dom->toString . " error: " . $EVAL_ERROR);
+               return;
+           }
+           $self->hostName($element); ### add another hostName  
+        }  elsif ($tagname eq  'description' && $nsid eq 'nmtb' && $self->can($tagname)) { 
+           my $element = undef;
+           eval {
+               $element = perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Description->new($childnode) 
+           };
+           if($EVAL_ERROR || !($element  && blessed $element)) {
+               $logger->error(" Failed to load and add  Description : " . $dom->toString . " error: " . $EVAL_ERROR);
+               return;
+           }
+           $self->description($element); ### add another description  
         }  elsif ($tagname eq  'location' && $nsid eq 'nmtb' && $self->can($tagname)) { 
            my $element = undef;
            eval {
@@ -419,9 +443,7 @@ sub fromDOM {
                return;
            }
            $self->port($element); ### add another port  
-        }  elsif ($childnode->textContent && $self->can("$tagname")) { 
-           $self->{$tagname} =  $childnode->textContent; ## text node 
-        }       ###  $dom->removeChild($childnode); ##remove processed element from the current DOM so subclass can deal with remaining elements
+        }      ###  $dom->removeChild($childnode); ##remove processed element from the current DOM so subclass can deal with remaining elements
     }
   $self->buildIdMap;
  $self->buildRefIdMap;
