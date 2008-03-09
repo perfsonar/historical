@@ -5,8 +5,8 @@
 	xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/"
 	xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
-  <nmtb:domain id="urn:ogf:network:domain=slac.stanford.edu">
-    <nmtb:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
+  <pingertopo:domain id="urn:ogf:network:domain=slac.stanford.edu">
+    <pingertopo:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
       <nmtb:name type="string">pinger</nmtb:name>
       <nmtb:hostName>pinger.slac.stanford.edu</nmtb:hostName>
       <nmtb:description></nmtb:description>
@@ -21,10 +21,10 @@
       <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.18.163">
         <nmtl3:ipAddress type="IPv4">134.79.240.30</nmtl3:ipAddress>
       </nmtl3:port>
-    </nmtb:node>
-  </nmtb:domain>
-  <nmtb:domain id="urn:ogf:network:domain=fnal.gov">
-    <nmtb:node id="urn:ogf:network:domain=fnal.gov:node=pinger">
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=fnal.gov">
+    <pingertopo:node id="urn:ogf:network:domain=fnal.gov:node=pinger">
       <nmtb:name type="string">pinger</nmtb:name>
       <nmtb:hostName>pinger.fnal.gov</nmtb:hostName>
       <nmtb:description></nmtb:description>
@@ -39,10 +39,10 @@
       <nmtl3:port id="urn:ogf:network:domain=fnal.gov:node=pinger:node=www:port=131.225.110.18">
         <nmtl3:ipAddress type="IPv4">131.225.110.18</nmtl3:ipAddress>
       </nmtl3:port>
-    </nmtb:node>
-  </nmtb:domain>
-  <nmtb:domain id="urn:ogf:network:domain=cern.ch">
-    <nmtb:node id="urn:ogf:network:domain=cern.ch:node=www">
+    </pingertopo:node>
+  </pingertopo:domain>
+  <pingertopo:domain id="urn:ogf:network:domain=cern.ch">
+    <pingertopo:node id="urn:ogf:network:domain=cern.ch:node=www">
       <nmtb:name type="string">www</nmtb:name>
       <nmtb:hostName>www.cern.ch</nmtb:hostName>
       <nmtb:description></nmtb:description>
@@ -57,7 +57,7 @@
       <nmtl3:port id="urn:ogf:network:domain=cern.ch:node=www:port=137.138.137.177">
         <nmtl3:ipAddress type="IPv4">137.138.137.177</nmtl3:ipAddress>
       </nmtl3:port>
-    </nmtb:node>
-  </nmtb:domain>
+    </pingertopo:node>
+  </pingertopo:domain>
 
 </pingertopo:topology>
