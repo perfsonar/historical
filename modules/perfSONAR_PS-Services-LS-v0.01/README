@@ -10,6 +10,10 @@ services can register the data they contain.
 INSTALLATION
 ------------
 
+ Prerequisites
+ -----------------
+    Oracle DB XML (http://www.oracle.com/technology/products/berkeley-db/xml/index.html)
+
  CPAN installation
  -----------------
 
@@ -24,6 +28,6 @@ INSTALLATION
     make
     make install
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.

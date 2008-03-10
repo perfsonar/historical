@@ -10,6 +10,12 @@ protocols.
 
 Installation
 ------------
+  
+ Prerequisites
+ -----------------
+    The AMI Framework is required to use this service.  The framework must be
+    installed, configured, and collecting measurements for this service to deliver
+    that data that it is intended to offer.
 
  CPAN installation
  -----------------
