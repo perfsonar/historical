@@ -216,26 +216,32 @@ sub parse
 
 	# rtts
 	@results = &IEPM::PingER::Statistics::RTT::calculate( \@{$self->results()->{'rtts'}} );
-	$self->results()->{'minRtt'} = $results[0] if ! defined $self->results()->{'minRtt'};
-	$self->results()->{'meanRtt'} = $results[1] if ! defined $self->results()->{'meanRtt'};
-	$self->results()->{'maxRtt'} = $results[2] if ! defined $self->results()->{'maxRtt'};
-	$self->results()->{'medianRtt'} = $results[3] if ! defined $self->results()->{'medianRtt'};
+	$self->results()->{'minRtt'} = sprintf( "%0.3f", $results[0] )
+		if ! defined $self->results()->{'minRtt'};
+	$self->results()->{'meanRtt'} = sprintf( "%0.3f", $results[1] )
+		if ! defined $self->results()->{'meanRtt'};
+	$self->results()->{'maxRtt'} = sprintf( "%0.3f", $results[2] )
+		if ! defined $self->results()->{'maxRtt'};
+	$self->results()->{'medianRtt'} = sprintf( "%0.3f", $results[3] )
+		if ! defined $self->results()->{'medianRtt'};
 
 	# ipd
 	@results = ();
 	@results = &IEPM::PingER::Statistics::IPD::calculate( \@{$self->results()->{'rtts'}} );
 
-	$self->results()->{'minIpd'} = $results[0] || '0.0'; 	
-	$self->results()->{'meanIpd'} = $results[1] || '0.0'; 	
-	$self->results()->{'maxIpd'} = $results[2] || '0.0'; 	
-	$self->results()->{'iqrIpd'} = $results[3] || '0.0'; 	
+	$self->results()->{'minIpd'} = sprintf( "%0.3f", $results[0] || '0.0' ); 	
+	$self->results()->{'meanIpd'} = sprintf( "%0.3f", $results[1] || '0.0' ); 	
+	$self->results()->{'maxIpd'} = sprintf( "%0.3f", $results[2] || '0.0' ); 	
+	$self->results()->{'iqrIpd'} = sprintf( "%0.3f", $results[3] || '0.0' ); 	
 
 	# loss
-	$self->results()->{'lossPercent'} = &IEPM::PingER::Statistics::Loss::calculate( 
-				$self->results()->{'sent'}, $self->results()->{'recv'} ) || '0.0';
+	$self->results()->{'lossPercent'} = sprintf( "%0.3f", &IEPM::PingER::Statistics::Loss::calculate( 
+				$self->results()->{'sent'}, $self->results()->{'recv'} ) || '0.0' );
 
 	$self->results()->{'clp'} = &IEPM::PingER::Statistics::Loss::CLP::calculate( 
 				$self->results()->{'sent'}, $self->results()->{'recv'}, \@{$self->results()->{'seqs'}} );
+	$self->results()->{'clp'} = sprintf( "%0.3f",$self->results()->{'clp'} )
+		if defined $self->results()->{'clp'} && $self->results()->{'clp'} > 0;
 
 	# duplicates
 	@results = ();
@@ -243,6 +249,24 @@ sub parse
 			$self->results()->{'sent'}, $self->results()->{'recv'}, \@{$self->results()->{'seqs'}} );
 	$self->results()->{'duplicates'} = $results[0];
 	$self->results()->{'outOfOrder'} = $results[1];
+
+	# if loss is 100%, nothing is certain
+	# normalise data
+	if ( ! defined $self->results()->{'lossPercent'} 
+		|| $self->results()->{'lossPercent'} == 100 ) {
+		$self->results()->{'minRtt'} = undef;
+		$self->results()->{'maxRtt'} = undef;
+		$self->results()->{'meanRtt'} = undef;
+		$self->results()->{'minIpd'} = undef;
+		$self->results()->{'maxIpd'} = undef;
+		$self->results()->{'meanIpd'} = undef;
+		$self->results()->{'iqrIpd'} = undef;
+		$self->results()->{'medianRtt'} = undef;
+ 		$self->results()->{'duplicates'} = undef;
+		$self->results()->{'outOfOrder'} = undef;
+		$self->results()->{'rtts'} = undef;
+		$self->results()->{'seqs'} = undef;
+	}
 
 	$self->results()->{'startTime'} = $time;
 	$self->results()->{'endTime'} = $endtime;

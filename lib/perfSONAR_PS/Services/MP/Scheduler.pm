@@ -637,7 +637,7 @@ sub doTest
 		
 		# run the test
 		my $test = $self->config()->getTestById( $testid );
-		$logger->warn( "RUN TEST: " . Data::Dumper::Dumper $test );
+		$logger->debug( "RUN TEST: " . Data::Dumper::Dumper $test );
 		my $agent = $self->getAgent( $test );
 		
 		# collector will return -1 if error occurs

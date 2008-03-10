@@ -253,7 +253,8 @@ sub parse
 		};
 	
 		push( @rtts, $v->{'time'} );
-		push( @seqs, $v->{'icmp_seq'} );
+		push( @seqs, $v->{'icmp_seq'} )
+ 			if $v->{'icmp_seq'} =~ /^\d+$/;
 	        	
   		# next time stamp
      	$time = $time + eval($v->{'time'}/1000);

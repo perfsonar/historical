@@ -142,7 +142,10 @@ sub init
 	
        # set up the schedule with the list of tests
 	$self->addTestSchedule( $config );
-		
+	
+	# set max children for parent class
+	$self->{MAXCHILDREN} = $self->getConf( 'max_worker_processes');
+	
 	# do not add any handlers as we do not want to support on-demand
 	# tests yet.
 	#$handler->addMessageHandler("SetupDataRequest", "", $self);
@@ -375,16 +378,6 @@ sub setupDatabase
 	return 0;
 }
 
-=head2 maxChildren( $number )
-
-accessor/mutator for the number of max child threads/processes
-
-=cut
-sub maxChildren
-{
-	my $self = shift;
-	return $self->getConf( 'max_worker_processes' );
-}
 
 =head2 storeData( $agent, $testid )
 
@@ -458,18 +451,18 @@ sub storeData
 					'timestamp' => $agent->results()->{'startTime'},
 					
 					# rtt
-					'minRtt'	=> sprintf( "%0.3f", $agent->results()->{'minRtt'} ),
-					'maxRtt'	=> sprintf( "%0.3f", $agent->results()->{'maxRtt'} ),
-					'meanRtt'	=> sprintf( "%0.3f", $agent->results()->{'meanRtt'} ),
+					'minRtt'	=> $agent->results()->{'minRtt'},
+					'maxRtt'	=> $agent->results()->{'maxRtt'},
+					'meanRtt'	=> $agent->results()->{'meanRtt'},
 					
 					# ipd
-					'minIpd'	=> sprintf( "%0.3f", $agent->results()->{'minIpd'} ),
-					'meanIpd'	=> sprintf( "%0.3f", $agent->results()->{'meanIpd'} ),
-					'maxIpd'	=> sprintf( "%0.3f", $agent->results()->{'maxIpd'} ),
+					'minIpd'	=> $agent->results()->{'minIpd'},
+					'meanIpd'	=> $agent->results()->{'meanIpd'},
+					'maxIpd'	=> $agent->results()->{'maxIpd'},
 					
 					# jitter
-					'iqrIpd'	=> sprintf( "%0.3f", $agent->results()->{'iqrIpd'} ),
-					'medianRtt' => sprintf( "%0.3f", $agent->results()->{'medianRtt'} ),
+					'iqrIpd'	=> $agent->results()->{'iqrIpd'},
+					'medianRtt' => $agent->results()->{'medianRtt'},
 					
 					# other
 					'duplicates' => $agent->results()->{'duplicates'},
