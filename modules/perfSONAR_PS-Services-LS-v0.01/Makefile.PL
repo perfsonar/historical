@@ -10,7 +10,7 @@ WriteMakefile(
         "Error" => 0,
         "Exporter" => 0,
         "fields" => 0,
-        "IO::File" => 1.23,
+        "IO::File" => 1.00,
         "Log::Log4perl" => 1.00,
         "Log::Dispatch::Screen" => 1.00,
         "Log::Dispatch::FileRotate" => 1.00,
@@ -23,7 +23,7 @@ WriteMakefile(
 	"perfSONAR_PS::Messages" => 0.08,
 	"perfSONAR_PS::Services::Base" => 0.08,
 	"perfSONAR_PS::Services::MA::General" => 0.08,
-        "XML::LibXML" => 1.60,
+        "XML::LibXML" => 1.58,
         "strict" => 0,
 	"Time::HiRes" => 1.85,
         "warnings" => 0
