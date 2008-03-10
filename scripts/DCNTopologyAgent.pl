@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 # 1. obtain the xml file from the IDC
 # 2. grab the 'last updated' time for the domain from the topology server
 # 3. if the last updated time is < the time in the xml file from the IDC, update the server
@@ -25,9 +27,9 @@ $status = GetOptions (
         'help' => \$HELP,
         );
 
-if (not $status) {
+if (not $status or $HELP) {
     print "$0: starts the DCN topology agent\n";
-    print "\t$0 [--verbose --help --config=config.file --logger=logger/filename.conf]\n";
+    print "\t$0 [--verbose --help --config=config.file --logger=logger/filename.conf --new_topology=topology_file.xml]\n";
     exit(1);
 }
 
@@ -96,6 +98,7 @@ exit (-1);
 
 package perfSONAR_PS::Client::DCN::TopologyAgent;
 
+use lib "lib";
 use lib "../lib";
 
 use XML::LibXML;
@@ -138,7 +141,7 @@ sub new {
                 LS_INSTANCE => $ls_uri,
                 SERVICE_TYPE => "TS",
                 SERVICE_ACCESSPOINT => $args->{topology_uri},
-                  );
+                );
         push @ls_clients, perfSONAR_PS::Client::LS::Remote->new($args->{ls_uri}, \%ls_conf);
     }
     $self->{LS_CLIENTS} = \@ls_clients;
@@ -184,8 +187,6 @@ sub getLocalTopology {
 
     my $domain = $res;
     my $time = $res2;
-
-    $self->{LOGGER}->info("IDC Domain: ".$domain->toString);
 
     if ($domain->getAttribute("id") ne $self->{DOMAINID}) {
         my $msg = "ID of domain returned by IDC does not match our own: ".$domain->getAttribute("id")." vs ".$self->{DOMAINID};
@@ -264,6 +265,13 @@ sub retrieveIDCDomain {
     }
 
     my $timeValue = findvalue($dom->getDocumentElement, "//*[local-name()='topology']/*[local-name()='lifetime']/*[local-name()='start']");
+    if (not $timeValue) {
+        my $topo_id = findvalue($dom->getDocumentElement, "//*[local-name()='topology']/\@id");
+        if ($topo_id and $topo_id =~ /(.*)-(\d+)/) {
+            $timeValue = $2;
+        }
+    }
+
     if (not $timeValue) {
         my $msg = "No time defined";
         $self->{LOGGER}->error($msg);
@@ -383,6 +391,12 @@ sub updateDomainIfNewer {
         $existing_time = $res;
     }
 
+    if (not $existing_time) {
+        $self->{LOGGER}->info("No existing time, updating any copies in there");
+    } else {
+        $self->{LOGGER}->info("Existing time: $existing_time");
+    }
+
     if (not $existing_time or $existing_time < $new_time) {
         $self->{LOGGER}->info("Updating local cache for topology information from $domain_id");
 
@@ -466,7 +480,7 @@ sub findNeighbors {
         }
 
         if ($id =~ /domain=([^:]+):/) {
-            if (not defined $neighbors->{$1} and $self->{DOMAIN} ne $1) {
+            if (not defined $neighbors->{$1} and $self->{DOMAIN} ne $1 and $1 ne "*") {
                 $neighbors->{$1} = 1;
             }
         }
@@ -478,3 +492,5 @@ sub findNeighbors {
 
     return;
 }
+
+# vim: expandtab shiftwidth=4 tabstop=4

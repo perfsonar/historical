@@ -703,21 +703,32 @@ sub reMap {
                 }
             }
         }
-    } elsif ((not defined $node->prefix or $node->prefix eq "") and defined $node->namespaceURI()) {
+    } elsif ($node->namespaceURI()) {
         if (defined $requestNamespaces->{$node->namespaceURI()}) {
+            $logger->debug("Setting namespace \"".$node->namespaceURI()."\" with prefix \"".$requestNamespaces->{$node->namespaceURI()}."\".");
             $node->setNamespace($node->namespaceURI(), $requestNamespaces->{$node->namespaceURI()}, 1);
         } else {
+            my $new_prefix;
             foreach my $ns (keys %{$namespaces}) {
                 if($namespaces->{$ns} eq $node->namespaceURI()) {
-                    $node->setNamespace($namespaces->{$ns}, $ns, 1);
-                    if ($set_owner_prefix) {
-                        $node->ownerDocument->getDocumentElement->setNamespace($namespaces->{$ns}, $ns, 0);
-                    }
-                    $logger->debug("Re-mapping namespace \"".$namespaces->{$ns}."\" to prefix \"".$ns."\".");
-                    $requestNamespaces->{$node->namespaceURI()} = $ns;
+                    $new_prefix = $ns;
                     last;
                 }
             }
+
+            if (not $new_prefix) {
+                $logger->debug("No prefix for namespace ".$node->namespaceURI().": generating one");
+                do {
+                    $new_prefix = "pref".(genuid()%1000);
+                } while (defined $namespaces->{$new_prefix});
+            }
+
+            $node->setNamespace($node->namespaceURI(), $new_prefix, 1);
+            if ($set_owner_prefix) {
+                $node->ownerDocument->getDocumentElement->setNamespace($node->namespaceURI(), $new_prefix, 0);
+            }
+            $logger->debug("Re-mapping namespace \"".$node->namespaceURI()."\" to prefix \"".$new_prefix."\".");
+            $requestNamespaces->{$node->namespaceURI()} = $new_prefix;
         }
     }
     if($node->hasChildNodes()) {

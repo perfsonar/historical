@@ -99,12 +99,15 @@ sub buildChangeTopologyRequest {
 
     my $request = "";
 
-    $request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-    $request .= "<nmwg:metadata id=\"meta0\">\n";
-    $request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+	$request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+	$request .= "<nmwg:metadata id=\"meta0\">\n";
+	$request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
     $request .= "</nmwg:metadata>\n";
     $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
-    $request .= $topology->toString;
+    my $elm = $topology->cloneNode(1);
+    $elm->unbindNode();
+
+    $request .= $elm->toString;
     $request .= "</nmwg:data>\n";
     $request .= "</nmwg:message>\n";
 
