@@ -428,7 +428,7 @@ sub storeData
 	# store results
 	my $src = $self->database()->soi_host( $agent->source(), $agent->sourceIp() );
 	unless($src) {
-	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->source() . "  " . $agent->sourceIp() );
+	    $logger->error(  "Failed to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() );
 	    return -1;
 	}	 
 		
@@ -448,7 +448,7 @@ sub storeData
 				});
 	 
 	  unless($md) {
-	    $logger->error(  "Failed to find or insert  soi_metadata:  ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl());
+	    $logger->error(  "Failed to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl());
 	    return -1;
 	}	   
 	
@@ -484,9 +484,9 @@ sub storeData
 					'seqs'	=> $seqs,
 					
 				});
-	unless($data){
+	if($data == -1 ){
 	   
-	   $logger->error(  "Failed to find or insert  soi_data:  " . $agent->results()->{'startTime'} . "  " .  $agent->results()->{'meanRtt'}  );
+	   $logger->error(  "Failed to find or insert soi_data: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'}  );
 	    return -1;
 	 
 	}

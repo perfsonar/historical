@@ -534,6 +534,9 @@ sub get_rose_objects_for_timestamp
 
 			if ( defined $createNewTables 
 					&& $createNewTables ) {
+						
+				# we need to always try to create the table as it's the only
+				# way to determine if the table exists agnostically
 				eval {
 					my $dataTable = $object->new();
 					$logger->debug( "creating new data table $table");
@@ -541,9 +544,9 @@ sub get_rose_objects_for_timestamp
 					$dataTable->dbh->do( "CREATE TABLE $table AS SELECT * FROM data" );	
 					undef $dataTable;		
 				};
-				if ( $@ ) {
-					$logger->debug( "table $table already exists");
-				}
+				#if ( $@ ) {
+				#	$logger->debug( "table $table already exists");
+				#}
 			}
 		}
 	}

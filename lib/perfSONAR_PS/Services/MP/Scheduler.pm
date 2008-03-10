@@ -41,7 +41,7 @@ use base 'perfSONAR_PS::Services::Base';
 
 use version; our $VERSION = qv('2.0_0'); 
 
-use fields qw( SCHEDULE METADATA );
+use fields qw( SCHEDULE METADATA MAXCHILDREN );
 
 use Time::HiRes qw ( &gettimeofday );
 use POSIX;
@@ -74,6 +74,7 @@ sub new {
 	my $self = $package->SUPER::new( @_ );
 	$self->{SCHEDULE} = {};
 	$self->{METADATA} = {};
+	$self->{MAXCHILDREN} = 2;
 
 	return $self;
 }
@@ -254,7 +255,7 @@ sub getNowTime
 }
 
 
-=head2 popNextTest()
+=head2 shiftNextTest()
 
 removes the next test from the schedule
 
@@ -262,7 +263,7 @@ Returns ( $time, $testid ) for the time in epoch seconds $time when test with
 id $testid should be started. If there is no test defined, returns (undef,undef)
 
 =cut
-sub popNextTest
+sub shiftNextTest
 {
 	my $self = shift;
 	my ( $time, $testid ) = $self->peekNextTest();
@@ -270,11 +271,13 @@ sub popNextTest
 	if ( defined $time ) {
 		# may be an array	
 		my $array = $self->schedule()->{$time};
-		my $test = pop @$array;
+		my $test = shift @$array;
 
+		# put it back if we still have entries for same time
 		if ( scalar @$array ) {
 			$self->schedule()->{$time} = $array;
 		}
+		# or clear it if empty
 		else {
 			delete $self->schedule()->{$time};
 		}	
@@ -301,7 +304,7 @@ sub peekNextTest
 
 		my $time = $times[0];
 		my $test = $self->schedule()->{$time}->[0];
-		my ( $testid, @tmp ) = keys %$test;
+		my ( $testid, @tmp ) = keys %$test; #FIXME
 	
 		return ( $time, $testid );
 
@@ -337,7 +340,7 @@ accessor/mutator for the number of max child threads/processes
 sub maxChildren
 {
 	my $self = shift;
-	return 2;
+	return $self->{MAXCHILDREN};
 }
 
 
@@ -358,12 +361,14 @@ sub REAPER {
     my $pid = undef;
     while( ( $pid = waitpid( -1, &WNOHANG) ) > 0 ) 
     {
- 		$CHILDREN_OCCUPIED--;
-		$logger->debug( "Child thread $pid died (left " . $CHILDREN_OCCUPIED . ")" );
 		my %map = reverse %CHILD;
    	 	my $child = $map{$pid};
 			
 		delete $CHILD{$child} if defined $child && $CHILD{$child};
+		
+		$CHILDREN_OCCUPIED = keys %CHILD;
+		$logger->debug( "Child thread $pid died (left " . $CHILDREN_OCCUPIED . ")" );
+
     }
     return;
 }
@@ -371,7 +376,7 @@ sub REAPER {
 
 =head2 run()
 
-Forks off a new instance that will act as a manager class for the scheduling
+Forks off a new instance that will act as a manager/boss class for the scheduling
 and forking off of new measurements.
 
 =cut
@@ -411,7 +416,6 @@ sub run
 		# setup handler to exit children
 		$SIG{INT} = sub { 
 						  my $logger = get_logger( CLASS );
-						  #$logger->fatal( "SOMETHING");
 						  foreach my $pid ( keys %CHILD ){
 							#$logger->fatal( "killing $pid ");
 							kill( "TERM", -$$ );
@@ -457,14 +461,18 @@ sub __run
 	
 			if ( defined $testid )
 			{
+				my $sigset = $self->blockInterrupts('while');
+				
 				# actually do the test!
 				my $now = &getNowTime();
-				( $testTime, $testid ) = $self->popNextTest();
+				( $testTime, $testid ) = $self->shiftNextTest();
 				
 				# determine when to run the next iteration of this test
 				my $delta = $self->config()->getTestNextTimeFromNowById( $testid );
 				$logger->debug( "testid '" . $testid . "' will run again in $delta seconds");
 				$self->addNextTest( $now + $delta, $testid );
+				
+				$self->unblockInterrupts( $sigset, 'while');
 				
 				# determine the test details and run it
 				$self->doTest( $i, $testid );
@@ -475,14 +483,60 @@ sub __run
 			}
 		}
 	
+		my $sigset = $self->blockInterrupts('while-check');
+		
 		if ( ! $badExit ) {
 			$i++;
 			$i -= $self->maxChildren() if( $i >= $self->maxChildren() );
 		}
 
+		$self->unblockInterrupts($sigset, 'while-check');
+
 	}
 	return;
 }
+
+
+=head2 blockInterrupts
+
+block signal interruption
+
+=cut
+sub blockInterrupts
+{
+	my $self = shift;
+        my $str = shift;
+        # need to block interrupts in case we are still loading etc.
+        my $sigset   = POSIX::SigSet->new; 
+        my $blockset = POSIX::SigSet->new( SIGCHLD, SIGHUP, SIGUSR1, SIGUSR2, SIGINT );
+
+        #$logger->debug( "BLOCKING INTERRUPTS for $str");
+
+        sigprocmask(SIG_BLOCK, $blockset, $sigset) 
+            or $logger->logdie( "Could not block interrupt signals: $!" );      
+        
+        return $sigset;
+}
+=head2 unblockInterrupts
+
+allow interrupts to do as they did
+
+=cut
+sub unblockInterrupts
+{
+	my $self = shift;
+        my $sigset = shift;
+        my $str = shift;
+        return 1 if ! defined $sigset;
+        
+        #$logger->debug( "DONE BLOCKING INTERRUPTS for $str");
+        
+        sigprocmask(SIG_SETMASK, $sigset)
+            or $logger->logdie( "Could not restore interrupt signals: $!" );
+        return 1;
+}
+
+
 
 =head2 waitForNextTest( )
 
@@ -495,12 +549,14 @@ sub waitForNextTest
 {
 	my $self = shift;
 
-	#my $logger = get_logger( CLASS );
+	my $sigset = $self->blockInterrupts('wait');
 
 	my ( $time, $testid ) = $self->peekNextTest();
 	my $now = &getNowTime();
 	my $wait = $time - $now;
 	$logger->debug( "Waiting $wait seconds for the next test at " . $time );
+
+	$self->unblockInterrupts($sigset, 'wait');
 
 	# wait some time for a signal
 	if ( $wait > 0.0 ) {
@@ -559,12 +615,16 @@ sub doTest
     {
         # Parent records the child's birth and returns.
         sigprocmask(SIG_UNBLOCK, $sigset)
-            or die "Can't unblock SIGINT for fork: $!\n";
+            or $logger->logdie( "Can't unblock SIGINT for fork: $!\n" );
 
         # keep state for the parent to keep count of children etc.
+		my $sigset = $self->blockInterrupts('fork');
+		
         $CHILD{$forkedProcessNumber} = $pid;
         $CHILDREN_OCCUPIED++;
         
+		$self->unblockInterrupts($sigset,'fork');
+
         return;
     }
     else 
@@ -577,6 +637,7 @@ sub doTest
 		
 		# run the test
 		my $test = $self->config()->getTestById( $testid );
+		$logger->warn( "RUN TEST: " . Data::Dumper::Dumper $test );
 		my $agent = $self->getAgent( $test );
 		
 		# collector will return -1 if error occurs
