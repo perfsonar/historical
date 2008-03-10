@@ -235,7 +235,7 @@ sub buildLSMetadata {
     $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/replace/20070809</nmwg:eventType>\n";
     $md .= "</nmwg:metadata>\n";
 
-    return;
+    return ($md, $md_id);
 }
 
 =head2 handleEvent

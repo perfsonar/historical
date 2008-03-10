@@ -15,7 +15,7 @@ WriteMakefile(
 	"Log::Log4perl" => 1.00,
 	"Time::HiRes" => 1.85,
 	"IO::File" => 0,
-	"XML::LibXML" => 1.60,
+	"XML::LibXML" => 1.58,
 	"LWP::UserAgent" => 2.032,
 	"Params::Validate" => 0.70,
 	"Data::Compare" => 0.09,

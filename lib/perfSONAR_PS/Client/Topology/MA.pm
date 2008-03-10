@@ -139,15 +139,21 @@ sub xQuery {
 
     my $topo_msg = $res;
 
-    foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
-        foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
+    my $data_elms = find($topo_msg, './*[local-name()="data"]', 0);
+    if ($data_elms) {
+    foreach my $data ($data_elms->get_nodelist) {
+        my $metadata_elms = find($topo_msg, './*[local-name()="metadata"]', 0);
+        if ($metadata_elms) {
+        foreach my $metadata ($metadata_elms->get_nodelist) {
             if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
-                my $topology = find($data, './nmtopo:topology', 1);
+                my $topology = find($data, './*[local-name()="topology"]', 1);
                 if (defined $topology) {
                     return (0, $topology->toString);
                 } 
             }
         }
+        }
+    }
     }
 
     my $msg = "Response does not contain a topology";
@@ -180,8 +186,13 @@ sub getAll {
 
     my $topo_msg = $res;
 
-    foreach my $data ($topo_msg->getChildrenByTagNameNS("*", "data")) {
-        foreach my $metadata ($topo_msg->getChildrenByTagNameNS("*", "metadata")) {
+    my $data_elms = find($topo_msg, './*[local-name()="data"]', 0);
+    if ($data_elms) {
+    foreach my $data ($data_elms->get_nodelist) {
+
+        my $metadata_elms = find($topo_msg, './*[local-name()="metadata"]', 0);
+        if ($metadata_elms) {
+        foreach my $metadata ($metadata_elms->get_nodelist) {
             if ($data->getAttribute("metadataIdRef") eq $metadata->getAttribute("id")) {
                 my $topology = find($data, './nmtopo:topology', 1);
                 if (defined $topology) {
@@ -189,6 +200,8 @@ sub getAll {
                 } 
             }
         }
+	}
+    }
     }
 
     my $msg = "Response does not contain a topology";

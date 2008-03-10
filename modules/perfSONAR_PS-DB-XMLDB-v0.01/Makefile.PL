@@ -13,6 +13,6 @@ WriteMakefile(
 	"Sleepycat::DbXml" => 2.00,
         "strict" => 0,
         "warnings" => 0,
-	"XML::LibXML" => 1.60,
+	"XML::LibXML" => 1.58,
     }
 );

@@ -32,7 +32,7 @@ WriteMakefile(
 	"Sys::Hostname" => 0,
 	"Time::HiRes" => 1.85,
         "warnings" => 0,
-	"XML::LibXML" => 1.60,
+	"XML::LibXML" => 1.58,
     },
 
     EXE_FILES => \@exe_files,

@@ -1,11 +1,14 @@
 use ExtUtils::MakeMaker;
 
+my @exe_files = ( "psCreateStatusDB" );
+
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Services::MA::Status',
     'VERSION_FROM' => 'lib/perfSONAR_PS/Services/MA/Status.pm',
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
 	"base" => 0,
+	"DBI" => 0,
 	"fields" => 0,
 	"Log::Log4perl" => 1.00,
 	"Params::Validate" => 0.64,
@@ -18,5 +21,7 @@ WriteMakefile(
         "perfSONAR_PS::Topology::ID" => 0.08,
         "strict" => 0,
         "warnings" => 0,
-    }
+    },
+
+    EXE_FILES => \@exe_files,
 );

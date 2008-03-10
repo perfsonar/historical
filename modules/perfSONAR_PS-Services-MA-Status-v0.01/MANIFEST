@@ -6,3 +6,4 @@ Makefile.PL
 README
 lib/perfSONAR_PS/Services/MA/Status.pm
 perl-perfSONAR_PS-Services-MA-Status.spec
+psCreateStatusDB

@@ -25,7 +25,7 @@ WriteMakefile(
 	"perfSONAR_PS::Topology::ID" => 0.08,
         "strict" => 0,
         "warnings" => 0,
-	"XML::LibXML" => 1.60,
+	"XML::LibXML" => 1.58,
     },
 
     EXE_FILES => \@exe_files,

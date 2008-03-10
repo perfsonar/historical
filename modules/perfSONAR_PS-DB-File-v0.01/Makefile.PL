@@ -14,6 +14,6 @@ WriteMakefile(
         "strict" => 0,
 	"Test::More" => 0,
         "warnings" => 0,
-	"XML::LibXML" => 1.60,
+	"XML::LibXML" => 1.58,
     }
 );
