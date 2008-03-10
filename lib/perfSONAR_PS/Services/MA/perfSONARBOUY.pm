@@ -45,9 +45,9 @@ use Sys::Hostname;
 use Fcntl ':flock';
 use Date::Manip;
 use Math::BigInt;
-use OWP;
-use OWP::Utils;
 
+use perfSONAR_PS::OWP;
+use perfSONAR_PS::OWP::Utils;
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
@@ -305,7 +305,7 @@ sub createStorage {
         DBHOST  => hostname(),
         CONFDIR => $self->{CONF}->{"perfsonarbouy"}->{"owmesh"}
     );
-    my $conf = new OWP::Conf(%defaults);
+    my $conf = new perfSONAR_PS::OWP::Conf(%defaults);
 
     my $dbsource = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
 
@@ -1685,10 +1685,11 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::BigInt>, L<OWP>, L<OWP::Utils>, L<perfSONAR_PS::Services::MA::General>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>
+L<Math::BigInt>, L<perfSONAR_PS::OWP>, L<perfSONAR_PS::OWP::Utils>,
+L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::DB::File>,
+L<perfSONAR_PS::DB::SQL>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
