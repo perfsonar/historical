@@ -1,210 +1,337 @@
-#
-#      $Id$
-#
-#########################################################################
-#									#
-#			   Copyright (C)  2002				#
-#	     			Internet2				#
-#			   All Rights Reserved				#
-#									#
-#########################################################################
-#
-#	File:		OWP::Utils.pm
-#
-#	Author:		Anatoly Karp
-#			Jeff Boote
-#			Internet2
-#
-#	Date:		Wed Oct 2 10:40:10  2002
-#
-#	Description: Auxiliary subs for large time conversions.
-package OWP::Utils;
+package perfSONAR_PS::OWP::Utils;
+
 require 5.005;
 require Exporter;
 use strict;
+use warnings;
+
 use vars qw(@ISA @EXPORT $VERSION);
+
+our $VERSION = 0.08;
+
+=head1 NAME
+
+perfSONAR_PS::OWP::Utils
+
+=head1 DESCRIPTION
+
+Auxiliary subs for large time conversions.
+
+=cut
+
 use Math::BigInt;
 use Math::BigFloat;
 use POSIX;
 
-@ISA = qw(Exporter);
+@ISA    = qw(Exporter);
 @EXPORT = qw(time2owptime owptimeadd owpgmtime owptimegm owpgmstring owplocaltime owplocalstring owptrange owptime2time owptstampi owpi2owp owptstampdnum pldatetime owptstamppldatetime owptime2exacttime owpexactgmstring);
 
-$Utils::REVISION = '$Id$';
-$VERSION = $Utils::VERSION='1.0';
+#$Utils::REVISION = '$Id$';
+#$VERSION = $Utils::VERSION='1.0';
 
-use constant JAN_1970 => 0x83aa7e80; # offset in seconds
+use constant JAN_1970 => 0x83aa7e80;    # offset in seconds
 my $scale = new Math::BigInt 2**32;
 
-# Convert value return by time() into owamp-style (ASCII form
-# of the unsigned 64-bit integer [32.32]
+=head2 time2owptime()
+
+Convert value return by time() into owamp-style (ASCII form
+of the unsigned 64-bit integer [32.32]
+
+=cut
+
 sub time2owptime {
     my $bigtime = new Math::BigInt $_[0];
-    $bigtime = ($bigtime + JAN_1970) * $scale;
+    $bigtime = ( $bigtime + JAN_1970 ) * $scale;
     $bigtime =~ s/^\+//;
     return $bigtime;
 }
 
-sub owptime2time{
-	my $bigtime = new Math::BigInt $_[0];
-	$bigtime /= $scale;
-	return $bigtime - JAN_1970;
+=head2 owptime2time()
+
+TDB
+
+=cut
+
+sub owptime2time {
+    my $bigtime = new Math::BigInt $_[0];
+    $bigtime /= $scale;
+    return $bigtime - JAN_1970;
 }
 
-#
-# Add a number of seconds to an owamp-style number.
-#
-sub owptimeadd{
-	my $bigtime = new Math::BigInt shift;
+=head2 owptimeadd()
 
-	while($_ = shift){
-		my $add = new Math::BigInt $_;
-		$bigtime += ($add * $scale);
-	}
+Add a number of seconds to an owamp-style number.
 
-	$bigtime =~ s/^\+//;
-	return $bigtime;
+=cut
+
+sub owptimeadd {
+    my $bigtime = new Math::BigInt shift;
+
+    while ( $_ = shift ) {
+        my $add = new Math::BigInt $_;
+        $bigtime += ( $add * $scale );
+    }
+
+    $bigtime =~ s/^\+//;
+    return $bigtime;
 }
 
-sub owptstampi{
-	my $bigtime = new Math::BigInt shift;
-	return $bigtime>>32;
+=head2 owptstampi()
+
+TDB
+
+=cut
+
+sub owptstampi {
+    my $bigtime = new Math::BigInt shift;
+    return $bigtime >> 32;
 }
 
-sub owpi2owp{
-	my $bigtime = new Math::BigInt shift;
+=head2 owpi2owp()
 
-	return $bigtime<<32;
+TDB
+
+=cut
+
+sub owpi2owp {
+    my $bigtime = new Math::BigInt shift;
+
+    return $bigtime << 32;
 }
 
-sub owpgmtime{
-	my $bigtime = new Math::BigInt shift;
+=head2 owpgmtime()
 
-	my $unixsecs = ($bigtime/$scale) - JAN_1970;
+TDB
 
-	return gmtime($unixsecs);
+=cut
+
+sub owpgmtime {
+    my $bigtime = new Math::BigInt shift;
+
+    my $unixsecs = ( $bigtime / $scale ) - JAN_1970;
+
+    return gmtime($unixsecs);
 }
 
-sub owptimegm{
-	$ENV{'TZ'} = 'UTC 0';
-	POSIX::tzset();
-	my $unixstamp = POSIX::mktime(@_) || return undef;
+=head2 owptimegm()
 
-	return time2owptime($unixstamp);
+TDB
+
+=cut
+
+sub owptimegm {
+    $ENV{'TZ'} = 'UTC 0';
+    POSIX::tzset();
+    my $unixstamp = POSIX::mktime(@_) || return;
+
+    return time2owptime($unixstamp);
 }
 
-sub pldatetime{
-	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$frac) = @_;
+=head2 pldatetime()
 
-	$frac = 0 if(!defined($frac));
+TDB
 
-	return sprintf "%04d-%02d-%02d.%02d:%02d:%06.3f",
-			$year+1900,$mon+1,$mday,$hour,$min,$sec+$frac;
+=cut
+
+sub pldatetime {
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $frac ) = @_;
+
+    $frac = 0 if ( !defined($frac) );
+
+    return sprintf "%04d-%02d-%02d.%02d:%02d:%06.3f", $year + 1900, $mon + 1, $mday, $hour, $min, $sec + $frac;
 }
 
-sub owptstamppldatetime{
-	my($tstamp) = new Math::BigInt shift;
-	my($frac) = new Math::BigFloat($tstamp);
-	# move fractional part to the right of the radix point.
-	$frac /= $scale;
-	# Now subtract away the integer portion
-	$frac -= ($tstamp/$scale);
-	return pldatetime((OWP::Utils::owpgmtime($tstamp))[0..7],$frac);
+=head2 owptstamppldatetime()
+
+TDB
+
+=cut
+
+sub owptstamppldatetime {
+    my ($tstamp) = new Math::BigInt shift;
+    my ($frac)   = new Math::BigFloat($tstamp);
+
+    # move fractional part to the right of the radix point.
+    $frac /= $scale;
+
+    # Now subtract away the integer portion
+    $frac -= ( $tstamp / $scale );
+    return pldatetime( ( perfSONAR_PS::OWP::Utils::owpgmtime($tstamp) )[ 0 .. 7 ], $frac );
 }
 
+=head2 owptstampdnum()
 
+TDB
 
-sub owptstampdnum{
-	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
-		OWP::Utils::owpgmtime(shift);
-	return sprintf "%04d%02d%02d",$year+1900,$mon+1,$mday;
+=cut
+
+sub owptstampdnum {
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday ) = perfSONAR_PS::OWP::Utils::owpgmtime(shift);
+    return sprintf "%04d%02d%02d", $year + 1900, $mon + 1, $mday;
 }
 
 my @dnames = qw(Sun Mon Tue Wed Thu Fri Sat);
 my @mnames = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
+=head2 owpgmstring()
 
-sub owpgmstring{
-	my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
-		OWP::Utils::owpgmtime(shift);
-	$year += 1900;
-	return sprintf "$dnames[$wday] $mnames[$mon] $mday %02d:%02d:%02d UTC $year", $hour,$min,$sec;
+TDB
+
+=cut
+
+sub owpgmstring {
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday ) = perfSONAR_PS::OWP::Utils::owpgmtime(shift);
+    $year += 1900;
+    return sprintf "$dnames[$wday] $mnames[$mon] $mday %02d:%02d:%02d UTC $year", $hour, $min, $sec;
 }
 
-sub owplocalstring{
-	my $bigtime = new Math::BigInt shift;
+=head2 owplocalstring()
 
-	my $unixsecs = ($bigtime/$scale) - JAN_1970;
+TDB
 
-        return strftime "%a %b %e %H:%M:%S %Z", localtime;
+=cut
+
+sub owplocalstring {
+    my $bigtime = new Math::BigInt shift;
+
+    my $unixsecs = ( $bigtime / $scale ) - JAN_1970;
+
+    return strftime "%a %b %e %H:%M:%S %Z", localtime;
 }
 
-sub owplocaltime{
-	my $bigtime = new Math::BigInt shift;
+=head2 owplocaltime()
 
-	my $unixsecs = ($bigtime/$scale) - JAN_1970;
+TDB
 
-	return localtime($unixsecs);
+=cut
+
+sub owplocaltime {
+    my $bigtime = new Math::BigInt shift;
+
+    my $unixsecs = ( $bigtime / $scale ) - JAN_1970;
+
+    return localtime($unixsecs);
 }
 
+=head2 owptrange()
 
-sub owptrange{
-	my ($tstamp,$fref,$lref,$dur) = @_;
+TDB
 
-	my ($first, $last);
+=cut
 
-	$dur = 900 if(!defined($dur));
+sub owptrange {
+    my ( $tstamp, $fref, $lref, $dur ) = @_;
 
-	undef $$fref;
-	undef $$lref;
+    my ( $first, $last );
 
-	if($$tstamp){
-		if($$tstamp =~ /^now$/oi){
-			undef $$tstamp;
-		}
-		elsif(($first,$last) = ($$tstamp =~ m#^(\d*?)_(\d*)#o)){
-			$first = new Math::BigInt $first;
-			$last = new Math::BigInt $last;
-			if($first>$last){
-				$$fref = $last + 0;
-				$$lref = $first + 0;
-			}
-			else{
-				$$fref = $first + 0;
-				$$lref = $last + 0;
-			}
-		}
-		else{
-			$$lref = new Math::BigInt $$tstamp;
-		}
-	}
+    $dur = 900 if ( !defined($dur) );
 
+    undef $$fref;
+    undef $$lref;
 
-	if(!$$tstamp){
-		$$lref = new Math::BigInt time2owptime(time());
-		$$tstamp='now';
-	}
+    if ($$tstamp) {
+        if ( $$tstamp =~ /^now$/oi ) {
+            undef $$tstamp;
+        }
+        elsif ( ( $first, $last ) = ( $$tstamp =~ m#^(\d*?)_(\d*)#o ) ) {
+            $first = new Math::BigInt $first;
+            $last  = new Math::BigInt $last;
+            if ( $first > $last ) {
+                $$fref = $last + 0;
+                $$lref = $first + 0;
+            }
+            else {
+                $$fref = $first + 0;
+                $$lref = $last + 0;
+            }
+        }
+        else {
+            $$lref = new Math::BigInt $$tstamp;
+        }
+    }
 
-	if(!$$fref){
-		$$fref = new Math::BigInt owptimeadd($$lref,-$dur);
-	}
+    if ( !$$tstamp ) {
+        $$lref   = new Math::BigInt time2owptime( time() );
+        $$tstamp = 'now';
+    }
 
-	return 1;
+    if ( !$$fref ) {
+        $$fref = new Math::BigInt owptimeadd( $$lref, -$dur );
+    }
+
+    return 1;
 }
 
-sub owptime2exacttime{
-  my $bigtime = new Math::BigInt $_[0];
-  my $mantissa = $bigtime % $scale;
-  my $significand = ($bigtime / $scale) - JAN_1970;
-  return ( $significand . "." . $mantissa );
-}  
- 
-sub owpexactgmstring{
-  my $time = OWP::Utils::owptime2exacttime(shift);
-  my @parts = split(/\./mx,$time);
-  my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) = gmtime($time);
-  $year += 1900;
-  return sprintf "$dnames[$wday] $mnames[$mon] $mday %02d:%02d:%02d.%u UTC $year", $hour,$min,$sec, $parts[1];
+=head2 owptime2exacttime()
+
+Convert owp time representation to a unix timestamp with fractional seconds
+where applicable.
+
+=cut
+
+sub owptime2exacttime {
+    my $bigtime     = new Math::BigInt $_[0];
+    my $mantissa    = $bigtime % $scale;
+    my $significand = ( $bigtime / $scale ) - JAN_1970;
+    return ( $significand . "." . $mantissa );
+}
+
+=head2 owpexactgmstring()
+
+Convert owp time representation to a ISO value with fractional seconds where
+applicable.
+
+=cut
+
+sub owpexactgmstring {
+    my $time = perfSONAR_PS::OWP::Utils::owptime2exacttime(shift);
+    my @parts = split( /\./mx, $time );
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday ) = gmtime($time);
+    $year += 1900;
+    return sprintf "$dnames[$wday] $mnames[$mon] $mday %02d:%02d:%02d.%u UTC $year", $hour, $min, $sec, $parts[1];
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<Math::BigInt>, L<Math::BigFloat>, L<POSIX>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  https://bugs.internet2.edu/jira/browse/PSPS
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Anatoly Karp
+Jeff Boote, boote@internet2.edu
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2008, Internet2
+
+All rights reserved.
+
+=cut

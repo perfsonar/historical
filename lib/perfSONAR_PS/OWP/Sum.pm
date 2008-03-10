@@ -1,108 +1,142 @@
-#
-#      $Id$
-#
-#########################################################################
-#									#
-#			   Copyright (C)  2006				#
-#	     			Internet2				#
-#			   All Rights Reserved				#
-#									#
-#########################################################################
-#
-#	File:		Sum.pm
-#
-#	Author:		Jeff Boote
-#			Internet2
-#
-#	Date:		Thu Feb 16 21:36:28 MST 2006
-#
-#	Description:	
-#
-#	Usage:
-#
-#	Environment:
-#
-#	Files:
-#
-#	Options:
-package OWP::Sum;
+package perfSONAR_PS::OWP::Sum;
+
 require 5.005;
 require Exporter;
 use strict;
+use warnings;
+
 use vars qw(@ISA @EXPORT $VERSION);
 
-@ISA = qw(Exporter);
+our $VERSION = 0.08;
+
+=head1 NAME
+
+perfSONAR_PS::OWP::Sum
+
+=head1 DESCRIPTION
+
+TBD 
+
+=cut
+
+@ISA    = qw(Exporter);
 @EXPORT = qw(parsesum);
 
-$Sum::REVISION = '$Id$';
-$VERSION = $Sum::VERSION='1.0';
+#$Sum::REVISION = '$Id$';
+#$VERSION = $Sum::VERSION='1.0';
 
-sub parsesum{
-    my($sfref,$rref) = @_;
+=head2 parsesum()
 
-    while(<$sfref>){
-        my ($key,$val);
-        next if(/^\s*#/); # comments
-        next if(/^\s*$/); # blank lines
+TDB
 
-        if((($key,$val) = /^(\w+)\s+(.*?)\s*$/o)){
+=cut
+
+sub parsesum {
+    my ( $sfref, $rref ) = @_;
+
+    while (<$sfref>) {
+        my ( $key, $val );
+        next if (/^\s*#/);    # comments
+        next if (/^\s*$/);    # blank lines
+
+        if ( ( ( $key, $val ) = /^(\w+)\s+(.*?)\s*$/o ) ) {
             $key =~ tr/a-z/A-Z/;
             $$rref{$key} = $val;
             next;
         }
 
-        if(/^<BUCKETS>\s*/){
+        if (/^<BUCKETS>\s*/) {
             my @buckets;
-            my ($bi,$bn);
-            BUCKETS:
-            while(<$sfref>){
-                last BUCKETS if(/^<\/BUCKETS>\s*/);
-                if((($bi,$bn) =
-                        /^\s*(-{0,1}\d+)\s+(\d+)\s*$/o)){
-                    push @buckets,$bi,$bn;
+            my ( $bi, $bn );
+        BUCKETS:
+            while (<$sfref>) {
+                last BUCKETS if (/^<\/BUCKETS>\s*/);
+                if ( ( ( $bi, $bn ) = /^\s*(-{0,1}\d+)\s+(\d+)\s*$/o ) ) {
+                    push @buckets, $bi, $bn;
                 }
-                else{
+                else {
                     warn "SUM Syntax Error[line:$.]: $_";
-                    return undef;
+                    return;
                 }
             }
-            if(@buckets > 0){
-                $$rref{'BUCKETS'} = join '_',@buckets;
+            if ( @buckets > 0 ) {
+                $$rref{'BUCKETS'} = join '_', @buckets;
             }
             next;
         }
 
-        if(/^<TTLBUCKETS>\s*/){
+        if (/^<TTLBUCKETS>\s*/) {
             my @buckets;
-            my ($bi,$bn);
-            TTLBUCKETS:
-            while(<$sfref>){
-                last TTLBUCKETS if(/^<\/TTLBUCKETS>\s*/);
-                if((($bi,$bn) =
-                        /^\s*(-{0,1}\d+)\s+(\d+)\s*$/o)){
-                    push @buckets,$bi,$bn;
+            my ( $bi, $bn );
+        TTLBUCKETS:
+            while (<$sfref>) {
+                last TTLBUCKETS if (/^<\/TTLBUCKETS>\s*/);
+                if ( ( ( $bi, $bn ) = /^\s*(-{0,1}\d+)\s+(\d+)\s*$/o ) ) {
+                    push @buckets, $bi, $bn;
                 }
-                else{
+                else {
                     warn "SUM Syntax Error[line:$.]: $_";
-                    return undef;
+                    return;
                 }
             }
-            if(@buckets > 0){
-                $$rref{'TTLBUCKETS'} = join '_',@buckets;
+            if ( @buckets > 0 ) {
+                $$rref{'TTLBUCKETS'} = join '_', @buckets;
             }
             next;
         }
 
         warn "SUM Syntax Error[line:$.]: $_";
-        return undef;
+        return;
     }
 
-    if(!defined($$rref{'SUMMARY'})){
-        warn "OWP::Sum::parsesum(): Invalid Summary";
-        return undef;
+    if ( !defined( $$rref{'SUMMARY'} ) ) {
+        warn "perfSONAR_PS::OWP::Sum::parsesum(): Invalid Summary";
+        return;
     }
 
     return 1;
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+N/A
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  https://bugs.internet2.edu/jira/browse/PSPS
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jeff Boote, boote@internet2.edu
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2008, Internet2
+
+All rights reserved.
+
+=cut
