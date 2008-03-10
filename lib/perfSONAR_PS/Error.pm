@@ -1,7 +1,5 @@
 use Error::Simple;
 
-our $VERSION = 0.08;
-
 =head1 NAME
 
 perfSONAR_PS::Error - A module that provides the exceptions framework for perfSONAR PS
@@ -70,6 +68,8 @@ package perfSONAR_PS::Error;
 use base "Error";
 
 use strict;
+
+our $VERSION = 0.08;
 
 sub new
 {

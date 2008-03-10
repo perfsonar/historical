@@ -536,31 +536,32 @@ of the specified link at a certain point in time.
 
 The getLinkStatus function returns the link status at the specified time. The
 $link_ids parameter is a reference to an array of link ids. $time is the time
-at which you'd like to know each link's status. If $time is an empty string, it
-returns the most recent information it has about each link. It returns the
-results as a hash with the key being the link id. Each element of the hash is
-an array of perfSONAR_PS::Status::Link structures containing a the status
-of the specified link at a certain point in time.
+at which you'd like to know each link's status. $time is a perfSONAR_PS::Time
+element. If $time is an undefined, it returns the most recent information it
+has about each link. It returns the results as a hash with the key being the
+link id. Each element of the hash is an array of perfSONAR_PS::Status::Link
+structures containing a the status of the specified link at a certain point in
+time.
 
 =head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
 
 The updateLinkStatus function adds a new data point for the specified link.
-$time is the time at which the measurement occured. $link_id is the link to
-update. $knowledge_level says whether or not this measurement can tell us
-everything about a given link ("full") or whether the information only
-corresponds to one side of the link("partial"). $oper_value is the current
-operational status and $admin_value is the current administrative status.
-$do_update tells whether or not we should try to update the a given range of
-information(e.g. if you were polling the link and knew that nothing had changed
-from the previous iteration, you could set $do_update to 1 and the server would
-elongate the previous range instead of creating a new one).
+$time is a unix timestamp corresponding to when the measurement occured.
+$link_id is the link to update. $knowledge_level says whether or not this
+measurement can tell us everything about a given link ("full") or whether the
+information only corresponds to one side of the link("partial"). $oper_value is
+the current operational status and $admin_value is the current administrative
+status.  $do_update tells whether or not we should try to update the a given
+range of information(e.g. if you were polling the link and knew that nothing
+had changed from the previous iteration, you could set $do_update to 1 and the
+server would elongate the previous range instead of creating a new one).
 
 =head2 getUniqueIDs($self)
 
-This function is NOT available in the SQL client as the functionality it is not
-exposed by the MA. It does more or less what it sounds like, it returns a list
-of unique link ids that appear in the database. This is used by the MA to get
-the list of IDs to register with the LS.
+This function is ONLY available in the SQL client as the functionality it is
+not exposed by the MA. It does more or less what it sounds like, it returns a
+list of unique link ids that appear in the database. This is used by the MA to
+get the list of IDs to register with the LS.
 
 =head1 SEE ALSO
 

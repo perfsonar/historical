@@ -1,5 +1,16 @@
 package perfSONAR_PS::Collectors::LinkStatus::Status;
 
+=head1 NAME
+
+perfSONAR_PS::Collectors::LinkStatus::Status - A module that provides an object
+describing the current status of a circuit.
+
+=head1 DESCRIPTION
+
+This module is to be treated as an object representing the status of a circuit
+at a certain point in time.
+=cut
+
 use strict;
 use warnings;
 
@@ -37,24 +48,36 @@ sub new {
     return $self;
 }
 
+=head2 getTime ($self)
+    Returns the time during which the circuit had this status
+=cut
 sub getTime {
     my ($self) = @_;
 
     return $self->{TIME};
 }
 
+=head2 getOperState ($self)
+    Returns the operational state
+=cut
 sub getOperState {
     my ($self) = @_;
 
     return $self->{OPER_STATE};
 }
 
+=head2 getAdminState ($self)
+    Returns the administrative state
+=cut
 sub getAdminState {
     my ($self) = @_;
 
     return $self->{ADMIN_STATE};
 }
 
+=head2 setTime ($self, $time)
+    Sets the time that the status was seen
+=cut
 sub setTime {
     my ($self, $time) = @_;
 
@@ -63,6 +86,10 @@ sub setTime {
     return;
 }
 
+=head2 setOperStatus ($self, $operState)
+    Sets the operation state. Returns 0 if successful. Returns -1 if the
+    operState is not valid.
+=cut
 sub setOperState {
     my ($self, $oper_state) = @_;
 
@@ -75,6 +102,10 @@ sub setOperState {
     return 0;
 }
 
+=head2 setAdminStatus ($self, $adminState)
+    Sets the administrative state. Returns 0 if successful. Returns -1 if the
+    adminState is not valid.
+=cut
 sub setAdminState {
     my ($self, $admin_state) = @_;
 
@@ -87,6 +118,11 @@ sub setAdminState {
     return 0;
 }
 
+=head2 updateOperState ($self, $operState)
+    This function updates the operational state with new information. This is
+    used to aggregate the state of a circuit based on the state of its links.
+    So, if for example, an up and a down are seen, the new status will be down.
+=cut
 sub updateOperState {
     my ($self, $oper_state) = @_;
 
@@ -109,6 +145,12 @@ sub updateOperState {
     return 0;
 }
 
+=head2 updateAdminState ($self, $adminState)
+    This function updates the administrative state with new information. This is
+    used to aggregate the state of a circuit based on the state of its links.
+    So, if for example, an normal and a troubleshooting are seen, the new
+    status will be troubleshooting.
+=cut
 sub updateAdminState {
     my ($self, $admin_state) = @_;
 
@@ -135,4 +177,17 @@ sub updateAdminState {
 
 1;
 
+__END__
+=head1 LICENSE
+ 
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+ 
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
+
+All rights reserved.
+
+=cut
 # vim: expandtab shiftwidth=4 tabstop=4

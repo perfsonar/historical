@@ -4,6 +4,7 @@ MANIFEST
 MANIFEST.SKIP
 Makefile.PL
 README
+lib/perfSONAR_PS/Services/LS.pm
 lib/perfSONAR_PS/Services/LS/General.pm
 lib/perfSONAR_PS/Services/LS/LS.pm
 perl-perfSONAR_PS-Services-LS.spec

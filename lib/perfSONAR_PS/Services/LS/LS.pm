@@ -1094,7 +1094,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 
@@ -1112,3 +1112,4 @@ Copyright (c) 2004-2008, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
+# vim: expandtab shiftwidth=4 tabstop=4

@@ -12,7 +12,6 @@ use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Status::Common;
 use perfSONAR_PS::Collectors::LinkStatus::Link;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 
@@ -427,14 +426,20 @@ sub parseAgentElement {
             }
         }
 
-        my $old_agent;
+        my $host_agent;
 
         if (defined $self->{SNMPAGENTS}->{$hostname}) {
-            $old_agent = $self->{SNMPAGENTS}->{$hostname};
+            $host_agent = $self->{SNMPAGENTS}->{$hostname};
         }
 
-        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP->new($status_type, $hostname, $ifIndex, $version, $community, $oid, $old_agent);
+        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP->new($status_type, $hostname, $ifIndex, $version, $community, $oid, $host_agent);
+
+        if (not defined $host_agent) {
+            $self->{SNMPAGENTS}->{$hostname} = $new_agent->getAgent();
+        }
     } elsif ($type eq "tl1") {
+        load perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
+
         my $type = $agent->findvalue("type");
         my $address = $agent->findvalue('address');
         my $port = $agent->findvalue('port');

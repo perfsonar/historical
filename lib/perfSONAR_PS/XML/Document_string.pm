@@ -1,5 +1,14 @@
 package perfSONAR_PS::XML::Document_string;
 
+=head1 NAME
+
+perfSONAR_PS::XML::Document_string - This module is used to provide a more
+abstract method for constructing XML documents that can be implemented using
+string construction, outputting to a file or even DOM construction without
+tying the code creating the XML to any particular construction method..
+
+=cut
+
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger :nowarn);
@@ -11,6 +20,9 @@ use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'STRING';
 
 my $pretty_print = 0;
 
+=head2 new ($package)
+    Allocate a new XML Document
+=cut
 sub new {
 	my ($package) = @_;
 
@@ -23,6 +35,9 @@ sub new {
 	return $self;
 }
 
+=head2 getNormalizedURI ($uri)
+    This function ensures the URI has no whitespace and ends in a '/'.
+=cut
 sub getNormalizedURI {
 	my ($uri) = @_;
 
@@ -37,6 +52,20 @@ sub getNormalizedURI {
 	return $uri;
 }
 
+=head2 startElement ($self, { prefix, namespace, tag, attributes, extra_namespaces, content })
+    This function starts a new element 'tag' with the prefix 'prefix' and
+    namespace 'namespace'. Those elements are the only ones that are required.
+    The attributes parameter can point at a hash whose keys will become
+    attributes of the element with the value of the attribute being the value
+    corresponding to that key in the hash. The extra_namespaces parameter can
+    be specified to add namespace declarations to this element. The keys of the
+    hash will be the new prefixes and the values those keys point to will be
+    the new namespace URIs. The content parameter can be specified to give the
+    content of the element in which case more elements can still be added, but
+    initally the content will be added. Once started, the element must be
+    closed before the document can be retrieved. This function returns -1 if an
+    error occurs and 0 if the element was successfully created.
+=cut
 sub startElement {
 	#my ($self, @params) = shift;
     my $self = shift;
@@ -141,6 +170,11 @@ sub startElement {
 	return 0;
 }
 
+=head2 createElement ($self, { prefix, namespace, tag, attributes, extra_namespaces, content })
+    This function has identical parameters to the startElement function.
+    However, it closes the element immediately. This function returns -1 if an
+    error occurs and 0 if the element was successfully created.
+=cut
 sub createElement {
 	my $self = shift;
 	my $args = validate(@_, 
@@ -245,6 +279,11 @@ sub createElement {
 	return 0;
 }
 
+=head2 endElement ($self, $tag)
+    This function is used to end the most recently opened element. The tag
+    being closed is specified to sanity check the output. If the element is
+    properly closed, 0 is returned. -1 otherwise.
+=cut
 sub endElement {
 	my ($self, $tag) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
@@ -282,6 +321,9 @@ sub endElement {
 	return 0;
 }
 
+=head2 addExistingXMLElement ($self, $element)
+    This function adds a LibXML element to the current document.
+=cut
 sub addExistingXMLElement {
 	my ($self, $element) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
@@ -294,6 +336,9 @@ sub addExistingXMLElement {
 	return 0;
 }
 
+=head2 addOpaque ($self, $element)
+    This function adds arbitrary data to the current document.
+=cut
 sub addOpaque {
 	my ($self, $data) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
@@ -303,6 +348,10 @@ sub addOpaque {
 	return 0;
 }
 
+=head2 getValue ($self)
+    This function returns the current state of the document. It will warn if
+    there are open tags still.
+=cut
 sub getValue {
 	my ($self) = @_;
 	my $logger = get_logger("perfSONAR_PS::XML::Document_string");
@@ -328,4 +377,44 @@ sub getValue {
 
 1;
 
+__END__
+
+=head1 SEE ALSO
+
+L<Log::Log4perl>, L<Params::Validate>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  https://bugs.internet2.edu/jira/browse/PSPS
+
+=head1 VERSION
+
+$Id: perfSONARBOUY.pm 1059 2008-03-07 02:30:34Z zurawski $
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
+
+All rights reserved.
+
+=cut
 # vim: expandtab shiftwidth=4 tabstop=4

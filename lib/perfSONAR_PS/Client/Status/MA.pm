@@ -474,17 +474,18 @@ programs that can interface via the MA server or directly with the database.
 =head2 getLinkStatus($self, $link_ids, $time)
 
     The getLinkStatus function returns the link status at the specified time. The
-    $link_ids parameter is a reference to an array of link ids. $time is the time
-    at which you'd like to know each link's status. If $time is an empty string, it
-    returns the most recent information it has about each link. It returns the
-    results as a hash with the key being the link id. Each element of the hash is
-    an array of perfSONAR_PS::Status::Link structures containing a the status
-    of the specified link at a certain point in time.
+    $link_ids parameter is a reference to an array of link ids. $time is a
+    perfSONAR_PS::Time element describing the time at which you'd like to know
+    each link's status. If $time is undefined, it returns the most recent
+    information it has about each link. It returns the results as a hash with
+    the key being the link id. Each element of the hash is an array of
+    perfSONAR_PS::Status::Link structures containing a the status of the
+    specified link at a certain point in time.
 
 =head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
 
     The updateLinkStatus function adds a new data point for the specified link.
-    $time is the time at which the measurement occured. $link_id is the link to
+    $time is a unix timestamp corresponding to when the measurement occured. $link_id is the link to
     update. $knowledge_level says whether or not this measurement can tell us
     everything about a given link ("full") or whether the information only
     corresponds to one side of the link("partial"). $oper_value is the current
@@ -492,39 +493,41 @@ programs that can interface via the MA server or directly with the database.
     $do_update is currently unused in this context, meaning that all intervals
     added have cover the second that the measurement occurred.
 
-    =head1 SEE ALSO
+=head1 SEE ALSO
 
-    L<perfSONAR_PS::DB::SQL>, L<perfSONAR_PS::Status::Link>, L<perfSONAR_PS::Client::Status::SQL>, L<Log::Log4perl>
+L<perfSONAR_PS::Status::Link>, L<perfSONAR_PS::Client::Status::SQL>, L<Log::Log4perl>
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Status::Common>, L<perfSONAR_PS::Transport>,
+L<perfSONAR_PS::Time>
 
-    To join the 'perfSONAR-PS' mailing list, please visit:
+To join the 'perfSONAR-PS' mailing list, please visit:
 
-    https://mail.internet2.edu/wws/info/i2-perfsonar
+https://mail.internet2.edu/wws/info/i2-perfsonar
 
-    The perfSONAR-PS subversion repository is located at:
+The perfSONAR-PS subversion repository is located at:
 
-    https://svn.internet2.edu/svn/perfSONAR-PS 
+https://svn.internet2.edu/svn/perfSONAR-PS 
 
-    Questions and comments can be directed to the author, or the mailing list. 
+Questions and comments can be directed to the author, or the mailing list. 
 
-    =head1 VERSION
+=head1 VERSION
 
-    $Id$
+$Id$
 
-    =head1 AUTHOR
+=head1 AUTHOR
 
-    Aaron Brown, aaron@internet2.edu
+Aaron Brown, aaron@internet2.edu
 
-    =head1 LICENSE
+=head1 LICENSE
 
-    You should have received a copy of the Internet2 Intellectual Property Framework along
-    with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
-    =head1 COPYRIGHT
+=head1 COPYRIGHT
 
-    Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2007, Internet2 and the University of Delaware
 
-    All rights reserved.
+All rights reserved.
 
-    =cut
+=cut
 
 # vim: expandtab shiftwidth=4 tabstop=4

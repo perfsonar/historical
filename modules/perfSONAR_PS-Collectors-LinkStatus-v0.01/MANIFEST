@@ -9,6 +9,7 @@ lib/perfSONAR_PS/Collectors/LinkStatus.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Agent/Constant.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Agent/SNMP.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Agent/Script.pm
+lib/perfSONAR_PS/Collectors/LinkStatus/Agent/TL1.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Link.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Status.pm
 lib/perfSONAR_PS/SNMPWalk.pm

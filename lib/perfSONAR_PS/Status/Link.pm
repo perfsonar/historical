@@ -8,115 +8,115 @@ our $VERSION = 0.08;
 use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
 
 sub new {
-	my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
+    my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
 
-	my $self = fields::new($package);
+    my $self = fields::new($package);
 
-	if (defined $link_id and $link_id ne "") {
-		$self->{ID} = $link_id;
-	}
+    if (defined $link_id and $link_id ne "") {
+        $self->{ID} = $link_id;
+    }
 
-	if (defined $knowledge and $knowledge ne "") {
-		$self->{KNOWLEDGE} = $knowledge;
-	}
-	if (defined $start_time and $start_time ne "") {
-		$self->{START_TIME} = $start_time;
-	}
-	if (defined $end_time and $end_time ne "") {
-		$self->{END_TIME} = $end_time;
-	}
-	if (defined $oper_status and $oper_status ne "") {
-		$self->{OPER_STATUS} = $oper_status;
-	}
-	if (defined $admin_status and $admin_status ne "") {
-		$self->{ADMIN_STATUS} = $admin_status;
-	}
+    if (defined $knowledge and $knowledge ne "") {
+        $self->{KNOWLEDGE} = $knowledge;
+    }
+    if (defined $start_time and $start_time ne "") {
+        $self->{START_TIME} = $start_time;
+    }
+    if (defined $end_time and $end_time ne "") {
+        $self->{END_TIME} = $end_time;
+    }
+    if (defined $oper_status and $oper_status ne "") {
+        $self->{OPER_STATUS} = $oper_status;
+    }
+    if (defined $admin_status and $admin_status ne "") {
+        $self->{ADMIN_STATUS} = $admin_status;
+    }
 
-	return $self;
+    return $self;
 }
 
 sub setID {
-	my ($self, $id) = @_;
+    my ($self, $id) = @_;
 
-	$self->{ID} = $id;
+    $self->{ID} = $id;
 
-	return;
+    return;
 }
 
 sub setKnowledge {
-	my ($self, $knowledge) = @_;
+    my ($self, $knowledge) = @_;
 
-	$self->{KNOWLEDGE} = $knowledge;
+    $self->{KNOWLEDGE} = $knowledge;
 
-	return;
+    return;
 }
 
 sub setStartTime {
-	my ($self, $starttime) = @_;
+    my ($self, $starttime) = @_;
 
-	$self->{START_TIME} = $starttime;
+    $self->{START_TIME} = $starttime;
 
-	return;
+    return;
 }
 
 sub setEndTime {
-	my ($self, $endtime) = @_;
+    my ($self, $endtime) = @_;
 
-	$self->{END_TIME} = $endtime;
+    $self->{END_TIME} = $endtime;
 
-	return;
+    return;
 }
 
 sub setOperStatus {
-	my ($self, $oper_status) = @_;
+    my ($self, $oper_status) = @_;
 
-	$self->{OPER_STATUS} = $oper_status;
+    $self->{OPER_STATUS} = $oper_status;
 
-	return;
+    return;
 }
 
 sub setAdminStatus {
-	my ($self, $admin_status) = @_;
+    my ($self, $admin_status) = @_;
 
-	$self->{ADMIN_STATUS} = $admin_status;
+    $self->{ADMIN_STATUS} = $admin_status;
 
-	return;
+    return;
 }
 
 sub getID {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{ID};
+    return $self->{ID};
 }
 
 sub getKnowledge {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{KNOWLEDGE};
+    return $self->{KNOWLEDGE};
 }
 
 sub getStartTime {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{START_TIME};
+    return $self->{START_TIME};
 }
 
 sub getEndTime {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{END_TIME};
+    return $self->{END_TIME};
 }
 
 sub getOperStatus {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{OPER_STATUS};
+    return $self->{OPER_STATUS};
 }
 
 sub getAdminStatus {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	return $self->{ADMIN_STATUS};
+    return $self->{ADMIN_STATUS};
 }
 
 1;
@@ -198,8 +198,9 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
  
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 
 =cut
+# vim: expandtab shiftwidth=4 tabstop=4

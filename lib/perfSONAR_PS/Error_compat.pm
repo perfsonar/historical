@@ -1,5 +1,57 @@
 package perfSONAR_PS::Error_compat;
 
+=head1 NAME
+
+perfSONAR_PS::Error_compat - A module that provides a transition between a full
+on exceptions framework for perfSONAR PS and having each service specify
+explicitly the eventType and description.
+
+=head1 DESCRIPTION
+
+This module provides a simple method for throwing exceptions that look similar
+to how eventType/description messages used to be propogated.
+
+=head1 SYNOPSIS
+
+  # if an error occurs, perfSONAR_PS objects should throw an error eg
+  sub openDB {
+    my $handle = undef;
+    $handle = DBI->connect( ... )
+  	  or throw perfSONAR_PS::Error_compat( "error.common.storage", "Could not connect to database: " . $DBI::errstr . "\n" );
+  	return $handle;
+  }
+
+  ### script.pl ###
+  
+  # in the calling code
+  my $dbh = undef;
+  try {
+  
+    $dbh = &openDB();
+  
+  }
+  catch perfSONAR_PS::Error_compat with {
+  
+    # print the contents of the error object (the string)
+    print "An error occur: ".$@->eventType."/".$@->errorMessage."\n";
+  
+  }
+  otherwise {
+  
+    # some other error occured!
+    print "Some unknown error occurred! $@\n";
+  
+  }
+  finally {
+  
+    print "Done!\n"'
+  
+  }; 
+  
+  # don't forget the trailing ';'
+
+=cut
+
 use strict;
 use warnings;
 
@@ -75,7 +127,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
  
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 

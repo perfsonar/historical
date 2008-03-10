@@ -12,10 +12,10 @@ use perfSONAR_PS::DB::File;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::new tests
 
-$fileBlank = perfSONAR_PS::DB::File->new( { file => './t/testfiles/blank' } );
-$fileNotExist = perfSONAR_PS::DB::File->new( { file => './t/testfiles/doesnotexist' } );
-$fileXML = perfSONAR_PS::DB::File->new( { file => './t/testfiles/simpleXML' } );
-$fileGarbage = perfSONAR_PS::DB::File->new( { file => './t/testfiles/garbage0' } );
+$fileBlank = perfSONAR_PS::DB::File->new( { file => './t/testfiles/blank.xml' } );
+$fileNotExist = perfSONAR_PS::DB::File->new( { file => './t/testfiles/doesnotexist.xml' } );
+$fileXML = perfSONAR_PS::DB::File->new( { file => './t/testfiles/simpleXML.xml' } );
+$fileGarbage = perfSONAR_PS::DB::File->new( { file => './t/testfiles/garbage0.xml' } );
 $fileXMLNoTag = perfSONAR_PS::DB::File->new;
 ok(defined $fileBlank, "DB::File::new - Blank file");
 ok(defined $fileNotExist, "DB::File::new - Non-existant file");
@@ -26,8 +26,8 @@ ok(defined $fileXMLNoTag, "DB::File::new - Small XML no tag file");
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::setFile
 
-$fileXMLNoTag->setFile( { file => './t/testfiles/simpleXMLNotag' } );
-is ($fileXMLNoTag->{FILE}, './t/testfiles/simpleXMLNotag');
+$fileXMLNoTag->setFile( { file => './t/testfiles/simpleXMLNotag.xml' } );
+is ($fileXMLNoTag->{FILE}, './t/testfiles/simpleXMLNotag.xml');
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #DB::File::openDB

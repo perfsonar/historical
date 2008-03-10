@@ -1,5 +1,23 @@
 package perfSONAR_PS::Services::MA::Topology;
 
+=head1 NAME
+
+perfSONAR_PS::Services::MA::Topology - A module that provides methods for a
+Topology Service. The Topology Service can be used to make Topology Data
+available to individuals via webservice interface.
+
+=head1 DESCRIPTION
+
+This module, in conjunction with other parts of the perfSONAR-PS framework,
+handles specific messages from interested actors in search of Topology data.
+
+There are two major message types that this service can act upon:
+    QueryRequest/SetupDataRequest   - Allows queries to the database
+    TopologyChangeRequest           - Allows updates to the topology database
+=head1 API
+
+=cut
+
 use base 'perfSONAR_PS::Services::Base';
 
 use fields 'CLIENT', 'LS_CLIENT', 'LOGGER';
@@ -17,6 +35,14 @@ use perfSONAR_PS::Client::LS::Remote;
 
 our $VERSION = 0.08;
 
+=head2 init 
+    Called at startup by the daemon when this particular module is loaded into
+    the perfSONAR-PS deployment. Checks the configuration file for the necessary
+    items and fills in others when needed. Initializes the backed metadata storage
+    (Oracle Sleepycat XML Database). Finally the message handler registers the
+    appropriate message types and eventTypes for this module. Any other
+    'pre-startup' tasks should be placed in this function.
+=cut
 sub init {
     my ($self, $handler) = @_;
 
@@ -26,7 +52,6 @@ sub init {
         $self->{LOGGER}->error("No database type specified");
         return -1;
     }
-
 
     if (lc($self->{CONF}->{"topology"}->{"db_type"}) eq "xml") {
         if (not defined $self->{CONF}->{"topology"}->{"db_file"} or $self->{CONF}->{"topology"}->{"db_file"} eq q{}) {
@@ -128,6 +153,11 @@ sub needLS {
     return ($self->{CONF}->{"topology"}->{"enable_registration"});
 }
 
+=head2 registerLS($self $sleep_time)
+    Given the service information (specified in configuration) and the contents
+    of our xmldb backend, we can contact the specified LS and register the
+    top-level identifiers (a summarized form of the elements in the database).
+=cut
 sub registerLS {
     my ($self, $sleep_time) = @_;
     my ($status, $res1);
@@ -179,6 +209,11 @@ sub registerLS {
     return $n;
 }
 
+=head2 buildLSMetadata ($id, $type, $prefix, $url)
+    This function is used to build the metadata that is registered with the LS.
+    This element contains the prefix and the local name of the element to be
+    register as well as the id for that element. 
+=cut
 sub buildLSMetadata {
     my ($id, $type, $prefix, $uri) = @_;
     my $md = q{};
@@ -203,6 +238,10 @@ sub buildLSMetadata {
     return;
 }
 
+=head2 handleEvent
+    This is the function that is called by the daemon whenever a metadata/data
+    pair with one of our eventTypes is found in a message we've regeistered in.
+=cut
 sub handleEvent {
     my ($self, @args) = @_;
       my $parameters = validate(@args,
@@ -242,9 +281,9 @@ sub handleEvent {
     } 
 
     if ($messageType eq "SetupDataRequest") {
-        $self->queryTopology($output, $eventType, $md, $d);
+        $self->handleSetupDataRequest($output, $eventType, $md, $d);
     } elsif ($messageType eq "TopologyChangeRequest") {
-        $self->changeTopology($output, $eventType, $md, $d);
+        $self->handleChangeTopologyRequest($output, $eventType, $md, $d);
     } elsif ($messageType eq "QueryRequest") {
         $self->handleQueryRequest($output, $eventType, $md, $d);
 #    } elsif ($messageType eq "AddRequest") {
@@ -258,44 +297,75 @@ sub handleEvent {
     return;
 }
 
+=head2 handleQueryRequest ($self, $output, $eventType, $m, $d)
+    This function handles the (hopefully to be standardized) QueryRequest
+    message. The semantics of the message are as follows:
+
+    If no subject is included, the semantics are "give me the whole database",
+    and a XQuery for "//*" (i.e. everything) is submitted to the backend database.
+
+    If an xquery subject is included, the semantics are "use the included
+    XQuery to query the database". It simply passes the included XQuery to the
+    backend database.
+
+    If any other subject is included, an invalid subject error is thrown.
+=cut
 sub handleQueryRequest {
-#    my ($self, $output, $eventType, $m, $d) = @_;
-#    my $res;
-#
-#    my $subjects = find($m, "./*[local-name()='subject']", 0);
-#    if ($subjects->size() > 1) {
-#        # XXX error out
-#    }
-#
-#    my $xquery;
-#    my $xquery_subject = find($m, "./*[local-name()='subject' and namespace='".$topology_namespaces{'xquery'}."']", 1);
-#    if ($xquery_subject) {
-#        $xquery = $xquery_subject->textContent;
-#    } elsif ($subjects->size() == 0) {
-#        # no subject is the query all request
-#        $xquery = "//*";
-#    } else {
-#        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
-#    }
-#
-#    my ($status, $res) = $self->{CLIENT}->xQuery($xquery);
-#    if ($status != 0) {
-#        my $msg = "Database query failed: $res";
-#        $self->{LOGGER}->error($msg);
-#        throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
-#    }
-#
-#    createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
-#    
-#    return;
+    my ($self, $output, $eventType, $m, $d) = @_;
+
+    my $subjects = find($m, "./*[local-name()='subject']", 0);
+    if ($subjects->size() > 1) {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Multiple subjects specified");
+    }
+
+    my $xquery;
+    my $xquery_subject = find($m, "./*[local-name()='subject' and namespace='http://ggf.org/ns/nmwg/tools/org/perfsonar/xquery/1.0/']", 1);
+    if ($xquery_subject) {
+        $xquery = $xquery_subject->textContent;
+    } elsif ($subjects->size() == 0) {
+        # no subject is the query all request
+        $xquery = "//*";
+    } else {
+        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+    }
+
+    my ($status, $res) = $self->{CLIENT}->xQuery($xquery);
+    if ($status != 0) {
+        my $msg = "Database query failed: $res";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
+    }
+
+    createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
+    
+    return;
 }
 
-sub queryTopology {
+=head2 handleSetupDataRequest ($self, $output, $eventType, $m, $d)
+    This function handles the older protocol's query mechanism.
+    The semantics of the message are as follows:
+
+    If an "http://ggf.org/ns/nmwg/topology/query/all/20070809" eventType is
+    included in the metadata, the entire backend database is returned.
+
+    If an "http://ggf.org/ns/nmwg/topology/query/xquery/20070809" eventType is
+    included in the metadata, an xquery subject must be included as well. The
+    xquery inside the xquery subject will be passed to the backend database.
+=cut
+sub handleSetupDataRequest {
     my ($self, $output, $eventType, $m, $d) = @_;
-    my $res;
+    my ($status, $res);
+    my $dataContent;
 
     if ($eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809") {
-        $res = $self->queryAllRequest();
+        ($status, $res) = $self->{CLIENT}->getAll;
+        if ($status != 0) {
+            my $msg = "Database dump failed: $res";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
+        }
+
+        $dataContent = $res->toString;
     } elsif ($eventType eq "http://ggf.org/ns/nmwg/topology/query/xquery/20070809") {
         my $query = findvalue($m, "./xquery:subject");
 
@@ -305,16 +375,50 @@ sub queryTopology {
             throw perfSONAR_PS::Error_compat("error.topology.query.query_not_found", $msg);
         }
 
-        $res = $self->queryXqueryRequest($query);
+        my ($status, $res) = $self->{CLIENT}->xQuery($query);
+        if ($status != 0) {
+            my $msg = "Database query failed: $res";
+            $self->{LOGGER}->error($msg);
+            throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
+        }
+
+        $dataContent = $res;
     }
 
-    createData($output, "data.".genuid(), $m->getAttribute("id"), $res, undef);
+    createData($output, "data.".genuid(), $m->getAttribute("id"), $dataContent, undef);
 
     return;
 }
 
-sub changeTopology {
+=head2 handleChangeTopologyRequest 
+    The hope is to standardize the information changing protocol between the LS
+    and the Topology Service. In the interim, this handler handle metadata/data
+    pairs corresponding to the current TS protocol.
+
+    The metadata contains an eventType specifying how the data should modify
+    the backend database and the data contains a topology wrapper containing
+    the topology elements to add or update.
+
+    If the eventType is "http://ggf.org/ns/nmwg/topology/change/add/20070809",
+    the elements in the data segment are added to the database. If any of the
+    elements (based on identifiers), already exist in the database, an error is
+    returned. 
+
+    If the eventType is
+    "http://ggf.org/ns/nmwg/topology/change/update/20070809", the elements in
+    the data segment are merged with the existing elements with the same
+    identifier in the database. If any element in the data segment does not
+    exist in the database, an error will be returned.
+
+    If the eventType is
+    "http://ggf.org/ns/nmwg/topology/change/replace/20070809", the elements in
+    the data segment are added to the database. If any of the elements already
+    exist in the database, they will be replaced with the element in the data
+    segment.
+=cut
+sub handleChangeTopologyRequest {
     my ($self, $output, $eventType, $m, $d) = @_;
+    my ($status, $res);
     my $changeType;
 
     if ($eventType eq "http://ggf.org/ns/nmwg/topology/change/add/20070809") {
@@ -333,7 +437,17 @@ sub changeTopology {
         throw perfSONAR_PS::Error_compat("error.topology.query.topology_not_found", $msg);
     }
 
-    $self->changeRequest($changeType, $topology);
+    ($status, $res) = topologyNormalize($topology);
+    if ($status != 0) {
+        $self->{LOGGER}->error("Couldn't normalize topology");
+        throw perfSONAR_PS::Error_compat("error.topology.invalid_topology", $res);
+    }
+
+    ($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
+    if ($status != 0) {
+        $self->{LOGGER}->error("Error handling topology request");
+        throw perfSONAR_PS::Error_compat("error.topology.ma", $res);
+    }
 
     my $changeDesc;
     my $mdID = "metadata.".genuid();
@@ -352,132 +466,14 @@ sub changeTopology {
     return;
 }
 
-sub changeRequest {
-    my($self, $changeType, $topology) = @_;
-    my ($status, $res);
-    my $localContent = q{};
-
-    $self->{LOGGER}->debug("Topology: ".$topology->toString);
-
-    ($status, $res) = topologyNormalize($topology);
-    if ($status != 0) {
-        $self->{LOGGER}->error("Couldn't normalize topology");
-        throw perfSONAR_PS::Error_compat("error.topology.invalid_topology", $res);
-    }
-
-    ($status, $res) = $self->{CLIENT}->changeTopology($changeType, $topology);
-    if ($status != 0) {
-        $self->{LOGGER}->error("Error handling topology request");
-        throw perfSONAR_PS::Error_compat("error.topology.ma", $res);
-    }
-
-    return;
-}
-
-sub queryAllRequest {
-    my ($self) = @_;
-    my ($status, $res);
-
-    ($status, $res) = $self->{CLIENT}->getAll;
-    if ($status != 0) {
-        my $msg = "Database dump failed: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
-    }
-
-    return $res->toString;
-}
-
-sub queryXqueryRequest {
-    my ($self, $xquery) = @_;
-    my ($status, $res);
-
-    ($status, $res) = $self->{CLIENT}->xQuery($xquery);
-    if ($status != 0) {
-        my $msg = "Database query failed: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.query", $msg);
-    }
-
-    return $res;
-}
-
-
 1;
 
 __END__
-=head1 NAME
-
-perfSONAR_PS::Services::MA::Topology - A module that provides methods for the Topology MA.
-
-=head1 DESCRIPTION
-
-This module aims to offer simple methods for dealing with requests for information, and the
-related tasks of interacting with backend storage.
-
-=head1 SYNOPSIS
-
-use perfSONAR_PS::Services::MA::Topology;
-
-my %conf = readConfiguration();
-
-my %ns = (
-        nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-        ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-        nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
-     );
-
-my $ma = perfSONAR_PS::Services::MA::Topology->new(\%conf, \%ns);
-
-# or
-# $ma = perfSONAR_PS::Services::MA::Topology->new;
-# $ma->setConf(\%conf);
-# $ma->setNamespaces(\%ns);
-
-if ($ma->init != 0) {
-    print "Error: couldn't initialize measurement archive\n";
-    exit(-1);
-}
-
-$ma->registerLS;
-
-while(1) {
-    my $request = $ma->receive;
-    $ma->handleRequest($request);
-}
-
-=head1 API
-
-The offered API is simple, but offers the key functions needed in a measurement archive.
-
-=head2 init
-
-       Initializes the MA and validates the entries in the
-       configuration file. Returns 0 on success and -1 on failure.
-
-=head2 registerLS($self)
-
-    Registers the data contained in the MA with the configured LS.
-
-=head2 receive($self)
-
-    Grabs an incoming message from transport object to begin processing. It
-    completes the processing if the message was handled by a lower layer.
-    If not, it returns the Request structure.
-
-=head2 handleMessage($self, $messageType, $message)
-    Handles the specific message. This should entail iterating through the
-    metadata/data pairs and handling each one.
-
-=head2 handleMetadataPair {
-    Handles a specific metadata/data request.
-
-
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>
-
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Topology::Common>, L<perfSONAR_PS::Client::Topology::XMLDB>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -504,7 +500,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 

@@ -1,15 +1,25 @@
 package perfSONAR_PS::Services::MA::Status;
+
 =head1 NAME
 
-perfSONAR_PS::Services::MA::Status - A module that provides methods for the Status MA.
+perfSONAR_PS::Services::MA::Status - A module that provides methods for a
+an L2 Status Measurement Archive. The service can be used to make Link Status
+Data available to individuals via webservice interface.
 
 =head1 DESCRIPTION
 
-This module aims to offer simple methods for dealing with requests for information, and the
-related tasks of interacting with backend storage.
+This module, in conjunction with other parts of the perfSONAR-PS framework,
+handles specific messages from interested actors in search of link status data.
 
-=head1 API
-
+There are two major message types that this service can act upon:
+ - MetadataKeyRequest             - Given some metadata about a specific measurement, 
+                                      request a re-playable 'key' to faster access
+                                      underlying data.
+ - SetupDataRequest               - Given either metadata or a key regarding a specific
+                                      measurement, retrieve data values.
+ - MeasurementArchiveStoreRequest - Given some metadata or a key and some link
+                                      status information, updates status
+                                      information about a given link.
 =cut
 
 use base 'perfSONAR_PS::Services::Base';
@@ -29,7 +39,7 @@ use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
 use perfSONAR_PS::Topology::ID;
 
-our $VERSION = 0.06;
+our $VERSION = 0.08;
 
 my %status_namespaces = (
     nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -40,9 +50,17 @@ my %status_namespaces = (
     nmtl2=>"http://ggf.org/ns/nmwg/topology/l2/3.0/",
 );
 
-=head2 init 
-    Initializes the MA and validates or fills in entries in the
-    configuration file. Returns 0 on success and -1 on failure.
+=head1 API
+
+The offered API is not meant for external use as many of the functions are
+relied upon by internal aspects of the perfSONAR-PS framework.
+
+=head2 init($self, $handler)
+    Called at startup by the daemon when this particular module is loaded into
+    the perfSONAR-PS deployment. Checks the configuration file for the
+    necessary items and fills in others when needed. Finally the message
+    handler loads the appropriate message types and eventTypes for this module.
+    Any other 'pre-startup' tasks should be placed in this function.
 =cut
 sub init {
     my ($self, $handler) = @_;
@@ -217,9 +235,11 @@ sub init {
     return 0;
 }
 
-=head2 needLS
-    returns true of false depending on whether or not this instance needs to
-    register with a lookup service.
+=head2 needLS($self)
+    This particular service (Status MA) should register with a lookup service. This
+    function simply returns the value set in the configuration file (either yes
+    or no, depending on user preference) to let other parts of the framework know
+    if LS registration is required.
 =cut
 sub needLS {
     my ($self) = @_;
@@ -227,9 +247,11 @@ sub needLS {
     return ($self->{CONF}->{"status"}->{"enable_registration"});
 }
 
-=head2 registerLS
-    This function reads in the list of link ids from the SQL backend and
-    registers them with the lookup service.
+=head2 registerLS($self $sleep_time)
+    Given the service information (specified in configuration) and the contents
+    of our backend database, we can contact the specified LS and register
+    ourselves. The $sleep_time ref can be set to specify how long before the
+    perfSONAR-PS daemon should call the function again.
 =cut
 sub registerLS {
     my ($self, $sleep_time) = @_;
@@ -276,12 +298,13 @@ sub registerLS {
     return $n;
 }
 
-=head2 handleEvent
+=head2 handleEvent($self, { output, messageId, messageType, messageParameters, eventType, subject, filterChain, data, rawRequest, doOutputMetadata })
+
     This function is called by the daemon whenever there is a metadata/data
     pair for this instance to handle. This function calls the subject parsing
-    routines that are common to all requests, calls the filter chaining parsing
-    routines which are common to all requests and then passes the results onto
-    the specific function depending on the request.
+    routines that are common to all requests, then calls the filter chaining
+    parsing routines which are common to all requests and then passes the
+    results onto the specific function depending on the request.
 =cut
 sub handleEvent {
     my ($self, @args) = @_;
