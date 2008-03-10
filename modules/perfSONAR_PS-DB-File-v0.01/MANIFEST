@@ -5,7 +5,6 @@ MANIFEST.SKIP
 Makefile.PL
 README
 lib/perfSONAR_PS/DB/File.pm
-modules
 perl-perfSONAR_PS-DB-File.spec
 t/perfSONAR_PS::DB::File.t
 t/testfiles/blank.xml

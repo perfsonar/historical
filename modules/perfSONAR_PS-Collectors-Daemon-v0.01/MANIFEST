@@ -5,7 +5,6 @@ Makefile.PL
 README
 lib/perfSONAR_PS/Collectors/Base.pm
 logger.conf
-modules
 perfsonar-collector
 perfsonar-collector.init
 perl-perfSONAR_PS-Collectors-Daemon.spec

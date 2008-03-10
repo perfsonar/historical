@@ -13,5 +13,4 @@ lib/perfSONAR_PS/Collectors/LinkStatus/Agent/TL1.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Link.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Status.pm
 lib/perfSONAR_PS/SNMPWalk.pm
-modules
 perl-perfSONAR_PS-Collectors-LinkStatus.spec

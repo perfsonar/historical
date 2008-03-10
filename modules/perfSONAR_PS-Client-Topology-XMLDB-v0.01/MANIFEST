@@ -5,5 +5,4 @@ MANIFEST.SKIP
 Makefile.PL
 README
 lib/perfSONAR_PS/Client/Topology/XMLDB.pm
-modules
 perl-perfSONAR_PS-Client-Topology-XMLDB.spec

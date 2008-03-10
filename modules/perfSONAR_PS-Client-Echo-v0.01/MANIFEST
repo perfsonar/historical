@@ -5,7 +5,6 @@ MANIFEST.SKIP
 Makefile.PL
 README
 lib/perfSONAR_PS/Client/Echo.pm
-modules
 perl-perfSONAR_PS-Client-Echo.spec
 psping
 t/perfSONAR_PS::Client::Echo.t
