@@ -552,7 +552,8 @@ sub lsRegisterRequestUpdateNew {
     }
     $parameters->{metadatadb}->remove( { name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
     $parameters->{metadatadb}->remove( { name => $parameters->{mdKey}, txn => $parameters->{dbTr}, error => \$error } );
-
+    $self->{STATE}->{"messageKeys"}->{$parameters->{mdKey}} = 0;
+    
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2 ) {
         if ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} ) {
             $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
@@ -1007,7 +1008,7 @@ sub lsQueryRequest {
         throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
     }
 
-    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), q{}, undef );
+    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
     my $mdPparameters = q{};
     $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
     if ( not $mdPparameters ) {
