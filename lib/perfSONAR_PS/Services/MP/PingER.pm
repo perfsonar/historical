@@ -522,7 +522,7 @@ sub getAgent {
 	$agent->count( $test->{count} );
 	$agent->packetSize( $test->{packetSize} );
 	$agent->ttl( $test->{ttl} );
-	$agent->interval( $test->{packetInterval} );
+	$agent->interval( $test->{interval} );
 	
 	# timeouts
 	$agent->timeout( $self->getConf('max_worker_lifetime') );
