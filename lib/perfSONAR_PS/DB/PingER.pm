@@ -384,7 +384,7 @@ sub insert_data
 	# handle mysql problems with booleans
 	if ( defined $hash->{'duplicates'} ) {
 		if ( $hash->{'duplicates'} eq 'false' 
-			|| $hash->{'duplicates'} == 0 ) {
+			|| ! $hash->{'duplicates'} ) {
 			$hash->{'duplicates'} = 0;
 		} else {
 			$hash->{'duplicates'} = 1;
@@ -392,7 +392,7 @@ sub insert_data
 	}
 	if ( defined $hash->{'outOfOrder'} ) {
 		if ( $hash->{'outOfOrder'} eq 'false' 
-			|| $hash->{'outOfOrder'} == 0 ) {
+			|| ! $hash->{'outOfOrder'} ) {
 			$hash->{'outOfOrder'} = 0;
 		} else {
 			$hash->{'outOfOrder'} = 1;
