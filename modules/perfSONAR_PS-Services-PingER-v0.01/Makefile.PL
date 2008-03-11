@@ -66,16 +66,16 @@ requires  'Rose::DB'  => 0;
 requires  'Rose::DB::Object'  => 0; 
 
 # perfsonar dependencies
-requires 'perfSONAR_PS::Common' => 0.06;
-requires 'perfSONAR_PS::Transport' => 0.06;
-requires 'perfSONAR_PS::Messages' => 0.06;
-requires 'perfSONAR_PS::DB::SQL' => 0.06;
-requires 'perfSONAR_PS::DB::File' => 0.06;
-requires 'perfSONAR_PS::Services::Base' => 0.06;
-requires 'perfSONAR_PS::Services::MA::General' => 0.06;
-requires 'perfSONAR_PS::XML::Document_string' => 0.06;
-requires 'perfSONAR_PS::Error_compat' => 0.06;
-requires 'perfSONAR_PS::Client::LS::Remote' => 0.06;
+requires 'perfSONAR_PS::Common' => 0.08;
+requires 'perfSONAR_PS::Transport' => 0.08;
+requires 'perfSONAR_PS::Messages' => 0.08;
+requires 'perfSONAR_PS::DB::SQL' => 0.08;
+requires 'perfSONAR_PS::DB::File' => 0.08;
+requires 'perfSONAR_PS::Services::Base' => 0.08;
+requires 'perfSONAR_PS::Services::MA::General' => 0.08;
+requires 'perfSONAR_PS::XML::Document_string' => 0.08;
+requires 'perfSONAR_PS::Error_compat' => 0.08;
+requires 'perfSONAR_PS::Client::LS::Remote' => 0.08;
 
 
 ###requires_external_bin 'mysql';
