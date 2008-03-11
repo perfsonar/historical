@@ -23,7 +23,6 @@ WriteMakefile(
         "perfSONAR_PS::Client::LS::Remote" => 0.08,
         "perfSONAR_PS::Common" => 0.08,
         "perfSONAR_PS::DB::File" => 0.08,
-        "perfSONAR_PS::DB::RRD" => 0.08,
         "perfSONAR_PS::DB::SQL" => 0.08,
         "perfSONAR_PS::DB::XMLDB" => 0.08,
         "perfSONAR_PS::Error_compat" => 0.08,
