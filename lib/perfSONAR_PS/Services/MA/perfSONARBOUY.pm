@@ -312,7 +312,7 @@ sub createStorage {
     my @dbSchema_nodes = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
     my @dbSchema_meshes = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type" );
     my @dbSchema_node_mesh_map = ( "mesh_id", "node_id" );
-    my $db = new perfSONAR_PS::DB::SQL( { name => $dbsource, schema => \@dbSchema_nodes, user => $conf->{'BWCentralDBUser'}, pass => $conf->{'BWCentralDBPass'} } );
+    my $db = new perfSONAR_PS::DB::SQL( { name => $dbsource, schema => \@dbSchema_nodes, user => $conf->{'BWCENTRALDBUSER'}, pass => $conf->{'BWCENTRALDBPASS'} } );
     $db->openDB;
 
     my $result_nodes = $db->query( { query => "select * from nodes" } );
