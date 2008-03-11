@@ -112,14 +112,14 @@ lib/perfSONAR_PS/Services/MP/Config/PingER.pm
 lib/perfSONAR_PS/Services/MP/Config/Schedule.pm
 lib/perfSONAR_PS/Services/MP/PingER.pm
 lib/perfSONAR_PS/Services/MP/Scheduler.pm
+logger.conf
 LICENSE
-link-modules.pl
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml
-perl-perfSONAR_PS-Services-PingER.spec
 README
+t/testfiles/pinger-landmarks.xml
 t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name.t

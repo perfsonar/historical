@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Pa
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = qv('v2.0');
+use version; our $VERSION = 0.08;
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter  - A base class, implements  'parameter'  element from the perfSONAR_PS RelaxNG schema

@@ -1,6 +1,6 @@
 package perfSONAR_PS::Services::MP::Config::Schedule;
 
-use version; our $VERSION = qv('2.0_0'); 
+use version; our $VERSION = 0.08; 
 
 =head1 NAME
 

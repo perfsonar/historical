@@ -49,12 +49,8 @@ package  perfSONAR_PS::DataModels::APIBuilder;
  use Log::Log4perl qw(get_logger);  
 BEGIN {
  use Exporter ();
- our ($VERSION, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-        use version;   $VERSION = qv('2.0'); 
-        # set the version for version checking
-        #$VERSION     = 2.0;
-        # if using RCS/CVS, this may be preferred
-        #$VERSION = sprintf "%d.%03d", q$Revision: 1.1 $ =~ /(\d+)/g;
+ our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+ use version; our $VERSION = 0.08;
         %EXPORT_TAGS = ();
         use base qw(Exporter);
         @EXPORT_OK     = qw( );

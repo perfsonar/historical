@@ -17,7 +17,7 @@ name             'perfSONAR_PS-Services-PingER';
 author_from      'lib/perfSONAR_PS/Datatypes/PingER.pm';
 license_from     'LICENSE';
 license          'perl';
-version          '1.0';
+version          '0.08';
 perl_version     '5.008';
 all_from 	 'lib/perfSONAR_PS/';
 
@@ -71,7 +71,6 @@ requires 'perfSONAR_PS::Transport' => 0.06;
 requires 'perfSONAR_PS::Messages' => 0.06;
 requires 'perfSONAR_PS::DB::SQL' => 0.06;
 requires 'perfSONAR_PS::DB::File' => 0.06;
-#requires 'perfSONAR_PS::DB::RRD' => 0.06;
 requires 'perfSONAR_PS::Services::Base' => 0.06;
 requires 'perfSONAR_PS::Services::MA::General' => 0.06;
 requires 'perfSONAR_PS::XML::Document_string' => 0.06;
@@ -83,8 +82,7 @@ requires 'perfSONAR_PS::Client::LS::Remote' => 0.06;
 requires_external_bin 'sqlite3';
 #requires_external_bin 'xml2-config';
 
-#no_index directory  => 't';
-no_index directory  => '.svn';
+no_index directory  => 't';
 install_scripts => 'bin/';
 
 auto_install;

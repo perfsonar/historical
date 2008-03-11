@@ -79,7 +79,7 @@ package perfSONAR_PS::DB::PingER;
 use Rose::DB;
 our @ISA = qw(Rose::DB);
 
-use version; our $VERSION = qv('2.0_0'); 
+use version; our $VERSION = 0.08; 
 
 use Log::Log4perl qw( get_logger );
 our $logger = get_logger("perfSONAR_PS::DB::PingER");

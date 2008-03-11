@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPo
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = qv('v2.0');
+use version; our $VERSION = 0.08;
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface::IfAddress  - A base class, implements  'ifAddress'  element from the perfSONAR_PS RelaxNG schema

@@ -38,7 +38,7 @@ Creates a new object, pass hash ref as collection of event types for tools names
 
 use strict;
 use warnings;
-use version; our $VERSION = qv('2.0_0'); 
+use version; our $VERSION = 0.08; 
 use Log::Log4perl qw(get_logger);
 use Class::Accessor;
 use Class::Fields;

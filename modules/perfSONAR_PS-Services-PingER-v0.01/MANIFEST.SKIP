@@ -12,3 +12,5 @@ CVS/.*
 ^pm_to_blib$
 ^tmp/
 ~$
+^perl-perfSONAR.*\.spec$
+^link-modules.pl$

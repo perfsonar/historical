@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::Datum;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = qv('v2.0');
+use version; our $VERSION = 0.08;
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::Datum  - A base class, implements  'datum'  element from the perfSONAR_PS RelaxNG schema
