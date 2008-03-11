@@ -31,6 +31,21 @@ WriteMakefile(
         "perfSONAR_PS::Services::Base" => 0.08,
         "perfSONAR_PS::Services::MA::General" => 0.08,
         "strict" => 0,
-        "warnings" => 0
+        "warnings" => 0,
+        "Carp" => 0,
+        "CGI::Carp" => 0,
+        "Date::Manip" => 0,
+        "DBI" => 0,
+        "Fcntl" => 0,
+        "File::Basename" => 0,
+        "FileHandle" => 0,
+        "File::Path" => 0,
+        "FindBin" => 0,
+        "Math::BigFloat" => 0,
+        "Math::BigInt" => 0,
+        "POSIX" => 0,
+        "Sys::Hostname" => 0,
+        "Sys::Syslog" => 0,
+        "Term::ReadKey" => 0
     }
 );
