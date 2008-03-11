@@ -381,6 +381,24 @@ sub insert_data
 	my ( $object, $manager ) = 
 			$self->get_rose_objects_for_timestamp( $hash->{'timestamp'}, undef, 1 );
 
+	# handle mysql problems with booleans
+	if ( defined $hash->{'duplicates'} ) {
+		if ( $hash->{'duplicates'} eq 'false' 
+			|| $hash->{'duplicates'} == 0 ) {
+			$hash->{'duplicates'} = 0;
+		} else {
+			$hash->{'duplicates'} = 1;
+		}
+	}
+	if ( defined $hash->{'outOfOrder'} ) {
+		if ( $hash->{'outOfOrder'} eq 'false' 
+			|| $hash->{'outOfOrder'} == 0 ) {
+			$hash->{'outOfOrder'} = 0;
+		} else {
+			$hash->{'outOfOrder'} = 1;
+		}
+	}
+
 	my $data = $object->[0]->new(
 					'metaID'	=> $metadata->metaID(),
 					
