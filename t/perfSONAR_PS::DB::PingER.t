@@ -20,7 +20,7 @@ print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 
 # create a blank database using sqlite for now
-`rm $tempDB; sqlite3 $tempDB < MA/PingER/create_pingerMA_SQLite.sql`; 
+`rm $tempDB; sqlite3 $tempDB < util/create_pingerMA_SQLite.sql`; 
 ok( -e $tempDB, "create temporary database $tempDB" );
 
 # use class
@@ -244,8 +244,18 @@ my @dates = sort { $a <=> $b } keys %unique;
 for ( my $i=0; $i<scalar @$obj; $i++ ) {
 	my $date = shift @dates;
 	#print "Got " . $obj->[$i] . " : " . $manager->[$i] . " --> DATE: $date\n";
-	ok( $obj->[$i] eq $basename . '::Data' . $date && $manager->[$i] eq $basename . '::Data' . $date . '::Manager', 'dynamic rose object load using static for timerange');
+	ok( $obj->[$i] eq $basename . '::Data' . $date && $manager->[$i] eq $basename . '::Data' . $date . '::Manager', 'dynamic rose object load for table ' . $date . ' using static for timerange');
 }
+
+# try loading again
+my @dates = sort { $a <=> $b } keys %unique;
+
+( $obj, $manager ) = &perfSONAR_PS::DB::PingER::get_rose_objects_for_timestamp( $time_x, $time_y, 1 );
+for ( my $i=0; $i<scalar @$obj; $i++ ) {
+        my $date = shift @dates;
+	ok( $obj->[$i] eq $basename . '::Data' . $date && $manager->[$i] eq $basename . '::Data' . $date . '::Manager', 'reload of rose object load for table ' . $date . ' using static for timerange');
+}
+
 
 # insert some data
 

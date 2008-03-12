@@ -519,12 +519,15 @@ sub get_rose_objects_for_timestamp
 		
 		push @objects, $object;
 		push @managers, $manager;
-		
+	
+		#$logger->fatal( "isa: " . $object->isa( $basename . '::Data' ) );
+		#$logger->fatal( "isa not: " . $object->isa( 'Data::Dumper' ) );
+		#$logger->fatal( "man: " . $manager->isa( 'Rose::DB::Object::Manager') );	
+
 		# inherit the base data table and create it if necessary
-		unless ( $object->isa( $basename . '::Data' )
-				&& $object->meta->is_initialized 
-				&& $manager->isa( 'Rose::DB::Object::Manager')
-				) {
+		if ( ! ( $object->isa( $basename . '::Data' )
+			&& $manager->isa( 'Rose::DB::Object::Manager') )
+		) {
 	
 			$logger->debug( "Dynamic load of '$object' with manager '$manager'" );
 			# need to turn off strict to enable dynamic loading
@@ -566,6 +569,8 @@ sub get_rose_objects_for_timestamp
 				#	$logger->debug( "table $table already exists");
 				#}
 			}
+		} else {
+			$logger->debug( "Object '$object' with manager '$manager' already loaded" );
 		}
 	}
 
