@@ -7,5 +7,4 @@ export PSHOME=/usr/local/perfSONAR-PS
 
 export PERL5LIB=$PSHOME/lib
 
-$PSHOME/perfsonar-daemon.pl --config=perfSONAR.conf --verbose --logger=logger.conf &
-
+$PSHOME/perfsonar-daemon.pl --config=perfSONAR.conf --logger=logger.conf &
