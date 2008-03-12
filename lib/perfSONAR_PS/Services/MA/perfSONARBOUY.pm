@@ -55,6 +55,7 @@ use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::SQL;
+use perfSONAR_PS::ParameterValidation;
 
 my %ma_namespaces = (
     nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -295,7 +296,7 @@ by providing a fast handle that points directly to a key.
 
 sub createStorage {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { metadatadb => 0 } );
+    my $parameters = validateParams( @args, { metadatadb => 0 } );
 
     # XXX: jason 3/4/08
     # have owmesh file specify the host instead, this assumes the mysql database
@@ -550,7 +551,7 @@ return this in response to a request.
 
 sub prepareDatabases {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 0 } );
+    my $parameters = validateParams( @args, { doc => 0 } );
 
     my $error = q{};
     my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"}, cont => $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
@@ -572,7 +573,7 @@ framework know if LS registration is required.
 
 sub needLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     return ( $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"} );
 }
@@ -586,10 +587,10 @@ We then sleep for some amount of time and do it again.
 =cut
 
 sub registerLS {
-    my ( $self, $sleep_time ) = validate_pos( @_, 1, { type => SCALARREF }, );
+    my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
     #    my ( $self, @args ) = @_;
-    #    my $parameters = validate( @args, { sleep_time => 0 } );
+    #    my $parameters = validateParams( @args, { sleep_time => 0 } );
 
     my ( $status, $res );
     my $ls = q{};
@@ -644,7 +645,7 @@ sub handleMessageBegin {
     my ( $self, $ret_message, $messageId, $messageType, $msgParams, $request, $retMessageType, $retMessageNamespaces ) = @_;
 
     #   my ($self, @args) = @_;
-    #      my $parameters = validate(@args,
+    #      my $parameters = validateParams(@args,
     #            {
     #                ret_message => 1,
     #                messageId => 1,
@@ -669,7 +670,7 @@ sub handleMessageEnd {
     my ( $self, $ret_message, $messageId ) = @_;
 
     #   my ($self, @args) = @_;
-    #      my $parameters = validate(@args,
+    #      my $parameters = validateParams(@args,
     #            {
     #                ret_message => 1,
     #                messageId => 1
@@ -689,7 +690,7 @@ future releases.
 
 sub handleEvent {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             output            => 1,
@@ -874,7 +875,7 @@ currently because it is not time sensitive.
 
 sub maMetadataKeyRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             output             => 1,
@@ -946,7 +947,7 @@ return the response.
 
 sub metadataKeyRetrieveKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             metadatadb         => 1,
@@ -1021,7 +1022,7 @@ be resolved and used to augment (i.e. 'cook') the key.
 
 sub metadataKeyRetrieveMetadataData {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             metadatadb         => 1,
@@ -1158,7 +1159,7 @@ with the database of choice (i.e. mysql, sqlite, others?).
 
 sub maSetupDataRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             output             => 1,
@@ -1234,7 +1235,7 @@ sqlite).
 
 sub setupDataRetrieveKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             metadatadb         => 1,
@@ -1336,7 +1337,7 @@ handling function.
 
 sub setupDataRetrieveMetadataData {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             metadatadb         => 1,
@@ -1474,7 +1475,7 @@ only interact with rrd files and sql databases.
 
 sub handleData {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             id                 => 1,
@@ -1519,7 +1520,7 @@ return in the response message.
 
 sub retrieveSQL {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             d                  => 1,
@@ -1634,7 +1635,7 @@ Re-construct the parameters block.
 
 sub addSelectParameters {
     my ( $self, @args ) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             parameter_block => 1,

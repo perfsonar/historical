@@ -67,6 +67,7 @@ use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
 use perfSONAR_PS::Datatypes::Message;
 use perfSONAR_PS::Datatypes::PingER;
 use perfSONAR_PS::DB::PingER;
+use perfSONAR_PS::ParameterValidation;
 
 use perfSONAR_PS::Services::Base;
 use base 'perfSONAR_PS::Services::Base';
@@ -393,7 +394,7 @@ main access into MA from Daemon Architecture
 sub handleEvent()
 {
     my ($self, @args) = @_;
-    my $parameters = validate(@args,
+    my $parameters = validateParams(@args,
             {
                 output => 1,
                 messageId => 1,
@@ -499,7 +500,7 @@ sub __handleEvent {
 
 sub mergeMetadata {
 	my ($self, @args) = @_;
-	my $parameters = validate(@args,
+	my $parameters = validateParams(@args,
     		{
     			messageType => 1,
     			eventType => 1,

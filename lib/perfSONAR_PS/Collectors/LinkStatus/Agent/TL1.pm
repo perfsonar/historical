@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
+use perfSONAR_PS::ParameterValidation;
 
 our $VERSION = 0.08;
 
@@ -31,7 +32,7 @@ my %stateMappings = (
 sub new {
     my ($class, @params) = @_;
 
-    my $parameters = validate(@params,
+    my $parameters = validateParams(@params,
             {
             type => 1,
             hostType => 0,
@@ -171,7 +172,7 @@ use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT',
 sub new {
     my ($class, @params) = @_;
 
-    my $parameters = validate(@params,
+    my $parameters = validateParams(@params,
             {
             type => 1,
             address => 1,

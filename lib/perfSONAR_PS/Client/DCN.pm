@@ -27,6 +27,7 @@ use English qw( -no_match_vars );
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract );
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Echo;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package { instance })
 
@@ -37,7 +38,7 @@ to be contacted for queries.  This can also be set via 'setInstance'.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { instance => 0 } );
+    my $parameters = validateParams( @args, { instance => 0 } );
 
     my $self = fields::new($package);
 
@@ -64,7 +65,7 @@ Required argument 'instance' is the LS instance to be contacted for queries.
 
 sub setInstance {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { instance => 1 } );
+    my $parameters = validateParams( @args, { instance => 1 } );
 
     $self->{INSTANCE}                    = $parameters->{"instance"};
     $self->{CONF}->{SERVICE_ACCESSPOINT} = $parameters->{"instance"};
@@ -81,7 +82,7 @@ Calls the LS instance with the sent message and returns the response (if any).
 
 sub callLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { message => 1 } );
+    my $parameters = validateParams( @args, { message => 1 } );
 
     unless ( $self->{INSTANCE} ) {
         $self->{LOGGER}->error("Instance not defined.");
@@ -136,7 +137,7 @@ registration of the 'DCN' service.
 
 sub getLSKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     my $msg = $self->callLS( { message => $self->createKeyRequest( {} ) } );
     unless ($msg) {
@@ -162,7 +163,7 @@ failure.
 
 sub getTopologyKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { accessPoint => 1, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
+    my $parameters = validateParams( @args, { accessPoint => 1, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
     my $msg = $self->callLS( { message => $self->createKeyRequest( { accessPoint => $parameters->{accessPoint}, serviceName => $parameters->{serviceName}, serviceType => $parameters->{serviceType}, serviceDescription => $parameters->{serviceDescription} } ) } );
     unless ($msg) {
@@ -185,7 +186,7 @@ Get the domain for a topology service given a key.
 
 sub getDomainKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1 } );
+    my $parameters = validateParams( @args, { key => 1 } );
     my @domains = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -229,7 +230,7 @@ Get the domain of a topology service given service information
 
 sub getDomainService {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { accessPoint => 1, serviceName => 0, serviceType => 0 } );
+    my $parameters = validateParams( @args, { accessPoint => 1, serviceName => 0, serviceType => 0 } );
     my @domains = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -281,7 +282,7 @@ particular domain string.
 
 sub getTopologyServices {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { domain => 0 } );
+    my $parameters = validateParams( @args, { domain => 0 } );
     my %services = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -338,7 +339,7 @@ Given a name (i.e. DNS 'hostname') return any matching link ids.
 
 sub nameToId {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { name => 1 } );
+    my $parameters = validateParams( @args, { name => 1 } );
     my @ids = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -374,7 +375,7 @@ Given a link id return any matching names (i.e. DNS 'hostname').
 
 sub idToName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 1 } );
+    my $parameters = validateParams( @args, { id => 1 } );
     my @names = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -410,7 +411,7 @@ Given an id AND a name, register this infomration to the LS instance.
 
 sub insert {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 1, name => 1 } );
+    my $parameters = validateParams( @args, { id => 1, name => 1 } );
 
     unless ( $self->{LS_KEY} ) {
         $self->{LS_KEY} = $self->getLSKey;
@@ -448,7 +449,7 @@ Given an id or a name, delete this specific info from the LS instance.
 
 sub remove {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 0, name => 0 } );
+    my $parameters = validateParams( @args, { id => 0, name => 0 } );
 
     unless ( $parameters->{id} or $parameters->{name} ) {
         $self->{LOGGER}->error("Must supply either a name or id.");
@@ -497,7 +498,7 @@ Return all link id to hostname mappings in the LS.
 
 sub getMappings {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
     my @lookup = ();
 
     my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
@@ -533,7 +534,7 @@ Construct the service metadata given the default values for this module.
 
 sub createService {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
+    my $parameters = validateParams( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
     my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
     $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
@@ -566,7 +567,7 @@ Construct the key metadata given the default values for this module.
 
 sub createKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     my $key = "    <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
     $key .= "      <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
@@ -585,7 +586,7 @@ Construct a node given an id and a name.
 
 sub createNode {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 0, name => 0 } );
+    my $parameters = validateParams( @args, { id => 0, name => 0 } );
 
     unless ( $parameters->{id} or $parameters->{name} ) {
         $self->{LOGGER}->error("Must supply either a name or id.");
@@ -614,7 +615,7 @@ this function.
 
 sub createQueryRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1 } );
+    my $parameters = validateParams( @args, { query => 1 } );
 
     my $request = q{};
     my $mdId    = "metadata." . genuid();
@@ -645,7 +646,7 @@ the information to remove.
 
 sub createDeregisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 0, name => 0 } );
+    my $parameters = validateParams( @args, { id => 0, name => 0 } );
 
     unless ( $parameters->{id} or $parameters->{name} ) {
         $self->{LOGGER}->error("Must supply either a name or id.");
@@ -683,7 +684,7 @@ mapping to register.
 
 sub createRegisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { id => 1, name => 1 } );
+    my $parameters = validateParams( @args, { id => 1, name => 1 } );
 
     unless ( $self->{LS_KEY} ) {
         $self->{LS_KEY} = $self->getLSKey;
@@ -719,7 +720,7 @@ mapping to register.
 
 sub createKeyRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
+    my $parameters = validateParams( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
     my $request = q{};
     my $mdId    = "metadata." . genuid();

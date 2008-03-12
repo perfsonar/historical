@@ -29,6 +29,7 @@ use English qw( -no_match_vars );
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package, { env, cont, ns }) 
 
@@ -44,7 +45,7 @@ The arguments can be set (and re-set) via the appropriate function calls.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { env => 0, cont => 0, ns => 0 } );
+    my $parameters = validateParams( @args, { env => 0, cont => 0, ns => 0 } );
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::XMLDB");
@@ -70,7 +71,7 @@ installation directory).
 
 sub setEnvironment {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { env => 1 } );
+    my $parameters = validateParams( @args, { env => 1 } );
 
     if ( defined $parameters->{env} and $parameters->{env} ) {
         $self->{ENVIRONMENT} = $parameters->{env};
@@ -89,7 +90,7 @@ as 'snmpstore.dbxml'; many containers can live in a single environment).
 
 sub setContainer {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { cont => 1 } );
+    my $parameters = validateParams( @args, { cont => 1 } );
 
     if ( defined $parameters->{cont} and $parameters->{cont} ) {
         $self->{CONTAINERFILE} = $parameters->{cont};
@@ -109,7 +110,7 @@ is sending mappings that will not be used).
 
 sub setNamespaces {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { ns => 1 } );
+    my $parameters = validateParams( @args, { ns => 1 } );
 
     if ( defined $parameters->{ns} and $parameters->{ns} ) {
         $self->{NAMESPACES} = \%{ $parameters->{ns} };
@@ -131,7 +132,7 @@ left blank for an atomic operation.  The error argument is optional.
 
 sub prep {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -200,7 +201,7 @@ operation.  The error argument is optional.
 
 sub openDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -269,7 +270,7 @@ for an atomic operation.  The error argument is optional.
 
 sub indexDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -331,7 +332,7 @@ for an atomic operation.  The error argument is optional.
 
 sub deIndexDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -391,7 +392,7 @@ Creates a new transaction object.  The error argument is optional.
 
 sub getTransaction {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     my $dbTr = q{};
     eval {
@@ -436,7 +437,7 @@ Given a transaction object, commit it.  The error argument is optional.
 
 sub commitTransaction {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     eval { $parameters->{txn}->commit() if $parameters->{txn}; };
     undef $parameters->{txn};
@@ -476,7 +477,7 @@ Given a transaction object, abort it.  The error argument is optional.
 
 sub abortTransaction {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { txn => 0, error => 0 } );
 
     eval { $parameters->{txn}->abort() if $parameters->{txn}; };
     undef $parameters->{txn};
@@ -531,7 +532,7 @@ left blank for an atomic operation.  The error argument is optional.
 
 sub query {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, txn => 0, error => 0 } );
 
     my @resString = ();
     my $dbTr      = q{};
@@ -628,7 +629,7 @@ operation.  The error argument is optional.
 
 sub querySet {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, txn => 0, error => 0 } );
 
     my $res = new XML::LibXML::NodeList;
 
@@ -729,7 +730,7 @@ left blank for an atomic operation.  The error argument is optional.
 
 sub queryForName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, txn => 0, error => 0 } );
 
     my @resString = ();
 
@@ -829,7 +830,7 @@ operation.  The error argument is optional.
 
 sub queryByName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { name => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { name => 1, txn => 0, error => 0 } );
 
     my $content = q{};
 
@@ -906,7 +907,7 @@ The error argument is optional.
 
 sub getDocumentByName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { name => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { name => 1, txn => 0, error => 0 } );
 
     my $content = q{};
 
@@ -986,7 +987,7 @@ error argument is optional.
 
 sub updateByName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { content => 1, name => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { content => 1, name => 1, txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -1061,7 +1062,7 @@ The error argument is optional.
 
 sub count {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, txn => 0, error => 0 } );
 
     my $size = -1;
 
@@ -1145,7 +1146,7 @@ atomic operation.  The error argument is optional.
 
 sub insertIntoContainer {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { content => 1, name => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { content => 1, name => 1, txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -1225,7 +1226,7 @@ for an atomic operation.  The error argument is optional.
 
 sub insertElement {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, content => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, content => 1, txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -1304,7 +1305,7 @@ The error argument is optional.
 
 sub remove {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { name => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { name => 1, txn => 0, error => 0 } );
 
     my $dbTr   = q{};
     my $atomic = 1;
@@ -1371,7 +1372,7 @@ Frees local elements for object destruction.
 
 sub closeDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     foreach my $key ( sort keys %{$self} ) {
         if ( $key ne "ENV" and $key ne "MANAGER" ) {
@@ -1394,7 +1395,7 @@ with storing XML data.  The 'type' argument is used to type the store file.
 
 sub wrapStore {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { content => 0, type => 0 } );
+    my $parameters = validateParams( @args, { content => 0, type => 0 } );
 
     my $store = "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
     if ( exists $parameters->{type} and $parameters->{type} ) {

@@ -33,6 +33,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Time;
 use perfSONAR_PS::Error_compat qw/:try/;
+use perfSONAR_PS::ParameterValidation;
 
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
@@ -258,7 +259,7 @@ sub needLS {
 
 sub handleEvent {
     my ($self, @args) = @_;
-      my $parameters = validate(@args,
+      my $parameters = validateParams(@args,
     		{
     			output => 1,
     			messageId => 1,

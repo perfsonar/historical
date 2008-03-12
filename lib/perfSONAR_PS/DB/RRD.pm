@@ -25,6 +25,7 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package, { path, name, dss, error })
 
@@ -41,7 +42,7 @@ The arguments can be set (and re-set) via the appropriate function calls.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { path => 0, name => 0, dss => 0, error => 0 } );
+    my $parameters = validateParams( @args, { path => 0, name => 0, dss => 0, error => 0 } );
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::RRD");
@@ -75,7 +76,7 @@ Sets the RRD filename for the RRD object.
 
 sub setFile {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { file => 1 } );
+    my $parameters = validateParams( @args, { file => 1 } );
 
     if ( $parameters->{file} =~ m/\.rrd$/mx ) {
         $self->{NAME} = $parameters->{file};
@@ -95,7 +96,7 @@ Sets the 'path' to the RRD binary for the RRD object.
 
 sub setPath {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { path => 1 } );
+    my $parameters = validateParams( @args, { path => 1 } );
 
     if ( $parameters->{path} =~ m/rrdtool$/mx ) {
         $self->{PATH} = $parameters->{path};
@@ -115,7 +116,7 @@ Sets several variables (as a hash reference) in the RRD object.
 
 sub setVariables {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { dss => 1 } );
+    my $parameters = validateParams( @args, { dss => 1 } );
 
     $self->{DATASOURCES} = \%{ $parameters->{dss} };
     return 0;
@@ -129,7 +130,7 @@ Sets a variable value in the RRD object.
 
 sub setVariable {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { ds => 1 } );
+    my $parameters = validateParams( @args, { ds => 1 } );
 
     $self->{DATASOURCES}->{ $parameters->{ds} } = q{};
     return 0;
@@ -143,7 +144,7 @@ Sets the error variable for the RRD object.
 
 sub setError {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 1 } );
+    my $parameters = validateParams( @args, { error => 1 } );
 
     if ( $parameters->{error} == 1 ) {
         $RRDp::error_mode = 'catch';
@@ -164,7 +165,7 @@ Gets any error returned from the underlying RRDp module for this RRD object.
 
 sub getErrorMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     if ($RRDp::error) {
         return $RRDp::error;
@@ -180,7 +181,7 @@ sub getErrorMessage {
 
 sub openDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     if ( exists $self->{PATH} and exists $self->{NAME} ) {
         RRDp::start $self->{PATH};
@@ -200,7 +201,7 @@ sub openDB {
 
 sub closeDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     if ( exists $self->{PATH} and exists $self->{NAME} ) {
         my $status = RRDp::end;
@@ -224,7 +225,7 @@ Query a RRD with specific times/resolutions.
 
 sub query {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { cf => 1, resolution => 0, start => 0, end => 0 } );
+    my $parameters = validateParams( @args, { cf => 1, resolution => 0, start => 0, end => 0 } );
 
     my %rrd_result   = ();
     my @rrd_headings = ();
@@ -253,7 +254,7 @@ sub query {
         return %rrd_result;
     }
 
-    if ( defined $$answer and $$answer ) {
+    if ( $$answer ) {
         my @array = split( /\n/mx, $$answer );
         my $len = $#{@array};
         for my $x ( 0 .. $len ) {
@@ -287,7 +288,7 @@ first, and reuse time figures.
 
 sub insert {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { time => 1, ds => 1, value => 1 } );
+    my $parameters = validateParams( @args, { time => 1, ds => 1, value => 1 } );
 
     $self->{COMMIT}->{ $parameters->{time} }->{ $parameters->{ds} } = $parameters->{value};
     return 0;
@@ -301,7 +302,7 @@ sub insert {
 
 sub insertCommit {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     my $answer = q{};
     my @result = ();
@@ -346,7 +347,7 @@ Returns the first value of an RRD.
 
 sub firstValue {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     RRDp::cmd "first " . $self->{NAME};
     my $answer = RRDp::read;
@@ -365,7 +366,7 @@ Returns the last value of an RRD.
 
 sub lastValue {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     RRDp::cmd "last " . $self->{NAME};
     my $answer = RRDp::read;
@@ -384,7 +385,7 @@ Returns the last time the RRD was updated.
 
 sub lastTime {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     RRDp::cmd "lastupdate " . $self->{NAME};
     my $answer = RRDp::read;

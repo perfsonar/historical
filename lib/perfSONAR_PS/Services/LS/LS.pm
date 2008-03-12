@@ -51,6 +51,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Error_compat qw/:try/;
+use perfSONAR_PS::ParameterValidation;
 
 my %ls_namespaces = (
     nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -174,7 +175,7 @@ currently disabled.
 
 sub needLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     return 0;
 }
@@ -191,7 +192,7 @@ will be removed.
 
 sub cleanLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -273,7 +274,7 @@ applicable.
 
 sub handleMessageParameters {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { msgParams => 1 } );
+    my $parameters = validateParams( @args, { msgParams => 1 } );
 
     foreach my $p ( $parameters->{msgParams}->getChildrenByTagNameNS( $ls_namespaces{"nmwg"}, "parameter" ) ) {
         if ( $p->getAttribute("name") eq "lsTTL" ) {
@@ -310,7 +311,7 @@ Opens the XMLDB and returns the handle if there was not an error.
 
 sub prepareDatabases {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 0 } );
+    my $parameters = validateParams( @args, { doc => 0 } );
 
     my $error      = q{};
     my $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -337,7 +338,7 @@ a valid key in the datbase.
 
 sub isValidKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { metadatadb => 1, key => 1 } );
+    my $parameters = validateParams( @args, { metadatadb => 1, key => 1 } );
 
     my $error = q{};
     my $result = $parameters->{metadatadb}->queryByName( { name => $parameters->{key}, txn => q{}, error => \$error } );
@@ -358,7 +359,7 @@ the message to the appropriate location based on message type.
 
 sub handleMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
+    my $parameters = validateParams( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
 
     my $error   = q{};
     my $counter = 0;
@@ -477,7 +478,7 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, request => 1, m => 1, d => 1, metadatadb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1, metadatadb => 1 } );
 
     my $error = q{};
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -530,7 +531,7 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequestUpdateNew {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, service => 1, sec => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, service => 1, sec => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -621,7 +622,7 @@ control info is simply updated, and the new data is appended.
 
 sub lsRegisterRequestUpdate {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, sec => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, sec => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -695,7 +696,7 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequestNew {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, metadatadb => 1, dbTr => 1, m => 1, d => 1, sec => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, metadatadb => 1, dbTr => 1, m => 1, d => 1, sec => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -790,7 +791,7 @@ The following is a brief outline of the procedures:
 
 sub lsDeregisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, request => 1, m => 1, d => 1, metadatadb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1, metadatadb => 1 } );
 
     my $msg   = q{};
     my $error = q{};
@@ -900,7 +901,7 @@ The following is a brief outline of the procedures:
 
 sub lsKeepaliveRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
 
     my $error = q{};
     my $mdId  = "metadata." . genuid();
@@ -975,7 +976,7 @@ Any database errors will cause the given metadata/data pair to fail.
 
 sub lsQueryRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
 
     my $error = q{};
     my $mdId  = "metadata." . genuid();
@@ -1036,7 +1037,7 @@ Any database errors will cause the given metadata/data pair to fail.
 
 sub lsKeyRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
 
     my $error = q{};
     my $service = find( $parameters->{m}, "./perfsonar:subject/psservice:service", 1 );

@@ -38,6 +38,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
 use perfSONAR_PS::Topology::ID;
+use perfSONAR_PS::ParameterValidation;
 
 our $VERSION = 0.08;
 
@@ -308,7 +309,7 @@ sub registerLS {
 =cut
 sub handleEvent {
     my ($self, @args) = @_;
-    my $parameters = validate(@args,
+    my $parameters = validateParams(@args,
             {
                 output => 1,
                 messageId => 1,

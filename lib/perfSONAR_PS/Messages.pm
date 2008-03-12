@@ -2,13 +2,29 @@ package perfSONAR_PS::Messages;
 
 use strict;
 use warnings;
-use Exporter;
-use Log::Log4perl qw(get_logger :nowarn);
-
-use perfSONAR_PS::Common;
-use Params::Validate qw(:all);
 
 our $VERSION = 0.08;
+
+=head1 NAME
+
+perfSONAR_PS::Messages - A module that provides common methods for performing
+actions on message constructs.
+
+=head1 DESCRIPTION
+
+This module is a catch all for message related methods in the perfSONAR-PS
+framework.  As such there is no 'common thread' that each method shares.  This
+module IS NOT an object, and the methods can be invoked directly (and
+sparingly). 
+
+=cut
+
+use Exporter;
+use Log::Log4perl qw(get_logger :nowarn);
+use Params::Validate qw(:all);
+
+use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 use base 'Exporter';
 
@@ -32,6 +48,11 @@ our @EXPORT = (
         'getErrorResponseMessage',
         );
 
+=head2 startMessage($output, $id, $messageIdRef, $type, $content, $namespaces)
+
+Start message element.
+
+=cut
 
 sub startMessage {
     my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
@@ -45,11 +66,23 @@ sub startMessage {
     return $output->startElement(prefix => "nmwg", tag => "message", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces, content => $content);
 }
 
+=head2 endMessage($output)
+
+End message element.
+
+=cut
+
 sub endMessage {
     my ($output) = @_;
 
     return $output->endElement("message");
 }
+
+=head2 startMetadata($output, $id, $metadataIdRef, $namespaces)
+
+Start a metadata element.
+
+=cut
 
 sub startMetadata {
     my ($output, $id, $metadataIdRef, $namespaces) = @_;  
@@ -67,12 +100,24 @@ sub startMetadata {
     return $output->startElement(prefix => "nmwg", tag => "metadata", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, extra_namespaces => $namespaces);
 }
 
+=head2 endMetadata($output)
+
+End a metadata element.
+
+=cut
+
 sub endMetadata {
     my ($output) = @_;  
     my $logger = get_logger("perfSONAR_PS::Messages");
 
     return $output->endElement("metadata");
 }
+
+=head2 startData($output, $id, $metadataIdRef, $namespaces)
+
+Start a data element.
+
+=cut
 
 sub startData {
     my ($output, $id, $metadataIdRef, $namespaces) = @_;  
@@ -86,6 +131,12 @@ sub startData {
     return $output->startElement(prefix => "nmwg", tag => "data", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id, metadataIdRef=>$metadataIdRef }, extra_namespaces => $namespaces);
 }
 
+=head2 endData($output)
+
+End a data element
+
+=cut
+
 sub endData {
     my ($output) = @_;  
     my $logger = get_logger("perfSONAR_PS::Messages");
@@ -93,17 +144,35 @@ sub endData {
     return $output->endElement("data");
 }
 
+=head2 startParameters($output)
+
+Start a parameters element.
+
+=cut
+
 sub startParameters {
     my ($output, $id) = @_;
 
     return $output->startElement(prefix => "nmwg", tag => "parameters", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id=>$id });
 }
 
+=head2 endParameters($output)
+
+End a parameters element.
+
+=cut
+
 sub endParameters {
     my ($output) = @_;
 
     return $output->endElement("parameters");
 }
+
+=head2 addParameter($output, $name, $value, $args)
+
+Add a parameter element, returns the results.
+
+=cut
 
 # XXX this should probably ensure that the parameters are being created inside a parameters block
 sub addParameter {
@@ -119,6 +188,12 @@ sub addParameter {
     
     return $output->createElement(prefix => "nmwg", tag => "parameter", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => \%attrs, content => $value);
 }
+
+=head2 getResultCodeMessage($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content)
+
+Create an entire result code message.
+
+=cut
 
 sub getResultCodeMessage {
     my ($output, $id, $messageIdRef, $metadataIdRef, $type, $event, $description, $namespaces, $escape_content) = @_;   
@@ -139,6 +214,12 @@ sub getResultCodeMessage {
 
     return 0;
 }
+
+=head2 getResultCodeMetadata($output, $id, $metadataIdRef, $event)
+
+Create a metadata element to pair with a result code.
+
+=cut
 
 sub getResultCodeMetadata {
     my ($output, $id, $metadataIdRef, $event) = @_; 
@@ -163,7 +244,12 @@ sub getResultCodeMetadata {
     return 0;
 }
 
-# Changes: adds an 'escape_content' parameter at the end
+=head2 getResultCodeData($output, $id, $metadataIdRef, $description, $escape_content)
+
+Create a data element for a result code.
+
+=cut
+
 sub getResultCodeData {
     my ($output, $id, $metadataIdRef, $description, $escape_content) = @_;  
     my $logger = get_logger("perfSONAR_PS::Messages");
@@ -184,6 +270,12 @@ sub getResultCodeData {
     return 0;
 }
 
+=head2 statusReport($output, $mdId, $mdIdRef, $dId, $eventType, $msg)
+
+Create a 'status' pair of data and metadata.
+
+=cut
+
 sub statusReport {
     my ($output, $mdId, $mdIdRef, $dId, $eventType, $msg) = @_;
     my $logger = get_logger("perfSONAR_PS::Messages");
@@ -195,6 +287,12 @@ sub statusReport {
     return getResultCodeData($output, $dId, $mdId, $msg, 1); 
 }
 
+=head2 createMessage($output, $id, $messageIdRef, $type, $content, $namespaces)
+
+Craft a message element.
+
+=cut
+
 sub createMessage {
     my ($output, $id, $messageIdRef, $type, $content, $namespaces) = @_;  
     my $logger = get_logger("perfSONAR_PS::Messages");
@@ -205,6 +303,12 @@ sub createMessage {
 
     return endMessage($output);
 }
+
+=head2 createMetadata($output, $id, $metadataIdRef, $content, $namespaces)
+
+Craft a metadata element.
+
+=cut
 
 sub createMetadata {
     my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
@@ -224,6 +328,12 @@ sub createMetadata {
     return $output->endElement("metadata");
 }
 
+=head2 createData($output, $id, $metadataIdRef, $content, $namespaces)
+
+Craft a data element.
+
+=cut
+
 sub createData {
     my ($output, $id, $metadataIdRef, $content, $namespaces) = @_;  
     my $logger = get_logger("perfSONAR_PS::Messages");
@@ -239,8 +349,16 @@ sub createData {
     return 0;
 }
 
+=head2 getErrorResponseMessage({ output, id, messageIdRef, metadataIdRef, eventType, description });
+
+Craft an error response message.
+
+XXX: Jason 3/12/08 - Document_string is still used here.
+
+=cut
+
 sub getErrorResponseMessage {
-	my $args = validate(@_, 
+	my $args = validateParams(@_, 
 			{
 				output => { optional => 1 },
 				id => { type => SCALAR | UNDEF, optional => 1 },
@@ -278,89 +396,12 @@ sub getErrorResponseMessage {
 
 1;
 
-
 __END__
-=head1 NAME
-
-perfSONAR_PS::Messages - A module that provides common methods for performing actions on message
-constructs.
-
-=head1 DESCRIPTION
-
-This module is a catch all for message related methods in the perfSONAR-PS framework.  As such 
-there is no 'common thread' that each method shares.  This module IS NOT an object, and the 
-methods can be invoked directly (and sparingly).  
-
-=head1 SYNOPSIS
-
-    use perfSONAR_PS::Messages;
-    
-    # NOTE: Individual methods can be extraced:
-    # 
-    # use perfSONAR_PS::Messages qw( getResultMessage getResultCodeMessage )
-
-    my $id = genuid();	
-    my $idRef = genuid();
-
-    my $content = "<nmwg:metadata />";
-	
-    my $msg = getResultMessage($id, $idRef, "response", $content);
-    
-    $msg = getResultCodeMessage($id, $idRef, "response", "error.ma.transport" , "something...");
-    
-    $msg = getResultCodeMetadata($id, $idRef, "error.ma.transport);
-    
-    $msg = getResultCodeData($id, $idRef, "something...");
-    
-    $msg = createMetadata($id, $idRef, $content);
-
-    $msg = createData($id, $idRef, $content);
-    
-           
-=head1 DETAILS
-
-The API for this module aims to be simple; note that this is not an object and 
-each method does not have the 'self knowledge' of variables that may travel 
-between functions.  
-
-=head1 API
-
-The API of perfSONAR_PS::Messages offers simple calls to create message
-constructs.
-
-=head2 getResultMessage($id, $messageIdRef, $type, $content, $namespaces)
-
-Given a messageId, messageIdRef, a type, and some amount of content a message
-element is returned. If $namespaces is specified, it adds the specified
-namespaces to the resulting nmwg:message.
-
-=head2 getResultCodeMessage($id, $messageIdRef, $metadataIdRef, $type, $event, $description, $encode_description)
-
-Given a messageId, messageIdRef, metadataIdRef, messageType, event code, and
-some sort of description, generate a result code message.  This function uses
-the getResultCodeMetadata and getResultCodeData.  If the $escape_description
-value is equal to 1, the description is XML escaped.
-
-=head2 getResultCodeMetadata($id, $metadataIdRef, $event)
-
-Given an id, metadataIdRef, and some event code retuns the result metadata.
-
-=head2 getResultCodeData($id, $metadataIdRef, $description, $escape_description)
-
-Given an id, metadataIdRef, and some description return the result data. If the
-$escape_description value is equal to 1, the description is XML escaped.
-
-=head2 createMetadata($id, $metadataIdRef, $content)
-
-Given an id, metadataIdRef and some content, create a metadata.
-
-=head2 createData($dataId, $metadataIdRef, $content)
-
-Given an id, metadataIdRef and some content, create a data.
-
+ 
 =head1 SEE ALSO
 
-L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>
+L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

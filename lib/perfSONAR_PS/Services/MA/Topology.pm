@@ -32,6 +32,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
+use perfSONAR_PS::ParameterValidation;
 
 our $VERSION = 0.08;
 
@@ -244,7 +245,7 @@ sub buildLSMetadata {
 =cut
 sub handleEvent {
     my ($self, @args) = @_;
-      my $parameters = validate(@args,
+      my $parameters = validateParams(@args,
             {
                 output => 1,
                 messageId => 1,

@@ -26,6 +26,7 @@ use perfSONAR_PS::XML::Document_string;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::EventTypeEquivalenceHandler;
+use perfSONAR_PS::ParameterValidation;
 
 our $VERSION = 0.08;
 
@@ -60,7 +61,7 @@ sub new {
     function.
 =cut
 sub registerMergeHandler {
-    my ($self, $messageType, $eventTypes, $service) = validate_pos(@_,
+    my ($self, $messageType, $eventTypes, $service) = validateParamsPos(@_,
             1,
             { type => SCALAR },
             { type => ARRAYREF },
@@ -104,7 +105,7 @@ sub registerEventEquivalence {
     message.
 =cut
 sub registerFullMessageHandler {
-    my ($self, $messageType, $service) = validate_pos(@_,
+    my ($self, $messageType, $service) = validateParamsPos(@_,
                 1,
                 { type => SCALAR },
                 { can => 'handleMessage'},
@@ -136,7 +137,7 @@ sub registerFullMessageHandler {
     been handled.
 =cut
 sub registerMessageHandler {
-    my ($self, $messageType, $service) = validate_pos(@_,
+    my ($self, $messageType, $service) = validateParamsPos(@_,
                 1,
                 { type => SCALAR },
                 { can => [ 'handleMessageBegin', 'handleMessageEnd', 'handleEvent' ]}
@@ -162,7 +163,7 @@ sub registerMessageHandler {
     specified type found in a message of the specified type.
 =cut
 sub registerEventHandler {
-    my ($self, $messageType, $eventType, $service) = validate_pos(@_,
+    my ($self, $messageType, $eventType, $service) = validateParamsPos(@_,
                 1,
                 { type => SCALAR },
                 { type => SCALAR },
@@ -194,7 +195,7 @@ sub registerEventHandler {
     type.
 =cut
 sub registerEventHandler_Regex {
-    my ($self, $messageType, $eventRegex, $service) = validate_pos(@_,
+    my ($self, $messageType, $eventRegex, $service) = validateParamsPos(@_,
                 1,
                 { type => SCALAR },
                 { type => SCALAR },
@@ -223,7 +224,7 @@ sub registerEventHandler_Regex {
 =cut
 sub __handleMessage {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR },
@@ -248,7 +249,7 @@ sub __handleMessage {
 =cut
 sub __handleMessageBegin {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },
@@ -278,7 +279,7 @@ sub __handleMessageBegin {
 =cut
 sub __handleMessageEnd {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },
@@ -307,7 +308,7 @@ sub __handleMessageEnd {
 =cut
 sub __handleEvent {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
                 messageId => { type => SCALAR | UNDEF },

@@ -27,6 +27,7 @@ use English qw( -no_match_vars );
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package, $name, $user, $pass, $schema)
 
@@ -43,7 +44,7 @@ The arguments can be set (and re-set) via the appropriate function calls.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { name => 0, user => 0, pass => 0, schema => 0 } );
+    my $parameters = validateParams( @args, { name => 0, user => 0, pass => 0, schema => 0 } );
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::SQL");
@@ -70,7 +71,7 @@ Sets the name of the database (write as a DBI connection string).
 
 sub setName {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { name => 1 } );
+    my $parameters = validateParams( @args, { name => 1 } );
 
     if ( $parameters->{name} ) {
         $self->{NAME} = $parameters->{name};
@@ -90,7 +91,7 @@ Sets the username for connectecting to the database.
 
 sub setUser {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { user => 1 } );
+    my $parameters = validateParams( @args, { user => 1 } );
 
     if ( $parameters->{user} ) {
         $self->{USER} = $parameters->{user};
@@ -110,7 +111,7 @@ Sets the password for the database.
 
 sub setPass {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { pass => 1 } );
+    my $parameters = validateParams( @args, { pass => 1 } );
 
     if ( $parameters->{pass} ) {
         $self->{PASS} = $parameters->{pass};
@@ -130,7 +131,7 @@ Sets the schema of the database (as a table).
 
 sub setSchema {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { schema => 1 } );
+    my $parameters = validateParams( @args, { schema => 1 } );
 
     if ( $parameters->{schema} ) {
         @{ $self->{SCHEMA} } = @{ $parameters->{schema} };
@@ -150,7 +151,7 @@ Opens the dabatase.
 
 sub openDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     eval {
         my %attr = ( RaiseError => 1, );
@@ -171,7 +172,7 @@ Closes the database.
 
 sub closeDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, {} );
+    my $parameters = validateParams( @args, {} );
 
     eval { 
         $self->{HANDLE}->disconnect;
@@ -191,7 +192,7 @@ Queries the database.
 
 sub query {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1 } );
+    my $parameters = validateParams( @args, { query => 1 } );
 
     my $results = ();
     if ( $parameters->{query} ) {
@@ -222,7 +223,7 @@ Counts the number of results of a query in the database.
 
 sub count {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1 } );
+    my $parameters = validateParams( @args, { query => 1 } );
 
     my $results = q{};
     if ( $parameters->{query} ) {
@@ -252,7 +253,7 @@ Inserts items in the database.
 
 sub insert {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { table => 1, argvalues => 1 } );
+    my $parameters = validateParams( @args, { table => 1, argvalues => 1 } );
 
     if ( $parameters->{table} and $parameters->{argvalues} ) {
         my %values = %{ $parameters->{argvalues} };
@@ -307,7 +308,7 @@ Updates items in the database.
 
 sub update {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { table => 1, wherevalues => 1, updatevalues => 1 } );
+    my $parameters = validateParams( @args, { table => 1, wherevalues => 1, updatevalues => 1 } );
 
     if ( $parameters->{table} and $parameters->{wherevalues} and $parameters->{updatevalues} ) {
         my $first = q{};
@@ -352,7 +353,7 @@ Removes items from the database.
 
 sub remove {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { delete => 1 } );
+    my $parameters = validateParams( @args, { delete => 1 } );
 
     if ( $parameters->{delete} ) {
         $self->{LOGGER}->debug( "Delete \"" . $parameters->{delete} . "\" received." );

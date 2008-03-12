@@ -23,7 +23,10 @@ shares.  This module IS NOT an object, and the methods can be invoked directly
 
 use Exporter;
 use Log::Log4perl qw(get_logger);
+
 use Params::Validate qw(:all);
+use perfSONAR_PS::ParameterValidation;
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
@@ -37,7 +40,7 @@ Given a metadata node, constructs and returns an XQuery statement.
 
 sub getMetadataXQuery {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1 } );
+    my $parameters = validateParams( @args, { node => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     my $query = getSPXQuery( { node => $parameters->{node}, queryString => q{} } );
@@ -60,7 +63,7 @@ Used by 'getMetadataXQuery', not to be called externally.
 
 sub getSPXQuery {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -108,7 +111,7 @@ by 'getMetadataXQuery', not to be called externally.
 
 sub getEventTypeXQuery {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -140,7 +143,7 @@ Given a data node, constructs and returns an XQuery statement.
 
 sub getDataXQuery {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -190,7 +193,7 @@ be called externally.
 
 sub xQueryParameters {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -283,7 +286,7 @@ be called externally.
 
 sub xQueryAttributes {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
     my $logger     = get_logger("perfSONAR_PS::Services::MA::General");
     my $counter    = 0;
 
@@ -354,7 +357,7 @@ be called externally.
 
 sub xQueryText {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, path => 1, queryCount => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -394,7 +397,7 @@ be called externally.
 
 sub xQueryEventType {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1, path => 1, queryString => 1 } );
+    my $parameters = validateParams( @args, { node => 1, path => 1, queryString => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     unless ( $parameters->{node}->getType == 8 ) {
@@ -427,7 +430,7 @@ Returns either an error or the actual results of an RRD database query.
 
 sub getDataRRD {
     my (@args) = @_;
-    my $parameters = validate( @args, { directory => 1, file => 1, timeSettings => 1, rrdtool => 1 } );
+    my $parameters = validateParams( @args, { directory => 1, file => 1, timeSettings => 1, rrdtool => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     my %result = ();
@@ -486,7 +489,7 @@ the start/end times to better fit the requested resolution.
 
 sub adjustRRDTime {
     my (@args) = @_;
-    my $parameters = validate( @args, { timeSettings => 1 } );
+    my $parameters = validateParams( @args, { timeSettings => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -541,7 +544,7 @@ Extract the filter parameters from the filter metadata block.
 
 sub getFilterParameters {
     my (@args) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             m                  => 1,
@@ -551,13 +554,10 @@ sub getFilterParameters {
         }
     );
 
-    my %time;
-    my $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"consolidationFunction\"]", 1 );
-    if ($temp) {
-        $time{"CF"} = extract( $temp, 1 );
-    }
+    my %time = ();
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"resolution\"]", 1 );
+    # We need to know the resolution before anything else since the gt or lt operators use it.
+    my $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"resolution\"]", 1 );
     if ($temp) {
         $time{"RESOLUTION"} = extract( $temp, 1 );
     }
@@ -574,42 +574,62 @@ sub getFilterParameters {
         $time{"RESOLUTION_SPECIFIED"} = 1;
     }
 
-    my $res = q{};
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"startTime\"]", 1 );
-    $res = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, start => "1" } ) if ($temp);
-    $time{"START"} = $res if ($res);
+    my $find_res = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\"]" );
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"endTime\"]", 1 );
-    $res  = q{};
-    $res  = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, end => "1" } ) if ($temp);
-    $time{"END"} = $res if ($res);
+    if ($find_res) {
+        foreach my $param ($find_res->get_nodelist) {
+            my $name = $param->getAttribute("name");
+            my $operator = $param->getAttribute("operator");
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"time\" and \@operator=\"gte\"]", 1 );
-    $res  = q{};
-    $res  = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, start => "1" } ) if ($temp);
-    $time{"START"} = $res if ($res);
+            if ($name eq "consolidationFunction") {
+                $time{"CF"} = extract( $param, 1 );
+                next;
+            }
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"time\" and \@operator=\"lte\"]", 1 );
-    $res  = q{};
-    $res  = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, end => "1" } ) if ($temp);
-    $time{"END"} = $res if ($res);
+            if ($name eq "startTime") {
+                my $res = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, start => "1" } );
+                $time{"START"} = $res if ($res);
+                next;
+            }
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"time\" and \@operator=\"gt\"]", 1 );
-    $res  = q{};
-    $res  = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, start => "1" } ) if ($temp);
-    $time{"START"} = $res + $time{"RESOLUTION"} if ($res);
+            if ($name eq "endTime") {
+                my $res  = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, end => "1" } );
+                $time{"END"} = $res if ($res);
+                next;
+            }
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"time\" and \@operator=\"lt\"]", 1 );
-    $res  = q{};
-    $res  = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces}, end => "1" } ) if ($temp);
-    $time{"END"} = $res + $time{"RESOLUTION"} if ($res);
+            if ($name eq "time" and $operator eq "gte") {
+                my $res  = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, start => "1" } );
+                $time{"START"} = $res if ($res);
+                next;
+            }
 
-    $temp = find( $parameters->{m}, ".//*[local-name()=\"parameters\"]/*[local-name()=\"parameter\" and \@name=\"time\" and \@operator=\"eq\"]", 1 );
-    if ($temp) {
-        $res = q{};
-        $res = extractTime( { parameter => $temp, namespaces => $parameters->{namespaces} } );
-        $time{"START"} = $res if ($res);
-        $time{"END"} = $time{"START"};
+            if ($name eq "time" and $operator eq "lte") {
+                my $res  = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, end => "1" } );
+                $time{"END"} = $res if ($res);
+                next;
+            }
+
+            if ($name eq "time" and $operator eq "gt") {
+                my $res = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, start => "1" } );
+                $time{"START"} = $res + $time{"RESOLUTION"} if ($res);
+                next;
+            }
+
+            if ($name eq "time" and $operator eq "lt") {
+                my $res  = extractTime( { parameter => $param, namespaces => $parameters->{namespaces}, end => "1" } );
+                $time{"END"} = $res + $time{"RESOLUTION"} if ($res);
+                next;
+            }
+
+            if ($name eq "time" and $operator eq "eq") {
+                my $res = extractTime( { parameter => $param, namespaces => $parameters->{namespaces} } );
+                $time{"START"} = $res if ($res);
+                $time{"END"} = $time{"START"};
+                next;
+            }
+
+        }
     }
 
     foreach my $t ( keys %time ) {
@@ -634,7 +654,7 @@ Checks the various nesting combinations possible when specifying time.
 
 sub extractTime {
     my (@args) = @_;
-    my $parameters = validate(
+    my $parameters = validateParams(
         @args,
         {
             parameter  => 1,
@@ -716,7 +736,7 @@ enclosed.
 
 sub complexTime {
     my (@args) = @_;
-    my $parameters = validate( @args, { element => 1 } );
+    my $parameters = validateParams( @args, { element => 1 } );
 
     my $complex = q{};
     foreach my $p ( $parameters->{element}->childNodes ) {

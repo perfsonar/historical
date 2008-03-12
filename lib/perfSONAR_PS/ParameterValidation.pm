@@ -34,11 +34,16 @@ Wrapper for the 'validate' function in Params::Validate.
 
 =cut
 
-sub validateParams {
+sub validateParams(\@$) {
     my ( $params, $options ) = @_;
 
     if ( $logger->is_debug() ) {
-        my @a = @{$params};
+        my @a;
+        if (not defined $options) {
+                $options = $params;
+        } else {
+                @a = @{ $params }; 
+        }
         return validate( @a, $options );
     }
     else {
@@ -63,7 +68,7 @@ Wrapper for the 'validate_pos' function in Params::Validate.
 
 =cut
 
-sub validateParamsPos {
+sub validateParamsPos(\@@) {
     my ( $params, @options ) = @_;
 
     if ( $logger->is_debug() ) {

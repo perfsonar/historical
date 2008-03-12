@@ -28,6 +28,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package, { file })
 
@@ -37,7 +38,7 @@ The only argument is a string representing the file to be opened.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { file => 0 } );
+    my $parameters = validateParams( @args, { file => 0 } );
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::File");
@@ -55,7 +56,7 @@ sub new {
 
 sub setFile {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { file => 1 } );
+    my $parameters = validateParams( @args, { file => 1 } );
 
     if ( $parameters->{file} =~ m/\.xml$/mx ) {
         $self->{FILE} = $parameters->{file};
@@ -75,7 +76,7 @@ Opens the database, will return status of operation.
 
 sub openDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     if ( defined $self->{FILE} ) {
         my $parser = XML::LibXML->new();
@@ -99,7 +100,7 @@ Close the database, will return status of operation.
 
 sub closeDB {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     if ( defined $self->{XML} and $self->{XML} ) {
         if ( defined open( my $FILE, ">", $self->{FILE} ) ) {
@@ -139,7 +140,7 @@ Given a query, returns the results or nothing.
 
 sub query {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, error => 0 } );
 
     my @results = ();
     if ( $parameters->{query} ) {
@@ -175,7 +176,7 @@ Given a query, returns the results (as a nodeset) or nothing.
 
 sub querySet {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, error => 0 } );
 
     if ( $parameters->{query} ) {
         $self->{LOGGER}->debug( "Query \"" . $parameters->{query} . "\" received." );
@@ -206,7 +207,7 @@ Counts the results of a query.
 
 sub count {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, error => 0 } );
 
     if ( $parameters->{query} ) {
         $self->{LOGGER}->debug( "Query \"" . $parameters->{query} . "\" received." );
@@ -238,7 +239,7 @@ Returns the internal XML::LibXML DOM object. Will return "" on error.
 
 sub getDOM {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { error => 0 } );
+    my $parameters = validateParams( @args, { error => 0 } );
 
     if ( defined $self->{XML} and $self->{XML} ) {
         ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
@@ -260,7 +261,7 @@ Sets the DOM object.
 
 sub setDOM {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { dom => 1, error => 0 } );
+    my $parameters = validateParams( @args, { dom => 1, error => 0 } );
 
     if ( $parameters->{dom} ) {
         $self->{XML} = $parameters->{dom};

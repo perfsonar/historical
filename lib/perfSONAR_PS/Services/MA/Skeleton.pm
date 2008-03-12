@@ -28,6 +28,7 @@ our $VERSION = 0.08;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 init($self, $handler);
     This routine is called on startup for each endpoint that uses this
@@ -151,7 +152,7 @@ sub needLS {
     should sleep for before calling the registerLS function again.
 =cut
 sub registerLS {
-    my ( $self, $sleep_time ) = validate_pos(@_,
+    my ( $self, $sleep_time ) = validateParamsPos(@_,
             1,
             { type => SCALARREF },
             );
@@ -185,7 +186,7 @@ sub registerLS {
 =cut
 sub handleMessage {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => 1,
                 messageId => 1,
@@ -231,7 +232,7 @@ sub handleMessage {
 =cut
 sub handleMessageBegin {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => 1,
                 messageId => 1, 
@@ -265,7 +266,7 @@ sub handleMessageBegin {
 =cut
 sub handleMessageEnd {
     my ($self, @args) = @_;
-    my $args = validate(@args, 
+    my $args = validateParams(@args, 
             {
                 output => 1,
                 messageId => 1,
@@ -303,7 +304,7 @@ sub handleMessageEnd {
 =cut
 sub handleEvent {
     my ($self, @args) = @_;
-    my $parameters = validate(@args,
+    my $parameters = validateParams(@args,
             {
                 output => 1,
                 messageId => 1,
@@ -357,7 +358,7 @@ sub handleEvent {
 =cut
 sub mergeMetadata {
 	my ($self, @args) = @_;
-	my $parameters = validate(@args,
+	my $parameters = validateParams(@args,
     		{
     			messageType => 1,
     			eventType => 1,

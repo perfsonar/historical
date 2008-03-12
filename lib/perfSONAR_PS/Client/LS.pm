@@ -27,6 +27,7 @@ use English qw( -no_match_vars );
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract unescapeString );
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Echo;
+use perfSONAR_PS::ParameterValidation;
 
 =head2 new($package { instance })
 
@@ -37,7 +38,7 @@ to be contacted for interaction.  This can also be set via 'setInstance'.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validate( @args, { instance => 0 } );
+    my $parameters = validateParams( @args, { instance => 0 } );
 
     my $self = fields::new($package);
     $self->{ALIVE}  = 0;
@@ -56,7 +57,7 @@ Required argument 'instance' is the LS instance to be contacted for queries.
 
 sub setInstance {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { instance => 1 } );
+    my $parameters = validateParams( @args, { instance => 1 } );
 
     $self->{ALIVE}    = 0;
     $self->{INSTANCE} = $parameters->{"instance"};
@@ -71,7 +72,7 @@ Calls the LS instance with the sent message and returns the response (if any).
 
 sub callLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { message => 1 } );
+    my $parameters = validateParams( @args, { message => 1 } );
 
     unless ( $self->{INSTANCE} ) {
         $self->{LOGGER}->error("Instance not defined.");
@@ -137,7 +138,7 @@ hash of results for each metadata/data pair.  Note this should be used for all
 
 sub registerRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { service => 1, data => 1 } );
+    my $parameters = validateParams( @args, { service => 1, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -179,7 +180,7 @@ where the goal is to add data to the registration set.
 
 sub registerUpdateRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1, data => 1 } );
+    my $parameters = validateParams( @args, { key => 1, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -223,7 +224,7 @@ replaces the need to deregister/register the data set.
 
 sub registerClobberRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { service => 1, key => 1, data => 1 } );
+    my $parameters = validateParams( @args, { service => 1, key => 1, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -263,7 +264,7 @@ in a hash.
 
 sub deregisterRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1, data => 0 } );
+    my $parameters = validateParams( @args, { key => 1, data => 0 } );
 
     my $metadata = q{};
     $metadata .= $self->createKey( { key => $parameters->{key} } );
@@ -295,7 +296,7 @@ data TTL does not expire.  The results of the operation are returned in a hash.
 
 sub keepaliveRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1 } );
+    my $parameters = validateParams( @args, { key => 1 } );
 
     my $metadata = q{};
     $metadata .= $self->createKey( { key => $parameters->{key} } );
@@ -330,7 +331,7 @@ hash of results for each metadata/data pair.  Note this should be used for all
 
 sub keyRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { service => 1 } );
+    my $parameters = validateParams( @args, { service => 1 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -376,7 +377,7 @@ handle either result.
 
 sub queryRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { query => 1, format => 0 } );
+    my $parameters = validateParams( @args, { query => 1, format => 0 } );
 
     my $metadata = q{};
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
@@ -427,7 +428,7 @@ from this function.
 
 sub createService {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { service => 1 } );
+    my $parameters = validateParams( @args, { service => 1 } );
 
     my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
     $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
@@ -449,7 +450,7 @@ will be returned from this function.
 
 sub createKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1 } );
+    my $parameters = validateParams( @args, { key => 1 } );
 
     my $key = "    <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
     $key .= "      <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
@@ -474,7 +475,7 @@ deregister messages).  The fully formed message is returned from this function.
 
 sub createLSMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { type => 1, metadata => 1, ns => 0, data => 0 } );
+    my $parameters = validateParams( @args, { type => 1, metadata => 1, ns => 0, data => 0 } );
 
     my $request = q{};
     my $mdId    = "metadata." . genuid();

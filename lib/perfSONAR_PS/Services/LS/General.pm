@@ -24,6 +24,7 @@ shares.  This module IS NOT an object, and the methods can be invoked directly
 use Exporter;
 use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
+use perfSONAR_PS::ParameterValidation;
 
 our @EXPORT = ( 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery' );
 
@@ -35,7 +36,7 @@ Creates a 'control' key for the control database that keeps track of time.
 
 sub createControlKey {
     my (@args) = @_;
-    my $parameters = validate( @args, { key => 1, time => 1 } );
+    my $parameters = validateParams( @args, { key => 1, time => 1 } );
 
     my $keyElement = "  <nmwg:metadata id=\"" . $parameters->{key} . "-control\" metadataIdRef=\"" . $parameters->{key} . "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $keyElement = $keyElement . "    <nmwg:parameters id=\"control-parameters\">\n";
@@ -55,7 +56,7 @@ Creates the 'internals' of the metadata that will be returned w/ a key.
 
 sub createLSKey {
     my (@args) = @_;
-    my $parameters = validate( @args, { key => 1, eventType => 0 } );
+    my $parameters = validateParams( @args, { key => 1, eventType => 0 } );
 
     my $keyElement = q{};
     $keyElement = $keyElement . "      <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
@@ -77,7 +78,7 @@ Creates a 'data' block that is stored in the backend storage.
 
 sub createLSData {
     my (@args) = @_;
-    my $parameters = validate( @args, { dataId => 1, metadataId => 1, data => 1 } );
+    my $parameters = validateParams( @args, { dataId => 1, metadataId => 1, data => 1 } );
 
     my $dataElement = "    <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $parameters->{dataId} . "\" metadataIdRef=\"" . $parameters->{metadataId} . "\">\n";
     $dataElement = $dataElement . "      " . $parameters->{data} . "\n";
@@ -94,7 +95,7 @@ elements.
 
 sub extractQuery {
     my (@args) = @_;
-    my $parameters = validate( @args, { node => 1 } );
+    my $parameters = validateParams( @args, { node => 1 } );
 
     my $query = q{};
     if ( $parameters->{node}->hasChildNodes() ) {
@@ -121,7 +122,7 @@ NOT FOR EXTERNAL USE
 
 sub wrapStore {
     my (@args) = @_;
-    my $parameters = validate( @args, { content => 0, type => 0 } );
+    my $parameters = validateParams( @args, { content => 0, type => 0 } );
 
     my $store = "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
     if ( exists $parameters->{type} and $parameters->{type} ) {
