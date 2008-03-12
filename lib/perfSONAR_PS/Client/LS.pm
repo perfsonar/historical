@@ -40,7 +40,7 @@ sub new {
     my $parameters = validate( @args, { instance => 0 } );
 
     my $self = fields::new($package);
-    $self->{ALIVE} = 0;
+    $self->{ALIVE}  = 0;
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::LS");
     if ( exists $parameters->{"instance"} and $parameters->{"instance"} ) {
         $self->{INSTANCE} = $parameters->{"instance"};
@@ -58,7 +58,7 @@ sub setInstance {
     my ( $self, @args ) = @_;
     my $parameters = validate( @args, { instance => 1 } );
 
-    $self->{ALIVE} = 0;
+    $self->{ALIVE}    = 0;
     $self->{INSTANCE} = $parameters->{"instance"};
     return;
 }
@@ -92,7 +92,7 @@ sub callLS {
     unless ( defined $host and defined $port and defined $endpoint ) {
         return;
     }
-    
+
     my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
     unless ($sender) {
         $self->{LOGGER}->error("LS could not be contaced.");
@@ -111,9 +111,7 @@ sub callLS {
     my $parser = XML::LibXML->new();
     if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
         my $doc = q{};
-        eval { 
-            $doc = $parser->parse_string($responseContent); 
-        };
+        eval { $doc = $parser->parse_string($responseContent); };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error( "Parser failed: " . $EVAL_ERROR );
         }
@@ -142,8 +140,10 @@ sub registerRequestLS {
     my $parameters = validate( @args, { service => 1, data => 1 } );
 
     my $metadata = q{};
-    my %ns = ( perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-               psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/");
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
     $metadata .= $self->createService( { service => $parameters->{service} } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
@@ -151,17 +151,17 @@ sub registerRequestLS {
         $self->{LOGGER}->error("Message element not found in return.");
         return;
     }
- 
+
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
-        $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+        $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
         unless ( $result{"response"} ) {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
         }
         if ( $eventType =~ m/^success/mx ) {
-            $result{"key"} = extract ( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0);
+            $result{"key"} = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
         }
     }
     return \%result;
@@ -182,8 +182,10 @@ sub registerUpdateRequestLS {
     my $parameters = validate( @args, { key => 1, data => 1 } );
 
     my $metadata = q{};
-    my %ns = ( perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-               psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/");
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
     $metadata .= $self->createKey( { key => $parameters->{key} } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
@@ -193,15 +195,15 @@ sub registerUpdateRequestLS {
     }
 
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
-        $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+        $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
         unless ( $result{"response"} ) {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
         }
         if ( $eventType =~ m/^success/mx ) {
-            $result{"key"} = extract ( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0);
+            $result{"key"} = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
         }
     }
     return \%result;
@@ -224,8 +226,10 @@ sub registerClobberRequestLS {
     my $parameters = validate( @args, { service => 1, key => 1, data => 1 } );
 
     my $metadata = q{};
-    my %ns = ( perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-               psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/");
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
     $metadata .= $self->createKey( { key => $parameters->{key} } ) . $self->createService( { service => $parameters->{service} } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
@@ -233,17 +237,17 @@ sub registerClobberRequestLS {
         $self->{LOGGER}->error("Message element not found in return.");
         return;
     }
- 
+
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
-        $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+        $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
         unless ( $result{"response"} ) {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
         }
         if ( $eventType =~ m/^success/mx ) {
-            $result{"key"} = extract ( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0);
+            $result{"key"} = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
         }
     }
     return \%result;
@@ -271,12 +275,12 @@ sub deregisterRequestLS {
     }
 
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
-        $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+        $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
         unless ( $result{"response"} ) {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
         }
     }
     return \%result;
@@ -303,12 +307,12 @@ sub keepaliveRequestLS {
     }
 
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
-        $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+        $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
         unless ( $result{"response"} ) {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
         }
     }
     return \%result;
@@ -329,8 +333,10 @@ sub keyRequestLS {
     my $parameters = validate( @args, { service => 1 } );
 
     my $metadata = q{};
-    my %ns = ( perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-               psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/");
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
     $metadata .= $self->createService( { service => $parameters->{service} } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSKeyRequest", ns => \%ns, metadata => $metadata } ) } );
@@ -340,21 +346,21 @@ sub keyRequestLS {
     }
 
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
         if ( $eventType =~ m/^success/mx ) {
-            $result{"key"} = extract ( find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0);
+            $result{"key"} = extract( find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
         }
         else {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
             unless ( $result{"response"} ) {
-                $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+                $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
             }
         }
     }
     else {
-        $result{"key"} = extract ( find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0);
+        $result{"key"} = extract( find( $msg, "./nmwg:data/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
     }
     return \%result;
 }
@@ -378,10 +384,10 @@ sub queryRequestLS {
     $metadata .= $parameters->{query};
     $metadata .= "    </xquery:subject>\n";
     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    if ( exists $parameters->{format} and $parameters->{format}) {
+    if ( exists $parameters->{format} and $parameters->{format} ) {
         $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
         $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-        $metadata .= "  </xquery:parameters>\n"; 
+        $metadata .= "  </xquery:parameters>\n";
     }
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
@@ -391,21 +397,21 @@ sub queryRequestLS {
     }
 
     my %result = ();
-    my $eventType = extract ( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0);
-    if ( $eventType ) {
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
         $result{"eventType"} = $eventType;
         if ( $eventType =~ m/^success/mx ) {
             $result{"response"} = $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString;
         }
         else {
-            $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0);
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
             unless ( $result{"response"} ) {
-                $result{"response"} = extract ( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0);
+                $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
             }
         }
     }
     else {
-        $result{"response"} = unescapeString($msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString);
+        $result{"response"} = unescapeString( $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString );
     }
     return \%result;
 }
@@ -425,9 +431,9 @@ sub createService {
 
     my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
     $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-    $service = $service . "        <psservice:serviceName>" . $parameters->{service}->{serviceName} . "</psservice:serviceName>\n"                      if ( defined $parameters->{service}->{serviceName} );
-    $service = $service . "        <psservice:accessPoint>" . $parameters->{service}->{accessPoint} . "</psservice:accessPoint>\n"                      if ( defined $parameters->{service}->{accessPoint} );
-    $service = $service . "        <psservice:serviceType>" . $parameters->{service}->{serviceType} . "</psservice:serviceType>\n"                      if ( defined $parameters->{service}->{serviceType} );
+    $service = $service . "        <psservice:serviceName>" . $parameters->{service}->{serviceName} . "</psservice:serviceName>\n" if ( defined $parameters->{service}->{serviceName} );
+    $service = $service . "        <psservice:accessPoint>" . $parameters->{service}->{accessPoint} . "</psservice:accessPoint>\n" if ( defined $parameters->{service}->{accessPoint} );
+    $service = $service . "        <psservice:serviceType>" . $parameters->{service}->{serviceType} . "</psservice:serviceType>\n" if ( defined $parameters->{service}->{serviceType} );
     $service = $service . "        <psservice:serviceDescription>" . $parameters->{service}->{serviceDescription} . "</psservice:serviceDescription>\n" if ( defined $parameters->{service}->{serviceDescription} );
     $service = $service . "      </psservice:service>\n";
     $service = $service . "    </perfsonar:subject>\n";
@@ -443,7 +449,7 @@ will be returned from this function.
 
 sub createKey {
     my ( $self, @args ) = @_;
-    my $parameters = validate( @args, { key => 1} );
+    my $parameters = validate( @args, { key => 1 } );
 
     my $key = "    <nmwg:key xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"key." . genuid() . "\">\n";
     $key .= "      <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
@@ -472,11 +478,11 @@ sub createLSMessage {
 
     my $request = q{};
     my $mdId    = "metadata." . genuid();
-    my $dId    = "data." . genuid();
-    $request .= "<nmwg:message type=\"".$parameters->{type}."\" id=\"message." . genuid() . "\"";
-    $request .= " xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";    
+    my $dId     = "data." . genuid();
+    $request .= "<nmwg:message type=\"" . $parameters->{type} . "\" id=\"message." . genuid() . "\"";
+    $request .= " xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
     if ( exists $parameters->{ns} and $parameters->{ns} ) {
-        foreach my $n (keys %{$parameters->{ns}}) {
+        foreach my $n ( keys %{ $parameters->{ns} } ) {
             $request .= " xmlns:" . $n . "=\"" . $parameters->{ns}->{$n} . "\"";
         }
     }
@@ -486,7 +492,7 @@ sub createLSMessage {
     $request .= "  </nmwg:metadata>\n";
     if ( exists $parameters->{data} and $parameters->{data} ) {
         $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"" . $dId . "\">\n";
-        foreach my $data ( @{$parameters->{data}} ) {
+        foreach my $data ( @{ $parameters->{data} } ) {
             $request .= $data;
         }
         $request .= "  </nmwg:data>\n";
