@@ -670,8 +670,18 @@ sub createRegisterRequest {
         perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
+   
+    my $metadata = q{};
+    if ( $self->{LS_KEY} ) {
+        $metadata = $self->createKey;
+    }
+    else {
+        $metadata = $self->createService;
+    }  
     
-    return $self->createMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $parameters->{service}, data => $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } ) } );
+    my @data = ();
+    $data[0] = $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } ); 
+    return $self->createMessage( { type => "LSRegisterRequest", ns => \%ns, metadata =>  $metadata, data => \@data } );
 }
 
 =head2 createDeregisterRequest($self {  })
@@ -695,7 +705,9 @@ sub createDeregisterRequest {
     }
 
     if ( $self->{LS_KEY} ) {
-        return $self->createMessage( { type => "LSDeregisterRequest", metadata => $self->createKey, data => $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } ) } );
+        my @data = ();
+        $data[0] = $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } );
+        return $self->createMessage( { type => "LSDeregisterRequest", metadata => $self->createKey, data => \@data } );
     }
 
     return;
