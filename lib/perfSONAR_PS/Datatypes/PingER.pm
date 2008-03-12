@@ -405,7 +405,7 @@ sub _mdSetLimit {
 }
 #  auxiliary private function
 #  get the name of the data table ( data_yyyyMM format ) for specific time period
-#  returns hashref to data_yyyyMM => DatayyyyMM ( the late one for class name)
+#  returns array ref ref to CALSSNAMEBASE::DatayyyyMM  
 #
 
 sub _getDataTables  {
@@ -423,16 +423,10 @@ sub _getDataTables  {
         return undef;
     }
   	
-  	# check  the tables required
+   # check  the tables required, will return list of objects and list of managers or empty if nothing found
      
-    &perfSONAR_PS::DB::PingER::get_rose_objects_for_timestamp( $stime, $etime );
-
-    for(my $i = $stime; $i<=$etime; $i+= $One_DAY_inSec ) {
-        $list{strftime("data_%Y%m", gmtime($i))} =  strftime("Data%Y%m", gmtime($i)); 
-	
-        $logger->debug("  FOUND------->  Data table: " . strftime("data_%Y%m", gmtime($i)));
-    }
-    return  \%list;
+   my ( $objects_ref, $managers_ref ) =  &perfSONAR_PS::DB::PingER::get_rose_objects_for_timestamp( $stime, $etime, undef, undef );
+   return   $objects_ref;
 }
 #
 #  auxiliary private function
@@ -552,15 +546,16 @@ sub _retriveDataByKey {
     } 
     
     $params->{tables}  =  _getDataTables($params->{timequery}) unless  $params->{tables};
-    $logger->debug(" Will query for  Pinger data tables: " .  (join " : " , keys %{$params->{tables}}) . " TimeQuery: " . Data::Dumper::Dumper   $params->{timequery}  );
+    $logger->debug(" Will query for found Pinger data tables: " .  (join " : " ,  @{$params->{tables}}) . " TimeQuery: " . Data::Dumper::Dumper   $params->{timequery}  );
     my $iterator_local = [];
     my @timestamp_conditions = map { ('timestamp' => { $_ => $params->{timequery}->{$_} } )} keys %{$params->{timequery}};
     no strict 'refs'; 
-    foreach my $table (keys %{$params->{tables}} ) { 
-        my $classname =    "perfSONAR_PS::DB::PingER_DB::" .  $params->{tables}->{$table} . "::Manager";
-        eval {
-            eval "require  $classname";
-	    my $objects =    ("$classname\:\:get_$table")->(
+    foreach my $table (@{$params->{tables}}) { 
+        my $classname =    $table . "::Manager";
+        my ($table_name)  =  $table =~ /\:(\w+)$/;
+	$table_name =~ s/^([A-Za-z]+)(\d+)$/$1_$2/;
+	eval{
+	    my $objects =    ("$classname\:\:get_\l$table_name")->(
                                 query =>  [ metaID => {eq =>  $keyid},  @timestamp_conditions],
 	                        sort_by =>    'timestamp'); 
 	    if ($objects &&  (ref($objects) eq 'ARRAY') &&  @{$objects}) {

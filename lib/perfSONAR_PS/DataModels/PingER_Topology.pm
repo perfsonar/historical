@@ -60,7 +60,7 @@ BEGIN {
 }
 use version;
 our @EXPORT_OK ;
-our ($pingertopo, $port,$parameters, $parameter,$location, $contact ,$basename,  $node ,$domain  );  
+our ($pingertopo, $port,$parameters, $parameter,$location, $contact ,$basename,  $node ,$domain , $textnode_nmtb );  
 use   perfSONAR_PS::DataModels::DataModel   2.0 qw($addressL3);
  
   $port = {'attrs'  => {id => 'scalar', xmlns => 'nmtl3'},
@@ -112,11 +112,15 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($addressL3);
                         
                               ],
                };   
-  $node =  {  'attrs'  => { id => 'scalar', metadataIdRef => 'scalar', xmlns => 'nmtb'}, 
+  $textnode_nmtb = {  'attrs'  => {xmlns => 'nmtb'}, 
+                   elements => [], 
+		   text => 'scalar',
+	       };
+  $node =  {  'attrs'  => { id => 'scalar', metadataIdRef => 'scalar', xmlns => 'pingertopo'}, 
                    elements => [ 
 		     [name =>  $basename],
-		     [hostName =>  'text' ],
-		     [description =>  'text' ],
+		     [hostName =>  $textnode_nmtb],
+		     [description =>  $textnode_nmtb ],
 		     [location => $location ],
 		     [contact =>  $contact], 
 		     [parameters =>  $parameters], 
@@ -124,9 +128,9 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($addressL3);
 		     ], 
 	       };
    
-  $domain =    {  'attrs'  => {id => 'scalar', xmlns => 'nmtb'}, 
+  $domain =    {  'attrs'  => {id => 'scalar', xmlns => 'pingertopo'}, 
                   elements => [ 
-		                 [ comments =>  'text'], 
+		                 [ comments =>  $textnode_nmtb ], 
 				 [ node => [$node]], 
 			        
 			      ], 

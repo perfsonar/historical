@@ -129,7 +129,7 @@ sub openDB {
 	# create the rose db objects
 	eval {
 		$self->{'RoseDbLoader'} = Rose::DB::Object::Loader->new(
-						db			=> perfSONAR_PS::DB::PingER->new_or_cached(),
+						db => perfSONAR_PS::DB::PingER->new_or_cached(),
 						class_prefix => $basename,
 						include_tables => '^(metaData|data|host)$',
 						db_options => { AutoCommit =>1, ChopBlanks => 1, 
@@ -470,7 +470,6 @@ sub get_rose_objects_for_timestamp
 	my $self = shift;
 	my $startTime = shift;
 	my $endTime = shift;
-
 	my $createNewTables = shift;	
 
 	# call as object
@@ -486,8 +485,7 @@ sub get_rose_objects_for_timestamp
 	}
 
 	# determine the datatable to use depending on the timestamp
-	$endTime = $startTime 
-		if ! defined $endTime;
+	$endTime = $startTime  if ! defined $endTime;
 	
 	my @dates = ();
 	my %list = ();
@@ -496,9 +494,10 @@ sub get_rose_objects_for_timestamp
 		
 	# go through every day and populate with new months
 	for( my $i = $startTime; $i <= $endTime ; $i += 86400 ) {
-		my $table = strftime( "data_%Y%m", gmtime( $i ) );
-    	$list{strftime("%Y%m", gmtime($i))}++;
-    }
+	    my $date_fmt = strftime("%Y%m", gmtime($i));
+	    my $table =  "data_$date_fmt";
+    	    $list{$date_fmt}++;
+        }
 	@dates = sort { $a <=> $b } keys %list;
 	undef %list;
 	
@@ -517,19 +516,14 @@ sub get_rose_objects_for_timestamp
 		my $object = $basename . '::' . $class;
 		my $manager = $object . '::Manager';
 		
-		push @objects, $object;
-		push @managers, $manager;
-	
 		#$logger->fatal( "isa: " . $object->isa( $basename . '::Data' ) );
 		#$logger->fatal( "isa not: " . $object->isa( 'Data::Dumper' ) );
 		#$logger->fatal( "man: " . $manager->isa( 'Rose::DB::Object::Manager') );	
 
 		# inherit the base data table and create it if necessary
-		if ( ! ( $object->isa( $basename . '::Data' )
-			&& $manager->isa( 'Rose::DB::Object::Manager') )
-		) {
+		if ( !( eval "require  $object")   &&  !(eval "require  $manager") )  {
 	
-			$logger->debug( "Dynamic load of '$object' with manager '$manager'" );
+			$logger->debug( "'$object' and  '$manager' are not loaded...loading..." );
 			# need to turn off strict to enable dynamic loading
 			no strict; # would like more strict use, but 'refs' makes the sub object_class fail
 			my $str = "
@@ -552,29 +546,57 @@ sub get_rose_objects_for_timestamp
 				$logger->error( "Could not create dynamic Rose::DB objects: $@" );
 				return ( undef, undef );
 			}
-
-			if ( defined $createNewTables 
-					&& $createNewTables ) {
-						
-				# we need to always try to create the table as it's the only
-				# way to determine if the table exists agnostically
-				eval {
-					my $dataTable = $object->new();
-					$logger->debug( "creating new data table $table");
-					# create the database table if necessary		
-					$dataTable->dbh->do( "CREATE TABLE $table AS SELECT * FROM data" );	
-					undef $dataTable;		
-				};
-				#if ( $@ ) {
-				#	$logger->debug( "table $table already exists");
-				#}
+                        if(_tableExists($object, $table)) {
+			    $logger->debug(" Table $table exists...");
+			    push @objects, $object;
+		            push @managers, $manager;
+			} elsif ( defined $createNewTables && $createNewTables) {
+			
+		             push @objects, $object;
+		             push @managers, $manager;
+			
+			     # we need to always try to create the table as it's the only
+			     # way to determine if the table exists agnostically
+			     eval {
+			  	     my $dataTable = $object->new();
+			  	     $logger->debug( "creating new data table $table");
+			  	     # create the database table if necessary		     
+			  	     $dataTable->dbh->do( "CREATE TABLE $table AS SELECT * FROM data" );     
+			  	     undef $dataTable;  	     
+			     };
+			     #if ( $@ ) {
+			     #       $logger->debug( "table $table already exists");
+			     #}
+			}  else {
+			     $logger->debug( "Object '$object' with manager '$manager' not loaded, skipped: " .  $@);  
 			}
+			
 		} else {
-			$logger->debug( "Object '$object' with manager '$manager' already loaded" );
+			$logger->debug( "Object '$object' with manager '$manager' already loaded" ); 
+			push @objects, $object;
+		        push @managers, $manager;
 		}
 	}
 
 	return ( \@objects, \@managers );
+}
+
+#
+#    ugly hack to check presence of the table
+#
+
+sub _tableExists {
+    my  ($object, $table) = @_; 
+    my $result = undef;
+    eval {
+     	  my $dataTable = $object->new();
+     	  $logger->debug( "testing presence of the table $table");
+     	  # create the database table if necessary		  
+     	  ($result)  =  $dataTable->dbh->selectrow_array("select * from  $table where 1 limit 1" );
+	  undef $dataTable;		  
+    }; 
+    return 0  if($@ || ! $result);
+    return 1;
 }
 
 
