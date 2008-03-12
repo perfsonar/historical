@@ -606,35 +606,72 @@ sub createNode {
     return $node;
 }
 
-=head2 createQueryRequest($self { query })
+=head2 createMessage($self, { type, metadata, ns, data })
 
-Construct a query message for the LS, supplying the specifics of the query to
-this function.  
+Creates the basic message structure for communication with the LS.  The type
+argument is used to insert a message type (LSRegisterRequest,
+LSDeregisterRequest, LSKeepaliveRequest, LSKeyRequest, LSQueryRequest).  The
+metadata argument must contain metadata (a service block, a key, or an xquery).
+The optional ns hash reference can contain namespace to prefix mappings and
+the data block can optionally contain data (in the case of register and
+deregister messages).  The fully formed message is returned from this function.
 
 =cut
 
-sub createQueryRequest {
+sub createMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { query => 1 } );
+    my $parameters = validateParams( @args, { type => 1, metadata => 1, ns => 0, data => 0 } );
 
     my $request = q{};
     my $mdId    = "metadata." . genuid();
-    $request .= "<nmwg:message type=\"LSQueryRequest\" id=\"message." . genuid() . "\"\n";
-    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    my $dId     = "data." . genuid();
+    $request .= "<nmwg:message type=\"" . $parameters->{type} . "\" id=\"message." . genuid() . "\"";
+    $request .= " xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"";
+    if ( exists $parameters->{ns} and $parameters->{ns} ) {
+        foreach my $n ( keys %{ $parameters->{ns} } ) {
+            $request .= " xmlns:" . $n . "=\"" . $parameters->{ns}->{$n} . "\"";
+        }
+    }
+    $request .= ">\n";
     $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
-    $request .= "    <xquery:subject id=\"subject." . genuid() . "\">\n";
-    $request .= $parameters->{query};
-    $request .= "    </xquery:subject>\n";
-    $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $request .= "  <xquery:parameters id=\"parameters." . genuid() . "\">\n";
-    $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $request .= "  </xquery:parameters>\n";
+    $request .= $parameters->{metadata};
     $request .= "  </nmwg:metadata>\n";
-    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\"/>\n";
+    if ( exists $parameters->{data} and $parameters->{data} ) {
+        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"" . $dId . "\">\n";
+        foreach my $data ( @{ $parameters->{data} } ) {
+            $request .= $data;
+        }
+        $request .= "  </nmwg:data>\n";
+    }
+    else {
+        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"" . $dId . "\"/>\n";
+    }
     $request .= "</nmwg:message>\n";
 
     return $request;
+}
+
+=head2 createRegisterRequest($self {  })
+
+Construct a registration message for the LS, supplying the specifics of the
+mapping to register.
+
+=cut
+
+sub createRegisterRequest {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { id => 1, name => 1 } );
+
+    unless ( $self->{LS_KEY} ) {
+        $self->{LS_KEY} = $self->getLSKey;
+    }
+
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
+    
+    return $self->createMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $parameters->{service}, data => $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } ) } );
 }
 
 =head2 createDeregisterRequest($self {  })
@@ -657,58 +694,11 @@ sub createDeregisterRequest {
         $self->{LS_KEY} = $self->getLSKey;
     }
 
-    my $request = q{};
     if ( $self->{LS_KEY} ) {
-        my $mdId = "metadata." . genuid();
-        $request .= "<nmwg:message type=\"LSDeregisterRequest\" id=\"message." . genuid() . "\"\n";
-        $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-        $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-        $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
-        $request .= $self->createKey;
-        $request .= "  </nmwg:metadata>\n";
-        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
-        $request .= $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } );
-        $request .= "  </nmwg:data>\n";
-        $request .= "</nmwg:message>\n";
+        return $self->createMessage( { type => "LSDeregisterRequest", metadata => $self->createKey, data => $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } ) } );
     }
 
-    return $request;
-}
-
-=head2 createRegisterRequest($self {  })
-
-Construct a registration message for the LS, supplying the specifics of the
-mapping to register.
-
-=cut
-
-sub createRegisterRequest {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { id => 1, name => 1 } );
-
-    unless ( $self->{LS_KEY} ) {
-        $self->{LS_KEY} = $self->getLSKey;
-    }
-
-    my $request = q{};
-    my $mdId    = "metadata." . genuid();
-    $request .= "<nmwg:message type=\"LSRegisterRequest\" id=\"message." . genuid() . "\"\n";
-    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
-    if ( $self->{LS_KEY} ) {
-        $request .= $self->createKey;
-    }
-    else {
-        $request .= $self->createService;
-    }
-    $request .= "  </nmwg:metadata>\n";
-    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
-    $request .= $self->createNode( { id => $parameters->{id}, name => $parameters->{name} } );
-    $request .= "  </nmwg:data>\n";
-    $request .= "</nmwg:message>\n";
-
-    return $request;
+    return;
 }
 
 =head2 createRegisterRequest($self {  })
@@ -722,18 +712,38 @@ sub createKeyRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { accessPoint => 0, serviceName => 0, serviceType => 0, serviceDescription => 0 } );
 
-    my $request = q{};
-    my $mdId    = "metadata." . genuid();
-    $request .= "<nmwg:message type=\"LSKeyRequest\" id=\"message." . genuid() . "\"\n";
-    $request .= "              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-    $request .= "              xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
-    $request .= $self->createService( { accessPoint => $parameters->{accessPoint}, serviceName => $parameters->{serviceName}, serviceType => $parameters->{serviceType}, serviceDescription => $parameters->{serviceDescription} } );
-    $request .= "  </nmwg:metadata>\n";
-    $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\"/>\n";
-    $request .= "</nmwg:message>\n";
+    my $metadata = q{};
+    my %ns       = (
+        perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+        psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
+    );
+    $metadata .= $self->createService( { accessPoint => $parameters->{accessPoint}, serviceName => $parameters->{serviceName}, serviceType => $parameters->{serviceType}, serviceDescription => $parameters->{serviceDescription} } );
 
-    return $request;
+    return $self->createMessage( { type => "LSKeyRequest", ns => \%ns, metadata => $metadata } );
+}
+
+=head2 createQueryRequest($self { query })
+
+Construct a query message for the LS, supplying the specifics of the query to
+this function.  
+
+=cut
+
+sub createQueryRequest {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { query => 1 } );
+
+    my $metadata = q{};
+    my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
+    $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $metadata .= $parameters->{query};
+    $metadata .= "    </xquery:subject>\n";
+    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
+    $metadata .= "  </xquery:parameters>\n";
+    
+    return $self->createMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } );
 }
 
 1;
