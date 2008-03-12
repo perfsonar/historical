@@ -331,6 +331,78 @@ sub getTopologyServices {
     return \%services;
 }
 
+=head2 queryTS($self, { topology })
+
+Given the name of a topology service, this performs a simple query to dump it's
+contents.  The contents are XML, but returned in string form.  Check the
+returned hash to see if an error occured.
+
+=cut
+
+sub queryTS {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { topology => 1 } );
+
+
+    my $echo_service = perfSONAR_PS::Client::Echo->new( $parameters->{topology} );
+    my ( $status, $res ) = $echo_service->ping();
+    if ( $status == -1 ) {
+        $self->{LOGGER}->error( "Ping to " . $parameters->{topology} . " failed: $res" );
+        return;
+    }
+
+    my ( $host, $port, $endpoint ) = perfSONAR_PS::Transport::splitURI( $parameters->{topology} );
+    unless ( defined $host and defined $port and defined $endpoint ) {
+        return;
+    }
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    unless ($sender) {
+        $self->{LOGGER}->error("TS could not be contaced.");
+        return;
+    }
+
+    my $error = q{};
+    my $responseContent = $sender->sendReceive( makeEnvelope( $self->createMessage( { type => "SetupDataRequest", metadata => "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/all/20070809</nmwg:eventType>\n" } ) ), q{}, \$error );
+    if ($error) {
+        $self->{LOGGER}->error("sendReceive failed: $error");
+        return;
+    }
+
+    my $msg    = q{};
+    my $parser = XML::LibXML->new();
+    if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
+        my $doc = q{};
+        eval { $doc = $parser->parse_string($responseContent); };
+        if ($EVAL_ERROR) {
+            $self->{LOGGER}->error( "Parser failed: " . $EVAL_ERROR );
+        }
+        else {
+            $msg = $doc->getDocumentElement->getElementsByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "message" )->get_node(1);
+        }
+    }
+    
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my %result = ();
+    my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
+    if ($eventType) {
+        $result{"eventType"} = $eventType;
+        if ( $eventType eq "http://ggf.org/ns/nmwg/topology/query/all/20070809" ) {
+            $result{"response"} = $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("topology")->get_node(1)->toString;
+        }
+        else {
+            $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
+            unless ( $result{"response"} ) {
+                $result{"response"} = extract( find( $msg, "./nmwg:data/nmwg:datum", 1 ), 0 );
+            }
+        }
+    }
+    return \%result;
+}
+
 =head2 nameToId
 
 Given a name (i.e. DNS 'hostname') return any matching link ids.
