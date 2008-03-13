@@ -516,14 +516,12 @@ sub get_rose_objects_for_timestamp
 		my $object = $basename . '::' . $class;
 		my $manager = $object . '::Manager';
 		
-		#$logger->fatal( "isa: " . $object->isa( $basename . '::Data' ) );
-		#$logger->fatal( "isa not: " . $object->isa( 'Data::Dumper' ) );
-		#$logger->fatal( "man: " . $manager->isa( 'Rose::DB::Object::Manager') );	
-
 		# inherit the base data table and create it if necessary
-		if ( !( eval "require  $object")   &&  !(eval "require  $manager") )  {
+		unless ( $object->isa( $basename . '::Data' )
+				&& $manager->isa( 'Rose::DB::Object::Manager')	)
+		{
 	
-			$logger->debug( "'$object' and  '$manager' are not loaded...loading..." );
+			$logger->debug( "Dynamic load of '$object' with manager '$manager'" );
 			# need to turn off strict to enable dynamic loading
 			no strict; # would like more strict use, but 'refs' makes the sub object_class fail
 			my $str = "
@@ -546,45 +544,42 @@ sub get_rose_objects_for_timestamp
 				$logger->error( "Could not create dynamic Rose::DB objects: $@" );
 				return ( undef, undef );
 			}
-                        if(_tableExists($object, $table)) {
-			    $logger->debug(" Table $table exists...");
-			    push @objects, $object;
-		            push @managers, $manager;
-			} elsif ( defined $createNewTables && $createNewTables) {
-			
-		             push @objects, $object;
-		             push @managers, $manager;
-			
-			     # we need to always try to create the table as it's the only
-			     # way to determine if the table exists agnostically
-			     eval {
-			  	     my $dataTable = $object->new();
-			  	     $logger->debug( "creating new data table $table");
-			  	     # create the database table if necessary		     
-			  	     $dataTable->dbh->do( "CREATE TABLE $table AS SELECT * FROM data" );     
-			  	     undef $dataTable;  	     
-			     };
-			     #if ( $@ ) {
-			     #       $logger->debug( "table $table already exists");
-			     #}
-			}  else {
-			     $logger->debug( "Object '$object' with manager '$manager' not loaded, skipped: " .  $@);  
+
+			# create the data table int he db
+			if ( defined $createNewTables 
+					&& $createNewTables 
+					&& ! &_tableExists( $object, $table ) ) {
+						
+				eval {
+					my $dataTable = $object->new();
+					$logger->debug( "creating new data table $table");
+					# create the database table if necessary		
+					$dataTable->dbh->do( "CREATE TABLE $table AS SELECT * FROM data" );	
+					undef $dataTable;		
+				};
+				if ( $@ ) {
+					$logger->debug( "table $table already exists");
+				}
 			}
 			
 		} else {
 			$logger->debug( "Object '$object' with manager '$manager' already loaded" ); 
-			push @objects, $object;
-		        push @managers, $manager;
 		}
+		
+		# add to list of created classes
+		push @objects, $object;
+		push @managers, $manager;
+		
 	}
 
 	return ( \@objects, \@managers );
 }
 
-#
-#    ugly hack to check presence of the table
-#
+=head2 _tableExists
 
+ugly hack to check presence of the table
+
+=cut
 sub _tableExists {
     my  ($object, $table) = @_; 
     my $result = undef;
@@ -595,7 +590,7 @@ sub _tableExists {
      	  ($result)  =  $dataTable->dbh->selectrow_array("select * from  $table where 1 limit 1" );
 	  undef $dataTable;		  
     }; 
-    return 0  if($@ || ! $result);
+    return 0  if ($@ || ! $result);
     return 1;
 }
 
