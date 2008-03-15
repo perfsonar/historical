@@ -57,9 +57,10 @@ use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::CommonTime;
 
 use perfSONAR_PS::Datatypes::v2_0::nmwgr::Message::Data::Datum;
 
+use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters;
+
+use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject; 
 use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::CommonTime::Datum;
 
 use perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters;
@@ -155,10 +156,10 @@ sub  MetadataKeyRequest {
         $logger->error(" Please supply  metadata  object and not the:" . ref($response));
         return  " System error, API incomplete";
     }
-    my $message_params = perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters->new();
-    my $message_limit = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({name => 'sizeLimit', value =>  $_sizeLimit});
-    $message_params->addParameter($message_limit);
-    $response->addParameters($message_params);
+    ##my $message_params = perfSONAR_PS::Datatypes::v2_0::select::Message::Parameters->new();
+    ##my $message_limit = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Parameters::Parameter->new({name => 'sizeLimit', value =>  $_sizeLimit});
+    ##$message_params->addParameter($message_limit);
+    ##$response->addParameters($message_params);
     #### setting status URI for response 
     $self->eventTypes->status->operation('metadatakey');
     $logger->error(" Please supply  array of metadata and not: " . $self->metadata ) unless $self->metadata && ref($self->metadata) eq 'ARRAY';
@@ -171,13 +172,15 @@ sub  MetadataKeyRequest {
                         );
 	$logger->debug(" Found Key =" . $requestmd->key->id);	       
     }  elsif(($requestmd->subject) ||  ($requestmd->parameters)) { 
-        my $query =  $self->buildQuery('eq', $requestmd );
+        my  $query = {query_metaData => []};
+        $query =  $self->buildQuery('eq', $requestmd );
+	 $query =  {query_metaData => []} unless $query;
 	$logger->debug(" Will query = " . Dumper $query);	 	
-	unless($query && $query->{query_metaData} && ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} > 0) {
-	    $logger->warn(" Empty or malformed request, md=" . $requestmd->id);
-	    $response->addResultResponse({ md => $requestmd, message => 'Empty or malformed request',  eventType => $self->eventTypes->status->failure});	
-            return;
-	}
+	#unless($query && $query->{query_metaData} && ref($query->{query_metaData}) eq 'ARRAY') {
+	#    $logger->warn(" Empty or malformed request, md=" . $requestmd->id);
+	#    $response->addResultResponse({ md => $requestmd, message => 'Empty or malformed request',  eventType => $self->eventTypes->status->failure});	
+        #    return;
+	#}
 	eval {
 	    $objects  = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData(
                             query =>    $query->{query_metaData},
@@ -284,10 +287,10 @@ sub  SetupDataRequest  {
         $logger->error(" Please supply defined object of metadata and not:" . ref($response));
         return "System error,  API incomplete";
     }
-    my $message_params = perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters->new();
-    my $message_limit  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({name => 'sizeLimit', value =>  $_sizeLimit});
-    $message_params->addParameter($message_limit);
-    $response->addParameters($message_params);
+    ##my $message_params = perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters->new();
+    ##my $message_limit  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({name => 'sizeLimit', value =>  $_sizeLimit});
+    ##$message_params->addParameter($message_limit);
+    ##$response->addParameters($message_params);
     #### setting status URI for response
     $self->eventTypes->status->operation('setupdata'); 
     ####  
@@ -316,14 +319,14 @@ sub  SetupDataRequest  {
 	        $response->addResultResponse({md => $requestmd, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
 	        return $response;
 	    }
-     }   elsif($requestmd->subject) {
+     }   elsif($requestmd->subject | $requestmd->parameters) {
 	        my $query = {}; 
 	        my  $md_objects = undef;
 	        eval {
-		   foreach my $supplied_md ( $requestmd, @filters)  {
-	             %{$query} =  (%{$query} , %{$self->buildQuery('eq',  $supplied_md)});
+		     foreach my $supplied_md ( $requestmd, @filters)  {
+	                %{$query} =  (%{$query} , %{$self->buildQuery('eq',  $supplied_md)});
 		    
-		   }  
+		     }  
 		     $logger->debug(" Will query = " . Dumper $query);
 	             unless($query && $query->{query_metaData} &&  ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} >= 1) {
 	                $logger->warn(" Nothing to query about for md=" . $requestmd->id);
@@ -423,8 +426,7 @@ sub _getDataTables  {
         return undef;
     }
   	
-   # check  the tables required, will return list of objects and list of managers or empty if nothing found
-     
+   # check  the tables required, will return list of objects and list of managers or empty if nothing found   
    my ( $objects_ref, $managers_ref ) =  &perfSONAR_PS::DB::PingER::get_rose_objects_for_timestamp( $stime, $etime, undef, undef );
    return   $objects_ref;
 }
@@ -464,7 +466,7 @@ sub _ressurectMd {
      				      }) 
      		  });		  
      
-    my $pinger_params =   perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters->new({ id => "params$metaid" });
+    my $pinger_params =   perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters->new({ id => "params$metaid" });
     my $param_arrref = []; 
     no strict 'refs';
       
@@ -474,11 +476,11 @@ sub _ressurectMd {
         }
     }
     use strict;
+    $md->subject($subject); 
     if($param_arrref && @{$param_arrref}) {
         $pinger_params->parameter($param_arrref);
-        $subject->parameters($pinger_params);
+        $md->parameters($pinger_params);
     }
-    $md->subject($subject); 
     $md->key($key); 
     return $md;   
 }

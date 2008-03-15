@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key  - A base class, implements  'key'  element from the perfSONAR_PS RelaxNG schema
@@ -37,7 +37,7 @@ use perfSONAR_PS::Datatypes::NSMap;
 use Readonly;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters;
+use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters;
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
@@ -448,7 +448,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 

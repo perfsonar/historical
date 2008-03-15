@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject  - A base class, implements  'subject'  element from the perfSONAR_PS RelaxNG schema
@@ -14,7 +14,6 @@ use version; our $VERSION = 0.08;
     Scalar:     metadataIdRef, 
     Scalar:     id, 
     Object reference:   endPointPair => type ARRAY,
-    Object reference:   parameters => type HASH,
    
    The constructor accepts only single parameter, it could be a hashref to parameters hash  or DOM with  'subject' element 
     
@@ -39,11 +38,10 @@ use perfSONAR_PS::Datatypes::NSMap;
 use Readonly;
 use perfSONAR_PS::Datatypes::v2_0::nmtl4::Message::Metadata::Subject::EndPointPair;
 use perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters;
 use Class::Accessor::Fast;
 use Class::Fields;
 use base qw(Class::Accessor::Fast Class::Fields);
-use fields qw(nsmap idmap refidmap metadataIdRef id endPointPair parameters  );
+use fields qw(nsmap idmap refidmap metadataIdRef id endPointPair  );
 
 perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject->mk_accessors(perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject->show_fields('Public'));
   
@@ -54,7 +52,6 @@ perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject->mk_accessors(
          metadataIdRef   => undef, 
          id   => undef, 
          endPointPair => ARRAY,
-         parameters => HASH,
 
 =cut
 Readonly::Scalar our $COLUMN_SEPARATOR => ':';
@@ -133,10 +130,6 @@ sub getDOM {
    if($self->endPointPair  && blessed $self->endPointPair  && $self->endPointPair->can("getDOM")) {
         my  $endPointPairDOM = $self->endPointPair->getDOM($subject);
        $endPointPairDOM?$subject->appendChild($endPointPairDOM):$logger->error("Failed to append  endPointPair  with value: " .  $endPointPairDOM->toString ); 
-   }
-   if($self->parameters  && blessed $self->parameters  && $self->parameters->can("getDOM")) {
-        my  $parametersDOM = $self->parameters->getDOM($subject);
-       $parametersDOM?$subject->appendChild($parametersDOM):$logger->error("Failed to append  parameters  with value: " .  $parametersDOM->toString ); 
    }
     return $subject;
 }
@@ -249,7 +242,7 @@ sub  querySQL {
     my $query = shift; ### undef at first and then will be hash ref
     my $logger  = get_logger( $CLASSPATH );
      
-    foreach my $subname (qw/endPointPair parameters/) {
+    foreach my $subname (qw/endPointPair/) {
         if($self->{$subname} && (ref($self->{$subname}) eq 'ARRAY' ||  blessed $self->{$subname}))   {
             my @array = ref($self->{$subname}) eq 'ARRAY'?@{$self->{$subname}}:($self->{$subname});
         foreach my $el  (@array) {
@@ -332,7 +325,7 @@ sub  buildIdMap {
     my $self = shift;
     my $map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/endPointPair parameters/) {
+    foreach my $field (qw/endPointPair/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -355,7 +348,7 @@ sub  buildRefIdMap {
     my $self = shift;
     my %map = (); 
     my $logger  = get_logger( $CLASSPATH );
-    foreach my $field (qw/endPointPair parameters/) {
+    foreach my $field (qw/endPointPair/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el ( @array)  {
@@ -396,7 +389,7 @@ sub registerNamespaces {
     }  else {
         %{$nsids} = ( %{$local_nss},  %{$nsids});
     }
-    foreach my $field (qw/endPointPair parameters/) {
+    foreach my $field (qw/endPointPair/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         foreach my $el ( @array)  {
             if(blessed $el &&   $el->can("registerNamespaces") )  { 
@@ -452,16 +445,6 @@ sub fromDOM {
                return;
            }
            $self->endPointPair($element); ### add another endPointPair  
-        }  elsif ($tagname eq  'parameters' && $nsid eq 'pinger' && $self->can($tagname)) { 
-           my $element = undef;
-           eval {
-               $element = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters->new($childnode) 
-           };
-           if($EVAL_ERROR || !($element  && blessed $element)) {
-               $logger->error(" Failed to load and add  Parameters : " . $dom->toString . " error: " . $EVAL_ERROR);
-               return;
-           }
-           $self->parameters($element); ### add another parameters  
         }      ###  $dom->removeChild($childnode); ##remove processed element from the current DOM so subclass can deal with remaining elements
     }
   $self->buildIdMap;
@@ -475,7 +458,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 

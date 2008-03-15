@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Parameters::Parameter;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Parameters::Parameter  - A base class, implements  'parameter'  element from the perfSONAR_PS RelaxNG schema
@@ -326,7 +326,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 

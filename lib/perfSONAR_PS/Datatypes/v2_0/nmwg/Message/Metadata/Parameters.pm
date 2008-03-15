@@ -1,6 +1,8 @@
 package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters;
-{
-##use lib qw(/home/netadmin/LHCOPN/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/lib/perfSONAR_PS);
+use strict;
+use warnings;
+use English qw( -no_match_vars);
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters  - A base class, implements  'parameter'  element from the perfSONAR_PS RelaxNG schema
@@ -18,24 +20,24 @@ package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters;
 =head1 SYNOPSIS
 
               use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters;
-	      
-	      my $el =  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters->new($DOM_Obj);
+          
+          my $el =  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters->new($DOM_Obj);
  
 =head1   METHODS
 
 =cut
  
-use strict;
-use warnings;
+
 use XML::LibXML;
 use Scalar::Util qw(blessed);
 use Log::Log4perl qw(get_logger); 
 use perfSONAR_PS::Datatypes::Element qw(getElement);
 use perfSONAR_PS::Datatypes::Namespace;
 use perfSONAR_PS::Datatypes::NSMap;
-use Class::Accessor;
+use Readonly;
+use Class::Accessor::Fast;
 use Class::Fields;
-use base qw(Class::Accessor Class::Fields);
+use base qw(Class::Accessor::Fast Class::Fields);
 use fields qw(nsmap idmap refidmap value name    text );
 
 perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters->mk_accessors(perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters->show_fields('Public'));
@@ -49,45 +51,47 @@ perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters->mk_accessors
 text => 'text'
 
 =cut
-
-use constant  CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters';
-use constant  LOCALNAME => 'parameter';
- 	       
+Readonly::Scalar our $COLUMN_SEPARATOR => ':';
+Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters';
+Readonly::Scalar our $LOCALNAME => 'parameter';
+            
 sub new { 
     my $that = shift;
     my $param = shift;
  
-    my $logger  = get_logger( CLASSPATH ); 
+    my $logger  = get_logger( $CLASSPATH ); 
     my $class = ref($that) || $that;
     my $self =  fields::new($class );
     $self->nsmap(perfSONAR_PS::Datatypes::NSMap->new()); 
-    $self->nsmap->mapname( LOCALNAME, 'nmwg');
+    $self->nsmap->mapname( $LOCALNAME, 'nmwg');
     
     if($param) {
-        if(blessed $param && $param->can('getName')  && ($param->getName =~ m/(${\LOCALNAME})$/x) ) {
+        if(blessed $param && $param->can('getName')  && ($param->getName =~ m/$LOCALNAME$/xm) ) {
             return  $self->fromDOM($param);  
-	      
+          
         } elsif(ref($param) ne 'HASH')   {
             $logger->error("ONLY hash ref accepted as param " . $param ); 
-            return undef;
+            return;
         }
-	if($param->{xml}) {
-	     my $parser = XML::LibXML->new();
+    if($param->{xml}) {
+         my $parser = XML::LibXML->new();
              my $dom;
              eval {
                   my $doc = $parser->parse_string( $param->{xml});
-		  $dom = $doc->getDocumentElement;
+          $dom = $doc->getDocumentElement;
              };
-             if($@) {
-                 $logger->error(" Failed to parse XML :" . $param->{xml} . " \n ERROR: \n" . $@);
-                return undef;
+             if($EVAL_ERROR) {
+                 $logger->error(" Failed to parse XML :" . $param->{xml} . " \n ERROR: \n" . $EVAL_ERROR);
+                return;
              }
              return  $self->fromDOM( $dom );  
-	} 
+    } 
         $logger->debug("Parsing parameters: " . (join " : ", keys %{$param}));
      
         no strict 'refs';
-        map { $self->$_ ( $param->{$_} ) if $self->can($_)} keys %{$param}; ###  
+        foreach my $param_key (keys %{$param}) {
+            $self->$param_key( $param->{$param_key} ) if $self->can($param_key);
+        }  
         use strict;     
    
        $logger->debug("Done ");     
@@ -95,14 +99,11 @@ sub new {
     return $self;
 }
 
-#
-#  no shortcuts !
-#
-sub AUTOLOAD {}  
-
+ 
 sub DESTROY {
     my $self = shift;
     $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
+    return;
 }
  
 =head2   getDOM ($) 
@@ -115,15 +116,15 @@ sub DESTROY {
 sub getDOM {
     my $self = shift;
     my $parent = shift; 
-    my $logger  = get_logger( CLASSPATH ); 
-    my $parameter = getElement({name =>   LOCALNAME, parent => $parent , ns => [$self->nsmap->mapname( LOCALNAME )],
+    my $logger  = get_logger( $CLASSPATH ); 
+    my $parameter = getElement({name =>   $LOCALNAME, parent => $parent , ns => [$self->nsmap->mapname( $LOCALNAME )],
                              attributes => [
 
                                                ['value' =>  $self->value],
-                                     ['name' =>  (($self->name    =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|deadline|transport|setLimit)$/)?$self->name:undef)],
+                                     ['name' =>  (($self->name    =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/)?$self->name:undef)],
                                            ],
                                       'text' => (!($self->value)?$self->text:undef),
-        	             }); 
+                         }); 
     return $parameter;
 }
 
@@ -140,23 +141,23 @@ sub getDOM {
 sub  querySQL {
     my $self = shift;
     my $query = shift; ### undef at first and then will be hash ref
-    my $logger  = get_logger( CLASSPATH );
+    my $logger  = get_logger( $CLASSPATH );
      
-    my %defined_table = (  'time' => [  'end',   'start',  ],   'metaData' => [  'transport',   'count',   'packetSize',   'ttl',   'deadline',   'packetInterval',  ],   'limit' => [  'setLimit',  ],  );
+    my %defined_table = (  'time' => [  'end',   'start',  ],   'metaData' => [  'protocol',   'transport',   'count',   'packetSize',   'ttl',   'packetInterval',  ],   'limit' => [  'setLimit',  ],  );
+    $query->{metaData}{protocol}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{protocol}) || ref($query->{metaData}{protocol});
     $query->{metaData}{count}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{count}) || ref($query->{metaData}{count});
     $query->{metaData}{transport}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{transport}) || ref($query->{metaData}{transport});
     $query->{metaData}{packetSize}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{packetSize}) || ref($query->{metaData}{packetSize});
     $query->{metaData}{ttl}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{ttl}) || ref($query->{metaData}{ttl});
-    $query->{metaData}{deadline}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{deadline}) || ref($query->{metaData}{deadline});
     $query->{metaData}{packetInterval}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{packetInterval}) || ref($query->{metaData}{packetInterval});
     $query->{time}{start}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{time}{start}) || ref($query->{time}{start});
     $query->{time}{end}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{time}{end}) || ref($query->{time}{end});
     $query->{limit}{setLimit}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{limit}{setLimit}) || ref($query->{limit}{setLimit});
+    $query->{metaData}{protocol}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{protocol}) || ref($query->{metaData}{protocol});
     $query->{metaData}{count}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{count}) || ref($query->{metaData}{count});
     $query->{metaData}{transport}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{transport}) || ref($query->{metaData}{transport});
     $query->{metaData}{packetSize}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{packetSize}) || ref($query->{metaData}{packetSize});
     $query->{metaData}{ttl}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{ttl}) || ref($query->{metaData}{ttl});
-    $query->{metaData}{deadline}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{deadline}) || ref($query->{metaData}{deadline});
     $query->{metaData}{packetInterval}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{metaData}{packetInterval}) || ref($query->{metaData}{packetInterval});
     $query->{time}{start}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{time}{start}) || ref($query->{time}{start});
     $query->{time}{end}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ] if!(defined $query->{time}{end}) || ref($query->{time}{end});
@@ -167,12 +168,12 @@ sub  querySQL {
                 if(ref($query->{$table}{$entry}) eq 'ARRAY') {
                     foreach my $classes (@{$query->{$table}{$entry}}) {  
                         if($classes && $classes eq 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters' ) { 
-                            if    ($self->value && ( (  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'deadline')  && $entry eq 'deadline') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
+                            if    ($self->value && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
                                 $query->{$table}{$entry} =  $self->value;
                                 $logger->debug(" Got value for SQL query $table.$entry: " . $self->value);
                                 last;  
                             }
-                            elsif ($self->text && ( (  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'deadline')  && $entry eq 'deadline') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
+                            elsif ($self->text && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
                                 $query->{$table}{$entry} =  $self->text;
                                 $logger->debug(" Got value for SQL query $table.$entry: " . $self->text);
                                 last;  
@@ -181,9 +182,9 @@ sub  querySQL {
                      }
                  }
              }
-         }
+        }
     }; 
-    if ($@) { $logger->logcroak(" SQL query building is failed  here " . $@)};
+    if ($EVAL_ERROR) { $logger->logcroak(" SQL query building is failed  here " . $EVAL_ERROR)};
     return $query;
 }
 
@@ -202,25 +203,42 @@ sub  querySQL {
 sub merge {
     my $self = shift;
     my $new_parameter = shift;
-    my $logger  = get_logger( CLASSPATH );  
+    my $logger  = get_logger( $CLASSPATH );  
     unless($new_parameter && blessed $new_parameter && $new_parameter->can("getDOM")) {
         $logger->error(" Please supply defined object of parameter  ");
-        return undef;
+        return;
     } 
-    foreach my $member ($new_parameter->show_fields) {
-        if($self->can($member)) {
-	     my $mergeList = $self->{$member};
-	     $mergeList = [ $self->{$member} ]  unless(ref($mergeList) eq 'ARRAY');
-	     foreach my $mem (@{ $mergeList }) {
-	         if(blessed $mem && $mem->can("merge")) {
-	             $mem->merge($new_parameter->{$member}); ## recursively merge it
-                 } else {
-                     $mem = $new_parameter->{$member};
-	         }
-	     }
-	} else {
-	    $logger->error(" This field $member,  found in supplied  metadata is not supported by MetaData class");
-	    return undef;
+    ### for each field ( element or attribute )
+    ### merge elements, add if its arrayref and overwrite attribtues for the same elements
+    ### merge only if namespace is the same  
+    foreach my $member_name ($new_parameter->show_fields) {
+        ### double check if   objects are the same
+    if($self->can($member_name)) {
+        my $current_member  = $self->{$member_name};
+        my $new_member      =  $new_parameter->{$member_name};
+        ###  check if both objects are defined
+        if($current_member && $new_member) {
+            ### if  one of them array then just add another one
+            if(blessed $current_member && blessed $new_member  && $current_member->can("merge") 
+               && ( $current_member->nsmap->mapname($member_name) 
+                eq  $new_member->nsmap->mapname($member_name) ) ) {
+               $current_member->merge($new_member);
+            $self->{$member_name} =  $current_member;
+            $logger->debug("  Merged $member_name , got" . $current_member->asString);
+            ### if its array then just push
+            } elsif(ref($current_member) eq 'ARRAY'){
+                 
+           $self->{$member_name}=[$current_member, $new_member];
+              
+            $logger->debug("  Pushed extra to $member_name ");
+            }  
+        ## thats it, dont merge if new member is just a scalar
+        } elsif( $new_member) {
+           $self->{$member_name} = $new_member;
+        }   
+    } else {
+        $logger->error(" This field $member_name,  found in supplied  parameter  is not supported by parameter class");
+        return;
         }
     }
     return $self;
@@ -235,9 +253,9 @@ sub merge {
 
 sub  buildIdMap {
     my $self = shift;
-    my %map = (); 
-    my $logger  = get_logger( CLASSPATH );
-    return undef;
+    my $map = (); 
+    my $logger  = get_logger( $CLASSPATH );
+    return;
 }
 =head2 buildrefIdMap ()
 
@@ -249,8 +267,8 @@ sub  buildIdMap {
 sub  buildRefIdMap {
     my $self = shift;
     my %map = (); 
-    my $logger  = get_logger( CLASSPATH );
-    return undef;
+    my $logger  = get_logger( $CLASSPATH );
+    return;
 }
 =head2  asString()
 
@@ -262,7 +280,7 @@ sub  buildRefIdMap {
 sub asString {
     my $self = shift;
     my $dom = $self->getDOM();
-    return $dom->toString();
+    return $dom->toString('1');
 }
 
 =head2 registerNamespaces ()
@@ -273,7 +291,7 @@ sub asString {
 
 sub registerNamespaces {
     my $self = shift;
-    my $logger  = get_logger( CLASSPATH );
+    my $logger  = get_logger( $CLASSPATH );
     my $nsids = shift;
     my $local_nss = {reverse %{$self->nsmap->mapname}};
     unless($nsids) {
@@ -292,26 +310,25 @@ sub registerNamespaces {
 
 sub fromDOM {
     my $self = shift;
-    my $logger  = get_logger( CLASSPATH ); 
+    my $logger  = get_logger( $CLASSPATH ); 
     my $dom = shift;
      
     $self->value($dom->getAttribute('value')) if($dom->getAttribute('value'));
     $logger->debug(" Attribute value= ". $self->value) if $self->value; 
-    $self->name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|deadline|transport|setLimit)$/));
+    $self->name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/));
     $logger->debug(" Attribute name= ". $self->name) if $self->name; 
     $self->text($dom->textContent) if(!($self->value) && $dom->textContent);
 
  return $self;
 }
 
-1; 
-}
-
-__END__
-
+ 
+ 
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
+
+1;
  

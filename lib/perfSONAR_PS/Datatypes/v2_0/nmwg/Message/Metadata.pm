@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata  - A base class, implements  'metadata'  element from the perfSONAR_PS RelaxNG schema
@@ -14,7 +14,7 @@ use version; our $VERSION = 0.08;
     Scalar:     metadataIdRef, 
     Scalar:     id, 
     Object reference:   subject => type ARRAY,
-    Object reference:   parameters => type HASH,
+    Object reference:   parameters => type ARRAY,
     Object reference:   eventType => type ,
     Object reference:   key => type HASH,
    
@@ -43,7 +43,7 @@ use perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Subject;
 use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters;
+use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key;
 use Class::Accessor::Fast;
 use Class::Fields;
@@ -59,7 +59,7 @@ perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->mk_accessors(perfSONAR_P
          metadataIdRef   => undef, 
          id   => undef, 
          subject => ARRAY,
-         parameters => HASH,
+         parameters => ARRAY,
          key => HASH,
 
 =cut
@@ -247,6 +247,99 @@ sub getSubjectById {
         return $self->subject->[$self->idmap->{subject}{$id}];
     } elsif(!ref($self->subject) || ref($self->subject) ne 'ARRAY')  {
         return $self->subject;
+    }  
+    $logger->warn("Requested element for non-existent id:$id"); 
+    return;   
+}
+  
+=head2  addparameters()
+
+    if any of subelements can be an arrray then this method will provide
+    facility to add another element to the  array and will return ref to such array
+    or just set the element to a new one
+=cut
+
+sub addParameters {
+    my $self = shift;
+    my $new = shift;
+    my $logger  = get_logger( $CLASSPATH ); 
+   
+    $self->parameters && ref($self->parameters) eq 'ARRAY'?push @{$self->parameters}, $new:$self->parameters([$new]); 
+    $logger->debug("Added new to parameters"); 
+    $self->buildIdMap; ## rebuild index map 
+    $self->buildRefIdMap; ## rebuild ref index map  
+    return $self->parameters;
+}
+
+=head2  removeParametersById()
+
+     remove specific element from the array of parameters elements by id ( if id is supported by this element )
+     accepts single param - id - which is id attribute of the element
+     if there is no array then it will return undef and warninig
+     if it removed some id then $id will be returned
+     
+=cut
+
+sub removeParametersById {
+    my $self = shift;
+    my $id = shift;
+    my $logger  = get_logger( $CLASSPATH ); 
+    if(ref($self->parameters) eq 'ARRAY' && $self->idmap->{parameters} &&  exists $self->idmap->{parameters}{$id}) { 
+        $self->parameters->[$self->idmap->{parameters}{$id}]->DESTROY; 
+    my @tmp =  grep { defined $_ } @{$self->parameters};  
+    $self->parameters([@tmp]);
+    $self->buildRefIdMap; ## rebuild ref index map  
+    $self->buildIdMap; ## rebuild index map 
+    return $id;
+    } elsif(!ref($self->parameters)  || ref($self->parameters) ne 'ARRAY')  {
+        $logger->warn("Failed to remove  element because parameters not an array for non-existent id:$id");  
+    } else {
+        $logger->warn("Failed to remove element for non-existant id:$id");  
+    } 
+    return;
+}   
+=head2  getParametersByMetadataIdRef()
+
+     get specific object from the array of parameters elements by  MetadataIdRef( if  MetadataIdRef is supported by this element )
+     accepts single param -  MetadataIdRef
+     if there is no array then it will return just an object
+     
+=cut
+
+sub getParametersByMetadataIdRef {
+    my $self = shift;
+    my $id = shift;
+    my $logger  = get_logger( $CLASSPATH ); 
+    if(ref($self->parameters) eq 'ARRAY' && $self->refidmap->{parameters} && exists $self->refidmap->{parameters}{$id}) {
+        my $parameters = $self->parameters->[$self->refidmap->{parameters}{$id}];
+    return ($parameters->can("metadataIdRef") &&   $parameters->metadataIdRef eq  $id)?$parameters:undef; 
+    } elsif($self->parameters && (!ref($self->parameters) || 
+                                    (ref($self->parameters) ne 'ARRAY' &&
+                                     blessed $self->parameters && $self->parameters->can("metadataIdRef") &&
+                     $self->parameters->metadataIdRef eq  $id)))  {
+        return $self->parameters;
+    }  
+    $logger->warn("Requested element for non-existent metadataIdRef:$id"); 
+    return;
+    
+}
+
+=head2  getParametersById()
+
+     get specific element from the array of parameters elements by id ( if id is supported by this element )
+     accepts single param - id
+     if there is no array then it will return just an object
+     
+=cut
+
+sub getParametersById {
+    my $self = shift;
+    my $id = shift;
+    my $logger  = get_logger( $CLASSPATH ); 
+    if(ref($self->parameters) eq 'ARRAY' && $self->idmap->{parameters} &&  exists $self->idmap->{parameters}{$id} ) {
+        return $self->parameters->[$self->idmap->{parameters}{$id}];
+    } elsif(!ref($self->parameters) || ref($self->parameters) ne 'ARRAY')  {
+        return $self->parameters;
     }  
     $logger->warn("Requested element for non-existent id:$id"); 
     return;   
@@ -480,6 +573,16 @@ sub fromDOM {
                return;
            }
            $self->parameters($element); ### add another parameters  
+        }  elsif ($tagname eq  'parameters' && $nsid eq 'pinger' && $self->can($tagname)) { 
+           my $element = undef;
+           eval {
+               $element = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters->new($childnode) 
+           };
+           if($EVAL_ERROR || !($element  && blessed $element)) {
+               $logger->error(" Failed to load and add  Parameters : " . $dom->toString . " error: " . $EVAL_ERROR);
+               return;
+           }
+           $self->parameters($element); ### add another parameters  
         }  elsif ($tagname eq  'key' && $nsid eq 'nmwg' && $self->can($tagname)) { 
            my $element = undef;
            eval {
@@ -505,7 +608,7 @@ sub fromDOM {
  
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)  2007, maxim@fnal.gov
+   Maxim Grigoriev (FNAL)  2007-2008, maxim@fnal.gov
 
 =cut 
 
