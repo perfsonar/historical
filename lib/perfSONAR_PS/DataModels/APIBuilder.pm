@@ -50,7 +50,7 @@ package  perfSONAR_PS::DataModels::APIBuilder;
 BEGIN {
  use Exporter ();
  our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
- use version; our $VERSION = 0.08;
+ use version; our $VERSION = qv('2.0');
         %EXPORT_TAGS = ();
         use base qw(Exporter);
         @EXPORT_OK     = qw( );

@@ -32,7 +32,7 @@ use Data::Dumper;
 BEGIN {
  use Exporter ();
  our (@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-        use version; our $VERSION = 0.08; 
+        use version; our $VERSION =    qv('2.0'); 
         # set the version for version checking
         #$VERSION     = 2.0;
         # if using RCS/CVS, this may be preferred
@@ -180,7 +180,7 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($endPointPair $interfaceL3  $
     $service_subject= { 'attrs'   => {id => 'scalar', metadataIdRef => 'scalar',xmlns => 'pinger'},
                         elements => [
 			                [endPointPair =>    [$endPointPair ,  $endPointPairL4]],
-					[parameters =>   $service_parameters],
+					 
 				    ], 
 	             };    
    $data = {'attrs'  => {id => 'scalar', metadataIdRef => 'scalar',xmlns => 'nmwg'},
@@ -195,7 +195,7 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($endPointPair $interfaceL3  $
    $metadata = {'attrs'  => {id => 'scalar', metadataIdRef => 'scalar',xmlns => 'nmwg'},
  	       elements => [
  			    [subject    =>  [$service_subject, $select_subj]],
-			    [parameters =>  $select_params],
+			    [parameters =>  [$select_params, $service_parameters]],
 			    [eventType  =>  'text'], 
  			    [key        =>  $key], 
 			  ], 

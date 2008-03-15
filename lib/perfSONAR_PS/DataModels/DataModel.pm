@@ -79,7 +79,7 @@ $message $metadata $data  $key $endPointPairL4  $datum $commonTime\
 BEGIN {
  use Exporter ();
  our (@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-        use version; our $VERSION = 0.08; 
+        use version; our $VERSION =   qv('2.0');
         # set the version for version checking
         #$VERSION     = 2.0;
         # if using RCS/CVS, this may be preferred
