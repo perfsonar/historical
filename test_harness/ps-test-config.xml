@@ -44,11 +44,6 @@ NOTE for MA testing:
      <expected_output>maKey</expected_output>
   </test>
   <test>
-     <input>MetadataKeyRequest/MDKR-cooked_key-filter-merge.xml</input>
-     <description> Test ... </description>
-     <expected_output>maKey</expected_output>
-  </test>
-  <test>
      <input>MetadataKeyRequest/MDKR-key.xml</input>
      <description> Test ... </description>
      <expected_output>maKey</expected_output>
@@ -60,11 +55,6 @@ NOTE for MA testing:
   </test>
   <test>
      <input>MetadataKeyRequest/MDKR-md-filter-merge.xml</input>
-     <description> Test ... </description>
-     <expected_output>maKey</expected_output>
-  </test>
-  <test>
-     <input>MetadataKeyRequest/MDKR-cooked_key-merge.xml</input>
      <description> Test ... </description>
      <expected_output>maKey</expected_output>
   </test>
@@ -131,16 +121,6 @@ NOTE for MA testing:
   <test>
      <input>SetupDataRequest/SetupDataRequest_Key_2.xml</input>
      <description> Test the ...  </description>
-     <expected_output>value timeValue</expected_output>
-  </test>
-  <test>
-     <input>SetupDataRequest/SDR-cooked_key-merge.xml</input>
-     <description> Test Merge  </description>
-     <expected_output>value timeValue</expected_output>
-  </test>
-  <test>
-     <input>SetupDataRequest/SDR-cooked_key-filter-merge.xml</input>
-     <description> Test Merge  </description>
      <expected_output>value timeValue</expected_output>
   </test>
   <test>
