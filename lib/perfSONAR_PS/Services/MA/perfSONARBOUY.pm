@@ -1595,7 +1595,7 @@ sub retrieveSQL {
     }
     else {
         my $prefix = "iperf";
-        my $uri    = "http://ggf.org/ns/nmwg/tools/iperf/2.0";
+        my $uri    = "http://ggf.org/ns/nmwg/tools/iperf/2.0/";
 
         startData( $parameters->{output}, $id, $parameters->{mid}, undef );
         my $len = $#{$result};

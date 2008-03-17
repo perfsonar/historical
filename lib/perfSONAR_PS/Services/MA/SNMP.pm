@@ -1493,12 +1493,12 @@ sub retrieveSQL {
     }
     else {
         my $prefix = "nmwg";
-        my $uri    = "http://ggf.org/ns/nmwg/base/2.0";
+        my $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
 
         if ($datumns) {
             if ( defined $parameters->{et} and $parameters->{et} ne q{} ) {
                 foreach my $e ( sort keys %{ $parameters->{et} } ) {
-                    next if $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0";
+                    next if $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0/";
                     $uri = $e;
                 }
             }
@@ -1511,7 +1511,7 @@ sub retrieveSQL {
                 }
                 if ( !$prefix ) {
                     $prefix = "nmwg";
-                    $uri    = "http://ggf.org/ns/nmwg/base/2.0";
+                    $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
                 }
             }
         }
@@ -1611,11 +1611,11 @@ sub retrieveRRD {
     }
     else {
         my $prefix = "nmwg";
-        my $uri    = "http://ggf.org/ns/nmwg/base/2.0";
+        my $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
         if ($datumns) {
             if ( defined $parameters->{et} and $parameters->{et} ne q{} ) {
                 foreach my $e ( sort keys %{ $parameters->{et} } ) {
-                    next if $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0";
+                    next if $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0/";
                     $uri = $e;
                 }
             }
@@ -1628,7 +1628,7 @@ sub retrieveRRD {
                 }
                 if ( !$prefix ) {
                     $prefix = "nmwg";
-                    $uri    = "http://ggf.org/ns/nmwg/base/2.0";
+                    $uri    = "http://ggf.org/ns/nmwg/base/2.0/";
                 }
             }
         }
