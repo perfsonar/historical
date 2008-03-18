@@ -22,7 +22,7 @@
 # To Do:
 #   do each test 2 times, one with bad input, to test for error message
 #   general cleanup
-#   better error handling
+#   better error handling / error messages
 #   using too many temporary files! (but helpful for debugging) Store results in memory?
 #
 # Possible improvements:
@@ -61,12 +61,13 @@ NMWG = "{http://ggf.org/ns/nmwg/base/2.0/}"
 NMWG2 = "{http://ggf.org/ns/nmwg/base/2.0}"   # BUG? sometimes there is no trailing '/'
 NMWGT = "{http://ggf.org/ns/nmwg/topology/2.0/}"
 NMWGS = "{http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/}"
+NMWGC = "{http://ggf.org/ns/nmwg/characteristic/utilization/2.0/}"
 
 IPERF = "{http://ggf.org/ns/nmwg/tools/iperf/2.0/}"
 NMWGR = "{http://ggf.org/ns/nmwg/result/2.0/}"  # for error/status messages only
 
 #NMWG_ALL = [NMWG, NMWG2, NMWGT, NMWGR, NMWGS, IPERF]
-NMWG_ALL = [NMWG, NMWGT, NMWGS, IPERF]
+NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF]
 
 verbose = 0
 
