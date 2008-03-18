@@ -11,6 +11,12 @@ expected_element:  tags and attribute that you expect to find in the reloy
 
 NOTE for MA testing: 
    You MUST run a test that returns a Key before a test that uses a Key.
+
+Current Limitations (may fix these later):
+  -You can't look for a tag that is part of the 'result' namespace 
+     (http://ggf.org/ns/nmwg/result/2.0/). That is reserved for error/status messages
+  -You can't look for specific element text or attribute values, only tag names and 
+	attribute names
 -->
 
 <perfSONAR-tests>

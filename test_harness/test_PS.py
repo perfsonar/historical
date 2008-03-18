@@ -20,18 +20,16 @@
 # output: Pass/Fail messages and performance information
 #
 # To Do:
-#   make work with results returned by Java MA
-#   add ability to specify tags vs text vs attrib in config file
 #   do each test 2 times, one with bad input, to test for error message
-#   save timing results in a csv file for plotting (Done, needs testing)
-#   for DataRequest, also print number of data elements returned
 #   general cleanup
 #   better error handling
 #   using too many temporary files! (but helpful for debugging) Store results in memory?
 #
 # Possible improvements:
+#    ability to specify namespace in the test config file?
+#    add ability to specify element text and attrib values in test config file?
 #    verify that data returned looks right (ie: start/end times, step size, etc.)
-#    do schema validation of reply
+#    do schema validation of reply?
 #    use python 'csv' module for handling csv file?
 #
 import time, sys, os, string, os.path, random

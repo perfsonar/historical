@@ -8,11 +8,13 @@ You can run this test harness against an existing service, or you can start
 See instructions below for starting the test services
 
 Sample use with existing services:
+    setenv PSHOME /path/to/perfSONAR-PS
     test_PS.py -u http://mea1.es.net:8080/perfSONAR_PS/services/snmpMA -c snpmMA-test-config.xml
     test_PS.py -u http://dc200.internet2.edu:8081/perfSONAR_PS/services/LS -c LS-test-config.xml
     test_PS.py -u http://dc211.internet2.edu:8080/perfSONAR_PS/services/perfSONARBOUY -c psBOUY-test-config.xml
     test_PS.py -u http://stats.geant2.net/perfsonar/RRDMA-access/MeasurementArchiveService -c snpmMA-test-config.xml
 
+See snpmMA-test-config.xml for notes on how to build the test config file
 
 -----------------------------------------------------------
 
@@ -29,15 +31,10 @@ To start the sample services
   start perfSONAR
      ./start-perfSONAR.sh
 
-  run test
-     edit requestDir in  ps-test-config.xml for your installation location
-     ./test_PS.py
 
-
-Test perfSONARBUOY
+Test perfSONARBUOY service
      coming soon
 
 
-
-Test pingERMA
+Test pingER-MA service
      coming soon
