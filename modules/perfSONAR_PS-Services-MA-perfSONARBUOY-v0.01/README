@@ -1,11 +1,11 @@
-perfSONAR_PS::Services::MA::perfSONARBOUY README File
+perfSONAR_PS::Services::MA::perfSONARBUOY README File
 =====================================================
 
 Description
 -----------
 
-The perfSONAR_PS::Services::MA::perfSONARBOUY module allows one to make BWCTL
-data available from backend SQL storage using the perfSONAR perfSONARBOUY MA
+The perfSONAR_PS::Services::MA::perfSONARBUOY module allows one to make BWCTL
+data available from backend SQL storage using the perfSONAR perfSONARBUOY MA
 protocols.
 
 Installation
@@ -20,7 +20,7 @@ Installation
  CPAN installation
  -----------------
 
-    perl -MCPAN -e 'install perfSONAR_PS::Services::MA::perfSONARBOUY'
+    perl -MCPAN -e 'install perfSONAR_PS::Services::MA::perfSONARBUOY'
 
  Standard installation
  ---------------------

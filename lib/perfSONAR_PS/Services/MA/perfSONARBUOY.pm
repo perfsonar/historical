@@ -1,4 +1,4 @@
-package perfSONAR_PS::Services::MA::perfSONARBOUY;
+package perfSONAR_PS::Services::MA::perfSONARBUOY;
 
 use base 'perfSONAR_PS::Services::Base';
 
@@ -7,12 +7,12 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 NAME
 
-perfSONAR_PS::Services::MA::perfSONARBOUY - A module that provides methods for
-the perfSONARBOUY MA.  perfSONARBOUY exposes data formerly collected by the 
+perfSONAR_PS::Services::MA::perfSONARBUOY - A module that provides methods for
+the perfSONARBUOY MA.  perfSONARBUOY exposes data formerly collected by the 
 AMI framework, including BWCTL and OWAMP data.  This data is stored in a 
 database backend (commonly MySQL).  The webservices interface provided by this
 MA currently exposes only iperf data collected via BWCTL.
@@ -102,67 +102,67 @@ ways:
 
 sub init {
     my ( $self, $handler ) = @_;
-    $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::perfSONARBOUY");
+    $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::perfSONARBUOY");
 
-    unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"owmesh"}
-        and $self->{CONF}->{"perfsonarbouy"}->{"owmesh"} )
+    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
+        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} )
     {
         $self->{LOGGER}->error("Value for 'owmesh' is not set.");
         return -1;
     }
     else {
         if ( defined $self->{DIRECTORY} ) {
-            unless ( $self->{CONF}->{"perfsonarbouy"}->{"owmesh"} =~ "^/" ) {
-                $self->{CONF}->{"perfsonarbouy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbouy"}->{"owmesh"};
+            unless ( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} =~ "^/" ) {
+                $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"};
             }
         }
     }
 
-    unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"}
-        and $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} )
+    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"}
+        and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} )
     {
         $self->{LOGGER}->error("Value for 'metadata_db_type' is not set.");
         return -1;
     }
 
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} )
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} )
         {
             $self->{LOGGER}->error("Value for 'metadata_db_file' is not set.");
             return -1;
         }
         else {
             if ( defined $self->{DIRECTORY} ) {
-                unless ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} =~ "^/" ) {
-                    $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"};
+                unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} =~ "^/" ) {
+                    $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
                 }
             }
         }
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         eval { load perfSONAR_PS::DB::XMLDB; };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
             return -1;
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} )
         {
             $self->{LOGGER}->error("Value for 'metadata_db_file' is not set.");
             return -1;
         }
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} )
         {
             $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
             return -1;
         }
         else {
             if ( defined $self->{DIRECTORY} ) {
-                unless ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"} =~ "^/" ) {
-                    $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"};
+                unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} =~ "^/" ) {
+                    $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"};
                 }
             }
         }
@@ -172,73 +172,73 @@ sub init {
         return -1;
     }
 
-    unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"}
-        and $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"} )
+    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"}
+        and $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} )
     {
-        $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"} = 0;
+        $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} = 0;
     }
 
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"} ) {
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"} )
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
         {
-            $self->{LOGGER}->error("No access point specified for perfSONARBOUY service");
+            $self->{LOGGER}->error("No access point specified for perfSONARBUOY service");
             return -1;
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"ls_instance"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"ls_instance"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
         {
             if ( defined $self->{CONF}->{"ls_instance"}
                 and $self->{CONF}->{"ls_instance"} )
             {
-                $self->{CONF}->{"perfsonarbouy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->error("No LS instance specified for perfSONARBOUY service");
+                $self->{LOGGER}->error("No LS instance specified for perfSONARBUOY service");
                 return -1;
             }
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"ls_registration_interval"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"ls_registration_interval"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
         {
             if ( defined $self->{CONF}->{"ls_registration_interval"}
                 and $self->{CONF}->{"ls_registration_interval"} )
             {
-                $self->{CONF}->{"perfsonarbouy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             }
             else {
                 $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
-                $self->{CONF}->{"perfsonarbouy"}->{"ls_registration_interval"} = 1800;
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = 1800;
             }
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
         {
-            $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"} = "http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT};
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} = "http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT};
             $self->{LOGGER}->warn( "Setting 'service_accesspoint' to 'http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT} . "'." );
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"service_description"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"service_description"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
         {
-            $self->{CONF}->{"perfsonarbouy"}->{"service_description"} = "perfSONAR_PS perfSONARBOUY MA";
-            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS perfSONARBOUY MA'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} = "perfSONAR_PS perfSONARBUOY MA";
+            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS perfSONARBUOY MA'.");
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"service_name"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"service_name"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} )
         {
-            $self->{CONF}->{"perfsonarbouy"}->{"service_name"} = "perfSONARBOUY MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONARBOUY MA'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "perfSONARBUOY MA";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONARBUOY MA'.");
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbouy"}->{"service_type"}
-            and $self->{CONF}->{"perfsonarbouy"}->{"service_type"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} )
         {
-            $self->{CONF}->{"perfsonarbouy"}->{"service_type"} = "MA";
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
         }
     }
@@ -247,20 +247,20 @@ sub init {
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
 
     my $error = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         unless ( $self->createStorage( {} ) == 0 ) {
             $self->{LOGGER}->error("Couldn't load the store file.");
             return -1;
         }
 
-        $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} } );
+        $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} } );
         $self->{METADATADB}->openDB( { error => \$error } );
         unless ( $self->{METADATADB} ) {
             $self->{LOGGER}->error("Couldn't initialize store file: $error");
             return -1;
         }
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         my $error      = q{};
         my $metadatadb = $self->prepareDatabases;
         unless ($metadatadb) {
@@ -304,7 +304,7 @@ sub createStorage {
     #
     my %defaults = (
         DBHOST  => hostname(),
-        CONFDIR => $self->{CONF}->{"perfsonarbouy"}->{"owmesh"}
+        CONFDIR => $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
     );
     my $conf = new perfSONAR_PS::OWP::Conf(%defaults);
 
@@ -353,7 +353,7 @@ sub createStorage {
     my $error     = q{};
     my $errorFlag = 0;
     my $dbTr      = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
 
         unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
             $parameters->{metadatadb} = $self->prepareDatabases;
@@ -371,8 +371,8 @@ sub createStorage {
             return -1;
         }
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-        my $fh = new IO::File "> " . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"};
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+        my $fh = new IO::File "> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
         if ( defined $fh ) {
             print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
             print $fh "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
@@ -470,7 +470,7 @@ sub createStorage {
                 $data .= "    </nmwg:key>\n";
                 $data .= "  </nmwg:data>";
 
-                if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
                     my $dHash  = md5_hex($data);
                     my $mdHash = md5_hex($metadata);
                     $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
@@ -478,12 +478,12 @@ sub createStorage {
                     $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
 
-                    $self->{CONF}->{"perfsonarbouy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                    $self->{CONF}->{"perfsonarbouy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
                     $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
                 }
-                elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"};
+                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
                     if ( defined $fh ) {
                         print $fh $metadata . "\n" . $data . "\n";
                         $fh->close;
@@ -494,8 +494,8 @@ sub createStorage {
                     }
 
                     my $dHash = md5_hex($data);
-                    $self->{CONF}->{"perfsonarbouy"}->{"hashToId"}->{$dHash} = "data-" . $id;
-                    $self->{CONF}->{"perfsonarbouy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
                     $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
                 }
                 $id++;
@@ -503,7 +503,7 @@ sub createStorage {
         }
     }
 
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         if ($errorFlag) {
             $parameters->{metadatadb}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
@@ -523,8 +523,8 @@ sub createStorage {
             }
         }
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-        my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"};
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+        my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
         if ( defined $fh ) {
             print $fh "</nmwg:store>\n";
             $fh->close;
@@ -554,7 +554,7 @@ sub prepareDatabases {
     my $parameters = validateParams( @args, { doc => 0 } );
 
     my $error = q{};
-    my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_name"}, cont => $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
+    my $metadatadb = new perfSONAR_PS::DB::XMLDB( { env => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}, cont => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}, ns => \%ma_namespaces, } );
     unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
         return;
@@ -564,7 +564,7 @@ sub prepareDatabases {
 
 =head2 needLS($self {})
 
-This particular service (perfSONARBOUY MA) should register with a lookup
+This particular service (perfSONARBUOY MA) should register with a lookup
 service.  This function simply returns the value set in the configuration file
 (either yes or no, depending on user preference) to let other parts of the
 framework know if LS registration is required.
@@ -575,7 +575,7 @@ sub needLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return ( $self->{CONF}->{"perfsonarbouy"}->{"enable_registration"} );
+    return ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} );
 }
 
 =head2 registerLS($self $sleep_time)
@@ -597,22 +597,22 @@ sub registerLS {
 
     if ( !defined $self->{LS_CLIENT} ) {
         my %ls_conf = (
-            SERVICE_TYPE        => $self->{CONF}->{"perfsonarbouy"}->{"service_type"},
-            SERVICE_NAME        => $self->{CONF}->{"perfsonarbouy"}->{"service_name"},
-            SERVICE_DESCRIPTION => $self->{CONF}->{"perfsonarbouy"}->{"service_description"},
-            SERVICE_ACCESSPOINT => $self->{CONF}->{"perfsonarbouy"}->{"service_accesspoint"},
+            SERVICE_TYPE        => $self->{CONF}->{"perfsonarbuoy"}->{"service_type"},
+            SERVICE_NAME        => $self->{CONF}->{"perfsonarbuoy"}->{"service_name"},
+            SERVICE_DESCRIPTION => $self->{CONF}->{"perfsonarbuoy"}->{"service_description"},
+            SERVICE_ACCESSPOINT => $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"},
         );
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( $self->{CONF}->{"perfsonarbouy"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES} );
+        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES} );
     }
 
     $ls = $self->{LS_CLIENT};
 
     my $error         = q{};
     my @resultsString = ();
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         my $metadatadb = $self->prepareDatabases;
         unless ($metadatadb) {
             $self->{LOGGER}->error("Database could not be opened.");
@@ -717,7 +717,7 @@ sub handleEvent {
     my %timeSettings = ();
 
     # go through the main subject and select filters looking for parameters.
-    my $new_timeSettings = getFilterParameters( { m => $md, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"perfsonarbouy"}->{"default_resolution"} } );
+    my $new_timeSettings = getFilterParameters( { m => $md, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"perfsonarbuoy"}->{"default_resolution"} } );
 
     $timeSettings{"CF"}                   = $new_timeSettings->{"CF"}                   if ( defined $new_timeSettings->{"CF"} );
     $timeSettings{"RESOLUTION"}           = $new_timeSettings->{"RESOLUTION"}           if ( defined $new_timeSettings->{"RESOLUTION"} and $timeSettings{"RESOLUTION_SPECIFIED"} );
@@ -754,7 +754,7 @@ sub handleEvent {
             my @filters = @{$filter_arr};
             my $filter  = $filters[-1];
 
-            $new_timeSettings = getFilterParameters( { m => $filter, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"perfsonarbouy"}->{"default_resolution"} } );
+            $new_timeSettings = getFilterParameters( { m => $filter, namespaces => $parameters->{rawRequest}->getNamespaces(), default_resolution => $self->{CONF}->{"perfsonarbuoy"}->{"default_resolution"} } );
 
             $timeSettings{"CF"}                   = $new_timeSettings->{"CF"}                   if ( defined $new_timeSettings->{"CF"} );
             $timeSettings{"RESOLUTION"}           = $new_timeSettings->{"RESOLUTION"}           if ( defined $new_timeSettings->{"RESOLUTION"} and $new_timeSettings->{"RESOLUTION_SPECIFIED"} );
@@ -810,7 +810,7 @@ sub handleEvent {
 
     # If no resolution was listed in the filters, go with the default
     if ( not defined $timeSettings{"RESOLUTION"} ) {
-        $timeSettings{"RESOLUTION"}           = $self->{CONF}->{"perfsonarbouy"}->{"default_resolution"};
+        $timeSettings{"RESOLUTION"}           = $self->{CONF}->{"perfsonarbuoy"}->{"default_resolution"};
         $timeSettings{"RESOLUTION_SPECIFIED"} = 0;
     }
 
@@ -889,15 +889,15 @@ sub maMetadataKeyRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
         unless ( $self->{METADATADB} ) {
             throw perfSONAR_PS::Error_compat("Database could not be opened.");
             return;
         }
     }
-    unless ( ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) )
+    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
+        or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
     {
         throw perfSONAR_PS::Error_compat("Wrong value for 'metadata_db_type' set.");
         return;
@@ -969,7 +969,7 @@ sub metadataKeyRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"perfsonarbouy"}->{"hashToId"}->{$hashKey};
+    my $hashId = $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$hashKey};
     unless ($hashId) {
         my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
         $self->{LOGGER}->error($msg);
@@ -978,10 +978,10 @@ sub metadataKeyRetrieveKey {
     }
 
     my $query = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
 
@@ -1037,10 +1037,10 @@ sub metadataKeyRetrieveMetadataData {
     my $mdId        = q{};
     my $dId         = q{};
     my $queryString = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
 
@@ -1061,10 +1061,10 @@ sub metadataKeyRetrieveMetadataData {
         }
     }
 
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:data";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
     }
 
@@ -1101,7 +1101,7 @@ sub metadataKeyRetrieveMetadataData {
             $parameters->{output}->addExistingXMLElement($md_temp);
 
             my $hashId  = $d->getAttribute("id");
-            my $hashKey = $self->{CONF}->{"perfsonarbouy"}->{"idToHash"}->{$hashId};
+            my $hashKey = $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{$hashId};
             unless ($hashKey) {
                 my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
                 $self->{LOGGER}->error($msg);
@@ -1131,7 +1131,7 @@ sub metadataKeyRetrieveMetadataData {
         }
     }
     else {
-        my $msg = "Database \"" . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} . "\" returned 0 results for search";
+        my $msg = "Database \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\" returned 0 results for search";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
@@ -1174,15 +1174,15 @@ sub maSetupDataRequest {
     my $mdId  = q{};
     my $dId   = q{};
     my $error = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
         unless ( $self->{METADATADB} ) {
             throw perfSONAR_PS::Error_compat("Database could not be opened.");
             return;
         }
     }
-    unless ( ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" )
-        or ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) )
+    unless ( ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" )
+        or ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) )
     {
         throw perfSONAR_PS::Error_compat("Wrong value for 'metadata_db_type' set.");
         return;
@@ -1260,7 +1260,7 @@ sub setupDataRetrieveKey {
         return;
     }
 
-    my $hashId = $self->{CONF}->{"perfsonarbouy"}->{"hashToId"}->{$hashKey};
+    my $hashId = $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$hashKey};
     $self->{LOGGER}->debug("Received hash key $hashKey which maps to $hashId");
     unless ($hashId) {
         my $msg = "Key error in metadata storage: 'maKey' cannot be found.";
@@ -1270,10 +1270,10 @@ sub setupDataRetrieveKey {
     }
 
     my $query = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
     }
 
@@ -1353,10 +1353,10 @@ sub setupDataRetrieveMetadataData {
     my $dId  = q{};
 
     my $queryString = q{};
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
     }
 
@@ -1378,10 +1378,10 @@ sub setupDataRetrieveMetadataData {
         }
     }
 
-    if ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         $queryString = "/nmwg:store/nmwg:data";
     }
-    elsif ( $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
+    elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
     }
 
@@ -1458,7 +1458,7 @@ sub setupDataRetrieveMetadataData {
         }
     }
     else {
-        my $msg = "Database \"" . $self->{CONF}->{"perfsonarbouy"}->{"metadata_db_file"} . "\" returned 0 results for search";
+        my $msg = "Database \"" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} . "\" returned 0 results for search";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }

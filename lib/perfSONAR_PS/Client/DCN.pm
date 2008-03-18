@@ -843,10 +843,16 @@ __END__
     my $dcn = new perfSONAR_PS::Client::DCN(
       { instance => "http://some.host.edu/perfSONAR_PS/services/LS"}
     );
+    
+    # 
+    # or 
+    # 
+    # my $dcn = new perfSONAR_PS::Client::DCN;
+    # $dcn->setInstance( { instance => "http://some.host.edu/perfSONAR_PS/services/LS"} );
 
     my $name = "some.hostname.edu";
-    my $id = "urn:ogf:network:domain=some.info.about.this.link"
- 
+    my $id = "urn:ogf:network:domain=some.info.about.this.link";
+
     # Get link id values given a host name
     # 
     my $ids = $dcn->nameToId({ name => $name });
@@ -860,7 +866,28 @@ __END__
     foreach my $n (@$names) {
       print $id , "\t=\t" , $n , "\n";
     }
-  
+
+    # Insert a new entry into the LS given a host name and link id
+    # 
+    $code = $dcn->insert({ name => "test", id => "test" });
+    print "Insert of \"test\" and \"test\" failed.\n" if($code == -1); 
+
+    # Remove an entry from the LS given the host name and link id
+    # 
+    my $code = $dcn->remove({ name => "test", id => "test" });
+    print "Removal of \"test\" and \"test\" failed.\n" if($code == -1);
+       
+    # Dump all of the nodes from the LS, returns a matrix in host name/link id
+    # format.
+    # 
+    my $map = $dcn->getMappings;
+    foreach my $m (@$map) {
+      foreach my $value (@$m) {
+        print $value , "\t";
+      }
+      print "\n";
+    }    
+
     # The DCN module has associated 'registration' info to make it act like
     # a service.  This info will be registered with an LS, and will have a key
     # associated with it.  This call will get that key from the LS.
@@ -872,16 +899,6 @@ __END__
     # 
     $key = $dcn->getTopologyKey({ accessPoint => "http://some.topology.service.edu:8080/perfSONAR_PS/services/topology" });
     print "Found key \"" , $key , "\" for topology service.\n" if($key);
-    
-    # Remove an entry from the LS given the host name and link id
-    # 
-    my $code = $dcn->remove({ name => $name, id => $id });
-    print "Removal of \"".$name."\" and \"".$id."\" failed.\n" if($code == -1);
-    
-    # Insert a new entry into the LS given a host name and link id
-    # 
-    $code = $dcn->insert({ name => $name, id => $id });
-    print "Insert of \"".$name."\" and \"".$id."\" failed.\n" if($code == -1);
 
     # Get the domain a particular topology service is responsible for given
     # the LS key that corresponds to the service
@@ -903,24 +920,19 @@ __END__
     # a hash reference to the structure.  Omit the 'domain' argument to simply
     # get ALL of the topology services in this LS.
     # 
-    my $all_my_services = $dcn->getTopologyServices;
+    my $service = $dcn->getTopologyServices({ domain => "I2" });
 
-    my $services = $dcn->getTopologyServices({ domain => "I2" });
+    my $services = $dcn->getTopologyServices;
     foreach my $s (sort keys %$services) {
       print $s , "\n";
       foreach my $s2 (sort keys %{$services->{$s}}) {
         print "\t" , $s2 , " - " , $services->{$s}->{$s2} , "\n";
-      }
-      print "\n";
-    }
 
-    # Dump all of the nodes from the LS, returns a matrix in host name/link id
-    # format.
-    # 
-    my $map = $dcn->getMappings;
-    foreach my $m (@$map) {
-      foreach my $value (@$m) {
-        print $value , "\t";
+        # Dump the topology file
+        # 
+
+        my $topo = $dcn->queryTS( { topology => $s } );
+        print "\t\t" , $topo->{eventType} , "\n" , $topo->{response} , "\n\n";
       }
       print "\n";
     }

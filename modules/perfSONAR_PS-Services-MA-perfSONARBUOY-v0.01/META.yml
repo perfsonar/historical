@@ -1,8 +1,8 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         perfSONAR_PS-Services-MA-perfSONARBOUY
+name:         perfSONAR_PS-Services-MA-perfSONARBUOY
 version:      0.06
-version_from: lib/perfSONAR_PS/Services/MA/perfSONARBOUY.pm
+version_from: lib/perfSONAR_PS/Services/MA/perfSONARBUOY.pm
 installdirs:  site
 requires:
     Log::Log4perl:                 1

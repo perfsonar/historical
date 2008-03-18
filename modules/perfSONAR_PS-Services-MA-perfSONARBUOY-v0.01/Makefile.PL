@@ -1,8 +1,8 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    'NAME' => 'perfSONAR_PS::Services::MA::perfSONARBOUY',
-    'VERSION_FROM' => 'lib/perfSONAR_PS/Services/MA/perfSONARBOUY.pm',
+    'NAME' => 'perfSONAR_PS::Services::MA::perfSONARBUOY',
+    'VERSION_FROM' => 'lib/perfSONAR_PS/Services/MA/perfSONARBUOY.pm',
     'AUTHOR' => 'Jason Zurawski <zurawski@internet2.edu>',
     'PREREQ_PM' => {
         "base" => 0,

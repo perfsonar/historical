@@ -238,16 +238,16 @@ while (1) {
                 $module = "ls";
             }
             elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBOUY" ) {
-                $module = "perfsonarbouy";
+                $module = "perfsonarbuoy";
             }
         }
 
         my %opts;
         do {
-            $module = &ask( "Enter endpoint module [snmp,ls,status,circuitstatus,topology,perfsonarbouy] ", q{}, $module, q{} );
+            $module = &ask( "Enter endpoint module [snmp,ls,status,circuitstatus,topology,perfsonarbuoy] ", q{}, $module, q{} );
             $module = lc($module);
 
-            if ( $module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology" or $module eq "perfsonarbouy" ) {
+            if ( $module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology" or $module eq "perfsonarbuoy" ) {
                 $valid_module = 1;
             }
         } while ( $valid_module == 0 );
@@ -278,9 +278,9 @@ while (1) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::LS";
             config_ls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
-        elsif ( $module eq "perfsonarbouy" ) {
+        elsif ( $module eq "perfsonarbuoy" ) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
-            config_perfsonarbouy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
+            config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
     }
 }
@@ -311,45 +311,45 @@ sub config_ls {
     return;
 }
 
-sub config_perfsonarbouy_ma {
+sub config_perfsonarbuoy_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
     my $amiconfdir = $confdir;
 
-    $config->{"perfsonarbouy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbouy"}->{"owmesh"}, '.+' );
-    $amiconfdir = $config->{"perfsonarbouy"}->{"owmesh"};
+    $config->{"perfsonarbuoy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbuoy"}->{"owmesh"}, '.+' );
+    $amiconfdir = $config->{"perfsonarbuoy"}->{"owmesh"};
 
-    $config->{"perfsonarbouy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbouy"}->{"metadata_db_type"}, '(file|xmldb)' );
+    $config->{"perfsonarbuoy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbuoy"}->{"metadata_db_type"}, '(file|xmldb)' );
 
-    if ( $config->{"perfsonarbouy"}->{"metadata_db_type"} eq "file" ) {
-        delete $config->{"perfsonarbouy"}->{"metadata_db_file"} if $config->{"perfsonarbouy"}->{"metadata_db_file"} and $config->{"perfsonarbouy"}->{"metadata_db_file"} =~ m/dbxml$/mx;
-        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/store.xml", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '\.xml$' );
+    if ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+        delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/dbxml$/mx;
+        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/store.xml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '\.xml$' );
     }
-    elsif ( $config->{"perfsonarbouy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"perfsonarbouy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/xmldb", $config->{"perfsonarbouy"}->{"metadata_db_name"}, '.+' );
-        delete $config->{"perfsonarbouy"}->{"metadata_db_file"} if $config->{"perfsonarbouy"}->{"metadata_db_file"} and $config->{"perfsonarbouy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
-        $config->{"perfsonarbouy"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"perfsonarbouy"}->{"metadata_db_file"}, '.+' );
+    elsif ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+        $config->{"perfsonarbuoy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/xmldb", $config->{"perfsonarbuoy"}->{"metadata_db_name"}, '.+' );
+        delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
+        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '.+' );
     }
 
-    $config->{"perfsonarbouy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbouy"}->{"enable_registration"}, '^[01]$' );
+    $config->{"perfsonarbuoy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbuoy"}->{"enable_registration"}, '^[01]$' );
 
-    if ( $config->{"perfsonarbouy"}->{"enable_registration"} eq "1" ) {
+    if ( $config->{"perfsonarbuoy"}->{"enable_registration"} eq "1" ) {
         my $registration_interval = $def_config->{"ls_registration_interval"};
-        $registration_interval = $config->{"perfsonarbouy"}->{"ls_registration_interval"} if ( defined $config->{"perfsonarbouy"}->{"ls_registration_interval"} );
-        $config->{"perfsonarbouy"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
+        $registration_interval = $config->{"perfsonarbuoy"}->{"ls_registration_interval"} if ( defined $config->{"perfsonarbuoy"}->{"ls_registration_interval"} );
+        $config->{"perfsonarbuoy"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
 
         my $ls_instance = $def_config->{"ls_instance"};
-        $ls_instance = $config->{"perfsonarbouy"}->{"ls_instance"} if ( defined $config->{"perfsonarbouy"}->{"ls_instance"} );
-        $config->{"perfsonarbouy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
+        $ls_instance = $config->{"perfsonarbuoy"}->{"ls_instance"} if ( defined $config->{"perfsonarbuoy"}->{"ls_instance"} );
+        $config->{"perfsonarbuoy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
     }
 
-    $config->{"perfsonarbouy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_name"}, '.+' );
+    $config->{"perfsonarbuoy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbuoy"}->{"service_name"}, '.+' );
 
-    $config->{"perfsonarbouy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbouy"}->{"service_type"}, '.+' );
+    $config->{"perfsonarbuoy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbuoy"}->{"service_type"}, '.+' );
 
-    $config->{"perfsonarbouy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbouy"}->{"service_description"}, '.+' );
+    $config->{"perfsonarbuoy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbuoy"}->{"service_description"}, '.+' );
 
-    $config->{"perfsonarbouy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbouy"}->{"service_accesspoint"}, '^http:\/\/' );
+    $config->{"perfsonarbuoy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbuoy"}->{"service_accesspoint"}, '^http:\/\/' );
 
     return;
 }

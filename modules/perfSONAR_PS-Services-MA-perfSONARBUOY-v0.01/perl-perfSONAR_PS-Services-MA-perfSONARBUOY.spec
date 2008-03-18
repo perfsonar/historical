@@ -1,11 +1,11 @@
-Name:           perl-perfSONAR_PS-Services-MA-perfSONARBOUY
+Name:           perl-perfSONAR_PS-Services-MA-perfSONARBUOY
 Version:        0.01
 Release:        1%{?dist}
-Summary:        perfSONAR_PS::Services::MA::perfSONARBOUY Perl module
+Summary:        perfSONAR_PS::Services::MA::perfSONARBUOY Perl module
 License:        distributable, see LICENSE
 Group:          Development/Libraries
-URL:            http://search.cpan.org/dist/perfSONAR_PS-Services-MA-perfSONARBOUY/
-Source0:        http://www.cpan.org/modules/by-module/perfSONAR_PS/perfSONAR_PS-Services-MA-perfSONARBOUY-%{version}.tar.gz
+URL:            http://search.cpan.org/dist/perfSONAR_PS-Services-MA-perfSONARBUOY/
+Source0:        http://www.cpan.org/modules/by-module/perfSONAR_PS/perfSONAR_PS-Services-MA-perfSONARBUOY-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:       perl(Log::Log4perl) >= 1
@@ -22,12 +22,12 @@ Requires:       perl(perfSONAR_PS::XML::Document_string) >= 0.06
 Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description
-The perfSONAR_PS::Services::MA::perfSONARBOUY module allows one to make
+The perfSONAR_PS::Services::MA::perfSONARBUOY module allows one to make
 BWCTL data available from backend SQL storage using the perfSONAR
-perfSONARBOUY MA protocols.
+perfSONARBUOY MA protocols.
 
 %prep
-%setup -q -n perfSONAR_PS-Services-MA-perfSONARBOUY-%{version}
+%setup -q -n perfSONAR_PS-Services-MA-perfSONARBUOY-%{version}
 
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor
@@ -51,7 +51,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc Changes LICENSE README perl-perfSONAR_PS-Services-MA-perfSONARBOUY.spec
+%doc Changes LICENSE README perl-perfSONAR_PS-Services-MA-perfSONARBUOY.spec
 %{perl_vendorlib}/*
 %{_mandir}/man3/*
 
