@@ -32,6 +32,8 @@
     <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
     <nmwg:parameters id="parameters-1">
       <nmwg:parameter name="protocol">TCP</nmwg:parameter>
+      <nmwg:parameter name="startTime">1105452600</nmwg:parameter>
+      <nmwg:parameter name="endTime">1105455100</nmwg:parameter>
     </nmwg:parameters>
   </nmwg:metadata> 
   
