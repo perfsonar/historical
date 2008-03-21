@@ -1,0 +1,43 @@
+max_worker_lifetime     300
+pid_file     pinger.pid
+disable_echo     0
+pid_dir     /tmp/
+max_worker_processes     30
+ls_registration_interval     60
+<port 8075>
+        <endpoint /perfSONAR_PS/services/pinger/mp>
+                service_type     MP
+                module     perfSONAR_PS::Services::MP::PingER
+                <pingermp>
+                    db_name     pingerMA
+                    service_description     FNAL Tier2 PingER MP
+                    configuration_file  /home/netadmin/LHCOPN/psps/branches/merge/modules/perfSONAR_PS-Services-PingER-v0.01/bin/pinger-landmarks.xml
+                    db_host     localhost
+                    db_username     pinger
+                    service_accesspoint     http://tukki.fnal.gov:8075/perfSONAR_PS/services/pinger/mp
+                    enable_registration     0
+                    service_name     PingER MP
+                    query_size_limit     100000
+                    db_type     mysql
+                    db_password     pinger_pass
+                    ls_registration_interval     60
+                </pingermp>
+        </endpoint>
+        <endpoint /perfSONAR_PS/services/pinger/ma>
+                service_type     MA
+                <pingerma>
+                    db_name     pingerMA
+                    service_description     FNAL Tier2 PingER MA
+                    db_host     localhost
+                    db_username     pinger
+                    service_accesspoint     http://tukki.fnal.gov:8075/perfSONAR_PS/services/pinger/ma
+                    enable_registration     0
+                    service_name     PingER MA
+                    query_size_limit     100000
+                    db_type     mysql
+                    db_password     pinger_pass
+                    ls_registration_interval     60
+                </pingerma>
+                module     perfSONAR_PS::Services::MA::PingER
+        </endpoint>
+</port>
