@@ -244,10 +244,11 @@ while (1) {
 
         my %opts;
         do {
-            $module = &ask( "Enter endpoint module [snmp,ls,status,circuitstatus,topology,perfsonarbuoy] ", q{}, $module, q{} );
+            $module = &ask( "Enter endpoint module [snmp,ls,perfsonarbuoy,pingerma,pingermp,status,circuitstatus,topology] ", q{}, $module, q{} );
             $module = lc($module);
 
-            if ( $module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology" or $module eq "perfsonarbuoy" ) {
+            if ( $module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology"
+                   or $module eq "perfsonarbuoy" or $module eq "pingerma" or $module eq "pingermp") {
                 $valid_module = 1;
             }
         } while ( $valid_module == 0 );
@@ -281,6 +282,16 @@ while (1) {
         elsif ( $module eq "perfsonarbuoy" ) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
             config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
+        }
+        elsif ($module eq "pingerma") {
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::PingER";
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MA";
+            config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingerma");
+        }
+        elsif ($module eq "pingermp") {
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MP::PingER";
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MP";
+            config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingermp");
         }
     }
 }
@@ -543,6 +554,46 @@ sub config_snmp_ma {
     $config->{"snmp"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"snmp"}->{"service_accesspoint"}, '^http:\/\/' );
 
     return;
+}
+
+sub config_pinger($$$$) {
+	my ($config, $accesspoint, $def_config, $modulename) = @_;
+	my $moduletype = ($modulename =~ /ma$/ ? "MA" : "MP");
+
+	$config->{$modulename}->{"db_type"} = &ask("Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$');
+
+	if ($config->{$modulename}->{"db_type"} eq "sqlite") {
+		$config->{$modulename}->{"db_file"} = &ask("Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+');
+	} elsif ($config->{$modulename}->{"db_type"} eq "mysql") {
+		$config->{$modulename}->{"db_name"} = &ask("Enter the name of the MySQL database ", "", $config->{$modulename}->{"db_name"}, '.+');
+		$config->{$modulename}->{"db_host"} = &ask("Enter the host for the MySQL database ", "localhost", $config->{$modulename}->{"db_host"}, '.+');
+		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ", "", $config->{$modulename}->{"db_port"}, '^\d*$');
+		$config->{$modulename}->{"db_port"} = $tmp if ($tmp ne "");
+		$tmp = &ask("Enter the username for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_username"}, '');
+		$config->{$modulename}->{"db_username"} = $tmp if ($tmp ne "");
+		$tmp  = &ask("Enter the password for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_password"}, '');
+		$config->{$modulename}->{"db_password"} = $tmp if ($tmp ne "");
+	}
+
+	if($modulename eq "pingerma") {
+		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "/etc/perfsonar/pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
+	}
+
+	$config->{$modulename}->{"enable_registration"} = &ask("Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$');
+
+	if($config->{$modulename}->{"enable_registration"} eq "1") {
+		my $registration_interval = $def_config->{"ls_registration_interval"};
+		$registration_interval = $config->{$modulename}->{"ls_registration_interval"} if (defined $config->{$modulename}->{"ls_registration_interval"});
+		$config->{$modulename}->{"ls_registration_interval"} = &ask("Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$');
+
+		$config->{$modulename}->{"service_name"} = &ask("Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+');
+
+#		$config->{$modulename}->{"service_type"} = &ask("Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+');
+
+		$config->{$modulename}->{"service_description"} = &ask("Enter a service description ", "PingER $moduletype", $config->{$modulename}->{"service_description"}, '.+');
+
+		$config->{$modulename}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/');
+	}
 }
 
 sub config_status_ma {

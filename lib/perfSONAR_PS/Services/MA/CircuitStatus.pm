@@ -6,9 +6,7 @@ use fields
     'LOCAL_MA_CLIENT',
     'TOPOLOGY_CLIENT',
     'STORE',
-    'LS_HOST',
-    'LS_PORT',
-    'LS_ENDPOINT',
+    'LS',
     'DOMAIN',
     'CIRCUITS',
     'INCOMPLETE_NODES',
@@ -18,12 +16,10 @@ use fields
 
 use warnings;
 use strict;
-use Exporter;
 use Log::Log4perl qw(get_logger);
 use Module::Load;
 use Fcntl qw (:flock);
 use Fcntl;
-use Data::Dumper;
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Services::Base;
@@ -33,8 +29,8 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Time;
 use perfSONAR_PS::Error_compat qw/:try/;
-use perfSONAR_PS::ParameterValidation;
 
+use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
 
@@ -55,11 +51,13 @@ sub init {
     }
 
     if (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ls") {
-        ($self->{LS_HOST}, $self->{LS_PORT}, $self->{LS_ENDPOINT}) = &perfSONAR_PS::Transport::splitURI($self->{CONF}->{"circuitstatus"}->{"ls_instance"});
-        if (not defined $self->{LS_HOST} or not defined $self->{LS_PORT} or not defined $self->{LS_ENDPOINT}) {
+        my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{CONF}->{"circuitstatus"}->{"ls_instance"});
+        if (not $host or not $port or not $endpoint) {
             $self->{LOGGER}->error("Specified LS is not a URI: ".$self->{CONF}->{"circuitstatus"}->{"ls_instance"});
             return -1;
         }
+
+        $self->{LS} = $self->{CONF}->{"circuitstatus"}->{"ls_instance"};
     } elsif (lc($self->{CONF}->{"circuitstatus"}->{"status_ma_type"}) eq "ma") {
         if (not defined $self->{CONF}->{"circuitstatus"}->{"status_ma_uri"} or $self->{CONF}->{"circuitstatus"}->{"status_ma_uri"} eq q{}) {
             $self->{LOGGER}->error("You specified an MA for the status, but did not specify the URI(status_ma_uri)");
@@ -259,17 +257,17 @@ sub needLS {
 
 sub handleEvent {
     my ($self, @args) = @_;
-      my $parameters = validateParams(@args,
-    		{
-    			output => 1,
-    			messageId => 1,
-    			messageType => 1,
-    			messageParameters => 1,
-    			eventType => 1,
-    			mergeChain => 1,
-    			filterChain => 1,
-    			data => 1,
-    			rawRequest => 1
+      my $parameters = validate(@args, {
+                output => 1,
+                messageId => 1,
+                messageType => 1,
+                messageParameters => 1,
+                eventType => 1,
+                subject => 1,
+                filterChain => 1,
+                data => 1,
+                rawRequest => 1,
+                doOutputMetadata => 1,
     		});
 
     my $output = $parameters->{"output"};
@@ -279,7 +277,12 @@ sub handleEvent {
     my $eventType = $parameters->{"eventType"};
     my $d = $parameters->{"data"};
     my $raw_request = $parameters->{"rawRequest"};
-    my $md = shift(@{ $parameters->{"mergeChain"} });
+    my @subjects = @{ $parameters->{"subject"} };
+    my $doOutputMetadata = $parameters->{doOutputMetadata};
+
+    my $md = $subjects[0];
+
+    ${$doOutputMetadata} = 0;
 
     my ($status, $res1, $res2);
 
@@ -502,7 +505,8 @@ sub getLinkStatus {
             $queries{$link_id} = $xquery;
         }
 
-        my ($status, $res) = queryLS($self->{LS_HOST}, $self->{LS_PORT}, $self->{LS_ENDPOINT}, \%queries);
+        my $ls = perfSONAR_PS::Client::LS::Remote->new($self->{LS});
+        my ($status, $res) = $ls->query(\%queries);
         if ($status != 0) {
             my $msg = "Couldn't lookup Link Status MAs from LS: $res";
             $self->{LOGGER}->warn($msg);
@@ -797,9 +801,7 @@ sub outputResults {
 sub outputNodeElement {
     my ($self, $output, $node) = @_;
 
-    $self->{LOGGER}->debug("Outputing Node Element: ".Dumper($node));
-
-    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/");
+    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $self->{DOMAIN}."-".$node->{"name"} });
       $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint");
       $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
     if (defined $node->{"city"} and $node->{"city"} ne q{}) {
@@ -830,13 +832,13 @@ sub outputCircuitElement {
       $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"globalName"});
       $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $circuit->{"type"});
       foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} });
+      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $self->{DOMAIN}."-".$endpoint->{"name"} });
       $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"});
       $output->endElement("node");
       }
-      startParameters($output, "params.0");
-        addParameter($output, "supportedEventType", "Path.Status");
-      endParameters($output);
+#      startParameters($output, "params.0");
+#        addParameter($output, "supportedEventType", "Path.Status");
+#      endParameters($output);
     $output->endElement("link");
 
     return;
@@ -889,6 +891,9 @@ sub parseCircuitsFile {
             $self->{LOGGER}->error($msg);
             throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
         }
+
+        $node_name =~ s/[^a-zA-Z0-9_]//g;
+        $node_name = uc($node_name);
 
         if (defined $nodes{$node_name}) {
             my $msg = "Multiple endpoints have the name \"$node_name\"";
@@ -982,6 +987,9 @@ sub parseCircuitsFile {
                 $self->{LOGGER}->error($msg);
                 throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
             }
+
+            $node_name =~ s/[^a-zA-Z0-9_]//g;
+            $node_name = uc($node_name);
 
             if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
                 my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
@@ -1095,7 +1103,7 @@ sub parseTopology {
         }
     }
 
-    return;
+    return ("", undef);
 }
 
 1;

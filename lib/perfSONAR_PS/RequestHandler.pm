@@ -694,6 +694,7 @@ sub handleMessage {
     }
 
     $raw_request->setResponse($ret_message->getValue());
+    $raw_request->finish();
 
     return;
 }
