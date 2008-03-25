@@ -34,9 +34,10 @@
 #
 import time, sys, os, string, os.path, random
 from stat import *
-from subprocess import *
+#from subprocess import *
 from optparse import OptionParser
-from xml.etree import ElementTree
+#from xml.etree import ElementTree
+from elementtree import ElementTree
 
 PSHOME = os.getenv("PSHOME")
 if PSHOME == None:
@@ -62,12 +63,12 @@ NMWG2 = "{http://ggf.org/ns/nmwg/base/2.0}"   # BUG? sometimes there is no trail
 NMWGT = "{http://ggf.org/ns/nmwg/topology/2.0/}"
 NMWGS = "{http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/}"
 NMWGC = "{http://ggf.org/ns/nmwg/characteristic/utilization/2.0/}"
-
+TOPO  = "{http://ogf.org/schema/network/topology/base/20070828/}"
 IPERF = "{http://ggf.org/ns/nmwg/tools/iperf/2.0/}"
 NMWGR = "{http://ggf.org/ns/nmwg/result/2.0/}"  # for error/status messages only
 
 #NMWG_ALL = [NMWG, NMWG2, NMWGT, NMWGR, NMWGS, IPERF]
-NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF]
+NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF, TOPO, NMWGR]
 
 verbose = 0
 
@@ -272,10 +273,12 @@ def runClient(fd, logfile, service, requestFile):
     data = []
     if verbose > 0:
         print "\nCalling: %s (stderr = %s) \n" % (cmd, logfile)
-    pipe = Popen(cmd, shell=True, stderr=fd, stdout=PIPE).stdout
+#    pipe = Popen(cmd, shell=True, stderr=fd, stdout=PIPE).stdout
+    pipe = os.popen(cmd)
     d1 = pipe.readlines()
     if verbose > 0:
         print "Query returned %d lines of data" % len(d1)
+	print d1
     if len(d1) == 0:
         PS_Error(fd,logfile)
     return (d1)
@@ -522,8 +525,6 @@ def main():
 
         # now use xpath to make sure the reply looks OK.
         tree = ElementTree.parse(resultFile)
-        # check for errors
-        e = tree.find("//%seventType/" % NMWG)
 
         if options.debug:
             # print out results
@@ -531,14 +532,21 @@ def main():
             ElementTree.dump(tree)
             print "------------------------------------------------------"
 
-        if e != None and e.text.find("error") >= 0:
-            error = tree.find("//%sdatum/" % NMWGR).text
-            print "Got error message: ", error
-            print "Test Failed!"
-            #sys.exit(-1)
-            result = 0
-        else:
+	found_error = 0
+
+        # check for errors
+	for e in tree.findall("//%seventType/" % NMWG):
+		if e != None and e.text.find("error") >= 0:
+	            error = tree.find("//%sdatum/" % NMWGR).text
+	            print "Got error message: ", error
+	            print "Test Failed!"
+		    found_error = 1
+		    break
+
+	if found_error == 0:
             result = CheckResult(testNum, expectedOutput[testNum], tree)
+	else:
+	    result = 0
 
         if result > 0:
             total_pass += 1
