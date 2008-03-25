@@ -89,7 +89,12 @@ if (not $conf{"domain"}) {
     exit(-1);
 }
 
-my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => $conf{"ls_uri"}, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"});
+if (not $conf{"oscars_client"}) {
+    $logger->error("You must specify the oscars client directory in the config file");
+    exit(-1);
+}
+
+my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => $conf{"ls_uri"}, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"}, oscars_client => $conf{"oscars_client"});
 
 $agent->getLocalTopology(file => $NEW_TOPOLOGY, do_register => 1);
 $agent->getNeighborTopologies();
@@ -114,18 +119,21 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Topology::ID;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Topology::MA;
+use perfSONAR_PS::OSCARS;
 
-use fields 'LOGGER', 'DOMAIN', 'DOMAINID', 'TOPOLOGY_CLIENT', 'TOPOLOGY_URI', 'LS_CLIENTS', 'LS_URIS', 'IDC_URI', 'NEIGHBORS';
+use fields 'LOGGER', 'DOMAIN', 'DOMAINID', 'TOPOLOGY_CLIENT', 'TOPOLOGY_URI', 'LS_CLIENTS', 'LS_URIS', 'IDC_URI', 'NEIGHBORS', 'OSCARS_CLIENT_DIR', 'REPO_DIRECTORY';
 
 sub new {
     my $package = shift;
-    my $args = validate(@_, { domain => 1, ls_uri => 1, topology_uri => 1, idc_uri => 1 });
+    my $args = validate(@_, { domain => 1, ls_uri => 1, topology_uri => 1, idc_uri => 1, oscars_client => 1});
 
     my $self = fields::new($package);
 
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::DCN::TopologyAgent");
     $self->{DOMAIN} = $args->{domain};
+    $self->{IDC_URI} = $args->{idc_uri};
     $self->{DOMAINID} = "urn:ogf:network:domain=".$args->{domain};
+    $self->{OSCARS_CLIENT_DIR} = $args->{oscars_client};
 
     my $ls_uris;
     if (ref $args->{ls_uri} eq "ARRAY") {
@@ -253,10 +261,16 @@ sub getNeighborTopologies {
 sub retrieveIDCDomain {
     my ($self, $file) = @_;
 
+    my $topology_str = getTopology($self->{IDC_URI}, $self->{OSCARS_CLIENT_DIR}, $self->{OSCARS_CLIENT_DIR}."/repo");
+    $self->{LOGGER}->debug("STR: $topology_str");
+    if (not $topology_str) {
+        return (-1, "Failed to get topology from ".$self->{IDC_URI});
+    }
+
     my $parser = XML::LibXML->new();
     my $dom;
     eval {
-        $dom = $parser->parse_file($file);
+        $dom = $parser->parse_string($topology_str);
     };
     if($@) {
         my $msg = escapeString("Parse of response failed: ".$@);
@@ -288,14 +302,14 @@ sub retrieveIDCDomain {
     my $lifetime = find($domain, "./*[local-name()='lifetime']", 1);
     if (not $lifetime) {
         $lifetime = $domain->ownerDocument->createElement("lifetime");
-        $lifetime->setNamespace("http://ogf.org/schema/network/topology/base/20070828/", "nmtb", 1);
+        $lifetime->setNamespace($domain->namespaceURI(), $domain->prefix, 1);
         $domain->addChild($lifetime);
     }
 
     my $start = find($lifetime, "./*[local-name()='start']", 1);
     if (not $start) {
         $start = $lifetime->ownerDocument->createElement("start");
-        $start->setNamespace("http://ogf.org/schema/network/topology/base/20070828/", "nmtb", 1);
+        $start->setNamespace($domain->namespaceURI(), $domain->prefix, 1);
         $lifetime->addChild($start);
     }
 
@@ -417,7 +431,7 @@ sub wrapDomain {
     my ($self, $domain) = @_;
 
     my $topology = $domain->ownerDocument->createElement("topology");
-    $topology->setNamespace("http://ogf.org/schema/network/topology/base/20070828/", "nmtb", 1);
+    $topology->setNamespace($domain->namespaceURI(), $domain->prefix, 1);
     $topology->addChild($domain);
 
     return $topology;
