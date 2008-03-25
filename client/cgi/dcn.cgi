@@ -4,16 +4,13 @@ use strict;
 use warnings;
 use CGI;
 use CGI::Ajax;
-use XML::Twig;
-
-use Text::Wrap
-$Text::Wrap::columns = 130;
 
 use lib "/usr/local/DCN_LS/merge/lib";
 use perfSONAR_PS::Client::DCN;
 use perfSONAR_PS::Common qw( escapeString );
 
 my $INSTANCE = "http://dc211.internet2.edu:8090/perfSONAR_PS/services/LS";
+#my $INSTANCE = "http://packrat.internet2.edu:8009/perfSONAR_PS/services/LS";
 
 my $cgi = new CGI;
 my $pjx = new CGI::Ajax( 
