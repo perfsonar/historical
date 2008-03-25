@@ -18,8 +18,7 @@ my $INSTANCE = "http://dc211.internet2.edu:8090/perfSONAR_PS/services/LS";
 my $cgi = new CGI;
 my $pjx = new CGI::Ajax( 
   'exported_func' => \&delete, 
-  'exported_func2' => \&topo,
-  'exported_func3' => \&topoQuery 
+  'exported_func2' => \&topo
 );
 
 print $pjx->build_html( $cgi, \&display);
@@ -192,22 +191,10 @@ sub topo {
         $html .= "<td align=\"center\">".$services->{$s}->{"serviceName"}."</td>\n";
         $html .= "<td align=\"center\">".$services->{$s}->{"serviceType"}."</td>\n";
         $html .= "<td align=\"center\">".$services->{$s}->{"serviceDescription"}."</td>\n";
-
         $html .= "<td align=\"center\">\n";
-        $html .= "<input type=\"submit\" name=\"ts_query\" ";
-        $html .= "value=\"Query\" onclick=\"exported_func3( ";
-        $html .= "['tqLoad', 'ts.".$tsCounter."'], ['topodiv".$tsCounter."'] );\">\n";
-        $html .= "<input type=\"hidden\" name=\"ts.".$tsCounter."\" value=\"".$s."\" id=\"ts.".$tsCounter."\" >\n";
-        $html .= "<input type=\"hidden\" name=\"tqLoad\" value=\"1\" id=\"tqLoad\" >\n";
-        $html .= "<input type=\"reset\" name=\"ts_reset".$tsCounter."\" ";
-        $html .= "value=\"Reset\" onclick=\"exported_func3( ";
-        $html .= "[], ['topodiv".$tsCounter."'] );\">\n";
-        $html .= "</td>\n";
-        $html .= "</tr>\n";
-
-        $html .= "<tr>\n";
-        $html .= "<td colspan=\"6\">\n";
-        $html .= "<div id=\"topodiv".$tsCounter."\"></div>\n";
+        $html .= "<input type=\"button\" value=\"Query\" name=\"ts_query\" id=\"ts_query\" ";
+        $html .= "onClick=\"window.open('display.cgi?dcn=".$INSTANCE."&ts=".$s."'";
+        $html .= ",'mywindow','width=600,height=400,status=yes,scrollbars=yes,resizable=yes')\">\n";
         $html .= "</td>\n";
         $html .= "</tr>\n";
 
@@ -222,36 +209,6 @@ sub topo {
   return $html;
 }
 
-
-
-
-sub topoQuery {
-  my($load, $ts) = @_;
-
-  my $html = q{};
-
-  unless(defined $load and $load) {
-    return $html;
-  }
-
-  unless(defined $ts and $ts) {
-    return $html;
-  }
-
-  my $dcn = new perfSONAR_PS::Client::DCN(
-    { instance => $INSTANCE }
-  );
-  my $result = $dcn->queryTS( { topology => $ts } );
-
-
-  my $t= XML::Twig->new( pretty_print => "wrapped" );
-  $t->parse($result->{response});
-  $html .= "<pre>".escapeString($t->toString)."</pre>";
-
-#  $html .= "<pre>".escapeString($result->{response})."</pre>";
-
-  return $html;
-}
 
 
 
