@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 use CGI;
-use XML::Twig;
 
 use lib "/usr/local/DCN_LS/merge/lib";
 use perfSONAR_PS::Client::DCN;
@@ -14,10 +13,8 @@ if ( $cgi->param('dcn') and $cgi->param('ts') ) {
     { instance => $cgi->param('dcn') }
   );
   my $result = $dcn->queryTS( { topology => $cgi->param('ts') } );
-  my $t= XML::Twig->new;
-  $t->parse($result->{response});
   print "Content-type: text/xml\n\n";
-  print $t->toString;
+  print $result->{response};
 }
 else {
   print "Content-type: text/html\n\n";
