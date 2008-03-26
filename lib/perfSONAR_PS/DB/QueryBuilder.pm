@@ -1156,8 +1156,8 @@ perfSONAR_PS::DB::QueryBuilder - Build SQL queries based on DB engine type and s
     # Coerce query values into the right format
     ($sql, $bind) = build_select
     ({
-      db      => $db,
-      tables  => [ 'articles' ],
+     dbh     => $dbh,
+     tables  => [ 'articles' ],
       columns => { articles => [ qw(id category type title date) ] },
       classes => { articles => 'Article' },
       query   =>
@@ -1183,7 +1183,8 @@ C<perfSONAR_PS::DB::QueryBuilder> is used to build SQL queries.  It (optionally)
 
 =item B<build_select PARAMS>
 
-Returns an SQL "select" query string (in scalar context) or an SQL "select" query string with placeholders and a reference to an array of bind values (in list context) constructed based on PARAMS.  Valid PARAMS are described below.
+Returns an SQL "select" query string (in scalar context) or an SQL "select" query string with placeholders
+ and a reference to an array of bind values (in list context) constructed based on PARAMS.  Valid PARAMS are described below.
 
 =over 4
 
@@ -1205,9 +1206,6 @@ A reference to a hash keyed by table name, each of which points to a reference t
 
 This argument is required.
 
-=item B<db DB>
-
-A L<Rose::DB>-derived object.  This argument is required if C<query_is_sql> is false or omitted.
 
 =item B<dbh DBH>
 
@@ -1408,10 +1406,7 @@ If C<query_is_sql> is false or omitted, then NAME can also take on these additio
 
 =over 4
 
-=item C<method>
-
-A L<Rose::DB::Object> method name for an object fronting one of the tables being queried.  There may also be ambiguity here if the same method name is defined on more than one of the the objects that front the tables.  In such a case, the method will be mapped to the first L<Rose::DB::Object>-derived object that contains a method by that name, considered in the order that the tables are provided in the C<tables> parameter.
-
+ 
 =item C<!method>
 
 This indicates the negation of the specified condition.
@@ -1425,7 +1420,7 @@ Finally, in the case of apparently intractable ambiguity, like when a table name
 All of these clauses are joined by C<logic> (default: "AND") in the final query.  Example:
 
     $sql = build_select
-    (
+    ( {
       dbh     => $dbh,
       select  => 'id, title',
       tables  => [ 'articles' ],
@@ -1437,7 +1432,8 @@ All of these clauses are joined by C<logic> (default: "AND") in the final query.
         title    => { like => [ '%million%', 
                                 '%resident%' ] },
       ],
-      query_is_sql => 1);
+      query_is_sql => 1
+      });
 
 The above returns an SQL statement something like this:
 
@@ -1452,7 +1448,8 @@ The above returns an SQL statement something like this:
 Nested boolean logic is possible using the special keywords C<and> and C<or> (case insensitive).  Example:
 
     $sql = build_select
-    (
+    ({
+     
       dbh     => $dbh,
       select  => 'id, title',
       tables  => [ 'articles' ],
@@ -1468,7 +1465,8 @@ Nested boolean logic is possible using the special keywords C<and> and C<or> (ca
         title    => { like => [ '%million%', 
                                 '%resident%' ] },
       ],
-      query_is_sql => 1);
+      query_is_sql => 1
+      });
 
 which returns an SQL statement something like this:
 
@@ -1488,18 +1486,16 @@ which returns an SQL statement something like this:
 The C<and> and C<or> keywords can be used multiple times within a query (just like all other NAME specifiers described earlier) and can be arbitrarily nested.
 
 If you have a column named "and" or "or", you'll have to use the fully-qualified (table.column) or alias-qualified (tN.column) forms in order to address that column.
-
-If C<query_is_sql> is false or omitted, all of the parameter values are passed through the C<parse_value()> and C<format_value()> methods of their corresponding L<perfSONAR_PS::DB::Metadata::Column>-dervied column objects.
-
-If a column object returns true from its C<manager_uses_method()> method, then its parameter value is passed through the corresponding L<Rose::DB::Object>-derived object method instead.
+ 
+ 
 
 Example:
 
     $dt = DateTime->new(year => 2001, month => 1, day => 31);
 
     $sql = build_select
-    (
-      db      => $db,
+    ({
+      dbh      => $dbh,
       select  => 'id, category',
       tables  => [ 'articles' ],
       columns => { articles => [ qw(id category type date) ] },
@@ -1511,7 +1507,8 @@ Example:
         date  => { gt => $dt },
       ],
       sort_by => 'id DESC, category',
-      limit   => 5);
+      limit   => 5
+      });
 
 The above returns an SQL statement something like this:
 
@@ -1529,19 +1526,15 @@ Finally, here's an example using more than one table:
     $dt = DateTime->new(year => 2001, month => 1, day => 31);
 
     $sql = build_select
-    (
-      db      => $db,
+    ({
+      dbh      => $dbh,
       tables  => [ 'articles', 'categories' ],
       columns =>
       {
         articles   => [ qw(id name category_id date) ],
         categories => [ qw(id name description) ],
       },
-      classes =>
-      {
-        articles   => 'Article',
-        categories => 'Category',
-      },
+   
       query   =>
       [
         '!t1.name' => { like => '%foo%' },
@@ -1554,7 +1547,8 @@ Finally, here's an example using more than one table:
         't1.category_id = t2.id',
       ],
       sort_by      => 'articles.name DESC, t2.name',
-      limit        => 5);
+      limit        => 5
+      });
 
 The above returns an SQL statement something like this:
 
@@ -1597,24 +1591,10 @@ If omitted, this boolean flag is false.  If true, then the values of the C<query
     );
 
 Here the date value "2003-12-25 20:00:00" must be in the format that the current database expects for columns of that data type.
+ 
 
-But if C<query_is_sql> is false or omitted, then any query value that can be handled by the L<Rose::DB::Object>-derived object method that services the corresponding database column is valid.  (Note that this is only possible when this method is called from one of the built-in L<perfSONAR_PS::DB::Manager> methods, e.g., L<get_objects()|perfSONAR_PS::DB::Manager/get_objects>.)
-
-Example:
-
-    $dt = DateTime->new(year => 2001, month => 1, day => 31);
-
-    $sql = build_select
-    (
-      query =>
-      [
-        date => { gt => $dt },
-        date => { lt => '12/25/2003 8pm' },
-      ],
-      ...
-    );
-
-Here a L<DateTime> object and a loosely formatted date are passed as values.  Provided the L<Rose::DB::Object>-derived object method that services the "date" column can handle such values, they will be parsed and formatted as appropriate for the current database.
+Here a L<DateTime> object and a loosely formatted date are passed as values.  
+Provided the L<Rose::DB::Object>-derived object method that services the "date" column can handle such values, they will be parsed and formatted as appropriate for the current database.
 
 The advantage of this approach is that the query values do not have to be so rigorously specified, nor do they have to be in a database-specific format.
 
