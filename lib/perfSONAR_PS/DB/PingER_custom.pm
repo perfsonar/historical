@@ -1,7 +1,6 @@
 =head1 NAME
 
-perfSONAR_PS::DB::PingER_suctom -A module that provides base Rose::DB implementation of 
-data access for PingER databases 
+perfSONAR_PS::DB::PingER_suctom  - A module that provides  data access for PingER databases 
 
 =head1 DESCRIPTION
 
@@ -30,6 +29,8 @@ data tables that is used by PingER in order to provide performance.
   if(   $db->connect()  == 0 ) {
   
      # everything is OK
+  } else {
+     $logger->logdie( $db->ERRORMSG );
   }
   #
   #  or redefine  some parameters
@@ -47,18 +48,20 @@ data tables that is used by PingER in order to provide performance.
   ) == 0 ) {
         #      ......................do something useful with DB ........
   } else {
-     $logger->logdie(" Failed to connect " );
+     $logger->logdie( $db->ERRORMSG );
   }
  
   
   	 
         #
-  	# automatically insert the entries into the host table if it does not exist
-  	 if($db->soi_host( {ip_name => 'localhost', ip_number => '127.0.0.1' }) == 0) {
-	    ### OK
-	 }
-  	if(  $db->soi_host( {ip_name => 'iepm-resp.slac.stanford.edu' } ) == 0) {
-	    ### OK
+  	# automatically insert   entries into the host table if it does not exist
+  	 if($db->soi_host( {ip_name => 'localhost', ip_number => '127.0.0.1' }) < 0) {
+	    ### NOT OK
+	     $logger->logdie( $db->ERRORMSG );
+	 }  
+  	if(  $db->soi_host( {ip_name => 'iepm-resp.slac.stanford.edu' } )< 0) {
+	    ### NOT OK 
+	     $logger->logdie( $db->ERRORMSG );
 	 }
 
 	# setup some values for the metadata entry
@@ -72,17 +75,17 @@ data tables that is used by PingER in order to provide performance.
   	# insert the entry into the database if it does not exist  
 	 
   	
-	my $metaIDs = $db->soi_metadata(  { ip_name_src => $src, ip_name_dst => $dst, 
+	my $metaID  = $db->soi_metadata(  { ip_name_src => $src, ip_name_dst => $dst, 
 	                           transport => $transport,  packetSize => $packetSize, 
 				   count => $count, packetINterval => $packetInterval, ttl => $ttl });
   	
         #
 	#
 	
-	#  it will also query for ip_number_src and ip_number_dst - in this case it will query host table
-	#
+	#  one can  also query for ip_number_src and ip_number_dst - in this case it will query host table
+	#  it returns hashref keyd by metaIDs ( see DBI docs about selectall_hashref )
 	
-	my $metaIDs = $db->getMetaID(  [ ip_name_src => { like =>  '%fnal.gov'}, 
+	my $metaIDs  = $db->getMetaID(  [ ip_name_src => { like =>  '%fnal.gov'}, 
 	                              ip_number_dst => '127.0.0.1']);
 	# 
 	#  or just ip_number_dst
@@ -95,26 +98,22 @@ data tables that is used by PingER in order to provide performance.
 	
 	 if( $db->insertTable(  { ip_name_src => $src, ip_name_dst => $dst, 
 	                           transport => $transport,  packetSize => $packetSize, 
-				   count => $count, packetINterval => $packetInterval, ttl => $ttl }, 'metaData') == 0) {
-	   ### OK
-				   
+				   count => $count, packetINterval => $packetInterval, ttl => $ttl }, 'metaData') < 0) {
+	   ### NOT OK
+	   $logger->error( $db->ERRORMSG );			   
 	}
   	
 	 
 	
 	if( $db->updateTable(  {  ip_name_src => $src, ip_name_dst => $dst, 
 	                           transport => $transport,  packetSize => $packetSize, 
-				   count => $count, packetINterval => $packetInterval, ttl => $ttl }, 'metaData', [metaID => '3345' ]) == 0 ) {
+				   count => $count, packetINterval => $packetInterval, ttl => $ttl }, 'metaData', [metaID => '3345' ]) < 0 ) {
 	
-	   # .... everything is OK			   
-	} else {
-	     $logger->error(" Update failed, see error log ");
+	     $logger->error( $db->ERRORMSG );
+	   
 	}
   	
-	
-	unless($metaId) {
-	  $logger->error(" Insert failed, probably duplicated primary key ");
-	} 
+	 } 
 	
 	
   	# say we have the data we want to insert  
@@ -146,10 +145,10 @@ data tables that is used by PingER in order to provide performance.
 	#
 	
 	# now,  insert some data into database
-  	my $data = $db->insert_data(   $hash );
+  	my $data = $db->insertData(   $hash );
 	
-	# or update some Data
-	my $data = $db->updatData(   $hash  ,  [metaID =>  '3402', 'timestamp' => '1000000000']  );
+	# or update some Data, the second argument is where clause
+	my $data = $db->updateData(   $hash  ,  [metaID =>  '3402', 'timestamp' => '1000000000']  );
 	
 	
 	
@@ -158,9 +157,11 @@ data tables that is used by PingER in order to provide performance.
   	my $tablename = $db->get_table_for_timestamp({startime => $timestamp});
 	#####
 	#
-	#   query for  data, will return array ref to the list of rows as hash_refs 
+	#   query for  data, will return hashref keyd by metaID - timestamp pair
+	# 
+	#  for example $data_ref->{30034}->{10222223323}->{meanRtt} will give you the meanRtt value for metaID=3--34 and timestamp=10222223323
 	#
-	my $data_ref = $db->getData({table => $tablename->[0], query => $query});
+	my $data_ref = $db->getData( [ metaID => '30034', timestamp => { gt => '1000000'}, timestamp => {lt => '999999999'}] );
 	
   } else 
   	print "Something went wrong with the database init.";
@@ -377,9 +378,9 @@ sub alive {
 
 returns 
 
-    0 = if everything is okay
+     
    -1 = somethign went wrong 
-
+   everything else is good ( could be 0 or ip_name )
 
 
 
@@ -636,7 +637,46 @@ sub  getMetaID {
     return  sort {$a <=> $b} keys %$results if ($results && ref($results) eq 'HASH') ;
     return $results; 
 }
+=head2 getData
  
+  helper method to get data for some query
+
+=cut
+
+
+sub  getData {
+     my ($self, $param ) = @_;
+    
+     if ( ! $param || ref($param) ne 'ARRAY'  )  {
+    	 $self->ERRORMSG("soi_host  requires single ARRAY ref parameter  ");
+    	 return -1;
+    } 
+    
+    my $stime = undef;
+    my $etime = undef;
+    my $param_sz = scalar @{$param};
+    for(my $i=0;$i<$param_sz;$i+=2) {
+       if ($param->[$i] eq 'timestamp') {
+          if(! ref($param->[$i+1]) || $param->[$i+1]->{eq}) {
+	    $stime = $param->[$i+1];
+	    $etime = undef;
+	    last;
+	  }  elsif($param->[$i+1]->{gt}) {
+	     $stime = $param->[$i+1]->{gt}+1;
+	  }  elsif( $param->[$i+1]->{ge}) {
+	     $stime = $param->[$i+1]->{ge};
+	  } elsif($param->[$i+1]->{lt}) {
+	     $etime = $param->[$i+1]->{lt}-1;
+	  } elsif($param->[$i+1]->{le}) {
+	    $etime = $param->[$i+1]->{le};
+	  }
+       }   
+    } 
+    my ( $table) =  $self->get_table_for_timestamp( $stime , $etime, undef); 
+    return -1 if  $table<0;
+    my $results = $self->_getFromTable(  $param  , $table,  DATA,  [qw(metaID timestamp)]);
+    return $results; 
+} 
 
 =head2 insertData (   $hashref );
 
