@@ -1,1 +1,1 @@
-../../scripts/genLinkStatus.pl
+../../scripts/status/genLinkStatus.pl

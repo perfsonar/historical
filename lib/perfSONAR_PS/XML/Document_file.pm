@@ -18,7 +18,7 @@ use perfSONAR_PS::ParameterValidation;
 
 use IO::File;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'OPEN_TAGS', 'DEFINED_PREFIXES', 'FH', 'LOGGER';
 

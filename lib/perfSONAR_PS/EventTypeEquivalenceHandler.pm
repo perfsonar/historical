@@ -24,7 +24,7 @@ use warnings;
 use perfSONAR_PS::Common;
 use Log::Log4perl qw(get_logger :nowarn);
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'EVENT_TYPES', 'LOGGER';
 

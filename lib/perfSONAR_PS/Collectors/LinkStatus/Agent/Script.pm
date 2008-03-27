@@ -18,7 +18,7 @@ use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'TYPE', 'SCRIPT','PARAMETERS';
 

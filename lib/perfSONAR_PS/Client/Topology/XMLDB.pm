@@ -12,7 +12,7 @@ use perfSONAR_PS::Topology::ID;
 
 use fields 'READ_ONLY', 'DB_OPEN', 'DB_NAMESPACES', 'DB_FILE', 'DB_CONTAINER', 'DATADB';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub new {
     my ($package, $db_container, $db_file, $ns, $read_only) = @_;

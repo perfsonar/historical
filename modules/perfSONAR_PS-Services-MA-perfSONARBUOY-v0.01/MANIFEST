@@ -16,3 +16,4 @@ lib/perfSONAR_PS/OWP/Conf.pm
 lib/perfSONAR_PS/OWP/RawIO.pm
 lib/perfSONAR_PS/OWP/Utils.pm
 perl-perfSONAR_PS-Services-MA-perfSONARBUOY.spec
+META.yml                                 Module meta-data (added by MakeMaker)

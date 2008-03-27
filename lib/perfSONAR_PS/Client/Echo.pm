@@ -8,7 +8,7 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::XML::Document_string;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'URI', 'EVENT_TYPE';
 

@@ -34,7 +34,7 @@ use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::ParameterValidation;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head2 init 
     Called at startup by the daemon when this particular module is loaded into
@@ -320,14 +320,17 @@ sub handleQueryRequest {
     }
 
     my $xquery;
-    my $xquery_subject = find($m, "./*[local-name()='subject' and namespace='http://ggf.org/ns/nmwg/tools/org/perfsonar/xquery/1.0/']", 1);
-    if ($xquery_subject) {
-        $xquery = $xquery_subject->textContent;
-    } elsif ($subjects->size() == 0) {
+
+    if ($subjects->size() == 0) {
         # no subject is the query all request
         $xquery = "//*";
-    } else {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
+    } else{
+        my $subject = $subjects->get_node(1);
+        if ($subject->namespaceURI() eq "http://ggf.org/ns/nmwg/tools/org/perfsonar/xquery/1.0/") {
+            $xquery = $subject->textContent;
+        } else {
+            throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type: ".$subject->namespaceURI());
+        }
     }
 
     my ($status, $res) = $self->{CLIENT}->xQuery($xquery);

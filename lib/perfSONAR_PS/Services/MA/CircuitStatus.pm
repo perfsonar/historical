@@ -34,7 +34,7 @@ use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::MA;
 use perfSONAR_PS::Client::Topology::MA;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub init {
     my ($self, $handler) = @_;

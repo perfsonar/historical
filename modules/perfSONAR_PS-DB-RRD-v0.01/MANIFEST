@@ -11,3 +11,4 @@ t/testfiles/createrrd
 t/testfiles/testrrd1.rrd
 t/testfiles/testrrd2.rrd
 t/testfiles/testrrd3.rrd
+META.yml                                 Module meta-data (added by MakeMaker)

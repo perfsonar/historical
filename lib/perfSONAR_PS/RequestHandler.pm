@@ -28,7 +28,7 @@ use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::EventTypeEquivalenceHandler;
 use perfSONAR_PS::ParameterValidation;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 API
 =cut

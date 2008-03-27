@@ -29,7 +29,7 @@ use Config::General;
 use Module::Load;
 use HTTP::Daemon;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 my $libdir;
 my $confdir;

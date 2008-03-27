@@ -6,7 +6,7 @@ use Log::Log4perl qw(get_logger);
 
 use fields 'CONF', 'DIRECTORY';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub new {
     my ($self, $conf, $directory) = @_;

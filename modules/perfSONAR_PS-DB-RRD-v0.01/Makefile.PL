@@ -9,7 +9,7 @@ WriteMakefile(
         "fields" => 0,
 	"Log::Log4perl" => 1.00,
 	"Params::Validate" => 0.64,
-	"perfSONAR_PS::Common" => 0.08,
+	"perfSONAR_PS::Common" => 0.09,
 	"RRDp" => 1.20,
         "strict" => 0,
 	"Test::More" => 0,

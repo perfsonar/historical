@@ -22,11 +22,11 @@ WriteMakefile(
 	"Log::Dispatch::Syslog" => 1.00,
 	"Module::Load" => 0.10,
 	"Params::Validate" => 0.70,
-	"perfSONAR_PS::Common" => 0.08,
-	"perfSONAR_PS::Error" => 0.08,
-	"perfSONAR_PS::Error_compat" => 0.08,
-	"perfSONAR_PS::Messages" => 0.08,
-	"perfSONAR_PS::XML::Document_string" => 0.08,
+	"perfSONAR_PS::Common" => 0.09,
+	"perfSONAR_PS::Error" => 0.09,
+	"perfSONAR_PS::Error_compat" => 0.09,
+	"perfSONAR_PS::Messages" => 0.09,
+	"perfSONAR_PS::XML::Document_string" => 0.09,
 	"POSIX" => 0,
         "strict" => 0,
 	"Sys::Hostname" => 0,
@@ -84,17 +84,17 @@ install ::
 
 	if [ -f $(INSTALLBIN)/perfsonar ]; then \
 		install -c -D -m 0755 perfsonar-daemon.init $(sysconfdir)/init.d/perfsonar-daemon; \
-		awk "{gsub(/^VARDIR=.*/,\"VARDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
+		awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
 		mv -f $(sysconfdir)/init.d/perfsonar-daemon.new $(sysconfdir)/init.d/perfsonar-daemon; \
 		chmod +x $(sysconfdir)/init.d/perfsonar-daemon; \
 	elif [ -f $(INSTALLSITEBIN)/perfsonar ]; then \
 		install -c -D -m 0755 perfsonar-daemon.init $(sysconfdir)/init.d/perfsonar-daemon; \
-		awk "{gsub(/^VARDIR=.*/,\"VARDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLSITEBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
+		awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLSITEBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
 		mv -f $(sysconfdir)/init.d/perfsonar-daemon.new $(sysconfdir)/init.d/perfsonar-daemon; \
 		chmod +x $(sysconfdir)/init.d/perfsonar-daemon; \
 	elif [ -f $(INSTALLVENDORBIN)/perfsonar ]; then \
 		install -c -D -m 0755 perfsonar-daemon.init $(sysconfdir)/init.d/perfsonar-daemon; \
-		awk "{gsub(/^VARDIR=.*/,\"VARDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLVENDORBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
+		awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=$(vardir)\"); gsub(/^BINDIR=.*/,\"BINDIR=$(INSTALLVENDORBIN)\"); gsub(/^PREFIX=.*/,\"PREFIX=$(PREFIX)\"); gsub(/^CONFDIR=.*/,\"CONFDIR=$(sysconfdir)\"); print}" $(sysconfdir)/init.d/perfsonar-daemon > $(sysconfdir)/init.d/perfsonar-daemon.new; \
 		mv -f $(sysconfdir)/init.d/perfsonar-daemon.new $(sysconfdir)/init.d/perfsonar-daemon; \
 		chmod +x $(sysconfdir)/init.d/perfsonar-daemon; \
 	fi;

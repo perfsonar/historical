@@ -9,13 +9,13 @@
 PREFIX=../
 BINDIR=${PREFIX}/bin
 CONFDIR=${PREFIX}/etc
-VARDIR=/var/run
+PIDDIR=/var/run
 
-COLLECTORCONF=${CONFDIR}/perfsonar/daemon.conf
+DAEMONCONF=${CONFDIR}/perfsonar/daemon.conf
 LOGGERCONF=${CONFDIR}/perfsonar/logger.conf
 PIDFILE=perfsonar-daemon.pid
 
-PERFSONAR="${BINDIR}/perfsonar --config ${COLLECTORCONF} --piddir=${VARDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} "
+PERFSONAR="${BINDIR}/perfsonar --config ${DAEMONCONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${LOGGERCONF} "
 
 ERROR=0
 ARGV="$@"
@@ -26,8 +26,8 @@ fi
 for ARG in $@ $ARGS
 do
     # check for pidfile
-    if [ -f $VARDIR/$PIDFILE ] ; then
-	PID=`cat $VARDIR/$PIDFILE`
+    if [ -f $PIDDIR/$PIDFILE ] ; then
+	PID=`cat $PIDDIR/$PIDFILE`
 	if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
 	    STATUS="perfsonar-daemon (pid $PID) running"
 	    RUNNING=1

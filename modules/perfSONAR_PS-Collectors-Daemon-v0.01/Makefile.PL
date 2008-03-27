@@ -19,7 +19,7 @@ WriteMakefile(
         "Log::Dispatch::Syslog" => 1.00,
 	"Log::Log4perl" => 1.00,
 	"Module::Load" => 0.10,
-	"perfSONAR_PS::Common" => 0.08,
+	"perfSONAR_PS::Common" => 0.09,
 	"POSIX" => 0,
         "strict" => 0,
 	"Time::HiRes" => 1.85,

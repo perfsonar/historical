@@ -11,3 +11,4 @@ t/testfiles/blank.xml
 t/testfiles/garbage0.xml
 t/testfiles/simpleXML.xml
 t/testfiles/simpleXMLNoTag.xml
+META.yml                                 Module meta-data (added by MakeMaker)

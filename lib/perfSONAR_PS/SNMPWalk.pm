@@ -1,7 +1,5 @@
 # ============================================================================
 
-# $Id: snmpwalk.pl,v 2.5 2005/07/20 13:53:07 dtown Rel $
-
 # Copyright (c) 2000-2005 David M. Town <dtown@cpan.org>
 # All rights reserved.
 
@@ -18,7 +16,7 @@ use Exporter;
 use strict;
 use warnings;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use base 'Exporter';
 our @EXPORT = ('snmpwalk');

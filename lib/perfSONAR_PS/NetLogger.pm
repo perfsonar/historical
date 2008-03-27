@@ -5,7 +5,7 @@ use warnings;
 require 5.002;
 use Time::HiRes;
   
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 # initialize Global GUID
 my $GUID = `/usr/bin/uuidgen`;

@@ -18,7 +18,7 @@ use fields 'TIME', 'OPER_STATE', 'ADMIN_STATE';
 
 use perfSONAR_PS::Status::Common;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub new {
     my ($class, $time, $oper_state, $admin_state) = @_;

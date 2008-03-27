@@ -17,7 +17,7 @@ to return along with the machine's current time.
 use strict;
 use warnings;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'TYPE', 'CONSTANT';
 

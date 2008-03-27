@@ -6,7 +6,7 @@ use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::ParameterValidation;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'AGENT', 'PHYSPORT', 'TYPE', 'LOGGER';
 

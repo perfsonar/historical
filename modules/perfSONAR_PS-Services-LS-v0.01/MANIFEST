@@ -8,3 +8,4 @@ lib/perfSONAR_PS/Services/LS.pm
 lib/perfSONAR_PS/Services/LS/General.pm
 lib/perfSONAR_PS/Services/LS/LS.pm
 perl-perfSONAR_PS-Services-LS.spec
+META.yml                                 Module meta-data (added by MakeMaker)

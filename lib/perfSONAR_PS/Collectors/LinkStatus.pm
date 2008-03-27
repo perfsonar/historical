@@ -21,7 +21,7 @@ use base 'perfSONAR_PS::Collectors::Base';
 
 use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS', 'TL1AGENTS';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 my %link_prev_update_status = ();
 

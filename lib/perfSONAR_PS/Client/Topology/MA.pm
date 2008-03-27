@@ -8,7 +8,7 @@ use perfSONAR_PS::Transport;
 
 use fields 'URI_STRING';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub new {
     my ($package, $uri_string) = @_;

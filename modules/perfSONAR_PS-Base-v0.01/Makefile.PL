@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     'NAME' => 'perfSONAR_PS::Base',
-    'VERSION' => 0.08,
+    'VERSION' => 0.09,
     'AUTHOR' => 'Aaron Brown <aaron@internet2.edu>',
     'PREREQ_PM' => {
         "strict" => 0,
@@ -20,7 +20,6 @@ WriteMakefile(
 	"Params::Validate" => 0.70,
 	"Data::Compare" => 0.09,
 	"Data::Dumper" => 2.101,
-	"Data::Stack" => 0.01,
 	"Error" => 0,
 	"Carp" => 0,
 	"Test::More" => 0,

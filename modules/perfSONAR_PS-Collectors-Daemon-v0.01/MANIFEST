@@ -9,3 +9,4 @@ perfsonar-collector
 perfsonar-collector.init
 perl-perfSONAR_PS-Collectors-Daemon.spec
 psConfigureCollectors
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -8,7 +8,7 @@ use warnings;
 use vars qw(@ISA @EXPORT $VERSION);
 use constant JAN_1970 => 0x83aa7e80;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 NAME
 

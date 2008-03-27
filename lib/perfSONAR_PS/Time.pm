@@ -7,7 +7,7 @@ use Data::Dumper;
 
 use fields 'TYPE', 'STARTTIME', 'ENDTIME', 'DURATION', 'TIME';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 NAME
 

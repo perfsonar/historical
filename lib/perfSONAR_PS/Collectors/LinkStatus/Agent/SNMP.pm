@@ -28,7 +28,7 @@ use warnings;
 use fields 'TYPE', 'HOSTNAME', 'IFINDEX', 'COMMUNITY', 'VERSION', 'OID', 'AGENT';
 
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head2 new ($package, $status_type, $hostname, $ifIndex, $version, $community, $oid, $agent)
     This function instantiates a new SNMP Agent for grabbing the ifIndex/oid

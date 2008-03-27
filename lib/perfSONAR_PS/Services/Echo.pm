@@ -23,7 +23,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::ParameterValidation;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 API
 =cut

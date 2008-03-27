@@ -6,7 +6,7 @@ use Log::Log4perl qw(get_logger);
 
 use perfSONAR_PS::Collectors::LinkStatus::Status;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'IDS', 'KNOWLEDGE', 'AGENTS', 'TIME_PRIORITIES', 'TIME_SOURCE';
 

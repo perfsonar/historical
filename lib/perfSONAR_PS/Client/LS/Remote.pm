@@ -93,7 +93,7 @@ use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::Echo;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 =head1 API
 

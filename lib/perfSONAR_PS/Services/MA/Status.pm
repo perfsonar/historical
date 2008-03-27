@@ -40,7 +40,7 @@ use perfSONAR_PS::Client::Status::SQL;
 use perfSONAR_PS::Topology::ID;
 use perfSONAR_PS::ParameterValidation;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 my %status_namespaces = (
     nmwg => "http://ggf.org/ns/nmwg/base/2.0/",

@@ -9,3 +9,4 @@ lib/perfSONAR_PS/Status/Link.pm
 perl-perfSONAR_PS-Status-Common.spec
 t/perfSONAR_PS::Status::Common.t
 t/perfSONAR_PS::Status::Link.t
+META.yml                                 Module meta-data (added by MakeMaker)

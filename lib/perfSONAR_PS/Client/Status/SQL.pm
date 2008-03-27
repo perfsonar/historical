@@ -7,7 +7,7 @@ use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields "READ_ONLY", "DBI_STRING", "DB_USERNAME", "DB_PASSWORD", "DB_TABLE", "DB_OPEN", "DATADB";
 

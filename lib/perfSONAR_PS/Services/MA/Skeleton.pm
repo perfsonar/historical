@@ -24,7 +24,7 @@ use Params::Validate qw(:all);
 
 use fields 'LOGGER';
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;

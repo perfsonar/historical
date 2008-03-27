@@ -9,7 +9,7 @@ use perfSONAR_PS::Status::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Time;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 use fields 'URI_STRING';
 

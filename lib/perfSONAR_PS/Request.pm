@@ -9,7 +9,7 @@ use XML::LibXML;
 
 use perfSONAR_PS::Common;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 sub new {
     my ($package, $call, $http_request) = @_;

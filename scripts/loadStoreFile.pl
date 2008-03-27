@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-loadXMLDB.pl - Load the contents of an XML file (commonly a used to store
+loadStoreFile.pl - Load the contents of an XML file (commonly a used to store
 metadata configuration for an MA) into an XML Databatabase.
 
 =head1 DESCRIPTION
@@ -14,7 +14,7 @@ file information directly.
 
 =head1 SYNOPSIS
 
-./loadXMLD.pl [--verbose --help --environment=/path/to/env --container=container.dbxml --filename=/path/to/store.xml]
+./loadStoreFile.pl [--verbose --help --environment=/path/to/env --container=container.dbxml --filename=/path/to/store.xml]
 
 =cut
 
