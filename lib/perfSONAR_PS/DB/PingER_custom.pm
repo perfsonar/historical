@@ -620,7 +620,7 @@ sub validateQuery {
 
 =head2 getMetaID
  
-  helper method to get list of metaID for some query
+  helper method to get sorted list of metaID for some query
 
 =cut
 
@@ -637,6 +637,25 @@ sub  getMetaID {
     return  sort {$a <=> $b} keys %$results if ($results && ref($results) eq 'HASH') ;
     return $results; 
 }
+
+=head2 getMeta
+ 
+  helper method to get hashref keyd by metaID with metadata
+
+=cut
+
+
+sub  getMeta  {
+     my ($self, $param) = @_;
+    
+     if ( ! $param || ref($param) ne 'ARRAY'  )  {
+    	 $self->ERRORMSG("soi_host  requires single ARRAY ref parameter  ");
+    	 return -1;
+    } 
+    my $results = $self->_getFromTable(  $param  , 'metaData', METADATA,  'metaID'); 
+    return $results; 
+}
+
 =head2 getData
  
   helper method to get data for some query
