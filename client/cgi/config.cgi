@@ -70,7 +70,7 @@ if ( $cgi->param('Store') ) {
     SaveConfig_mine( $file, \%config );
 
     print $cgi->br;
-    print "<i>Saving...</i>";
+    print "<center><i>Configuration Saved</i></center>";
     print $cgi->br;
 }
 
@@ -295,6 +295,18 @@ sub addService {
     else {
         $html .= "  <option value=\"perfsonarbuoy\">perfsonarbuoy</option>\n";
     }
+    if ( $cgi->param('addServiceType') eq "pingerma" ) {
+        $html .= "  <option selected=\"true\" value=\"pingerma\">pingerma</option>\n";
+    }
+    else {
+        $html .= "  <option value=\"pingerma\">pingerma</option>\n";
+    }
+    if ( $cgi->param('addServiceType') eq "pingermp" ) {
+        $html .= "  <option selected=\"true\" value=\"pingermp\">pingermp</option>\n";
+    }
+    else {
+        $html .= "  <option value=\"pingermp\">pingermp</option>\n";
+    }
     $html .= "</select>\n";
     $html .= "<input type=\"hidden\" name=\"add_service1\" id=\"add_service1\" value=\"1\">";
     $html .= $cgi->end_td;
@@ -332,475 +344,159 @@ sub addService {
         else {
             if ( $cgi->param('addServiceType') eq "snmp" ) {
 
-                unless ( $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"} ) {
-                    my $rrdtool = q{};
-                    if ( open( RRDTOOL, "which rrdtool |" ) ) {
-                        $rrdtool = <RRDTOOL>;
-                        $rrdtool =~ s/rrdtool:\s+//mx;
-                        $rrdtool =~ s/\n//gmx;
-                        close(RRDTOOL);
+                my $list = configureSNMP( \%config );
+                foreach my $item ( @{$list} ) {
+                    $html .= $cgi->start_Tr;
+                    $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                    $html .= $item->{"prompt"};
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                    $html
+                        .= "<input type=\"text\" size=\"45\" name=\""
+                        . $item->{"name"}
+                        . "\" id=\""
+                        . $item->{"name"}
+                        . "\" value=\""
+                        . (
+                        exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        : $item->{"default"} );
+                    if ( $item->{"suffix"} ) {
+                        $html .= "\">&nbsp;" . $item->{"suffix"};
                     }
-                    unless ($rrdtool) {
-                        $rrdtool = "/usr/local/bin/rrdtool";
+                    else {
+                        $html .= "\">";
                     }
-                    $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"} = $rrdtool;
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->end_Tr;
                 }
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the location of the RRD binary ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"rrdtool\" id=\"rrdtool\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"}
-                    : ""
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the default resolution of RRD queries ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"default_resolution\" id=\"default_resolution\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"default_resolution"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"default_resolution"}
-                    : "300"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                # we should just set the default to be 'file', don't ask
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the database type to read from (file or xmldb) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_type\" id=\"metadata_db_type\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_type"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_type"}:"file")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the filename of the XML file ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    : "/etc/perfsonar/store.xml"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                # leave these out for now (till we can figure out the switch between xmldb/file
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the directory of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_name"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_name"}:"/etc/perfsonar/xmldb")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the name of the container inside of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_file"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_file"}:"store.dbxml")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                # load this later
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Will this service register with an LS (0 for no, 1 for yes) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"enable_registration\" id=\"enable_registration\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"enable_registration"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"enable_registration"}:"0")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Interval between when LS registrations occur (0 for none) ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"ls_registration_interval\" id=\"ls_registration_interval\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"}
-                    : "0"
-                    ) . "\">&nbsp;minutes";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                unless ( $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
-                    $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config{"ls_instance"};
-                }
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "URL of an LS to register with ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"ls_instance\" id=\"ls_instance\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}
-                    : "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a name for this service ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    : "perfSONAR-PS SNMP MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service type ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    : "MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a service description ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    : "SNMP MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service's URI ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    : "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
             }
             elsif ( $cgi->param('addServiceType') eq "ls" ) {
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter default TTL for registered data: ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"ls_ttl\" id=\"ls_ttl\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_ttl"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_ttl"}
-                    : "240"
-                    ) . "\">&nbsp;minutes";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
 
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the directory of the XML database ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_name"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_name"}
-                    : "/etc/perfsonar/xmldb"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the name of the container inside of the XML database ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    : "lsstore.dbxml"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the time between LS removal (0 for none)";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"reaper_interval\" id=\"reaper_interval\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"reaper_interval"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"reaper_interval"}
-                    : "0"
-                    ) . "\">&nbsp;minutes";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a name for this service ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    : "perfSONAR-PS Lookup Service"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service type ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    : "LS"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a service description ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    : "Lookup Service"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service's URI ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    : "http://localhost:" . $cgi->param('addService') . "/" . $cgi->param('addService1')
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
+                my $list = configureLS( \%config );
+                foreach my $item ( @{$list} ) {
+                    $html .= $cgi->start_Tr;
+                    $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                    $html .= $item->{"prompt"};
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                    $html
+                        .= "<input type=\"text\" size=\"45\" name=\""
+                        . $item->{"name"}
+                        . "\" id=\""
+                        . $item->{"name"}
+                        . "\" value=\""
+                        . (
+                        exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        : $item->{"default"} );
+                    if ( $item->{"suffix"} ) {
+                        $html .= "\">&nbsp;" . $item->{"suffix"};
+                    }
+                    else {
+                        $html .= "\">";
+                    }
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->end_Tr;
+                }
             }
             elsif ( $cgi->param('addServiceType') eq "perfsonarbuoy" ) {
 
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the directory <font color=\"red\"><b>LOCATION</b></font> of the <i>owmesh.conf</i> file: ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"owmesh\" id=\"owmesh\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"owmesh"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"owmesh"}
-                    : "/etc/ami/etc"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                # we should just set the default to be 'file', don't ask
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the database type to read from (file or xmldb) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_type\" id=\"metadata_db_type\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_type"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_type"}:"file")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the filename of the XML file ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}
-                    : "/etc/ami/etc/store.xml"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                # leave these out for now (till we can figure out the switch between xmldb/file
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the directory of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_name"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_name"}:"/etc/ami/etc/xmldb")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the name of the container inside of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_file"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"metadata_db_file"}:"store.dbxml")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                # load this later
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Will this service register with an LS (0 for no, 1 for yes) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"enable_registration\" id=\"enable_registration\" value=\"".(exists $config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"enable_registration"}?$config{"port"}->{$cgi->param('addService')}->{"endpoint"}->{$cgi->param('addService1')}->{$cgi->param('addServiceType')}->{"enable_registration"}:"0")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Interval between when LS registrations occur (0 for none) ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"ls_registration_interval\" id=\"ls_registration_interval\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"}
-                    : "0"
-                    ) . "\">&nbsp;minutes";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                unless ( $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
-                    $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config{"ls_instance"};
+                my $list = configurepSB( \%config );
+                foreach my $item ( @{$list} ) {
+                    $html .= $cgi->start_Tr;
+                    $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                    $html .= $item->{"prompt"};
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                    $html
+                        .= "<input type=\"text\" size=\"45\" name=\""
+                        . $item->{"name"}
+                        . "\" id=\""
+                        . $item->{"name"}
+                        . "\" value=\""
+                        . (
+                        exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        : $item->{"default"} );
+                    if ( $item->{"suffix"} ) {
+                        $html .= "\">&nbsp;" . $item->{"suffix"};
+                    }
+                    else {
+                        $html .= "\">";
+                    }
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->end_Tr;
                 }
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "URL of an LS to register with ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"ls_instance\" id=\"ls_instance\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}
-                    : "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a name for this service ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}
-                    : "perfSONAR-PS perfSONAR-BUOY MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service type ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}
-                    : "MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter a service description ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"}
-                    : "perfSONAR-BUOY MA"
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { align => "left", width => "40%" } );
-                $html .= "Enter the service's URI ";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { align => "left", width => "60%" } );
-                $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                    . (
-                    exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"}
-                    : "http://localhost:" . $cgi->param('addService') . "/" . $cgi->param('addService1')
-                    ) . "\">&nbsp;";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
             }
-        }
+            elsif ( $cgi->param('addServiceType') eq "pingerma" ) {
 
-        $html .= $cgi->start_Tr;
-        $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
-        $html .= $cgi->br;
-        $html .= "<input type=\"submit\" name=\"add_service_2\" id=\"add_service_2\" value=\"Store\" onClick=\"export4_1([],['add_s_result'])\">";
-        $html .= $cgi->br;
-        $html .= $cgi->br;
-        $html .= $cgi->end_td;
-        $html .= $cgi->end_Tr;
+                my $list = configurePingERMA( \%config );
+                foreach my $item ( @{$list} ) {
+                    $html .= $cgi->start_Tr;
+                    $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                    $html .= $item->{"prompt"};
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                    $html
+                        .= "<input type=\"text\" size=\"45\" name=\""
+                        . $item->{"name"}
+                        . "\" id=\""
+                        . $item->{"name"}
+                        . "\" value=\""
+                        . (
+                        exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        : $item->{"default"} );
+                    if ( $item->{"suffix"} ) {
+                        $html .= "\">&nbsp;" . $item->{"suffix"};
+                    }
+                    else {
+                        $html .= "\">";
+                    }
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->end_Tr;
+                }
+            }
+            elsif ( $cgi->param('addServiceType') eq "pingermp" ) {
+
+                my $list = configurePingERMP( \%config );
+                foreach my $item ( @{$list} ) {
+                    $html .= $cgi->start_Tr;
+                    $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                    $html .= $item->{"prompt"};
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                    $html
+                        .= "<input type=\"text\" size=\"45\" name=\""
+                        . $item->{"name"}
+                        . "\" id=\""
+                        . $item->{"name"}
+                        . "\" value=\""
+                        . (
+                        exists $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        ? $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} }
+                        : $item->{"default"} );
+                    if ( $item->{"suffix"} ) {
+                        $html .= "\">&nbsp;" . $item->{"suffix"};
+                    }
+                    else {
+                        $html .= "\">";
+                    }
+                    $html .= $cgi->end_td;
+                    $html .= $cgi->end_Tr;
+                }
+            }
+
+            $html .= $cgi->start_Tr;
+            $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
+            $html .= $cgi->br;
+            $html .= "<input type=\"submit\" name=\"add_service_2\" id=\"add_service_2\" value=\"Store\" onClick=\"export4_1([],['add_s_result'])\">";
+            $html .= $cgi->br;
+            $html .= $cgi->br;
+            $html .= $cgi->end_td;
+            $html .= $cgi->end_Tr;
+        }
     }
 
     $html .= $cgi->end_table . "\n";
@@ -822,25 +518,20 @@ sub addServiceResult {
 
         if ( $cgi->param('addServiceType') eq "snmp" ) {
 
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MA::SNMP";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"}            = $cgi->param('rrdtool')            if $cgi->param('rrdtool');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"default_resolution"} = $cgi->param('default_resolution') if $cgi->param('default_resolution');
-
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_type"}         = "file";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}         = $cgi->param('metadata_db_file') if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"} = $cgi->param('ls_registration_interval') if $cgi->param('ls_registration_interval');
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}                                              = "perfSONAR_PS::Services::MA::SNMP";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"}                                            = "0";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_type"} = "file";
             if ( $cgi->param('ls_registration_interval') ) {
                 $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "1";
             }
             else {
                 $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "0";
             }
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}         = $cgi->param('ls_instance')         if $cgi->param('ls_instance');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configureSNMP( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -851,14 +542,11 @@ sub addServiceResult {
 
             $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::LS::LS";
             $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_ttl"}              = $cgi->param('ls_ttl')              if $cgi->param('ls_ttl');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_name"}    = $cgi->param('metadata_db_name')    if $cgi->param('metadata_db_name');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}    = $cgi->param('metadata_db_file')    if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"reaper_interval"}     = $cgi->param('reaper_interval')     if $cgi->param('reaper_interval');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configureLS( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -867,23 +555,62 @@ sub addServiceResult {
         }
         elsif ( $cgi->param('addServiceType') eq "perfsonarbuoy" ) {
 
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MA::perfSONARBOUY";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"owmesh"}                   = $cgi->param('owmesh') if $cgi->param('owmesh');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_type"}         = "file";
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_file"}         = $cgi->param('metadata_db_file') if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_registration_interval"} = $cgi->param('ls_registration_interval') if $cgi->param('ls_registration_interval');
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}                                              = "perfSONAR_PS::Services::MA::perfSONARBOUY";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"}                                            = "0";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"metadata_db_type"} = "file";
             if ( $cgi->param('ls_registration_interval') ) {
                 $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "1";
             }
             else {
                 $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "0";
             }
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"}         = $cgi->param('ls_instance')         if $cgi->param('ls_instance');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configurepSB( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
+
+            if ( -f $file ) {
+                system("cp $file $file~");
+            }
+            SaveConfig_mine( $file, \%config );
+        }
+        elsif ( $cgi->param('addServiceType') eq "pingerma" ) {
+
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MA::PingER";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
+            if ( $cgi->param('ls_registration_interval') ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "1";
+            }
+            else {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "0";
+            }
+
+            my $list = configurePingERMA( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
+
+            if ( -f $file ) {
+                system("cp $file $file~");
+            }
+            SaveConfig_mine( $file, \%config );
+        }
+        elsif ( $cgi->param('addServiceType') eq "pingermp" ) {
+
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MA::PingER";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
+            if ( $cgi->param('ls_registration_interval') ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "1";
+            }
+            else {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "0";
+            }
+
+            my $list = configurePingERMP( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -964,194 +691,34 @@ sub editService {
 
     if ( $cgi->param('editService1') ) {
 
-
         if ( exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"snmp"} ) {
+            my $list = configureSNMP( \%config );
 
-            unless ( $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"rrdtool"} ) {
-                my $rrdtool = q{};
-                if ( open( RRDTOOL, "which rrdtool |" ) ) {
-                    $rrdtool = <RRDTOOL>;
-                    $rrdtool =~ s/rrdtool:\s+//mx;
-                    $rrdtool =~ s/\n//gmx;
-                    close(RRDTOOL);
+            foreach my $item ( @{$list} ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                $html .= $item->{"prompt"};
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                $html
+                    .= "<input type=\"text\" size=\"45\" name=\""
+                    . $item->{"name"}
+                    . "\" id=\""
+                    . $item->{"name"}
+                    . "\" value=\""
+                    . (
+                    exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"snmp"}->{ $item->{"name"} }
+                    ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"snmp"}->{ $item->{"name"} }
+                    : $item->{"default"} );
+                if ( $item->{"suffix"} ) {
+                    $html .= "\">&nbsp;" . $item->{"suffix"};
                 }
-                unless ($rrdtool) {
-                    $rrdtool = "/usr/local/bin/rrdtool";
+                else {
+                    $html .= "\">";
                 }
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"rrdtool"} = $rrdtool;
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
             }
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the location of the RRD binary ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"rrdtool\" id=\"rrdtool\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"rrdtool"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"rrdtool"}
-                : ""
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the default resolution of RRD queries ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"default_resolution\" id=\"default_resolution\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"default_resolution"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"default_resolution"}
-                : "300"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            # we should just set the default to be 'file', don't ask
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the database type to read from (file or xmldb) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_type\" id=\"metadata_db_type\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_type"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_type"}:"file")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the filename of the XML file ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"metadata_db_file"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"metadata_db_file"}
-                : "/etc/perfsonar/store.xml"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            # leave these out for now (till we can figure out the switch between xmldb/file
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the directory of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_name"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_name"}:"/etc/perfsonar/xmldb")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the name of the container inside of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_file"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"metadata_db_file"}:"store.dbxml")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            # load this later
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Will this service register with an LS (0 for no, 1 for yes) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"enable_registration\" id=\"enable_registration\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"enable_registration"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"snmp"}->{"enable_registration"}:"0")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Interval between when LS registrations occur (0 for none) ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"ls_registration_interval\" id=\"ls_registration_interval\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_registration_interval"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_registration_interval"}
-                : "0"
-                ) . "\">&nbsp;minutes";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            unless ( $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_instance"} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_instance"} = $config{"ls_instance"};
-            }
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "URL of an LS to register with ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"ls_instance\" id=\"ls_instance\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_instance"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"ls_instance"}
-                : "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a name for this service ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_name"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_name"}
-                : "perfSONAR-PS SNMP MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service type ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_type"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_type"}
-                : "MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a service description ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_description"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_description"}
-                : "SNMP MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service's URI ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_accesspoint"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "snmp" }->{"service_accesspoint"}
-                : "http://localhost:" . $cgi->param('editService') . $cgi->param('editService1')
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
 
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
@@ -1163,163 +730,32 @@ sub editService {
         }
         elsif ( exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"perfsonarbuoy"} ) {
 
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the directory <font color=\"red\"><b>LOCATION</b></font> of the <i>owmesh.conf</i> file: ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"owmesh\" id=\"owmesh\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"owmesh"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"owmesh"}
-                : "/etc/ami/etc"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            # we should just set the default to be 'file', don't ask
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the database type to read from (file or xmldb) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_type\" id=\"metadata_db_type\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_type"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_type"}:"file")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the filename of the XML file ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"metadata_db_file"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"metadata_db_file"}
-                : "/etc/ami/etc/store.xml"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            # leave these out for now (till we can figure out the switch between xmldb/file
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the directory of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_name"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_name"}:"/etc/ami/etc/xmldb")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Enter the name of the container inside of the XML database ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_file"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"metadata_db_file"}:"store.dbxml")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            # load this later
-
-#$html .= $cgi->start_Tr;
-#$html .= $cgi->start_td( { align => "left", width => "40%" } );
-#$html .= "Will this service register with an LS (0 for no, 1 for yes) ";
-#$html .= $cgi->end_td;
-#$html .= $cgi->start_td( { align => "left", width => "60%" } );
-#$html .= "<input type=\"text\" size=\"45\" name=\"enable_registration\" id=\"enable_registration\" value=\"".(exists $config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"enable_registration"}?$config{"port"}->{$cgi->param('editService')}->{"endpoint"}->{$cgi->param('editService1')}->{"perfsonarbuoy"}->{"enable_registration"}:"0")."\">&nbsp;";
-#$html .= $cgi->end_td;
-#$html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Interval between when LS registrations occur (0 for none) ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"ls_registration_interval\" id=\"ls_registration_interval\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_registration_interval"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_registration_interval"}
-                : "0"
-                ) . "\">&nbsp;minutes";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            unless ( $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_instance"} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_instance"} = $config{"ls_instance"};
+            my $list = configurepSB( \%config );
+            foreach my $item ( @{$list} ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                $html .= $item->{"prompt"};
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                $html
+                    .= "<input type=\"text\" size=\"45\" name=\""
+                    . $item->{"name"}
+                    . "\" id=\""
+                    . $item->{"name"}
+                    . "\" value=\""
+                    . (
+                    exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"perfsonarbuoy"}->{ $item->{"name"} }
+                    ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"perfsonarbuoy"}->{ $item->{"name"} }
+                    : $item->{"default"} );
+                if ( $item->{"suffix"} ) {
+                    $html .= "\">&nbsp;" . $item->{"suffix"};
+                }
+                else {
+                    $html .= "\">";
+                }
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
             }
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "URL of an LS to register with ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"ls_instance\" id=\"ls_instance\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_instance"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"ls_instance"}
-                : "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a name for this service ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_name"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_name"}
-                : "perfSONAR-PS perfSONAR-BUOY MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service type ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_type"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_type"}
-                : "MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a service description ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_description"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_description"}
-                : "perfSONAR-BUOY MA"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service's URI ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_accesspoint"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "perfsonarbuoy" }->{"service_accesspoint"}
-                : "http://localhost:" . $cgi->param('editService') . "/" . $cgi->param('editService1')
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
 
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
@@ -1331,121 +767,108 @@ sub editService {
         }
         elsif ( exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"ls"} ) {
 
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter default TTL for registered data: ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"ls_ttl\" id=\"ls_ttl\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"ls_ttl"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"ls_ttl"}
-                : "240"
-                ) . "\">&nbsp;minutes";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
+            my $list = configureLS( \%config );
+            foreach my $item ( @{$list} ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                $html .= $item->{"prompt"};
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                $html
+                    .= "<input type=\"text\" size=\"45\" name=\""
+                    . $item->{"name"}
+                    . "\" id=\""
+                    . $item->{"name"}
+                    . "\" value=\""
+                    . (
+                    exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"ls"}->{ $item->{"name"} } ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"ls"}->{ $item->{"name"} } : $item->{"default"} );
+                if ( $item->{"suffix"} ) {
+                    $html .= "\">&nbsp;" . $item->{"suffix"};
+                }
+                else {
+                    $html .= "\">";
+                }
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
+            }
 
             $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the directory of the XML database ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_name\" id=\"metadata_db_name\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"metadata_db_name"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"metadata_db_name"}
-                : "/etc/perfsonar/xmldb"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the name of the container inside of the XML database ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"metadata_db_file\" id=\"metadata_db_file\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"metadata_db_file"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"metadata_db_file"}
-                : "lsstore.dbxml"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the time between LS removal (0 for none)";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"reaper_interval\" id=\"reaper_interval\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"reaper_interval"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"reaper_interval"}
-                : "0"
-                ) . "\">&nbsp;minutes";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a name for this service ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_name\" id=\"service_name\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_name"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_name"}
-                : "perfSONAR-PS Lookup Service"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service type ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_type\" id=\"service_type\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_type"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_type"}
-                : "LS"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter a service description ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_description\" id=\"service_description\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_description"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_description"}
-                : "Lookup Service"
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "left", width => "40%" } );
-            $html .= "Enter the service's URI ";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { align => "left", width => "60%" } );
-            $html .= "<input type=\"text\" size=\"45\" name=\"service_accesspoint\" id=\"service_accesspoint\" value=\""
-                . (
-                exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_accesspoint"}
-                ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ "ls" }->{"service_accesspoint"}
-                : "http://localhost:" . $cgi->param('editService') . "/" . $cgi->param('editService1')
-                ) . "\">&nbsp;";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );            
+            $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
             $html .= "<input type=\"hidden\" name=\"editServiceType\" id=\"editServiceType\" value=\"ls\">";
+            $html .= "<input type=\"submit\" name=\"edit_service_3\" id=\"edit_service_3\" value=\"Edit\" onClick=\"export5_1([],['edit_s_result'])\">";
+            $html .= $cgi->br;
+            $html .= $cgi->end_td;
+            $html .= $cgi->end_Tr;
+        }
+        elsif ( exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingerma"} ) {
+
+            my $list = configurePingERMA( \%config );
+            foreach my $item ( @{$list} ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                $html .= $item->{"prompt"};
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                $html
+                    .= "<input type=\"text\" size=\"45\" name=\""
+                    . $item->{"name"}
+                    . "\" id=\""
+                    . $item->{"name"}
+                    . "\" value=\""
+                    . (
+                    exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingerma"}->{ $item->{"name"} }
+                    ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingerma"}->{ $item->{"name"} }
+                    : $item->{"default"} );
+                if ( $item->{"suffix"} ) {
+                    $html .= "\">&nbsp;" . $item->{"suffix"};
+                }
+                else {
+                    $html .= "\">";
+                }
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
+            }
+
+            $html .= $cgi->start_Tr;
+            $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
+            $html .= "<input type=\"hidden\" name=\"editServiceType\" id=\"editServiceType\" value=\"pingerma\">";
+            $html .= "<input type=\"submit\" name=\"edit_service_3\" id=\"edit_service_3\" value=\"Edit\" onClick=\"export5_1([],['edit_s_result'])\">";
+            $html .= $cgi->br;
+            $html .= $cgi->end_td;
+            $html .= $cgi->end_Tr;
+        }
+        elsif ( exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingermp"} ) {
+
+            my $list = configurePingERMP( \%config );
+            foreach my $item ( @{$list} ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { align => "left", width => "40%" } );
+                $html .= $item->{"prompt"};
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { align => "left", width => "60%" } );
+                $html
+                    .= "<input type=\"text\" size=\"45\" name=\""
+                    . $item->{"name"}
+                    . "\" id=\""
+                    . $item->{"name"}
+                    . "\" value=\""
+                    . (
+                    exists $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingermp"}->{ $item->{"name"} }
+                    ? $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"pingermp"}->{ $item->{"name"} }
+                    : $item->{"default"} );
+                if ( $item->{"suffix"} ) {
+                    $html .= "\">&nbsp;" . $item->{"suffix"};
+                }
+                else {
+                    $html .= "\">";
+                }
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
+            }
+
+            $html .= $cgi->start_Tr;
+            $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
+            $html .= "<input type=\"hidden\" name=\"editServiceType\" id=\"editServiceType\" value=\"pingermp\">";
             $html .= "<input type=\"submit\" name=\"edit_service_3\" id=\"edit_service_3\" value=\"Edit\" onClick=\"export5_1([],['edit_s_result'])\">";
             $html .= $cgi->br;
             $html .= $cgi->end_td;
@@ -1480,25 +903,20 @@ sub editServiceResult {
 
         if ( $cgi->param('editServiceType') eq "snmp" ) {
 
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}   = "perfSONAR_PS::Services::MA::SNMP";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"rrdtool"}            = $cgi->param('rrdtool')            if $cgi->param('rrdtool');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"default_resolution"} = $cgi->param('default_resolution') if $cgi->param('default_resolution');
-
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_type"}         = "file";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_file"}         = $cgi->param('metadata_db_file') if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"ls_registration_interval"} = $cgi->param('ls_registration_interval') if $cgi->param('ls_registration_interval');
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}                                               = "perfSONAR_PS::Services::MA::SNMP";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"}                                             = "0";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_type"} = "file";
             if ( $cgi->param('ls_registration_interval') ) {
                 $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "1";
             }
             else {
                 $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "0";
             }
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"ls_instance"}         = $cgi->param('ls_instance')         if $cgi->param('ls_instance');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configureSNMP( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -1509,14 +927,11 @@ sub editServiceResult {
 
             $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}   = "perfSONAR_PS::Services::LS::LS";
             $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"ls_ttl"}              = $cgi->param('ls_ttl')              if $cgi->param('ls_ttl');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_name"}    = $cgi->param('metadata_db_name')    if $cgi->param('metadata_db_name');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_file"}    = $cgi->param('metadata_db_file')    if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"reaper_interval"}     = $cgi->param('reaper_interval')     if $cgi->param('reaper_interval');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configureLS( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -1525,23 +940,62 @@ sub editServiceResult {
         }
         elsif ( $cgi->param('editServiceType') eq "perfsonarbuoy" ) {
 
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}   = "perfSONAR_PS::Services::MA::perfSONARBOUY";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"} = "0";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"owmesh"}                   = $cgi->param('owmesh') if $cgi->param('owmesh');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_type"}         = "file";
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_file"}         = $cgi->param('metadata_db_file') if $cgi->param('metadata_db_file');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"ls_registration_interval"} = $cgi->param('ls_registration_interval') if $cgi->param('ls_registration_interval');
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}                                               = "perfSONAR_PS::Services::MA::perfSONARBOUY";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"}                                             = "0";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"metadata_db_type"} = "file";
             if ( $cgi->param('ls_registration_interval') ) {
                 $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "1";
             }
             else {
                 $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "0";
             }
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"ls_instance"}         = $cgi->param('ls_instance')         if $cgi->param('ls_instance');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_name"}        = $cgi->param('service_name')        if $cgi->param('service_name');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_type"}        = $cgi->param('service_type')        if $cgi->param('service_type');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_description"} = $cgi->param('service_description') if $cgi->param('service_description');
-            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"service_accesspoint"} = $cgi->param('service_accesspoint') if $cgi->param('service_accesspoint');
+
+            my $list = configurepSB( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
+
+            if ( -f $file ) {
+                system("cp $file $file~");
+            }
+            SaveConfig_mine( $file, \%config );
+        }
+        elsif ( $cgi->param('editServiceType') eq "pingerma" ) {
+
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}   = "perfSONAR_PS::Services::MA::PingER";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"} = "0";
+            if ( $cgi->param('ls_registration_interval') ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "1";
+            }
+            else {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "0";
+            }
+
+            my $list = configurePingERMA( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
+
+            if ( -f $file ) {
+                system("cp $file $file~");
+            }
+            SaveConfig_mine( $file, \%config );
+        }
+        elsif ( $cgi->param('editServiceType') eq "pingermp" ) {
+
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"module"}   = "perfSONAR_PS::Services::MP::PingER";
+            $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{"disabled"} = "0";
+            if ( $cgi->param('ls_registration_interval') ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "1";
+            }
+            else {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{"enable_registration"} = "0";
+            }
+
+            my $list = configurePingERMP( \%config );
+            foreach my $item ( @{$list} ) {
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+            }
 
             if ( -f $file ) {
                 system("cp $file $file~");
@@ -1792,77 +1246,75 @@ sub global {
     my $html = $cgi->br;
     $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "100%" } ) . "\n";
 
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Maximum number of child processes (0 for infinite) ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"max_worker_processes\" id=\"max_worker_processes\" value=\"" . ( exists $config{"max_worker_processes"} ? $config{"max_worker_processes"} : "0" ) . "\">";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
+    my @list = ();
+    push @list,
+        {
+        prompt  => "Maximum number of child processes (0 for infinite) ",
+        name    => "max_worker_processes",
+        default => "0"
+        };
+    push @list,
+        {
+        prompt  => "Time before killing children (0 for infinite) ",
+        name    => "max_worker_lifetime",
+        default => "0",
+        suffix  => "seconds"
+        };
+    push @list,
+        {
+        prompt  => "Disable \"Echo\" (0 for yes, 1 for no) ",
+        name    => "disable_echo",
+        default => "0"
+        };
+    push @list,
+        {
+        prompt  => "LS instance to register with ",
+        name    => "ls_instance",
+        default => "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
+        };
+    push @list,
+        {
+        prompt  => "LS registration interval ",
+        name    => "ls_registration_interval",
+        default => "60",
+        suffix  => "minutes"
+        };
+    push @list,
+        {
+        prompt  => "Interval to \"reap\" (collect and destroy) children ",
+        name    => "reaper_interval",
+        default => "20",
+        suffix  => "seconds"
+        };
+    push @list,
+        {
+        prompt  => "Directory to store \"pid\" file ",
+        name    => "pid_dir",
+        default => "/var/run"
+        };
+    push @list,
+        {
+        prompt  => "Name of \"pid\" file ",
+        name    => "pid_file",
+        default => "ps.pid"
+        };
 
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Time before killing children (0 for infinite) ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"max_worker_lifetime\" id=\"max_worker_lifetime\" value=\"" . ( exists $config{"max_worker_lifetime"} ? $config{"max_worker_lifetime"} : "0" ) . "\">&nbsp;seconds";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Disable \"Echo\" (0 for yes, 1 for no) ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"disable_echo\" id=\"disable_echo\" value=\"" . ( exists $config{"disable_echo"} ? $config{"disable_echo"} : "0" ) . "\">";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "LS instance to register with ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"ls_instance\" id=\"ls_instance\" value=\"" . ( exists $config{"ls_instance"} ? $config{"ls_instance"} : "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS" ) . "\">";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "LS registration interval ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"ls_registration_interval\" id=\"ls_registration_interval\" value=\"" . ( exists $config{"ls_registration_interval"} ? $config{"ls_registration_interval"} : "60" ) . "\">&nbsp;minutes";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Interval to \"reap\" (collect and destroy) children ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"reaper_interval\" id=\"reaper_interval\" value=\"" . ( exists $config{"reaper_interval"} ? $config{"reaper_interval"} : "20" ) . "\">&nbsp;seconds";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Directory to store \"pid\" file ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"pid_dir\" id=\"pid_dir\" value=\"" . ( exists $config{"pid_dir"} ? $config{"pid_dir"} : "/var/run" ) . "\">";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "left", width => "40%" } );
-    $html .= "Name of \"pid\" file ";
-    $html .= $cgi->end_td;
-    $html .= $cgi->start_td( { align => "left", width => "60%" } );
-    $html .= "<input type=\"text\" size=\"50\" name=\"pid_file\" id=\"pid_file\" value=\"" . ( exists $config{"pid_file"} ? $config{"pid_file"} : "ps.pid" ) . "\">";
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
+    foreach my $item (@list) {
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_td( { align => "left", width => "40%" } );
+        $html .= $item->{"prompt"};
+        $html .= $cgi->end_td;
+        $html .= $cgi->start_td( { align => "left", width => "60%" } );
+        $html .= "<input type=\"text\" size=\"50\" name=\"" . $item->{"name"} . "\" id=\"" . $item->{"name"} . "\" value=\"" . ( exists $config{ $item->{"name"} } ? $config{ $item->{"name"} } : $item->{"default"} );
+        if ( $item->{"suffix"} ) {
+            $html .= "\">&nbsp;" . $item->{"suffix"};
+        }
+        else {
+            $html .= "\">";
+        }
+        $html .= $cgi->end_td;
+        $html .= $cgi->end_Tr;
+    }
 
     $html .= $cgi->start_Tr;
     $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
@@ -1873,6 +1325,512 @@ sub global {
     $html .= $cgi->end_table . "\n";
 
     return ($html);
+}
+
+=head2 configureSNMP( $config )
+
+configureSNMP...
+
+=cut
+
+sub configureSNMP {
+    my ($config) = @_;
+
+    unless ( $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"} ) {
+        my $rrdtool = q{};
+        if ( open( RRDTOOL, "which rrdtool |" ) ) {
+            $rrdtool = <RRDTOOL>;
+            $rrdtool =~ s/rrdtool:\s+//mx;
+            $rrdtool =~ s/\n//gmx;
+            close(RRDTOOL);
+        }
+        unless ($rrdtool) {
+            $rrdtool = "/usr/local/bin/rrdtool";
+        }
+        $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"rrdtool"} = $rrdtool;
+    }
+
+    my @list = ();
+    push @list,
+        {
+        prompt  => "Enter the location of the RRD binary ",
+        name    => "rrdtool",
+        default => ""
+        };
+
+    push @list,
+        {
+        prompt  => "Enter the default resolution of RRD queries ",
+        name    => "default_resolution",
+        default => "300"
+        };
+
+    # we should just set the default to be 'file', don't ask
+    # push @list, {
+    #     prompt => "Enter the database type to read from (file or xmldb) ",
+    #     name => "metadata_db_type",
+    #     default => "file"
+    # };
+
+    push @list,
+        {
+        prompt  => "Enter the filename of the XML file ",
+        name    => "metadata_db_file",
+        default => "/etc/perfsonar/store.xml"
+        };
+
+    # leave these two out for now (till we can figure out the switch between xmldb/file
+    # push @list, {
+    #     prompt => "Enter the directory of the XML database ",
+    #     name => "metadata_db_name",
+    #     default => "/etc/perfsonar/xmldb"
+    # };
+
+    # push @list, {
+    #     prompt => "Enter the name of the container inside of the XML database ",
+    #     name => "metadata_db_file",
+    #     default => "store.dbxml"
+    # };
+
+    # load this later
+    # push @list, {
+    #     prompt => "Will this service register with an LS (0 for no, 1 for yes) ",
+    #     name => "enable_registration",
+    #     default => "0"
+    # };
+
+    push @list,
+        {
+        prompt  => "Interval between when LS registrations occur (0 for none) ",
+        name    => "ls_registration_interval",
+        default => "0",
+        suffix  => "minutes"
+        };
+
+    unless ( $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
+        $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config->{"ls_instance"};
+    }
+
+    push @list,
+        {
+        prompt  => "URL of an LS to register with ",
+        name    => "ls_instance",
+        default => "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
+        };
+    push @list,
+        {
+        prompt  => "Enter a name for this service ",
+        name    => "service_name",
+        default => "perfSONAR-PS SNMP MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service type ",
+        name    => "service_type",
+        default => "MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter a service description ",
+        name    => "service_description",
+        default => "perfSONAR-PS SNMP MA Located Somewhere"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service's URI ",
+        name    => "service_accesspoint",
+        default => "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
+        };
+
+    return \@list;
+}
+
+=head2 configureLS( $config )
+
+configureLS...
+
+=cut
+
+sub configureLS {
+    my ($config) = @_;
+
+    my @list = ();
+    push @list,
+        {
+        prompt  => "Enter default TTL for registered data: ",
+        name    => "ls_ttl",
+        default => "240",
+        suffix  => "minutes"
+        };
+    push @list,
+        {
+        prompt  => "Enter the directory of the XML database ",
+        name    => "metadata_db_name",
+        default => "/etc/perfsonar/xmldb"
+        };
+    push @list,
+        {
+        prompt  => "Enter the name of the container inside of the XML database ",
+        name    => "metadata_db_file",
+        default => "lsstore.dbxml"
+        };
+    push @list,
+        {
+        prompt  => "Enter the time between LS removal (0 for none)",
+        name    => "reaper_interval",
+        default => "0",
+        suffix  => "minutes"
+        };
+    push @list,
+        {
+        prompt  => "Enter a name for this service ",
+        name    => "service_name",
+        default => "perfSONAR-PS LS"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service type ",
+        name    => "service_type",
+        default => "LS"
+        };
+    push @list,
+        {
+        prompt  => "Enter a service description ",
+        name    => "service_description",
+        default => "perfSONAR-PS LS Located Somewhere"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service's URI ",
+        name    => "service_accesspoint",
+        default => "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
+        };
+
+    return \@list;
+}
+
+=head2 configurepSB( $config )
+
+configurepSB...
+
+=cut
+
+sub configurepSB {
+    my ($config) = @_;
+
+    my @list = ();
+    push @list,
+        {
+        prompt  => "Enter the directory <font color=\"red\"><b>LOCATION</b></font> of the <i>owmesh.conf</i> file: ",
+        name    => "owmesh",
+        default => "/etc/ami/etc"
+        };
+
+    # we should just set the default to be 'file', don't ask
+    # push @list, {
+    #     prompt => "Enter the database type to read from (file or xmldb) ",
+    #     name => "metadata_db_type",
+    #     default => "file"
+    # };
+    push @list,
+        {
+        prompt  => "Enter the filename of the XML file ",
+        name    => "metadata_db_file",
+        default => "/etc/ami/etc/store.xml"
+        };
+
+    # leave these two out for now (till we can figure out the switch between xmldb/file
+    # push @list, {
+    #     prompt => "Enter the directory of the XML database ",
+    #     name => "metadata_db_name",
+    #     default => "/etc/perfsonar/xmldb"
+    # };
+    # push @list, {
+    #     prompt => "Enter the name of the container inside of the XML database ",
+    #     name => "metadata_db_file",
+    #     default => "store.dbxml"
+    # };
+
+    # load this later
+    # push @list, {
+    #     prompt => "Will this service register with an LS (0 for no, 1 for yes) ",
+    #     name => "enable_registration",
+    #     default => "0"
+    # };
+    push @list,
+        {
+        prompt  => "Interval between when LS registrations occur (0 for none) ",
+        name    => "ls_registration_interval",
+        default => "0",
+        suffix  => "minutes"
+        };
+
+    unless ( $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
+        $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config->{"ls_instance"};
+    }
+
+    push @list,
+        {
+        prompt  => "URL of an LS to register with ",
+        name    => "ls_instance",
+        default => "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
+        };
+
+    push @list,
+        {
+        prompt  => "Enter a name for this service ",
+        name    => "service_name",
+        default => "perfSONAR-PS perfSONAR-BUOY MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service type ",
+        name    => "service_type",
+        default => "MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter a service description ",
+        name    => "service_description",
+        default => "perfSONAR-PS perfSONAR-BUOY MA Located Somewhere"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service's URI ",
+        name    => "service_accesspoint",
+        default => "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
+        };
+
+    return \@list;
+}
+
+=head2 configurePingERMA( $config )
+
+configurePingERMA...
+
+=cut
+
+sub configurePingERMA {
+    my ($config) = @_;
+
+    my @list = ();
+    push @list,
+        {
+        prompt  => "Enter the database type to read from (sqlite,mysql) ",
+        name    => "db_type",
+        default => "mysql"
+        };
+
+    #    push @list, {
+    #        prompt => "Enter the filename of the SQLite database ",
+    #        name => "db_file",
+    #        default => "pinger.db"
+    #    };
+
+    push @list,
+        {
+        prompt  => "Enter the name of the MySQL database ",
+        name    => "db_name",
+        default => ""
+        };
+    push @list,
+        {
+        prompt  => "Enter the host for the MySQL database ",
+        name    => "db_host",
+        default => "localhost"
+        };
+    push @list,
+        {
+        prompt  => "Enter the port for the MySQL database (leave blank for the default) ",
+        name    => "db_port",
+        default => "3306"
+        };
+    push @list,
+        {
+        prompt  => "Enter the username for the MySQL database (leave blank for none) ",
+        name    => "db_username",
+        default => ""
+        };
+    push @list,
+        {
+        prompt  => "Enter the password for the MySQL database (leave blank for none) ",
+        name    => "db_password",
+        default => ""
+        };
+
+    push @list,
+        {
+        prompt  => "Enter the limit on query size ",
+        name    => "query_size_limit",
+        default => "100000"
+        };
+
+    # load this later
+    # push @list, {
+    #     prompt => "Will this service register with an LS (0 for no, 1 for yes) ",
+    #     name => "enable_registration",
+    #     default => "0"
+    # };
+    push @list,
+        {
+        prompt  => "Interval between when LS registrations occur (0 for none) ",
+        name    => "ls_registration_interval",
+        default => "0",
+        suffix  => "minutes"
+        };
+
+    unless ( $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
+        $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config->{"ls_instance"};
+    }
+
+    push @list,
+        {
+        prompt  => "URL of an LS to register with ",
+        name    => "ls_instance",
+        default => "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
+        };
+
+    push @list,
+        {
+        prompt  => "Enter a name for this service ",
+        name    => "service_name",
+        default => "perfSONAR-PS PingER MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service type ",
+        name    => "service_type",
+        default => "MA"
+        };
+    push @list,
+        {
+        prompt  => "Enter a service description ",
+        name    => "service_description",
+        default => "perfSONAR-PS PingER MA Located Somewhere"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service's URI ",
+        name    => "service_accesspoint",
+        default => "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
+        };
+
+    return \@list;
+}
+
+=head2 configurePingERMP( $config )
+
+configurePingERMP...
+
+=cut
+
+sub configurePingERMP {
+    my ($config) = @_;
+
+    my @list = ();
+
+    push @list,
+        {
+        prompt  => "Enter the database type to read from (sqlite,mysql) ",
+        name    => "db_type",
+        default => "mysql"
+        };
+
+    #    push @list, {
+    #        prompt => "Enter the filename of the SQLite database ",
+    #        name => "db_file",
+    #        default => "pinger.db"
+    #    };
+
+    push @list,
+        {
+        prompt  => "Enter the name of the MySQL database ",
+        name    => "db_name",
+        default => ""
+        };
+    push @list,
+        {
+        prompt  => "Enter the host for the MySQL database ",
+        name    => "db_host",
+        default => "localhost"
+        };
+    push @list,
+        {
+        prompt  => "Enter the port for the MySQL database (leave blank for the default) ",
+        name    => "db_port",
+        default => "3306"
+        };
+    push @list,
+        {
+        prompt  => "Enter the username for the MySQL database (leave blank for none) ",
+        name    => "db_username",
+        default => ""
+        };
+    push @list,
+        {
+        prompt  => "Enter the password for the MySQL database (leave blank for none) ",
+        name    => "db_password",
+        default => ""
+        };
+
+    push @list,
+        {
+        prompt  => "Name of XML configuration file for landmarks and schedules ",
+        name    => "configuration_file",
+        default => "/etc/perfsonar/pinger-landmarks.xml"
+        };
+
+    # load this later
+    # push @list, {
+    #     prompt => "Will this service register with an LS (0 for no, 1 for yes) ",
+    #     name => "enable_registration",
+    #     default => "0"
+    # };
+    push @list,
+        {
+        prompt  => "Interval between when LS registrations occur (0 for none) ",
+        name    => "ls_registration_interval",
+        default => "0",
+        suffix  => "minutes"
+        };
+
+    unless ( $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} ) {
+        $config->{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"ls_instance"} = $config->{"ls_instance"};
+    }
+
+    push @list,
+        {
+        prompt  => "URL of an LS to register with ",
+        name    => "ls_instance",
+        default => "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS"
+        };
+
+    push @list,
+        {
+        prompt  => "Enter a name for this service ",
+        name    => "service_name",
+        default => "perfSONAR-PS PingER MP"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service type ",
+        name    => "service_type",
+        default => "MP"
+        };
+    push @list,
+        {
+        prompt  => "Enter a service description ",
+        name    => "service_description",
+        default => "perfSONAR-PS PingER MP Located Somewhere"
+        };
+    push @list,
+        {
+        prompt  => "Enter the service's URI ",
+        name    => "service_accesspoint",
+        default => "http://localhost:" . $cgi->param('addService') . $cgi->param('addService1')
+        };
+
+    return \@list;
 }
 
 =head2 SaveConfig_mine( $file, $hash )
