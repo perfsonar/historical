@@ -240,6 +240,12 @@ while (1) {
             elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBOUY" ) {
                 $module = "perfsonarbuoy";
             }
+            elsif ( $module eq "perfSONAR_PS::Services::MA::PingER" ) {
+                $module = "pingerma";
+            }
+            elsif ( $module eq "perfSONAR_PS::Services::MP::PingER" ) {
+                $module = "pingermp";
+            }
         }
 
         my %opts;
@@ -575,9 +581,13 @@ sub config_pinger($$$$) {
 		$config->{$modulename}->{"db_password"} = $tmp if ($tmp ne "");
 	}
 
-	if($modulename eq "pingerma") {
+	if($modulename eq "pingermp") {
 		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "/etc/perfsonar/pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
 	}
+	
+	if($modulename eq "pingerma") {
+	  $config->{$modulename}->{"query_size_limit"} = &ask("Enter the limit on query size ", "100000", $config->{$modulename}->{"query_size_limit"}, '^\d*$');
+  }
 
 	$config->{$modulename}->{"enable_registration"} = &ask("Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$');
 
