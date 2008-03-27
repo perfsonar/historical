@@ -32,6 +32,8 @@ write permissions.  We need to work around this.
 
 my $cgi = new CGI();
 my $pjx = new CGI::Ajax(
+    'exportg'   => \&global,
+    'exportg_1' => \&globalResult,
     'export1'   => \&addPort,
     'export1_1' => \&addPortResult,
     'export3'   => \&deletePort,
@@ -53,25 +55,99 @@ if ( -f $file ) {
 
 print $pjx->build_html( $cgi, \&show_HTML );
 
-if ( $cgi->param('Store') ) {
+# ------------------------------------------------------------------------------
 
-    $config{"max_worker_processes"}     = $cgi->param('max_worker_processes')     if ( $cgi->param('max_worker_processes') );
-    $config{"max_worker_lifetime"}      = $cgi->param('max_worker_lifetime')      if ( $cgi->param('max_worker_lifetime') );
-    $config{"disable_echo"}             = $cgi->param('disable_echo')             if ( $cgi->param('disable_echo') );
-    $config{"ls_instance"}              = $cgi->param('ls_instance')              if ( $cgi->param('ls_instance') );
-    $config{"ls_registration_interval"} = $cgi->param('ls_registration_interval') if ( $cgi->param('ls_registration_interval') );
-    $config{"reaper_interval"}          = $cgi->param('reaper_interval')          if ( $cgi->param('reaper_interval') );
-    $config{"pid_dir"}                  = $cgi->param('pid_dir')                  if ( $cgi->param('pid_dir') );
-    $config{"pid_file"}                 = $cgi->param('pid_file')                 if ( $cgi->param('pid_file') );
+=head2 clear()
 
+Clear the screen.
+
+=cut
+
+sub clear {
+    return;
+}
+
+=head2 global()
+
+...
+
+=cut
+
+sub global {
     if ( -f $file ) {
-        system("cp $file $file~");
+        %config = ParseConfig($file);
     }
-    SaveConfig_mine( $file, \%config );
 
-    print $cgi->br;
-    print "<center><i>Configuration Saved</i></center>";
-    print $cgi->br;
+    my $html = q{};
+    $html = $cgi->br;
+    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "100%" } ) . "\n";
+
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
+    $html .= $cgi->div( { -id => "global_result2" }, ( $cgi->param('global_1') ? globalResult() : "" ) );
+    $html .= $cgi->end_td;
+    $html .= $cgi->end_Tr;
+
+    my $list = configureGlobal( \%config );
+
+    foreach my $item (@{$list}) {
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_td( { align => "left", width => "40%" } );
+        $html .= $item->{"prompt"};
+        $html .= $cgi->end_td;
+        $html .= $cgi->start_td( { align => "left", width => "60%" } );
+        $html .= "<input type=\"text\" size=\"50\" name=\"" . $item->{"name"} . "\" id=\"" . $item->{"name"} . "\" value=\"" . ( exists $config{ $item->{"name"} } ? $config{ $item->{"name"} } : $item->{"default"} );
+        if ( $item->{"suffix"} ) {
+            $html .= "\">&nbsp;" . $item->{"suffix"};
+        }
+        else {
+            $html .= "\">";
+        }
+        $html .= $cgi->end_td;
+        $html .= $cgi->end_Tr;
+    }
+            
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
+    $html .= $cgi->br;
+    $html .= "<input type=\"hidden\" name=\"global1\" id=\"global1\" value=\"1\">";
+    $html .= "<input type=\"submit\" name=\"global_1\" id=\"global_1\" value=\"Store\" onClick=\"exportg_1([],['global_result'])\">";
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+    $html .= $cgi->end_td;
+    $html .= $cgi->end_Tr;
+
+    $html .= $cgi->end_table . "\n";
+
+    return $html;
+}
+
+=head2 globalResult()
+
+...
+
+=cut
+
+sub globalResult {
+    my $html = q{};
+
+    if ( $cgi->param('global_1') ) {
+        $html .= "<i><font color=\"green\">Configuration Updated.</font></i><br><br>";
+
+        my $list = configureGlobal( \%config );
+        foreach my $item ( @{$list} ) {
+            $config{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
+        }
+
+        if ( -f $file ) {
+            system("cp $file $file~");
+        }
+        SaveConfig_mine( $file, \%config ); 
+    }
+    else {
+        $html .= "<i><font color=\"red\">Nothing Changed.</font></i><br><br>";
+    }
+    return $html;
 }
 
 # ------------------------------------------------------------------------------
@@ -530,7 +606,7 @@ sub addServiceResult {
 
             my $list = configureSNMP( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -545,7 +621,7 @@ sub addServiceResult {
 
             my $list = configureLS( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -567,7 +643,7 @@ sub addServiceResult {
 
             my $list = configurepSB( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -588,7 +664,7 @@ sub addServiceResult {
 
             my $list = configurePingERMA( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -598,7 +674,7 @@ sub addServiceResult {
         }
         elsif ( $cgi->param('addServiceType') eq "pingermp" ) {
 
-            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MA::PingER";
+            $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"module"}   = "perfSONAR_PS::Services::MP::PingER";
             $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{"disabled"} = "0";
             if ( $cgi->param('ls_registration_interval') ) {
                 $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{"enable_registration"} = "1";
@@ -609,7 +685,7 @@ sub addServiceResult {
 
             my $list = configurePingERMP( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('addService') }->{"endpoint"}->{ $cgi->param('addService1') }->{ $cgi->param('addServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -915,7 +991,7 @@ sub editServiceResult {
 
             my $list = configureSNMP( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -930,7 +1006,7 @@ sub editServiceResult {
 
             my $list = configureLS( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -952,7 +1028,7 @@ sub editServiceResult {
 
             my $list = configurepSB( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -973,7 +1049,7 @@ sub editServiceResult {
 
             my $list = configurePingERMA( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -994,7 +1070,7 @@ sub editServiceResult {
 
             my $list = configurePingERMP( \%config );
             foreach my $item ( @{$list} ) {
-                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if $cgi->param( $item->{"name"} );
+                $config{"port"}->{ $cgi->param('editService') }->{"endpoint"}->{ $cgi->param('editService1') }->{ $cgi->param('editServiceType') }->{ $item->{"name"} } = $cgi->param( $item->{"name"} ) if (defined $cgi->param( $item->{"name"} ));
             }
 
             if ( -f $file ) {
@@ -1198,6 +1274,9 @@ sub show_HTML {
     elsif ( $cgi->param('delete_service') ) {
         $html .= $cgi->div( { -id => "delete_s_result" }, ( $cgi->param('delete_service') ? deleteService() : "" ) );
     }
+    elsif ( $cgi->param('global_1') ) {
+        $html .= $cgi->div( { -id => "global_result" }, ( $cgi->param('global_1') ? global() : "" ) );
+    }
     elsif ( $cgi->param('add_port1') ) {
         $html .= $cgi->div( { -id => "add_result" }, ( $cgi->param('add_port1') ? addPort() : "" ) );
     }
@@ -1222,30 +1301,15 @@ sub show_HTML {
     return ($html);
 }
 
-=head2 clear()
+=head2 configureGlobal( $config )
 
-Clear the screen.
-
-=cut
-
-sub clear {
-    return;
-}
-
-=head2 global()
-
-Configure all global information for the daemon.
+configureGlobal...
 
 =cut
 
-sub global {
-    if ( -f $file ) {
-        %config = ParseConfig($file);
-    }
-
-    my $html = $cgi->br;
-    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "100%" } ) . "\n";
-
+sub configureGlobal {
+    my ($config) = @_;
+    
     my @list = ();
     push @list,
         {
@@ -1299,32 +1363,7 @@ sub global {
         default => "ps.pid"
         };
 
-    foreach my $item (@list) {
-        $html .= $cgi->start_Tr;
-        $html .= $cgi->start_td( { align => "left", width => "40%" } );
-        $html .= $item->{"prompt"};
-        $html .= $cgi->end_td;
-        $html .= $cgi->start_td( { align => "left", width => "60%" } );
-        $html .= "<input type=\"text\" size=\"50\" name=\"" . $item->{"name"} . "\" id=\"" . $item->{"name"} . "\" value=\"" . ( exists $config{ $item->{"name"} } ? $config{ $item->{"name"} } : $item->{"default"} );
-        if ( $item->{"suffix"} ) {
-            $html .= "\">&nbsp;" . $item->{"suffix"};
-        }
-        else {
-            $html .= "\">";
-        }
-        $html .= $cgi->end_td;
-        $html .= $cgi->end_Tr;
-    }
-
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_td( { align => "center", width => "100%", colspan => "2" } );
-    $html .= $cgi->br;
-    $html .= $cgi->submit( -name => 'Store' );
-    $html .= $cgi->end_td;
-    $html .= $cgi->end_Tr;
-    $html .= $cgi->end_table . "\n";
-
-    return ($html);
+    return \@list;
 }
 
 =head2 configureSNMP( $config )
