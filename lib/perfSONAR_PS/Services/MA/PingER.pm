@@ -66,7 +66,7 @@ use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
 use perfSONAR_PS::Datatypes::Message;
 use perfSONAR_PS::Datatypes::PingER;
-use perfSONAR_PS::DB::PingER;
+use perfSONAR_PS::DB::SQL::PingER;
 use perfSONAR_PS::ParameterValidation;
 
 use perfSONAR_PS::Services::Base;
@@ -79,10 +79,9 @@ use Exporter;
 use Params::Validate qw(:all);
 
 use POSIX qw(strftime);
+  
 
-# temp change the rose::db::object basename path to suit code
-${perfSONAR_PS::DB::PingER::basename} = 'perfSONAR_PS::DB::PingER_DB';
-
+ 
 use constant CLASSPATH => 'perfSONAR_PS::Services::MA::PingER';
 
 use Log::Log4perl qw(get_logger);
@@ -165,27 +164,29 @@ sub init {
   
 	if( $self->getConf("db_type") eq "SQLite" || "mysql") {
 		
-		# setup rose object
+		# setup DB  object
 		eval {
-			perfSONAR_PS::DB::PingER->register_db(
-				domain	=> 'default',
-				type	=> 'default',
+		       my $dbo =  perfSONAR_PS::DB::SQL::PingER->new( {
+				 
 				driver	=> $self->getConf( "db_type" ),
 				database => $self->getConf( "db_name" ),
 				host	=> $self->getConf( "db_host"),
 				port	=> $self->getConf( "db_port"),
 				username	=> $self->getConf( "db_username" ),
 				password	=> $self->getConf( "db_password" ),
-			);
-			# try to opent eh db
-			my $db = perfSONAR_PS::DB::PingER->new_or_cached();
-			$self->database( $db );
-			$db->openDB();
+			});
+		 
+		 
+			if($dbo->openDB() == 0 )  {
+			  $self->database( $dbo );
+			 } else {
+			   die " Failed to open DB" . $dbo->ERRORMSG;
+			 } 
 		};
 		if ( $@ ) {
 			$logger->logdie( "Could not open database '" . $self->getConf( 'db_type') . "' for '"
 				. $self->getConf( 'db_name') 
-				. "' using '" . $self->getConf( 'db_username') ."'" );
+				. "' using '" . $self->getConf( 'db_username') ."'" . $@);
 		}
 			
 	} else {
@@ -411,7 +412,8 @@ sub handleEvent()
 	# shoudl do some validation on the eventType
 	 ${ $parameters->{"doOutputMetadata"} } = 0;
 	 
-	my $response = $self->__handleEvent( $parameters->{"messageType"},  $parameters->{"rawRequest"}, \@{ $parameters->{"subject"}},  $parameters->{"data"},  $parameters->{"filterChain"}->[0]  ,  $parameters->{"messageParameters"} );
+	my $response = $self->__handleEvent( $parameters->{"messageType"},  $parameters->{"rawRequest"}, \@{ $parameters->{"subject"}}, 
+	                                     $parameters->{"data"},  $parameters->{"filterChain"}->[0]  ,  $parameters->{"messageParameters"} );
 	
 	##### $response is  
 	foreach my $element (@{$response->metadata}, @{$response->data}) {
@@ -475,10 +477,12 @@ sub __handleEvent {
 	$logger->debug(" Mapping namespaces on response");
 	$pingerResponse->nsmap($pingerRequest->nsmap);
 	## merge chains and work with them in request
-    $logger->debug("Done...");
+        $logger->debug("Done...");
 	### 
    	 
 	my $evt = $pingerRequest->eventTypes;
+	## setting up db object
+	$pingerRequest->DBO($self->database);
   	my $errorMessage = $pingerRequest->handle($type, $pingerResponse, $self->{'CONF'}->{'pingerma'});
 
 	$logger->debug( "PINGER RESPONSE: $errorMessage\n" . $pingerResponse->asString() );

@@ -123,7 +123,7 @@ sub getDOM {
                              attributes => [
 
                                                ['value' =>  $self->value],
-                                               ['type' =>  $self->type],
+                                     ['type' =>  (($self->type    =~ m/(hostname)$/)?$self->type:undef)],
                                                ['port' =>  $self->port],
                                            ],
                                       'text' => (!($self->value)?$self->text:undef),
@@ -306,7 +306,7 @@ sub fromDOM {
      
     $self->value($dom->getAttribute('value')) if($dom->getAttribute('value'));
     $logger->debug(" Attribute value= ". $self->value) if $self->value; 
-    $self->type($dom->getAttribute('type')) if($dom->getAttribute('type'));
+    $self->type($dom->getAttribute('type')) if($dom->getAttribute('type') && ($dom->getAttribute('type')   =~ m/(hostname)$/));
     $logger->debug(" Attribute type= ". $self->type) if $self->type; 
     $self->port($dom->getAttribute('port')) if($dom->getAttribute('port'));
     $logger->debug(" Attribute port= ". $self->port) if $self->port; 

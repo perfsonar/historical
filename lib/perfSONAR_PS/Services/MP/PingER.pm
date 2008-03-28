@@ -45,7 +45,7 @@ file.
 =cut
 
 # db storage
-use perfSONAR_PS::DB::PingER;
+use perfSONAR_PS::DB::SQL::PingER;
 
 # agent class for pinger
 use perfSONAR_PS::Services::MP::Agent::PingER;
@@ -137,7 +137,7 @@ sub init
 	use Data::Dumper;
 	$logger->debug( Dumper $self->{CONF} );	
 	
-    my $config = perfSONAR_PS::Services::MP::Config::PingER->new();
+        my $config = perfSONAR_PS::Services::MP::Config::PingER->new();
 	$config->load( $self->getConf( 'configuration_file' ) );
 	
        # set up the schedule with the list of tests
@@ -328,6 +328,7 @@ will call $self->storeData() in order to store the output of the $agent into
 a MA or similar.
 
 =cut
+
 sub run
 {
 	my $self = shift;
@@ -343,38 +344,46 @@ sub run
 =head2 setupDatabase
 
 =cut
+
 sub setupDatabase
 {
 	my $self = shift;
 	
 	my $err = 0;
-	# setup rose object
-	eval {
-		perfSONAR_PS::DB::PingER->register_db(
-			domain	=> 'default',
-			type	=> 'default',
-			driver	=> $self->getConf( "db_type" ),
-			database => $self->getConf( "db_name" ),
-			host	=> $self->getConf( "db_host"),
-			port	=> $self->getConf( "db_port"),
-			username	=> $self->getConf( "db_username" ),
-			password	=> $self->getConf( "db_password" ),
-		);
-		# try to opent eh db
-		my $db = perfSONAR_PS::DB::PingER->new_or_cached();
-		$self->database( $db );
-		if( $db->openDB() == -1 ){
-			$err = 1;
+        # setup database  
+  	$logger->debug( "initializing database " . $self->getConf("db_type") );
+  
+	if( $self->getConf("db_type") eq "SQLite" || "mysql") {
+		
+		# setup DB  object
+		eval {
+		       my $dbo =  perfSONAR_PS::DB::SQL::PingER->new( {
+				 
+				driver	=> $self->getConf( "db_type" ),
+				database => $self->getConf( "db_name" ),
+				host	=> $self->getConf( "db_host"),
+				port	=> $self->getConf( "db_port"),
+				username	=> $self->getConf( "db_username" ),
+				password	=> $self->getConf( "db_password" ),
+			});
+		 
+		 
+			if($dbo->openDB() == 0 )  {
+			  $self->database( $dbo );
+			 } else {
+			   die " Failed to open DB" . $dbo->ERRORMSG;
+			 } 
+		};
+		if ( $@ ) {
+			$logger->logdie( "Could not open database '" . $self->getConf( 'db_type') . "' for '"
+				. $self->getConf( 'db_name') 
+				. "' using '" . $self->getConf( 'db_username') ."'" . $@);
 		}
-	};
-	if ( $@ || $err == 1 ) {
-		my $type = $self->getConf( 'db_type') || '';
-		my $dbname = $self->getConf( 'db_name') || '';
-		my $user = $self->getConf( 'db_username') || '';
-		$logger->logdie( "Could not open database '$type' for '$dbname' as user '$user'" );
+			
+	} else {
+		$logger->logdie( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
 		return -1;
 	}
-	
 	return 0;
 }
 
@@ -413,26 +422,23 @@ sub storeData
 		$logger->debug( "construcing array from seqs '$seqs'");
 	}
 
-	if ( ! defined $self->database() || ! $self->database()->isa( 'perfSONAR_PS::DB::PingER') ) {
-		$logger->fatal( "Could not open database" );
-		return -1;
-	}
+	 
 
 	# store results
-	my $src = $self->database()->soi_host( $agent->source(), $agent->sourceIp() );
-	unless($src) {
-	    $logger->error(  "Failed to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() );
+	my $src = $self->database()->soi_host({ ip_name => $agent->source(), ip_number => $agent->sourceIp() });
+	if(!$src || $src<0) {
+	    $logger->error(  "Failed to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	 
 		
-	my $dst = $self->database()->soi_host( $agent->destination(), $agent->destinationIp() );
+	my $dst = $self->database()->soi_host({ ip_name => $agent->destination(),ip_number => $agent->destinationIp() });
 	 
-	 unless($dst) {
-	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() );
+	if(!$dst || $dst<0) {
+	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	  
 
-	my $md = $self->database()->soi_metadata( $src, $dst, {
+	my $md = $self->database()->soi_metadata( { ip_name_src => $src, ip_name_dst => $dst,  
 					'transport'	  => 'ICMP',
 					'packetSize'  => $agent->packetSize(),
 					'count'		  => $agent->count(),
@@ -440,12 +446,12 @@ sub storeData
 					'ttl'		  => $agent->ttl(),
 				});
 	 
-	  unless($md) {
-	    $logger->error(  "Failed to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl());
+	if(!$md || $md < 0) {
+	    $logger->error(  "Failed to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	   
 	
-	my $data = $self->database()->insert_data( $md, {
+	my $data = $self->database()->insertData( { metaID =>$md, 
 	
 					#time
 					'timestamp' => $agent->results()->{'startTime'},
@@ -474,12 +480,12 @@ sub storeData
 
 					# raw
 					'rtts'	=> $rtts,
-					'seqs'	=> $seqs,
+					'seqNums'	=> $seqs,
 					
 				});
 	if($data == -1 ){
 	   
-	   $logger->error(  "Failed to find or insert soi_data: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'}  );
+	   $logger->error(  "Failed to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
 	    return -1;
 	 
 	}
@@ -575,14 +581,7 @@ sub handleEvent($$$$$$$$$)
 	} else {
 		#return $self->maSetupDataRequest($output, $md, $raw_request, $message_parameters);
 	}
-
-	# get db
-	my $db = $self->getDB();	
-	my $status = $db->openDB();
-	if ( $status == -1  ) {
-		$logger->logdie( "Could not open database. Please check configuration.");
-	}
-	
+ 
 	$logger->debug( 'handle event ' .   $parameters->{"rawRequest"});
 	my $response = $self->handleRequest( $parameters->{"rawRequest"} );
 	$parameters->{"output"}->addExistingXMLElement( $response->getDOM() );

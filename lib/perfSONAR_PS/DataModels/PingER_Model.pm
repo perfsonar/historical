@@ -85,7 +85,9 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($endPointPair $interfaceL3  $
 					                    'ip_name'   =>   {'value' => [ 'address' ,'interface']},
 							   },
 			}; 
-							     
+    
+    $endPoint->{attrs}->{type} = 'enum:hostname'; 							     
+    
     $endPoint->{sql} = {metaData => {'ip_name_src' =>   { value => ['value' , 'text'], if => 'type:hostname'}, 
     							  'ip_name_dst' =>   { value => ['value' , 'text'], if => 'type:hostname'}, 
 						         },

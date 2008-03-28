@@ -34,13 +34,24 @@ use version; our $VERSION = 0.08;
 use English '-no_match_vars';
 use Scalar::Util qw(blessed);
 use Log::Log4perl qw( get_logger ); 
-  
+ 
 use perfSONAR_PS::DB::SQL::QueryBuilder qw(build_select);
 
 use constant  CLASSPATH  => 'perfSONAR_PS::DB::SQL::Base';
 use constant  PARAMS =>  qw(driver database handle ERRORMSG LOGGER host port username password attributes);
  
 use fields  (PARAMS);
+
+
+no strict 'refs';
+foreach my $key  (PARAMS)  { 
+       *{__PACKAGE__ . "::$key"} = sub {  my $obj = shift; my $a = shift;
+                          if($a) {
+			     ($key  eq 'ERRORMSG')?$obj->{"$key"} .= " \n $a":$obj->{"$key"} = $a;
+			  }  
+			  return $obj->{"$key"}}; 
+} 
+use strict;
 
 =head2  new
 
@@ -52,23 +63,17 @@ use fields  (PARAMS);
 sub new { 
     my $that = shift;
     my $param = shift;
-    my $logger  = get_logger( CLASSPATH ); 
+    my $logger  = get_logger( __PACKAGE__ ); 
     my $class = ref($that) || $that;
     my $self =  fields::new($class );
     ## injecting accessor/mutator for each field
-    foreach my $key  (PARAMS)  { 
-       *{"$key"} = sub {  my $obj = shift; my $a = shift;
-                          if($a) {
-			     $obj->{"$key"} = $a;
-			  }  
-			  return $obj->{"$key"}}; 
-    }  
-        
     $self->LOGGER($logger);
     $self->attributes(  {RaiseError => 1} ); 
-    if( $self->init($param) == -1 ) {
-       $self->LOGGER()->error($self->ERRORMSG); 
-       return;
+    if($param) {
+        if( $self->init($param) == -1 ) {
+           $self->LOGGER()->error($self->ERRORMSG); 
+           return;
+        }
     }
     return   $self;
 }
@@ -205,7 +210,11 @@ sub alive {
 sub  getFromTable {
      my ($self, $param) = @_;    
    
-     unless( $param && ref($param) eq 'HASH' && $param->{table} && $param->{query}  && ref($param->{query}) eq 'ARRAY')  {
+     unless( $param && ref($param) eq 'HASH' && $param->{table} && 
+               ( ($param->{query}  && ref($param->{query}) eq 'ARRAY') ||
+	         ($param->{validate}  && ref($param->{validate}) eq 'HASH') 
+	       ) 
+	   )  {
     	 $self->ERRORMSG("getFromTable  requires single HASH ref parameter with required query  key as ARRAY ref ");
     	 return -1;
      }   
@@ -228,7 +237,9 @@ sub  getFromTable {
 				         query =>  $param->{query}, 
 					 query_is_sql => 1, 
 				         columns => {   $param->{table}  => \@array_of_names},
+					 limit => ($param->{limit}?$param->{limit}:'1000000'), ## i am pretty sure that 1 mil of records is more than enough
 				      });
+	 $self->LOGGER->debug("  SQL:: $sql_query ");			      
 	 $self->openDB  if !($self->alive == 0);	      
 	 $results = $self->handle->selectall_hashref($sql_query,  $param->{index} );
      };
@@ -276,7 +287,7 @@ sub updateTable{
 				      });
  
      chop $stringified_names if $stringified_names;
-    
+     $self->LOGGER->debug("  SQL::  $query_sql ");	
      eval {
            $self->openDB  if !($self->alive == 0);
            $self->handle->do("update  " .$param->{table} . "  set  $stringified_names  $query_sql "); 
@@ -315,7 +326,7 @@ sub insertTable{
     
     foreach my $key (keys %{$param->{insert}}) {
         if(defined  $param->{insert}->{$key}) {
-	      $stringified_names   .=  "'$key',";
+	      $stringified_names   .=  "$key,";
 	      $stringified_values  .=  "'". $param->{insert}->{$key}."',";
 	}
     } 
@@ -324,7 +335,9 @@ sub insertTable{
          chop $stringified_values; 
          eval {
             $self->openDB  if !($self->alive == 0);
-            $self->handle->do("insert into ". $param->{table} ."  ($stringified_names) values ($stringified_values)"); 
+	    my $query_sql  = "insert into ". $param->{table} ."  ($stringified_names) values ($stringified_values)";
+	    $self->LOGGER->debug("  SQL::  $query_sql ");	
+            $self->handle->do($query_sql); 
 	    $rv =  ($self->driver =~ /mysql/i)? $self->handle->{q{mysql_insertid}}:$self->handle->last_insert_id(undef, undef,  $param->{table}, undef);
         };
         if ($EVAL_ERROR) {
@@ -381,11 +394,13 @@ sub createTable {
 sub validateQuery {
    my ($self, $params, $valid_const, $required) = @_;
    foreach my $key (keys %{$params}) {
-       return -1 unless defined  $valid_const->{$key};
-       delete $required->{$key}  if $required->{$key} &&  defined $params->{$key};
-       
+       unless(defined  $valid_const->{$key}) {
+         $self->ERRORMSG(" Field $key is unknown for DB schema");
+         return -1;
+       }
+       delete $required->{$key}  if $required  && $required->{$key} &&  defined $params->{$key}; 
    }
-   return -1 if $required && scalar $required;
+   return -1 if $required && scalar %{$required};
    return 0;
 }
 

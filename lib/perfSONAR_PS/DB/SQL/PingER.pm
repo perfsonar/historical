@@ -216,7 +216,7 @@ use constant  DATA => {
                  'duplicates'     =>  10,  
                  'outOfOrder'     =>   11, 
                  'clp'     =>   	12,     
-                 'iqrIpd '     =>    13,   
+                 'iqrIpd'     =>    13,   
                  'lossPercent'     =>  14, 
                  'rtts'     =>   	15,    
                  'seqNums'     =>    16,
@@ -243,7 +243,7 @@ returns
 
 sub soi_host {
 	my ($self, $param) = @_;
-	if ( ! $param || ref($param) ne 'HASH' || $self->validateQuery($param, HOST, { ip_name => 1, ip_number => 2}) < 0)  {
+	unless( $param &&  ref($param) eq  'HASH'  &&  $self->validateQuery($param, HOST, { ip_name => 1, ip_number => 2}) ==0)  {
 	    $self->ERRORMSG("soi_host  requires single HASH ref parameter with ip_name and ip_number set");
 	    return -1;
 	} 
@@ -251,7 +251,8 @@ sub soi_host {
 					             'ip_number' => { 'eq' =>  $param->{ip_number} }], 
 					 table => 'host', 
 					 validate => HOST, 
-					 index => 'ip_name'
+					 index => 'ip_name',
+					 limit => 1
 					});
 	return $query if(!ref($query) && $query < 0);
 	# insert if not there
@@ -297,9 +298,8 @@ returns
 =cut
 
 sub soi_metadata {
-	my $self = shift;
-	my $param = shift;
-	if ( ! $param || ref($param) ne 'HASH' || $self->validateQuery($param, METADATA) < 0)  {
+	my ($self,  $param) = @_;
+	unless (   $param  && ref($param) eq 'HASH' && $self->validateQuery($param, METADATA) == 0)  {
 	    $self->ERRORMSG("soi_metadata requires single HASH ref parameter");
 	    return -1;
 	} 
@@ -310,7 +310,8 @@ sub soi_metadata {
 	          my $host =   $self->getFromTable({ query=>  [ $what_num  => { 'eq' =>  $param->{$what_num} }], 
 		                                     table => 'host',
 						     validate =>  HOST, 
-						     index => 'ip_name'
+						     index => 'ip_name',
+					             limit => 1
 						  });
 		  if($host && ref($host) eq 'HASH') {
 		      my ($ip_name, $ip_num) =   each (%$host);
@@ -333,20 +334,18 @@ sub soi_metadata {
 				                    ],
 				          table  => 'metaData',
 					  validate => METADATA, 
-					  index => 'metaID'
+					  index => 'metaID',
+					  limit => 1
 					});
 	 
-	my $n = scalar @$query;
+	my $n =  scalar (keys %{$query});
 	if ( $n == 0 ) {
 	       return $self->insertTable({ insert => $param, table => 'metaData'});   
 					  
-	} elsif ( $n == 1 ) {
+	} else {
 	     $self->LOGGER->debug( "found host ". $param->{ip_name_src} . "/ " .  $param->{ip_name_dst} . " metaID=". (keys  %{$query})[0] ); 
 	     return  (keys  %{$query})[0] ;
-	} else {
-	    $self->ERRORMSG( "Found more than one element!");
-	    return -1; 
-	}
+	}  
 }
 
  
@@ -354,20 +353,17 @@ sub soi_metadata {
 =head2 getMetaID
  
   helper method to get sorted list of metaID for some query
-
+  arguments: query , limit on results
+  
 =cut
 
 
 sub  getMetaID {
-     my ($self, $param) = @_;
-    
-     if ( ! $param || ref($param) ne 'ARRAY'  )  {
-    	 $self->ERRORMSG("soi_host  requires single ARRAY ref parameter  ");
-    	 return -1;
-    } 
-    my $results = $self->getFromTable({ query =>  $param, 
+     my ($self, $param, $limit) = @_;  
+     my $results = $self->getFromTable({ query =>  $param, 
                                         table => 'metaData', 
-				  	index => 'metaID'
+				  	index => 'metaID',
+					limit => $limit,
 				      });
     return  sort {$a <=> $b} keys %$results if ($results && ref($results) eq 'HASH') ;
     return $results; 
@@ -376,21 +372,19 @@ sub  getMetaID {
 =head2 getMeta
  
   helper method to get hashref keyd by metaID with metadata
+  accepts query  and limit arg
+ 
 
 =cut
 
 
 sub  getMeta  {
-     my ($self, $param) = @_;
-    
-     if ( ! $param || ref($param) ne 'ARRAY'  )  {
-    	 $self->ERRORMSG("soi_host  requires single ARRAY ref parameter  ");
-    	 return -1;
-    } 
-    my $results = $self->getFromTable({ query =>  $param, 
+     my ($self, $param, $limit) = @_;    
+     my $results = $self->getFromTable({ query =>  $param, 
                                         table => 'metaData', 
 					validate => METADATA,
-				  	index => 'metaID'
+				  	index => 'metaID',
+					limit => $limit,
 				      });  
     return $results; 
 }
@@ -398,44 +392,49 @@ sub  getMeta  {
 =head2 getData
  
   helper method to get data for some query
+  arguments: query , tablename ( if missed then it wil lbe defined from timestamp), limit on results
 
 =cut
 
 
 sub  getData {
-     my ($self, $param ) = @_;
+     my ($self, $param, $table, $limit) = @_;
     
-     if ( ! $param || ref($param) ne 'ARRAY'  )  {
-    	 $self->ERRORMSG("soi_host  requires single ARRAY ref parameter  ");
+    unless( $param || $table)  {
+    	 $self->ERRORMSG(" getData   requires  query parameter or tablename ");
     	 return -1;
     } 
-    
-    my $stime = undef;
-    my $etime = undef;
-    my $param_sz = scalar @{$param};
-    for(my $i=0;$i<$param_sz;$i+=2) {
-       if ($param->[$i] eq 'timestamp') {
-          if(! ref($param->[$i+1]) || $param->[$i+1]->{eq}) {
-	    $stime = $param->[$i+1];
-	    $etime = undef;
-	    last;
-	  }  elsif($param->[$i+1]->{gt}) {
-	     $stime = $param->[$i+1]->{gt}+1;
-	  }  elsif( $param->[$i+1]->{ge}) {
-	     $stime = $param->[$i+1]->{ge};
-	  } elsif($param->[$i+1]->{lt}) {
-	     $etime = $param->[$i+1]->{lt}-1;
-	  } elsif($param->[$i+1]->{le}) {
-	    $etime = $param->[$i+1]->{le};
-	  }
-       }   
-    } 
-    my ( $table) =  $self->get_table_for_timestamp( $stime , $etime, undef); 
-    return -1 if  $table<0;
+    unless($table) {
+	my $stime = undef;
+	my $etime = undef;
+	my $param_sz = scalar @{$param};
+	for(my $i=0;$i<$param_sz;$i+=2) {
+	   if ($param->[$i] eq 'timestamp') {
+              if(! ref($param->[$i+1]) || $param->[$i+1]->{eq}) {
+		$stime = $param->[$i+1];
+		$etime = undef;
+		last;
+	      }  elsif($param->[$i+1]->{gt}) {
+		 $stime = $param->[$i+1]->{gt}+1;
+	      }  elsif( $param->[$i+1]->{ge}) {
+		 $stime = $param->[$i+1]->{ge};
+	      } elsif($param->[$i+1]->{lt}) {
+		 $etime = $param->[$i+1]->{lt}-1;
+	      } elsif($param->[$i+1]->{le}) {
+		$etime = $param->[$i+1]->{le};
+	      }
+	   }   
+	} 
+	my $table_arref  =  $self->get_table_for_timestamp( { startTime =>  $stime , endTime => $etime}); 
+	return -1 unless $table_arref && ref($table_arref) eq 'ARRAY' && scalar @{$table_arref};
+	$table  = $table_arref->[0]->[0];
+    }
+  
     my $results = $self->getFromTable({ query =>  $param, 
                                         table =>  $table, 
 					validate =>  DATA, 
-					index =>  [qw(metaID timestamp)] 
+					index =>  [qw(metaID timestamp)],
+					limit =>  $limit,
 				     });
     return $results; 
 } 
@@ -484,22 +483,21 @@ Returns
 =cut
 
 sub insertData {
-	my $self = shift;
-        my $hash = shift;
-	if ( ! $hash  || ref($hash ) ne 'HASH' || $self->validateQuery($hash,  DATA, {timestamp => '1', metaID => '2'}) < 0)  {
-	    $self->ERRORMSG("insert_data   requires single HASH ref parameter");
+	my ($self , $hash) = @_;
+	unless (  $hash && ref($hash ) eq 'HASH' && $self->validateQuery($hash,  DATA, {metaID => 1, timestamp => 2}) ==0)  {
+	    $self->ERRORMSG("insertData   requires single HASH ref parameter  with proper keys " . $self->ERRORMSG);
 	    return -1;
 	} 	
 	 $hash->{'timestamp'} = $self->fixTimestamp( $hash->{'timestamp'} );  
 	return -1 unless    $hash->{'timestamp'}  ;  
 	 
 	# get the data table  and create them if necessary (1)
-	my ( $table) =  $self->get_table_for_timestamp(   $hash->{'timestamp'} , undef, 1 );
-        return -1 if  $table<0;
+	my    $table  =  $self->get_table_for_timestamp( { startTime => $hash->{'timestamp'} , createNewTables =>   1 });
+        return -1 unless $table && ref($table) eq 'ARRAY' && scalar @{$table};
 	# handle mysql problems with booleans
 	$hash->{'duplicates'} = $self->booleanToInt($hash->{'duplicates'}); 
 	$hash->{'outOfOrder'} = $self->booleanToInt($hash->{'outOfOrder'}); 
-	return $self->insertTable({ insert => $hash, table => $table });
+	return $self->insertTable({ insert => $hash, table => $table->[0]->[0] });
 							 
 }
 
@@ -560,13 +558,13 @@ sub updateData {
 	return -1 unless   $timestamp;
 	
 	# get the data table  and create them if necessary (1)
-	my ( $table) =  $self->get_table_for_timestamp(  $timestamp , undef, 0 );
-        return -1 if  $table<0;
+	my  $table  =  $self->get_table_for_timestamp( { startTime => $timestamp });
+        return -1 unless $table && ref($table) eq 'ARRAY' && scalar @{$table};
 	# handle mysql problems with booleans
 	$hash->{'duplicates'} = $self->booleanToInt($hash->{'duplicates'}); 
 	$hash->{'outOfOrder'} = $self->booleanToInt($hash->{'outOfOrder'}); 
 	return $self->updateTable({ set => $hash, 
-	                            table => $table, 
+	                            table => $table->[0]->[0], 
 				    where => $where
 				 });							 
 }

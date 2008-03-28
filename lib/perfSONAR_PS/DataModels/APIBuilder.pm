@@ -1097,12 +1097,12 @@ sub _printConditional {
     } elsif($condition->{condition}  =~ /^if|unless$/ &&  $condition->{logic}) {
         $string =  $what eq 'get'?"                                     $arrayref_signleft '$key' => (".$condition->{logic}."?\$self->$key:undef)$arrayref_signright,\n":
                                  "    \$self->$key($fromDomArg) if(" . $condition->{logic}. " && $fromDomArg);\n";   
-    }elsif($condition->{condition} =~ /enum|set|exclude/ &&  $condition->{regexp}) {
+    } elsif($condition->{condition} =~ /enum|set|exclude/ &&  $condition->{regexp}) {
           
-    my $regexp  =  $what eq 'get'?"(\$self->$key   " . $condition->{regexp} . ")":"($fromDomArg  " . $condition->{regexp}  .")";
+        my $regexp  =  $what eq 'get'?"(\$self->$key   " . $condition->{regexp} . ")":"($fromDomArg  " . $condition->{regexp}  .")";
           
-    $string =   $what eq 'get'?"                                     $arrayref_signleft'$key' =>  ($regexp?\$self->$key:undef)$arrayref_signright,\n":
-                                 "    \$self->$key($fromDomArg) if($fromDomArg && $regexp);\n";   
+        $string     =   $what eq 'get'?"                                     $arrayref_signleft'$key' =>  ($regexp?\$self->$key:undef)$arrayref_signright,\n":
+                                  "    \$self->$key($fromDomArg) if($fromDomArg && $regexp);\n";   
   
     } else {
         $logger->fatal("Malfromed , uknown condition=" . $condition->{condition} );

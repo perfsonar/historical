@@ -516,7 +516,7 @@ sub get_rose_objects_for_timestamp
 		my $object = $basename . '::' . $class;
 		my $manager = $object . '::Manager';
 		
-		# inherit the base data table and create it if necessary
+		# if modules are  not loaded and not there at all
 		unless ( $object->isa( $basename . '::Data' )
 				&& $manager->isa( 'Rose::DB::Object::Manager')	)
 		{

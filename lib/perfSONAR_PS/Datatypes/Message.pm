@@ -72,7 +72,7 @@ use perfSONAR_PS::Datatypes::Element qw(getElement);
 use perfSONAR_PS::Datatypes::NSMap;
 use perfSONAR_PS::Datatypes::EventTypes;
 use base qw(perfSONAR_PS::Datatypes::v2_0::nmwg::Message);   
-use fields qw( eventTypes mdID dataID filters);
+use fields qw( eventTypes mdID dataID filters DBO);
 use constant  CLASSPATH =>  'perfSONAR_PS::Datatypes::Message';
 use constant  LOCALNAME => 'message';
   
@@ -100,7 +100,7 @@ sub new {
  
     $self->mdID(1);
     $self->dataID(1);
-  
+   
     
     $self->nsmap(perfSONAR_PS::Datatypes::NSMap->new()); 
     $self->nsmap->mapname( LOCALNAME, 'nmwg');
@@ -188,6 +188,24 @@ sub eventTypes {
     }
 } 
 
+=head2 DBO
+
+    set or return DB object
+
+=cut
+
+
+
+sub DBO {
+    my $self = shift;
+    my $arg = shift;
+    if($arg) {
+        return $self->{DBO} = $arg;
+    } else {
+        return $self->{DBO}; 
+    }
+} 
+
 =head2  mdID
 
    set id number for metadata element
@@ -245,12 +263,7 @@ sub  dataID {
    }
 
 } 
-#  allow explicit invocation
-#
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-}
+ 
 
 =head2 getDom()
 
