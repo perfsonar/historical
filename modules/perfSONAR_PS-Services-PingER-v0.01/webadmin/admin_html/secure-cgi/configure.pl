@@ -37,19 +37,9 @@ use HTML::Template;
 use IO::File;
 use File::Copy;
 use Storable qw(lock_retrieve lock_store);
-
-#
-#    configuration parameters are in the next packages
-#
-BEGIN {
-    use constant BASEDIR =>
-'/home/netadmin/LHCOPN/perfSONAR-PS/branches/pinger/perfSONAR-PS-PingER-1.0/webadmin';
-    use Log::Log4perl qw(get_logger :levels);
-    Log::Log4perl->init( BASEDIR . "/etc/logger.conf" );
-    our $CONFIG_FILE = BASEDIR . '/etc/GeneralSystem.conf';
-    use perfSONAR_PS::WebAdmin::Config qw(&loadConfig $CONFIG_FILE $debug);
-}
-
+use Log::Log4perl qw(get_logger :levels);
+use Config::General;
+ 
 use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology;
 use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
 use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node;
@@ -59,14 +49,18 @@ use perfSONAR_PS::Datatypes::v2_0::nmwg::Topology::Domain::Node::Parameters::Par
 use perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port;
 use constant URNBASE => 'urn:ogf:network';
 
+
+use constant BASEDIR => '/home/netadmin/LHCOPN/psps/branches/merge/modules/perfSONAR_PS-Services-PingER-v0.01/webadmin';
 #
-$debug = 1;
+ 
+Log::Log4perl->init( BASEDIR . "/etc/logger.conf" );
+our $CONFIG_FILE = BASEDIR . '/etc/GeneralSystem.conf'; 
 
 $ENV{PATH} = '/usr/bin:/usr/local/bin:/bin';
 our %GENERAL_CONFIG = %{ loadConfig() };
 my $this_script = "$GENERAL_CONFIG{admin_server}/secure-cgi/configure.pl";
 my $logger      = get_logger("configure");
-$logger->level($DEBUG) if $debug;
+$logger->level($DEBUG);
 
 #
 #   although this is  the CGI script, but there is no HTML here
@@ -119,8 +113,8 @@ my $myhtml =
     $TEMPLATE_HEADER->output()
   . displayGlobal()
   . $TEMPLATE_FOOTER->output();    ##### get html
-                                   # $ajax->DEBUG($debug);
-                                   # $ajax->JSDEBUG($debug);
+                                   # $ajax->DEBUG($DEBUG);
+                                   # $ajax->JSDEBUG($DEBUG);
 print $ajax->build_html( $cgi, $myhtml,
     { '-Expires' => '1d', '-cookie' => $COOKIE } );
 
@@ -151,11 +145,11 @@ sub fromFile {
         local ( $/, *FH );
         open( FH, $file ) or $logger->logdie(" Failed to load landmarks $file");
         my $text = <FH>;
-        $TOPOLOGY_OBJ =
-          perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology->new(
+        $TOPOLOGY_OBJ =  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology->new(
             { xml => $text } );
         $LANDMARKS_CONFIG = $text;
         close FH;
+	$logger->debug( " Loaded topology " . Dumper  $TOPOLOGY_OBJ );
     };
     if ($@) {
         $logger->error( " Failed to load landmarks $file into object" . $@ );
@@ -361,11 +355,10 @@ sub updateNode {
         type              => '^IPv[4|6]$',
         hostName          => '^[\w\.\-]+$'
     );
-    my ( $node_urn, $port_name ) =
-      $urn =~ /^(.+\:node\=[\w\-\.]+)(?:\:port\=([\w\-\.]+))?$/;
+    my ( $node_urn, $port_name ) =  $urn =~ /^(.+\:node\=[\w\-\.]+)(?:\:port\=([\w\-\.]+))?$/;
     my $node = findNode( { urn => $node_urn } );
     my ($param_name) = $action =~ /^update\_(\w+)/;
-    if ( $urn && $node && $param1 && isParam($param_name) ) )
+    if ( $urn && $node && $param1 && isParam($param_name)  )
       {
           my $item = $1;
           if ( $param1 =~ /$validation_regs{$item}/o ) {
@@ -621,6 +614,40 @@ sub findNode {
           }
       }
       return undef;
+}
+
+=head2 loadConfig
+ 
+       load config and return it as hash ref
+ 
+=cut
+
+sub loadConfig {
+   
+    my $conf_obj =  new Config::General(-ConfigFile =>   $CONFIG_FILE, 
+                                      -AutoTrue => '',
+				      -InterPolateVars => '1',
+                                      -StoreDelimiter => '=');
+    my %GENERAL_CONFIG  = $conf_obj->getall;
+    $logger->logdie("Problem with parsing config file: $CONFIG_FILE ") unless %GENERAL_CONFIG && $GENERAL_CONFIG{PINGER_HOME};
+    return \%GENERAL_CONFIG; 
+}
+
+=head2 manage_proc
+
+     check daemon pid and kill it if asked and return one, can be used to restart some process
+
+=cut
+
+sub manage_proc {
+      my ($id, $killit) = @_;
+      my $pid = `/bin/ps auxw | grep -v grep | grep $id`;
+      if($pid) {
+          chomp $pid;
+         $pid =~ s/^\w+\s+(\d+)\s+.+$/$1/;
+	 kill ('TERM', $pid) if $killit;
+      }  
+     return $pid;
 }
 
 1;
