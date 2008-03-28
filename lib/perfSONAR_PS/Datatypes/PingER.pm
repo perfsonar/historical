@@ -306,12 +306,11 @@ sub  SetupDataRequest  {
 		    die " System error, store failed";
 	        }
 	        my $timequery =  $self->processTime({timehash => $query->{time}});
-	        my $data_tables =  $self->_getDataTables( $timequery );
-		###$self->_createTimeSelect({timequery => $timequery, response => $response, timeselects => $time_selects}); 
-	        if($md_objects &&  (ref($md_objects) eq 'HASH') &&   %{$md_objects}) { 
+	      
+		  if($md_objects &&  (ref($md_objects) eq 'HASH') &&   %{$md_objects}) { 
 	            foreach my $metaid  (sort { $a <=> $b} keys %{$md_objects}) {   
 		        my $md =  $self->_ressurectMd( { md_row =>  $md_objects->{$metaid}});
-		        if($self->_retriveDataByKey({key =>  $metaid,   tables =>  $data_tables, timequery => $timequery, timeselects => $time_selects,
+		        if($self->_retriveDataByKey({key =>  $metaid,   timequery => $timequery, timeselects => $time_selects,
 			                             metaids => $metaids, datas => $objects_hashref, response => $response}) ){
 			    $response->addResultResponse({md => $md, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
 	                    return $response;
@@ -368,29 +367,7 @@ sub _mdSetLimit {
     }
     return $_sizeLimit;
 }
-#  auxiliary private function
-#  get the name of the data table ( data_yyyyMM format ) for specific time period
-#  returns array ref ref to CALSSNAMEBASE::DatayyyyMM  
-#
-
-sub _getDataTables  {
-    my  ($self, $timequery) = @_;
-    my %list = ();
-    my $One_DAY_inSec = 86400;
-    my $now =  time();
-    my $logger  = get_logger( CLASSPATH );  
-    my $stime =  $timequery->{gt}?$timequery->{gt}:$timequery->{eq};
-    my $etime =  $timequery->{lt}?$timequery->{lt}:$timequery->{eq};
-    $etime = $now if $etime>$now; ### corrected to current time to avoid creation of bogus empty data tables
-    $logger->debug(" Looking for Data tables starting=$stime ending=$etime ");
-    unless($stime && $etime) {
-        $logger->error(" Failed to get time values stime=$stime etime=$etime");
-        return undef;
-    }
-  	
-   # check  the tables required, will return array ref of arrayrefs where  [0] = tablename [1] = date part
-   return   $self->DBO->get_table_for_timestamp({startTime => $stime, endTime => $etime});
-}
+ 
 #
 #  auxiliary private function
 #  
@@ -506,22 +483,9 @@ sub _retriveDataByKey {
         $params->{response}->addResultResponse({ md =>  $params->{md}, message =>  'No time range in the query found' ,  eventType => $self->eventTypes->status->failure});	
         return -1;
     } 
-    #####   $params->{tables}  holds the arrayref or arryarefs where  [0] = tablename [1] = date part
-    $params->{tables}  =  $self->_getDataTables($params->{timequery}) unless  $params->{tables};
-    
-    $logger->debug(" Will query for found Pinger data tables: " .  (join " : " ,  map { $_->[0] } @{$params->{tables}}) . " TimeQuery: " . Data::Dumper::Dumper   $params->{timequery}  );
-    my $iterator_local = {};
-    my @timestamp_conditions = map { ('timestamp' => { $_ => $params->{timequery}->{$_} } )} keys %{$params->{timequery}};  
-    foreach my $table_aref (@{$params->{tables}}) { 
-            my $objects =  $self->DBO->getData( [ metaID => {eq =>  $keyid},  @timestamp_conditions], $table_aref->[0], $_sizeLimit);
-	                     
-	    if ($objects &&  (ref($objects) eq 'HASH') && %{$objects}) {
-	        $iterator_local->{$_} = $objects->{$_} for keys  %{$objects}; 
-		$logger->debug(" Added data rows ..... ......: " . scalar %{$objects});		
-	    } else {
-	        $logger->debug(" ...............No  data rows  .....from ". $table_aref->[0]  );	
-	    } 
-    }   
+ 
+    my @timestamp_conditions = map { ('timestamp' => { $_ => $params->{timequery}->{$_} } )} keys %{$params->{timequery}};     
+    my  $iterator_local =  $self->DBO->getData( [ metaID => {eq =>  $keyid},  @timestamp_conditions], undef, $_sizeLimit);
     if(%{$iterator_local}) {
         $params->{datas}->{$keyid} = $iterator_local;
         my $idref = $self->_createTimeSelect( $params );
