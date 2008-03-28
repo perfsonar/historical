@@ -30,12 +30,13 @@ package perfSONAR_PS::DB::SQL::Base;
 use warnings;
 use strict; 
 use DBI;
+use Data::Dumper;
 use version; our $VERSION = 0.08; 
 use English '-no_match_vars';
 use Scalar::Util qw(blessed);
 use Log::Log4perl qw( get_logger ); 
  
-use perfSONAR_PS::DB::SQL::QueryBuilder qw(build_select);
+use perfSONAR_PS::DB::SQL::QueryBuilder qw(build_select build_where_clause);
 
 use constant  CLASSPATH  => 'perfSONAR_PS::DB::SQL::Base';
 use constant  PARAMS =>  qw(driver database handle ERRORMSG LOGGER host port username password attributes);
@@ -133,7 +134,7 @@ sub  openDB {
          return -1;
     } 
     eval {
-        $self->handle(DBI->connect_cached("DBI:" .  $self->driver . ":database=" .  $self->database  . 
+        $self->handle(DBI->connect_cached("DBI:" .  $self->driver . ":dbname=" .  $self->database  . 
 	                      ($self->host?";host=" . $self->host:'') .
 			      ($self->port?";port=" . $self->port:'') , $self->username, $self->password, $self->attributes)) 
 			      or  die $DBI::errstr; 
@@ -226,7 +227,14 @@ sub  getFromTable {
      if(defined $param->{validate} && ref($param->{validate}) eq 'HASH') {
          @array_of_names = keys %{$param->{validate}}; 
      } else {
-         @array_of_names = keys %{$param->{query}}; 
+         my $param_sz = scalar @{$param->{query}};
+         for(my $i=0;$i<$param_sz;$i+=2) {
+             push @array_of_names ,$param->{query}->[$i] if  $param->{query}->[$i];
+	 }
+     }
+     unless(   @array_of_names ) {
+        $self->ERRORMSG(" getFromTable  failed, someting misssing  for  " . Dumper $param);
+        return -1;
      }
      my  $stringified_names  = join ", ",  @array_of_names;
       
@@ -240,8 +248,11 @@ sub  getFromTable {
 					 limit => ($param->{limit}?$param->{limit}:'1000000'), ## i am pretty sure that 1 mil of records is more than enough
 				      });
 	 $self->LOGGER->debug("  SQL:: $sql_query ");			      
-	 $self->openDB  if !($self->alive == 0);	      
-	 $results = $self->handle->selectall_hashref($sql_query,  $param->{index} );
+	 $self->openDB  if !($self->alive == 0);
+	 my $sth = $self->handle->prepare($sql_query);	      
+	 $results = $self->handle->selectall_hashref($sth,  $param->{index});
+	  $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);	
+	 die $DBI::errstr if  $DBI::err;
      };
      if ($EVAL_ERROR) {
         $self->ERRORMSG("getFromTable  failed with error \"" . $EVAL_ERROR . "\"." );
@@ -270,19 +281,25 @@ sub  getFromTable {
 
 sub updateTable{
      my ($self, $param) = @_;    
-     unless( $param && ref($param) eq 'HASH' && $param->{table}  && $param->{set}  && ref($param->{set}) eq 'HASH' && $param->{where}  && ref($param->{where}) eq 'ARRAY')  {
-    	 $self->ERRORMSG("updateTable  requires single HASH ref parameter with required set key as HASH ref ");
+     unless($param && ref($param) eq 'HASH' && $param->{table}  && 
+                  ($param->{set}  && ref($param->{set}) eq 'HASH') &&
+	         ($param->{validate}  && ref($param->{validate}) eq 'HASH')    
+             && $param->{where}  && ref($param->{where}) eq 'ARRAY')  {
+    	 $self->ERRORMSG("updateTable  requires single HASH ref parameter with required set,validate and where keys ");
     	 return -1;
      }  
      my $stringified_names  = ''; 
-     my @array_of_names = keys %{$param->{set}};
+     my @array_of_names =  keys %{$param->{validate}}; 
      foreach my $key (@array_of_names ) {
          $stringified_names  .=  " $key='" .  $param->{set}->{$key} ."'," if defined  $param->{set}->{$key};
      } 
-     my $query_sql = build_where_clause({ dbh => $self->handle, 
+       
+     my $query_sql = build_where_clause({ 
+                                         dbh => $self->handle, 
 	                                 tables => [$param->{table}], 
 				         query =>  $param->{where}, 
 					 query_is_sql => 1, 
+					 table_aliases => 0,
 				         columns => { $param->{table}  => \@array_of_names},
 				      });
  
@@ -290,8 +307,8 @@ sub updateTable{
      $self->LOGGER->debug("  SQL::  $query_sql ");	
      eval {
            $self->openDB  if !($self->alive == 0);
-           $self->handle->do("update  " .$param->{table} . "  set  $stringified_names  $query_sql "); 
-	  
+	    my $sth = $self->handle->prepare("update  " .$param->{table} . "  set  $stringified_names where $query_sql ");	
+            $sth->execute() or die $DBI::errstr; 	  
       };
       if ($EVAL_ERROR) {
           $self->ERRORMSG("updateTable failed with error \"" . $EVAL_ERROR . "\"." );
@@ -338,7 +355,10 @@ sub insertTable{
 	    my $query_sql  = "insert into ". $param->{table} ."  ($stringified_names) values ($stringified_values)";
 	    $self->LOGGER->debug("  SQL::  $query_sql ");	
             $self->handle->do($query_sql); 
-	    $rv =  ($self->driver =~ /mysql/i)? $self->handle->{q{mysql_insertid}}:$self->handle->last_insert_id(undef, undef,  $param->{table}, undef);
+	    # return last serial number of the newly inserted row or integer primary key
+	    $rv =  ($self->driver =~ /mysql/i)?$self->handle->{q{mysql_insertid}}:
+	               ($self->driver =~ /sqlite/i)?$self->handle->func("last_insert_rowid"):
+		            $self->handle->last_insert_id(undef, undef,  $param->{table}, undef);
         };
         if ($EVAL_ERROR) {
             $self->ERRORMSG("insertTable failed with error \"" . $EVAL_ERROR . "\"." );
@@ -419,13 +439,16 @@ sub validateQuery {
 sub  fixTimestamp {
     my ($self, $timestamp) = @_;
 # remap the timestamp if it's not valid
-    if ($timestamp &&  $timestamp  !~ m/^(\d+)$/  &&  $timestamp =~ m/^(\d+)\./ ) {
-        return  sprintf "%.0f",  $timestamp;
-    } else {
-        $self->ERRORMSG( "Timestamp $timestamp format unparseable");
-        return;
-    }
-    return $timestamp;
+    if ($timestamp) {
+        if( $timestamp  =~ m/^\d+$/) {
+            return  $timestamp; 
+        } elsif ($timestamp =~ s/^(\d+)\.\d+$/$1/ ) {
+            return   $timestamp;
+        } 
+     }	 
+     $self->ERRORMSG( "Timestamp $timestamp format unparseable or its undef");
+     return;
+     
 }
 
 =head2  booleanToInt

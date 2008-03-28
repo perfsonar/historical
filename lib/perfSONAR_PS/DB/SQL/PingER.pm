@@ -177,6 +177,7 @@ data tables that is used by PingER in order to provide performance.
 package perfSONAR_PS::DB::SQL::PingER;
 use warnings;
 use strict; 
+use Data::Dumper;
 use version; our $VERSION = 0.08; 
 use English '-no_match_vars';
 use Scalar::Util qw(blessed);
@@ -258,16 +259,14 @@ sub soi_host {
 	# insert if not there
 	my $n = scalar (keys %{$query});
 	if ( $n == 0  ) {
-	    return $self->insertTable({ insert => { 'ip_name' =>  $param->{ip_name}, 'ip_number' =>  $param->{ip_number}},
+	     my $id = $self->insertTable({ insert => { 'ip_name' =>  $param->{ip_name}, 'ip_number' =>  $param->{ip_number}},
 	                                 table => 'host'
 				      });
-	} elsif ( $n == 1 ) {
-	    $self->LOGGER->debug( "found host ". $param->{ip_name} . "/ " .  $param->{ip_number} );
-	    return   (keys  %{$query})[0] ;
-	} else {
-	    $self->ERRORMSG( "Found more than one element!");
-	    return -1;
-	}	
+	     # return ip_name if everything is OK or result code
+	     $id>0?return $param->{ip_name}:return $id;		      
+	} 
+	$self->LOGGER->debug( "found host ". $param->{ip_name} . "/ " .  $param->{ip_number} );
+	return   (keys  %{$query})[0];  	
 }
 
  
@@ -337,15 +336,16 @@ sub soi_metadata {
 					  index => 'metaID',
 					  limit => 1
 					});
-	 
+	return -1 if  !ref($query) && $query < 0;
 	my $n =  scalar (keys %{$query});
 	if ( $n == 0 ) {
+	       # metaId is serial number so it will return metaId or -1
 	       return $self->insertTable({ insert => $param, table => 'metaData'});   
 					  
-	} else {
-	     $self->LOGGER->debug( "found host ". $param->{ip_name_src} . "/ " .  $param->{ip_name_dst} . " metaID=". (keys  %{$query})[0] ); 
-	     return  (keys  %{$query})[0] ;
 	}  
+	$self->LOGGER->debug( "found host ". $param->{ip_name_src} . "/ " .  $param->{ip_name_dst} . " metaID=". (keys  %{$query})[0] ); 
+	return  (keys  %{$query})[0] ;
+	 
 }
 
  
@@ -361,11 +361,12 @@ sub soi_metadata {
 sub  getMetaID {
      my ($self, $param, $limit) = @_;  
      my $results = $self->getFromTable({ query =>  $param, 
-                                        table => 'metaData', 
+                                        table => 'metaData',
+					 validate => METADATA,
 				  	index => 'metaID',
 					limit => $limit,
 				      });
-    return  sort {$a <=> $b} keys %$results if ($results && ref($results) eq 'HASH') ;
+    return  sort {$a <=> $b} keys %{$results} if ($results && ref($results) eq 'HASH') ;
     return $results; 
 }
 
@@ -373,6 +374,7 @@ sub  getMetaID {
  
   helper method to get hashref keyd by metaID with metadata
   accepts query  and limit arg
+  returns metadata as hashref index by metaID
  
 
 =cut
@@ -400,43 +402,35 @@ sub  getMeta  {
 sub  getData {
      my ($self, $param, $table, $limit) = @_;
     
-    unless( $param || $table)  {
+    unless( ($param && ref($param) eq 'ARRAY') || $table)  {
     	 $self->ERRORMSG(" getData   requires  query parameter or tablename ");
     	 return -1;
     } 
-    unless($table) {
-	my $stime = undef;
-	my $etime = undef;
-	my $param_sz = scalar @{$param};
-	for(my $i=0;$i<$param_sz;$i+=2) {
-	   if ($param->[$i] eq 'timestamp') {
-              if(! ref($param->[$i+1]) || $param->[$i+1]->{eq}) {
-		$stime = $param->[$i+1];
-		$etime = undef;
-		last;
-	      }  elsif($param->[$i+1]->{gt}) {
-		 $stime = $param->[$i+1]->{gt}+1;
-	      }  elsif( $param->[$i+1]->{ge}) {
-		 $stime = $param->[$i+1]->{ge};
-	      } elsif($param->[$i+1]->{lt}) {
-		 $etime = $param->[$i+1]->{lt}-1;
-	      } elsif($param->[$i+1]->{le}) {
-		$etime = $param->[$i+1]->{le};
-	      }
-	   }   
-	} 
-	my $table_arref  =  $self->get_table_for_timestamp( { startTime =>  $stime , endTime => $etime}); 
+    # if table is not defined then determine list of tables from the query and return result for the whole set
+    my $table_arref = [];
+    if($table) {
+       push @{$table_arref}, [ $table => $table ]; 
+    } else {
+	$table_arref  =  $self->get_table_for_timestamp( { from_query => $param}); 
 	return -1 unless $table_arref && ref($table_arref) eq 'ARRAY' && scalar @{$table_arref};
-	$table  = $table_arref->[0]->[0];
     }
-  
-    my $results = $self->getFromTable({ query =>  $param, 
-                                        table =>  $table, 
-					validate =>  DATA, 
-					index =>  [qw(metaID timestamp)],
-					limit =>  $limit,
+    my $iterator_local = {};
+    
+    foreach my $table_aref (@{$table_arref}) { 
+        my $objects = $self->getFromTable({ query =>  $param, 
+                                            table =>  $table_aref->[0], 
+					    validate =>  DATA, 
+				      	    index =>  [qw(metaID timestamp)],
+					    limit =>  $limit,
 				     });
-    return $results; 
+        if ($objects &&  (ref($objects) eq 'HASH') && %{$objects}) {
+	        $iterator_local->{$_} = $objects->{$_} for keys  %{$objects}; 
+		$self->LOGGER->debug(" Added data rows ..... ......: " . scalar %{$objects});		
+	 } else {
+	        $self->LOGGER->debug(" ...............No  data rows  .....from ". $table_aref->[0]  );	
+	 } 
+    }			     
+    return  $iterator_local; 
 } 
 
 =head2 insertData (   $hashref );
@@ -503,12 +497,9 @@ sub insertData {
 
 =head2 updateData (   $hashref, $where_clause );
 
-inserts info from the required hashref parameter  into the database   data table, where 
+updates info from the required hashref parameter  in  the database   data tables, where 
 $hash = {
-         metaID => 'metaid',
-	 
-	'timestamp' => # epoch seconds timestamp of test
-
+       
 	# RTT values
 	'minRtt'	=> # minimum rtt of ping measurement
 	'meanRtt'	=> # mean rtt of ping measurement
@@ -536,7 +527,12 @@ $hash = {
 	'seqNums'	=> [] # array of the order in which sequence numbers are recvd
 }
 
+please note than primary key - (timestamp,metaID)  is skipped here 
+
 and $where_clause is query  formatted  as Rose::DB::Object query
+
+   usualy it looks as ['timestamp' => { 'eq' => $nowTime } , metaID => 'metaid' ] 
+   it will update several tables at once if there is a time range in the $where clause
 
 Returns
    0 = everything okay
@@ -548,25 +544,36 @@ Returns
 
 sub updateData {
 	my ($self,  $hash, $where) = @_;
-	if ( ! $hash  || ref($hash ) ne 'HASH' || $self->validateQuery($hash,  DATA) < 0)  {
-	    $self->ERRORMSG("updateData   requires single HASH ref parameter");
+	unless( $hash  &&  ref($hash ) eq 'HASH' && $self->validateQuery($hash,  DATA) ==0 && 
+	        $where && ref($where) eq 'ARRAY')  {
+	    $self->ERRORMSG("updateData   requires  HASH ref parameter and ARRAYref query parameter");
 	    return -1;
-	} 	
-	 
-	# remap the timestamp if it's not valid
-	my $timestamp = $self->fixTimestamp( $where->{'timestamp'}?$where->{'timestamp'}:$hash->{'timestamp'}?$hash->{'timestamp'}:'');  
-	return -1 unless   $timestamp;
+	}
+	if ($hash->{'timestamp'}) {
+	   $hash->{'timestamp'} = $self->fixTimestamp( $hash->{'timestamp'} );  
+	   return -1 unless    $hash->{'timestamp'}  ;  
+	}  		  
+	# get the data table  and create them if necessary ( its really arrayref of arryarefs and we need only th first one )
+	my  $tables  =  $self->get_table_for_timestamp( { startTime => $hash->{'timestamp'} , from_query =>  $where});
+        return -1 unless $tables && ref($tables) eq 'ARRAY' && scalar @{$tables};
 	
-	# get the data table  and create them if necessary (1)
-	my  $table  =  $self->get_table_for_timestamp( { startTime => $timestamp });
-        return -1 unless $table && ref($table) eq 'ARRAY' && scalar @{$table};
 	# handle mysql problems with booleans
 	$hash->{'duplicates'} = $self->booleanToInt($hash->{'duplicates'}); 
 	$hash->{'outOfOrder'} = $self->booleanToInt($hash->{'outOfOrder'}); 
-	return $self->updateTable({ set => $hash, 
-	                            table => $table->[0]->[0], 
-				    where => $where
-				 });							 
+	$self->LOGGER->debug(" tables found ... " . Dumper $tables);
+	foreach my $table_arr (@{$tables}) {
+	   $self->LOGGER->debug(" table  ... " . Dumper $table_arr); 
+	    unless( $self->updateTable({ set => $hash, 
+	                                table =>  $table_arr->[0], 
+					 
+				        where => $where,
+					validate => DATA,
+				 }) == 0) {
+	         
+		 return -1;			 
+	    } 
+	}
+				 							 
 }
 
  
@@ -594,14 +601,45 @@ Returns
 sub get_table_for_timestamp {
 	my ( $self, $param ) = @_;
 	$param = $self unless(blessed $self);
-	if ( ! $param  || ref($param ) ne  'HASH' || ! $param->{startTime} )  {
-	    $self->ERRORMSG("get_table_for_timestamp   requires single HASH ref parameter with at least defined startTime");
+	unless( $param && ref($param) eq  'HASH' &&  ($param->{startTime} || $param->{from_query}))  {
+	    $self->ERRORMSG("get_table_for_timestamp   requires single HASH ref parameter with at least defined startTime or from_query");
 	    return -1;
 	} 
 	my $startTime =  $param->{startTime};
 	my $endTime =  $param->{endTime};
+	if(!$startTime && $param->{from_query} && ref($param->{from_query}) eq 'ARRAY') {
+	       
+	      my $param_sz = scalar @{$param->{from_query}};
+	      for(my $i=0;$i<$param_sz;$i+=2) {
+		  if ($param->{from_query}->[$i] eq 'timestamp') {
+                      if(! ref($param->{from_query}->[$i+1])) {
+	  	          $startTime = $param->{from_query}->[$i+1];
+	 	          $endTime  = undef;
+		          last;
+		      } elsif($param->{from_query}->[$i+1]->{eq}) {
+	                  $startTime = $param->{from_query}->[$i+1]->{eq};
+			  $endTime = undef;
+			  last;
+		      } elsif($param->{from_query}->[$i+1]->{gt}) {
+			  $startTime= $param->{from_query}->[$i+1]->{gt}+1;
+		      }  elsif( $param->{from_query}->[$i+1]->{ge}) {
+			  $startTime  = $param->{from_query}->[$i+1]->{ge};
+		      } elsif($param->{from_query}->[$i+1]->{lt}) {
+			  $endTime= $param->{from_query}->[$i+1]->{lt}-1;
+		      } elsif($param->{from_query}->[$i+1]->{le}) {
+			  $endTime = $param->{from_query}->[$i+1]->{le};
+		      }
+	          }   
+	    }
+	     $startTime  = $self->fixTimestamp($startTime); 
+	     $endTime =  $self->fixTimestamp($endTime); 
+	}   
 	my $createNewTables = $param->{createNewTables};	
-
+        unless($startTime) {
+	     $self->ERRORMSG(" startTime still is not defined  ");
+	     return -1;
+	
+	}
 	# call as object
 	
 	# determine the datatable to use depending on the timestamp
@@ -634,7 +672,35 @@ sub get_table_for_timestamp {
 	return  \@tables;
 }
 
+=head2   getDataTables 
  
+  auxiliary   function, 
+  accepts single argument - timequery which is hashref  with { gt => | lt =>  | eq => } keys
+  get the name of the data table ( data_yyyyMM format ) for specific time period
+  returns array ref  of array refs of data_yyyyMM  => yyyyMM 
+  or retuns undef if  failed
+  
+
+=cut 
+
+
+
+sub getDataTables  {
+    my  ($self, $timequery) = @_;
+  
+    my $now =  gmtime(); 
+    my $stime =  $timequery->{gt}?$timequery->{gt}:$timequery->{eq};
+    my $etime =  $timequery->{lt}?$timequery->{lt}:$timequery->{eq};
+    $etime = $now if $etime>$now; ### corrected to current time to avoid creation of bogus empty data tables
+    $self->LOGGER->debug(" Looking for Data tables starting=$stime ending=$etime ");
+    unless($stime && $etime) {
+         $self->ERRORMSG(" Undef startime/endtime ");
+        return;
+    }
+  	
+   # check  the tables required, will return array ref of arrayrefs where  [0] = tablename [1] = date part
+   return   $self->DBO->get_table_for_timestamp({startTime => $stime, endTime => $etime});
+}
 
 
 1;

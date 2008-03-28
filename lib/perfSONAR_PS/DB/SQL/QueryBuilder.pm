@@ -63,7 +63,12 @@ our %Op_Arg_PassThru = map { $_ => 1 }
 BEGIN { eval { require DBI::Const::GetInfoType }; }
 use constant SQL_DBMS_VER => $DBI::Const::GetInfoType::GetInfoType{'SQL_DBMS_VER'} || 18;
 
-sub build_where_clause { build_select({@_, {where_only => 1}}) }
+sub build_where_clause {
+    my $arg = shift;
+    $arg->{where_only} = 1;
+    return build_select($arg);
+ 
+ }
 
 sub build_select {
   my $args  = shift;
