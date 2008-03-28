@@ -426,14 +426,14 @@ sub storeData
 
 	# store results
 	my $src = $self->database()->soi_host({ ip_name => $agent->source(), ip_number => $agent->sourceIp() });
-	if(!$src || $src<0) {
+	unless($src &&  $src =~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
 	    $logger->error(  "Failed to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	 
 		
 	my $dst = $self->database()->soi_host({ ip_name => $agent->destination(),ip_number => $agent->destinationIp() });
 	 
-	if(!$dst || $dst<0) {
+	unless($dst  &&  $dst =~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
 	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	  
@@ -446,7 +446,7 @@ sub storeData
 					'ttl'		  => $agent->ttl(),
 				});
 	 
-	if(!$md || $md < 0) {
+	if(!$md ||   $md < 0) {
 	    $logger->error(  "Failed to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	   
