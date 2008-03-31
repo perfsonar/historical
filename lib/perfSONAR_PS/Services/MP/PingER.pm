@@ -166,6 +166,7 @@ sub database
 	if ( @_ ) {
 		$self->{DATABASE} = shift;
 	}
+	$logger->debug( "database: " . $self->{DATABASE} ) ;
 	return $self->{DATABASE};
 }
 
@@ -353,7 +354,7 @@ sub setupDatabase
         # setup database  
   	$logger->debug( "initializing database " . $self->getConf("db_type") );
   
-	if( $self->getConf("db_type") eq "SQLite" || "mysql") {
+	if( $self->getConf("db_type") eq "SQLite" || $self->getConf("db_type") eq "mysql") {
 		
 		# setup DB  object
 		eval {
@@ -367,11 +368,12 @@ sub setupDatabase
 				password	=> $self->getConf( "db_password" ),
 			});
 		 
-		 
-			if($dbo->openDB() == 0 )  {
+			my $status = $dbo->openDB(); 
+			if( $status == 0 )  {
 			  $self->database( $dbo );
 			 } else {
-			   die " Failed to open DB" . $dbo->ERRORMSG;
+			   $logger->fatal(" Failed to open DB" . $dbo->ERRORMSG );
+			   return -1;
 			 } 
 		};
 		if ( $@ ) {
@@ -381,7 +383,7 @@ sub setupDatabase
 		}
 			
 	} else {
-		$logger->logdie( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
+		$logger->fatal( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
 		return -1;
 	}
 	return 0;
