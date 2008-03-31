@@ -1,6 +1,6 @@
 package perfSONAR_PS::Services::MP::Agent::SNMP;
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 
 =head1 NAME
 

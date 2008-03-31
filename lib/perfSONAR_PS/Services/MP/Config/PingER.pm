@@ -5,7 +5,7 @@ use perfSONAR_PS::Services::MP::Config::Schedule;
 package perfSONAR_PS::Services::MP::Config::PingER;
 use base "perfSONAR_PS::Services::MP::Config::Schedule";
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 
 =head1 NAME
 

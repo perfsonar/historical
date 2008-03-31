@@ -41,7 +41,7 @@ Creates a new object, pass hash ref as collection of namespaces
 
 =cut
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 use Readonly;
 use Log::Log4perl qw(get_logger);
 Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::Namespace';

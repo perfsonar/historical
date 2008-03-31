@@ -1,7 +1,7 @@
 package  perfSONAR_PS::Datatypes::Element;
 use strict;
 use warnings;
-use version;our $VERSION = 0.08;
+use version;our $VERSION = 0.09;
 use base 'Exporter';
 =head1 NAME
 

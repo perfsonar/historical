@@ -11,12 +11,13 @@ BEGIN
   perfSONAR_PS::DB::SQL::QueryBuilder->import(qw(build_select));
 }
  my $dbh = undef;
+ my $tempDB = "/tmp/pingerMA_test_$$.sqlite";
  # create a blank database using sqlite for now
 `rm $tempDB` if -e  $tempDB;
 `sqlite3 $tempDB < util/create_pingerMA_SQLite.sql`; 
  
  eval { 
-    $dbh =  DBI->connect("DBI:SQLite:dbname=pingerMA",  ,'',  
+    $dbh =  DBI->connect("DBI:SQLite:dbname=$tempDB",'','',  
                               {RaiseError => 0,  PrintError => 0}) or croak $DBI::errstr;
  };
  

@@ -1,7 +1,7 @@
 
 package perfSONAR_PS::Services::MA::PingER;
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 
 =head1 NAME
 

@@ -1,4 +1,4 @@
-use perfSONAR_PS::DB::PingER;
+use perfSONAR_PS::DB::SQL::PingER;
 
 package perfSONAR_PS::Datatypes::PingER;
 {

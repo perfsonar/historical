@@ -10,7 +10,7 @@ use warnings;
       see each call description for details
 
 =cut
-use version;our $VERSION = 0.08;
+use version;our $VERSION = 0.09;
 use Readonly;  
 Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::Datatypes::NSMap';
 use perfSONAR_PS::Datatypes::Namespace;

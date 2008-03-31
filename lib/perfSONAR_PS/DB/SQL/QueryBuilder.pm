@@ -9,7 +9,7 @@ our @ISA = qw(Exporter);
 
 our @EXPORT_OK = qw(build_select build_where_clause);
 
-our $VERSION = '0.766';
+our $VERSION = '0.09';
 
 use constant PRIVATE_PREFIX     => '__xrdbopriv';
 use constant META_ATTR_NAME     => PRIVATE_PREFIX . '_meta';

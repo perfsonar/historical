@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = 0.09;
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain  - A base class, implements  'domain'  element from the perfSONAR_PS RelaxNG schema

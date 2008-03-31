@@ -40,7 +40,7 @@ Creates a new object, pass hash ref as hash  of event type => characteristic URI
 
 use strict;
 use warnings;
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 use Log::Log4perl qw(get_logger);
 use Class::Accessor;
 use Class::Fields;

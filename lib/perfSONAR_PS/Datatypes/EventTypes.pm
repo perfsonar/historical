@@ -40,7 +40,7 @@ There are   get/set methods for tools and characteristics  fields
 =cut
 
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 use Readonly;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Datatypes::EventTypes::Tools;

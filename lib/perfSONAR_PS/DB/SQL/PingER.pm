@@ -178,7 +178,7 @@ package perfSONAR_PS::DB::SQL::PingER;
 use warnings;
 use strict; 
 use Data::Dumper;
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 use English '-no_match_vars';
 use Scalar::Util qw(blessed);
 use Log::Log4perl qw( get_logger ); 

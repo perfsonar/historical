@@ -3,7 +3,7 @@ use Socket;
 
 package perfSONAR_PS::Services::MP::Agent::CommandLine;
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 
 =head1 NAME
 

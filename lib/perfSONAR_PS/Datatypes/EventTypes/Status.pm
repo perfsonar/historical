@@ -34,7 +34,7 @@ Creates a new object, accepts scalar operation name, if missed then default is '
 
 use strict;
 use warnings;
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 use Log::Log4perl qw(get_logger);
 use Class::Accessor;
 use Class::Fields;

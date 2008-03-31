@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Para
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.08;
+use version; our $VERSION = 0.09;
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters  - A base class, implements  'parameters'  element from the perfSONAR_PS RelaxNG schema

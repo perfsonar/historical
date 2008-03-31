@@ -99,7 +99,9 @@ lib/perfSONAR_PS/Datatypes/v2_0/pingertopo/Topology/Domain/Node.pm
 lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Metadata/Parameters.pm
 lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Metadata/Subject.pm
 lib/perfSONAR_PS/Datatypes/v2_0/select/Message/Parameters.pm
-lib/perfSONAR_PS/DB/PingER.pm
+lib/perfSONAR_PS/DB/SQL/Base.pm
+lib/perfSONAR_PS/DB/SQL/PingER.pm
+lib/perfSONAR_PS/DB/SQL/QueryBuilder.pm
 lib/perfSONAR_PS/Services/MA/PingER.pm
 lib/perfSONAR_PS/Services/MP/Agent/Base.pm
 lib/perfSONAR_PS/Services/MP/Agent/CommandLine.pm
@@ -112,7 +114,6 @@ lib/perfSONAR_PS/Services/MP/Config/PingER.pm
 lib/perfSONAR_PS/Services/MP/Config/Schedule.pm
 lib/perfSONAR_PS/Services/MP/PingER.pm
 lib/perfSONAR_PS/Services/MP/Scheduler.pm
-logger.conf
 LICENSE
 Makefile.PL
 MANIFEST
@@ -120,8 +121,6 @@ MANIFEST.SKIP
 META.yml
 README
 t/testfiles/pinger-landmarks.xml
-t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain.t
-t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface::IfAddress.t
@@ -155,10 +154,10 @@ t/perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::Datum.t
 t/perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject.t
 t/perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters.t
 t/perfSONAR_PS::Datatypes::v2_0::pinger::Message::Parameters.t
-t/perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology.t
 t/perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters.t
 t/perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Subject.t
-t/perfSONAR_PS::DB::PingER.t
+t/perfSONAR_PS::DB::SQL::PingER.t
+t/perfSONAR_PS::DB::SQL::QueryBuilder.t
 t/perfSONAR_PS::Services::MA::PingER.t
 t/perfSONAR_PS::Services::MP::Agent::CommandLine.t
 t/perfSONAR_PS::Services::MP::Agent::Ping.t

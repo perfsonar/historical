@@ -17,24 +17,24 @@ name             'perfSONAR_PS-Services-PingER';
 author_from      'lib/perfSONAR_PS/Datatypes/PingER.pm';
 license_from     'LICENSE';
 license          'perl';
-version          '0.08';
+version          '0.09';
 perl_version     '5.008';
 all_from 	 'lib/perfSONAR_PS/';
 
 build_requires  'Test::Exception' => 0;
 
-requires  'YAML' => '0.60';
-requires  'DateTime' => '0.41';
-requires  'DateTime::Locale' => '0.35';
-requires  'DateTime::TimeZone' => '0.59';
-requires  'DateTime::Format::Builder' => 0;
+#requires  'YAML' => '0.60';
+#requires  'DateTime' => '0.41';
+#requires  'DateTime::Locale' => '0.35';
+#requires  'DateTime::TimeZone' => '0.59';
+#requires  'DateTime::Format::Builder' => 0;
 
 requires  'Bit::Vector' => 0;
 requires  'Error' => 0;
 
-requires  'Carp' => 0;
-build_requires  'Object::Deadly' => 0;
-build_requires  'Carp::Clan' => 0;
+#requires  'Carp' => 0;
+#build_requires  'Object::Deadly' => 0;
+#build_requires  'Carp::Clan' => 0;
 requires  'XML::LibXML' => '1.60';
 requires  'XML::NamespaceSupport' => 0;
 requires  'XML::LibXML::Common'  => '0.13';
@@ -62,20 +62,20 @@ requires  'Crypt::CBC'  => '2';
 requires  'FreezeThaw' => 0;
 requires  'Readonly' => 0;
 
-requires  'Rose::DB'  => 0; 
-requires  'Rose::DB::Object'  => 0; 
+#requires  'Rose::DB'  => 0; 
+#requires  'Rose::DB::Object'  => 0; 
 
 # perfsonar dependencies
-requires 'perfSONAR_PS::Common' => 0.08;
-requires 'perfSONAR_PS::Transport' => 0.08;
-requires 'perfSONAR_PS::Messages' => 0.08;
-requires 'perfSONAR_PS::DB::SQL' => 0.08;
-requires 'perfSONAR_PS::DB::File' => 0.08;
-requires 'perfSONAR_PS::Services::Base' => 0.08;
-requires 'perfSONAR_PS::Services::MA::General' => 0.08;
-requires 'perfSONAR_PS::XML::Document_string' => 0.08;
-requires 'perfSONAR_PS::Error_compat' => 0.08;
-requires 'perfSONAR_PS::Client::LS::Remote' => 0.08;
+requires 'perfSONAR_PS::Common' => 0.09;
+requires 'perfSONAR_PS::Transport' => 0.09;
+requires 'perfSONAR_PS::Messages' => 0.09;
+requires 'perfSONAR_PS::DB::SQL' => 0.09;
+requires 'perfSONAR_PS::DB::File' => 0.09;
+requires 'perfSONAR_PS::Services::Base' => 0.09;
+requires 'perfSONAR_PS::Services::MA::General' => 0.09;
+requires 'perfSONAR_PS::XML::Document_string' => 0.09;
+requires 'perfSONAR_PS::Error_compat' => 0.09;
+requires 'perfSONAR_PS::Client::LS::Remote' => 0.09;
 
 
 ###requires_external_bin 'mysql';

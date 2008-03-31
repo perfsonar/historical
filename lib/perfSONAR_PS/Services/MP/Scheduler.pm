@@ -39,7 +39,7 @@ This module exposes the following methods.
 use perfSONAR_PS::Services::Base;
 use base 'perfSONAR_PS::Services::Base';
 
-use version; our $VERSION = 0.08; 
+use version; our $VERSION = 0.09; 
 
 use fields qw( SCHEDULE METADATA MAXCHILDREN );
 
