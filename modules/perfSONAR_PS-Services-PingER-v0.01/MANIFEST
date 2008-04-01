@@ -1,8 +1,8 @@
 bin/lhcopn-landmarks.xml
 bin/logger.conf
+bin/perfsonar-daemon.pl
 bin/pinger-landmarks.xml
 bin/pinger.conf
-bin/pinger.pl
 bin/tier2-landmarks.xml
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
@@ -115,12 +115,12 @@ lib/perfSONAR_PS/Services/MP/Config/Schedule.pm
 lib/perfSONAR_PS/Services/MP/PingER.pm
 lib/perfSONAR_PS/Services/MP/Scheduler.pm
 LICENSE
+logger.conf
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 META.yml
 README
-t/testfiles/pinger-landmarks.xml
 t/perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface.t
 t/perfSONAR_PS::Datatypes::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface::IfAddress.t
@@ -166,10 +166,11 @@ t/perfSONAR_PS::Services::MP::Config::PingER.t
 t/perfSONAR_PS::Services::MP::Config::Schedule.t
 t/perfSONAR_PS::Services::MP::PingER.t
 t/perfSONAR_PS::Services::MP::Scheduler.t
+t/testfiles/pinger-landmarks.xml
 util/create_pingerMA_MySQL.sql
 util/create_pingerMA_SQLite.sql
 util/pinger_schema.pl
-util/psConfigurePingER
+util/psConfigureDaemon
 webadmin/admin_html/menu.css
 webadmin/admin_html/mystyle.css
 webadmin/admin_html/overlib/makemini.pl

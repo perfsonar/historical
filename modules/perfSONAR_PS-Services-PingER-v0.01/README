@@ -132,7 +132,7 @@ Configuration
 1) pinger.conf: daemon configuration of MP and MA services. This file
 specifies the relevant perfSONAR specific services of PingER such as the port
 number, endpoints and registration service descriptions that the PingER MA and
-MP should use.  Use util/psConfigurePingER to make a configuration file.
+MP should use.  Use util/psConfigureDaemon to make a configuration file.
 
 2) pinger-landmarks.xml: A XML configuration file of the hosts to perform
 measurements to. This also contains the specification of the tests and

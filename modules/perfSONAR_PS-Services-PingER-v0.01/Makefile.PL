@@ -30,7 +30,7 @@ build_requires  'Test::Exception' => 0;
 #requires  'DateTime::Format::Builder' => 0;
 
 requires  'Bit::Vector' => 0;
-requires  'Error' => 0;
+requires  'Error' => '0.17';
 
 #requires  'Carp' => 0;
 #build_requires  'Object::Deadly' => 0;
@@ -57,12 +57,12 @@ requires  'version'  => 0;
 requires  'fields'  => 0; 
 requires  'Clone::Fast'  => 0; 
 requires  'Clone'  => 0; 
-requires  'Module::Load' => 0;
-requires  'Params::Validate' => 0;
 requires  'Data::Compare'  => 0; 
 requires  'Crypt::CBC'  => '2'; 
 requires  'FreezeThaw' => 0;
 requires  'Readonly' => 0;
+requires  'Params::Validate' => '0.70';
+requires  'Module::Load' => 0;
 
 #requires  'Rose::DB'  => 0; 
 #requires  'Rose::DB::Object'  => 0; 
