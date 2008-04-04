@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Iperf Schema Profile</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479020"></a>Iperf Schema Profile</h1></div><div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3><div class="affiliation"><span class="orgname">Internet2<br /></span><div class="address"><p>   <br />
-          <code class="email">&lt;<a href="mailto:zurawski@internet2.edu">zurawski@internet2.edu</a>&gt;</code><br />
-        </p></div></div></div></div><div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3><div class="affiliation"><span class="orgname">Internet2<br /></span><div class="address"><p>   <br />
-          <code class="email">&lt;<a href="mailto:boote@internet2.edu">boote@internet2.edu</a>&gt;</code><br />
-        </p></div></div></div></div><div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3><div class="affiliation"><span class="orgname">Universtity of Delaware<br /></span><div class="address"><p>   <br />
-          <code class="email">&lt;<a href="mailto:swany@cis.udel.edu">swany@cis.udel.edu</a>&gt;</code><br />
-        </p></div></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#related">3. Related Schema Profiles</a></span></dt><dt><span class="section"><a href="#schema_description">4. Schema Description</a></span></dt><dd><dl><dt><span class="section"><a href="#schema_rnc">4.1. Relax NG Schema</a></span></dt></dl></dd><dt><span class="section"><a href="#analysis">5. Analysis</a></span></dt><dd><dl><dt><span class="section"><a href="#analysis_metadata">5.1. Metadata</a></span></dt><dt><span class="section"><a href="#analysis_subject">5.2. Subject</a></span></dt><dt><span class="section"><a href="#analysis_parameters">5.3. Parameters</a></span></dt><dt><span class="section"><a href="#analysis_parameter">5.4. Parameter</a></span></dt><dt><span class="section"><a href="#analysis_data">5.5. Data</a></span></dt><dt><span class="section"><a href="#analysis_commontime">5.6. CommonTime</a></span></dt><dt><span class="section"><a href="#analysis_datum">5.7. Datum</a></span></dt></dl></dd><dt><span class="section"><a href="#examples">6. Example Usage</a></span></dt><dd><dl><dt><span class="section"><a href="#examples_metadata">6.1. Example Usage Metadata</a></span></dt><dt><span class="section"><a href="#examples_data">6.2. Example Usage Data</a></span></dt></dl></dd><dt><span class="section"><a href="#conclusion">7. Conclusion</a></span></dt><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">4/2/2008</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
-      <a href="#id2530648">Iperf</a> is a tool used to measure maximum available
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Iperf Schema Profile</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479020"></a>Iperf Schema Profile</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3><div class="affiliation"><span class="orgname">Internet2<br /></span><div class="address"><p>   <br />
+            <code class="email">&lt;<a href="mailto:zurawski@internet2.edu">zurawski@internet2.edu</a>&gt;</code><br />
+          </p></div></div></div><div class="editor"><h4 class="editedby">Edited by</h4><h3 class="editor"><span class="firstname">M.</span> <span class="surname">Swany</span></h3><div class="affiliation"><span class="orgname">Universtity of Delaware<br /></span><div class="address"><p>   <br />
+            <code class="email">&lt;<a href="mailto:swany@cis.udel.edu">swany@cis.udel.edu</a>&gt;</code><br />
+          </p></div></div></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#related">3. Related Schema Profiles</a></span></dt><dt><span class="section"><a href="#schema_description">4. Schema Description</a></span></dt><dd><dl><dt><span class="section"><a href="#schema_rnc">4.1. Relax NG Schema</a></span></dt></dl></dd><dt><span class="section"><a href="#analysis">5. Analysis</a></span></dt><dd><dl><dt><span class="section"><a href="#analysis_metadata">5.1. Metadata</a></span></dt><dt><span class="section"><a href="#analysis_subject">5.2. Subject</a></span></dt><dt><span class="section"><a href="#analysis_parameters">5.3. Parameters</a></span></dt><dt><span class="section"><a href="#analysis_parameter">5.4. Parameter</a></span></dt><dt><span class="section"><a href="#analysis_data">5.5. Data</a></span></dt><dt><span class="section"><a href="#analysis_commontime">5.6. CommonTime</a></span></dt><dt><span class="section"><a href="#analysis_datum">5.7. Datum</a></span></dt></dl></dd><dt><span class="section"><a href="#examples">6. Example Usage</a></span></dt><dd><dl><dt><span class="section"><a href="#examples_metadata">6.1. Example Usage Metadata</a></span></dt><dt><span class="section"><a href="#examples_data">6.2. Example Usage Data</a></span></dt></dl></dd><dt><span class="section"><a href="#conclusion">7. Conclusion</a></span></dt><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">4/2/2008</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      <a href="#id2530631">Iperf</a> is a tool used to measure maximum available
       bandwidth over both the <a href="#TCP">TCP</a> and <a href="#UDP">UDP</a>
       protocols.  This software is flexible enough to allow for tuning of
       the various parameters and characteristics of either protocol and will
@@ -22,10 +20,10 @@
       of the powerful features it offers.
     </p><p>
       This document will describe a schema extension of the
-      <a href="#id2530742">OGF</a>'s base measurement schema as defined by the
-      <a href="#id2530723">NM-WG</a>.  Details regarding all aspects and nuances of
+      <a href="#id2530725">OGF</a>'s base measurement schema as defined by the
+      <a href="#id2530706">NM-WG</a>.  Details regarding all aspects and nuances of
       the base schema appear in the publication
-      <a href="#id2530667">Measurement Schema</a>.  The remainder of the document 
+      <a href="#id2530650">Measurement Schema</a>.  The remainder of the document 
       will proceed as follows.  We will introduce additional schema
       <span class="emphasis"><em>profiles</em></span> that are related to this work; examination
       of these subsequent examples is recommended.  A reprint and discussion of
@@ -36,7 +34,7 @@
     </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="related"></a>3. Related Schema Profiles</h2></div></div></div><p>
       Iperf is able to deliver data that is akin to several network
       <a href="#characteristic">characteristics</a> as defined by
-      [<a href="#id2530566" title="[Lowekamp04Hierarchy]"><abbr class="abbrev">Lowekamp04Hierarchy</abbr></a>].  To prevent this document from
+      [<a href="#id2530548" title="[Lowekamp04Hierarchy]"><abbr class="abbrev">Lowekamp04Hierarchy</abbr></a>].  To prevent this document from
       becoming dated  we avoid directly citing references, but list several
       characteristics of interest:
     </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">characteristic.bandwidth.achievable</strong></span></p></li><li style="list-style-type: circle"><p><span><strong class="command">characteristic.delay.roundtrip</strong></span></p></li><li style="list-style-type: circle"><p><span><strong class="command">characteristic.loss.roundtrip</strong></span></p></li></ul></div><p>
@@ -53,13 +51,13 @@
       constructed message.  
     </p><p>
       This document will explore the native form of the iperf schema from the 
-      <span class="emphasis"><em>NM-WG</em></span> written in the <a href="#id2530760">RELAX-NG</a>
+      <span class="emphasis"><em>NM-WG</em></span> written in the <a href="#id2530742">RELAX-NG</a>
       language.  Admittedly <span class="emphasis"><em>RELAX-NG</em></span> is not as widely
       accepted of a schema definition language when it comes to validation and
       consumption.  We will avoid including schema definitions in other
-      languages such as <a href="#id2530815">XSD</a> since they can be easily
-      produced using tools such as <a href="#id2530705">Multi-Schema XML Validator</a> and
-      <a href="#id2530796">Trang</a>.
+      languages such as <a href="#id2530798">XSD</a> since they can be easily
+      produced using tools such as <a href="#id2530688">Multi-Schema XML Validator</a> and
+      <a href="#id2530779">Trang</a>.
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="schema_rnc"></a>4.1. Relax NG Schema</h3></div></div></div><p>
         The following schema is a native description of the iperf schema as
         originally prepared by members of the <span class="emphasis"><em>NM-WG</em></span> in
@@ -440,10 +438,10 @@
       </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">subject</strong></span> - Described in
           <a href="#analysis_subject">Subject</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">eventType</strong></span> - An element used to describe the
           type of data related to this metadata.  This is explained
-          in more detail in <a href="#id2530667">Measurement Schema</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">parameters</strong></span> - Described in
+          in more detail in <a href="#id2530650">Measurement Schema</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">parameters</strong></span> - Described in
           <a href="#analysis_parameters">Parameters</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">key</strong></span> - A structure normally used
           by services to describe backend storage.  This is explained
-          in more detail in <a href="#id2530667">Measurement Schema</a>,
+          in more detail in <a href="#id2530650">Measurement Schema</a>,
           <span class="emphasis"><em>must appear alone</em></span></p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="analysis_subject"></a>5.2. Subject</h3></div></div></div><pre class="programlisting">
         
 &lt;iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject1"&gt;
@@ -467,10 +465,10 @@
           inlcude a reference to a specific metadata</p></li></ul></div><p>
         Iperf measures point to point performance between two topological
         points.  We utilize the schema profile from the
-        <a href="#id2530687">Topology Schema</a> to describe this entity: the
+        <a href="#id2530670">Topology Schema</a> to describe this entity: the
         endPointPair.
       </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">endPointPair</strong></span> - A source and destination
-          on a network, described in <a href="#id2530687">Topology Schema</a></p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="analysis_parameters"></a>5.3. Parameters</h3></div></div></div><pre class="programlisting">
+          on a network, described in <a href="#id2530670">Topology Schema</a></p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="analysis_parameters"></a>5.3. Parameters</h3></div></div></div><pre class="programlisting">
         
 &lt;nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="parameters1"&gt;
 
@@ -571,7 +569,7 @@
           <a href="#analysis_commontime">CommonTime</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">datum</strong></span> - Described in
           <a href="#analysis_datum">datum</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">key</strong></span> - A structure normally used
           by services to describe backend storage.  This is explained
-          in more detail in <a href="#id2530667">Measurement Schema</a>,
+          in more detail in <a href="#id2530650">Measurement Schema</a>,
           <span class="emphasis"><em>must appear alone</em></span></p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="analysis_commontime"></a>5.6. CommonTime</h3></div></div></div><pre class="programlisting">
         
 &lt;nmwg:commonTime xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" type="range"&gt;
@@ -584,7 +582,7 @@
         
       </pre><div class="table"><a id="table.analysis_commontime"></a><p class="title"><b>Table 7. CommonTime Element Requirements</b></p><div class="table-contents"><table summary="CommonTime Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">commonTime</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">type, timeValue, timeType</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">time, start, end, datum</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">no</td></tr></tbody></table></div></div><br class="table-break" /><p>
         This element is contained within the Base
-        <a href="#id2530667">Measurement Schema</a>; a full description of the
+        <a href="#id2530650">Measurement Schema</a>; a full description of the
         purpose may be found there.  This basic description should be taken in
         the context of <span class="emphasis"><em>iperf</em></span> specific use only, and may
         differ slightly between <span class="emphasis"><em>profile</em></span> documents.
@@ -622,7 +620,7 @@
         The <span class="emphasis"><em>datum</em></span> element can only contain
         <span class="emphasis"><em>one</em></span> type of element, and this is a
         <span class="emphasis"><em>time</em></span> element from
-        <a href="#id2530667">Measurement Schema</a>:
+        <a href="#id2530650">Measurement Schema</a>:
       </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">time</strong></span> - Used in place of the
           <span class="emphasis"><em>timeValue</em></span> and <span class="emphasis"><em>timeType</em></span>
           attributes.</p></li></ul></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="examples"></a>6. Example Usage</h2></div></div></div><p>
@@ -634,7 +632,7 @@
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="examples_metadata"></a>6.1. Example Usage Metadata</h3></div></div></div><p>
         The first example of iperf metadata demonstrates an essentially
         <span class="emphasis"><em>full</em></span> description.  This example features a subject
-        using the second version of the <a href="#id2530687">Topology Schema</a>, 
+        using the second version of the <a href="#id2530670">Topology Schema</a>, 
         several parameter elements, and the standard eventType notation.
       </p><pre class="programlisting">
         
@@ -663,7 +661,7 @@
         
       </pre><p>
         The second example is similar, but uses version 3 of the
-        <a href="#id2530687">Topology Schema</a>.
+        <a href="#id2530670">Topology Schema</a>.
       </p><pre class="programlisting">
         
 &lt;!-- Begin XML --&gt;
@@ -698,7 +696,7 @@
         <span class="emphasis"><em>chaining</em></span> can be demonstrated.  Note that there
         are two kinds of chaining in play: merge and operator.  A full
         description of chaining may be found in the
-        <a href="#id2530667">Measurement Schema</a>.
+        <a href="#id2530650">Measurement Schema</a>.
       </p><pre class="programlisting">
         
 &lt;!-- Begin XML --&gt;
@@ -783,7 +781,7 @@
         use of commonTime (e.g. the various measurements do not start at the
         same time), this example is a little sparse.  CommonTime has many
         possible configurations, please see
-        <a href="#id2530667">Measurement Schema</a> for more examples.
+        <a href="#id2530650">Measurement Schema</a> for more examples.
       </p><pre class="programlisting">
         
 &lt;!-- Begin XML --&gt;
@@ -869,7 +867,7 @@
           </p></dd></dl></div><div class="glossdiv"><h3 class="title">C</h3><dl><dt><a id="characteristic"></a>characteristic</dt><dd><p>Taken on the context of networking, these describe the 
           intrinsic properties of a portion of the network that are related 
           to the performance and reliability of the network.  See also
-          [<a href="#id2530566" title="[Lowekamp04Hierarchy]"><abbr class="abbrev">Lowekamp04Hierarchy</abbr></a>].</p></dd></dl></div><div class="glossdiv"><h3 class="title">D</h3><dl><dt><a id="delay"></a>delay</dt><dd><p>
+          [<a href="#id2530548" title="[Lowekamp04Hierarchy]"><abbr class="abbrev">Lowekamp04Hierarchy</abbr></a>].</p></dd></dl></div><div class="glossdiv"><h3 class="title">D</h3><dl><dt><a id="delay"></a>delay</dt><dd><p>
             Period of time observed from initial sending of a network packet to
             final delivery at the recipient.  Commonly broken down into four
             areas:
@@ -883,7 +881,7 @@
             make up the total delay.
           </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><h3 class="title">J</h3><dl><dt><a id="jitter"></a>jitter</dt><dd><p>
             Variation in delay between arrival of network packets.  See also
-            <a href="#id2530778">RFC 3393</a>.
+            <a href="#id2530761">RFC 3393</a>.
           </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><h3 class="title">L</h3><dl><dt><a id="loss"></a>loss</dt><dd><p>
             When specific packets in a stream go missing.  Can be attributed to
             different factors such as network failure, network congestion, 
@@ -901,24 +899,24 @@
             Provides for un-reliable, non-ordered delivery of short messages
             (datagrams).  Used in applications such as video and audio
             transmission.
-          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2530566"></a><p>[<abbr class="abbrev">Lowekamp04Hierarchy</abbr>] <span class="title"><i>A Hierarchy of Network Performance Characteristics for Grid Applications and Services</i>. </span><span class="authorgroup"><span class="firstname">Bruce</span> <span class="surname">Lowekamp</span>, <span class="firstname">Brian</span> <span class="surname">Tierney</span>, <span class="firstname">Les</span> <span class="surname">Cottrell</span>, <span class="firstname">Richard</span> <span class="surname">Hughes-Jones</span>, <span class="firstname">Thilo</span> <span class="surname">Kielmann</span>, and <span class="firstname">Martin</span> <span class="surname">Swany</span>. </span><span class="confgroup"><span class="conftitle">GGF Network Measurements Working Group - Community Recomendation. </span>. </span></p></div><div class="biblioentry"><a id="id2530648"></a><p>[<abbr class="abbrev">Iperf</abbr>] <span class="title"><i>
+          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2530548"></a><p>[<abbr class="abbrev">Lowekamp04Hierarchy</abbr>] <span class="title"><i>A Hierarchy of Network Performance Characteristics for Grid Applications and Services</i>. </span><span class="authorgroup"><span class="firstname">Bruce</span> <span class="surname">Lowekamp</span>, <span class="firstname">Brian</span> <span class="surname">Tierney</span>, <span class="firstname">Les</span> <span class="surname">Cottrell</span>, <span class="firstname">Richard</span> <span class="surname">Hughes-Jones</span>, <span class="firstname">Thilo</span> <span class="surname">Kielmann</span>, and <span class="firstname">Martin</span> <span class="surname">Swany</span>. </span><span class="confgroup"><span class="conftitle">GGF Network Measurements Working Group - Community Recomendation. </span>. </span></p></div><div class="biblioentry"><a id="id2530631"></a><p>[<abbr class="abbrev">Iperf</abbr>] <span class="title"><i>
         <a href="http://dast.nlanr.net/Projects/Iperf" target="_top">Iperf</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530667"></a><p>[<abbr class="abbrev">Measurement Schema</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530650"></a><p>[<abbr class="abbrev">Measurement Schema</abbr>] <span class="title"><i>
         <a href="https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119" target="_top">Measurement Schema</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530687"></a><p>[<abbr class="abbrev">Topology Schema</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530670"></a><p>[<abbr class="abbrev">Topology Schema</abbr>] <span class="title"><i>
         <a href="..." target="_top">Topology Schema</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530705"></a><p>[<abbr class="abbrev">MSV</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530688"></a><p>[<abbr class="abbrev">MSV</abbr>] <span class="title"><i>
         <a href="https://msv.dev.java.net/" target="_top">Sun Multi-Schema XML Validator (MSV)</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530723"></a><p>[<abbr class="abbrev">NM-WG</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530706"></a><p>[<abbr class="abbrev">NM-WG</abbr>] <span class="title"><i>
         <a href="http://nmwg.internet2.edu" target="_top">Network Measurements Working Group</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530742"></a><p>[<abbr class="abbrev">OGF</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530725"></a><p>[<abbr class="abbrev">OGF</abbr>] <span class="title"><i>
         <a href="http://www.ogf.org/" target="_top">Open Grid Forum</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530760"></a><p>[<abbr class="abbrev">RELAX-NG</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530742"></a><p>[<abbr class="abbrev">RELAX-NG</abbr>] <span class="title"><i>
         <a href="http://relaxng.org/" target="_top">RELAX-NG Schema Language</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530778"></a><p>[<abbr class="abbrev">RFC 3393</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530761"></a><p>[<abbr class="abbrev">RFC 3393</abbr>] <span class="title"><i>
         <a href="http://tools.ietf.org/html/rfc3393" target="_top">RFC 3393</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530796"></a><p>[<abbr class="abbrev">Trang</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530779"></a><p>[<abbr class="abbrev">Trang</abbr>] <span class="title"><i>
         <a href="http://www.thaiopensource.com/relaxng/trang.html" target="_top">Multi-format schema converter based on RELAX NG</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530815"></a><p>[<abbr class="abbrev">XSD</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530798"></a><p>[<abbr class="abbrev">XSD</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/XML/Schema" target="_top">XML Schema</a>
       </i>. </span></p></div></div></div></body></html>
