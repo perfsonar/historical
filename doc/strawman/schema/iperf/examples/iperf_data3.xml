@@ -1,0 +1,21 @@
+<nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data1" 
+           metadataIdRef="metadata-1">  
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata">
+    <iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject-1">
+      <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
+        <nmwgt:src type="ipv4" value="198.32.8.170" port="5433" />
+        <nmwgt:dst type="ipv4" value="198.32.8.174" port="5433" />
+      </nmwgt:endPointPair>
+    </iperf:subject>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+    <nmwg:eventType>
+      http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0
+    </nmwg:eventType>
+    <iperf:parameters xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="parameters-1">
+      <nmwg:parameter name="windowSize">4m</nmwg:parameter>
+      <nmwg:parameter name="timeDuration">30</nmwg:parameter>
+      <nmwg:parameter name="interval">2</nmwg:parameter>
+      <nmwg:parameter name="protocol">TCP</nmwg:parameter>
+    </iperf:parameters>
+  </nmwg:metadata>
+</nmwg:data>  

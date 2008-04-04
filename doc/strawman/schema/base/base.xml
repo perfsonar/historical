@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>An Extensible Schema for Network Measurement and Performance Data</title>
+
+    <author>
+      <firstname>M.</firstname>
+      <surname>Swany</surname>
+      <affiliation>
+        <orgname>University of Delaware</orgname>
+        <address>   
+          <email>swany@udel.edu</email>
+        </address>
+      </affiliation>
+    </author>
+
+    <copyright>
+      <year>2008</year>
+      <holder>Open Grid Forum</holder>
+    </copyright>
+
+  </articleinfo>
+
+  <section id="introduction" xreflabel="Introduction">
+    <title>Introduction</title>
+    
+    <para>
+      Place holder ... see <ulink url="https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119">https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119</ulink>
+    </para>    
+
+  </section>
+
+  <glossary id="glossary">
+    <title>Terms</title>
+
+    <glossdiv id="A">
+      <title>A</title>    
+    </glossdiv> 
+    
+    <glossdiv id="B">
+      <title>B</title>    
+    </glossdiv> 
+    
+    <glossdiv id="C">
+      <title>C</title>    
+    </glossdiv> 
+    
+    <glossdiv id="D">
+      <title>D</title>   
+    </glossdiv> 
+    
+    <glossdiv id="E">
+      <title>E</title>    
+    </glossdiv> 
+    
+    <glossdiv id="F">
+      <title>F</title>        
+    </glossdiv> 
+    
+    <glossdiv id="G">
+      <title>G</title>    
+    </glossdiv> 
+    
+    <glossdiv id="H">
+      <title>H</title>           
+    </glossdiv> 
+    
+    <glossdiv id="I">
+      <title>I</title>          
+    </glossdiv> 
+    
+    <glossdiv id="J">
+      <title>J</title>    
+    </glossdiv> 
+    
+    <glossdiv id="K">
+      <title>K</title>    
+    </glossdiv> 
+    
+    <glossdiv id="L">
+      <title>L</title>    
+    </glossdiv> 
+    
+    <glossdiv id="M">
+      <title>M</title>      
+    </glossdiv> 
+    
+    <glossdiv id="N">
+      <title>N</title>  
+    </glossdiv> 
+    
+    <glossdiv id="O">
+      <title>O</title>    
+    </glossdiv> 
+    
+    <glossdiv id="P">
+      <title>P</title>       
+    </glossdiv>
+    
+    <glossdiv id="Q">
+      <title>Q</title>    
+    </glossdiv> 
+    
+    <glossdiv id="R">
+      <title>R</title>  
+    </glossdiv> 
+    
+    <glossdiv id="S">
+      <title>S</title>          
+    </glossdiv> 
+    
+    <glossdiv id="T">
+      <title>T</title>     
+    </glossdiv> 
+    
+    <glossdiv id="U">
+      <title>U</title>   
+    </glossdiv> 
+    
+    <glossdiv id="V">
+      <title>V</title>    
+    </glossdiv> 
+    
+    <glossdiv id="W">
+      <title>W</title>    
+    </glossdiv> 
+    
+    <glossdiv id="X">
+      <title>X</title>  
+    </glossdiv> 
+    
+    <glossdiv id="Y">
+      <title>Y</title>    
+    </glossdiv> 
+    
+    <glossdiv id="Z">
+      <title>Z</title>    
+    </glossdiv>
+     
+  </glossary>
+
+  <bibliography id="bibliography">
+    <title>References</title>
+
+  </bibliography>
+
+</article>

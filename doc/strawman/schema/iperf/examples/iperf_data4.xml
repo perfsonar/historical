@@ -1,0 +1,9 @@
+<nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data1" 
+           metadataIdRef="metadata-1">  
+  <nmwg:key id="key-1">
+    <nmwg:parameters id="parameters-key-1">
+      <nmwg:parameter name="STRING">STRING</nmwg:parameter>
+      <nmwg:parameter name="STRING" value="STRING" />
+    </nmwg:parameters>
+  </nmwg:key>
+</nmwg:data>  

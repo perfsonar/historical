@@ -1,0 +1,157 @@
+# ##############################################################
+# 
+# File:         nmtopo_l3.rnc - Schema for Layer 3 entities 
+# Version:      $Id: nmtopo-l3.rnc 189 2007-01-31 20:46:21Z boote $
+# Purpose:      This schema represents entities at Layer 3, or the 
+#               Network Layer.
+# Reference:    http://books.xmlschemata.org/relaxng/page2.html
+#                         
+# ##############################################################
+
+
+# ##############################################################
+# Namespace definitions
+# ##############################################################
+namespace nmtl3 = "http://ggf.org/ns/nmwg/topology/l3/3.0/"
+namespace nmtl2 = "http://ggf.org/ns/nmwg/topology/l2/3.0/"
+namespace nmwgtopo3 = "http://ggf.org/ns/nmwg/topology/base/3.0/"
+
+
+## ########################
+## l3 interface
+## ########################
+
+L3Interface = 
+        element nmtl3:interface {
+                L3InterfaceContent
+        }
+
+L3InterfaceContent = 
+        Identifier? &
+        L3InterfaceIdRef? &
+        element nmtl3:ipAddress {
+                L3Address
+        }? &
+        element nmtl3:netmask { xsd:string }? &
+        element nmtl3:ifName { xsd:string }? &
+        element nmtl3:ifDescription { xsd:string }? &
+        element nmtl3:ifAddress {
+                L3Address
+        }? &
+        element nmtl3:ifHostName { xsd:string }? &
+        element nmtl3:ifIndex { xsd:string }? &
+        element nmtl3:type { xsd:string }? &
+        element nmtl3:capacity { xsd:string }?
+
+L3Address = 
+        (
+                attribute value { xsd:string } |
+                text
+        ) &
+        attribute type { xsd:string }
+
+
+## ########################
+## l3 link
+## ########################
+
+L3Link = 
+        element nmtl3:link {
+                L3LinkContent
+        }
+
+L3LinkContent =
+        Identifier? &
+        L3LinkIdRef? &
+        element nmtl3:index { xsd:string }? &        
+        element nmtl3:type { xsd:string }? &                
+        element nmtl3:name { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        element nmtl3:globalName { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &        
+        (
+                L3Interface |
+                L2Interface
+        )* &
+        (
+                L3Link |
+                L2Link
+        )* &
+        Node*
+        
+
+## ########################
+## l3 network
+## ########################
+
+L3Network =
+        element nmtl3:network{
+                L3NetworkContent
+        }
+
+L3NetworkContent =
+        Identifier? &
+        L3NetworkIdRef? &
+        element nmtl3:name { 
+                attribute type { xsd:string }? &
+                xsd:string
+        }? &
+        element nmtl3:type { xsd:string }? &        
+        element nmtl3:subnet { xsd:string }? &        
+        element nmtl3:netmask { xsd:string }? &        
+        element nmtl3:asn { xsd:string }? &
+        (
+                L3Interface |
+                L2Interface
+        )* &
+        (
+                L3Link |
+                L2Link
+        )* &
+        Node*
+                
+
+## ########################
+## l3 path
+## ########################
+
+L3Path = 
+        element nmtl3:path {
+                L3PathContent
+        }
+
+L3PathContent = 
+        Identifier &
+        L3PathIdRef? &        
+        (
+                L2Link |
+                L3Link
+        )*
+
+
+## ########################
+## l3 misc
+## ########################
+
+L3Role = 
+        (
+                attribute role { xsd:string } |
+                element nmtl3:role { xsd:string }
+        )
+
+L3InterfaceIdRef =
+            attribute interfaceIdRef { xsd:string }        
+
+L3LinkIdRef =
+            attribute linkIdRef { xsd:string }
+
+L3NetworkIdRef =
+            attribute networkIdRef { xsd:string }
+
+L3PathIdRef =
+            attribute pathIdRef { xsd:string }
+
