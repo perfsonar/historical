@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<nmwg:store type="LSStore-control"
-            xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-            xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
-            xmlns:netutil="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/"
-            xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"
-            xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" />

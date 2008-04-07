@@ -1,0 +1,12 @@
+<message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+         type="request" id="message1">
+
+  <metadata id="m1">
+    <nmwg:eventType>
+      echo
+    </nmwg:eventType>
+  </metadata>
+
+  <data id="d1" metadatIdRef="m1" />
+  
+</message>

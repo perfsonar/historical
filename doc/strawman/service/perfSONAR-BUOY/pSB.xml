@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>perfSONAR-PS perfSONAR-BUOY Measurement Archive</title>
+
+    <authorgroup>
+      <author>
+        <firstname>J.</firstname>
+        <surname>Zurawski</surname>
+        <affiliation>
+          <orgname>Internet2</orgname>
+          <address>   
+            <email>zurawski@internet2.edu</email>
+          </address>
+        </affiliation>
+      </author>
+
+      <editor>
+        <firstname>M.</firstname>
+        <surname>Swany</surname>
+        <affiliation>
+          <orgname>Universtity of Delaware</orgname>
+          <address>   
+            <email>swany@cis.udel.edu</email>
+          </address>
+        </affiliation>
+      </editor>
+    </authorgroup>
+
+  </articleinfo>
+
+  <section id="changes" xreflabel="Document Changes">
+    <title>Document Changes</title>
+
+    <table frame="all" align="center" halign="center" width="80%"  id="table.1">
+      <title>Change Log</title>
+      <tgroup cols="1" align="left" colsep="1" rowsep="1">
+        <colspec colnum="1" colname="c1" width="10%"/>
+        <colspec colnum="2" colname="c2" width="10%"/>
+        <colspec colnum="3" colname="c3" width="50%"/>
+        <colspec colnum="4" colname="c4" width="30%"/>
+        <thead>
+          <row>
+            <entry>Version</entry>
+            <entry>Date</entry>
+            <entry>Description</entry>
+            <entry>Author(s)</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>1.0</entry>
+            <entry>4/5/2008</entry>
+            <entry>Initial Preparation</entry>
+            <entry>J. Zurawski</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+   
+  </section>
+
+  <section id="introduction" xreflabel="Introduction">
+    <title>Introduction</title>
+    
+    <para>
+      <citation>perfSONAR-PS</citation> is a set of independent software
+      services that implement the <citation>perfSONAR</citation> protocols for
+      network performance monitoring. perfSONAR-PS services are designed to be
+      compatible with all other perfSONAR software that implements the
+      <citation>perfSONAR Base Protocol</citation>. 
+    </para>
+    
+    <para>
+      The <emphasis>perfSONAR-BUOY</emphasis> Measurement Archive service
+      exposes active measurement data, making the results available through
+      perfSONAR web services interfaces. All performance tests are performed
+      via the <citation>BWCTL</citation> tool (<emphasis>throughput</emphasis>
+      measurements) and currently consist of regularly-scheduled
+      <citation>Iperf</citation> tests to a configurable list of source and
+      destination hosts.
+    </para>
+
+    <para>
+      Data collected through the <emphasis>BWCTL</emphasis> interaction is
+      stored in a <citation>MySQL</citation> database. Active measurements
+      between known hosts are particularly valuable when assuring connectivity,
+      availability, and quality of the network.
+      <emphasis>perfSONAR-BUOY</emphasis> allows for the easy configuration of
+      a <emphasis>mesh</emphasis> of tests to hosts equipped with
+      <emphasis>BWCTL</emphasis>.
+    </para>
+    
+    <para>
+      Based on a configurable schedule, the tests will be conducted autonomously
+      and stored for consumption via the <emphasis>perfSONAR-BUOY</emphasis>
+      interface as well as presentation through included web scripts. Using the
+      same XML protocols as the the other perfSONAR services,
+      <emphasis>perfSONAR-BUOY</emphasis> provides uncomplicated access methods
+      to retrieve the data in an unambiguous manner, thus eliminating the
+      mystery associated with the backend storage.
+    </para>
+    
+    <para>
+      Closely coupled with development on <emphasis>BWCTL</emphasis>,
+      <emphasis>perfSONAR-BUOY</emphasis> will soon offer data originating from
+      sources besides <emphasis>Iperf</emphasis> such as
+      <citation>OWAMP</citation> (latency measurements),
+      <citation>thrulay</citation>, and <citation>nuttcp</citation>.
+    </para>
+    
+  </section>
+
+  <section id="protocol" xreflabel="Protocols Implemented">
+    <title>Protocols Implemented</title>
+
+    <para>
+      The perfSONAR-BUOY Measurement archive implements portions of the 
+      <citation>perfSONAR LS Protocol</citation> for service registration
+      and management.  The following messages from this protocol are 
+      supported.
+    </para>
+    
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para>LSRegistrationRequest</para>    
+      </listitem>
+      <listitem>
+        <para>LSKeepaliveRequest</para>    
+      </listitem>     
+    </itemizedlist>
+    
+    <para>
+      The only notable deviation from this protocol is the inclusion of 
+      service specific data into the <emphasis>LSRegistrationRequest</emphasis>
+      message.
+    </para>
+    
+    <para>
+      The perfSONAR-BUOY Measurement archive also implements portions of the 
+      <citation>perfSONAR MA Protocol</citation>.  The first notable exception
+      is that it <command>does not</command> implement the
+      <emphasis>MeasurementArchiveStore</emphasis> message for reasons of
+      security.  Future iterations of the service will consider implementing an
+      interface to this message type.  
+    </para>
+
+    <section id="protocol_metadatakey" xreflabel="MetadataKey">
+      <title>MetadataKey</title>
+
+      <para>
+      </para>
+
+      <section id="metadata_key_request" xreflabel="MetadataKeyRequest Message">
+        <title>MetadataKeyRequest Message</title>
+    
+        <para>
+        </para>
+
+        <section id="metadata_key_request_schema" xreflabel="MetadataKeyRequest Message Schema">
+          <title>MetadataKeyRequest Message Schema</title>
+    
+          <para>
+            The following schema is a native description of the request schema as
+            in the <citation>RELAX-NG</citation> language.  Through the use of
+            tools such as <citation>Trang</citation> and <citation>MSV</citation>
+            it is possible to convert this to other widely accepted formats such
+            as <citation>XSD</citation>.
+          </para>
+
+          <programlisting>
+            <![CDATA[
+              <inlineschema file="schema/.rnc"/>
+            ]]>
+          </programlisting> 
+
+        </section>
+    
+        <section id="metadata_key_request_analysis" xreflabel="Request Message Analysis">
+          <title>MetadataKeyRequest Message Analysis</title>
+    
+          <para>
+          </para>
+
+          <section id="metadata_key_request_analysis_" xreflabel="">
+            <title></title>
+      
+            <programlisting>
+              <![CDATA[
+
+              ]]>
+            </programlisting>
+
+            <table frame="all" align="center" halign="center" width="80%"  id="table.metadata_key_request_analysis_">
+              <title> Element Requirements</title>
+              <tgroup cols="1" align="left" colsep="1" rowsep="1">
+                <colspec colnum="1" colname="c1" width="30%"/>
+                <colspec colnum="2" colname="c2" width="70%"/>
+                <tbody>
+                  <row>
+                    <entry><command>localname</command></entry>
+                    <entry></entry>
+                  </row>
+                  <row>
+                    <entry><command>namespaces</command></entry>
+                    <entry></entry>
+                  </row>
+                  <row>
+                    <entry><command>attributes</command></entry>
+                    <entry></entry>
+                  </row>
+                  <row>
+                    <entry><command>nested elements</command></entry>
+                    <entry></entry>
+                  </row>
+                  <row>
+                    <entry><command>required</command></entry>
+                    <entry></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </table>
+       
+            <para>
+            </para> 
+
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command></command> - </para>
+              </listitem>
+            </itemizedlist>
+
+            <para>
+            </para> 
+      
+            <itemizedlist mark='opencircle'>
+              <listitem>
+                <para><command></command> - </para>
+              </listitem>
+            </itemizedlist>
+
+          </section>
+
+        </section>
+      
+        <section id="metadata_key_request_example" xreflabel="MetadataKeyRequest Message Example">
+          <title>MetadataKeyRequest Message Example</title>
+    
+          <para>
+          </para>
+
+          <programlisting>
+            <![CDATA[
+              <inlinexml file="examples/.xml"/>
+            ]]>
+          </programlisting> 
+         
+        </section>
+
+      </section>
+
+    </section>
+    
+    <section id="protocol_setupdata" xreflabel="SetupData">
+      <title>SetupData</title>
+
+
+    </section>
+    
+  </section>
+  
+  <section id="schema" xreflabel="Schemas Implemented">
+    <title>Schemas Implemented</title>
+    
+    <para>
+      The <emphasis>perfSONAR-BUOY</emphasis> Measurement Archive implements the
+      <citation>Iperf Schema Profile</citation> in it's entirety.  There are no changes
+      to this implementation.
+    </para>
+    
+    <para>
+      Future iterations of this service will consider implementation of any
+      or all of the following schema profiles:
+    </para>
+    
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><citation>BWCTL Schema Profile</citation></para>    
+      </listitem>
+      <listitem>
+        <para><citation>OWAMP Schema Profile</citation></para>    
+      </listitem>
+      <listitem>
+        <para><citation>Thrulay Schema Profile</citation></para>    
+      </listitem>
+      <listitem>
+        <para><citation>Nuttcp Schema Profile</citation></para>    
+      </listitem>
+      <listitem>
+        <para><citation>Achievable Bandwidth Schema Profile</citation></para>    
+      </listitem>
+    </itemizedlist>
+    
+  </section>
+
+  <section id="installation" xreflabel="Installation">
+    <title>Installation</title>
+    
+    <para>
+      There are three primary methods used to install the perfSONAR-BUOY 
+      Measurement Archive.  
+    </para>
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para>Subversion - The perfSONAR-PS code
+        base is available for download via our subversion server,  See
+        <xref linkend="installation_svn" /></para>    
+      </listitem>
+      <listitem>
+        <para>CPAN - The preferred method of installation
+        is through the <citation>Comprehensive Perl Archive Network</citation>,
+        See <xref linkend="installation_cpan" /></para>    
+      </listitem>
+      <listitem>
+        <para>RPM - Enclosed RPM files are also available,
+        See <xref linkend="installation_rpm" /></para>    
+      </listitem>
+    </itemizedlist>
+
+    <section id="installation_pre" xreflabel="Prerequisites">
+      <title>Prerequisites</title>
+    
+      <para>
+        There are several items of prerequisite software that are required
+        before the installation of the <emphasis>perfSONAR-BUOY</emphasis>
+        Measurement Archive.  The individual instructions regarding the
+        installation and configuration of these items is well beyond the scope
+        of this work; users are encouraged to read the documentation of the
+        individual software packages before proceeding further in this
+        installation process.
+      </para>
+      
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para>Perl - Available on most modern Linux and Unix distributions, 
+          or see <citation>Perl</citation></para>.
+        </listitem>
+        <listitem>
+          <para>MySQL - Open source database, see <citation>MySQL</citation>
+          </para>    
+        </listitem>
+        <listitem>
+          <para>AMI - The AMI framework is currently undergoing a complete
+          re-organization.  The old software may be obtained by contacting the
+          <ulink url="mailto:i2-perfsonar@internet2.edu">perfSONAR-PS</ulink>
+          developers</para>    
+        </listitem>
+
+      </itemizedlist>     
+    
+    </section>    
+    
+    <section id="installation_svn" xreflabel="Subversion">
+      <title>Subversion</title>
+
+      <para>    
+        From a shell in the destination directory, do the following:
+      </para>
+	
+      <command>$ svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/</command>
+
+      <para>
+        This will download the current working branch of the perfSONAR-PS
+        repository.  If you have this already it can be updated from time to
+        time with:
+      </para>
+      
+      <command>$ svn update</command>
+
+      <para>
+        Use CPAN to install any necessary libraries.  The following will be 
+        needed by the perfSONAR-BUOY MA:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>Carp</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Config::General</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Cwd</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>DBI</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Data::Compare</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Data::Dumper</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Date::Manip</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Digest::MD5</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>English</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Error::Simple</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Error</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Exporter</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Fcntl</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>File::Basename</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>File::Path</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>FileHandle</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>FindBin</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Getopt::Long</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>HTTP::Daemon</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>IO::File</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>LWP::UserAgent</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Log::Dispatch::FileRotate</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Log::Dispatch::Screen</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Log::Dispatch::Syslog</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Log::Log4perl</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Math::BigFloat</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Math::BigInt</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Module::Load</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Params::Validate</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Sys::Hostname</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Sys::Syslog</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Term::ReadKey</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>Time::HiRes</command></para>    
+        </listitem>
+        <listitem>
+          <para><command>XML::LibXML</command></para>    
+        </listitem>
+
+      </itemizedlist>  
+
+      <para>
+        From a shell, do the following:
+      </para>
+	
+      <command>$ sudo perl -MCPAN -e shell</command>
+
+      <para>
+        If this is your first time using CPAN, please answer any questions it
+        asks.  These can be as simple as selecting a default value, or
+        choosing a download mirror.  These questions will be asked only once.
+        You will eventually see a prompt:
+      </para>
+      
+      <command>cpan[1]></command>
+
+      <para>
+        Type the following:
+      </para>
+      
+      <command>cpan[1]> install LIBRARY::NAME</command>
+
+      <para>
+        This will start the installation process. There may be pre-requisites
+        to install, and other questions to answer, this is normal.  When
+        completed another prompt will appear, use this to quit:
+      </para>
+
+      <command>cpan[2]> exit</command>
+    
+    </section>    
+
+    <section id="installation_cpan" xreflabel="CPAN">
+      <title>CPAN</title>
+    
+      <para>
+        From a shell, do the following:
+      </para>
+	
+      <command>$ sudo perl -MCPAN -e shell</command>
+
+      <para>
+        If this is your first time using CPAN, please answer any questions it
+        asks.  These can be as simple as selecting a default value, or choosing
+        a download mirror.  These questions will be asked only once.  You will
+        eventually see a prompt:
+      </para>
+
+      <command>cpan[1]></command>
+
+      <para>
+        Type the following:
+      </para>
+
+      <command>cpan[1]> install perfSONAR_PS::Services::MA::perfSONARBUOY</command>
+
+      <para>
+        This will start the installation process. There may be pre-requisites
+        to install, and other questions to answer, this is normal.  When
+        completed another prompt will appear, use this to quit:
+      </para>
+      
+      <command>cpan[2]> exit</command>
+    
+    </section>    
+
+    <section id="installation_rpm" xreflabel="RPM">
+      <title>RPM</title>
+    
+      <para>
+      TBD
+      </para>
+    
+    </section>        
+
+  </section>
+  
+  <section id="configuration" xreflabel="Configuration">
+    <title>Configuration</title>
+    
+    <para>
+      All services in the <emphasis>perfSONAR-PS</emphasis> framework
+      run on a shared software infrastructure simply termed the 
+      <emphasis>perfSONAR-PS Daemon</emphasis>.  To properly operate this, and
+      the other services a certain amount of configuration is required.  This
+      configuration addresses both <emphasis>universal</emphasis> options that
+      are required for the <emphasis>Daemon</emphasis> and service specific
+      options for the <emphasis>perfSONAR-BUOY Measurement Archive</emphasis>.
+    </para>
+    
+    <para>
+      There are two primary methods to configure the <emphasis>Daemon</emphasis>:
+    </para>
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para>Script - A interactive perl based script to generate a
+        configuration file, see <xref linkend="configuration_daemon" /></para>    
+      </listitem>
+      <listitem>
+        <para>Web Configuration - A web based form used to generate a 
+        configuration file and control other aspects of the software, see
+        <xref linkend="configuration_daemon_web" /></para>    
+      </listitem>
+    </itemizedlist>       
+
+    <section id="configuration_daemon" xreflabel="perfSONAR-PS Daemon">
+      <title>perfSONAR-PS Daemon</title>
+    
+      <para>
+      </para>
+
+      <section id="configuration_daemon_script" xreflabel="psConfigurDaemon">
+        <title>psConfigurDaemon</title>
+    
+        <para>
+          From a shell, type the following command:
+        </para>
+        
+        <command>$ psConfigureDaemon</command>
+
+        <para>
+          The following menu will appear:
+        </para>
+
+        <programlisting>
+          <![CDATA[        
+-- perfSONAR-PS Daemon Configuration --
+
+- [press enter for the default choice] -
+
+
+What file should I write the configuration to? [/etc/perfsonar/daemon.conf]:
+          ]]>
+        </programlisting> 
+      
+        <para>
+          After selecting a file, you shall see this:
+        </para>
+
+        <programlisting>
+          <![CDATA[
+1) Add/Edit endpoint
+
+2) Set global values
+
+3) Save configuration
+
+4) Exit
+
+? []:
+          ]]>
+        </programlisting> 
+      
+        <para>
+          If this is your first time setting up ANY perfSONAR-PS service please
+          configure option (2) as well as option (1) to set up this specific
+          service.  If this is an additional service to a perfSONAR-PS daemon
+          then only worry about option (1).  
+        </para>
+
+        <para>
+          A series of questions will appear, answer them and finally save the
+          configuration using option (3) and exit using option (4).
+        </para>
+        
+      </section> 
+
+      <section id="configuration_daemon_web" xreflabel="perfSONAR-PS WebAdmin">
+        <title>perfSONAR-PS WebAdmin</title>
+    
+        <para>
+          TBD
+        </para>
+    
+      </section> 
+    
+    </section>   
+
+  </section>
+
+  <section id="operation" xreflabel="Service Operation">
+    <title>Service Operation</title>
+
+    <para>
+      There are different ways to run this service depending on the installation
+      method.  
+    </para>
+
+    <section id="operation_svn" xreflabel="Running from Subversion">
+      <title>Running from Subversion</title>
+
+      <para>
+        The service can be started via the script in the root of the 
+        downloaded perfSONAR-PS subversion repository:
+      </para>
+    
+      <command>$PS_PS_HOME/./perfsonar-daemon.pl</command>
+
+      <para>
+        For usage information, and options you may pass to the daemon, try this:
+      </para>
+    
+      <command>$PS_PS_HOME/./perfsonar-daemon.pl -h</command>
+
+    </section>
+
+    <section id="operation_other" xreflabel="Running from RPM or CPAN">
+      <title>Running from RPM or CPAN</title>
+
+      <para>
+        The service can be started via the init.d facility:
+      </para>
+    
+      <command>$ /etc/init.d/perfsonar-daemon start</command>
+
+      <para>
+        For usage information, and options you may pass to the daemon, try this:
+      </para>
+    
+      <command>perfsonar-daemon -h</command>
+
+    </section>
+        
+  </section>
+
+  <section id="functional" xreflabel="Functional Specification">
+    <title>Functional Specification</title>
+
+    <para>
+      TBD
+    </para>
+    
+  </section>
+
+  <section id="faq" xreflabel="FAQ">
+    <title>FAQ</title>
+    
+    <para> 
+      The following are a sampling of questions and common problems addressed
+      over the writing and maintenance of this document.  When applicable a date
+      will be associated with each question.
+    </para>
+    
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><command>Q: (April 6, 2008) </command> - Blah Blah?</para>    
+      </listitem>
+      <listitem>
+        <para><command>A:</command> - Blah Blah!</para>
+      </listitem>
+    </itemizedlist>   
+
+  </section>
+
+  <section id="additional" xreflabel="Additional Info">
+    <title>Additional Info</title>
+    
+    <para> 
+      For more information on perfSONAR, please visit the perfSONAR website or
+      wiki:
+    </para>
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><ulink url="http://www.perfsonar.net/">http://www.perfsonar.net/</ulink></para>    
+      </listitem>
+      <listitem>
+        <para><ulink url="http://wiki.perfsonar.net/">http://wiki.perfsonar.net/</ulink></para>    
+      </listitem>
+    </itemizedlist>  
+
+    <para> 
+      For information regarding perfSONAR-PS please visit our information page
+      and wiki:
+    </para>    
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><ulink url="http://www.internet2.edu/performance/pS-PS/">http://www.internet2.edu/performance/pS-PS/</ulink></para>    
+      </listitem>
+      <listitem>
+        <para><ulink url="https://wiki.internet2.edu/confluence/display/PSPS/Home">https://wiki.internet2.edu/confluence/display/PSPS/Home</ulink></para>    
+      </listitem>
+    </itemizedlist> 
+
+    <para> 
+      The developers mailing list is located here:
+    </para>  
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><ulink url="https://mail.internet2.edu/wws/info/i2-perfsonar">https://mail.internet2.edu/wws/info/i2-perfsonar</ulink></para>    
+      </listitem>
+    </itemizedlist>
+
+    <para> 
+      And finally the bug tracker for perfSONAR-BUOY is located here:
+    </para>  
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><ulink url="https://bugs.internet2.edu/jira/browse/PSPS">https://bugs.internet2.edu/jira/browse/PSPS</ulink></para>    
+      </listitem>
+    </itemizedlist>
+
+  </section>
+
+  <glossary id="glossary">
+    <title>Terms</title>
+
+    <glossdiv id="A">
+      <title>A</title>    
+    </glossdiv> 
+    
+    <glossdiv id="B">
+      <title>B</title>    
+    </glossdiv> 
+    
+    <glossdiv id="C">
+      <title>C</title>     
+    </glossdiv> 
+    
+    <glossdiv id="D">
+      <title>D</title>   
+    </glossdiv> 
+    
+    <glossdiv id="E">
+      <title>E</title>    
+    </glossdiv> 
+    
+    <glossdiv id="F">
+      <title>F</title>        
+    </glossdiv> 
+    
+    <glossdiv id="G">
+      <title>G</title>    
+    </glossdiv> 
+    
+    <glossdiv id="H">
+      <title>H</title>           
+    </glossdiv> 
+    
+    <glossdiv id="I">
+      <title>I</title>          
+    </glossdiv> 
+    
+    <glossdiv id="J">
+      <title>J</title>     
+    </glossdiv> 
+    
+    <glossdiv id="K">
+      <title>K</title>    
+    </glossdiv> 
+    
+    <glossdiv id="L">
+      <title>L</title>    
+    </glossdiv> 
+    
+    <glossdiv id="M">
+      <title>M</title>      
+    </glossdiv> 
+    
+    <glossdiv id="N">
+      <title>N</title>  
+    </glossdiv> 
+    
+    <glossdiv id="O">
+      <title>O</title>    
+    </glossdiv> 
+    
+    <glossdiv id="P">
+      <title>P</title>    
+    </glossdiv>
+    
+    <glossdiv id="Q">
+      <title>Q</title>    
+    </glossdiv> 
+    
+    <glossdiv id="R">
+      <title>R</title>  
+    </glossdiv> 
+    
+    <glossdiv id="S">
+      <title>S</title>            
+    </glossdiv> 
+    
+    <glossdiv id="T">
+      <title>T</title>     
+    </glossdiv> 
+    
+    <glossdiv id="U">
+      <title>U</title>  
+    </glossdiv> 
+    
+    <glossdiv id="V">
+      <title>V</title>    
+    </glossdiv> 
+    
+    <glossdiv id="W">
+      <title>W</title>    
+    </glossdiv> 
+    
+    <glossdiv id="X">
+      <title>X</title>  
+    </glossdiv> 
+    
+    <glossdiv id="Y">
+      <title>Y</title>    
+    </glossdiv> 
+    
+    <glossdiv id="Z">
+      <title>Z</title>    
+    </glossdiv>
+     
+  </glossary>
+
+  <bibliography id="bibliography">
+    <title>References</title>
+
+    <biblioentry xreflabel="Measurement Schema">
+      <abbrev>Measurement Schema</abbrev>
+      <title>
+        <ulink url="https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119">Measurement Schema</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Iperf Schema Profile">
+      <abbrev>Iperf Schema</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/iperf/iperf.html">Iperf Schema</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="BWCTL Schema Profile">
+      <abbrev>BWCTL Schema Profile</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/bwctl/bwctl.html">BWCTL Schema Profile</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="OWAMP Schema Profile">
+      <abbrev>OWAMP Schema Profile</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/owamp/owamp.html">OWAMP Schema Profile</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Thurlay Schema Profile">
+      <abbrev>Thrulay Schema Profile</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/thrulay/thulay.html">Thurlay Schema Profile</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Nuttcp Schema Profile">
+      <abbrev>Nuttcp Schema Profile</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/nuttcp/nuttcp.html">Nuttcp Schema Profile</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Achievable Bandwidth Schema Profile">
+      <abbrev>Achievable Bandwidth Schema Profile</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/schema/abw/abw.html">Achievable Bandwidth Schema Profile</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="perfSONAR Base Protocol">
+      <abbrev>perfSONAR Base Protocol</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/protocol/base/base_protocol.html">perfSONAR Base Protocol</ulink>
+      </title>
+    </biblioentry>
+    
+    <biblioentry xreflabel="perfSONAR MA Protocol">
+      <abbrev>perfSONAR MA Protocol</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/protocol/MA/ma.html">perfSONAR MA Protocol</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="perfSONAR LS Protocol">
+      <abbrev>perfSONAR LS Protocol</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/protocol/LS/ls.html">perfSONAR LS Protocol</ulink>
+      </title>
+    </biblioentry>
+
+
+    <biblioentry xreflabel="perfSONAR">
+      <abbrev>perfSONAR</abbrev>
+      <title>
+        <ulink url="http://www.perfsonar.net">perfSONAR</ulink>
+      </title>
+    </biblioentry>  
+
+    <biblioentry xreflabel="perfSONAR-PS">
+      <abbrev>perfSONAR-PS</abbrev>
+      <title>
+        <ulink url="http://www.internet2.edu/performance/pS-PS/">perfSONAR-PS</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="Perl">
+      <abbrev>Perl</abbrev>
+      <title>
+        <ulink url="http://www.perl.org">Perl</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="Iperf">
+      <abbrev>Iperf</abbrev>
+      <title>
+        <ulink url="http://dast.nlanr.net/Projects/Iperf">Iperf</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="BWCTL">
+      <abbrev>BWCTL</abbrev>
+      <title>
+        <ulink url="http://e2epi.internet2.edu/bwctl/index.html">BWCTL</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="thrulay">
+      <abbrev>thrulay</abbrev>
+      <title>
+        <ulink url="http://e2epi.internet2.edu/thrulay/index.html">thrulay</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="nuttcp">
+      <abbrev>nuttcp</abbrev>
+      <title>
+        <ulink url="ftp://ftp.lcp.nrl.navy.mil/pub/nuttcp/">nuttcp</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="MySQL">
+      <abbrev>MySQL</abbrev>
+      <title>
+        <ulink url="http://www.mysql.com/">MySQL</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="OWAMP">
+      <abbrev>OWAMP</abbrev>
+      <title>
+        <ulink url="http://e2epi.internet2.edu/owamp/index.html">OWAMP</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Comprehensive Perl Archive Network">
+      <abbrev>Comprehensive Perl Archive Network</abbrev>
+      <title>
+        <ulink url="http://www.cpan.org">Comprehensive Perl Archive Network</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="RPM Package Manager">
+      <abbrev>RPM Package Manager</abbrev>
+      <title>
+        <ulink url="http://www.rpm.org">RPM Package Manager</ulink>
+      </title>
+    </biblioentry>
+
+  </bibliography>
+
+</article>

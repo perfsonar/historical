@@ -1,0 +1,16 @@
+<nmwg:message type="TopologyChangeRequest" xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+<nmwg:metadata id="meta0">
+  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/replace/20070809</nmwg:eventType>
+</nmwg:metadata>
+<nmwg:data id="data0" metadataIdRef="meta0">
+  <nmtopo:topology 
+              xmlns:nmtopo="http://ogf.org/schema/network/topology/base/20070707/"
+              xmlns:nmtl2="http://ogf.org/schema/network/topology/l2/20070707/"
+              xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/"
+              xmlns:nmtl4="http://ogf.org/schema/network/topology/l4/20070707/">
+
+	<nmtopo:domain id="urn:ogf:network:domain=I2" />
+  </nmtopo:topology>
+</nmwg:data>
+</nmwg:message>
+

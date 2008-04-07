@@ -1,0 +1,1345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>Iperf Schema Profile</title>
+
+    <authorgroup>
+      <author>
+        <firstname>J.</firstname>
+        <surname>Zurawski</surname>
+        <affiliation>
+          <orgname>Internet2</orgname>
+          <address>   
+            <email>zurawski@internet2.edu</email>
+          </address>
+        </affiliation>
+      </author>
+
+      <editor>
+        <firstname>M.</firstname>
+        <surname>Swany</surname>
+        <affiliation>
+          <orgname>Universtity of Delaware</orgname>
+          <address>   
+            <email>swany@cis.udel.edu</email>
+          </address>
+        </affiliation>
+      </editor>
+    </authorgroup>
+
+  </articleinfo>
+
+  <section id="changes" xreflabel="Document Changes">
+    <title>Document Changes</title>
+
+    <table frame="all" align="center" halign="center" width="80%"  id="table.1">
+      <title>Change Log</title>
+      <tgroup cols="1" align="left" colsep="1" rowsep="1">
+        <colspec colnum="1" colname="c1" width="10%"/>
+        <colspec colnum="2" colname="c2" width="10%"/>
+        <colspec colnum="3" colname="c3" width="50%"/>
+        <colspec colnum="4" colname="c4" width="30%"/>
+        <thead>
+          <row>
+            <entry>Version</entry>
+            <entry>Date</entry>
+            <entry>Description</entry>
+            <entry>Author(s)</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>1.0</entry>
+            <entry>4/2/2008</entry>
+            <entry>Initial Preparation</entry>
+            <entry>J. Zurawski</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+   
+  </section>
+
+  <section id="introduction" xreflabel="Introduction">
+    <title>Introduction</title>
+    
+    <para>
+      <citation>Iperf</citation> is a tool used to measure maximum available
+      bandwidth over both the <xref linkend="TCP" /> and <xref linkend="UDP" />
+      protocols.  This software is flexible enough to allow for tuning of
+      the various parameters and characteristics of either protocol and will
+      report statistics such as <xref linkend="bandwidth" />,
+      <xref linkend="delay" />, <xref linkend="jitter" /> and
+      <xref linkend="loss" />.  
+    </para>
+
+    <para>
+      Commonly used as a <xref linkend="active" /> test to gauge network
+      performance, iperf is widely known to both system administrators and
+      users alike.  In addition to direct use, iperf has been incorporated into
+      a wide variety of tools and libraries to simplify use and take advantage
+      of the powerful features it offers.
+    </para>
+
+    <para>
+      This document will describe a schema extension of the
+      <citation>OGF</citation>'s base measurement schema as defined by the
+      <citation>NM-WG</citation>.  Details regarding all aspects and nuances of
+      the base schema appear in the publication
+      <citation>Measurement Schema</citation>.  The remainder of the document 
+      will proceed as follows.  We will introduce additional schema
+      <emphasis>profiles</emphasis> that are related to this work; examination
+      of these subsequent examples is recommended.  A reprint and discussion of
+      the iperf schema appears next, this includes an analysis of the
+      individual units along with some background as to why they are important.
+      We conclude with examples of usage that promotes use of the iperf data
+      format at the service level and beyond.
+    </para>
+
+  </section>
+
+  <section id="related" xreflabel="Related Schema Profiles">
+    <title>Related Schema Profiles</title>
+    
+    <para>
+      Iperf is able to deliver data that is akin to several network
+      <xref linkend="characteristic" /> as defined by
+      <citation>Lowekamp04Hierarchy</citation>.  To prevent this document from
+      becoming dated  we avoid directly citing references, but list several
+      characteristics of interest:
+    </para>
+
+    <itemizedlist mark='opencircle'>
+      <listitem>
+        <para><command>characteristic.bandwidth.achievable</command></para>    
+      </listitem>
+      <listitem>
+        <para><command>characteristic.delay.roundtrip</command></para>
+      </listitem>
+      <listitem>
+        <para><command>characteristic.loss.roundtrip</command></para>
+      </listitem>
+    </itemizedlist>   
+
+    <para>
+      This document will present the iperf data <emphasis>ONLY</emphasis> under
+      the auspices of the tool itself; no additional effort will be taken to 
+      describe the data in the light of the various characteristics.  The
+      interested reader should consult related documents for details.
+    </para>
+    
+  </section>
+
+  <section id="schema_description" xreflabel="Schema Description">
+    <title>Schema Description</title>
+
+    <para>
+      An XML <xref linkend="schema" /> is typically used to describe 
+      the structure and internal content of a given XML instance.  This 
+      description can sometimes be expressed in XML itself.  This 
+      abstraction is generally created to allow programmatic validation of 
+      XML instances and to protect a service from receiving a poorly 
+      constructed message.  
+    </para>
+
+    <para>
+      This document will explore the native form of the iperf schema from the 
+      <emphasis>NM-WG</emphasis> written in the <citation>RELAX-NG</citation>
+      language.  Admittedly <emphasis>RELAX-NG</emphasis> is not as widely
+      accepted of a schema definition language when it comes to validation and
+      consumption.  We will avoid including schema definitions in other
+      languages such as <citation>XSD</citation> since they can be easily
+      produced using tools such as <citation>MSV</citation> and
+      <citation>Trang</citation>.
+    </para>
+
+    <section id="schema_rnc" xreflabel="Relax NG Schema">
+      <title>Relax NG Schema</title>
+    
+      <para>
+        The following schema is a native description of the iperf schema as
+        originally prepared by members of the <emphasis>NM-WG</emphasis> in
+        the <emphasis>RELAX-NG</emphasis> language.  A detailed description
+        of the elements will follow in <xref linkend="analysis" />.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlineschema file="schema/iperf.rnc"/>
+        ]]>
+      </programlisting> 
+
+    </section>
+
+  </section>
+
+  <section id="analysis" xreflabel="Analysis">
+    <title>Analysis</title>
+
+    <para>
+      The following is a breakdown of the elements featured in the schema.  For
+      brevity anything that appears in a separate profile is not explained in
+      fine detail.  When applicable citations are provided to point the
+      interested reader in the correct direction.  
+    </para>
+    
+    <section id="analysis_metadata" xreflabel="Metadata">
+      <title>Metadata</title>
+
+      <programlisting>
+        <![CDATA[
+<nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata2"
+               metadataIdRef="metadata1">
+  
+  <iperf:subject id="subect2" />
+  
+  <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+  
+  <iperf:parameters id="parameters2" />
+  
+  <!-- OR --> 
+  
+  <nmwg:parameters id="parameters2" />
+
+</nmwg:metadata>
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_metadata">
+        <title>Metadata Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>metadata</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/base/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>id, metadataIdRef</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>subject, parameters, eventType, key</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+       
+      <para>
+        The metadata element is the primary method for describing all static
+        aspects of a measurement.  It normally contains information such as the
+        subject(s) of the test, any environmental considerations that may
+        modify the behavior, and a listing of possible data types the resulting
+        measurements can be used to satisfy.
+      </para> 
+
+      <para>
+        There are two possible attributes for this element: id and
+        metadataIdRef.  These are both state tracking mechanisms and are used to
+        link metadata to data, as well as perform any necessary chaining
+        operations.
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>id</command> - Identifying attribute used to track
+          state</para>
+        </listitem>
+        <listitem>
+          <para><command>metadataIdRef</command> - Identifying attribute used to
+          inlcude a reference to a specific metadata when chaining</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        There are four types of elements that may appear in the metadata
+        element:
+      </para> 
+      
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>subject</command> - Described in
+          <xref linkend="analysis_subject" /></para>
+        </listitem>
+        <listitem>
+          <para><command>eventType</command> - An element used to describe the
+          type of data related to this metadata.  This is explained
+          in more detail in <citation>Measurement Schema</citation></para>
+        </listitem>
+        <listitem>
+          <para><command>parameters</command> - Described in
+          <xref linkend="analysis_parameters" /></para>
+        </listitem>
+        <listitem>
+          <para><command>key</command> - A structure normally used
+          by services to describe backend storage.  This is explained
+          in more detail in <citation>Measurement Schema</citation>,
+          <emphasis>must appear alone</emphasis></para>
+        </listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section id="analysis_subject" xreflabel="Subject">
+      <title>Subject</title>
+
+      <programlisting>
+        <![CDATA[
+<iperf:subject xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="subject1">
+
+  <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" />
+
+  <!-- OR -->
+
+  <nmtl4:endPointPair xmlns:nmtl4="http://ggf.org/ns/nmwg/topology/l4/3.0/" />
+
+</iperf:subject>
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_subject">
+        <title>Subject Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>subject</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/tools/iperf/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>id, metadataIdRef</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>endPointPair</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+          
+      <para>
+        The subject element describes the source, and when applicable the
+        destination, of a measurement.  The subject can stand on its own in many
+        cases but is allowed to refer to other metadata elements as being
+        the focus of interest (normally used in chaining).  This is capable
+        through the use of the attributes:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>id</command> - Identifying attribute used to track
+          state</para>
+        </listitem>
+        <listitem>
+          <para><command>metadataIdRef</command> - Identifying attribute used to
+          inlcude a reference to a specific metadata</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        Iperf measures point to point performance between two topological
+        points.  We utilize the schema profile from the
+        <citation>Topology Schema</citation> to describe this entity: the
+        endPointPair.
+      </para> 
+      
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>endPointPair</command> - A source and destination
+          on a network, described in <citation>Topology Schema</citation></para>
+        </listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section id="analysis_parameters" xreflabel="Parameters">
+      <title>Parameters</title>
+
+      <programlisting>
+        <![CDATA[
+<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="parameters1">
+
+  <nmwg:parameter />
+
+</nmwg:parameters>
+
+<!-- OR -->
+
+<iperf:parameters xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="parameters1">
+
+  <nmwg:parameter />
+
+</iperf:parameters>
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_parameters">
+        <title>Parameters Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>parameters</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/base/2.0/, http://ggf.org/ns/nmwg/tools/iperf/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>id</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>parameter</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>no</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+          
+      <para>
+        The parameters element encloses a series of parameter elements that
+        reflect state from the tool or environment when a specific measurement
+        was taken.  This element serves merely as a container, and contains on
+        two pieces of self identification: an id attribute and the namespace.
+        The namespace should be that of iperf, but certain situations dictate
+        that it be that of the base.  The single attribute is described first:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>id</command> - Identifying attribute used to track
+          state</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        This particular version of parameters can only contain one type
+        of enclosed element:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>parameter</command> - Described in
+          <xref linkend="analysis_parameter" /></para>
+        </listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section id="analysis_parameter" xreflabel="Parameter">
+      <title>Parameter</title>
+
+      <programlisting>
+        <![CDATA[
+<nmwg:parameter name="windowSize">4m</nmwg:parameter>
+
+<!-- OR -->
+
+<nmwg:parameter name="timeDuration" value="30" />
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_parameter">
+        <title>Parameter Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>parameter</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/base/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>name, value</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>text</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+          
+      <para>
+        The parameter element features a generic structure that allows it to
+        easily adapt to the needs of a particular schema.  Iperf as a tool has
+        many options that may be adjusted; recording this information as
+        parameter elements captures the state of the tool and environment at the
+        time of a test. 
+      </para>    
+
+      <para>
+        There are two major attributes for the parameters element: 
+        <emphasis>name</emphasis> and <emphasis>value</emphasis>.  Below is an 
+        enumeration of the possible values <emphasis>name</emphasis> may take
+        on.  <emphasis>Value</emphasis> can store the observed value of the
+        particular options, or this can be stored as a text element (the only
+        type of element enclosed within parameter).
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>format</command> - format to report for data: 
+          Kbits, Mbits, KBytes, MBytes</para>
+        </listitem>
+        <listitem>
+          <para><command>interval</command> - Time length for specific leg of
+          the entire test</para>
+        </listitem>
+        <listitem>
+          <para><command>protocol</command> - Protocol used (TCP/UDP)</para>
+        </listitem>
+        <listitem>
+          <para><command>bufferLength</command> - Length of the TCP buffer
+          </para>
+        </listitem>
+        <listitem>
+          <para><command>windowSizeRequest</command> - The requested TCP window
+          size</para>
+        </listitem>
+        <listitem>
+          <para><command>windowSize</command> - The actual TCP window size
+          </para>
+        </listitem>
+        <listitem>
+          <para><command>timeDuration</command> - Total length of test</para>
+        </listitem>
+        <listitem>
+          <para><command>arguments</command> - The entire command line string
+          </para>
+        </listitem>
+        <listitem>
+          <para><command>valueUnits</command> - Units for the specified value
+          </para>
+        </listitem>
+        <listitem>
+          <para><command>numBytes</command> - Amount of data sent</para>
+        </listitem>
+        <listitem>
+          <para><command>numBytesUnits</command> - Units for the amount of data
+          </para>
+        </listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section id="analysis_data" xreflabel="Data">
+      <title>Data</title>
+
+      <programlisting>
+        <![CDATA[
+<nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="data2" metadataIdRef="metadata2">  
+
+  <nmwg:commonTime>    
+    
+    <iperf:datum />
+    
+    <!-- OR -->
+
+    <nmwg:datum />
+    
+  </nmwg:commonTime>  
+
+  <iperf:datum />
+  
+  <!-- OR -->
+  
+  <nmwg:metadata />
+
+  <!-- OR -->
+  
+  <nmwg:key />
+
+</nmwg:data>  
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_data">
+        <title>Data Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>data</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/base/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>id, metadataIdRef</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>commonTime, datum, metadata, key</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>
+        The data element normally contains the results of measurement, although
+        it may contain <emphasis>metadata</emphasis> when applicable (e.g. when
+        transmitting this information <emphasis>as</emphasis> data).  This element
+        will always be in the base namespace, and features two possible
+        attributes to use as a decoration:
+      </para> 
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>id</command> - Identifying attribute to track
+          state</para>
+        </listitem>
+        <listitem>
+          <para><command>metadataIdRef</command> - Identifying attribute to
+          track state to a specific metadata</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        This particular version of the data element should only ever contain 
+        four particular types of elements.  Note that when some elements appear,
+        they <emphasis>must</emphasis> be alone.   
+      </para> 
+      
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>metadata</command> - Described in
+          <xref linkend="analysis_metadata" />,
+          <emphasis>must appear alone</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><command>commonTime</command> - Described in
+          <xref linkend="analysis_commontime" /></para>
+        </listitem>
+        <listitem>
+          <para><command>datum</command> - Described in
+          <xref linkend="analysis_datum" /></para>
+        </listitem>
+        <listitem>
+          <para><command>key</command> - A structure normally used
+          by services to describe backend storage.  This is explained
+          in more detail in <citation>Measurement Schema</citation>,
+          <emphasis>must appear alone</emphasis></para>
+        </listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section id="analysis_commontime" xreflabel="CommonTime">
+      <title>CommonTime</title>
+
+      <programlisting>
+        <![CDATA[
+<nmwg:commonTime xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" type="range">
+  <nmtm:start xmlns:nmtm= "http://ggf.org/ns/nmwg/time/2.0/" type="unix" value="1107492095"/>
+  <nmtm:end xmlns:nmtm= "http://ggf.org/ns/nmwg/time/2.0/" type="unix" value="1107492195"/>
+ 
+  <iperf:datum />
+
+</nmwg:commonTime>
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_commontime">
+        <title>CommonTime Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>commonTime</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/base/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>type, timeValue, timeType</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>time, start, end, datum</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>no</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>
+        This element is contained within the Base
+        <citation>Measurement Schema</citation>; a full description of the
+        purpose may be found there.  This basic description should be taken in
+        the context of <emphasis>iperf</emphasis> specific use only, and may
+        differ slightly between <emphasis>profile</emphasis> documents.
+      </para> 
+      
+      <para>
+        When used inside of an <emphasis>iperf</emphasis> formatted
+        <emphasis>data</emphasis>, commonTime may contain a number of
+        attributes:  
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>type</command> - Specific kind of time we are using
+          (deprecicated)</para>
+        </listitem>
+        <listitem>
+          <para><command>timeType</command> - Specific kind of time we are
+          using</para>
+        </listitem>
+        <listitem>
+          <para><command>timeValue</command> - Time measurement of when the test
+          started</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        Additionally, the following elements are supported:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>time</command> - Used in place of the
+          <emphasis>timeValue</emphasis> and <emphasis>timeType</emphasis>
+          attributes</para>
+        </listitem>
+        <listitem>
+          <para><command>start</command> - A time element specialized to
+          note the starting time</para>
+        </listitem>
+        <listitem>
+          <para><command>end</command> - A time element specialized to
+          note the ending time</para>
+        </listitem>
+        <listitem>
+          <para><command>datum</command> - Described in
+          <xref linkend="analysis_datum" /></para>
+        </listitem>
+      </itemizedlist>
+      
+    </section>
+
+    <section id="analysis_datum" xreflabel="datum">
+      <title>Datum</title>
+
+      <programlisting>
+        <![CDATA[
+<iperf:datum xmlns:iperf="http://ggf.org/ns/nmwg/tools/iperf/2.0/" timeType="iso" 
+             jitter="0.003" sent="138890" throughput="9.10248e+08" 
+             timeValue="Tue Jan 11 14:27:20.623436245 UTC 2005"/>
+        ]]>
+      </programlisting>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.analysis_datum">
+        <title>Datum Element Requirements</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" width="30%"/>
+          <colspec colnum="2" colname="c2" width="70%"/>
+          <tbody>
+            <row>
+              <entry><command>localname</command></entry>
+              <entry>datum</entry>
+            </row>
+            <row>
+              <entry><command>namespaces</command></entry>
+              <entry>http://ggf.org/ns/nmwg/tools/iperf/2.0/, http://ggf.org/ns/nmwg/base/2.0/</entry>
+            </row>
+            <row>
+              <entry><command>attributes</command></entry>
+              <entry>value, jitter, sent, throughput, valueUnits, numBytes, numBytesUnits, interval, timeType, timeValue</entry>
+            </row>
+            <row>
+              <entry><command>nested elements</command></entry>
+              <entry>time</entry>
+            </row>
+            <row>
+              <entry><command>required</command></entry>
+              <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+          
+      <para>
+        The <emphasis>datum</emphasis> element contains the results of iperf
+        measurements.  This element <emphasis>MUST</emphasis> appear in either
+        the <emphasis>data</emphasis> or <emphasis>commonTime</emphasis>
+        elements.  The <emphasis>datum</emphasis> element
+        <emphasis>SHOULD</emphasis> maintain the <emphasis>iperf</emphasis>
+        namespace, but <emphasis>MAY</emphasis> utilize the
+        <emphasis>nmwg</emphasis> namespace when applicable.
+      </para>
+
+      <para>
+        The attributes for the <emphasis>datum</emphasis> are as follows:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>value</command> - Generic results of the collected measurement</para>
+        </listitem>
+        <listitem>
+          <para><command>jitter</command> - Variation in packet delay</para>
+        </listitem>
+        <listitem>
+          <para><command>sent</command> - Number of packets sent per test</para>
+        </listitem>
+        <listitem>
+          <para><command>throughput</command> - Observed bandwidth of test</para>
+        </listitem>
+        <listitem>
+          <para><command>valueUnits</command> - Units to be appended to the <emphasis>value</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><command>numBytes</command> - Measurement of the amount of data involved in the test</para>
+        </listitem>
+        <listitem>
+          <para><command>numBytesUnits</command> - Units to be appended to the <emphasis>numBytes</emphasis></para>
+        </listitem>
+        <listitem>
+          <para><command>interval</command> - Time interval of the test</para>
+        </listitem>
+        <listitem>
+          <para><command>timeValue</command> - Time measurement of when the test started</para>
+        </listitem>
+        <listitem>
+          <para><command>timeType</command> - Specific kind of time we are using</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>
+        The <emphasis>datum</emphasis> element can only contain
+        <emphasis>one</emphasis> type of element, and this is a
+        <emphasis>time</emphasis> element from
+        <citation>Measurement Schema</citation>:
+      </para>
+
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>time</command> - Used in place of the
+          <emphasis>timeValue</emphasis> and <emphasis>timeType</emphasis>
+          attributes.</para>
+        </listitem>
+      </itemizedlist>
+      
+    </section>
+
+  </section>
+
+  <section id="examples" xreflabel="Example Usage">
+    <title>Example Usage</title>
+    
+    <para>
+      The following sections will demonstrate some of the possible examples of
+      data formatted to use the iperf schema profile.  These examples are not
+      an attempt to be exhaustive, but rather some examples of ways to perform
+      common tasks.  Note that these messages are <emphasis>NOT</emphasis>
+      indicative of a particular service. 
+    </para>
+
+    <section id="examples_metadata" xreflabel="Example Usage Metadata">
+      <title>Example Usage Metadata</title>    
+      
+      <para>
+        The first example of iperf metadata demonstrates an essentially
+        <emphasis>full</emphasis> description.  This example features a subject
+        using the second version of the <citation>Topology Schema</citation>, 
+        several parameter elements, and the standard eventType notation.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_metadata1.xml"/>
+        ]]>
+      </programlisting> 
+      
+      <para>
+        The second example is similar, but uses version 3 of the
+        <citation>Topology Schema</citation>.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_metadata2.xml"/>
+        ]]>
+      </programlisting> 
+      
+      <para>
+        The third example demonstrates how the concept of
+        <emphasis>chaining</emphasis> can be demonstrated.  Note that there
+        are two kinds of chaining in play: merge and operator.  A full
+        description of chaining may be found in the
+        <citation>Measurement Schema</citation>.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_metadata3.xml"/>
+        ]]>
+      </programlisting> 
+      
+      <para>
+        The final example shows how a key can be used as a replacement for a
+        fully formed metadata.  The key is left blank in order to be general,
+        and would differ from service to service.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_metadata4.xml"/>
+        ]]>
+      </programlisting> 
+
+    </section>
+
+    <section id="examples_data" xreflabel="Example Usage Data">
+      <title>Example Usage Data</title>    
+
+      <para>
+        The first example of iperf data illustrates the most common use case:
+        returning datum elements with measurement data.  
+      </para>
+      
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_data1.xml"/>
+        ]]>
+      </programlisting> 
+      
+      <para>
+        The second example is similar, but note how common time may be used
+        instead.  Because the structure of iperf does not easily benefit from
+        use of commonTime (e.g. the various measurements do not start at the
+        same time), this example is a little sparse.  CommonTime has many
+        possible configurations, please see
+        <citation>Measurement Schema</citation> for more examples.
+      </para>
+      
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_data2.xml"/>
+        ]]>
+      </programlisting> 
+      
+      <para>
+        The third example shows how metadata can be contained in the data
+        element, perhaps as a result of a query.
+      </para>
+      
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_data3.xml"/>
+        ]]>
+      </programlisting> 
+
+      <para>
+        The final example shows how a key can be contained in the data element,
+        perhaps as the result of a query.
+      </para>
+      
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/iperf_data4.xml"/>
+        ]]>
+      </programlisting> 
+   
+    </section>
+
+  </section>
+
+  <section id="conclusion" xreflabel="Conclusion">
+    <title>Conclusion</title>
+    
+    <para>
+      Using the schema and examples described in this document it is possible to
+      integrate the concept of iperf data into services in the perfSONAR
+      framework.  The data formats themselves should remain constant over time,
+      despite changes to the iperf API.  The schema is presented in RELAX-NG
+      format, and through a litany of tools it is possible to convert this into
+      easier to consume formats.  
+    </para>
+
+  </section>
+
+  <glossary id="glossary">
+    <title>Terms</title>
+
+    <glossdiv id="A">
+      <title>A</title>    
+      <glossentry id="active" xreflabel="active measurement"><glossterm>active measurement</glossterm>
+        <glossdef>
+          <para>
+            Obtaining network performance information using 'live' mechanisms.
+            Examples of this include tools to measure available bandwidth.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="passive">passive measurement</glossseealso>
+      </glossentry> 
+    </glossdiv> 
+    
+    <glossdiv id="B">
+      <title>B</title>    
+      <glossentry id="bandwidth" xreflabel="bandwidth"><glossterm>bandwidth</glossterm>
+        <glossdef>
+          <para>
+            Rate of network throughput commonly measured in bits/s.
+          </para>
+        </glossdef>
+      </glossentry> 
+    </glossdiv> 
+    
+    <glossdiv id="C">
+      <title>C</title>    
+      <glossentry id="characteristic" xreflabel="characteristics"><glossterm>characteristic</glossterm>
+        <glossdef>
+          <para>Taken on the context of networking, these describe the 
+          intrinsic properties of a portion of the network that are related 
+          to the performance and reliability of the network.  See also
+          <citation>Lowekamp04Hierarchy</citation>.</para>
+        </glossdef>
+      </glossentry> 
+    </glossdiv> 
+    
+    <glossdiv id="D">
+      <title>D</title>   
+      <glossentry id="delay" xreflabel="delay"><glossterm>delay</glossterm>
+        <glossdef>
+          <para>
+            Period of time observed from initial sending of a network packet to
+            final delivery at the recipient.  Commonly broken down into four
+            areas:
+          </para>
+          <itemizedlist mark='opencircle'>
+            <listitem>
+              <para><command>Nodal Processing</command> - Time between when an
+              application creates a packet and when it is sent to the lower
+              level communication device.</para>
+            </listitem>
+            <listitem>
+              <para><command>Queuing</command> - Time spent waiting for
+              transmission onto a specific link.</para>
+            </listitem>
+            <listitem>
+              <para><command>Transmission Delay</command> - Time to send all
+              bits of a packet onto the link.</para>
+            </listitem>
+            <listitem>
+              <para><command>Propagation Delay</command> - Time spent
+              'in flight' between ends of a link.</para>
+            </listitem>
+          </itemizedlist> 
+          <para>
+            The combination for all of these factors (for all links of a path)
+            make up the total delay.
+          </para>
+        </glossdef>
+      </glossentry> 
+    </glossdiv> 
+    
+    <glossdiv id="E">
+      <title>E</title>    
+    </glossdiv> 
+    
+    <glossdiv id="F">
+      <title>F</title>        
+    </glossdiv> 
+    
+    <glossdiv id="G">
+      <title>G</title>    
+    </glossdiv> 
+    
+    <glossdiv id="H">
+      <title>H</title>           
+    </glossdiv> 
+    
+    <glossdiv id="I">
+      <title>I</title>          
+    </glossdiv> 
+    
+    <glossdiv id="J">
+      <title>J</title>    
+      <glossentry id="jitter" xreflabel="jitter"><glossterm>jitter</glossterm>
+        <glossdef>
+          <para>
+            Variation in delay between arrival of network packets.  See also
+            <citation>RFC 3393</citation>.
+          </para>
+        </glossdef>
+      </glossentry>  
+    </glossdiv> 
+    
+    <glossdiv id="K">
+      <title>K</title>    
+    </glossdiv> 
+    
+    <glossdiv id="L">
+      <title>L</title>    
+      <glossentry id="loss" xreflabel="loss"><glossterm>loss</glossterm>
+        <glossdef>
+          <para>
+            When specific packets in a stream go missing.  Can be attributed to
+            different factors such as network failure, network congestion, 
+            data corruption or changes to the routing algorithm.  Network 
+            protocols may have facilities to deal with loss.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="TCP">TCP</glossseealso>
+      </glossentry> 
+    </glossdiv> 
+    
+    <glossdiv id="M">
+      <title>M</title>      
+    </glossdiv> 
+    
+    <glossdiv id="N">
+      <title>N</title>  
+    </glossdiv> 
+    
+    <glossdiv id="O">
+      <title>O</title>    
+    </glossdiv> 
+    
+    <glossdiv id="P">
+      <title>P</title>    
+      <glossentry id="passive" xreflabel="passive measurement"><glossterm>passive measurement</glossterm>
+        <glossdef>
+          <para>
+            Obtaining network performance information using 'inert' mechanisms.
+            Examples of this include tools that collect statistics about network
+            utilization.  Available bandwidth could then be calculated based on
+            known size of a communication link.  
+          </para>
+        </glossdef>
+        <glossseealso otherterm="passive">passive measurement</glossseealso>
+      </glossentry>     
+    </glossdiv>
+    
+    <glossdiv id="Q">
+      <title>Q</title>    
+    </glossdiv> 
+    
+    <glossdiv id="R">
+      <title>R</title>  
+    </glossdiv> 
+    
+    <glossdiv id="S">
+      <title>S</title>     
+      <glossentry id="schema"><glossterm>schema</glossterm>
+        <glossdef>
+          <para>XML specification, normally written in XML.</para>
+        </glossdef>
+        <glossseealso otherterm="schemata">schemata</glossseealso>
+      </glossentry>   
+      <glossentry id="schemata"><glossterm>schemata</glossterm>
+        <glossdef>
+          <para>Plural of schema.</para>
+        </glossdef>
+        <glossseealso otherterm="schema">schema</glossseealso>
+      </glossentry>        
+    </glossdiv> 
+    
+    <glossdiv id="T">
+      <title>T</title>    
+      <glossentry id="TCP" xreflabel="TCP"><glossterm>Transmission Control Protocol </glossterm>
+        <glossdef>
+          <para>
+            Provides for reliable, in-order delivery of a stream of bytes.  Used
+            in applications such as file transfer and e-mail.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="UDP">UDP</glossseealso>
+      </glossentry>  
+    </glossdiv> 
+    
+    <glossdiv id="U">
+      <title>U</title>  
+      <glossentry id="UDP" xreflabel="UDP"><glossterm>User Datagram Protocol</glossterm>
+        <glossdef>
+          <para>
+            Provides for un-reliable, non-ordered delivery of short messages
+            (datagrams).  Used in applications such as video and audio
+            transmission.
+          </para>
+        </glossdef>
+        <glossseealso otherterm="TCP">TCP</glossseealso>
+      </glossentry>  
+    </glossdiv> 
+    
+    <glossdiv id="V">
+      <title>V</title>    
+    </glossdiv> 
+    
+    <glossdiv id="W">
+      <title>W</title>    
+    </glossdiv> 
+    
+    <glossdiv id="X">
+      <title>X</title>  
+    </glossdiv> 
+    
+    <glossdiv id="Y">
+      <title>Y</title>    
+    </glossdiv> 
+    
+    <glossdiv id="Z">
+      <title>Z</title>    
+    </glossdiv>
+     
+  </glossary>
+
+  <bibliography id="bibliography">
+    <title>References</title>
+
+    <biblioentry>
+      <abbrev>Lowekamp04Hierarchy</abbrev>
+      <title>A Hierarchy of Network Performance Characteristics for Grid Applications and Services</title>
+      <authorgroup>
+        <author><personname>
+          <firstname>Bruce</firstname><surname>Lowekamp</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>Brian</firstname><surname>Tierney</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>Les</firstname><surname>Cottrell</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>Richard</firstname><surname>Hughes-Jones</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>Thilo</firstname><surname>Kielmann</surname>
+        </personname></author>
+        <author><personname>
+          <firstname>Martin</firstname><surname>Swany</surname>
+        </personname></author>
+      </authorgroup>
+      <confgroup>
+        <conftitle>GGF Network Measurements Working Group - Community Recomendation</conftitle>
+      </confgroup>
+    </biblioentry>
+
+    <biblioentry xreflabel="Iperf">
+      <abbrev>Iperf</abbrev>
+      <title>
+        <ulink url="http://dast.nlanr.net/Projects/Iperf">Iperf</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="Measurement Schema">
+      <abbrev>Measurement Schema</abbrev>
+      <title>
+        <ulink url="https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119">Measurement Schema</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Topology Schema">
+      <abbrev>Topology Schema</abbrev>
+      <title>
+        <ulink url="...">Topology Schema</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="Multi-Schema XML Validator">
+      <abbrev>MSV</abbrev>
+      <title>
+        <ulink url="https://msv.dev.java.net/">Sun Multi-Schema XML Validator (MSV)</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="NM-WG">
+      <abbrev>NM-WG</abbrev>
+      <title>
+        <ulink url="http://nmwg.internet2.edu">Network Measurements Working Group</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="OGF">
+      <abbrev>OGF</abbrev>
+      <title>
+        <ulink url="http://www.ogf.org/">Open Grid Forum</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="RELAX-NG">
+      <abbrev>RELAX-NG</abbrev>
+      <title>
+        <ulink url="http://relaxng.org/">RELAX-NG Schema Language</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="RFC 3393">
+      <abbrev>RFC 3393</abbrev>
+      <title>
+        <ulink url="http://tools.ietf.org/html/rfc3393">RFC 3393</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="Trang">
+      <abbrev>Trang</abbrev>
+      <title>
+        <ulink url="http://www.thaiopensource.com/relaxng/trang.html">Multi-format schema converter based on RELAX NG</ulink>
+      </title>
+    </biblioentry>
+
+    <biblioentry xreflabel="XSD">
+      <abbrev>XSD</abbrev>
+      <title>
+        <ulink url="http://www.w3.org/XML/Schema">XML Schema</ulink>
+      </title>
+    </biblioentry> 
+
+  </bibliography>
+
+</article>

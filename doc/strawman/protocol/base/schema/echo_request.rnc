@@ -1,0 +1,21 @@
+namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+
+start = 
+  element nmwg:message { 
+    attribute id { xsd:string } &
+    attribute type { 
+      "EchoRequest" |
+      "http://schemas.perfsonar.net/messages/EchoRequest/1.0"
+    } &
+    element nmwg:metadata {
+      attribute id { xsd:string } &
+      element nmwg:eventType { 
+        "http://schemas.perfsonar.net/tools/admin/echo/2.0"
+      }
+    } &
+    element nmwg:data {
+      attribute id { xsd:string } &
+      attribute metadataIdRef { xsd:string }
+     }
+   }
+

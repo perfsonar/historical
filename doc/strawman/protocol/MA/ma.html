@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>perfSONAR Measurement Archive (MA) Protocol Extension</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479489"></a>perfSONAR Measurement Archive (MA) Protocol Extension</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3><div class="affiliation"><span class="orgname">Internet2<br /></span><div class="address"><p>   <br />
+            <code class="email">&lt;<a href="mailto:zurawski@internet2.edu">zurawski@internet2.edu</a>&gt;</code><br />
+          </p></div></div></div><div class="editor"><h4 class="editedby">Edited by</h4><h3 class="editor"><span class="firstname">M.</span> <span class="surname">Swany</span></h3><div class="affiliation"><span class="orgname">Universtity of Delaware<br /></span><div class="address"><p>   <br />
+            <code class="email">&lt;<a href="mailto:swany@cis.udel.edu">swany@cis.udel.edu</a>&gt;</code><br />
+          </p></div></div></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#metadata_key">3. MetadataKey</a></span></dt><dd><dl><dt><span class="section"><a href="#metadata_key_request">3.1. MetadataKeyRequest Message</a></span></dt><dd><dl><dt><span class="section"><a href="#metadata_key_request_schema">3.1.1. MetadataKeyRequest Message Schema</a></span></dt><dt><span class="section"><a href="#metadata_key_request_analysis">3.1.2. MetadataKeyRequest Message Analysis</a></span></dt><dd><dl><dt><span class="section"><a href="#metadata_key_request_analysis_message">3.1.2.1. Message</a></span></dt><dt><span class="section"><a href="#metadata_key_request_analysis_parameters">3.1.2.2. Parameters</a></span></dt><dt><span class="section"><a href="#metadata_key_request_analysis_parameter">3.1.2.3. Parameter</a></span></dt><dt><span class="section"><a href="#metadata_key_request_analysis_metadata">3.1.2.4. Metadata</a></span></dt><dt><span class="section"><a href="#metadata_key_request_analysis_data">3.1.2.5. Data</a></span></dt></dl></dd><dt><span class="section"><a href="#metadata_key_request_example">3.1.3. MetadataKeyRequest Message Example</a></span></dt></dl></dd><dt><span class="section"><a href="#metadata_key_response">3.2. MetadataKeyResponse Message</a></span></dt><dd><dl><dt><span class="section"><a href="#metadata_key_response_schema">3.2.1. MetadataKeyResponse Message Schema</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis">3.2.2. MetadataKeyResponse Message Analysis</a></span></dt><dd><dl><dt><span class="section"><a href="#metadata_key_response_analysis_message">3.2.2.1. Message</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_parameters">3.2.2.2. Parameters</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_parameter">3.2.2.3. Parameter</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_metadata">3.2.2.4. Metadata</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_data">3.2.2.5. Data</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_key">3.2.2.6. Key</a></span></dt><dt><span class="section"><a href="#metadata_key_response_analysis_datum">3.2.2.7. Datum</a></span></dt></dl></dd><dt><span class="section"><a href="#metadata_key_response_example">3.2.3. MetadataKeyResponse Message Example</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#setup_data">4. SetupData</a></span></dt><dt><span class="section"><a href="#measurement_archive_store">5. MeasurementArchiveStore</a></span></dt><dt><span class="section"><a href="#result_codes">6. Result Codes</a></span></dt><dt><span class="section"><a href="#conclusion">7. Conclusion</a></span></dt><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">4/4/2008</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      Extensions to the <a href="#id2529527">perfSONAR Base Protocol</a> have the
+      advantage of further specifying interactions on a message by message
+      basis for use in multiple service types.  This eliminates the need to
+      exhaustively document key exchanges for each service, and allows the 
+      protocols to evolve over time more efficiently.  
+    </p><p>
+      The <span class="emphasis"><em>Measurement Archive</em></span> protocol features three 
+      messages used to query services identifying themselves as locations
+      of measurement data:
+    </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">MetadataKey</strong></span> - Message set that supplies
+        metadata information in return for a re-playable key, see 
+        <a href="#metadata_key">MetadataKey</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">SetupData</strong></span> - Message set that supplies
+        metadata information in return for a re-playable key, see 
+        <a href="#setup_data">SetupData</a></p></li><li style="list-style-type: circle"><p><span><strong class="command">MeasurementArchiveStore</strong></span> - Message set that supplies
+        metadata information in return for a re-playable key, see 
+        <a href="#measurement_archive_store">MeasurementArchiveStore</a></p></li></ul></div><p>
+      The rest of this document will proceed as follows: We will introduce each
+      message along with a schema description, analysis, and example usage
+      scenario.  After this, we will briefly discuss some of the common 
+      result codes that are shared among services identified as
+      <span class="emphasis"><em>Measurement Archives</em></span>.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="metadata_key"></a>3. MetadataKey</h2></div></div></div><p>
+      The <span class="emphasis"><em>MetadataKey</em></span> message exchange offers a way to
+      exchange the often complex <span class="emphasis"><em>metadata</em></span> description
+      of a measurement set for more easily consumed and exchange
+      <span class="emphasis"><em>key</em></span>.  The <span class="emphasis"><em>key structure</em></span>
+      was first introduced in <a href="#id2529508">Measurement Schema</a>, and can
+      be customized for any particular service implementation; the overall goal
+      being a <span class="emphasis"><em>shortcut</em></span> to an underlying data set, similar
+      to keys used in relational databases.
+    </p><p>
+      Based on initial work in <a href="#id2529527">perfSONAR Base Protocol</a>, 
+      this exchange will be described in terms of both the
+      <a href="#metadata_key_request">MetadataKeyRequest Message</a> and 
+      <a href="#metadata_key_response">MetadataKeyResponse Message</a>.  Each explanation will include
+      a schematic definition and analysis, followed by example instances.  Note
+      that no one service will implement this protocol exactly as written;
+      services are expected to offer an explanation of how they implement the
+      protocol as well as any divergence in the service documentation.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="metadata_key_request"></a>3.1. MetadataKeyRequest Message</h3></div></div></div><p>
+        The MetadataKeyRequest message is a container for submitting metadata
+        of a given type to a perfSONAR based
+        <span class="emphasis"><em>Measurement Archive</em></span>.  Enclosed in this envelope
+        will be a series of metadata and data pairs containing various
+        instructions to act on.  We first present
+        a very simple schema in <a href="#metadata_key_request_schema">MetadataKeyRequest Message Schema</a>
+        along with an analysis of the elements in 
+        <a href="#metadata_key_request_analysis">Request Message Analysis</a>.  We conclude with
+        examples in <a href="#metadata_key_request_example">MetadataKeyRequest Message Example</a>.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_request_schema"></a>3.1.1. MetadataKeyRequest Message Schema</h4></div></div></div><p>
+          The following schema is a native description of the request schema as
+          in the [<span class="citation">RELAX-NG</span>] language.  Through the use of
+          tools such as [<span class="citation">Trang</span>] and [<span class="citation">MSV</span>]
+          it is possible to convert this to other widely accepted formats such
+          as [<span class="citation">XSD</span>].
+        </p><pre class="programlisting">
+          
+<font color=red># Begin Schema</font>
+
+<font color=orange>namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"</font>
+
+<font color=orange>start =</font>
+  <font color=green>element</font> <font color=blue>nmwg:message</font> { 
+    Identifier? &amp; 
+    attribute type { "MetadataKeyRequest" } &amp;
+    Parameters? &amp;                        
+    (
+      Metadata |  
+      Data
+    )+
+  } 
+
+<font color=orange>Parameters = </font>
+  <font color=green>element</font> <font color=blue>nmwg:parameters</font> { 
+    Identifier &amp;
+    Parameter+
+  }
+ 
+<font color=orange>Parameter = </font>
+  <font color=green>element</font> <font color=blue>nmwg:parameter</font> { 
+    attribute name { xsd:string } &amp;
+    (
+      attribute value { xsd:string } |
+      (
+        anyElement |
+        text
+      )
+    )
+  }   
+
+<font color=orange>Metadata =</font>
+  <font color=green>element</font> <font color=blue>nmwg:metadata</font> { 
+    Identifier &amp; 
+    MetadataIdentifierRef? &amp;
+    anyElement*
+  }
+
+<font color=orange>Data =</font>
+  <font color=green>element</font> <font color=blue>nmwg:data</font> { 
+    Identifier &amp; 
+    MetadataIdentifierRef &amp;
+  }
+
+<font color=orange>Identifier =</font>
+  attribute id { xsd:string }
+
+<font color=orange>MetadataIdentifierRef =</font>
+  attribute metadataIdRef { xsd:string }
+
+<font color=orange>anyElement = </font>
+  <font color=green>element</font> <font color=blue>*</font> { 
+    anyThing 
+  }
+
+<font color=orange>anyAttribute = </font>
+  attribute * { text }
+
+<font color=orange>anyThing = </font>
+  ( 
+    anyElement | 
+    anyAttribute | 
+    text 
+  )*
+
+
+<font color=red># End Schema</font>
+          
+        </pre></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_request_analysis"></a>3.1.2. MetadataKeyRequest Message Analysis</h4></div></div></div><p>
+          There are view deviations from the
+          <a href="#id2529527">perfSONAR Base Protocol</a> for this particular
+          message type.  The following analysis will describe each element,
+          noting when there are changes.
+        </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_request_analysis_message"></a>3.1.2.1. Message</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="message1"
+              type="Request"&gt;
+
+  &lt;nmwg:parameters /&gt;
+  
+  &lt;nmwg:metadata /&gt;
+  
+  &lt;nmwg:data /&gt;
+  
+&lt;/nmwg:message&gt;
+            
+          </pre><div class="table"><a id="table.messages_request_analysis_message"></a><p class="title"><b>Table 2. Message Element Requirements</b></p><div class="table-contents"><table summary="Message Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">message</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, type</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">parameters, metadata, data</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.  The only
+            notable difference is the value of <span class="emphasis"><em>type</em></span> is
+            restricted to be <span class="emphasis"><em>MetadataKeyRequest</em></span>.  
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_request_analysis_parameters"></a>3.1.2.2. Parameters</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="parameters1"&gt;
+
+  &lt;nmwg:parameter /&gt;
+
+&lt;/nmwg:parameters&gt;
+            
+          </pre><div class="table"><a id="table.messages_request_analysis_parameters"></a><p class="title"><b>Table 3. Parameters Element Requirements</b></p><div class="table-contents"><table summary="Parameters Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">parameters</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">parameter</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">no</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_request_analysis_parameter"></a>3.1.2.3. Parameter</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                name="NAME"&gt;VALUE&lt;/nmwg:parameter&gt;
+
+&lt;!-- OR --&gt;
+
+&lt;nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                name="NAME" value="VALUE" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_request_analysis_parameter"></a><p class="title"><b>Table 4. Parameter Element Requirements</b></p><div class="table-contents"><table summary="Parameter Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">parameter</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">name, value</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">text</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_request_analysis_metadata"></a>3.1.2.4. Metadata</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+               id="metadata2" metadataIdRef="metadata1" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_request_analysis_metadata"></a><p class="title"><b>Table 5. Metadata Element Requirements</b></p><div class="table-contents"><table summary="Metadata Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">metadata</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, metadataIdRef</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">undefined</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_request_analysis_data"></a>3.1.2.5. Data</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+           id="data2" metadataIdRef="metadata2" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_request_analysis_data"></a><p class="title"><b>Table 6. Data Element Requirements</b></p><div class="table-contents"><table summary="Data Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">data</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, metadataIdRef</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">N/A</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">varies</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.  The only
+            notable difference is that this element
+            <span class="emphasis"><em>should not</em></span> contain any nested elements.  This
+            element should only be used as a <span class="emphasis"><em>data trigger</em></span>
+            for services to act on particular metadata elements.
+          </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_request_example"></a>3.1.3. MetadataKeyRequest Message Example</h4></div></div></div><p>
+          The following examples demonstrate some of the possible uses and
+          layouts of request messages in the MA Protocol.  These examples are
+          not an attempt to be exhaustive, but rather some examples of ways to
+          perform common tasks.  Note that these messages are
+          <span class="emphasis"><em>NOT</em></span> indicative of a particular service. 
+        </p><p>
+          The first example demonstrates the most common use case: a single 
+          metadata and data pair.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1" /&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p>
+          The second example is similar, but incorporates a parameters block
+          that may be populated with optional behaviors for a service. 
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1"&gt;
+
+  &lt;nmwg:parameters id="paraemters1"&gt;
+    &lt;nmwg:parameter name="something"&gt;something else&lt;/nmwg:parameter&gt;
+  &lt;/nmwg:parameters&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1" /&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p>
+          The third example is also similar to the first, but shows it is
+          possible to ask for multiple pairs of metadata and data in a single
+          message.  Note that there are two empty data triggers to signify that
+          each message be acted upon.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1" /&gt;
+
+  &lt;nmwg:metadata id="m2"&gt;
+    &lt;!-- another metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d2" metadatIdRef="m2" /&gt;
+
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p>
+          This example features merge chaining.  Note there is only one data
+          trigger, and it is at the <span class="emphasis"><em>tail</em></span> of the chain.  A
+          service would perform the necessary chaining first, then act on the
+          result of this operation.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:metadata id="m2" metadataIdRef="m1"&gt;
+    &lt;!-- more metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m2" /&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p>
+          The final example is an invalid case where the metadata does not
+          have an appropriate data trigger.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m2" /&gt;
+
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="metadata_key_response"></a>3.2. MetadataKeyResponse Message</h3></div></div></div><p>
+        The MetadataKeyResponse message is a container filled with the results
+        of a <a href="#metadata_key_request">MetadataKeyRequest Message</a> from
+        <span class="emphasis"><em>perfSONAR Measurement Archive</em></span> services.  Enclosed
+        in this simple envelope will be a series of metadata and data
+        pairs containing the results of actions performed by a service. We first
+        present a very simple schema in
+        <a href="#metadata_key_response_schema">MetadataKeyResponse Message Schema</a> along with an analysis of
+        the elements in <a href="#metadata_key_response_analysis">Response Message Analysis</a>.  We
+        conclude with examples in <a href="#metadata_key_response_example">MetadataKeyResponse Message Example</a>.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_response_schema"></a>3.2.1. MetadataKeyResponse Message Schema</h4></div></div></div><p>
+          The following schema is a native description of the response schema as
+          in the [<span class="citation">RELAX-NG</span>] language.  Through the use of
+          tools such as [<span class="citation">Trang</span>] and [<span class="citation">MSV</span>]
+          it is possible to convert this to other widely accepted formats such
+          as [<span class="citation">XSD</span>].
+        </p><pre class="programlisting">
+          
+<font color=red># Begin Schema</font>
+
+<font color=orange>namespace nmwg = "http://ggf.org/ns/nmwg/base/2.0/"</font>
+
+<font color=orange>start =</font>
+  <font color=green>element</font> <font color=blue>nmwg:message</font> { 
+    Identifier? &amp; 
+    attribute messageIdRef { xsd:string }? &amp;
+    attribute type { "MetadataKeyResponse" } &amp;
+    Parameters? &amp;                        
+    (
+      Metadata |  
+      Data
+    )+
+  } 
+
+<font color=orange>Parameters = </font>
+  <font color=green>element</font> <font color=blue>nmwg:parameters</font> { 
+    Identifier &amp;
+    Parameter+
+  }
+ 
+<font color=orange>Parameter = </font>
+  <font color=green>element</font> <font color=blue>nmwg:parameter</font> { 
+    attribute name { xsd:string } &amp;
+    (
+      attribute value { xsd:string } |
+      (
+        anyElement |
+        text
+      )
+    )
+  }   
+
+<font color=orange>Metadata =</font>
+  <font color=green>element</font> <font color=blue>nmwg:metadata</font> { 
+    Identifier &amp; 
+    MetadataIdentifierRef? &amp;
+    anyElement*
+  }
+
+<font color=orange>Data =</font>
+  <font color=green>element</font> <font color=blue>nmwg:data</font> { 
+    Identifier &amp; 
+    MetadataIdentifierRef &amp;
+    (
+      Key |
+      Datum+
+    )
+  }
+
+<font color=orange>Identifier =</font>
+  attribute id { xsd:string }
+
+<font color=orange>MetadataIdentifierRef =</font>
+  attribute metadataIdRef { xsd:string }
+
+<font color=orange>anyElement = </font>
+  <font color=green>element</font> <font color=blue>*</font> { 
+    anyThing 
+  }
+
+<font color=orange>anyAttribute = </font>
+  attribute * { text }
+
+<font color=orange>anyThing = </font>
+  ( 
+    anyElement | 
+    anyAttribute | 
+    text 
+  )*
+
+<font color=orange>Key = </font>
+  <font color=green>element</font> <font color=blue>nmwg:key</font> { 
+    Identifier? &amp;    
+    Parameters
+  }
+
+<font color=orange>Datum = </font>
+  <font color=green>element</font> <font color=blue>nmwg:datum</font> { 
+    anyThing*
+  }
+
+<font color=red># End Schema</font>
+          
+        </pre></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_response_analysis"></a>3.2.2. MetadataKeyResponse Message Analysis</h4></div></div></div><p>
+          The following is a breakdown of the elements featured in the schema.
+        </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_message"></a>3.2.2.1. Message</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="message1"
+              type="MetadataKeyResponse"&gt;
+
+  &lt;nmwg:parameters /&gt;
+  
+  &lt;nmwg:metadata /&gt;
+  
+  &lt;nmwg:data /&gt;
+  
+&lt;/nmwg:message&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_message"></a><p class="title"><b>Table 7. Message Element Requirements</b></p><div class="table-contents"><table summary="Message Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">message</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, type</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">parameters, metadata, data</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.  The only
+            notable difference is the value of <span class="emphasis"><em>type</em></span> is
+            restricted to be <span class="emphasis"><em>MetadataKeyResponse</em></span>.  
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_parameters"></a>3.2.2.2. Parameters</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="parameters1"&gt;
+
+  &lt;nmwg:parameter /&gt;
+
+&lt;/nmwg:parameters&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_parameters"></a><p class="title"><b>Table 8. Parameters Element Requirements</b></p><div class="table-contents"><table summary="Parameters Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">parameters</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">parameter</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">no</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_parameter"></a>3.2.2.3. Parameter</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                name="NAME"&gt;VALUE&lt;/nmwg:parameter&gt;
+
+&lt;!-- OR --&gt;
+
+&lt;nmwg:parameter xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                name="NAME" value="VALUE" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_parameter"></a><p class="title"><b>Table 9. Parameter Element Requirements</b></p><div class="table-contents"><table summary="Parameter Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">parameter</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">name, value</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">text</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_metadata"></a>3.2.2.4. Metadata</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+               id="metadata2" metadataIdRef="metadata1" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_metadata"></a><p class="title"><b>Table 10. Metadata Element Requirements</b></p><div class="table-contents"><table summary="Metadata Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">metadata</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, metadataIdRef</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">undefined</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            There is no difference in the structure of this element.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_data"></a>3.2.2.5. Data</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+           id="data2" metadataIdRef="metadata2" /&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_data"></a><p class="title"><b>Table 11. Data Element Requirements</b></p><div class="table-contents"><table summary="Data Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">data</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id, metadataIdRef</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">key, datum</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">yes</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            This element features only one deviation from that of the
+            <a href="#id2529527">perfSONAR Base Protocol</a>: the key element
+            or a datum element must exist inside.  The key element
+            will be explained in
+            <a href="#metadata_key_response_analysis_key">Key</a> and the datum
+            element will be explained in
+            <a href="#metadata_key_response_analysis_datum">Datum</a>.
+          </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_key"></a>3.2.2.6. Key</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:key xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="key1"&gt;
+
+  &lt;nmwg:parameters /&gt;
+
+&lt;/nmwg:key&gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_key"></a><p class="title"><b>Table 12. Key Element Requirements</b></p><div class="table-contents"><table summary="Key Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">key</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">id</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">parameters</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">varies</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            The key element is used to specify particular nuances of a dataset
+            linked to a metadata description.  The key element was first
+            described in <a href="#id2529508">Measurement Schema</a>.  This element
+            can contain the following attributes:
+          </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">id</strong></span> - Identifying attribute that can be
+              used to track state.</p></li></ul></div><p>
+            There is only one element allowed within the key:
+          </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Parameters</strong></span> - Described in 
+              <a href="#metadata_key_response_analysis_parameters">Parameters</a></p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="metadata_key_response_analysis_datum"></a>3.2.2.7. Datum</h5></div></div></div><pre class="programlisting">
+            
+&lt;nmwg:datum xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" &gt;
+            
+          </pre><div class="table"><a id="table.messages_response_analysis_datum"></a><p class="title"><b>Table 13. Datum Element Requirements</b></p><div class="table-contents"><table summary="Datum Element Requirements" border="1"><colgroup><col align="left" /></colgroup><tbody><tr><td align="left"><span><strong class="command">localname</strong></span></td><td align="left">datum</td></tr><tr><td align="left"><span><strong class="command">namespaces</strong></span></td><td align="left">http://ggf.org/ns/nmwg/base/2.0/</td></tr><tr><td align="left"><span><strong class="command">attributes</strong></span></td><td align="left">undefined</td></tr><tr><td align="left"><span><strong class="command">nested elements</strong></span></td><td align="left">undefined</td></tr><tr><td align="left"><span><strong class="command">required</strong></span></td><td align="left">varies</td></tr></tbody></table></div></div><br class="table-break" /><p>
+            The datum element may appear instead of the
+            <a href="#metadata_key_response_analysis_key">Key</a> when anomalous 
+            behaviour in the service prevents the return of a key.  Legacy or
+            alternate services may also choose to issue the key inside
+            of a datum element (see individual service documentation for
+            details).  This document will not specific attributes or elements
+            for the datum element. 
+          </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="metadata_key_response_example"></a>3.2.3. MetadataKeyResponse Message Example</h4></div></div></div><p>
+          The following examples demonstrate some of the possible uses and
+          layouts of response messages in the MA Protocol.
+        </p><p>
+          The first example is the most common form of MetadataKeyResponse
+          message containing a single metadata and data pair.  This would be
+          indicitive of success due to the presence of the key.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyResponse" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1"&gt;
+
+    &lt;nmwg:key id="key1"&gt;
+      &lt;nmwg:parameters id="parameters1"&gt;
+        &lt;nmwg:parameter name="something" value="something" /&gt;
+      &lt;/nmwg:parameters&gt;
+    &lt;/nmwg:key&gt;
+    
+  &lt;/nmwg:data&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p> 
+          The second example is similar, although it features two pairs.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyResponse" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1"&gt;
+
+    &lt;nmwg:key id="key1"&gt;
+      &lt;nmwg:parameters id="parameters1"&gt;
+        &lt;nmwg:parameter name="something" value="something" /&gt;
+      &lt;/nmwg:parameters&gt;
+    &lt;/nmwg:key&gt;
+
+  &lt;/nmwg:data&gt;
+  
+  &lt;nmwg:metadata id="m2"&gt;
+    &lt;!-- another metadata --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d2" metadatIdRef="m2"&gt;
+
+    &lt;nmwg:key id="key2"&gt;
+      &lt;nmwg:parameters id="parameters2"&gt;
+        &lt;nmwg:parameter name="something" value="something" /&gt;
+      &lt;/nmwg:parameters&gt;
+    &lt;/nmwg:key&gt;
+
+  &lt;/nmwg:data&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre><p> 
+          The final example demonstrates an error condition.  Note that this
+          may contain multiple pairs if sent, and it may be possible to have
+          sucess for some, and errors for others.
+        </p><pre class="programlisting">
+          
+&lt;!-- Begin XML --&gt;
+
+&lt;nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyResponse" id="message1"&gt;
+
+  &lt;nmwg:metadata id="m1"&gt;
+    &lt;!-- some error --&gt;
+  &lt;/nmwg:metadata&gt;
+
+  &lt;nmwg:data id="d1" metadatIdRef="m1"&gt;
+
+    &lt;nmwg:datum&gt;
+      &lt;!-- some error message --&gt;
+    &lt;/nmwg:datum&gt;
+    
+  &lt;/nmwg:data&gt;
+  
+&lt;/nmwg:message&gt;
+
+&lt;!-- End XML --&gt;
+          
+        </pre></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="setup_data"></a>4. SetupData</h2></div></div></div><p>
+      TBD
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="measurement_archive_store"></a>5. MeasurementArchiveStore</h2></div></div></div><p>
+      TBD
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="result_codes"></a>6. Result Codes</h2></div></div></div><p>
+      The following new result codes can be incorporated into the MA
+      Protocol based on the work in the
+      <a href="#id2529527">perfSONAR Base Protocol</a>.  We will introduce
+      these into both styles to allow for backwards compatibility.  The
+      original style is presented first:
+    </p><pre class="programlisting">
+          
+success.
+        ma
+error.
+      ma                   
+          
+        </pre><p>
+          We can express the same information using the new URI style:
+        </p><pre class="programlisting">
+          
+http://schemas.perfsonar.net/status/
+                                    success/
+                                            ma/
+                                    error/
+                                          ma/                                           
+          
+        </pre></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="conclusion"></a>7. Conclusion</h2></div></div></div><p>
+    </p></div><div class="glossary"><div class="titlepage"><div><div><h2 class="title"><a id="glossary"></a>Terms</h2></div></div></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2529508"></a><p>[<abbr class="abbrev">Measurement Schema</abbr>] <span class="title"><i>
+        <a href="https://forge.gridforum.org/sf/docman/do/downloadDocument/projects.nm-wg/docman.root.working_drafts/doc15119" target="_top">Measurement Schema</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529527"></a><p>[<abbr class="abbrev">perfSONAR Base Protocol</abbr>] <span class="title"><i>
+        <a href="http://anonsvn.internet2.edu/svn/perfSONAR-PS/branches/merge/doc/strawman/protocol/base/base_protocol.html" target="_top">perfSONAR Base Protocol</a>
+      </i>. </span></p></div></div></div></body></html>

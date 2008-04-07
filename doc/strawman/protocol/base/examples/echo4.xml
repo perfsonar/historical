@@ -1,0 +1,13 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/"
+              type="EchoResponse" id="message1" messageIdRef="message1">
+ 
+  <metadata id="m1">
+    <nmwg:eventType>error.echo</nmwg:eventType>
+  </metadata>
+ 
+  <data id="d1" metadatIdRef="m1">
+    <nmwgr:datum>The echo request has failed.</nmwgr:datum>
+  </data>
+ 
+</nmwg:message>
