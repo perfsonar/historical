@@ -1,0 +1,16 @@
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              type="MetadataKeyRequest" id="message1">
+
+  <nmwg:metadata id="m1">
+    <!-- metadata -->
+  </nmwg:metadata>
+
+  <nmwg:data id="d1" metadatIdRef="m1" />
+
+  <nmwg:metadata id="m2">
+    <!-- another metadata -->
+  </nmwg:metadata>
+
+  <nmwg:data id="d2" metadatIdRef="m2" />
+
+</nmwg:message>
