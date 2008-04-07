@@ -17,16 +17,16 @@
         </affiliation>
       </author>
 
-      <editor>
+      <author>
         <firstname>M.</firstname>
         <surname>Swany</surname>
         <affiliation>
-          <orgname>Universtity of Delaware</orgname>
+          <orgname>University of Delaware</orgname>
           <address>   
             <email>swany@cis.udel.edu</email>
           </address>
         </affiliation>
-      </editor>
+      </author>
     </authorgroup>
 
   </articleinfo>
@@ -67,31 +67,32 @@
     
     <para>
       <citation>perfSONAR</citation> is an infrastructure for network
-      performance monitoring. It consists of a set of services delivering 
-      performance measurements in a federated environment. These services 
-      act as an intermediate layer, between the performance measurement 
+      performance monitoring and data exchange. It consists of a set of services
+      delivering performance measurements in a federated environment. These
+      services act as an intermediate layer, between the performance measurement
       tools and the diagnostic or visualization applications.
     </para>
 
     <para>
-      This framework is designed in the <emphasis>services-oriented</emphasis>
+      This framework is designed in the <emphasis>service-oriented</emphasis>
       style, implying that a set of elementary functions has been isolated and
-      can be provided by different software entities. All services communicate
-      using well-defined protocols.  This work describes the simple
-      communication protocol used as a basis by all services and clients in the
+      can be provided by different software entities.  In this model, all
+      services must communicate using well-defined protocols.  This document
+      describes the base communication protocol to be used by all services and
+      clients in the
       <emphasis>perfSONAR</emphasis> framework.  These communication protocols
-      are based on the same <citation>XML</citation> formats used to exchange
-      and store measurement data as defined by the <citation>NM-WG</citation>
-      in the <citation>OGF</citation>.
+      are based on and utilize the same <citation>XML</citation> structure used
+      to exchange and store measurement data as defined by
+      the <citation>NM-WG</citation> in the <citation>OGF</citation>.
     </para>
     
     <para>
-      This work will proceed as follows: we first examine why this document is
-      necessary and what it will achieve.  We follow with a discussion of the
-      syntactic details and a semantic analysis of the major message types. 
+      This document will proceed as follows: we first examine why this document
+      is necessary and what it will achieve.  We follow with a discussion of the
+      syntactic details and a semantic description of the major message types.
       After, we introduce two common protocols used by every service in the
       <emphasis>perfSONAR</emphasis> infrastructure: the Echo and Authentication
-      protocols.  Finally we conclude with some foreshadowing of other protocol
+      protocols.  Finally we conclude with some description of other protocol
       documents.
     </para>
 
@@ -99,7 +100,8 @@
 
   <section id="motivation" xreflabel="Motivation">
     <title>Motivation</title>
-    
+
+    <!--
     <para>
       All services feature communication mechanisms derived from the same
       source and function in a particularly similar manner utilizing a
@@ -109,6 +111,19 @@
       application interacting with some <emphasis>perfSONAR</emphasis> service
       in search of data.
     </para>
+	-->
+
+	<para>
+	  A common message exchange pattern in <emphasis>perfSONAR</emphasis> is
+	  a <emphasis>Request</emphasis> followed by
+	  a <emphasis>Response</emphasis>.  As this pattern is important, we will
+	  show a basic interaction and build on it.  Consider this example of a
+	  client application interacting with some <emphasis>perfSONAR</emphasis>
+	  service in search of data.
+	</para>
+
+	<!--TODO: While one-sided messaging is not precluded, it is not completely
+	  defined yet -->
 
     <para>
       <mediaobject>
@@ -122,7 +137,7 @@
       It becomes the burden of <emphasis>both</emphasis> the service developer
       and the client developer to document what an exchange consists of, and how
       it takes place (albeit from different points of view).  A second example
-      involving different actors is still remarkably similar:
+      involving different actors is quite similar:
     </para>
     
     <para>
@@ -134,9 +149,10 @@
     </para>   
 
     <para>
-      The bottom line remains that the actual act of messages, receiving
-      responses, and being able to discern success or failure are common tasks.
-      This document will prevent:
+      Essentially, the acts of sending messages, receiving responses, and being
+      able to discern success or failure are common across many specific
+      interactions.  One aim of this document is to prevent the following
+      redundancies:
     </para>
 
     <itemizedlist mark='opencircle'>
@@ -144,25 +160,25 @@
         <para><command>Duplicate Schemata</command> - Messages will differ
         from service to service, but the overarching concepts will not; we
         present some of the common features that must be present in every
-        exchange and describe how extension is possible</para>
+        exchange and describe how extension is possible.</para>
       </listitem>
       <listitem>
         <para><command>Duplicate Error Conditions</command> - Some errors will
-        occur from service to service and do not need to be explained
-        repeatedly (e.g. Unknown Message Type)</para>     
+        occur across services and do not need to be defined repeatedly
+        (e.g. Unknown Message Type).</para>
       </listitem>
       <listitem>
         <para><command>Duplication of Common Exchanges</command> - Every service
         in perfSONAR is capable of receiving and acting upon common protocols
-        such as <emphasis>Echo</emphasis> and <emphasis>AA</emphasis>, these
+        such as <emphasis>Echo</emphasis> and <emphasis>AA</emphasis>.  These
         will be presented as the first two <emphasis>extensions</emphasis> to
-        this base</para>     
+        this base.</para>
       </listitem>
     </itemizedlist> 
   
     <para>
-      With this base as a sure footing, it will be possible to define protocol
-      extensions on a <emphasis>type by type</emphasis> basis instead of
+      With this base, it will be possible to define protocol extensions on
+      a <emphasis>type-by-type</emphasis> basis instead of
       <emphasis>service by service</emphasis>.  This also allows for a
       sufficient reduction in documentation due to service types implementing
       the same underlying format of messages (e.g. Measurement Archives mostly
