@@ -14,15 +14,15 @@ return $retval
 }
 
 
-XMLLIB=$(xml2-config  --libtool-libs)
-if [ -z $XMLLIB  ]
+XMLROOT=$(xml2-config  --prefix)
+if [ -z $XMLROOT   ]
 then
 echo " libxml2 libraries must be installed on building host "
 exit
 fi  
-XMLLIB_NAME=$(echo  $XMLLIB | sed -s 's/\.la//')
-XMLLIB_SO="$XMLLIB_NAME.so.2"
-XMLLIB_A="$XMLLIB_NAME.a"
+ 
+XMLLIB_SO="$XMLROOT/lib/libxml2.so.2"
+XMLLIB_A="$XMLROOT/lib/libxml2.a"
 
 
 MODULE=$1
@@ -36,7 +36,7 @@ fi
  
 
 EXECNAME=$(tolower $MODULE) 
-echo "Building executable ps-$EXECNAME  for $MODULE MA and MP with $XMLLIB_NAME"
+echo "Building executable ps-$EXECNAME  for $MODULE MA and MP"
  
 COM="pp -I ../lib/ -M DBD::mysql  -M perfSONAR_PS::Services::LS  \
  -M perfSONAR_PS::Services::Echo -M  perfSONAR_PS::Request \
