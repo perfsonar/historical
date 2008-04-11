@@ -20,6 +20,10 @@ then
 echo " libxml2 libraries must be installed on building host "
 exit
 fi  
+XMLLIB_NAME=$(echo  $XMLLIB | sed -s 's/\.la//')
+XMLLIB_SO="$XMLLIB_NAME.so.2"
+XMLLIB_A="$XMLLIB_NAME.a"
+
 
 MODULE=$1
 
@@ -29,10 +33,11 @@ echo " Usage: make_exec.sh <service module name  - for example PingER> "
 echo "        for service XXX it checks  module  ../lib/perfSONAR_PS/Services/M[PA]/XXX.pm "
 exit
 fi
+ 
 
 EXECNAME=$(tolower $MODULE) 
-echo "Building executable ps-$EXECNAME  for $MODULE MA and MP"
-
+echo "Building executable ps-$EXECNAME  for $MODULE MA and MP with $XMLLIB_NAME"
+ 
 COM="pp -I ../lib/ -M DBD::mysql  -M perfSONAR_PS::Services::LS  \
  -M perfSONAR_PS::Services::Echo -M  perfSONAR_PS::Request \
  -M perfSONAR_PS::RequestHandler  -M perfSONAR_PS::DB::RRD \
@@ -41,7 +46,8 @@ COM="pp -I ../lib/ -M DBD::mysql  -M perfSONAR_PS::Services::LS  \
  -M fields -M DateTime::Locale::en  \
  -M perfSONAR_PS::Services::MP::$MODULE  \
  -M perfSONAR_PS::Services::MA::$MODULE \
- -l  $XMLLIB  \
+ -l  $XMLLIB_A  \
+ -l  $XMLLIB_SO  \
  -o ps-$EXECNAME  ../perfsonar-daemon.pl"
 
 echo -e " Building ... \n  $COM  \n "
