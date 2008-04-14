@@ -6,6 +6,7 @@ use Log::Log4perl qw(:easy);
 use XML::LibXML;
 use File::Basename;
 
+
 sub dump($$);
 sub print_help();
 
@@ -23,6 +24,7 @@ use lib "$libdir";
 
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Common qw( readXML );
+use perfSONAR_PS::NetLogger;
 
 our $DEBUGFLAG;
 our %opts = ();
@@ -107,8 +109,16 @@ my $xml = readXML($file);
 # Make a SOAP envelope, use the XML file as the body.
 my $envelope = &perfSONAR_PS::Common::makeEnvelope($xml);
 my $error;
+
 # Send/receive to the server, store the response for later processing
+my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.client.sendReceive.start",
+	{host=>$host, port=>$port, endpoint=>$endpoint,});
+$logger->debug($msg);
+
 my $responseContent = $sender->sendReceive($envelope, "", \$error);
+
+$msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.client.sendReceive.end",);
+$logger->debug($msg);
 
 if ($error ne "") {
 	die("Error sending request to service: $error");
