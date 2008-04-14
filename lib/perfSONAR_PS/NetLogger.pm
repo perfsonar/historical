@@ -8,7 +8,7 @@ use Time::HiRes;
 our $VERSION = 0.09;
 
 # initialize Global GUID
-my $GUID = `/usr/bin/uuidgen`;
+my $GUID = get_guid();
 
 sub format {
   my($evnt, $data) = @_;
@@ -38,12 +38,13 @@ sub date {
 
 sub get_guid
 {
-  return (`/usr/bin/uuidgen`);
+  my $guid = `uuidgen`; chomp $guid;
+  return ($guid);
 }
 
-sub set_guid  # reset GUID
+sub reset_guid  # reset GUID
 {
-  $GUID = `/usr/bin/uuidgen`;
+  $GUID = `uuidgen`; chomp $GUID;
   return;
 }
 
