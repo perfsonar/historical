@@ -492,47 +492,24 @@ sub adjustRRDTime {
     my $parameters = validateParams( @args, { timeSettings => 1 } );
     my $logger = get_logger("perfSONAR_PS::Services::MA::General");
 
-    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
-
-    return if ( ( not exists $parameters->{timeSettings}->{"START"}->{"internal"} ) and ( not exists $parameters->{timeSettings}->{"END"}->{"internal"} ) );
-
-    my $oldStart = $parameters->{timeSettings}->{"START"}->{"internal"};
-    my $oldEnd   = $parameters->{timeSettings}->{"END"}->{"internal"};
-    if ( $parameters->{timeSettings}->{"RESOLUTION"} and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/mx ) {
-        if ( $parameters->{timeSettings}->{"START"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} ) {
-            $parameters->{timeSettings}->{"START"}->{"internal"} = int( $parameters->{timeSettings}->{"START"}->{"internal"} / $parameters->{timeSettings}->{"RESOLUTION"} + 1 ) * $parameters->{timeSettings}->{"RESOLUTION"};
-        }
-        if ( $parameters->{timeSettings}->{"END"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} ) {
-            $parameters->{timeSettings}->{"END"}->{"internal"} = int( $parameters->{timeSettings}->{"END"}->{"internal"} / $parameters->{timeSettings}->{"RESOLUTION"} ) * $parameters->{timeSettings}->{"RESOLUTION"};
-        }
-    }
-
-    # XXX: Jason 2/24
-    # When run over and over this will alter the START time for an RRD range.
-    #
-    #  if($parameters->{timeSettings}->{"START"} and $parameters->{timeSettings}->{"RESOLUTION"} and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/) {
-    #    $parameters->{timeSettings}->{"START"} = $parameters->{timeSettings}->{"START"} - $parameters->{timeSettings}->{"RESOLUTION"};
-    #  }
-
     if (    $parameters->{timeSettings}->{"START"}->{"internal"}
         and $parameters->{timeSettings}->{"START"}->{"internal"} =~ m/^\d+$/mx
         and $parameters->{timeSettings}->{"RESOLUTION"}
-        and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/mx )
-    {
-        while ( $parameters->{timeSettings}->{"START"}->{"internal"} > ( $sec - ( $parameters->{timeSettings}->{"RESOLUTION"} * 2 ) ) ) {
-            $parameters->{timeSettings}->{"START"}->{"internal"} -= $parameters->{timeSettings}->{"RESOLUTION"};
-        }
+        and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/mx
+        and $parameters->{timeSettings}->{"START"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} )
+    {    
+        $parameters->{timeSettings}->{"START"}->{"internal"} = ( $parameters->{timeSettings}->{"START"}->{"internal"} + ( $parameters->{timeSettings}->{"RESOLUTION"} - ( $parameters->{timeSettings}->{"START"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} ) ) ) - $parameters->{timeSettings}->{"RESOLUTION"};
     }
 
     if (    $parameters->{timeSettings}->{"END"}->{"internal"}
         and $parameters->{timeSettings}->{"END"}->{"internal"} =~ m/^\d+$/mx
         and $parameters->{timeSettings}->{"RESOLUTION"}
-        and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/mx )
-    {
-        while ( $parameters->{timeSettings}->{"END"}->{"internal"} > ( $sec - ( $parameters->{timeSettings}->{"RESOLUTION"} * 2 ) ) ) {
-            $parameters->{timeSettings}->{"END"}->{"internal"} -= $parameters->{timeSettings}->{"RESOLUTION"};
-        }
+        and $parameters->{timeSettings}->{"RESOLUTION"} =~ m/^\d+$/mx
+        and $parameters->{timeSettings}->{"END"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} )
+    {    
+        $parameters->{timeSettings}->{"END"}->{"internal"} = ( $parameters->{timeSettings}->{"END"}->{"internal"} - ( $parameters->{timeSettings}->{"END"}->{"internal"} % $parameters->{timeSettings}->{"RESOLUTION"} ) ) - $parameters->{timeSettings}->{"RESOLUTION"};
     }
+      
     return;
 }
 
