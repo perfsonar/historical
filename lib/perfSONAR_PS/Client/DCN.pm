@@ -460,6 +460,10 @@ sub idToName {
         return;
     }
 
+#print $self->createQueryRequest( { query => $query } ) , "\n";
+
+#print $msg->toString , "\n";
+
     my $hostnames = find( $msg, ".//psservice:datum/nmtb:node/nmtb:address[\@type=\"hostname\"]", 0 );
     if ($hostnames) {
         foreach my $hn ( $hostnames->get_nodelist ) {

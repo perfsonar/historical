@@ -137,7 +137,11 @@ sub metadataKeyRequest {
     my $mdId = "metadata." . genuid();
     my $dId = "data." . genuid();
     my $content = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$mdId."\">\n";
-    $content .= $parameters->{"subject"};
+
+    if ( exists $parameters->{"subject"} and $parameters->{"subject"} ) {    
+        $content .= $parameters->{"subject"};
+    }
+
     foreach my $et ( @{ $parameters->{"eventTypes"} } ) {
         $content .= "    <nmwg:eventType>".$et."</nmwg:eventType>\n";
     }
@@ -188,12 +192,14 @@ sub metadataKeyRequest {
     my $list = find( $msg, "./nmwg:metadata", 0 );
     my @mdList = ();
     foreach my $md ( $list->get_nodelist ) {
+        $md->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
         push @mdList, $md->toString;
     } 
 
     $list = find( $msg, "./nmwg:data", 0 );
     my @dList = ();
     foreach my $d ( $list->get_nodelist ) {
+        $d->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
         push @dList, $d->toString;
     } 
 
@@ -211,12 +217,16 @@ Perform a SetupDataRequest, the results are returned as a data/metadata pair.
 
 sub setupDataRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { subject => 1, eventTypes => 1, parameters => 0, start => 0, end => 0, resolution => 0, consolidationFunction => 0 } );
+    my $parameters = validateParams( @args, { subject => 0, eventTypes => 1, parameters => 0, start => 0, end => 0, resolution => 0, consolidationFunction => 0 } );
 
     my $mdId = "metadata." . genuid();
     my $dId = "data." . genuid();
     my $content = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$mdId."\">\n";
-    $content .= $parameters->{"subject"};
+
+    if ( exists $parameters->{"subject"} and $parameters->{"subject"} ) {    
+        $content .= $parameters->{"subject"};
+    }
+    
     foreach my $et ( @{ $parameters->{"eventTypes"} } ) {
         $content .= "    <nmwg:eventType>".$et."</nmwg:eventType>\n";
     }
@@ -257,8 +267,6 @@ sub setupDataRequest {
         $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
     }
     
-    print $content , "\n\n";
-    
     my $msg = $self->callMA( { message => $self->createMAMessage( { type => "SetupDataRequest", content => $content } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -269,12 +277,14 @@ sub setupDataRequest {
     my $list = find( $msg, "./nmwg:metadata", 0 );
     my @mdList = ();
     foreach my $md ( $list->get_nodelist ) {
+        $md->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
         push @mdList, $md->toString;
     } 
 
     $list = find( $msg, "./nmwg:data", 0 );
     my @dList = ();
     foreach my $d ( $list->get_nodelist ) {
+        $d->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
         push @dList, $d->toString;
     } 
 
