@@ -182,39 +182,46 @@ sub getColor {
     elsif($value >= 524288000 && $value < 1073741824) {
         return $c6;  
     }
-    elsif($value >= 1073741824 && $value < 2147483648) {
-        return $c7;  
-    }
-    elsif($value >= 2147483648 && $value < 3221225472) {
-        return $c8;  
-    }
-    elsif($value >= 3221225472 && $value < 4294967296) {
-        return $c9;  
-    }
-    elsif($value >= 4294967296 && $value < 5368709120) {
-        return $c10;  
-    }
-    elsif($value >= 5368709120 && $value < 6442450944) {
-        return $c11;  
-    }
-    elsif($value >= 6442450944 && $value < 7516192768) {
-        return $c12;  
-    }
-    elsif($value >= 7516192768 && $value < 8589934592) {
-        return $c13;  
-    }
-    elsif($value >= 8589934592 && $value < 9663676416) {
-        return $c14;  
-    }
-    elsif($value >= 9663676416 && $value < 10737418240) {
-        return $c15;  
-    }
-    elsif($value >= 10737418240) {
-      return $c16;  
-    }
     else {
-        return $black;
+        return $c6;      
     }
+
+# Kludge...
+
+#    elsif($value >= 1073741824 && $value < 2147483648) {
+#        return $c7;  
+#    }
+#    elsif($value >= 2147483648 && $value < 3221225472) {
+#        return $c8;  
+#    }
+#    elsif($value >= 3221225472 && $value < 4294967296) {
+#        return $c9;  
+#    }
+#    elsif($value >= 4294967296 && $value < 5368709120) {
+#        return $c10;  
+#    }
+#    elsif($value >= 5368709120 && $value < 6442450944) {
+#        return $c11;  
+#    }
+#    elsif($value >= 6442450944 && $value < 7516192768) {
+#        return $c12;  
+#    }
+#    elsif($value >= 7516192768 && $value < 8589934592) {
+#        return $c13;  
+#    }
+#    elsif($value >= 8589934592 && $value < 9663676416) {
+#        return $c14;  
+#    }
+#    elsif($value >= 9663676416 && $value < 10737418240) {
+#        return $c15;  
+#    }
+#    elsif($value >= 10737418240) {
+#      return $c16;  
+#    }
+#    else {
+#        return $black;
+#    }
+
 }
 
 
@@ -343,15 +350,14 @@ sub callSNMP_MA {
         
         # Extract the datum elements. 
         foreach my $dt ( $data->getDocumentElement->getChildrenByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "datum" ) ) {
-
             # Make sure the time and data are legit.
             if($dt->getAttribute("timeValue") =~ m/^\d{10}$/) {           
                 if($dt->getAttribute("value") and $dt->getAttribute("value") ne "nan") {
                     $datum{$dt->getAttribute("timeValue")} = $dt->getAttribute("value") * 8;
                 }
-                else {
-                    $datum{$dt->getAttribute("timeValue")} = 0;
-                }
+#                else {
+#                    $datum{$dt->getAttribute("timeValue")} = 0;
+#                }
             }
         }
     }
@@ -359,7 +365,8 @@ sub callSNMP_MA {
     # Sort, than find the max (lets us climb fast, fall slow)
     my $max = 0;
     foreach my $value ( sort keys %datum ) {   
-        $max = $datum{$value} if $datum{$value} > $max;
+#        $max = $datum{$value} if $datum{$value} > $max;
+        $max = $datum{$value};
     }
  
     return $max;
