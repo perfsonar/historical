@@ -160,7 +160,8 @@ sub topo {
       $html .= "<th align=\"center\">Name</th>\n";
       $html .= "<th align=\"center\">Type</th>\n";
       $html .= "<th align=\"center\">Description</th>\n";
-      $html .= "<th align=\"center\">Operations</th>\n";
+      $html .= "<th align=\"center\">Show Topo</th>\n";
+      $html .= "<th align=\"center\">Graph Topo</th>\n";
       $html .= "</tr>\n";
 
       my $tsCounter = 0;
@@ -192,6 +193,11 @@ sub topo {
         $html .= "<input type=\"button\" value=\"Query\" name=\"ts_query\" id=\"ts_query\" ";
         $html .= "onClick=\"window.open('display.cgi?dcn=".$INSTANCE."&ts=".$s."'";
         $html .= ",'mywindow','width=600,height=400,status=yes,scrollbars=yes,resizable=yes')\">\n";
+        $html .= "</td>\n";
+        $html .= "<td align=\"center\">\n";
+        $html .= "<input type=\"button\" value=\"Graph\" name=\"ts_graph\" id=\"ts_graph\" ";
+        $html .= "onClick=\"window.open('graph.cgi?dcn=".$INSTANCE."&ts=".$s."'";
+        $html .= ",'mywindow2','width=800,height=600,status=yes,scrollbars=yes,resizable=yes')\">\n";
         $html .= "</td>\n";
         $html .= "</tr>\n";
 
