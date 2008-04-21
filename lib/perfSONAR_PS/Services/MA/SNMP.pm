@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::SNMP;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER';
+use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'NETLOGGER';
 
 use strict;
 use warnings;
@@ -49,6 +49,7 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::NetLogger;
 
 my %ma_namespaces = (
     nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -101,6 +102,9 @@ ways:
 sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::SNMP");
+    # something like this to send NetLogger logs to separate file....
+    #   -currently does not work ?? -blt
+    $self->{NETLOGGER} = get_logger("perfSONAR_PS::NetLogger");
 
     unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_type"}
         and $self->{CONF}->{"snmp"}->{"metadata_db_type"} )
@@ -574,6 +578,10 @@ sub handleEvent {
             doOutputMetadata  => 1,
         }
     );
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleEvent.start",
+             {messageType=>$parameters->{messageType},});
+    $self->{NETLOGGER}->debug($msg);
+
 
     my @subjects = @{ $parameters->{subject} };
     my @filters  = @{ $parameters->{filterChain} };
@@ -723,6 +731,9 @@ sub handleEvent {
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
         return;
     }
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleEvent.end",
+             {subject=>$parameters->{subject}, messageType=>$parameters->{messageType},});
+    $self->{NETLOGGER}->debug($msg);
     return;
 }
 
@@ -1604,7 +1615,17 @@ sub retrieveRRD {
 
     adjustRRDTime( { timeSettings => $timeSettings } );
     my $id = "data." . genuid();
+
+
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.getDataRRD.start",
+        {rrdfile=>$rrd_file,});
+    $self->{NETLOGGER}->debug($msg);
+
     my %rrd_result = getDataRRD( { directory => $self->{DIRECTORY}, file => $rrd_file, timeSettings => $timeSettings, rrdtool => $self->{CONF}->{"snmp"}->{"rrdtool"} } );
+
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.getDataRRD.end");
+    $self->{NETLOGGER}->debug($msg);
+
     if ( $rrd_result{ERROR} ) {
         $self->{LOGGER}->error( "RRD error seen: " . $rrd_result{ERROR} );
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $rrd_result{ERROR}, 1 );
