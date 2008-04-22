@@ -109,6 +109,8 @@ sub drawArrows {
 
   # NB: Draw from the source to the cloud
 
+  $target->createImage(225,225, -image => $image); 
+
   my $write = 0;
   foreach my $host ( %{ $result } ) {
       if ( $host eq "phoebus.salt.dcn.internet2.edu" ) {
@@ -146,7 +148,6 @@ sub drawArrows {
   unless ( $write ) {
     $target->createImage(225,225, -image => $image);    
   }
-  
   
   
   $target->after($ms, [ \&drawArrows => $target, $ms ] );
@@ -325,14 +326,14 @@ sub collectData {
 
                 my $names = $dcn_ls->idToName( { id => $list[0] } );
                 my $names2 = $dcn_ls->idToName( { id => $list[$#list] } );
-                if($names->[0] and $names2->[0]) {
+                if($names->[0]) {
                     my %temp = ();
-                    my %temp2 = ();
-                    
                     $temp{"in"} = callSNMP_MA($snmp_ma, $names->[0], "in");        
                     $temp{"out"} = callSNMP_MA($snmp_ma, $names->[0], "out");
                     $final{$names->[0]} = \%temp;
-
+                }
+                if($names2->[0]) {
+                    my %temp2 = ();
                     $temp2{"in"} = callSNMP_MA($snmp_ma, $names2->[0], "in");
                     $temp2{"out"} = callSNMP_MA($snmp_ma, $names2->[0], "out");    
                     $final{$names2->[0]} = \%temp2;
