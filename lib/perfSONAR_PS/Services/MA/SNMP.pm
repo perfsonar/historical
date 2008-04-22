@@ -716,7 +716,7 @@ sub handleEvent {
         );
     }
     elsif ( $parameters->{messageType} eq "SetupDataRequest" ) {
-        return $self->maSetupDataRequest(
+        $self->maSetupDataRequest(
             {
                 output             => $parameters->{output},
                 metadata           => $md,
@@ -729,10 +729,8 @@ sub handleEvent {
     }
     else {
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
-        return;
     }
-    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleEvent.end",
-             {subject=>$parameters->{subject}, messageType=>$parameters->{messageType},});
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleEvent.end");
     $self->{NETLOGGER}->debug($msg);
     return;
 }
