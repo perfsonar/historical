@@ -1,6 +1,6 @@
 package perfSONAR_PS::Request;
 
-use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES';
+use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME', 'CALL', 'NAMESPACES', 'NETLOGGER';
 
 use strict;
 use warnings;
@@ -8,6 +8,7 @@ use Log::Log4perl qw(get_logger);
 use XML::LibXML;
 
 use perfSONAR_PS::Common;
+use perfSONAR_PS::NetLogger;
 
 our $VERSION = 0.09;
 
@@ -16,6 +17,7 @@ sub new {
     my $logger = get_logger("perfSONAR_PS::Request");
 
     my $self = fields::new($package);
+    $self->{NETLOGGER} = get_logger("perfSONAR_PS::NetLogger");
 
     $self->{"CALL"} = $call;
     if (defined $http_request and $http_request ne "") {
@@ -68,6 +70,9 @@ sub parse {
     }
 
     $logger->debug("Parsing request: ".$self->{REQUEST}->content); 
+
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.start");
+    $self->{NETLOGGER}->debug($msg);
 
     my $parser = XML::LibXML->new();
     my $dom;
@@ -229,6 +234,7 @@ sub setRequestDOM {
 sub finish {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
+
     if(defined $self->{CALL} and $self->{CALL} ne "") {
         my $end_time = [Time::HiRes::gettimeofday];
         my $diff = Time::HiRes::tv_interval $self->{START_TIME}, $end_time;
@@ -237,6 +243,10 @@ sub finish {
         $self->{CALL}->close;
         delete $self->{CALL};
         $logger->debug("Closing call.");
+
+        my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.end");
+        $self->{NETLOGGER}->debug($msg);
+
     } else {
         $logger->error("Call not established.");
     }
