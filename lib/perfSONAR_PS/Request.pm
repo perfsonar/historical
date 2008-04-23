@@ -17,7 +17,7 @@ sub new {
     my $logger = get_logger("perfSONAR_PS::Request");
 
     my $self = fields::new($package);
-    $self->{NETLOGGER} = get_logger("perfSONAR_PS::NetLogger");
+    $self->{NETLOGGER} = get_logger("NetLogger");
 
     $self->{"CALL"} = $call;
     if (defined $http_request and $http_request ne "") {

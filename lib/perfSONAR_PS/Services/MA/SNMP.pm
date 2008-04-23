@@ -102,9 +102,7 @@ ways:
 sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::SNMP");
-    # something like this to send NetLogger logs to separate file....
-    #   -currently does not work ?? -blt
-    $self->{NETLOGGER} = get_logger("perfSONAR_PS::NetLogger");
+    $self->{NETLOGGER} = get_logger("NetLogger");
 
     unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_type"}
         and $self->{CONF}->{"snmp"}->{"metadata_db_type"} )
@@ -704,7 +702,7 @@ sub handleEvent {
     $self->{LOGGER}->debug("Request filter parameters: cf: $cf resolution: $resolution start: $start end: $end");
 
     if ( $parameters->{messageType} eq "MetadataKeyRequest" ) {
-        return $self->maMetadataKeyRequest(
+        $self->maMetadataKeyRequest(
             {
                 output             => $parameters->{output},
                 metadata           => $md,
@@ -1044,6 +1042,8 @@ sub maSetupDataRequest {
             message_parameters => 1
         }
     );
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.SetupDataRequest.start");
+    $self->{NETLOGGER}->debug($msg);
 
     my $mdId  = q{};
     my $dId   = q{};
@@ -1091,6 +1091,8 @@ sub maSetupDataRequest {
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.SetupDataRequest.end");
+    $self->{NETLOGGER}->debug($msg);
     return;
 }
 
@@ -1227,6 +1229,8 @@ sub setupDataRetrieveMetadataData {
 
     my $mdId = q{};
     my $dId  = q{};
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start");
+    $self->{NETLOGGER}->debug($msg);
 
     my $queryString = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
@@ -1338,6 +1342,8 @@ sub setupDataRetrieveMetadataData {
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.end");
+    $self->{NETLOGGER}->debug($msg);
     return;
 }
 
@@ -1363,7 +1369,11 @@ sub handleData {
         }
     );
 
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleData.start");
+    $self->{NETLOGGER}->debug($msg);
+
     my $type = extract( find( $parameters->{data}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1 ), 0 );
+
     if ( $type eq "rrd" ) {
         $self->retrieveRRD(
             {
@@ -1395,6 +1405,8 @@ sub handleData {
         $self->{LOGGER}->error($msg);
         getResultCodeData( $parameters->{output}, "data." . genuid(), $parameters->{id}, $msg, 1 );
     }
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleData.end");
+    $self->{NETLOGGER}->debug($msg);
     return;
 }
 
@@ -1581,6 +1593,9 @@ sub retrieveRRD {
         }
     );
 
+    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.retrieveRRD.setup.start");
+    $self->{NETLOGGER}->debug($msg);
+
     my $timeSettings = $parameters->{time_settings};
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -1614,8 +1629,10 @@ sub retrieveRRD {
     adjustRRDTime( { timeSettings => $timeSettings } );
     my $id = "data." . genuid();
 
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.retrieveRRD.setup.end");
+    $self->{NETLOGGER}->debug($msg);
 
-    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.getDataRRD.start",
+    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.getDataRRD.start",
         {rrdfile=>$rrd_file,});
     $self->{NETLOGGER}->debug($msg);
 
@@ -1656,6 +1673,8 @@ sub retrieveRRD {
         my $valueUnits = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]", 1 ), 0 );
 
         startData( $parameters->{output}, $id, $parameters->{mid}, undef );
+        $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.retrieveRRD.genXML.start");
+        $self->{NETLOGGER}->debug($msg);
         foreach my $a ( sort( keys(%rrd_result) ) ) {
             if ( $a < $sec ) {
                 my %attrs = ();
@@ -1680,6 +1699,8 @@ sub retrieveRRD {
             }
         }
         endData( $parameters->{output} );
+        $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.retrieveRRD.genXML.end");
+        $self->{NETLOGGER}->debug($msg);
     }
     return;
 }
