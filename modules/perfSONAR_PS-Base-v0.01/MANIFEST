@@ -21,6 +21,7 @@ lib/perfSONAR_PS/Time.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/XML/Base.pm
 lib/perfSONAR_PS/XML/Document_string.pm
+lib/perfSONAR_PS/XML/Document_file.pm
 lib/perfSONAR_PS/XML/Namespace.pm
 perl-perfSONAR_PS-Base.spec
 t/perfSONAR_PS::Common.t

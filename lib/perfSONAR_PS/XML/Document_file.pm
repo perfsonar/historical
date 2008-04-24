@@ -182,7 +182,7 @@ sub createElement {
 	my $args = validateParams(@_, 
 			{
 				prefix => { type => SCALAR, regex => qr/^[a-z0-9]/ },
-                namespace => { type => SCALAR, regex => qr/^http:\/\/.*[^\/]$/ },
+                namespace => { type => SCALAR, regex => qr/^http/ },
 				tag => { type => SCALAR, regex => qr/^[a-z0-9]/ },
 				attributes => { type => HASHREF | UNDEF, optional => 1 },
 				extra_namespaces => { type => HASHREF | UNDEF, optional => 1 },
