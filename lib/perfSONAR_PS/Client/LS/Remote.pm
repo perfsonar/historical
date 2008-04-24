@@ -253,7 +253,7 @@ sub sendDeregister {
     my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
 
-    my $doc = perfSONAR_PS::XML::Document_string->new();
+    my $doc = perfSONAR_PS::XML::Document->new();
     startMessage($doc, "message.".genuid(), "", "LSDeregisterRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
 
     my $mdID = "metadata.".genuid();
@@ -282,7 +282,7 @@ sub sendKeepalive {
     my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
 
 
-    my $doc = perfSONAR_PS::XML::Document_string->new();
+    my $doc = perfSONAR_PS::XML::Document->new();
     startMessage($doc, "message.".genuid(), "", "LSKeepaliveRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
 
     my $mdID = "metadata.".genuid();
@@ -386,7 +386,7 @@ sub __register {
     my $x = 0;
 
     for(my $y = 1; $y <= ($iterations+1); $y++) {
-        my $doc = perfSONAR_PS::XML::Document_string->new();
+        my $doc = perfSONAR_PS::XML::Document->new();
         startMessage($doc, "message.".genuid(), "", "LSRegisterRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
         my $mdID = "metadata.".genuid();
         createMetadata($doc, $mdID, "", createService($self), undef);

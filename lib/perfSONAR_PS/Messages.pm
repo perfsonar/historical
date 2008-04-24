@@ -353,8 +353,6 @@ sub createData {
 
 Craft an error response message.
 
-XXX: Jason 3/12/08 - Document_string is still used here.
-
 =cut
 
 sub getErrorResponseMessage {
@@ -382,7 +380,7 @@ sub getErrorResponseMessage {
     }
 
     if (not defined $args->{output}) {
-        $output = new perfSONAR_PS::XML::Document_string();
+        $output = new perfSONAR_PS::XML::Document();
     }
 
     my $n = getResultCodeMessage($output, $id, $messageIdRef, $metadataIdRef, "ErrorResponse", $eventType, $description, undef, 0);

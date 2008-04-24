@@ -6,7 +6,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::XML::Document_string;
+use perfSONAR_PS::XML::Document;
 
 our $VERSION = 0.09;
 
@@ -80,7 +80,7 @@ sub ping {
 		return (-1, "Invalid URI specified \"".$self->{URI}."\"");
 	}
 
-	my $doc = perfSONAR_PS::XML::Document_string->new();
+	my $doc = perfSONAR_PS::XML::Document->new();
 	$self->createEchoRequest($doc);
 
 	my ($status, $res) = consultArchive($host, $port, $endpoint, $doc->getValue());
@@ -179,7 +179,7 @@ The setEventType function changes the eventType that the instance uses.
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::XML::Document_string>, L<Log::Log4perl>
+L<perfSONAR_PS::XML::Document>, L<Log::Log4perl>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

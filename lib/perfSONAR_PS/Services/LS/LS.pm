@@ -359,7 +359,7 @@ the message to the appropriate location based on message type.
 
 sub handleMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
+    my $parameters = validateParams( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
 
     my $error   = q{};
     my $counter = 0;

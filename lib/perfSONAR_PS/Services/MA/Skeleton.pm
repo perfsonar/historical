@@ -177,7 +177,7 @@ sub registerLS {
     when a new message of the specified type is received.
 
     Valid Parameters:
-     output: The perfSONAR_PS::XML::Document_string being used to construct the response message
+     output: The perfSONAR_PS::XML::Document being used to construct the response message
      messageId: The id for the message received
      messageType: The type of the message received
      message: The full message received
@@ -217,7 +217,7 @@ sub handleMessage {
      pair is found.  
 
     Valid Parameters:
-     output: The perfSONAR_PS::XML::Document_string being used to construct the response message
+     output: The perfSONAR_PS::XML::Document being used to construct the response message
      messageId: The id for the message received
      messageType: The type of the message received
      messageParameters: The parameters for the message received as a hash
@@ -257,7 +257,7 @@ sub handleMessageBegin {
     request fields (like open database connections).
 
     Valid Parameters:
-     output: The perfSONAR_PS::XML::Document_string being used to construct the response message
+     output: The perfSONAR_PS::XML::Document being used to construct the response message
      messageId: The id for the message finished being handled
      messageType: The type of the message finished being handled
      message: The full message handled
@@ -290,7 +290,7 @@ sub handleMessageEnd {
     received message. 
 
     Valid Parameters:
-     output: The perfSONAR_PS::XML::Document_string being used to construct the response message
+     output: The perfSONAR_PS::XML::Document being used to construct the response message
      messageId: The id for the message the md/d pair was in
      messageType: The type of the message rthe md/d pair was in
      messageParameters: The parameters for the message received as a hash

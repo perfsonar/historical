@@ -22,7 +22,7 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::XML::Document_string;
+use perfSONAR_PS::XML::Document;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::EventTypeEquivalenceHandler;
@@ -226,7 +226,7 @@ sub __handleMessage {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR },
                 messageType => { type => SCALAR },
                 message => { type => SCALARREF },
@@ -251,7 +251,7 @@ sub __handleMessageBegin {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
@@ -281,7 +281,7 @@ sub __handleMessageEnd {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 message => { type => SCALARREF },
@@ -310,7 +310,7 @@ sub __handleEvent {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document_string" },
+                output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
@@ -452,7 +452,7 @@ sub handleMessage {
         my ($errorEventType, $errorMessage);
 
         try {
-            my $ret_message = new perfSONAR_PS::XML::Document_string();
+            my $ret_message = new perfSONAR_PS::XML::Document();
             $self->__handleMessage({ output => $ret_message, messageId => $messageId, messageType => $messageType, message => $message, rawRequest => $raw_request });
             $raw_request->setResponse($ret_message->getValue());
         }
@@ -478,7 +478,7 @@ sub handleMessage {
         };
 
         if (defined $errorEventType) {
-            my $ret_message = new perfSONAR_PS::XML::Document_string();
+            my $ret_message = new perfSONAR_PS::XML::Document();
             my $retMessageId = "message.".genuid();
 
             # we weren't given a return message type, so try to construct
@@ -522,7 +522,7 @@ sub handleMessage {
         }
     }
 
-    my $ret_message = perfSONAR_PS::XML::Document_string->new();
+    my $ret_message = perfSONAR_PS::XML::Document->new();
 
     my $doOutputMessageHeader = 1;
     my $doOutputMetadata = 0;
@@ -943,7 +943,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<perfSONAR_PS::XML::Document_string>
+L<Log::Log4perl>, L<perfSONAR_PS::XML::Document>
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

@@ -379,7 +379,7 @@ sub generateMDXpath {
 sub createMetadataStore {
     my ($self, $nodes, $circuits) = @_;
 
-    my $doc = perfSONAR_PS::XML::Document_string->new();
+    my $doc = perfSONAR_PS::XML::Document->new();
 
     $doc->startElement(prefix => "nmwg", tag => "store", namespace => "http://ggf.org/ns/nmwg/base/2.0/");
     foreach my $node_id (keys %{ $nodes }) {
@@ -718,7 +718,7 @@ sub handlePathStatus {
         $circuit_status{$circuit_name} = \@data_points;
     }
 
-    my $doc = perfSONAR_PS::XML::Document_string->new();
+    my $doc = perfSONAR_PS::XML::Document->new();
 
     startParameters($doc, "params.0");
      addParameter($doc, "DomainName", $self->{DOMAIN});

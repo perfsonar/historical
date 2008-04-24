@@ -1,8 +1,8 @@
-package perfSONAR_PS::XML::Document_file;
+package perfSONAR_PS::XML::Document;
 
 =head1 NAME
 
-perfSONAR_PS::XML::Document_file - This module is used to provide a more
+perfSONAR_PS::XML::Document - This module is used to provide a more
 abstract method for constructing XML documents that can be implemented using
 file construction, outputting to a file or even DOM construction without
 tying the code creating the XML to any particular construction method..
@@ -31,7 +31,7 @@ sub new {
     my ($package) = @_;
     my $self = fields::new($package);
 
-    $self->{LOGGER} = get_logger("perfSONAR_PS::XML::Document_file");
+    $self->{LOGGER} = get_logger("perfSONAR_PS::XML::Document");
 
     $self->{OPEN_TAGS} = ();
     $self->{DEFINED_PREFIXES} = ();
