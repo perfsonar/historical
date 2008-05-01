@@ -69,3 +69,4 @@ perfsonarbuoy.init
 Makefile
 perfsonar-daemon.pl
 logger.conf
+psConfigurePerfSONARBUOY.perl

@@ -17,7 +17,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define daemon_prefix    /opt/perfsonar
 %define daemon_conf_dir  %{daemon_prefix}/etc
-%define daemon_conf_file  %{daemon_conf_dir}/perfsonarbuoy-daemon.conf
+%define daemon_conf_filename  perfsonarbuoy-daemon.conf
+%define daemon_conf_file  %{daemon_conf_dir}/%{daemon_conf_filename}
 %define daemon_var_dir   %{daemon_prefix}/var
 %define daemon_bin_dir   %{daemon_prefix}/bin
 
@@ -28,11 +29,17 @@ perfSONARBUOY MA protocols.
 
 %prep
 %setup -q -n perfSONAR_PS-perfSONARBUOY
+# edit the default path in the configuration tool
+awk "{gsub(/XXX_CONFFILE_XXX/,\"%{daemon_conf_filename}\"); sub(/XXX_CONFDIR_XXX/,\"%{daemon_conf_dir}\"); print}" psConfigurePerfSONARBUOY.perl > psConfigurePerfSONARBUOY.perl.new
+perl -i -p -e "s/was_installed = 0/was_installed = 1/" psConfigurePerfSONARBUOY.perl.new
+mv psConfigurePerfSONARBUOY.perl.new psConfigurePerfSONARBUOY.perl
 
 %build
 sh build.sh
+pp -M RRDp -M File::Temp -M Module::Load -M Sys::Hostname -M Class::Accessor -M CGI -M CGI::Ajax -M Config::General -o psConfigurePerfSONARBUOY psConfigurePerfSONARBUOY.perl
 
 %install
+# edit the paths in the init scripts
 awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=%{daemon_var_dir}\"); gsub(/^PSB_EXE=.*/,\"PSB_EXE=%{daemon_bin_dir}/perfsonarbuoy\"); gsub(/^PSB_CONF=.*/,\"PSB_CONF=%{daemon_conf_dir}/perfsonarbuoy.conf\");; gsub(/^PSB_LOGGER=.*/,\"PSB_LOGGER=%{daemon_conf_dir}/perfsonarbuoy-logger.conf\"); print}" perfsonarbuoy.init > perfsonarbuoy.new
 mv perfsonarbuoy.new perfsonarbuoy.init
 
@@ -41,6 +48,7 @@ mkdir -p %{buildroot}/%{daemon_var_dir}
 mkdir -p %{buildroot}/%{daemon_conf_dir}
 
 install -p -m755 perfsonarbuoy %{buildroot}/%{daemon_bin_dir}
+install -p -m755 psConfigurePerfSONARBUOY %{buildroot}/%{daemon_bin_dir}
 install -p -m644 logger.conf %{buildroot}/%{daemon_conf_dir}/perfsonarbuoy-logger.conf
 mkdir -p %{buildroot}/etc/init.d/
 install -p -m755 perfsonarbuoy.init %{buildroot}/etc/init.d/perfsonarbuoy
