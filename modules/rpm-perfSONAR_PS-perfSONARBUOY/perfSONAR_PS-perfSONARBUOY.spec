@@ -53,6 +53,9 @@ install -p -m755 perfsonarbuoy.init %{buildroot}/etc/init.d/perfsonarbuoy
 %{daemon_conf_dir}/*
 /etc/init.d/*
 
+%preun
+/etc/init.d/perfsonarbuoy stop
+
 %changelog
 * Thu Apr 29 2008 aaron@internet2.edu 0.09-1
 - Initial specfile

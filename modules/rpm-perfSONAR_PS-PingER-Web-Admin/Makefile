@@ -1,4 +1,4 @@
-PACKAGE=perfSONAR_PS-perfSONARBUOY
+PACKAGE=perfSONAR_PS-PingER-Web-Admin
 
 dist:
 	mkdir /tmp/$(PACKAGE)

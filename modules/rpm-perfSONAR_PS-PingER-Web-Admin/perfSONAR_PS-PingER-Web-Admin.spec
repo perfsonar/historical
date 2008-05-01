@@ -1,11 +1,12 @@
-Name:           perfSONAR_PS-Web-Admin
+Name:           perfSONAR_PS-PingER-Web-Admin
 Version:        0.09
 Release:        1%{?dist}
 Summary:        perfSONAR_PS Web utility for configuring perfSONAR-PS services
 License:        distributable, see LICENSE
 Group:          Development/Libraries
-Source0:        perfSONAR_PS-Web-Admin.tar.gz
+Source0:        perfSONAR_PS-PingER-Web-Admin.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires:       perfSONAR_PS-Services-PingER
 #BuildRequires:  perl(PAR::Packer)
 #BuildRequires:  perl(CGI)
 #BuildRequires:  perl(CGI::Ajax)
@@ -15,15 +16,15 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 # Disable stripping the binary since it makes PAR binaries inoperable
 %define __os_install_post /usr/lib/rpm/brp-compress
 
-%define daemon_conf_dir  /etc/perfsonar
-%define daemon_conf_file  %{daemon_conf_dir}/daemon.conf
+%define daemon_conf_dir  /opt/perfsonar/etc
+%define daemon_conf_file  %{daemon_conf_dir}/pinger.conf
 
 %description
-This package includes a CGI script for configuring the perfSONAR-PS daemon to
-enable a perfSONARBUOY or Pinger Services.
+This package includes a CGI script for configuring a PingER Measurement
+Archive or Measurement Point.
 
 %prep
-%setup -q -n perfSONAR_PS-Web-Admin
+%setup -q -n perfSONAR_PS-PingER-Web-Admin
 ## we need to set the file paths
 awk "{gsub(/XXX_DEFAULT_XXX/,\"%{daemon_conf_file}\"); print}" web-admin.perl.cgi > web-admin.perl.new.cgi
 mv web-admin.perl.new.cgi web-admin.perl.cgi
@@ -34,9 +35,9 @@ pp -M Class::Accessor -M CGI -M CGI::Ajax -M Config::General -o web-admin.cgi we
 
 %install
 mkdir -p %{buildroot}/var/www/cgi-bin/perfSONAR-PS
-install -p -m755 web-admin.cgi %{buildroot}/var/www/cgi-bin/perfSONAR-PS
+install -p -m755 web-admin.cgi %{buildroot}/var/www/cgi-bin/perfSONAR-PS/pinger-web-admin.cgi
 mkdir -p %{buildroot}/etc/httpd/conf.d
-install -p -m644 perfsonar-httpd.conf %{buildroot}/etc/httpd/conf.d/perfSONAR-PS-web-admin.conf
+install -p -m644 perfsonar-httpd.conf %{buildroot}/etc/httpd/conf.d/perfSONAR-PS-PingER-Web-Admin.conf
 
 #%clean
 
@@ -52,7 +53,7 @@ chmod 664 %{daemon_conf_file}
 
 %files
 %defattr(-,root,root,-)
-%doc Changes LICENSE README perfSONAR_PS-Web-Admin.spec
+%doc Changes LICENSE README perfSONAR_PS-PingER-Web-Admin.spec
 /etc/httpd/conf.d/*
 /var/www/cgi-bin/*
 

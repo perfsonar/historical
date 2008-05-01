@@ -12,7 +12,7 @@ my $was_installed = 0;
 my %enabled_services = (
     snmp => 0,
     ls => 0,
-    perfsonarbuoy => 1,
+    perfsonarbuoy => 0,
     pingerma => 1,
     pingermp => 1,
 );

@@ -13,8 +13,8 @@ my %enabled_services = (
     snmp => 0,
     ls => 0,
     perfsonarbuoy => 1,
-    pingerma => 1,
-    pingermp => 1,
+    pingerma => 0,
+    pingermp => 0,
 );
 
 =head1 NAME
