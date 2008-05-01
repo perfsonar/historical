@@ -41,9 +41,13 @@ if ( not $file ) {
 }
 
 my $tmp;
-my $default_hostname = hostname();
-my $hostname;
-
+our $default_hostname = hostname();
+our  $hostname = 'localhost';
+our  $db_name = '';
+our  $db_port = '';
+our  $db_username = 'dbuser';
+our  $db_password  = 'dbpass'; 
+ 
 my %config = ();
 if ( -f $file ) {
     %config = ParseConfig($file);
@@ -71,10 +75,9 @@ if ( defined $config{"port"} ) {
 
 while (1) {
     my $input;
-
-    print "1) Add/Edit endpoint\n";
-    print "2) Enable/Disable port/endpoint\n";
-    print "3) Set global values\n";
+    print "1) Set global values\n";
+    print "2) Add/Edit endpoint\n";
+    print "3) Enable/Disable port/endpoint\n";
     print "4) Save configuration\n";
     print "5) Exit\n";
     $input = &ask( "? ", q{}, undef, '[12345]' );
@@ -92,9 +95,9 @@ while (1) {
         print "Saved config to $file\n";
         print "\n";
     }
-    elsif ( $input == 3 ) {
-        $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "0",                                                          $config{"max_worker_processes"},     '^\d+$' );
-        $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "0",                                                          $config{"max_worker_lifetime"},      '^\d+$' );
+    elsif ( $input == 1 ) {
+        $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "30",                                                          $config{"max_worker_processes"},     '^\d+$' );
+        $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300",                                                          $config{"max_worker_lifetime"},      '^\d+$' );
         $config{"disable_echo"}             = &ask( "Disable echo by default (0 for yes, 1 for now) ",                                      0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
@@ -102,7 +105,7 @@ while (1) {
         $config{"pid_dir"}                  = &ask( "Enter pid dir location ",                                                              "/var/run",                                                   $config{"pid_dir"},                  q{} );
         $config{"pid_file"}                 = &ask( "Enter pid filename ",                                                                  "ps.pid",                                                     $config{"pid_file"},                 q{} );
     }
-    elsif ( $input == 2 ) {
+    elsif ( $input == 3 ) {
         my @elements = ();
         my %status   = ();
 
@@ -172,7 +175,7 @@ while (1) {
             print "\n";
         }
     }
-    elsif ( $input == 1 ) {
+    elsif ( $input == 2 ) {
         my @endpoints = ();
         foreach my $port ( sort keys %{ $config{"port"} } ) {
             next if ( !defined $config{"port"}->{$port}->{"endpoint"} );
@@ -395,12 +398,12 @@ sub config_snmp_ma {
     $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
 
     my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-    if ( $makeStore ) {
-        eval { 
-#            load RRDp; 
-            use RRDp; 
-            $RRDp::error_mode = 'catch';
-            RRDp::start $config->{"snmp"}->{"rrdtool"};
+    if ( $makeStore ) { 
+        no strict 'refs';
+        eval {  
+            require RRDp; 
+	    ${'RRDp::error_mode'} = 'catch';
+            RRDp::start($config->{"snmp"}->{"rrdtool"});
             my $cmd .= "create ".$confdir."/localhost.rrd --start N --step 1 ";
             $cmd .= "DS:ifinoctets:COUNTER:10:U:U ";
             $cmd .= "DS:ifoutoctets:COUNTER:10:U:U ";
@@ -417,13 +420,15 @@ sub config_snmp_ma {
             $cmd .= "RRA:AVERAGE:0.5:48:5040 ";
             $cmd .= "RRA:AVERAGE:0.5:60:4032 ";
             $cmd .= "RRA:AVERAGE:0.5:120:2016";
-            RRDp::cmd $cmd;
-            my $answer = RRDp::read;
+            RRDp::cmd($cmd);
+            my $answer = RRDp::read();
+	    
         };
-        if ($EVAL_ERROR) {
+        use strict;
+	if ($EVAL_ERROR) {
             return -1;
         }
-
+        
         my($fileHandle, $fileName) = tempfile();
         $makeStore = $fileName;
         print $fileHandle "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -562,7 +567,7 @@ sub config_snmp_ma {
     return;
 }
 
-sub config_pinger($$$$) {
+sub config_pinger {
 	my ($config, $accesspoint, $def_config, $modulename) = @_;
 	my $moduletype = ($modulename =~ /ma$/ ? "MA" : "MP");
 
@@ -571,23 +576,23 @@ sub config_pinger($$$$) {
 	if ($config->{$modulename}->{"db_type"} eq "sqlite") {
 		$config->{$modulename}->{"db_file"} = &ask("Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+');
 	} elsif ($config->{$modulename}->{"db_type"} eq "mysql") {
-		$config->{$modulename}->{"db_name"} = &ask("Enter the name of the MySQL database ", "", $config->{$modulename}->{"db_name"}, '.+');
-		$config->{$modulename}->{"db_host"} = &ask("Enter the host for the MySQL database ", "localhost", $config->{$modulename}->{"db_host"}, '.+');
-		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ", "", $config->{$modulename}->{"db_port"}, '^\d*$');
+		$config->{$modulename}->{"db_name"} = &ask("Enter the name of the MySQL database ", $db_name, $config->{$modulename}->{"db_name"}, '.+');
+		$config->{$modulename}->{"db_host"} = &ask("Enter the host for the MySQL database ",  $default_hostname , $config->{$modulename}->{"db_host"}, '.+');
+		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ",  $db_port, $config->{$modulename}->{"db_port"}, '^\d*$');
 		$config->{$modulename}->{"db_port"} = $tmp if ($tmp ne "");
-		$tmp = &ask("Enter the username for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_username"}, '');
+		$tmp = &ask("Enter the username for the MySQL database (leave blank for default) ",  $db_username, $config->{$modulename}->{"db_username"}, '');
 		$config->{$modulename}->{"db_username"} = $tmp if ($tmp ne "");
-		$tmp  = &ask("Enter the password for the MySQL database (leave blank for none) ", "", $config->{$modulename}->{"db_password"}, '');
+		$tmp  = &ask("Enter the password for the MySQL database (leave blank for default) ", $db_password , $config->{$modulename}->{"db_password"}, '');
 		$config->{$modulename}->{"db_password"} = $tmp if ($tmp ne "");
 	}
 
 	if($modulename eq "pingermp") {
-		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "/etc/perfsonar/pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
+		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
 	}
 	
 	if($modulename eq "pingerma") {
 	  $config->{$modulename}->{"query_size_limit"} = &ask("Enter the limit on query size ", "100000", $config->{$modulename}->{"query_size_limit"}, '^\d*$');
-  }
+        }
 
 	$config->{$modulename}->{"enable_registration"} = &ask("Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$');
 
@@ -595,15 +600,15 @@ sub config_pinger($$$$) {
 		my $registration_interval = $def_config->{"ls_registration_interval"};
 		$registration_interval = $config->{$modulename}->{"ls_registration_interval"} if (defined $config->{$modulename}->{"ls_registration_interval"});
 		$config->{$modulename}->{"ls_registration_interval"} = &ask("Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$');
+        }
+        $config->{$modulename}->{"service_name"} = &ask("Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+');
 
-		$config->{$modulename}->{"service_name"} = &ask("Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+');
+        $config->{$modulename}->{"service_type"} = &ask("Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+');
 
-#		$config->{$modulename}->{"service_type"} = &ask("Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+');
+        $config->{$modulename}->{"service_description"} = &ask("Enter a service description ", "PingER $moduletype on $default_hostname", $config->{$modulename}->{"service_description"}, '.+');
 
-		$config->{$modulename}->{"service_description"} = &ask("Enter a service description ", "PingER $moduletype", $config->{$modulename}->{"service_description"}, '.+');
-
-		$config->{$modulename}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/');
-	}
+        $config->{$modulename}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/');
+	
 }
 
 sub config_status_ma {
