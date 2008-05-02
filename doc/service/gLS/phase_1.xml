@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://docbook.org/xml/4.2/docbookx.dtd">
+<article>
+
+  <articleinfo>
+    <title>dLS Implementation Phase 1 -- The Rise of the gLS</title>
+    
+    <authorgroup>
+      <author>
+        <firstname>J.</firstname>
+        <surname>Boote</surname>
+      </author>
+
+      <author>
+        <firstname>M.</firstname>
+        <surname>Glowiak</surname>
+      </author>
+   
+      <author>
+        <firstname>M.</firstname>
+        <surname>Swany</surname>
+      </author>
+    
+      <author>
+        <firstname>J.</firstname>
+        <surname>Zurawski</surname>
+      </author>
+    </authorgroup>
+
+  </articleinfo>
+
+  <section id="changes" xreflabel="Document Changes">
+    <title>Document Changes</title>
+
+    <table frame="all" align="center" halign="center" width="80%"  id="table.1">
+      <title>Change Log</title>
+      <tgroup cols="1" align="left" colsep="1" rowsep="1">
+        <colspec colnum="1" colname="c1" width="10%"/>
+        <colspec colnum="2" colname="c2" width="10%"/>
+        <colspec colnum="3" colname="c3" width="50%"/>
+        <colspec colnum="4" colname="c4" width="30%"/>
+        <thead>
+          <row>
+            <entry>Version</entry>
+            <entry>Date</entry>
+            <entry>Description</entry>
+            <entry>Author(s)</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>1.0</entry>
+            <entry>05/2/2007</entry>
+            <entry>Initial Preparation</entry>
+            <entry>J. Zurawski</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+   
+  </section>
+  
+  <section id="introduction" xreflabel="Introduction">
+    <title>Introduction</title>
+    
+    <para>
+      This document builds upon the work described in <citation>dLS</citation>
+      to create <command>Phase 1</command> of the proposed distributed
+      information service.  This document will describe concrete details of the
+      plan, prescribing both the overall structure of the system as well as
+      associated APIs used to interact.
+    </para>
+    
+    <para>
+      This work was broken into two phases due to:
+    </para>
+    
+    <para>
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para><command>Complexity</command> - The design of a distributed
+          information model consists of many considerations and complexities
+          to be weighed.  A proper implementation takes time to implement and
+          test.</para>
+        </listitem>
+        <listitem>
+          <para><command>Time Constraints</command> -
+          <emphasis>perfSONAR</emphasis> has been without a truly global method
+          of discovery for some time.  This feature is desperately needed to
+          claim full multi-domain operation.</para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    
+    <para>
+      <command>Phase 1</command> of the <emphasis>dLS</emphasis> will be
+      followed by <command>Phase 2</command>, a completely distributed Lookup
+      Service, sometime in the near future.  Details such as API will not be
+      affected by the implementation of <command>Phase 2</command> as it is
+      concerned more with the hierarchy of information services and not the
+      location of information.
+    </para>
+        
+    <para>
+      The remainder of the document is structured as follows:
+      <xref linkend="architecture" /> will go into details of the system as
+      viewed from afar.  Issues such as communication and individual service
+      behavior will be discussed.  <xref linkend="api" /> will describe the
+      interface service developers will implement to interact with this system.
+      <xref linkend="operation" /> will lay out some common use cases and
+      examples.  <xref linkend="implementation" /> will discuss some 
+      algorithms and specific considerations that the both reference
+      implementations will need to take into account.  Finally 
+      <xref linkend="appendix" /> details some XML and code examples to be used
+      in the construction of this service.
+    </para>
+    
+  </section>
+
+  <section id="architecture" xreflabel="Architecture">
+    <title>Architecture</title>
+    
+    <para>
+      The following schematic shows the overall architecture of this system.
+    </para>
+
+    <para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/architecture.png"/>
+        </imageobject>
+      </mediaobject>
+    </para>   
+
+    <para>
+      We will now explain some key features of this architecture:
+    </para>
+
+    <para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para><xref linkend="gLS_instances" /> - Global,
+          <emphasis>well known</emphasis>, LS instances that will serve as
+          the <emphasis>top level</emphasis> of the hierarchy.  Under normal
+          conditions <command>only</command> manage the registration of
+          <emphasis>hLS</emphasis> instances and not other forms of
+          <emphasis>perfSONAR</emphasis> service.</para>
+        </listitem>
+        <listitem>
+          <para><xref linkend="hLS_instances" /> - Local LS instances that
+          manage the registration of individual services and communicate a
+          summary of information to the upper level.</para>
+        </listitem>
+        <listitem>
+          <para><xref linkend="registration" /> - Services may require
+          modifications to support interaction with more than one LS instance to
+          foster both reliability and balancing of load.
+          </para>
+        </listitem>
+        <listitem>
+          <para><xref linkend="synchronization" /> - <emphasis>gLS</emphasis>
+          instances will require tooling to synchronize registration
+          information.  This factor may also depend on
+          <xref linkend="registration" />.
+          </para>
+        </listitem>
+        <listitem>
+          <para><xref linkend="interaction" /> - To use this new framework, 
+          clients and services require a unified access method.  This access
+          requires two components: Discovery (e.g. <emphasis>where</emphasis>
+          information can be found) and Query (e.g. <emphasis>what</emphasis>
+          specifically can I find).</para>
+        </listitem>
+      </orderedlist>
+    </para>
+
+    <section id="gLS_instances" xreflabel="gLS Instances">
+      <title>gLS Instances</title>
+    
+      <para>
+        The <emphasis>perfSONAR</emphasis> project partners (e.g.
+        <citation>ESnet</citation>, <citation>Geant2</citation>,
+        <citation>Internet2</citation>, and <citation>RNP</citation>) are
+        expected to stand up and maintain <emphasis>root</emphasis>
+        <xref linkend="gLS" /> instances.  As the driving force behind
+        <emphasis>perfSONAR</emphasis>, this contribution serves as the basis
+        for all distributed information discovery.  The purpose of these LS
+        instances is similar to the function of the DNS root servers: well known
+        contact points to manage data distribution.  With this easily remembered
+        location, administrators of new LS instances can easily determine who
+        is <emphasis>closest</emphasis> (geographically, topologically, or
+        administratively) and use the respective root server (or servers) as a
+        registration point.
+      </para>
+
+      <para>
+        The following image describes the general operation of a
+        <emphasis>gLS</emphasis> in the context of other
+        <emphasis>gLS</emphasis> instances, <emphasis>hLS</emphasis> instances, 
+        and other services.
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/gLS.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>   
+      
+      <para>
+        Each well known instance <emphasis>must</emphasis> communicate with
+        other well known instances in a static method: by replicating the list
+        of known <xref linkend="hLS" /> instances as well as their summaries,
+        across the top of the hierarchy.  This ensures that a
+        <emphasis>Discovery</emphasis> query posed to any root is able to be
+        completed.  In addition to the process to propagate registration
+        information the <emphasis>hLS</emphasis> instances may register
+        themselves with multiple <emphasis>gLS</emphasis>s when applicable.
+        Due to concerns of policy, load, or latency, this approach may turn out
+        to not be very prudent.
+      </para>
+    
+      <para>
+        All <emphasis>discovery</emphasis> queries must originate at the root
+        <emphasis>gLS</emphasis> instances if they have any hope of finding
+        something globally.  <emphasis>hLS</emphasis> instances may be aware of
+        their own summary information and could of course service a discovery
+        query posed to them, but the answer will not be relevant.
+      </para>
+    
+      <para>
+        <emphasis>gLS</emphasis> instances <command>should not</command> allow
+        services beyond <emphasis>hLS</emphasis>s to register with them.  This
+        can be an internal mechanism, or could be via a different type of
+        registration message.  If services do register with a
+        <emphasis>gLS</emphasis> it is understood that they may be left out of
+        any summarization and discovery activities (unless the
+        <emphasis>gLS</emphasis> summarizies itself, and is able to include this
+        information in the discovery phase).  
+      </para>
+    
+    </section>
+
+    <section id="hLS_instances" xreflabel="hLS Instances">
+      <title>hLS Instances</title>
+
+      <para>
+        This service resembles the current LS implementation.  Aside from the
+        changes that allow the <emphasis>hLS</emphasis> itself to register with
+        a <emphasis>gLS</emphasis> and the addition of the API, there is little
+        difference.  The following diagram discusses some of the major functions
+        of the <emphasis>hLS</emphasis> in the context of other services and
+        the <emphasis>gLS</emphasis>.
+      </para>
+        
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/hLS.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>          
+      
+      <para>
+        The <emphasis>hLS</emphasis> will accept registration from any and all
+        interested <emphasis>perfSONAR</emphasis> services with the caveat that
+        they be from the managed domain (this is not a strict requirement, but
+        is logical from both an administrative and functional standpoint).  This
+        service still contain the primitives of previous the previous LS with
+        regards to query and registration and will implement the new API.
+      </para>
+    
+      <para>
+        The <emphasis>hLS</emphasis> instances will know about at least one
+        <emphasis>gLS</emphasis> instance to register with.  Optionally,
+        <emphasis>hLS</emphasis> instances could know about several
+        <emphasis>gLS</emphasis> instances and register with as many as
+        possible. This could ease the burden of <emphasis>gLS</emphasis>s to
+        synchronize registered information as well as speeding up the
+        availability of this information to the framework as a whole, but may
+        become complicated due to performance issues (latency, topology) or
+        administrative (authorization, information sharing).
+      </para>
+
+      <para>
+        The <emphasis>hLS</emphasis> must summarize the current data set it
+        maintains in the following ways:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem><para><command>IP Addresses</command> - The IP Addresses of
+            all topology elements (for now IPv4, in the future IPv6) must be
+            combined into useful CIDR style summaries.  Preliminary work will
+            incorporate the <emphasis>Patricia Trie</emphasis> data structure to
+            find <emphasis>K Dominators</emphasis> from a list of
+            addresses.</para>
+          </listitem>
+          <listitem>
+            <para><command>Host/Domain Names</command> - Similar to IP
+            Addresses, the hostname of each service will be extracted and
+            broken into sub elements (e.g.
+            <emphasis>stout.pc.cis.udel.edu</emphasis> is really an
+            <emphasis>edu</emphasis>, a <emphasis>udel.edu</emphasis> a
+            <emphasis>cis.udel.edu</emphasis> and finally a
+            <emphasis>pc.cis.udel.edu</emphasis>). </para>
+          </listitem>
+          <listitem>
+            <para><command>EventTypes</command> - The registered eventType of
+            each data for a particular service should be extracted for future
+            search and associated to the previous two items.  For instance we
+            may have the eventType
+            <emphasis>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</emphasis>
+            for several interfaces in <emphasis>udel.edu</emphasis> and
+            <emphasis>edu</emphasis> but not <emphasis>cis.udel.edu</emphasis>,
+            a different eventType may be available in other Domain and Address
+            ranges as well.  The <emphasis>gLS</emphasis> will require each
+            <emphasis>hLS</emphasis> to organize these in the summary message it
+            registers.  The eventType should be associated with both the Domain
+            level and IP Address level summarizations.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        Another optional behavior is the notion of
+        <emphasis>self registration</emphasis>, e.g. making an internal summary
+        available to service <emphasis>Discovery</emphasis> requests.  This can
+        be as simple as always maintaining an internal view of your summary
+        (eliminating the need to register with yourself) or treating the
+        <emphasis>hLS</emphasis> instance itself as a <emphasis>root</emphasis>
+        <emphasis>gLS</emphasis>.  Either solution delivers the same goal, and
+        due to code reuse it is understood that any given deployment may be a
+        <emphasis>gLS</emphasis> or <emphasis>hLS</emphasis> so the necessary
+        tooling to do either approach would be available.
+      </para>
+
+    </section>
+
+    <section id="registration" xreflabel="Multiple Registration">
+      <title>Multiple Registration</title>
+
+      <para>
+        The following diagram illustrates the procedure of an
+        <emphasis>hLS</emphasis> instance registering with two distinct
+        <emphasis>gLS</emphasis> instances.
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/registration.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>  
+    
+      <para>
+        There are several positive reasons to implement this scheme:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem><para><command>Replication</command> - An
+          <emphasis>hLS</emphasis> that registers with (and knows about)
+          multiple <emphasis>gLS</emphasis> instances is less susceptible to
+          being partitioned from the rest of the <emphasis>perfSONAR</emphasis>
+          infrastructure.</para>
+          </listitem>
+          <listitem><para><command>Performance (for
+          <emphasis>gLS</emphasis>)</command> - Less synchronization needs to be
+          performed between <emphasis>gLS</emphasis> instances.</para>
+          </listitem>
+          <listitem><para><command>Data Availability</command> - Registration
+          on the part of the <emphasis>hLS</emphasis> ensures that data
+          summaries are available faster to the <emphasis>gLS</emphasis> layer
+          than through a scheduled synchronization.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        Several negative reasons also exist.
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem><para><command>Performance</command> - registering with
+          remote <emphasis>gLS</emphasis> instances as well as multiple
+          <emphasis>gLS</emphasis>s takes time and effort on the part of the 
+          <emphasis>hLS</emphasis>.</para>
+          </listitem>
+          <listitem><para><command>Complexity</command> - currently the
+          <emphasis>gLS</emphasis> instances are <emphasis>well known</emphasis>
+          and there is no automatic way to retrieve this result.  Configuring
+          many must be done by hand.</para>
+          </listitem>
+          <listitem><para><command>Necessity</command> - With synchronization
+          available, this move is not required.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        With explicit <xref linkend="synchronization" /> in place, this
+        procedure becomes more about performance than necessity.  We leave the
+        decision to perform multiple registrations up to the implementers.
+      </para>
+    
+    </section>
+
+    <section id="synchronization" xreflabel="Synchronization">
+      <title>Synchronization</title>
+
+      <para>
+        The actual process of synchronization only involves communication
+        between <emphasis>gLS</emphasis> instances but indirectly involves 
+        the participation of the <emphasis>hLS</emphasis>s and does effect the
+        overall distribution and location of data via the API.  The following
+        diagram describes some of the parts of synchronization.
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/synch.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>  
+    
+      <para>
+        For <emphasis>Discovery</emphasis> to be successful, all top level
+        <emphasis>gLS</emphasis> instances should know about every
+        <emphasis>hLS</emphasis> as well as what data it is making available.
+        This can be done via scheduled exchanges (e.g. on some periodic interval
+        the <emphasis>gLS</emphasis> re-registers data that it knows with other
+        <emphasis>gLS</emphasis>s, repeat for each <emphasis>gLS</emphasis>), or
+        through <xref linkend="registration" />.
+      </para>
+    
+      <para>
+        This operation must be performed regularly, and could even be triggered
+        by events such as <emphasis>hLS</emphasis> registration and update.  
+        Simple heuristics such as this will ensure that information at the 
+        root level is both <emphasis>valid</emphasis> and
+        <emphasis>fresh</emphasis>.
+      </para>
+    
+    </section>
+
+    <section id="interaction" xreflabel="Interaction">
+      <title>Interaction</title>
+      
+      <para>
+        Currently, services and clients only have a single way to query an 
+        <emphasis>LS</emphasis> instance for data: <citation>XQuery</citation>
+        or <citation>XPath</citation> statements.  While useful to individuals
+        with an intimate knowledge of the data storage structure and the query
+        language syntax, this leaves other services and client applications 
+        frustrated and out of luck when it comes to lookup.
+      </para>
+      
+      <para>
+        As a part of <command>Phase 1</command>, an API for use in client
+        applications and other services will be defined.  The following image
+        describes the basic operation of the API in terms of services, 
+        <emphasis>gLS</emphasis> instances, <emphasis>hLS</emphasis> instances, 
+        and clients:
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/api.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>  
+    
+      <para>
+        The API has two goals:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem><para><command>Discovery</command> - Discovery queries have
+          known values (e.g. they pertain to a specific domain, address range,
+          or eventType) and the end result should be a
+          <emphasis>location</emphasis> where a more exact
+          <emphasis>query</emphasis> should be sent.</para>
+          </listitem>
+          <listitem><para><command>Query</command> - more interested in 
+          <emphasis>what</emphasis> then <emphasis>where</emphasis>.  These can
+          still be <emphasis>XQuery</emphasis> and <emphasis>XPath</emphasis>
+          based although they are more at home dealing with domain, address
+          range, eventType, or other specific features that pertain to the
+          data and service type.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    
+      <para>
+        The API will be specified in <xref linkend="api" />.
+      </para>
+     
+    </section>
+
+  </section>
+  
+  <section id="api" xreflabel="API">
+    <title>API</title>
+    
+    <para>
+      ... 
+    </para>
+    
+  </section>
+
+  <section id="operation" xreflabel="Operation">
+    <title>Operation</title>
+    
+    <para>
+      ... 
+    </para>
+    
+  </section>
+
+  <section id="implementation" xreflabel="Implementation">
+    <title>Implementation</title>
+    
+    <para>
+      ... 
+    </para>
+    
+  </section>
+
+  <section id="appendix" xreflabel="Appendix">
+    <title>Appendix</title>
+    
+    <para>
+      The following sections describe some of the more concreate details of this
+      implementation when applicable.
+    </para>
+    
+    <section id="appendix_summary" xreflabel="Summary Message Example">
+      <title>Summary Message Example</title>
+    
+      <para>
+        Each <emphasis>hLS</emphasis> instance must register a summary of the
+        data it is aware of with the <emphasis>gLS</emphasis> or 
+        <emphasis>gLS</emphasis>s it communicates with.  This summary should
+        be of the format described below.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inlinexml file="examples/ex.xml"/>
+        ]]>
+      </programlisting> 
+    
+    </section>
+
+    <section id="appendix_summarization_source" xreflabel="Summarization Source Code">
+      <title>Summarization Source Code</title>
+    
+      <para>
+        As a proof of concept to performing a rudimentary
+        <emphasis>K Dominators</emphasis> identification of the IP addresses an
+        <emphasis>hLS</emphasis> will know of consider the following source
+        code written in perl.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inline file="examples/ipTree.pl"/>
+        ]]>
+      </programlisting> 
+
+      <para>
+        Some things to note:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>This script uses two external perl libraries
+            (<emphasis>Net::CIDR</emphasis> and
+            <emphasis>Net::IPTrie</emphasis>) to solve this problem.  Similar
+            libraries may not be available in Java, but can easily be
+            re-created.</para>
+          </listitem>
+          <listitem>
+            <para>The output (shown below) is currently used to create a 
+            <citation>Graphviz</citation> formated image.  The script can be
+            modified to output the tree in a more readable format.</para>
+          </listitem>
+          <listitem>
+            <para>This script does not allow one to specifiy a set value for
+            <emphasis>K</emphasis> and return only those dominators.  A simple
+            walk of the tree should be able to perform this task.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        The following output represents a <emphasis>Graphviz</emphasis>
+        description of a DAG.  
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inline file="examples/graph.dot"/>
+        ]]>
+      </programlisting> 
+    
+      <para>
+        This image was created from the above source and represents the
+        dominators (in CIDR notation) as well as the original endpoints
+        (represented in red).
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/graph.png"/>
+          </imageobject>
+        </mediaobject>
+      </para>  
+    
+    </section>
+    
+  </section>
+
+  <glossary id="glossary">
+    <title>Terms</title>
+
+    <glossdiv id="A">
+      <title>A</title>     
+    </glossdiv> 
+    
+    <glossdiv id="B">
+      <title>B</title>   
+    </glossdiv> 
+    
+    <glossdiv id="C">
+      <title>C</title>     
+    </glossdiv> 
+    
+    <glossdiv id="D">
+      <title>D</title>   
+ 
+    </glossdiv> 
+    
+    <glossdiv id="E">
+      <title>E</title>    
+    </glossdiv> 
+    
+    <glossdiv id="F">
+      <title>F</title>         
+    </glossdiv> 
+    
+    <glossdiv id="G">
+      <title>G</title>    
+      <glossentry id="gLS"><glossterm>gLS</glossterm>
+        <glossdef>
+          <para>
+            A <emphasis>globally</emphasis> acessible Lookup Service.
+          </para>
+        </glossdef>
+      </glossentry>   
+    </glossdiv> 
+    
+    <glossdiv id="H">
+      <title>H</title>   
+      <glossentry id="hLS"><glossterm>hLS</glossterm>
+        <glossdef>
+          <para>
+            The <emphasis>home</emphasis> Lookup Service.
+          </para>
+        </glossdef>
+      </glossentry>        
+    </glossdiv> 
+    
+    <glossdiv id="I">
+      <title>I</title>           
+    </glossdiv> 
+    
+    <glossdiv id="J">
+      <title>J</title>    
+    </glossdiv> 
+    
+    <glossdiv id="K">
+      <title>K</title>    
+    </glossdiv> 
+    
+    <glossdiv id="L">
+      <title>L</title>    
+    </glossdiv> 
+    
+    <glossdiv id="M">
+      <title>M</title>       
+    </glossdiv> 
+    
+    <glossdiv id="N">
+      <title>N</title>  
+    </glossdiv> 
+    
+    <glossdiv id="O">
+      <title>O</title>    
+    </glossdiv> 
+    
+    <glossdiv id="P">
+      <title>P</title>     
+    </glossdiv>
+    
+    <glossdiv id="Q">
+      <title>Q</title>    
+    </glossdiv> 
+    
+    <glossdiv id="R">
+      <title>R</title>  
+    </glossdiv> 
+    
+    <glossdiv id="S">
+      <title>S</title>   
+    </glossdiv> 
+    
+    <glossdiv id="T">
+      <title>T</title>      
+    </glossdiv> 
+    
+    <glossdiv id="U">
+      <title>U</title>  
+    </glossdiv> 
+    
+    <glossdiv id="V">
+      <title>V</title>    
+    </glossdiv> 
+    
+    <glossdiv id="W">
+      <title>W</title>    
+    </glossdiv> 
+    
+    <glossdiv id="X">
+      <title>X</title>  
+    </glossdiv> 
+    
+    <glossdiv id="Y">
+      <title>Y</title>    
+    </glossdiv> 
+    
+    <glossdiv id="Z">
+      <title>Z</title>    
+    </glossdiv>
+     
+  </glossary>
+
+  <bibliography id="bibliography">
+    <title>References</title>
+
+    <biblioentry xreflabel="dLS Design Document">
+      <abbrev>dLS</abbrev>
+      <title>
+        <ulink url="http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html">http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html</ulink>
+      </title>
+    </biblioentry>  
+
+    <biblioentry xreflabel="ESnet">
+      <abbrev>ESnet</abbrev>
+      <title>
+        <ulink url="http://www.es.net">http://www.es.net</ulink>
+      </title>
+    </biblioentry>  
+
+    <biblioentry xreflabel="Geant2">
+      <abbrev>Geant2</abbrev>
+      <title>
+        <ulink url="http://www.geant2.net">http://www.geant2.net</ulink>
+      </title>
+    </biblioentry>  
+
+    <biblioentry xreflabel="Internet2">
+      <abbrev>Internet2</abbrev>
+      <title>
+        <ulink url="http://www.internet2.edu">http://www.internet2.edu</ulink>
+      </title>
+    </biblioentry>  
+    
+    <biblioentry xreflabel="RNP">
+      <abbrev>RNP</abbrev>
+      <title>
+        <ulink url="http://www.rnp.br/en">http://www.rnp.br/en</ulink>
+      </title>
+    </biblioentry>  
+
+    <biblioentry xreflabel="XPath">
+      <abbrev>XPath</abbrev>
+      <title>
+        <ulink url="http://www.w3.org/TR/xpath">XPath</ulink>
+      </title>
+    </biblioentry> 
+    
+    <biblioentry xreflabel="XQuery">
+      <abbrev>XQuery</abbrev>
+      <title>
+        <ulink url="http://www.w3.org/TR/xquery/">XQuery</ulink>
+      </title>
+    </biblioentry> 
+
+    <biblioentry xreflabel="Graphviz">
+      <abbrev>Graphviz</abbrev>
+      <title>
+        <ulink url="http://www.graphviz.org/">Graphviz</ulink>
+      </title>
+    </biblioentry> 
+
+  </bibliography>
+
+</article>

@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.2. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.3. Multiple Registration</a></span></dt><dt><span class="section"><a href="#synchronization">3.4. Synchronization</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      This document builds upon the work described in <a href="#id2529046">dLS Design Document</a>
+      to create <span><strong class="command">Phase 1</strong></span> of the proposed distributed
+      information service.  This document will describe concrete details of the
+      plan, prescribing both the overall structure of the system as well as
+      associated APIs used to interact.
+    </p><p>
+      This work was broken into two phases due to:
+    </p><p>
+      </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Complexity</strong></span> - The design of a distributed
+          information model consists of many considerations and complexities
+          to be weighed.  A proper implementation takes time to implement and
+          test.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Time Constraints</strong></span> -
+          <span class="emphasis"><em>perfSONAR</em></span> has been without a truly global method
+          of discovery for some time.  This feature is desperately needed to
+          claim full multi-domain operation.</p></li></ul></div><p>
+    </p><p>
+      <span><strong class="command">Phase 1</strong></span> of the <span class="emphasis"><em>dLS</em></span> will be
+      followed by <span><strong class="command">Phase 2</strong></span>, a completely distributed Lookup
+      Service, sometime in the near future.  Details such as API will not be
+      affected by the implementation of <span><strong class="command">Phase 2</strong></span> as it is
+      concerned more with the hierarchy of information services and not the
+      location of information.
+    </p><p>
+      The remainder of the document is structured as follows:
+      <a href="#architecture">Architecture</a> will go into details of the system as
+      viewed from afar.  Issues such as communication and individual service
+      behavior will be discussed.  <a href="#api">API</a> will describe the
+      interface service developers will implement to interact with this system.
+      <a href="#operation">Operation</a> will lay out some common use cases and
+      examples.  <a href="#implementation">Implementation</a> will discuss some 
+      algorithms and specific considerations that the both reference
+      implementations will need to take into account.  Finally 
+      <a href="#appendix">Appendix</a> details some XML and code examples to be used
+      in the construction of this service.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="architecture"></a>3. Architecture</h2></div></div></div><p>
+      The following schematic shows the overall architecture of this system.
+    </p><p>
+      </p><div class="mediaobject"><img src="images/architecture.png" /></div><p>
+    </p><p>
+      We will now explain some key features of this architecture:
+    </p><p>
+      </p><div class="orderedlist"><ol type="1"><li><p><a href="#gLS_instances">gLS Instances</a> - Global,
+          <span class="emphasis"><em>well known</em></span>, LS instances that will serve as
+          the <span class="emphasis"><em>top level</em></span> of the hierarchy.  Under normal
+          conditions <span><strong class="command">only</strong></span> manage the registration of
+          <span class="emphasis"><em>hLS</em></span> instances and not other forms of
+          <span class="emphasis"><em>perfSONAR</em></span> service.</p></li><li><p><a href="#hLS_instances">hLS Instances</a> - Local LS instances that
+          manage the registration of individual services and communicate a
+          summary of information to the upper level.</p></li><li><p><a href="#registration">Multiple Registration</a> - Services may require
+          modifications to support interaction with more than one LS instance to
+          foster both reliability and balancing of load.
+          </p></li><li><p><a href="#synchronization">Synchronization</a> - <span class="emphasis"><em>gLS</em></span>
+          instances will require tooling to synchronize registration
+          information.  This factor may also depend on
+          <a href="#registration">Multiple Registration</a>.
+          </p></li><li><p><a href="#interaction">Interaction</a> - To use this new framework, 
+          clients and services require a unified access method.  This access
+          requires two components: Discovery (e.g. <span class="emphasis"><em>where</em></span>
+          information can be found) and Query (e.g. <span class="emphasis"><em>what</em></span>
+          specifically can I find).</p></li></ol></div><p>
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gLS_instances"></a>3.1. gLS Instances</h3></div></div></div><p>
+        The <span class="emphasis"><em>perfSONAR</em></span> project partners (e.g.
+        <a href="#id2529066">ESnet</a>, <a href="#id2529084">Geant2</a>,
+        <a href="#id2529102">Internet2</a>, and <a href="#id2529121">RNP</a>) are
+        expected to stand up and maintain <span class="emphasis"><em>root</em></span>
+        <a href="#gLS">gLS</a> instances.  As the driving force behind
+        <span class="emphasis"><em>perfSONAR</em></span>, this contribution serves as the basis
+        for all distributed information discovery.  The purpose of these LS
+        instances is similar to the function of the DNS root servers: well known
+        contact points to manage data distribution.  With this easily remembered
+        location, administrators of new LS instances can easily determine who
+        is <span class="emphasis"><em>closest</em></span> (geographically, topologically, or
+        administratively) and use the respective root server (or servers) as a
+        registration point.
+      </p><p>
+        The following image describes the general operation of a
+        <span class="emphasis"><em>gLS</em></span> in the context of other
+        <span class="emphasis"><em>gLS</em></span> instances, <span class="emphasis"><em>hLS</em></span> instances, 
+        and other services.
+      </p><p>
+        </p><div class="mediaobject"><img src="images/gLS.png" /></div><p>
+      </p><p>
+        Each well known instance <span class="emphasis"><em>must</em></span> communicate with
+        other well known instances in a static method: by replicating the list
+        of known <a href="#hLS">hLS</a> instances as well as their summaries,
+        across the top of the hierarchy.  This ensures that a
+        <span class="emphasis"><em>Discovery</em></span> query posed to any root is able to be
+        completed.  In addition to the process to propagate registration
+        information the <span class="emphasis"><em>hLS</em></span> instances may register
+        themselves with multiple <span class="emphasis"><em>gLS</em></span>s when applicable.
+        Due to concerns of policy, load, or latency, this approach may turn out
+        to not be very prudent.
+      </p><p>
+        All <span class="emphasis"><em>discovery</em></span> queries must originate at the root
+        <span class="emphasis"><em>gLS</em></span> instances if they have any hope of finding
+        something globally.  <span class="emphasis"><em>hLS</em></span> instances may be aware of
+        their own summary information and could of course service a discovery
+        query posed to them, but the answer will not be relevant.
+      </p><p>
+        <span class="emphasis"><em>gLS</em></span> instances <span><strong class="command">should not</strong></span> allow
+        services beyond <span class="emphasis"><em>hLS</em></span>s to register with them.  This
+        can be an internal mechanism, or could be via a different type of
+        registration message.  If services do register with a
+        <span class="emphasis"><em>gLS</em></span> it is understood that they may be left out of
+        any summarization and discovery activities (unless the
+        <span class="emphasis"><em>gLS</em></span> summarizies itself, and is able to include this
+        information in the discovery phase).  
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="hLS_instances"></a>3.2. hLS Instances</h3></div></div></div><p>
+        This service resembles the current LS implementation.  Aside from the
+        changes that allow the <span class="emphasis"><em>hLS</em></span> itself to register with
+        a <span class="emphasis"><em>gLS</em></span> and the addition of the API, there is little
+        difference.  The following diagram discusses some of the major functions
+        of the <span class="emphasis"><em>hLS</em></span> in the context of other services and
+        the <span class="emphasis"><em>gLS</em></span>.
+      </p><p>
+        </p><div class="mediaobject"><img src="images/hLS.png" /></div><p>
+      </p><p>
+        The <span class="emphasis"><em>hLS</em></span> will accept registration from any and all
+        interested <span class="emphasis"><em>perfSONAR</em></span> services with the caveat that
+        they be from the managed domain (this is not a strict requirement, but
+        is logical from both an administrative and functional standpoint).  This
+        service still contain the primitives of previous the previous LS with
+        regards to query and registration and will implement the new API.
+      </p><p>
+        The <span class="emphasis"><em>hLS</em></span> instances will know about at least one
+        <span class="emphasis"><em>gLS</em></span> instance to register with.  Optionally,
+        <span class="emphasis"><em>hLS</em></span> instances could know about several
+        <span class="emphasis"><em>gLS</em></span> instances and register with as many as
+        possible. This could ease the burden of <span class="emphasis"><em>gLS</em></span>s to
+        synchronize registered information as well as speeding up the
+        availability of this information to the framework as a whole, but may
+        become complicated due to performance issues (latency, topology) or
+        administrative (authorization, information sharing).
+      </p><p>
+        The <span class="emphasis"><em>hLS</em></span> must summarize the current data set it
+        maintains in the following ways:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">IP Addresses</strong></span> - The IP Addresses of
+            all topology elements (for now IPv4, in the future IPv6) must be
+            combined into useful CIDR style summaries.  Preliminary work will
+            incorporate the <span class="emphasis"><em>Patricia Trie</em></span> data structure to
+            find <span class="emphasis"><em>K Dominators</em></span> from a list of
+            addresses.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Host/Domain Names</strong></span> - Similar to IP
+            Addresses, the hostname of each service will be extracted and
+            broken into sub elements (e.g.
+            <span class="emphasis"><em>stout.pc.cis.udel.edu</em></span> is really an
+            <span class="emphasis"><em>edu</em></span>, a <span class="emphasis"><em>udel.edu</em></span> a
+            <span class="emphasis"><em>cis.udel.edu</em></span> and finally a
+            <span class="emphasis"><em>pc.cis.udel.edu</em></span>). </p></li><li style="list-style-type: circle"><p><span><strong class="command">EventTypes</strong></span> - The registered eventType of
+            each data for a particular service should be extracted for future
+            search and associated to the previous two items.  For instance we
+            may have the eventType
+            <span class="emphasis"><em>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</em></span>
+            for several interfaces in <span class="emphasis"><em>udel.edu</em></span> and
+            <span class="emphasis"><em>edu</em></span> but not <span class="emphasis"><em>cis.udel.edu</em></span>,
+            a different eventType may be available in other Domain and Address
+            ranges as well.  The <span class="emphasis"><em>gLS</em></span> will require each
+            <span class="emphasis"><em>hLS</em></span> to organize these in the summary message it
+            registers.  The eventType should be associated with both the Domain
+            level and IP Address level summarizations.</p></li></ul></div><p>
+      </p><p>
+        Another optional behavior is the notion of
+        <span class="emphasis"><em>self registration</em></span>, e.g. making an internal summary
+        available to service <span class="emphasis"><em>Discovery</em></span> requests.  This can
+        be as simple as always maintaining an internal view of your summary
+        (eliminating the need to register with yourself) or treating the
+        <span class="emphasis"><em>hLS</em></span> instance itself as a <span class="emphasis"><em>root</em></span>
+        <span class="emphasis"><em>gLS</em></span>.  Either solution delivers the same goal, and
+        due to code reuse it is understood that any given deployment may be a
+        <span class="emphasis"><em>gLS</em></span> or <span class="emphasis"><em>hLS</em></span> so the necessary
+        tooling to do either approach would be available.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="registration"></a>3.3. Multiple Registration</h3></div></div></div><p>
+        The following diagram illustrates the procedure of an
+        <span class="emphasis"><em>hLS</em></span> instance registering with two distinct
+        <span class="emphasis"><em>gLS</em></span> instances.
+      </p><p>
+        </p><div class="mediaobject"><img src="images/registration.png" /></div><p>
+      </p><p>
+        There are several positive reasons to implement this scheme:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Replication</strong></span> - An
+          <span class="emphasis"><em>hLS</em></span> that registers with (and knows about)
+          multiple <span class="emphasis"><em>gLS</em></span> instances is less susceptible to
+          being partitioned from the rest of the <span class="emphasis"><em>perfSONAR</em></span>
+          infrastructure.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Performance (for
+          <span class="emphasis"><em>gLS</em></span>)</strong></span> - Less synchronization needs to be
+          performed between <span class="emphasis"><em>gLS</em></span> instances.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Data Availability</strong></span> - Registration
+          on the part of the <span class="emphasis"><em>hLS</em></span> ensures that data
+          summaries are available faster to the <span class="emphasis"><em>gLS</em></span> layer
+          than through a scheduled synchronization.</p></li></ul></div><p>
+      </p><p>
+        Several negative reasons also exist.
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Performance</strong></span> - registering with
+          remote <span class="emphasis"><em>gLS</em></span> instances as well as multiple
+          <span class="emphasis"><em>gLS</em></span>s takes time and effort on the part of the 
+          <span class="emphasis"><em>hLS</em></span>.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Complexity</strong></span> - currently the
+          <span class="emphasis"><em>gLS</em></span> instances are <span class="emphasis"><em>well known</em></span>
+          and there is no automatic way to retrieve this result.  Configuring
+          many must be done by hand.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Necessity</strong></span> - With synchronization
+          available, this move is not required.</p></li></ul></div><p>
+      </p><p>
+        With explicit <a href="#synchronization">Synchronization</a> in place, this
+        procedure becomes more about performance than necessity.  We leave the
+        decision to perform multiple registrations up to the implementers.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="synchronization"></a>3.4. Synchronization</h3></div></div></div><p>
+        The actual process of synchronization only involves communication
+        between <span class="emphasis"><em>gLS</em></span> instances but indirectly involves 
+        the participation of the <span class="emphasis"><em>hLS</em></span>s and does effect the
+        overall distribution and location of data via the API.  The following
+        diagram describes some of the parts of synchronization.
+      </p><p>
+        </p><div class="mediaobject"><img src="images/synch.png" /></div><p>
+      </p><p>
+        For <span class="emphasis"><em>Discovery</em></span> to be successful, all top level
+        <span class="emphasis"><em>gLS</em></span> instances should know about every
+        <span class="emphasis"><em>hLS</em></span> as well as what data it is making available.
+        This can be done via scheduled exchanges (e.g. on some periodic interval
+        the <span class="emphasis"><em>gLS</em></span> re-registers data that it knows with other
+        <span class="emphasis"><em>gLS</em></span>s, repeat for each <span class="emphasis"><em>gLS</em></span>), or
+        through <a href="#registration">Multiple Registration</a>.
+      </p><p>
+        This operation must be performed regularly, and could even be triggered
+        by events such as <span class="emphasis"><em>hLS</em></span> registration and update.  
+        Simple heuristics such as this will ensure that information at the 
+        root level is both <span class="emphasis"><em>valid</em></span> and
+        <span class="emphasis"><em>fresh</em></span>.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="interaction"></a>3.5. Interaction</h3></div></div></div><p>
+        Currently, services and clients only have a single way to query an 
+        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2529157">XQuery</a>
+        or <a href="#id2529138">XPath</a> statements.  While useful to individuals
+        with an intimate knowledge of the data storage structure and the query
+        language syntax, this leaves other services and client applications 
+        frustrated and out of luck when it comes to lookup.
+      </p><p>
+        As a part of <span><strong class="command">Phase 1</strong></span>, an API for use in client
+        applications and other services will be defined.  The following image
+        describes the basic operation of the API in terms of services, 
+        <span class="emphasis"><em>gLS</em></span> instances, <span class="emphasis"><em>hLS</em></span> instances, 
+        and clients:
+      </p><p>
+        </p><div class="mediaobject"><img src="images/api.png" /></div><p>
+      </p><p>
+        The API has two goals:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Discovery</strong></span> - Discovery queries have
+          known values (e.g. they pertain to a specific domain, address range,
+          or eventType) and the end result should be a
+          <span class="emphasis"><em>location</em></span> where a more exact
+          <span class="emphasis"><em>query</em></span> should be sent.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Query</strong></span> - more interested in 
+          <span class="emphasis"><em>what</em></span> then <span class="emphasis"><em>where</em></span>.  These can
+          still be <span class="emphasis"><em>XQuery</em></span> and <span class="emphasis"><em>XPath</em></span>
+          based although they are more at home dealing with domain, address
+          range, eventType, or other specific features that pertain to the
+          data and service type.</p></li></ul></div><p>
+      </p><p>
+        The API will be specified in <a href="#api">API</a>.
+      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="api"></a>4. API</h2></div></div></div><p>
+      ... 
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="operation"></a>5. Operation</h2></div></div></div><p>
+      ... 
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="implementation"></a>6. Implementation</h2></div></div></div><p>
+      ... 
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="appendix"></a>7. Appendix</h2></div></div></div><p>
+      The following sections describe some of the more concreate details of this
+      implementation when applicable.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="appendix_summary"></a>7.1. Summary Message Example</h3></div></div></div><p>
+        Each <span class="emphasis"><em>hLS</em></span> instance must register a summary of the
+        data it is aware of with the <span class="emphasis"><em>gLS</em></span> or 
+        <span class="emphasis"><em>gLS</em></span>s it communicates with.  This summary should
+        be of the format described below.
+      </p><pre class="programlisting">
+        
+<b style="color:blue">&lt;!--</b><b style="color:green"> Begin XML --</b><b style="color:blue">&gt;</b>
+
+&lt;nmwg:message type="LSRegisterRequest"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070707/"
+              xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070707/"
+              xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/"                    
+              xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"&gt;
+                     
+
+  <b style="color:blue">&lt;nmwg:metadata</b><b style="color:green"> id="metadata.1"</b><b style="color:blue">&gt;</b>
+    <b style="color:blue">&lt;perfsonar:subject</b><b style="color:green"> id="subject.1"</b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;psservice:service</b><b style="color:green"> id="service.1"</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;psservice:serviceName</b><b style="color:green"></b><b style="color:blue">&gt;</b>UDel_LS<b style="color:blue">&lt;/psservice:serviceName</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;psservice:accessPoint</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://newcastle.pc.cis.udel.edu:8080/perfSONAR_PS/services/LS<b style="color:blue">&lt;/psservice:accessPoint</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;psservice:serviceType</b><b style="color:green"></b><b style="color:blue">&gt;</b>LS<b style="color:blue">&lt;/psservice:serviceType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;psservice:serviceDescription</b><b style="color:green"></b><b style="color:blue">&gt;</b>University of Delware LS Deployment<b style="color:blue">&lt;/psservice:serviceDescription</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;/psservice:service</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    <b style="color:blue">&lt;/perfsonar:subject</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b><b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    
+  <b style="color:blue">&lt;/nmwg:metadata</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+  <b style="color:blue">&lt;nmwg:data</b><b style="color:green"> id="data.1" metadataIdRef="metadata.1"</b><b style="color:blue">&gt;</b>
+  
+    <b style="color:blue">&lt;nmwg:metadata</b><b style="color:green"> id="summmary.md.1"</b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;summary:subject</b><b style="color:green"> id="summmary.md.1"</b><b style="color:blue">&gt;</b>    
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.0.0.0<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>9<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.4.0.0<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>17<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.4.128.0<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>17<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.4.40.0<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>28<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtb:name</b><b style="color:green"> type="dns"</b><b style="color:blue">&gt;</b>cis.udel.edu<b style="color:blue">&lt;/nmtb:name</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtb:name</b><b style="color:green"> type="dns"</b><b style="color:blue">&gt;</b>eecis.udel.edu<b style="color:blue">&lt;/nmtb:name</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;/summary:subject</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b><b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;summary:parameters</b><b style="color:green"> id="summmary.md.1"</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmwg:parameter</b><b style="color:green"> name="eventType" value="http://ggf.org/ns/nmwg/characteristic/utilization/2.0/" /</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmwg:parameter</b><b style="color:green"> name="eventType" value="http://ggf.org/ns/nmwg/characteristic/discards/2.0/" /</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmwg:parameter</b><b style="color:green"> name="eventType" value="http://ggf.org/ns/nmwg/characteristic/errors/2.0/" /</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmwg:parameter</b><b style="color:green"> name="eventType" value="http://ggf.org/ns/nmwg/tools/snmp/2.0/" /</b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;/summary:parameters</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    <b style="color:blue">&lt;/nmwg:metadata</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+    <b style="color:blue">&lt;nmwg:metadata</b><b style="color:green"> id="summmary.md.2"</b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;summary:subject</b><b style="color:green"> id="summmary.md.2"</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.4.132.0<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>22<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:address</b><b style="color:green"> type="ipv4"</b><b style="color:blue">&gt;</b>128.4.133.164<b style="color:blue">&lt;/nmtl3:address</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+            <b style="color:blue">&lt;nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>30<b style="color:blue">&lt;/nmtl3:netmask</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;/nmtl3:subnet</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtl3:network</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+          <b style="color:blue">&lt;nmtb:name</b><b style="color:green"> type="dns"</b><b style="color:blue">&gt;</b>pc.cis.udel.edu<b style="color:blue">&lt;/nmtb:name</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;/nmtb:domain</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;/summary:subject</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b><b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;summary:parameters</b><b style="color:green"> id="summmary.md.2"</b><b style="color:blue">&gt;</b>
+        <b style="color:blue">&lt;nmwg:parameter</b><b style="color:green"> name="eventType" value="http://ggf.org/ns/nmwg/tools/iperf/2.0/" /</b><b style="color:blue">&gt;</b>
+      <b style="color:blue">&lt;/summary:parameters</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    <b style="color:blue">&lt;/nmwg:metadata</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    
+  <b style="color:blue">&lt;/nmwg:data</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+  
+<b style="color:blue">&lt;/nmwg:message</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+<b style="color:blue">&lt;!--</b><b style="color:green"> End XML --</b><b style="color:blue">&gt;</b>
+        
+      </pre></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="appendix_summarization_source"></a>7.2. Summarization Source Code</h3></div></div></div><p>
+        As a proof of concept to performing a rudimentary
+        <span class="emphasis"><em>K Dominators</em></span> identification of the IP addresses an
+        <span class="emphasis"><em>hLS</em></span> will know of consider the following source
+        code written in perl.
+      </p><pre class="programlisting">
+        
+# Begin 
+
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+=head1 NAME
+
+ipTree.pl - Utility to demonstrate the effectivness of CIDR summarizations of
+IP addresses as well as a potential solution to finding dominating values
+when used in a Radix Tree (Patricia Trie) data structure.
+
+=head1 DESCRIPTION
+
+The perfSONAR dLS and gLS require a way to summarize large amounts of
+topological data (namely IP addresses of type IPv4 and IPv6).  Using the
+well known CIDR way of specificying IP address ranges, this simple script aims
+to combine the 'dominating' (i.e. greatest available CIDR summaries) for some
+set of source IP addresses.
+
+The output is placed into a graphviz dot file for display.
+
+=cut
+
+use Net::CIDR ':all';
+use Net::IPTrie;
+use Data::Dumper;
+
+# IP Trie Data Structure (similar to Net::Patricia)
+my $tr = Net::IPTrie-&gt;new( version =&gt; 4 );
+
+# I need to be able to do my own manipulations
+my %tree = ();
+
+# Ensure that each child only has one parent (IPTrie data structure
+# uses a strange internal representation).
+my %claim = ();
+
+# starting list of IPs [UDel addresses from all over the domain]
+
+my @map = ("128.175.13.92",
+           "128.175.13.74",
+           "128.4.40.10",
+           "128.4.40.12",
+           "128.4.40.17",
+           "128.4.131.23",
+           "128.4.133.167",
+           "128.4.133.163",
+           "128.4.133.164");
+
+my $vote = getCDIRSummaries(\@map);
+$tr = makePatriciaTrie(\@map, $vote, $tr);
+manipulatePatriciaTrie($tr);
+genGraph(\%tree);
+
+exit(1);
+
+=head2 getCDIRSummaries($map)
+
+Given a list of IP addresses, gather the CIDR representations then 
+group this by a popularity ranking (i.e. if there are 9 hosts, and 9
+have a set grouping of CIDR values in common, this is a dominator).
+
+=cut
+
+sub getCDIRSummaries {
+  my($map) = @_;
+  
+  # We can get ALL applicable CIDR summaries for each (in order of least to
+  # greatest).  Then vote on what is popular, skip 0.0.0.0/0 though...
+
+  my %vote = ();
+  foreach my $host (@{$map}) {
+    my @list = Net::CIDR::addr2cidr($host);
+    foreach my $range (@list) {
+      next if $range eq "0.0.0.0/0"; 
+      $vote{$range}++ if defined $vote{$range};
+      $vote{$range} = 1 if not defined $vote{$range};
+    }
+  }
+
+  # organize the votes into popularity groups
+
+  my %tally = ();
+  foreach my $range (sort keys %vote) {
+    if(defined $tally{$vote{$range}}) {
+      push @{$tally{$vote{$range}}}, $range;
+    }
+    else {
+      my @temp = ();
+      push @temp, $range;
+      $tally{$vote{$range}} = \@temp;
+    }  
+  }
+  return \%tally;
+}
+
+=head2 makePatriciaTrie($map, $votes, $tr)
+
+Creates the initial IPTrie structure using the list of 
+available hosts (e.g. $map) and the CIDR values for
+each (ranked into popularity groups).  The end result is
+the IPTrie.
+
+=cut
+
+sub makePatriciaTrie {
+  my($map, $votes, $tr) = @_;
+  
+  # Start to make the IPTrie data structure.  First we add in all
+  # of the 'base' addresses
+
+  foreach my $host (@{$map}) {
+    $tr-&gt;add( address =&gt; $host, prefix =&gt; "32" );
+  }
+
+  # Now we add in the summaries.  We should try to find the 
+  # dominators in each 'vote' group first.  This will ensure
+  # we are closer to a minimal set
+
+  foreach my $t (keys %{$votes}) {
+    my @total = ();
+    foreach my $addr (@{$votes-&gt;{$t}}) {
+      @total = Net::CIDR::cidradd($addr, @total);
+    }
+    foreach my $t2 (@total) {
+      my @parts = split(/\//,$t2);
+      $tr-&gt;add( address =&gt; $parts[0], prefix =&gt; $parts[1] );
+    }
+  } 
+
+  return $tr;
+}
+
+=head2 manipulatePatriciaTrie($tr)
+
+Given the IPTrie structure, we need to manually manipulate the nodes into
+our own format.
+
+=cut
+
+sub manipulatePatriciaTrie {
+  my($tr) = @_;
+  
+  my $list = ();
+  my $code = sub { push @$list, shift @_; };
+  my $count = $tr-&gt;traverse( code =&gt; $code );
+
+  # we need to go backwards when looking at the IPTrie print out, this is 
+  # is really to be sure children aren't all claimed by the root (the internal
+  # structure is a little strange) so this ensures we hit the root last.
+  
+  foreach my $node (reverse @{$list}) {
+    my $me = "";
+    $me = $node-&gt;[3]."/".$node-&gt;[5] if defined $node-&gt;[3] and defined $node-&gt;[5];
+    next unless $me;
+
+    # each one of our node-keys has some location information
+    my @temp = ();
+    $tree{$me}{"C"} = \@temp;
+    $tree{$me}{"U"} = "";
+  
+    # recursively search the tree, stop after you find a left and right
+    # child though (N.B. this creates problems unfortunately, so we need
+    # to manually manipulate...)
+    my %status = (
+      "L" =&gt; 0, 
+      "R" =&gt; 0
+    );
+    extract($me, $node, \%status, "");
+  }
+
+  # link all the parent information
+  foreach my $item (keys %tree) {
+    foreach my $c (@{$tree{$item}{"C"}}) {
+      $tree{$c}{"U"} = $item if $c and $item;
+    }  
+  }
+
+  # No we get to do some manual mainpulation of the tree we just created, 
+  # there are two cases we should watch out for:
+  #
+  # 1) Node with only one child, child has children
+  # 2) Node with only one child, child is a terminal
+  #
+  # Based on these two cases we will search the tree searching for 
+  # candidates.  When we find one, be sure to move all the 'pointers'
+  # around, and mark the node for deletion
+
+  my @delete = ();
+  foreach my $item (keys %tree) {
+    if($#{$tree{$item}{"C"}} == 0 and $#{$tree{$tree{$item}{"C"}-&gt;[0]}{"C"}} &gt;= -1) {
+      my @size = ($#{$tree{$item}{"C"}}, $#{$tree{$tree{$item}{"C"}-&gt;[0]}{"C"}});
+
+      # we either look at the node and child, or node and parent as the
+      # candidates for replacement.
+      my @items = ();
+      if($size[1] == -1) {
+        @items = ($tree{$item}{"U"}, $item);
+      }
+      else {
+        @items = ($item, $tree{$item}{"C"}-&gt;[0]); 
+      }
+
+      # We are assuming this will give us the most dominant
+      # node (and that there will only be one).  
+      my @total = ();
+      @total = Net::CIDR::cidradd($items[0], @total);
+      @total = Net::CIDR::cidradd($items[1], @total);
+
+      # move the children 
+      if($size[1] == -1) {
+        push @{$tree{$items[0]}{"C"}}, @{$tree{$items[1]}{"C"}};    
+        my $counter = 0;
+        foreach my $c (@{$tree{$items[0]}{"C"}}) {
+          if($c eq $items[1]) {
+            splice(@{$tree{$items[0]}{"C"}}, $counter, 1);
+            last;
+          }
+          $counter++;
+        }
+      }
+      else {
+        $tree{$items[0]}{"C"} = $tree{$items[1]}{"C"};
+      }
+
+      # mark the node for deletion
+      push @delete, $items[1];        
+ 
+      # Re-map the children (if any) to the new parent
+      foreach my $c (@{$tree{$items[0]}{"C"}}) {
+        $tree{$c}{"U"} = $items[0] if $c and $items[0];
+      }  
+    }
+  }
+
+  # Get rid of dead nodes identified above (perl doesn't like you deleting from
+  # and 'in use' data structure so deleting needs to be done out of the
+  # above loop)
+  
+  foreach my $d (@delete) {
+    delete $tree{$d};
+  }
+
+  return;
+}
+
+=head2 extract($parent, $node, $status, $side)
+
+This aux function recursively walks the nodes of the IPTrie structure
+and creates a more usefriendly tree that we will use for manipulation
+and final display.
+
+=cut
+
+sub extract {
+  my($parent, $node, $status, $side) = @_;
+  my $me = "";
+  $me = $node-&gt;[3]."/".$node-&gt;[5] if defined $node-&gt;[3] and defined $node-&gt;[5];
+  if($me and $side and (not $claim{$me})) {
+    push @{$tree{$parent}{"C"}}, $me;
+    $claim{$me} = 1;
+  }
+  $status = extract($parent, $node-&gt;[1], $status, "L") if $node-&gt;[1] and (not $status-&gt;{"L"});
+  $status = extract($parent, $node-&gt;[2], $status, "R") if $node-&gt;[2] and (not $status-&gt;{"R"});
+  return $status;  
+}
+
+=head2 genGraph
+
+Outputs the contents of the tree structure into a "Graphviz" formated
+DAG file.  
+
+=cut
+
+sub genGraph {
+  print "digraph g {\n";
+
+  foreach my $item (keys %tree) {
+    next unless $item;
+    my @array = ();
+    @array =split(/\//, $item);
+    
+    # color the terminal elements so we know they are not dominators
+    if($array[1] eq "32") {
+      print "\t\"" , $item , "\"[ color=crimson, style=filled ];\n";
+    }
+    else {
+      print "\t\"" , $item , "\";\n";
+    }
+  }
+
+  foreach my $item (keys %tree) {
+    next unless $item;
+    foreach my $c (@{$tree{$item}{"C"}}) {
+      next unless $c;
+      print "\t\"" , $item , "\" -&gt; \"" , $c , "\";\n";
+    }
+  }
+
+  print "}\n";
+}
+
+__END__
+
+=head1 SEE ALSO
+
+L<b style="color:blue">&lt;Net::CIDR</b><b style="color:green"></b><b style="color:blue">&gt;</b>, L<b style="color:blue">&lt;Net::IPTrie</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  https://bugs.internet2.edu/jira/browse/PSPS
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Jason Zurawski, zurawski@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework
+along with this software.  If not, see
+<b style="color:blue">&lt;http://www.internet2.edu/membership/ip.html</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008, Internet2
+
+All rights reserved.
+
+=cut
+
+
+# End 
+        
+      </pre><p>
+        Some things to note:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>This script uses two external perl libraries
+            (<span class="emphasis"><em>Net::CIDR</em></span> and
+            <span class="emphasis"><em>Net::IPTrie</em></span>) to solve this problem.  Similar
+            libraries may not be available in Java, but can easily be
+            re-created.</p></li><li style="list-style-type: circle"><p>The output (shown below) is currently used to create a 
+            <a href="#id2529175">Graphviz</a> formated image.  The script can be
+            modified to output the tree in a more readable format.</p></li><li style="list-style-type: circle"><p>This script does not allow one to specifiy a set value for
+            <span class="emphasis"><em>K</em></span> and return only those dominators.  A simple
+            walk of the tree should be able to perform this task.</p></li></ul></div><p>
+      </p><p>
+        The following output represents a <span class="emphasis"><em>Graphviz</em></span>
+        description of a DAG.  
+      </p><pre class="programlisting">
+        
+# Begin 
+
+digraph g {
+	"128.0.0.0/9";
+	"128.4.131.23/32"[ color=crimson, style=filled ];
+	"128.0.0.0/1";
+	"128.4.133.163/32"[ color=crimson, style=filled ];
+	"128.175.13.92/32"[ color=crimson, style=filled ];
+	"128.4.40.0/28";
+	"128.4.128.0/17";
+	"128.4.40.17/32"[ color=crimson, style=filled ];
+	"128.4.133.164/30";
+	"128.4.40.12/32"[ color=crimson, style=filled ];
+	"128.128.0.0/9";
+	"128.4.133.164/32"[ color=crimson, style=filled ];
+	"128.4.133.167/32"[ color=crimson, style=filled ];
+	"128.4.132.0/22";
+	"128.4.0.0/17";
+	"128.175.13.74/32"[ color=crimson, style=filled ];
+	"128.4.40.10/32"[ color=crimson, style=filled ];
+	"128.0.0.0/9" -&gt; "128.4.0.0/17";
+	"128.0.0.0/9" -&gt; "128.4.128.0/17";
+	"128.0.0.0/1" -&gt; "128.0.0.0/9";
+	"128.0.0.0/1" -&gt; "128.128.0.0/9";
+	"128.4.40.0/28" -&gt; "128.4.40.10/32";
+	"128.4.40.0/28" -&gt; "128.4.40.12/32";
+	"128.4.128.0/17" -&gt; "128.4.132.0/22";
+	"128.4.128.0/17" -&gt; "128.4.131.23/32";
+	"128.4.133.164/30" -&gt; "128.4.133.164/32";
+	"128.4.133.164/30" -&gt; "128.4.133.167/32";
+	"128.128.0.0/9" -&gt; "128.175.13.74/32";
+	"128.128.0.0/9" -&gt; "128.175.13.92/32";
+	"128.4.132.0/22" -&gt; "128.4.133.163/32";
+	"128.4.132.0/22" -&gt; "128.4.133.164/30";
+	"128.4.0.0/17" -&gt; "128.4.40.0/28";
+	"128.4.0.0/17" -&gt; "128.4.40.17/32";
+}
+
+# End 
+        
+      </pre><p>
+        This image was created from the above source and represents the
+        dominators (in CIDR notation) as well as the original endpoints
+        (represented in red).
+      </p><p>
+        </p><div class="mediaobject"><img src="images/graph.png" /></div><p>
+      </p></div></div><div class="glossary"><div class="titlepage"><div><div><h2 class="title"><a id="glossary"></a>Terms</h2></div></div></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><h3 class="title">G</h3><dl><dt><a id="gLS"></a>gLS</dt><dd><p>
+            A <span class="emphasis"><em>globally</em></span> acessible Lookup Service.
+          </p></dd></dl></div><div class="glossdiv"><h3 class="title">H</h3><dl><dt><a id="hLS"></a>hLS</dt><dd><p>
+            The <span class="emphasis"><em>home</em></span> Lookup Service.
+          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2529046"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
+        <a href="http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html" target="_top">http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529066"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
+        <a href="http://www.es.net" target="_top">http://www.es.net</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529084"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
+        <a href="http://www.geant2.net" target="_top">http://www.geant2.net</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529102"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
+        <a href="http://www.internet2.edu" target="_top">http://www.internet2.edu</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529121"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
+        <a href="http://www.rnp.br/en" target="_top">http://www.rnp.br/en</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529138"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
+        <a href="http://www.w3.org/TR/xpath" target="_top">XPath</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529157"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
+        <a href="http://www.w3.org/TR/xquery/" target="_top">XQuery</a>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529175"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
+        <a href="http://www.graphviz.org/" target="_top">Graphviz</a>
+      </i>. </span></p></div></div></div></body></html>
