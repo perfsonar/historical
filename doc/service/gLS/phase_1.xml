@@ -54,6 +54,12 @@
             <entry>Initial Preparation</entry>
             <entry>J. Zurawski</entry>
           </row>
+          <row>
+            <entry>1.01</entry>
+            <entry>05/6/2007</entry>
+            <entry>Corrections, API Details</entry>
+            <entry>J. Zurawski</entry>
+          </row>
         </tbody>
       </tgroup>
     </table>
@@ -147,6 +153,15 @@
           <emphasis>perfSONAR</emphasis> service.</para>
         </listitem>
         <listitem>
+          <para><xref linkend="bootstrapping" /> - Finding gLS instances can
+          be challenging, and we <emphasis>should not</emphasis> rely only on
+          well known values.  We propose a simple method for this implementation
+          phase that will allow other <emphasis>gLS</emphasis> instances, 
+          <emphasis>hLS</emphasis>s, and anyone using the API a chance to
+          find and communicate with root <emphasis>gLS</emphasis> instances.
+          </para>
+        </listitem>
+        <listitem>
           <para><xref linkend="hLS_instances" /> - Local LS instances that
           manage the registration of individual services and communicate a
           summary of information to the upper level.</para>
@@ -155,13 +170,6 @@
           <para><xref linkend="registration" /> - Services may require
           modifications to support interaction with more than one LS instance to
           foster both reliability and balancing of load.
-          </para>
-        </listitem>
-        <listitem>
-          <para><xref linkend="synchronization" /> - <emphasis>gLS</emphasis>
-          instances will require tooling to synchronize registration
-          information.  This factor may also depend on
-          <xref linkend="registration" />.
           </para>
         </listitem>
         <listitem>
@@ -209,10 +217,18 @@
       </para>   
       
       <para>
-        Each well known instance <emphasis>must</emphasis> communicate with
-        other well known instances in a static method: by replicating the list
-        of known <xref linkend="hLS" /> instances as well as their summaries,
-        across the top of the hierarchy.  This ensures that a
+        Each well known instance will manage a given set of
+        <emphasis>hLS</emphasis> data.  To ease the strain on communication and
+        data exchange we bypass the notion of requiring <emphasis>gLS</emphasis>
+        instances to perform an explicit synchronization step.  Rather, we 
+        rely on some <xref linkend="bootstrapping" /> techniques that allow
+        Service and Client applications alike the ability to access the
+        <emphasis>upper layer</emphasis> consisting of <emphasis>gLS</emphasis>
+        deployments.
+      </para>        
+
+      <para>        
+        This <xref linkend="bootstrapping" /> ensures that a
         <emphasis>Discovery</emphasis> query posed to any root is able to be
         completed.  In addition to the process to propagate registration
         information the <emphasis>hLS</emphasis> instances may register
@@ -236,12 +252,70 @@
         registration message.  If services do register with a
         <emphasis>gLS</emphasis> it is understood that they may be left out of
         any summarization and discovery activities (unless the
-        <emphasis>gLS</emphasis> summarizies itself, and is able to include this
+        <emphasis>gLS</emphasis> summarizes itself, and is able to include this
         information in the discovery phase).  
       </para>
     
     </section>
 
+    <section id="bootstrapping" xreflabel="Bootstrapping">
+      <title>Bootstrapping</title>
+    
+      <para>
+        The deployment locations of the <emphasis>gLS</emphasis> may be broadly
+        known, but the specific contact information will probably not be.  It
+        will be necessary for the <emphasis>gLS</emphasis> instances,
+        <emphasis>hLS</emphasis> instances, and the Discovery API to have
+        knowledge of the current <emphasis>gLS</emphasis> locations.  The
+        following image describes typical bootstrapping issues:
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/boot.png"/>
+          </imageobject>
+        </mediaobject>
+      </para> 
+      
+      <para>       
+        The proposed solution for this phase of implementation is to rely upon
+        an <emphasis>out of band</emphasis> registration for
+        <emphasis>gLS</emphasis> location.  This can proceed in different
+        (perhaps simultaneous) ways:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem><para><command>Roots File</command> - Similar to a
+          <command>root.hints</command> in <emphasis>DNS</emphasis>, we simply
+          require a way to find the contact information of root
+          <emphasis>gLS</emphasis> instances.  This information could be on a
+          web server or a wiki.</para>
+          </listitem>
+          <listitem><para><command>Meta LS</command> - A deployment of the LS
+          code (possibly at ls.perfsonar.net) could be used just for
+          <emphasis>gLS</emphasis> registration and location by all interested
+          parties.  This service should be modified to ensure it functions only
+          for this specific task.</para>
+          </listitem>
+          <listitem><para><command>CNAMEing Services</command> - The various
+          <emphasis>gLS</emphasis> operators may choose to implement DNS
+          <emphasis>CNAME</emphasis> aliases to the location of the LS.  This
+          will ensure that the location name will always be the same no matter
+          where a deployment moves.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        It is expected that the first option will be implemented immediately,
+        with the prospects of the second option to follow.  The third option
+        will be depend on participation from the perfSONAR partners.
+      </para>
+    
+    </section>
+    
     <section id="hLS_instances" xreflabel="hLS Instances">
       <title>hLS Instances</title>
 
@@ -276,11 +350,9 @@
         <emphasis>gLS</emphasis> instance to register with.  Optionally,
         <emphasis>hLS</emphasis> instances could know about several
         <emphasis>gLS</emphasis> instances and register with as many as
-        possible. This could ease the burden of <emphasis>gLS</emphasis>s to
-        synchronize registered information as well as speeding up the
-        availability of this information to the framework as a whole, but may
-        become complicated due to performance issues (latency, topology) or
-        administrative (authorization, information sharing).
+        possible. This may become complicated due to performance issues
+        (latency, topology) or administrative issues (authorization, 
+        information sharing).
       </para>
 
       <para>
@@ -294,7 +366,7 @@
             all topology elements (for now IPv4, in the future IPv6) must be
             combined into useful CIDR style summaries.  Preliminary work will
             incorporate the <emphasis>Patricia Trie</emphasis> data structure to
-            find <emphasis>K Dominators</emphasis> from a list of
+            naively find <emphasis>K Dominators</emphasis> from a list of
             addresses.</para>
           </listitem>
           <listitem>
@@ -367,14 +439,9 @@
           being partitioned from the rest of the <emphasis>perfSONAR</emphasis>
           infrastructure.</para>
           </listitem>
-          <listitem><para><command>Performance (for
-          <emphasis>gLS</emphasis>)</command> - Less synchronization needs to be
-          performed between <emphasis>gLS</emphasis> instances.</para>
-          </listitem>
           <listitem><para><command>Data Availability</command> - Registration
           on the part of the <emphasis>hLS</emphasis> ensures that data
-          summaries are available faster to the <emphasis>gLS</emphasis> layer
-          than through a scheduled synchronization.</para>
+          summaries are available faster to the <emphasis>gLS</emphasis>.</para>
           </listitem>
         </itemizedlist>
       </para>
@@ -395,55 +462,15 @@
           and there is no automatic way to retrieve this result.  Configuring
           many must be done by hand.</para>
           </listitem>
-          <listitem><para><command>Necessity</command> - With synchronization
-          available, this move is not required.</para>
+          <listitem><para><command>Duplication</command> - Information in the
+          discovery phase will produce duplicate results.</para>
           </listitem>
         </itemizedlist>
       </para>
-
-      <para>
-        With explicit <xref linkend="synchronization" /> in place, this
-        procedure becomes more about performance than necessity.  We leave the
-        decision to perform multiple registrations up to the implementers.
-      </para>
-    
-    </section>
-
-    <section id="synchronization" xreflabel="Synchronization">
-      <title>Synchronization</title>
-
-      <para>
-        The actual process of synchronization only involves communication
-        between <emphasis>gLS</emphasis> instances but indirectly involves 
-        the participation of the <emphasis>hLS</emphasis>s and does effect the
-        overall distribution and location of data via the API.  The following
-        diagram describes some of the parts of synchronization.
-      </para>
-
-      <para>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/synch.png"/>
-          </imageobject>
-        </mediaobject>
-      </para>  
     
       <para>
-        For <emphasis>Discovery</emphasis> to be successful, all top level
-        <emphasis>gLS</emphasis> instances should know about every
-        <emphasis>hLS</emphasis> as well as what data it is making available.
-        This can be done via scheduled exchanges (e.g. on some periodic interval
-        the <emphasis>gLS</emphasis> re-registers data that it knows with other
-        <emphasis>gLS</emphasis>s, repeat for each <emphasis>gLS</emphasis>), or
-        through <xref linkend="registration" />.
-      </para>
-    
-      <para>
-        This operation must be performed regularly, and could even be triggered
-        by events such as <emphasis>hLS</emphasis> registration and update.  
-        Simple heuristics such as this will ensure that information at the 
-        root level is both <emphasis>valid</emphasis> and
-        <emphasis>fresh</emphasis>.
+        We leave the option of multiple registration up to the individual
+        service designers.
       </para>
     
     </section>
@@ -477,7 +504,12 @@
       </para>  
     
       <para>
-        The API has two goals:
+        The overall goal of the API should be to abstract away the specifics
+        regarding discovery and query from the service and client applications.
+        In general these applications will not care about
+        <emphasis>how</emphasis> the information is structured but will care
+        about if the information exists and where it may be available.  The API
+        will address two primary issues:
       </para>
 
       <para>

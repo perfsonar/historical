@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.2. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.3. Multiple Registration</a></span></dt><dt><span class="section"><a href="#synchronization">3.4. Synchronization</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
-      This document builds upon the work described in <a href="#id2529046">dLS Design Document</a>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#bootstrapping">3.2. Bootstrapping</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.3. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.4. Multiple Registration</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/6/2007</td><td align="left">Corrections, API Details</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      This document builds upon the work described in <a href="#id2528848">dLS Design Document</a>
       to create <span><strong class="command">Phase 1</strong></span> of the proposed distributed
       information service.  This document will describe concrete details of the
       plan, prescribing both the overall structure of the system as well as
@@ -47,15 +47,17 @@
           the <span class="emphasis"><em>top level</em></span> of the hierarchy.  Under normal
           conditions <span><strong class="command">only</strong></span> manage the registration of
           <span class="emphasis"><em>hLS</em></span> instances and not other forms of
-          <span class="emphasis"><em>perfSONAR</em></span> service.</p></li><li><p><a href="#hLS_instances">hLS Instances</a> - Local LS instances that
+          <span class="emphasis"><em>perfSONAR</em></span> service.</p></li><li><p><a href="#bootstrapping">Bootstrapping</a> - Finding gLS instances can
+          be challenging, and we <span class="emphasis"><em>should not</em></span> rely only on
+          well known values.  We propose a simple method for this implementation
+          phase that will allow other <span class="emphasis"><em>gLS</em></span> instances, 
+          <span class="emphasis"><em>hLS</em></span>s, and anyone using the API a chance to
+          find and communicate with root <span class="emphasis"><em>gLS</em></span> instances.
+          </p></li><li><p><a href="#hLS_instances">hLS Instances</a> - Local LS instances that
           manage the registration of individual services and communicate a
           summary of information to the upper level.</p></li><li><p><a href="#registration">Multiple Registration</a> - Services may require
           modifications to support interaction with more than one LS instance to
           foster both reliability and balancing of load.
-          </p></li><li><p><a href="#synchronization">Synchronization</a> - <span class="emphasis"><em>gLS</em></span>
-          instances will require tooling to synchronize registration
-          information.  This factor may also depend on
-          <a href="#registration">Multiple Registration</a>.
           </p></li><li><p><a href="#interaction">Interaction</a> - To use this new framework, 
           clients and services require a unified access method.  This access
           requires two components: Discovery (e.g. <span class="emphasis"><em>where</em></span>
@@ -63,8 +65,8 @@
           specifically can I find).</p></li></ol></div><p>
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gLS_instances"></a>3.1. gLS Instances</h3></div></div></div><p>
         The <span class="emphasis"><em>perfSONAR</em></span> project partners (e.g.
-        <a href="#id2529066">ESnet</a>, <a href="#id2529084">Geant2</a>,
-        <a href="#id2529102">Internet2</a>, and <a href="#id2529121">RNP</a>) are
+        <a href="#id2528867">ESnet</a>, <a href="#id2528885">Geant2</a>,
+        <a href="#id2528904">Internet2</a>, and <a href="#id2528922">RNP</a>) are
         expected to stand up and maintain <span class="emphasis"><em>root</em></span>
         <a href="#gLS">gLS</a> instances.  As the driving force behind
         <span class="emphasis"><em>perfSONAR</em></span>, this contribution serves as the basis
@@ -83,10 +85,16 @@
       </p><p>
         </p><div class="mediaobject"><img src="images/gLS.png" /></div><p>
       </p><p>
-        Each well known instance <span class="emphasis"><em>must</em></span> communicate with
-        other well known instances in a static method: by replicating the list
-        of known <a href="#hLS">hLS</a> instances as well as their summaries,
-        across the top of the hierarchy.  This ensures that a
+        Each well known instance will manage a given set of
+        <span class="emphasis"><em>hLS</em></span> data.  To ease the strain on communication and
+        data exchange we bypass the notion of requiring <span class="emphasis"><em>gLS</em></span>
+        instances to perform an explicit synchronization step.  Rather, we 
+        rely on some <a href="#bootstrapping">Bootstrapping</a> techniques that allow
+        Service and Client applications alike the ability to access the
+        <span class="emphasis"><em>upper layer</em></span> consisting of <span class="emphasis"><em>gLS</em></span>
+        deployments.
+      </p><p>        
+        This <a href="#bootstrapping">Bootstrapping</a> ensures that a
         <span class="emphasis"><em>Discovery</em></span> query posed to any root is able to be
         completed.  In addition to the process to propagate registration
         information the <span class="emphasis"><em>hLS</em></span> instances may register
@@ -106,9 +114,41 @@
         registration message.  If services do register with a
         <span class="emphasis"><em>gLS</em></span> it is understood that they may be left out of
         any summarization and discovery activities (unless the
-        <span class="emphasis"><em>gLS</em></span> summarizies itself, and is able to include this
+        <span class="emphasis"><em>gLS</em></span> summarizes itself, and is able to include this
         information in the discovery phase).  
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="hLS_instances"></a>3.2. hLS Instances</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="bootstrapping"></a>3.2. Bootstrapping</h3></div></div></div><p>
+        The deployment locations of the <span class="emphasis"><em>gLS</em></span> may be broadly
+        known, but the specific contact information will probably not be.  It
+        will be necessary for the <span class="emphasis"><em>gLS</em></span> instances,
+        <span class="emphasis"><em>hLS</em></span> instances, and the Discovery API to have
+        knowledge of the current <span class="emphasis"><em>gLS</em></span> locations.  The
+        following image describes typical bootstrapping issues:
+      </p><p>
+        </p><div class="mediaobject"><img src="images/boot.png" /></div><p>
+      </p><p>       
+        The proposed solution for this phase of implementation is to rely upon
+        an <span class="emphasis"><em>out of band</em></span> registration for
+        <span class="emphasis"><em>gLS</em></span> location.  This can proceed in different
+        (perhaps simultaneous) ways:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Roots File</strong></span> - Similar to a
+          <span><strong class="command">root.hints</strong></span> in <span class="emphasis"><em>DNS</em></span>, we simply
+          require a way to find the contact information of root
+          <span class="emphasis"><em>gLS</em></span> instances.  This information could be on a
+          web server or a wiki.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Meta LS</strong></span> - A deployment of the LS
+          code (possibly at ls.perfsonar.net) could be used just for
+          <span class="emphasis"><em>gLS</em></span> registration and location by all interested
+          parties.  This service should be modified to ensure it functions only
+          for this specific task.</p></li><li style="list-style-type: circle"><p><span><strong class="command">CNAMEing Services</strong></span> - The various
+          <span class="emphasis"><em>gLS</em></span> operators may choose to implement DNS
+          <span class="emphasis"><em>CNAME</em></span> aliases to the location of the LS.  This
+          will ensure that the location name will always be the same no matter
+          where a deployment moves.</p></li></ul></div><p>
+      </p><p>
+        It is expected that the first option will be implemented immediately,
+        with the prospects of the second option to follow.  The third option
+        will be depend on participation from the perfSONAR partners.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="hLS_instances"></a>3.3. hLS Instances</h3></div></div></div><p>
         This service resembles the current LS implementation.  Aside from the
         changes that allow the <span class="emphasis"><em>hLS</em></span> itself to register with
         a <span class="emphasis"><em>gLS</em></span> and the addition of the API, there is little
@@ -129,11 +169,9 @@
         <span class="emphasis"><em>gLS</em></span> instance to register with.  Optionally,
         <span class="emphasis"><em>hLS</em></span> instances could know about several
         <span class="emphasis"><em>gLS</em></span> instances and register with as many as
-        possible. This could ease the burden of <span class="emphasis"><em>gLS</em></span>s to
-        synchronize registered information as well as speeding up the
-        availability of this information to the framework as a whole, but may
-        become complicated due to performance issues (latency, topology) or
-        administrative (authorization, information sharing).
+        possible. This may become complicated due to performance issues
+        (latency, topology) or administrative issues (authorization, 
+        information sharing).
       </p><p>
         The <span class="emphasis"><em>hLS</em></span> must summarize the current data set it
         maintains in the following ways:
@@ -142,7 +180,7 @@
             all topology elements (for now IPv4, in the future IPv6) must be
             combined into useful CIDR style summaries.  Preliminary work will
             incorporate the <span class="emphasis"><em>Patricia Trie</em></span> data structure to
-            find <span class="emphasis"><em>K Dominators</em></span> from a list of
+            naively find <span class="emphasis"><em>K Dominators</em></span> from a list of
             addresses.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Host/Domain Names</strong></span> - Similar to IP
             Addresses, the hostname of each service will be extracted and
             broken into sub elements (e.g.
@@ -172,7 +210,7 @@
         due to code reuse it is understood that any given deployment may be a
         <span class="emphasis"><em>gLS</em></span> or <span class="emphasis"><em>hLS</em></span> so the necessary
         tooling to do either approach would be available.
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="registration"></a>3.3. Multiple Registration</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="registration"></a>3.4. Multiple Registration</h3></div></div></div><p>
         The following diagram illustrates the procedure of an
         <span class="emphasis"><em>hLS</em></span> instance registering with two distinct
         <span class="emphasis"><em>gLS</em></span> instances.
@@ -185,12 +223,9 @@
           <span class="emphasis"><em>hLS</em></span> that registers with (and knows about)
           multiple <span class="emphasis"><em>gLS</em></span> instances is less susceptible to
           being partitioned from the rest of the <span class="emphasis"><em>perfSONAR</em></span>
-          infrastructure.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Performance (for
-          <span class="emphasis"><em>gLS</em></span>)</strong></span> - Less synchronization needs to be
-          performed between <span class="emphasis"><em>gLS</em></span> instances.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Data Availability</strong></span> - Registration
+          infrastructure.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Data Availability</strong></span> - Registration
           on the part of the <span class="emphasis"><em>hLS</em></span> ensures that data
-          summaries are available faster to the <span class="emphasis"><em>gLS</em></span> layer
-          than through a scheduled synchronization.</p></li></ul></div><p>
+          summaries are available faster to the <span class="emphasis"><em>gLS</em></span>.</p></li></ul></div><p>
       </p><p>
         Several negative reasons also exist.
       </p><p>
@@ -200,38 +235,15 @@
           <span class="emphasis"><em>hLS</em></span>.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Complexity</strong></span> - currently the
           <span class="emphasis"><em>gLS</em></span> instances are <span class="emphasis"><em>well known</em></span>
           and there is no automatic way to retrieve this result.  Configuring
-          many must be done by hand.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Necessity</strong></span> - With synchronization
-          available, this move is not required.</p></li></ul></div><p>
+          many must be done by hand.</p></li><li style="list-style-type: circle"><p><span><strong class="command">Duplication</strong></span> - Information in the
+          discovery phase will produce duplicate results.</p></li></ul></div><p>
       </p><p>
-        With explicit <a href="#synchronization">Synchronization</a> in place, this
-        procedure becomes more about performance than necessity.  We leave the
-        decision to perform multiple registrations up to the implementers.
-      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="synchronization"></a>3.4. Synchronization</h3></div></div></div><p>
-        The actual process of synchronization only involves communication
-        between <span class="emphasis"><em>gLS</em></span> instances but indirectly involves 
-        the participation of the <span class="emphasis"><em>hLS</em></span>s and does effect the
-        overall distribution and location of data via the API.  The following
-        diagram describes some of the parts of synchronization.
-      </p><p>
-        </p><div class="mediaobject"><img src="images/synch.png" /></div><p>
-      </p><p>
-        For <span class="emphasis"><em>Discovery</em></span> to be successful, all top level
-        <span class="emphasis"><em>gLS</em></span> instances should know about every
-        <span class="emphasis"><em>hLS</em></span> as well as what data it is making available.
-        This can be done via scheduled exchanges (e.g. on some periodic interval
-        the <span class="emphasis"><em>gLS</em></span> re-registers data that it knows with other
-        <span class="emphasis"><em>gLS</em></span>s, repeat for each <span class="emphasis"><em>gLS</em></span>), or
-        through <a href="#registration">Multiple Registration</a>.
-      </p><p>
-        This operation must be performed regularly, and could even be triggered
-        by events such as <span class="emphasis"><em>hLS</em></span> registration and update.  
-        Simple heuristics such as this will ensure that information at the 
-        root level is both <span class="emphasis"><em>valid</em></span> and
-        <span class="emphasis"><em>fresh</em></span>.
+        We leave the option of multiple registration up to the individual
+        service designers.
       </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="interaction"></a>3.5. Interaction</h3></div></div></div><p>
         Currently, services and clients only have a single way to query an 
-        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2529157">XQuery</a>
-        or <a href="#id2529138">XPath</a> statements.  While useful to individuals
+        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2528958">XQuery</a>
+        or <a href="#id2528940">XPath</a> statements.  While useful to individuals
         with an intimate knowledge of the data storage structure and the query
         language syntax, this leaves other services and client applications 
         frustrated and out of luck when it comes to lookup.
@@ -244,7 +256,12 @@
       </p><p>
         </p><div class="mediaobject"><img src="images/api.png" /></div><p>
       </p><p>
-        The API has two goals:
+        The overall goal of the API should be to abstract away the specifics
+        regarding discovery and query from the service and client applications.
+        In general these applications will not care about
+        <span class="emphasis"><em>how</em></span> the information is structured but will care
+        about if the information exists and where it may be available.  The API
+        will address two primary issues:
       </p><p>
         </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p><span><strong class="command">Discovery</strong></span> - Discovery queries have
           known values (e.g. they pertain to a specific domain, address range,
@@ -735,7 +752,7 @@ All rights reserved.
             <span class="emphasis"><em>Net::IPTrie</em></span>) to solve this problem.  Similar
             libraries may not be available in Java, but can easily be
             re-created.</p></li><li style="list-style-type: circle"><p>The output (shown below) is currently used to create a 
-            <a href="#id2529175">Graphviz</a> formated image.  The script can be
+            <a href="#id2528976">Graphviz</a> formated image.  The script can be
             modified to output the tree in a more readable format.</p></li><li style="list-style-type: circle"><p>This script does not allow one to specifiy a set value for
             <span class="emphasis"><em>K</em></span> and return only those dominators.  A simple
             walk of the tree should be able to perform this task.</p></li></ul></div><p>
@@ -794,20 +811,20 @@ digraph g {
             A <span class="emphasis"><em>globally</em></span> acessible Lookup Service.
           </p></dd></dl></div><div class="glossdiv"><h3 class="title">H</h3><dl><dt><a id="hLS"></a>hLS</dt><dd><p>
             The <span class="emphasis"><em>home</em></span> Lookup Service.
-          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2529046"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
+          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2528848"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
         <a href="http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html" target="_top">http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529066"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528867"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
         <a href="http://www.es.net" target="_top">http://www.es.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529084"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528885"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
         <a href="http://www.geant2.net" target="_top">http://www.geant2.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529102"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528904"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
         <a href="http://www.internet2.edu" target="_top">http://www.internet2.edu</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529121"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528922"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
         <a href="http://www.rnp.br/en" target="_top">http://www.rnp.br/en</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529138"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528940"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xpath" target="_top">XPath</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529157"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528958"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xquery/" target="_top">XQuery</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2529175"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2528976"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
         <a href="http://www.graphviz.org/" target="_top">Graphviz</a>
       </i>. </span></p></div></div></div></body></html>
