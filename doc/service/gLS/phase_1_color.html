@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#bootstrapping">3.2. Bootstrapping</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.3. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.4. Multiple Registration</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/6/2007</td><td align="left">Corrections, API Details</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
-      This document builds upon the work described in <a href="#id2528848">dLS Design Document</a>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#bootstrapping">3.2. Bootstrapping</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.3. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.4. Multiple Registration</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dd><dl><dt><span class="section"><a href="#level0_api">4.1. Level 0 API</a></span></dt><dt><span class="section"><a href="#level1_api">4.2. Level 1 API</a></span></dt><dt><span class="section"><a href="#level2_api">4.3. Level 2 API</a></span></dt></dl></dd><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/6/2007</td><td align="left">Corrections, API Details</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      This document builds upon the work described in <a href="#id2529781">dLS Design Document</a>
       to create <span><strong class="command">Phase 1</strong></span> of the proposed distributed
       information service.  This document will describe concrete details of the
       plan, prescribing both the overall structure of the system as well as
@@ -65,8 +65,8 @@
           specifically can I find).</p></li></ol></div><p>
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gLS_instances"></a>3.1. gLS Instances</h3></div></div></div><p>
         The <span class="emphasis"><em>perfSONAR</em></span> project partners (e.g.
-        <a href="#id2528867">ESnet</a>, <a href="#id2528885">Geant2</a>,
-        <a href="#id2528904">Internet2</a>, and <a href="#id2528922">RNP</a>) are
+        <a href="#id2529801">ESnet</a>, <a href="#id2529819">Geant2</a>,
+        <a href="#id2529837">Internet2</a>, and <a href="#id2529856">RNP</a>) are
         expected to stand up and maintain <span class="emphasis"><em>root</em></span>
         <a href="#gLS">gLS</a> instances.  As the driving force behind
         <span class="emphasis"><em>perfSONAR</em></span>, this contribution serves as the basis
@@ -242,8 +242,8 @@
         service designers.
       </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="interaction"></a>3.5. Interaction</h3></div></div></div><p>
         Currently, services and clients only have a single way to query an 
-        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2528958">XQuery</a>
-        or <a href="#id2528940">XPath</a> statements.  While useful to individuals
+        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2529892">XQuery</a>
+        or <a href="#id2529873">XPath</a> statements.  While useful to individuals
         with an intimate knowledge of the data storage structure and the query
         language syntax, this leaves other services and client applications 
         frustrated and out of luck when it comes to lookup.
@@ -276,8 +276,80 @@
       </p><p>
         The API will be specified in <a href="#api">API</a>.
       </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="api"></a>4. API</h2></div></div></div><p>
-      ... 
-    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="operation"></a>5. Operation</h2></div></div></div><p>
+      To effectively navigate through the distributed information service, an
+      effective and complete API is necessary.  This API should offer ways to 
+      perform two important tasks (together, and separately as needed):
+    </p><p>
+      </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+            <span><strong class="command">Discovery</strong></span> - A series of parameters should deliver
+            results that locate information stored at the
+            <span class="emphasis"><em>hLS</em></span> layer, but reported to and discovered in
+            the <span class="emphasis"><em>gLS</em></span> layer.  The answers to these types of
+            queries should be contact information where a
+            <span><strong class="command">Query</strong></span> should be issued.
+          </p></li><li style="list-style-type: circle"><p>
+            <span><strong class="command">Query</strong></span> - A series of parameters should deliver
+            <span class="emphasis"><em>specific</em></span> results (e.g. metadata or data
+            elements) from the <span class="emphasis"><em>hLS</em></span> layer where services
+            are directly registering.
+          </p></li></ul></div><p>
+    </p><p>
+      Information structure and location may be of little to no use to the
+      typical perfSONAR client or service.  In general it assumed that queries
+      should be simply asked and the end result returned without needing to
+      worry about the additional discovery phase between
+      <span class="emphasis"><em>gLS</em></span> and <span class="emphasis"><em>hLS</em></span> instances.  As such
+      the API should be structured in such a way that the
+      <span class="emphasis"><em>high level</em></span> use cases be of the utmost importance, but
+      lower level functionality that is able to expose more primitive operations
+      should remain available.  The following breakdown isolates the various
+      functions:
+    </p><div class="table"><a id="table.2"></a><p class="title"><b>Table 2. LS API</b></p><div class="table-contents"><table summary="LS API" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">API Layer</th><th align="left">Message Type</th><th align="left">Event Type</th><th align="left">Input</th><th align="left">Output</th><th align="left">Purpose</th></tr></thead><tbody><tr><td rowspan="4" align="center" valign="middle"><a href="#level0_api">0</a></td><td rowspan="8" align="left" valign="middle">LSQueryRequest</td><td align="left">service.lookup.xquery</td><td rowspan="4" align="left" valign="middle">XQuery</td><td rowspan="4" align="left" valign="middle">Raw XML</td><td rowspan="4" align="left" valign="middle">Most primitive call.</td></tr><tr><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</td></tr><tr><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</td></tr><tr><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</td></tr><tr><td rowspan="2" align="center" valign="middle"><a href="#level1_api">1</a></td><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/2.0</td><td align="left">IP, Domain, eventType, Service Data</td><td align="left">hLS URL</td><td align="left">Standalone Discovery</td></tr><tr><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/2.0</td><td align="left">IP, Domain, eventType, Service Data</td><td align="left">Metadata (e.g. Service/Measurement based)</td><td align="left">Standalone Query</td></tr><tr><td rowspan="2" align="center" valign="middle"><a href="#level2_api">2</a></td><td align="left">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/2.0</td><td align="left">IP, Domain, eventType, Service Data</td><td align="left">Metadata (e.g. Service/Measurement based)</td><td align="left">Complete Discovery/Query</td></tr></tbody></table></div></div><br class="table-break" /><p>
+      We will now explain in greater detail the expected  format of the API for
+      the various levels, including function names, parameter lists, as well
+      as expected behaviors.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="level0_api"></a>4.1. Level 0 API</h3></div></div></div><p>
+        The Level 0 API is based on the current query method used in the
+        <span class="emphasis"><em>LS</em></span>: <span><strong class="command">LSQueryRequest</strong></span> messages
+        sending a raw <span><strong class="command">XQuery</strong></span> string.  We would like to keep
+        this base functionality for two reasons:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+              This method will serve as the base that upper layers of this API
+              use to communicate with the framework.
+            </p></li><li style="list-style-type: circle"><p>
+              It provides an <span class="emphasis"><em>expert</em></span> interface for service
+              designers looking for specific information and not wishing to go
+              through the API.
+            </p></li></ul></div><p>      
+      </p><p>
+        There are only minor modifications that must be made to the existing
+        <span><strong class="command">LSQueryRequest</strong></span> functionality is the addition of
+        two new eventTypes:
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+              <span><strong class="command">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</strong></span>
+              - Allows the <span><strong class="command">XQuery</strong></span> to travel directly to the specific
+              backend storage holding summarization information.
+            </p></li><li style="list-style-type: circle"><p>
+              <span><strong class="command">http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</strong></span>
+              - Allows the <span><strong class="command">XQuery</strong></span> to travel directly to the specific
+              backend storage holding registered information.
+            </p></li></ul></div><p>      
+      </p><p>
+        These <span class="emphasis"><em>eventTypes</em></span> are more of an
+        <span class="emphasis"><em>ease of design</em></span> feature for the implementers of the
+        <span class="emphasis"><em>gLS</em></span> and <span class="emphasis"><em>hLS</em></span> due to the nature
+        of the backend storage mechanisms.  The existing
+        <span class="emphasis"><em>eventTypes</em></span>, as well as message structure regarding
+        subject and parameters, will remain unchanged.
+      </p><p>
+        An API breakdown follows:
+      </p><div class="table"><a id="table.api.l0"></a><p class="title"><b>Table 3. Level 0 API Calls</b></p><div class="table-contents"><table summary="Level 0 API Calls" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Function Name</th><th align="left">Input</th><th align="left">Output</th><th align="left">Purpose</th></tr></thead><tbody><tr><td align="left">getLSDiscoveryResults</td><td rowspan="3" align="left" valign="middle">XQuery String</td><td rowspan="3" align="left" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</td><td align="left">Send XQuery for results in the <span class="emphasis"><em>Summary</em></span>
+                storage only.</td></tr><tr><td align="left">getLSQueryResults</td><td align="left">Send XQuery for results in the <span class="emphasis"><em>Registered</em></span>
+                storage only.</td></tr><tr><td align="left">getLSResults</td><td align="left">Send XQuery for any matching results.</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="level1_api"></a>4.2. Level 1 API</h3></div></div></div><p>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="level2_api"></a>4.3. Level 2 API</h3></div></div></div><p>
+      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="operation"></a>5. Operation</h2></div></div></div><p>
       ... 
     </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="implementation"></a>6. Implementation</h2></div></div></div><p>
       ... 
@@ -752,7 +824,7 @@ All rights reserved.
             <span class="emphasis"><em>Net::IPTrie</em></span>) to solve this problem.  Similar
             libraries may not be available in Java, but can easily be
             re-created.</p></li><li style="list-style-type: circle"><p>The output (shown below) is currently used to create a 
-            <a href="#id2528976">Graphviz</a> formated image.  The script can be
+            <a href="#id2529910">Graphviz</a> formated image.  The script can be
             modified to output the tree in a more readable format.</p></li><li style="list-style-type: circle"><p>This script does not allow one to specifiy a set value for
             <span class="emphasis"><em>K</em></span> and return only those dominators.  A simple
             walk of the tree should be able to perform this task.</p></li></ul></div><p>
@@ -811,20 +883,20 @@ digraph g {
             A <span class="emphasis"><em>globally</em></span> acessible Lookup Service.
           </p></dd></dl></div><div class="glossdiv"><h3 class="title">H</h3><dl><dt><a id="hLS"></a>hLS</dt><dd><p>
             The <span class="emphasis"><em>home</em></span> Lookup Service.
-          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2528848"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
+          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2529781"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
         <a href="http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html" target="_top">http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528867"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529801"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
         <a href="http://www.es.net" target="_top">http://www.es.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528885"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529819"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
         <a href="http://www.geant2.net" target="_top">http://www.geant2.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528904"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529837"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
         <a href="http://www.internet2.edu" target="_top">http://www.internet2.edu</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528922"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529856"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
         <a href="http://www.rnp.br/en" target="_top">http://www.rnp.br/en</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528940"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529873"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xpath" target="_top">XPath</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528958"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529892"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xquery/" target="_top">XQuery</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2528976"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2529910"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
         <a href="http://www.graphviz.org/" target="_top">Graphviz</a>
       </i>. </span></p></div></div></div></body></html>

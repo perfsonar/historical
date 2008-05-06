@@ -542,9 +542,229 @@
     <title>API</title>
     
     <para>
-      ... 
+      To effectively navigate through the distributed information service, an
+      effective and complete API is necessary.  This API should offer ways to 
+      perform two important tasks (together, and separately as needed):
     </para>
+
+    <para>
+      <itemizedlist mark='opencircle'>
+        <listitem>
+          <para>
+            <command>Discovery</command> - A series of parameters should deliver
+            results that locate information stored at the
+            <emphasis>hLS</emphasis> layer, but reported to and discovered in
+            the <emphasis>gLS</emphasis> layer.  The answers to these types of
+            queries should be contact information where a
+            <command>Query</command> should be issued.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <command>Query</command> - A series of parameters should deliver
+            <emphasis>specific</emphasis> results (e.g. metadata or data
+            elements) from the <emphasis>hLS</emphasis> layer where services
+            are directly registering.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+
+    <para>
+      Information structure and location may be of little to no use to the
+      typical perfSONAR client or service.  In general it assumed that queries
+      should be simply asked and the end result returned without needing to
+      worry about the additional discovery phase between
+      <emphasis>gLS</emphasis> and <emphasis>hLS</emphasis> instances.  As such
+      the API should be structured in such a way that the
+      <emphasis>high level</emphasis> use cases be of the utmost importance, but
+      lower level functionality that is able to expose more primitive operations
+      should remain available.  The following breakdown isolates the various
+      functions:
+    </para>
+
+    <table frame="all" align="center" halign="center" width="80%"  id="table.2">
+      <title>LS API</title>
+      <tgroup cols="1" align="left" colsep="1" rowsep="1">
+        <colspec colnum="1" colname="c1"/>
+        <colspec colnum="2" colname="c2"/>
+        <colspec colnum="3" colname="c3"/>
+        <colspec colnum="4" colname="c4"/>
+        <thead>
+          <row>
+            <entry>API Layer</entry>
+            <entry>Message Type</entry>
+            <entry>Event Type</entry>
+            <entry>Input</entry>
+            <entry>Output</entry>
+            <entry>Purpose</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry morerows="3" valign="middle" align="center"><xref linkend="level0_api" /></entry>
+            <entry morerows="7" valign="middle">LSQueryRequest</entry>
+            <entry>service.lookup.xquery</entry>
+            <entry morerows="3" valign="middle">XQuery</entry>
+            <entry morerows="3" valign="middle">Raw XML</entry>
+            <entry morerows="3" valign="middle">Most primitive call.</entry>
+          </row>
+          <row>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</entry>
+          </row>      
+          <row>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</entry>
+          </row>   
+          <row>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</entry>
+          </row>   
+          <row>
+            <entry morerows="1" valign="middle" align="center"><xref linkend="level1_api" /></entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/2.0</entry>
+            <entry>IP, Domain, eventType, Service Data</entry>
+            <entry>hLS URL</entry>
+            <entry>Standalone Discovery</entry>
+          </row>
+          <row>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/2.0</entry>
+            <entry>IP, Domain, eventType, Service Data</entry>
+            <entry>Metadata (e.g. Service/Measurement based)</entry>
+            <entry>Standalone Query</entry>
+          </row>
+          <row>
+            <entry morerows="1" valign="middle" align="center"><xref linkend="level2_api" /></entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/2.0</entry>
+            <entry>IP, Domain, eventType, Service Data</entry>
+            <entry>Metadata (e.g. Service/Measurement based)</entry>
+            <entry>Complete Discovery/Query</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <para>
+      We will now explain in greater detail the expected  format of the API for
+      the various levels, including function names, parameter lists, as well
+      as expected behaviors.
+    </para>
+
+    <section id="level0_api" xreflabel="0">
+      <title>Level 0 API</title>
     
+      <para>
+        The Level 0 API is based on the current query method used in the
+        <emphasis>LS</emphasis>: <command>LSQueryRequest</command> messages
+        sending a raw <command>XQuery</command> string.  We would like to keep
+        this base functionality for two reasons:
+      </para>
+      
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              This method will serve as the base that upper layers of this API
+              use to communicate with the framework.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              It provides an <emphasis>expert</emphasis> interface for service
+              designers looking for specific information and not wishing to go
+              through the API.
+            </para>
+          </listitem>
+        </itemizedlist>      
+      </para>
+      
+      <para>
+        There are only minor modifications that must be made to the existing
+        <command>LSQueryRequest</command> functionality is the addition of
+        two new eventTypes:
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</command>
+              - Allows the <command>XQuery</command> to travel directly to the specific
+              backend storage holding summarization information.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</command>
+              - Allows the <command>XQuery</command> to travel directly to the specific
+              backend storage holding registered information.
+            </para>
+          </listitem>
+        </itemizedlist>      
+      </para>
+      
+      <para>
+        These <emphasis>eventTypes</emphasis> are more of an
+        <emphasis>ease of design</emphasis> feature for the implementers of the
+        <emphasis>gLS</emphasis> and <emphasis>hLS</emphasis> due to the nature
+        of the backend storage mechanisms.  The existing
+        <emphasis>eventTypes</emphasis>, as well as message structure regarding
+        subject and parameters, will remain unchanged.
+      </para>
+      
+      <para>
+        An API breakdown follows:
+      </para>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.api.l0">
+        <title>Level 0 API Calls</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" />
+          <colspec colnum="2" colname="c2" />
+          <colspec colnum="3" colname="c3" />
+          <thead>
+            <row>
+              <entry>Function Name</entry>
+              <entry >Input</entry>
+              <entry>Output</entry>
+              <entry>Purpose</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>getLSDiscoveryResults</entry>
+              <entry morerows="2" valign="middle">XQuery String</entry>
+              <entry morerows="2" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
+              <entry>Send XQuery for results in the <emphasis>Summary</emphasis>
+                storage only.</entry>
+            </row>
+            <row>
+              <entry>getLSQueryResults</entry>
+              <entry>Send XQuery for results in the <emphasis>Registered</emphasis>
+                storage only.</entry>
+            </row>
+            <row>
+              <entry>getLSResults</entry>
+              <entry>Send XQuery for any matching results.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+      
+    </section>
+
+    <section id="level1_api" xreflabel="1">
+      <title>Level 1 API</title>
+    
+      <para>
+      </para>
+    </section>
+    
+    <section id="level2_api" xreflabel="2">
+      <title>Level 2 API</title>
+    
+      <para>
+      </para>
+    </section>
+
   </section>
 
   <section id="operation" xreflabel="Operation">
