@@ -2,33 +2,67 @@ package perfSONAR_PS::OSCARS;
 
 use strict;
 use warnings;
-use IO::Handle;
 use Cwd;
-use Data::Dumper;
+use Params::Validate qw(:all);
 
-our @ISA = ('Exporter');
-our @EXPORT = ('queryCircuits', 'getActiveCircuits', 'getTopology');
+use fields 'IDC_URL', 'CLIENT_DIR';
 
-sub exec_input($$);
-sub queryCircuits($$$$);
-sub getActiveCircuits($$$);
-sub getClasspath();
-sub getTopology($$$);
+sub new {
+	my $package = shift;
+	my $args = validate(@_, { idc_url => 0, client_directory => 0});
 
-sub getTopology($$$) {
-	my ($url, $client_dir, $repo_dir) = @_;
+	my $self = fields::new($package);
+	$self->{IDC_URL} = $args->{idc_url} if ($args->{idc_url});
+	$self->{CLIENT_DIR} = $args->{client_directory} if ($args->{client_directory});
+
+	return $self;
+}
+
+sub getIDC {
+	my ($self) = @_;
+
+	return $self->{IDC_URL};
+}
+
+sub getClientDirectory {
+	my ($self) = @_;
+
+	return $self->{CLIENT_DIR};
+}
+
+sub setIDC {
+	my ($self, $url) = @_;
+
+	$self->{IDC_URL} = $url;
+
+	return;
+}
+
+sub setClientDirectory {
+	my ($self, $dir) = @_;
+
+	$self->{CLIENT_DIR} = $dir;
+
+	return;
+}
+
+sub getTopology($$) {
+	my ($self, $output) = @_;
 	my $prev_dir = cwd;
-	my @ids = ();
 
-	chdir($client_dir);
+	chdir($self->{CLIENT_DIR});
 
 	my ($status, $classpath) = getClasspath();
 	if ($status == -1) {
 		return;
 	}
 
+	my $repo_dir = $self->{CLIENT_DIR}."/repo";
+
 	my @input = ( "\n" );
-	my $lines = exec_input("java -cp $classpath GetNetworkTopologyClient $repo_dir $url", \@input);
+	my $lines = exec_input("java -cp $classpath GetNetworkTopologyClient $repo_dir ".$self->{IDC_URL}, \@input);
+
+	my $cmd_output = "";
 
 	my $topology = "";
 	my $in_topology = 0;
@@ -44,26 +78,33 @@ sub getTopology($$$) {
 		} elsif ($line =~ /Topology Start/) {
 			$in_topology = 1;
 		}
+		$cmd_output .= $line;
 	}
 
 	chdir($prev_dir);
+
+	if ($output) {
+		$$output = $cmd_output;
+	}
 
 	return $topology;
 }
 
 sub queryCircuits($$$$) {
-	my ($url, $client_dir, $repo_dir, $circuit_ids) = @_;
+	my ($self, $circuit_ids) = @_;
 	my $prev_dir = cwd;
 
 	my (%paths, %pids);
 
-	chdir($client_dir);
+	chdir($self->{CLIENT_DIR});
 
 	my ($status, $classpath) = getClasspath();
 
 	if ($status == -1) {
 		return \%paths;
 	}
+
+	my $repo_dir = $self->{CLIENT_DIR}."/repo";
 
 	foreach my $id (@{ $circuit_ids }) {
 		my ($parent_fd, $child_fd);
@@ -75,7 +116,7 @@ sub queryCircuits($$$$) {
 			my @input = ();
 			my $in_path = 0;
 
-			my $lines = exec_input("java -cp $classpath QueryReservationCLI -repo $repo_dir -url $url -gri $id", \@input);
+			my $lines = exec_input("java -cp $classpath QueryReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -gri $id", \@input);
 			my $ret = "$id";
 			foreach my $line (@{ $lines }) {
 				if ($line =~ /Path:/) {
@@ -106,19 +147,21 @@ sub queryCircuits($$$$) {
 }
 
 sub getActiveCircuits($$$) {
-	my ($url, $client_dir, $repo_dir) = @_;
+	my ($self) = @_;
 	my $prev_dir = cwd;
 	my @ids = ();
 
-	chdir($client_dir);
+	chdir($self->{CLIENT_DIR});
 
 	my ($status, $classpath) = getClasspath();
 	if ($status == -1) {
 		return \@ids;
 	}
 
+	my $repo_dir = $self->{CLIENT_DIR}."/repo";
+
 	my @input = ( "\n" );
-	my $lines = exec_input("java -cp $classpath ListReservationCLI -repo $repo_dir -url $url -active", \@input);
+	my $lines = exec_input("java -cp $classpath ListReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -active", \@input);
 	my $i = 0;
 	my ($curr_id, $owner);
 	my %pids = ();
@@ -195,3 +238,5 @@ sub exec_input($$) {
 
 	return \@lines;
 }
+
+1;

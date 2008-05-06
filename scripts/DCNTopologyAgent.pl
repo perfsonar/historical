@@ -188,7 +188,7 @@ sub getLocalTopology {
 
     ($status, $res, $res2) = $self->retrieveIDCDomain($args->{file});
     if ($status != 0) {
-        my $msg = "Failed to retrieve the topology from the IDC";
+        my $msg = "Failed to retrieve the topology from the IDC: $res";
         $self->{LOGGER}->error($msg);
         return (-1, $msg);
     }
@@ -211,7 +211,7 @@ sub getLocalTopology {
     my %neighbors = ();
     $self->findNeighbors($domain, \%neighbors);
     $self->{NEIGHBORS} = \%neighbors;
-    $self->{LOGGER}->info("Found neighbors: ".Dumper(\%neighbors));
+    $self->{LOGGER}->debug("Found neighbors: ".Dumper(\%neighbors));
 
     return (0, "");
 }
@@ -226,8 +226,6 @@ sub getNeighborTopologies {
 
     foreach my $neighbor (keys %{ $self->{NEIGHBORS} }) {
         my $neighbor_id = "urn:ogf:network:domain=".$neighbor;
-
-        $self->{LOGGER}->info("Neighbor: $neighbor");
 
         my ($status, $res) = $self->lookupNeighborTS($neighbor);
 
@@ -261,8 +259,9 @@ sub getNeighborTopologies {
 sub retrieveIDCDomain {
     my ($self, $file) = @_;
 
-    my $topology_str = getTopology($self->{IDC_URI}, $self->{OSCARS_CLIENT_DIR}, $self->{OSCARS_CLIENT_DIR}."/repo");
-    $self->{LOGGER}->debug("STR: $topology_str");
+    my $oscars_client = perfSONAR_PS::OSCARS->new({ idc_url => $self->{IDC_URI}, client_directory => $self->{OSCARS_CLIENT_DIR} });
+
+    my $topology_str = $oscars_client->getTopology();
     if (not $topology_str) {
         return (-1, "Failed to get topology from ".$self->{IDC_URI});
     }
@@ -406,13 +405,13 @@ sub updateDomainIfNewer {
     }
 
     if (not $existing_time) {
-        $self->{LOGGER}->info("No existing time, updating any copies in there");
+        $self->{LOGGER}->debug("No existing time, updating any copies in there");
     } else {
-        $self->{LOGGER}->info("Existing time: $existing_time");
+        $self->{LOGGER}->debug("Existing time: $existing_time");
     }
 
     if (not $existing_time or $existing_time < $new_time) {
-        $self->{LOGGER}->info("Updating local cache for topology information from $domain_id");
+        $self->{LOGGER}->debug("Updating local cache for topology information from $domain_id");
 
         my $args = validate(@_, { domain => 1 });
 
@@ -444,7 +443,7 @@ sub wrapDomain {
 sub lookupNeighborTS {
     my ($self, $neighbor) = @_;
 
-    $self->{LOGGER}->info("Looking up ".$neighbor);
+    $self->{LOGGER}->debug("Looking up ".$neighbor);
 
     foreach my $ls_client (@{ $self->{LS_CLIENTS} }) {
         my $xquery = q{};
