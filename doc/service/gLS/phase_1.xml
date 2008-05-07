@@ -592,7 +592,7 @@
         <colspec colnum="4" colname="c4"/>
         <thead>
           <row>
-            <entry>API Layer</entry>
+            <entry>API Level</entry>
             <entry>Message Type</entry>
             <entry>Event Type</entry>
             <entry>Input</entry>
@@ -613,31 +613,34 @@
             <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</entry>
           </row>      
           <row>
-            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</entry>
           </row>   
           <row>
-            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0</entry>
           </row>   
           <row>
             <entry morerows="1" valign="middle" align="center"><xref linkend="level1_api" /></entry>
-            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/2.0</entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</entry>
             <entry>IP, Domain, eventType, Service Data</entry>
             <entry>hLS URL</entry>
             <entry>Standalone Discovery</entry>
           </row>
           <row>
-            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/2.0</entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0</entry>
             <entry>IP, Domain, eventType, Service Data</entry>
             <entry>Metadata (e.g. Service/Measurement based)</entry>
             <entry>Standalone Query</entry>
           </row>
           <row>
             <entry morerows="1" valign="middle" align="center"><xref linkend="level2_api" /></entry>
-            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/2.0</entry>
-            <entry>IP, Domain, eventType, Service Data</entry>
-            <entry>Metadata (e.g. Service/Measurement based)</entry>
-            <entry>Complete Discovery/Query</entry>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</entry>
+            <entry morerows="1" valign="middle">IP, Domain, eventType, Service Data</entry>
+            <entry morerows="1" valign="middle">Metadata (e.g. Service/Measurement based)</entry>
+            <entry morerows="1" valign="middle">Complete Discovery/Query</entry>
           </row>
+          <row>
+            <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0</entry>
+          </row>   
         </tbody>
       </tgroup>
     </table>
@@ -662,7 +665,7 @@
         <itemizedlist mark='opencircle'>
           <listitem>
             <para>
-              This method will serve as the base that upper layers of this API
+              This method will serve as the base that upper levels of this API
               use to communicate with the framework.
             </para>
           </listitem>
@@ -678,8 +681,11 @@
       
       <para>
         There are only minor modifications that must be made to the existing
-        <command>LSQueryRequest</command> functionality is the addition of
-        two new eventTypes:
+        <command>LSQueryRequest</command> functionality, mainly the addition of
+        two new <emphasis>eventType</emphasis>s.  These
+        <emphasis>eventType</emphasis>s will not only help this level isolate
+        the specific dataset to query, but provided needed functionality to the 
+        abstractions built on top of Level 0:
       </para>
 
       <para>
@@ -702,14 +708,43 @@
       </para>
       
       <para>
-        These <emphasis>eventTypes</emphasis> are more of an
+        These <emphasis>eventType</emphasis>s are more of an
         <emphasis>ease of design</emphasis> feature for the implementers of the
         <emphasis>gLS</emphasis> and <emphasis>hLS</emphasis> due to the nature
         of the backend storage mechanisms.  The existing
-        <emphasis>eventTypes</emphasis>, as well as message structure regarding
+        <emphasis>eventType</emphasis>s, as well as message structure regarding
         subject and parameters, will remain unchanged.
       </para>
+
+
+      <para>
+        Addtional considerations for this level of the API revolve around the
+        internal representation of when data is set to expire, namely the
+        <emphasis>LSStore-control</emphasis> structure.  It is desirable to
+        have access to this when providing status reports about registered
+        information.  This would require two new
+        <emphasis>eventType</emphasis>s:
+      </para>
       
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/1.0</command>
+              - Allows the <command>XQuery</command> to travel directly to the specific
+              backend storage holding summarization control information.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/1.0</command>
+              - Allows the <command>XQuery</command> to travel directly to the specific
+              backend storage holding registered control information.
+            </para>
+          </listitem>
+        </itemizedlist>      
+      </para>
+
       <para>
         An API breakdown follows:
       </para>
@@ -723,46 +758,275 @@
           <thead>
             <row>
               <entry>Function Name</entry>
-              <entry >Input</entry>
+              <entry>Input</entry>
               <entry>Output</entry>
               <entry>Purpose</entry>
             </row>
           </thead>
           <tbody>
             <row>
-              <entry>getLSDiscoveryResults</entry>
-              <entry morerows="2" valign="middle">XQuery String</entry>
-              <entry morerows="2" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
+              <entry>getLSDiscoverRaw</entry>
+              <entry morerows="1" valign="middle">XQuery String</entry>
+              <entry morerows="1" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
               <entry>Send XQuery for results in the <emphasis>Summary</emphasis>
                 storage only.</entry>
             </row>
             <row>
-              <entry>getLSQueryResults</entry>
+              <entry>getLSQueryRaw</entry>
               <entry>Send XQuery for results in the <emphasis>Registered</emphasis>
                 storage only.</entry>
             </row>
-            <row>
-              <entry>getLSResults</entry>
-              <entry>Send XQuery for any matching results.</entry>
-            </row>
+             <row>
+                <entry>getLSDiscoverControlRaw</entry>
+                <entry morerows="1" valign="middle">XQuery String</entry>
+                <entry morerows="1" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
+                <entry>Send XQuery for results in the <emphasis>Summary</emphasis>
+                  control storage only.</entry>
+              </row>
+              <row>
+                <entry>getLSQueryControlRaw</entry>
+                <entry>Send XQuery for results in the <emphasis>Registered</emphasis>
+                  control storage only.</entry>
+              </row>
           </tbody>
         </tgroup>
       </table>
-      
+
     </section>
 
     <section id="level1_api" xreflabel="1">
       <title>Level 1 API</title>
     
       <para>
+        The Level 1 API offers a the first true way of abstracting the queries
+        to the LS by identifying a series of well defined parameters as input
+        as well as structured output.  This particular portion of the API will
+        not try to unify the roles of <emphasis>Discovery</emphasis> and
+        <emphasis>Query</emphasis> in favor of keeping these tasks seperate to
+        act as building blocks for client and service applications alike.  This
+        level will not require any additional modifications to be made to the
+        <command>LSQueryRequest</command>, as it will utilize Level 0 API calls.
       </para>
+
+      <para>
+        An API breakdown follows:
+      </para>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.api.l1">
+        <title>Level 1 API Calls</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" />
+          <colspec colnum="2" colname="c2" />
+          <colspec colnum="3" colname="c3" />
+          <thead>
+            <row>
+              <entry>Function Name</entry>
+              <entry>Input</entry>
+              <entry>Output</entry>
+              <entry>Purpose</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>getLSDiscoverEventType</entry>
+              <entry>EventType</entry>
+              <entry>hLS URL</entry>
+              <entry>Given an <emphasis>eventType</emphasis>, return <emphasis>hLS</emphasis>s</entry>
+            </row>
+            <row>
+              <entry>getLSDiscoverAddress</entry>
+              <entry>IP Address</entry>
+              <entry>hLS URL</entry>
+              <entry>Given an IP Address, return <emphasis>hLS</emphasis>s</entry>
+            </row>
+            <row>
+              <entry>getLSDiscoverDomain</entry>
+              <entry>Domain</entry>
+              <entry>hLS URL</entry>
+              <entry>Given a Domain, return <emphasis>hLS</emphasis>s</entry>
+            </row>
+            <row>
+              <entry>getLSDiscoverService</entry>
+              <entry>Service Type</entry>
+              <entry>hLS URL</entry>
+              <entry>Given a Service Type, return <emphasis>hLS</emphasis>s</entry>
+            </row>
+            <row>
+              <entry>getLSQueryEventType</entry>
+              <entry>EventType</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given an <emphasis>eventType</emphasis>, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSQueryAddress</entry>
+              <entry>IP Address</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given an IP Address, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSQueryDomain</entry>
+              <entry>Domain</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given a Domain, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSQueryService</entry>
+              <entry>Service Type</entry>
+              <entry>Service Metadata Array</entry>
+              <entry>Given a Service Type, return array of metadata.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <section id="level1_api_ext" xreflabel="1 Extension">
+        <title>Level 1 API Extension</title>
+
+        <para>
+          The following extension may be made to the <command>Level 0</command>
+          functions dealing with access to the
+          <emphasis>LSStore-control</emphasis> structures. These formats are
+          presented mearly as a suggestion as they are optional to the overall
+          success of the framework.  Note there are not specific
+          <emphasis>Discovery</emphasis> calls here as the same job could be
+          accomplished with the previous descriptions.  The only purpose of this
+          API is to return the actual time values associated to a registered 
+          service instead of having to deal with raw XML as done in
+          <command>Level 0</command>.
+        </para>
+      
+        <para>
+          An API breakdown follows:
+        </para>
+
+        <table frame="all" align="center" halign="center" width="80%"  id="table.api.l1.c">
+          <title>Additional Level 1 API Calls</title>
+          <tgroup cols="1" align="left" colsep="1" rowsep="1">
+            <colspec colnum="1" colname="c1" />
+            <colspec colnum="2" colname="c2" />
+            <colspec colnum="3" colname="c3" />
+            <thead>
+              <row>
+                <entry>Function Name</entry>
+                <entry>Input</entry>
+                <entry>Output</entry>
+                <entry>Purpose</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>getLSQueryControlService</entry>
+                <entry>Service Type</entry>
+                <entry>Time Array</entry>
+                <entry>Given a Service Type, return array of times.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+      </section>
+      
     </section>
     
     <section id="level2_api" xreflabel="2">
       <title>Level 2 API</title>
     
       <para>
+        The highest level of this API will perform all work with regards to 
+        discovery and query in a single call.  It is expected that services and
+        client applications will make use of this API instead of manually using
+        the previous 2 layers.
       </para>
+      
+      <para>
+        An API breakdown follows:
+      </para>
+
+      <table frame="all" align="center" halign="center" width="80%"  id="table.api.l2">
+        <title>Level 2 API Calls</title>
+        <tgroup cols="1" align="left" colsep="1" rowsep="1">
+          <colspec colnum="1" colname="c1" />
+          <colspec colnum="2" colname="c2" />
+          <colspec colnum="3" colname="c3" />
+          <thead>
+            <row>
+              <entry>Function Name</entry>
+              <entry>Input</entry>
+              <entry>Output</entry>
+              <entry>Purpose</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>getLSEventType</entry>
+              <entry>EventType</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given an <emphasis>eventType</emphasis>, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSAddress</entry>
+              <entry>IP Address</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given an IP Address, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSDomain</entry>
+              <entry>Domain</entry>
+              <entry>Metadata Array</entry>
+              <entry>Given a Domain, return array of metadata.</entry>
+            </row>
+            <row>
+              <entry>getLSService</entry>
+              <entry>Service Type</entry>
+              <entry>Service Metadata Array</entry>
+              <entry>Given a Service Type, return array of metadata.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>      
+
+      <section id="level2_api_ext" xreflabel="2 Extension">
+        <title>Level 2 API Extension</title>
+
+        <para>
+          The following extension may be made to the <command>Level 0</command>
+          and <command>Level 1</command> functions dealing with access to the
+          <emphasis>LSStore-control</emphasis> structures. These formats are
+          presented mearly as a suggestion as they are optional to the overall
+          success of the framework.
+        </para>
+      
+        <para>
+          An API breakdown follows:
+        </para>
+
+        <table frame="all" align="center" halign="center" width="80%"  id="table.api.l2.c">
+          <title>Additional Level 2 API Calls</title>
+          <tgroup cols="1" align="left" colsep="1" rowsep="1">
+            <colspec colnum="1" colname="c1" />
+            <colspec colnum="2" colname="c2" />
+            <colspec colnum="3" colname="c3" />
+            <thead>
+              <row>
+                <entry>Function Name</entry>
+                <entry>Input</entry>
+                <entry>Output</entry>
+                <entry>Purpose</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>getLSControlService</entry>
+                <entry>Service Type</entry>
+                <entry>Time Array</entry>
+                <entry>Given a Service Type, return array of times.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+      </section>
+
     </section>
 
   </section>
