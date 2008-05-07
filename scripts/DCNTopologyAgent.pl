@@ -94,10 +94,17 @@ if (not $conf{"oscars_client"}) {
     exit(-1);
 }
 
-my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => $conf{"ls_uri"}, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"}, oscars_client => $conf{"oscars_client"});
+my $repeat;
+$repeat = 1 if ($conf{"interval"});
 
-$agent->getLocalTopology(file => $NEW_TOPOLOGY, do_register => 1);
-$agent->getNeighborTopologies();
+do {
+    my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => $conf{"ls_uri"}, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"}, oscars_client => $conf{"oscars_client"});
+
+    $agent->getLocalTopology(file => $NEW_TOPOLOGY, do_register => 1);
+    $agent->getNeighborTopologies();
+
+    sleep ($conf{"interval"}) if ($conf{"interval"});
+} while($repeat);
 
 exit (-1);
 
@@ -121,7 +128,7 @@ use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Topology::MA;
 use perfSONAR_PS::OSCARS;
 
-use fields 'LOGGER', 'DOMAIN', 'DOMAINID', 'TOPOLOGY_CLIENT', 'TOPOLOGY_URI', 'LS_CLIENTS', 'LS_URIS', 'IDC_URI', 'NEIGHBORS', 'OSCARS_CLIENT_DIR', 'REPO_DIRECTORY';
+use fields 'LOGGER', 'DOMAIN', 'DOMAINID', 'TOPOLOGY_CLIENT', 'TOPOLOGY_URI', 'LS_CLIENTS', 'LS_URIS', 'IDC_URI', 'NEIGHBORS', 'OSCARS_CLIENT_DIR';
 
 sub new {
     my $package = shift;
