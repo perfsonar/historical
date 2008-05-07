@@ -60,6 +60,12 @@
             <entry>Corrections, API Details</entry>
             <entry>J. Zurawski</entry>
           </row>
+          <row>
+            <entry>1.01</entry>
+            <entry>05/7/2007</entry>
+            <entry>Implementation Details</entry>
+            <entry>J. Zurawski</entry>
+          </row>
         </tbody>
       </tgroup>
     </table>
@@ -104,7 +110,7 @@
       Service, sometime in the near future.  Details such as API will not be
       affected by the implementation of <command>Phase 2</command> as it is
       concerned more with the hierarchy of information services and not the
-      location of information.
+      actual location of the information.
     </para>
         
     <para>
@@ -1035,7 +1041,7 @@
     <title>Operation</title>
     
     <para>
-      ... 
+      <command>TBD</command>
     </para>
     
   </section>
@@ -1044,8 +1050,212 @@
     <title>Implementation</title>
     
     <para>
-      ... 
+      The following sections detail notes on implementation.  These will change
+      as the development effort progresses, and eventually will be moved
+      into individual service documentation.
     </para>
+
+    <section id="implementation_java" xreflabel="Java Considerations">
+      <title>Java Considerations</title>
+    
+      <para>
+        <command>TBD</command>
+      </para>
+    
+    </section>
+
+    <section id="implementation_perl" xreflabel="Perl Considerations">
+      <title>Perl Considerations</title>
+    
+      <para>
+        The following represents a list of changes that must be made to the
+        Perl implementation along with related commentary.
+      </para>
+      
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              <xref linkend="implementation_perl_mode" /> - The
+              <emphasis>gLS</emphasis> will have special functionality beyond
+              the <emphasis>hLS</emphasis> and vice versa.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <xref linkend="implementation_perl_summarization" /> - The data
+              must be summarized in some way and conveyed to the
+              <emphasis>gLS</emphasis> layer.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <xref linkend="implementation_perl_storage" /> - The summarized
+              data must be stored somewhere.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <xref linkend="implementation_perl_registration" /> - Changes to
+              how we treat the act of registration.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <section id="implementation_perl_mode" xreflabel="gLS and hLS Operation Differences">
+        <title>gLS and hLS Operation Differences</title>
+        
+        <para>
+          The <emphasis>gLS</emphasis> must contain the following functionality
+          that is not currently found (or should be turned off in) in the LS:
+        </para>
+        
+        <para>
+          <itemizedlist mark='opencircle'>
+            <listitem>
+              <para>
+                Only allow registration of hLS instances with the summary
+                data type (optional, with <emphasis>self registration</emphasis>
+                this can be worked around).
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Self Registration.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Ability to answer Discovery Queries (requires modification).
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Ability to answer Queries (amount that is implemented depends on
+                <emphasis>self registration</emphasis>).
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+
+        <para>
+          The <emphasis>hLS</emphasis> must contain the following functionality
+          that is not currently found (or should be turned off in) in the LS:
+        </para>
+
+        <para>
+          <itemizedlist mark='opencircle'>
+            <listitem>
+              <para>
+                Only allow registration of non LS instances.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Self Registration.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Ability to answer Queries (requires modification).
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Ability to answer Discovery Queries (depends on self
+                registration).  
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+        
+        <para>
+          A proposed solution to use the same code base for both services is the
+          inclusion of a configuration switch indicating the mode of operation.
+          This mode can be <emphasis>hLS</emphasis> by default and perhaps
+          not even asked about during configuration (this will ensure that
+          a user inadvertently deploys a <emphasis>gLS</emphasis> instead of a
+          <emphasis>hLS</emphasis>).  To enable the <emphasis>gLS</emphasis>
+          mode the switch will manually need to be edited in the
+          <command>daemon.conf</command> file.
+        </para>
+        
+      </section>    
+      
+      <section id="implementation_perl_summarization" xreflabel="Summarizing Registered Data">
+        <title>Summarizing Registered Data</title>
+        
+        <para>
+          Using the example code in
+          <xref linkend="appendix_summarization_source_perl" />, a summarization
+          of the registered data should be completed on-demand (e.g. If new
+          information is registered, the summary should be re-run and the
+          information re-registered with the <emphasis>gLS</emphasis> layer.
+        </para>
+        
+        <para>
+          This method may cause performance issues, testing will need to reveal
+          if a periodic summarization event will lead to better operation (at
+          the detriment of information location). 
+        </para>
+        
+        <para>
+          Storage of the <emphasis>self</emphasis> summary is also an issue
+          that will need to be examined.  It makes sense from an organization
+          standpoint to keep all summarized info together, but having a faster
+          <emphasis>cache</emphasis> of your own summary may prove to be
+          worthwhile.
+        </para>
+        
+      </section>  
+      
+      <section id="implementation_perl_storage" xreflabel="Storage Reorganization">
+        <title>Storage Reorganization</title>
+        
+        <para>
+          Currently it is an option to specify the name of the collection that
+          the registered data will reside in (e.g.
+          <emphasis>store.dbxml</emphasis> or similar).  We will require the
+          same thing for a summary container (e.g.
+          <emphasis>summary.dbxml</emphasis>).  Giving the option of the
+          collection names is a bit troublesome, especially for a user who
+          doesn't really care.  We are proposing only giving one option to the
+          user, the <emphasis>location</emphasis> of the XML Database (e.g. 
+          <emphasis>/etc/perfsonar/ls_xmldb</emphasis>) and simply providing 
+          well known container names.
+        </para>
+        
+        <para>
+          This will also help with the new <emphasis>eventType</emphasis>s used
+          to route the query to the proper data set.  A well known container
+          is much easier to query than checking the configuration for the 
+          exact container name, and modifying the existing
+          <emphasis>XQuery</emphasis> to take this into consideration.
+        </para>
+      </section>  
+      
+      <section id="implementation_perl_registration" xreflabel="Multiple and Self Registration">
+        <title>Multiple and Self Registration</title>
+        
+        <para>
+          Currently the tooling to support registration to multiple LS instances
+          is not as error resistant as it should be.  The operation works, but
+          does not do much in the way of checking the result codes of each
+          registered metadata/data pair.  This should be addressed in this service.
+        </para>
+        
+        <para>
+          Self registration will be required to ensure that you maintain your
+          own summary information.  This will mean using the accessPoint as
+          a <emphasis>default</emphasis> LS instance.  This will also mean
+          addressing the storage issue discussed in
+          <xref linkend="implementation_perl_storage" />.
+        </para>
+        
+      </section>  
+    
+    </section>
     
   </section>
 
@@ -1082,66 +1292,80 @@
         As a proof of concept to performing a rudimentary
         <emphasis>K Dominators</emphasis> identification of the IP addresses an
         <emphasis>hLS</emphasis> will know of consider the following source
-        code written in perl.
+        code written in both Java and Perl.
       </para>
 
-      <programlisting>
-        <![CDATA[
-          <inline file="examples/ipTree.pl"/>
-        ]]>
-      </programlisting> 
+      <section id="appendix_summarization_source_java" xreflabel="Summarization Source Code (Java)">
+        <title>Summarization Source Code (Java)</title>
 
-      <para>
-        Some things to note:
-      </para>
+        <para>
+          <command>TBD</command>
+        </para>
 
-      <para>
-        <itemizedlist mark='opencircle'>
-          <listitem>
-            <para>This script uses two external perl libraries
-            (<emphasis>Net::CIDR</emphasis> and
-            <emphasis>Net::IPTrie</emphasis>) to solve this problem.  Similar
-            libraries may not be available in Java, but can easily be
-            re-created.</para>
-          </listitem>
-          <listitem>
-            <para>The output (shown below) is currently used to create a 
-            <citation>Graphviz</citation> formated image.  The script can be
-            modified to output the tree in a more readable format.</para>
-          </listitem>
-          <listitem>
-            <para>This script does not allow one to specifiy a set value for
-            <emphasis>K</emphasis> and return only those dominators.  A simple
-            walk of the tree should be able to perform this task.</para>
-          </listitem>
-        </itemizedlist>
-      </para>
+      </section>    
 
-      <para>
-        The following output represents a <emphasis>Graphviz</emphasis>
-        description of a DAG.  
-      </para>
+      <section id="appendix_summarization_source_perl" xreflabel="Summarization Source Code (Perl)">
+        <title>Summarization Source Code (Perl)</title>
 
-      <programlisting>
-        <![CDATA[
-          <inline file="examples/graph.dot"/>
-        ]]>
-      </programlisting> 
+        <programlisting>
+          <![CDATA[
+            <inline file="examples/ipTree.pl"/>
+          ]]>
+        </programlisting> 
+
+        <para>
+          Some things to note:
+        </para>
+
+        <para>
+          <itemizedlist mark='opencircle'>
+            <listitem>
+              <para>This script uses two external perl libraries
+              (<emphasis>Net::CIDR</emphasis> and
+              <emphasis>Net::IPTrie</emphasis>) to solve this problem.  Similar
+              libraries may not be available in Java, but can easily be
+              re-created.</para>
+            </listitem>
+            <listitem>
+              <para>The output (shown below) is currently used to create a 
+              <citation>Graphviz</citation> formated image.  The script can be
+              modified to output the tree in a more readable format.</para>
+            </listitem>
+            <listitem>
+              <para>This script does not allow one to specifiy a set value for
+              <emphasis>K</emphasis> and return only those dominators.  A simple
+              walk of the tree should be able to perform this task.</para>
+            </listitem>
+          </itemizedlist>
+        </para>
+
+        <para>
+          The following output represents a <emphasis>Graphviz</emphasis>
+          description of a DAG.  
+        </para>
+
+        <programlisting>
+          <![CDATA[
+            <inline file="examples/graph.dot"/>
+          ]]>
+        </programlisting> 
     
-      <para>
-        This image was created from the above source and represents the
-        dominators (in CIDR notation) as well as the original endpoints
-        (represented in red).
-      </para>
+        <para>
+          This image was created from the above source and represents the
+          dominators (in CIDR notation) as well as the original endpoints
+          (represented in red).
+        </para>
 
-      <para>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/graph.png"/>
-          </imageobject>
-        </mediaobject>
-      </para>  
-    
+        <para>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/graph.png"/>
+            </imageobject>
+          </mediaobject>
+        </para>  
+
+      </section>    
+
     </section>
     
   </section>

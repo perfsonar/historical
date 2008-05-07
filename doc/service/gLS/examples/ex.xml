@@ -16,7 +16,19 @@
       </psservice:service>
     </perfsonar:subject>
     
-    <nmwg:eventType></nmwg:eventType>
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0</nmwg:eventType>
+    
+    <!-- need to introduce 
+    
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0</nmwg:eventType>
+
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/2.0</nmwg:eventType>
+
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/2.0</nmwg:eventType>
+
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/2.0</nmwg:eventType>    
+    
+    -->
     
   </nmwg:metadata>
 

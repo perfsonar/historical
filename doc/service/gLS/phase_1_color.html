@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#bootstrapping">3.2. Bootstrapping</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.3. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.4. Multiple Registration</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dd><dl><dt><span class="section"><a href="#level0_api">4.1. Level 0 API</a></span></dt><dt><span class="section"><a href="#level1_api">4.2. Level 1 API</a></span></dt><dd><dl><dt><span class="section"><a href="#level1_api_ext">4.2.1. Level 1 API Extension</a></span></dt></dl></dd><dt><span class="section"><a href="#level2_api">4.3. Level 2 API</a></span></dt><dd><dl><dt><span class="section"><a href="#level2_api_ext">4.3.1. Level 2 API Extension</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/6/2007</td><td align="left">Corrections, API Details</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
-      This document builds upon the work described in <a href="#id2530608">dLS Design Document</a>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>dLS Implementation Phase 1 -- The Rise of the gLS</title><meta name="generator" content="DocBook XSL Stylesheets V1.71.0" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2479019"></a>dLS Implementation Phase 1 -- The Rise of the gLS</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Boote</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Glowiak</span></h3></div><div class="author"><h3 class="author"><span class="firstname">M.</span> <span class="surname">Swany</span></h3></div><div class="author"><h3 class="author"><span class="firstname">J.</span> <span class="surname">Zurawski</span></h3></div></div></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#changes">1. Document Changes</a></span></dt><dt><span class="section"><a href="#introduction">2. Introduction</a></span></dt><dt><span class="section"><a href="#architecture">3. Architecture</a></span></dt><dd><dl><dt><span class="section"><a href="#gLS_instances">3.1. gLS Instances</a></span></dt><dt><span class="section"><a href="#bootstrapping">3.2. Bootstrapping</a></span></dt><dt><span class="section"><a href="#hLS_instances">3.3. hLS Instances</a></span></dt><dt><span class="section"><a href="#registration">3.4. Multiple Registration</a></span></dt><dt><span class="section"><a href="#interaction">3.5. Interaction</a></span></dt></dl></dd><dt><span class="section"><a href="#api">4. API</a></span></dt><dd><dl><dt><span class="section"><a href="#level0_api">4.1. Level 0 API</a></span></dt><dt><span class="section"><a href="#level1_api">4.2. Level 1 API</a></span></dt><dd><dl><dt><span class="section"><a href="#level1_api_ext">4.2.1. Level 1 API Extension</a></span></dt></dl></dd><dt><span class="section"><a href="#level2_api">4.3. Level 2 API</a></span></dt><dd><dl><dt><span class="section"><a href="#level2_api_ext">4.3.1. Level 2 API Extension</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#operation">5. Operation</a></span></dt><dt><span class="section"><a href="#implementation">6. Implementation</a></span></dt><dd><dl><dt><span class="section"><a href="#implementation_java">6.1. Java Considerations</a></span></dt><dt><span class="section"><a href="#implementation_perl">6.2. Perl Considerations</a></span></dt><dd><dl><dt><span class="section"><a href="#implementation_perl_mode">6.2.1. gLS and hLS Operation Differences</a></span></dt><dt><span class="section"><a href="#implementation_perl_summarization">6.2.2. Summarizing Registered Data</a></span></dt><dt><span class="section"><a href="#implementation_perl_storage">6.2.3. Storage Reorganization</a></span></dt><dt><span class="section"><a href="#implementation_perl_registration">6.2.4. Multiple and Self Registration</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#appendix">7. Appendix</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summary">7.1. Summary Message Example</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source">7.2. Summarization Source Code</a></span></dt><dd><dl><dt><span class="section"><a href="#appendix_summarization_source_java">7.2.1. Summarization Source Code (Java)</a></span></dt><dt><span class="section"><a href="#appendix_summarization_source_perl">7.2.2. Summarization Source Code (Perl)</a></span></dt></dl></dd></dl></dd><dt><span class="glossary"><a href="#glossary">Terms</a></span></dt><dt><span class="bibliography"><a href="#bibliography">References</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="changes"></a>1. Document Changes</h2></div></div></div><div class="table"><a id="table.1"></a><p class="title"><b>Table 1. Change Log</b></p><div class="table-contents"><table summary="Change Log" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Version</th><th align="left">Date</th><th align="left">Description</th><th align="left">Author(s)</th></tr></thead><tbody><tr><td align="left">1.0</td><td align="left">05/2/2007</td><td align="left">Initial Preparation</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/6/2007</td><td align="left">Corrections, API Details</td><td align="left">J. Zurawski</td></tr><tr><td align="left">1.01</td><td align="left">05/7/2007</td><td align="left">Implementation Details</td><td align="left">J. Zurawski</td></tr></tbody></table></div></div><br class="table-break" /></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="introduction"></a>2. Introduction</h2></div></div></div><p>
+      This document builds upon the work described in <a href="#id2530841">dLS Design Document</a>
       to create <span><strong class="command">Phase 1</strong></span> of the proposed distributed
       information service.  This document will describe concrete details of the
       plan, prescribing both the overall structure of the system as well as
@@ -22,7 +22,7 @@
       Service, sometime in the near future.  Details such as API will not be
       affected by the implementation of <span><strong class="command">Phase 2</strong></span> as it is
       concerned more with the hierarchy of information services and not the
-      location of information.
+      actual location of the information.
     </p><p>
       The remainder of the document is structured as follows:
       <a href="#architecture">Architecture</a> will go into details of the system as
@@ -65,8 +65,8 @@
           specifically can I find).</p></li></ol></div><p>
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="gLS_instances"></a>3.1. gLS Instances</h3></div></div></div><p>
         The <span class="emphasis"><em>perfSONAR</em></span> project partners (e.g.
-        <a href="#id2530628">ESnet</a>, <a href="#id2530646">Geant2</a>,
-        <a href="#id2530664">Internet2</a>, and <a href="#id2530683">RNP</a>) are
+        <a href="#id2530860">ESnet</a>, <a href="#id2530879">Geant2</a>,
+        <a href="#id2530897">Internet2</a>, and <a href="#id2530915">RNP</a>) are
         expected to stand up and maintain <span class="emphasis"><em>root</em></span>
         <a href="#gLS">gLS</a> instances.  As the driving force behind
         <span class="emphasis"><em>perfSONAR</em></span>, this contribution serves as the basis
@@ -242,8 +242,8 @@
         service designers.
       </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="interaction"></a>3.5. Interaction</h3></div></div></div><p>
         Currently, services and clients only have a single way to query an 
-        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2530719">XQuery</a>
-        or <a href="#id2530700">XPath</a> statements.  While useful to individuals
+        <span class="emphasis"><em>LS</em></span> instance for data: <a href="#id2530951">XQuery</a>
+        or <a href="#id2530933">XPath</a> statements.  While useful to individuals
         with an intimate knowledge of the data storage structure and the query
         language syntax, this leaves other services and client applications 
         frustrated and out of luck when it comes to lookup.
@@ -409,10 +409,116 @@
         </p><p>
           An API breakdown follows:
         </p><div class="table"><a id="table.api.l2.c"></a><p class="title"><b>Table 7. Additional Level 2 API Calls</b></p><div class="table-contents"><table summary="Additional Level 2 API Calls" border="1"><colgroup><col align="left" /></colgroup><thead><tr><th align="left">Function Name</th><th align="left">Input</th><th align="left">Output</th><th align="left">Purpose</th></tr></thead><tbody><tr><td align="left">getLSControlService</td><td align="left">Service Type, Name, AccessPoint</td><td align="left">Time Array</td><td align="left">Given service information, return array of times.</td></tr></tbody></table></div></div><br class="table-break" /></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="operation"></a>5. Operation</h2></div></div></div><p>
-      ... 
+      <span><strong class="command">TBD</strong></span>
     </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="implementation"></a>6. Implementation</h2></div></div></div><p>
-      ... 
-    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="appendix"></a>7. Appendix</h2></div></div></div><p>
+      The following sections detail notes on implementation.  These will change
+      as the development effort progresses, and eventually will be moved
+      into individual service documentation.
+    </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="implementation_java"></a>6.1. Java Considerations</h3></div></div></div><p>
+        <span><strong class="command">TBD</strong></span>
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="implementation_perl"></a>6.2. Perl Considerations</h3></div></div></div><p>
+        The following represents a list of changes that must be made to the
+        Perl implementation along with related commentary.
+      </p><p>
+        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+              <a href="#implementation_perl_mode">gLS and hLS Operation Differences</a> - The
+              <span class="emphasis"><em>gLS</em></span> will have special functionality beyond
+              the <span class="emphasis"><em>hLS</em></span> and vice versa.
+            </p></li><li style="list-style-type: circle"><p>
+              <a href="#implementation_perl_summarization">Summarizing Registered Data</a> - The data
+              must be summarized in some way and conveyed to the
+              <span class="emphasis"><em>gLS</em></span> layer.
+            </p></li><li style="list-style-type: circle"><p>
+              <a href="#implementation_perl_storage">Storage Reorganization</a> - The summarized
+              data must be stored somewhere.
+            </p></li><li style="list-style-type: circle"><p>
+              <a href="#implementation_perl_registration">Multiple and Self Registration</a> - Changes to
+              how we treat the act of registration.
+            </p></li></ul></div><p>
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="implementation_perl_mode"></a>6.2.1. gLS and hLS Operation Differences</h4></div></div></div><p>
+          The <span class="emphasis"><em>gLS</em></span> must contain the following functionality
+          that is not currently found (or should be turned off in) in the LS:
+        </p><p>
+          </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+                Only allow registration of hLS instances with the summary
+                data type (optional, with <span class="emphasis"><em>self registration</em></span>
+                this can be worked around).
+              </p></li><li style="list-style-type: circle"><p>
+                Self Registration.
+              </p></li><li style="list-style-type: circle"><p>
+                Ability to answer Discovery Queries (requires modification).
+              </p></li><li style="list-style-type: circle"><p>
+                Ability to answer Queries (amount that is implemented depends on
+                <span class="emphasis"><em>self registration</em></span>).
+              </p></li></ul></div><p>
+        </p><p>
+          The <span class="emphasis"><em>hLS</em></span> must contain the following functionality
+          that is not currently found (or should be turned off in) in the LS:
+        </p><p>
+          </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>
+                Only allow registration of non LS instances.
+              </p></li><li style="list-style-type: circle"><p>
+                Self Registration.
+              </p></li><li style="list-style-type: circle"><p>
+                Ability to answer Queries (requires modification).
+              </p></li><li style="list-style-type: circle"><p>
+                Ability to answer Discovery Queries (depends on self
+                registration).  
+              </p></li></ul></div><p>
+        </p><p>
+          A proposed solution to use the same code base for both services is the
+          inclusion of a configuration switch indicating the mode of operation.
+          This mode can be <span class="emphasis"><em>hLS</em></span> by default and perhaps
+          not even asked about during configuration (this will ensure that
+          a user inadvertently deploys a <span class="emphasis"><em>gLS</em></span> instead of a
+          <span class="emphasis"><em>hLS</em></span>).  To enable the <span class="emphasis"><em>gLS</em></span>
+          mode the switch will manually need to be edited in the
+          <span><strong class="command">daemon.conf</strong></span> file.
+        </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="implementation_perl_summarization"></a>6.2.2. Summarizing Registered Data</h4></div></div></div><p>
+          Using the example code in
+          <a href="#appendix_summarization_source_perl">Summarization Source Code (Perl)</a>, a summarization
+          of the registered data should be completed on-demand (e.g. If new
+          information is registered, the summary should be re-run and the
+          information re-registered with the <span class="emphasis"><em>gLS</em></span> layer.
+        </p><p>
+          This method may cause performance issues, testing will need to reveal
+          if a periodic summarization event will lead to better operation (at
+          the detriment of information location). 
+        </p><p>
+          Storage of the <span class="emphasis"><em>self</em></span> summary is also an issue
+          that will need to be examined.  It makes sense from an organization
+          standpoint to keep all summarized info together, but having a faster
+          <span class="emphasis"><em>cache</em></span> of your own summary may prove to be
+          worthwhile.
+        </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="implementation_perl_storage"></a>6.2.3. Storage Reorganization</h4></div></div></div><p>
+          Currently it is an option to specify the name of the collection that
+          the registered data will reside in (e.g.
+          <span class="emphasis"><em>store.dbxml</em></span> or similar).  We will require the
+          same thing for a summary container (e.g.
+          <span class="emphasis"><em>summary.dbxml</em></span>).  Giving the option of the
+          collection names is a bit troublesome, especially for a user who
+          doesn't really care.  We are proposing only giving one option to the
+          user, the <span class="emphasis"><em>location</em></span> of the XML Database (e.g. 
+          <span class="emphasis"><em>/etc/perfsonar/ls_xmldb</em></span>) and simply providing 
+          well known container names.
+        </p><p>
+          This will also help with the new <span class="emphasis"><em>eventType</em></span>s used
+          to route the query to the proper data set.  A well known container
+          is much easier to query than checking the configuration for the 
+          exact container name, and modifying the existing
+          <span class="emphasis"><em>XQuery</em></span> to take this into consideration.
+        </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="implementation_perl_registration"></a>6.2.4. Multiple and Self Registration</h4></div></div></div><p>
+          Currently the tooling to support registration to multiple LS instances
+          is not as error resistant as it should be.  The operation works, but
+          does not do much in the way of checking the result codes of each
+          registered metadata/data pair.  This should be addressed in this service.
+        </p><p>
+          Self registration will be required to ensure that you maintain your
+          own summary information.  This will mean using the accessPoint as
+          a <span class="emphasis"><em>default</em></span> LS instance.  This will also mean
+          addressing the storage issue discussed in
+          <a href="#implementation_perl_storage">Storage Reorganization</a>.
+        </p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="appendix"></a>7. Appendix</h2></div></div></div><p>
       The following sections describe some of the more concreate details of this
       implementation when applicable.
     </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="appendix_summary"></a>7.1. Summary Message Example</h3></div></div></div><p>
@@ -442,7 +548,19 @@
       <b style="color:blue">&lt;/psservice:service</b><b style="color:green"></b><b style="color:blue">&gt;</b>
     <b style="color:blue">&lt;/perfsonar:subject</b><b style="color:green"></b><b style="color:blue">&gt;</b>
     
-    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b><b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0<b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+    
+    &lt;!-- need to introduce 
+    
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0<b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/2.0<b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/2.0<b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>
+
+    <b style="color:blue">&lt;nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/2.0<b style="color:blue">&lt;/nmwg:eventType</b><b style="color:green"></b><b style="color:blue">&gt;</b>    
+    
+    --&gt;
     
   <b style="color:blue">&lt;/nmwg:metadata</b><b style="color:green"></b><b style="color:blue">&gt;</b>
 
@@ -524,9 +642,11 @@
         As a proof of concept to performing a rudimentary
         <span class="emphasis"><em>K Dominators</em></span> identification of the IP addresses an
         <span class="emphasis"><em>hLS</em></span> will know of consider the following source
-        code written in perl.
-      </p><pre class="programlisting">
-        
+        code written in both Java and Perl.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="appendix_summarization_source_java"></a>7.2.1. Summarization Source Code (Java)</h4></div></div></div><p>
+          <span><strong class="command">TBD</strong></span>
+        </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="appendix_summarization_source_perl"></a>7.2.2. Summarization Source Code (Perl)</h4></div></div></div><pre class="programlisting">
+          
 # Begin 
 
 #!/usr/bin/perl -w
@@ -874,24 +994,24 @@ All rights reserved.
 
 
 # End 
-        
-      </pre><p>
-        Some things to note:
-      </p><p>
-        </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>This script uses two external perl libraries
-            (<span class="emphasis"><em>Net::CIDR</em></span> and
-            <span class="emphasis"><em>Net::IPTrie</em></span>) to solve this problem.  Similar
-            libraries may not be available in Java, but can easily be
-            re-created.</p></li><li style="list-style-type: circle"><p>The output (shown below) is currently used to create a 
-            <a href="#id2530737">Graphviz</a> formated image.  The script can be
-            modified to output the tree in a more readable format.</p></li><li style="list-style-type: circle"><p>This script does not allow one to specifiy a set value for
-            <span class="emphasis"><em>K</em></span> and return only those dominators.  A simple
-            walk of the tree should be able to perform this task.</p></li></ul></div><p>
-      </p><p>
-        The following output represents a <span class="emphasis"><em>Graphviz</em></span>
-        description of a DAG.  
-      </p><pre class="programlisting">
-        
+          
+        </pre><p>
+          Some things to note:
+        </p><p>
+          </p><div class="itemizedlist"><ul type="opencircle"><li style="list-style-type: circle"><p>This script uses two external perl libraries
+              (<span class="emphasis"><em>Net::CIDR</em></span> and
+              <span class="emphasis"><em>Net::IPTrie</em></span>) to solve this problem.  Similar
+              libraries may not be available in Java, but can easily be
+              re-created.</p></li><li style="list-style-type: circle"><p>The output (shown below) is currently used to create a 
+              <a href="#id2530970">Graphviz</a> formated image.  The script can be
+              modified to output the tree in a more readable format.</p></li><li style="list-style-type: circle"><p>This script does not allow one to specifiy a set value for
+              <span class="emphasis"><em>K</em></span> and return only those dominators.  A simple
+              walk of the tree should be able to perform this task.</p></li></ul></div><p>
+        </p><p>
+          The following output represents a <span class="emphasis"><em>Graphviz</em></span>
+          description of a DAG.  
+        </p><pre class="programlisting">
+          
 # Begin 
 
 digraph g {
@@ -931,31 +1051,31 @@ digraph g {
 }
 
 # End 
-        
-      </pre><p>
-        This image was created from the above source and represents the
-        dominators (in CIDR notation) as well as the original endpoints
-        (represented in red).
-      </p><p>
-        </p><div class="mediaobject"><img src="images/graph.png" /></div><p>
-      </p></div></div><div class="glossary"><div class="titlepage"><div><div><h2 class="title"><a id="glossary"></a>Terms</h2></div></div></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><h3 class="title">G</h3><dl><dt><a id="gLS"></a>gLS</dt><dd><p>
+          
+        </pre><p>
+          This image was created from the above source and represents the
+          dominators (in CIDR notation) as well as the original endpoints
+          (represented in red).
+        </p><p>
+          </p><div class="mediaobject"><img src="images/graph.png" /></div><p>
+        </p></div></div></div><div class="glossary"><div class="titlepage"><div><div><h2 class="title"><a id="glossary"></a>Terms</h2></div></div></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><h3 class="title">G</h3><dl><dt><a id="gLS"></a>gLS</dt><dd><p>
             A <span class="emphasis"><em>globally</em></span> acessible Lookup Service.
           </p></dd></dl></div><div class="glossdiv"><h3 class="title">H</h3><dl><dt><a id="hLS"></a>hLS</dt><dd><p>
             The <span class="emphasis"><em>home</em></span> Lookup Service.
-          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2530608"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
+          </p></dd></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div><div class="glossdiv"><dl></dl></div></div><div class="bibliography"><div class="titlepage"><div><div><h2 class="title"><a id="bibliography"></a>References</h2></div></div></div><div class="biblioentry"><a id="id2530841"></a><p>[<abbr class="abbrev">dLS</abbr>] <span class="title"><i>
         <a href="http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html" target="_top">http://anonsvn.internet2.edu/svn/nmwg/trunk/nmwg/doc/dLS/dLS_spec_1.html</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530628"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530860"></a><p>[<abbr class="abbrev">ESnet</abbr>] <span class="title"><i>
         <a href="http://www.es.net" target="_top">http://www.es.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530646"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530879"></a><p>[<abbr class="abbrev">Geant2</abbr>] <span class="title"><i>
         <a href="http://www.geant2.net" target="_top">http://www.geant2.net</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530664"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530897"></a><p>[<abbr class="abbrev">Internet2</abbr>] <span class="title"><i>
         <a href="http://www.internet2.edu" target="_top">http://www.internet2.edu</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530683"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530915"></a><p>[<abbr class="abbrev">RNP</abbr>] <span class="title"><i>
         <a href="http://www.rnp.br/en" target="_top">http://www.rnp.br/en</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530700"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530933"></a><p>[<abbr class="abbrev">XPath</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xpath" target="_top">XPath</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530719"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530951"></a><p>[<abbr class="abbrev">XQuery</abbr>] <span class="title"><i>
         <a href="http://www.w3.org/TR/xquery/" target="_top">XQuery</a>
-      </i>. </span></p></div><div class="biblioentry"><a id="id2530737"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
+      </i>. </span></p></div><div class="biblioentry"><a id="id2530970"></a><p>[<abbr class="abbrev">Graphviz</abbr>] <span class="title"><i>
         <a href="http://www.graphviz.org/" target="_top">Graphviz</a>
       </i>. </span></p></div></div></div></body></html>
