@@ -916,9 +916,9 @@
             <tbody>
               <row>
                 <entry>getLSQueryControlService</entry>
-                <entry>Service Type</entry>
+                <entry>Service Type, Name, AccessPoint</entry>
                 <entry>Time Array</entry>
-                <entry>Given a Service Type, return array of times.</entry>
+                <entry>Given service information, return array of times.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -1017,9 +1017,9 @@
             <tbody>
               <row>
                 <entry>getLSControlService</entry>
-                <entry>Service Type</entry>
+                <entry>Service Type, Name, AccessPoint</entry>
                 <entry>Time Array</entry>
-                <entry>Given a Service Type, return array of times.</entry>
+                <entry>Given service information, return array of times.</entry>
               </row>
             </tbody>
           </tgroup>
