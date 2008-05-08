@@ -61,9 +61,21 @@
             <entry>J. Zurawski</entry>
           </row>
           <row>
-            <entry>1.01</entry>
+            <entry>1.02</entry>
             <entry>05/7/2007</entry>
             <entry>Implementation Details</entry>
+            <entry>J. Zurawski</entry>
+          </row>
+          <row>
+            <entry>1.03</entry>
+            <entry>05/8/2007</entry>
+            <entry>Plural results/eventType version numbers corrections.</entry>
+            <entry>J. Boote</entry>
+          </row>
+          <row>
+            <entry>1.04</entry>
+            <entry>05/8/2007</entry>
+            <entry>...</entry>
             <entry>J. Zurawski</entry>
           </row>
         </tbody>
@@ -166,6 +178,13 @@
           <emphasis>hLS</emphasis>s, and anyone using the API a chance to
           find and communicate with root <emphasis>gLS</emphasis> instances.
           </para>
+        </listitem>
+        <listitem>
+          <para><xref linkend="synchronization" /> - To ease the burden on
+          client applications trying to discovery information, the top level
+          gLS instances should regularly synchronize their summary sets to
+          ensure that any discovery query posed anywhere can be answered
+          correctly.</para>
         </listitem>
         <listitem>
           <para><xref linkend="hLS_instances" /> - Local LS instances that
@@ -320,6 +339,15 @@
         will be depend on participation from the perfSONAR partners.
       </para>
     
+    </section>
+
+    <section id="synchronization" xreflabel="Synchronization">
+      <title>Synchronization</title>
+
+      <para>
+      TBD
+      </para>
+
     </section>
     
     <section id="hLS_instances" xreflabel="hLS Instances">
