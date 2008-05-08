@@ -522,8 +522,8 @@
         <itemizedlist mark='opencircle'>
           <listitem><para><command>Discovery</command> - Discovery queries have
           known values (e.g. they pertain to a specific domain, address range,
-          or eventType) and the end result should be a
-          <emphasis>location</emphasis> where a more exact
+          or eventType) and the end result should be
+          <emphasis>locations</emphasis> where a more exact
           <emphasis>query</emphasis> should be sent.</para>
           </listitem>
           <listitem><para><command>Query</command> - more interested in 
@@ -698,14 +698,14 @@
         <itemizedlist mark='opencircle'>
           <listitem>
             <para>
-              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/1.0</command>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</command>
               - Allows the <command>XQuery</command> to travel directly to the specific
               backend storage holding summarization information.
             </para>
           </listitem>
           <listitem>
             <para>
-              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/1.0</command>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0</command>
               - Allows the <command>XQuery</command> to travel directly to the specific
               backend storage holding registered information.
             </para>
@@ -736,14 +736,14 @@
         <itemizedlist mark='opencircle'>
           <listitem>
             <para>
-              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/1.0</command>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0</command>
               - Allows the <command>XQuery</command> to travel directly to the specific
               backend storage holding summarization control information.
             </para>
           </listitem>
           <listitem>
             <para>
-              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/1.0</command>
+              <command>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0</command>
               - Allows the <command>XQuery</command> to travel directly to the specific
               backend storage holding registered control information.
             </para>
