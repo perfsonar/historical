@@ -20,6 +20,7 @@
 # output: Pass/Fail messages and performance information
 #
 # To Do:
+#   waiting for MA to support metadata query: then can do better start/end times
 #   do each test 2 times, one with bad input, to test for error message
 #   general cleanup
 #   better error handling / error messages
@@ -36,8 +37,10 @@ import time, sys, os, string, os.path, random
 from stat import *
 #from subprocess import *
 from optparse import OptionParser
-#from xml.etree import ElementTree
-from elementtree import ElementTree
+# python 2.4 and higher XML parsing
+from xml.etree import ElementTree
+# python 2.2/2.3  XML parsing
+#from elementtree import ElementTree
 
 PSHOME = os.getenv("PSHOME")
 if PSHOME == None:
@@ -65,10 +68,11 @@ NMWGS = "{http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/}"
 NMWGC = "{http://ggf.org/ns/nmwg/characteristic/utilization/2.0/}"
 TOPO  = "{http://ogf.org/schema/network/topology/base/20070828/}"
 IPERF = "{http://ggf.org/ns/nmwg/tools/iperf/2.0/}"
+PINGER = "{http://ggf.org/ns/nmwg/tools/pinger/2.0/}"
 NMWGR = "{http://ggf.org/ns/nmwg/result/2.0/}"  # for error/status messages only
 
 #NMWG_ALL = [NMWG, NMWG2, NMWGT, NMWGR, NMWGS, IPERF]
-NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF, TOPO, NMWGR]
+NMWG_ALL = [NMWG, NMWGT, NMWGS, NMWGC, IPERF, PINGER, TOPO, NMWGR]
 
 verbose = 0
 
@@ -457,10 +461,14 @@ def main():
         file.writelines(data)
         file.close()
 
-        if options.PS_url.find("perfSONARBOUY") > 0:
+        if options.PS_url.find("perfSONARBOUY") > 0 or options.PS_url.find("pinger") > 0:
             src, dst, nr = pickEndPointPair(resultFile)
-            print "Using src/dst randomly selected interface: %s/%s : %s/%s" % ( src.attrib.get("value"),
-                src.attrib.get("port"), dst.attrib.get("value"), dst.attrib.get("port"))
+            if options.PS_url.find("perfSONARBOUY") > 0:
+                print "Using src/dst randomly selected interface: %s/%s : %s/%s" % ( src.attrib.get("value"),
+                    src.attrib.get("port"), dst.attrib.get("value"), dst.attrib.get("port"))
+	    else:  # pinger
+                print "Using src/dst randomly selected interface: %s : %s" % ( src.attrib.get("value"),
+                    dst.attrib.get("value"))
         else:
             hostName, ifAddr, ifName, nr = pickInterface(resultFile)
             print "Using interface randomly selected interface %s:%s " % (hostName, ifName)
@@ -490,6 +498,9 @@ def main():
             replaceElementAttribute(tree, "dst", "value", dst.attrib.get("value"))
             replaceElementAttribute(tree, "src", "port", src.attrib.get("port"))
             replaceElementAttribute(tree, "dst", "port", dst.attrib.get("port"))
+        elif options.PS_url.find("pinger") > 0:
+            replaceElementAttribute(tree, "src", "value", src.attrib.get("value"))
+            replaceElementAttribute(tree, "dst", "value", dst.attrib.get("value"))
         elif getAllRequest != "":
             replaceElement(tree, "ifAddress", ifAddr)
             replaceElement(tree, "hostName", hostName)
@@ -559,16 +570,28 @@ def main():
         testNum += 1
 
         if save_Key == None:  # need to find a valid key to use in future requests
-	    try:
-                e = tree.findall("//%skey" % NMWG)[0]
-	    except:
-		continue
-            save_Key = e[0]  # known good Key: save this to use in a future request
-            if options.debug:
-                print "Saving this key element for future requests: ", e
-                for p in e[0].getiterator():
+            if options.PS_url.find("pinger") > 0: # pinger puts key under data, so need to find data first... 
+		# FIXME? not sure if this is generalizable???
+                e = tree.findall("//%sdata" % NMWG)[0]
+                for p in e.getiterator():
                     for c in p:
-                        print "   ", c.tag, c.text, c.attrib
+                        #print "  tag: %s; text: %s; attrib: %s " %(c.tag, c.text, c.attrib)
+			if c.tag.find("key") >=0:
+			    print "Found key to save for future requests: ", c.attrib.get("id")
+                            save_Key = c.attrib.get("id")
+            else:
+	        try:
+                    e = tree.findall("//%skey" % NMWG)[0]
+	        except:
+		    continue
+                if options.debug:
+                    ElementTree.dump(e)
+                save_Key = e[0]  # known good Key: save this to use in a future request
+                if options.debug:
+                    print "Saving this key element for future requests: ", e
+                    for p in e[0].getiterator():
+                        for c in p:
+                            print "   ", c.tag, c.text, c.attrib
 
 
     print "\nTotal of %d tests passed and %d tests failed. " % (total_pass, total_fail)
