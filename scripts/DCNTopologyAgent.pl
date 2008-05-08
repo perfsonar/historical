@@ -265,12 +265,13 @@ sub getNeighborTopologies {
 #    elements. XXX This is a stub function that just reads from a file.
 sub retrieveIDCDomain {
     my ($self, $file) = @_;
+    my $output;
 
     my $oscars_client = perfSONAR_PS::OSCARS->new({ idc_url => $self->{IDC_URI}, client_directory => $self->{OSCARS_CLIENT_DIR} });
 
-    my $topology_str = $oscars_client->getTopology();
+    my $topology_str = $oscars_client->getTopology(\$output);
     if (not $topology_str) {
-        return (-1, "Failed to get topology from ".$self->{IDC_URI});
+        return (-1, "Failed to get topology from ".$self->{IDC_URI}.": $output");
     }
 
     my $parser = XML::LibXML->new();
