@@ -180,11 +180,11 @@
           </para>
         </listitem>
         <listitem>
-          <para><xref linkend="synchronization" /> - To ease the burden on
-          client applications trying to discovery information, the top level
-          gLS instances should regularly synchronize their summary sets to
-          ensure that any discovery query posed anywhere can be answered
-          correctly.</para>
+          <para><xref linkend="synchronization" /> - To ease the burden of
+          discovery, the top level <emphasis>gLS</emphasis> instances should
+          regularly synchronize their summary sets to ensure that any discovery
+          query posed anywhere in the framework can be answered correctly.
+          </para>
         </listitem>
         <listitem>
           <para><xref linkend="hLS_instances" /> - Local LS instances that
@@ -243,17 +243,24 @@
       
       <para>
         Each well known instance will manage a given set of
-        <emphasis>hLS</emphasis> data.  To ease the strain on communication and
-        data exchange we bypass the notion of requiring <emphasis>gLS</emphasis>
-        instances to perform an explicit synchronization step.  Rather, we 
-        rely on some <xref linkend="bootstrapping" /> techniques that allow
-        Service and Client applications alike the ability to access the
+        <emphasis>hLS</emphasis> data.  For each <emphasis>gLS</emphasis>,
+        maintaining a consistent view of all data contained in the framework
+        is necessary to facilitate information discovery.  Service and client
+        applications will rely on <emphasis>gLS</emphasis> root servers as a
+        point of contact with regards to locating information; therefore each 
+        root should know the complete contents at any given time.  To accomplish
+        the goals of <emphasis>gLS</emphasis> discovery we rely on some
+        <xref linkend="bootstrapping" /> techniques that allow service and
+        client applications alike the ability to access the
         <emphasis>upper layer</emphasis> consisting of <emphasis>gLS</emphasis>
-        deployments.
+        deployments.  To ensure that <emphasis>gLS</emphasis> instances can talk
+        an additional data <xref linkend="synchronization" /> step is also
+        required.
       </para>        
 
       <para>        
-        This <xref linkend="bootstrapping" /> ensures that a
+        The <xref linkend="bootstrapping" /> and
+        <xref linkend="synchronization" /> ensure that a
         <emphasis>Discovery</emphasis> query posed to any root is able to be
         completed.  In addition to the process to propagate registration
         information the <emphasis>hLS</emphasis> instances may register
@@ -263,7 +270,7 @@
       </para>
     
       <para>
-        All <emphasis>discovery</emphasis> queries must originate at the root
+        All <emphasis>Discovery</emphasis> queries must originate at the root
         <emphasis>gLS</emphasis> instances if they have any hope of finding
         something globally.  <emphasis>hLS</emphasis> instances may be aware of
         their own summary information and could of course service a discovery
@@ -345,7 +352,56 @@
       <title>Synchronization</title>
 
       <para>
-      TBD
+        There are two possible approaches to information discovery using the 
+        <emphasis>gLS</emphasis> deployment scenario.
+      </para>
+
+      <para>
+        <itemizedlist mark='opencircle'>
+          <listitem>
+            <para>
+              Client applications consult the <emphasis>Root.hints</emphasis>
+              file to find list of <command>all</command>
+              <emphasis>gLS</emphasis> instances.  Query each one to find
+              complete discovery of the framework.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <emphasis>gLS</emphasis> instances periodically exchange
+              information via a scheduled or on-demand synchronization
+              procedure.  Client applications then pose discovery queries to
+              single instance from <emphasis>Root.hints</emphasis> list.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </para>
+
+      <para>
+        To ease the communication burden system wide (e.g. every client
+        performing discovery to every root causes unnecessary data exchange) the
+        second option shall be implemented.  Consider the following simple
+        diagram of synchronization:
+      </para>
+
+      <para>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/sync.png"/>
+          </imageobject>
+        </mediaobject>
+      </para> 
+
+      <para>
+        Open questions remain if this should be a periodic scheduled event that
+        is frequent enough to capture new information propagation without
+        overloading <emphasis>gLS</emphasis> instances or if it may be able to
+        function as an on-demand service when new summarizations are available.
+      </para>
+      
+      <para>
+        See <xref linkend="appendix_synch" /> for an example of a naive
+        synchronization between LS instances.
       </para>
 
     </section>
@@ -375,18 +431,22 @@
         interested <emphasis>perfSONAR</emphasis> services with the caveat that
         they be from the managed domain (this is not a strict requirement, but
         is logical from both an administrative and functional standpoint).  This
-        service still contain the primitives of previous the previous LS with
-        regards to query and registration and will implement the new API.
+        service <command>should not</command> allow other
+        <emphasis>hLS</emphasis> instances to register with it unless it happens
+        to be a <emphasis>gLS</emphasis>.  This service still contain the
+        primitives of previous the previous LS with regards to query and
+        registration and will implement the new API.
       </para>
     
       <para>
-        The <emphasis>hLS</emphasis> instances will know about at least one
-        <emphasis>gLS</emphasis> instance to register with.  Optionally,
-        <emphasis>hLS</emphasis> instances could know about several
-        <emphasis>gLS</emphasis> instances and register with as many as
-        possible. This may become complicated due to performance issues
-        (latency, topology) or administrative issues (authorization, 
-        information sharing).
+        The <emphasis>hLS</emphasis> instances <emphasis>should</emphasis> know
+        about at least one <emphasis>gLS</emphasis> instance to register with
+        (can be programmed through configuration, or can be gleaned from the 
+        <emphasis>Root.hints</emphasis> file and various performance tests to
+        find the closest).  Optionally, <emphasis>hLS</emphasis> instances could
+        register with as many <emphasis>gLS</emphasis>s as possible. This may
+        become complicated due to performance issues (latency, topology) or
+        administrative issues (authorization, information sharing).
       </para>
 
       <para>
@@ -1395,7 +1455,29 @@
       </section>    
 
     </section>
-    
+
+    <section id="appendix_synch" xreflabel="Synchronization Example">
+      <title>Synchronization Example</title>
+
+      <para>
+        The following example illustrates synchronization using the 
+        perfSONAR-PS framework mainly for backup up <emphasis>DCN</emphasis>
+        registered information.  This small snippet of code is currently used
+        to provie a <emphasis>backup</emphasis> LS for both replication and
+        backup purposes.  This code would need modification for inclusion into
+        the <emphasis>gLS</emphasis> to address the issues of registration
+        and de-registration of <emphasis>only</emphasis> data a given
+        <emphasis>gLS</emphasis> is authoritative for.
+      </para>
+
+      <programlisting>
+        <![CDATA[
+          <inline file="examples/sync.pl"/>
+        ]]>
+      </programlisting> 
+
+    </section>
+        
   </section>
 
   <glossary id="glossary">
