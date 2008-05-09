@@ -716,20 +716,20 @@
             <entry morerows="1" valign="middle" align="center"><xref linkend="level1_api" /></entry>
             <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</entry>
             <entry>IP, Domain, eventType, Service Data</entry>
-            <entry>hLS URL</entry>
+            <entry>hLS URL Array</entry>
             <entry>Standalone Discovery</entry>
           </row>
           <row>
             <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0</entry>
-            <entry>IP, Domain, eventType, Service Data</entry>
-            <entry>Metadata (e.g. Service/Measurement based)</entry>
+            <entry>hLS, IP, Domain, eventType, Service Data</entry>
+            <entry>Metadata (e.g. Service/Measurement based) Array</entry>
             <entry>Standalone Query</entry>
           </row>
           <row>
             <entry morerows="1" valign="middle" align="center"><xref linkend="level2_api" /></entry>
             <entry>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0</entry>
             <entry morerows="1" valign="middle">IP, Domain, eventType, Service Data</entry>
-            <entry morerows="1" valign="middle">Metadata (e.g. Service/Measurement based)</entry>
+            <entry morerows="1" valign="middle">Metadata (e.g. Service/Measurement based) Array</entry>
             <entry morerows="1" valign="middle">Complete Discovery/Query</entry>
           </row>
           <row>
@@ -810,11 +810,10 @@
         subject and parameters, will remain unchanged.
       </para>
 
-
       <para>
         Addtional considerations for this level of the API revolve around the
         internal representation of when data is set to expire, namely the
-        <emphasis>LSStore-control</emphasis> structure.  It is desirable to
+        <emphasis>LS*-control</emphasis> structure.  It is desirable to
         have access to this when providing status reports about registered
         information.  This would require two new
         <emphasis>eventType</emphasis>s:
@@ -859,29 +858,25 @@
           </thead>
           <tbody>
             <row>
-              <entry>getLSDiscoverRaw</entry>
-              <entry morerows="1" valign="middle">XQuery String</entry>
-              <entry morerows="1" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
-              <entry>Send XQuery for results in the <emphasis>Summary</emphasis>
-                storage only.</entry>
+              <entry>getLSDiscoveryRaw</entry>
+              <entry morerows="1" valign="middle">LS &amp; XQuery String</entry>
+              <entry morerows="1" valign="middle">Raw XML (e.g. XML elements in an array)</entry>
+              <entry>Send XQuery for results in the <emphasis>Summary</emphasis> storage only.</entry>
             </row>
             <row>
               <entry>getLSQueryRaw</entry>
-              <entry>Send XQuery for results in the <emphasis>Registered</emphasis>
-                storage only.</entry>
+              <entry>Send XQuery for results in the <emphasis>Registered</emphasis> storage only.</entry>
             </row>
-             <row>
-                <entry>getLSDiscoverControlRaw</entry>
-                <entry morerows="1" valign="middle">XQuery String</entry>
-                <entry morerows="1" valign="middle">Raw XML (e.g. Data/Metadata pairs in an array)</entry>
-                <entry>Send XQuery for results in the <emphasis>Summary</emphasis>
-                  control storage only.</entry>
-              </row>
-              <row>
-                <entry>getLSQueryControlRaw</entry>
-                <entry>Send XQuery for results in the <emphasis>Registered</emphasis>
-                  control storage only.</entry>
-              </row>
+            <row>
+              <entry>getLSSummaryControlRaw</entry>
+              <entry morerows="1" valign="middle">LS &amp; XQuery String</entry>
+              <entry morerows="1" valign="middle">Raw XML (e.g. XML elements in an array)</entry>
+              <entry>Send XQuery for results from the <emphasis>Summary</emphasis> control storage only.</entry>
+            </row>
+            <row>
+              <entry>getLSRegistrationControlRaw</entry>
+              <entry>Send XQuery for results from the <emphasis>Registered</emphasis> control storage only.</entry>
+            </row>
           </tbody>
         </tgroup>
       </table>
@@ -922,52 +917,21 @@
           </thead>
           <tbody>
             <row>
-              <entry>getLSDiscoverEventType</entry>
-              <entry>EventType</entry>
-              <entry>hLS URL</entry>
-              <entry>Given an <emphasis>eventType</emphasis>, return <emphasis>hLS</emphasis>s</entry>
+              <entry>getLSDiscovery</entry>
+              <entry>(IP Address | Domain) | eventType | Service Type</entry>
+              <entry>hLS URL Array</entry>
+              <entry>Given several input parameters, return a list of <emphasis>hLS</emphasis>s</entry>
             </row>
             <row>
-              <entry>getLSDiscoverAddress</entry>
-              <entry>IP Address</entry>
-              <entry>hLS URL</entry>
-              <entry>Given an IP Address, return <emphasis>hLS</emphasis>s</entry>
-            </row>
-            <row>
-              <entry>getLSDiscoverDomain</entry>
-              <entry>Domain</entry>
-              <entry>hLS URL</entry>
-              <entry>Given a Domain, return <emphasis>hLS</emphasis>s</entry>
-            </row>
-            <row>
-              <entry>getLSDiscoverService</entry>
-              <entry>Service Type</entry>
-              <entry>hLS URL</entry>
-              <entry>Given a Service Type, return <emphasis>hLS</emphasis>s</entry>
-            </row>
-            <row>
-              <entry>getLSQueryEventType</entry>
-              <entry>EventType</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given an <emphasis>eventType</emphasis>, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSQueryAddress</entry>
-              <entry>IP Address</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given an IP Address, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSQueryDomain</entry>
-              <entry>Domain</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given a Domain, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSQueryService</entry>
-              <entry>Service Type</entry>
+              <entry>getLSQueryLocation</entry>
+              <entry morerows="1" valign="left">hLS &amp; ((IP Address | Domain) | eventType | Service Type)</entry>
               <entry>Service Metadata Array</entry>
-              <entry>Given a Service Type, return array of metadata.</entry>
+              <entry>Given several input parameters, return a list of <emphasis>Service</emphasis> metadata elements.</entry>
+            </row>
+            <row>
+              <entry>getLSQueryContent</entry>
+              <entry>Measurement Metadata Array</entry>
+              <entry>Given several input parameters, return a list of <emphasis>Measurement</emphasis> metadata elements.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -979,12 +943,17 @@
         <para>
           The following extension may be made to the <command>Level 0</command>
           functions dealing with access to the
-          <emphasis>LSStore-control</emphasis> structures. These formats are
+          <emphasis>LS*-control</emphasis> structures. These formats are
           presented mearly as a suggestion as they are optional to the overall
-          success of the framework.  Note there are not specific
-          <emphasis>Discovery</emphasis> calls here as the same job could be
-          accomplished with the previous descriptions.  The only purpose of this
-          API is to return the actual time values associated to a registered 
+          success of the framework.  
+        </para>
+        
+        <para>
+          Note there is not an implicit <emphasis>Discovery</emphasis> step, the
+          specific query you are interested must be posed directly to a given
+          <emphasis>LS</emphasis> (e.g. <emphasis>hLS</emphasis>  or
+          <emphasis>gLS</emphasis>).  The purpose of this API is to return the
+          actual time values associated with the information of a registered 
           service instead of having to deal with raw XML as done in
           <command>Level 0</command>.
         </para>
@@ -1009,10 +978,14 @@
             </thead>
             <tbody>
               <row>
-                <entry>getLSQueryControlService</entry>
-                <entry>Service Type, Name, AccessPoint</entry>
-                <entry>Time Array</entry>
-                <entry>Given service information, return array of times.</entry>
+                <entry>getLSSummaryControlDirect</entry>
+                <entry morerows="1" valign="left">LS &amp; (Service Type | Name | AccessPoint)</entry>
+                <entry morerows="1" valign="middle">Time Array</entry>
+                <entry>Given an LS instance and service information, return array of times from the <emphasis>Summarization</emphasis> control storage only.</entry>
+              </row>
+              <row>
+                <entry>getLSRegistrationControlDirect</entry>
+                <entry>Given an LS instance and service information, return array of times from the <emphasis>Registered</emphasis> control storage only.</entry>
               </row>
             </tbody>
           </tgroup>
@@ -1052,28 +1025,15 @@
           </thead>
           <tbody>
             <row>
-              <entry>getLSEventType</entry>
-              <entry>EventType</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given an <emphasis>eventType</emphasis>, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSAddress</entry>
-              <entry>IP Address</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given an IP Address, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSDomain</entry>
-              <entry>Domain</entry>
-              <entry>Metadata Array</entry>
-              <entry>Given a Domain, return array of metadata.</entry>
-            </row>
-            <row>
-              <entry>getLSService</entry>
-              <entry>Service Type</entry>
+              <entry>getLSLocation</entry>
+              <entry morerows="1" valign="left">(IP Address | Domain) | eventType | Service Type</entry>
               <entry>Service Metadata Array</entry>
-              <entry>Given a Service Type, return array of metadata.</entry>
+              <entry>Given several input parameters, return a list of <emphasis>Service</emphasis> metadata elements.</entry>
+            </row>
+            <row>
+              <entry>getLSContent</entry>
+              <entry>Measurement Metadata Array</entry>
+              <entry>Given several input parameters, return a list of <emphasis>Measurement</emphasis> metadata elements.</entry>
             </row>
           </tbody>
         </tgroup>
@@ -1110,10 +1070,14 @@
             </thead>
             <tbody>
               <row>
-                <entry>getLSControlService</entry>
-                <entry>Service Type, Name, AccessPoint</entry>
-                <entry>Time Array</entry>
-                <entry>Given service information, return array of times.</entry>
+                <entry>getLSSummaryControl</entry>
+                <entry morerows="1" valign="left">Service Type | Name | AccessPoint</entry>
+                <entry morerows="1" valign="middle">Time Array</entry>
+                <entry>Given an LS instance and service information, return array of times from the <emphasis>Summarization</emphasis> control storage only.</entry>
+              </row>
+              <row>
+                <entry>getLSRegistrationControl</entry>
+                <entry>Given an LS instance and service information, return array of times from the <emphasis>Registered</emphasis> control storage only.</entry>
               </row>
             </tbody>
           </tgroup>
