@@ -2,6 +2,7 @@ package perfSONAR_PS::OSCARS;
 
 use strict;
 use warnings;
+use IO::Handle;
 use Cwd;
 use Params::Validate qw(:all);
 
@@ -54,13 +55,14 @@ sub getTopology($$) {
 
 	my ($status, $classpath) = getClasspath();
 	if ($status == -1) {
+		$$output = "Couldn't get classpath. Is environmental variable AXIS2_HOME set?" if ($output);
 		return;
 	}
 
 	my $repo_dir = $self->{CLIENT_DIR}."/repo";
 
 	my @input = ( "\n" );
-	my $lines = exec_input("java -cp $classpath GetNetworkTopologyClient $repo_dir ".$self->{IDC_URL}, \@input);
+	my $lines = exec_input("java -cp $classpath -Djava.net.preferIPv4Stack=true GetNetworkTopologyClient $repo_dir ".$self->{IDC_URL}, \@input);
 
 	my $cmd_output = "";
 
@@ -116,7 +118,7 @@ sub queryCircuits($$$$) {
 			my @input = ();
 			my $in_path = 0;
 
-			my $lines = exec_input("java -cp $classpath QueryReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -gri $id", \@input);
+			my $lines = exec_input("java -cp $classpath -Djava.net.preferIPv4Stack=true QueryReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -gri $id", \@input);
 			my $ret = "$id";
 			foreach my $line (@{ $lines }) {
 				if ($line =~ /Path:/) {
@@ -161,7 +163,7 @@ sub getActiveCircuits($$$) {
 	my $repo_dir = $self->{CLIENT_DIR}."/repo";
 
 	my @input = ( "\n" );
-	my $lines = exec_input("java -cp $classpath ListReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -active", \@input);
+	my $lines = exec_input("java -cp $classpath -Djava.net.preferIPv4Stack=true ListReservationCLI -repo $repo_dir -url ".$self->{IDC_URL}." -status ACTIVE", \@input);
 	my $i = 0;
 	my ($curr_id, $owner);
 	my %pids = ();
