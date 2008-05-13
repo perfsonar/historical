@@ -36,11 +36,17 @@
 import time, sys, os, string, os.path, random
 from stat import *
 #from subprocess import *
+
 from optparse import OptionParser
-# python 2.4 and higher XML parsing
-from xml.etree import ElementTree
-# python 2.2/2.3  XML parsing
-#from elementtree import ElementTree
+try: # python 2.4 and higher XML parsing
+   from xml.etree import ElementTree
+except:
+   try: # python 2.2/2.3  XML parsing
+      from elementtree import ElementTree
+   except:
+	print "No ElemenTree XML parser found."
+	print "Try upgrading to python 2.5 or higher, or install ElemenTree from http://effbot.org/zone/element-index.htm "
+        sys.exit(-1)
 
 PSHOME = os.getenv("PSHOME")
 if PSHOME == None:

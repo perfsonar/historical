@@ -21,7 +21,7 @@ Current Limitations (may fix these later):
 
 <perfSONAR-tests>
   <requestDir>/test_harness/requests</requestDir>
-  <getAll>MetadataKeyRequest/MetadataKeyRequest_getAll.xml</getAll>
+  <getAll>SNMP/MetadataKeyRequest/MetadataKeyRequest_getAll.xml</getAll>
   <test>
      <input>EchoRequest/EchoRequest_1.xml</input>
      <description>Simple Echo Request Test </description>
