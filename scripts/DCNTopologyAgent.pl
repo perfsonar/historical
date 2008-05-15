@@ -97,13 +97,18 @@ if (not $conf{"oscars_client"}) {
 my $repeat;
 $repeat = 1 if ($conf{"interval"});
 
+my @ls_uris = split(',', $conf{"ls_uri"});
+
 do {
-    my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => $conf{"ls_uri"}, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"}, oscars_client => $conf{"oscars_client"});
+    my $agent = perfSONAR_PS::Client::DCN::TopologyAgent->new(ls_uri => \@ls_uris, topology_uri => $conf{"topology_uri"}, idc_uri => $conf{"idc_uri"}, domain => $conf{"domain"}, oscars_client => $conf{"oscars_client"});
 
     $agent->getLocalTopology(file => $NEW_TOPOLOGY, do_register => 1);
     $agent->getNeighborTopologies();
 
-    sleep ($conf{"interval"}) if ($conf{"interval"});
+    if ($conf{"interval"}) {
+        $logger->debug("Sleeping for ".($conf{"interval"})." seconds");
+        sleep ($conf{"interval"});
+    }
 } while($repeat);
 
 exit (-1);
@@ -157,7 +162,7 @@ sub new {
                 SERVICE_TYPE => "TS",
                 SERVICE_ACCESSPOINT => $args->{topology_uri},
                 );
-        push @ls_clients, perfSONAR_PS::Client::LS::Remote->new($args->{ls_uri}, \%ls_conf);
+        push @ls_clients, perfSONAR_PS::Client::LS::Remote->new($ls_uri, \%ls_conf);
     }
     $self->{LS_CLIENTS} = \@ls_clients;
     $self->{LS_URIS} = $ls_uris;
