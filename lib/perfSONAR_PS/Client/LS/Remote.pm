@@ -83,7 +83,7 @@ related tasks of interacting with backend storage.
 
 =cut
 
-use fields 'URI', 'CONF', 'CHUNK', 'ALIVE', 'FIRST', 'LSKEY';
+use fields 'URI', 'CONF', 'CHUNK', 'ALIVE', 'FIRST', 'LS_KEY';
 
 use strict;
 use warnings;
