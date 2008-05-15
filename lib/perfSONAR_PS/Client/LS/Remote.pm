@@ -83,7 +83,7 @@ related tasks of interacting with backend storage.
 
 =cut
 
-use fields 'URI', 'CONF', 'CHUNK', 'ALIVE', 'FIRST';
+use fields 'URI', 'CONF', 'CHUNK', 'ALIVE', 'FIRST', 'LSKEY';
 
 use strict;
 use warnings;
@@ -175,7 +175,7 @@ sub createKey {
     if (defined $lsKey and $lsKey ne "") {
         $key = $key . "        <nmwg:parameter name=\"lsKey\">".$lsKey."</nmwg:parameter>\n";
     } else {
-        $key = $key . "        <nmwg:parameter name=\"lsKey\">".$self->{CONF}->{"SERVICE_ACCESSPOINT"}."</nmwg:parameter>\n";
+        $key = $key . "        <nmwg:parameter name=\"lsKey\">".$self->{LS_KEY}."</nmwg:parameter>\n";
     }
     $key = $key . "      </nmwg:parameters>\n";
     $key = $key . "    </nmwg:key>\n";
@@ -227,6 +227,7 @@ sub callLS {
             if($msg) {
                 my $eventType = findvalue($msg, "./nmwg:metadata/nmwg:eventType");
                 if(defined $eventType and $eventType =~ m/success/x) {
+                    $self->{LS_KEY} = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
                     return 0;
                 }
             }
@@ -319,7 +320,7 @@ sub registerStatic {
     }
 
     if($self->{FIRST}) {
-        if ($self->sendDeregister($self->{CONF}->{"SERVICE_ACCESSPOINT"}) == 0) {
+        if ($self->sendDeregister() == 0) {
             $logger->debug("Nothing registered.");
         }
         else {
@@ -429,7 +430,7 @@ sub registerDynamic {
     }
 
     if($self->{FIRST}) {
-        if ($self->sendDeregister($self->{CONF}->{"SERVICE_ACCESSPOINT"}) == 0) {
+        if ($self->sendDeregister() == 0) {
             $logger->debug("Nothing registered.");
         }
         else {
@@ -452,7 +453,7 @@ sub registerDynamic {
             $subject = createService($self);
         }
         else {
-            $subject = createKey($self, $self->{CONF}->{SERVICE_ACCESSPOINT})."\n".createService($self);
+            $subject = createKey($self)."\n".createService($self);
         }
 
         if($#resultsString != -1) {
