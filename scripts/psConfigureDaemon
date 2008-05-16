@@ -246,6 +246,9 @@ while (1) {
             elsif ( $module eq "perfSONAR_PS::Services::LS::LS" ) {
                 $module = "ls";
             }
+            elsif ( $module eq "perfSONAR_PS::Services::LS::gLS" ) {
+                $module = "gls";
+            }
             elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBOUY" ) {
                 $module = "perfsonarbuoy";
             }
@@ -259,12 +262,13 @@ while (1) {
 
         my %opts;
         do {
-            $module = &ask( "Enter endpoint module [snmp,ls,perfsonarbuoy,pingerma,pingermp,status,circuitstatus,topology] ", q{}, $module, q{} );
+            $module = &ask( "Enter endpoint module [snmp,ls,gls,perfsonarbuoy,pingerma,pingermp,status,circuitstatus,topology] ", q{}, $module, q{} );
             $module = lc($module);
 
             if (   $module eq "snmp"
                 or $module eq "status"
                 or $module eq "ls"
+                or $module eq "gls"
                 or $module eq "circuitstatus"
                 or $module eq "topology"
                 or $module eq "perfsonarbuoy"
@@ -301,6 +305,10 @@ while (1) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::LS";
             config_ls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
+        elsif ( $module eq "gls" ) {
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::LS::gLS";
+            config_gls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
+        }
         elsif ( $module eq "perfsonarbuoy" ) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
             config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
@@ -318,6 +326,54 @@ while (1) {
     }
 }
 
+sub config_gls {
+    my ( $config, $accesspoint, $def_config ) = @_;
+
+    if ( !defined $config->{"gls"} ) {
+        $config->{"gls"} = ();
+    }
+
+    $config->{"gls"}->{"root"} = "0";
+    $config->{"gls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"gls"}->{"ls_ttl"}, '\d+' );
+    $config->{"gls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
+
+    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "1", "1", '^[01]$' );
+    if ($makeDBConfig) {
+        open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+        my @result = <RUN>;
+        close(RUN);
+        if ( $result[0] ) {
+            unless ( $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/ ) {
+                $config->{"gls"}->{"metadata_db_name"} .= "/";
+            }
+            if ( -f $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+                system( "mv " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG~" );
+            }
+            system( "mv " . $result[0] . " " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" );
+        }
+        else {
+            return -1;
+        }
+    }
+
+    $config->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
+    $config->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
+    $config->{"gls"}->{"reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"gls"}->{"reaper_interval"}, '^[01]$' );
+    if ( $config->{"gls"}->{"reaper_interval"} ) {
+        $config->{"gls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
+    }
+
+    $config->{"gls"}->{"service_name"} = &ask( "Enter a name for this service ", "Lookup Service", $config->{"gls"}->{"service_name"}, '.+' );
+
+    $config->{"gls"}->{"service_type"} = &ask( "Enter the service type ", "LS", $config->{"gls"}->{"service_type"}, '.+' );
+
+    $config->{"gls"}->{"service_description"} = &ask( "Enter a service description ", "Lookup Service", $config->{"gls"}->{"service_description"}, '.+' );
+
+    $config->{"gls"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"gls"}->{"service_accesspoint"}, '^http:\/\/' );
+
+    return;
+}
+
 sub config_ls {
     my ( $config, $accesspoint, $def_config ) = @_;
 
@@ -328,7 +384,7 @@ sub config_ls {
     $config->{"ls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
     $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
 
-    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "1", "1", '^[01]$' );
     if ($makeDBConfig) {
         open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
         my @result = <RUN>;
@@ -337,14 +393,17 @@ sub config_ls {
             unless ( $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/ ) {
                 $config->{"ls"}->{"metadata_db_name"} .= "/";
             }
+            if ( -f $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+                system( "mv " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG~" );
+            }
             system( "mv " . $result[0] . " " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" );
         }
         else {
             return -1;
         }
     }
-
-    $config->{"ls"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"ls"}->{"metadata_db_file"}, '.+' );
+    
+    $config->{"ls"}->{"metadata_db_file"} = "lsstore.dbxml";
     $config->{"ls"}->{"reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"reaper_interval"}, '^[01]$' );
     if ( $config->{"ls"}->{"reaper_interval"} ) {
         $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
@@ -352,7 +411,7 @@ sub config_ls {
 
     $config->{"ls"}->{"service_name"} = &ask( "Enter a name for this service ", "Lookup Service", $config->{"ls"}->{"service_name"}, '.+' );
 
-    $config->{"ls"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"ls"}->{"service_type"}, '.+' );
+    $config->{"ls"}->{"service_type"} = &ask( "Enter the service type ", "LS", $config->{"ls"}->{"service_type"}, '.+' );
 
     $config->{"ls"}->{"service_description"} = &ask( "Enter a service description ", "Lookup Service", $config->{"ls"}->{"service_description"}, '.+' );
 
@@ -378,7 +437,7 @@ sub config_perfsonarbuoy_ma {
     elsif ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $config->{"perfsonarbuoy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/xmldb", $config->{"perfsonarbuoy"}->{"metadata_db_name"}, '.+' );
         delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
-        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '.+' );
+        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
     }
 
     $config->{"perfsonarbuoy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbuoy"}->{"enable_registration"}, '^[01]$' );
@@ -454,8 +513,7 @@ sub config_snmp_ma {
     elsif ( $config->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/\.xml$/mx;
-        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"snmp"}->{"metadata_db_file"}, '.+' );
-
+        $config->{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
         if ($makeStore) {
             $config->{"snmp"}->{"db_autoload"} = 1;
             $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
