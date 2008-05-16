@@ -7,6 +7,7 @@ use Sys::Hostname;
 use English qw( -no_match_vars );
 use Module::Load;
 use File::Temp qw(tempfile);
+use Cwd;
 
 =head1 NAME
 
@@ -18,6 +19,11 @@ Ask questions based on a service to generate a configuration file.
 
 =cut
 
+my $dirname = getcwd . "/";
+unless ( $dirname =~ m/scripts\/$/ ) {
+    $dirname .= "scripts/";
+}
+
 my $was_installed = 0;
 my $DEFAULT_FILE;
 my $confdir;
@@ -26,7 +32,7 @@ if ($was_installed) {
     $confdir = "XXX_CONFDIR_XXX";
 }
 else {
-    $confdir = "."
+    $confdir = getcwd;
 }
 
 $DEFAULT_FILE = $confdir . "/daemon.conf";
@@ -42,12 +48,12 @@ if ( not $file ) {
 
 my $tmp;
 our $default_hostname = hostname();
-our  $hostname = 'localhost';
-our  $db_name = '';
-our  $db_port = '';
-our  $db_username = 'dbuser';
-our  $db_password  = 'dbpass'; 
- 
+our $hostname         = 'localhost';
+our $db_name          = '';
+our $db_port          = '';
+our $db_username      = 'dbuser';
+our $db_password      = 'dbpass';
+
 my %config = ();
 if ( -f $file ) {
     %config = ParseConfig($file);
@@ -96,8 +102,8 @@ while (1) {
         print "\n";
     }
     elsif ( $input == 1 ) {
-        $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "30",                                                          $config{"max_worker_processes"},     '^\d+$' );
-        $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300",                                                          $config{"max_worker_lifetime"},      '^\d+$' );
+        $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "30",                                                         $config{"max_worker_processes"},     '^\d+$' );
+        $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300",                                                        $config{"max_worker_lifetime"},      '^\d+$' );
         $config{"disable_echo"}             = &ask( "Disable echo by default (0 for yes, 1 for now) ",                                      0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
@@ -256,8 +262,15 @@ while (1) {
             $module = &ask( "Enter endpoint module [snmp,ls,perfsonarbuoy,pingerma,pingermp,status,circuitstatus,topology] ", q{}, $module, q{} );
             $module = lc($module);
 
-            if ( $module eq "snmp" or $module eq "status" or $module eq "ls" or $module eq "circuitstatus" or $module eq "topology"
-                   or $module eq "perfsonarbuoy" or $module eq "pingerma" or $module eq "pingermp") {
+            if (   $module eq "snmp"
+                or $module eq "status"
+                or $module eq "ls"
+                or $module eq "circuitstatus"
+                or $module eq "topology"
+                or $module eq "perfsonarbuoy"
+                or $module eq "pingerma"
+                or $module eq "pingermp" )
+            {
                 $valid_module = 1;
             }
         } while ( $valid_module == 0 );
@@ -292,15 +305,15 @@ while (1) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
             config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
-        elsif ($module eq "pingerma") {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::PingER";
+        elsif ( $module eq "pingerma" ) {
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"}       = "perfSONAR_PS::Services::MA::PingER";
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MA";
-            config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingerma");
+            config_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingerma" );
         }
-        elsif ($module eq "pingermp") {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MP::PingER";
+        elsif ( $module eq "pingermp" ) {
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"}       = "perfSONAR_PS::Services::MP::PingER";
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"service_type"} = "MP";
-            config_pinger($config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingermp");
+            config_pinger( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config, "pingermp" );
         }
     }
 }
@@ -312,10 +325,27 @@ sub config_ls {
         $config->{"ls"} = ();
     }
 
-    $config->{"ls"}->{"ls_ttl"}           = &ask( "Enter default TTL for registered data [in minutes] ",                                   "60",                $config->{"ls"}->{"ls_ttl"},           '\d+' );
-    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ",                                              $confdir . "/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
-    $config->{"ls"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ",                           "store.dbxml",       $config->{"ls"}->{"metadata_db_file"}, '.+' );
-    $config->{"ls"}->{"reaper_interval"}  = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0",                 $config->{"ls"}->{"reaper_interval"},  '^[01]$' );
+    $config->{"ls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
+    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
+
+    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+    if ($makeDBConfig) {
+        open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+        my @result = <RUN>;
+        close(RUN);
+        if ( $result[0] ) {
+            unless ( $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/ ) {
+                $config->{"ls"}->{"metadata_db_name"} .= "/";
+            }
+            system( "mv " . $result[0] . " " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" );
+        }
+        else {
+            return -1;
+        }
+    }
+
+    $config->{"ls"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"ls"}->{"metadata_db_file"}, '.+' );
+    $config->{"ls"}->{"reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"reaper_interval"}, '^[01]$' );
     if ( $config->{"ls"}->{"reaper_interval"} ) {
         $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
     }
@@ -398,126 +428,24 @@ sub config_snmp_ma {
     $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
 
     my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-    if ( $makeStore ) { 
-        no strict 'refs';
-        eval {  
-            require RRDp; 
-	    ${'RRDp::error_mode'} = 'catch';
-            RRDp::start($config->{"snmp"}->{"rrdtool"});
-            my $cmd .= "create ".$confdir."/localhost.rrd --start N --step 1 ";
-            $cmd .= "DS:ifinoctets:COUNTER:10:U:U ";
-            $cmd .= "DS:ifoutoctets:COUNTER:10:U:U ";
-            $cmd .= "DS:ifinerrors:COUNTER:10:U:U ";
-            $cmd .= "DS:ifouterrors:COUNTER:10:U:U ";
-            $cmd .= "DS:ifindiscards:COUNTER:10:U:U ";
-            $cmd .= "DS:ifoutdiscards:COUNTER:10:U:U ";
-            $cmd .= "RRA:AVERAGE:0.5:1:241920 ";
-            $cmd .= "RRA:AVERAGE:0.5:2:120960 ";
-            $cmd .= "RRA:AVERAGE:0.5:6:40320 ";
-            $cmd .= "RRA:AVERAGE:0.5:12:20160 ";
-            $cmd .= "RRA:AVERAGE:0.5:24:10080 "; 
-            $cmd .= "RRA:AVERAGE:0.5:36:6720 ";
-            $cmd .= "RRA:AVERAGE:0.5:48:5040 ";
-            $cmd .= "RRA:AVERAGE:0.5:60:4032 ";
-            $cmd .= "RRA:AVERAGE:0.5:120:2016";
-            RRDp::cmd($cmd);
-            my $answer = RRDp::read();
-	    
-        };
-        use strict;
-	if ($EVAL_ERROR) {
+    my @result = ();
+    if ($makeStore) {
+        open( RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
+        @result = <RUN>;
+        close(RUN);
+        unless ( $result[0] ) {
             return -1;
         }
-        
-        my($fileHandle, $fileName) = tempfile();
-        $makeStore = $fileName;
-        print $fileHandle "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        print $fileHandle "<nmwg:store  xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-        print $fileHandle "             xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\"\n";
-        print $fileHandle "             xmlns:neterr=\"http://ggf.org/ns/nmwg/characteristic/errors/2.0/\"\n";
-        print $fileHandle "             xmlns:netdisc=\"http://ggf.org/ns/nmwg/characteristic/discards/2.0/\"\n";
-        print $fileHandle "             xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
-        print $fileHandle "             xmlns:snmp=\"http://ggf.org/ns/nmwg/tools/snmp/2.0/\"\n";
-        print $fileHandle "             xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">\n\n";
-        foreach my $et (("netutil", "neterr", "netdisc")) {
-            foreach my $dir (("in", "out")) {
-                print $fileHandle "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"m-".$dir."-".$et."-1\">\n";
-                if($et eq "netutil") {
-                    print $fileHandle "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s-".$dir."-".$et."-1\">\n";
-                }
-                elsif($et eq "neterr") {
-                    print $fileHandle "    <neterr:subject xmlns:neterr=\"http://ggf.org/ns/nmwg/characteristic/errors/2.0/\" id=\"s-".$dir."-".$et."-1\">\n";
-                }
-                elsif($et eq "netdisc") {
-                    print $fileHandle "    <netdisc:subject xmlns:netdisc=\"http://ggf.org/ns/nmwg/characteristic/discards/2.0/\" id=\"s-".$dir."-".$et."-1\">\n";
-                }
-                print $fileHandle "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                print $fileHandle "        <nmwgt:ifAddress type=\"ipv4\">127.0.0.1</nmwgt:ifAddress>\n";
-                print $fileHandle "        <nmwgt:hostName>localhost</nmwgt:hostName>\n";
-                print $fileHandle "        <nmwgt:ifName>eth0</nmwgt:ifName>\n";
-                print $fileHandle "        <nmwgt:ifIndex>2</nmwgt:ifIndex>\n";
-                print $fileHandle "        <nmwgt:direction>".$dir."</nmwgt:direction>\n";
-                print $fileHandle "        <nmwgt:capacity>1000000000</nmwgt:capacity>\n";
-                print $fileHandle "      </nmwgt:interface>\n";
-                if($et eq "netutil") {
-                    print $fileHandle "    </netutil:subject>\n";
-                    print $fileHandle "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>\n";
-                }
-                elsif($et eq "neterr") {
-                    print $fileHandle "    </neterr:subject>\n";
-                    print $fileHandle "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:eventType>\n";
-                }      
-                elsif($et eq "netdisc") {
-                    print $fileHandle "    </netdisc:subject>\n";
-                    print $fileHandle "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:eventType>\n";
-                }     
-                print $fileHandle "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>\n";
-                print $fileHandle "  </nmwg:metadata>\n\n";
- 
-                print $fileHandle "  <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"d-".$dir."-".$et."-1\" metadataIdRef=\"m-".$dir."-".$et."-1\">\n";
-                print $fileHandle "    <nmwg:key id=\"k-".$dir."-".$et."-1\">\n";
-                print $fileHandle "      <nmwg:parameters id=\"pk-".$dir."-".$et."-1\">\n";
-                print $fileHandle "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>\n";
-                if($et eq "netutil") {
-                    print $fileHandle "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>\n";             
-                }
-                elsif($et eq "neterr") {
-                    print $fileHandle "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>\n";             
-                }     
-                elsif($et eq "netdisc") {
-                    print $fileHandle "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/discards/2.0</nmwg:parameter>\n";             
-                }    
-                print $fileHandle "        <nmwg:parameter name=\"type\">rrd</nmwg:parameter>\n";
-                print $fileHandle "        <nmwg:parameter name=\"file\">".$confdir."/localhost.rrd</nmwg:parameter>\n";
-                if($et eq "netutil") {        
-                    print $fileHandle "        <nmwg:parameter name=\"valueUnits\">Bps</nmwg:parameter>\n";
-                    print $fileHandle "        <nmwg:parameter name=\"dataSource\">if".$dir."octets</nmwg:parameter>\n";
-                }
-                elsif($et eq "neterr") {
-                    print $fileHandle "        <nmwg:parameter name=\"valueUnits\">Eps</nmwg:parameter>\n";
-                    print $fileHandle "        <nmwg:parameter name=\"dataSource\">if".$dir."errors</nmwg:parameter>\n";
-                }                
-                elsif($et eq "netdisc") {
-                    print $fileHandle "        <nmwg:parameter name=\"valueUnits\">Dps</nmwg:parameter>\n";
-                    print $fileHandle "        <nmwg:parameter name=\"dataSource\">if".$dir."discards</nmwg:parameter>\n";
-                }   
-                print $fileHandle "      </nmwg:parameters>\n";
-                print $fileHandle "    </nmwg:key>\n";
-                print $fileHandle "  </nmwg:data>\n\n";
-            }
-        }
-        print $fileHandle "</nmwg:store>\n";
-        close($fileHandle);
     }
 
     if ( $config->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/dbxml$/mx;
         $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $confdir . "/store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
-        if ( $makeStore ) {
+        if ( $makeStore and $result[0] ) {
             if ( -f $config->{"snmp"}->{"metadata_db_file"} ) {
-                system("mv " . $config->{"snmp"}->{"metadata_db_file"} . " " . $config->{"snmp"}->{"metadata_db_file"} . "~");
+                system( "mv " . $config->{"snmp"}->{"metadata_db_file"} . " " . $config->{"snmp"}->{"metadata_db_file"} . "~" );
             }
-            system( "mv " . $makeStore . " " . $config->{"snmp"}->{"metadata_db_file"});
+            system( "mv " . $result[0] . " " . $config->{"snmp"}->{"metadata_db_file"} );
         }
         delete $config->{"snmp"}->{"db_autoload"}               if $config->{"snmp"}->{"db_autoload"};
         delete $config->{"snmp"}->{"autoload_metadata_db_file"} if $config->{"snmp"}->{"autoload_metadata_db_file"};
@@ -528,18 +456,18 @@ sub config_snmp_ma {
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/\.xml$/mx;
         $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the name of the container inside of the XML database ", "store.dbxml", $config->{"snmp"}->{"metadata_db_file"}, '.+' );
 
-        if ( $makeStore ) {
+        if ($makeStore) {
             $config->{"snmp"}->{"db_autoload"} = 1;
             $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
             if ( -f $config->{"snmp"}->{"autoload_metadata_db_file"} ) {
-                system("mv " . $config->{"snmp"}->{"autoload_metadata_db_file"} . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} . "~");
+                system( "mv " . $config->{"snmp"}->{"autoload_metadata_db_file"} . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} . "~" );
             }
-            system( "mv " . $makeStore . " " . $config->{"snmp"}->{"metadata_db_file"});
+            system( "mv " . $makeStore . " " . $config->{"snmp"}->{"metadata_db_file"} );
         }
         else {
             $config->{"snmp"}->{"db_autoload"} = &ask( "Would you like to auto-load the database [non-destructive] ? (0 for no, 1 for yes) ", "1", $config->{"snmp"}->{"db_autoload"}, '^[01]$' );
             if ( $config->{"snmp"}->{"db_autoload"} eq "1" ) {
-                $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );            
+                $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
             }
         }
     }
@@ -568,47 +496,48 @@ sub config_snmp_ma {
 }
 
 sub config_pinger {
-	my ($config, $accesspoint, $def_config, $modulename) = @_;
-	my $moduletype = ($modulename =~ /ma$/ ? "MA" : "MP");
+    my ( $config, $accesspoint, $def_config, $modulename ) = @_;
+    my $moduletype = ( $modulename =~ /ma$/ ? "MA" : "MP" );
 
-	$config->{$modulename}->{"db_type"} = &ask("Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$');
+    $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
 
-	if ($config->{$modulename}->{"db_type"} eq "sqlite") {
-		$config->{$modulename}->{"db_file"} = &ask("Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+');
-	} elsif ($config->{$modulename}->{"db_type"} eq "mysql") {
-		$config->{$modulename}->{"db_name"} = &ask("Enter the name of the MySQL database ", $db_name, $config->{$modulename}->{"db_name"}, '.+');
-		$config->{$modulename}->{"db_host"} = &ask("Enter the host for the MySQL database ",  $default_hostname , $config->{$modulename}->{"db_host"}, '.+');
-		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ",  $db_port, $config->{$modulename}->{"db_port"}, '^\d*$');
-		$config->{$modulename}->{"db_port"} = $tmp if ($tmp ne "");
-		$tmp = &ask("Enter the username for the MySQL database (leave blank for default) ",  $db_username, $config->{$modulename}->{"db_username"}, '');
-		$config->{$modulename}->{"db_username"} = $tmp if ($tmp ne "");
-		$tmp  = &ask("Enter the password for the MySQL database (leave blank for default) ", $db_password , $config->{$modulename}->{"db_password"}, '');
-		$config->{$modulename}->{"db_password"} = $tmp if ($tmp ne "");
-	}
+    if ( $config->{$modulename}->{"db_type"} eq "sqlite" ) {
+        $config->{$modulename}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "pinger.db", $config->{$modulename}->{"db_file"}, '.+' );
+    }
+    elsif ( $config->{$modulename}->{"db_type"} eq "mysql" ) {
+        $config->{$modulename}->{"db_name"} = &ask( "Enter the name of the MySQL database ",                                $db_name,          $config->{$modulename}->{"db_name"}, '.+' );
+        $config->{$modulename}->{"db_host"} = &ask( "Enter the host for the MySQL database ",                               $default_hostname, $config->{$modulename}->{"db_host"}, '.+' );
+        $tmp                                = &ask( "Enter the port for the MySQL database (leave blank for the default) ", $db_port,          $config->{$modulename}->{"db_port"}, '^\d*$' );
+        $config->{$modulename}->{"db_port"} = $tmp if ( $tmp ne "" );
+        $tmp = &ask( "Enter the username for the MySQL database (leave blank for default) ", $db_username, $config->{$modulename}->{"db_username"}, '' );
+        $config->{$modulename}->{"db_username"} = $tmp if ( $tmp ne "" );
+        $tmp = &ask( "Enter the password for the MySQL database (leave blank for default) ", $db_password, $config->{$modulename}->{"db_password"}, '' );
+        $config->{$modulename}->{"db_password"} = $tmp if ( $tmp ne "" );
+    }
 
-	if($modulename eq "pingermp") {
-		$config->{$modulename}->{"configuration_file"} = &ask("Name of XML configuration file for landmarks and schedules ", "pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+');
-	}
-	
-	if($modulename eq "pingerma") {
-	  $config->{$modulename}->{"query_size_limit"} = &ask("Enter the limit on query size ", "100000", $config->{$modulename}->{"query_size_limit"}, '^\d*$');
-        }
+    if ( $modulename eq "pingermp" ) {
+        $config->{$modulename}->{"configuration_file"} = &ask( "Name of XML configuration file for landmarks and schedules ", "pinger-landmarks.xml", $config->{$modulename}->{"configuration_file"}, '.+' );
+    }
 
-	$config->{$modulename}->{"enable_registration"} = &ask("Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$');
+    if ( $modulename eq "pingerma" ) {
+        $config->{$modulename}->{"query_size_limit"} = &ask( "Enter the limit on query size ", "100000", $config->{$modulename}->{"query_size_limit"}, '^\d*$' );
+    }
 
-	if($config->{$modulename}->{"enable_registration"} eq "1") {
-		my $registration_interval = $def_config->{"ls_registration_interval"};
-		$registration_interval = $config->{$modulename}->{"ls_registration_interval"} if (defined $config->{$modulename}->{"ls_registration_interval"});
-		$config->{$modulename}->{"ls_registration_interval"} = &ask("Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$');
-        }
-        $config->{$modulename}->{"service_name"} = &ask("Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+');
+    $config->{$modulename}->{"enable_registration"} = &ask( "Will this service register with an LS (0,1) ", "0", $config->{$modulename}->{"enable_registration"}, '^[01]$' );
 
-        $config->{$modulename}->{"service_type"} = &ask("Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+');
+    if ( $config->{$modulename}->{"enable_registration"} eq "1" ) {
+        my $registration_interval = $def_config->{"ls_registration_interval"};
+        $registration_interval = $config->{$modulename}->{"ls_registration_interval"} if ( defined $config->{$modulename}->{"ls_registration_interval"} );
+        $config->{$modulename}->{"ls_registration_interval"} = &ask( "Enter the number of minutes between LS registrations ", "30", $registration_interval, '^\d+$' );
+    }
+    $config->{$modulename}->{"service_name"} = &ask( "Enter a name for this service ", "PingER $moduletype", $config->{$modulename}->{"service_name"}, '.+' );
 
-        $config->{$modulename}->{"service_description"} = &ask("Enter a service description ", "PingER $moduletype on $default_hostname", $config->{$modulename}->{"service_description"}, '.+');
+    $config->{$modulename}->{"service_type"} = &ask( "Enter the service type ", $moduletype, $config->{$modulename}->{"service_type"}, '.+' );
 
-        $config->{$modulename}->{"service_accesspoint"} = &ask("Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/');
-	
+    $config->{$modulename}->{"service_description"} = &ask( "Enter a service description ", "PingER $moduletype on $default_hostname", $config->{$modulename}->{"service_description"}, '.+' );
+
+    $config->{$modulename}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{$modulename}->{"service_accesspoint"}, '^http:\/\/' );
+
 }
 
 sub config_status_ma {
