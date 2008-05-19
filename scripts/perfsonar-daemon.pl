@@ -70,41 +70,44 @@ BEGIN {
 }
 
 my %ns = (
-  nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-  nmtm => "http://ggf.org/ns/nmwg/time/2.0/",
-  ifevt => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
-  iperf => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
-  bwctl => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
-  owamp => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
-  netutil => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
-  neterr => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
-  netdisc => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/" ,
-  snmp => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
-  select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
-  perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
-  psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
-  nmwgr => "http://ggf.org/ns/nmwg/result/2.0/",
-  xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
-  xpath => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/",
-  nmwgt => "http://ggf.org/ns/nmwg/topology/2.0/",
-  nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
-  ctrlplane => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
-  CtrlPlane => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
-  ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
-  ethernet => "http://ogf.org/schema/network/topology/ethernet/20070828/",
-  ipv4 => "http://ogf.org/schema/network/topology/ipv4/20070828/",
-  ipv6 => "http://ogf.org/schema/network/topology/ipv6/20070828/",
-  nmtb => "http://ogf.org/schema/network/topology/base/20070828/",
-  nmtl2 => "http://ogf.org/schema/network/topology/l2/20070828/",
-  nmtl3 => "http://ogf.org/schema/network/topology/l3/20070828/",
-  nmtl4 => "http://ogf.org/schema/network/topology/l4/20070828/",
-  nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
-  sonet => "http://ogf.org/schema/network/topology/sonet/20070828/",
-  transport => "http://ogf.org/schema/network/topology/transport/20070828/",
-  pinger => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
-  traceroute => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
-  tracepath => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
-  ping => "http://ggf.org/ns/nmwg/tools/ping/2.0/"
+    nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
+    nmtm          => "http://ggf.org/ns/nmwg/time/2.0/",
+    ifevt         => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+    iperf         => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
+    bwctl         => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+    owamp         => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
+    netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
+    neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
+    netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
+    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",   
+    select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
+    psservice     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
+    xquery        => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
+    xpath         => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/",
+    nmwgt         => "http://ggf.org/ns/nmwg/topology/2.0/",
+    nmwgtopo3     => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    pinger        => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
+    nmwgr         => "http://ggf.org/ns/nmwg/result/2.0/",
+    traceroute    => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
+    tracepath     => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
+    ping          => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
+    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",        
+    ctrlplane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
+    CtrlPlane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
+    ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
+    ethernet      => "http://ogf.org/schema/network/topology/ethernet/20070828/",
+    ipv4          => "http://ogf.org/schema/network/topology/ipv4/20070828/",
+    ipv6          => "http://ogf.org/schema/network/topology/ipv6/20070828/",
+    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtl2         => "http://ogf.org/schema/network/topology/l2/20070828/",
+    nmtl3         => "http://ogf.org/schema/network/topology/l3/20070828/",
+    nmtl4         => "http://ogf.org/schema/network/topology/l4/20070828/",
+    nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    sonet         => "http://ogf.org/schema/network/topology/sonet/20070828/",
+    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"  
 );
 
 use lib "$libdir";
@@ -581,7 +584,18 @@ sub cleanLS {
     my ($args) = @_;
 
     my $service = $args->{"service"};
-    my $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"} * 60;
+    
+    my $sleep_time;
+    if( $args->{"conf"}->{"ls"}->{"reaper_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"} * 60;
+    }
+    elsif ( $args->{"conf"}->{"gls"}->{"reaper_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"gls"}->{"reaper_interval"} * 60;
+    }
+    else {
+        $sleep_time = 300;
+    }
+    
     my $error = q{};
 
     unless ( $sleep_time ) {
