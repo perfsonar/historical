@@ -30,106 +30,110 @@ sub initialize {
     return $self->SUPER::initialize($parameters);
 }
 
-sub addVCG {
-    my ($self, $name) = @_;
-
-    $self->{VCGS}->{$name} = 1;
-}
-
 sub getVCG {
     my ($self, $name) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{VCGS}) {
+        $do_reload_stats = 1;
+    }
+
+    # Add it to our list of VCGs
+    $self->{VCGS}->{$name} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
     return $self->{VCGSBYNAME}->{$name};
 }
 
-sub addSNC {
-    my ($self, $name) = @_;
-
-    $self->{SNCS}->{$name} = 1;
-}
 
 sub getSNC {
     my ($self, $name) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{SNCS}) {
+        $do_reload_stats = 1;
+    }
+
+    # Add it to our list of SNCs
+    $self->{SNCS}->{$name} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
     return $self->{SNCSBYNAME}->{$name};
 }
 
-sub addETH {
-    my ($self, $aid) = @_;
-
-    $self->{ETHS}->{$aid} = 1;
-}
-
 sub getETH {
     my ($self, $aid) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{ETHS}) {
+        $do_reload_stats = 1;
+    }
+
+    $self->{ETHS}->{$aid} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
-    return $self->{ETHSBYAID}->{$aid};
-}
-
-sub addOCN {
-    my ($self, $aid, $rate) = @_;
-
-    return unless ($rate eq "3" or $rate eq "12" or $rate eq "48" or $rate eq "192" or not $rate); 
-
-    $self->{OCNS}->{$rate}->{$aid} = 1;
+    return $self->{OTHSBYAID}->{$aid};
 }
 
 sub getOCN {
     my ($self, $aid) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{OCNS}) {
+        $do_reload_stats = 1;
+    }
+
+    $self->{OCNS}->{$aid} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
     return $self->{OCNSBYAID}->{$aid};
 }
 
-sub addOCH {
-    return;
-}
-
 sub getOCH {
     return;
 }
 
-sub addGTP {
-    my ($self, $name) = @_;
-
-    $self->{GTPS}->{$name} = 1;
-}
 
 sub getGTP {
     my ($self, $name) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{GTPS}) {
+        $do_reload_stats = 1;
+    }
+
+    $self->{GTPS}->{$name} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
     return $self->{GTPSBYNAME}->{$name};
 }
 
-sub addCrossconnect {
-    my ($self, $name) = @_;
-
-    $self->{CRSS}->{$name} = 1;
-}
-
 sub getCrossconnect {
     my ($self, $name) = @_;
+    my $do_reload_stats = 0;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+    if (not defined $self->{CRSS}) {
+        $do_reload_stats = 1;
+    }
+
+    $self->{CRSS}->{$name} = 1;
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
         $self->readStats();
     }
 
