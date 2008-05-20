@@ -34,7 +34,7 @@ sub getVCG {
     my ($self, $name) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{VCGS}) {
+    if (scalar(keys %{ $self->{VCGS} }) == 0) {
         $do_reload_stats = 1;
     }
 
@@ -53,7 +53,7 @@ sub getSNC {
     my ($self, $name) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{SNCS}) {
+    if (scalar(keys %{ $self->{SNCS} }) == 0) {
         $do_reload_stats = 1;
     }
 
@@ -71,7 +71,7 @@ sub getETH {
     my ($self, $aid) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{ETHS}) {
+    if (scalar(keys %{ $self->{ETHS} }) == 0) {
         $do_reload_stats = 1;
     }
 
@@ -88,7 +88,7 @@ sub getOCN {
     my ($self, $aid) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{OCNS}) {
+    if (scalar(keys %{ $self->{OCNS} }) == 0) {
         $do_reload_stats = 1;
     }
 
@@ -110,7 +110,7 @@ sub getGTP {
     my ($self, $name) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{GTPS}) {
+    if (scalar(keys %{ $self->{GTPS} }) == 0) {
         $do_reload_stats = 1;
     }
 
@@ -127,7 +127,7 @@ sub getCrossconnect {
     my ($self, $name) = @_;
     my $do_reload_stats = 0;
 
-    if (not defined $self->{CRSS}) {
+    if (scalar(keys %{ $self->{CRSS} }) == 0) {
         $do_reload_stats = 1;
     }
 
