@@ -3,7 +3,6 @@ package perfSONAR_PS::Utils::TL1::Base;
 use warnings;
 use strict;
 
-use strict;
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Utils::TL1;
