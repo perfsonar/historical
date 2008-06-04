@@ -1812,16 +1812,16 @@ sub retrieveSQL {
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
                 my %attrs = ();
-#                if ( $timeType eq "unix" ) {
+                if ( $timeType eq "unix" ) {
                     $attrs{"timeType"} = "unix";
                     $attrs{ "startTime" } = owptime2exacttime( $result->[$a][3] );
                     $attrs{ "endTime" } = owptime2exacttime( $result->[$a][4] );
-#                }
-#                else {
-#                    $attrs{"timeType"} = "iso";
-#                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
-#                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
-#                }
+                }
+                else {
+                    $attrs{"timeType"} = "iso";
+                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
+                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
+                }
 
                 #min
                 $attrs{ "min_delay" } = $result->[$a][5] if defined $result->[$a][5];
