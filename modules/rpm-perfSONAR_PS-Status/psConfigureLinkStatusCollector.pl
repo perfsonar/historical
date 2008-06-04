@@ -8,10 +8,15 @@ my $was_installed = 0;
 my $DEFAULT_FILE;
 
 if ($was_installed) {
-	$DEFAULT_FILE  = "XXX_DEFAULT_XXX";
-} else {
-	$DEFAULT_FILE  = "/etc/perfsonar/collector.conf";
+    $confdir = "XXX_CONFDIR_XXX";
+    $conffile = "XXX_CONFFILE_XXX";
 }
+else {
+    $confdir = ".";
+    $conffile = "daemon.conf";
+}
+
+$DEFAULT_FILE = $confdir ."/". $conffile;
 
 print " -- perfSONAR-PS Collectors Configuration --\n";
 print " - [press enter for the default choice] -\n\n";
@@ -83,8 +88,8 @@ sub config_linkstatus {
 
 	$config->{"collection_interval"} = &ask("Enter the number of seconds between status collections ", "60", $config->{"collection_interval"}, '^\d+$');
 
-	$config->{"link_file"} = &ask("Enter the file to read the link information from", "/etc/perfsonar/links.conf", $config->{"link_file"}, '^.+$');
-	$config->{"link_file_type"} = "file";
+	$config->{"elements_file"} = &ask("Enter the file to read the link information from", "$confdir/elements.conf", $config->{"elements_file"}, '^.+$');
+	$config->{"elements_file_type"} = "file";
 
 	$config->{"ma_type"} = &ask("Enter the database type to read from ", "sqlite|mysql|ma", $config->{"ma_type"}, '(sqlite|mysql|ma)');
 

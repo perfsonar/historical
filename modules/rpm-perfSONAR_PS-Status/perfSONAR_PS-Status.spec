@@ -28,6 +28,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %define perfsonar_var_dir               %{perfsonar_prefix}/var
 %define perfsonar_bin_dir               %{perfsonar_prefix}/bin
 
+%define elements_conf_file              %{perfsonar_conf_dir}/elements.conf
+%define e2emon_compat_file              %{perfsonar_conf_dir}/e2emon_compat.conf
+
 %description
 The perfSONAR_PS Link Status service allows one to collect to and make link or
 circuit status information available from SQL storage using perfSONAR Status MA
@@ -71,6 +74,8 @@ install -p -m755 psConfigureLinkStatus %{buildroot}/%{perfsonar_bin_dir}
 install -p -m755 psConfigureLinkStatusCollector %{buildroot}/%{perfsonar_bin_dir}
 install -p -m644 logger.conf %{buildroot}/%{daemon_logger_conf_file}
 install -p -m644 logger.conf %{buildroot}/%{collector_logger_conf_file}
+install -p -m644 elements.conf %{buildroot}/%{elements_conf_file}
+install -p -m644 e2emon_compat.conf %{buildroot}/%{e2emon_compat_file}
 mkdir -p %{buildroot}/etc/init.d/
 install -p -m755 perfsonar-linkstatus-collector.init %{buildroot}/etc/init.d/perfsonar-linkstatus-collector
 install -p -m755 perfsonar-linkstatus.init %{buildroot}/etc/init.d/perfsonar-linkstatus

@@ -12,6 +12,7 @@ perfsonar-collector.pl
 perfSONAR_PS-Status.spec
 psConfigureLinkStatusCollector.pl
 psConfigureLinkStatus.pl
+elements.conf
 README
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm

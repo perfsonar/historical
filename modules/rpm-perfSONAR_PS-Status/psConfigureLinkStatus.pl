@@ -11,10 +11,10 @@ use File::Temp qw(tempfile);
 my %enabled_services = (
     snmp => 0,
     ls => 0,
-    perfsonarbuoy => 1,
+    perfsonarbuoy => 0,
     pingerma => 0,
     pingermp => 0,
-    status => 0,
+    status => 1,
     circuitstatus => 0,
     topology => 0,    
 );

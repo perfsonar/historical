@@ -1,26 +1,20 @@
-perfSONAR_PS::Services::MA::perfSONARBUOY README File
+perfSONAR_PS::Services::MA::Status README File
 =====================================================
 
 Description
 -----------
 
-The perfSONAR_PS::Services::MA::perfSONARBUOY module allows one to make BWCTL
-data available from backend SQL storage using the perfSONAR perfSONARBUOY MA
+The perfSONAR_PS Link Status service allows one to collect to and make link or
+circuit status information available from SQL storage using perfSONAR Status MA
 protocols.
 
 Installation
 ------------
   
- Prerequisites
- -----------------
-    The AMI Framework is required to use this service.  The framework must be
-    installed, configured, and collecting measurements for this service to deliver
-    that data that it is intended to offer.
-
  CPAN installation
  -----------------
 
-    perl -MCPAN -e 'install perfSONAR_PS::Services::MA::perfSONARBUOY'
+    perl -MCPAN -e 'install perfSONAR_PS::Services::MA::Status'
 
  Standard installation
  ---------------------

@@ -19,7 +19,7 @@ use perfSONAR_PS::SNMPWalk;
 
 use base 'perfSONAR_PS::Collectors::Base';
 
-use fields 'CLIENT', 'LINKS', 'LINKSBYID', 'SNMPAGENTS', 'TL1AGENTS';
+use fields 'CLIENT', 'ELEMENTS', 'ELEMENTSBYID', 'SNMPAGENTS', 'TL1AGENTS';
 
 our $VERSION = 0.09;
 
@@ -39,17 +39,17 @@ sub init {
 
     $logger->debug("init()");
 
-    if (not defined $self->{CONF}->{"link_file_type"} or $self->{CONF}->{"link_file_type"} eq "") {
+    if (not defined $self->{CONF}->{"elements_file_type"} or $self->{CONF}->{"elements_file_type"} eq "") {
         $logger->error("no link file type specified");
         return -1;
     }
 
-    if($self->{CONF}->{"link_file_type"} ne "file") {
-        $logger->error("invalid link file type specified: " . $self->{CONF}->{"link_file_type"});
+    if($self->{CONF}->{"elements_file_type"} ne "file") {
+        $logger->error("invalid link file type specified: " . $self->{CONF}->{"elements_file_type"});
         return -1;
     }
 
-    if ($self->parseLinkFile($self->{CONF}->{"link_file"}, $self->{CONF}->{"link_file_type"}) != 0) {
+    if ($self->parseElementsFile($self->{CONF}->{"elements_file"}, $self->{CONF}->{"elements_file_type"}) != 0) {
         $logger->error("couldn't load links to measure");
         return -1;
     }
@@ -125,10 +125,10 @@ sub init {
     return 0;
 }
 
-sub parseLinkFile {
+sub parseElementsFile {
     my($self, $file, $type) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
-    my $links_config;
+    my $elements_config;
 
     if (defined $self->{DIRECTORY}) {
         if (!($file =~ "^/")) {
@@ -138,42 +138,42 @@ sub parseLinkFile {
 
     my $filedb = perfSONAR_PS::DB::File->new( { file => $file } );
     $filedb->openDB;
-    $links_config = $filedb->getDOM();
+    $elements_config = $filedb->getDOM();
 
-    $self->{LINKSBYID} = ();
+    $self->{ELEMENTSBYID} = ();
 
-    foreach my $link ($links_config->getElementsByTagName("link")) {
-        my ($status, $res) = $self->parseLinkElement($link);
+    foreach my $element ($elements_config->getElementsByTagName("element")) {
+        my ($status, $res) = $self->parseElement($element);
         if ($status != 0) {
-            my $msg = "Failure parsing link element: $res";
+            my $msg = "Failure parsing element: $res";
             $logger->error($msg);
             return -1;
         }
 
-        my $parsed_link = $res;
+        my $parsed_element = $res;
 
-        push @{ $self->{LINKS} }, $parsed_link;
+        push @{ $self->{ELEMENTS} }, $parsed_element;
 
-        foreach my $id ($parsed_link->getIDs()) {
-            if (defined $self->{LINKSBYID}->{$id}) {
-                $logger->error("Tried to redefine link $id");
+        foreach my $id ($parsed_element->getIDs()) {
+            if (defined $self->{ELEMENTSBYID}->{$id}) {
+                $logger->error("Tried to redefine element $id");
                 return -1;
             }
 
-            $self->{LINKSBYID}->{$id} = $parsed_link;
+            $self->{ELEMENTSBYID}->{$id} = $parsed_element;
         }
     }
 
     return 0;
 }
 
-sub parseLinkElement {
-    my ($self, $link_desc) = @_;
+sub parseElement {
+    my ($self, $element_desc) = @_;
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
 
     my $link = perfSONAR_PS::Collectors::LinkStatus::Link->new();
 
-    my $knowledge = $link_desc->getAttribute("knowledge");
+    my $knowledge = $element_desc->getAttribute("knowledge");
     if (not defined $knowledge) {
         my $msg = "It is not stated whether or knowledge is full or partial";
         $logger->error($msg);
@@ -182,21 +182,21 @@ sub parseLinkElement {
 
     $link->setKnowledge($knowledge);
 
-    foreach my $id_elm ($link_desc->getElementsByTagName("id")) {
+    foreach my $id_elm ($element_desc->getElementsByTagName("id")) {
         my $id = $id_elm->textContent;
 
         $link->addID($id);
     }
 
     if (scalar($link->getIDs()) == 0) {
-        my $msg = "No ids associated with specified link";
+        my $msg = "No ids associated with specified element";
         $logger->error($msg);
         return (-1, $msg);
     }
 
     my $primary_time_source;
 
-    foreach my $agent ($link_desc->getElementsByTagName("agent")) {
+    foreach my $agent ($element_desc->getElementsByTagName("agent")) {
         my ($status, $res);
 
         # The following sections for grabbing 'operStatus' and
@@ -208,7 +208,7 @@ sub parseLinkElement {
 
             ($status, $oper_agent_ref) = $self->parseAgentElement($oper_info, "oper");
             if ($status != 0) {
-                $logger->error("Problem parsing operational status agent for link");
+                $logger->error("Problem parsing operational status agent for element");
                 return -1;
             }
 
@@ -234,7 +234,7 @@ sub parseLinkElement {
 
             ($status, $admin_agent_ref) = $self->parseAgentElement($admin_info, "admin");
             if ($status != 0) {
-                $logger->error("Problem parsing adminstrative status agent for link");
+                $logger->error("Problem parsing adminstrative status agent for element");
                 return -1;
             }
 
@@ -260,7 +260,7 @@ sub parseLinkElement {
 
         ($status, $res) = $self->parseAgentElement($agent, "");
         if ($status != 0) {
-            my $msg = "Problem parsing operational status agent for link: $res";
+            my $msg = "Problem parsing operational status agent for element: $res";
             $logger->error($msg);
             return (-1, $msg);
         }
@@ -525,7 +525,7 @@ sub collectMeasurements {
         return (-1, $msg);
     }
 
-    foreach my $link (@{$self->{LINKS}}) {
+    foreach my $link (@{$self->{ELEMENTS}}) {
         my ($status, $res);
 
         $logger->debug("Getting information on link: ".(@{$link->getIDs()}[0]));
