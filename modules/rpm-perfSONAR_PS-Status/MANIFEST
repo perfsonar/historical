@@ -2,7 +2,8 @@ build_collector.sh
 build_service.sh
 Changes
 LICENSE
-logger.conf
+linkstatus-service-logger.conf
+linkstatus-collector-logger.conf
 Makefile
 MANIFEST
 perfsonar-linkstatus.init

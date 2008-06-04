@@ -28,30 +28,30 @@ do
     if [ -f $PIDDIR/$PIDFILE ] ; then
 	PID=`cat $PIDDIR/$PIDFILE`
 	if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
-	    STATUS="perfsonarbuoy (pid $PID) running"
+	    STATUS="perfsonar-linkstatus (pid $PID) running"
 	    RUNNING=1
 	else
-	    STATUS="perfsonarbuoy (pid $PID?) not running"
+	    STATUS="perfsonar-linkstatus (pid $PID?) not running"
 	    RUNNING=0
 	fi
     else
-	STATUS="perfsonarbuoy (no pid file) not running"
+	STATUS="perfsonar-linkstatus (no pid file) not running"
 	RUNNING=0
     fi
 
     case $ARG in
     start)
 	if [ $RUNNING -eq 1 ]; then
-	    echo "$0 $ARG: perfsonarbuoy (pid $PID) already running"
+	    echo "$0 $ARG: perfsonar-linkstatus (pid $PID) already running"
 	    continue
 	fi
 
 	echo $PERFSONAR
 
 	if $PERFSONAR ; then
-	    echo "$0 $ARG: perfsonarbuoy started"
+	    echo "$0 $ARG: perfsonar-linkstatus started"
 	else
-	    echo "$0 $ARG: perfsonarbuoy could not be started"
+	    echo "$0 $ARG: perfsonar-linkstatus could not be started"
 	    ERROR=3
 	fi
 	;;
@@ -61,9 +61,9 @@ do
 	    continue
 	fi
 	if kill $PID ; then
-	    echo "$0 $ARG: perfsonarbuoy stopped"
+	    echo "$0 $ARG: perfsonar-linkstatus stopped"
 	else
-	    echo "$0 $ARG: perfsonarbuoy could not be stopped"
+	    echo "$0 $ARG: perfsonar-linkstatus could not be stopped"
 	    ERROR=4
 	fi
 	;;
@@ -71,18 +71,18 @@ do
     	$0 stop; echo "waiting..."; sleep 10; $0 start;
 	;;
 #	if [ $RUNNING -eq 0 ]; then
-#	    echo "$0 $ARG: perfsonarbuoy not running, trying to start"
+#	    echo "$0 $ARG: perfsonar-linkstatus not running, trying to start"
 #	    if $PERFSONAR ; then
-#		echo "$0 $ARG: perfsonarbuoy started"
+#		echo "$0 $ARG: perfsonar-linkstatus started"
 #	    else
-#		echo "$0 $ARG: perfsonarbuoy could not be started"
+#		echo "$0 $ARG: perfsonar-linkstatus could not be started"
 #		ERROR=5
 #	    fi
 #	else
 #	    if kill -HUP $PID ; then
-#	       echo "$0 $ARG: perfsonarbuoy restarted"
+#	       echo "$0 $ARG: perfsonar-linkstatus restarted"
 #	    else
-#	       echo "$0 $ARG: perfsonarbuoy could not be restarted"
+#	       echo "$0 $ARG: perfsonar-linkstatus could not be restarted"
 #	       ERROR=6
 #	    fi
 #	fi
@@ -91,9 +91,9 @@ do
 	echo "usage: $0 (start|stop|restart|help)"
 	cat <<EOF
 
-start      - start perfsonarbuoy
-stop       - stop perfsonarbuoy
-restart    - restart perfsonarbuoy if running by sending a SIGHUP or start if 
+start      - start perfsonar-linkstatus
+stop       - stop perfsonar-linkstatus
+restart    - restart perfsonar-linkstatus if running by sending a SIGHUP or start if 
              not running
 help       - this screen
 

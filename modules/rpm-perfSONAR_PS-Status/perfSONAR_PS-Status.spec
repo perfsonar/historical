@@ -26,6 +26,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %define collector_logger_conf_filename  linkstatus-collector-logger.conf
 %define collector_logger_conf_file      %{perfsonar_conf_dir}/%{collector_logger_conf_filename}
 %define perfsonar_var_dir               %{perfsonar_prefix}/var
+%define perfsonar_log_dir               %{perfsonar_prefix}/log
 %define perfsonar_bin_dir               %{perfsonar_prefix}/bin
 
 %define elements_conf_file              %{perfsonar_conf_dir}/elements.conf
@@ -66,14 +67,15 @@ mv perfsonar-linkstatus-collector.new perfsonar-linkstatus-collector.init
 
 mkdir -p %{buildroot}/%{perfsonar_bin_dir}
 mkdir -p %{buildroot}/%{perfsonar_var_dir}
+mkdir -p %{buildroot}/%{perfsonar_log_dir}
 mkdir -p %{buildroot}/%{perfsonar_conf_dir}
 
 install -p -m755 perfsonar-linkstatus %{buildroot}/%{perfsonar_bin_dir}
 install -p -m755 perfsonar-linkstatus-collector %{buildroot}/%{perfsonar_bin_dir}
 install -p -m755 psConfigureLinkStatus %{buildroot}/%{perfsonar_bin_dir}
 install -p -m755 psConfigureLinkStatusCollector %{buildroot}/%{perfsonar_bin_dir}
-install -p -m644 logger.conf %{buildroot}/%{daemon_logger_conf_file}
-install -p -m644 logger.conf %{buildroot}/%{collector_logger_conf_file}
+install -p -m644 linkstatus-service-logger.conf %{buildroot}/%{daemon_logger_conf_file}
+install -p -m644 linkstatus-collector-logger.conf %{buildroot}/%{collector_logger_conf_file}
 install -p -m644 elements.conf %{buildroot}/%{elements_conf_file}
 install -p -m644 e2emon_compat.conf %{buildroot}/%{e2emon_compat_file}
 mkdir -p %{buildroot}/etc/init.d/

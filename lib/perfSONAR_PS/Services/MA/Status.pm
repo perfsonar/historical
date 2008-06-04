@@ -1253,7 +1253,7 @@ sub parseCompatCircuitsFile {
     $self->{NODES} = \%nodes;
 
     # Grab the set of links
-    $find_res = find($conf, "./*[local-name()='link']", 0);
+    $find_res = find($conf, "./*[local-name()='circuit']", 0);
     if ($find_res) {
         foreach my $link ($find_res->get_nodelist) {
             my $global_name = findvalue($link, "globalName");
