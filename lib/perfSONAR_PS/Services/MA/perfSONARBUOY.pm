@@ -63,6 +63,8 @@ my %ma_namespaces = (
     ifevt     => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
     iperf     => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
     bwctl     => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+    owd       => "http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/",
+    summary   => "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/",
     owamp     => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
     select    => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average   => "http://ggf.org/ns/nmwg/ops/average/2.0/",
@@ -383,8 +385,6 @@ sub createStorage {
         }
         $nodesOWP{ $x + 1 } = \%temp;
     }
-use Data::Dumper;
-print "\n\n" , Dumper(%nodesOWP) , "\n\n";
 
     $dbOWP->setSchema( { schema => \@dbSchema_meshesOWP } );
     my $result_meshesOWP = $dbOWP->query( { query => "select * from meshes" } );
@@ -398,7 +398,6 @@ print "\n\n" , Dumper(%nodesOWP) , "\n\n";
         }
         $meshesOWP{ $x + 1 } = \%temp;
     }
-print "\n\n" , Dumper(%meshesOWP) , "\n\n";
 
     $dbOWP->closeDB;
 
@@ -438,6 +437,9 @@ print "\n\n" , Dumper(%meshesOWP) , "\n\n";
             print $fh "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
             print $fh "            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
             print $fh "            xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\"\n";
+            print $fh "            xmlns:owd=\"http://ggf.org/ns/nmwg/characteristic/delay/one-way/20070914/\"\n";
+            print $fh "            xmlns:summary=\"http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/\"\n";          
+            print $fh "            xmlns:bwctl=\"http://ggf.org/ns/nmwg/tools/bwctl/2.0/\"\n";            
             print $fh "            xmlns:iperf= \"http://ggf.org/ns/nmwg/tools/iperf/2.0/\">\n\n";
             $fh->close;
         }
@@ -463,7 +465,7 @@ print "\n\n" , Dumper(%meshesOWP) , "\n\n";
 
                 my $metadata = q{};
                 $metadata = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
-                $metadata .= "    <owamp:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                $metadata .= "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
                 $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
                 if ( $meshesOWP{ $x+1 }->{"addr_type"} eq "LAT6" or 
                      $meshesOWP{ $x+1 }->{"addr_type"} eq "LATV6" ) {
@@ -477,6 +479,7 @@ print "\n\n" , Dumper(%meshesOWP) , "\n\n";
                 $metadata .= "      </nmwgt:endPointPair>\n";
                 $metadata .= "    </owamp:subject>\n";
                 $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
                 $metadata .= "  </nmwg:metadata>";
  
                 my $data = q{};
@@ -484,6 +487,7 @@ print "\n\n" , Dumper(%meshesOWP) , "\n\n";
                 $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
                 $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
                 $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceOWP . "</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"user\">" . $conf->{'OWPCENTRALDBUSER'} . "</nmwg:parameter>\n" if $conf->{'OWPCENTRALDBUSER'};
@@ -1692,20 +1696,18 @@ sub retrieveSQL {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
     }
 
-# try to figure out which schema we need here...
-
-   my $dataType = "";
-   foreach my $eventType (keys %{$parameters->{et}}) {
-       if($eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0") {
-           $dataType = "OWAMP";
-           last;
-       }
-       elsif($eventType eq "http://ggf.org/ns/nmwg/tools/bwctl/2.0" or
+    my $dataType = "";
+    foreach my $eventType (keys %{$parameters->{et}}) {
+        if($eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0") {
+            $dataType = "OWAMP";
+            last;
+        }
+        elsif($eventType eq "http://ggf.org/ns/nmwg/tools/bwctl/2.0" or
              $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0") {
-           $dataType = "BWCTL";
-           last;
-       }
-   }
+            $dataType = "BWCTL";
+            last;
+        }
+    }
 
     my $id = "data." . genuid();
 
@@ -1803,32 +1805,36 @@ sub retrieveSQL {
             endData( $parameters->{output} );
         }
         elsif( $dataType eq "OWAMP" ) {
-            my $prefix = "owamp";
-            my $uri    = "http://ggf.org/ns/nmwg/tools/owamp/2.0/";
+            my $prefix = "summary";
+            my $uri    = "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921/";
             
             startData( $parameters->{output}, $id, $parameters->{mid}, undef );
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
                 my %attrs = ();
-                if ( $timeType eq "unix" ) {
+#                if ( $timeType eq "unix" ) {
                     $attrs{"timeType"} = "unix";
                     $attrs{ "startTime" } = owptime2exacttime( $result->[$a][3] );
                     $attrs{ "endTime" } = owptime2exacttime( $result->[$a][4] );
-                }
-                else {
-                    $attrs{"timeType"} = "iso";
-                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
-                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
-                }
+#                }
+#                else {
+#                    $attrs{"timeType"} = "iso";
+#                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
+#                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
+#                }
 
-                $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
-                $attrs{ $dbSchema[6] } = $result->[$a][6] if $result->[$a][6];
-                $attrs{ $dbSchema[7] } = $result->[$a][7] if $result->[$a][7];
-                $attrs{ $dbSchema[8] } = $result->[$a][8] if $result->[$a][8];
-                $attrs{ $dbSchema[9] } = $result->[$a][9] if $result->[$a][9];
-                $attrs{ $dbSchema[10] } = $result->[$a][10] if $result->[$a][10];
-                $attrs{ $dbSchema[11] } = $result->[$a][11] if $result->[$a][11];
-                $attrs{ $dbSchema[12] } = $result->[$a][12] if $result->[$a][12];
+                #min
+                $attrs{ "min_delay" } = $result->[$a][5] if defined $result->[$a][5];
+                # max
+                $attrs{ "max_delay" } = $result->[$a][6] if defined $result->[$a][6];
+                #sent
+                $attrs{ $dbSchema[9] } = $result->[$a][9] if defined $result->[$a][9];
+                #lost
+                $attrs{ "loss" } = $result->[$a][10] if defined $result->[$a][10];
+                #dups
+                $attrs{ "duplicates" } = $result->[$a][11] if defined $result->[$a][11];
+                #err
+                $attrs{ "maxError" } = $result->[$a][12] if defined $result->[$a][12];
 
                 $parameters->{output}->createElement(
                     prefix     => $prefix,
