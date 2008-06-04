@@ -132,21 +132,28 @@ sub run {
     $logger->debug("Command returned \"$lines[0]\"");
 
     chomp($lines[0]);
-    my ($measurement_time, $measurement_value) = split(',', $lines[0]);
+    my @fields = split(',', $lines[0]);
 
-    if (not defined $measurement_time or $measurement_time eq "") {
+    if (scalar(@fields) == 0) {
         my $msg = "script returned invalid output: does not contain measurement time";
         return (-1, $msg);
     }
 
-    if (not defined $measurement_value or $measurement_value eq "") {
+    if (scalar(@fields) == 1) {
         my $msg = "script returned invalid output: does not contain link status";
         return (-1, $msg);
     }
 
-    $measurement_value = lc($measurement_value);
+    if ($self->{TYPE} eq "oper/admin" and scalar(@fields) == 2) {
+        my $msg = "script returned invalid output: does not contain link admin status";
+        return (-1, $msg);
+    }
 
-    return (0, $measurement_time, $measurement_value);
+    if ($self->{TYPE} eq "oper/admin") {
+        return (0, $fields[0], lc($fields[1]), lc($fields[2]));
+    } else {
+        return (0, $fields[0], lc($fields[1]));
+    }
 }
 
 1;

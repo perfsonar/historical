@@ -13,6 +13,7 @@ perfSONAR_PS-Status.spec
 psConfigureLinkStatusCollector.pl
 psConfigureLinkStatus.pl
 elements.conf
+e2emon_compat.conf
 README
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm

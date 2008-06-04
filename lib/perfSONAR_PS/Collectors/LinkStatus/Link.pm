@@ -122,26 +122,38 @@ sub measure {
     my $link_status_time;
 
     foreach my $agent (@{ $self->{AGENTS} }) {
-        my ($status, $res1, $res2) = $agent->run();
+        my ($status, $res1, $res2, $res3) = $agent->run();
         if ($status != 0) {
             $logger->error("Agent failed: $res1");
             return (-1, $res1);
         }
 
-        my $time = $res1;
-        my $value = $res2;
+        my $oper_value;
+        my $admin_value;
 
-        $logger->debug($agent->getType()." agent returned ".$time.", ".$value);
+        my $time = $res1;
+        if ($agent->getType() eq "oper") {
+            $oper_value = $res2;
+        } elsif ($agent->getType() eq "admin") {
+            $admin_value = $res2;
+        } elsif ($agent->getType() eq "oper/admin") {
+            $oper_value = $res2;
+            $admin_value = $res3;
+        }
+
+        $logger->debug($agent->getType()." agent returned ".$time.", oper= ".$oper_value." admin=".$admin_value);
 
         if (defined $self->{TIME_SOURCE} and $self->{TIME_SOURCE} eq $agent) {
             $logger->debug("Setting time from an agent");
             $link_status_time = $time;
         }
 
-        if ($agent->getType() eq "admin") {
-            $link_status->updateAdminState($value);
-        } else {
-            $link_status->updateOperState($value);
+        if ($admin_value) {
+            $link_status->updateAdminState($admin_value);
+        }
+
+        if ($oper_value) {
+            $link_status->updateOperState($oper_value);
         }
     }
 

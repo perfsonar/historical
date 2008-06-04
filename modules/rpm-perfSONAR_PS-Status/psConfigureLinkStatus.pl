@@ -685,6 +685,13 @@ sub config_status_ma {
 
         $config->{"status"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"status"}->{"service_accesspoint"}, '^http:\/\/' );
     }
+
+    $config->{"status"}->{"enable_e2emon_compatibility"} = &ask( "Enable E2EMon compatibility? (0 for no, 1 for yes) ", "0", $config->{"status"}->{"enable_e2emon_compatibility"}, '^[01]$' );
+
+    if ( $config->{"status"}->{"enable_e2emon_compatibility"} eq "1" ) {
+        $config->{"status"}->{"e2emon_definitions_file"} = &ask("Enter the file to read the E2EMon compatibility information from", "$confdir/e2emon_compat.conf", $config->{"status"}->{"e2emon_definitions_file"}, '^.+$');
+    }
+
     return;
 }
 

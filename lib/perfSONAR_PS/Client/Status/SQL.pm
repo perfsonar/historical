@@ -339,6 +339,9 @@ sub updateLinkStatus {
         my $time_elm = perfSONAR_PS::Time->new("point", $time);
 
 		my ($status, $res) = $self->getLinkStatus(\@tmp_array, $time_elm);
+        if ($status != 0) {
+			return (-1, $res);
+        }
 
         if (defined $res->{$link_id} and defined $res->{$link_id}->[0]) {
             my $state = $res->{$link_id}->[0];

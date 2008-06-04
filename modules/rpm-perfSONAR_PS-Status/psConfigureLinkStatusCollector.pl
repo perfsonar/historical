@@ -6,6 +6,8 @@ use Config::General qw(ParseConfig SaveConfig);
 
 my $was_installed = 0;
 my $DEFAULT_FILE;
+my $confdir;
+my $conffile;
 
 if ($was_installed) {
     $confdir = "XXX_CONFDIR_XXX";
@@ -94,7 +96,7 @@ sub config_linkstatus {
 	$config->{"ma_type"} = &ask("Enter the database type to read from ", "sqlite|mysql|ma", $config->{"ma_type"}, '(sqlite|mysql|ma)');
 
 	if ($config->{"ma_type"} eq "sqlite") {
-		$config->{"ma_name"} = &ask("Enter the filename of the SQLite database ", "", $config->{"ma_file"}, '.+');
+		$config->{"ma_file"} = &ask("Enter the filename of the SQLite database ", "", $config->{"ma_file"}, '.+');
 		$tmp = &ask("Enter the table in the database to use (leave blank for the default) ", "link_status", $config->{"ma_table"}, '');
 		$config->{"ma_table"} = $tmp if ($tmp ne "");
 	} elsif ($config->{"ma_type"} eq "mysql") {

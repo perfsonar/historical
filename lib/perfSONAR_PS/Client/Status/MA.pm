@@ -61,7 +61,7 @@ sub buildGetAllRequest {
 
     $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $request .= "<nmwg:metadata id=\"meta0\">\n";
-    $request .= "  <topoid:subject xmlns:topoid=\"http://ogf.org/schema/network/topology/id/20070828/\">urn:ogf:network:domain=*:node=*:port=*:link=*</topoid:subject>\n";
+    $request .= "  <topoid:subject xmlns:topoid=\"http://ogf.org/schema/network/topology/id/20070828/\">urn:ogf:network:*</topoid:subject>\n";
     $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
     $request .= "</nmwg:metadata>\n";
     $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
@@ -80,11 +80,11 @@ sub buildLinkRequest {
     my %metadata_ids = ();
     my $i = 0;
 
-    foreach my $link_id (@{ $links }) {
+    foreach my $id (@{ $links }) {
         $request .= "<nmwg:metadata id=\"meta$i\">\n";
         $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
         $request .= "  <nmwg:subject id=\"sub$i\">\n";
-        $request .= "    <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
+        $request .= "    <topoid:subject xmlns:topoid=\"http://ogf.org/schema/network/topology/id/20070828/\">".escapeString($id)."</topoid:subject>\n";
         $request .= "  </nmwg:subject>\n";
         if (defined $time and $time ne "") {
             $request .= "  <nmwg:parameters>\n";
@@ -94,7 +94,7 @@ sub buildLinkRequest {
         $request .= "</nmwg:metadata>\n";
         $request .= "<nmwg:data id=\"data$i\" metadataIdRef=\"meta$i\" />\n";
 
-        $metadata_ids{"meta$i"} = $link_id;
+        $metadata_ids{"meta$i"} = $id;
 
 
         $i++;
@@ -113,7 +113,7 @@ sub buildUpdateRequest {
     $request .= "        xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $request .= "<nmwg:metadata id=\"meta0\">\n";
     $request .= "  <nmwg:subject id=\"sub0\">\n";
-    $request .= "    <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($link_id)."\" />\n";
+    $request .= "    <topoid:subject xmlns:topoid=\"http://ogf.org/schema/network/topology/id/20070828/\">".escapeString($link_id)."</topoid:subject>\n";
     $request .= "  </nmwg:subject>\n";
     $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
     $request .= "  <nmwg:parameters>\n";

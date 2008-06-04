@@ -205,7 +205,7 @@ sub init {
         return -1;
     }
 
-    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_caompatibility"})) {
+    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_compatibility"})) {
         if ($self->{CONF}->{"status"}->{"e2emon_definitions_file"}) {
             $self->parseCompatCircuitsFile($self->{CONF}->{"status"}->{"e2emon_definitions_file"});
         } else {
@@ -221,7 +221,7 @@ sub init {
     $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
     $handler->registerEventHandler("MeasurementArchiveStoreRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
 
-    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_caompatibility"})) {
+    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_compatibility"})) {
         $handler->registerEventHandler("SetupDataRequest", "Path.Status", $self);
     }
 
@@ -1368,17 +1368,17 @@ sub parseCompatCircuitsFile {
             $new_link{"endpoints"} = \@endpoints;
             $new_link{"type"} = $link_type;
 
-            if (defined $links{$local_name}) {
+            if (defined $circuits{$local_name}) {
                 my $msg = "Error: existing link of name $local_name";
                 $self->{LOGGER}->error($msg);
                 throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
             } else {
-                $links{$local_name} = \%new_link;
+                $circuits{$local_name} = \%new_link;
             }
         }
     }
 
-    $self->{CIRCUITS} = \%links;
+    $self->{CIRCUITS} = \%circuits;
 
     return;
 }
