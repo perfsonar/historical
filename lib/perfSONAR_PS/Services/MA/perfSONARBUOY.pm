@@ -7,7 +7,7 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -15,7 +15,7 @@ perfSONAR_PS::Services::MA::perfSONARBUOY - A module that provides methods for
 the perfSONARBUOY MA.  perfSONARBUOY exposes data formerly collected by the 
 AMI framework, including BWCTL and OWAMP data.  This data is stored in a 
 database backend (commonly MySQL).  The webservices interface provided by this
-MA currently exposes only iperf data collected via BWCTL.
+MA currently exposes iperf data collected via BWCTL and OWAMP data.
 
 =head1 DESCRIPTION
 
@@ -63,6 +63,7 @@ my %ma_namespaces = (
     ifevt     => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
     iperf     => "http://ggf.org/ns/nmwg/tools/iperf/2.0/",
     bwctl     => "http://ggf.org/ns/nmwg/tools/bwctl/2.0/",
+    owamp     => "http://ggf.org/ns/nmwg/tools/owamp/2.0/",
     select    => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average   => "http://ggf.org/ns/nmwg/ops/average/2.0/",
     perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
@@ -75,8 +76,7 @@ my %ma_namespaces = (
     nmtl4     => "http://ogf.org/schema/network/topology/l4/20070828/",
     nmtopo    => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/",
-    owamp     => "http://ggf.org/ns/nmwg/tools/owamp/2.0/"
+    nmwgr     => "http://ggf.org/ns/nmwg/result/2.0/"
 );
 
 =head2 init($self, $handler)
@@ -298,57 +298,117 @@ sub createStorage {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { metadatadb => 0 } );
 
-    # XXX: jason 3/4/08
-    # have owmesh file specify the host instead, this assumes the mysql database
-    #  lives on the same host as the MA currently.
-    #
     my %defaults = (
         DBHOST  => hostname(),
         CONFDIR => $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
     );
     my $conf = new perfSONAR_PS::OWP::Conf(%defaults);
 
-    my $dbsource = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
+# ------------------------------------------------------------------------------
 
-    my @dbSchema_nodes = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
-    my @dbSchema_meshes = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type" );
-    my @dbSchema_node_mesh_map = ( "mesh_id", "node_id" );
-    my $db = new perfSONAR_PS::DB::SQL( { name => $dbsource, schema => \@dbSchema_nodes, user => $conf->{'BWCENTRALDBUSER'}, pass => $conf->{'BWCENTRALDBPASS'} } );
-    $db->openDB;
-
-    my $result_nodes = $db->query( { query => "select * from nodes" } );
-    my %nodes        = ();
-    my $data_len     = $#{$result_nodes};
-    for my $x ( 0 .. $data_len ) {
-        my $data_len2 = $#{ $result_nodes->[$x] };
-        my %temp      = ();
-        for my $z ( 1 .. $data_len2 ) {
-            $temp{ $dbSchema_nodes[$z] } = $result_nodes->[$x][$z];
-        }
-        $nodes{ $x + 1 } = \%temp;
+    # BWCTL Database
+    my $dbsourceBW;
+    if($conf->{'BWCENTRALDBHOST'}) {
+        $dbsourceBW = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'BWCENTRALDBHOST'};
+    }
+    else {
+        $dbsourceBW = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
     }
 
-    $db->setSchema( { schema => \@dbSchema_meshes } );
-    my $result_meshes = $db->query( { query => "select * from meshes" } );
-    my %meshes = ();
-    $data_len = $#{$result_meshes};
+    my @dbSchema_nodesBW = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
+    my @dbSchema_meshesBW = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type" );
+    my @dbSchema_node_mesh_mapBW = ( "mesh_id", "node_id" );
+    my $dbBW = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dbSchema_nodesBW, user => $conf->{'BWCENTRALDBUSER'}, pass => $conf->{'BWCENTRALDBPASS'} } );
+    $dbBW->openDB;
+
+    my $result_nodesBW = $dbBW->query( { query => "select * from nodes" } );
+    my %nodesBW        = ();
+    my $data_len     = $#{$result_nodesBW};
     for my $x ( 0 .. $data_len ) {
-        my $data_len2 = $#{ $result_meshes->[$x] };
+        my $data_len2 = $#{ $result_nodesBW->[$x] };
         my %temp      = ();
         for my $z ( 1 .. $data_len2 ) {
-            $temp{ $dbSchema_meshes[$z] } = $result_meshes->[$x][$z];
+            $temp{ $dbSchema_nodesBW[$z] } = $result_nodesBW->[$x][$z];
         }
-        $meshes{ $x + 1 } = \%temp;
+        $nodesBW{ $x + 1 } = \%temp;
     }
 
-    $db->setSchema( { schema => \@dbSchema_node_mesh_map } );
-    my $result_node_mesh_map = $db->query( { query => "select * from node_mesh_map" } );
-    $db->closeDB;
+    $dbBW->setSchema( { schema => \@dbSchema_meshesBW } );
+    my $result_meshesBW = $dbBW->query( { query => "select * from meshes" } );
+    my %meshesBW = ();
+    $data_len = $#{$result_meshesBW};
+    for my $x ( 0 .. $data_len ) {
+        my $data_len2 = $#{ $result_meshesBW->[$x] };
+        my %temp      = ();
+        for my $z ( 1 .. $data_len2 ) {
+            $temp{ $dbSchema_meshesBW[$z] } = $result_meshesBW->[$x][$z];
+        }
+        $meshesBW{ $x + 1 } = \%temp;
+    }
 
-    if ( $#{$result_nodes} == -1 or $#{$result_meshes} == -1 or $#{$result_node_mesh_map} == -1 ) {
-        $self->{LOGGER}->error("Database query returned 0 results, aborting.");
+    $dbBW->setSchema( { schema => \@dbSchema_node_mesh_mapBW } );
+    my $result_node_mesh_mapBW = $dbBW->query( { query => "select * from node_mesh_map" } );
+    $dbBW->closeDB;
+
+    if ( $#{$result_nodesBW} == -1 or $#{$result_meshesBW} == -1 or $#{$result_node_mesh_mapBW} == -1 ) {
+        $self->{LOGGER}->error("BW Database query returned 0 results, aborting.");
         return -1;
     }
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+    # OWAMP Database
+    my $dbsourceOWP;
+    if($conf->{'OWPCENTRALDBHOST'}) {
+        $dbsourceOWP = $conf->{'OWPCENTRALDBTYPE'} . ":" . $conf->{'OWPCENTRALDBNAME'} . ":" . $conf->{'OWPCENTRALDBHOST'};
+    }
+    else {
+        $dbsourceOWP = $conf->{'OWPCENTRALDBTYPE'} . ":" . $conf->{'OWPCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
+    }
+
+    my @dbSchema_nodesOWP = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
+    my @dbSchema_meshesOWP = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type", "session_duration");
+    my $dbOWP = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dbSchema_nodesOWP, user => $conf->{'OWPCENTRALDBUSER'}, pass => $conf->{'OWPCENTRALDBPASS'} } );
+    $dbOWP->openDB;
+
+    my $result_nodesOWP = $dbOWP->query( { query => "select * from nodes" } );
+    my %nodesOWP        = ();
+    my $data_len     = $#{$result_nodesOWP};
+    for my $x ( 0 .. $data_len ) {
+        my $data_len2 = $#{ $result_nodesOWP->[$x] };
+        my %temp      = ();
+        for my $z ( 1 .. $data_len2 ) {
+            $temp{ $dbSchema_nodesOWP[$z] } = $result_nodesOWP->[$x][$z];
+        }
+        $nodesOWP{ $x + 1 } = \%temp;
+    }
+use Data::Dumper;
+print "\n\n" , Dumper(%nodesOWP) , "\n\n";
+
+    $dbOWP->setSchema( { schema => \@dbSchema_meshesOWP } );
+    my $result_meshesOWP = $dbOWP->query( { query => "select * from meshes" } );
+    my %meshesOWP = ();
+    $data_len = $#{$result_meshesOWP};
+    for my $x ( 0 .. $data_len ) {
+        my $data_len2 = $#{ $result_meshesOWP->[$x] };
+        my %temp      = ();
+        for my $z ( 1 .. $data_len2 ) {
+            $temp{ $dbSchema_meshesOWP[$z] } = $result_meshesOWP->[$x][$z];
+        }
+        $meshesOWP{ $x + 1 } = \%temp;
+    }
+print "\n\n" , Dumper(%meshesOWP) , "\n\n";
+
+    $dbOWP->closeDB;
+
+    if ( $#{$result_nodesOWP} == -1 or $#{$result_meshesOWP} == -1 ) {
+        $self->{LOGGER}->error("OWP Database query returned 0 results, aborting.");
+        return -1;
+    }
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -377,6 +437,7 @@ sub createStorage {
             print $fh "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
             print $fh "<nmwg:store xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
             print $fh "            xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"\n";
+            print $fh "            xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\"\n";
             print $fh "            xmlns:iperf= \"http://ggf.org/ns/nmwg/tools/iperf/2.0/\">\n\n";
             $fh->close;
         }
@@ -391,23 +452,97 @@ sub createStorage {
     }
 
     my $id = 1;
-    $data_len = $#{$result_node_mesh_map};
+
+    $data_len = $#{$result_meshesOWP};
+    my $data_len2 = $#{$result_nodesOWP};
+    for my $x ( 0 .. $data_len ) {
+        for my $y ( 0 .. $data_len2 ) {
+            for my $z ( 0 .. $data_len2 ) {
+
+               next if not ($conf->{ "NODE-" . $result_nodesOWP->[$y][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} }) or not ($conf->{ "NODE-" . $result_nodesOWP->[$z][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} });
+
+                my $metadata = q{};
+                $metadata = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
+                $metadata .= "    <owamp:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject-" . $id . "\">\n";
+                $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+                if ( $meshesOWP{ $x+1 }->{"addr_type"} eq "LAT6" or 
+                     $meshesOWP{ $x+1 }->{"addr_type"} eq "LATV6" ) {
+                    $metadata .= "        <nmwgt:src type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $result_nodesOWP->[$y][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} . "ADDR" } . "\" />\n";
+                    $metadata .= "        <nmwgt:dst type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $result_nodesOWP->[$z][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} . "ADDR" } . "\" />\n";
+                }
+                else {
+                    $metadata .= "        <nmwgt:src type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $result_nodesOWP->[$y][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} . "ADDR" } . "\" />\n";
+                    $metadata .= "        <nmwgt:dst type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $result_nodesOWP->[$z][1] }->{ $meshesOWP{ $x+1 }->{"addr_type"} . "ADDR" } . "\" />\n";
+                }
+                $metadata .= "      </nmwgt:endPointPair>\n";
+                $metadata .= "    </owamp:subject>\n";
+                $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
+                $metadata .= "  </nmwg:metadata>";
+ 
+                my $data = q{};
+                $data = "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"data-" . $id . "\" metadataIdRef=\"metadata-" . $id . "\">\n";
+                $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
+                $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
+                $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceOWP . "</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"user\">" . $conf->{'OWPCENTRALDBUSER'} . "</nmwg:parameter>\n" if $conf->{'OWPCENTRALDBUSER'};
+                $data .= "        <nmwg:parameter name=\"pass\">" . $conf->{'OWPCENTRALDBPASS'} . "</nmwg:parameter>\n" if $conf->{'OWPCENTRALDBPASS'};
+                $data .= "        <nmwg:parameter name=\"table\">" . "OWP_" . $meshesOWP{ $x+1 }->{"mesh_name"} . "_" . $nodesOWP{ $y+1 }->{"node_name"} . "_" . $nodesOWP{ $z+1 }->{"node_name"} . "</nmwg:parameter>\n";
+                $data .= "      </nmwg:parameters>\n";
+                $data .= "    </nmwg:key>\n";
+                $data .= "  </nmwg:data>";
+
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
+                    my $dHash  = md5_hex($data);
+                    my $mdHash = md5_hex($metadata);
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+
+                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+                    $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
+                }
+                elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
+                    my $fh = new IO::File ">> " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"};
+                    if ( defined $fh ) {
+                        print $fh $metadata . "\n" . $data . "\n";
+                        $fh->close;
+                    }
+                    else {
+                        $self->{LOGGER}->error("File cannot be written.");
+                        return -1;
+                    }
+
+                    my $dHash = md5_hex($data);
+                    $self->{CONF}->{"perfsonarbuoy"}->{"hashToId"}->{$dHash} = "data-" . $id;
+                    $self->{CONF}->{"perfsonarbuoy"}->{"idToHash"}->{ "data-" . $id } = $dHash;
+                    $self->{LOGGER}->debug( "Key id $dHash maps to data element data-" . $id );
+                }
+                $id++;
+            }
+        }
+    }
+
+    $data_len = $#{$result_node_mesh_mapBW};
     for my $x ( 0 .. $data_len ) {
         for my $y ( 0 .. $data_len ) {
-            if (    $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} eq $meshes{ $result_node_mesh_map->[$y][0] }->{"mesh_name"}
-                and $nodes{ $result_node_mesh_map->[$x][1] }->{"node_name"} ne $nodes{ $result_node_mesh_map->[$y][1] }->{"node_name"} )
+            if (    $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} eq $meshesBW{ $result_node_mesh_mapBW->[$y][0] }->{"mesh_name"}
+                and $nodesBW{ $result_node_mesh_mapBW->[$x][1] }->{"node_name"} ne $nodesBW{ $result_node_mesh_mapBW->[$y][1] }->{"node_name"} )
             {
                 my $metadata = q{};
                 $metadata = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $id . "\">\n";
                 $metadata .= "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject-" . $id . "\">\n";
                 $metadata .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-                if ( $meshes{ $result_node_mesh_map->[$x][0] }->{"addr_type"} eq "BWV6" ) {
-                    $metadata .= "        <nmwgt:src type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $nodes{ $result_node_mesh_map->[$x][1] }->{"node_name"} }->{"ADDRBWV6"} . "\" port=\"" . $nodes{ $result_node_mesh_map->[$x][1] }->{"uptime_port"} . "\" />\n";
-                    $metadata .= "        <nmwgt:dst type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $nodes{ $result_node_mesh_map->[$y][1] }->{"node_name"} }->{"ADDRBWV6"} . "\" port=\"" . $nodes{ $result_node_mesh_map->[$y][1] }->{"uptime_port"} . "\" />\n";
+                if ( $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"addr_type"} eq "BWV6" ) {
+                    $metadata .= "        <nmwgt:src type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $nodesBW{ $result_node_mesh_mapBW->[$x][1] }->{"node_name"} }->{"BW6ADDR"} . "\" />\n";
+                    $metadata .= "        <nmwgt:dst type=\"ipv6\" value=\"" . $conf->{ "NODE-" . $nodesBW{ $result_node_mesh_mapBW->[$y][1] }->{"node_name"} }->{"BW6ADDR"} . "\" />\n";
                 }
                 else {
-                    $metadata .= "        <nmwgt:src type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $nodes{ $result_node_mesh_map->[$x][1] }->{"node_name"} }->{"ADDRBWV4"} . "\" port=\"" . $nodes{ $result_node_mesh_map->[$x][1] }->{"uptime_port"} . "\" />\n";
-                    $metadata .= "        <nmwgt:dst type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $nodes{ $result_node_mesh_map->[$y][1] }->{"node_name"} }->{"ADDRBWV4"} . "\" port=\"" . $nodes{ $result_node_mesh_map->[$y][1] }->{"uptime_port"} . "\" />\n";
+                    $metadata .= "        <nmwgt:src type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $nodesBW{ $result_node_mesh_mapBW->[$x][1] }->{"node_name"} }->{"BW4ADDR"} . "\" />\n";
+                    $metadata .= "        <nmwgt:dst type=\"ipv4\" value=\"" . $conf->{ "NODE-" . $nodesBW{ $result_node_mesh_mapBW->[$y][1] }->{"node_name"} }->{"BW4ADDR"} . "\" />\n";
                 }
                 $metadata .= "      </nmwgt:endPointPair>\n";
                 $metadata .= "    </iperf:subject>\n";
@@ -415,40 +550,40 @@ sub createStorage {
                 $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:eventType>\n";
                 $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
 
-                if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWWINDOWSIZE"} ) {
-                    $metadata .= "      <nmwg:parameter name=\"windowSize\">" . $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWWINDOWSIZE"} . "</nmwg:parameter>\n";
+                if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWWINDOWSIZE"} ) {
+                    $metadata .= "      <nmwg:parameter name=\"windowSize\">" . $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWWINDOWSIZE"} . "</nmwg:parameter>\n";
                 }
                 elsif ( $conf->{"BWWINDOWSIZE"} ) {
                     $metadata .= "      <nmwg:parameter name=\"windowSize\">" . $conf->{"BWWINDOWSIZE"} . "</nmwg:parameter>\n";
                 }
 
-                if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWBUFFERLEN"} ) {
-                    $metadata .= "      <nmwg:parameter name=\"bufferLength\">" . $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWBUFFERLEN"} . "</nmwg:parameter>\n";
+                if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWBUFFERLEN"} ) {
+                    $metadata .= "      <nmwg:parameter name=\"bufferLength\">" . $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWBUFFERLEN"} . "</nmwg:parameter>\n";
                 }
                 elsif ( $conf->{"BWBUFFERLEN"} ) {
                     $metadata .= "      <nmwg:parameter name=\"bufferLength\">" . $conf->{"BWBUFFERLEN"} . "</nmwg:parameter>\n";
                 }
 
-                if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWTESTDURATION"} ) {
-                    $metadata .= "      <nmwg:parameter name=\"timeDuration\">" . $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWTESTDURATION"} . "</nmwg:parameter>\n";
+                if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWTESTDURATION"} ) {
+                    $metadata .= "      <nmwg:parameter name=\"timeDuration\">" . $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWTESTDURATION"} . "</nmwg:parameter>\n";
                 }
                 elsif ( $conf->{"BWTESTDURATION"} ) {
                     $metadata .= "      <nmwg:parameter name=\"timeDuration\">" . $conf->{"BWTESTDURATION"} . "</nmwg:parameter>\n";
                 }
 
-                if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWREPORTINTERVAL"} ) {
-                    $metadata .= "      <nmwg:parameter name=\"interval\">" . $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWREPORTINTERVAL"} . "</nmwg:parameter>\n";
+                if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWREPORTINTERVAL"} ) {
+                    $metadata .= "      <nmwg:parameter name=\"interval\">" . $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWREPORTINTERVAL"} . "</nmwg:parameter>\n";
                 }
                 elsif ( $conf->{"BWREPORTINTERVAL"} ) {
                     $metadata .= "      <nmwg:parameter name=\"interval\">" . $conf->{"BWREPORTINTERVAL"} . "</nmwg:parameter>\n";
                 }
 
-                if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWUDP"} ) {
+                if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWUDP"} ) {
                     $metadata .= "      <nmwg:parameter name=\"protocol\">UDP</nmwg:parameter>\n";
-                    $metadata .= "      <nmwg:parameter name=\"bandwidthLimit\">" . $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWUDPBANDWIDTHLIMIT"} . "</nmwg:parameter>\n"
-                        if ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWUDPBANDWIDTHLIMIT"} );
+                    $metadata .= "      <nmwg:parameter name=\"bandwidthLimit\">" . $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWUDPBANDWIDTHLIMIT"} . "</nmwg:parameter>\n"
+                        if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWUDPBANDWIDTHLIMIT"} );
                 }
-                elsif ( $conf->{ "MESH-" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} }->{"BWTCP"} ) {
+                elsif ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWTCP"} ) {
                     $metadata .= "      <nmwg:parameter name=\"protocol\">TCP</nmwg:parameter>\n";
                 }
 
@@ -462,10 +597,10 @@ sub createStorage {
                 $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
-                $data .= "        <nmwg:parameter name=\"db\">" . $dbsource . "</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceBW . "</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"user\">" . $conf->{'BWCENTRALDBUSER'} . "</nmwg:parameter>\n" if $conf->{'BWCENTRALDBUSER'};
                 $data .= "        <nmwg:parameter name=\"pass\">" . $conf->{'BWCENTRALDBPASS'} . "</nmwg:parameter>\n" if $conf->{'BWCENTRALDBPASS'};
-                $data .= "        <nmwg:parameter name=\"table\">" . "BW_" . $meshes{ $result_node_mesh_map->[$x][0] }->{"mesh_name"} . "_" . $nodes{ $result_node_mesh_map->[$x][1] }->{"node_name"} . "_" . $nodes{ $result_node_mesh_map->[$y][1] }->{"node_name"} . "</nmwg:parameter>\n";
+                $data .= "        <nmwg:parameter name=\"table\">" . "BW_" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} . "_" . $nodesBW{ $result_node_mesh_mapBW->[$x][1] }->{"node_name"} . "_" . $nodesBW{ $result_node_mesh_mapBW->[$y][1] }->{"node_name"} . "</nmwg:parameter>\n";
                 $data .= "      </nmwg:parameters>\n";
                 $data .= "    </nmwg:key>\n";
                 $data .= "  </nmwg:data>";
@@ -1557,20 +1692,65 @@ sub retrieveSQL {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
     }
 
+# try to figure out which schema we need here...
+
+   my $dataType = "";
+   foreach my $eventType (keys %{$parameters->{et}}) {
+       if($eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0") {
+           $dataType = "OWAMP";
+           last;
+       }
+       elsif($eventType eq "http://ggf.org/ns/nmwg/tools/bwctl/2.0" or
+             $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0") {
+           $dataType = "BWCTL";
+           last;
+       }
+   }
+
+    my $id = "data." . genuid();
+
+    my @dbSchema = ();
+    if( $dataType eq "BWCTL" ) {
+        @dbSchema = ( "ti", "time", "throughput", "jitter", "lost", "sent" );
+    }
+    elsif( $dataType eq "OWAMP" ) {
+        @dbSchema = ( "res", "si", "ei", "start", "end", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "err", "pending" );
+    }
+    else {
+        my $msg = "Improper eventType found.";
+        $self->{LOGGER}->error($msg);
+        getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+    }
+
     my $query = {};
     if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
         $query = "select * from " . $dbtable . " where";
         my $queryCount = 0;
         if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-            $query = $query . " time > " . $parameters->{time_settings}->{"START"}->{"internal"};
+            if( $dataType eq "BWCTL" ) {
+                $query = $query . " time > " . $parameters->{time_settings}->{"START"}->{"internal"};
+            }
+            elsif( $dataType eq "OWAMP" ) {
+                $query = $query . " start > " . $parameters->{time_settings}->{"START"}->{"internal"};
+            }
             $queryCount++;
         }
         if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
             if ($queryCount) {
-                $query = $query . " and time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                if( $dataType eq "BWCTL" ) {
+                    $query = $query . " and time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                }
+                elsif( $dataType eq "OWAMP" ) {
+                    $query = $query . " and end < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                }
             }
             else {
-                $query = $query . " time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                if( $dataType eq "BWCTL" ) {
+                    $query = $query . " time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                }
+                elsif( $dataType eq "OWAMP" ) {
+                    $query = $query . " end < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                }
             }
         }
     }
@@ -1578,15 +1758,11 @@ sub retrieveSQL {
         $query = "select * from " . $dbtable . ";";
     }
 
-    my @dbSchema = ( "ti", "time", "throughput", "jitter", "lost", "sent" );
-
     my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dbSchema, user => $dbuser, pass => $dbpass } );
 
     $datadb->openDB;
     my $result = $datadb->query( { query => $query } );
     $datadb->closeDB;
-
-    my $id = "data." . genuid();
 
     if ( $#{$result} == -1 ) {
         my $msg = "Query returned 0 results";
@@ -1594,35 +1770,75 @@ sub retrieveSQL {
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
     }
     else {
-        my $prefix = "iperf";
-        my $uri    = "http://ggf.org/ns/nmwg/tools/iperf/2.0/";
 
-        startData( $parameters->{output}, $id, $parameters->{mid}, undef );
-        my $len = $#{$result};
-        for my $a ( 0 .. $len ) {
-            my %attrs = ();
-            if ( $timeType eq "unix" ) {
-                $attrs{"timeType"} = "unix";
-                $attrs{ $dbSchema[1] . "Value" } = owptime2exacttime( $result->[$a][1] );
+        if( $dataType eq "BWCTL" ) {
+            my $prefix = "iperf";
+            my $uri    = "http://ggf.org/ns/nmwg/tools/iperf/2.0/";
+            
+            startData( $parameters->{output}, $id, $parameters->{mid}, undef );
+            my $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my %attrs = ();
+                if ( $timeType eq "unix" ) {
+                    $attrs{"timeType"} = "unix";
+                    $attrs{ $dbSchema[1] . "Value" } = owptime2exacttime( $result->[$a][1] );
+                }
+                else {
+                    $attrs{"timeType"} = "iso";
+                    $attrs{ $dbSchema[1] . "Value" } = owpexactgmstring( $result->[$a][1] );
+                }
+
+                $attrs{ $dbSchema[2] } = $result->[$a][2] if $result->[$a][2];
+                $attrs{ $dbSchema[3] } = $result->[$a][3] if $result->[$a][3];
+                $attrs{ $dbSchema[4] } = $result->[$a][4] if $result->[$a][4];
+                $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
+
+                $parameters->{output}->createElement(
+                    prefix     => $prefix,
+                    namespace  => $uri,
+                    tag        => "datum",
+                    attributes => \%attrs
+                );
             }
-            else {
-                $attrs{"timeType"} = "iso";
-                $attrs{ $dbSchema[1] . "Value" } = owpexactgmstring( $result->[$a][1] );
-            }
-
-            $attrs{ $dbSchema[2] } = $result->[$a][2] if $result->[$a][2];
-            $attrs{ $dbSchema[3] } = $result->[$a][3] if $result->[$a][3];
-            $attrs{ $dbSchema[4] } = $result->[$a][4] if $result->[$a][4];
-            $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
-
-            $parameters->{output}->createElement(
-                prefix     => $prefix,
-                namespace  => $uri,
-                tag        => "datum",
-                attributes => \%attrs
-            );
+            endData( $parameters->{output} );
         }
-        endData( $parameters->{output} );
+        elsif( $dataType eq "OWAMP" ) {
+            my $prefix = "owamp";
+            my $uri    = "http://ggf.org/ns/nmwg/tools/owamp/2.0/";
+            
+            startData( $parameters->{output}, $id, $parameters->{mid}, undef );
+            my $len = $#{$result};
+            for my $a ( 0 .. $len ) {
+                my %attrs = ();
+                if ( $timeType eq "unix" ) {
+                    $attrs{"timeType"} = "unix";
+                    $attrs{ "startTime" } = owptime2exacttime( $result->[$a][3] );
+                    $attrs{ "endTime" } = owptime2exacttime( $result->[$a][4] );
+                }
+                else {
+                    $attrs{"timeType"} = "iso";
+                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
+                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
+                }
+
+                $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
+                $attrs{ $dbSchema[6] } = $result->[$a][6] if $result->[$a][6];
+                $attrs{ $dbSchema[7] } = $result->[$a][7] if $result->[$a][7];
+                $attrs{ $dbSchema[8] } = $result->[$a][8] if $result->[$a][8];
+                $attrs{ $dbSchema[9] } = $result->[$a][9] if $result->[$a][9];
+                $attrs{ $dbSchema[10] } = $result->[$a][10] if $result->[$a][10];
+                $attrs{ $dbSchema[11] } = $result->[$a][11] if $result->[$a][11];
+                $attrs{ $dbSchema[12] } = $result->[$a][12] if $result->[$a][12];
+
+                $parameters->{output}->createElement(
+                    prefix     => $prefix,
+                    namespace  => $uri,
+                    tag        => "datum",
+                    attributes => \%attrs
+                );
+            }
+            endData( $parameters->{output} );
+        }
     }
     return;
 }

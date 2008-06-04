@@ -249,7 +249,7 @@ while (1) {
             elsif ( $module eq "perfSONAR_PS::Services::LS::gLS" ) {
                 $module = "gls";
             }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBOUY" ) {
+            elsif ( $module eq "perfSONAR_PS::Services::MA::perfSONARBUOY" ) {
                 $module = "perfsonarbuoy";
             }
             elsif ( $module eq "perfSONAR_PS::Services::MA::PingER" ) {
@@ -310,7 +310,7 @@ while (1) {
             config_gls( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
         elsif ( $module eq "perfsonarbuoy" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBOUY";
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::perfSONARBUOY";
             config_perfsonarbuoy_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
         elsif ( $module eq "pingerma" ) {
@@ -452,11 +452,11 @@ sub config_perfsonarbuoy_ma {
         $config->{"perfsonarbuoy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
     }
 
-    $config->{"perfsonarbuoy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBOUY MA", $config->{"perfsonarbuoy"}->{"service_name"}, '.+' );
+    $config->{"perfsonarbuoy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBUOY MA", $config->{"perfsonarbuoy"}->{"service_name"}, '.+' );
 
     $config->{"perfsonarbuoy"}->{"service_type"} = &ask( "Enter the service type ", "MA", $config->{"perfsonarbuoy"}->{"service_type"}, '.+' );
 
-    $config->{"perfsonarbuoy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBOUY MA", $config->{"perfsonarbuoy"}->{"service_description"}, '.+' );
+    $config->{"perfsonarbuoy"}->{"service_description"} = &ask( "Enter a service description ", "perfSONARBUOY MA", $config->{"perfsonarbuoy"}->{"service_description"}, '.+' );
 
     $config->{"perfsonarbuoy"}->{"service_accesspoint"} = &ask( "Enter the service's URI ", $accesspoint, $config->{"perfsonarbuoy"}->{"service_accesspoint"}, '^http:\/\/' );
 
