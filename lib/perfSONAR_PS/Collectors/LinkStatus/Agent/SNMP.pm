@@ -57,142 +57,93 @@ sub new {
     return $self;
 }
 
-=head2 getType
-    Returns the status type of this agent: admin or oper.
+=head2 type
+    Gets/sets the status type of this agent: admin or oper.
 =cut
-sub getType {
-    my ($self) = @_;
+sub type {
+    my ($self, $type) = @_;
+    
+    if ($type) {
+        $self->{TYPE} = $type;
+    }
 
     return $self->{TYPE};
 }
 
-=head2 setType ($self, $type)
-    Sets the status type of this agent: admin or oper.
+=head2 hostname ($self, $hostname)
+    Gets/sets the hostname for this agent to poll.
 =cut
-sub setType {
-    my ($self, $type) = @_;
-
-    $self->{TYPE} = $type;
-
-    return;
-}
-
-=head2 setHostname ($self, $hostname)
-    Sets the hostname for this agent to poll.
-=cut
-sub setHostname {
+sub hostname {
     my ($self, $hostname) = @_;
 
-    $self->{HOSTNAME} = $hostname;
-
-    return;
-}
-
-=head2 getHostname ($self)
-    Returns the hostname that this agent is polling.
-=cut
-sub getHostname {
-    my ($self) = @_;
+    if ($hostname) {
+        $self->{HOSTNAME} = $hostname;
+    }
 
     return $self->{HOSTNAME};
 }
 
-=head2 setifIndex ($self, $ifIndex)
-    Sets the ifIndex that this agent returns the status of.
+=head2 ifIndex ($self, $ifIndex)
+    Gets/sets the ifIndex that this agent returns the status of.
 =cut
-sub setifIndex {
+sub ifIndex {
     my ($self, $ifIndex) = @_;
 
-    $self->{IFINDEX} = $ifIndex;
-
-    return;
-}
-
-=head2 getifIndex ($self)
-    Returns the ifIndex that this agent returns the status of.
-=cut
-sub getifIndex {
-    my ($self) = @_;
+    if ($ifIndex) {
+        $self->{IFINDEX} = $ifIndex;
+    }
 
     return $self->{IFINDEX};
 }
 
-=head2 setCommunity ($self, $community)
-    Sets the community string that will be used by this agent.
+=head2 community ($self, $community)
+    Gets/sets the community string that will be used by this agent.
 =cut
-sub setCommunity {
+sub community {
     my ($self, $community) = @_;
-
-    $self->{COMMUNITY} = $community;
-
-    return;
-}
-
-=head2 getCommunity ($self)
-    Returns the community string that will be used by this agent.
-=cut
-sub getCommunity {
-    my ($self) = @_;
+    
+    if ($community) {
+        $self->{COMMUNITY} = $community;
+    }
 
     return $self->{COMMUNITY};
 }
 
-=head2 setVersion ($self, $version)
-    Sets the snmp version string for this agent.
+=head2 version ($self, $version)
+    Gets/sets the snmp version string for this agent.
 =cut
-sub setVersion {
+sub version {
     my ($self, $version) = @_;
 
-    $self->{VERSION} = $version;
-
-    return;
-}
-
-=head2 getVersion ($self)
-    Returns the snmp version string for this agent.
-=cut
-sub getVersion {
-    my ($self) = @_;
+    if ($version) {
+        $self->{VERSION} = $version;
+    }
 
     return $self->{VERSION};
 }
 
-=head2 setOID ($self, $oid)
-    Sets the OID for this agent.
+=head2 OID ($self, $oid)
+    Gets/sets the OID for this agent.
 =cut
-sub setOID {
+sub OID {
     my ($self, $oid) = @_;
 
-    $self->{OID} = $oid;
-
-    return;
-}
-
-=head2 getOID ($self)
-    Returns the OID for this agent.
-=cut
-sub getOID {
-    my ($self) = @_;
+    if ($oid) {
+        $self->{OID} = $oid;
+    }
 
     return $self->{OID};
 }
 
-=head2 setAgent ($self, $agent)
-    Sets the caching snmp object used by this agent
+=head2 agent ($self, $agent)
+    Gets/sets the caching snmp object used by this agent
 =cut
-sub setAgent {
+sub agent {
     my ($self, $agent) = @_;
 
-    $self->{AGENT} = $agent;
-
-    return;
-}
-
-=head2 getAgent ($self)
-    Returns the caching snmp object used by this agent
-=cut
-sub getAgent {
-    my ($self) = @_;
+    if ($agent) {
+        $self->{AGENT} = $agent;
+    }
 
     return $self->{AGENT};
 }

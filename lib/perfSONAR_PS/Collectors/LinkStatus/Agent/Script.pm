@@ -38,62 +38,41 @@ sub new {
     return $self;
 }
 
-=head2 getType
-    Returns the status type of this agent: admin or oper.
+=head2 type ($self, $type)
+    Gets/sets the status type of this agent: admin or oper.
 =cut
-sub getType {
-    my ($self) = @_;
+sub type {
+    my ($self, $type) = @_;
+
+    if ($type) {
+        $self->{TYPE} = $type;
+    }
 
     return $self->{TYPE};
 }
 
-=head2 setType ($self, $type)
-    Sets the status type of this agent: admin or oper.
+=head2 script ($self, $script)
+    Gets/sets the script to be run
 =cut
-sub setType {
-    my ($self, $type) = @_;
-
-    $self->{TYPE} = $type;
-
-    return;
-}
-
-=head2 setScript ($self, $script)
-    Sets the script to be run
-=cut
-sub setScript {
+sub script {
     my ($self, $script) = @_;
 
-    $self->{SCRIPT} = $script;
-
-    return;
-}
-
-=head2 getScript
-    Returns the script to be run
-=cut
-sub getScript {
-    my ($self) = @_;
+    if ($script) {
+        $self->{SCRIPT} = $script;
+    }
 
     return $self->{SCRIPT};
 }
 
-=head2 setParameters ($self, $parameters)
+=head2 parameters ($self, $parameters)
     Sets the parameters that are passed to the script
 =cut
-sub setParameters {
+sub parameters {
     my ($self, $parameters) = @_;
 
-    $self->{PARAMETERS} = $parameters;
-
-    return;
-}
-
-=head2 getParameters
-    Returns the set of parameters that are passed to the script
-=cut
-sub getParameters {
-    my ($self) = @_;
+    if ($parameters) {
+        $self->{PARAMETERS} = $parameters;
+    }
 
     return $self->{PARAMETERS};
 }

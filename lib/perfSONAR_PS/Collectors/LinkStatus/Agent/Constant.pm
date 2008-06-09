@@ -36,42 +36,28 @@ sub new {
     return $self;
 }
 
-=head2 getType
-    Returns the status type of this agent: admin or oper.
+=head2 type
+    Set/return the status type of this agent: admin or oper.
 =cut
-sub getType {
-    my ($self) = @_;
+sub type {
+    my ($self, $type) = @_;
+
+    if ($type) {
+        $self->{TYPE} = $type;
+    }
 
     return $self->{TYPE};
 }
 
-=head2 setType ($self, $type)
-    Sets the status type of this agent: admin or oper.
+=head2 constant ($self, $constant)
+    Sets/Gets the constant value to be returned.
 =cut
-sub setType {
-    my ($self, $type) = @_;
-
-    $self->{TYPE} = $type;
-
-    return;
-}
-
-=head2 setConstant ($self, $constant)
-    Sets the constant value to be returned.
-=cut
-sub setConstant {
+sub constant {
     my ($self, $constant) = @_;
 
-    $self->{CONSTANT} = $constant;
-
-    return;
-}
-
-=head2 getConstant ($self)
-    Returns the constant value.
-=cut
-sub getConstant {
-    my ($self) = @_;
+    if ($constant) {
+        $self->{CONSTANT} = $constant;
+    }
 
     return $self->{CONSTANT};
 }

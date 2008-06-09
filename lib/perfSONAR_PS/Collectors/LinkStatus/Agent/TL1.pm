@@ -163,7 +163,7 @@ package perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Caching;
 use strict;
 use Params::Validate qw(:all);
 
-use TL1;
+use perfSONAR_PS::Utils::TL1;
 
 use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT',
     'OPTICAL', 'SONET', 'ETHERNET', 'CACHE_TIME', 'CHECK_OPTICAL',
@@ -195,7 +195,7 @@ sub new {
     my $self = fields::new($class);
 
 
-    $self->{TL1AGENT} = TL1->new(
+    $self->{TL1AGENT} = perfSONAR_PS::Utils::TL1->new(
             username => $parameters->{username},
             password => $parameters->{password},
             type => $parameters->{type},
