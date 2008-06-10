@@ -124,6 +124,20 @@ sub getAgent {
     return $self->{TL1AGENT};
 }
 
+sub setCacheTime {
+    my ($self, $time) = @_;
+
+    $self->{CACHE_TIME} = $time;
+
+    return $self->{CACHE_TIME};
+}
+
+sub getCacheTime {
+    my ($self) = @_;
+
+    return $self->{CACHE_TIME};
+}
+
 sub send_cmd {
     my ($self, $cmd) = @_;
 
