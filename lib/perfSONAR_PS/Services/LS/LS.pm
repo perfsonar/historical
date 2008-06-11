@@ -501,7 +501,7 @@ sub lsRegisterRequest {
             throw perfSONAR_PS::Error_compat( "error.ls.register.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
         }
 
-        my $service = find( $parameters->{m}, "./perfsonar:subject/psservice:service", 1 );
+        my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
         if ($service) {
             $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, service => $service, sec => $sec } );
         }
@@ -540,10 +540,13 @@ sub lsRegisterRequestUpdateNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-    my $accessPoint = extract( find( $parameters->{service}, "./psservice:accessPoint", 1 ), 0 );
+    my $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='accessPoint']", 1 ), 0 );
     unless ($accessPoint) {
-        throw perfSONAR_PS::Error_compat( "error.ls.register.access_point_missing", "Cannont register data, accessPoint was not supplied." );
-        return;
+        $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='address']", 1 ), 0 );
+        unless ($accessPoint) {
+            throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
+            return;
+        }
     }
     my $mdKeyStorage = md5_hex($accessPoint);
 
@@ -705,10 +708,13 @@ sub lsRegisterRequestNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-    my $accessPoint = extract( find( $parameters->{m}, "./perfsonar:subject/psservice:service/psservice:accessPoint", 1 ), 0 );
+    my $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
     unless ($accessPoint) {
-        throw perfSONAR_PS::Error_compat( "error.ls.register.access_point_missing", "Cannont register data, accessPoint was not supplied." );
-        return;
+        $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
+        unless ($accessPoint) {
+            throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
+            return;
+        }
     }
     my $mdKey = md5_hex($accessPoint);
 
@@ -1042,7 +1048,7 @@ sub lsKeyRequest {
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1 } );
 
     my $error = q{};
-    my $service = find( $parameters->{m}, "./perfsonar:subject/psservice:service", 1 );
+    my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
     if ($service) {
         my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
         my @resultsString = $parameters->{metadatadb}->query( { query => $queryString, txn => q{}, error => \$error } );

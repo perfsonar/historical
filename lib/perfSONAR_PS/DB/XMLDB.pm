@@ -532,7 +532,7 @@ left blank for an atomic operation.  The error argument is optional.
 
 sub query {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { query => 1, txn => 0, error => 0 } );
+    my $parameters = validateParams( @args, { query => 1, txn => 0, internal => 0, error => 0 } );
 
     my @resString = ();
     my $dbTr      = q{};
@@ -549,10 +549,12 @@ sub query {
         eval {
             my $contName = $self->{CONTAINER}->getName();
 
-            # make sure the query is clean
-            $parameters->{query} =~ s/&/&amp;/gmx;
-            $parameters->{query} =~ s/</&lt;/gmx;
-            $parameters->{query} =~ s/>/&gt;/gmx;
+            unless ( exists $parameters->{internal} and $parameters->{internal} ) {
+                # make sure the query is clean
+                $parameters->{query} =~ s/&/&amp;/gmx;
+                $parameters->{query} =~ s/</&lt;/gmx;
+                $parameters->{query} =~ s/>/&gt;/gmx;
+            }
 
             if ( $parameters->{query} =~ m/collection\(/mx ) {
                 $parameters->{query} =~ s/CHANGEME/$contName/gmx;

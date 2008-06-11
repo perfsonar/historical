@@ -36,13 +36,19 @@ Creates a 'control' key for the control database that keeps track of time.
 
 sub createControlKey {
     my (@args) = @_;
-    my $parameters = validateParams( @args, { key => 1, time => 1 } );
-
+    my $parameters = validateParams( @args, { key => 1, time => 1, auth => 0 } );
+    
     my $keyElement = "  <nmwg:metadata id=\"" . $parameters->{key} . "-control\" metadataIdRef=\"" . $parameters->{key} . "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $keyElement = $keyElement . "    <nmwg:parameters id=\"control-parameters\">\n";
     $keyElement = $keyElement . "      <nmwg:parameter name=\"timestamp\">\n";
-    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $parameters->{time} . "</nmtm:time>\n";
+    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $parameters->{time} . "</nmtm:time>\n";    
     $keyElement = $keyElement . "      </nmwg:parameter>\n";
+    if ( exists $parameters->{auth} and $parameters->{auth} ) { 
+        $keyElement = $keyElement . "      <nmwg:parameter name=\"authoritative\">yes</nmwg:parameter>\n";
+    }
+    else {
+        $keyElement = $keyElement . "      <nmwg:parameter name=\"authoritative\">no</nmwg:parameter>\n";
+    }
     $keyElement = $keyElement . "    </nmwg:parameters>\n";
     $keyElement = $keyElement . "  </nmwg:metadata>\n";
     return wrapStore( { content => $keyElement, type => "LSStore-control" } );

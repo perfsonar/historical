@@ -5,7 +5,7 @@ use fields 'INSTANCE', 'LOGGER', 'ALIVE';
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -126,7 +126,7 @@ sub callLS {
     return $msg;
 }
 
-=head2 registerRequestLS($self, { service, data })
+=head2 registerRequestLS($self, { eventType, service, servicexml, data })
 
 Given service information (in the form of a hash reference) create a service
 metadata block and include the data (in the form of an array reference) into
@@ -138,14 +138,28 @@ hash of results for each metadata/data pair.  Note this should be used for all
 
 sub registerRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { service => 1, data => 1 } );
+    my $parameters = validateParams( @args, { eventType => 0, service => 0, servicexml => 0, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
         perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
-    $metadata .= $self->createService( { service => $parameters->{service} } );
+    
+    if ( exists $parameters->{service} and $parameters->{service} ) {    
+        $metadata .= $self->createService( { service => $parameters->{service} } );
+    }
+    elsif ( exists $parameters->{servicexml} and $parameters->{servicexml} ) {
+        $metadata .= $parameters->{servicexml};
+    }
+    else {
+        $self->{LOGGER}->error("Some type of service required to send message.");
+        return;
+    }    
+    
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
     unless ($msg) {
@@ -168,7 +182,7 @@ sub registerRequestLS {
     return \%result;
 }
 
-=head2 registerUpdateRequestLS($self, { key, data })
+=head2 registerUpdateRequestLS($self, { eventType, key, data })
 
 Given a key of an alredy registered service, create a key metadata block and
 include the data (in the form of an array reference) into an LS registration
@@ -180,7 +194,7 @@ where the goal is to add data to the registration set.
 
 sub registerUpdateRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { key => 1, data => 1 } );
+    my $parameters = validateParams( @args, { eventType => 0, key => 1, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -188,7 +202,10 @@ sub registerUpdateRequestLS {
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
     $metadata .= $self->createKey( { key => $parameters->{key} } );
-
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+            
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -210,7 +227,7 @@ sub registerUpdateRequestLS {
     return \%result;
 }
 
-=head2 registerClobberRequestLS($self, { service, key, data })
+=head2 registerClobberRequestLS($self, { eventType, service, servicexml, key, data })
 
 Given service information (in the form of a hash reference) and an already 
 existing key, create a service/key metadata block and include the data
@@ -224,15 +241,29 @@ replaces the need to deregister/register the data set.
 
 sub registerClobberRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { service => 1, key => 1, data => 1 } );
+    my $parameters = validateParams( @args, { eventType => 0, service => 0, servicexml => 0, key => 1, data => 1 } );
 
     my $metadata = q{};
     my %ns       = (
         perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
-    $metadata .= $self->createKey( { key => $parameters->{key} } ) . $self->createService( { service => $parameters->{service} } );
-
+    $metadata .= $self->createKey( { key => $parameters->{key} } );
+    if ( exists $parameters->{service} and $parameters->{service} ) {    
+        $metadata .= $self->createService( { service => $parameters->{service} } );
+    }
+    elsif ( exists $parameters->{servicexml} and $parameters->{servicexml} ) {
+        $metadata .= $parameters->{servicexml};
+    }
+    else {
+        $self->{LOGGER}->error("Some type of service required to send message.");
+        return;
+    }      
+    
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+    
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -254,7 +285,7 @@ sub registerClobberRequestLS {
     return \%result;
 }
 
-=head2 deregisterRequestLS($self, { key, data })
+=head2 deregisterRequestLS($self, { key, data, eventType })
 
 Given the key of a registered service, and optional data, deregister either
 the data or the entire service.  The results of the operation are returned 
@@ -264,11 +295,14 @@ in a hash.
 
 sub deregisterRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { key => 1, data => 0 } );
+    my $parameters = validateParams( @args, { key => 1, data => 0, eventType => 0 } );
 
     my $metadata = q{};
     $metadata .= $self->createKey( { key => $parameters->{key} } );
-
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+    
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSDeregisterRequest", metadata => $metadata, data => $parameters->{data} } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -287,7 +321,7 @@ sub deregisterRequestLS {
     return \%result;
 }
 
-=head2 keepaliveRequestLS($self, { key })
+=head2 keepaliveRequestLS($self, { key, eventType })
 
 Given the key of a registered service, send a 'keepalive' to ensure that the
 data TTL does not expire.  The results of the operation are returned in a hash.
@@ -296,11 +330,14 @@ data TTL does not expire.  The results of the operation are returned in a hash.
 
 sub keepaliveRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { key => 1 } );
+    my $parameters = validateParams( @args, { key => 1, eventType => 0 } );
 
     my $metadata = q{};
     $metadata .= $self->createKey( { key => $parameters->{key} } );
-
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+    
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSKeepaliveRequest", metadata => $metadata } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -319,7 +356,7 @@ sub keepaliveRequestLS {
     return \%result;
 }
 
-=head2 keyRequestLS($self, { service, data })
+=head2 keyRequestLS($self, { service, data, eventType })
 
 Given service information (in the form of a hash reference) create a service
 metadata block and include the data (in the form of an array reference) into
@@ -331,7 +368,7 @@ hash of results for each metadata/data pair.  Note this should be used for all
 
 sub keyRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { service => 1 } );
+    my $parameters = validateParams( @args, { service => 1, eventType => 0 } );
 
     my $metadata = q{};
     my %ns       = (
@@ -339,7 +376,10 @@ sub keyRequestLS {
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
     $metadata .= $self->createService( { service => $parameters->{service} } );
-
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+    
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSKeyRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -366,7 +406,7 @@ sub keyRequestLS {
     return \%result;
 }
 
-=head2 queryRequestLS($self, { query, format })
+=head2 queryRequestLS($self, { query, format, eventType })
 
 Given an xquery/xpath expression, return the results of this query to the
 user.  The result could be a status message (i.e. 'no results') or the actual
@@ -377,14 +417,19 @@ handle either result.
 
 sub queryRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { query => 1, format => 0 } );
+    my $parameters = validateParams( @args, { query => 1, format => 0, eventType => 0 } );
 
     my $metadata = q{};
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
     $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
     $metadata .= $parameters->{query};
     $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+        $metadata .= "    <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    }
+    else {
+        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+    }
     if ( exists $parameters->{format} and $parameters->{format} ) {
         $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
         $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";

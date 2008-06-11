@@ -242,6 +242,7 @@ $logger->debug("Starting '".$$."'");
 
 my @ls_services;
 my @ls_reaper;
+my @ls_sum;
 
 my %loaded_modules = ();
 my $echo_module = "perfSONAR_PS::Services::Echo";
@@ -356,6 +357,13 @@ foreach my $port (keys %{ $conf{"port"} }) {
                 $ls_reaper_args{"conf"} = \%endpoint_conf;
                 push @ls_reaper, \%ls_reaper_args;
             }
+
+            if ($service->can("summarizeLS")) {
+                my %ls_sum_args = ();
+                $ls_sum_args{"service"} = $service;
+                $ls_sum_args{"conf"} = \%endpoint_conf;
+                push @ls_sum, \%ls_sum_args;
+            }
         }
 
         $num_endpoints++;
@@ -415,7 +423,6 @@ foreach my $ls_args (@ls_services) {
         killChildren();
         exit(-1);
     }
-
     $child_pids{$ls_pid} = q{};
 }
 
@@ -432,6 +439,21 @@ foreach my $ls_reaper_args (@ls_reaper) {
         exit(-1);
     }
     $child_pids{$ls_reaper_pid} = q{};
+}
+
+foreach my $ls_sum_args (@ls_sum) {
+    my $ls_sum_pid = fork();
+    if ($ls_sum_pid == 0) {
+        %child_pids = ();
+        $0 .= " - LS Summarizer";
+        summarizeLS( $ls_sum_args );
+        exit(0);
+    } elsif ($ls_sum_pid < 0) {
+        $logger->error("Couldn't spawn LS Summarizer");
+        killChildren();
+        exit(-1);
+    }
+    $child_pids{$ls_sum_pid} = q{};
 }
 
 unlockPIDFile($pidfile);
@@ -548,12 +570,10 @@ sub registerLS {
     my ($args) = @_;
 
     my $service = $args->{"service"};
-    my $default_interval = $args->{"conf"}->{"ls_registration_interval"};
-
     $logger->debug("Starting '".$$."' for LS registration");
 
+    my $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
     while(1) {
-        my $sleep_time;
 
         eval {
             $service->registerLS(\$sleep_time);
@@ -563,15 +583,9 @@ sub registerLS {
             $sleep_time = undef;
         }
 
-        if (not defined $sleep_time or $sleep_time eq q{}) {
-            $sleep_time = $default_interval;
-        }
-
         $logger->debug("Sleeping for $sleep_time");
-
         sleep($sleep_time);
     }
-
     return;
 }
 
@@ -609,6 +623,50 @@ sub cleanLS {
         };
         if ($@) {
             $logger->error("Problem cleaning LS: $@");
+        }
+        elsif ( $status == -1 ) {
+            $logger->error("Error returned: $error");        
+        }
+        
+        $logger->debug("Sleeping for $sleep_time");
+
+        sleep($sleep_time);
+    }
+    return 0;
+}
+
+=head2 summarizeLS($args)
+    The summarizeLS function is used (only by the LS) to periodically summarize
+    the set of registered data.
+=cut
+
+sub summarizeLS {
+    my ($args) = @_;
+
+    my $service = $args->{"service"};
+    my $error = q{};
+    my $sleep_time;
+    if( $args->{"conf"}->{"ls"}->{"summarization_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"ls"}->{"summarization_interval"} * 60;
+    }
+    elsif ( $args->{"conf"}->{"gls"}->{"summarization_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"gls"}->{"summarization_interval"} * 60;
+    }
+    else {
+        $sleep_time = 300;
+    }
+
+    unless ( $sleep_time ) {
+      return -1;
+    }
+
+    while(1) {
+        my $status = q{};
+        eval {
+            $status = $service->summarizeLS( { error => \$error } );
+        };
+        if ($@) {
+            $logger->error("Problem summarizing LS: $@");
         }
         elsif ( $status == -1 ) {
             $logger->error("Error returned: $error");        
