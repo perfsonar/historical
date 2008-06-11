@@ -84,7 +84,7 @@ sub login {
   elsif ($type eq "ome") {
     
     $telnet->waitfor('/<$/');
-    $telnet->print("ACT-USER::$username:1::$password;");
+    $telnet->print("ACT-USER::$username:1::\"$password\";");
     
     while ($line = $telnet->getline) {
       

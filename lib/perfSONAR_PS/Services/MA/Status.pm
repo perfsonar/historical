@@ -1057,10 +1057,10 @@ sub handleCompatPathStatus {
             }
         }
 
-        if (defined $self->{CONF}->{"circuitstatus"}->{"max_recent_age"} and $self->{CONF}->{"circuitstatus"}->{"max_recent_age"} ne q{}) {
+        if (defined $self->{CONF}->{"status"}->{"max_recent_age"} and $self->{CONF}->{"status"}->{"max_recent_age"} ne q{}) {
             my $curr_time = time;
 
-            if ($curr_time - $circuit_time > $self->{CONF}->{"circuitstatus"}->{"max_recent_age"}) {
+            if ($curr_time - $circuit_time > $self->{CONF}->{"status"}->{"max_recent_age"}) {
                 $self->{LOGGER}->debug("Old link time: $circuit_time Current Time: ".$curr_time.": ".($curr_time - $circuit_time));
                 $circuit_time = $curr_time;
                 $circuit_oper_value = "unknown";
@@ -1235,6 +1235,8 @@ sub parseCompatCircuitsFile {
                 $self->{LOGGER}->error($msg);
                 throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
             }
+
+            $self->{LOGGER}->debug("Found '$node_name'");
 
             my %tmp = ();
             my $new_node = \%tmp;

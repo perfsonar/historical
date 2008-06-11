@@ -131,19 +131,18 @@ sub measure {
         my $oper_value;
         my $admin_value;
 
-        $logger->info("Status: $status, Res1: $res1, Res2: $res2, Res3: $res3");
-
         my $time = $res1;
         if ($agent->type() eq "oper") {
             $oper_value = $res2;
+            $logger->debug($agent->type." agent returned ".$time.", oper=".$oper_value);
         } elsif ($agent->type() eq "admin") {
             $admin_value = $res2;
+            $logger->debug($agent->type." agent returned ".$time.", admin=".$admin_value);
         } elsif ($agent->type() eq "oper/admin") {
             $oper_value = $res2;
             $admin_value = $res3;
+            $logger->debug($agent->type." agent returned ".$time.", oper= ".$oper_value." admin=".$admin_value);
         }
-
-        $logger->debug($agent->type." agent returned ".$time.", oper= ".$oper_value." admin=".$admin_value);
 
         if (defined $self->{TIME_SOURCE} and $self->{TIME_SOURCE} eq $agent) {
             $logger->debug("Setting time from an agent");
