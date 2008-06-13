@@ -309,23 +309,32 @@ sub createStorage {
 # ------------------------------------------------------------------------------
 
     # BWCTL Database
-    my $dbsourceBW;
-    if($conf->{'BWCENTRALDBHOST'}) {
-        $dbsourceBW = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'BWCENTRALDBHOST'};
-    }
-    else {
-        $dbsourceBW = $conf->{'BWCENTRALDBTYPE'} . ":" . $conf->{'BWCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
-    }
+    my $dbsourceBW  = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBNAME"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBHOST"  } );
+    my $dbuserBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBUSER"  } );
+    my $dbpassBW = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBPASS" } );
 
     my @dbSchema_nodesBW = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
     my @dbSchema_meshesBW = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type" );
     my @dbSchema_node_mesh_mapBW = ( "mesh_id", "node_id" );
-    my $dbBW = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dbSchema_nodesBW, user => $conf->{'BWCENTRALDBUSER'}, pass => $conf->{'BWCENTRALDBPASS'} } );
-    $dbBW->openDB;
+    my $dbBW = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dbSchema_nodesBW, user => $dbuserBW, pass => $dbpassBW } );
+    my $result = $dbBW->openDB;
 
-    my $result_nodesBW = $dbBW->query( { query => "select * from nodes" } );
+    if ( $result == -1 ) {
+        $dbsourceBW  = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBNAME"  } ) . ":localhost";
+        $dbBW = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dbSchema_nodesBW, user => $dbuserBW, pass => $dbpassBW } );
+        $result = $dbBW->openDB;
+    }
+
+    my $result_nodesBW;
+    my $result_meshesBW;
+    my $result_node_mesh_mapBW;
     my %nodesBW        = ();
-    my $data_len     = $#{$result_nodesBW};
+    my %meshesBW = ();
+    my $data_len;
+    if ( $result == 0 ) {
+    $result_nodesBW = $dbBW->query( { query => "select * from nodes" } );
+    %nodesBW        = ();
+    $data_len     = $#{$result_nodesBW};
     for my $x ( 0 .. $data_len ) {
         my $data_len2 = $#{ $result_nodesBW->[$x] };
         my %temp      = ();
@@ -336,8 +345,8 @@ sub createStorage {
     }
 
     $dbBW->setSchema( { schema => \@dbSchema_meshesBW } );
-    my $result_meshesBW = $dbBW->query( { query => "select * from meshes" } );
-    my %meshesBW = ();
+    $result_meshesBW = $dbBW->query( { query => "select * from meshes" } );
+    %meshesBW = ();
     $data_len = $#{$result_meshesBW};
     for my $x ( 0 .. $data_len ) {
         my $data_len2 = $#{ $result_meshesBW->[$x] };
@@ -349,34 +358,43 @@ sub createStorage {
     }
 
     $dbBW->setSchema( { schema => \@dbSchema_node_mesh_mapBW } );
-    my $result_node_mesh_mapBW = $dbBW->query( { query => "select * from node_mesh_map" } );
+    $result_node_mesh_mapBW = $dbBW->query( { query => "select * from node_mesh_map" } );
     $dbBW->closeDB;
 
     if ( $#{$result_nodesBW} == -1 or $#{$result_meshesBW} == -1 or $#{$result_node_mesh_mapBW} == -1 ) {
         $self->{LOGGER}->error("BW Database query returned 0 results, aborting.");
         return -1;
     }
+    }
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
     # OWAMP Database
-    my $dbsourceOWP;
-    if($conf->{'OWPCENTRALDBHOST'}) {
-        $dbsourceOWP = $conf->{'OWPCENTRALDBTYPE'} . ":" . $conf->{'OWPCENTRALDBNAME'} . ":" . $conf->{'OWPCENTRALDBHOST'};
-    }
-    else {
-        $dbsourceOWP = $conf->{'OWPCENTRALDBTYPE'} . ":" . $conf->{'OWPCENTRALDBNAME'} . ":" . $conf->{'DBHOST'};
-    }
+    my $dbsourceOWP  = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBHOST"  } );
+    my $dbuserOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBUSER"  } );
+    my $dbpassOWP = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBPASS" } );
 
     my @dbSchema_nodesOWP = ( "node_id", "node_name", "uptime_addr", "uptime_port" );
     my @dbSchema_meshesOWP = ( "mesh_id", "mesh_name", "mesh_desc", "tool_name", "addr_type", "session_duration");
-    my $dbOWP = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dbSchema_nodesOWP, user => $conf->{'OWPCENTRALDBUSER'}, pass => $conf->{'OWPCENTRALDBPASS'} } );
-    $dbOWP->openDB;
+    my $dbOWP = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dbSchema_nodesOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+    $result = $dbOWP->openDB;
 
-    my $result_nodesOWP = $dbOWP->query( { query => "select * from nodes" } );
+    if ( $result == -1 ) {
+        $dbsourceOWP  = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME"  } ) . ":localhost";
+        $dbOWP = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dbSchema_nodesOWP, user => $dbuserOWP, pass => $dbpassOWP } );
+        $result = $dbOWP->openDB;
+    }
+
+
+    my $result_nodesOWP;
+    my $result_meshesOWP;
     my %nodesOWP        = ();
-    my $data_len     = $#{$result_nodesOWP};
+    my %meshesOWP = ();
+    if ( $result == 0 ) {
+    $result_nodesOWP = $dbOWP->query( { query => "select * from nodes" } );
+    %nodesOWP        = ();
+    $data_len     = $#{$result_nodesOWP};
     for my $x ( 0 .. $data_len ) {
         my $data_len2 = $#{ $result_nodesOWP->[$x] };
         my %temp      = ();
@@ -387,8 +405,8 @@ sub createStorage {
     }
 
     $dbOWP->setSchema( { schema => \@dbSchema_meshesOWP } );
-    my $result_meshesOWP = $dbOWP->query( { query => "select * from meshes" } );
-    my %meshesOWP = ();
+    $result_meshesOWP = $dbOWP->query( { query => "select * from meshes" } );
+    %meshesOWP = ();
     $data_len = $#{$result_meshesOWP};
     for my $x ( 0 .. $data_len ) {
         my $data_len2 = $#{ $result_meshesOWP->[$x] };
@@ -404,6 +422,7 @@ sub createStorage {
     if ( $#{$result_nodesOWP} == -1 or $#{$result_meshesOWP} == -1 ) {
         $self->{LOGGER}->error("OWP Database query returned 0 results, aborting.");
         return -1;
+    }
     }
 
 # ------------------------------------------------------------------------------
@@ -490,8 +509,8 @@ sub createStorage {
                 $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceOWP . "</nmwg:parameter>\n";
-                $data .= "        <nmwg:parameter name=\"user\">" . $conf->{'OWPCENTRALDBUSER'} . "</nmwg:parameter>\n" if $conf->{'OWPCENTRALDBUSER'};
-                $data .= "        <nmwg:parameter name=\"pass\">" . $conf->{'OWPCENTRALDBPASS'} . "</nmwg:parameter>\n" if $conf->{'OWPCENTRALDBPASS'};
+                $data .= "        <nmwg:parameter name=\"user\">" . $dbuserOWP . "</nmwg:parameter>\n" if $dbuserOWP;
+                $data .= "        <nmwg:parameter name=\"pass\">" . $dbpassOWP . "</nmwg:parameter>\n" if $dbpassOWP;
                 $data .= "        <nmwg:parameter name=\"table\">" . "OWP_" . $meshesOWP{ $x+1 }->{"mesh_name"} . "_" . $nodesOWP{ $y+1 }->{"node_name"} . "_" . $nodesOWP{ $z+1 }->{"node_name"} . "</nmwg:parameter>\n";
                 $data .= "      </nmwg:parameters>\n";
                 $data .= "    </nmwg:key>\n";
@@ -602,8 +621,8 @@ sub createStorage {
                 $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
                 $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceBW . "</nmwg:parameter>\n";
-                $data .= "        <nmwg:parameter name=\"user\">" . $conf->{'BWCENTRALDBUSER'} . "</nmwg:parameter>\n" if $conf->{'BWCENTRALDBUSER'};
-                $data .= "        <nmwg:parameter name=\"pass\">" . $conf->{'BWCENTRALDBPASS'} . "</nmwg:parameter>\n" if $conf->{'BWCENTRALDBPASS'};
+                $data .= "        <nmwg:parameter name=\"user\">" . $dbuserBW . "</nmwg:parameter>\n" if $dbuserBW;
+                $data .= "        <nmwg:parameter name=\"pass\">" . $dbpassBW . "</nmwg:parameter>\n" if $dbpassBW;
                 $data .= "        <nmwg:parameter name=\"table\">" . "BW_" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} . "_" . $nodesBW{ $result_node_mesh_mapBW->[$x][1] }->{"node_name"} . "_" . $nodesBW{ $result_node_mesh_mapBW->[$y][1] }->{"node_name"} . "</nmwg:parameter>\n";
                 $data .= "      </nmwg:parameters>\n";
                 $data .= "    </nmwg:key>\n";
@@ -678,6 +697,31 @@ sub createStorage {
         return -1;
     }
     return 0;
+}
+
+=head2 confHierarchy($self, {  conf, type, variable } )
+
+...
+
+=cut
+
+sub confHierarchy {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { conf => 1, type => 1, variable => 1 } );
+
+    if( exists $parameters->{conf}->{ $parameters->{variable} } and $parameters->{conf}->{ $parameters->{variable} } ) {
+        return $parameters->{conf}->{ $parameters->{variable} };
+    }
+    elsif( exists $parameters->{conf}->{ $parameters->{type} . $parameters->{variable} } and $parameters->{conf}->{ $parameters->{type} . $parameters->{variable} } ) {
+        return $parameters->{conf}->{ $parameters->{type} . $parameters->{variable} };
+    }
+    elsif( exists $parameters->{conf}->{ "CENTRAL" . $parameters->{variable} } and $parameters->{conf}->{ "CENTRAL" . $parameters->{variable} } ) {
+        return $parameters->{conf}->{ "CENTRAL" . $parameters->{variable} };
+    }
+    elsif( exists $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} } and $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} } ) {
+        return $parameters->{conf}->{ $parameters->{type} . "CENTRAL" . $parameters->{variable} };
+    }
+    return;
 }
 
 =head2 prepareDatabases($self, { doc })
