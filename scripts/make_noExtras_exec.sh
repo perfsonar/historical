@@ -1,6 +1,6 @@
 #!/bin/env  bash
 #
-#     perl + libxml2 + db stuff but no SSL or crypto
+#    just perl and libxml2, no db stuff
 #
  
 tolower()
@@ -40,7 +40,7 @@ fi
 EXECNAME=$(tolower $MODULE) 
 echo "Building executable ps-$EXECNAME  for $MODULE MA and MP"
  
-COM="pp -I ../lib/ -M DBD::mysql -M  Sleepycat::DbXml  -M DBD::SQLite -M perfSONAR_PS::Services::LS  \
+COM="pp -I ../lib/  -M  Sleepycat::DbXml  -M perfSONAR_PS::Services::LS  \
  -M perfSONAR_PS::Services::Echo -M  perfSONAR_PS::Request \
  -M perfSONAR_PS::RequestHandler  -M perfSONAR_PS::DB::RRD \
  -M perfSONAR_PS::DB::File  -M perfSONAR_PS::DB::XMLDB \

@@ -1,6 +1,6 @@
 #!/bin/env  bash
 #
-#     perl + libxml2 + db stuff but no SSL or crypto
+#  perl + db + ssl  + crypto
 #
  
 tolower()
@@ -25,6 +25,10 @@ fi
  
 XMLLIB_SO="$XMLROOT/lib/libxml2.so.2"
 XMLLIB_A="$XMLROOT/lib/libxml2.a"
+SSL_SO=/lib/libssl.so.4
+SSL_A=/usr/lib/libssl.a
+LIBCRYPTO_A=/usr/lib/libcrypto.a
+LIBCRYPTO_SO=/lib/libcrypto.so.4
 
 
 MODULE=$1
@@ -50,6 +54,10 @@ COM="pp -I ../lib/ -M DBD::mysql -M  Sleepycat::DbXml  -M DBD::SQLite -M perfSON
  -M perfSONAR_PS::Services::MA::$MODULE \
  -l  $XMLLIB_A  \
  -l  $XMLLIB_SO  \
+ -l  $SSL_SO  \
+ -l  $SSL_A  \
+ -l  $LIBCRYPTO_A  \
+ -l  $LIBCRYPTO_SO  \
  -o ps-$EXECNAME  ../perfsonar-daemon.pl"
 
 echo -e " Building ... \n  $COM  \n "
