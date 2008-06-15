@@ -2271,6 +2271,12 @@ sub lsQueryRequest {
         }                           
     }
     else {
+        # deny the 'control' eventTypes for now    
+        if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0" or 
+             $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" ) {
+            throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Sent evnentType not supported." );
+        }
+    
         my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
         unless ($query) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
