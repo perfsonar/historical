@@ -1,6 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+Name:    LSQueryRequest
+Purpose: Test query via the xquery interface
+Outcome: N/A
+
+-->
+
 <nmwg:message type="LSQueryRequest"
-              id="msg1"
+              id="LSQueryRequest"
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
               xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
                           
