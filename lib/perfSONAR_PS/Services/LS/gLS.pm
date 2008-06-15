@@ -513,7 +513,7 @@ sub summarizeLS {
                         $address .= "/" . $mask if $mask;
                         $l_address->{$address} = 1;
                     }
-                }     
+                }       
                 
                 my $l_domains = find( $doc->getDocumentElement, "./summary:subject/nmtb:domain", 0 );
                 foreach my $d ( $l_domains->get_nodelist ) {
@@ -2133,7 +2133,8 @@ sub lsQueryRequest {
     );
     my %summary_map = (
         "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0"         => 1,
-        "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" => 1
+        "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" => 1,
+        "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" => 1
     );
 
     my $database;
@@ -2150,39 +2151,160 @@ sub lsQueryRequest {
         }
     }
 
-    my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
-    unless ($query) {
-        throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
-    }
-    $query =~ s/\s+\// collection('CHANGEME')\//gmx;
+    # special case discovery message
+    if( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
+        my $subject = find( $parameters->{m}, "./summary:subject", 1 );        
+        unless ( $subject ) {
+            throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." );
+        } 
 
-    my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
-    if ($error) {
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
-    }
+        if ( $self->{CONF}->{"gls"}->{"root"} ) {
+            # special case for 'self' summary in the hLS instances
+            $database = $parameters->{metadatadb};
+        }
 
-    my $dataString = q{};
-    my $len        = $#resultsString;
-    for my $x ( 0 .. $len ) {
-        $dataString = $dataString . $resultsString[$x];
-    }
-    unless ($dataString) {
-        throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
-    }
+        # pull out items from the summary subject               
+        my @resultServices = ();
+        my $sent;
+        my $l_eventTypes = find( $subject, "./nmwg:eventType", 0 );
+        foreach my $e ( $l_eventTypes->get_nodelist ) {
+            my $value = extract( $e, 0 );
+            next unless $value;
+            $sent->{"eventType"}->{$value} = 1
+        }      
+        my $l_domains = find( $subject, "./nmtb:domain", 0 );
+        foreach my $d ( $l_domains->get_nodelist ) {
+            my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
+            next unless $name;
+            $sent->{"domain"}->{$name} = 1
+        }    
+        my $l_addresses = find( $subject, "./nmtb:address", 0 );
+        foreach my $address ( $l_addresses->get_nodelist ) {
+            my $ad = extract( $address, 0 );
+            next unless $ad;
+            $sent->{"address"}->{$ad} = 1
+        } 
 
-    createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
-    my $mdPparameters = q{};
-    $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
-    if ( not $mdPparameters ) {
-        $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
-    }
+        # extract our summary
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => q{}, error => \$error } );
+        my $len = $#resultsString;
+        throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service empty, query not found." ) if $len == -1;
+       
+        for my $x ( 0 .. $len ) {
+            my $parser = XML::LibXML->new();
+            my $doc    = $parser->parse_string( $resultsString[$x] );
 
-    if ( $mdPparameters eq "native" ) {
-        createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . $dataString . "</psservice:datum>\n", undef );
+            my %store = ();
+            $store{ "eventType" } = 0 if exists $sent->{ "eventType" };
+            $store{ "address" } = 0 if exists $sent->{ "address" };
+            $store{ "domain" } = 0 if exists $sent->{ "domain" };
+
+            # gather eventTypes
+            if ( exists $store{ "eventType" } ) {
+                my $l_eventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:eventType", 0 );
+                my $l_supportedEventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+                foreach my $e ( $l_eventTypes->get_nodelist ) {
+                    my $value = extract( $e, 0 );
+                    next unless $value;
+                    $store{"eventType"}++ if $sent->{ "eventType" }->{ $value };
+                }
+                foreach my $se ( $l_supportedEventTypes->get_nodelist ) {
+                    my $value = extract( $se, 0 );
+                    next unless $value;
+                    $store{"eventType"}++ if $sent->{ "eventType" }->{ $value };
+                }      
+            }          
+   
+            # gather the domains
+            if ( exists $store{ "domain" } ) {
+                my $l_domains = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
+                foreach my $d ( $l_domains->get_nodelist ) {
+                    my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
+                    next unless $name;
+                    $store{"domain"}++ if $sent->{ "domain" }->{ $name };
+                }     
+            }
+            
+            #gather the networks
+            if ( exists $store{ "address" } ) {
+                my $l_networks = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
+                my @cidr_list = ();
+                foreach my $n ( $l_networks->get_nodelist ) {
+                    my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
+                    my $mask = extract( find( $n, "./nmtl3:subnet/nmtl3:netmask", 1 ), 0 );
+                    if ( $address ) {
+                        $address .= "/" . $mask if $mask;
+                        @cidr_list = Net::CIDR::cidradd($address, @cidr_list);
+                    }
+                }  
+                # we need to do some CIDR finding
+                foreach my $add (keys %{$sent->{ "address" }} ) {
+                    $store{"address"}++ if Net::CIDR::cidrlookup($add, @cidr_list);
+                }
+            }
+
+            # we have a mactch, get the contact service.
+            my $flag = 1;
+            foreach my $key ( keys %store ) {
+                $flag = $store{$key};
+                last if $flag <= 0;
+            }
+            if ( $flag ) {         
+                my $query2 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$doc->getDocumentElement->getAttribute("metadataIdRef")."\"]";
+                my @resultsString2 = $database->query( { query => $query2, txn => q{}, error => \$error } );
+                my $len2 = $#resultsString2;
+                for my $y ( 0 .. $len2 ) {
+                    push @resultServices, $resultsString2[$y];
+                }
+            }
+        }
+               
+        if($#resultServices == -1) {
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $subject->toString . "\n<nmwg:eventType>error.ls.query.empty_results</nmwg:eventType>\n" , undef );  
+            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"><nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">Nothing returned for search.</nmwgr:datum></nmwg:data>\n", undef );                
+        }
+        else {
+            createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $subject->toString . "\n<nmwg:eventType>" . $eventType . "</nmwg:eventType>\n" , undef );  
+            foreach my $metadata (@resultServices) {
+                createData( $parameters->{doc}, $dId, $mdId, "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">" . $metadata . "</nmwg:data>\n", undef );                
+            }
+        }                           
     }
     else {
-        createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . escapeString($dataString) . "</psservice:datum>\n", undef );
-    }
+        my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
+        unless ($query) {
+            throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
+        }
+        $query =~ s/\s+\// collection('CHANGEME')\//gmx;
+    
+        my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
+        if ($error) {
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
+        }
+
+        my $dataString = q{};
+        my $len        = $#resultsString;
+        for my $x ( 0 .. $len ) {
+            $dataString = $dataString . $resultsString[$x];
+        }
+        unless ($dataString) {
+            throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
+        }
+
+        createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
+        my $mdPparameters = q{};
+        $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
+        if ( not $mdPparameters ) {
+            $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
+        }
+
+        if ( $mdPparameters eq "native" ) {
+            createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . $dataString . "</psservice:datum>\n", undef );
+        }
+        else {
+            createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . escapeString($dataString) . "</psservice:datum>\n", undef );
+        }
+    }    
     return;
 }
 
