@@ -1430,6 +1430,21 @@ sub lsRegisterRequest {
             # Anything else is rejected
             throw perfSONAR_PS::Error_compat( "error.gls.register", "Root gLS servers can only accept registration and synchronization of hLS summaries." );
         }
+
+        my $totalCount = 0;
+        my $summaryCount = 0;
+        foreach my $d_content ( $parameters->{d}->childNodes ) {
+            if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
+                if ( find( $d_content, ".//summary:subject", 1 ) ) {
+                    $summaryCount++;
+                }
+                $totalCount++;
+            }
+        }
+        
+        unless ( $summaryCount == $totalCount ) {
+            throw perfSONAR_PS::Error_compat( "error.gls.register", "Root gLS servers can only accept registration and synchronization of hLS summaries." );
+        }
     }
     else {
         # hLS should have no eventType, or the service registration eventType.
@@ -1440,6 +1455,15 @@ sub lsRegisterRequest {
                 throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
             }
         }
+
+        foreach my $d_content ( $parameters->{d}->childNodes ) {
+            if ( $d_content->getType != 3 and $d_content->getType != 8 ) {
+                if ( find( $d_content, ".//summary:subject", 1 ) ) {  
+                    throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can not accept summary registration." );
+                }
+            }
+        }
+
         $auth = 1;
     }
 
@@ -1781,6 +1805,10 @@ sub lsRegisterRequestNew {
 
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
             my $service = $parameters->{m}->cloneNode(1);
+
+            my $et = find( $service, "./nmwg:eventType", 1 );
+            my $junk = $service->removeChild( $et ) if $et;
+            
             $service->setAttribute( "id", $mdKey );
             $parameters->{database}->insertIntoContainer( { content => $parameters->{database}->wrapStore( { content => $service->toString, type => "LSStore" } ), name => $mdKey, txn => $parameters->{dbTr}, error => \$error } );
             $errorFlag++ if $error;
@@ -1946,7 +1974,7 @@ sub lsDeregisterRequest {
     if ($errorFlag) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
     }
     else {
         my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
@@ -2174,7 +2202,8 @@ sub lsKeyRequest {
 
     my $error     = q{};
     my $summary   = 0;
-    my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
+    my $et = find( $parameters->{m}, "./nmwg:eventType", 1 );
+    my $eventType = extract( $et, 0 );
     unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0" or 
              $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0") {
         if( $eventType ) {
@@ -2188,7 +2217,9 @@ sub lsKeyRequest {
 
     my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
     if ($service) {
+        my $junk = $parameters->{m}->removeChild( $et ) if $et;
         my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
+
         my @resultsString = ();
 
         if ($summary) {
