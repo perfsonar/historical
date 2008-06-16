@@ -8,7 +8,7 @@ use Params::Validate qw(:all);
 use Data::Dumper;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-use fields 'CRSSBYNAME', 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'SECTSBYAID', 'LINESBYAID', 'LINESBYNAME', 'READ_CRS', 'READ_ETH', 'READ_OCN', 'READ_SECT', 'READ_LINE';
+use fields 'CRSSBYNAME', 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'SECTSBYAID', 'LINESBYAID', 'LINESBYNAME', 'SECT_PMS', 'LINE_PMS', 'READ_CRS', 'READ_ETH', 'READ_OCN', 'READ_SECT', 'READ_LINE', 'READ_SECT_PM', 'READ_LINE_PM';
 
 sub initialize {
     my ($self, @params) = @_;
@@ -174,6 +174,54 @@ sub getOCN_PM {
     return;
 }
 
+sub getLine_PM {
+    my ($self, $aid, $name) = @_;
+    my $do_reload_stats = 0;
+
+    if (not $self->{READ_LINE_PM}) {
+        $do_reload_stats = 1;
+        $self->{READ_LINE_PM} = 1;
+    }
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
+        $self->readStats();
+    }
+
+    if (not $aid) {
+        return $self->{LINE_PMS};
+    }
+
+    if (not $name) {
+        return $self->{LINE_PMS}->{$aid};
+    }
+
+    return $self->{LINE_PMS}->{$aid}->{$name};
+}
+
+sub getSect_PM {
+    my ($self, $aid, $name) = @_;
+    my $do_reload_stats = 0;
+
+    if (not $self->{READ_SECT_PM}) {
+        $do_reload_stats = 1;
+        $self->{READ_SECT_PM} = 1;
+    }
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
+        $self->readStats();
+    }
+
+    if (not $aid) {
+        return $self->{SECT_PMS};
+    }
+
+    if (not $name) {
+        return $self->{SECT_PMS}->{$aid};
+    }
+
+    return $self->{SECT_PMS}->{$aid}->{$name};
+}
+
 sub readStats {
     my ($self) = @_;
 
@@ -192,8 +240,16 @@ sub readStats {
         $self->readSECTs();
     }
 
+    if ($self->{READ_SECT_PM}) {
+        $self->readSect_PM();
+    }
+
     if ($self->{READ_LINE}) {
         $self->readLINEs();
+    }
+
+    if ($self->{READ_LINE_PM}) {
+        $self->readLine_PM();
     }
 
     $self->{CACHE_TIME} = time;
@@ -329,6 +385,84 @@ sub readCRSs {
     $self->{CRSSBYNAME} = \%crss;
 
     return;
+}
+
+sub readLine_PM {
+    my ($self) = @_;
+
+    my %pms = ();
+
+    my @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:INDEX=1;");
+
+    foreach my $line (@results) {
+        if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^"]*)"/) {
+            my $aid = $1;
+            my $pm_type = $2;
+            my $pm_value = $3;
+            my $validity = $4;
+            my $location = $5;
+            my $direction = $6;
+            my $time_period = $7;
+            my $monitoring_date = $8;
+            my $monitoring_time = $9;
+
+            my %pm = (
+                aid => $aid,
+                aid_type => "line",
+                type => $pm_type,
+                value => $pm_value,
+                validity => $validity,
+                location => $location,
+                direction => $direction,
+                time_period => $time_period,
+                monitoring_date => $monitoring_date,
+                monitoring_time => $monitoring_time,
+            );
+
+            $pms{$aid}->{$pm_type} = \%pm;
+        }
+    }
+
+    $self->{LINE_PMS} = \%pms;
+}
+
+sub readSect_PM {
+    my ($self) = @_;
+    my %pms = ();
+
+    my @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:INDEX=1;");
+
+    foreach my $line (@results) {
+#        "OC192S-1-501-2-1:SEFS-S,505,PRTL,NEND,RCV,15-MIN,06-16,14-15"
+        if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^"]*)"/) {
+            my $aid = $1;
+            my $pm_type = $2;
+            my $pm_value = $3;
+            my $validity = $4;
+            my $location = $5;
+            my $direction = $6;
+            my $time_period = $7;
+            my $monitoring_date = $8;
+            my $monitoring_time = $9;
+
+            my %pm = (
+                aid => $aid,
+                aid_type => "sect",
+                type => $pm_type,
+                value => $pm_value,
+                validity => $validity,
+                location => $location,
+                direction => $direction,
+                time_period => $time_period,
+                monitoring_date => $monitoring_date,
+                monitoring_time => $monitoring_time,
+            );
+
+            $pms{$aid}->{$pm_type} = \%pm;
+        }
+    }
+
+    $self->{SECT_PMS} = \%pms;
 }
 
 1;
