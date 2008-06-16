@@ -181,7 +181,7 @@ sub metadataKeyRequest {
     else {
         $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
     }
-    
+
     my $msg = $self->callMA( { message => $self->createMAMessage( { type => "MetadataKeyRequest", content => $content } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
