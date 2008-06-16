@@ -3,11 +3,12 @@
 use warnings;
 use strict;
 
-use lib "./lib";
+use lib "../../lib";
 
 use perfSONAR_PS::Client::LS;
 use Config::General qw(ParseConfig SaveConfig);
 use Data::Random::WordList;
+use Getopt::Long;
 
 =head1 NAME
 
@@ -23,6 +24,19 @@ not present.
 
 =cut
 
+my $DEBUG = '';
+my $HELP = '';
+my %opts = ();
+GetOptions('verbose' => \$DEBUG,
+           'help' => \$HELP,
+           'config=s' => \$opts{CONF});
+
+if(!(defined $opts{CONF}) or $HELP) {
+  print "$0: Runs fakeService with configuration file CONFIG\n";
+  print "$0 [--verbose --help --config=/path/to/config/file]\n";
+  exit(1);
+}
+
 # 0-2 = 33% odds of switching the SNMP Subject/EventType
 my $subjectOdds = 2;
 
@@ -35,7 +49,11 @@ my $numC    = int rand(5) + 5;
 my @cClass  = ();
 my %service = ();
 
-my $file   = "fakeService.conf";
+my $file = "./fakeService.conf";
+if(defined $opts{ENV}) {
+  $file = $opts{ENV};
+}
+
 my %config = ();
 if ( -f $file ) {
     %config = ParseConfig($file);
@@ -521,7 +539,8 @@ __END__
 
 =head1 SEE ALSO
 
-L<>
+L<perfSONAR_PS::Client::LS>, L<Config::General>, L<Data::Random::WordList>,
+L<Getopt::Long>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
