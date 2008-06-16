@@ -338,18 +338,37 @@ sub registerLS {
 
                 foreach my $root ( keys %rootList ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
-                    my $result = $ls->registerRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );
-                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
-                        my $msg = "Success from LS";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->debug( $msg );
+                    my $result = $ls->keyRequestLS( { servicexml => $service[0] } );
+                    if ( exists $result->{key} and $result->{key} ) {
+                        my $key = $result->{key};
+                        $result = $ls->registerClobberRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );                        
+                        if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                            my $msg = "Success from LS";
+                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                            $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                        }
+                        else {
+                            my $msg = "Error in LS Registration";
+                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                            $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                        }
                     }
                     else {
-                        my $msg = "Error in LS Registration";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->error( $msg );
+                        $result = $ls->registerRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );
+                        if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                            my $msg = "Success from LS";
+                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                            $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                        }
+                        else {
+                            my $msg = "Error in LS Registration";
+                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                            $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                        }
                     }
                 }
             }
@@ -731,8 +750,8 @@ sub summarizeLS {
         my @resultsString2 = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]", txn => $sum_dbTr, error => \$sum_error } );
         $sum_errorFlag++ if $sum_error;
         my $len2 = $#resultsString2;
-        for my $x ( 0 .. $len2 ) {
-            $summarydb->remove( { name => $resultsString2[$x], txn => $sum_dbTr, error => \$sum_error } );
+        for my $y ( 0 .. $len2 ) {
+            $summarydb->remove( { name => $resultsString2[$y], txn => $sum_dbTr, error => \$sum_error } );
             $sum_errorFlag++ if $sum_error;
         }
 
@@ -1176,17 +1195,18 @@ sub cleanLSAux {
                 $key =~ s/-control$//mx;
                 if ( $time and $key and $parameters->{time} >= $time ) {
                     $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\"." );
-                    @resultsString = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => q{}, error => \$error } );
-                    my $len = $#resultsString;
-                    for my $x ( 0 .. $len ) {
-                        $parameters->{database}->remove( { name => $resultsString[$x], txn => $dbTr, error => \$error } );
+                    my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    my $len2 = $#resultsString2;
+                    for my $y ( 0 .. $len2 ) {
+                        $parameters->{database}->remove( { name => $resultsString2[$y], txn => $dbTr, error => \$error } );
                         $errorFlag++ if $error;
                     }
                     $parameters->{database}->remove( { name => $key . "-control", txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
                     $parameters->{database}->remove( { name => $key, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
-                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
+                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString2 + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
                 }
             }
         }
@@ -1552,11 +1572,11 @@ sub lsRegisterRequestUpdateNew {
     if ( $update ) {
         # remove all the old stuff (its a 'clobber' after all)
     
-        my @resultsString = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => q{}, error => \$error } );
-        my $len = $#resultsString;
+        my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => q{}, error => \$error } );
+        my $len2 = $#resultsString2;
         $self->{LOGGER}->debug( "Removing all info for \"" . $parameters->{mdKey} . "\"." );
-        for my $x ( 0 .. $len ) {
-            $parameters->{database}->remove( { name => $resultsString[$x], txn => $parameters->{dbTr}, error => \$error } );
+        for my $y ( 0 .. $len2 ) {
+            $parameters->{database}->remove( { name => $resultsString2[$y], txn => $parameters->{dbTr}, error => \$error } );
         }
         $parameters->{database}->remove( { name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
         $parameters->{database}->remove( { name => $parameters->{mdKey}, txn => $parameters->{dbTr}, error => \$error } );
@@ -1675,9 +1695,9 @@ sub lsRegisterRequestUpdate {
                 
                 $self->{LOGGER}->debug( "Removing data for \"" . $parameters->{mdKey} . "\" so we can start clean." );
                 my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => $parameters->{dbTr}, error => \$error } );
-                my $len = $#resultsString2;
-                for my $x ( 0 .. $len ) {
-                    $parameters->{database}->remove( { name => $resultsString2[$x], txn => $parameters->{dbTr}, error => \$error } );
+                my $len2 = $#resultsString2;
+                for my $y ( 0 .. $len2 ) {
+                    $parameters->{database}->remove( { name => $resultsString2[$y], txn => $parameters->{dbTr}, error => \$error } );
                     $errorFlag++ if $error;
                 }
         }
@@ -1785,9 +1805,9 @@ sub lsRegisterRequestNew {
                     # it is safest to just nuke it)
                     $self->{LOGGER}->debug( "Removing data for \"" . $mdKey . "\" so we can start clean." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]", txn => $parameters->{dbTr}, error => \$error } );
-                    my $len = $#resultsString2;
-                    for my $x ( 0 .. $len ) {
-                        $parameters->{database}->remove( { name => $resultsString2[$x], txn => $parameters->{dbTr}, error => \$error } );
+                    my $len2 = $#resultsString2;
+                    for my $y ( 0 .. $len2 ) {
+                        $parameters->{database}->remove( { name => $resultsString2[$y], txn => $parameters->{dbTr}, error => \$error } );
                         $errorFlag++ if $error;
                     }
                 }

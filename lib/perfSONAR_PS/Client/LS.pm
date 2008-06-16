@@ -368,14 +368,19 @@ hash of results for each metadata/data pair.  Note this should be used for all
 
 sub keyRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { service => 1, eventType => 0 } );
+    my $parameters = validateParams( @args, { service => 0, servicexml => 0, eventType => 0 } );
 
     my $metadata = q{};
     my %ns       = (
         perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
         psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"
     );
-    $metadata .= $self->createService( { service => $parameters->{service} } );
+    if ( exists $parameters->{service} and $parameters->{service} ) {    
+        $metadata .= $self->createService( { service => $parameters->{service} } );
+    }
+    elsif ( exists $parameters->{servicexml} and $parameters->{servicexml} ) {
+        $metadata .= $parameters->{servicexml};
+    }
     if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
         $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
     }
