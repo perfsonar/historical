@@ -2281,12 +2281,12 @@ sub lsQueryRequest {
                
         if($#resultServices == -1) {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $subject->toString . "\n<nmwg:eventType>error.ls.query.empty_results</nmwg:eventType>\n" , undef );  
-            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"><nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">Nothing returned for search.</nmwgr:datum></nmwg:data>\n", undef );                
+            createData( $parameters->{doc}, $dId, $mdId, "<nmwgr:datum xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">Nothing returned for search.</nmwgr:datum>\n", undef );                
         }
         else {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), $subject->toString . "\n<nmwg:eventType>" . $eventType . "</nmwg:eventType>\n" , undef );  
             foreach my $metadata (@resultServices) {
-                createData( $parameters->{doc}, $dId, $mdId, "<nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">" . $metadata . "</nmwg:data>\n", undef );                
+                createData( $parameters->{doc}, $dId, $mdId, $metadata, undef );                
             }
         }                           
     }
