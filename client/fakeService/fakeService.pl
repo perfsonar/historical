@@ -67,7 +67,7 @@ else {
 
     # get some questions answered
 
-    $config{"domain"}      = getWord(1);
+    $config{"domain"}      = getWord(1, $wordList);
     $config{"ip"}          = getIP(1);
     $config{"type"}        = &ask( "Enter the service type (snmp|pSB )", "snmp", $config{"type"}, '(snmp|pSB)' );
     $config{"md_number"}   = &ask( "Enter the number of metadata ", "10", $config{"md_number"}, '\d+' );
@@ -89,13 +89,13 @@ if ( $config{"type"} eq "snmp" ) {
         serviceName        => $config{"domain"} . " SNMP MA",
         serviceType        => "MA",
         serviceDescription => "A fake " . "SNMP MA deployed at " . $config{"domain"},
-        accessPoint        => "http://" . getWord() . "." . $config{"domain"} . ":" . ( int rand(8192) + 1024 ) . "/perfSONAR_PS/services/snmpMA"
+        accessPoint        => "http://" . getWord(0, $wordList) . "." . $config{"domain"} . ":" . ( int rand(8192) + 1024 ) . "/perfSONAR_PS/services/snmpMA"
     );
 
     for my $id ( 1 .. ( int( $config{"md_number"} / 2 ) ) ) {
 
         my $type = int rand($subjectOdds);
-        my $host = getWord();
+        my $host = getWord(0, $wordList);
         my $sub  = int rand($subnetOdds);
         if ($sub) {
             $sub = int rand( $#subnets - 1 );
@@ -177,7 +177,7 @@ elsif ( $config{"type"} eq "pSB" ) {
         serviceName        => $config{"domain"} . " perfSONAR-BUOY MA",
         serviceType        => "MA",
         serviceDescription => "A fake " . "perfSONAR-BUOY MA deployed at " . $config{"domain"},
-        accessPoint        => "http://" . getWord() . "." . $config{"domain"} . ":" . ( int rand(8192) + 1024 ) . "/perfSONAR_PS/services/pSB"
+        accessPoint        => "http://" . getWord(0, $wordList) . "." . $config{"domain"} . ":" . ( int rand(8192) + 1024 ) . "/perfSONAR_PS/services/pSB"
     );
 
     for my $id ( 1 .. ( int( $config{"md_number"} / 2 ) ) ) {
@@ -191,21 +191,21 @@ elsif ( $config{"type"} eq "pSB" ) {
         my $sub = int rand($subnetOdds);
         if ($sub) {
             $sub   = int rand( $#subnets - 1 );
-            $host1 = getWord() . "." . $subnets[$sub] . "." . $config{"domain"};
+            $host1 = getWord(0, $wordList) . "." . $subnets[$sub] . "." . $config{"domain"};
         }
         else {
-            $host1 = getWord() . "." . $config{"domain"};
+            $host1 = getWord(0, $wordList) . "." . $config{"domain"};
         }
 
         my $host2;
-        my $domain2 = getWord(1);
+        my $domain2 = getWord(1, $wordList);
         $sub = int rand($subnetOdds);
         if ($sub) {
             $sub   = int rand( $#subnets - 1 );
-            $host2 = getWord() . "." . $subnets[$sub] . "." . $domain2;
+            $host2 = getWord(0, $wordList) . "." . $subnets[$sub] . "." . $domain2;
         }
         else {
-            $host2 = getWord() . "." . $domain2;
+            $host2 = getWord(0, $wordList) . "." . $domain2;
         }
 
         my $address1 = $config{"ip"};
@@ -371,7 +371,7 @@ sub getIP {
 =cut
 
 sub getWord {
-    my ($domain) = @_;
+    my ($domain, $wordList) = @_;
     my $wl = new Data::Random::WordList( wordlist => $wordList );
 
     my $d = 0;
