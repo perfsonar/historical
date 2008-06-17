@@ -341,7 +341,7 @@ sub registerLS {
                     my $result = $ls->keyRequestLS( { servicexml => $service[0] } );
                     if ( exists $result->{key} and $result->{key} ) {
                         my $key = $result->{key};
-                        $result = $ls->registerClobberRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );                        
+                        $result = $ls->registerClobberRequestLS( { key => $key, eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );                        
                         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
