@@ -50,8 +50,8 @@ my @cClass  = ();
 my %service = ();
 
 my $file = "./fakeService.conf";
-if(defined $opts{ENV}) {
-  $file = $opts{ENV};
+if(defined $opts{CONF}) {
+  $file = $opts{CONF};
 }
 
 my %config = ();
