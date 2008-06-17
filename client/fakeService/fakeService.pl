@@ -29,11 +29,12 @@ my $HELP = '';
 my %opts = ();
 GetOptions('verbose' => \$DEBUG,
            'help' => \$HELP,
-           'config=s' => \$opts{CONF});
+           'config=s' => \$opts{CONF},
+           'list=s' => \$opts{WLIST});
 
-if(!(defined $opts{CONF}) or $HELP) {
+if(!(defined $opts{CONF} or defined $opts{WLIST}) or $HELP) {
   print "$0: Runs fakeService with configuration file CONFIG\n";
-  print "$0 [--verbose --help --config=/path/to/config/file]\n";
+  print "$0 [--verbose --help --list=/usr/share/dict/words --config=/path/to/config/file]\n";
   exit(1);
 }
 
@@ -50,8 +51,12 @@ my @cClass  = ();
 my %service = ();
 
 my $file = "./fakeService.conf";
+my $wordList = "/usr/share/dict/american-english-huge";
 if(defined $opts{CONF}) {
   $file = $opts{CONF};
+}
+if(defined $opts{WLIST}) {
+  $wordList = $opts{WLIST};
 }
 
 my %config = ();
@@ -367,7 +372,7 @@ sub getIP {
 
 sub getWord {
     my ($domain) = @_;
-    my $wl = new Data::Random::WordList( wordlist => '/usr/share/dict/american-english' );
+    my $wl = new Data::Random::WordList( wordlist => $wordList );
 
     my $d = 0;
     while ( not $d ) {
