@@ -347,13 +347,13 @@ sub registerLS {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                             $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                            $self->{LOGGER}->debug( $msg );
                         }
                         else {
                             my $msg = "Error in LS Registration";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                             $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                            $self->{LOGGER}->error( $msg );
                         }
                     }
                     else {
@@ -362,13 +362,13 @@ sub registerLS {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                             $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                            $self->{LOGGER}->debug( $msg );
                         }
                         else {
                             my $msg = "Error in LS Registration";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                             $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                            $self->{LOGGER}->error( $msg . "\n\n" . $service[0] , "\n\n");
+                            $self->{LOGGER}->error( $msg );
                         }
                     }
                 }
@@ -2206,7 +2206,7 @@ sub lsQueryRequest {
             $sent->{"address"}->{$ad} = 1
         } 
 
-        # extract our summary
+        # extract our summaries
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => q{}, error => \$error } );
         my $len = $#resultsString;
         throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service empty, query not found." ) if $len == -1;
@@ -2248,6 +2248,7 @@ sub lsQueryRequest {
             
             #gather the networks
             if ( exists $store{ "address" } ) {
+
                 my $l_networks = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
                 my @cidr_list = ();
                 foreach my $n ( $l_networks->get_nodelist ) {
@@ -2258,6 +2259,7 @@ sub lsQueryRequest {
                         @cidr_list = Net::CIDR::cidradd($address, @cidr_list);
                     }
                 }  
+
                 # we need to do some CIDR finding
                 foreach my $add (keys %{$sent->{ "address" }} ) {
                     $store{"address"}++ if Net::CIDR::cidrlookup($add, @cidr_list);
@@ -2270,6 +2272,7 @@ sub lsQueryRequest {
                 $flag = $store{$key};
                 last if $flag <= 0;
             }
+
             if ( $flag ) {         
                 my $query2 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$doc->getDocumentElement->getAttribute("metadataIdRef")."\"]";
                 my @resultsString2 = $database->query( { query => $query2, txn => q{}, error => \$error } );
