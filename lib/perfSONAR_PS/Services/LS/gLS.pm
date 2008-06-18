@@ -333,6 +333,7 @@ sub registerLS {
                 $resultsString[$x] =~ s/\"//g;
                 my $query2 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$resultsString[$x]."\"]/perfsonar:subject";
                 my @service = $database->query( { query => $query2, txn => q{}, error => \$error } );
+
                 my $query3 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[$x]."\"]/nmwg:metadata";
                 my @metadataArray = $database->query( { query => $query3, txn => q{}, error => \$error } );
 
@@ -1597,7 +1598,7 @@ sub lsRegisterRequestUpdateNew {
             # its new to us, so add it
         
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
-            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">" . $parameters->{service}->toString . "</nmwg:metadata>\n";
+            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">\n<perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">" . $parameters->{service}->toString . "</perfsonar:subject>\n</nmwg:metadata>\n";
             $parameters->{database}->insertIntoContainer( { content => $parameters->{database}->wrapStore( { content => $mdCopy, type => "LSStore" } ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$error } );
             $parameters->{database}->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
         }
