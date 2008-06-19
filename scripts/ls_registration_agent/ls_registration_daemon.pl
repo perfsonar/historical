@@ -3,6 +3,7 @@
 use lib 'lib';
 use lib '../lib';
 
+use File::Basename;
 use POSIX qw( setsid );
 use Fcntl qw(:DEFAULT :flock);
 use Log::Log4perl qw(:easy);
@@ -14,7 +15,7 @@ use Getopt::Long;
 
 my $CONFIG_FILE;
 my $LOGOUTPUT;
-my $PIDDIR;
+my $PIDFILE;
 my $DEBUGFLAG;
 my $NAMED_PIPE;
 my $HELP;
@@ -22,16 +23,16 @@ my $HELP;
 my $status = GetOptions (
         'config=s' => \$CONFIG_FILE,
         'output=s' => \$LOGOUTPUT,
-        'piddir=s' => \$PIDDIR,
+        'pidfile=s' => \$PIDFILE,
         'verbose'  => \$DEBUGFLAG,
         'pipe=s'   => \$NAMED_PIPE,
         'help'     => \$HELP);
 
-if (not $PIDDIR) {
-    $PIDDIR="/var/run";
+if (not $PIDFILE) {
+    $PIDFILE="/var/run/ls_registration_daemon.pid";
 }
 
-my $pidfile = lockPIDFile($PIDDIR, "ls_registration_agent.pid");
+my $pidfile = lockPIDFile($PIDFILE);
 
 my $output_level = $INFO;
 if($DEBUGFLAG) {
@@ -98,8 +99,6 @@ if ($npad->init(\%config)) {
     exit(-5);
 }
 
-unlockPIDFile($pidfile);
-
 my $pipe_handle;
 
 # open the named pipe both read and write so that it doesn't try to tell us
@@ -115,6 +114,8 @@ if(not $DEBUGFLAG) {
 	&daemonize;
 }
 
+unlockPIDFile($pidfile);
+
 while(1) {
     my $select = IO::Select->new();
     $select->add($pipe_handle);
@@ -124,10 +125,8 @@ while(1) {
     if ($#ready > -1) {
         my $line = <$pipe_handle>;
         chomp($line);
-        print "Got message; '$line'\n";
+        $logger->info("Received message: ".$line);
         handle_message($line);
-    } else {
-        print "Timeout occurred\n";
     }
 
     $bwctl->refresh();
@@ -153,17 +152,16 @@ sub handle_message {
     }
 }
 
-=head2 lockPIDFile($piddir, $pidfile);
+=head2 lockPIDFile($pidfile);
 The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
 sub lockPIDFile {
-    my($piddir, $pidfile) = @_;
+    my($pidfile) = @_;
     my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
-    $logger->debug("Locking pid file: $piddir/$pidfile");
-    die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
-    $pidfile = $piddir ."/".$pidfile;
+    $logger->debug("Locking pid file: $pidfile");
+    die "Can't write pidfile: $pidfile\n" unless -w dirname($pidfile);
     sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
     flock(PIDFILE, LOCK_EX);
     my $p_id = <PIDFILE>;

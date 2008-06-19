@@ -6,17 +6,9 @@
 # description: perfSONAR Lookup Service Registration Daemon
 #
 
-PREFIX=../
-SBINDIR=${PREFIX}/sbin
-CONFDIR=${PREFIX}/etc
-RUNDIR=${PREFIX}/var/run
-LOGDIR=${PREFIX}/var/log
+source /etc/default/ls_registration_daemon
 
-NAMEDPIPE=${RUNDIR}/ls_registration_daemon.pipe
-CONFFILE=${CONFDIR}/ls_registration_daemon.conf
-LOGFILE=${LOGDIR}/ls_registration_daemon.log
-
-PERFSONAR="${SBINDIR}/ls_registration_daemon.pl --config=${CONFFILE} --piddir=${RUNDIR} --output=${LOGFILE} --pipe=${NAMEDPIPE}"
+PERFSONAR="${SBINDIR}/ls_registration_daemon.pl --config=${CONFFILE} --pidfile=${PIDFILE} --output=${LOGFILE} --pipe=${NAMEDPIPE}"
 
 ERROR=0
 ARGV="$@"
@@ -26,6 +18,21 @@ fi
 
 for ARG in $@ $ARGS
 do
+    # check for pidfile
+    if [ -f $PIDFILE ] ; then
+        PID=`cat $PIDFILE`
+        if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
+            STATUS="LS Registration Daemon (pid $PID) running"
+            RUNNING=1
+        else
+            STATUS="LS Registration Daemon (pid $PID?) not running"
+            RUNNING=0
+        fi
+    else
+        STATUS="LS Registration Daemon (no pid file) not running"
+        RUNNING=0
+    fi 
+
     case $ARG in
     start)
 	echo $PERFSONAR
