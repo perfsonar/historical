@@ -267,7 +267,8 @@ sub prepareDatabase {
 
 =head2 needLS($self)
 
-Stub function that would allow the LS to register with another LS.
+Stub function that would allow the LS to register with another LS (used in the
+gLS for synchronization as well).
 
 =cut
 
@@ -290,6 +291,7 @@ sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
     my $error = q{};
+    my $eventType;
     my $database;
 
     # Try to compile a list of gLS root servers (the hints file, the local
@@ -316,33 +318,33 @@ sub registerLS {
     }  
 
     if( $self->{CONF}->{"gls"}->{root} ) {
-        # if we are root, we are 'synchronizing'
+        # if we are a root, we are 'synchronizing'
     
+        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
         $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
         unless ($database) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
         }    
 
-        my $query = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id";
+        my $query = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata";
         my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
         if ( $#resultsString != -1 ) {
             my $len = $#resultsString;
             for my $x (0..$len) {
-                $resultsString[$x] =~ s/^\{\}id=//;
-                $resultsString[$x] =~ s/\"//g;
-                my $query2 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"".$resultsString[$x]."\"]/perfsonar:subject";
-                my @service = $database->query( { query => $query2, txn => q{}, error => \$error } );
-
-                my $query3 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[$x]."\"]/nmwg:metadata";
-                my @metadataArray = $database->query( { query => $query3, txn => q{}, error => \$error } );
+                my $parser = XML::LibXML->new();
+                my $doc    = $parser->parse_string( $resultsString[$x] );
+                my $service = find($doc->getDocumentElement, "./perfsonar:subject", 1);
+                
+                my $query2 = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$doc->getDocumentElement->getAttribute("id")."\"]/nmwg:metadata";
+                my @metadataArray = $database->query( { query => $query2, txn => q{}, error => \$error } );
 
                 foreach my $root ( keys %rootList ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
-                    my $result = $ls->keyRequestLS( { servicexml => $service[0] } );
+                    my $result = $ls->keyRequestLS( { servicexml => $service->toString } );
                     if ( exists $result->{key} and $result->{key} ) {
                         my $key = $result->{key};
-                        $result = $ls->registerClobberRequestLS( { key => $key, eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );                        
+                        $result = $ls->registerClobberRequestLS( { key => $key, eventType => $eventType, servicexml => $service->toString, data => \@metadataArray } );                        
                         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
@@ -357,7 +359,7 @@ sub registerLS {
                         }
                     }
                     else {
-                        $result = $ls->registerRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0", servicexml => $service[0], data => \@metadataArray } );
+                        $result = $ls->registerRequestLS( { eventType => $eventType, servicexml => $service->toString, data => \@metadataArray } );
                         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
@@ -377,38 +379,43 @@ sub registerLS {
     }
     else {
         # if we are not a root, send our summary to a root
-    
+
+        my %service = (
+            serviceName        => $self->{CONF}->{"gls"}->{"service_name"},
+            serviceType        => $self->{CONF}->{"gls"}->{"service_type"},
+            serviceDescription => $self->{CONF}->{"gls"}->{"service_description"},
+            accessPoint        => $self->{CONF}->{"gls"}->{"service_accesspoint"}
+        );
+
+        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0";    
         $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
         unless ($database) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
             return -1;
         } 
 
-        my $query = "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[./nmwg:parameters/nmwg:parameter[\@name=\"authoritative\" and text()=\"yes\"]]/\@metadataIdRef";
-        my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
         if ( $#resultsString != -1 ) {
+            my $md_len = $#resultsString;
+            my @metadataArray = ();
+            for my $x (0..$md_len) {
+                $resultsString[$x] =~ s/^\{\}id=//;
+                $resultsString[$x] =~ s/\"//g;
 
-            my %service = (
-                serviceName        => $self->{CONF}->{"gls"}->{"service_name"},
-                serviceType        => $self->{CONF}->{"gls"}->{"service_type"},
-                serviceDescription => $self->{CONF}->{"gls"}->{"service_description"},
-                accessPoint        => $self->{CONF}->{"gls"}->{"service_accesspoint"}
-            );
-    
-            my $len = $#resultsString;
-            if ( $resultsString[0] ) {
-                $resultsString[0] =~ s/^\{\}metadataIdRef=//;
-                $resultsString[0] =~ s/\"//g;
-    
-                my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore-summary\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[0]."\"]/nmwg:metadata", txn => q{}, error => \$error } );
- 
+                my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[$x]."\"]/nmwg:metadata", txn => q{}, error => \$error } );
+                foreach my $t ( @temp ) {
+                    push @metadataArray, $t if $t;
+                }                    
+            }
+
+            if( $#metadataArray != -1 ) {
                 foreach my $root ( keys %rootList ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
                 
                     my $result = $ls->keyRequestLS( { service => \%service } );
                     if ( exists $result->{key} and $result->{key} ) {
                         my $key = $result->{key};
-                        $result = $ls->registerClobberRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0", service => \%service, key => $key, data => \@metadataArray } );
+                        $result = $ls->registerClobberRequestLS( { eventType => $eventType, service => \%service, key => $key, data => \@metadataArray } );
                         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
@@ -423,7 +430,7 @@ sub registerLS {
                         }
                     }
                     else {
-                        $result = $ls->registerRequestLS( { eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0", service => \%service, data => \@metadataArray } );
+                        $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
                         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                             my $msg = "Success from LS";
                             $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
@@ -439,10 +446,11 @@ sub registerLS {
                     } 
                 }
             }
-        }    
+        }
         else {
             $self->{LOGGER}->error("Nothing to register at this time.");
-        }    
+        }   
+        
     }
     
     $database->closeDB( { error => \$error } );
