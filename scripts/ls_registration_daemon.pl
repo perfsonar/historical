@@ -31,6 +31,8 @@ if (not $PIDDIR) {
     $PIDDIR="/var/run";
 }
 
+my $pidfile = lockPIDFile($PIDDIR, "ls_registration_agent.pid");
+
 my $output_level = $INFO;
 if($DEBUGFLAG) {
     $output_level = $DEBUG;
@@ -67,7 +69,7 @@ if (not $NAMED_PIPE) {
 }
 
 if (not $NAMED_PIPE) {
-    $NAMED_PIPE = "/var/run/ls_agent.pipe";
+    $NAMED_PIPE = "/var/run/ls_registration_agent.pipe";
 }
 
 unless (-p $NAMED_PIPE) {
@@ -95,8 +97,6 @@ my $npad = perfSONAR_PS::Agent::LS::Registration::NPAD->new();
 if ($npad->init(\%config)) {
     exit(-5);
 }
-
-my $pidfile = lockPIDFile($PIDDIR, "ls_registration_agent.pid");
 
 unlockPIDFile($pidfile);
 
@@ -139,15 +139,15 @@ while(1) {
 sub handle_message {
     my ($msg) = @_;
 
-    my ($service, $status, $config) = split(' ', $msg);
+    my ($service, $status, @config_options) = split(' ', $msg);
     if (lc($service) eq "bwctl") {
-        return $bwctl->handle_message($status, $config);
+        return $bwctl->handle_message($status, @config_options);
     } elsif (lc($service) eq "owamp") {
-        return $owamp->handle_message($status, $config);
+        return $owamp->handle_message($status, @config_options);
     } elsif (lc($service) eq "ndt") {
-        return $ndt->handle_message($status, $config);
+        return $ndt->handle_message($status, @config_options);
     } elsif (lc($service) eq "npad") {
-        return $npad->handle_message($status, $config);
+        return $npad->handle_message($status, @config_options);
     } else {
         print "Got message for unknown service ".lc($service)."\n";
     }
@@ -159,8 +159,9 @@ the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
 sub lockPIDFile {
-    $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
+    my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
+    $logger->debug("Locking pid file: $piddir/$pidfile");
     die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir ."/".$pidfile;
     sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
@@ -187,6 +188,7 @@ unlocks the file and closes it.
 =cut
 sub unlockPIDFile {
     my($filehandle) = @_;
+    my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
 
     truncate($filehandle, 0);
     seek($filehandle, 0, 0);
@@ -247,22 +249,22 @@ sub init {
 }
 
 sub handle_message {
-    my ($self, $msg, $config) = @_;
+    my ($self, $msg, @config_options) = @_;
 
     if (lc($msg) eq "stop") {
         if ($self->{STATUS} eq "REGISTERED") {
-            $self->unregister($config);
+            $self->unregister(@config_options);
             $self->{STATUS} = "UNREGISTERED";
         }
 
         $self->{APP_STATUS} = "STOPPED";
     } elsif (lc($msg) eq "start") {
         if ($self->{STATUS} eq "REGISTERED") {
-            $self->unregister($config);
+            $self->unregister(@config_options);
             $self->{STATUS} = "UNREGISTERED";
         }
 
-        $self->register($config);
+        $self->register(@config_options);
 
         $self->{APP_STATUS} = "STARTED";
     }
@@ -286,7 +288,8 @@ sub unregister {
 sub refresh {
     my ($self) = @_;
 
-    if ($self->{APP_STATUS} eq "RUNNING") {
+    if ($self->{APP_STATUS} eq "STARTED") {
+        print "App is running, Time is ".time." Next time is ".$self->{NEXT_REGISTRATION}."\n";
         if ($self->{STATUS} eq "REGISTERED" and time >= $self->{NEXT_REGISTRATION}) {
             $self->{LS_CLIENT}->keepaliveRequestLS(key => $self->{KEY});
         } elsif ($self->{STATUS} eq "UNREGISTERED") {
@@ -356,8 +359,9 @@ use Data::Dumper;
 use base 'perfSONAR_PS::Agent::LS::Registration::Base';
 
 sub register {
-    my ($self, $config_file) = @_;
+    my ($self, @config_options) = @_;
 
+    my $config_file = $config_options[0];
     if (not $config_file) {
         return;
     }
@@ -410,9 +414,7 @@ sub register {
     if ($res and $res->{"key"}) {
         $self->{STATUS} = "REGISTERED";
         $self->{KEY} = $res->{"key"};
-        print "Registered!\n";
-    } else {
-        print "Failure!: ".Dumper($res)."\n";
+        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
     }
 }
 
@@ -463,8 +465,9 @@ package perfSONAR_PS::Agent::LS::Registration::OWAMP;
 use base 'perfSONAR_PS::Agent::LS::Registration::Base';
 
 sub register {
-    my ($self, $config_file) = @_;
+    my ($self, @config_options) = @_;
 
+    my $config_file = $config_options[0];
     if (not $config_file) {
         return;
     }
@@ -511,6 +514,7 @@ sub register {
     if ($res and $res->{"key"}) {
         $self->{STATUS} = "REGISTERED";
         $self->{KEY} = $res->{"key"};
+        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
     }
 }
 
@@ -561,13 +565,7 @@ package perfSONAR_PS::Agent::LS::Registration::NDT;
 use base 'perfSONAR_PS::Agent::LS::Registration::Base';
 
 sub register {
-    my ($self, $config_file) = @_;
-
-    if (not $config_file) {
-        return;
-    }
-
-    $self->{APP_CONFIG} = $config_file;
+    my ($self, @config_options) = @_;
 
     # This isn't easily modifiable so for now, assume they haven't changed ports on me.
     my @addresses = $self->lookup_interfaces();
@@ -606,6 +604,7 @@ sub register {
     if ($res and $res->{"key"}) {
         $self->{STATUS} = "REGISTERED";
         $self->{KEY} = $res->{"key"};
+        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
     }
 }
 
@@ -634,8 +633,9 @@ package perfSONAR_PS::Agent::LS::Registration::NPAD;
 use base 'perfSONAR_PS::Agent::LS::Registration::Base';
 
 sub register {
-    my ($self, $config_file) = @_;
+    my ($self, @config_options) = @_;
 
+    my $config_file = $config_options[0];
     if (not $config_file) {
         return;
     }
@@ -691,6 +691,7 @@ sub register {
     if ($res and $res->{"key"}) {
         $self->{STATUS} = "REGISTERED";
         $self->{KEY} = $res->{"key"};
+        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
     }
 }
 

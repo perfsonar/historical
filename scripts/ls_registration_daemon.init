@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# Init file for perfSONAR Lookup Service Registration Daemon
+#
+# chkconfig: 2345 60 20
+# description: perfSONAR Lookup Service Registration Daemon
+#
+
+PREFIX=../
+SBINDIR=${PREFIX}/sbin
+CONFDIR=${PREFIX}/etc
+RUNDIR=${PREFIX}/var/run
+LOGDIR=${PREFIX}/var/log
+
+NAMEDPIPE=${RUNDIR}/ls_registration_daemon.pipe
+CONFFILE=${CONFDIR}/ls_registration_daemon.conf
+LOGFILE=${LOGDIR}/ls_registration_daemon.log
+
+PERFSONAR="${SBINDIR}/ls_registration_daemon.pl --config=${CONFFILE} --piddir=${RUNDIR} --output=${LOGFILE} --pipe=${NAMEDPIPE}"
+
+ERROR=0
+ARGV="$@"
+if [ "x$ARGV" = "x" ] ; then 
+    ARGS="help"
+fi
+
+for ARG in $@ $ARGS
+do
+    case $ARG in
+    start)
+	echo $PERFSONAR
+
+	if $PERFSONAR ; then
+	    echo "$0 $ARG: LS Registration Daemon started"
+	else
+	    echo "$0 $ARG: LS Registration Daemon could not be started"
+	    ERROR=3
+	fi
+	;;
+    stop)
+	if [ $RUNNING -eq 0 ]; then
+	    echo "$0 $ARG: $STATUS"
+	    continue
+	fi
+	if kill $PID ; then
+	    echo "$0 $ARG: LS Registration Daemon stopped"
+	else
+	    echo "$0 $ARG: LS Registration Daemon could not be stopped"
+	    ERROR=4
+	fi
+	;;
+    restart)
+    	$0 stop; echo "waiting..."; sleep 10; $0 start;
+	;;
+    *)
+	echo "usage: $0 (start|stop|restart|help)"
+	cat <<EOF
+
+start      - start LS Registration Daemon
+stop       - stop LS Registration Daemon
+restart    - restart LS Registration Daemon if running by sending a SIGHUP or start if 
+             not running
+help       - this screen
+
+EOF
+	ERROR=2
+    ;;
+
+    esac
+
+done
+
+exit $ERROR
