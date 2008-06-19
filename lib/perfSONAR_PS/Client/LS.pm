@@ -422,25 +422,55 @@ handle either result.
 
 sub queryRequestLS {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { query => 1, format => 0, eventType => 0 } );
+    my $parameters = validateParams( @args, { query => 0, subject => 0, format => 0, eventType => 0 } );
 
     my $metadata = q{};
-    my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
-    $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= $parameters->{query};
-    $metadata .= "    </xquery:subject>\n";
-    if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
-        $metadata .= "    <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+    my %ns = ();
+    if ( ( exists $parameters->{query} and $parameters->{query} ) and 
+         ( exists $parameters->{subject} and $parameters->{subject} ) ) {
+        $self->{LOGGER}->error("Choose either 'query' XOR 'subject' parameter.");
+        return;
+    }
+    elsif ( exists $parameters->{subject} and $parameters->{subject} ) {
+        %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
+                summary => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",
+                nmtb => "http://ogf.org/schema/network/topology/base/20070828/",
+                nmtl3 => "http://ogf.org/schema/network/topology/l3/20070828/" );
+
+        $metadata .= $parameters->{subject};
+
+        if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+            $metadata .= "    <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+        }
+        else {
+           $metadata .= "    <nmwg:eventType>http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0</nmwg:eventType>\n";
+        } 
+    }
+    elsif ( exists $parameters->{query} and $parameters->{query} ) {
+        %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
+ 
+        $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+        $metadata .= $parameters->{query};
+        $metadata .= "    </xquery:subject>\n";
+
+        if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
+            $metadata .= "    <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
+        }
+        else {
+           $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+        } 
+        
+        if ( exists $parameters->{format} and $parameters->{format} ) {
+            $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+            $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
+            $metadata .= "  </xquery:parameters>\n";
+        }
     }
     else {
-        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+        $self->{LOGGER}->error("Choose either 'query' XOR 'subject' parameter.");
+        return;
     }
-    if ( exists $parameters->{format} and $parameters->{format} ) {
-        $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-        $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-        $metadata .= "  </xquery:parameters>\n";
-    }
-
+    
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -453,6 +483,14 @@ sub queryRequestLS {
         $result{"eventType"} = $eventType;
         if ( $eventType =~ m/^success/mx ) {
             $result{"response"} = $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString;
+        }
+        elsif ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
+            my $data = $msg->getChildrenByLocalName("data");
+            $result{"response"} = "<nmwgr:datum xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
+            foreach my $d ( $data->get_nodelist ) {
+                $result{"response"} .= $d->toString;
+            }
+            $result{"response"} .= "</nmwgr:datum>";
         }
         else {
             $result{"response"} = extract( find( $msg, "./nmwg:data/nmwgr:datum", 1 ), 0 );
