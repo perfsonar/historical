@@ -84,12 +84,17 @@ Creates a 'data' block that is stored in the backend storage.
 
 sub createLSData {
     my (@args) = @_;
-    my $parameters = validateParams( @args, { dataId => 1, metadataId => 1, data => 1 } );
+    my $parameters = validateParams( @args, { dataId => 1, metadataId => 1, data => 1, type => 0 } );
 
     my $dataElement = "    <nmwg:data xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $parameters->{dataId} . "\" metadataIdRef=\"" . $parameters->{metadataId} . "\">\n";
     $dataElement = $dataElement . "      " . $parameters->{data} . "\n";
     $dataElement = $dataElement . "    </nmwg:data>\n";
-    return wrapStore( { content => $dataElement, type => "LSStore" } );
+    if ( exists $parameters->{type} and $parameters->{type} ) {
+        return wrapStore( { content => $dataElement, type => $parameters->{type} } );
+    }
+    else {
+        return wrapStore( { content => $dataElement, type => "LSStore" } );
+    }
 }
 
 =head2 extractQuery($node)
