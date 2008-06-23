@@ -25,6 +25,7 @@ my $HELP = '';
 my %opts = ();
 GetOptions('verbose' => \$DEBUG,
            'help' => \$HELP,
+           'type=s' => \$opts{TYPE}, 
            'environment=s' => \$opts{ENV}, 
            'container=s' => \$opts{CONT});
 
@@ -36,11 +37,16 @@ if(!(defined $opts{ENV} and $opts{CONT}) or $HELP) {
 
 my $XMLDBENV = "./xmldb/";
 my $XMLDBCONT = "lsstore.dbxml";
+my $XMLDBTYPE = "LSStore";
 if(defined $opts{ENV}) {
   $XMLDBENV = $opts{ENV};
 }
 if(defined $opts{CONT}) {
   $XMLDBCONT = $opts{CONT};
+}
+
+if(defined $opts{TYPE}) {
+  $XMLDBTYPE = $opts{TYPE};
 }
 
 my %ns = (
@@ -95,7 +101,7 @@ unless($metadatadb->openDB({ txn => q{}, error => \$error }) == 0) {
   exit(1);
 }
 
-my $query = " /nmwg:store/nmwg:metadata";   
+my $query = " /nmwg:store[\@type=\"".$XMLDBTYPE."\"]/nmwg:metadata";   
 $query =~ s/\s+\// collection('$XMLDBCONT')\//gmx;
 print "QUERY:\t" , $query , "\n" if $DEBUG;
 
@@ -109,7 +115,7 @@ unless($#resultsString > -1) {
   print "Nothing returned for search.\n";        
 }   
 
-$query = "/nmwg:store/nmwg:data";   
+$query = "/nmwg:store[\@type=\"".$XMLDBTYPE."\"]/nmwg:data";   
 $query =~ s/\s+\// collection('$XMLDBCONT')\//gmx;
 print "QUERY:\t" , $query , "\n" if $DEBUG;  
 

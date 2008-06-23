@@ -282,8 +282,9 @@ sub needLS {
 =head2 registerLS($self $sleep_time)
 
 Given the service information (specified in configuration) and the contents of
-our metadata database, we can contact the specified LS and register ourselves.
-We then sleep for some amount of time and do it again.
+our metadata database, we can contact the specified LS and register ourselves 
+(or in the case or root servers we can synchronize).  We then sleep for some 
+amount of time and do it again.
 
 =cut
 
@@ -822,8 +823,6 @@ sub summarizeLS {
             my $insRes = $summarydb->insertIntoContainer( { content => createLSData( { type => "LSStore-summary", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $totalSummary } ), name => $mdKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
             $sum_errorFlag++ if $sum_error;
         }
-        
-        
 
         if ($sum_errorFlag) {
             $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
@@ -875,9 +874,10 @@ sub summarizeLS {
     return 0;
 }
 
-=head2 ...
+=head2 makeSummary( $self, { key, addresses, domains, eventTypes } )
 
-...
+Given the summary information, create a summary metadata that we can register
+internally as well as with other LS instances.
 
 =cut
 
@@ -1296,11 +1296,18 @@ sub cleanLSAux {
                         $parameters->{database}->remove( { name => $resultsString2[$y], txn => $dbTr, error => \$error } );
                         $errorFlag++ if $error;
                     }
+                    my @resultsString3 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore-summary\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    my $len3 = $#resultsString3;
+                    for my $y ( 0 .. $len3 ) {
+                        $parameters->{database}->remove( { name => $resultsString3[$y], txn => $dbTr, error => \$error } );
+                        $errorFlag++ if $error;
+                    }
                     $parameters->{database}->remove( { name => $key . "-control", txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
                     $parameters->{database}->remove( { name => $key, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
-                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString2 + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
+                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString3 + $#resultsString2 + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
                 }
             }
         }
@@ -1598,7 +1605,7 @@ sub lsRegisterRequest {
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
     if ($mdKey) {
         unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-            $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $parameters->{database}, key => $mdKey } );
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $parameters->{database}, key => $mdKey } );
         }
 
         unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
@@ -1879,7 +1886,7 @@ sub lsRegisterRequestNew {
 
     my $mdKey = md5_hex($accessPoint);
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $parameters->{database}, key => $mdKey } );
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $parameters->{database}, key => $mdKey } );
     }
 
     my $update = 1;
@@ -2035,7 +2042,7 @@ sub lsDeregisterRequest {
     }
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $database, key => $mdKey } );
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
     }
 
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
@@ -2167,7 +2174,7 @@ sub lsKeepaliveRequest {
     }
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $database, key => $mdKey } );
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
     }
 
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
