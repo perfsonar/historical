@@ -545,16 +545,16 @@ sub summarizeLS {
                         }
                     }  
 
-                    if ( $self->{CONF}->{"gls"}->{"root"} ) {
+                    my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
+                    foreach my $k ( $temp_keywords->get_nodelist ) {
+                        my $value = extract( $k, 0 );
+                        if ($value) {
+                            $service_keywords->{$value} = 1;
+                            $all_keywords->{$value} = 1;
+                        }
+                    }  
 
-                        my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
-                        foreach my $k ( $temp_keywords->get_nodelist ) {
-                            my $value = extract( $k, 0 );
-                            if ($value) {
-                                $service_keywords->{$value} = 1;
-                                $all_keywords->{$value} = 1;
-                            }
-                        }  
+                    if ( $self->{CONF}->{"gls"}->{"root"} ) {
                 
                         my $temp_networks = find( $doc2->getDocumentElement, "./summary:subject/nmtl3:network", 0 );
                         foreach my $n ( $temp_networks->get_nodelist ) {
@@ -578,15 +578,6 @@ sub summarizeLS {
                          
                     }
                     else {
-
-                        my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"keyword\" and \@type=\"project\"]", 0 );
-                        foreach my $k ( $temp_keywords->get_nodelist ) {
-                            my $value = extract( $k, 0 );
-                            if ($value) {
-                                $service_keywords->{$value} = 1;
-                                $all_keywords->{$value} = 1;
-                            }
-                        }  
 
                         # topology junk (interface)
                         my $temp_interfaces = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='interface']", 0 );
