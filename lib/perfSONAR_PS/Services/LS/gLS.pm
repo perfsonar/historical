@@ -491,6 +491,7 @@ sub summarizeLS {
         my $all_eventTypes;
         my $all_addresses;
         my $all_domains;
+        my $all_keywords;
 
         my $sum_error     = q{};
         my $sum_errorFlag = 0;
@@ -521,6 +522,7 @@ sub summarizeLS {
                 my $service_eventTypes;
                 my $service_addresses;
                 my $service_domains;
+                my $service_keywords;
 
                 for my $x ( 0 .. $len ) {
                     my $doc2 = $parser->parse_string( $resultsString[$x] );
@@ -540,6 +542,16 @@ sub summarizeLS {
                         if ($value) {
                             $service_eventTypes->{$value} = 1;
                             $all_eventTypes->{$value} = 1;
+                        }
+                    }  
+
+                    # keywords common to both...
+                    my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"keyword\" and \@type=\"project\"]", 0 );
+                    foreach my $k ( $temp_keywords->get_nodelist ) {
+                        my $value = extract( $k, 0 );
+                        if ($value) {
+                            $service_keywords->{$value} = 1;
+                            $all_keywords->{$value} = 1;
                         }
                     }  
 
@@ -711,7 +723,7 @@ sub summarizeLS {
                 else {
                     $list1 = $self->ipSummarization( { addresses => $service_addresses } );
                 }
-                my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes } );
+                my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
 
                 unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
                     $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $sum_dbTr } );
@@ -781,7 +793,7 @@ sub summarizeLS {
             $list2 = $self->ipSummarization( { addresses => $all_addresses } );
         }
 
-        my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $all_domains, eventTypes => $all_eventTypes } );
+        my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $all_domains, eventTypes => $all_eventTypes, keywords => $all_keywords } );
 
         unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
             $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $sum_dbTr } );
@@ -883,7 +895,7 @@ internally as well as with other LS instances.
 
 sub makeSummary {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { key => 1, addresses => 0, domains => 0, eventTypes => 0 } );
+    my $parameters = validateParams( @args, { key => 1, addresses => 0, domains => 0, eventTypes => 0, keywords => 0 } );
 
     my $summary = q{};
     $summary .= "    <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata." . $parameters->{key} . "\">\n";
@@ -919,6 +931,9 @@ sub makeSummary {
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
+        }
+        foreach my $k ( keys %{ $parameters->{keywords} } ) {
+            $summary .= "        <nmwg:parameter name=\"keyword\" value=\"" . $k . "\" />\n";
         }
         $summary .= "      </summary:parameters>\n";
     } 
