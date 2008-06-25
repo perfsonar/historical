@@ -194,7 +194,7 @@ sub getRoot {
     return;
 }
 
-=head2 createSummaryMetadata( $self, { addresses, domains, eventTypes } )
+=head2 createSummaryMetadata( $self, { addresses, domains, eventTypes, keywords } )
 
 Given the data items of the summary metadata (addresses, domains, eventTypes), 
 create and return this XML.
@@ -208,7 +208,8 @@ sub createSummaryMetadata {
         {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF }
+            eventTypes => { type => Params::Validate::ARRAYREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 
@@ -235,6 +236,16 @@ sub createSummaryMetadata {
         $subject .= "      <nmwg:eventType>" . $eT . "</nmwg:eventType>\n";
     }
     $subject .= "    </summary:subject>\n";
+
+    if ( exists $parameters->{keywords} ) {
+        $subject .= "    <summary:parameters>\n";
+    }
+    foreach my $k ( @{ $parameters->{keywords} } ) {
+        $subject .= "      <nmwg:parameter name=\"keyword\">".$k."</nmwg:parameter>\n";    
+    }
+    if ( exists $parameters->{keywords} ) {
+        $subject .= "    </summary:parameters>\n";
+    }
 
     return $subject;
 }
@@ -369,7 +380,8 @@ sub getLSDiscovey {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
             eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF }
+            service    => { type => Params::Validate::HASHREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 
@@ -394,7 +406,8 @@ sub getLSDiscovey {
         {
             addresses  => $parameters->{addresses},
             domains    => $parameters->{domains},
-            eventTypes => $parameters->{eventTypes}
+            eventTypes => $parameters->{eventTypes},
+            keywords   => $parameters->{keywords}
         }
     );
 
@@ -465,7 +478,8 @@ sub getLSQueryLocation {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
             eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF }
+            service    => { type => Params::Validate::HASHREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 
@@ -487,7 +501,8 @@ sub getLSQueryLocation {
         {
             addresses  => $parameters->{addresses},
             domains    => $parameters->{domains},
-            eventTypes => $parameters->{eventTypes}
+            eventTypes => $parameters->{eventTypes},
+            keywords   => $parameters->{keywords}
         }
     );
 
@@ -558,7 +573,8 @@ sub getLSQueryContent {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
             eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF }
+            service    => { type => Params::Validate::HASHREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 
@@ -613,7 +629,8 @@ sub getLSLocation {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
             eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF }
+            service    => { type => Params::Validate::HASHREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 
@@ -640,7 +657,8 @@ sub getLSLocation {
             addresses  => $parameters->{addresses},
             domains    => $parameters->{domains},
             eventTypes => $parameters->{eventTypes},
-            service    => $parameters->{service}
+            service    => $parameters->{service},
+            keywords   => $parameters->{keywords}
         }
     );
 
@@ -651,7 +669,8 @@ sub getLSLocation {
                 addresses  => $parameters->{addresses},
                 domains    => $parameters->{domains},
                 eventTypes => $parameters->{eventTypes},
-                service    => $parameters->{service}
+                service    => $parameters->{service},
+                keywords   => $parameters->{keywords}
             }
         );
         push @service, @{ $result } if $result;
@@ -689,7 +708,8 @@ sub getLSContent {
             addresses  => { type => Params::Validate::ARRAYREF },
             domains    => { type => Params::Validate::ARRAYREF },
             eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF }
+            service    => { type => Params::Validate::HASHREF },
+            keywords   => { type => Params::Validate::ARRAYREF }
         }
     );
 

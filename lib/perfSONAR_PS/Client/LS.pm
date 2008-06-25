@@ -470,7 +470,7 @@ sub queryRequestLS {
         $self->{LOGGER}->error("Choose either 'query' XOR 'subject' parameter.");
         return;
     }
-    
+
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");

@@ -2304,6 +2304,8 @@ sub lsQueryRequest {
 
     # special case discovery message
     if( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
+        my $sum_parameters = find( $parameters->{m}, "./summary:parameters", 1 );  
+
         my $subject = find( $parameters->{m}, "./summary:subject", 1 );        
         unless ( $subject ) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." );
@@ -2323,6 +2325,13 @@ sub lsQueryRequest {
             next unless $value;
             $sent->{"eventType"}->{$value} = 1
         }      
+        my $l2_eventTypes = find( $sum_parameters, ".//nmwg:parameter[\@name=\"eventType\" or \@name=\"supportedEventType\"]", 0 );
+        foreach my $e ( $l2_eventTypes->get_nodelist ) {
+            my $value = extract( $e, 0 );
+            next unless $value;
+            $sent->{"eventType"}->{$value} = 1
+        } 
+
         my $l_domains = find( $subject, "./nmtb:domain", 0 );
         foreach my $d ( $l_domains->get_nodelist ) {
             my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
@@ -2336,6 +2345,14 @@ sub lsQueryRequest {
             $sent->{"address"}->{$ad} = 1
         } 
 
+        # pull out items from the summary parameters
+        my $l_keywords = find( $sum_parameters, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
+        foreach my $k ( $l_keywords->get_nodelist ) {
+            my $value = extract( $k, 0 );
+            next unless $value;
+            $sent->{"keyword"}->{$value} = 1
+        } 
+        
         # extract our summaries
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => q{}, error => \$error } );
         my $len = $#resultsString;
@@ -2349,6 +2366,7 @@ sub lsQueryRequest {
             $store{ "eventType" } = 0 if exists $sent->{ "eventType" };
             $store{ "address" } = 0 if exists $sent->{ "address" };
             $store{ "domain" } = 0 if exists $sent->{ "domain" };
+            $store{ "keyword" } = 0 if exists $sent->{ "keyword" };
 
             # gather eventTypes
             if ( exists $store{ "eventType" } ) {
@@ -2395,6 +2413,16 @@ sub lsQueryRequest {
                     $store{"address"}++ if Net::CIDR::cidrlookup($add, @cidr_list);
                 }
             }
+
+            # gather keywords
+            if ( exists $store{ "keyword" } ) {
+                my $l_keywords = find( $doc->getDocumentElement, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
+                foreach my $k ( $l_keywords->get_nodelist ) {
+                    my $value = extract( $k, 0 );
+                    next unless $value;
+                    $store{"keyword"}++ if $sent->{ "keyword" }->{ $value };
+                }      
+            }    
 
             # we have a mactch, get the contact service.
             my $flag = 1;
