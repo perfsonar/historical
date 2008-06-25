@@ -71,6 +71,7 @@ else {
     $config{"ip"}          = getIP(1);
     $config{"type"}        = &ask( "Enter the service type (snmp|pSB )", "snmp", $config{"type"}, '(snmp|pSB)' );
     $config{"md_number"}   = &ask( "Enter the number of metadata ", "10", $config{"md_number"}, '\d+' );
+    $config{"keywords"}        = &ask( "Enter any service keywords separated by commas (ex: LHC,Internet2)", "LHC", $config{"keywords"}, '.*' );
     $config{"ls"}          = &ask( "Enter the hLS to register with ", "http://localhost:8080/perfSONAR_PS/services/gLS", $config{"ls"}, '^http:\/\/' );
     $config{"ls_interval"} = &ask( "Enter the hLS registration interval (in minutes) ", "1", $config{"ls_interval"}, '\d+' );
     $config{"ls_interval"} *= 60;
@@ -162,6 +163,13 @@ if ( $config{"type"} eq "snmp" ) {
                 $metadata .= "        <nmwg:parameter name=\"supportedEventType\">http://ggf.org/ns/nmwg/characteristic/errors/2.0</nmwg:parameter>\n";
                 $metadata .= "        <nmwg:parameter name=\"supportedEventType\">http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:parameter>\n";
             }
+            
+            my @k_array = split(/,/, $config{"keywords"});
+            foreach my $k ( @k_array ) {
+              $k =~ s/(\s|\n)*//g;
+              $metadata .= "        <nmwg:parameter name=\"keyword\" type=\"project\">".$k."</nmwg:parameter>\n";
+            }            
+
             $metadata .= "      </nmwg:parameters>\n";
             $metadata .= "    </nmwg:metadata>\n";
 
@@ -237,6 +245,15 @@ elsif ( $config{"type"} eq "pSB" ) {
                 $metadata .= "      </owamp:subject>\n";
                 $metadata .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/owamp/2.0</nmwg:eventType>\n";
                 $metadata .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921</nmwg:eventType>\n";
+
+                $metadata .= "      <nmwg:parameters id=\"parameters." . $id . "\" >\n";
+                my @k_array = split(/,/, $config{"keywords"});
+                foreach my $k ( @k_array ) {
+                  $k =~ s/(\s|\n)*//g;
+                  $metadata .= "        <nmwg:parameter name=\"keyword\" type=\"project\">".$k."</nmwg:parameter>\n";
+                }            
+                $metadata .= "      </nmwg:parameters>\n";
+
                 $metadata .= "    </nmwg:metadata>\n";
                 push @metadataArray, $metadata;
             }
@@ -265,6 +282,13 @@ elsif ( $config{"type"} eq "pSB" ) {
                 $metadata .= "        <nmwg:parameter name=\"interval\">2</nmwg:parameter>\n";
                 $metadata .= "        <nmwg:parameter name=\"protocol\">UDP</nmwg:parameter>\n";
                 $metadata .= "        <nmwg:parameter name=\"bandwidthLimit\">5m</nmwg:parameter>\n";
+  
+                my @k_array = split(/,/, $config{"keywords"});
+                foreach my $k ( @k_array ) {
+                  $k =~ s/(\s|\n)*//g;
+                  $metadata .= "        <nmwg:parameter name=\"keyword\" type=\"project\">".$k."</nmwg:parameter>\n";
+                }            
+
                 $metadata .= "      </nmwg:parameters>\n";
                 $metadata .= "    </nmwg:metadata>\n";
                 push @metadataArray, $metadata;
