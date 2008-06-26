@@ -411,19 +411,19 @@ foreach my $port (keys %listeners) {
     }
 }
 
-foreach my $ls_args (@ls_services) {
-    my $ls_pid = fork();
-    if ($ls_pid == 0) {
+foreach my $ls_sum_args (@ls_sum) {
+    my $ls_sum_pid = fork();
+    if ($ls_sum_pid == 0) {
         %child_pids = ();
-        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";
-        registerLS($ls_args);
+        $0 .= " - LS Summarizer";
+        summarizeLS( $ls_sum_args );
         exit(0);
-    } elsif ($ls_pid < 0) {
-        $logger->error("Couldn't spawn LS");
+    } elsif ($ls_sum_pid < 0) {
+        $logger->error("Couldn't spawn LS Summarizer");
         killChildren();
         exit(-1);
     }
-    $child_pids{$ls_pid} = q{};
+    $child_pids{$ls_sum_pid} = q{};
 }
 
 foreach my $ls_reaper_args (@ls_reaper) {
@@ -441,19 +441,19 @@ foreach my $ls_reaper_args (@ls_reaper) {
     $child_pids{$ls_reaper_pid} = q{};
 }
 
-foreach my $ls_sum_args (@ls_sum) {
-    my $ls_sum_pid = fork();
-    if ($ls_sum_pid == 0) {
+foreach my $ls_args (@ls_services) {
+    my $ls_pid = fork();
+    if ($ls_pid == 0) {
         %child_pids = ();
-        $0 .= " - LS Summarizer";
-        summarizeLS( $ls_sum_args );
+        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";
+        registerLS($ls_args);
         exit(0);
-    } elsif ($ls_sum_pid < 0) {
-        $logger->error("Couldn't spawn LS Summarizer");
+    } elsif ($ls_pid < 0) {
+        $logger->error("Couldn't spawn LS");
         killChildren();
         exit(-1);
     }
-    $child_pids{$ls_sum_pid} = q{};
+    $child_pids{$ls_pid} = q{};
 }
 
 unlockPIDFile($pidfile);
