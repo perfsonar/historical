@@ -218,11 +218,11 @@ sub createElement {
 
 	if ($pretty_print) {
 		foreach my $node (@{ $self->{OPEN_TAGS} }) {
-            $output .=  "  ";
+            print { $self->{FH} }  "  ";
 		}
 	}
 
-    $output .= "<$prefix:$tag";
+    print { $self->{FH} } "<$prefix:$tag";
 
 	foreach my $prefix (keys %namespaces) {
 		my $require_defintion = 0;
@@ -241,41 +241,41 @@ sub createElement {
 		}
 
 		if ($require_defintion) {
-            $output .= " xmlns:$prefix=\"".$namespaces{$prefix}."\"";
+            print { $self->{FH} } " xmlns:$prefix=\"".$namespaces{$prefix}."\"";
 		}
 	}
 
 	if (defined $attributes) {
 		for my $attr (keys %{ $attributes }) {
-            $output .= " ".$attr."=\"".$attributes->{$attr}."\"";
+            print { $self->{FH} } " ".$attr."=\"".$attributes->{$attr}."\"";
 		}
 	}
 
 	if (not defined $content or $content eq "") {
-        $output .= " />";
+        print { $self->{FH} } " />";
 	} else {
-        $output .= ">";
+        print { $self->{FH} } ">";
 
 		if ($pretty_print) {
-            $output .= "\n" if ($content =~ /\n/);
+            print { $self->{FH} } "\n" if ($content =~ /\n/);
 		}
 
-        $output .= $content;
+        print { $self->{FH} } $content;
 
 		if ($pretty_print) {
 			if ($content =~ /\n/) {
-                $output .= "\n";
+                print { $self->{FH} } "\n";
 				foreach my $node (@{ $self->{OPEN_TAGS} }) {
-                    $output .= "  ";
+                    print { $self->{FH} } "  ";
 				}
 			}
 		}
 
-        $output .= "</".$prefix.":".$tag.">";
+        print { $self->{FH} } "</".$prefix.":".$tag.">";
 	}
 
 	if ($pretty_print) {
-        $output .= "\n";
+        print { $self->{FH} } "\n";
 	}
 
     print { $self->{FH} } $output if $output;
