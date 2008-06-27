@@ -259,32 +259,67 @@ sub insert {
         my %values = %{ $parameters->{argvalues} };
         my $insert = "insert into " . $parameters->{table} . " (";
 
-        my $len = $#{ $self->{SCHEMA} };
-        for my $x ( 0 .. $len ) {
-            if ( $x == 0 ) {
-                $insert = $insert . $self->{SCHEMA}->[$x];
+        if (not $self->{SCHEMA}) {
+            my $x;
+
+            $x = 0;
+            foreach my $name (sort keys %values) {
+                if ($x != 0) {
+                    $insert .= ", "; 
+                }
+
+                $insert .= $name;
+                $x++;
             }
-            else {
-                $insert = $insert . ", " . $self->{SCHEMA}->[$x];
+
+            $insert .= ") values (";
+
+            $x = 0;
+            foreach my $name (sort keys %values) {
+                if ($x != 0) {
+                    $insert .= ", "; 
+                }
+
+                $insert .= "?";
+                $x++;
             }
+            $insert = $insert . ")";
+        } else {
+            my $len = $#{ $self->{SCHEMA} };
+            for my $x ( 0 .. $len ) {
+                if ( $x == 0 ) {
+                    $insert = $insert . $self->{SCHEMA}->[$x];
+                }
+                else {
+                    $insert = $insert . ", " . $self->{SCHEMA}->[$x];
+                }
+            }
+            $insert = $insert . ") values (";
+            $len    = $#{ $self->{SCHEMA} };
+            for my $x ( 0 .. $len ) {
+                if ( $x == 0 ) {
+                    $insert = $insert . "?";
+                }
+                else {
+                    $insert = $insert . ", ?";
+                }
+            }
+            $insert = $insert . ")";
         }
-        $insert = $insert . ") values (";
-        $len    = $#{ $self->{SCHEMA} };
-        for my $x ( 0 .. $len ) {
-            if ( $x == 0 ) {
-                $insert = $insert . "?";
-            }
-            else {
-                $insert = $insert . ", ?";
-            }
-        }
-        $insert = $insert . ")";
         $self->{LOGGER}->debug( "Insert \"" . $insert . "\" prepared." );
         eval {
             my $sth  = $self->{HANDLE}->prepare($insert);
-            my $len2 = $#{ $self->{SCHEMA} };
-            for my $x ( 0 .. $len2 ) {
-                $sth->bind_param( $x + 1, $values{ $self->{SCHEMA}->[$x] } );
+            if (not $self->{SCHEMA}) {
+                my $x = 0;
+                foreach my $name (sort keys %values) {
+                    $sth->bind_param($x + 1, $values{$name});
+                    $x++;
+                }
+            } else {
+                my $len2 = $#{ $self->{SCHEMA} };
+                for my $x ( 0 .. $len2 ) {
+                    $sth->bind_param( $x + 1, $values{ $self->{SCHEMA}->[$x] } );
+                }
             }
             $sth->execute() or $self->{LOGGER}->error( "Insert error on statement \"" . $insert . "\"." );
         };
