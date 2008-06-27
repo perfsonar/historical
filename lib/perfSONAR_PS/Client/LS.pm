@@ -161,6 +161,14 @@ sub registerRequestLS {
         $metadata .= "  <nmwg:eventType>".$parameters->{eventType}."</nmwg:eventType>\n";
     }
 
+    if ($parameters->{service}->{projects}) {
+        $metadata .= "  <nmwg:parameters>\n";
+	foreach my $project (@{ $parameters->{service}->{projects} }) {
+            $metadata .= "    <nmwg:parameter type=\"keyword\">project:".$parameters->{service}->{project}."</nmwg:parameter>\n";
+        }
+        $metadata .= "  </nmwg:parameters>\n";
+    }
+
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
@@ -518,7 +526,23 @@ sub createService {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { service => 1 } );
 
-    my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
+    my $service = "";
+
+    if ($parameters->{service}->{nonPerfSONARService}) {
+        $service .= "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
+        $service .= "      <nmtb:service xmlns:nmtb=\"http://ogf.org/schema/network/base/20070828/\">\n";
+        $service .= "        <nmtb:name>" . $parameters->{service}->{name} . "</nmtb:name>\n" if ( defined $parameters->{service}->{name} );
+        $service .= "        <nmtb:type>" . $parameters->{service}->{type} . "</nmtb:type>\n" if ( defined $parameters->{service}->{type} );
+        $service .= "        <nmtb:description>" . $parameters->{service}->{description} . "</nmtb:description>\n" if ( defined $parameters->{service}->{description} );
+        if ($parameters->{service}->{addresses}) {
+            foreach my $address (@{ $parameters->{service}->{addresses} }) {
+                $service .= "        <nmtb:address type=\"".$address->{type}."\">" . $address->{value} . "</nmtb:address>\n";
+            }
+        }
+        $service .= "      </nmtb:service>\n";
+        $service .= "    </perfsonar:subject>\n";
+    } else {
+    $service = $service . "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
     $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
     $service = $service . "        <psservice:serviceName>" . $parameters->{service}->{serviceName} . "</psservice:serviceName>\n" if ( defined $parameters->{service}->{serviceName} );
     $service = $service . "        <psservice:accessPoint>" . $parameters->{service}->{accessPoint} . "</psservice:accessPoint>\n" if ( defined $parameters->{service}->{accessPoint} );
@@ -526,6 +550,7 @@ sub createService {
     $service = $service . "        <psservice:serviceDescription>" . $parameters->{service}->{serviceDescription} . "</psservice:serviceDescription>\n" if ( defined $parameters->{service}->{serviceDescription} );
     $service = $service . "      </psservice:service>\n";
     $service = $service . "    </perfsonar:subject>\n";
+    }
     return $service;
 }
 
