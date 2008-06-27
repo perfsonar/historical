@@ -25,6 +25,9 @@ sub initialize {
     $parameters->{"type"} = "hdxc";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc");
 
+    $self->{READ_LINE_PM} = ();
+    $self->{READ_SECT_PM} = ();
+
     return $self->SUPER::initialize($parameters);
 }
 
@@ -77,6 +80,7 @@ sub getGTP {
 }
 
 sub getSect {
+
     my ($self, $aid) = @_;
     my $do_reload_stats = 0;
 
@@ -175,12 +179,21 @@ sub getOCN_PM {
 }
 
 sub getLine_PM {
-    my ($self, $aid, $name) = @_;
+    my $self = shift;
+    my %args = @_;
     my $do_reload_stats = 0;
 
-    if (not $self->{READ_LINE_PM}) {
+    my $index = $args{'index'};
+    my $name = $args{'variable_name'};
+    my $aid= $args{'aid'};
+
+    if (not $index) {
+        $index = 0;
+    }
+
+    if (not $self->{READ_LINE_PM}->{$index}) {
         $do_reload_stats = 1;
-        $self->{READ_LINE_PM} = 1;
+        $self->{READ_LINE_PM}->{$index} = 1;
     }
 
     if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
@@ -188,23 +201,32 @@ sub getLine_PM {
     }
 
     if (not $aid) {
-        return $self->{LINE_PMS};
+        return $self->{LINE_PMS}->{$index};
     }
 
     if (not $name) {
-        return $self->{LINE_PMS}->{$aid};
+        return $self->{LINE_PMS}->{$index}->{$aid};
     }
 
-    return $self->{LINE_PMS}->{$aid}->{$name};
+    return $self->{LINE_PMS}->{$index}->{$aid}->{$name};
 }
 
 sub getSect_PM {
-    my ($self, $aid, $name) = @_;
+    my $self = shift;
+    my %args = @_;
     my $do_reload_stats = 0;
 
-    if (not $self->{READ_SECT_PM}) {
+    my $index = $args{'index'};
+    my $name = $args{'variable_name'};
+    my $aid= $args{'aid'};
+
+    if (not $index) {
+        $index = 0;
+    }
+
+    if (not $self->{READ_SECT_PM}->{$index}) {
         $do_reload_stats = 1;
-        $self->{READ_SECT_PM} = 1;
+        $self->{READ_SECT_PM}->{$index} = 1;
     }
 
     if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
@@ -212,14 +234,14 @@ sub getSect_PM {
     }
 
     if (not $aid) {
-        return $self->{SECT_PMS};
+        return $self->{SECT_PMS}->{$index};
     }
 
     if (not $name) {
-        return $self->{SECT_PMS}->{$aid};
+        return $self->{SECT_PMS}->{$index}->{$aid};
     }
 
-    return $self->{SECT_PMS}->{$aid}->{$name};
+    return $self->{SECT_PMS}->{$index}->{$aid}->{$name};
 }
 
 sub readStats {
@@ -241,7 +263,9 @@ sub readStats {
     }
 
     if ($self->{READ_SECT_PM}) {
-        $self->readSect_PM();
+        foreach my $index (keys %{ $self->{READ_SECT_PM} }) {
+            $self->readSect_PM($index);
+        }
     }
 
     if ($self->{READ_LINE}) {
@@ -249,7 +273,9 @@ sub readStats {
     }
 
     if ($self->{READ_LINE_PM}) {
-        $self->readLine_PM();
+        foreach my $index (keys %{ $self->{READ_LINE_PM} }) {
+            $self->readLine_PM($index);
+        }
     }
 
     $self->{CACHE_TIME} = time;
@@ -266,6 +292,12 @@ sub readSECTs {
     my @results = $self->send_cmd("RTRV-SECT:::1234;");
 
     foreach my $line (@results) {
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
+
         if ($line =~ /"([^:]*):[^:]*:[^:]*:([A-Z]*),([A-Z]*)"/) {
             my ($aid, $name, $pst, $sst);
 
@@ -293,6 +325,12 @@ sub readLINEs {
     my @results = $self->send_cmd("RTRV-LINE:::1234;");
 
     foreach my $line (@results) {
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
+
         if ($line =~ /"([^:]*):.*:.*LABEL=\\"([^\\]*)\\".*:([A-Z]*)"/) {
             my ($aid, $name, $pst, $sst);
 
@@ -325,6 +363,11 @@ sub readOCNs {
         my @results = $self->send_cmd("RTRV-OC".$i.":::1234;");
 
         foreach my $line (@results) {
+            if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+                $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+                next;
+            }
+
             if ($line =~ /"(OC$i[^:]*)/) {
                 my ($aid, $name, $pst, $sst);
 
@@ -362,6 +405,11 @@ sub readCRSs {
     my @results = $self->send_cmd("RTRV-CRS-ALL:::1234;");
 
     foreach my $line (@results) {
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
         if ($line =~ /LABEL=\\"([^\\]*)\\"/) {
             my ($pst, $sst, $name);
             $name = $1;
@@ -388,13 +436,24 @@ sub readCRSs {
 }
 
 sub readLine_PM {
-    my ($self) = @_;
+    my ($self, $index) = @_;
 
     my %pms = ();
 
-    my @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:INDEX=1;");
+    my @results;
+
+    if ($index) {
+        @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:INDEX=$index;");
+    } else {
+        @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:;");
+    }
 
     foreach my $line (@results) {
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
         if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^"]*)"/) {
             my $aid = $1;
             my $pm_type = $2;
@@ -423,17 +482,27 @@ sub readLine_PM {
         }
     }
 
-    $self->{LINE_PMS} = \%pms;
+    $self->{LINE_PMS}->{$index} = \%pms;
 }
 
 sub readSect_PM {
-    my ($self) = @_;
+    my ($self, $index) = @_;
     my %pms = ();
 
-    my @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:INDEX=1;");
+    my @results;
+    if ($index) {
+        @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:INDEX=$index;");
+    } else {
+        @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:;");
+    }
 
     foreach my $line (@results) {
 #        "OC192S-1-501-2-1:SEFS-S,505,PRTL,NEND,RCV,15-MIN,06-16,14-15"
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
         if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^"]*)"/) {
             my $aid = $1;
             my $pm_type = $2;
@@ -462,7 +531,7 @@ sub readSect_PM {
         }
     }
 
-    $self->{SECT_PMS} = \%pms;
+    $self->{SECT_PMS}->{$index} = \%pms;
 }
 
 1;

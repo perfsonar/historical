@@ -8,7 +8,6 @@ use Params::Validate qw(:all);
 use Data::Dumper;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-#use fields 'CRSSBYNAME', 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_CRS', 'READ_ETH', 'READ_OCN';
 use fields 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_ETH', 'READ_OCN', 'READ_PM', 'PMS';
 
 sub initialize {
@@ -125,82 +124,51 @@ sub getCrossconnect {
 }
 
 sub getETH_PM {
-    my ($self, $aid, $type) = @_;
-    my $do_reload_stats = 0;
+    my $self = shift;
+    my %args = @_;
 
-    if (not $self->{READ_PM}) {
-        $do_reload_stats = 1;
-        $self->{READ_PM} = 1;
-    }
+    my %aid_types = ( "eth" => 1, "eth10g" => 1 );
+    $args{"aid_types"} = \%aid_types;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if ($aid and $type) {
-        return $self->{PMS}->{$aid}->{$type};
-    }
-
-    my %eth_pm = ();
-    foreach my $curr_aid (keys %{ $self->{PMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
-
-        foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
-            next unless (not $type or $type eq $curr_type);
-
-            my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
-
-            next unless (lc($pm->{aid_type}) eq "eth" or lc($pm->{aid_type}) eq "eth10g");
-
-            $eth_pm{$curr_aid}->{$curr_type} = $pm;
-        }
-    }
-
-    return \%eth_pm;
+    return $self->__get_PM(%args);
 }
 
 sub getSTS_PM {
-    my ($self, $aid, $type) = @_;
-    my $do_reload_stats = 0;
+    my $self = shift;
+    my %args = @_;
 
-    if (not $self->{READ_PM}) {
-        $do_reload_stats = 1;
-        $self->{READ_PM} = 1;
-    }
+    my %aid_types = ( "sts1" => 1, "sts3c" => 1, "sts12c" => 1, "sts24c" => 1, "sts48c" => 1, "sts192c" );
+    $args{"aid_types"} = \%aid_types;
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if ($aid and $type) {
-        return $self->{PMS}->{$aid}->{$type};
-    }
-
-    my %sts_pm = ();
-    foreach my $curr_aid (keys %{ $self->{PMS} }) {
-        next unless (not $aid or $aid eq $curr_aid);
-
-        foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
-            next unless (not $type or $type eq $curr_type);
-
-            my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
-
-            next unless (lc($pm->{aid_type}) eq "sts1" or lc($pm->{aid_type}) eq "sts3c"
-                        or lc($pm->{aid_type}) eq "sts12c" or lc($pm->{aid_type}) eq "sts24c"
-                        or lc($pm->{aid_type}) eq "sts48c" or lc($pm->{aid_type}) eq "sts192c");
-
-            $sts_pm{$curr_aid}->{$curr_type} = $pm;
-        }
-    }
-
-    return \%sts_pm;
+    return $self->__get_PM(%args);
 }
 
 sub getOCN_PM {
-    my ($self, $aid, $type) = @_;
+    my $self = shift;
+    my %args = @_;
+
+    my %aid_types = ( "oc3" => 1, "oc12" => 1, "oc48" => 1, "oc192" => 1 );
+    $args{"aid_types"} = \%aid_types;
+
+    return $self->__get_PM(%args);
+}
+
+sub __get_PM {
+    my $self = shift;
+    my %args = @_;
+
+    my $aid = $args{'aid'};
+    my $type = $args{'variable_name'};
+    my $index = $args{'index'};
+    my $valid_aid_types = $args{'index'};
+
     my $do_reload_stats = 0;
 
-    if (not $self->{READ_PM}) {
+    if (not $index) {
+        $index = 0;
+    }
+
+    if (not $self->{READ_PM}->{$index}) {
         $do_reload_stats = 1;
         $self->{READ_PM} = 1;
     }
@@ -210,26 +178,25 @@ sub getOCN_PM {
     }
 
     if ($aid and $type) {
-        return $self->{PMS}->{$aid}->{$type};
+        return $self->{PMS}->{$index}->{$aid}->{$type};
     }
 
-    my %ocn_pm = ();
-    foreach my $curr_aid (keys %{ $self->{PMS} }) {
+    my %pm = ();
+    foreach my $curr_aid (keys %{ $self->{PMS}->{$index} }) {
         next unless (not $aid or $aid eq $curr_aid);
 
-        foreach my $curr_type (keys %{ $self->{PMS}->{$curr_aid} }) {
+        foreach my $curr_type (keys %{ $self->{PMS}->{$index}->{$curr_aid} }) {
             next unless (not $type or $type eq $curr_type);
 
-            my $pm = $self->{PMS}->{$curr_aid}->{$curr_type};
+            my $pm = $self->{PMS}->{$index}->{$curr_aid}->{$curr_type};
 
-            next unless (lc($pm->{aid_type}) eq "oc3" or lc($pm->{aid_type}) eq "oc12"
-                        or lc($pm->{aid_type}) eq "oc48" or lc($pm->{aid_type}) eq "oc192");
+            next unless ($valid_aid_types->{lc($pm->{aid_type})});
 
-            $ocn_pm{$curr_aid}->{$curr_type} = $pm;
+            $pm{$curr_aid}->{$curr_type} = $pm;
         }
     }
 
-    return \%ocn_pm;
+    return \%pm;
 }
 
 sub readStats {
@@ -270,6 +237,11 @@ sub readETHs {
     my @results = $self->send_cmd("RTRV-ETH::ETH-1-ALL:1234;");
 
     foreach my $line (@results) {
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
         if ($line =~ /"(ETH[^:]*)/) {
             my ($aid, $name, $pst, $sst);
 
@@ -303,6 +275,11 @@ sub readOCNs {
         my @results = $self->send_cmd("RTRV-OC".$i."::OC".$i."-1-ALL:1234;");
 
         foreach my $line (@results) {
+            if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+                $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+                next;
+            }
+
             if ($line =~ /"(OC$i[^:]*)/) {
                 my ($aid, $pst, $sst);
 
@@ -333,6 +310,11 @@ sub readPMs {
 
     foreach my $line (@results) {
 #       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
         if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^",]*),?1?"/) {
             my $aid = $1;
             my $aid_type = $2;

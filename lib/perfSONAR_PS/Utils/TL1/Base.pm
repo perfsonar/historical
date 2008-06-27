@@ -7,7 +7,7 @@ use Params::Validate qw(:all);
 
 use perfSONAR_PS::Utils::TL1;
 
-use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER';
+use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME';
 
 sub new {
     my ($class) = @_;
@@ -144,6 +144,31 @@ sub send_cmd {
     my $res = $self->{TL1AGENT}->send($cmd);
 
     return split('\n', $res);
+}
+
+sub setMachineTime {
+    my ($self, $time) = @_;
+
+    my ($curr_date, $curr_time) = split(" ", $time);
+    my ($year, $month, $day) = split("-", $curr_date);
+
+    # make sure it's in 4 digit year form
+    if (length($year) == 2) {
+        # I don't see why it'd ever not be +2000, but...
+        if ($year < 70) {
+            $year += 2000;
+        } else {
+            $year += 1900;
+        }
+    }
+
+    $self->{MACHINE_TIME} = "$year-$month-$day $curr_time";
+}
+
+sub getMachineTime {
+    my ($self) = @_;
+
+    return $self->{MACHINE_TIME};
 }
 
 1;
