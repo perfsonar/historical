@@ -167,7 +167,7 @@ if ( $config{"type"} eq "snmp" ) {
             my @k_array = split(/,/, $config{"keywords"});
             foreach my $k ( @k_array ) {
               $k =~ s/(\s|\n)*//g;
-              $metadata .= "        <nmwg:parameter name=\"keyword\">".$k."</nmwg:parameter>\n";
+              $metadata .= "        <nmwg:parameter name=\"keyword\">project:".$k."</nmwg:parameter>\n";
             }            
 
             $metadata .= "      </nmwg:parameters>\n";
@@ -250,7 +250,7 @@ elsif ( $config{"type"} eq "pSB" ) {
                 my @k_array = split(/,/, $config{"keywords"});
                 foreach my $k ( @k_array ) {
                   $k =~ s/(\s|\n)*//g;
-                  $metadata .= "        <nmwg:parameter name=\"keyword\">".$k."</nmwg:parameter>\n";
+                  $metadata .= "        <nmwg:parameter name=\"keyword\">project:".$k."</nmwg:parameter>\n";
                 }            
                 $metadata .= "      </nmwg:parameters>\n";
 
@@ -286,7 +286,7 @@ elsif ( $config{"type"} eq "pSB" ) {
                 my @k_array = split(/,/, $config{"keywords"});
                 foreach my $k ( @k_array ) {
                   $k =~ s/(\s|\n)*//g;
-                  $metadata .= "        <nmwg:parameter name=\"keyword\">".$k."</nmwg:parameter>\n";
+                  $metadata .= "        <nmwg:parameter name=\"keyword\">project:".$k."</nmwg:parameter>\n";
                 }            
 
                 $metadata .= "      </nmwg:parameters>\n";
