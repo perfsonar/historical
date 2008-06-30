@@ -608,11 +608,11 @@ sub createLSMessage {
     $request .= $parameters->{metadata};
     $request .= "  </nmwg:metadata>\n";
     if ( exists $parameters->{data} and $parameters->{data} ) {
+        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
         foreach my $data ( @{ $parameters->{data} } ) {
-            $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
             $request .= $data;
-            $request .= "  </nmwg:data>\n";
         }
+        $request .= "  </nmwg:data>\n";
     }
     else {
         $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\" />\n";

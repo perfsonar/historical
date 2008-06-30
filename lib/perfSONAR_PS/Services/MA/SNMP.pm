@@ -104,6 +104,10 @@ sub init {
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::SNMP");
     $self->{NETLOGGER} = get_logger("NetLogger");
 
+    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
+        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+    }
+    
     unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_type"}
         and $self->{CONF}->{"snmp"}->{"metadata_db_type"} )
     {
@@ -196,7 +200,6 @@ sub init {
             }
             else {
                 $self->{LOGGER}->error("No LS instance specified for SNMP service");
-                return -1;
             }
         }
 
@@ -243,6 +246,7 @@ sub init {
         }
     }
 
+    $self->{CONF}->{"snmp"}->{"ls_chunk"} = 50;
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
 
@@ -463,25 +467,64 @@ sub registerLS {
     #    my ( $self, @args ) = @_;
     #    my $parameters = validateParams( @args, { sleep_time => 0 } );
 
-    my ( $status, $res );
-    my $ls = q{};
-
-    if ( !defined $self->{LS_CLIENT} ) {
-        my %ls_conf = (
-            SERVICE_TYPE        => $self->{CONF}->{"snmp"}->{"service_type"},
-            SERVICE_NAME        => $self->{CONF}->{"snmp"}->{"service_name"},
-            SERVICE_DESCRIPTION => $self->{CONF}->{"snmp"}->{"service_description"},
-            SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp"}->{"service_accesspoint"},
-        );
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( $self->{CONF}->{"snmp"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES} );
+    my @ls = ();
+    if ( exists $self->{CONF}->{"snmp"}->{"ls_instance"} and $self->{CONF}->{"snmp"}->{"ls_instance"} ) {
+        my @array = split(/ /, $self->{CONF}->{"snmp"}->{"ls_instance"});
+        foreach my $l ( @array ) {
+            $l =~ s/(\s|\n)*//g;
+            push @ls, $l if $l;
+        }
+    }
+    elsif ( exists $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ) {
+        my @array = split(/ /, $self->{CONF}->{"ls_instance"});
+        foreach my $l ( @array ) {
+            $l =~ s/(\s|\n)*//g;
+            push @ls, $l if $l;
+        }
+    }
+    else {
+        if ( exists $self->{CONF}->{"root_hints_url"} and $self->{CONF}->{"root_hints_url"} ) {
+            use perfSONAR_PS::Client::gLS;
+            use perfSONAR_PS::Client::Echo;
+            my $gls = perfSONAR_PS::Client::gLS->new( { url => $self->{CONF}->{"root_hints_url"} } );
+            my $result = $gls->getLSQueryRaw( { ls => $gls->{ROOTS}->[0], xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/perfsonar:subject/psservice:service[./psservice:serviceType[text()=\"hLS\" or text()=\"LS\" or \@value=\"hLS\" or \@value=\"LS\"]]" } );
+            my $parser = XML::LibXML->new();
+            
+            if ( exists $result->{response} or exists $result->{eventType} ) {
+                if ( $result->{eventType} =~ m/error/ ) {
+                    $self->{LOGGER}->error("LS instances not found in gLS, aborting.");
+                    return -1;
+                }            
+                my $doc = $parser->parse_string( $result->{response} );        
+                my $service = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+                foreach my $s ( $service->get_nodelist ) {
+                    my $value = extract( $s, 0 );
+                    if ( $value ) {
+                        my $echo_service = perfSONAR_PS::Client::Echo->new( $value );
+                        my ( $status, $res ) = $echo_service->ping(); 
+                        push @ls, $value if $status != -1;                
+                    }
+                }
+            }
+            else {
+                $self->{LOGGER}->error("Response from gLS not found, aborting.");
+                return -1;
+            }
+        }
     }
 
-    $ls = $self->{LS_CLIENT};
+    my %service = (
+        serviceName        => $self->{CONF}->{"snmp"}->{"service_name"},
+        serviceType        => $self->{CONF}->{"snmp"}->{"service_type"},
+        serviceDescription => $self->{CONF}->{"snmp"}->{"service_description"},
+        accessPoint        => $self->{CONF}->{"snmp"}->{"service_accesspoint"}
+    );
+    my $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0";
 
     my $error         = q{};
-    my @resultsString = ();
+    my @metadataArray = ();
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
+        @metadataArray = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         my $metadatadb = $self->prepareDatabases;
@@ -489,7 +532,7 @@ sub registerLS {
             $self->{LOGGER}->error("Database could not be opened.");
             return -1;
         }
-        @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
+        @metadataArray = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
         $metadatadb->closeDB( { error => \$error } );
     }
     else {
@@ -497,11 +540,78 @@ sub registerLS {
         return -1;
     }
 
-    if ( $#resultsString == -1 ) {
+    my @mdMatrix = ();
+    my $counter = 0;
+    my @row = ();
+    foreach my $md ( @metadataArray ) {
+        unless ( $counter < $self->{CONF}->{"snmp"}->{"ls_chunk"} ) {
+            push @mdMatrix, [@row];
+            $counter = 0;
+            @row = ();
+        }
+        push @row, $md;
+        $counter++;
+    }
+    push @mdMatrix, [@row] if $#row > -1;
+ 
+    if ( $#metadataArray > -1 ) {
+        foreach my $instance ( @ls ) {
+            my $ls = perfSONAR_PS::Client::LS->new( { instance => $instance } );
+            my $result = $ls->keyRequestLS( { service => \%service } );
+            if ( exists $result->{key} and $result->{key} ) {
+
+use Data::Dumper;
+$self->{LOGGER}->error( Dumper($result) );
+
+                my $key = $result->{key};
+                foreach my $chunk ( @mdMatrix ) {
+                    $result = $ls->registerUpdateRequestLS( { key => $key, eventType => $eventType, data => \@{$chunk} } );                        
+
+use Data::Dumper;
+$self->{LOGGER}->error( Dumper($result) );
+
+                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                        my $msg = "Success from LS";
+                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                        $self->{LOGGER}->debug( $msg );
+                    }
+                    else {
+                        my $msg = "Error in LS Registration";
+                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                        $self->{LOGGER}->error( $msg );
+                    }
+                }
+            }
+            else {
+                foreach my $chunk ( @mdMatrix ) {
+                    $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@{$chunk} } );
+
+use Data::Dumper;
+$self->{LOGGER}->error( Dumper($result) );
+
+                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                        my $msg = "Success from LS";
+                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                        $self->{LOGGER}->debug( $msg );
+                    }
+                    else {
+                        my $msg = "Error in LS Registration";
+                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
+                        $self->{LOGGER}->error( $msg );
+                    }
+                }
+            }
+        }
+    }
+    else {
         $self->{LOGGER}->error("No data to register with LS");
         return -1;
     }
-    $ls->registerStatic( \@resultsString );
+
     return 0;
 }
 

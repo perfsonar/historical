@@ -104,9 +104,10 @@ while (1) {
     elsif ( $input == 1 ) {
         $config{"max_worker_processes"}     = &ask( "Enter the maximum number of children processes (0 means infinite) ",                   "30",                                                         $config{"max_worker_processes"},     '^\d+$' );
         $config{"max_worker_lifetime"}      = &ask( "Enter number of seconds a child can process before it is stopped (0 means infinite) ", "300",                                                        $config{"max_worker_lifetime"},      '^\d+$' );
-        $config{"disable_echo"}             = &ask( "Disable echo by default (0 for no, 1 for yes) ",                                      0,                                                            $config{"disable_echo"},             '^[01]$' );
+        $config{"disable_echo"}             = &ask( "Disable echo by default (0 for no, 1 for yes) ",                                       0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
+        $config{"root_hints_url"}           = &ask( "URL of the root.hints file ",                                                          "http://www.perfsonar.net/gls.root.hints",                    $config{"root_hints_url"},           '(^http|^$)' );      
         $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed [in seconds] ",                             20,                                                           $config{"reaper_interval"},          '^\d+$' );
         $config{"pid_dir"}                  = &ask( "Enter pid dir location ",                                                              "/var/run",                                                   $config{"pid_dir"},                  q{} );
         $config{"pid_file"}                 = &ask( "Enter pid filename ",                                                                  "ps.pid",                                                     $config{"pid_file"},                 q{} );
@@ -334,9 +335,7 @@ sub config_gls {
     }
 
     $config->{"gls"}->{"root"} = "0";
-    $config->{"gls"}->{"root_hints_url"} = &ask( "URL of the root.hints file ", "http://www.perfsonar.net/gls.root.hints", $config->{"gls"}->{"root_hints_url"}, '(^http|^$)' );      
-    $config->{"gls"}->{"root_hints_file"} = &ask( "Where shold the root.hints file be stored ", $confdir . "/gls.root.hints", $config->{"gls"}->{"root_hints_file"}, '^\/' );
-
+    $config->{"gls"}->{"root_hints_file"}          = &ask( "Where shold the root.hints file be stored ",                                           $confdir . "/gls.root.hints",                                 $config{"root_hints_file"},          '^\/' );
     $config->{"gls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"gls"}->{"ls_ttl"}, '\d+' );
     $config->{"gls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
 
@@ -472,14 +471,20 @@ sub config_snmp_ma {
     my $rrdtool = q{};
     if ( open( RRDTOOL, "which rrdtool |" ) ) {
         $rrdtool = <RRDTOOL>;
-        $rrdtool =~ s/rrdtool:\s+//mx;
-        $rrdtool =~ s/\n//gmx;
-        unless ( close(RRDTOOL) ) {
-            return -1;
-        }
+        $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
+        $rrdtool =~ s/\n//gmx if $rrdtool;
+        close(RRDTOOL);
+    }
+
+    if ( open( RRDTOOL, "whereis rrdtool |" ) ) {
+        $rrdtool = <RRDTOOL>;
+        $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
+        $rrdtool =~ s/\n//gmx if $rrdtool;
+        close(RRDTOOL);
     }
 
     unless ($rrdtool) {
+        print "RRDTool binary not found, please install RRDTool.\n";
         return -1;
     }
 

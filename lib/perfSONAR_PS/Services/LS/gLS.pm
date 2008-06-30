@@ -145,8 +145,8 @@ sub init {
         $self->{CONF}->{"gls"}->{"root"} = "0";
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"root_hints_url"} ) {
-        $self->{CONF}->{"gls"}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
+        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
     }
     
     if ( exists $self->{CONF}->{"gls"}->{"root_hints_file"} ) {
@@ -226,9 +226,9 @@ sub init {
     }
     $summarydb->closeDB( { error => \$error } );
     
-    my $content = get $self->{CONF}->{"gls"}->{"root_hints_url"};
+    my $content = get $self->{CONF}->{"root_hints_url"};
     unless ( $content ) {
-        $self->{LOGGER}->error( "There was an error accessing " . $self->{CONF}->{"gls"}->{"root_hints_url"} . "." );
+        $self->{LOGGER}->error( "There was an error accessing " . $self->{CONF}->{"root_hints_url"} . "." );
         return -1;
     }
     open(HINTS, ">".$self->{CONF}->{"gls"}->{"root_hints_file"});
