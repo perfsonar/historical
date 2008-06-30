@@ -559,17 +559,9 @@ sub registerLS {
             my $ls = perfSONAR_PS::Client::LS->new( { instance => $instance } );
             my $result = $ls->keyRequestLS( { service => \%service } );
             if ( exists $result->{key} and $result->{key} ) {
-
-use Data::Dumper;
-$self->{LOGGER}->error( Dumper($result) );
-
                 my $key = $result->{key};
                 foreach my $chunk ( @mdMatrix ) {
                     $result = $ls->registerUpdateRequestLS( { key => $key, eventType => $eventType, data => \@{$chunk} } );                        
-
-use Data::Dumper;
-$self->{LOGGER}->error( Dumper($result) );
-
                     if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS";
                         $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
@@ -587,10 +579,6 @@ $self->{LOGGER}->error( Dumper($result) );
             else {
                 foreach my $chunk ( @mdMatrix ) {
                     $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@{$chunk} } );
-
-use Data::Dumper;
-$self->{LOGGER}->error( Dumper($result) );
-
                     if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS";
                         $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
