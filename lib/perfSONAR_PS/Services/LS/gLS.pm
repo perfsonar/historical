@@ -327,36 +327,16 @@ sub registerLS {
     }
 
     if( $self->{CONF}->{"gls"}->{root} ) {
+        # if we are a root, we are 'synchronizing'
+    
+        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
         $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
         unless ($database) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
-        } 
-    }
-    else {
-        $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-        unless ($database) {
-            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
-            return -1;
-        } 
-    }
-    
-    my $errorFlag = 0;
-    my $dbTr = $database->getTransaction( { error => \$error } );
-    unless ( $dbTr ) {
-        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-        undef $dbTr;
-        $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
-        return -1;
-    }
+        }    
 
-    if( $self->{CONF}->{"gls"}->{root} ) {
-        # if we are a root, we are 'synchronizing'
-    
-        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
-
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-        $errorFlag++ if $error;
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
         if ( $#resultsString != -1 ) {
             my $len = $#resultsString;
             for my $x (0..$len) {
@@ -364,8 +344,8 @@ sub registerLS {
                 my $doc    = $parser->parse_string( $resultsString[$x] );
                 my $service = find($doc->getDocumentElement, "./perfsonar:subject", 1);
                 
-                my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$doc->getDocumentElement->getAttribute("id")."\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-                $errorFlag++ if $error;
+                my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$doc->getDocumentElement->getAttribute("id")."\"]/nmwg:metadata", txn => q{}, error => \$error } );
+
                 foreach my $root ( keys %rootList ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
                     my $result = $ls->keyRequestLS( { servicexml => $service->toString } );
@@ -403,7 +383,6 @@ sub registerLS {
                 }
             }
         }
-         
     }
     else {
         # if we are not a root, send our summary to a root
@@ -414,10 +393,15 @@ sub registerLS {
             serviceDescription => $self->{CONF}->{"gls"}->{"service_description"},
             accessPoint        => $self->{CONF}->{"gls"}->{"service_accesspoint"}
         );
-        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0";    
 
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => $dbTr, error => \$error } );
-        $errorFlag++ if $error;
+        $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0";    
+        $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+        unless ($database) {
+            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
+            return -1;
+        } 
+
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
         if ( $#resultsString != -1 ) {
             my $md_len = $#resultsString;
             my @metadataArray = ();
@@ -425,8 +409,7 @@ sub registerLS {
                 $resultsString[$x] =~ s/^\{\}id=//;
                 $resultsString[$x] =~ s/\"//g;
 
-                my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[$x]."\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-                $errorFlag++ if $error;
+                my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$resultsString[$x]."\"]/nmwg:metadata", txn => q{}, error => \$error } );
                 foreach my $t ( @temp ) {
                     push @metadataArray, $t if $t;
                 }                    
@@ -473,30 +456,11 @@ sub registerLS {
         }
         else {
             $self->{LOGGER}->error("Nothing to register at this time.");
-        }         
+        }   
+        
     }
-
-    if ($errorFlag) {
-        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-        undef $dbTr;
-        $database->closeDB( { error => \$error } );
-        $self->{LOGGER}->error("Database errors prevented the transaction from completing.");
-        return -1;
-    }
-    else {
-        my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
-        if ( $status == 0 ) {
-            undef $dbTr;
-            $database->closeDB( { error => \$error } );
-        }
-        else {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $database->closeDB( { error => \$error } );
-            $self->{LOGGER}->error( "Database Error: \"" . $error . "\"." );
-            return -1;
-        }
-    }      
+    
+    $database->closeDB( { error => \$error } );
     return 0;
 }
 
@@ -524,7 +488,6 @@ sub summarizeLS {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
-        return -1;
     }
 
     my @serviceString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
@@ -549,7 +512,6 @@ sub summarizeLS {
             $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
             undef $sum_dbTr;
             $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $sum_error . "\"." );
-            return -1;
         }
 
         for my $x ( 0 .. $numServices ) {
@@ -1725,7 +1687,7 @@ sub lsRegisterRequestUpdateNew {
 
     my $update = 1;
     if( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
-        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"".$parameters->{mdKey}."\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$error } );
+        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"".$parameters->{mdKey}."\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => q{}, error => \$error } );
         $errorFlag++ if $error;
         if ( lc($resultsString[0]) eq "yes" ) {
             # if this is a synch message, AND we already have some authoratative
