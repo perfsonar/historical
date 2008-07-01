@@ -27,7 +27,7 @@ use perfSONAR_PS::ParameterValidation;
 use perfSONAR_PS::Client::MA;
 
 use  aliased 'perfSONAR_PS::Datatypes::EventTypes';
-use  aliased 'perfSONAR_PS::Datatypes::Namespace';
+ 
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message'; 
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata';
@@ -266,7 +266,90 @@ sub setupDataRequest {
    
 }
 
+=head2 getMetaID ($message_response_object)
  
+     helper method, accepts repsonse object
+     return ref to hash:
+     'src:dst:packetSize' => { 
+          src_name    => $src,
+          dst_name    => $dst,
+          packet_size => $pkgsz,
+          metaIDs	 => [ ($metaID) ]
+     }
+
+=cut
+
+sub getMetaData {
+    my ($self, $response) = @_;
+    my $metaids = {};
+    $self->{LOGGER}->error("Must be perfSONAR_PS::Datatypes::v2_0::nmwg::Message object") unless $response && 
+                                                                                                 blessed $response &&
+											         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
+    foreach my $md (@{$response->metadata}) {
+        my $key = $md->key->id or $self->{LOGGER}->error("Malformed metadata in response - key is missing ");
+        my $subject = $md->subject->[0]; #first subj
+        my $endpoint = $subject->endPointPair->[0]; # first endpoint
+        my $src = $endpoint->src;
+        my $dst= $endpoint->dst;
+        my $packetSize;  
+        foreach my $params (@{$md->parameters}) {
+            foreach my $param (@{$params->parameter}) {
+                if($param->name eq 'packetSize') {
+		    $packetSize = $param->value?$param->value:$param->text;
+		    last;
+		}
+	    }
+        }
+        my $composite_key = "$src:$dst:$packetSize"; 
+        if( exists $metaids->{$composite_key}) { 
+            push @{ $metaids->{$composite_key}{metaIDs}}, $key;
+        } else { 
+            $metaids->{$composite_key} = {
+                                src_name    => $src,
+                                dst_name    => $dst,
+                                packet_size =>  $packetSize,
+                                metaIDs     => [ ($key) ]
+            };
+        }   
+    }
+    return $metaids; 
+}
+
+
+=head2 getData ($message_response_object)
+   
+     helper method
+     returns extended metaids hashref ( see getMetaData) with extra subkey - data which is 
+     ref to hash with epoch time as a key and value is ref to hash with datums ( name => value )
+
+=cut
+
+sub getData {
+    my ($self, $response) = @_;
+ 
+    $self->{LOGGER}->error("Must be perfSONAR_PS::Datatypes::v2_0::nmwg::Message object") unless $response && 
+                                                                                                 blessed $response &&
+											         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
+    my $metaids = $self->getMetaData($response);
+    foreach my $meta  (keys %{$metaids}) {
+        my $ids = $metaids->{$meta}->{metaIDs};
+	my $data = {};
+        foreach my $id (@{$ids}) {
+	    my $data_obj = $response->getDataByMetadataIdref($id);
+	    foreach my $ctime (@{$data_obj->commonTime}) {
+	        my $timev = $ctime->value;
+                foreach my $datum (@{$ctime->datum}) {
+	           $data->{$id}{$timev}{$datum->name} =   $datum->value; 
+	        }  
+	   
+	    } 
+        }
+	$metaids->{$meta}{data} = $data;
+    }
+    return $metaids;
+}
+
+
 
 1;
 
@@ -343,7 +426,13 @@ __END__
          end => $sec, 
          key => '123456',
       } );
+      #
+      #   normilize metadata and print src_dst_packetsize 
+      #
       
+      foreach my $src_dst_packetsize (keys %{$self->getMetaData($result)})
+           print "Src:DST:packetsize key = $src_dst_packetsize \n";
+      }
 
 =head1 SEE ALSO
 
