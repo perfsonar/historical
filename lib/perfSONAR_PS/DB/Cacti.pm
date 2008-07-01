@@ -13,6 +13,8 @@ use Config::General qw(ParseConfig);
 use DBI;
 use Socket;
 
+use perfSONAR_PS::ParameterValidation;
+
 =head1 NAME
 
 ...
@@ -38,7 +40,7 @@ sub new {
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::Cacti");
-    $self->{VERSIONS} = ("0.8.6j");
+    @{$self->{VERSIONS}} = ("0.8.6j");
     if ( exists $parameters->{conf} and $parameters->{conf} ) {
         $self->{CONF} = $parameters->{conf};
     }
@@ -113,7 +115,7 @@ sub openDB {
         "DBI:mysql:database=".$config{"DB_Database"}.";host=".$config{"DB_Host"},
         $config{"DB_User"},
         $config{"DB_Pass"},
-        \%attr) or print "Database \"".$config{"DB_Host"}.":".$config{"DB_Database"}."\" unavailable with user \"".$USER."\" and password \"".$PASS."\".\n";
+        \%attr) or print "Database \"".$config{"DB_Host"}.":".$config{"DB_Database"}."\" unavailable with user \"".$config{"DB_User"}."\" and password \"".$config{DB_Pass}."\".\n";
 
     my $query = "select cacti from version";
     my $sth = $dbh->prepare($query);
