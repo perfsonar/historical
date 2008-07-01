@@ -250,6 +250,18 @@ sub init {
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
 
+
+    if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"} and $self->{CONF}->{"snmp"}->{"metadata_db_external"} ) {
+        unless ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
+            $self->{LOGGER}->error("External monitoring source \"".$self->{CONF}->{"snmp"}->{"metadata_db_external"}."\" not currently supported.");
+            return -1;
+        }
+        use perfSONAR_PS::DB::Cacti;
+        
+#        $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}
+        
+    }
+
     my $error = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );

@@ -574,6 +574,9 @@ sub registerLS {
 
     my $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
     while(1) {
+        if (not $sleep_time) { 
+            $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
+        }
 
         eval {
             $service->registerLS(\$sleep_time);

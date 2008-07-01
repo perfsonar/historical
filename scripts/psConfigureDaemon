@@ -492,18 +492,28 @@ sub config_snmp_ma {
 
     $config->{"snmp"}->{"default_resolution"} = &ask( "Enter the default resolution of RRD queries ", "300", $config->{"snmp"}->{"default_resolution"}, '^\d+$' );
 
-    $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
-
-    my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-    my @result = ();
-    if ($makeStore) {
-        open( RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
-        @result = <RUN>;
-        close(RUN);
-        unless ( $result[0] ) {
-            return -1;
+    my $makeStore = 0;
+    my $external = &ask( "Use external monitoring source [e.g. cacti, cricket, mrtg, etc.] for metadata creation? (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+    if ( $external ) {
+        $config->{"snmp"}->{"metadata_db_external"} = &ask( "Enter external monitoring source (none | cacti | cricket | mrtg ) ", "none", $config->{"snmp"}->{"metadata_db_external"}, '^(none|cacti|mrtg|cricket)$' );
+        if (exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
+            $config->{"snmp"}->{"metadata_db_external_source"} = &ask( "Enter cacti configuration file location (/path/to/file) ", "/etc/cacti/cactid.conf", $config->{"snmp"}->{"metadata_db_external_source"}, '\.conf$' );
         }
     }
+    else {
+        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+        my @result = ();
+        if ( $makeStore ) {
+            open( RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
+            @result = <RUN>;
+            close(RUN);
+            unless ( $result[0] ) {
+                return -1;
+            }
+        }
+    }
+
+    $config->{"snmp"}->{"metadata_db_type"} = &ask( "Enter the internal database type to read from (file or xmldb) ", "file", $config->{"snmp"}->{"metadata_db_type"}, '(file|xmldb)' );
 
     if ( $config->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/dbxml$/mx;
