@@ -7,12 +7,12 @@ our $VERSION = 0.10;
 
 =head1 NAME
 
-perfSONAR_PS::Client::PingER - API for calling an PingER MA from a client or another 
-service.
+perfSONAR_PS::Client::PingER - client API for calling PingER MA from a client or another  service.
 
 =head1 DESCRIPTION
 
-Module with a very basic API to some common MA functions.
+Module inherits from perfSONAR_PS::Client::MA and overloads callMA,  metadataKeyRequest and  setupDataRequest
+
 
 =cut
 
@@ -20,7 +20,7 @@ use Log::Log4perl qw( get_logger );
 use Params::Validate qw( :all );
 use English qw( -no_match_vars );
 
-use perfSONAR_PS::Common qw( genuid makeEnvelope find extract );
+use perfSONAR_PS::Common qw( genuid );
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Echo;
 use perfSONAR_PS::ParameterValidation;
@@ -32,16 +32,11 @@ use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key' => 'MetaKey';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key' => 'DataKey';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::CommonTime';
-
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwgr::Message::Data::Datum' => 'DataDatum';
-
+ 
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Parameters' => 'MessageParams';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters' => 'PingerParams';
 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject' => 'MetaSubj'; 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Data::CommonTime::Datum' => 'CTimeDatum';
+use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject' => 'MetaSubj';  
 
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters' => 'SelectParams';
 use  aliased 'perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Subject' => 'SelectSubj';
@@ -85,14 +80,15 @@ sub callMA {
 
 sub metadataKeyRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0,  src_name => 0, dst_name => 0,   parameters => 0 } );
-  
+    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  key => 0, subject => 0,  src_name => 0, dst_name => 0,   parameters => 0 } );
+    my $eventType =  EventTypes->new();
     my $metaid = genuid();
     my $message = Message->new( { 'type' =>  'MetadataKeyRequest', 'id' =>  'message.' .  genuid() });
     if($parameters->{xml})  {
        $message = Message->new( { xml => $parameters->{xml}});
     } else {
         $parameters->{id} = $metaid;
+	$parameters->{eventType} = $eventType->tools->pinger; 
         my $metadata = $self->getMetaSubj( $parameters );
 	 
 	# create the  element
@@ -104,25 +100,44 @@ sub metadataKeyRequest {
     return  $self->callMA($message);
 }
 
-=head2 getMetaSubj 
+=head2 getMetaSubj ($self,   { id , metadata , subject ,  key , src_name  , dst_name ,   parameters  })
    
    returns metadata object with pinger subj and pinger parameters 
-   id => 1, metadata => 0, subject => 0,  src_name => 0, dst_name => 0,   parameters => 0
+   
+   mundatory:
+   
+   id => id of the metadata,
+   eventType => pigner eventtype
+   
+   optional:
+   
+   metadata => XML string of the whole metadata, if supplied then the rest of parameters dont matter
+   key => key value, if supplied then the rest of parameters dont matter
+   subject => XML string of the subject, if supplied then the rest of parameters dont matter
+   src_name =>  source nostname
+   dst_name => destination hostname
+   parameters => pinger parameters from this list:  count packetSize interval 
    
 =cut
 
 sub getMetaSubj {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { id => 1, metadata => 0, subject => 0,  src_name => 0, dst_name => 0,   parameters => 0 } );
+    my $parameters = validateParams( @args, { id => 1, metadata => 0, eventType =>  1, subject => 0,  key => 0, src_name => 0, dst_name => 0,   parameters => 0 } );
   
     my $metaid = $parameters->{id};
     my $md;
     if($parameters->{metadata})  {
-       $md = Metadata->new( { metadata => $parameters->{xml}});
-    } else {
-        $md  =  Metadata->new({ id => "md$metaid"}); 
+       $md = Metadata->new( { xml => $parameters->{metadata}});
+    } elsif($parameters->{key}) {
+       $md = Metadata->new( { key => MetaKey->new( {
+                                                    id => $parameters->{id}
+						 } )
+			 } );
+       
+    } else  {
+        $md  =  Metadata->new(); 
     	my $subject =  MetaSubj->new({ id => "subj$metaid" });
-	if ( $parameters->{"subject"} ) {    
+	if ( $parameters->{subject} ) {    
             $subject =  MetaSubj->new({xml => $subject});
 	} else {
 
@@ -144,20 +159,15 @@ sub getMetaSubj {
         	    push @params, $param;
         	}
 	    }
-
 	      # add the params to the parameters
 	    if(@params) {   
     		$meta_params->parameter( @params );
     		$md->parameters( $meta_params );
-
 	    }
-	} 
-	my $eventType =  EventTypes->new();
-	$md->eventType( $eventType->tools->pinger );
-	if($parameters->{eventType}) {
-            $md->eventType( $parameters->{eventType} );
-	}   
+	} 	 
     }
+    $md->id("metaid". $parameters->{id});
+    $md->eventType($parameters->{eventType});
     return $md;
 
 }
@@ -166,21 +176,31 @@ sub getMetaSubj {
 =head2 getMetaTime 
    
    returns metadata object with select subj and time range parameters
-   id => 1, idRef => 1, metadata => 0,     parameters => 0
+   
+   mundatory:
+   
+   id => 1, 
+   idRef => 1,
+   
+   optional:
+    
+   metadata => 0,  
+   start => start time in seconds since epoch ( GMT )
+   end => end  time in seconds since epoch ( GMT )
    
 =cut
 
 sub getMetaTime  {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { id => 1, idRef => 1,  metadata => 0,   start => 0, end => 0 } );
+    my $parameters = validateParams( @args, { id => 1, idRef => 1, eventType => 1,  metadata => 0,   start => 0, end => 0 } );
   
     my $metaid = $parameters->{id};
+   
     my $md;
     if($parameters->{metadata})  {
-       $md = Metadata->new( { metadata => $parameters->{xml}});
-    } else {
-        
-        $md  =  Metadata->new({ id => "md$metaid"}); 
+       $md = Metadata->new({xml => $parameters->{metadata}});
+    } else {      
+        $md  =  Metadata->new(); 
     	my $subject =  SelectSubj->new({ id => "subj$metaid" , metadataIdRef => $parameters->{idRef}});
 	 
         my  @params;
@@ -196,10 +216,10 @@ sub getMetaTime  {
             $time_params->parameter( @params );
             $md->parameters( $time_params );
         }  
-	my $eventType =  EventTypes->new();
-	$md->eventType( $eventType->ops->select );
-	   
+	 
     }
+    $md->id("metaid". $parameters->{id});
+    $md->eventType($parameters->{eventType});
     return $md;
 
 }
@@ -220,18 +240,20 @@ sub setupDataRequest {
     my ( $self, @args ) = @_;   
     my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0, 
                                               start => 0, end => 0, src_name => 0, dst_name => 0,   parameters => 0 } );
-  
+    my $eventType =  EventTypes->new();
     my $metaid = genuid();
     my $message = Message->new( { 'type' =>  'SetupDataRequest', 'id' =>  'message.' .  genuid() });
     if($parameters->{xml})  {
        $message = Message->new( { xml => $parameters->{xml}});
     } else {
         $parameters->{id} = $metaid;
+	$parameters->{eventType} = $eventType->tools->pinger; 
         my $md_pinger = $self->getMetaSubj( $parameters );
 	delete $parameters->{parameters} if $parameters->{parameters};
 	  
 	$parameters->{id} = genuid();
 	$parameters->{idRef} =  $metaid;
+	$parameters->{eventType} = $eventType->ops->select; 
 	my $md_time =  $self->getMetaTime( $parameters );
 	  
 	# create the  element
@@ -274,14 +296,7 @@ __END__
       { instance => "http://packrat.internet2.edu:8082/perfSONAR_PS/services/pigner/ma"}
     );
 
-    my $subject = "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s-in-16\">\n";
-    $subject .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
-    $subject .= "        <nmwgt:hostName>nms-rexp.salt.net.internet2.edu</nmwgt:hostName>\n";
-    $subject .= "        <nmwgt:ifName>eth0</nmwgt:ifName>\n";
-    $subject .= "        <nmwgt:direction>in</nmwgt:direction>\n";
-    $subject .= "      </nmwgt:interface>\n";
-    $subject .= "    </netutil:subject>\n";
-   
+    
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
     my $result = $ma->metadataKeyRequest( { 
@@ -291,20 +306,49 @@ __END__
      #   or 
      #
      $result = $ma->metadataKeyRequest( { 
-        src_name 'www.fnal.gov', dst_name => 'some.lab.gov'
+        src_name => 'www.fnal.gov', dst_name => 'some.lab.gov'
      );
-
+     #
+     #   or  with parameters
+     #
+     $result = $ma->metadataKeyRequest( { 
+        src_name => 'www.fnal.gov', dst_name => 'some.lab.gov',
+	parameters => { count => 10, packetSize => 1000 }
+     );
+     #
+     #   get data for metadata snippet
+     #
     $result = $ma->setupDataRequest( { 
-         start => ($sec-300), 
+         start => ($sec-3600), 
          end => $sec, 
-          metadata => $metadata 
+         metadata => $metadata 
          parameters => {count => 10}
       } );
+     #
+     #   or with all parameters 
+     #
+    
+     $result = $ma->setupDataRequest( { 
+         start => ($sec-3600), 
+         end => $sec, 
+        src_name => 'www.fnal.gov', 
+	dst_name => 'some.lab.gov',
+        parameters => {count => 10}
+      } );
+      #
+      #  or by Key
+      #
+       $result = $ma->setupDataRequest( { 
+         start => ($sec-3600), 
+         end => $sec, 
+         key => '123456',
+      } );
+      
 
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Params::Validate>, L<English>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Client::Echo>
+L<perfSONAR_PS::Transport> , L<perfSONAR_PS::Datatypes>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
