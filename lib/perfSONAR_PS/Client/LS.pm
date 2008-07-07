@@ -164,7 +164,7 @@ sub registerRequestLS {
     if ( $parameters->{service}->{projects} ) {
         $metadata .= "  <nmwg:parameters>\n";
         foreach my $project ( @{ $parameters->{service}->{projects} } ) {
-            $metadata .= "    <nmwg:parameter type=\"keyword\">project:" . $parameters->{service}->{project} . "</nmwg:parameter>\n";
+            $metadata .= "    <nmwg:parameter type=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
         }
         $metadata .= "  </nmwg:parameters>\n";
     }
