@@ -170,7 +170,7 @@ sub verifyURL {
 =head2 ( $self, { } )
 
 Extract the first usable root element.  In the event you exhaust the list, try
-again.
+again (once only, covers the case where a previously 'dead' root may come back).
 
 =cut
 
@@ -206,10 +206,10 @@ sub createSummaryMetadata {
     my $parameters = validateParams(
         @args,
         {
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
+            addresses  => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            domains    => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            eventTypes => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            keywords   => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 }
         }
     );
 
@@ -377,11 +377,11 @@ sub getLSDiscovey {
         @args,
         {
             ls         => 0,
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
+            addresses  => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            domains    => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            eventTypes => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            service    => { type => Params::Validate::HASHREF | Params::Validate::UNDEF, optional => 1 },
+            keywords   => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 }
         }
     );
 
@@ -474,12 +474,12 @@ sub getLSQueryLocation {
     my $parameters = validateParams(
         @args,
         {
-            ls         => { type => Params::Validate::SCALAR },
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
+            ls         => { type => Params::Validate::SCALAR | Params::Validate::UNDEF, optional => 1 },
+            addresses  => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            domains    => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            eventTypes => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 },
+            service    => { type => Params::Validate::HASHREF | Params::Validate::UNDEF, optional => 1 },
+            keywords   => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF, optional => 1 }
         }
     );
 
@@ -547,45 +547,13 @@ sub getLSQueryLocation {
 
 =head3 getLSQueryContent( $self, { ls, addresses, domains, eventTypes, service } )
 
-Perform query on the supplied hLS and using the supplied arguments:
-
- - array of arrays of ip addresses: ( ( ADDRESS, "ipv4"), ( ADDRESS, "ipv6") )
- - array of domains: ( "edu", "udel.edu" )
- - array of eventTypes: ( http://ggf.org/ns/nmwg/tools/owamp/2.0" )
- - hash of service variables: ( 
-   { 
-     serviceType => "MA", 
-     psservice:serviceType => "MA" 
-   } 
- )
-
-The result is a list of metadata elements (metadata XML) that should match the
-original query.
+Not implemented.
 
 =cut
 
-sub getLSQueryContent {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams(
-        @args,
-        {
-            ls         => { type => Params::Validate::SCALAR },
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
-        }
-    );
-
-    # TBD
-
-    return;
-}
-
 =head3 getLSSummaryControlDirect( $self, { } )
 
-Not implemented.
+Pending Implementation.
 
 =cut
 
@@ -626,11 +594,11 @@ sub getLSLocation {
         @args,
         {
             ls         => 0,
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
+            addresses  => { type => Params::Validate::ARRAYREF, optional => 1 },
+            domains    => { type => Params::Validate::ARRAYREF, optional => 1 },
+            eventTypes => { type => Params::Validate::ARRAYREF, optional => 1 },
+            service    => { type => Params::Validate::HASHREF, optional => 1 },
+            keywords   => { type => Params::Validate::ARRAYREF, optional => 1 }
         }
     );
 
@@ -681,42 +649,9 @@ sub getLSLocation {
 
 =head3 getLSContent( $self, { addresses, domains, eventTypes, service } )
 
-Perform query on the root (or the supplied hLS) and using the supplied
-arguments:
-
- - array of arrays of ip addresses: ( ( ADDRESS, "ipv4"), ( ADDRESS, "ipv6") )
- - array of domains: ( "edu", "udel.edu" )
- - array of eventTypes: ( http://ggf.org/ns/nmwg/tools/owamp/2.0" )
- - hash of service variables: ( 
-   { 
-     serviceType => "MA", 
-     psservice:serviceType => "MA" 
-   } 
- )
-
-The result is a list of metadata elements (metadata XML) that should match the
-original query.
+Pending Implementation.
 
 =cut
-
-sub getLSContent {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams(
-        @args,
-        {
-            ls         => 0,
-            addresses  => { type => Params::Validate::ARRAYREF },
-            domains    => { type => Params::Validate::ARRAYREF },
-            eventTypes => { type => Params::Validate::ARRAYREF },
-            service    => { type => Params::Validate::HASHREF },
-            keywords   => { type => Params::Validate::ARRAYREF }
-        }
-    );
-
-    # TBD
-
-    return;
-}
 
 =head3 getLSSummaryControl( $self, { } )
 
@@ -740,14 +675,43 @@ __END__
 
     use strict;
     use warnings;
-    use Data::Dumper;
-    
+
     use perfSONAR_PS::Client::gLS;
+    use Data::Dumper;
     my $url = "http://dc211.internet2.edu/gls.root.hints";
+    my $hls = "http://dc211.internet2.edu:8080/perfSONAR_PS/services/LS";
 
     my $gls = perfSONAR_PS::Client::gLS->new( { url => $url} );
-    print Dumper( $gls->{ROOTS} ) , "\n";
+    foreach my $root ( @{ $gls->{ROOTS} } ) {
+        print "Root:\t" , $root , "\n";
+    }
 
+    unless ( $#{ $gls->{ROOTS} } > -1 ) {
+        print "Root not found, exiting...\n";
+        exit(1);
+    }
+
+    my $result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata" } );
+    print Dumper($result) , "\n"; 
+        
+    my $result = $gls->getLSQueryRaw( { ls => $hls, xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata" } );
+    print Dumper($result) , "\n"; 
+
+    # baselines:
+    my @ipaddresses = ();
+    my @eventTypes = ();
+    my @domains = ("edu");
+    my @keywords = ();
+    my %service = ();
+
+    $result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+    print Dumper($result) , "\n"; 
+    
+    $result = $gls->getLSQueryLocation( { ls => $h, addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+    print Dumper($result) , "\n"; 
+    
+    $result = $gls->getLSLocation( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+    print Dumper($result) , "\n"; 
 
 =head1 SEE ALSO
 
