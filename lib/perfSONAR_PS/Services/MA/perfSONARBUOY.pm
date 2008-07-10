@@ -2,7 +2,7 @@ package perfSONAR_PS::Services::MA::perfSONARBUOY;
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER';
+use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'RES';
 
 use strict;
 use warnings;
@@ -320,6 +320,7 @@ sub createStorage {
     my $result = $dbBW->openDB;
 
     if ( $result == -1 ) {
+        $self->{LOGGER}->info( "\"".hostname()."\" failed...trying \"localhost\"." );
         $dbsourceBW  = $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "BW", variable => "DBNAME"  } ) . ":localhost";
         $dbBW = new perfSONAR_PS::DB::SQL( { name => $dbsourceBW, schema => \@dbSchema_nodesBW, user => $dbuserBW, pass => $dbpassBW } );
         $result = $dbBW->openDB;
@@ -381,6 +382,7 @@ sub createStorage {
     $result = $dbOWP->openDB;
 
     if ( $result == -1 ) {
+        $self->{LOGGER}->info( "\"".hostname()."\" failed...trying \"localhost\"." );
         $dbsourceOWP  = $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBTYPE"  } ) . ":" . $self->confHierarchy( { conf => $conf, type => "OWP", variable => "DBNAME"  } ) . ":localhost";
         $dbOWP = new perfSONAR_PS::DB::SQL( { name => $dbsourceOWP, schema => \@dbSchema_nodesOWP, user => $dbuserOWP, pass => $dbpassOWP } );
         $result = $dbOWP->openDB;
@@ -415,6 +417,14 @@ sub createStorage {
             $temp{ $dbSchema_meshesOWP[$z] } = $result_meshesOWP->[$x][$z];
         }
         $meshesOWP{ $x + 1 } = \%temp;
+    }
+
+    my @dbSchema_resOWP = ( "res", "description", "save_period", "plot_period", "plot_period_desc" );
+    $dbOWP->setSchema( { schema => \@dbSchema_resOWP } );
+    my $result_resOWP = $dbOWP->query( { query => "select * from resolutions" } );
+    $data_len = $#{$result_resOWP};
+    for my $x ( 0 .. $data_len ) {
+        $self->{RES}->{ $result_resOWP->[$x][0] } = 1;
     }
 
     $dbOWP->closeDB;
@@ -1756,11 +1766,43 @@ sub retrieveSQL {
     my $id = "data." . genuid();
 
     my @dbSchema = ();
+    my $res;
     if( $dataType eq "BWCTL" ) {
         @dbSchema = ( "ti", "time", "throughput", "jitter", "lost", "sent" );
     }
     elsif( $dataType eq "OWAMP" ) {
         @dbSchema = ( "res", "si", "ei", "start", "end", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "err", "pending" );
+
+        # set res
+        if ( exists $parameters->{time_settings}->{"RESOLUTION"} and $parameters->{time_settings}->{"RESOLUTION"} ) {
+            my $min = 999999;
+            my $max = -999999;
+            foreach my $r ( keys %{ $self->{RES} } ) {
+                $min = $r if $r < $min;
+                $max = $r if $r > $max;
+            }
+            foreach my $r ( keys %{ $self->{RES} } ) {
+                if ( $r <  $parameters->{time_settings}->{"RESOLUTION"} ) {
+                    $min = $r if $r > $min;
+                } 
+                else {
+                    $max = $r if $r < $max;
+                } 
+            }
+            if ( ( $parameters->{time_settings}->{"RESOLUTION"} -  $min ) <  ( $max - $parameters->{time_settings}->{"RESOLUTION"} ) ) {
+                $res = $min;
+            }
+            else {
+                $res = $max;
+            }        
+        }    
+        else {
+            $res = 999999;
+            foreach my $r ( keys %{ $self->{RES} } ) {
+                $res = $r if $r < $res;
+            }
+        }
+
     }
     else {
         my $msg = "Improper eventType found.";
@@ -1770,7 +1812,13 @@ sub retrieveSQL {
 
     my $query = {};
     if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-        $query = "select * from " . $dbtable . " where";
+        if ( $res ) {
+            $query = "select * from " . $dbtable . " where res = \"".$res."\" and";
+        }
+        else {
+            $query = "select * from " . $dbtable . " where";
+        }
+
         my $queryCount = 0;
         if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
             if( $dataType eq "BWCTL" ) {
@@ -1801,7 +1849,12 @@ sub retrieveSQL {
         }
     }
     else {
-        $query = "select * from " . $dbtable . ";";
+        if ( $res ) {
+            $query = "select * from " . $dbtable . " where res = \"".$res."\";";
+        }
+        else {
+            $query = "select * from " . $dbtable . ";";
+        }
     }
 
     my $datadb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@dbSchema, user => $dbuser, pass => $dbpass } );
