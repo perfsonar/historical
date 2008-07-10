@@ -1,5 +1,7 @@
 use Net::Domain qw(hostfqdn);
-use Socket;
+use Socket qw(:DEFAULT);
+use IO::Socket;
+use IO::Interface qw(:flags);
 
 package perfSONAR_PS::Services::MP::Agent::CommandLine;
 
@@ -155,20 +157,40 @@ sub init
 	if( ! -e $cmd ) {
 		$self->error( "Executable '$cmd' not found.");
 		return -1;
-	}
-	
-	# work out dns and ip address of source (ie this host)
-	my $src = Net::Domain::hostfqdn;
-	#use Data::Dumper;
-	#$logger->fatal( Dumper $src );
-	$self->source( $src  );
+	}	
+ 
+        my $s = IO::Socket::INET->new(Proto => 'tcp');
+        my @ret_interfaces = ();
+        my @interfaces = $s->if_list;
+        foreach my $if (@interfaces) {
+            my $if_flags = $s->if_flags($if);
+            next if ($if_flags & IO::Interface::IFF_LOOPBACK);
+            next if (not ($if_flags & IO::Interface::IFF_RUNNING));
+            push @ret_interfaces, $s->if_addr($if);
+        }
+
+        $iaddr = Socket::inet_aton( $ret_interfaces[0] );
+	$self->source( gethostbyaddr($iaddr, Socket::AF_INET) );
+
 	# TODO: check to make sure we pick up correct ip
-	$self->sourceIp( Socket::inet_ntoa(
-    	scalar gethostbyname( $self->source() || 'localhost' )
-    ));
+	$self->sourceIp( $ret_interfaces[0] );
+
+# XXX - JZ 7/10
+#
+# Fails for machines with a hostname different than a fqdn.
+#
+#	# work out dns and ip address of source (ie this host)
+#	my $src = Net::Domain::hostfqdn;
+#	#use Data::Dumper;
+#	#$logger->fatal( Dumper $src );
+#	$self->source( $src  );
+#	# TODO: check to make sure we pick up correct ip
+#	$self->sourceIp( Socket::inet_ntoa(
+#    	scalar gethostbyname( $self->source() || 'localhost' )
+#    ));
     
-    #$logger->fatal( "\n\n\n\nSOURCE: " . $self->source() . '  ' . $self->sourceIp() . "\n\n\n");
-	
+
+        #$logger->fatal( "\n\n\n\nSOURCE: " . $self->source() . '  ' . $self->sourceIp() . "\n\n\n");	
 	return 0;
 }
 
