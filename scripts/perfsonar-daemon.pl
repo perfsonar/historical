@@ -583,9 +583,7 @@ sub registerLS {
         };
         if ($@) {
             $logger->error("Problem running register LS: $@");
-            $sleep_time = undef;
         }
-
         $logger->debug("Sleeping for $sleep_time");
         sleep($sleep_time);
     }
