@@ -11,7 +11,7 @@ elements.
 
 =head1 SYNOPSIS
 
-./dump.pl [--verbose --help --environment=/path/to/env --container=container.dbxml]
+./dump.pl [--verbose --help --environment=/path/to/env --container=container.dbxml --type=(LSStore|LSStore-control|LSStore-summary)]
 
 =cut
 
@@ -31,7 +31,7 @@ GetOptions('verbose' => \$DEBUG,
 
 if(!(defined $opts{ENV} and $opts{CONT}) or $HELP) {
   print "$0: Loads into the specified container in the XML DB environment the contents of the store file.\n";
-  print "$0 [--verbose --help --environment=/path/to/env/xmldb --container=container.dbxml --filename=/path/to/store.xml]\n";
+  print "$0 [--verbose --help --environment=/path/to/env/xmldb --container=container.dbxml --type=(LSStore|LSStore-control|LSStore-summary)]\n";
   exit(1);
 }
 
