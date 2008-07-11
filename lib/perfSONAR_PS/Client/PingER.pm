@@ -208,6 +208,8 @@ sub getMetaSubj {
    optional:
     
    metadata => 0,  
+   cf => consolidationFunction ( average, min, max )
+   resolution => how many datums return for the period of time ( from 0 to 1000)
    start => start time in seconds since epoch ( GMT )
    end => end  time in seconds since epoch ( GMT )
    
@@ -216,7 +218,8 @@ sub getMetaSubj {
 sub getMetaTime  {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { id => 1,  eventType => 1,  metadata => 0, md=> 0,    start => 0, end => 0, 
-                                              subject => 0,  key => 0,  
+                                              subject => 0,  key => 0,  cf => 0, 
+					      resolution => 0, 
 					      src_name => 0, dst_name => 0,   parameters => 0 } );
   
     my $metaid =  $parameters->{id} ;
@@ -234,7 +237,17 @@ sub getMetaTime  {
         if($parameters->{end}) {
           push @params,   Parameter->new({ name => 'endTime',  type=>'unix', text =>  $parameters->{end} });
         }
-          # add the params to the parameters
+        if($parameters->{cf}) {
+	  my $up_cf = uc($parameters->{cf});
+	  $self->{LOGGER}->logdie("Unsupported consolidationFunction  $up_cf")
+	      unless $up_cf  =~ /^(AVERAGE|MIN|MAX)$/;
+          push @params,   Parameter->new({ name => 'consolidationFunction',text =>  $up_cf});
+        }
+	if($parameters->{resolution}) {
+	  $self->{LOGGER}->logdie("Resolution must be > 0 and < 1000") if $parameters->{resolution}< 0 || $parameters->{resolution} > 1000;
+          push @params,   Parameter->new({ name => 'resolution',   text =>  $parameters->{resolution} });
+        }
+	# add the params to the parameters
         if(@params) {	
             $time_params->parameter( @params );
             $md->parameters( $time_params );
@@ -264,7 +277,8 @@ Perform a SetupDataRequest, the result is returned  as message DOM
 
 sub setupDataRequest {
     my ( $self, @args ) = @_;   
-    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0,  keys => 0, 
+    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0,  keys => 0, cf => 0, 
+					      resolution => 0, 
                                               start => 0, end => 0, src_name => 0, dst_name => 0,   parameters => 0 } );
     my $eventType =  EventTypes->new();
     $parameters->{eventType} = $eventType->tools->pinger;  
@@ -322,12 +336,14 @@ sub getPair {
 =head2 getMetaID ($message_response_object)
  
      helper method, accepts response object
-     return ref to hash:
-     'src:dst:packetSize' => { 
+     return ref to hash with pairs as:
+     
+     "$src:$dst:$packetSize" => { 
           src_name    => $src,
           dst_name    => $dst,
-          packet_size => $pkgsz,
-          metaIDs	 => [ ($metaID) ]
+          packet_size => $packetSize,
+	  keys => [ array of metadata keys assigned with "$src:$dst:$packetSize" ],
+          metaIDs	 => [ array of metadata ids ]
      }
 
 =cut
@@ -335,9 +351,7 @@ sub getPair {
 sub getMetaData {
     my ($self, $response) = @_;
     my $metaids = {};
-    $self->{LOGGER}->error("Must be perfSONAR_PS::Datatypes::v2_0::nmwg::Message object") unless $response && 
-                                                                                                 blessed $response &&
-											         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
+    $self->{LOGGER}->logdie(" Attempted to get metadata from empty response") unless $response;										         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
     foreach my $md (@{$response->metadata}) {
         unless ($md->key && $md->key->id && $md->subject) {
 	    $self->{LOGGER}->info("Skipping metadata - key or subject is missing ");
@@ -385,9 +399,18 @@ sub getMetaData {
 
 =head2 getData ($message_response_object)
    
-     helper method
-     returns extended metaids hashref ( see getMetaData) with extra subkey - data which is 
+     helper method accepts response object
+     returns extended metadata hashref  with extra subkey - data which is 
      ref to hash with epoch time as a key and value is ref to hash with datums ( name => value )
+      
+     "$src:$dst:$packetSize" => { 
+          src_name    => $src,
+          dst_name    => $dst,
+          packet_size => $packetSize,
+	  data =>  { "$timestamp" => { "$datum_name" => "$datum_value" ...   } }
+	  keys => [ array of metadata keys assigned with "$src:$dst:$packetSize" ],
+          metaIDs	 => [ array of metadata ids ]
+     }
 
 =cut
 
@@ -398,6 +421,7 @@ sub getData {
                                                                                                  blessed $response &&
 											         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
     my $metadata = $self->getMetaData($response);
+    
     foreach my $uniq_key  (keys %{$metadata}) {
         
         my $metaids =   $metadata->{$uniq_key}{metaIDs};
@@ -500,7 +524,7 @@ __END__
          key => '123456',
       } );
       #
-      #   normilize metadata and print src_dst_packetsize 
+      #   normalize metadata and print src_dst_packetsize 
       #
       
       foreach my $src_dst_packetsize (keys %{$self->getMetaData($result)})
