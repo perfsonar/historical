@@ -584,12 +584,9 @@ sub summarizeLS {
                          
                     }
                     else {
-
                         # topology junk (interface)
-print "\t1\n";
                         my $temp_interfaces = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='interface']", 0 );
                         foreach my $interface ( $temp_interfaces->get_nodelist ) {
-print "\t2\n";
                             my @elements = ( "address", "ipAddress", "ifAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types, addresses => $service_addresses } );
@@ -603,11 +600,9 @@ print "\t2\n";
                         }
 
                         # topology junk (port)
-print "\t3\n";
                         my $temp_ports = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='port']", 0 );
                         foreach my $port ( $temp_ports->get_nodelist ) {
 # what do we do here...
-print "\t4\n";
                             my $netmask = extract( find( $port, "./*[local-name()='netmask']", 1 ), 0 );
 
                             my @elements = ( "address", "ipAddress", "name" );
@@ -622,10 +617,8 @@ print "\t4\n";
                         }
 
                         # topology junk (node)
-print "\t5\n";
                         my $temp_nodes = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='node']", 0 );
                         foreach my $node ( $temp_nodes->get_nodelist ) {
-print "\t6\n";
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
@@ -638,10 +631,8 @@ print "\t6\n";
                         }
 
                         # topology junk (network)
-print "\t7\n";
                         my $temp_networks = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='network']", 0 );
                         foreach my $network ( $temp_networks->get_nodelist ) {
-print "\t8\n";
 # what do we do here...
                             my $subaddress = extract( find( $network, "./*[local-name()='subnet']/*[local-name()='address']", 1 ), 0 );
                             my $subnetmask = extract( find( $network, "./*[local-name()='subnet']/*[local-name()='netmask']", 1 ), 0 );
@@ -657,11 +648,9 @@ print "\t8\n";
                             $all_domains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );  
                         }
 
-print "\t9\n";
                         # topology junk (domain)
                         my $temp_domains = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='domain']", 0 );
-                        foreach my $domain ( $temp_domains->get_nodelist ) {
-print "\t10\n";          
+                        foreach my $domain ( $temp_domains->get_nodelist ) {   
                             my @hosts    = ();
                             my @elements = ("name");
                             my @types    = ( "hostname", "hostName", "host", "dns", "DNS" );
@@ -670,10 +659,9 @@ print "\t10\n";
                         }
 
                         # topology junk (service)
-print "\t11\n";
                         my $temp_services = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']", 0 );
-                        foreach my $service ( $temp_services->get_nodelist ) {
-print "\t12\n";           
+                        my $temp_test = find( $doc2->getDocumentElement, "./*[local-name()='subject']", 0 );
+                        foreach my $service ( $temp_services->get_nodelist ) {     
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types, addresses => $service_addresses } );    
@@ -686,10 +674,8 @@ print "\t12\n";
                         }
 
                         # topology junk (endPointPair)
-print "\t13\n";
                         my $temp_endpointpairs = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']", 0 );
                         foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
-print "\t14\n";
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $service_addresses } );
@@ -702,10 +688,8 @@ print "\t14\n";
                         }
 
                         # topology junk (endPointPair)
-print "\t15\n";
                         $temp_endpointpairs = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='endPoint']", 0 );
                         foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
-print "\t16\n";
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $service_addresses } );    
@@ -718,10 +702,8 @@ print "\t16\n";
                         }
 
                         # topology junk (endPoint)
-print "\t17\n";
                         my $temp_endpoints = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='endPoint']", 0 );
-                        foreach my $endpoint ( $temp_endpoints->get_nodelist ) {
-print "\t18\n";           
+                        foreach my $endpoint ( $temp_endpoints->get_nodelist ) {     
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types, addresses => $service_addresses } );
@@ -731,10 +713,8 @@ print "\t18\n";
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            
                             $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );                                                   
-                        } 
-print "\t19\n";           
-                    }
-print "\t20\n";           
+                        }          
+                    }        
                 }
                 # specific service done
 
@@ -745,7 +725,7 @@ print "\t20\n";
                     }
                 }
                 else {
-                    $list1 = $self->ipSummarization( { addresses => $service_addresses } );
+                    $list1 = $self->ipSummarization( { addresses => $service_addresses } ) if $service_addresses;
                 }
                 my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
 
