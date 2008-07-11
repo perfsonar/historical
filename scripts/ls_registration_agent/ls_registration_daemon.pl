@@ -380,10 +380,40 @@ sub create_event_type_md {
 
     my $md = "";
     $md .= "<nmwg:metadata id=\"".int(rand(9000000))."\">\n";
+    $md .= "  <nmwg:subject>\n";
+    $md .= $self->create_junk_node();
+    $md .= "  </nmwg:subject>\n";
     $md .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
     $md .= "</nmwg:metadata>\n";
 
     return $md;
+}
+
+sub create_junk_node {
+    my $self = shift;
+    my $node = "";
+    my $nmtb = "http://ogf.org/schema/network/topology/base/20070828/";
+    my $nmtl3 = "http://ogf.org/schema/network/topology/l3/20070828/";
+
+    my @addresses = $self->lookup_interfaces();
+
+    $node .= "<nmtb:node xmlns:nmtb=\"$nmtb\" xmlns:nmtl3=\"$nmtl3\">\n";
+    foreach my $addr (@addresses) {
+        my $addr_type;
+
+        if ($addr =~ /:/) {
+            $addr_type = "ipv6";
+        } else {
+            $addr_type = "ipv4";
+        }
+
+        $node .= " <nmtl3:port>\n";
+        $node .= "   <nmtl3:address type=\"$addr_type\">$addr</nmtl3:address>\n";
+        $node .= " </nmtl3:port>\n";
+    }
+    $node .= "</nmtb:node>\n";
+
+    return $node;
 }
 
 package perfSONAR_PS::Agent::LS::Registration::BWCTL;
@@ -498,6 +528,8 @@ sub init {
         $desc .= "BWCTL Server";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
@@ -632,6 +664,8 @@ sub init {
         $desc .= "OWAMP Server";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
@@ -664,7 +698,8 @@ sub register {
 
     # This isn't easily modifiable so for now, assume they haven't changed ports on me.
     my @addresses = $self->lookup_interfaces();
-    my $port = 7123;
+    my $web_port  = 7123;
+    my $ctrl_port = 3001;
 
     my @metadata = ();
     my %service = ();
@@ -677,18 +712,18 @@ sub register {
         my %addr = ();
         $addr{"type"} = "uri";
         if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$port";
+            $addr{"value"} = "tcp://[$address]:$ctrl_port";
         } else {
-            $addr{"value"} = "tcp://$address:$port";
+            $addr{"value"} = "tcp://$address:$ctrl_port";
         }
         push @serv_addrs, \%addr;
 
         my %web_addr = ();
         $web_addr{"type"} = "url";
         if ($address =~ /:/) {
-            $web_addr{"value"} = "http://[$address]:$port";
+            $web_addr{"value"} = "http://[$address]:$web_port";
         } else {
-            $web_addr{"value"} = "http://$address:$port";
+            $web_addr{"value"} = "http://$address:$web_port";
         }
         push @serv_addrs, \%web_addr;
     }
@@ -738,6 +773,8 @@ sub init {
         $desc .= "NDT Server";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
@@ -773,9 +810,11 @@ sub register {
 
     my %res = $self->read_app_config($config_file);
 
-    my $port = 8001;
+    my $ctrl_port = 8100;
+    my $web_port  = 8200;
+
     if ($res{port}) {
-        $port = $res{port};
+        $ctrl_port = $res{port};
     }
    
     my @addresses; 
@@ -798,18 +837,18 @@ sub register {
         my %addr = ();
         $addr{"type"} = "uri";
         if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$port";
+            $addr{"value"} = "tcp://[$address]:$ctrl_port";
         } else {
-            $addr{"value"} = "tcp://$address:$port";
+            $addr{"value"} = "tcp://$address:$ctrl_port";
         }
         push @serv_addrs, \%addr;
 
         my %web_addr = ();
         $web_addr{"type"} = "url";
         if ($address =~ /:/) {
-            $web_addr{"value"} = "http://[$address]:$port";
+            $web_addr{"value"} = "http://[$address]:$web_port";
         } else {
-            $web_addr{"value"} = "http://$address:$port";
+            $web_addr{"value"} = "http://$address:$web_port";
         }
         push @serv_addrs, \%web_addr;
     }
@@ -876,6 +915,8 @@ sub init {
         $desc .= "NPAD Server";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
@@ -968,6 +1009,8 @@ sub init {
         $desc .= "Ping Responder";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
@@ -1063,6 +1106,8 @@ sub init {
         $desc .= "Traceroute Responder";
         if ($conf->{"project"}) {
             $desc .= " for ".$conf->{project};
+        } elsif ($conf->{"site_project"}) {
+            $desc .= " for ".$conf->{site_project};
         }
 
         if ($conf->{"site_name"}) {
