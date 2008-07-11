@@ -617,8 +617,11 @@ sub summarizeLS {
                         }
 
                         # topology junk (node)
+print "\t1\n";
                         my $temp_nodes = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='node']", 0 );
+print "\t2\n";
                         foreach my $node ( $temp_nodes->get_nodelist ) {
+print "\t3\n";
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
@@ -961,14 +964,18 @@ sub summarizeAddress {
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             if ( $element eq "." ) {
-                my $address = extract( find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 1 ), 0 );
-print "\taddress: " , $address , "\n";
-                $parameters->{addresses}->{$address} = 1 if $address;
+                my $temp_addresses = find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 0 );
+                foreach my $a ( $temp_addresses->get_nodelist ) {
+                    my $address = extract( $a, 0 );
+                    $parameters->{addresses}->{$address} = 1 if $address;
+                }
             }
             else {
-                my $address = extract( find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 1 ), 0 );
-print "\taddress: " , $address , "\n";
-                $parameters->{addresses}->{$address} = 1 if $address;
+                my $temp_addresses = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
+                foreach my $a ( $temp_addresses->get_nodelist ) {
+                    my $address = extract( $a, 0 );
+                    $parameters->{addresses}->{$address} = 1 if $address;
+                }
             }
         }
     }
@@ -989,7 +996,10 @@ sub summarizeHosts {
 
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
-            push @{ $parameters->{hostarray} }, extract( find( $parameters->{search}, "./*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 1 ), 0 );
+            my $temp_hosts = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
+            foreach my $h ( $temp_hosts->get_nodelist ) {        
+                push @{ $parameters->{hostarray} }, extract( $h, 0 );
+            }
         }
     }
 
@@ -1003,7 +1013,6 @@ sub summarizeHosts {
             }
             $cat =~ s/^\.//;
             $parameters->{hosts}->{$cat} = 1 if $cat;
-print "\thost: " , $cat , "\n";
         }
     }
 
