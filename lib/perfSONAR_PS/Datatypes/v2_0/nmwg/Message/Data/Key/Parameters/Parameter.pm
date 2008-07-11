@@ -121,7 +121,7 @@ sub getDOM {
                              attributes => [
 
                                                ['value' =>  $self->value],
-                                     ['name' =>  (($self->name    =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/)?$self->name:undef)],
+                                     ['name' =>  (($self->name    =~ m/(consolidationFunction|resolution|count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/)?$self->name:undef)],
                                            ],
                                       'text' => (!($self->value)?$self->text:undef),
                          }); 
@@ -143,13 +143,15 @@ sub  querySQL {
     my $query = shift; ### undef at first and then will be hash ref
     my $logger  = get_logger( $CLASSPATH );
      
-    my %defined_table = (  'time' => [  'end',   'start',  ],   'metaData' => [  'protocol',   'transport',   'count',   'packetSize',   'ttl',   'packetInterval',  ],   'limit' => [  'setLimit',  ],  );
+    my %defined_table = (  'time' => [  'consolidationFunction',   'resoluton',   'end',   'start',  ],   'metaData' => [  'protocol',   'transport',   'count',   'packetSize',   'ttl',   'packetInterval',  ],   'limit' => [  'setLimit',  ],  );
     $query->{metaData}{protocol}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{protocol}) || ref($query->{metaData}{protocol});
     $query->{metaData}{count}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{count}) || ref($query->{metaData}{count});
     $query->{metaData}{transport}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{transport}) || ref($query->{metaData}{transport});
     $query->{metaData}{packetSize}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{packetSize}) || ref($query->{metaData}{packetSize});
     $query->{metaData}{ttl}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{ttl}) || ref($query->{metaData}{ttl});
     $query->{metaData}{packetInterval}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{packetInterval}) || ref($query->{metaData}{packetInterval});
+    $query->{time}{consolidationFunction}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{consolidationFunction}) || ref($query->{time}{consolidationFunction});
+    $query->{time}{resoluton}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{resoluton}) || ref($query->{time}{resoluton});
     $query->{time}{start}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{start}) || ref($query->{time}{start});
     $query->{time}{end}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{end}) || ref($query->{time}{end});
     $query->{limit}{setLimit}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{limit}{setLimit}) || ref($query->{limit}{setLimit});
@@ -159,6 +161,8 @@ sub  querySQL {
     $query->{metaData}{packetSize}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{packetSize}) || ref($query->{metaData}{packetSize});
     $query->{metaData}{ttl}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{ttl}) || ref($query->{metaData}{ttl});
     $query->{metaData}{packetInterval}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{metaData}{packetInterval}) || ref($query->{metaData}{packetInterval});
+    $query->{time}{consolidationFunction}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{consolidationFunction}) || ref($query->{time}{consolidationFunction});
+    $query->{time}{resoluton}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{resoluton}) || ref($query->{time}{resoluton});
     $query->{time}{start}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{start}) || ref($query->{time}{start});
     $query->{time}{end}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{time}{end}) || ref($query->{time}{end});
     $query->{limit}{setLimit}= [ 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ] if!(defined $query->{limit}{setLimit}) || ref($query->{limit}{setLimit});
@@ -168,12 +172,12 @@ sub  querySQL {
                 if(ref($query->{$table}{$entry}) eq 'ARRAY') {
                     foreach my $classes (@{$query->{$table}{$entry}}) {  
                         if($classes && $classes eq 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters::Parameter' ) { 
-                            if    ($self->value && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
+                            if    ($self->value && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'consolidationFunction')  && $entry eq 'consolidationFunction') or  ( ($self->name eq 'resolution')  && $entry eq 'resoluton') or  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
                                 $query->{$table}{$entry} =  $self->value;
                                 $logger->debug(" Got value for SQL query $table.$entry: " . $self->value);
                                 last;  
                             }
-                            elsif ($self->text && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
+                            elsif ($self->text && ( (  ( ($self->name eq 'protocol')  && $entry eq 'protocol') or  ( ($self->name eq 'count')  && $entry eq 'count') or  ( ($self->name eq 'transport')  && $entry eq 'transport') or  ( ($self->name eq 'packetSize')  && $entry eq 'packetSize') or  ( ($self->name eq 'ttl')  && $entry eq 'ttl') or  ( ($self->name eq 'packetInterval')  && $entry eq 'packetInterval')) || (  ( ($self->name eq 'consolidationFunction')  && $entry eq 'consolidationFunction') or  ( ($self->name eq 'resolution')  && $entry eq 'resoluton') or  ( ($self->name eq 'startTime')  && $entry eq 'start') or  ( ($self->name eq 'endTime')  && $entry eq 'end')) || (  ( ($self->name eq 'setLimit')  && $entry eq 'setLimit')) )) {
                                 $query->{$table}{$entry} =  $self->text;
                                 $logger->debug(" Got value for SQL query $table.$entry: " . $self->text);
                                 last;  
@@ -315,7 +319,7 @@ sub fromDOM {
      
     $self->value($dom->getAttribute('value')) if($dom->getAttribute('value'));
     $logger->debug(" Attribute value= ". $self->value) if $self->value; 
-    $self->name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/));
+    $self->name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(consolidationFunction|resolution|count|packetInterval|packetSize|ttl|valueUnits|startTime|endTime|protocol|transport|setLimit)$/));
     $logger->debug(" Attribute name= ". $self->name) if $self->name; 
     $self->text($dom->textContent) if(!($self->value) && $dom->textContent);
 
