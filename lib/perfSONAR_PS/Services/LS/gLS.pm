@@ -725,7 +725,7 @@ sub summarizeLS {
                     }
                 }
                 else {
-                    $list1 = $self->ipSummarization( { addresses => $service_addresses } ) if $service_addresses;
+                    $list1 = $self->ipSummarization( { addresses => $service_addresses } ) if defined $service_addresses;
                 }
                 my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
 
@@ -794,7 +794,7 @@ sub summarizeLS {
             }
         }
         else {
-            $list2 = $self->ipSummarization( { addresses => $all_addresses } );
+            $list2 = $self->ipSummarization( { addresses => $all_addresses } ) if defined $all_addresses;
         }
 
         my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $all_domains, eventTypes => $all_eventTypes, keywords => $all_keywords } );
