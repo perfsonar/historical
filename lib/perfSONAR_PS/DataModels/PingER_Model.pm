@@ -108,7 +108,7 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($endPointPair $interfaceL3  $
    
    
    
-   $parameter->{'attrs'} = {name => 'enum:count,packetInterval,packetSize,ttl,valueUnits,startTime,endTime,protocol,transport,setLimit', 
+   $parameter->{'attrs'} = {name => 'enum:consolidationFunction,resolution,count,packetInterval,packetSize,ttl,valueUnits,startTime,endTime,protocol,transport,setLimit', 
                             value => 'scalar', xmlns => 'nmwg'};
                   
    $parameter->{sql} =            {metaData => {count => { value =>  ['value' , 'text'], if => 'name:count'},

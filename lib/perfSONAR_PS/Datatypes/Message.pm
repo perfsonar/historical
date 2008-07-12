@@ -548,12 +548,18 @@ sub  processTime {
    } elsif($params->{timehash}->{'end'} && !ref($params->{timehash}->{'end'})) {
        $timequery{lt} =  $params->{timehash}->{'end'};
    } else {
-       my $tmp =  $timequery{gt};
-       %timequery = (eq  => $timequery{gt});
+        %timequery = (eq  => $timequery{gt});
    }
    unless( $timequery{eq} || $timequery{gt}) {
        $logger->error(" Failed to get time values,possible missed start time or timestamp from the data element commonTime  ");
        return undef;
+   } 
+                        
+   if($params->{timehash}{'cf'} && $params->{timehash}{'resolution'}) {
+       $timequery{count} = $params->{timehash}->{'resolution'};
+       $timequery{function} =  $params->{timehash}->{'cf'} eq 'AVERAGE'?'avg':$params->{timehash}->{'cf'};
+   } else {
+       $logger->debug("  ---No cf -  full search : " . Data::Dumper::Dumper  $params); 
    }
    $logger->debug("  -------> Processed Timestamp=  " . Data::Dumper::Dumper %timequery); 
    return \%timequery;
@@ -563,7 +569,7 @@ sub  processTime {
 
 =head1 AUTHORS
 
-   Maxim Grigoriev (FNAL)   2007
+   Maxim Grigoriev (FNAL)   2007-2008
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -360,11 +360,12 @@ sub soi_metadata {
 
 sub  getMetaID {
      my ($self, $param, $limit) = @_;  
+    
      my $results = $self->getFromTable({ query =>  $param, 
-                                        table => 'metaData',
+                                         table => 'metaData',
 					 validate => METADATA,
-				  	index => 'metaID',
-					limit => $limit,
+				  	 index => 'metaID',
+					 limit => $limit,
 				      });
     return  sort {$a <=> $b} keys %{$results} if ($results && ref($results) eq 'HASH') ;
     return $results; 
@@ -400,7 +401,7 @@ sub  getMeta  {
 
 
 sub  getData {
-     my ($self, $param, $table, $limit) = @_;
+     my ($self, $param,  $table, $limit) = @_;
     
     unless( ($param && ref($param) eq 'ARRAY') || $table)  {
     	 $self->ERRORMSG(" getData   requires  query parameter or tablename ");
@@ -415,23 +416,113 @@ sub  getData {
 	return -1 unless $table_arref && ref($table_arref) eq 'ARRAY' && scalar @{$table_arref};
     }
     my $iterator_local = {};
+    my $query = [];
     
+     ## special processing for consolidation function and resolution  timestamp => {  =>  $keyid}, 
+     ##
+     ##  $cf => { avg,max,min =>   <count>} - resolution, $group_by - resulted clause, @selects - resulted select, $time_period
+     ##
+     my (%cf,  @selects, @fixed_query);		    
+    for(my $indx=0;$indx<(scalar(@{$param})-1);$indx+=2) {
+        if($param->[$indx] eq 'timestamp') {
+	   my $tm_href =  $param->[$indx+1];
+	   my ($oper, $value) = each %{$tm_href};
+	   $self->LOGGER->debug(" time query: $oper, $value");  
+	   if($oper =~ /function|count/) {
+	       $cf{$oper}  = $value;
+	       undef $param->[$indx];
+	       undef $param->[$indx+1];
+	   }  
+	}
+        push @fixed_query,  $param->[$indx], $param->[$indx+1]  if $param->[$indx] && $param->[$indx+1];
+    }
+    
+    my %counts = %{$self->getTimeDiffs({tables => $table_arref, sql => \@fixed_query })};
+    my $total_ratio = $cf{count}?($counts{total}/$cf{count}):0; 
+    map { push @selects, "$cf{func}($_)" unless $_ =~ /^seqNums|timestamp|outOfOrder|duplicates|rtts$/ }  keys %{(DATA)} if $cf{count} && $cf{func}; 
+    
+    ##########    $bin =  $time_period  - ( $time_start + $i*$table_period )
     foreach my $table_aref (@{$table_arref}) { 
-        my $objects = $self->getFromTable({ query =>  $param, 
+	#### ok we have to aggregate results, first is a quick check on the time difference in the data table
+	my $group_by;
+	if(%cf && $cf{count} && $cf{count}>0 && $total_ratio) {
+	    my $time_diff = shift @{$counts{counts}};
+	    my $factor = $time_diff->[1]*$total_ratio;
+	    $group_by =  "round((timestamp - " .  $time_diff->[0] . ")/$factor)" if $time_diff->[0] && $factor;
+	}  
+	$self->LOGGER->debug(" test sql:   $group_by select:" . ( join " " , @selects)); 
+        my $objects = $self->getFromTable({ query =>  \@fixed_query, 
                                             table =>  $table_aref->[0], 
 					    validate =>  DATA, 
+					    select => (@selects?\@selects:undef),
+					    group_by => ($group_by?$group_by:undef),
 				      	    index =>  [qw(metaID timestamp)],
 					    limit =>  $limit,
-				     });
+				         });
         if ($objects &&  (ref($objects) eq 'HASH') && %{$objects}) {
 	        $iterator_local->{$_} = $objects->{$_} for keys  %{$objects}; 
 		$self->LOGGER->debug(" Added data rows ..... ......: " . scalar %{$objects});		
 	 } else {
 	        $self->LOGGER->debug(" ...............No  data rows  .....from ". $table_aref->[0]  );	
 	 } 
-    }			     
+    }
+ 			     
     return  $iterator_local; 
-} 
+}
+
+=head2 getTimeDiffs 
+
+     returns hashref to hash :
+          counts => ref to array with elements as ref to arrays of form:
+          [  time_start for this table , seconds_diff_between_timestamps ]
+	and 
+	  total => total count    
+     accepts  param in form of hashref  where:
+         tables =>  arrayref - of data tables
+	 time_start => timestart for the query
+	 time_end => time end for the query
+	 count => returning resolution count
+
+=cut
+
+sub getTimeDiffs {
+    my ($self, $param) = @_;
+    unless ($param && ref($param) eq 'HASH' && $param->{tables}  && ref $param->{tables} eq 'ARRAY' 
+            && $param->{sql} )  {
+	$self->ERRORMSG("single HASHref as paramater required " . $self->ERRORMSG);
+	return {};
+    } 
+    my @times;   
+    my $total_count=0;
+    foreach my $table (@{ $param->{tables} }) { 
+     
+       my $count_table = $self->getFromTable({ 
+        				    query =>  $param->{sql}, 
+        				    table =>  $table->[0], 
+					    index =>  [qw(COUNT(timestamp))],
+					    select => [qw/COUNT(timestamp)/], 
+      	 			       });
+	my $count_from = ($count_table && ref $count_table)?(keys %{$count_table})[0]:0;  			       
+	my $time_diff = $self->getFromTable({ 
+        				   query =>  $param->{sql}, 
+					   index =>  [qw(timestamp)],
+					   table =>  $table->[0], 
+      	 				   select => [qw/timestamp/],
+					   limit => 2 
+      	 			       });
+       $self->LOGGER->logdie($self->ERRORMSG) if($self->ERRORMSG);
+        my ($seconds_diff, @timestamps);		       
+        if($time_diff &&  (ref($time_diff ) eq 'HASH') && scalar(keys %{$time_diff}) == 2) {	
+	    @timestamps =  sort {$a <=> $b} keys %{$time_diff};
+	    $seconds_diff = $timestamps[1] - $timestamps[0];  						  
+        }
+	$self->LOGGER->debug(" count frm table: " .   $table->[0].  Dumper($time_diff) . " \n" .   Dumper $count_table ); 
+        $total_count+=  $count_from ;  
+	push   @times,   [($timestamps[0], $seconds_diff)]; 
+    }
+    return  { counts => \@times, total =>  $total_count};
+}
+
 
 =head2 insertData (   $hashref );
 

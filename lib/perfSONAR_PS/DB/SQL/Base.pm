@@ -220,38 +220,49 @@ sub  getFromTable {
     	 return -1;
      }   
      my $results = -1;
-     my @array_of_names = ();
+     my (@array_of_names, @array_of_columns);
      #
+     # if select is provided then use names from select
      # if validation hash is not provided then we should use query  itself for the list of columns
      #
+    $self->LOGGER->debug("  SQL::  params  " . Dumper $param);
+     if(defined $param->{select} && ref($param->{select}) eq 'ARRAY') {
+         foreach my $name (@{$param->{select}}) { 
+	     push @array_of_names, $name;
+         }    
+     }
      if(defined $param->{validate} && ref($param->{validate}) eq 'HASH') {
-         @array_of_names = keys %{$param->{validate}}; 
+          @array_of_names = keys %{$param->{validate}} unless @array_of_names; 
+	  @array_of_columns= keys %{$param->{validate}};
      } else {
          my $param_sz = scalar @{$param->{query}};
          for(my $i=0;$i<$param_sz;$i+=2) {
-             push @array_of_names ,$param->{query}->[$i] if  $param->{query}->[$i];
+             push @array_of_names ,$param->{query}->[$i] if !@array_of_names && $param->{query}->[$i];
+	     push  @array_of_columns, $param->{query}->[$i]  if $param->{query}->[$i];
 	 }
      }
-     unless(   @array_of_names ) {
+     unless( @array_of_names ) {
         $self->ERRORMSG(" getFromTable  failed, someting misssing  for  " . Dumper $param);
         return -1;
      }
      my  $stringified_names  = join ", ",  @array_of_names;
-      
+     $self->LOGGER->debug("  SQL::$stringified_names...");	
      eval {
-         my $sql_query =  build_select({ dbh => $self->handle, 
-	                                 select =>   $stringified_names,
+        my $param_to = { dbh => $self->handle, 
+	                                 select => $stringified_names,
                                          tables => [$param->{table}], 
 				         query =>  $param->{query}, 
-					 query_is_sql => 1, 
-				         columns => {   $param->{table}  => \@array_of_names},
+					 query_is_sql => 1,  
+				         columns => { $param->{table} => \@array_of_columns},
 					 limit => ($param->{limit}?$param->{limit}:'1000000'), ## i am pretty sure that 1 mil of records is more than enough
-				      });
+				      };
+	$param_to->{group_by}  = $param->{group_by} if $param->{group_by};			      
+         my $sql_query =  build_select( $param_to );
 	 $self->LOGGER->debug("  SQL:: $sql_query ");			      
 	 $self->openDB  if !($self->alive == 0);
-	 my $sth = $self->handle->prepare($sql_query);	      
+	 my $sth = $self->handle->prepare($sql_query);      
 	 $results = $self->handle->selectall_hashref($sth,  $param->{index});
-	  $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);	
+	 $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);	
 	 die $DBI::errstr if  $DBI::err;
      };
      if ($EVAL_ERROR) {
@@ -401,7 +412,7 @@ sub createTable {
  
 =head2 validateQuery
 
-   vlaidated supplied query parameters against defined  fields for particular table
+   vlaidate  supplied query parameters against defined  fields for particular table
    optional arg $required is a hash of the required  table fields
    returns 
          

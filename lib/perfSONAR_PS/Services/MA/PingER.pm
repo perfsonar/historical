@@ -312,57 +312,12 @@ sub registerLS($)
 	my @sendToLS = ();
 	
 	# open db
-	my $iterator = perfSONAR_PS::DB::PingER_DB::MetaData::Manager->get_metaData_iterator();
-	while( $md = $iterator->next )
+	my $metas = $self->database()->getMeta([],10000);
+	my $pingerMA =  perfSONAR_PS::Datatypes::PingER->new();
+	foreach my  $metaid (sort keys %{$metas})
 	{
-		# get hosts
-		my $endpoint = perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair->new();
-		
-		my $src = perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Src->new({
-								'value' =>  $md->ip_name_src(),
-								'type'  =>  'hostname', 
-							});
-		my $dst = perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Src->new({
-								'value' =>  $md->ip_name_dst(),
-								'type'  =>  'hostname', 
-							});
-	
-		$endpoint->src( $src );
-		$endpoint->dst( $dst );
-
-
-		my $subject = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject->new();
-		$subject->endPointPair( $endpoint );
-		
-		# setup parameters
-		my @params = ();
-		no strict 'refs';
-		foreach my $p ( qw/ count packetSize interval ttl / ) {
-			my $param = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter->new({
-							'name' => $p, });
-			my $q = $p;
-			$q = 'packetInterval'
-				if $p eq 'interval';
-			$param->text( $md->$q() );
-			push @params, $param;
-		}
-		use strict 'refs';
-		my $parameters = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters->new();
-		$parameters->parameter( @params );
-		
-		# event type
-		my $eventType = perfSONAR_PS::Datatypes::EventTypes->new();
-
-		# create the metadata
-		my $mdid = ref($md->metaID) eq 'Math::BigInt' ? $md->metaID->bstr : $md->metaID;
-		my $metadata = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new({
-			 				'id' => $mdid });
-
-		$metadata->subject( $subject );
-		$metadata->eventType( $eventType->tools->pinger );
-		$metadata->parameters( $parameters );
-		
-		push @sendToLS, $metadata->getDOM()->toString() ;
+		my $md =   $self->ressurectMd({ md_row =>  $metas->{$metaid}  });   
+		push @sendToLS, $md->getDOM()->toString() ;
 
 	}
 	

@@ -154,16 +154,21 @@ sub  MetadataKeyRequest {
     my $requestmd =  $self->metadata->[0];
     my  $objects  = undef;### iterator returned by backend query
     if($requestmd->key  &&  $requestmd->key->id) {
-        $logger->debug(" Found Key =" . $requestmd->key->id);	  
-        $objects  = $self->DBO->getMeta([ metaID=> {eq =>  $requestmd->key->id}], 1);
-	     
+        $logger->debug(" Found Key =" . $requestmd->key->id);	
+	eval {  
+            $objects  = $self->DBO->getMeta([ metaID=> {eq =>  $requestmd->key->id}], 1);
+	}; 
+	if($EVAL_ERROR) {
+	    $logger->logdie("PingER backend  Query failed: " . $EVAL_ERROR);
+	}     
     }  elsif(($requestmd->subject) ||  ($requestmd->parameters)) { 
         my  $query = {query_metaData => []};
         $query =  $self->buildQuery('eq', $requestmd );
 	$query =  {query_metaData => []} unless $query;
 	$logger->debug(" Will query = " . Dumper $query);	 	
-	$objects  =   $self->DBO->getMeta(  $query->{query_metaData},  _mdSetLimit($query->{query_limit}) );
-	 
+	eval {
+	    $objects  =   $self->DBO->getMeta(  $query->{query_metaData},  _mdSetLimit($query->{query_limit}) );
+	}; 
 	if($EVAL_ERROR) {
 	    $logger->logdie("PingER backend  Query failed: " . $EVAL_ERROR);
 	}
@@ -176,7 +181,7 @@ sub  MetadataKeyRequest {
     if($objects &&   ref($objects) eq 'HASH' &&  %{$objects}) {
 	foreach my  $metaid (keys %{$objects}) {
 	    $logger->debug( "Found metaID " .  $metaid  );
-	    my $md =   $self->_ressurectMd({ md_row =>  $objects->{$metaid}  });  
+	    my $md =   $self->ressurectMd({ md_row =>  $objects->{$metaid}  });  
 	    my $md_id = $response->addIDMetadata($md, $self->eventTypes->tools->pinger);
             $logger->debug(" MD created: \n " .  $md->asString);
 	    my $key =   perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key->new({id => $metaid });
@@ -281,13 +286,18 @@ sub  SetupDataRequest  {
     ### objects hashref  returned by backend query with metaID as key
     my  $objects_hashref  = {};
 	# if there is a Key, then get data arrayref
+      my $query = {}; 
      if($requestmd->key  && $requestmd->key->id) {      
-	    if($self->_retriveDataByKey({md => $requestmd , datas => $objects_hashref,  timeselects => $time_selects, metaids => $metaids, response => $response})) {
+            foreach my $supplied_md ( $requestmd, @filters)  {
+	         %{$query} =  (%{$query}, %{$self->buildQuery('eq',  $supplied_md)});		    
+	    }  
+	    if($self->_retrieveDataByKey({md => $requestmd , datas => $objects_hashref,  timequery =>  $self->processTime({timehash => $query->{time}}), 
+	                                  timeselects => $time_selects, metaids => $metaids, response => $response})) {
 	        $response->addResultResponse({md => $requestmd, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
 	        return $response;
 	    }
-     }   elsif($requestmd->subject | $requestmd->parameters) {
-	        my $query = {}; 
+     }   elsif($requestmd->subject || $requestmd->parameters) {
+	     
 	        my  $md_objects = undef;
 	        eval {
 		     foreach my $supplied_md ( $requestmd, @filters)  {
@@ -296,7 +306,8 @@ sub  SetupDataRequest  {
 		     $logger->debug(" Will query = " . Dumper $query);
 	             unless($query && $query->{query_metaData} &&  ref($query->{query_metaData}) eq 'ARRAY' && scalar @{$query->{query_metaData}} >= 1) {
 	                $logger->warn(" Nothing to query about for md=" . $requestmd->id);
-		        $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  eventType => $self->eventTypes->status->failure});	
+		        $response->addResultResponse({ md => $requestmd, message => 'Nothing to query about(no key or parameters supplied)',  
+			                               eventType => $self->eventTypes->status->failure});	
                         return $response;
 	            }
                     $md_objects  = $self->DBO->getMeta($query->{query_metaData}, _mdSetLimit($query->{query_limit}) );
@@ -309,8 +320,8 @@ sub  SetupDataRequest  {
 	      
 		  if($md_objects &&  (ref($md_objects) eq 'HASH') &&   %{$md_objects}) { 
 	            foreach my $metaid  (sort { $a <=> $b} keys %{$md_objects}) {   
-		        my $md =  $self->_ressurectMd( { md_row =>  $md_objects->{$metaid}});
-		        if($self->_retriveDataByKey({key =>  $metaid,   timequery => $timequery, timeselects => $time_selects,
+		        my $md =  $self->ressurectMd( { md_row =>  $md_objects->{$metaid}});
+		        if($self->_retrieveDataByKey({key =>  $metaid,   timequery => $timequery, timeselects => $time_selects,
 			                             metaids => $metaids, datas => $objects_hashref, response => $response}) ){
 			    $response->addResultResponse({md => $md, message => 'no  matching data found',  eventType => $self->eventTypes->status->failure});		   
 	                    return $response;
@@ -368,13 +379,15 @@ sub _mdSetLimit {
     return $_sizeLimit;
 }
  
-#
-#  auxiliary private function
-#  
-#  accepting SQL row or metaID and will create md element for response and return it as object
-#
-#
-sub _ressurectMd {
+=head2 ressurectMd
+  
+   accepts SQL row or metaID and will create md element   and returns it as object
+   params: { metaId => <>, md_row => <> }
+   
+=cut
+
+
+sub  ressurectMd {
     my ($self, $params)  = @_; 
     my $logger  = get_logger( CLASSPATH ); 
     unless($params && ref($params) eq 'HASH' &&    ($params->{md_row} ||  $params->{metaID})) {
@@ -390,11 +403,13 @@ sub _ressurectMd {
 	if($EVAL_ERROR)  {
 	  $logger->logdie(" Fatal error while calling Rose::DB object query". $EVAL_ERROR);
 	}
-    } 
+    } else {
+         $params->{metaID} = $params->{md_row}->{metaID};
+    }
   
     my $metaid =  $params->{metaID};
     $md  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new(); 
-    my $key =  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key->new({id => "meta$metaid" });
+    my $key =  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key->new({id => $metaid });
    
     my $subject = perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject->new({ id => "subj$metaid",
   		      endPointPair => perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair->new({		      
@@ -466,7 +481,7 @@ sub _createTimeSelect {
 #  return 0 if everything OK, result will be added as data objects arrayref to the {datas} arrayref
 #  return 1 if something is wrong
 #
-sub _retriveDataByKey {
+sub _retrieveDataByKey {
     my ( $self, $params)  = @_; 
     my $logger  = get_logger( CLASSPATH );  
     unless($params && ref($params) eq 'HASH' && ($params->{key} || ($params->{md} && blessed $params->{md}))  && 
@@ -490,7 +505,7 @@ sub _retriveDataByKey {
         $params->{datas}->{$keyid} = $iterator_local;
         my $idref = $self->_createTimeSelect( $params );
 	$logger->debug(" Created Time Select ..... ......id=$idref");	 
-	my $pinger_md = $self->_ressurectMd({metaID =>  $keyid});
+	my $pinger_md = $self->ressurectMd({metaID =>  $keyid});
 	$pinger_md->metadataIdRef($idref) if $idref; 
 	$params->{metaids}->{$keyid} =   $params->{response}->addIDMetadata($pinger_md,  $self->eventTypes->tools->pinger); 
         return 0;
