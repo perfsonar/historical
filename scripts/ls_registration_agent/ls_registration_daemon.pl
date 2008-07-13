@@ -957,9 +957,9 @@ sub register {
         my %addr = ();
         $addr{"value"} = $address;
         if ($address =~ /:/) {
-            $addr{"type"} = "ipv4";
-        } else {
             $addr{"type"} = "ipv6";
+        } else {
+            $addr{"type"} = "ipv4";
         }
         push @serv_addrs, \%addr;
     }
@@ -1054,9 +1054,9 @@ sub register {
         my %addr = ();
         $addr{"value"} = $address;
         if ($address =~ /:/) {
-            $addr{"type"} = "ipv4";
-        } else {
             $addr{"type"} = "ipv6";
+        } else {
+            $addr{"type"} = "ipv4";
         }
         push @serv_addrs, \%addr;
     }
