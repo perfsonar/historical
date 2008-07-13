@@ -617,16 +617,13 @@ sub summarizeLS {
                         }
 
                         # topology junk (node)
-print "\t1\n";
                         my $temp_nodes = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='node']", 0 );
-print "\t2\n";
                         foreach my $node ( $temp_nodes->get_nodelist ) {
-print "\t3\n";
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
                             $all_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $all_addresses } );
-                                
+
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
@@ -1028,6 +1025,14 @@ Summarize IP addresses into CDIR ranges.
 sub ipSummarization {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { addresses => 1 } );
+
+    if ( keys ( %{ $parameters->{addresses} } ) == 1) {
+        my @temp = ();
+        foreach my $host ( keys %{ $parameters->{addresses} } ) {
+            push @temp, $host."/32";
+        }
+        return \@temp;
+    }
 
     $self->{IPTRIE}    = ();
     $self->{CLAIMTREE} = ();
