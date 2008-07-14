@@ -753,6 +753,7 @@ sub summarizeLS {
                     else {
                         $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
 
+                        $doc->getDocumentElement->setAttribute("id", $serviceKey); 
                         $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $doc->getDocumentElement->toString, type => "LSStore" } ), name => $serviceKey, txn => $sum_dbTr, error => \$sum_error } );
                         $sum_errorFlag++ if $sum_error;
                         $summarydb->insertIntoContainer( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
