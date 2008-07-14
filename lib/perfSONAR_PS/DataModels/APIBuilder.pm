@@ -355,11 +355,6 @@ print $fh <<EOG;
 }
 
  
-sub DESTROY {
-    my \$self = shift;
-    \$self->SUPER::DESTROY  if \$self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM (\$) 
       
@@ -463,7 +458,7 @@ sub remove\u${subname}ById {
     my \$id = shift;
     my \$logger  = get_logger( \$CLASSPATH ); 
     if(ref(\$self->$subname) eq 'ARRAY' && \$self->idmap->{$subname} &&  exists \$self->idmap->{$subname}{\$id}) { 
-        \$self->$subname->\[\$self->idmap->{$subname}{\$id}\]->DESTROY; 
+        undef \$self->$subname->\[\$self->idmap->{$subname}{\$id}\]; 
     my \@tmp =  grep { defined \$_ } \@{\$self->$subname};  
     \$self->$subname([\@tmp]);
     \$self->buildRefIdMap; ## rebuild ref index map  

@@ -1,4 +1,4 @@
-package  perfSONAR_PS::DataModels::PingER_Model;
+ package  perfSONAR_PS::DataModels::PingER_Model;
  
 =head1 NAME
 
@@ -120,6 +120,8 @@ use   perfSONAR_PS::DataModels::DataModel   2.0 qw($endPointPair $interfaceL3  $
                                                 },
 			           time     => {start =>  { value =>   ['value' , 'text'],  if => 'name:startTime'},
                                                 end  =>   { value =>  ['value' , 'text'],  if => 'name:endTime'},
+						resolution  =>   { value =>  ['value' , 'text'],  if => 'name:resolution'},
+						cf  =>   { value =>  ['value' , 'text'],  if => 'name:consolidationFunction'},
                                                },
 			           limit    => {setLimit => { value =>   ['value' , 'text'],  if => 'name:setLimit'},			  
 				                },
