@@ -316,7 +316,8 @@ sub registerLS($)
 	my $pingerMA =  perfSONAR_PS::Datatypes::PingER->new();
 	foreach my  $metaid (sort keys %{$metas})
 	{
-		my $md =   $pingerMA->ressurectMd({ md_row =>  $metas->{$metaid}  });   
+		my $md =   $pingerMA->ressurectMd({ md_row =>  $metas->{$metaid}  });  
+                $md->eventType($self->{eventTypes}->tools->pinger); 
 		push @sendToLS, $md->getDOM()->toString() ;
 
 	}
