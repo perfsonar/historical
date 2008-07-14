@@ -519,9 +519,21 @@ sub summarizeLS {
             my $doc    = $parser->parse_string( $serviceString[$x] );
 
             my $service_mdId = $doc->getDocumentElement->getAttribute("id");                     
-            my $serviceKey = md5_hex( extract( find( $doc->getDocumentElement, "./perfsonar:subject/psservice:service/psservice:accessPoint", 1 ), 0 ) );                        
+         
+            my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
+            my $contactName;
+            my $contactType;
+            unless ( $contactPoint ) {
+                $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
+                $contactName = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='name']", 1 ), 0 );
+                $contactType = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='type']", 1 ), 0 );
+                unless ( $contactPoint ) {
+                    return;
+                }
+            }            
+            my $serviceKey = md5_hex( $contactPoint.$contactName.$contactType );    
+                        
             my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$service_mdId."\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-
             $errorFlag++ if $error;
             if ( $#resultsString != -1 ) {
                 my $len = $#resultsString;
