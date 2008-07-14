@@ -112,11 +112,6 @@ sub new {
 }
 
  
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM ($) 
       
@@ -190,7 +185,7 @@ sub removeDatumById {
     my $id = shift;
     my $logger  = get_logger( $CLASSPATH ); 
     if(ref($self->datum) eq 'ARRAY' && $self->idmap->{datum} &&  exists $self->idmap->{datum}{$id}) { 
-        $self->datum->[$self->idmap->{datum}{$id}]->DESTROY; 
+        undef $self->datum->[$self->idmap->{datum}{$id}]; 
     my @tmp =  grep { defined $_ } @{$self->datum};  
     $self->datum([@tmp]);
     $self->buildRefIdMap; ## rebuild ref index map  

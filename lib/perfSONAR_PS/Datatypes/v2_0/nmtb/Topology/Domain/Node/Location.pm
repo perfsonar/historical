@@ -109,11 +109,6 @@ sub new {
 }
 
  
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM ($) 
       

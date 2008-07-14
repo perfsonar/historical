@@ -100,11 +100,6 @@ sub new {
 }
 
  
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM ($) 
       
@@ -167,7 +162,7 @@ sub removeParameterById {
     my $id = shift;
     my $logger  = get_logger( $CLASSPATH ); 
     if(ref($self->parameter) eq 'ARRAY' && $self->idmap->{parameter} &&  exists $self->idmap->{parameter}{$id}) { 
-        $self->parameter->[$self->idmap->{parameter}{$id}]->DESTROY; 
+        undef $self->parameter->[$self->idmap->{parameter}{$id}]; 
     my @tmp =  grep { defined $_ } @{$self->parameter};  
     $self->parameter([@tmp]);
     $self->buildRefIdMap; ## rebuild ref index map  

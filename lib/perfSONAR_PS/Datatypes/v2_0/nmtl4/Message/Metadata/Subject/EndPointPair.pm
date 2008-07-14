@@ -98,11 +98,6 @@ sub new {
 }
 
  
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM ($) 
       
@@ -164,7 +159,7 @@ sub removeEndPointById {
     my $id = shift;
     my $logger  = get_logger( $CLASSPATH ); 
     if(ref($self->endPoint) eq 'ARRAY' && $self->idmap->{endPoint} &&  exists $self->idmap->{endPoint}{$id}) { 
-        $self->endPoint->[$self->idmap->{endPoint}{$id}]->DESTROY; 
+        undef $self->endPoint->[$self->idmap->{endPoint}{$id}]; 
     my @tmp =  grep { defined $_ } @{$self->endPoint};  
     $self->endPoint([@tmp]);
     $self->buildRefIdMap; ## rebuild ref index map  

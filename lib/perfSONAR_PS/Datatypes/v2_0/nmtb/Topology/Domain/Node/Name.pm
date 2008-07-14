@@ -2,7 +2,7 @@ package  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name;
 use strict;
 use warnings;
 use English qw( -no_match_vars);
-use version; our $VERSION = 0.09;
+use version; our $VERSION = qv('v2.0');
 =head1 NAME
 
  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name  - A base class, implements  'name'  element from the perfSONAR_PS RelaxNG schema
@@ -98,11 +98,6 @@ sub new {
 }
 
  
-sub DESTROY {
-    my $self = shift;
-    $self->SUPER::DESTROY  if $self->can("SUPER::DESTROY");
-    return;
-}
  
 =head2   getDOM ($) 
       
