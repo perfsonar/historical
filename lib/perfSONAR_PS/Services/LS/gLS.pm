@@ -2359,12 +2359,15 @@ sub lsQueryRequest {
             next unless $value;
             $sent->{"eventType"}->{$value} = 1
         }      
-        my $l2_eventTypes = find( $sum_parameters, ".//nmwg:parameter[\@name=\"eventType\" or \@name=\"supportedEventType\"]", 0 );
-        foreach my $e ( $l2_eventTypes->get_nodelist ) {
-            my $value = extract( $e, 0 );
-            next unless $value;
-            $sent->{"eventType"}->{$value} = 1
-        } 
+
+        if ( $sum_parameters ) {
+            my $l2_eventTypes = find( $sum_parameters, ".//nmwg:parameter[\@name=\"eventType\" or \@name=\"supportedEventType\"]", 0 );
+            foreach my $e ( $l2_eventTypes->get_nodelist ) {
+                my $value = extract( $e, 0 );
+                next unless $value;
+                $sent->{"eventType"}->{$value} = 1
+            } 
+        }
 
         my $l_domains = find( $subject, "./nmtb:domain", 0 );
         foreach my $d ( $l_domains->get_nodelist ) {
@@ -2372,6 +2375,7 @@ sub lsQueryRequest {
             next unless $name;
             $sent->{"domain"}->{$name} = 1
         }    
+
         my $l_addresses = find( $subject, "./nmtb:address", 0 );
         foreach my $address ( $l_addresses->get_nodelist ) {
             my $ad = extract( $address, 0 );
@@ -2379,12 +2383,15 @@ sub lsQueryRequest {
             $sent->{"address"}->{$ad} = 1
         } 
 
-        # pull out items from the summary parameters
-        my $l_keywords = find( $sum_parameters, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
-        foreach my $k ( $l_keywords->get_nodelist ) {
-            my $value = extract( $k, 0 );
-            next unless $value;
-            $sent->{"keyword"}->{$value} = 1
+        # pull out items from the summary parameters        
+
+        if ( $sum_parameters ) {
+            my $l_keywords = find( $sum_parameters, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
+            foreach my $k ( $l_keywords->get_nodelist ) {
+                my $value = extract( $k, 0 );
+                next unless $value;
+                $sent->{"keyword"}->{$value} = 1
+            }
         } 
         
         # extract our summaries
