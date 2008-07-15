@@ -182,12 +182,17 @@ sub saveConfigs {
     my ($input) = shift;
     return displayGlobal(), "Wrong Request"
       unless $input && $input =~ /^Save\ MP landmarks XML$/;
-    my $tmp_file = "/tmp/temp_LANDMARKS." . $SESSION;
-    my $fd       = new IO::File(">$tmp_file")
-      or $logger->logdie( "Failed to open file $tmp_file" . $! );
-    print $fd $TOPOLOGY_OBJ->asString;
+    my $tmp_file = "/tmp/temp_LANDMARKS." . $SESSION->id;
+    my $fd  = new IO::File(">$tmp_file")  or $logger->logdie( "Failed to open file $tmp_file" . $! );
+    eval {
+        print $fd $TOPOLOGY_OBJ->asString;
+    };
+    if($@) {
+       $logger->logdie( "Failed to print $@"  );
+    }
+    
     $fd->close;
-    move( $tmp_file, BASEDIR . $GENERAL_CONFIG{LANDMARKS} );
+    move( $tmp_file, BASEDIR . $GENERAL_CONFIG{LANDMARKS} ) or  $logger->logdie( "Failed to replace:" .  BASEDIR . $GENERAL_CONFIG{LANDMARKS} . " due - $! "); ;
     return displayGlobal(), displayResponse("MP landmarks XML file was Saved"),  '&nbsp;';
 }
 
