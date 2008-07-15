@@ -419,7 +419,7 @@ sub getLSDiscovey {
         if ( exists $result->{response} and $result->{response} ) {
             my $parser  = XML::LibXML->new();
             my $doc     = $parser->parse_string( $result->{response} );
-            my $service = find( $doc->getDocumentElement, ".//nmwg:data/nmwg:metadata/perfsonar:subject/psservice:service", 0 );
+            my $service = find( $doc->getDocumentElement, ".//nmwg:data/nmwg:metadata/*[local-name()='subject']/*[local-name()='service']", 0 );
             foreach my $s ( $service->get_nodelist ) {
                 my $flag = 1;
                 foreach my $element ( keys %{ $parameters->{service} } ) {
@@ -513,7 +513,7 @@ sub getLSQueryLocation {
         if ( exists $result->{response} and $result->{response} ) {
             my $parser  = XML::LibXML->new();
             my $doc     = $parser->parse_string( $result->{response} );
-            my $service = find( $doc->getDocumentElement, ".//nmwg:data/nmwg:metadata/perfsonar:subject/psservice:service", 0 );
+            my $service = find( $doc->getDocumentElement, ".//nmwg:data/nmwg:metadata/*[local-name()='subject']/*[local-name()='service']", 0 );
             foreach my $s ( $service->get_nodelist ) {
                 my $flag = 1;
                 foreach my $element ( keys %{ $parameters->{service} } ) {
