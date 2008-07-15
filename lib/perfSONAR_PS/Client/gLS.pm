@@ -351,7 +351,7 @@ Not implemented.
 The following functions are classified according to the gLS design document
 as existing in "Level 0".
 
-=head3 getLSDiscovey( $self, { ls, addresses, domains, eventTypes, service } )
+=head3 getLSDiscovery( $self, { ls, addresses, domains, eventTypes, service } )
 
 Perform discovery on the gLS, or if applicable on the supplied (g|h)LS, and the
 supplied arguments:
@@ -371,7 +371,7 @@ more information.
 
 =cut
 
-sub getLSDiscovey {
+sub getLSDiscovery {
     my ( $self, @args ) = @_;
     my $parameters = validateParams(
         @args,
@@ -620,7 +620,7 @@ sub getLSLocation {
         $ls->setInstance( { instance => $ls_instance } );
     }
 
-    my $hls_array = $self->getLSDiscovey(
+    my $hls_array = $self->getLSDiscovery(
         {
             addresses  => $parameters->{addresses},
             domains    => $parameters->{domains},
@@ -704,7 +704,7 @@ __END__
     my @keywords = ();
     my %service = ();
 
-    $result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+    $result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
     print Dumper($result) , "\n"; 
     
     $result = $gls->getLSQueryLocation( { ls => $h, addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );

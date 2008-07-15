@@ -166,7 +166,7 @@ if ( $#hls > -1 ) {
 
 
 # ------------------------------------------------------------------------------
-# level 1 tests - getLSDiscovey
+# level 1 tests - getLSDiscovery
 # ------------------------------------------------------------------------------
 
 
@@ -178,8 +178,8 @@ my @keywords = ();
 my %service = ();
 
 @domains = ("edu");
-print "\nLevel 1: getLSDiscovey for \"domain = edu\" @ the root...\n";
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+print "\nLevel 1: getLSDiscovery for \"domain = edu\" @ the root...\n";
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
@@ -188,8 +188,8 @@ unless ( $#{ $result } > -1 ) {
 }
 
 @eventTypes = ("http://ggf.org/ns/nmwg/characteristic/utilization/2.0");
-print "\nLevel 1: getLSDiscovey for \"domain = edu, eventType = utilization\" @ the root...\n";
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+print "\nLevel 1: getLSDiscovery for \"domain = edu, eventType = utilization\" @ the root...\n";
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
@@ -198,9 +198,9 @@ unless ( $#{ $result } > -1 ) {
 }
 
 @keywords = ("LHC");
-print "\nLevel 1: getLSDiscovey for \"domain = edu, eventType = utilization\" keywords = \"LHC\"@ the root...\n";
+print "\nLevel 1: getLSDiscovery for \"domain = edu, eventType = utilization\" keywords = \"LHC\"@ the root...\n";
 undef $result;
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
@@ -208,9 +208,9 @@ unless ( $#{ $result } > -1 ) {
     print "\tNothing found for search.\n";
 }
 @keywords = ("blah");
-print "\nLevel 1: getLSDiscovey for \"domain = edu, eventType = utilization\" keywords = \"blah\"@ the root...\n";
+print "\nLevel 1: getLSDiscovery for \"domain = edu, eventType = utilization\" keywords = \"blah\"@ the root...\n";
 undef $result;
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
@@ -220,8 +220,8 @@ unless ( $#{ $result } > -1 ) {
 @keywords = ();
 
 %service = ( serviceType => "LS" );
-print "\nLevel 1: getLSDiscovey for \"domain = edu, eventType = utilization, serviceType = LS\" @ the root...\n";
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+print "\nLevel 1: getLSDiscovery for \"domain = edu, eventType = utilization, serviceType = LS\" @ the root...\n";
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
@@ -230,8 +230,8 @@ unless ( $#{ $result } > -1 ) {
 }
 
 @ipaddresses = (["118.71.52.126", "ipv4"]);
-print "\nLevel 1: getLSDiscovey for \"domain = edu, eventType = utilization, serviceType = LS, ipaddress = 118.71.52.126\" @ the root...\n";
-$result = $gls->getLSDiscovey( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
+print "\nLevel 1: getLSDiscovery for \"domain = edu, eventType = utilization, serviceType = LS, ipaddress = 118.71.52.126\" @ the root...\n";
+$result = $gls->getLSDiscovery( { addresses => \@ipaddresses, domains => \@domains, eventTypes => \@eventTypes, service => \%service, keywords => \@keywords } );
 foreach my $ls ( @{ $result } ) {
     print "\thLS to Try:\ " , $ls , "\n";
 }
