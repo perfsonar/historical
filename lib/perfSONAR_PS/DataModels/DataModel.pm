@@ -90,7 +90,7 @@ BEGIN {
         
       
         @EXPORT_OK   =qw($message $metadata $datum $data   $resultDatum   $key $endPointPairL4  $endPointL4 $commonTime 
-	              $endPointPairL3 $interfaceL3 $addressL4 $addressL3 $endPointPair $key  $time   $parameter $parameters
+	              $endPointPairL3 $interfaceL3 $addressL4 $addressL3 $endPointPair $key  $time $event_datum  $parameter $parameters
 		      $endPoint $service_parameters $select_params $select_subj $service_subject);
 }
 our @EXPORT_OK ;
@@ -99,13 +99,13 @@ our ($message, $metadata, $data,  $key, $endPointPairL4 , $resultDatum,  $common
 		      $service_parameters, $service_subject,  
 		      $select_params, $average_params, $mean_params, $median_params, $max_params, $min_params, $cdf_params, $histogram_params,		      
 		      $select_subj, $average_subj, $mean_subj, $median_subj, $max_subj, $min_subj, $cdf_subj, $histogram_subj,
-		      
+		      $event_datum,
 		      $endPoint );  
  
    $subject =  {'attrs'  => {id => 'scalar', metadataIdRef => 'scalar',xmlns => 'nmwg'},
                  elements => [] , 
 	         }; 
-		 
+   		 
 		 
    $parameter	=  {'attrs'  => {name => 'scalar',  value => 'scalar', xmlns => 'nmwg'},
                      elements => [],
@@ -126,11 +126,6 @@ our ($message, $metadata, $data,  $key, $endPointPairL4 , $resultDatum,  $common
 		                               [parameter  => [$parameter]], 			      
 			                     ], 
 	                       };
-      		
-    }
-   
-   
-   foreach my $filters (qw/select average mean median max min cdf histogram/) {
         ${"$filters\_subj"} = {'attrs'  => {id => 'scalar', metadataIdRef => 'scalar',  xmlns =>  $filters },
                                elements => [], 
 	                      };
@@ -145,18 +140,27 @@ our ($message, $metadata, $data,  $key, $endPointPairL4 , $resultDatum,  $common
 	        };
 		
   
-   $datum = 	 {'attrs'  => {xmlns => 'nmwg'},
+    $datum = 	 {'attrs'  => {xmlns => 'nmwg'},
                    elements => [],
                   };  
-   $resultDatum = 	 {'attrs'  => {type => 'scalar', xmlns => 'nmwgr'},
+    $resultDatum = 	 {'attrs'  => {type => 'scalar', xmlns => 'nmwgr'},
                    elements => [],
 		   text => 'scalar',
                   };  
 		  
-   $time = 	{'attrs'  => {type => 'scalar', value => 'scalar', duration => 'scalar', inclusive => 'scalar', xmlns => 'nmtm'},
+    $time = 	{'attrs'  => {type => 'scalar', value => 'scalar', duration => 'scalar', inclusive => 'scalar', xmlns => 'nmtm'},
                   elements => [], 
 	         }; 
-   $addressL4 = {'attrs'  => {value => 'scalar', type  => 'scalar',  xmlns => 'nmtl4'},
+    $event_datum = {'attrs'  => {timeType => 'scalar', timeValue => 'scalar', xmlns => 'ifevt'},
+                                elements => [ 
+			 	              [time => $time, 'unless:timeValue,timeType'],  
+					      [stateAdmin => 'text'],
+				              [stateOper => 'text'],
+					     
+				            ],
+			 
+    }; 
+    $addressL4 = {'attrs'  => {value => 'scalar', type  => 'scalar',  xmlns => 'nmtl4'},
                   elements => [], 
                   text => 'unless:value',
    
