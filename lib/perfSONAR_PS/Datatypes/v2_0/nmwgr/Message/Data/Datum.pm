@@ -109,8 +109,16 @@ sub new {
 sub getDOM {
     my $self = shift;
     my $parent = shift; 
-    my $logger  = get_logger( $CLASSPATH ); 
-    my $datum = getElement({name =>   $LOCALNAME, parent => $parent , ns => [$self->nsmap->mapname( $LOCALNAME )],
+    my $logger  = get_logger( $CLASSPATH );
+    my @nss; 
+    ## if this is root element then register all namespaces + nmwg
+    unless($parent) {
+        my $nsses = $self->registerNamespaces(); 
+        @nss = map {$_  if($_ && $_  ne  $self->nsmap->mapname( $LOCALNAME ))}  keys %{$nsses};
+        push(@nss,  $self->nsmap->mapname( $LOCALNAME ));
+    } 
+    push  @nss, $self->nsmap->mapname( $LOCALNAME ) unless  @nss;
+    my $datum = getElement({name =>   $LOCALNAME, parent => $parent , ns => \@nss,
                              attributes => [
 
                                                ['type' =>  $self->type],

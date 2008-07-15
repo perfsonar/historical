@@ -60,7 +60,7 @@ Readonly::Hash our %NSS => (
 	      
 	       'min'  => "http://ggf.org/ns/nmwg/ops/min/2.0/",
 	       'mean'  => "http://ggf.org/ns/nmwg/ops/mean/2.0/",
-	      
+	       'ifevt' => 'http://ggf.org/ns/nmwg/event/status/base/2.0/',
 	       'pingertopo' =>   "http://ogf.org/ns/nmwg/tools/pinger/landmarks/1.0/",
 	       'netutil' => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/", 
 	

@@ -263,60 +263,7 @@ sub  dataID {
    }
 
 } 
- 
-
-=head2 getDom()
-
-   accepts parent DOM object as argument
-   returns newly created DOM with all namespaces acquired from underlying elements
-   
-=cut
-
-sub getDOM {
-    my $self = shift;
-    my $parent = shift; 
-    my $logger  = get_logger( CLASSPATH ); 
-    my $message_ns = $self->registerNamespaces(); 
-     
-    my @nss = map { $_  if($_ && $_  ne 'nmwg')}  keys %{$message_ns};
-    push(@nss, 'nmwg');   
-    $logger->debug(" NSMap ::" . (join " : " ,  @nss ));  
-   
- 
-    my $message = getElement({name =>   LOCALNAME, parent => $parent , ns =>  [@nss],
-                              attributes => [
-
-                                                 ['type' =>  $self->type],
-                                                 ['id' =>  $self->id],
-                                            ],
-        	                 }); 
-    # $message->setNamespace(   "http://ggf.org/ns/nmwg/base/2.0/", 'nmwg', 1);   
-    eval {
-    if($self->metadata && ref($self->metadata) eq 'ARRAY' ) {
-        foreach my $subel (@{$self->metadata}) { 
-            if(blessed  $subel  &&  $subel->can("getDOM")) { 
-                 my  $subDOM =  $subel->getDOM($message);
-		 
-                 $subDOM?$message->appendChild($subDOM):$logger->error("Failed to append  metadata elements $subel with value: " .  $subDOM->toString ); 
-            }
-         }
-    }
-    };
-    if($@) {
-         $logger->debug("................... Metadata doomed " . $@);
-    }
-    
-    if($self->data && ref($self->data) eq 'ARRAY' ) {
-        foreach my $subel (@{$self->data}) { 
-            if(blessed  $subel  &&  $subel->can("getDOM")) { 
-                 my  $subDOM =  $subel->getDOM($message);
-                 $subDOM?$message->appendChild($subDOM):$logger->error("Failed to append  data elements  with value: " .  $subDOM->toString ); 
-            }
-         }
-    }
-    
-    return $message;
-}  
+  
 
 =head2 getChain
 
