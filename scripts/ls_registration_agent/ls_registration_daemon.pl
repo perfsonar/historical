@@ -135,11 +135,11 @@ open($pipe_handle, "+<$NAMED_PIPE") || die("Couldn't open named pipe");
 
 # Daemonize if not in debug mode. This must be done before forking off children
 # so that the children are daemonized as well.
-#if(not $DEBUGFLAG) {
+if(not $DEBUGFLAG) {
 # flush the buffer
     $| = 1;
         &daemonize;
-#}
+}
 
 unlockPIDFile($pidfile);
 
@@ -251,6 +251,7 @@ package perfSONAR_PS::Agent::LS::Registration::Base;
 
 use perfSONAR_PS::Client::LS;
 use IO::Socket;
+use IO::Socket::INET6;
 use IO::Interface qw(:flags);
 use Log::Log4perl qw(:easy);
 
@@ -333,19 +334,42 @@ sub refresh {
 }
 
 sub lookup_interfaces {
-    my $s = IO::Socket::INET->new(Proto => 'tcp');
     my @ret_interfaces = ();
 
-    my @interfaces = $s->if_list;
-    foreach my $if (@interfaces) {
-        my $if_flags = $s->if_flags($if);
+#    my $s = IO::Socket::INET6->new(Proto => 'tcp');
+#
+#    my @interfaces = $s->if_list;
+#    foreach my $if (@interfaces) {
+#        print "Found an interface\n";
+#        my $if_flags = $s->if_flags($if);
+#
+#        next if ($if_flags & IFF_LOOPBACK);
+#        print "Found a non-loopback interface\n";
+#        next if (not ($if_flags & IFF_RUNNING));
+#        print "Found a non-loopback, running interface\n";
+#
+#        push @ret_interfaces, $s->if_addr($if);
+#    }
 
-        next if ($if_flags & IFF_LOOPBACK);
-        next if (not ($if_flags & IFF_RUNNING));
+    open(IFCONFIG, "ifconfig |");
+    my $is_eth = 0;
+    while(<IFCONFIG>) {
+        if (/Link encap:([^ ]+)/) {
+            if (lc($1) eq "ethernet") {
+                $is_eth = 1;
+            } else {
+                $is_eth = 0;
+            }
+        }
 
-        push @ret_interfaces, $s->if_addr($if);
+        next if (not $is_eth);
+
+        if (/inet addr:(\d+\.\d+\.\d+\.\d+)/) {
+            push @ret_interfaces, $1;
+        } elsif (/inet6 addr: (\d*:[^ ]*) +Scope:Global/) {
+            push @ret_interfaces, $1;
+        }
     }
-
     return @ret_interfaces;
 }
 
@@ -376,7 +400,7 @@ sub __boote_read_app_config {
 }
 
 sub create_event_type_md {
-    my ($self, $eventType) = @_;
+    my ($self, $eventType, $projects) = @_;
 
     my $md = "";
     $md .= "<nmwg:metadata id=\"".int(rand(9000000))."\">\n";
@@ -384,9 +408,22 @@ sub create_event_type_md {
     $md .= $self->create_junk_node();
     $md .= "  </nmwg:subject>\n";
     $md .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+    if ($projects) {
+        $md .= "  <nmwg:parameters>\n";
+        foreach my $project (@$projects) {
+            $md .= "    <nmwg:parameter name=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
+        }
+        $md .= "  </nmwg:parameters>\n";
+    }
     $md .= "</nmwg:metadata>\n";
 
     return $md;
+}
+
+sub lookup_hostname {
+	my $ip = shift;
+	my @h = gethostbyaddr(pack('C4',split('\.',$ip)),2);
+	return $h[0];
 }
 
 sub create_junk_node {
@@ -398,6 +435,13 @@ sub create_junk_node {
     my @addresses = $self->lookup_interfaces();
 
     $node .= "<nmtb:node xmlns:nmtb=\"$nmtb\" xmlns:nmtl3=\"$nmtl3\">\n";
+    foreach my $addr (@addresses) {
+        my $name = lookup_hostname($addr);
+        if ($name) {
+            $node .= " <nmtb:name type=\"dns\">$name</nmtb:name>\n";
+        }
+    }
+
     foreach my $addr (@addresses) {
         my $addr_type;
 
@@ -473,7 +517,7 @@ sub register {
         push @projects, $self->{CONF}->{bwctl}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/bwctl/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/bwctl/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
@@ -609,7 +653,7 @@ sub register {
         push @projects, $self->{CONF}->{owamp}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/owamp/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/owamp/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
@@ -736,7 +780,7 @@ sub register {
         push @projects, $self->{CONF}->{ndt}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ndt/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ndt/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
@@ -861,7 +905,7 @@ sub register {
         push @projects, $self->{CONF}->{npad}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/npad/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/npad/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
@@ -972,7 +1016,7 @@ sub register {
         push @projects, $self->{CONF}->{ping}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ping/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ping/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
@@ -1069,7 +1113,7 @@ sub register {
         push @projects, $self->{CONF}->{traceroute}->{project};
     }
     $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/traceroute/1.0");
+    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/traceroute/1.0", \@projects);
 
     my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
     if ($res and $res->{"key"}) {
