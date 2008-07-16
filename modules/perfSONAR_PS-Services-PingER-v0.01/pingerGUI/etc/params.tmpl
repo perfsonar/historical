@@ -1,0 +1,97 @@
+<div id="params">
+<TABLE   class="main"  cols="6"> 
+   <TR>
+   <TD   colspan="6">
+       <span class="arn">Graph parameters</span>
+    </TD>
+  </TR>
+  <TR>
+      <TMPL_LOOP NAME=time_params>
+       <TD  colspan="2"> 
+             <TABLE class="params">	 
+	        <TR>
+		   <span class="snbld"><TMPL_VAR NAME=when></span>
+		   <TMPL_LOOP NAME=date_parts>   
+		     <TD class="smver_2"> 
+		         <SELECT ID="<TMPL_VAR NAME=when_type>"  NAME="<TMPL_VAR NAME=when_type>" class="fc_st">
+                              <TMPL_LOOP NAME=time_options>   
+                                <OPTION VALUE="<TMPL_VAR NAME=time_option>><TMPL_VAR NAME=time_option_label>
+			      </TMPL_LOOP>     
+                          </SELECT>
+		      </TD>
+		    </TMPL_LOOP>     
+                </TR>
+	     </TABLE>
+        </TD>
+     </TMPL_LOOP>
+     <TD   colspan="2">
+       <TABLE class="params">	 
+	        <TR>
+		   <span class="snbld">GMT offset</span>
+                   <TD class="smver_2"> 
+	             <SELECT ID="gmt_offset"  NAME="gmt_offset" class="fc_st">
+                       <TMPL_LOOP NAME=gmt_options>	
+                          <OPTION VALUE="<TMPL_VAR NAME=gmt_time>><TMPL_VAR NAME=gmt_time_label>
+	                </TMPL_LOOP>	  
+                      </SELECT>
+                    </TD>
+	      </TR>
+      </TABLE>    
+     </TD>         
+  </TR>
+   <TR>
+   <TD   colspan="6">
+    &nbsp;
+    </TD>
+     </TR>
+     <TR>
+        <TD colspan="2">
+	 <span class="snbld">Type of metric:</span><br>
+	   <SELECT NAME="gtype" ID="gtype" class="fc_st">
+	   <OPTION VALUE="ipdv">MIN/MAX/MEAN/IQR IPD
+	   <OPTION VALUE="dupl">DUPL/REORDERED packets
+	   <OPTION VALUE="rt">Round Trip Time (RTT)
+	   <OPTION VALUE="loss">Loss/Conditional Loss
+	   <OPTION VALUE="rtloss" SELECTED>RTT/Loss/Conditional Loss
+	  </SELECT>
+	 </TD>
+	 <TD colspan="2">
+	    <span class="snbld">Upper RTT(or IPD) Limit:</span><br>
+              <SELECT NAME="upper_rt"  ID="upper_rt"  class="fc_st">  
+	           <TMPL_LOOP NAME=rt_times>	
+                     <OPTION VALUE="<TMPL_VAR NAME=rtt_time>><TMPL_VAR NAME=rtt_time_label>
+	        </TMPL_LOOP>	
+                </SELECT>
+        </TD>
+	<TD colspan="2">
+	  <span class="snbld">Graph type:</span><br>
+	  <SELECT NAME="gpresent"  ID="gpresent" class="fc_st">
+	    <OPTION VALUE="bars">BARS
+	    <OPTION VALUE="lines" SELECTED>LINES
+	    <OPTION VALUE="area">AREA(STACKED)
+	    <OPTION VALUE="points">POINTS
+	  </SELECT>
+      </TD> 
+  </TR>
+ 
+ <p>
+<TR>
+  <TD colspan="3">
+  <input type="button"  class="buttons" 
+	  	        name="get_graph"  
+		        id="get_graph"
+                        onClick="displayGraph(['From:hour','From:day','From:month','From:year','To:hour','To:day','To:month','To:year',
+		                               'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'NO_CACHE'],['graph']);" 
+                        value="Get Graph"/>
+  </TD>   
+  <TD colspan="3">
+  <input type="button"  class="buttons" 
+	  	        name="resetSession"  
+		        id="resetSession"
+                        onClick="resetSession(['resetSession', 'NO_CACHE'],['remote_ma','matching', 'graph', 'linksdiv', 'params']);" 
+                        value="Reset Session"/>
+  </TD> 
+</TR>
+</TABLE>
+
+</div>

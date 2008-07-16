@@ -1,0 +1,32 @@
+<!--   
+        menu template,  regexp for src/dst hostname, js will output into links div
+-->
+<div id="matching">
+<TABLE    class="main"  cols="6"> 
+<TR>
+      <TD class="nblue" colspan="6">   
+        Use wildcard to get hostname or packetsize of interest. List of links will be updated automatically.<br/>
+   </TD>
+  </TR>   
+  <TR>
+      <TD class="snbld"> Source Hostname: </TD>
+      <TD VALIGN="Middle"><INPUT TYPE="text" 
+                                 NAME="src_regexp" SIZE=15    
+                                 ID="src_regexp"  VALUE="<TMPL_VAR ESCAPE=HTML  NAME=src_regexp>"
+				 onChange="displayLinks([ 'src_regexp','dst_regexp', 'packetsize', 'ma_urls','NO_CACHE'],['linksdiv']);"> 
+      </TD>
+      <TD class="snbld"> Destination Hostname: </TD>
+      <TD VALIGN="Middle"><INPUT TYPE="text" 
+                                 NAME="dst_regexp" SIZE=15    
+				 ID="dst_regexp"  VALUE="<TMPL_VAR ESCAPE=HTML  NAME=dst_regexp>" 
+                                 onChange="displayLinks([ 'src_regexp','dst_regexp', 'packetsize', 'ma_urls','NO_CACHE'],['linksdiv']);"> 
+      </TD>
+      <TD class="snbld" VALIGN="Middle">  Packetsize: <INPUT TYPE="text" 
+                                                            NAME="packetsize" SIZE="5"  
+							    ID="packetsize"  
+							    VALUE="<TMPL_VAR ESCAPE=HTML  NAME=packetsize>"
+							    onChange="displayLinks([ 'src_regexp','dst_regexp', 'packetsize', 'ma_urls','NO_CACHE'],['linksdiv']);"> 
+     </TD>
+  </TR>   
+ </TABLE>      
+</div>

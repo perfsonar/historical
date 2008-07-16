@@ -1,0 +1,143 @@
+<HTML>
+<HEAD>
+<Title>Pie with Small Sectors</Title>
+<link type='text/css' rel='Stylesheet' href="maxchartapi.css" />
+</HEAD>
+<body bgcolor="#FFFFFF" text="#000000" topmargin="0" leftmargin="0" rightmargin="0" marginwidth="0" marginheight="0">
+
+<p class="heading0">ChartDirector Ver 4.1 (Perl Edition)</p>
+<p class="heading1">Pie with Small Sectors</p>
+<hr class="separator">
+<div class="content">
+<img src="images/smallsectorpie.png">
+<br><br>
+This example demonstrates how "side label layout" can avoid sector labels from overlapping. It also demonstrates metallic background colors, and sector labels with glass shading effect and rounded corners.<br><br>
+<ul><li> The golden background is achieved by using <a href="perlchartdir.goldColor.htm">perlchartdir::goldColor</a> to create the golden color, then use <a href="PieChart.PieChart.htm">PieChart.PieChart</a> to set it as the chart background color.<br><br>
+<li> Similarly, the pink metallic background for the chart title is achieved by using <a href="perlchartdir.metalColor.htm">perlchartdir::metalColor</a> to create the pink metallic color, then use <a href="Box.setBackground.htm">Box.setBackground</a> of the title <a href="TextBox.htm">TextBox</a> object to set it as the background color.<br><br>
+<li> The glass shading effect of the sector labels is defined using <a href="perlchartdir.glassEffect.htm">perlchartdir::glassEffect</a>, then applied to the sector labels using <a href="Box.setBackground.htm">Box.setBackground</a> of the sector label prototype object (obtained via <a href="PieChart.setLabelStyle.htm">PieChart.setLabelStyle</a>).<br><br>
+<li> The rounded corners of the sector labels are configured using <a href="Box.setRoundedCorners.htm">Box.setRoundedCorners</a> of the sector label prototype object.</ul>
+Note that in the above chart, there are a number of small sectors. With the "side label layout" method selected using <a href="PieChart.setLabelLayout.htm">PieChart.setLabelLayout</a>, ChartDirector automatically shifts the labels up and down to avoid overlapping.<br><br>
+This example demonstrates a technique for further improving sector label layout by adjusting the start angle of the first sector using <a href="PieChart.setStartAngle.htm">PieChart.setStartAngle</a>.<br><br>
+If a pie chart may contain a lot of small sectors crowded together (common if the sectors are in descending or ascending order), the labels may become very crowded and need to be shifted far away to avoid overlapping.<br><br>
+In this case, label layout will be optimal (with the least shifting required) if the small sectors happen to lie almost horizontally.<br><br>
+For example, if the data is in ascending order (small sectors at the beginning), you may use a start angle of 45 degrees with clockwise sector layout. This will put the small sectors at approximately 45 - 135 degrees, which are around the horizontal position.<br><br>
+Similarly, if the data is in descending order (like this example), you may use a start angle of 135 degrees with clockwise sector layout to achieve similar effect.
+</div>
+<p class="heading1a">Source Code Listing</p>
+<div class="content">
+<b>[Standalone Version]</b> perldemo\smallsectorpie.pl
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/perl
+use perlchartdir;
+
+# The data for the pie chart
+my $data = [35, 30, 25, 7, 6, 5, 4, 3, 2, 1];
+
+# The labels for the pie chart
+my $labels = ["Labor", "Production", "Facilities", "Taxes", "Misc", "Legal",
+    "Insurance", "Licenses", "Transport", "Interest"];
+
+# Create a PieChart object of size 560 x 270 pixels, with a golden background and a 1
+# pixel 3D border
+my $c = new PieChart(560, 270, perlchartdir::goldColor(), -1, 1);
+
+# Add a title box using 15 pts Times Bold Italic font and metallic pink background
+# color
+$c-&gt;addTitle("Project Cost Breakdown", "timesbi.ttf", 15)-&gt;setBackground(
+    perlchartdir::metalColor(0xff9999));
+
+# Set the center of the pie at (280, 135) and the radius to 110 pixels
+$c-&gt;setPieSize(280, 135, 110);
+
+# Draw the pie in 3D with 20 pixels 3D depth
+$c-&gt;set3D(20);
+
+# Use the side label layout method
+$c-&gt;setLabelLayout($perlchartdir::SideLayout);
+
+# Set the label box background color the same as the sector color, with glass effect,
+# and with 5 pixels rounded corners
+my $t = $c-&gt;setLabelStyle();
+$t-&gt;setBackground($perlchartdir::SameAsMainColor, $perlchartdir::Transparent,
+    perlchartdir::glassEffect());
+$t-&gt;setRoundedCorners(5);
+
+# Set the border color of the sector the same color as the fill color. Set the line
+# color of the join line to black (0x0)
+$c-&gt;setLineColor($perlchartdir::SameAsMainColor, 0x000000);
+
+# Set the start angle to 135 degrees may improve layout when there are many small
+# sectors at the end of the data array (that is, data sorted in descending order). It
+# is because this makes the small sectors position near the horizontal axis, where
+# the text label has the least tendency to overlap. For data sorted in ascending
+# order, a start angle of 45 degrees can be used instead.
+$c-&gt;setStartAngle(135);
+
+# Set the pie data and the pie labels
+$c-&gt;setData($data, $labels);
+
+# output the chart
+$c-&gt;makeChart("smallsectorpie.png")</pre></tr></td></table><br><b>[CGI Version]</b> perldemo_cgi\smallsectorpie.pl
+<table width="98%" border="0" cellpadding="10"><tr><td bgcolor="#cccccc"><pre>#!/usr/bin/perl
+
+# Include current script directory in the module path (needed on Microsoft IIS).
+# This allows this script to work by copying ChartDirector to the same directory
+# as the script (as an alternative to installation in Perl module directory)
+use File::Basename;
+use lib dirname($0);
+
+use perlchartdir;
+
+# The data for the pie chart
+my $data = [35, 30, 25, 7, 6, 5, 4, 3, 2, 1];
+
+# The labels for the pie chart
+my $labels = ["Labor", "Production", "Facilities", "Taxes", "Misc", "Legal",
+    "Insurance", "Licenses", "Transport", "Interest"];
+
+# Create a PieChart object of size 560 x 270 pixels, with a golden background and a 1
+# pixel 3D border
+my $c = new PieChart(560, 270, perlchartdir::goldColor(), -1, 1);
+
+# Add a title box using 15 pts Times Bold Italic font and metallic pink background
+# color
+$c-&gt;addTitle("Project Cost Breakdown", "timesbi.ttf", 15)-&gt;setBackground(
+    perlchartdir::metalColor(0xff9999));
+
+# Set the center of the pie at (280, 135) and the radius to 110 pixels
+$c-&gt;setPieSize(280, 135, 110);
+
+# Draw the pie in 3D with 20 pixels 3D depth
+$c-&gt;set3D(20);
+
+# Use the side label layout method
+$c-&gt;setLabelLayout($perlchartdir::SideLayout);
+
+# Set the label box background color the same as the sector color, with glass effect,
+# and with 5 pixels rounded corners
+my $t = $c-&gt;setLabelStyle();
+$t-&gt;setBackground($perlchartdir::SameAsMainColor, $perlchartdir::Transparent,
+    perlchartdir::glassEffect());
+$t-&gt;setRoundedCorners(5);
+
+# Set the border color of the sector the same color as the fill color. Set the line
+# color of the join line to black (0x0)
+$c-&gt;setLineColor($perlchartdir::SameAsMainColor, 0x000000);
+
+# Set the start angle to 135 degrees may improve layout when there are many small
+# sectors at the end of the data array (that is, data sorted in descending order). It
+# is because this makes the small sectors position near the horizontal axis, where
+# the text label has the least tendency to overlap. For data sorted in ascending
+# order, a start angle of 45 degrees can be used instead.
+$c-&gt;setStartAngle(135);
+
+# Set the pie data and the pie labels
+$c-&gt;setData($data, $labels);
+
+# output the chart
+binmode(STDOUT);
+print "Content-type: image/png\n\n";
+print $c-&gt;makeChart2($perlchartdir::PNG);</pre></tr></td></table>
+</div>
+<br><hr class="separator"><div class="copyright">&copy; 2008 Advanced Software Engineering Limited. All rights reserved.</div>
+</body>
+</HTML>
