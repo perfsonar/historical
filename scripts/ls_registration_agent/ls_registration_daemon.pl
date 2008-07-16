@@ -251,7 +251,6 @@ package perfSONAR_PS::Agent::LS::Registration::Base;
 
 use perfSONAR_PS::Client::LS;
 use IO::Socket;
-use IO::Socket::INET6;
 use IO::Interface qw(:flags);
 use Log::Log4perl qw(:easy);
 
@@ -366,7 +365,7 @@ sub lookup_interfaces {
 
         if (/inet addr:(\d+\.\d+\.\d+\.\d+)/) {
             push @ret_interfaces, $1;
-        } elsif (/inet6 addr: (\d*:[^ ]*) +Scope:Global/) {
+        } elsif (/inet6 addr: (\d*:[^\/ ]*)(\/\d+)? +Scope:Global/) {
             push @ret_interfaces, $1;
         }
     }
