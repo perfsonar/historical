@@ -40,7 +40,7 @@ sub new {
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::Cacti");
-    @{$self->{VERSIONS}} = ("0.8.6j");
+    @{$self->{VERSIONS}} = ( "0.8.6i", "0.8.6j" );
     if ( exists $parameters->{conf} and $parameters->{conf} ) {
         $self->{CONF} = $parameters->{conf};
     }
@@ -123,14 +123,16 @@ sub openDB {
     my $result = $sth->fetchall_arrayref;  
 
     my $pass = 0;
+    my $string;
     foreach my $ver ( @{ $self->{VERSIONS} } ) {
+        $string .= " ".$ver;
         if($ver eq $result->[0][0]) {
             $pass = 1;
         }
     }
     unless ( $pass ) {
-        $self->{LOGGER}->error( "Cacti version mismatch.  This script has only been tested with versions \"".@{ $self->{VERSIONS} }."\"." );
-        return -1;
+        $self->{LOGGER}->warn( "Cacti version mismatch.  This script has only been tested with versions \"".$ver."\"." );
+#        return -1;
     }
 
     $self->{STORE} = $self->printHeader();
