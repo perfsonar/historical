@@ -64,6 +64,7 @@ my %ma_namespaces = (
     psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
     nmwgt     => "http://ggf.org/ns/nmwg/topology/2.0/",
     nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmwgt3    => "http://ggf.org/ns/nmwg/topology/base/3.0/",
     nmtb      => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtl2     => "http://ogf.org/schema/network/topology/l2/20070828/",
     nmtl3     => "http://ogf.org/schema/network/topology/l3/20070828/",
