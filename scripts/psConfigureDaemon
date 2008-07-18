@@ -430,6 +430,7 @@ sub config_perfsonarbuoy_ma {
 
     $config->{"perfsonarbuoy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbuoy"}->{"owmesh"}, '.+' );
     $amiconfdir = $config->{"perfsonarbuoy"}->{"owmesh"};
+    $config->{"perfsonarbuoy"}->{"legacy"} = "0";
 
     $config->{"perfsonarbuoy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbuoy"}->{"metadata_db_type"}, '(file|xmldb)' );
 
