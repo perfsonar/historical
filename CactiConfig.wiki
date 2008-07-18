@@ -129,4 +129,25 @@ network device is present.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/cactiConfig/cacti14.png
 
+== Step 14 ==
 
+Back on the NPTookit, it is necessary to (Re-)start the perfSONAR-PS SNMP
+MA daemon.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/cactiConfig/cacti15.png
+
+== Step 15 ==
+
+Finally from either the NPToolkit or some other machine, visit a perfSONAR
+testing service to verify the SNMP MA is functional.  The url is:
+
+https://dc211.internet2.edu/cgi-bin/test.cgi?url=http://HOSTNAME:8065/perfSONAR_PS/services/snmpMA
+
+Be sure to replace *HOSTNAME* in the above example.  Graphically you may see
+something like this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/cactiConfig/cacti16.png
+
+== Last Updated ==
+
+$Id:$
