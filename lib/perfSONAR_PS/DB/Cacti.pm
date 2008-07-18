@@ -131,7 +131,7 @@ sub openDB {
         }
     }
     unless ( $pass ) {
-        $self->{LOGGER}->warn( "Cacti version mismatch.  This script has only been tested with versions \"".$ver."\"." );
+        $self->{LOGGER}->warn( "Cacti version mismatch.  This script has only been tested with versions \"".join(',', @{ $self->{VERSIONS} })."\"." );
 #        return -1;
     }
 
