@@ -128,7 +128,7 @@ sub orderRoots {
             $host =~ s/^http:\/\///;
             $host =~ s/:.*//;
             my ( $ret, $duration, $ip ) = $ping->ping($host);
-            $list{$duration} = $root if $ret;
+            $list{$duration} = $root if $ret or $duration;
         }
     }
     $ping->close();
