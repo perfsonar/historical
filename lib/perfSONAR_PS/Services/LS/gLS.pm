@@ -93,6 +93,7 @@ my %ls_namespaces = (
     nmtl2         => "http://ogf.org/schema/network/topology/l2/20070828/",
     nmtl3         => "http://ogf.org/schema/network/topology/l3/20070828/",
     nmtl4         => "http://ogf.org/schema/network/topology/l4/20070828/",
+    nmwgt3        => "http://ggf.org/ns/nmwg/topology/base/3.0/",
     nmttcp        => "http://ogf.org/schema/network/topology/l4/20070828/tcp/20070828/",
     nmtudt        => "http://ogf.org/schema/network/topology/l4/20070828/udt/20070828/",
     ethernet      => "http://ogf.org/schema/network/topology/ethernet/20070828/",
