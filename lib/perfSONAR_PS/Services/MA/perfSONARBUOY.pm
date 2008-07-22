@@ -762,7 +762,6 @@ sub createStorage {
                 }        
 
                 $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
-                $data .= "        <nmwg:parameter name=\"table\">"."TABLE"."</nmwg:parameter>\n";
                 $data .= "      </nmwg:parameters>\n";
                 $data .= "    </nmwg:key>\n";
                 $data .= "  </nmwg:data>\n";
@@ -1824,6 +1823,8 @@ sub setupDataRetrieveMetadataData {
         foreach my $md ( $results->get_nodelist ) {
             next if not $md->getAttribute("id");
 
+            my $src = extract ( find( $md, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='src']", 1 ), 0);
+            my $dst = extract ( find( $md, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='dst']", 1 ), 0);
             my %l_et                  = ();
             my $l_eventTypes          = find( $md, "./nmwg:eventType", 0 );
             my $l_supportedEventTypes = find( $md, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
@@ -1843,6 +1844,8 @@ sub setupDataRetrieveMetadataData {
             my %hash = ();
             $hash{"md"}                     = $md;
             $hash{"et"}                     = \%l_et;
+            $hash{"src"}                    = $src;
+            $hash{"dst"}                    = $dst;
             $mds{ $md->getAttribute("id") } = \%hash;
         }
 
@@ -1864,6 +1867,8 @@ sub setupDataRetrieveMetadataData {
                     output             => $parameters->{output},
                     time_settings      => $parameters->{time_settings},
                     et                 => $mds{$idRef}->{"et"},
+                    src                => $mds{$idRef}->{"src"},
+                    dst                => $mds{$idRef}->{"dst"},
                     message_parameters => $parameters->{message_parameters}
                 }
             );
@@ -1895,7 +1900,9 @@ sub handleData {
             output             => 1,
             et                 => 1,
             time_settings      => 1,
-            message_parameters => 1
+            message_parameters => 1,
+            src                => 1,
+            dst                => 1
         }
     );
 
@@ -1909,7 +1916,9 @@ sub handleData {
                 output             => $parameters->{output},
                 time_settings      => $parameters->{time_settings},
                 et                 => $parameters->{et},
-                message_parameters => $parameters->{et}
+                src                => $parameters->{src},
+                dst                => $parameters->{dst},                
+                message_parameters => $parameters->{message_parameters}
             }
         );
     }
@@ -1940,7 +1949,9 @@ sub retrieveSQL {
             time_settings      => 1,
             output             => 1,
             et                 => 1,
-            message_parameters => 1
+            message_parameters => 1,
+            src                => 1,
+            dst                => 1
         }
     );
 
@@ -1960,11 +1971,11 @@ sub retrieveSQL {
     }
 
     my $dbconnect = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"db\"]",    1 ), 1 );
-    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );
     my $dbuser    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"user\"]",  1 ), 1 );
     my $dbpass    = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"pass\"]",  1 ), 1 );
-
-    unless ( $dbconnect and $dbtable ) {
+    my $dbtable   = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"table\"]", 1 ), 1 );    
+    
+    unless ( $dbconnect ) {
         $self->{LOGGER}->error( "Data element " . $parameters->{d}->getAttribute("id") . " is missing some SQL elements" );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", "Unable to open associated database" );
     }
@@ -2028,6 +2039,7 @@ sub retrieveSQL {
             my $msg = "Improper eventType found.";
             $self->{LOGGER}->error($msg);
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
         }
 
         if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
@@ -2077,19 +2089,53 @@ sub retrieveSQL {
         }
     }
     else {
-
         # new data format
 
         if( $dataType eq "BWCTL" ) {
-            @dbSchema = ( "ti", "time", "throughput", "jitter", "lost", "sent" );
-        }
-        elsif( $dataType eq "OWAMP" ) {
-            @dbSchema = ( "res", "si", "ei", "start", "end", "min", "max", "minttl", "maxttl", "sent", "lost", "dups", "err", "pending" );
+
+            my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
+            my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
+
+            $nodedb->openDB;
+            my $result1 = $nodedb->query( { query => "select distinct node_id from 200807_NODES where addr=\"".$parameters->{src}."\";" } );
+            my $result2 = $nodedb->query( { query => "select distinct node_id from 200807_NODES where addr=\"".$parameters->{dst}."\";" } );
+            $nodedb->closeDB;
+
+            if ( $#{$result1} == -1 or $#{$result2} == -1 ) {
+                my $msg = "Query returned 0 results";
+                $self->{LOGGER}->error($msg);
+                getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+                return;
+            }
+            else {
+                @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "time", "throughput", "jitter", "lost", "sent" );
+                if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                    $query = "select * from 200807_DATA where send_id=\"".$result1->[0][0]."\" and recv_id=\"".$result2->[0][0]."\" and";
+    
+                    my $queryCount = 0;
+                    if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+                        $query = $query . " time > " . $parameters->{time_settings}->{"START"}->{"internal"};
+                        $queryCount++;
+                    }
+                    if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                        if ($queryCount) {
+                            $query = $query . " and time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                        }
+                        else {
+                            $query = $query . " time < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
+                        }
+                    }
+                }
+                else {
+                    $query = "select * from " . $dbtable . ";";            
+                }
+            }
         }
         else {
             my $msg = "Improper eventType found.";
             $self->{LOGGER}->error($msg);
             getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+            return;
         }  
     }
 
@@ -2103,6 +2149,7 @@ sub retrieveSQL {
         my $msg = "Query returned 0 results";
         $self->{LOGGER}->error($msg);
         getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+        return;
     }
     else {
 
@@ -2114,26 +2161,51 @@ sub retrieveSQL {
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
                 my %attrs = ();
-                if ( $timeType eq "unix" ) {
-                    $attrs{"timeType"} = "unix";
-                    $attrs{ $dbSchema[1] . "Value" } = owptime2exacttime( $result->[$a][1] );
+
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
+                    if ( $timeType eq "unix" ) {
+                        $attrs{"timeType"} = "unix";
+                        $attrs{ $dbSchema[1] . "Value" } = owptime2exacttime( $result->[$a][1] );
+                    }
+                    else {
+                        $attrs{"timeType"} = "iso";
+                        $attrs{ $dbSchema[1] . "Value" } = owpexactgmstring( $result->[$a][1] );
+                    }
+
+                    $attrs{ $dbSchema[2] } = $result->[$a][2] if $result->[$a][2];
+                    $attrs{ $dbSchema[3] } = $result->[$a][3] if $result->[$a][3];
+                    $attrs{ $dbSchema[4] } = $result->[$a][4] if $result->[$a][4];
+                    $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
+
+                    $parameters->{output}->createElement(
+                        prefix     => $prefix,
+                        namespace  => $uri,
+                        tag        => "datum",
+                        attributes => \%attrs
+                    );
                 }
                 else {
-                    $attrs{"timeType"} = "iso";
-                    $attrs{ $dbSchema[1] . "Value" } = owpexactgmstring( $result->[$a][1] );
+                    if ( $timeType eq "unix" ) {
+                        $attrs{"timeType"} = "unix";
+                        $attrs{ $dbSchema[4] . "Value" } = owptime2exacttime( $result->[$a][4] );
+                    }
+                    else {
+                        $attrs{"timeType"} = "iso";
+                        $attrs{ $dbSchema[4] . "Value" } = owpexactgmstring( $result->[$a][4] );
+                    }
+
+                    $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
+                    $attrs{ $dbSchema[6] } = $result->[$a][6] if $result->[$a][6];
+                    $attrs{ $dbSchema[7] } = $result->[$a][7] if $result->[$a][7];
+                    $attrs{ $dbSchema[8] } = $result->[$a][8] if $result->[$a][8];
+
+                    $parameters->{output}->createElement(
+                        prefix     => $prefix,
+                        namespace  => $uri,
+                        tag        => "datum",
+                        attributes => \%attrs
+                    );
                 }
-
-                $attrs{ $dbSchema[2] } = $result->[$a][2] if $result->[$a][2];
-                $attrs{ $dbSchema[3] } = $result->[$a][3] if $result->[$a][3];
-                $attrs{ $dbSchema[4] } = $result->[$a][4] if $result->[$a][4];
-                $attrs{ $dbSchema[5] } = $result->[$a][5] if $result->[$a][5];
-
-                $parameters->{output}->createElement(
-                    prefix     => $prefix,
-                    namespace  => $uri,
-                    tag        => "datum",
-                    attributes => \%attrs
-                );
             }
             endData( $parameters->{output} );
         }
@@ -2144,37 +2216,42 @@ sub retrieveSQL {
             startData( $parameters->{output}, $id, $parameters->{mid}, undef );
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
-                my %attrs = ();
-                if ( $timeType eq "unix" ) {
-                    $attrs{"timeType"} = "unix";
-                    $attrs{ "startTime" } = owptime2exacttime( $result->[$a][3] );
-                    $attrs{ "endTime" } = owptime2exacttime( $result->[$a][4] );
+                
+                if ( $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
+                    my %attrs = ();
+                    if ( $timeType eq "unix" ) {
+                        $attrs{"timeType"} = "unix";
+                        $attrs{ "startTime" } = owptime2exacttime( $result->[$a][3] );
+                        $attrs{ "endTime" } = owptime2exacttime( $result->[$a][4] );
+                    }
+                    else {
+                        $attrs{"timeType"} = "iso";
+                        $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
+                        $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
+                    }
+
+                    #min
+                    $attrs{ "min_delay" } = $result->[$a][5] if defined $result->[$a][5];
+                    # max
+                    $attrs{ "max_delay" } = $result->[$a][6] if defined $result->[$a][6];
+                    #sent
+                    $attrs{ $dbSchema[9] } = $result->[$a][9] if defined $result->[$a][9];
+                    #lost
+                    $attrs{ "loss" } = $result->[$a][10] if defined $result->[$a][10];
+                    #dups
+                    $attrs{ "duplicates" } = $result->[$a][11] if defined $result->[$a][11];
+                    #err
+                    $attrs{ "maxError" } = $result->[$a][12] if defined $result->[$a][12];
+
+                    $parameters->{output}->createElement(
+                        prefix     => $prefix,
+                        namespace  => $uri,
+                        tag        => "datum",
+                        attributes => \%attrs
+                    );
                 }
                 else {
-                    $attrs{"timeType"} = "iso";
-                    $attrs{ "startTime" } = owpexactgmstring( $result->[$a][3] );
-                    $attrs{ "endTime" } = owpexactgmstring( $result->[$a][4] );
                 }
-
-                #min
-                $attrs{ "min_delay" } = $result->[$a][5] if defined $result->[$a][5];
-                # max
-                $attrs{ "max_delay" } = $result->[$a][6] if defined $result->[$a][6];
-                #sent
-                $attrs{ $dbSchema[9] } = $result->[$a][9] if defined $result->[$a][9];
-                #lost
-                $attrs{ "loss" } = $result->[$a][10] if defined $result->[$a][10];
-                #dups
-                $attrs{ "duplicates" } = $result->[$a][11] if defined $result->[$a][11];
-                #err
-                $attrs{ "maxError" } = $result->[$a][12] if defined $result->[$a][12];
-
-                $parameters->{output}->createElement(
-                    prefix     => $prefix,
-                    namespace  => $uri,
-                    tag        => "datum",
-                    attributes => \%attrs
-                );
             }
             endData( $parameters->{output} );
         }
