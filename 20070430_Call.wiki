@@ -1,0 +1,89 @@
+= April 30 2007 Conference Call =
+
+
+== Where ==
+
+Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
+Occurs: Every Monday from Jan 22, 2007 to Jan 16, 2012
+Duration: 1 hour
+
+To join the call, do one of the following:
+  a. Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT), +1-866-411-0013 (toll free US/Canada Only) or
++1-800-392-6130 (alternate toll free US/Canada Only) and enter access code 0188065, or
+  b. To have the system call you, click here:https://edial.internet2.edu/call/0188065;
+
+== When ==
+
+April 30 2007 - 2:30 EDT
+
+== Agenda/Minutes ==
+
+ # Attendees: Jason, Eric, MattZ, Maxim, Les
+ # Team Updates
+   # Internet2 (Eric)
+     * Demo's at SMM were successful.  Lots of positive feedback and suggestions on  both the gmaps demo from SLAC and the perfOMeter used in conjunction with the HOPI session.
+   # SLAC (Les)
+     * Nothing new to report, working w/ Joe/Maxim and Phil/Eric and Jeff/Martin and Jason on LHC-OPN strawman work (e-mail was sent around outlining tasks). 
+   # FNAL (Maxim)
+     * Working on LHC-OPN monitoring.  Looking to organize a call with interested people (Les/Yee/Jason/others?) on examining strawman and dividing tasks.  Still interested in wrapping a service around pinger.  Will examine the tutorial's ping MP or work Warren started on OWAMP when thinking about using pinger.
+   # UDEL (Jason)
+     * Busy w/ SMM tasks so nothing major to contribute.  
+     * Started work with Maxim on SQL MA, Topology schema/representation w/ IU and for OGF next week.  
+     * Hope to work on (and present) NMWG schema format standard to working group next week.
+     * SMM changes to codebase will be uploaded soon, and re-deployments of the code will be in progress at IU and Internet2 (monitoring MERIT uplinks). 
+ # pS-PS
+   * N/A This week
+ # RRD Service (Internet2 network deployment)
+   * What is needed to make this a 'production' service?
+     * Ben (UD) and Jason will work on benchmarking of XMLDB vs storage 'file'.  Concern is over the sometimes difficult installation of XMLDB vs the easy of setting up a single file.  If the performance is not horrible, we could (should) offer installations that do not require the extra software.
+   * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+     * Based on the outcome of the benchmarking, we will know how complex it will be to distribute/configure the software.  We will be working closely with MERIT initially, and other regional providers such as MAX later, to streamline the distribution/configuration of the MA.
+     * Jason and Maxim discussed Maxim's contribution to E2Emon that constructs configuration files, and the potential to extend this idea to other software packages that can be used as a basis for creating the metadata store.
+   * Schema differences from Java RRD-MA
+     * Ongoing work, work w/ gmaps demo has exposed issues such as namespace mismatches.  
+     * Perfsonar UI testing will probably expose more.  
+     * Standards document (in progress) will start to address the differences between java and perl code.
+ # pS-Topo Service
+   * Jason has started examples of topology (available in the wiki) and will work with Martin and IU to create something similar to NDL to display network information.
+ # Internet2 network deployment (L2)
+   * Demo's exposed the need to make some changes to the IU store file.  
+   * Jason is working with Luke and Chris to resolve the issues.
+   * Only 'new' network hosts are currently available.  
+   * Asking IU if we can make data available from abilene hosts as well.  
+   * New hosts will be added as they come online. 
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Necessary parties will organize a call later this week, and CC the list with results.
+ # SQL-MA
+   * Current discussions between Jason and Maxim revolve around the databases we should support (sqlite, mysql, postgres, oracle), how similar the db schema can be to the Java version (leaning towards a two table setup):
+   * {{{                   create table link_status (
+                    link_id varchar,
+                    status_begin  timestamp,
+                    status_end    timestamp,
+                    link_type varchar,
+                    status_oper varchar,
+                    status_admin varchar,
+                    alarm_id int,
+                    primary key ( link_id, sstatus_begin),
+                    foreign key (alarm_id) references alarms (alarm_id),
+                    index (status_end),
+                    index (link_id)
+                  )
+                  create table alarms (
+                    alarm_id int primary key,
+                    details varchar,
+                  ) }}}
+   * This organization will allow for fewer records (by employing a 'range') than in the Java version. 
+   * Overall design will be similar to the SNMP MA/MP with a focus on getting status variables.
+ # Post-Internet2 network deployments
+   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
+ # Brazil Meeting
+   * Jeff/Martin will be demoing many of the same things as at the SMM. 
+   * They will keep us updated on how things are going.
+ # SMM Followup
+   * Successful demos and good progress was made.  
+   * The HOPI project is interesting in using pS in monitoring their own infrastructure and will work with us to help monitor dynamic circuits (by potentially inserting hooks into pS or Dragon that aware of the changes to be monitored). 
+
+== Last Updated ==
+
+$Id: 20070430Call.wiki 10 2008-07-24 18:39:05Z jwzurawski $
+

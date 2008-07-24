@@ -1,0 +1,52 @@
+= August 13 2007 Conference Call =
+
+
+== Where ==
+
+Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
+Occurs: Every Monday from Jan 22, 2007 to Jan 16, 2012
+Duration: 1 hour
+
+To join the call, do one of the following:
+  a. Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT), +1-866-411-0013 (toll free US/Canada Only) or
++1-800-392-6130 (alternate toll free US/Canada Only) and enter access code 0188065, or
+  b. To have the system call you, click here:https://edial.internet2.edu/call/0188065;
+
+== When ==
+
+August 13 2007 - 2:30 EDT
+
+== Agenda/Minutes ==
+
+ # Attendees: Chris, Luke, Aaron, Jason, Joe, Matt, Jeff
+ # Team Updates
+   # Internet2
+     * Jeff has been concentrating his coding efforts on bwctl and AMI.  He has also been working with Jason and Martin to further refine the mLS design. 
+     * Jason has been concentrating his efforts on creating a distribution for the SNMP MA. It should be ready this week. 
+     * Jason will also have the first distribution of the LS out this week. 
+     * Aaron has been working with Andy Lake to make sure the topology service is useful from the control-plan as well as from measurement tools. Aaron has been working with Chris and others at the NOC to get the LinkStatusMA and CircuitStatusMA integrated with the LS and Topo service. Most of this is now working. The largest hurtle remaining is coming up with global id's to cross reference topology elements between different services (and the topology service).
+     * Additionally, Aaron has been working with Mark (Internet2 intern) to make these services available to a perfSONAR-UI plugin which is now consuming this data.
+   # SLAC
+   # IU
+     * Chris has taken Aaron's last modifications to the pS-topology generation script so the service should now be exporting the topology with the latest changes. 
+     * Luke is prepared to update the SNMP MA configuration as soon as Jason has it available.
+   # FNAL
+   # UDEL
+   # Ga Tech
+   # ESnet
+     * Joe is back from vacation and had questions about pingER MA status. (MA looks ready to start testing, right?)
+ # pS-PS
+   * Anything new in the infrastructure portions?
+     * Jason reports that message generation will happen using tmp files. This seems to increase performance substantially, but further testing will be done.
+ # RRD Service (Internet2 network deployment)
+   * Jason and Luke will get the service running this week and notify Jeff when he can announce it to the full perfSONAR-dev list. Also, Jason will install a test instance that Nina and Roman can look at to make sure we are exposing the errors/discards in compatible ways.
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * Aaron will continue to work with Chris to make this service available ASAP.
+ # pingER MA Service
+   * no update
+ # Next call will be August 27 at 2:30 EDT.
+
+== Last Updated ==
+
+$Id: 20070813Call.wiki 14 2008-07-24 20:24:02Z jwzurawski $
+

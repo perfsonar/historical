@@ -1,0 +1,61 @@
+= March 26 2007 Conference Call =
+
+
+== Where ==
+
+Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
+Occurs: Every Monday from Jan 22, 2007 to Jan 16, 2012
+Duration: 1 hour
+
+To join the call, do one of the following:
+  a. Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT), +1-866-411-0013 (toll free US/Canada Only) or
++1-800-392-6130 (alternate toll free US/Canada Only) and enter access code 0188065, or
+  b. To have the system call you, click here:https://edial.internet2.edu/call/0188065;
+
+== When ==
+
+March 26 2007 - 2:30 EDT
+
+== Agenda/Minutes ==
+
+ # Attending: Luke, Maxim, Jason, Jeff, Yee, Les, Mohammad
+ # Team updates:
+   # IU (Luke/Chris)
+     * Luke has a store file for exposing the Internet2 network SNMP data via the pS-PS RRD MA. Still having trouble, will work with Jason to get it going.
+     * Luke and Jason will have this working before the next meeting.
+   # FNAL (Maxim)
+     * Submitted configuration tool to E2EMon.
+   # UDEL (Martin/Jason)
+     * Looking at parsing models and internal object representation for XML structures.
+   # Ga Tech (Warren)
+     * N/A
+   # ESnet (Joe/Mike)
+     * N/A
+   # Internet2 (Eric/Jeff)
+     * bwctl development - Looking at service dispatching to allow for multiple services to co-exist more easily.
+   # SLAC (Yee/Les)
+     * SQL MA integration work, Starting to look at topological/geographical map views. (I missed a fair amount here - Mohammad/Yee, can you please add?)
+ # SOAP/XML parsing status
+     * How do we want to represent the XML objects internal to the code? (update)
+       * Jason will email a proposal out in the next week
+ # pS-PS
+     * Current status. What is new that others should know about.
+       * Tutorial updates
+     * Not much different - a few small updates
+     * Questions about the current implementation
+       * N/A
+ # RRD
+     * current status
+       * (see IU update above)
+ # L2 Status (Internet2 network)
+     * current status (Where is data coming from?)
+       * Jeff will setup a meeting with Luke/Chris/Martin/Jason/Matt/Jeff to discuss this along with exporting Internet2 topology via pS-PS.
+ # Other topics?
+     * Visualizing Internet2 network data with SLAC analysis software
+       * Yee said SLAC could at least present some views of the RRD data in time for the SMM.
+ # Next meeting will be April 10.
+
+== Last Updated ==
+
+$Id: 20070326Call.wiki 9 2008-07-24 18:12:30Z jwzurawski $
+
