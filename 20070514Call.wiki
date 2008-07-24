@@ -18,9 +18,70 @@ May 14 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees:
+      IU: Luke, Chris, John (Hicks)
+      FNAL: Maxim
+      UDel: Martin, Jason, Ben
+      ESnet: Joe
+      Internet2: Jeff
+ # Team Updates
+   # SLAC
+   # IU
+     * Luke has worked on store file updates from the auto-gen configs for the RRD MA. 
+     * When it is done, he will turn auto-gen back on, and the new Kansas City router likes will be added into the current set. 
+     * There were also questions about adding data from current Abilene and HOPI links. 
+     * Abilene links are a problem because those configurations are not automatically generated. 
+     * Luke will add the HOPI links, which will make some fermi lab links available. 
+     * Luke plans on doing this using a separate MA. 
+     * HOPI data could be strange due to VLAN tagging - we will need to look at it.
+   # FNAL
+     * Focused on LHCOPN requirements. Has been working with Yee to design a pS/pinger MP/MA. 
+     * Has also been working with Jason on the SQL-MA schema. 
+     * Has not added much to config web services.
+   # UDEL
+     * Martin presented the NMWG schema standardization document at OGF last week.
+     * He will integrate comments received and plans to circulate the document to this group for further comment. Additionally, there are minor changes for topology. Jason has been working with Chris on the topology service. Ben has been making modifications to the traceroute service. Ben will make the traceroute changes available so Maxim and others can determine if it is useful for the LHCOPN set of services.
+   # Ga Tech
+     *  N/A
+   # ESnet
+     * Joe does not have anything new, but will have a recommendation for LHCOPN services soon. He would like some of the people in this group to review the document when it is ready.
+   # Internet2
+     * Jeff has started setting up a schema/eventType registration web site so that extensions to the NMWG schema can be shared.
+ # pS-PS
+     * Anything new in the infrastructure portions?
+       * Jason - Not yet, but more code refactoring will be happening in the next week to improve modularity.
+ # Standards docs
+     * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. 
+     * The OGF document will lay the foundation, but more specific 'profile' documents will be required. 
+     * How much should this group be involved in defining them?
+     * This will be addressed after Martin sends out the next version of the NMWG document.
+ # RRD Service (Internet2 network deployment)
+   * What is needed to make this a 'production' service?
+     * Luke - should be ok once the auto-updates are reapplied.
+   * Status of benchmarking XMLDB vs file storage.
+     * Ben and Jason are working on it.
+   * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+   * Status of Maxim's configuration web-service - application to other services.
+   * Schema differences from Java RRD-MA
+     * Current strategy is to match what is done in the Java MA. Future strategy is to set up some kind of equivalence mapping so multiple namespaces can be used.
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * status update
+     * Chris and Jason are making progress. 
+     * Chris would like a meeting fairly soon to discuss naming problems and problems stitching together multiple groups at edges. (Jeff will see if we can meet next week Tuesday as part of the regular IU/I2 call.)
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Things currently look on schedule.
+ # SQL-MA
+   * Any comments regarding the proposed schema?
+     * Martin felt the proposed schema was too complex for the task. Martin will propose an alternative.
+ # Post-Internet2 network deployments
+   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
+ # GN2 Meeting
+   * Who is going? (Eric, Jeff, Joe)
+   * Is there anything we need to get GN2 to agree to?
+   * Everyone will think about possible things we need agreement on. For example, namespaces for SNMP error counters.
+ # Next call will be next week. (I said 2 weeks on the call, but that is Memorial Day.)
 
 == Last Updated ==
-
 
 $Id$
 

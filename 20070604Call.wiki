@@ -18,9 +18,60 @@ June 04 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees: (Jason, Les, Yee, Luke, Maxim, Warren, John H., Chris)
+ # Team Updates
+   # FNAL (Maxim)
+     * Worked w/ Yee on the Pinger schema.  
+     * Preparing to start work on a Pinger MA (and will possibly work w/ Yee on the Pinger MP).  
+     * Will be waiting for Tutorial update from Jason regarding use of the new modules.
+   # UDEL (N/A)
+   # Ga Tech (Warren)
+     * Will be updating the OWAMP/BWCTL MP/MA w/ Jason's help to reflect code changes.  
+     * Currently working to integrate access to I2 databases. 
+   # ESnet (N/A)
+   # Internet2 (Jason)
+     * Finishing up adding Log4perl functionality to all classes, and refactoring a lot of common functions for the MA/MP.  
+     * Will be updating tutorial to reflect changes.  
+     * Will be adding a beta single LS using new code.
+   # SLAC (Les/Yee)
+     * Working w/ Maxim on Pinger Schema/Instances.  
+     * Will upload into NMWG repo when they are complete.  
+     * Will be making changes to Pinger itself, then start wrapping a pS MP around the tool.
+   # IU (Luke/Chris)
+     * Chris has prepared a new version of the network topology using NMWG elements: http://dc-1.grnoc.iu.edu/ndl/nmwg/i2_net.xml
+     * Jason will be working w/ Luke to prepare new RRD MA installation on IU servers. 
+ # pS-PS Code Changes
+   * Logging
+     * We  will be using Log4perl to handle logging duties throughout the infrastructure.  
+     * This approach will allow us to use syslog, file logging, or even display to the screen (other formats are available).  
+     * We are  using a standard configuration right now; Maxim will provide a more customized version he uses.  
+     * A wiki page will be added to document how and when to use Log4perl in the code.
+   * MA/Transport Changes
+     * The MA classes were simplified a great deal with much of the common functions being pushed to the Transport module.  
+     * This will allow other services such as the LS to benefit from the basics of message handling. 
+ # RRD Service (Internet2 network deployment)
+   * Luke and Jason will be bringing the IU RRD MA installation online again after the code changes.  
+   * Luke has prepared a new store file.   
+ # pS-Topo Service / L2 Status MA for Internet2 network
+   * There will be a call scheduled later this week to deal with new issues in topology. 
+   * Jason will be uploading a very basic SQL MA to handle status.  
+   * An intern at Internet2 will look into packaging start next week with the goal of packaging both the status tool as well as the RRD MA
+ # LHC-OPN Update
+   * Pinger
+     * Yee explained the origin of Pinger  (originally series of cron jobs to get data they were interested in between sites).  Will be working to wrap Pinger with MP/MA functionality.  Currently not planning on offering 'on demand' measurements (goal to work on).  
+     * Pinger relies on local scheduling to remain easy to use/deploy/configure. 
+   * To validate, or not to validate
+     * The concept has always been viewed as optional.  We will re-visit this in the future when there are more voices on the issue.
+     * Maxim's point of view is that because we are spending the time to write the schema documents, we should use them with validation tooling to do some good for the services (reject poor messages, etc.).  Jason states he is not against it, and will look into what is available in the perl world as well as compare performance w/ and without using the tooling.  
+     * Will need to work on 'one off' schemas on a per service level to enforce what a service is or is not expecting (current approach to testing in the pS framework). 
+     * Yee was curious as to what the EU does w/ pS.  
+     * Jason replies that he is pretty sure they do not do validation on live systems, The only validation that could be present is via Axis.
+     * Maxim recalls there are some tools (xml beans?) that could do validation.  Jason explains that at the time of original development these tools (JAXME?) were not as mature as they currently all, which explains the original plan of going with a custom SAX parser.
+   * Schema simplification
+     * Maxim  brings up topic of explaining all possible outcomes in the schema vs. what is required for a service to run/be useful.  From a standards point of view it is good to be able to express many things in many ways, but this can be a drawback from a practical, developmental standpoint.  As we work to simple validation it may be useful to make smaller schemas that validate a service, and not the entire standard as proposed by OGF.
+ # Next call will be June 18.
 
 == Last Updated ==
-
 
 $Id$
 

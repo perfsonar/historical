@@ -2,6 +2,10 @@
 
 Welcome to the [https://wiki.internet2.edu/confluence/display/PSPS/Home perfSONAR-PS] Google Code wiki.
 
+== Meetings and Conference Calls ==
+
+A listing of the nodes from all meetings and conference calls can be found in Meetings.
+
 == Last Updated ==
 
 $Id$
