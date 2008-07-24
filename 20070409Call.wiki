@@ -18,9 +18,58 @@ April 09 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attending: Maxim, Martin, Jason, Joe, Jeff, Matt, Yee, Les, Asif 
+ # Team Updates
+   # FNAL (Maxim)
+     * Not much this week. Will be working on deployment documentation with E2Emon for configuration tool. Wants to work with Jason on a perl SQL MA.
+   # UDEL (Martin/Jason)
+     * Martin: been working with a student on a more general way to incorporate libxml2 functionality into a server. (apache mod_cgi seems easiest at this point, but globus method is still the goal) Martin has also been working with students to get multi-ls work done by udel-yee resurected. Especially the bdb/exist database comparison work.
+     * Jason: been working to integrate the XML::LibXML perl module (that uses libxml2 under the covers) into the pS-PS code base in place of the current perl hash objects. It looks to support all the current things we are doing and allows XPath queries of the DOM objects.
+   # Ga Tech (Warren)
+     * N/A
+   # ESnet (Joe/Mike)
+     * Joe: student working on google maps view of network topology elements.
+     * ESnet will have workshop to define network 'services' for the future at the end of April. ESnet will be exposing network information using pS interfaces so pS is a likely topic of conversation. ESnet recently hired Jon Duggan to rewrite statistics collection for ESnet.
+   # Internet2 (Eric/Jeff)
+     * Jeff: Working on simple speedometer GUI over link-untilization MA. Working on software to define 'meshes' of measurement hosts for collecting data from a full set of points. (owamp and bwctl) Eventually will define pS administrative interfaces. Jeff will contact Joe to discuss creating a shared mesh of Internet2/ESnet measurment points for owamp data.
+   # SLAC (Yee/Les/Asif)
+     * Yee: Working on a google-maps visualization of network. Need:
+       * LS registration for Internet2/ESnet services
+       * More topology resources
+         * Jason and Chris will be be working on pS topology of Internet2 network - update when ready.
+     * Les: SLAC has submitted a proposal to work with the Pakastan research network to deploy pS services on their network. (See Les email for additional details.)
+   # IU (Luke/Chris)
+     * Luke (via email): RRD MA seems to be working. Currently working on auto-update of RRD MA configuration based on changes to the GRNOC database.
+ # SOAP/XML parsing status
+     * Update (XML::LibXML)
+       * Jason will have most code modified to the new method in the next couple of days including updates to the tutorial.
+ # pS-PS
+     * Any changes others need to be aware of?
+       * No
+     * Any tutorial feedback?
+       * No
+     * Any questions from new developers?
+       * No
+ # RRD Service (Internet2 network deployment)
+     * Topic postponed to next week
+       * What is needed to make this a 'production' service?
+       * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
+ # L2 Status (Internet2 network deployment)
+     * Topic postponed to next week
+        * Current status (IU/Jason)
+ # Post-Internet2 network deployments
+     * As we get services working, we need to have a few of us concentrating on packaging and deployment/configuration scripts to make them easy to install.
+ # Spring Member Meeting
+     * Can we show the SLAC analysis/google maps interface interacting with Internet2 RRD MA in Eric's performance update? (Main session)
+     * perfSONAR will be used in HOPI demo
+       * Jeff will send email to update on the status of this when there is something to show.
+         # Deploy RRD MP/MA to grab SNMP utilization for both ends of a HOPI circuit connection.
+         # Iperf will generate traffic between two hosts connected to circuit.
+         # HOPI/Oscars-BRU/Dragon software will reconfigure the circuit for larger/smaller capacity.
+         # Speedometer style web page will interact with RRD MA to show utilization as it changes.
+ # Next Meeting: 16 April 07 2:30 US/Eastern
 
 == Last Updated ==
-
 
 $Id$
 
