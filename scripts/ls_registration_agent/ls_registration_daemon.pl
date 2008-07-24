@@ -509,11 +509,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{bwctl}->{project}) {
-        push @projects, $self->{CONF}->{bwctl}->{project};
+    if ($self->{CONF}->{bwctl}->{site_project}) {
+        push @projects, $self->{CONF}->{bwctl}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/bwctl/1.0", \@projects);
@@ -570,7 +570,7 @@ sub init {
 
         $desc .= "BWCTL Server";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }
@@ -645,11 +645,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{owamp}->{project}) {
-        push @projects, $self->{CONF}->{owamp}->{project};
+    if ($self->{CONF}->{owamp}->{site_project}) {
+        push @projects, $self->{CONF}->{owamp}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/owamp/1.0", \@projects);
@@ -706,7 +706,7 @@ sub init {
 
         $desc .= "OWAMP Server";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }
@@ -772,11 +772,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{ndt}->{project}) {
-        push @projects, $self->{CONF}->{ndt}->{project};
+    if ($self->{CONF}->{ndt}->{site_project}) {
+        push @projects, $self->{CONF}->{ndt}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ndt/1.0", \@projects);
@@ -815,7 +815,7 @@ sub init {
 
         $desc .= "NDT Server";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }
@@ -897,11 +897,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{npad}->{project}) {
-        push @projects, $self->{CONF}->{npad}->{project};
+    if ($self->{CONF}->{npad}->{site_project}) {
+        push @projects, $self->{CONF}->{npad}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/npad/1.0", \@projects);
@@ -957,7 +957,7 @@ sub init {
 
         $desc .= "NPAD Server";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }
@@ -1008,11 +1008,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{ping}->{project}) {
-        push @projects, $self->{CONF}->{ping}->{project};
+    if ($self->{CONF}->{ping}->{site_project}) {
+        push @projects, $self->{CONF}->{ping}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ping/1.0", \@projects);
@@ -1051,7 +1051,7 @@ sub init {
 
         $desc .= "Ping Responder";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }
@@ -1105,11 +1105,11 @@ sub register {
     }
     $service{addresses} = \@serv_addrs;
     my @projects = ();
-    if ($self->{CONF}->{project}) {
-        push @projects, $self->{CONF}->{project};
+    if ($self->{CONF}->{site_project}) {
+        push @projects, $self->{CONF}->{site_project};
     }
-    if ($self->{CONF}->{traceroute}->{project}) {
-        push @projects, $self->{CONF}->{traceroute}->{project};
+    if ($self->{CONF}->{traceroute}->{site_project}) {
+        push @projects, $self->{CONF}->{traceroute}->{site_project};
     }
     $service{projects} = \@projects;
     push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/traceroute/1.0", \@projects);
@@ -1148,7 +1148,7 @@ sub init {
 
         $desc .= "Traceroute Responder";
         if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{project};
+            $desc .= " for ".$conf->{site_project};
         } elsif ($conf->{"site_project"}) {
             $desc .= " for ".$conf->{site_project};
         }

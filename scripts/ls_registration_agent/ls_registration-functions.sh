@@ -4,15 +4,16 @@ function is_ls_registration_agent_running() {
 	if [ -f ${PIDFILE} ]; then
 		PID=`cat ${PIDFILE}`
 		if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
-			return 1;
+			IS_LS_AGENT_RUNNING=1; return;
 		fi
 	fi
 
-	return 0;
+	IS_LS_AGENT_RUNNING=0
 }
 
 function send_ls_agent_msg() {
-	if [ is_ls_registration_agent_running -eq 1 ]; then
+	is_ls_registration_agent_running
+	if [ $IS_LS_AGENT_RUNNING -eq 1 ]; then
 		echo "$1 $2 $3" > ${NAMEDPIPE}
 	fi
 }
