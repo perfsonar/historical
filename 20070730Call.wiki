@@ -18,9 +18,42 @@ July 30 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees: Les, Yee, Maxim, Phil, Chris, Luke, Jason, Aaron, Matt, Jeff
+ # Team Updates
+   # ESnet
+   # Internet2
+     * Jeff gave a run-down of the LHCOPN meeting (with respect to how it effects this effort).
+     * Specifically, the MDM 'appliance' that Dante is interested in giving to each LHC Tier-1 center. 
+     * We will attempt to get as much of our pS-PS software installed as part of that distribution. 
+     * Also, the Internet2/Dante software support partnership was discussed.
+   # SLAC
+     * Yee has primarily been working on the pingerMA implementation with Maxim. 
+     * Yee also indicated that GMAPS could be extended to be a pingERMA client.
+   # IU
+     * Chris has made another version of the Internet2 network topology schema instance available to Aaron for testing with his topology service. Chad installed Aaron's link-status MP without much difficulty. 
+     * Also, Luke and Jason will make a 'production' version of the SNMP MA available soon.
+   # FNAL
+     * Maxim has been working on the pingER MA - specifically changing the internal schema.
+   # UDEL
+     * Ben is still interested in getting the traceroute MA working for others. 
+     * Jason will work with him on that.
+   # Ga Tech
+ # LHC Meeting Update
+     * Internet2 and Dante have agreed to a partnership to support software. 
+     * This should allow our tools to be included as part of their MDM effort.
+     * Dante intends to offer an 'appliance' to Tier-1 centers.
+ # pS-PS
+     * Anything new in the infrastructure portions?
+       * Jason has made some changes in the Transport area. 
+       * They should largely be transparent to others, but he will help anyone that has problems.
+ # SNMP Service (Internet2 network deployment)
+     * Service 'software' status
+       * Jason is preparing a release bundle of this service that includes all changes made for the Jt Techs demo. (All the fixes for the bugs we found.) When that is available, he and Luke will get it going on ndb2 and we can announce the service.
+ # pingER MA Service
+     * A version should be ready for testing in the next week. Jeff will see if someone in AA is willing to test it, and will look for other testers as well.
+ # Next call will be August 13 and 2:30 EDT.
 
 == Last Updated ==
-
 
 $Id$
 
