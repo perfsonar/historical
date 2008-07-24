@@ -6,56 +6,56 @@ applicable.
 
 == Future Events ==
 
- * 20080804Video - Video Conference for August 4, 2008
- * 200809XXMeet - perfSONAR Developers Meeting, Ann Arbor MI, September XX, 2008
+ * [20080804Video] - Video Conference for August 4, 2008
+ * [200809XXMeet] - perfSONAR Developers Meeting, Ann Arbor MI, September XX, 2008
 
 == Past Meetings ==
 
  * 2008
-   * 20080720Meet - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 20, 2008
-   * 20080423Meet - perfSONAR-PS Dev Meeting at Spring Member Meeting, April 23, 2008
+   * [20080720Meet] - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 20, 2008
+   * 20080423Meet] - perfSONAR-PS Dev Meeting at Spring Member Meeting, April 23, 2008
  * 2007
-   * 20070717Meet - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 17, 2007
+   * [20070717Meet] - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 17, 2007
   
 == Past Conference/Video Calls ==
 
  * 2008
-   * 20080714Video - Video Conference for July 14, 2008
-   * 20080630Call - Conference Call for June 30, 2008
-   * 20080609Call - Conference Call for June 09, 2008
-   * 20080519Call - Conference Call for May 19, 2008
-   * 20080505Call - Conference Call for May 05, 2008
-   * 20080414Call - Conference Call for April 14, 2008
-   * 20080331Call - Conference Call for March 31, 2008
-   * 20080317Call - Conference Call for March 17, 2008
-   * 20080310Call - Conference Call for March 10, 2008
-   * 20080303Call - LHC T2 BCP Conference Call for March 03, 2008
-   * 20080221Call - Conference Call for February 21, 2008
-   * 20080211Call - Conference Call for February 11, 2008
-   * 20080204Call - Conference Call for February 04, 2008
-   * 20080114Call - Conference Call for January 14, 2008
-   * 20080107Call - Conference Call for January 07, 2008
+   * [20080714Video] - Video Conference for July 14, 2008
+   * [20080630Call] - Conference Call for June 30, 2008
+   * [20080609Call] - Conference Call for June 09, 2008
+   * [20080519Call] - Conference Call for May 19, 2008
+   * [20080505Call] - Conference Call for May 05, 2008
+   * [20080414Call] - Conference Call for April 14, 2008
+   * [20080331Call] - Conference Call for March 31, 2008
+   * [20080317Call] - Conference Call for March 17, 2008
+   * [20080310Call] - Conference Call for March 10, 2008
+   * [20080303Call] - LHC T2 BCP Conference Call for March 03, 2008
+   * [20080221Call] - Conference Call for February 21, 2008
+   * [20080211Call] - Conference Call for February 11, 2008
+   * [20080204Call] - Conference Call for February 04, 2008
+   * [20080114Call] - Conference Call for January 14, 2008
+   * [20080107Call] - Conference Call for January 07, 2008
  * 2007
-   * 20071117Call - Conference Call for December 17, 2007
-   * 20071103Call - Conference Call for December 03, 2007
-   * 20071126Call - Conference Call for November 26, 2007
-   * 20071029Call - Conference Call for October 29, 2007
-   * 20071015Call - Conference Call for October 15, 2007
-   * 20071001Call - Conference Call for October 1, 2007
-   * 20070924Call - Conference Call for September 24, 2007
-   * 20070827Call - Conference Call for August 27, 2007
-   * 20070813Call - Conference Call for August 13, 2007
-   * 20070730Call - Conference Call for July 30, 2007
-   * 20070709Call - Conference Call for July 09, 2007
-   * 20070625Call - Conference Call for June 25, 2007
-   * 20070618Call - Conference Call for June 18, 2007
-   * 20070604Call - Conference Call for June 04, 2007
-   * 20070521Call - Conference Call for May 21, 2007
-   * 20070514Call - Conference Call for May 14, 2007
-   * 20070430Call - Conference Call for April 30, 2007
-   * 20070416Call - Conference Call for April 16, 2007
-   * 20070409Call - Conference Call for April 09, 2007
-   * 20070326Call - Conference Call for March 26, 2007
+   * [20071117Call] - Conference Call for December 17, 2007
+   * [20071103Call] - Conference Call for December 03, 2007
+   * [20071126Call] - Conference Call for November 26, 2007
+   * [20071029Call] - Conference Call for October 29, 2007
+   * [20071015Call] - Conference Call for October 15, 2007
+   * [20071001Call] - Conference Call for October 1, 2007
+   * [20070924Call] - Conference Call for September 24, 2007
+   * [20070827Call] - Conference Call for August 27, 2007
+   * [20070813Call] - Conference Call for August 13, 2007
+   * [20070730Call] - Conference Call for July 30, 2007
+   * [20070709Call] - Conference Call for July 09, 2007
+   * [20070625Call] - Conference Call for June 25, 2007
+   * [20070618Call] - Conference Call for June 18, 2007
+   * [20070604Call] - Conference Call for June 04, 2007
+   * [20070521Call] - Conference Call for May 21, 2007
+   * [20070514Call] - Conference Call for May 14, 2007
+   * [20070430Call] - Conference Call for April 30, 2007
+   * [20070416Call] - Conference Call for April 16, 2007
+   * [20070409Call] - Conference Call for April 09, 2007
+   * [20070326Call] - Conference Call for March 26, 2007
 
 == Last Updated ==
 
