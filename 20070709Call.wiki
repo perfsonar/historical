@@ -61,8 +61,7 @@ July 09 2007 - 2:30 EDT
   </select:parameters>
 </nmwg:metadata>
 
-<nmwg:data id="d1" metadataIdRef="2" /> 
-}}}
+<nmwg:data id="d1" metadataIdRef="2" /> }}}
        * SNMP MA Output: {{{ 
 <nmwg:metadata id="1">
   <netutil:subject>
@@ -84,8 +83,7 @@ July 09 2007 - 2:30 EDT
 
 <nmwg:data id="d1" metadataIdRef="2">
   <!-- datum elements -->
-</nmwg:data> 
-}}}
+</nmwg:data> }}}
        * RRD MA Output: {{{ 
 <nmwg:metadata id="store1">
   <netutil:subject>
@@ -95,8 +93,7 @@ July 09 2007 - 2:30 EDT
 
 <nmwg:data id="d1" metadataIdRef="store1">
   <!-- datum elements -->
-</nmwg:data> 
-}}}
+</nmwg:data> }}}
        * This is definitely a problem. Jason will see if the Java version is working as expected based on the interface definition documents that they wrote. We will figure out how to proceed based on the findings. (Could just be a bug-report, or it could be a more difficult discussion about what the interface should look like in the future.
    * Topology Service (Aaron)
      * Aaron has a topology service working that currently has an SQL and an XMLDB backend. As he looks at queries, if we support xquery syntax, we will need to either translate the xquery syntax into SQL queries, or drop the SQL backend. Currently it expects nodes, interfaces, links to all be top-level elements, but after discussions with Martin is seems likely we will change this to be more similar to what control-plane proponents want. (Nodes contain interfaces contain links).

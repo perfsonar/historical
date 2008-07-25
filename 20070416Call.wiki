@@ -46,7 +46,7 @@ April 16 2007 - 2:30 EDT
    * Feedback on what is needed to make the software a reasonable distribution for other network administrators.
  # pS-Topo Service
    * Status of Internet2 topology database exposed with pS-topology schema.
-   * Overview of available messages. *Martin and Chris will work on this.
+   * Overview of available messages. Martin and Chris will work on this.
  # L2 Status (Internet2 network deployment)
    * Current status (IU/Jason)
      * N/A
