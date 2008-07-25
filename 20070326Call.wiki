@@ -1,6 +1,5 @@
 = March 26 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -21,8 +20,7 @@ March 26 2007 - 2:30 EDT
  # Attending: Luke, Maxim, Jason, Jeff, Yee, Les, Mohammad
  # Team updates:
    # IU (Luke/Chris)
-     * Luke has a store file for exposing the Internet2 network SNMP data via the pS-PS RRD MA. Still having trouble, will work with Jason to get it going.
-     * Luke and Jason will have this working before the next meeting.
+     * Luke has a store file for exposing the Internet2 network SNMP data via the pS-PS RRD MA. Still having trouble, will work with Jason to get it going.  Luke and Jason will have this working before the next meeting.
    # FNAL (Maxim)
      * Submitted configuration tool to E2EMon.
    # UDEL (Martin/Jason)
@@ -34,24 +32,22 @@ March 26 2007 - 2:30 EDT
    # Internet2 (Eric/Jeff)
      * bwctl development - Looking at service dispatching to allow for multiple services to co-exist more easily.
    # SLAC (Yee/Les)
-     * SQL MA integration work, Starting to look at topological/geographical map views. (I missed a fair amount here - Mohammad/Yee, can you please add?)
+     * SQL MA integration work, Starting to look at topological/geographical map views.
  # SOAP/XML parsing status
-     * How do we want to represent the XML objects internal to the code? (update)
-       * Jason will email a proposal out in the next week
+     * How do we want to represent the XML objects internal to the code?  Jason will email a proposal out in the next week
  # pS-PS
      * Current status. What is new that others should know about.
-       * Tutorial updates
-     * Not much different - a few small updates
+       * N/A
+     * Tutorial updates
+       * Not much different - a few small updates
      * Questions about the current implementation
        * N/A
  # RRD
-     * current status
-       * (see IU update above)
+     * See IU update
  # L2 Status (Internet2 network)
-     * current status (Where is data coming from?)
+     * Where is data coming from?
        * Jeff will setup a meeting with Luke/Chris/Martin/Jason/Matt/Jeff to discuss this along with exporting Internet2 topology via pS-PS.
- # Other topics?
-     * Visualizing Internet2 network data with SLAC analysis software
+ # Visualizing Internet2 network data with SLAC analysis software
        * Yee said SLAC could at least present some views of the RRD data in time for the SMM.
  # Next meeting will be April 10.
 

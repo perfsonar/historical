@@ -1,6 +1,5 @@
 =  May 19 2008 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,44 @@ To join the call, do one of the following:
 
 == Agenda/Minutes ==
 
+ # Attendees: Jason, Martin, Joe Brian, Maxim, Jeff
+ # New items
+   * perfSONAR Packaging Proposal (From Gijs)
+   * Anything new in the infrastructure portions?
+   * gLS
+   * Performance testing
+     * black-box testing of pingER status
+       * Maxim will give it a try:
+         * Jason's examples are at http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/test_harness/
+         * Bundle a set of test data?
+       * Jason will make error conditions for LS/SNMP/pS-B
+       * Jason will look test harness data generation for SQL PingER data
+     * profiling
+       * Service authors: instrument code
+       * aaron/jason/jeff will split up 'base'
+       * jason will start wiki page for profiler BCP
+   * Jason's GT Summary
+   * Time variant metaData issue
+      * Do we need a new utilization schema to deal with circuits?
+   * UI development
+ # Review of old business
+   * Code directory hierarchy refactoring - status update (maxim)
+   * MDM release
+   * Topo schema available via NMWG URL?
+   * Deployment plan accepted?
+   * API agreed to?
+   * RRD - communicate resolution - (jason update)
+     * Message examples? (New eventType version?)
+     * SNMP MA support it? (and other data storage specifics)
+   * Code review (status)
+     * Need to make the following consistent:
+       * documentation - (and svn tags $Id$ for example)
+       * logging
+       * parameter parsing
+       * perlcrit/tidy
+   * web admin
 
 == Last Updated ==
-
 
 $Id$
 

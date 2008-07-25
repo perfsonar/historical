@@ -1,6 +1,5 @@
 = October 29 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,51 @@ October 29 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees: Jason, Martin, Aaron, Yee, Joe, Les
+ # Team Updates
+   # Ga Tech
+     * N/A
+   # ESnet
+     * Joe: Working on a deployment of the Topology Service with his Student. Currently getting topology file description done. Potential deployment within 2 weeks (no promises). Looking forward to linking SNMP MA data w/ Topology data. Will deploy new SNMP code when ready from Jason for SC
+   # Internet2
+     * Aaron: Mostly focusing on SC07 work for the various demos we are participating in. Recently completed pS-PS Oscars MP (will query oscars for list of links, functions like a basic topology service). Plugin for pS-UI to consume data from this service, and display geographic placement of links + quantity.
+     * Jason: Since OGF much time was devoted to writing standards/documents with martin. Contributed to dLS, Service documentation, Protocol documentation, chaining description. Updated LS code for SC/DICE requirements. Updated SNMP MA code based on FMM findings. Expect to see new release very soon, will need to redeploy at several sights for SC demo. Will be asking everyone to use a new LS instance due to vhost issues w/ patdev0.
+     * Jeff: In Spain for JRA1 meeting, Will be spending lots of time at SC/SCinet over the next month.
+   # SLAC
+     * Yee: Deployed Pinger/Topology service. Working with maxim on new framework. Will answer questions soon on issues Jeff/Jason have raised regarding complexity. Goal: easier to make new MA/MP services (will only require developers to write new parsers for xml)
+   # IU
+     * N/A
+   # FNAL
+     * N/A
+   # UDEL
+     * Martin: Speant most time on dls docs, nmwg base docs, chaining docs.
+     * Ben: Last time Martin checked was working to make a traceroute MP in java for planetlab? Also may be interested in exporting routing tables from IU (junos?). Karthik: Will be devoting some time to summary stuff, specifically a raddix tree alg in java
+ # SC07 Topics
+   * Who will be there
+     * Martin, Aaron, Jason, Jeff, Eric
+   * Internet2 Demos
+     * perfSONAR(-PS) support in DCN
+       * We will be monitoring the edges of the DCN demo (HEANet, GRNET, PSNC, FNAL, BNL, BU, UNL, CERN?). Will be displaying a weathermap (written by Jason) and Aaron's pS-UI plugin for OSCARS. pS-Ps services in use will include SNMP MA, LS, Topology, OSCARS MP, perfSONAR-UI Plugins
+     * perfSONAR(-PS) support for Phoebus
+       * Will be using the paths set up by the DCN demo to show fast file transfers between Phoebus deployments.
+     * perfSONAR-PS Demo
+       * Will be showing off mostly visualization (GMaps, perfOMeter, perfAdmin, perfSONAR-UI Plugins) for the various servies we have deployed around the US/Europe. Les has asked that Jason look into booth signage for partners.
+   * Measurement BOF (Any interest in a dial-in line?)
+     * When: Wednesday, November 14th 10:00 AM - 12:00 PM
+     * Where: Room A16 at the Reno-Sparks Convention Center
+     * Hosts: Jon Dugan, ESnet and Jeff Boote, Internet2
+ # Standards docs
+   * Martin is hard at work, and hopes to push these out before SC for internal review.
+ # pS-PS code
+   * Anything new in the infrastructure portions?
+     * Jason has added some PID management, it is still rather simple.
+ # pS architecture
+   * N/A
+ # Follow up on LHC-OPN support, requirements, priorities
+   * Joe and Eric will be in Geneva next week for a meeting.
+ # Next call will be November 19, 2:30 EDT ?
 
 == Last Updated ==
-
 
 $Id$
 

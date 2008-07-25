@@ -1,6 +1,5 @@
 = June 25 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -29,6 +28,7 @@ June 25 2007 - 2:30 EDT
    # SLAC
  # pS-PS
    * Anything new in the infrastructure portions?
+     * N/A
    * Exploring a dispatcher architecture:
      * Easier process management (daemon code only written once)
      * Cleaner distribution/package management
@@ -39,11 +39,13 @@ June 25 2007 - 2:30 EDT
    * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
  # RRD Service (Internet2 network deployment)
    * status update
+     * N/A
  # pS-Topo Service / L2 Status MA for Internet2 network
    * status update
+     * N/A
  # pingerMP/MA development
    * status update
- # Follow up on LHC-OPN support, requirements, priorities
+     * N/A
 
 == Last Updated ==
 

@@ -1,6 +1,5 @@
 = May 21 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -27,32 +26,24 @@ May 21 2007 - 2:30 EDT
      * Specifically he is interested in the traceroute MP/MA that Ben has been working on, and has been working with Yee on creating a pinger MP/MA. For now, ping-on-demand will not be focused on.
    # UDEL
      * Jason has made changes to the pS-PS code base. (See the next section for specifics.) 
-     * Jason has also been working with Ben on the traceroute MP/MA. 
-     * There are significant differences between versions of traceroute that are presenting problems. 
-     * Maxim suggested using the perl Net::traceroute module as a more simple standard way to deal with this.
-     * Jason will suggest it (and may modify the ping MP/MA to use Net::Ping as well).
+     * Jason has also been working with Ben on the traceroute MP/MA. There are significant differences between versions of traceroute that are presenting problems. Maxim suggested using the perl Net::traceroute module as a more simple standard way to deal with this. Jason will suggest it (and may modify the ping MP/MA to use Net::Ping as well).
    # Ga Tech
      * Warren was not able to make the call, but has been actively working on the bwctl/owamp MP/MA implementations.
    # ESnet
-     * Joe's student has been working more on the Topology/Google maps interface. 
-     * He has been having problems due to the fact that many networks are setting the LAT/LON fields inconsistently with each other. After much discussion regarding the issues with attempting to get the many organizations to agree on syntax, let alone the more difficult issues of semantics... Chris/Jason will attempt to get a good example of the Internet2 network described in the pS-Topo format including nodes and links finished before the GN2 meeting on June 6. Joe will attempt to do the same for ESnet. All three will make sure the topology files agree with regard to syntax and semantic issues as much as possible. Joe and Jeff will present the two examples at the GN2 E2EMON and cNIS meetings to make others aware of the issues.
+     * Joe's student has been working more on the Topology/Google maps interface.  He has been having problems due to the fact that many networks are setting the LAT/LON fields inconsistently with each other. After much discussion regarding the issues with attempting to get the many organizations to agree on syntax, let alone the more difficult issues of semantics... Chris/Jason will attempt to get a good example of the Internet2 network described in the pS-Topo format including nodes and links finished before the GN2 meeting on June 6. Joe will attempt to do the same for ESnet. All three will make sure the topology files agree with regard to syntax and semantic issues as much as possible. Joe and Jeff will present the two examples at the GN2 E2EMON and cNIS meetings to make others aware of the issues.
    # Internet2
      * Jeff is working primarily on the next bwctl release and on figuring out a structure for individual groups to register new namespaces for OGF/NMWG schema extensions (or profiles). Eric asked about the potential for monitoring the link-status of the IN2P3 circuit. The issue is that the EU link-status monitoring application is unable to fully determine the state of this particular circuit due to the fact that the HOPI links are not currently monitored by anything exporting the E2EMON service. http://cnmdev.lrz-muenchen.de/e2e/lhc/G2_E2E_view_e2elink_FERMI-IN2P3-IGTMD-001.html Jason and Jeff will look into creating a package that will combine the topology service and the SNMP collection agent to allow a simple E2EMON service to be built. They will begin that the week of June 18 when they are both in AA. When complete, they will work with Chris and Luke to get it deployed for monitoring the HOPI links of interest.
    # SLAC
-     *  Yee is also working on the pinger MP/MA functionality. 
-     * Specifically he is determining what the XML schema will look like for representing this data.
+     * Yee is also working on the pinger MP/MA functionality. Specifically he is determining what the XML schema will look like for representing this data.
  # pS-PS
    * Anything new in the infrastructure portions? (Refactoring?)
-     * Jason has moved some functions into Transport and Common where they can be more easily shared (common message types such as echo). 
-     * This may break some services, so he will be working with others to correct any problems. (Warren - this most likely effects you the most.)
+     * Jason has moved some functions into Transport and Common where they can be more easily shared (common message types such as echo). This may break some services, so he will be working with others to correct any problems. (Warren - this most likely effects you the most.)
  # Standards docs
    * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
      * Martin unavailable, postponed to next time.
  # RRD Service (Internet2 network deployment)
    * status update
-     * Luke has the service auto updating now. 
-     * The service crashed a few times this week. 
-     * Jason and/or Jeff will work with Luke to add more logging into the service to attempt to determine where the service is crashing and why.
+     * Luke has the service auto updating now. The service crashed a few times this week. Jason and/or Jeff will work with Luke to add more logging into the service to attempt to determine where the service is crashing and why.
  # pS-Topo Service / L2 Status MA for Internet2 network (Meeting planned?)
    * status update
      * This is related to the IN2P3 issue above, but more inclusive of the full issue. 

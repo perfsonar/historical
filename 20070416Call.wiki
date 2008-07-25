@@ -1,6 +1,5 @@
 = April 16 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -30,9 +29,10 @@ April 16 2007 - 2:30 EDT
    # Internet2 (Eric/Jeff)
      * Jeff has been working on the demo exclusively.
    # SLAC (Yee/Les/Asif)
-     * Asif has been working on some kind of Java front-end. (Sorry - I waited too long before writing up these notes, and I don't remember the details now. Please edit this page and add in more details!) Yee has been continuing to work on a Google-maps demo.
+     * Asif has been working on some kind of Java front-end.
+     * Yee has been continuing to work on a Google-maps demo.
    # IU (Luke/Chris)
-     * Luke as the SNMP MA up and running - it is ready for testing.
+     * Luke has the SNMP MA up and running - it is ready for testing.
    # FNAL (Maxim)
      * Maxim plans to work through the tutorial and perhaps create a pingER MA.
  # pS-PS
@@ -49,8 +49,10 @@ April 16 2007 - 2:30 EDT
    * Overview of available messages. *Martin and Chris will work on this.
  # L2 Status (Internet2 network deployment)
    * Current status (IU/Jason)
+     * N/A
  # SQL-MA
    * Update (Maxim/Jason)
+     * N/A
  # Post-Internet2 network deployments
    * As we get services working, we need to have a few of us concentrating on packaging and deployment/configuration scripts to make them easy to install.
  # Spring Member Meeting

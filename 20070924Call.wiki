@@ -1,6 +1,5 @@
 = September 24 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,29 @@ September 24 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees: Chris, Maxim, Martin, Joe, Aaron, Jason, Jeff, Yee
+ # Team Updates
+   # IU
+     * Chris reported the IU has been working on: access to the devices and topology information for the status service (with aaron), SNMP MA store file changes, Topo service changes (not all information is currently easily accessible from the SQL database they use.
+   # FNAL
+     * Maxim is working on the pingerMA metadata engine because there are over 20,000 entries in the metadata database due to count being used as a differentiator. Looking at better integration into the pS-Topo service. Will soon look into pS-UI. Plans to use Yee's statistics package to enhance graphics. Maxim would like to see a better API abstraction in the pS-PS schema usage to decouple namespace issues from schema in the API. Jeff indicated that an abstraction would be a very reasonable idea here, and that we would work on it immediately after SC.
+   # UDEL
+     * Martin has done some topology schema development. He has also worked with Aaron to better define the Topology service interactions. Martin made the point that going forward we need 3 levels of specification for services:
+       * Schema (Base rules and syntax)
+       * Protocol (Specific service 'type' rules)
+       * Profile (Differences to account for different data types)
+   # Ga Tech
+   # ESnet
+     * Joe has been working on rewriting his trace-route visualization tool. He wanted to know if he could rely on some of the pS-PS API for use in his scripts. Yes!
+   # Internet2
+     * Aaron has been working on the circuit-status service, he has tied it together with topology and the link-status service to provide E2EMon style information. He is not yet able to monitory the IN2P3 circuit because of access issues, but is ready to try. Aaron has also been working on phoebus.
+     * Jason has been primarily working on the dLS document and enhancing the pS-PS usage of XMLDB. pS-PS code needs to set more XMLDB error handlers and such. Jason has also been enhancing the perfAdmin client.
+     * Jeff has primarily been working on owd schema development and is starting to work on the FMM demo. (Along with a fair amount of BWCTL coding.)
+   # SLAC
+     * Yee has worked with Maxim on the metadata issues and is also looking at visualization and analysis of the pinger data.
+ # Next call will be October 1
 
 == Last Updated ==
-
 
 $Id$
 

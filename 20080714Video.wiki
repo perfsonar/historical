@@ -1,6 +1,5 @@
 =  July 14 2008 Video Conference =
 
-
 == Where ==
 
 Number of sites: 10
@@ -29,9 +28,36 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
+ # Attendees: Maxim, Aaron, Jason, Jeff, Jared
+ # Team Updates
+   # IU
+   # FNAL
+     * Maxim: working on web-admin problems - worked out with aaron/jason - fixes should be checked in today. pingER-UI modified data access methods to pick specific data resolution.
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Aaron: New bwctl rc. (New functionality is plug-able logging scripts) lsregistration configuration script. Generates a site info file so daemons registered in similar fashion. Adjusted much of the knoppix distribution (removed unneeded packages, worked on system configuration.) Additionally, there was a discussion about the differences from LiveCD and knoppix distributions.
+     * Jason: Working on puting pS-PS distributions on the iso. gLS/hLS is working and deployed on iso. Maxim will attempt to use gLS in pingER-UI. Jared will ask Yee if it is possible to integrate gmaps with the gLS before next week.
+     * Jeff: Has worked on pSB-agent development including the 'star' configuration. Also worked on owamp/bwctl bug tracking.
+   # SLAC
+     * Jared: Nothing since the gmaps enhancements.
+ # Jt Techs
+   * What do we want to demonstrate? What deployments are ready? What GUI's can we use to show them off?
+     * Planed Deployments
+       # FNAL Aaron will work with Maxim to get the ls-registration daemon deployed.
+       # BNL Jason/Maxim will work with John.
+       # UNL Jeff will contact Dale to attempt to get something deployed.
+       # UCB Brian will try and get something working
+       # Stanford Jarad will see what he can do.
+       # UMich Jeff will contact Shawn if needed.
+       # CalTech Jeff will contact Michael Thomas if needed.
+   * What meetings will we have there?
+     * 20 July 08 - pS-Dev Meeting (plus several presentations throughout the main conference
+       * Jeff will send out a list of initial proposed agenda topics with more details on the meeting.
+ # Next meeting will be at Joint Techs
 
 == Last Updated ==
-
 
 $Id$
 

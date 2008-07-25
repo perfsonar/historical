@@ -1,6 +1,5 @@
 =  July 20 2008 Meeting =
 
-
 == Where ==
 
 Summer Joint Techs 2008, Lincoln NE
@@ -11,9 +10,9 @@ Summer Joint Techs 2008, Lincoln NE
 
 == Agenda/Minutes ==
 
+TBD
 
 == Last Updated ==
-
 
 $Id$
 

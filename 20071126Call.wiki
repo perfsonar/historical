@@ -1,6 +1,5 @@
 = November 26 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,33 @@ November 26 2007 - 2:30 EDT
 
 == Agenda/Minutes ==
 
+ # Attendees: Les, Yee, Luke, Chris, Jason, Aaron, Maxim, Jeff, Matt (lurked a bit)
+ # Team Updates
+   # ESnet
+     * Joe is concerned about a fracture in the pS development groups due to the Java implementation and the Perl implementation. Specifically, Joe is concerned that it will be difficult to get pingER and other pS-PS services included in the LHC distributions if they are not included in the MDM-Perfsonar distributions. Eric, Joe and Jeff will discuss the issue. Additionally, there was discussion about the pingER MA/MP service, and how soon it would be available. (Discussion in separate section below.)
+   # Internet2
+     * Jason has been working on SC demos every waking minute since the last meeting. There are infosheets, fliers, and posters. Jason will send out links eventually. The demos were very successful. Specifically the KISTI (Korean) networking folks were very interested in GMAPS and the pS services. Additionally, perfSONAR interfaces were shown on the SCinet NOC displays - both some new perfSONAR network weathermaps as well as perfOMeter's of some of the more interesting links. Also, perfOMeter was used to show network utilization during the bandwidth challenge. Jason was able to modify the SNMP MA to store netFLOW data instead of doing SNMP queries. This allowed faster updates of the bandwidth challenge interfaces without impacting the performance of the F10 switch the participants were using.
+     * Aaron was more focused on phoebus, but still managed to create a new pS service to expose Oscars (DCN) topology information. This service, along with a new pS-UI plugin can be used to show links as they are provisioned. Also, Aaron has re-factored the link-status MA to allow more easy integration of a tl1 status monitor for the ciena hardware.
+     * Jeff was primarily involved with SCinet, but was able to get some high-level visibility of perfSONAR interfaces by including them in the NOC displays.
+   # SLAC
+     * Yee has re-factored GMAPS to make it easier to add new data types. Yee has also worked on an MP abstraction to allow multiple 'agents' for running a given tool. It could be useful in context with Aaron's link-status abstraction.
+   # IU
+     * Nothing new this week.
+   # FNAL
+     * Maxim has finished creating an OO parsing abstraction for marshalling/unmarshalling XML. He used the Rose::DB module. The idea was to put all the SQL in one place to allow for a more object oriented model of handing the XML. The code is in the Yee branch. This lead to a discussion of the merits of using DOM parsing vs custom Marshalling. For now, Maxim will sub-class his abstraction in the pingER code as an example, and then others can evaluate what he has done to decide if it is useful for other services.
+   # UDEL
+     * Nothing new this week.
+ # pS-PS
+   * pS-PS daemon architecture and CPAN (next week)
+ # pingER MA/MP status
+   * There was discussion about how soon the pingER MA/MP needed to be available. Generally, it was decided to attempt to get it out in time for Jt Techs so it is available for the MDM-Perfsonar release schedule. This should help ensure it is included in the LHC releases that are being created. It was decided that an initial release would be made in 2 weeks for friendly user testing (Joe). Yee will send out an initial requirements document for what needs to be done to make this happen and others will comment. Maxim will have developer conf-calls on the Fridays.
+ # Standards Docs (status)
+   * dLS
+   * LS protocol
+   * MA/MP protocol
+ # Next call will be Dec 3rd.
 
 == Last Updated ==
-
 
 $Id$
 

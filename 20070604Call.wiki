@@ -1,6 +1,5 @@
 = June 04 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -64,8 +63,7 @@ June 04 2007 - 2:30 EDT
      * The concept has always been viewed as optional.  We will re-visit this in the future when there are more voices on the issue.
      * Maxim's point of view is that because we are spending the time to write the schema documents, we should use them with validation tooling to do some good for the services (reject poor messages, etc.).  Jason states he is not against it, and will look into what is available in the perl world as well as compare performance w/ and without using the tooling.  
      * Will need to work on 'one off' schemas on a per service level to enforce what a service is or is not expecting (current approach to testing in the pS framework). 
-     * Yee was curious as to what the EU does w/ pS.  
-     * Jason replies that he is pretty sure they do not do validation on live systems, The only validation that could be present is via Axis.
+     * Yee was curious as to what the EU does w/ pS.  Jason replies that he is pretty sure they do not do validation on live systems, The only validation that could be present is via Axis.
      * Maxim recalls there are some tools (xml beans?) that could do validation.  Jason explains that at the time of original development these tools (JAXME?) were not as mature as they currently all, which explains the original plan of going with a custom SAX parser.
    * Schema simplification
      * Maxim  brings up topic of explaining all possible outcomes in the schema vs. what is required for a service to run/be useful.  From a standards point of view it is good to be able to express many things in many ways, but this can be a drawback from a practical, developmental standpoint.  As we work to simple validation it may be useful to make smaller schemas that validate a service, and not the entire standard as proposed by OGF.

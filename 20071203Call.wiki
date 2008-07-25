@@ -1,0 +1,51 @@
+= December 03 2007 Conference Call =
+
+== Where ==
+
+Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
+Occurs: Every Monday from Jan 22, 2007 to Jan 16, 2012
+Duration: 1 hour
+
+To join the call, do one of the following:
+  a. Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT), +1-866-411-0013 (toll free US/Canada Only) or
++1-800-392-6130 (alternate toll free US/Canada Only) and enter access code 0188065, or
+  b. To have the system call you, click here:https://edial.internet2.edu/call/0188065;
+
+== When ==
+
+December 03 2007 - 2:30 EDT
+
+== Agenda/Minutes ==
+
+ # Attendees: Jason,
+ # Team Updates
+   # ESnet
+   # Internet2
+     * Jason: dLS document, SNMP Service Documentation, LS Protocol, Echo Protocol
+     * Aaron: Working on daemon architecture. Using Conf::General, HTTP::Daemon for now. Restructured configuration to be more similar to apache configuration for eventual move to mod_perl.
+     * Jeff: Working on bwctl and perfSONOBUOY and dLS document review.
+   # SLAC
+     * Yee: has pingER MP ready. Moved to a more topology-like conf file, and is using Maxim's API. Yee is also using the Agent API that he described a couple of weeks ago.
+   # IU
+   # FNAL
+     * Maxim: Done with framework, pingER-MA is still using same simple configuration module. Maxim sent out a web-configuration URL that others should look at to see if it is useful for configuring other services. Maxim is currently working on making pingER-MA work with SQLite.
+   # UDEL
+     * Martin is in Vancouver for IETF. Working to complete dLS document based on suggestions from Maciej, Jason, Jeff in conf call last week. Working with student at UD (Karthik) to complete summary algorithms based on Patricia Trie/Radix implementations in Java.
+ # pS-PS
+   * pS-PS daemon architecture and CPAN (next week)
+     * Aaron is merging all Aaron/Jason services into a single branch (merge), and is creating the daemon-dispatch architecture there. The idea is to make a good modular design for the service components, and to work on creating CPAN modules out of these pieces for the January releases. These releases will still use HTTP::Daemon for transport, but soon after will be modified to also work within mod_perl. Versions of services need to be released by January 18.
+ # Standards Docs (status)
+   * dLS
+     * Martin will come out with a new version soon. Jason/Jeff will review.
+   * LS/Echo/(others) protocol
+     * Jason will have it out soon.
+   * Service Level Documentation (SNMP MA/LS)
+     * Jason will have it out soon.
+ # pingER MA/MP status
+   * Friendly user testing will start December 10.
+ # Next call will be Dec 17
+
+== Last Updated ==
+
+$Id$
+

@@ -1,6 +1,5 @@
 =  June 09 2008 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,22 @@ To join the call, do one of the following:
 
 == Agenda/Minutes ==
 
+ # Attendees:
+ # BNL and FERMI perfSONAR deployments
+   * What is currently working?
+   * What support do BNL/FERMI need?
+   * What GUI tools can we put in front of them to show what is possible? i.e. What demo can we do at the LHCOPN meeting?
+ # Team Updates
+   * IU
+   * FNAL
+   * UDEL
+   * Ga Tech
+   * ESnet
+   * Internet2
+   * SLAC
+ # New items.
 
 == Last Updated ==
-
 
 $Id$
 

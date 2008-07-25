@@ -1,6 +1,5 @@
 =  January 07 2008 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,49 @@ To join the call, do one of the following:
 
 == Agenda/Minutes ==
 
+ # Attendees: Chris, Jared, Brian, Aaron, Jason, Maxim, Jeff, Martin
+ # Team Updates
+   # SLAC
+     * Jared: Looking at test suites and build systems in an attempt to harmonize what Aaron has put in pS-PS with the pingER code base.
+   # IU
+     * Chris: Nothing new.
+   # FNAL
+     * Maxim: Working on pingER MA functionality doc, hoping to combine it with pingER MP document (with Yee). Enhanced the pingER MA with limits and timeType support. Questions about installation process and packaging. Aaron outlined the packaging solution he is currently developing.
+   # UDEL
+     * Martin: Working on the OGF document to get it ready before the OGF meeting. Iterating on the dLS document, specifically the summarization section.
+   # ESnet
+     * Brian: Working on an interface for the ESnet RRD-MA.
+   # Internet2
+     * Jeff: Working on the dLS document. Nearly ready for a new bwctl release, which will lead to development of the bwctl MA (perfSONOBUOY-MA).
+     * Aaron: Packaging and testing work. Would like others to try the testing as soon as possible.
+     * Jason: Lots of protocol/profile/service documentation. Preparing for Jt-Tech's demos. Preparing to help Jeff with pSB development.
+ # pS-PS
+   * Coding Standards
+     * (Everyone ok with Maxim's suggestions? Perhaps we could document this somewhere - perhaps on this wiki? What about code reviews?)
+     * General agreement with the proposed standards. Jeff will put the current version on the wiki. Outstanding, is how we will deal with code reviews - there is general agreement that we should do them, but it is difficult to implement a process to get it done given the short release cycles we have been dealing with.
+   * Update from Aaron on current state of Daemon architecture.
+     * Main change is the addition of the Error/Exceptions object.
+ # Docs
+   * General status was reported in group updates - there was progress on all current docs.
+     * Status of Protocol Documents
+       * Echo
+       * LS
+       * Others?
+     * Status of Service Documents
+       * SNMP MA
+       * LS
+       * Others?
+     * Status of dLS doc
+ # MDM Requirements/Issues
+   * Documentation for MDM process/procedures is at: http://anonsvn.internet2.edu/svn/perfsonar/trunk/perfsonar-doc/release-management/
+   * Jeff, Brian, Maxim will review this and be on the MDM release-mgmt call tomorrow.
+     * Review requirements to get pS-PS services in MDM-perfSONAR
+     * Review testing team procedures for MDM-perfSONAR
+ # LHC Tier-2 BCP Document
+ # Jeff is enlisting help to write an LHC Tier-2 document to be ready for the next big Tier-2 meeting (Mar 10?). Maxim suggested this should be merged with an effort to get pS-PS code included with OSG tools. (http://www.opensciencegrid.org/)
+ # There will be a release focused call on Jan 11, and a face to face meeting in Hawaii (probably Jan 20, but details will follow).
 
 == Last Updated ==
-
 
 $Id$
 

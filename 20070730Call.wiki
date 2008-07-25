@@ -1,6 +1,5 @@
 = July 30 2007 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -39,18 +38,18 @@ July 30 2007 - 2:30 EDT
      * Jason will work with him on that.
    # Ga Tech
  # LHC Meeting Update
-     * Internet2 and Dante have agreed to a partnership to support software. 
-     * This should allow our tools to be included as part of their MDM effort.
-     * Dante intends to offer an 'appliance' to Tier-1 centers.
+   * Internet2 and Dante have agreed to a partnership to support software. 
+   * This should allow our tools to be included as part of their MDM effort.
+   * Dante intends to offer an 'appliance' to Tier-1 centers.
  # pS-PS
-     * Anything new in the infrastructure portions?
-       * Jason has made some changes in the Transport area. 
-       * They should largely be transparent to others, but he will help anyone that has problems.
+   * Anything new in the infrastructure portions?
+     * Jason has made some changes in the Transport area. 
+     * They should largely be transparent to others, but he will help anyone that has problems.
  # SNMP Service (Internet2 network deployment)
-     * Service 'software' status
-       * Jason is preparing a release bundle of this service that includes all changes made for the Jt Techs demo. (All the fixes for the bugs we found.) When that is available, he and Luke will get it going on ndb2 and we can announce the service.
+   * Service 'software' status
+     * Jason is preparing a release bundle of this service that includes all changes made for the Jt Techs demo. (All the fixes for the bugs we found.) When that is available, he and Luke will get it going on ndb2 and we can announce the service.
  # pingER MA Service
-     * A version should be ready for testing in the next week. Jeff will see if someone in AA is willing to test it, and will look for other testers as well.
+   * A version should be ready for testing in the next week. Jeff will see if someone in AA is willing to test it, and will look for other testers as well.
  # Next call will be August 13 and 2:30 EDT.
 
 == Last Updated ==

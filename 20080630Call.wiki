@@ -1,6 +1,5 @@
 =  June 30 2008 Conference Call =
 
-
 == Where ==
 
 Starting Time: Jan 22, 2007 at 2:30 PM US/Eastern
@@ -18,9 +17,39 @@ To join the call, do one of the following:
 
 == Agenda/Minutes ==
 
+ # Attendees: Maxim, Aaron, Jason, Jeff, Jared
+ # Team Updates
+   # IU
+   # FNAL
+     * Maxim: Worked with John Bigrow to get a pingER instance deployed @BNL. Found MySQL interoperability problems with the pre-compiled version of pingER. Also working on a new pingER web-based analysis GUI. This one will actually interact with pS services on the back end and not directly with the pingER database. This will allow BNL and FNAL pingER data to be shown from the same interface.
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # Internet2
+     * Jason: GN2 meeting. Worked on gLS implementation and deployments. It is now operational but much testing is still happening. Currently modifying registration of services to use the gLS and will be making an API available for this. Also made test GUI's to show gLS information and will be enhancing web-admin client to use this as well as the google-chart API for displaying data contents. Other activities include working on the Knoppix disk to make LS, pingER, pS-BUOY available that way. Incorporating cacti in with the SNMP-MA for BNL. And will be helping John Hicks deploy pS-BUOY for APAN.
+     * Aaron: Worked on TL1 collection scripts so link-status service can support more hardware types. Also working on integrating the use of the circuit-status/link-status services into Internet2 production network so the IU NOC can hopefully start leveraging these tools. Worked on an LS registration daemon for registering non-pS services (for example a phoebus server, an NDT server or an owampd server). It was discussed that this might be a way to register ping-able or traceroute-able addresses as well. Additionally worked on the knoppix disk - specifically specific release versions of some tools on the disk as well as system configuration issues such as where logs are stored.
+     * Jeff: Worked on bwctl and owamp bug fixes and is currently working on star-config for pS-BUOY. Will give LHCOPN/GN2 update below.
+   # SLAC
+     * Jared: SLAC helped by making gmaps work with pS-BUOY data just before LHCOPN. Otherwise, nothing more yet. Still attempting to figure out what kind of re-engagement will be happening with respect to the NSF grant.
+ # LHCOPN report
+   * Jeff reported that the T2/T3 support plan was well received. Most non-US Tier-1 centers have not given much thought to how they plan to support T2/T3 related monitoring of network performance.
+ # GN2 report
+   * Specific thrusts from us in 3 areas: AA integration, Circuit-callbacks, Circuit-monitoring. These discussions were heated but fruitful. The topics will be revisited at the DICE meeting in Ann Arbor in September. Additional ps-dev specific work revolved mostly on schema issues. (How should the results be formated from a 'test' request to a service. What specific information needs to be in an LS registration. etc...)
+   * Additionally, we found out a lot of information about how GN3 is likely to be structured. It sounds like most activities that we have been currently working on will now be handled by a 'service' organization, not a 'research' one. There will be 'research' activities, but it sounds like they will be of much more limited scope both in breadth and in duration. My take on this is that they are trying to 'direct' the research to be more applied.
+ # Jt Techs
+   * What do we want to demonstrate?
+     * Want to essentially have 2 US LHC-T1 sites and a handful of US LHC-T2 sites running pS services and exporting data to show an application community targeted measurement framework. (That is general enough from a backbone networking perspective to support multiple application communities.
+   * What do we want/can we reasonably release?
+     * Will be working on a specific knoppix release that we can hopefully give T2/T3 sites to try deploying post-jt techs.
+   * What meetings will we have there?
+     * 20 July 08 - pS-Dev Meeting (plus several presentations throughout the main conference
+ # Administrivia
+   * Will discuss this portion on-list since there wasn't enough participation this week.
+     * Is call time still good?
+     * Should we consider doing a vid-conf (bridged to the call)?
+ # Next call will be July 14.
 
 == Last Updated ==
-
 
 $Id$
 

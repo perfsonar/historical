@@ -13,7 +13,7 @@ applicable.
 
  * 2008
    * [20080720Meet] - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 20, 2008
-   * 20080423Meet] - perfSONAR-PS Dev Meeting at Spring Member Meeting, April 23, 2008
+   * [20080423Meet] - perfSONAR-PS Dev Meeting at Spring Member Meeting, April 23, 2008
  * 2007
    * [20070717Meet] - perfSONAR-PS Dev Meeting at Summer Joint Techs, July 17, 2007
   
@@ -36,8 +36,8 @@ applicable.
    * [20080114Call] - Conference Call for January 14, 2008
    * [20080107Call] - Conference Call for January 07, 2008
  * 2007
-   * [20071117Call] - Conference Call for December 17, 2007
-   * [20071103Call] - Conference Call for December 03, 2007
+   * [20071217Call] - Conference Call for December 17, 2007
+   * [20071203Call] - Conference Call for December 03, 2007
    * [20071126Call] - Conference Call for November 26, 2007
    * [20071029Call] - Conference Call for October 29, 2007
    * [20071015Call] - Conference Call for October 15, 2007
