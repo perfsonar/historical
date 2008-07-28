@@ -263,6 +263,8 @@ A breakdown of each item in the *snmp* section follows:
 || *Configuration Value* || *Required* || *Type* ||
 || _default_resolution_ || yes || integer, related to RRD/SQL storage ||
 || _enable_registration_ || yes || boolean, 0 or 1 ||
+|| _ls_instance_ || yes || string, LS instance to register to (instead of using gLS) ||
+|| _ls_registration_interval_ || no, yes with _ls_instance_ || integer, how often (in minutes) to register to an LS ||
 || _metadata_db_external_ || no || string, currently only *cacti* ||
 || _metadata_db_external_source_ || no, yes w/ *metadata_db_external* || string, path to cactid.conf ||
 || _metadata_db_type_ || yes || string, either *file* or *xmldb* ||
@@ -288,12 +290,119 @@ dependant software (such as DBXML), and finally library paths
 
 == Code Tour ==
 
-TBD
+The following tour starts in _*perfSONAR_PS::Services::MA::SNMP*_, and enters
+into related _*perfSONAR_PS*_ modules only.  The code tour will end end with
+control is passed back to the [perfSONARPSDaemon daemon].
+
+=== Initialization ===
+
+The module's _init_ function is called by the [perfSONARPSDaemon daemon] on 
+startup.  This function is responsible for:
+
+ * Checking the configuration file, exiting if something is wrong, filling in things that are missing
+ * Loading the appropriate message handlers.
+   * Currently _MetadataKeyRequest_ and _SetupDataRequest_
+ * Loading the appropriate event handlers.
+   * Not used currently.
+ * Starting/Loading the DB XML instance (if required)
+ * Starting/Loading the File dabtase instance (if required) 
+ * Building a 'cache' of registered metadata key values
+ 
+After initialization this module will remain unused until an appropriate
+message/metadata is encountered and passed in for handling.
+
+=== LS Registration ===
+
+LS registration is triggered on a periodic timer as specified by a value in the
+configuration file.  This process will be started by the daemon by looking at:
+
+ * enable_registration - If this is no, registration will never happen
+ * ls_registration_interval - This can be global or within the endpoint/service specification.  This is normally measured in minutes.
+ * ls_instance - This can be global or within the endpoint/service specification. This is the LS instance to register with.
+ 
+The function that performs LS registration, _registerLS_, extracts the current
+set of registered data from the metadata DB storage, and uses the LS API (soon
+to be gLS API) to create _LSRegistration_ or _LSKeepalive_ messages.  
+
+=== Communication Entry ===
+
+The [perfSONARPSDaemon daemon] will pass messages to this module only when
+the observed _eventType_ and _messageType_ of a given message/metadata are
+appropriate for this service as specified by the handlers.
+
+The entry point is the _handleEvent_ function.  This function has several
+serial tasks:
+
+ * Resolve filter/merge chains (*N.B.* this module does this outside of the daemon's control for historic reasons, future iterations may not work this way)
+ * Resolve filter parameters (e.g. start/end times, resolution, consolidation function)
+ * Handle message parameters (if any are applicable)
+ * Depending on the message type, pass control to a function:
+   * _MetadataKeyRequest_ Message - *maMetadataKeyRequest*
+   * _SetupDataRequest_ Message - *maSetupDataRequest*
+
+==== !MetadataKeyRequest Case ====
+
+This minor function first checks to see if the metadata contains a key.  If
+there is no key, control passes to the *metadataKeyRetrieveMetadataData*  If the
+key is present and valid control will go to *metadataKeyRetrieveKey*.  Other
+paths out of this function are error conditions.
+
+===== !metadataKeyRetrieveMetadataData =====
+
+This function handles the rest of the _MetadataKeyRequest_ message when a key
+is not present by performing an XPath search for the metadata specified in the
+request.  If this returns positive results the _complete_ metadata from storage
+will be returned along with the key.  Any chained parameters will
+be applied to the key in an effort to _cook_ it (e.g. insert the filter
+parameters directly into the key) for later use.  Other paths out of this
+function are error conditions.
+
+===== !metadataKeyRetrieveKey =====
+
+This function handles the rest of the _MetadataKeyRequest_ message when a key
+is present by checking to see if the key is *valid* in the cache or by
+examining the database for the key.  The return value of this function is
+success or failure (e.g. a _key_ element or an error element) depending on the
+results of this search.  Any chained parameters will be applied to the key in
+an effort to _cook_ it (e.g. insert the filter parameters directly into the
+key) for later use.  Other paths out of this function are error conditions.
+
+==== !SetupDataRequest Case ====
+
+This minor function first checks to see if the metadata contains a key.  If
+there is no key, control passes to the *setupDataRetrieveMetadataData*  If the
+key is present and valid control will go to *setupDataRetrieveKey*.  Other
+paths out of this function are error conditions.
+
+===== setupDataRetrieveMetadataData =====
+
+This function handles the rest of the _MetadataKeyRequest_ message when a key
+is not present by performing an XPath search for the metadata specified in the
+request.  Using filter parameters (if present) the backend storage is consulted
+and queried for the request data in _handleData_.  Depending on what type of
+backend storage is in use (e.g. relational database, RRD) the appropriate 
+function will be used to query and form the datum elements. Other paths out of
+this function are error conditions.
+
+===== setupDataRetrieveKey =====
+
+This function handles the rest of the _SetupDataRequest_ message when a key
+is present by checking to see if the key is *valid* in the cache or by
+examining the database for the key.  Using filter parameters (if present) the
+backend storage is consulted and queried for the request data in _handleData_.
+Depending on what type of backend storage is in use (e.g. relational database, 
+RRD) the appropriate function will be used to query and form the datum elements.
+Other paths out of this function are error conditions.
 
 == FAQ ==
 
-TBD
-
+ * *Q:* _Insert question text here?_ 
+ * *A:* Insert answer text here.
+ 
+ * *Q:* _Insert question text here?_ 
+ * *A:* Insert answer text here.
+ 
 == Last Updated ==
 
 $Id$
+
