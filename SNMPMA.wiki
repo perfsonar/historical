@@ -301,7 +301,7 @@ startup.  This function is responsible for:
 
  * Checking the configuration file, exiting if something is wrong, filling in things that are missing
  * Loading the appropriate message handlers.
-   * Currently _MetadataKeyRequest_ and _SetupDataRequest_
+   * Currently _!MetadataKeyRequest_ and _!SetupDataRequest_
  * Loading the appropriate event handlers.
    * Not used currently.
  * Starting/Loading the DB XML instance (if required)
@@ -337,8 +337,8 @@ serial tasks:
  * Resolve filter parameters (e.g. start/end times, resolution, consolidation function)
  * Handle message parameters (if any are applicable)
  * Depending on the message type, pass control to a function:
-   * _MetadataKeyRequest_ Message - *maMetadataKeyRequest*
-   * _SetupDataRequest_ Message - *maSetupDataRequest*
+   * _!MetadataKeyRequest_ Message - *maMetadataKeyRequest*
+   * _!SetupDataRequest_ Message - *maSetupDataRequest*
 
 ==== !MetadataKeyRequest Case ====
 
@@ -349,7 +349,7 @@ paths out of this function are error conditions.
 
 ===== !metadataKeyRetrieveMetadataData =====
 
-This function handles the rest of the _MetadataKeyRequest_ message when a key
+This function handles the rest of the _!MetadataKeyRequest_ message when a key
 is not present by performing an XPath search for the metadata specified in the
 request.  If this returns positive results the _complete_ metadata from storage
 will be returned along with the key.  Any chained parameters will
@@ -359,7 +359,7 @@ function are error conditions.
 
 ===== !metadataKeyRetrieveKey =====
 
-This function handles the rest of the _MetadataKeyRequest_ message when a key
+This function handles the rest of the _!MetadataKeyRequest_ message when a key
 is present by checking to see if the key is *valid* in the cache or by
 examining the database for the key.  The return value of this function is
 success or failure (e.g. a _key_ element or an error element) depending on the
@@ -376,7 +376,7 @@ paths out of this function are error conditions.
 
 ===== setupDataRetrieveMetadataData =====
 
-This function handles the rest of the _MetadataKeyRequest_ message when a key
+This function handles the rest of the _!MetadataKeyRequest_ message when a key
 is not present by performing an XPath search for the metadata specified in the
 request.  Using filter parameters (if present) the backend storage is consulted
 and queried for the request data in _handleData_.  Depending on what type of
@@ -386,7 +386,7 @@ this function are error conditions.
 
 ===== setupDataRetrieveKey =====
 
-This function handles the rest of the _SetupDataRequest_ message when a key
+This function handles the rest of the _!SetupDataRequest_ message when a key
 is present by checking to see if the key is *valid* in the cache or by
 examining the database for the key.  Using filter parameters (if present) the
 backend storage is consulted and queried for the request data in _handleData_.
