@@ -484,16 +484,16 @@ our $VERSION = "2.0";
 == Base vs. ISA ==
 
 {{{
-use base
+use base;
 }}} 
 
-instead of 
+Instead of:
 
 {{{
-@ISA = 
+@ISA = something;
 }}}
 
-It will try to load  superclass at compile time. Try to avoid multiple
+This will try to load the superclass at compile time. Try to avoid multiple
 inheritance: this is the hellish way which leads into creating namespace
 conflicts.
 
