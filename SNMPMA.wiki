@@ -413,7 +413,7 @@ serial tasks:
    * !MetadataKeyRequest Message - *maMetadataKeyRequest*
    * !SetupDataRequest Message - *maSetupDataRequest*
 
-==== MetadataKeyRequest Case ====
+==== !MetadataKeyRequest Case ====
 
 This minor function first checks to see if the metadata contains a key.  If
 there is no key, control passes to the *metadataKeyRetrieveMetadataData*  If the
@@ -440,7 +440,7 @@ results of this search.  Any chained parameters will be applied to the key in
 an effort to _cook_ it (e.g. insert the filter parameters directly into the
 key) for later use.  Other paths out of this function are error conditions.
 
-==== SetupDataRequest Case ====
+==== !SetupDataRequest Case ====
 
 This minor function first checks to see if the metadata contains a key.  If
 there is no key, control passes to the *setupDataRetrieveMetadataData*  If the
