@@ -264,7 +264,7 @@ A breakdown of each item in the *snmp* section follows:
 || _default_resolution_ || yes || integer, related to RRD/SQL storage ||
 || _enable_registration_ || yes || boolean, 0 or 1 ||
 || _metadata_db_external_ || no || string, currently only *cacti* ||
-|| _metadata_db_external_source_ || no, yes w/ *metadata_db_external* where the value is the path to cactid.conf || ||
+|| _metadata_db_external_source_ || no, yes w/ *metadata_db_external* || string, path to cactid.conf ||
 || _metadata_db_type_ || yes || string, either *file* or *xmldb* ||
 || _metadata_db_file_ || yes || string, when *metadata_db_type* is _xmldb_ this must end in *.dbxml*, when *metadata_db_type* is _file_ this should be a path to an XML file ||
 || _metadata_db_name_ || yes || string, used only, used only when *metadata_db_type* is _xmldb_  ||
@@ -278,7 +278,7 @@ A breakdown of each item in the *snmp* section follows:
 
 === Running ===
 
-See [psConfigureDaemon] for running instructions.  The configuration file
+See [perfSONARPSDaemon] for running instructions.  The configuration file
 dictates the specifics of the service to be run.  
 
 If you run into issues, consult the FAQ, we may have seen it before. The most

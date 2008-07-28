@@ -1,5 +1,132 @@
 = perfSONAR-PS Service Configuration =
 
+The following example illustrates a *perfSONAR-PS* configuration file.  The
+daemon has been configured to serve three different services using two
+separate communication ports. Additionally, there are global configuration
+items.  The observant reader will note the similarity to existing
+[http://www.apache.org apache] configuration files; this is not an accident.
+      
+{{{
+reaper_interval     20
+max_worker_lifetime     120
+pid_dir     /var/run
+pid_file     ps_daemon.pid
+ls_instance     http://HOST.DOMAIN:8083/perfSONAR_PS/services/LS
+disable_echo     0
+max_worker_processes     0
+ls_registration_interval     60
+<port 8083>
+        <endpoint /perfSONAR_PS/services/perfSONARBUOY>
+                <perfsonarbuoy>
+                    service_type     MA
+                    service_description     perfSONARBOUY MA
+                    service_name     perfSONARBOUY MA
+                    service_accesspoint     http://HOST.DOMAIN:8083/perfSONAR_PS/services/perfSONARBOUY
+                    owmesh     /usr/local/etc
+                    metadata_db_type     file
+                    metadata_db_file     /usr/local/etc/psb-store.xml
+                    enable_registration     0
+                    ls_instance     http://HOST.DOMAIN:8083/perfSONAR_PS/services/LS
+                    ls_registration_interval     240
+                </perfsonarbuoy>
+                module     perfSONAR_PS::Services::MA::perfSONARBUOY
+                disabled     1
+        </endpoint>
+        <endpoint /perfSONAR_PS/services/LS>
+                <ls>
+                    service_type     MA
+                    service_description     Lookup Service
+                    service_accesspoint     http://HOST.DOMAIN:8083/perfSONAR_PS/services/LS
+                    service_name     Lookup Service
+                    reaper_interval     0
+                    ls_ttl     1
+                    metadata_db_file     lsstore.dbxml
+                    metadata_db_name     /etc/perfsonar/xmldb
+                </ls>
+                module     perfSONAR_PS::Services::LS::LS
+                disabled     0
+        </endpoint>
+</port>
+<port 8084>
+        <endpoint /perfSONAR_PS/services/snmpMA>
+                <snmp>
+                    service_type     MA
+                    service_description     SNMP MA
+                    service_accesspoint     http://HOST.DOMAIN:8083/perfSONAR_PS/services/snmpMA
+                    service_name     SNMP MA
+                    rrdtool     /usr/bin/rrdtool
+                    default_resolution     300
+                    metadata_db_type     xmldb
+                    metadata_db_file     snmpstore.dbxml
+                    metadata_db_name     /etc/perfsonar/xmldb
+                    db_autoload     1
+                    autoload_metadata_db_file     /etc/perfsonar/store.xml
+                    enable_registration     1
+                    ls_instance     http://HOST.DOMAIN:8083/perfSONAR_PS/services/LS
+                    ls_registration_interval     2
+                </snmp>
+                module     perfSONAR_PS::Services::MA::SNMP
+                disabled     0
+        </endpoint>
+</port>
+}}}
+    
+Some important features to note:
+
+ * Comments - Start with a sharp (*#*)
+ * Order - doesn't (and _shouldn't_) matter
+ * Whitespace - also doesn't (and _shouldn't_) matter
+ * Services - must be enclosed in an endpoint, which must be enclosed in a port. Many services can exist inside of a port, but only one can listen on a particular endpoint for that port (this is a Web Service requirement in general).
+
+A breakdown of the global (and some not so global) elements:
+
+|| *Configuration Value* || *Required* || *Type* ||
+|| _max_worker_processes_ || yes || integer, maximum number of processes (limit resources) ||
+|| _max_worker_lifetime_ || yes || integer, how long processes may be allowed to complete a task ||
+|| _disable_echo_ || yes || boolean, respond to echo queries ||
+|| _ls_instance_ || yes || string, LS instance to register to (instead of using gLS) ||
+|| _ls_registration_interval_ || no, yes with _ls_instance_ || integer, how often (in minutes) to register to an LS ||
+|| _root_hints_url_ || no || string, url of root.hints file, normally http://www.perfsonar.net/gls.root.hints ||
+|| _root_hints_file_ || no, yes with _root_hints_file_ || string, path to file to store the root_hints_url contents ||
+|| _reaper_interval_ || yes || integer, interval where daemon will kill off unresponsive processes ||
+|| _pid_dir_ || no || string, defaults to /var/log ||
+|| _pid_file_ || no || string, defaults to ps.pid ||
+|| disabled || no || boolean, present at each endpoint to enable/disable service at the daemon level ||        
+
+== Configuration Via the Command Line ==
+
+An example is currently located in svn:
+
+http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/scripts/psConfigureDaemon
+
+Some notes on this software:
+
+ * It may be described as _purpose driven_, which is just code for _a hack_.
+ * It has grown from configuring a single service to being used for all current services and in general is *not* easily extensible.  
+ * Having to add in new functions every time a service is added (e.g. every 3 months) or altered when the questions change (more frequently than 3 months) is bothersome.
+ * It is written in Perl.
+
+== Configuration Via the Web ==
+
+The source code is located in svn:
+
+http://perfsonar-ps-cfg.googlecode.com/svn/trunk/cgi/config.cgi
+
+Some notes on this software:
+
+ * This is a proof of concept gone bad (also code for _a hack_).  
+ * Not much attention was paid with regard to modularization: this was more of an exercise in _could it be done_.  
+ * Perl may not be the best language given the age of the CGI/AJAX components in use.
+ * Configuration of this software is near minimal (need a working Apache service with CGI functionality.
+
+== Future of Configuration ==
+
+Currently we are experimenting with a new configuration management system
+developed in part with the [http://code.google.com/soc/2008 Google Summer of Code].  For
+more information on this effort, please visit:
+
+http://code.google.com/p/perfsonar-ps-cfg/
+
 == Last Updated ==
 
 $Id$
