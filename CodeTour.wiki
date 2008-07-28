@@ -7,7 +7,7 @@ and installation/use help.
 
 == Internal Structure ==
 
- * Daemon Architecture
+ * [perfSONARPSDaemon Daemon Architecture]
  * [ServiceConfiguration Service Configuration]
  * Error Handling
  * Parsing
