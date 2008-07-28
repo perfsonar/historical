@@ -451,7 +451,7 @@ As an alternative solution I would like to suggest adding something called
 ErrorCode object into the API,   and returning instance of it in case of error.
 Then error condition can be easily checked by saying :
 
-{{
+{{{
       my $return = mySub($myparam);
       if($return && blessed $return && ref($return) eq 'ErrorCode') {
            do somehting about it...
