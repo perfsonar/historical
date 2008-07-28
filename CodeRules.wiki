@@ -1,5 +1,510 @@
 = perfSONAR-PS Coding Standards =
 
+A recent examination of all perl code in the perfSONAR-PS code base has turned
+up many different programming styles in use.  This is a common problem in 
+OSS projects involving developers of many different backgrounds and skill sets.
+We are aiming to establish several guidelines to make the code uniform, reliable
+and functional (and to make code review easier).  
+
+This list is not complete but a reflection of examples from already existing
+code.  Also, this list is open for additions but please be reasonable and base 
+your suggestions on really "best for large project" practices.
+
+== Perl best practices ==
+
+Read perl best practices book by Damian Conway.  90% of the items related to
+code layout and naming conventions are very accurate (cant say the same about
+other policies, use them on your own risk). Perl coding has changed a lot in
+the past 10 years, please dont apply examples from cookbook if the are older 
+than ~3-5 years.
+
+== POD Conventions (Functional) ==
+
+Despite Conway's book, please use POD in front of each function/method 
+definition and not in the bottom or as simple comments in the body of the 
+function like in this example:
+
+{{{
+ sub handleRequest($$$) {
+	my ($handler, $request, $endpoint_conf) = @_;
+
+	# This function is a wrapper around the handler's handleRequest
+	# function.  The purpose of the function is to handle the case where a
+	# crash occurs while handling the request.
+}}}
+ 
+It will make other person happier if he will be able to read semantic of the
+function, accepted parameters and returns, all in one place in front of the
+function definition ( private methods might be documented ad hoc).  A good
+example:
+
+{{{
+=head2 functionName( args )
+
+        this function is a ....
+        accepts parameters:
+        returns:
+=cut
+
+sub functionName {
+}
+
+}}}
+
+== POD Conventions (File) ==
+
+To keep the SVN consistent, all perl modules should use the following POD
+template:
+
+{{{
+package perfSONAR_PS::NAME;
+
+use fields 'LOGGER';
+
+use strict;
+use warnings;
+
+use version;
+our $VERSION = qv("XXX");
+
+=head1 NAME
+
+perfSONAR_PS::NAME
+
+=head1 DESCRIPTION
+
+description
+
+=cut
+
+use Log::Log4perl qw( get_logger );
+use Params::Validate qw( :all );
+use perfSONAR_PS::ParameterValidation;
+
+=head2 new( $package, {  } )
+
+description
+
+=cut
+
+sub new {
+    # function goo
+}
+
+=head2 function( $self, { param } )
+
+description
+
+=cut
+
+sub function {
+    # function goo
+}
+
+# other functions
+
+1;
+
+__END__
+
+=head1 SYNOPSIS
+
+    #!/usr/bin/perl -w
+
+    use strict;
+    use warnings;
+
+    use perfSONAR_PS::NAME;
+    
+    # example use...
+
+=head1 SEE ALSO
+
+L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::ParameterValidation>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+VERSION info or SVN ID string
+
+=head1 AUTHOR
+
+John Q Author, jqa@asdf.org
+
+=head1 LICENSE
+
+YOUR LICENCE
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008, YOUR ORG
+
+All rights reserved.
+
+=cut
+}}}
+
+The same can be said for scripts:
+
+{{{
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use version;
+our $VERSION = qv("XXX");
+
+=head1 NAME
+
+description
+
+=head1 DESCRIPTION
+
+description
+
+=cut
+
+# Script guts
+
+
+__END__
+
+=head1 SEE ALSO
+
+L<strict>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  http://anonsvn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+VERSION info or SVN ID string
+
+=head1 AUTHOR
+
+John Q Author, jqa@asdf.org
+
+=head1 LICENSE
+
+YOUR LICENCE
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008, YOUR ORG
+
+All rights reserved.
+
+=cut
+}}}
+
+== Indention ==
+
+Use indention of 4 spaces _*everywhere*_.  
+
+== Spacing in Control/Logic/Arithmetic Operations ==
+
+Use one space to seperate the operation and bounding characters of all
+operations.  For example loops:
+
+{{{
+foreach my $x ( @array ) {
+    # loop stuff
+}
+}}}
+
+or
+
+{{{
+foreach my $x ( @{ $array } ) {
+    # loop stuff
+}
+}}}
+
+Ifs:
+
+{{{
+if ( exists $content->{ "first" } and $content->{ $first } ) {
+}
+else {
+}
+}}}
+
+Assignments:
+
+{{{
+my $length = $# { $hash->{ "array" }->[0] };
+}}}
+
+or
+
+{{{
+my $var = 4 + ( $array * eval ( $hash->{ "stuff" } ) );
+}}}
+
+And finally print statements:
+
+{{{
+print "One $motion over the " . $bird . "'s nest.\n";
+}}}
+
+== Braces/Parenthesis == 
+
+Brace and parenthesize are up to the module author (it is more about personal 
+taste) but please be consistent. This is fine:
+
+{{{
+    if ( defined $content and $content ) {
+        # something
+    }
+    else {
+        # something else
+    }
+}}}
+
+Or this:
+
+{{{
+    if ( defined $content and $content ) 
+    {
+        # something
+    }
+    else 
+    {
+        # something else
+    }
+}}}
+
+Or this:
+
+{{{
+    if ( defined $content and $content ) {
+        # something
+    } else {
+        # something else
+    }
+}}}
+
+Do not do this for the single line case:
+
+{{{
+    if ( defined $content and $content )
+        # something
+    else
+        # something else
+}}}
+
+This is acceptable:
+
+{{{
+    print "This" if $that;
+}}}
+
+== Function Parameter Handling ==
+
+Dont use this:
+
+{{{
+      sub handleRequest($$$)
+}}}
+
+Or this:
+
+{{{
+   sub new {
+     my ($package, $ns, $port, $listenEndPoint, $contactHost, $contactPort, $contactEndPoint) = @_;
+}}}
+
+Or even this:
+
+{{{
+    sub createSubjectL3
+    {
+	my $doc = shift;
+	my $ns = shift;
+	my $baseNS = shift;
+	my $protocol = shift;
+	my $sourceAddress = shift;
+	my $destinationAddress = shift;
+}}}
+
+This is very error prone and makes debugging hell. If you have more than 1 
+parameter (except for object _self_) then *_ALWAYS_* use _hashref_ with named
+parameters like that:
+
+{{{
+use Params::Validate qw( :all );
+use perfSONAR_PS::ParameterValidation;
+
+sub function {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            arg1 => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF },
+            arg2 => { type => Params::Validate::HASHREF | Params::Validate::UNDEF, optional => 1 },
+            arg3 => 0
+        }
+    );
+    
+    # code...
+    
+}   
+
+}}}
+
+This implies that besides _self_, arg1 is rquired and should be a _ARRAYREF_.
+Arg2 and Arg3 are optional, with Arg2 being a _HASHREF_ wile the type of
+Arg3 is undefined.
+
+== Function Return Values ==
+
+return _arrayref_ if you need to return multiple parameters or 
+_hashref_ if they should be keyd.
+
+== Using References ==
+
+Check when dereferencing _hashrefs_ or _arrayrefs_, this line:
+
+{{{
+    foreach my $port (keys %{ $conf{"port"} }) {
+}}}
+
+will break at one time when *$conf{port}* is _undef_.
+
+== Libraries ==
+
+Don't put:
+
+{{{
+#!/usr/bin/perl -w -I ../lib 
+}}}
+
+in the first line of your module/class, because it doesn't make sense and even
+if you tested your module by doing this then it does not mean it will work on
+other host under other environment with other perl executable. 
+
+== Configuration ==
+
+Please avoid dealing with multiple configuration parameters in the main script,
+move processing somewhere and use standard modules.
+
+== Fields ==
+
+{{{
+use fields;
+}}} 
+
+for your class public ( and private ) fields.
+
+== Passing Variables/State ==
+
+This is an example of  bad design:
+
+{{{
+   sub registerLS($) {
+	my ($args) = @_;
+
+	%child_pids = ();
+}}}
+
+Try to create pass state object instead or create queue object.
+
+== Error Codes/Conditions ==
+
+We must establish single rule which must be supported throughout the API about
+what is an error return of some function and what is the correct return. 
+I've seen 0 as error, 0 as correct, -1 as error, "" as error, _undef_ as error, 
+error message as an error. So lets consider set of rules (please add or change 
+any):
+
+ * if function must return something  then _undef_ is an error ( it should be explicitly expressed in the function name by using "get" as prefix )
+ * if function may or may not return then -1 is an error ( except when function operate over negative numbers, but this case is extremely rare)
+ * if function should not return anything then -1 is an error condition
+ * Always use return , don rely on the last expression returned value!
+ 
+*_Correctness might be achieved by negating error condition_*
+
+As an alternative solution I would like to suggest adding something called
+ErrorCode object into the API,   and returning instance of it in case of error.
+Then error condition can be easily checked by saying :
+
+{{
+      my $return = mySub($myparam);
+      if($return && blessed $return && ref($return) eq 'ErrorCode') {
+           do somehting about it...
+      }
+}}}
+
+The ErrorCode might be a _hash_ based object with code and value keys. This
+will lead us into establishing single place for quantified error
+codes/messages. This ErrorCode can be subclass of Error::Simple module from
+CPAN.
+
+== Constructors ==
+
+Constructor of the class must support inheritance, period.  Its even better if
+it could be a copy constructor as well ( Clone::Fast is good).
+
+== Version ==
+
+{{{
+use version;
+our $VERSION = qv("2.0");
+}}}
+
+Is way better alternative to just saying:
+
+{{{
+our $VERSION = "2.0";
+}}}
+
+== Base vs. ISA ==
+
+{{{
+use base
+}}} 
+
+instead of 
+
+{{{
+@ISA =.... 
+}}}
+
+It will try to load  superclass at compile time. Try to avoid multiple
+inheritance - this is the hellish way which leads into creating namespace
+conflicts.
+
+== Perl Tests ==
+
+Write tests at the same time as your modules are written. Automate tests 
+generation if possible.
+
+== SVN Rules ==
+
+Trunk is place for  tested modules, _*ONLY*_.
 
 == Last Updated ==
 
