@@ -1,5 +1,45 @@
 = perfSONAR-PS Daemon =
 
+== TOC ==
+
+ * Introduction
+ * Installation
+ * Code Tour
+ * FAQ
+
+== Introduction ==
+
+The perfSONAR-PS daemon is the central portion of all services that is
+responsible for handling all outside communication from the outside as well
+as process management and the execution of external events (e.g. LS
+registration).
+
+== Running ==
+
+The daemon is invoked as follows:
+
+{{{
+perl perfsonar-daemon.pl --OPTION1 --OPTION2
+}}}
+
+A breakdown of possible options:
+
+|| *Option Name* || Purpose ||
+|| _--verbose || Run the process in the forground (useful for debugging) ||
+|| _--help || Display help and exit ||
+|| _--config=config.file || Path to daemon configuration file ||
+|| _--piddir=/path/to/pid/dir || path to process id directory ||
+|| _--pidfile=filename.pid || name of process id file ||
+|| _--logger=logger/filename.conf || path to logger configuration ||
+
+== Code Tour ==
+
+TBD
+
+== FAQ ==
+
+TBD
+
 == Last Updated ==
 
 $Id$
