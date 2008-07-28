@@ -91,7 +91,7 @@ A breakdown of the global (and some not so global) elements:
 || _reaper_interval_ || yes || integer, interval where daemon will kill off unresponsive processes ||
 || _pid_dir_ || no || string, defaults to /var/log ||
 || _pid_file_ || no || string, defaults to ps.pid ||
-|| disabled || no || boolean, present at each endpoint to enable/disable service at the daemon level ||        
+|| _disabled_ || no || boolean, present at each endpoint to enable/disable service at the daemon level ||        
 
 == Configuration Via the Command Line ==
 

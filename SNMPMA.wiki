@@ -287,6 +287,7 @@ A breakdown of each item in the *snmp* section follows:
 || _service_description_ || yes || string, description of service ||
 || _service_name_ || yes || string, name of the service ||
 || _service_type_ || yes || string, type of service ||
+|| _disabled_ || no || boolean, present at each endpoint to enable/disable service at the daemon level ||        
 
 ==== Metadata Configuration ====
 
@@ -373,7 +374,7 @@ startup.  This function is responsible for:
 
  * Checking the configuration file, exiting if something is wrong, filling in things that are missing
  * Loading the appropriate message handlers.
-   * Currently _!MetadataKeyRequest_ and _!SetupDataRequest_
+   * Currently !MetadataKeyRequest and !SetupDataRequest
  * Loading the appropriate event handlers.
    * Not used currently.
  * Starting/Loading the DB XML instance (if required)
@@ -394,7 +395,7 @@ configuration file.  This process will be started by the daemon by looking at:
  
 The function that performs LS registration, _registerLS_, extracts the current
 set of registered data from the metadata DB storage, and uses the LS API (soon
-to be gLS API) to create _LSRegistration_ or _LSKeepalive_ messages.  
+to be gLS API) to create !LSRegistration or !LSKeepalive messages.  
 
 === Communication Entry ===
 
@@ -409,19 +410,19 @@ serial tasks:
  * Resolve filter parameters (e.g. start/end times, resolution, consolidation function)
  * Handle message parameters (if any are applicable)
  * Depending on the message type, pass control to a function:
-   * _!MetadataKeyRequest_ Message - *maMetadataKeyRequest*
-   * _!SetupDataRequest_ Message - *maSetupDataRequest*
+   * !MetadataKeyRequest Message - *maMetadataKeyRequest*
+   * !SetupDataRequest Message - *maSetupDataRequest*
 
-==== !MetadataKeyRequest Case ====
+==== MetadataKeyRequest Case ====
 
 This minor function first checks to see if the metadata contains a key.  If
 there is no key, control passes to the *metadataKeyRetrieveMetadataData*  If the
 key is present and valid control will go to *metadataKeyRetrieveKey*.  Other
 paths out of this function are error conditions.
 
-===== !metadataKeyRetrieveMetadataData =====
+===== metadataKeyRetrieveMetadataData =====
 
-This function handles the rest of the _!MetadataKeyRequest_ message when a key
+This function handles the rest of the !MetadataKeyRequest message when a key
 is not present by performing an XPath search for the metadata specified in the
 request.  If this returns positive results the _complete_ metadata from storage
 will be returned along with the key.  Any chained parameters will
@@ -429,9 +430,9 @@ be applied to the key in an effort to _cook_ it (e.g. insert the filter
 parameters directly into the key) for later use.  Other paths out of this
 function are error conditions.
 
-===== !metadataKeyRetrieveKey =====
+===== metadataKeyRetrieveKey =====
 
-This function handles the rest of the _!MetadataKeyRequest_ message when a key
+This function handles the rest of the !MetadataKeyRequest message when a key
 is present by checking to see if the key is *valid* in the cache or by
 examining the database for the key.  The return value of this function is
 success or failure (e.g. a _key_ element or an error element) depending on the
@@ -439,7 +440,7 @@ results of this search.  Any chained parameters will be applied to the key in
 an effort to _cook_ it (e.g. insert the filter parameters directly into the
 key) for later use.  Other paths out of this function are error conditions.
 
-==== !SetupDataRequest Case ====
+==== SetupDataRequest Case ====
 
 This minor function first checks to see if the metadata contains a key.  If
 there is no key, control passes to the *setupDataRetrieveMetadataData*  If the
@@ -448,7 +449,7 @@ paths out of this function are error conditions.
 
 ===== setupDataRetrieveMetadataData =====
 
-This function handles the rest of the _!MetadataKeyRequest_ message when a key
+This function handles the rest of the !MetadataKeyRequest message when a key
 is not present by performing an XPath search for the metadata specified in the
 request.  Using filter parameters (if present) the backend storage is consulted
 and queried for the request data in _handleData_.  Depending on what type of
@@ -458,7 +459,7 @@ this function are error conditions.
 
 ===== setupDataRetrieveKey =====
 
-This function handles the rest of the _!SetupDataRequest_ message when a key
+This function handles the rest of the !SetupDataRequest message when a key
 is present by checking to see if the key is *valid* in the cache or by
 examining the database for the key.  Using filter parameters (if present) the
 backend storage is consulted and queried for the request data in _handleData_.

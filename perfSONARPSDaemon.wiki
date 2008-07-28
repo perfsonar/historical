@@ -25,12 +25,12 @@ perl perfsonar-daemon.pl --OPTION1 --OPTION2
 A breakdown of possible options:
 
 || *Option Name* || Purpose ||
-|| _--verbose || Run the process in the forground (useful for debugging) ||
-|| _--help || Display help and exit ||
-|| _--config=config.file || Path to daemon configuration file ||
-|| _--piddir=/path/to/pid/dir || path to process id directory ||
-|| _--pidfile=filename.pid || name of process id file ||
-|| _--logger=logger/filename.conf || path to logger configuration ||
+|| _--verbose_ || Run the process in the forground (useful for debugging) ||
+|| _--help_ || Display help and exit ||
+|| _--config=config.file_ || Path to daemon configuration file ||
+|| _--piddir=/path/to/pid/dir_ || path to process id directory ||
+|| _--pidfile=filename.pid_ || name of process id file ||
+|| _--logger=logger/filename.conf_ || path to logger configuration ||
 
 == Code Tour ==
 
