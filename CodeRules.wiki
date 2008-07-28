@@ -490,11 +490,11 @@ use base
 instead of 
 
 {{{
-@ISA =.... 
+@ISA = 
 }}}
 
 It will try to load  superclass at compile time. Try to avoid multiple
-inheritance - this is the hellish way which leads into creating namespace
+inheritance: this is the hellish way which leads into creating namespace
 conflicts.
 
 == Perl Tests ==
