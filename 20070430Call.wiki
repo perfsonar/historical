@@ -54,7 +54,21 @@ April 30 2007 - 2:30 EDT
    * Necessary parties will organize a call later this week, and CC the list with results.
  # SQL-MA
    * Current discussions between Jason and Maxim revolve around the databases we should support (sqlite, mysql, postgres, oracle), how similar the db schema can be to the Java version (leaning towards a two table setup):
-   * {{{                   
+   * See examples below
+   * This organization will allow for fewer records (by employing a 'range') than in the Java version. 
+   * Overall design will be similar to the SNMP MA/MP with a focus on getting status variables.
+ # Post-Internet2 network deployments
+   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
+ # Brazil Meeting
+   * Jeff/Martin will be demoing many of the same things as at the SMM. 
+   * They will keep us updated on how things are going.
+ # SMM Followup
+   * Successful demos and good progress was made.  
+   * The HOPI project is interesting in using pS in monitoring their own infrastructure and will work with us to help monitor dynamic circuits (by potentially inserting hooks into pS or Dragon that aware of the changes to be monitored). 
+
+== SQL Examples ==
+
+{{{
    		  create table link_status (
                     link_id varchar,
                     status_begin  timestamp,
@@ -73,16 +87,6 @@ April 30 2007 - 2:30 EDT
                     details varchar,
                   ) 
 }}}
-   * This organization will allow for fewer records (by employing a 'range') than in the Java version. 
-   * Overall design will be similar to the SNMP MA/MP with a focus on getting status variables.
- # Post-Internet2 network deployments
-   * N/A for now, as we get close to deployment we will need to discuss things like code cleanup, testing, configuration, packaging, etc.
- # Brazil Meeting
-   * Jeff/Martin will be demoing many of the same things as at the SMM. 
-   * They will keep us updated on how things are going.
- # SMM Followup
-   * Successful demos and good progress was made.  
-   * The HOPI project is interesting in using pS in monitoring their own infrastructure and will work with us to help monitor dynamic circuits (by potentially inserting hooks into pS or Dragon that aware of the changes to be monitored). 
 
 == Last Updated ==
 

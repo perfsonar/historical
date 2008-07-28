@@ -45,7 +45,7 @@ To join the call, do one of the following:
    * Are we ready (after release)?
    * Set a date and time: April XX 2008
  # Additional Topics...
- # CodeHause
+ # !CodeHause
    * Jeff will brief us on the discussions held in AA two weeks ago.
    * See the wiki
    * Internet2 is interested in at least hosting some of the material in-house due to political issues. However, the bug-tracking project management and software distribution mechanisms could easily be split off. (The main portions of interest for keeping in-house are the 'public project' web pages as well as the svn service.
@@ -59,7 +59,7 @@ To join the call, do one of the following:
      # pSB
        * 0.09 release out this week.
        * Documentation (will look like PingER)
-       * WebAdmin (cleanups still needed, it functions fine, needs look and feel of Java version?
+       * !WebAdmin (cleanups still needed, it functions fine, needs look and feel of Java version?
        * Functional testing things (similar to PingER)?
      # Packages for MDM?
  # RPM Packages

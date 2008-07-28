@@ -6,7 +6,22 @@ Summer Joint Techs 2008, Lincoln NE
 
 == When ==
 
- July 20, 2008
+ July 20, 2008  - 1 to 5 Central
+
+== Attendees ==
+
+ # Maxim (FNAL)
+ # Jason (Internet2)
+ # Aaron (Internet2)
+ # Eric (Internet2)
+ # Jeff (Internet2)
+ # Martin (UDel)
+ # Joe (ESnet)
+ # Brian (ESnet)
+ # Carla Hunt (MCNC)
+ # Drew (Broadband Census)
+ # Rich (Internet2)
+ # Mike? (UCLA)
 
 == Agenda/Minutes ==
 

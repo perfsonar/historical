@@ -34,7 +34,7 @@ To join the call, do one of the following:
      * John Hicks: Nothing new, will be interacting with Jason/Jeff/Eric on some meetings down the road with a vistor to IU who would like to hear some discussions on pS and DCN (End of March/Beginning of April). Will pass on to Luke that Jason will be installing new SNMP MA very soon (after ndb machines have maintenance).
    # FNAL
      * Maxim: Worked with Yee/Jared all week on release related activities. Everything seems to work as expected. Has PingER/GUI installed and will keep running. Fixed schema issue (see mailing list). Plans on profiling next week to find the issues (will take Jason's comments into consideration), lots of room for improvement. Fixed a topology schema issue with webadmin.  Thinks we need a more often release system than CPAN such as night builds. There will be issues with quality control, etc. that we would need to work out.
- # CodeHause
+ # !CodeHause
    * Jason/Aaron/Maxim will update on anything they have determined on evaluating potential hosting sites.
      * 1. Wiki page is posted https://wiki.internet2.edu/confluence/display/PSPS/Code_Hosting_Comparison. Will hold off on decision until after Jeff has meeting in AA.
  # Licensing/Trademark
@@ -45,7 +45,7 @@ To join the call, do one of the following:
      * In the process of collecting 'Test Points' (PingER, pSB have installed versions to test against currently). As a group we need to discuss/come to some conclusion on packaging soon (see below). Jason needs to see about making pSB use webadmin very soon. Need to package AMI to go along with pSB (at a minimum the collectors and database). April release deadline...
  # pS-PS
    * Anything new in the infrastructure portions?
-     * Aaron discussed the modifications that he and Jason made to the framework to the 'Document_file' class that offers a very significant speedup to outputing messages (particularly SetupDataRequest Messages with LOTS of datum). Jason wants to know if this can be a 'configurable option' so that people could choose. Aaron wants to make a subclass that can be used for either, although Document_string may go away. Jeff points out that 'random write' services may need to use that, and couldn't use file. For now default should be changed to file writing since it is the quickest.
+     * Aaron discussed the modifications that he and Jason made to the framework to the 'Document_file' class that offers a very significant speedup to outputing messages (particularly !SetupDataRequest Messages with LOTS of datum). Jason wants to know if this can be a 'configurable option' so that people could choose. Aaron wants to make a subclass that can be used for either, although Document_string may go away. Jeff points out that 'random write' services may need to use that, and couldn't use file. For now default should be changed to file writing since it is the quickest.
  # Packaging
    * We've got the Perl packages. What other kinds of packages should we offer and what should they look like? (e.g. a full tarball of each service, an RPM of each service, RPMs for each Perl package, ...)
      * Aaron: We should go with all in one 'packages' of SVN on a per-service basis. Jeff: This would be bad for sharing the daemon/configuration, would prefer package of entire svn, or 'daemon' package + 'service' packages. Also wants to the concept of a 'Bundle'. Joe wants everything. For MDM we will need to decide soon.
@@ -55,7 +55,8 @@ To join the call, do one of the following:
  # LHC-OPN Meeting from March 10th
    * Joe, can you give a summary of what was decided and what that means to us?
  # LHC-Tier2 BCP
-   * How did LHC-OPN take the direction? If they were supportive, what is our next steps? I assume we need to get more of the document actually written now. ### Heard interesting presentations:
+   * How did LHC-OPN take the direction? If they were supportive, what is our next steps? I assume we need to get more of the document actually written now.
+   * Heard interesting presentations:
      * Dante presentation on re-designing the LHC OPN (i.e. get rid of circuits and go IP. Discussion ensued, some strong objections. Large part of meeting spent on this issue.
      * Jamie Shiers/James Casey (both from CERN) - Want/Need to monitor the status of the WLCG (Worldwide LHC Computing Grid). Looking into doing this and tracking to the MOU that each organization signed (i.e. make sure everyone is keeping up with the promises of uptime/availability etc.) The general idea is to print reports for the high level people to see and check out. Will need to get SOME info from the network layer (not just compute). Currently E2EMON & reports by Dante are the only source of network info.  Need to add active measurmenets to the mix to get a more accurate info, and then figure out how to present it to the WLCG grid management framework.
    * 8/12 Organizations are ok with MDM as a service provided by Dante (i.e. not the appliance or software specifically, just the idea of the service itself). Brookhaven didn't respond yet, same with Triumph. Sara and Italy have security concerns.

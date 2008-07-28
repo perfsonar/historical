@@ -33,8 +33,8 @@ June 25 2007 - 2:30 EDT
      * Easier process management (daemon code only written once)
      * Cleaner distribution/package management
      * Still working on mappings:
-       * (URL)->(ServiceType)
-       * (ServiceType,MessageType,EventType)->(Handler)
+       * (URL)->(!ServiceType)
+       * (!ServiceType,!MessageType,!EventType)->(Handler)
  # Standards docs
    * namespace mismatches and other inconsistencies need to be addressed in an authoritative document. The OGF document will lay the foundation, but more specific 'profile' documents will be required. How much should this group be involved in defining them?
  # RRD Service (Internet2 network deployment)
