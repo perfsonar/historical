@@ -1,0 +1,128 @@
+= September 8 - 10, 2008 Meeting =
+
+== Expected Attendees ==
+
+ # Jeff Boote - Internet2
+ # Eric Boyd - Internet2
+ # Arron Brown - Internet2
+ # -
+ # - 
+ # -
+
+== Logistics ==
+
+The following information will be useful when booking your travel and lodging 
+details in Ann Arbor.  Information regarding local attractions and food will
+be added over time.
+
+=== Venue ===
+
+All meetings (DICE, perfSONAR-Dev) are scheduled the week of 09/08-09/12 
+and will be held in the MITC Building where Internet2 has its office.
+Internet2's address is: 
+
+1000 Oakbrook Drive, 
+Suite 300, 
+Ann Arbor, MI 48104
+
+A map and driving directions can be found at:  
+
+http://www.michitc.org/cc/08/index.html
+
+=== Airport Information ===
+
+The closest international Airport is Detroit 
+([http://www.metroairport.com/ DTW]).  The major domestic carrier is Northwest
+airlines ([http://www.nwa.com NWA]) but the airport is serviced by all other
+major carriers.  International service can be found on the following carriers
+to the the list cities (possibly more than what I was able to find via 
+wikipedia):
+
+ # Air France (Paris-Charles de Gaulle)
+ # KLM (Amsterdam)
+ # Lufthansa (Frankfurt)
+ # Northwest Airlines (Amsterdam, Düsseldorf, Frankfurt, London-Gatwick, London-Heathrow, Paris-Charles de Gaulle )
+
+Please allow the usual 1 hour domestic/2 hrs international for security 
+procedures.
+
+=== Ground Transportation ===
+
+Ann Arbor is 25 miles (40 km) from DTW.  Driving directions can be found 
+[http://maps.google.com/maps?f=d&hl=en&geocode=&saddr=DTW&daddr=3200+Boardwalk,+Ann+Arbor,+Michigan+48108&sll=37.0625,-95.677068&sspn=56.200193,102.65625&ie=UTF8&z=11 here].
+
+All major car rental vendors (Alamo, Avis, Budget, Enterprise, Hertz, Thrifty, 
+etc.) are available.  It is recommended that reservations be made prior to 
+arrival.
+
+Additionally, a shared van/bus service is available for $15 USD each way between
+Ann Arbor and DTW: http://michiganflyer.com .  This service picks up at some
+of the major hotels near the Internet2 office, and it is recommended that
+arrangements be made beforehand.
+
+=== Lodging ===
+
+Please note the deadline to take advantage of the reserved block is Wednesday,
+August 13.  Any questions or problems with making a reservation can be directed
+to Jocelyn Gerich (jgerich with an internet2 address) or after August 10th to
+Cecelia Dove (cdove with an internet2 address).  
+
+Internet2 has reserved a block of rooms at the Four Points by Sheraton which 
+is about a 10 minute walk from our office. The room block is in effect for 
+the following dates: arrival on Sunday, September 7 and departure on Friday, 
+September 12.  The room block deadline is Wednesday, August 13. After that 
+time, reservations will be accepted on a space availability basis only and 
+are subject to prevailing rates.
+
+The room block rate is $92.00 USD (plus taxes - currently 8%). This is for 
+either a single or double room. Note that all rooms are non-smoking.
+
+When making your reservation, please mention you are with the perfSONAR/DICE 
+Meeting.
+
+Four Points by Sheraton Ann Arbor
+3200 Boardwalk
+Ann Arbor, Michigan 48108
+United States
+Phone: +1-734-996-0600 or toll free (US only) +1-800-368-7764 or +1-800-848-2770
+
+Check-in time: 3:00pm
+Check-out time: 12:00pm
+Cancellation policy: prior to 6PM on the date of arrival
+
+Additional hotels in the area include:
+
+Courtyard Ann Arbor
+3205 Boardwalk
+Ann Arbor, MI  48108
+734-995-5900
+
+Fairfield Inn Ann Arbor
+3285 Boardwalk
+Ann Arbor, MI  48108
+734-995-5200 or Toll Free 1-800-407-3395
+
+Holiday Inn Hotel & Suites Ann Arbor
+3155 Boardwalk Dr.
+Ann Arbor, MI 48108
+734-213-1900
+
+Residence Inn Ann Arbor South
+800 Victors Way
+Ann Arbor, MI  48108
+734-996-5666
+
+http://perfsonar-ps.googlecode.com/svn/wiki/20080908Directions.png
+
+=== Restaurants ===
+
+TBD
+
+== Agenda ===
+
+TBD
+
+== Last Updated ==
+
+$Id$
+
