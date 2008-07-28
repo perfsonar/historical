@@ -1,0 +1,299 @@
+= SNMP Measurement Archive =
+
+== TOC ==
+
+ * Introduction
+ * Installation
+ * Code Tour
+ * FAQ
+
+== Introduction ==
+
+The following article covers topics related to the perfSONAR-PS SNMP Measurement
+Archive.  This service functions as a standalone warehouse for SNMP gathered
+information, currently limited to:
+
+ * Interface Utilization (e.g. interface octet counters)
+ * Inteface Errors
+ * Interface Discards
+
+Expansion to other MIB values is possible, but was not considered in the initial
+development.
+
+Data is normally stored in RRD database (e.g. the kind normally used for network
+monitoring tools such as [http://www.cacti.net Cacti], 
+[http://oss.oetiker.ch/mrtg/ MRTG] or [http://cricket.sourceforge.net/ Cricket].
+This software has extensions available to handle special case storage in SQL
+based databases (currently [http://www.mysql.com/ MySQL] and 
+[http://www.sqlite.org/ SQLite]) although these were tested with specific use 
+cases in mind.  Extension to your homegrown monitoring solution may require 
+some perl slinging.
+
+As with all perfSONAR-PS tools the underlying communication and storage
+information is described in XML formats as specified by the Network
+Measurements Working Group ([http://nmwg.internet2.edu NM-WG]) organized in the
+Open Grid Forum ([http://www.ogf.org OGF]).
+
+== Installation ==
+
+The following covers several installation methods.
+
+=== Pre-requisites ===
+
+There are several dependencies, depending on how the SNMP MA is to be used to
+serve collected data.
+
+==== RRD Tool ====
+
+[http://oss.oetiker.ch/rrdtool/ RRDTool] is required for the common use case of
+this software (e.g. pairing the application with existing RRD stored data).  If
+you will be installing this software on a host that is already running
+collection software (recommended) this step is probably already done. 
+
+Ensure that you have installed both the rrdtool executable and the rrd-perl
+libraries (different packages in package managers such as _apt_ and _yum_).  If
+installing from source be sure to use the *_--enable-perl-site-install_* flag.
+
+After installation be sure to adjust your *PATH* and *LD_LIBRARY_PATH*
+variables as needed.
+
+==== SQLite ====
+
+SQLite can be installed via your package manager (_apt_, _yum_, etc.) along with
+related database access methods (e.g. _DBI_, _DBD::SQLite_).  The alternative is
+to install from source and CPAN.
+
+==== MySQL ====
+
+MySQL should be installed via your package manager (_apt_, _yum_, etc.) along with
+related database access methods (e.g. _DBI_, _DBD::mysql_).  The alternative is
+to install from source and CPAN.
+
+==== Oracle DB XML ====
+
+Oracle DB XML is an open source XML database formerly from the
+Berkeley/Sleepycat company.  This optional component can be used instead of
+relying on a flat XML file to store metadata information.  Current testing has
+revealead that there is not an explicit performance advantage for using this
+method unless managing 1000's of metadata descriptions, so we do not expect
+most installations to require this software.
+
+A current version (*2.3.X* series) is available here:
+
+http://www.oracle.com/technology/software/products/berkeley-db/xml/index.html
+
+We are asking that installation of the *2.4.X* series be avoided until we have
+had a time to investigate new features and improvements to the code.  It is
+necessary to install this with the *_--enable-perl_* flag. 
+
+Enabling this flag does cause some strange behaviors on certain systems.  We
+have found through testing it is best to disable the *make test* option directly
+in the *buildall.sh* file.  This can be done by replacing this:
+
+{{{
+# Perl
+if [ $BUILD_PERL = "yes" ]; then
+if [ $BUILD_ONE = "no" -o $BUILD_ONE = "perl" ]; then
+    echo Start Perl build: `date`
+    echo "If Perl build fails, see $DBXML_DIR/src/perl/README"
+    echo "for configuration and build instructions"
+    cd $DBXML_DIR/src/perl
+    if [ $DO_CONFIGURE = "yes" ]; then
+        $PERL Makefile.PL
+    fi
+    echo Building Perl
+    $MAKE || exit $?
+    echo Testing Perl
+    $MAKE test || exit $?
+    if [ $DO_INSTALL = "yes" ]; then
+        echo Installing Perl
+        $MAKE install || exit $?
+    fi
+
+    cd $TOP
+    echo End Perl build: `date`
+fi
+fi
+}}}
+
+with this:
+
+{{{
+# Perl
+if [ $BUILD_PERL = "yes" ]; then
+if [ $BUILD_ONE = "no" -o $BUILD_ONE = "perl" ]; then
+    echo Start Perl build: `date`
+    echo "If Perl build fails, see $DBXML_DIR/src/perl/README"
+    echo "for configuration and build instructions"
+    cd $DBXML_DIR/src/perl
+    if [ $DO_CONFIGURE = "yes" ]; then
+        $PERL Makefile.PL
+    fi
+    echo Building Perl
+    $MAKE || exit $?
+#    echo Testing Perl
+#    $MAKE test || exit $?
+    if [ $DO_INSTALL = "yes" ]; then
+        echo Installing Perl
+        $MAKE install || exit $?
+    fi
+
+    cd $TOP
+    echo End Perl build: `date`
+fi
+fi
+}}}
+
+Note that this is *_normally_* the last section of *buildall.sh*, at the end of
+the file.  
+
+=== SVN Installation ===
+
+perfSONAR-PS can be downloaded from a read-only copy of svn if you prefer 
+to be on the bleeding edge of things.  Normally we do not expect to upload to
+CPAN more than once a month, so the latest performance and bug fixes will
+always be available here.  Do note that experimental software such
+as this may have some lingering bugs: please let us know via email if you 
+intend to run something production from here and we may recomend making you a
+specific tag.
+
+To download this repository, ensure you have subversion installed on the target
+machine. Then:
+
+ * mkdir /path/to/perfSONAR_PS
+ * svn checkout http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk /path/to/perfSONAR_PS
+
+When it comes time to update this repository, it is as simple as:
+
+ * cd /path/to/perfSONAR_PS
+ * svn update
+
+The svn directory itself contains most of what is needed to run the services
+immediately. There is some minor configuration that must be performed to get
+the perfSONAR-PS daemon configured.  Please see [ServiceConfiguration] for
+examples of the configuration file as well as instructions for operating the
+configuration script.
+
+=== CPAN Instalation ===
+
+Each search can be installed (along with most dependencies) via the
+Comprehensive Perl Archive Network ([http://search.cpan.org CPAN]).  Here is a
+breakdown of the requirements/instructions/configuration steps that are 
+required for this service:
+
+ # Install any pre-requistes.  
+ # perl -MCPAN -e 'install perfSONAR_PS::Services::MA::SNMP'
+ # Configure the daemon, see [ServiceConfiguration].
+ # Install the store file, this can:
+   * be autogenerated in the previous step (for a _test_ instance)
+   * come from an external source such as Cacti (currently), MRTG, Cricket (planned)
+   * may exist from a previous SNMP MA instance
+ # Make sure the configuration/store information is up to date, and the RRD files are accessable.
+
+=== Binary Executable Installation ===
+
+Using a tool called the Perl Archive Toolkit
+(or [http://search.cpan.org/~smueller/PAR-0.980/lib/PAR.pm PAR]) it is possible
+to make self contained executables of our perfSONAR-PS services.  These
+executables contain all perl (and in some cases C) library dependencies and are
+tested to function on _clean_ installs of major OS releases (e.g. Debian,
+Fedora, RHEL, Scientific Linux, Ubuntu) on major architectures (e.g. x86,
+x86 64 Bit, PPC).  
+
+To install a PAR package follow these steps:
+
+ # Download the PAR .tar.gz file of interest (*N.B.* we do not maintain a stable location of these due to their fleeting nature, the location will be fixed after the next major release) 
+ # Untar the application: *tar -zxvf FILE.tar.gz*
+ # Enter the directory: *cd FILE*
+ # Read any instructions.  These may tell you how to configure/operate the specific software. There may be pre-requisites that are not available in the PAR (e.g. MySQL database drivers)
+ # Install exeuctables in well know locations (optional)
+ # Test installation as per-instructions.
+ # Adjust logging, install any *init* scripts if available.
+
+=== RPM Installation ===
+
+To install a packaged RPM of a perfSONAR-PS service following the following steps:
+
+ # Download the necessary RPMs (due to dependencies this step may be repeated)
+ # Select the RPM you wish to install, run: *rpm -ivh RPM_NAME.ARCH.rpm*
+ # Repeat step 1 if errors are seen, installing any dependency libraries or applications (may require 3rd party software)
+
+=== Deb Installation ===
+
+TBD
+
+=== Configuration ===
+
+See [ServiceConfiguration] for a complete discussion.  Beyond the _daemon_
+level options there are several configuration options specific to the SNMP MA.
+The following is an example configuration:
+
+{{{
+<port 8098>
+        <endpoint /perfSONAR_PS/services/snmpMA>
+                module     perfSONAR_PS::Services::MA::SNMP
+                disabled        0
+                <snmp>
+                    default_resolution     300
+                    enable_registration     1
+                    metadata_db_external     cacti
+                    metadata_db_external_source     /etc/cacti/cactid.conf
+                    metadata_db_file     /usr/local/perfSONAR-PS/snmp-store.xml
+                    metadata_db_type     file
+                    rrdtool     /usr/bin/rrdtool
+                    service_accesspoint     http://HOST.DOMAIN:8098/perfSONAR_PS/services/snmpMA
+                    service_description     SNMP MA @ HOST in DOMAIN
+                    service_name     SNMP MA
+                    service_type     MA
+                </snmp>
+        </endpoint>
+</port>
+disable_echo     0
+ls_registration_interval     60
+max_worker_lifetime     300
+max_worker_processes     30
+pid_dir     /var/run
+pid_file     snmp.pid
+reaper_interval     20
+ls_instance     http://HOST.DOMAIN:9095/perfSONAR_PS/services/hLS
+}}}
+
+A breakdown of each item in the *snmp* section follows:
+
+|| *Configuration Value* || *Required* || *Type* ||
+|| _default_resolution_ || yes || integer, related to RRD/SQL storage ||
+|| _enable_registration_ || yes || boolean, 0 or 1 ||
+|| _metadata_db_external_ || no || string, currently only *cacti* ||
+|| _metadata_db_external_source_ || no, yes w/ *metadata_db_external* where the value is the path to cactid.conf || ||
+|| _metadata_db_type_ || yes || string, either *file* or *xmldb* ||
+|| _metadata_db_file_ || yes || string, when *metadata_db_type* is _xmldb_ this must end in *.dbxml*, when *metadata_db_type* is _file_ this should be a path to an XML file ||
+|| _metadata_db_name_ || yes || string, used only, used only when *metadata_db_type* is _xmldb_  ||
+|| _db_autoload_ || no || boolean, used only when *metadata_db_type* is _xmldb_ ||
+|| _autoload_metadata_db_file_ || yes || used only when *metadata_db_type* is _xmldb_ to load the specified path to an XML file ||
+|| _rrdtool_ || yes || string, location of rrdtool binary ||
+|| _service_accesspoint_ || yes || string, access url of the service ||
+|| _service_description_ || yes || string, description of service ||
+|| _service_name_ || yes || string, name of the service ||
+|| _service_type_ || yes || string, type of service ||
+
+=== Running ===
+
+See [psConfigureDaemon] for running instructions.  The configuration file
+dictates the specifics of the service to be run.  
+
+If you run into issues, consult the FAQ, we may have seen it before. The most
+common issues arise with the dependency modules (LibXML in particular),
+dependant software (such as DBXML), and finally library paths
+(LD_LIBRARY_PATH, etc.)
+
+== Code Tour ==
+
+TBD
+
+== FAQ ==
+
+TBD
+
+== Last Updated ==
+
+$Id$
