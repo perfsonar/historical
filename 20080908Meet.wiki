@@ -120,9 +120,12 @@ TBD
 
 == Agenda ===
 
-TBD
+Some possible agenda items taken from mailing list conversations and current work:
+
+ * _keyword_ Parameter: What is the format of the contained value?  It was suggested we mandate this to be  a URI.  (Maxim/Roman/Jason)
+ * Self Tests: Which services should be doing this?  Has anything more been done to standardize this beyond the initial proposal? (Maxim/Jason)
+ * Proper way to get info such as consolidation function/data range from an MA. (Jason)
 
 == Last Updated ==
 
 $Id$
-
