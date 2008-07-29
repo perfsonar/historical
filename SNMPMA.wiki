@@ -361,6 +361,33 @@ common issues arise with the dependency modules (LibXML in particular),
 dependant software (such as DBXML), and finally library paths
 (LD_LIBRARY_PATH, etc.)
 
+=== Testing ===
+
+To test this service, a client is required.  From subversion a simple client can
+be used:
+
+http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/client.pl
+
+The client can be invoked as such:
+
+{{{
+perl client.pl --server=localhost --port=8080 --endpoint=perfSONAR_PS/services/snmpMA --verbose request.xml
+}}}
+
+or
+
+{{{
+perl client.pl --verbose  http://localhost:8080/perfSONAR_PS/services/snmpMA request.xml
+}}}
+
+Along with the client a series of requests exits:
+
+http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/requests/MA/SNMP/
+
+To test the different cases that are possible in this service.  These basic
+requests should be modified to fit the exact metadat of your service, and
+are a fast way to verify everything is working properly.
+
 == Code Tour ==
 
 The following tour starts in _*perfSONAR_PS::Services::MA::SNMP*_, and enters
