@@ -2070,7 +2070,7 @@ sub retrieveSQL {
     my $id       = "data." . genuid();
     my @dbSchema = ();
     my $res;
-    my $query = {};
+    my $query = q{};
 
 
 # XXX Jul 22, 2008
@@ -2181,46 +2181,62 @@ sub retrieveSQL {
             my @nodeSchema = ( "node_id", "node_name", "longname", "addr", "first", "last" );
             my $nodedb = new perfSONAR_PS::DB::SQL( { name => $dbconnect, schema => \@nodeSchema, user => $dbuser, pass => $dbpass } );
 
-
-# XXX Jul 22, 2008
-#
-# Ick: we need to determine what table we select from (not just 200807_*).   We
-# should first check the times to see if we span.  If we are asking without time
-# ranges, get our most recent and give the person things from there.
-
             $nodedb->openDB;
-            my $result1 = $nodedb->query( { query => "select distinct node_id from 200807_NODES where addr=\"" . $parameters->{src} . "\";" } );
-            my $result2 = $nodedb->query( { query => "select distinct node_id from 200807_NODES where addr=\"" . $parameters->{dst} . "\";" } );
+            my $result_d = $nodedb->query( { query => "select * from DATES;" } );
             $nodedb->closeDB;
-
-            if ( $#{$result1} == -1 or $#{$result2} == -1 ) {
-                my $msg = "Query returned 0 results";
+            unless ( $#{$result_d} > -1 ) {
+                my $msg = "No data in database";
                 $self->{LOGGER}->error($msg);
                 getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
                 return;
             }
-            else {
-                @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
-                if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                    $query = "select * from 200807_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+            
+            foreach my $row ( @{$result_d} ) {
+                my $year = $row->[0];
+                my $mon = $row->[1];
+                $mon = "0" . $mon if $mon =~ m/^\d$/;
+     
+                $nodedb->openDB;
+                my $result1 = $nodedb->query( { query => "select distinct node_id from ".$year.$mon."_NODES where addr=\"" . $parameters->{src} . "\";" } );
+                my $result2 = $nodedb->query( { query => "select distinct node_id from ".$year.$mon."_NODES where addr=\"" . $parameters->{dst} . "\";" } );
+                $nodedb->closeDB;
 
-                    my $queryCount = 0;
-                    if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
-                        $query = $query . " timestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
-                        $queryCount++;
-                    }
-                    if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                        if ($queryCount) {
-                            $query = $query . " and timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
-                        }
-                        else {
-                            $query = $query . " timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"} . ";";
-                        }
-                    }
+                if( $#{$result1} == -1 or $#{$result2} == -1 ) {
                 }
                 else {
-                    $query = "select * from 200807_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\";";
+                    @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
+                    if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {                   
+                        if ( $query ) { 
+                            $query = " union select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+                        }
+                        else {
+                            $query = "select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+                        }
+   
+                        my $queryCount = 0;
+                        if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
+                            $query = $query . " timestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
+                            $queryCount++;
+                        }
+                        if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                            if ($queryCount) {
+                                $query = $query . " and timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                            }
+                            else {
+                                $query = $query . " timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
+                            }
+                        }
+                    }
+                    else {
+                        if ( $query ) { 
+                            $query = " union select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
+                        }
+                        else {
+                            $query = "select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
+                        }
+                    }
                 }
+                $query = $query . ";" if $query;
             }
         }
         else {
