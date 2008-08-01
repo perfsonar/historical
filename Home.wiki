@@ -18,6 +18,7 @@ Anyone interested in working on this project should contact our mailing list.
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
+ * The [NPToolkit] is available for Beta testing.
  * Take a [CodeTour tour] of the services, installation procedures, and source code.
  * Please adhere to the [CodeRules coding guidelines].
  * Installing perfSONAR-PS from SVN or CPAN for the first time? Maybe we can offer [FAQ some help].
