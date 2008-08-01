@@ -171,7 +171,7 @@ TBD
 
  * *Q:* How do I test that my services are working?
  * *A:* 
-   * Disk - There is a _self status_ page available on every installation: http://lab244.internet2.edu/cgi-bin/services.cgi
+   * Disk - There is a _self status_ page available on every installation: http://HOST/cgi-bin/services.cgi
    * PingER - Navigate to http://tukki.fnal.gov/pinger/pingerUI.pl, Enter the address of the PingER service into the form. To get the address of the PingER service, navigate to https://HOST/ and scroll to PingER; the address will be listed in this area.
    * SNMP MA - Navigate to https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/characteristics/utilization/2.0&url=HOST_ADDRESS to verify that the SNMP MA is working. To get the address of the SNMP MA service, navigate to https://HOST/ and scroll to SNMP MA; the address will be listed in this area.
    * perfSONAR-BUOY - Navigate to https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0&url=HOST_ADDRESS to verify that perfSONAR-BUOY is working. To get the address of the perfSONAR-BUOY service, navigate to https://HOST/ and scroll to perfSONAR-BUOY; the address will be listed in this area.
