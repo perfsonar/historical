@@ -17,6 +17,7 @@ and installation/use help.
 
 == Services ==
 
+ * [NPToolkit NPToolkit Performance Monitoring Tool]
  * [SNMPMA SNMP Measurement Archive]
  * Lookup Service (Legacy)
  * Global Lookup Service

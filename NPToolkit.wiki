@@ -1,0 +1,224 @@
+= NPToolkit =
+
+== TOC ==
+
+ * Introduction
+ * Features
+ * Purpose
+ * Installation
+   * Cacti
+   * perfSONAR-BUOY
+ * Code Tour
+ * FAQ
+
+== Introduction ==
+
+The Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit])
+is an experimental version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk. The software
+consists of an [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.iso ISO] 
+([http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.md5 MD5] sum) that can be used in 
+one of two ways:
+
+ * Burn the image to a disk (recommended)
+ * Mount the ISO filesystem and run as a virtual machine
+
+Atfter either step, the resulting system features a [http://web100.org/ Web100]-enhanced 
+[http://www.kernel.org/pub/linux/kernel/v2.6/ChangeLog-2.6.23.9 Linux 2.6.23-9 kernel] and will
+start the network performance tools installed on this disk.  All servers start up using a default 
+configuration, which can be customized if the need arises. The disk also brings up the 
+[http://www.ntp.org/ NTP] daemon using a default configuration.
+
+== Features ==
+
+This disk features several performance tools pre-installed and configured:
+
+ * [http://e2epi.internet2.edu/bwctl/ BWCTL]
+ * [http://www.cacti.net/ Cacti]
+ * [http://e2epi.internet2.edu/ndt/ NDT]
+ * [http://www.psc.edu/networking/projects/pathdiag/ NPAD]
+ * [http://e2epi.internet2.edu/owamp/ OWAMP]
+ * [http://www.internet2.edu/performance/pS-PS/ perfSONAR-PS Tools]
+   * [SNMPMA SNMP Measurement Archive]
+   * [PSBMA perfSONAR-BUOY Measurement Archive] and [PSBAGENT Collection Framework]
+   * [HLS Lookup Service]
+   * [PINGER PingER Measurement Archive and Measurement Point]
+ * [http://e2epi.internet2.edu/thrulay/ Thrulay]
+
+Graphical and command line tools are available to aide in the customization process when
+necessary.
+
+== Purpose ==
+
+The original idea for the NPToolkit came from the 
+[http://e2epi.internet2.edu/npw/ Network Performance Workshop] series sponsored by 
+[http://www.internet2.edu Internet2].  The old format of this workshop consisted of a day of 
+tool installation (e.g. installing the Web100 kernel and other performance tools) followed
+by some time to test and use them.  This particular format did not allow enough time to get to
+the primary reason many particpants choose to sign up: solving network performance problems.
+
+To lower the bar on this complex topic, this disk offers a complete network performance suite
+pre-installed (and in most cases pre-configured) that is ready to be dropped directly into 
+the network of a NOC of any size.  With the integration of [http://www.perfsonar.net perfSONAR]
+tools, the results of both passive and active measurements can be shared in a federated environment
+with your peers enabling the early detection of performance issues.
+
+== Installaton ==
+
+The initial steps are:
+
+ # Download the following:
+   * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.iso]
+   * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.md5]
+ # Verify the MD5 sum:
+   * md5sum NPToolkit-2.0-beta1.iso 
+   * cat NPToolkit-2.0-beta1.md5
+   * The results should be the same, if they aren't please re-download the ISO.
+ # Burn the ISO to a CD-ROM
+ # Insert the CD-ROM into the tray and boot the system
+ # After the boot process completes, enter the user name knoppix to access the system.
+
+During the boot process, you will notice that you are prompted to customize the
+tools. The customization process allows you to add specific information (i.e.,
+physical location of the server or local link speed). After all the tools have been
+started, the boot process allows you to easily customize each tool. The customization
+files, along with log files, can be stored on an external drive (e.g., a USB thumb
+drive) or if choosen on the root partition of the internal hard drive.
+
+=== Cacti ===
+
+Step by step instructions for configuring Cacti are available on the [CactiConfig] page.
+
+=== perfSONAR-BUOY ===
+
+perfSONAR-BUOY is a framework aimed at collecting and exposing periodic tests of the BWCTL
+and OWAMP measurement tools.  There are a couple of quick configuration steps that must be
+taken before this software may run, namely to create a list of machines to test with and
+start the software after this configuration is done.
+
+==== Configuration ====
+
+After your machine is booted, visit the configuration web page (this can be done locally if
+you have console access to the freshly booted machine, or remotly):
+
+https://HOST/cgi-bin/perfSONAR-BUOY/pSB-config.cgi
+
+Being sure to replace *HOST*.  This should bring up a screen similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
+
+For now, only one choice works: *_BWCTL IPv4_* on the left side.  Click on this.  A screen
+similar to this will appear (note on this test machine the mesh is already set up so values
+will appear selected already).  Under _Select IPv4 BWCTL Instances to Include in Measurements_, 
+choose BWCTL instances to test with.  These are seperated into groups that are associated with the
+LHC project, as well as other registered BWCTL test points.  
+
+_Enter test Description_ is optional, but helpful to enter.
+
+Finally select a test type (note currently we only support one test at a time).  There are two
+common options for tests:
+
+ * Test every hour for 60 seconds
+ * Test every 4 hours for 60 seconds
+ 
+More test options will be available in future releases.  The screen will look like this after
+selection
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
+
+Press _Save_ and wait for the browser to display a message indicating success.  The browser can be
+closed and a terminal will be required to start the services:
+
+ * /etc/init.d/pSB_master.sh restart
+ * /etc/init.d/pSB_collector.sh restart
+ * /etc/init.d/pSB.sh restart
+
+Due to the frequency of tests you have choosen, there may be a small lag when the results become
+available.  To test out your results the following test web page may be used:
+
+https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0&url=http://HOST:8085:/perfSONAR_PS/services/pSB
+
+Being sure to replace *HOST*.
+
+== Code Tour ==
+
+TBD
+
+== FAQ ==
+
+ * *Q:* Do I want to customize the disk?
+ * *A:* All of the performance tools operate correctly without any customization. Just drop the CD into the tray and power up the system. However, some of the tools, NDT, NPAD and the perfSONAR tools in particular, will provide more useful information if you customize them. Customization of these tools will allow these two tools to generate web pages that inform the end-users where they are testing to and will allow you to specify where trouble reports are sent.  You can also customize the BWCTL and OWAMP tools to provide additional access to authenticated remote users. Finally, you can also set the system to use either the default DHCP address or configure a static IP address.
+   * To change the customization options, boot the system and, at the end of the boot process, you are presented with a customization menu.
+   * When the NPToolkit image is booted, the standard Knoppix startup script searches all drives for this knoppix.sh file, if found it executes the script, restoring the customized files. 
+
+ * *Q:* How do I logon to the console?
+ * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. By default, there is no password for this account and no remote access is allowed. You may enable a password by manually running the _/usr/bin/passwd_ command. Remote access (e.g., ssh) should only be enabled after you set passwords for the *_knoppix_* and *_root_* userids.
+
+ * *Q:* How do I get an X-windows environment?
+ * *A:* The NPToolkit was designed for hands-off operations, so it boots up into the command prompt mode. To bring the system up in X11 mode:
+   # Use the Knoppix boot command *_knoppix_* at the boot prompt.
+   # Modify the _/etc/inittab_ file and change the initial default value from 3 to 5. (Be sure to save this file manually to the backup storage drive, and modify the knoppix.sh file to restore it during the boot process.
+   # After the system has booted, log in as *_knoppix_* and run the _/usr/bin/startx_ command.
+
+ * *Q:* How do I get access from a remote host?
+ * *A:*
+   * By default, the NPToolkit does not allow remote access. To enable remote access:
+     # Login using the *_knoppix_* userid and run the _/usr/bin/passwd_ command
+     # Run the _/bin/su_ command to become root and run the /usr/bin/passwd command
+     # Start the sshd process using the _/etc/init.d/ssh start_ command
+
+ * *Q:* How do I run the NPAD system?
+ * *A:* The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] (Network Path and Application Diagnosis) is a client/server program developed by the network research group at Pittsburgh Supercomputer Center ([http://www.psc.edu PSC]). At boot time, the NPToolkit starts the NPAD server process and leaves it listening on TCP port *8200*. To use this server, a user starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:8200). The server automatically downloads a Java applet to the client. Then the user runs a test to begin the diagnostic process. Once the test has been completed, the server displays a results page on the clients browser. The user may examine these results and follow the recommendations to resolve problems. If the user is unable to repair a reported problem, the results page URL can be emailed to the appropriate system administrator or NOC operator.  The server retains a complete record of the test results and the raw data used to derive these results. This allows post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NPAD server.
+
+ * *Q:* How do I use BWCTL?
+ * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify Iperf testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients or you can logon to this NPToolkit server and run tests to remote BWCTL servers. The BWCTL server allows TCP tests with a maximum duration of 30 seconds.
+   * To run a test to a remote BWCTL server:
+     # Logon to the NPToolkit server using the _knoppix_ userid
+     # Identify the remote server
+     # Run the _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the your NPToolkit server to the remote BWCTL server. Results are displayed on our console or terminal window.
+
+ * *Q:* How do I run the NDT system?
+ * *A:* The [http://e2epi.internet2.edu/ndt/ NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the NPToolkit starts a pair of NDT server processes and leaves them listening on TCP ports *7123* and *3001*. To use this server, a client starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate NPToolkit administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
+
+ * *Q:* What is NTP?
+ * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes your computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default, the NPToolkit server synchronized to both Internet2 and public time sources.
+
+ * *Q:* How do I use OWAMP?
+ * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two Internet2 hosts. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients or you can logon to this NPToolkit server and run tests to remote OWAMP servers. By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
+   * To run a test to a remote OWAMP server:
+     # Logon to the NPToolkit server using the _knoppix_ userid.
+     # Identify the remote server.
+     # Run the _owping remote-owamp-server_ command to make a pair of 10 second delay measurements (one in each direction) between remote OWAMP server and your NPToolkit server. Results are displayed on your console or terminal window.
+
+ * *Q:* What is Thrulay?
+ * *A:* [http://e2epi.internet2.edu/thurlay/ Thrulay] is an advanced client/server Bandwidth measurement tool. It reports both the measured throughput and the path delay (hence the name Thrulay). In UDP mode, it can generate true Poisson streams with micro-second errors in sending times. By default, the Thrulay daemon is not started. Future versions of the NPToolkit may change this behavior.
+
+ * *Q:* Where can I ask questions or report bugs?
+
+ * *A:* 
+   * For questions, you can email to i2-perfsonar _at_ internet2 _dot_ edu
+   * For bugs, report them at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description that you're using the NPtoolkit.
+
+ * *Q:* How do I configure the SNMP MA?
+ * *A:* The SNMP MA is pre-configured to use the Cacti SNMP collection system. A step by step guide to configuring cacti is available here at [CactiConfig]
+
+ * *Q:* How do I configure the hosts PingER pings?
+ * *A:* There's an included GUI for configuring the sites PingER should collect ping between. Nagivateto https://HOST/cgi-bin/pinger/configure_landmarks.cgi . With this GUI, add and remove hosts and domains from testing. Hit the _Save landmarks_ button when done and restart PingER by logging into the machine and typing _sudo /etc/init.d/PingER.sh restart_.
+
+ * *Q:* How do I test that my services are working?
+   * Disk - There is a _self status_ page avalable on ever installation: http://lab244.internet2.edu/cgi-bin/services.cgi
+   * PingER - Navigate to http://tukki.fnal.gov/pinger/pingerUI.pl, Enter the address of the PingER service into the form. To get the address of the PingER service, navigate to https://HOST/ and scroll to PingER; the address will be listed in this area.
+   * SNMP MA - Navigate to https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/characteristics/utilization/2.0&url=HOST_ADDRESS to verify that the SNMP MA is working. To get the address of the SNMP MA service, navigate to https://HOST/ and scroll to SNMP MA; the address will be listed in this area.
+   * perfSONAR-BUOY - Navigate to https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0&url=HOST_ADDRESS to verify that perfSONAR-BUOY is working. To get the address of the perfSONAR-BUOY service, navigate to https://HOST/ and scroll to perfSONAR-BUOY; the address will be listed in this area.
+
+ * *Q:* I'd like to PXE boot the NPToolkit. Is that possible?
+ * *A:* Not currently, but this is a consideration of future releases.
+
+ * *Q:* When I boot, it gives me the following error "Can't find knoppix filesystem, sorry. Dropping you to a very limited shell ...."
+ * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
+
+ * *Q:* I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_200807' doesn't exist at /some/path/to/Base.pm line XXX_.
+ * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.
+
+== Last Updated ==
+
+$Id$
