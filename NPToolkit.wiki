@@ -57,7 +57,7 @@ The initial steps are:
    * The results should be the same, if they aren't please re-download the ISO.
  # Burn the ISO to a CD-ROM
  # Insert the CD-ROM into the tray and boot the system
- # After the boot process completes, enter the user name _knoppix_ to access the system.
+ # After the boot process completes, enter the user name *_knoppix_* to access the system.
 
 During the boot process, you will notice that you are prompted to customize the tools. The customization process allows you to add specific information (i.e., physical location of the server or local link speed). After all the tools have been started, the boot process allows you to easily customize each tool. The customization files, along with log files, can be stored on an external drive (e.g., a USB thumb drive) or if chosen on the root partition of the internal hard drive.
 
@@ -129,7 +129,7 @@ TBD
  * *Q: How do I use BWCTL?*
  * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify Iperf testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients or you can logon to this NPToolkit server and run tests to remote BWCTL servers. The BWCTL server allows TCP tests with a maximum duration of 30 seconds.
    * To run a test to a remote BWCTL server:
-     # Logon to the NPToolkit server using the _knoppix_ userid
+     # Logon to the NPToolkit server using the *_knoppix_* userid
      # Identify the remote server
      # Run the _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the your NPToolkit server to the remote BWCTL server. Results are displayed on our console or terminal window.
 
@@ -142,7 +142,7 @@ TBD
  * *Q: How do I use OWAMP?*
  * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two Internet2 hosts. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients or you can logon to this NPToolkit server and run tests to remote OWAMP servers. By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
    * To run a test to a remote OWAMP server:
-     # Logon to the NPToolkit server using the _knoppix_ userid.
+     # Logon to the NPToolkit server using the *_knoppix_* userid.
      # Identify the remote server.
      # Run the _owping remote-owamp-server_ command to make a pair of 10 second delay measurements (one in each direction) between remote OWAMP server and your NPToolkit server. Results are displayed on your console or terminal window.
 
