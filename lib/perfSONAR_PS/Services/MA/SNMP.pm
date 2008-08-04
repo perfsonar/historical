@@ -254,8 +254,14 @@ sub init {
     my $error = q{};
     if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"} and 
          $self->{CONF}->{"snmp"}->{"metadata_db_external"} ) {
-        if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            use perfSONAR_PS::DB::Cacti;
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+            require perfSONAR_PS::DB::Cricket;
+            my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
+            $cricket->openDB();
+            $cricket->closeDB();
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
+            require perfSONAR_PS::DB::Cricket;
             my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
             $cacti->openDB();
             $cacti->closeDB();
