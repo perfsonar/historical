@@ -217,6 +217,59 @@ sub closeDB {
     }
 }
 
+=head2 info($self, { })
+
+Get the RRD info from a given rrd file.
+
+=cut
+
+sub info {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { } );
+
+    my %rrd_result   = ();
+    my $cmd = "info " . $self->{NAME};
+
+    $self->{LOGGER}->debug( "Calling rrdtool with command: " . $cmd );
+    RRDp::cmd $cmd;
+    my $answer = RRDp::read;
+    if ($RRDp::error) {
+        $self->{LOGGER}->error( "Database error \"" . $RRDp::error . "\"." );
+        %rrd_result = ();
+        $rrd_result{ANSWER} = $RRDp::error;
+        return %rrd_result;
+    }
+
+    my %res = ();
+    if ( $$answer ) {
+        my @array = split( /\n/mx, $$answer );
+        my $len = $#{@array};
+
+        my %lookup = ();
+        for my $x ( 0 .. $len ) {
+            my @line = split( /\s=\s/mx, $array[$x] );
+            if ( $line[0] =~ m/^rra/ ) {
+                my @key = split( /\./mx, $line[0] );
+                if ( $#{@key} == 1) {
+                  $key[0] =~ s/^.*\[//;
+                  $key[0] =~ s/\]$//;
+                  $key[1] =~ s/\[.*$//;
+                  $line[1] =~ s/\"//g;
+                  $lookup{$key[0]}{$key[1]} = $line[1]; 
+                }
+            }
+            elsif ( $line[0] =~ m/^ds/ ) {
+                # no use for these right now...
+            }
+            else {
+                $rrd_result{$line[0]} = $line[1];
+            }  
+        }
+        $rrd_result{"rra"} = \%lookup;
+    }
+    return \%rrd_result;
+}
+
 =head2 query($self, { cf, resolution, start, end })
 
 Query a RRD with specific times/resolutions.

@@ -250,7 +250,8 @@ sub init {
     $self->{CONF}->{"snmp"}->{"ls_chunk"} = 50;
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
-
+    $handler->registerMessageHandler( "DataInfoRequest", $self );
+    
     my $error = q{};
     if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"} and 
          $self->{CONF}->{"snmp"}->{"metadata_db_external"} ) {
@@ -844,6 +845,18 @@ sub handleEvent {
             }
         );
     }
+    elsif ( $parameters->{messageType} eq "DataInfoRequest" ) {
+        $self->maDataInfoRequest(
+            {
+                output             => $parameters->{output},
+                metadata           => $md,
+                filters            => \@filters,
+                time_settings      => \%timeSettings,
+                request            => $parameters->{rawRequest},
+                message_parameters => $parameters->{messageParameters}
+            }
+        );
+    }
     else {
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
     }
@@ -1119,6 +1132,346 @@ sub metadataKeyRetrieveMetadataData {
             endParameters( $parameters->{output} );
             $parameters->{output}->endElement("key");
             endData( $parameters->{output} );
+        }
+    }
+    else {
+        my $msg = "Database \"" . $self->{CONF}->{"snmp"}->{"metadata_db_file"} . "\" returned 0 results for search";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+    return;
+}
+
+=head2 maDataInfoRequest($self, { output, metadata, time_settings, filters, request, message_parameters })
+
+Testing of a new request message to get the 'meta' metadata; e.g. information like data start/end
+times in the database, resolutions, etc.
+
+=cut
+
+sub maDataInfoRequest {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output             => 1,
+            metadata           => 1,
+            time_settings      => 1,
+            filters            => 1,
+            request            => 1,
+            message_parameters => 1
+        }
+    );
+
+    my $mdId  = q{};
+    my $dId   = q{};
+    my $error = q{};
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB} = $self->prepareDatabases( { doc => $parameters->{output} } );
+        unless ( $self->{METADATADB} ) {
+            throw perfSONAR_PS::Error_compat("Database could not be opened.");
+            return;
+        }
+    }
+    unless ( ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" )
+        or ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) )
+    {
+        throw perfSONAR_PS::Error_compat("Wrong value for 'metadata_db_type' set.");
+        return;
+    }
+
+    my $nmwg_key = find( $parameters->{metadata}, "./nmwg:key", 1 );
+    if ($nmwg_key) {
+        $self->dataInfoRetrieveKey(
+            {
+                metadatadb         => $self->{METADATADB},
+                key                => $nmwg_key,
+                metadata           => $parameters->{metadata},
+                filters            => $parameters->{filters},
+                request_namespaces => $parameters->{request}->getNamespaces(),
+                output             => $parameters->{output}
+            }
+        );
+    }
+    else {
+        $self->dataInfoRetrieveMetadataData(
+            {
+                metadatadb         => $self->{METADATADB},
+                time_settings      => $parameters->{time_settings},
+                metadata           => $parameters->{metadata},
+                filters            => $parameters->{filters},
+                request_namespaces => $parameters->{request}->getNamespaces(),
+                output             => $parameters->{output}
+            }
+        );
+
+    }
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $self->{METADATADB}->closeDB( { error => \$error } );
+    }
+    return;
+}
+
+=head2 dataInfoRetrieveKey($self, { metadatadb, key, metadata, filters, request_namespaces, output })
+
+Case where a key is provided
+
+=cut
+
+sub dataInfoRetrieveKey {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            metadatadb         => 1,
+            key                => 1,
+            metadata           => 1,
+            filters            => 1,
+            request_namespaces => 1,
+            output             => 1
+        }
+    );
+
+    my $mdId    = "metadata." . genuid();
+    my $dId     = "data." . genuid();
+    my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+    unless ($hashKey) {
+        my $msg = "Key error in metadata storage.";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        return;
+    }
+
+    my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
+    unless ($hashId) {
+        my $msg = "Key error in metadata storage.";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        return;
+    }
+
+    my $query = q{};
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+        $query = "/nmwg:store/nmwg:data[\@id=\"" . $hashId . "\"]";
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $query = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data[\@id=\"" . $hashId . "\"]";
+    }
+
+    my $results = $parameters->{metadatadb}->querySet( { query => $query } );
+    if ( $results->size() != 1 ) {
+        my $msg = "Key error in metadata storage.";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        return;
+    }
+
+    my $mdIdRef;
+    my @filters = @{ $parameters->{filters} };
+    if ( $#filters > -1 ) {
+        $mdIdRef = $filters[-1][0]->getAttribute("id");
+    }
+    else {
+        $mdIdRef = $parameters->{metadata}->getAttribute("id");
+    }
+
+
+    my $key2 = $results->get_node(1)->cloneNode(1);
+    my $params = find( $key2, ".//nmwg:parameters", 1 );
+        
+    my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
+    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
+    $rrd->openDB;
+    my $rrd_result = $rrd->info();
+    my $first = $rrd->firstValue();
+    my $last = $rrd->lastValue();
+
+    if ( $rrd->getErrorMessage ) {
+        my $msg = "Data storage error";
+        $self->{LOGGER}->error($msg);
+        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+    }
+    else {
+        createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
+
+        my %lookup = ();
+        foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
+            push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
+        }
+        foreach my $cf ( keys %lookup ) {
+            my $thing = XML::LibXML::Element->new( "parameter" );
+            $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+            $thing->setAttribute( "name", "consolidationFunction" );
+            $thing->setAttribute( "value", $cf );
+            foreach my $res ( @{$lookup{$cf}} ) {
+                my $thing2 = XML::LibXML::Element->new( "parameter" );
+                $thing2->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing2->setAttribute( "name", "resolution" );
+                $thing2->appendTextNode( $res );
+                $thing->addChild($thing2); 
+            }
+            $params->addChild($thing);
+        }
+        
+        my $thing = XML::LibXML::Element->new( "parameter" );
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        $thing->setAttribute( "name", "firstTime" );
+        $thing->appendTextNode( $first );
+        $params->addChild($thing);  
+        $thing = XML::LibXML::Element->new( "parameter" );
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        $thing->setAttribute( "name", "lastTime" );
+        $thing->appendTextNode( $last );
+        $params->addChild($thing);        
+
+        $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
+        createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+    }
+    $rrd->closeDB;
+
+    return;
+}
+
+=head2 dataInfoRetrieveMetadataData($self, $metadatadb, $metadata, $chain, $id, $request_namespaces, $output)
+
+case where no key is provided
+
+=cut
+
+sub dataInfoRetrieveMetadataData {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            metadatadb         => 1,
+            time_settings      => 1,
+            metadata           => 1,
+            filters            => 1,
+            request_namespaces => 1,
+            output             => 1
+        }
+    );
+
+    my $mdId        = q{};
+    my $dId         = q{};
+    my $queryString = q{};
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+        $queryString = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+    }
+
+    my $results             = $parameters->{metadatadb}->querySet( { query => $queryString } );
+    my %et                  = ();
+    my $eventTypes          = find( $parameters->{metadata}, "./nmwg:eventType", 0 );
+    my $supportedEventTypes = find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+    foreach my $e ( $eventTypes->get_nodelist ) {
+        my $value = extract( $e, 0 );
+        if ($value) {
+            $et{$value} = 1;
+        }
+    }
+    foreach my $se ( $supportedEventTypes->get_nodelist ) {
+        my $value = extract( $se, 0 );
+        if ($value) {
+            $et{$value} = 1;
+        }
+    }
+
+    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
+        $queryString = "/nmwg:store/nmwg:data";
+    }
+    elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+        $queryString = "/nmwg:store[\@type=\"MAStore\"]/nmwg:data";
+    }
+
+    if ( $eventTypes->size() or $supportedEventTypes->size() ) {
+        $queryString = $queryString . "[./nmwg:key/nmwg:parameters/nmwg:parameter[(\@name=\"supportedEventType\" or \@name=\"eventType\")";
+        foreach my $e ( sort keys %et ) {
+            $queryString = $queryString . " and (\@value=\"" . $e . "\" or text()=\"" . $e . "\")";
+        }
+        $queryString = $queryString . "]]";
+    }
+    my $dataResults = $parameters->{metadatadb}->querySet( { query => $queryString } );
+    if ( $results->size() > 0 and $dataResults->size() > 0 ) {
+        my %mds = ();
+        foreach my $md ( $results->get_nodelist ) {
+            my $curr_md_id = $md->getAttribute("id");
+            next if not $curr_md_id;
+            $mds{$curr_md_id} = $md;
+        }
+
+        foreach my $d ( $dataResults->get_nodelist ) {
+            my $curr_d_mdIdRef = $d->getAttribute("metadataIdRef");
+            next if ( not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef} );
+            my $curr_md = $mds{$curr_d_mdIdRef};
+
+            my $dId  = "data." . genuid();
+            my $mdId = "metadata." . genuid();
+
+            my $md_temp = $curr_md->cloneNode(1);
+            $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
+            $md_temp->setAttribute( "id",            $mdId );
+
+
+            my $hashId  = $d->getAttribute("id");
+            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+
+            next if ( not defined $hashKey );
+
+            my $key2 = $d->cloneNode(1);
+            my $params = find( $key2, ".//nmwg:parameters", 1 );
+
+            my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
+            my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
+            $rrd->openDB;
+            my $rrd_result = $rrd->info();
+            my $first = $rrd->firstValue();
+            my $last = $rrd->lastValue();
+
+            if ( $rrd->getErrorMessage ) {
+                my $msg = "Data storage error";
+                $self->{LOGGER}->error($msg);
+                throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+            }
+            else {
+                $parameters->{output}->addExistingXMLElement($md_temp);
+
+                my %lookup = ();
+                foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
+                    push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
+                }
+                foreach my $cf ( keys %lookup ) {
+                    my $thing = XML::LibXML::Element->new( "parameter" );
+                    $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                    $thing->setAttribute( "name", "consolidationFunction" );
+                    $thing->setAttribute( "value", $cf );
+                    foreach my $res ( @{$lookup{$cf}} ) {
+                        my $thing2 = XML::LibXML::Element->new( "parameter" );
+                        $thing2->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                        $thing2->setAttribute( "name", "resolution" );
+                        $thing2->appendTextNode( $res );
+                        $thing->addChild($thing2); 
+                    }
+                    $params->addChild($thing);
+                }
+        
+                my $thing = XML::LibXML::Element->new( "parameter" );
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing->setAttribute( "name", "firstTime" );
+                $thing->appendTextNode( $first );
+                $params->addChild($thing);  
+                $thing = XML::LibXML::Element->new( "parameter" );
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing->setAttribute( "name", "lastTime" );
+                $thing->appendTextNode( $last );
+                $params->addChild($thing);        
+
+                $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );      
+                createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+            }
+            $rrd->closeDB;
         }
     }
     else {
