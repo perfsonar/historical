@@ -29,40 +29,55 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
- # Attendees: Jason
+ # Attendees: Jason, Maxim, Aaron, Joe
  # Team Updates
    # Internet2
+     * Jason: Wiki migration.  Need people to update services.  Helped get ready for APAN.  Modifications to SNMP MA to support meta queries on data formats (needs lots of work).  
+     * Aaron: Post JTs activity is to modify OSCARS to use the topology service to do path finding (paths internal to local domain, hop into next domain).  Using 2 seperate path finding situations: inter/intra domain.  Inter: Each domain has a 'routes' file that explains which domain given certain situations.  Calculates path based on in/out info.  Aaron's approach doesn't use static routes.  All of this written in Java.  BWCTL testing: looking to do full release in next week or so for 1.3.  Doing basic testing (32/64 bit linux, freebsd) on src/dst.  
+     * Jeff: At an SC meeting, will report in later.
    # IU
    # UDEL
    # Ga Tech
    # ESnet 
+     * Joe: Deploying tools on testers.  Using CFEngine.  
    # SLAC
    # FNAL
+     * Maxim: Web GUI.  Added feature for Jason (direct URL for graph).  Fixed some bugs.  Trying to deploy w/ w/o apache.  SQLite issues in PingER (BNL issues).  Will look into warnings.
    # MCNC
  # JT Techs Wrap Up
- # Wiki Migration (Jason)
+   * Talk about the disk.  Maxim: Need a more PR centric web page.  No one has contacted us about it yet.  More official release in the last week for PR purposes.  'Stable' by Oct.  Joe wants: Security info (e.g. iptables) - will come from SOC student in a couple of weeks.  Also wants to discuss ways to 'update' your testing star as people come online (e.g. define a group).  Lastly has 2 NTP servers to add to the default config.
+   * Some talk about SOAP in perl.  
+ # Wiki Migration
    * Some content there already
    * Follow the current structure (authors need to fill in the blanks on their services)
- # LHC Disk (Jason)
+   * Use new wiki from now on
+   * Migrate/Kill anything you won't need.
+ # LHC Disk (Postponed talking about the major issues due to attendance)
    * Hardening
      * PingER
-       * Warning handling
+       * Warning handling - Maxim will address.
      * hLS
-       * Database startup size (DB_CONFIG issues)
+       * Database startup size (DB_CONFIG issues) - Jason will address.
      * SNMP MA
-       * Better startup/test procedures on cacti integration
-       * cricket/mrtg inclusion
+       * Better startup/test procedures on cacti integration - Distant future
+       * cricket/mrtg inclusion - Not so distant future.
      * perfSONAR-BUOY
-       * OWAMP Collection Agent
-       * Conversion into pS space of collection agents
-       * MA Database handling
+       * OWAMP Collection Agent - Fall
+       * Conversion into pS space of collection agents - Fall/Winter
+       * MA Database handling - Fall
        * Configuration
    * SOC Improvement roll in (over next month or two)
    * Community Involvement (Testing by Jon Dugan/Brian/MCNC/GT?)
  # GLIF Demo Update (Aaron/Jeff)
+   * Aaron: E2E mon demo.  Showing GLIF members how to deploy/use the stuff.  Moving slow due to provisioning.  KISTI up? Others no.  May need to register data into LS (Aaron can right a GUI to bypass E2E mon) = theorized way forward for DCN
    * What is the plan (wikify it?)
+     * Copy to our wiki 
    * Group inter-dependencies
- # FMM/SC08 Demo Planning
+     * gLS API/gLS/hLS Instances - Jason
+     * GUIs - Aaron/Jason
+     * Status monitor - Aaron
+     * E2EMon Setup - Maxim? - Aaron
+ # FMM/SC08 Demo Planning (Postponed)
    * What should/could we do?
      * Use the Disks/gLS
      * New GUIs (Fusion/addl web things)
