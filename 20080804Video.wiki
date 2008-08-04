@@ -29,9 +29,48 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
-TBD
+ # Attendees: Jason
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet 
+   # SLAC
+   # FNAL
+   # MCNC
+ # JT Techs Wrap Up
+ # Wiki Migration (Jason)
+   * Some content there already
+   * Follow the current structure (authors need to fill in the blanks on their services)
+ # LHC Disk (Jason)
+   * Hardening
+     * PingER
+       * Warning handling
+     * hLS
+       * Database startup size (DB_CONFIG issues)
+     * SNMP MA
+       * Better startup/test procedures on cacti integration
+       * cricket/mrtg inclusion
+     * perfSONAR-BUOY
+       * OWAMP Collection Agent
+       * Conversion into pS space of collection agents
+       * MA Database handling
+       * Configuration
+   * SOC Improvement roll in (over next month or two)
+   * Community Involvement (Testing by Jon Dugan/Brian/MCNC/GT?)
+ # GLIF Demo Update (Aaron/Jeff)
+   * What is the plan (wikify it?)
+   * Group inter-dependencies
+ # FMM/SC08 Demo Planning
+   * What should/could we do?
+     * Use the Disks/gLS
+     * New GUIs (Fusion/addl web things)
+     * Incorporate *all* services; total package of e2e monitoring (potential use case is UMich -> Merit -> Internet2 Network -> SOX -> GT)
+   * Individuals wanting to be involved
+   * Deadlines
+ # Next meeting will be August 11, 2008
 
 == Last Updated ==
 
 $Id$
-
