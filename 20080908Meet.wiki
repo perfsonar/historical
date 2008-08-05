@@ -5,9 +5,15 @@
  # Jeff Boote - Internet2
  # Eric Boyd - Internet2
  # Arron Brown - Internet2
- # -
+ # Jason Zurawski - Internet2
  # - 
  # -
+ # - 
+ # - 
+ # - 
+ # - 
+ # - 
+ # - 
 
 == Logistics ==
 
@@ -116,7 +122,35 @@ http://perfsonar-ps.googlecode.com/svn/wiki/20080908Directions.png
 
 === Restaurants ===
 
-TBD
+Seva Restaurant (Vegan/Vegetarian)
+314 E Liberty St
+Ann Arbor, MI 48104
+(734) 662-1111
+
+[htt://www.redhawkannarbor.com Red Hawk Bar & Grill] (Pub/American)
+316 S. State Street
+Ann Arbor, MI 48104
+(734) 994-4004
+
+[http://www.ashleys.com Ashley's Restaurant & Pub] (Pub/American)
+338 S. State Street
+Ann Arbor, MI 48104
+(734) 996-9191
+
+[http://grizzlypeak.net Grizzly Peak Brewing Company‎] (Pub/American)
+120 W. Washington
+Ann Arbor, MI 48104
+(734) 741-7325
+
+Arbor Brewing Co‎ (Pub/American)
+114 E Washington St
+Ann Arbor, MI 48104
+(734) 213-1393
+
+Conor O'Neill's‎ (Pub/Irish)
+318 South Main St
+Ann Arbor, MI 48104
+(734) 665-2968
 
 == Agenda ===
 
