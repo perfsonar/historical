@@ -6,7 +6,7 @@ applicable.
 
 == Future Events ==
 
- * [20080804Video] - Video Conference for August 4, 2008
+ * [20080811Video] - Video Conference for August 11, 2008
  * [20080908Meet] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
 
 == Past Meetings ==
@@ -20,6 +20,7 @@ applicable.
 == Past Conference/Video Calls ==
 
  * 2008
+   * [20080804Video] - Video Conference for August 4, 2008
    * [20080714Video] - Video Conference for July 14, 2008
    * [20080630Call] - Conference Call for June 30, 2008
    * [20080609Call] - Conference Call for June 09, 2008
