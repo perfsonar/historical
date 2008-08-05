@@ -1137,7 +1137,7 @@ sub outputCompatResults {
 sub outputCompatNodeElement {
     my ($self, $output, $node) = @_;
 
-    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $self->{DOMAIN}."-".$node->{"name"} });
+    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $node->{"name"} });
       $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint");
       $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
     if (defined $node->{"city"} and $node->{"city"} ne q{}) {
@@ -1168,7 +1168,7 @@ sub outputCompatCircuitElement {
       $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"globalName"});
       $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $circuit->{"type"});
       foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $self->{DOMAIN}."-".$endpoint->{"name"} });
+      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} });
       $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"});
       $output->endElement("node");
       }
@@ -1221,13 +1221,17 @@ sub parseCompatCircuitsFile {
             my $institution = findvalue($endpoint, "institution");
             my $latitude = findvalue($endpoint, "latitude");
 
+            if ($node_name !~ /-/) {
+                $node_name = $domain."-".$node_name;
+            }
+
             if (not defined $node_name or $node_name eq q{}) {
                 my $msg = "Node needs to have a name";
                 $self->{LOGGER}->error($msg);
                 throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
             }
 
-            $node_name =~ s/[^a-zA-Z0-9_]//g;
+            $node_name =~ s/[^a-zA-Z0-9_-]//g;
             $node_name = uc($node_name);
 
             if (defined $nodes{$node_name}) {
@@ -1321,7 +1325,11 @@ sub parseCompatCircuitsFile {
                         throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
                     }
 
-                    $node_name =~ s/[^a-zA-Z0-9_]//g;
+                    if ($node_name !~ /-/) {
+                        $node_name = $self->{DOMAIN}."-".$node_name;
+                    }
+
+                    $node_name =~ s/[^a-zA-Z0-9_-]//g;
                     $node_name = uc($node_name);
 
                     if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
