@@ -1,0 +1,73 @@
+=  August 11 2008 Conference Call =
+
+== Where ==
+
+Number of sites: 10
+Mode: Voice Switched
+
+Phone Ports: 10
+Phone Bridge Information: (Scheduled through December 2008 due to scheduling limitations.)
+Dial +1-614-247-6427
+At the prompt, enter the Conference ID: 9746 followed by the pound (#) key.
+
+GDS Dialing Directions:
+ # Register with a GDS-enabled Gatekeeper.  To borrow space see: http://commons.internet2.edu/reggate.html
+ # Make sure you are connecting at 384 kbps.
+ # Dial 001189 783 9746 (no spaces)
+
+IP Dialing Directions
+ # Dial 192.148.244.143.
+ # Enable FAR END camera control.
+ # DOWN ARROW until you highlight Internet2 9746
+ # Use the RIGHT ARROW to enter that conference.
+ # Do not forget to disable the FAR END camera control.
+
+== When ==
+
+ August 11 2008 - 2:30 EDT
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet 
+   # SLAC
+   # FNAL
+   # MCNC
+ # Wiki Migration
+ # LHC Disk
+   * Hardening
+     * PingER
+       * Warning handling
+     * hLS
+       * Database startup size (DB_CONFIG issues)
+     * SNMP MA
+       * Better startup/test procedures on cacti integration
+       * cricket/mrtg inclusion
+     * perfSONAR-BUOY
+       * OWAMP Collection Agent
+       * Conversion into pS space of collection agents
+       * MA Database handling
+       * Configuration
+   * SOC Improvement roll in (over next month or two)
+   * Community Involvement (Testing by Jon Dugan/Brian/MCNC/GT?)
+   * Extensions
+   * SVN for Source Code
+ # GLIF Demo Update (Aaron/Jeff)
+   * Status
+ # FMM/SC08 Demo Planning
+   * What should/could we do?
+     * Use the Disks/gLS
+     * New GUIs (Fusion/addl web things)
+     * Incorporate *all* services; total package of e2e monitoring (potential use case is UMich -> Merit -> Internet2 Network -> SOX -> GT)
+   * Individuals wanting to be involved
+   * Deadlines
+ # Next meeting will be August 18, 2008
+
+== Last Updated ==
+
+$Id$
