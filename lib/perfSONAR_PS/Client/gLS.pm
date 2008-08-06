@@ -125,10 +125,12 @@ sub orderRoots {
         $root =~ s/\s+//g;
         unless (  $self->verifyURL( { url => $root } ) == -1 ) {
             my $host = $root;
-            $host =~ s/^http:\/\///;
-            $host =~ s/:.*//;
-            my ( $ret, $duration, $ip ) = $ping->ping($host);
-            $list{$duration} = $root if $ret or $duration;
+	    if ($host =~ /^http/) {
+                $host =~ s/^http:\/\///;
+                my ($unt_host) = $host =~ /^(.+):/; 
+                my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
+                $list{$duration} = $root if $ret or $duration;
+	    }
         }
     }
     $ping->close();
