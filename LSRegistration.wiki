@@ -199,29 +199,36 @@ following sections will chronical these formats.
 
 The IDC will have the following information available that it may want to share:
 
- # URL
- # Protocol version (will be a namespace URL)
+ # URL (There may be two, there may not be.  Because of this we need to be careful how the info is organized)
+ # Protocol versions (will be a namespace URL)
  # List of domains under its control (will always be one domain for now)
- # Where can users/services subscribe to my notifications.
+ # Where can users/services subscribe to my notifications (see 1)
  
-Some additional pieces of info that will be required:
+This is the proposed way forward:
 
- # _Main_ contact address (if there is some _status_ endpoint or just a url to visit the IDC), this would go in the service section along with the other metadata
- # Contact URLs - use different metadata block for each in the data section
-   # IDC host:port/endPoint for IDC/DC communication
-     * Domains under control would go here?
-     * eventType(s) for protocol(s)
-     * Peers/Neigbors - If there is a peering relationship we may want to represent this (maybe not, is it internal?  Is it secret?)
-     * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
-   # Notification host:port/endPoint for Subscriptions
-     * Messages/log levels supported?
-     * eventType(s) for protocol(s)
-     * services subscribed (if we are keeping track)
-     * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
-   # Other things that are accessible to the IDC over WSs?
- # Others?
+ * *Metadata*
+   * One _Metadata_ / _Service_ block per _endPoint_.  This covers the case of an IDC maintaining two endpoints (one for IDC messages, one for subscriptions)
+   * _Service_ info similar to perfSONAR/topology use case, information may vary
+   * eventTypes/parameters not necessary
+ * Data
+   * Linked to a service block, may be many, contains at least one (possibly more) metadata blocks
+   * Each metadata block describes a capability/service of the aforementioned service block
+   * Follows the perfSONAR/NM-WG format (using NML-WG topology)
+   * Use Subject/eventTypes/parameters as needed
+   * Examples:
+     # IDC host:port/endPoint for IDC/DC communication
+       * Domains under control would go here?
+       * eventType(s) for protocol(s)
+       * Peers/Neigbors - If there is a peering relationship we may want to represent this (maybe not, is it internal?  Is it secret?)
+       * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
+     # Notification host:port/endPoint for Subscriptions
+       * Messages/log levels supported?
+       * eventType(s) for protocol(s)
+       * services subscribed (if we are keeping track)
+       * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
+     # Other things that are accessible to the IDC over WSs?
  
-A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
+A _very_ basic mockup of the _metadata_ / _data_ relationship is here (note this is the _single URL_ case):
 
 {{{
   <nmwg:metadata id="meta1"
@@ -232,8 +239,8 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
         <nmtb:name>Internet2 IDC</nmtb:name>
         <nmtb:type>IDC</nmtb:type>
         <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
-        <nmtb:address type="uri">http://somehost.internet2.edu:8080/some/end/point</nmtb:address>
-        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8080/some/end/point</nmtb:address>
+        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
       </nmtb:service>
 
     </dcn:subject>
@@ -246,19 +253,18 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
     <nmwg:metadata id="m1">
       <nmwg:subject id="s1">
         
-        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol 
-             (yeah, that should work) -->
+        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol -->
         <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
                    xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="uri">http://somehost.internet2.edu:8080/IDC/end/point</nmtb:address>
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
         </nmtb:node>
         
         <!-- domains controlled (could be many of these) -->
         <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
           <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
         </nmtb:domain>  
-        
-        <!-- I wanted to do something about peers here... -->
+
+        <!-- future: list of neighbors -->
         
       </nmwg:subject>
       
@@ -267,35 +273,248 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
       
       <nmwg:parameters id="p1">
         <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 1</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 2</nmwg:parameter>
       </nmwg:parameters>
-      
     </nmwg:metadata>
 
     <nmwg:metadata id="m2">
-      <nmwg:subject>
+      <nmwg:subject id="s2">
+        
+        <!-- information to interact (subscribe, stop subscribing) -->
         <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
                    xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
-          <nmtl3:port>
-            <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
-          </nmtl3:port>
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
         </nmtb:node>
+        
+        <!-- future: list of subscribers (e.g. NBs) that I pushed out to -->
+        
       </nmwg:subject>
+      
       <nmwg:eventType>NOTIFICATION PROTOCOL URN</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+
+<!-- would this still be necessary? -->
+        <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+
+        <nmwg:parameter name="keyword:supportedMessage">supported message 1</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 2</nmwg:parameter>
+
+<!-- log levels i am willing to share? -->
+        
+      </nmwg:parameters>
     </nmwg:metadata>
     
   </nmwg:data>
 }}}
+
+
+And also the _seperate URL_ case:
+
+{{{
+  <nmwg:metadata id="meta1"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 IDC</nmtb:name>
+        <nmtb:type>IDC</nmtb:type>
+        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+      </nmtb:service>
+
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+    <nmwg:metadata id="m1">
+      <nmwg:subject id="s1">
+        
+        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol -->
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        </nmtb:node>
+        
+        <!-- domains controlled (could be many of these) -->
+        <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
+          <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
+        </nmtb:domain>  
+
+        <!-- future: list of neighbors -->
+        
+      </nmwg:subject>
+      
+      <nmwg:eventType>IDC PROTOCOL URN</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+        <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 1</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 2</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:metadata>
+  </nmwg:data>
+
+
+
+  <nmwg:metadata id="meta2"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 IDC</nmtb:name>
+        <nmtb:type>IDC</nmtb:type>
+        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARSNotify</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARSNotify</nmtb:address>
+      </nmtb:service>
+
+    </dcn:subject>
+  </nmwg:metadata>
+
+  <nmwg:data id="data2" 
+             metadataIdRef="meta2"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+    <nmwg:metadata id="m2">
+      <nmwg:subject id="s2">
+        
+        <!-- information to interact (subscribe, stop subscribing) -->
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARSNotify</nmtb:address>
+        </nmtb:node>
+        
+        <!-- future: list of subscribers (e.g. NBs) that I pushed out to -->
+        
+      </nmwg:subject>
+      
+      <nmwg:eventType>NOTIFICATION PROTOCOL URN</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+
+<!-- would this still be necessary? -->
+        <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+
+        <nmwg:parameter name="keyword:supportedMessage">supported message 1</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 2</nmwg:parameter>
+
+<!-- log levels i am willing to share? -->
+        
+      </nmwg:parameters>
+    </nmwg:metadata>
+    
+  </nmwg:data>
+}}}
+
+
+==== Notification Broker Service ==== 
+
+The Notification Broker will have the following information available that it may want to share:
+
+ # URL
+ # protocol version (ws-notify maybe)
+ # list of services that send it notifications (corresponds to IDC url)
+ 
+This is the proposed way forward:
+
+ * *Metadata*
+   * One _Metadata_ / _Service_ block.
+   * _Service_ info similar to perfSONAR/topology use case, information may vary
+   * eventTypes/parameters not necessary
+ * Data
+   * Linked to a service block, may be many, contains at least one (possibly more) metadata blocks
+   * Each metadata block describes a capability/service of the aforementioned service block
+   * Follows the perfSONAR/NM-WG format (using NML-WG topology)
+   * Use Subject/eventTypes/parameters as needed
+   * Examples:
+     # IDC host:port/endPoint for IDC/DC communication
+       * eventType(s) for protocol(s)
+       * list of subscribers
+       * list of publishers
+       * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
+
+A _very_ basic mockup of the _metadata_ / _data_ relationship is here (note this is the _single URL_ case):
+
+{{{
+  <nmwg:metadata id="meta1"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 Notification Broker</nmtb:name>
+        <nmtb:type>NB</nmtb:type>
+        <nmtb:description>DCN NB, Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/NotificationBroker</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/NotificationBroker</nmtb:address>
+      </nmtb:service>
+
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+    <nmwg:metadata id="m1">
+      <nmwg:subject id="s1">
+        
+        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol -->
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/NotificationBroker</nmtb:address>
+
+          <nmtb:relation type="subscriber">
+            <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
+          </nmtb:relation>
+
+          <nmtb:relation type="subscriber">
+            <nmtb:address type="uri">http://packrat.internet2.edu:8090/perfSONAR_PS/services/IDCMA</nmtb:address>
+          </nmtb:relation>
+          
+          <nmtb:relation type="publisher">
+            <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          </nmtb:relation>
+      
+        </nmtb:node>
+      </nmwg:subject>
+      
+      <nmwg:eventType>NOTIFICATION PROTOCOL URN</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+        <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 1</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">supported message 2</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:metadata>
+    
+  </nmwg:data>
+}}}
+
+=== Questions ===
 
 Some questions to be answered:
 
  * What is the namespace of the _metadata_'s _subject_?  I have this as *DCN* tooling in the *NM-WG* namespace, do we want to use something else?
  * Is the topology _service_ element what we want to use here?
  * Is there more we can/should represent in the _service_ element (e.g. is there a _contact_ address for general info on the *IDC*)
-
-==== Notification Broker Service ==== 
-
-TBD
+ * The two EndPoints is unfortunate, it would be cleaner if:
+   * The IDC had a _catch all_ url
+   * There was a _status_ url or something that could redirect
+   * IDC had only one endPoint for both the notify and the IDC functions
+ * What would a neighbors/peers/subscribers/publishers list look like?
+ * What is the format for message names (URN like?)
+ * How many eventTypes (not that it matters)
+ * What needs the X509 info, what does that look like?
 
 == Last Updated ==
 
