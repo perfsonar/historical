@@ -1,0 +1,308 @@
+= Lookup Service Registration =
+
+Different types of services may be able to take advantage of the _perfSONAR Lookup Service_ whether
+it be publishing the existance of resources or the discovery of remote information.  This page is a 
+high level view of what the *LS* expects in terms of registered information as well as potential
+queries that motivate what a service should (or should not) share. 
+
+== Lookup Service Overview ==
+
+The Lookup Service is really nothing more than an XML database (e.g. in the case of perfSONAR-PS 
+the Oracle Berkeley [http://www.oracle.com/database/berkeley-db/xml/index.html DB XML], Java
+incarnations use the [http://exist.sourceforge.net/ eXist] database) exposed throgh the perfSONAR
+Web Services interface.  This design decission allows the *LS* to deal with the native format of
+metadata in the perfSONAR framework: [http://nmwg.internet2.edu/ NM-WG] formated XML.  Because there
+is rarely a need to inspect or beset the XML submited by the various services, the query interface
+is also left in a native form, namely by use of the [http://www.w3.org/TR/xquery/ XQuery] and 
+[http://www.w3.org/TR/xpath XPath] languages.
+
+The *LS* was originally designed with only the registration of perfSONAR services in mind.  Recent
+advances have allowed this service to be utilized in new ways and has changed the orginal design 
+paradigm.  In general all services must respect the seperation between the _Metadata_ (psuedo static
+information that is normally used to describe the service itself) and the _Data_ (specific information
+about the type of services offered such as the spoken protocol or data offered).  Adherence to this
+rule enables the various APIs (legacy as well as new) the ability to find data seemlessly both locally
+as well as in the new _Global Lookup Service_ (*gLS*) abstraction.
+
+== Data Format ==
+
+We start out with an example of the perfSONAR LS expected registration format for a perfSONAR service 
+(specifically the PingER Measurement Archive):
+
+{{{
+  <nmwg:metadata id="meta1">
+    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>PingER MA</psservice:serviceName>
+        <psservice:accessPoint>http://lab244.internet2.edu:8075/perfSONAR_PS/services/pinger/ma</psservice:accessPoint>
+        <psservice:serviceType>MA</psservice:serviceType>
+        <psservice:serviceDescription>PingER MA</psservice:serviceDescription>
+      </psservice:service>
+    </perfsonar:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" >
+    <nmwg:metadata id="pinger1"
+                   xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" 
+                   xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+                   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <pinger:subject id="subj1">
+        <nmwgt:endPointPair>
+          <nmwgt:src value="lab244.internet2.edu" type="hostname"/>
+          <nmwgt:dst value="cmssrm.hep.wisc.edu" type="hostname"/>
+        </nmwgt:endPointPair>
+      </pinger:subject>
+      <pinger:parameters id="params1">
+        <nmwg:parameter value="10" name="count"/>
+        <nmwg:parameter value="1000" name="packetSize"/>
+        <nmwg:parameter value="255" name="ttl"/>
+        <nmwg:parameter value="ICMP" name="transport"/>
+        <nmwg:parameter value="1" name="packetInterval"/>
+      </pinger:parameters>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+    </nmwg:metadata>
+    
+    <nmwg:metadata id="pinger2"
+                   xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/" 
+                   xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" 
+                   xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+      <pinger:subject id="subj2">
+        <nmwgt:endPointPair>
+          <nmwgt:src value="lab244.internet2.edu" type="hostname"/>
+          <nmwgt:dst value="www.cern.ch" type="hostname"/>
+        </nmwgt:endPointPair>
+      </pinger:subject>
+      <pinger:parameters id="params2">
+        <nmwg:parameter value="10" name="count"/>
+        <nmwg:parameter value="1000" name="packetSize"/>
+        <nmwg:parameter value="255" name="ttl"/>
+        <nmwg:parameter value="ICMP" name="transport"/>
+        <nmwg:parameter value="1" name="packetInterval"/>
+      </pinger:parameters>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>
+    </nmwg:metadata>    
+    
+  </nmwg:data>
+}}}
+
+Some notes on the _metadata_:
+
+ * The format is in the style of the *NM-WG*
+ * _subject_ is expected
+   * The subject namespace is perfSONAR because this is a perfSONAR service
+   * The subject contains a perfSONAR service element because this is a perfSONAR service
+   * The service element contins name, type, description, and contact information _*for the service only*_
+ * _parameters_ are optional
+ * _eventType_ is not expected (if it is present, it is normally used to trigger LS actions such as registration or a refresh)
+ * _key_ is not expected (also used in conjunction with LS operations such as a removal or a refresh).  
+ 
+Some notes on the _data_:
+
+ * The format is in the style of the *NM-WG*
+ * The data is linked to the metadata via id reference
+ * There many be many data elements that point to the service element
+ * The data must contain at least one (possibly many) metadata elements
+ * Each enclosed metadata element are also in the style of the *NM-WG*
+   * _subject_, _key_, _eventType_, and _parameters_ are possible.
+   * _subject_ is used to describe the topological features of a measurement (normally using a topology element such as the endPoint pair)
+   * _key_ can be an opaque identifier used in place of subject (not normally used)
+   * _eventType_ should describe the data type
+   * _parameters_ may contain any other optional information about the measurement data (e.g. command line defaults, etc.)
+
+New development has led to the inclusion of non-perfSONAR services into the LS, and the format is similar 
+(although not exact):
+
+{{{
+  <nmwg:metadata id="meta1"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 BWCTL Server</nmtb:name>
+        <nmtb:type>bwctl</nmtb:type>
+        <nmtb:description>BWCTL Server for LHC at Internet2 in Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">tcp://207.75.164.244:4823</nmtb:address>
+        <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:4823</nmtb:address>
+      </nmtb:service>
+    </perfsonar:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <nmwg:metadata id="bwctl1">
+      <nmwg:subject>
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
+          <nmtl3:port>
+            <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
+          </nmtl3:port>
+          <nmtl3:port>
+            <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+          </nmtl3:port>
+        </nmtb:node>
+      </nmwg:subject>
+      <nmwg:eventType>http://ggf.org/ns/nmwg/tools/bwctl/1.0</nmwg:eventType>
+    </nmwg:metadata>
+  </nmwg:data>
+}}}
+
+Some notes on the _metadata_:
+
+ * The format is in the style _similar_ to the *NM-WG*, but uses *NML-WG* elements as well
+ * _subject_ is expected
+   * The subject namespace is still perfSONAR (it is used in a perfSONAR context) but it is not a perfSONAR service
+   * The subject contains a topology service element to be generic (*not* a perfSONAR service element)
+   * The service element contins name, type, description, and contact information _*for the service only*_
+ * _parameters_ are optional
+ * _eventType_ is not expected (if it is present, it is normally used to trigger LS actions such as registration or a refresh)
+ * _key_ is not expected (also used in conjunction with LS operations such as a removal or a refresh).  
+ 
+Some notes on the _data_:
+
+ * The format is in the style of the *NM-WG*, but uses *NML-WG* elements as well
+ * The data is linked to the metadata via id reference
+ * There many be many data elements that point to the service element
+ * The data must contain at least one (possibly many) metadata elements
+ * Each enclosed metadata element are also in the style of the *NM-WG*, but use *NML-WG* elements as well
+   * _subject_, _key_, _eventType_, and _parameters_ are possible.
+   * _subject_ in this case is merely a defintion of the machine that is running the daemon (e.g. a node describing the access addresses/host names)
+   * _key_ can be an opaque identifier used in place of subject (not normally used)
+   * _eventType_ should describe the data type or perhaps protocol spoken (e.g. BWCTL 1.3 protocol)
+   * _parameters_ may contain any other optional information about the measurement data (e.g. command line defaults, etc.)
+
+== New Data Formats ==
+
+When creating new data formats for services it is important to identify several things:
+
+ * Service Information - What makes the service unique?  The service info should be limited to just that: information that describes the service and not necessarily the data that it contains
+ * Service Data - What does this service do?  Is it measurement related, does it provide other services?  Each atomic task/function can be described in a seperate data/metdata description and linked to the service itself
+
+=== Case Study - DCN Integration ===
+
+The Internet2 Dynamic Circuit Network (*DCN*) features several autonomous units that work together
+to perform the tasks necessary to dynamically allocate network resources across domains.  These
+units are interested in both registering themselves to the LS as well as quering the LS for information
+on resources they may require to function (instead of relying on static configuration).  There are two
+services that we will explore for LS integration:
+
+ * Interdomain Controler Service (*IDC*)
+ * Notification Broker Service
+
+Each of these services will be required to register their _presence_ (e.g. that they exist and can be
+contacted at a certain address) along with any capabilities (e.g. services, data) they may offer.  The
+following sections will chronical these formats.
+
+==== Interdomain Controler Service ====
+
+The IDC will have the following information available that it may want to share:
+
+ # URL
+ # Protocol version (will be a namespace URL)
+ # List of domains under its control (will always be one domain for now)
+ # Where can users/services subscribe to my notifications.
+ 
+Some additional pieces of info that will be required:
+
+ # _Main_ contact address (if there is some _status_ endpoint or just a url to visit the IDC), this would go in the service section along with the other metadata
+ # Contact URLs - use different metadata block for each in the data section
+   # IDC host:port/endPoint for IDC/DC communication
+     * Domains under control would go here?
+     * eventType(s) for protocol(s)
+     * Peers/Neigbors - If there is a peering relationship we may want to represent this (maybe not, is it internal?  Is it secret?)
+     * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
+   # Notification host:port/endPoint for Subscriptions
+     * Messages/log levels supported?
+     * eventType(s) for protocol(s)
+     * services subscribed (if we are keeping track)
+     * X509 info (not really sure about this, need a better explanation of what this is, what it is for)
+   # Other things that are accessible to the IDC over WSs?
+ # Others?
+ 
+A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
+
+{{{
+  <nmwg:metadata id="meta1"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 IDC</nmtb:name>
+        <nmtb:type>IDC</nmtb:type>
+        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">http://somehost.internet2.edu:8080/some/end/point</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8080/some/end/point</nmtb:address>
+      </nmtb:service>
+
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+    <nmwg:metadata id="m1">
+      <nmwg:subject id="s1">
+        
+        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol 
+             (yeah, that should work) -->
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="uri">http://somehost.internet2.edu:8080/IDC/end/point</nmtb:address>
+        </nmtb:node>
+        
+        <!-- domains controlled (could be many of these) -->
+        <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
+          <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
+        </nmtb:domain>  
+        
+        <!-- I wanted to do something about peers here... -->
+        
+      </nmwg:subject>
+      
+      <nmwg:eventType>IDC PROTOCOL URN</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+        <nmwg:parameter name="keyword:x509">insert the subject thing here?</nmwg:parameter>
+      </nmwg:parameters>
+      
+    </nmwg:metadata>
+
+    <nmwg:metadata id="m2">
+      <nmwg:subject>
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
+          <nmtl3:port>
+            <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
+          </nmtl3:port>
+        </nmtb:node>
+      </nmwg:subject>
+      <nmwg:eventType>NOTIFICATION PROTOCOL URN</nmwg:eventType>
+    </nmwg:metadata>
+    
+  </nmwg:data>
+}}}
+
+Some questions to be answered:
+
+ * What is the namespace of the _metadata_'s _subject_?  I have this as *DCN* tooling in the *NM-WG* namespace, do we want to use something else?
+ * Is the topology _service_ element what we want to use here?
+ * Is there more we can/should represent in the _service_ element (e.g. is there a _contact_ address for general info on the *IDC*)
+
+==== Notification Broker Service ==== 
+
+TBD
+
+== Last Updated ==
+
+$Id$
+
+
+
+
+
+
