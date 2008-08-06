@@ -93,11 +93,12 @@ $endPointPair->{sql} =   { metaData => { 'ip_name_src' =>   { value => 'src'},
 					     
 
 
-$service_parameter->({ attrs => { name => 'enum:consolidationFunction,resolution,count,packetInterval,packetSize,ttl,valueUnits,startTime,endTime,protocol,transport,setLimit', 
-        		           value => 'scalar', xmlns => 'nmwg'}, 
+$service_parameter->({ attrs => { name => 'enum:keyword,consolidationFunction,resolution,count,packetInterval,packetSize,ttl,valueUnits,startTime,endTime,protocol,transport,setLimit', 
+        		          value => 'scalar', xmlns => 'nmwg'}, 
 		       elements => [],
 		       text => 'unless:value',
-		       sql => {metaData => { count => { value =>  ['value' , 'text'], if => 'name:count'},
+		       sql => {metaData => { project => { value =>  ['value' , 'text'], if => 'name:keyword'},
+		                             count => { value =>  ['value' , 'text'], if => 'name:count'},
 			        	     packetInterval=> { value =>  ['value' , 'text'], if => 'name:packetInterval'},
 			        	     packetSize=> { value => ['value' , 'text']  , if => 'name:packetSize'},
 			        	     ttl=> { value =>   ['value' , 'text'] , if => 'name:ttl'},
