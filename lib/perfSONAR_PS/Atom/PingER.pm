@@ -8,8 +8,8 @@ our $VERSION = 0.001;
 
 =head1 DESCRIPTION
 
-  Atom feed publisher for PingER MA, implemented as mod_perl2 handler,  gets list of metadata from pre-configured
-  remote MAs and checks if lossPercent was > 5 then reports that link is having a problem
+  Atom feed publisher for PingER MA, implemented as mod_perl2 handler,  gets list of metadata 
+  from gLS and checks if lossPercent was > 5 then reports that link is having a problem
   updates for the past 30 minutes
   For startup.pl script see trunk/startup.pl
 
@@ -29,20 +29,26 @@ use Cache::FileCache;
 use Storable qw(freeze thaw);
 
 use perfSONAR_PS::Client::PingER;
+use perfSONAR_PS::Datatypes::EventTypes;
 use Data::Dumper;
 use Log::Log4perl qw( get_logger);
 use Data::UUID;
 use POSIX qw(strftime);
 use XML::Atom::SimpleFeed; 
-
+use perfSONAR_PS::Client::gLS;
+use perfSONAR_PS::Common;
+use aliased  'perfSONAR_PS::SONAR_DATATYPES::v2_0::psservice::Message::Metadata::Subject::Service';
  
 $LOGGER = get_logger("perfSONAR_PS::Atom::PingER");  
- 
+our $gls = perfSONAR_PS::Client::gLS->new( { url => "http://www.perfsonar.net/gls.root.hints"} ); 
+our $event = perfSONAR_PS::Datatypes::EventTypes->new();
+our @eventTypes = ("http://ggf.org/ns/nmwg/tools/pinger/2.0", "http://ggf.org/ns/nmwg/tools/pinger/2.0/");
+our $result;
 
 sub handler {
-    my $req = shift;
-   
+    my $req = shift;  
     $req->content_type('application/atom+xml');
+    
     printFeed($req);  
     return Apache2::Const::OK; 
 } 
@@ -57,14 +63,13 @@ sub printFeed {
  my $req = shift;
     
  my $uuid_obj = Data::UUID->new();
- my $uuid =  $uuid_obj->create_from_name('http://ggf.org/ns/nmwg/base/2.0/', 'pinger'); 
+ my $uuid =  $uuid_obj->create_from_name($event->tools->pinger, 'pinger'); 
  my $now = strftime '%Y-%m-%dT%H:%M:%SZ', gmtime;
  my $feed = XML::Atom::SimpleFeed->new(
-     title   => 'Fermilab and BNL T1 Pinger MA metadata updated in the past 30 minutes',
-   #    link    => 'http://lhcopnmon1-mgm.fnal.gov:8075/perfSONAR_PS/services/pinger/ma',
-     link    => { rel => 'self', href => 'http://lhcopnmon1-mgm.fnal.gov:9090/atom', },
+     title   => 'Pinger MA metadata updated in the past 30 minutes',
+     link    => { rel => 'self', href => 'http://lhcopnmon1-mgm.fnal.gov:9090/atom_ma', },
      updated =>  $now,
-     author  => 'Maxim Grigoriev',
+     author  => 'perfSONAR gLS',
      id      => "urn:uuid:" . $uuid_obj->to_string($uuid),
  );
  my $error = setMetaFeed($req, $feed, $uuid_obj, $now);
@@ -87,8 +92,8 @@ sub  setMetaFeed {
    my ($req, $feed, $uuid_obj, $now) = @_;
    my   $time_start =	time() -  1800;
    my   $time_end   =	time();
-   my   $cache = new Cache::FileCache( { 'namespace' => 'pingerMA',
-                                   'default_expires_in' => 300 } );
+   my   $cache = new Cache::FileCache( { 'namespace' => $event->tools->pinger,
+                                         'default_expires_in' => 300 } );
    my ($CACHED_MDKR, $CACHED_SDR) = ();  
    unless ($cache) {
       $LOGGER->error(" Could not instantiate FileCache.");
@@ -103,10 +108,14 @@ sub  setMetaFeed {
       #$LOGGER->info(" Data dump:" . Dumper   $CACHED_SDR);
       
    }
- 
-   ########## http://newmon.bnl.gov:8075/perfSONAR_PS/services/pinger/ma
-   foreach my $url (qw{ http://lhcopnmon1-mgm.fnal.gov:8075/perfSONAR_PS/services/pinger/ma http://newmon.bnl.gov:8075/perfSONAR_PS/services/pinger/ma})  {
-      my $ma = new perfSONAR_PS::Client::PingER( { instance => $url } );
+   $result = $gls->getLSLocation( {  eventTypes => \@eventTypes  } );
+   #### my @local_ma  = qw{ http://lhcopnmon1-mgm.fnal.gov:8075/perfSONAR_PS/services/pinger/ma http://newmon.bnl.gov:8077/perfSONAR_PS/services/pinger/ma};
+   ########## 
+   foreach my $s  (@{ $result } )  {
+      #my $ma = $url =~ /^http\:/s?$url:$url;
+      my $service = Service->new({ xml => $s });
+      my $url =  $service->get_accessPoint;
+      my $ma = new perfSONAR_PS::Client::PingER( { instance =>  $url} );
       $ma->setLOGGER($LOGGER);
      
       if( !$CACHED_MDKR  || !$CACHED_MDKR->{$url}) { 
@@ -125,6 +134,8 @@ sub  setMetaFeed {
           my $dresult = $ma->setupDataRequest( { 
                   start => $time_start, 
                   end =>   $time_end,  
+		  cf => 'AVERAGE',
+		  resolution => 10,
                   keys =>  \@keys_send,
 
           });
@@ -149,15 +160,16 @@ sub  setMetaFeed {
 	                            $loss_flag <  $CACHED_SDR->{$url}{$id}{data}{$key}{$timev}{'lossPercent'};
    	   }
 	}   
+	my $t_start = strftime "%Y-%m-%dT%H:%M:%S", localtime($time_start);
+	my $t_end = strftime "%Y-%m-%dT%H:%M:%S", localtime($time_end);
         my $uuid = $uuid_obj->create_from_name('http://ggf.org/ns/nmwg/base/2.0/',  $CACHED_MDKR->{$url}{$id}{keys}[0]);     
         $feed->add_entry(
             title     =>"Link: ( $src - $dst ) and  PacketSize = $pkgsz bytes",
-            link      => ($src =~ /fnal\.gov/?"http://lhcopnmon1-mgm.fnal.gov:9090/pinger/gui?src_regexp=$src\&dest_regexp=$dst\&packetsize=$pkgsz":
-	                                      "http://tukki.fnal.gov/pinger/pingerUI.pl"),
+            link      => "http://tukki.fnal.gov/pinger/pingerUI.pl?ma=$url&get_it=jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7&link=$id&time_start=$t_start&time_end=$t_end&upper_rtt=auto&gmt_offset=-5&gtype=rtloss&gpresent=lines",
             id        => "urn:uuid:". $uuid_obj->to_string($uuid),
-            summary   => "Link " . ($loss_flag>5?$loss_flag>95?'is <red>DOWN</red>':" is OK, BUT packets loss=$loss_flag\% is observed":" is OK"),
             updated   => $now ,
-            category  => 'perfSONAR-PS',
+            category  => 'perfSONAR-PS',  
+	    summary   => "Link " . ($loss_flag>5?$loss_flag>95?'is <red>DOWN</red>':" is OK, BUT packets loss=$loss_flag\% is observed":" is OK") . "</br> Most recent RTT and Loss rate: <img src=\"http://tukki.fnal.gov/pinger/pingerUI.pl?ma=$url&get_it=jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7&link=$id&time_start=$t_start&time_end=$t_end&upper_rtt=auto&gmt_offset=-5&gtype=rtloss&gpresent=lines\"/>",
         );
      }
    }
