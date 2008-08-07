@@ -1282,7 +1282,6 @@ sub dataInfoRetrieveKey {
     my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
     my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
     $rrd->openDB;
-    my $rrd_result = $rrd->info();
     my $first = $rrd->firstValue();
     my $last = $rrd->lastValue();
 
@@ -1294,25 +1293,6 @@ sub dataInfoRetrieveKey {
     else {
         createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
 
-        my %lookup = ();
-        foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
-            push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
-        }
-        foreach my $cf ( keys %lookup ) {
-            my $thing = XML::LibXML::Element->new( "parameter" );
-            $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
-            $thing->setAttribute( "name", "consolidationFunction" );
-            $thing->setAttribute( "value", $cf );
-            foreach my $res ( @{$lookup{$cf}} ) {
-                my $thing2 = XML::LibXML::Element->new( "parameter" );
-                $thing2->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
-                $thing2->setAttribute( "name", "resolution" );
-                $thing2->appendTextNode( $res );
-                $thing->addChild($thing2); 
-            }
-            $params->addChild($thing);
-        }
-        
         my $thing = XML::LibXML::Element->new( "parameter" );
         $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
         $thing->setAttribute( "name", "firstTime" );
@@ -1322,6 +1302,11 @@ sub dataInfoRetrieveKey {
         $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
         $thing->setAttribute( "name", "lastTime" );
         $thing->appendTextNode( $last );
+        $params->addChild($thing);        
+        $thing = XML::LibXML::Element->new( "parameter" );
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        $thing->setAttribute( "name", "maKey" );
+        $thing->appendTextNode( $hashKey );
         $params->addChild($thing);        
 
         $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
@@ -1414,7 +1399,6 @@ sub dataInfoRetrieveMetadataData {
             $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
             $md_temp->setAttribute( "id",            $mdId );
 
-
             my $hashId  = $d->getAttribute("id");
             my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
 
@@ -1426,7 +1410,6 @@ sub dataInfoRetrieveMetadataData {
             my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
             my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
             $rrd->openDB;
-            my $rrd_result = $rrd->info();
             my $first = $rrd->firstValue();
             my $last = $rrd->lastValue();
 
@@ -1438,25 +1421,6 @@ sub dataInfoRetrieveMetadataData {
             else {
                 $parameters->{output}->addExistingXMLElement($md_temp);
 
-                my %lookup = ();
-                foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
-                    push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
-                }
-                foreach my $cf ( keys %lookup ) {
-                    my $thing = XML::LibXML::Element->new( "parameter" );
-                    $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
-                    $thing->setAttribute( "name", "consolidationFunction" );
-                    $thing->setAttribute( "value", $cf );
-                    foreach my $res ( @{$lookup{$cf}} ) {
-                        my $thing2 = XML::LibXML::Element->new( "parameter" );
-                        $thing2->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
-                        $thing2->setAttribute( "name", "resolution" );
-                        $thing2->appendTextNode( $res );
-                        $thing->addChild($thing2); 
-                    }
-                    $params->addChild($thing);
-                }
-        
                 my $thing = XML::LibXML::Element->new( "parameter" );
                 $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
                 $thing->setAttribute( "name", "firstTime" );
@@ -1466,6 +1430,11 @@ sub dataInfoRetrieveMetadataData {
                 $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
                 $thing->setAttribute( "name", "lastTime" );
                 $thing->appendTextNode( $last );
+                $params->addChild($thing);        
+                $thing = XML::LibXML::Element->new( "parameter" );
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing->setAttribute( "name", "maKey" );
+                $thing->appendTextNode( $hashKey );
                 $params->addChild($thing);        
 
                 $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );      

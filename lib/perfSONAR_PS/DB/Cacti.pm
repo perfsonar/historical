@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::Cacti;
 
-use fields 'LOGGER', 'CONF', 'FILE', 'VERSIONS', 'STORE';
+use fields 'LOGGER', 'CONF', 'FILE', 'VERSIONS', 'STORE', 'RRDTOOL';
 
 use strict;
 use warnings;
@@ -14,6 +14,7 @@ use DBI;
 use Socket;
 
 use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::DB::RRD;
 
 =head1 NAME
 
@@ -39,6 +40,7 @@ sub new {
     my $parameters = validateParams( @args, { conf => 0, file => 0 } );
 
     my $self = fields::new($package);
+    $self->{RRDTOOL} = "/usr/bin/rrdtool";
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::Cacti");
     @{$self->{VERSIONS}} = ( "0.8.6i", "0.8.6j" );
     if ( exists $parameters->{conf} and $parameters->{conf} ) {
@@ -135,6 +137,8 @@ sub openDB {
 #        return -1;
     }
 
+    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{"RRDTOOL"}, error => 1 } );
+    $rrd->openDB;
     $self->{STORE} = $self->printHeader();
 
     $query = "select id, description, hostname from host order by id";
@@ -211,13 +215,15 @@ sub openDB {
                         $d{"id"} = $d{"id"} . "_out";
                         $md{"ifDir"} = "out"; 
                     }
-                    $self->{STORE} .= $self->printPair( { metadata => \%md, data => \%d } );
+                    $self->{STORE} .= $self->printPair( { rrddb => $rrd, metadata => \%md, data => \%d } );
                 }
             }
         }
     }
     $dbh->disconnect();
     $self->{STORE} .= $self->printFooter();
+    $rrd->closeDB;
+
     return 0;
 }
 
@@ -247,7 +253,7 @@ Given some metadata and data information, print out the associated XML pair.
 
 sub printPair {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { metadata => 1, data => 1 } );
+    my $parameters = validateParams( @args, { rrddb => 0, metadata => 1, data => 1 } );
     
     my $output = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata.".$parameters->{metadata}->{"id"}."-".$parameters->{data}->{"id"}."\">\n";
     $output .= "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"subject.".$parameters->{metadata}->{"id"}."-".$parameters->{data}->{"id"}."\">\n";
@@ -284,6 +290,25 @@ sub printPair {
     $output .= "        <nmwg:parameter name=\"file\">".$parameters->{data}->{"file"}."</nmwg:parameter>\n" if defined $parameters->{data}->{"file"};
     $output .= "        <nmwg:parameter name=\"valueUnits\">Bps</nmwg:parameter>\n";
     $output .= "        <nmwg:parameter name=\"dataSource\">".$parameters->{data}->{"ds"}."</nmwg:parameter>\n" if defined $parameters->{data}->{"ds"};
+
+    if ( exists $parameters->{rrddb} ) {
+        $parameters->{rrddb}->setFile( { file => $parameters->{data}->{"file"} } );
+        my $rrd_result = $parameters->{rrddb}->info();
+        unless ( $parameters->{rrddb}->getErrorMessage ) {
+            my %lookup = ();
+            foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
+                push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
+            }
+            foreach my $cf ( keys %lookup ) {
+                $output .= "        <nmwg:parameter name=\"consolidationFunction\" value=\"".$cf."\">\n";
+                foreach my $res ( @{$lookup{$cf}} ) {
+                    $output .= "          <nmwg:parameter name=\"resolution\">".$res."</nmwg:parameter>\n";
+                }
+                $output .= "        </nmwg:parameter>\n";
+            }    
+        }
+    }
+
     $output .= "      </nmwg:parameters>\n";
     $output .= "    </nmwg:key>\n";
     $output .= "  </nmwg:data>\n\n";

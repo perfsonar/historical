@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::Cricket;
 
-use fields 'LOGGER', 'FILE', 'STORE';
+use fields 'LOGGER', 'FILE', 'STORE', 'RRDTOOL';
 
 use strict;
 use warnings;
@@ -54,6 +54,7 @@ sub new {
 
     my $self = fields::new($package);
     $self->{STORE} = q{}; 
+    $self->{RRDTOOL} = "/usr/bin/rrdtool"; 
     $self->{LOGGER} = get_logger("perfSONAR_PS::DB::Cricket");
     if ( exists $parameters->{file} and $parameters->{file} ) {
         $self->{FILE} = $parameters->{file};
@@ -112,7 +113,7 @@ sub openDB {
     foreach my $thing (keys %{$gCT}) {
         if($thing eq "DbRef") {	
             foreach my $thing2 (keys %{$gCT->{$thing}}) {
-                if($thing2 =~ m/^d.*router-interfaces\// and !($thing2 =~ m/chassis-generic/)) {
+                if($thing2 =~ m/^d.*(switch|router)-interfaces\// and !($thing2 =~ m/chassis-generic/)) {
                     my @line = split(/:/, $thing2);
                     $master{$dataDir.$line[1]}->{$line[4]} = $gCT->{$thing}->{$thing2};
                 }
@@ -120,14 +121,16 @@ sub openDB {
         }
     }    
 
+    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{"RRDTOOL"}, error => 1 } );    
+    $rrd->openDB;
+
     $self->{STORE} .= $self->printHeader();
     my $counter = 0;
     foreach my $item (keys %master) {
         if(!($item =~ m/\.sc07\.org$/)) {
 # XXX 8/4/08
 # HACK - need to address this...
-#            (my $temp = $item) =~ s/\/services\/cricket\.sc07\.org\/cricket\/cricket-data\/router-interfaces\///;
-            (my $temp = $item) =~ s/$dataDir\/router-interfaces\///;
+            (my $temp = $item) =~ s/$dataDir\/(router|switch)-interfaces\///;
 
             my @address = split(/\//, $temp);
 
@@ -142,12 +145,21 @@ sub openDB {
             my $okChar = '-a-zA-Z0-9_.@\s';
             $des =~  s/[^$okChar]/ /go;
 
-            $self->{STORE} .= $self->printInterface( { id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"},direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, file => $item, ds => "ds0" } );
-            $self->{STORE} .= $self->printInterface( { id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"},direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, file => $item, ds => "ds1" } );
+            (my $des2 = $master{$item}->{"short-desc"}) =~ s/<BR>/ /g;
+            $des2 =~ s/&/&amp;/g;
+            $des2 =~ s/</&lt;/g;
+            $des2 =~ s/>/&gt;/g;
+            $des2 =~ s/'/&apos;/g;
+            $des2 =~ s/"/&quot;/g;
+            $des2 =~  s/[^$okChar]/ /go;
+
+            $self->{STORE} .= $self->printInterface( { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds0" } );
+            $self->{STORE} .= $self->printInterface( { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"},direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds1" } );
             $counter++;
         }
     }
     $self->{STORE} .=  $self->printFooter();
+    $rrd->closeDB;
 
     return 0;
 }
@@ -178,11 +190,12 @@ Print out the interface direction
 
 sub printInterface {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { id => 1, hostName => 1, ifName => 1, direction => 1, capacity => 1, des => 1, file => 1, ds => 1 } );
+    my $parameters = validateParams( @args, { rrddb => 0, id => 1, hostName => 1, ifName => 1, ipAddress => 0, direction => 1, capacity => 1, des => 1, des2 => 0, file => 1, ds => 1 } );
 
     my $output = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-".$parameters->{direction}."-".$parameters->{id}."\">\n";  
     $output .= "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"subject-".$parameters->{direction}."-".$parameters->{id}."\">\n";
     $output .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";  
+    $output .= "        <nmwgt:ipAddress>".$parameters->{ipAddress}."</nmwgt:ipAddress>\n" if $parameters->{ipAddress};
     $output .= "        <nmwgt:hostName>".$parameters->{hostName}."</nmwgt:hostName>\n" if $parameters->{hostName};
     $output .= "        <nmwgt:ifName>".$parameters->{ifName}."</nmwgt:ifName>\n" if $parameters->{ifName};
     $output .= "        <nmwgt:ifIndex>".$parameters->{ifName}."</nmwgt:ifIndex>\n" if $parameters->{ifIndex};
@@ -195,8 +208,13 @@ sub printInterface {
             $output .= "        <nmwgt:capacity>".$parameters->{capacity}."</nmwgt:capacity>\n";
         } 
     }
-    $output .= "        <nmwgt:description>".$parameters->{des}."</nmwgt:description>\n" if $parameters->{des};
-    $output .= "        <nmwgt:ifDescription>".$parameters->{des}."</nmwgt:ifDescription>\n" if $parameters->{des};
+    $output .= "        <nmwgt:description>".$parameters->{des}."</nmwgt:description>\n" if $parameters->{des}; 
+    if ( $parameters->{des2} ) {
+        $output .= "        <nmwgt:ifDescription>".$parameters->{des2}."</nmwgt:ifDescription>\n";
+    } 
+    else { 
+        $output .= "        <nmwgt:ifDescription>".$parameters->{des}."</nmwgt:ifDescription>\n" if $parameters->{des};
+    }
     $output .= "      </nmwgt:interface>\n";  
     $output .= "    </netutil:subject>\n";
     $output .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>\n";
@@ -216,6 +234,24 @@ sub printInterface {
     $output .= "        <nmwg:parameter name=\"file\">".$parameters->{file}.".rrd</nmwg:parameter>\n";
     $output .= "        <nmwg:parameter name=\"valueUnits\">Bps</nmwg:parameter>\n";
     $output .= "        <nmwg:parameter name=\"dataSource\">".$parameters->{ds}."</nmwg:parameter>\n";
+   
+    if ( exists $parameters->{rrddb} ) {
+        $parameters->{rrddb}->setFile( { file => $parameters->{file}.".rrd" } );
+        my $rrd_result = $parameters->{rrddb}->info();
+        unless ( $parameters->{rrddb}->getErrorMessage ) {
+            my %lookup = ();
+            foreach my $rra ( sort keys %{$rrd_result->{"rra"}} ) {
+                push @{$lookup{$rrd_result->{"rra"}->{$rra}->{"cf"}}}, ($rrd_result->{"rra"}->{$rra}->{"pdp_per_row"}*$rrd_result->{"step"});
+            }
+            foreach my $cf ( keys %lookup ) {
+                $output .= "        <nmwg:parameter name=\"consolidationFunction\" value=\"".$cf."\">\n";
+                foreach my $res ( @{$lookup{$cf}} ) {
+                    $output .= "          <nmwg:parameter name=\"resolution\">".$res."</nmwg:parameter>\n";
+                }
+                $output .= "        </nmwg:parameter>\n";
+            }    
+        }
+    }
     $output .= "      </nmwg:parameters>\n";
     $output .= "    </nmwg:key>\n";
     $output .= "  </nmwg:data>\n\n";

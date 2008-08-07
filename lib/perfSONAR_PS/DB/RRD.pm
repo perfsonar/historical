@@ -183,7 +183,7 @@ sub openDB {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    if ( exists $self->{PATH} and exists $self->{NAME} ) {
+    if ( exists $self->{PATH} ) {
         RRDp::start $self->{PATH};
         return 0;
     }

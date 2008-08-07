@@ -209,6 +209,66 @@ sub metadataKeyRequest {
     return \%result;
 }
 
+=head2 dataInfoRequest($self, { subject, eventTypes, parameters })
+
+Perform a DataInfoRequest, the results are returned as a data/metadata pair.
+
+=cut
+
+sub dataInfoRequest {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { subject => 1, eventTypes => 1, parameters => 0 } );
+
+    my $mdId = "metadata." . genuid();
+    my $dId = "data." . genuid();
+    my $content = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"".$mdId."\">\n";
+
+    if ( exists $parameters->{"subject"} and $parameters->{"subject"} ) {    
+        $content .= $parameters->{"subject"};
+    }
+
+    foreach my $et ( @{ $parameters->{"eventTypes"} } ) {
+        $content .= "    <nmwg:eventType>".$et."</nmwg:eventType>\n";
+    }
+    if ( exists $parameters->{"parameters"} and $parameters->{"parameters"} ) {
+        $content .= "    <nmwg:parameters id=\"parameters.".genuid()."\">\n";
+        foreach my $p ( keys %{ $parameters->{"parameters"} } ) {
+            $content .= "      <nmwg:parameter name=\"".$p."\">".$parameters->{"parameters"}->{$p}."</nmwg:parameter>\n";
+        }
+        $content .= "    </nmwg:parameters>\n";
+    }
+    $content .= "  </nmwg:metadata>\n";
+    
+    $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
+    
+    my $msg = $self->callMA( { message => $self->createMAMessage( { type => "DataInfoRequest", content => $content } ) } );
+    unless ($msg) {
+        $self->{LOGGER}->error("Message element not found in return.");
+        return;
+    }
+
+    my %result = ();
+    my $list = find( $msg, "./nmwg:metadata", 0 );
+    my @mdList = ();
+    foreach my $md ( $list->get_nodelist ) {
+        $md->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
+        push @mdList, $md->toString;
+    } 
+
+    $list = find( $msg, "./nmwg:data", 0 );
+    my @dList = ();
+    foreach my $d ( $list->get_nodelist ) {
+        $d->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 0 );
+        push @dList, $d->toString;
+    } 
+
+    $result{"metadata"} = \@mdList;
+    $result{"data"} = \@dList;
+
+    return \%result;
+}
+
+
 =head2 setupDataRequest($self, { subject, eventTypes, parameters, start, end, resolution, consolidationFunction })
 
 Perform a SetupDataRequest, the results are returned as a data/metadata pair.
