@@ -330,6 +330,10 @@ Below is a case where the IDC implements all the Subscription messages locally a
         <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmwg:parameter>
         <!-- It accepts Notify messages from other services to which it's subscribed -->
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+        <!-- Topics I am willing to publish to my direct subscribers-->
+        <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+        <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
+        <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
       </nmwg:parameters>
     </nmwg:metadata>
 
@@ -355,10 +359,6 @@ Below is a case where the IDC implements all the Subscription messages locally a
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
-        <!-- Topics I am willing to publish to my direct subscribers-->
-        <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
-        <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
-        <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
       </nmwg:parameters>
     </nmwg:metadata>
     
@@ -465,7 +465,7 @@ Some questions to be answered:
  * What would a neighbors/peers/subscribers/publishers list look like?
  * What is the format for message names (URN like?)
  * How many eventTypes (not that it matters)
-* Should the domain _name_ element be a URN?
+ * Should the domain _name_ element be a URN?
 
 == Last Updated ==
 
