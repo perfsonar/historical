@@ -198,8 +198,67 @@ This is the proposed way forward:
        * eventType(s) for protocol(s)
        * Peers/Neighbors - If there is a peering relationship we may want to represent this (maybe not, is it internal?  Is it secret?)
  
-A _very_ basic mockup of the _metadata_ / _data_ relationship is here (this an example where an IDC does not have a NotificationBroker and performs its own subscription management):
+A _very_ basic mockup of the _metadata_ / _data_ relationship where the IDC relies on an external NotificationBroker service is shown here:
 
+{{{
+  <nmwg:metadata id="meta1"
+                 xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
+        <nmtb:name>Internet2 IDC</nmtb:name>
+        <nmtb:type>IDC</nmtb:type>
+        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
+        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+      </nmtb:service>
+
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" 
+             metadataIdRef="meta1"
+             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+
+    <nmwg:metadata id="m1">
+      <nmwg:subject id="s1">
+        
+        <!-- information to interact (request reservations, etc) for the IDC, identified by protocol -->
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        </nmtb:node>
+        
+        <!-- domains controlled (could be many of these) -->
+        <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
+          <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
+        </nmtb:domain>  
+         
+         <nmtb:relation type="notificationbroker">
+            <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARSNotify</nmtb:address>
+          </nmtb:relation>
+        <!-- future: list of neighbors -->
+        
+      </nmwg:subject>
+      
+      <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
+      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
+      <!-- other eventTypes for backwards compat? -->
+      
+      <nmwg:parameters id="p1">
+        <!-- may include list of supported messages. For example this will be useful for domains that don't want to implement user signaling right away but still want to support resource scheduling functions. In general it should be a best common practice to publish these...maybe we should even make it required? -->
+        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmwg:parameter>
+       <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmwg:parameter>
+        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmwg:parameter>
+     <!-- It accepts Notify messages from other services to which it's subscribed -->
+     <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:metadata>
+
+  </nmwg:data>
+}}}
+
+Below is a case where the IDC implements all the Subscription messages locally and does not use a NotificationBroker service:
 {{{
   <nmwg:metadata id="meta1"
                  xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
@@ -239,15 +298,16 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here (this an e
       </nmwg:subject>
       
       <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
+      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
       <!-- other eventTypes for backwards compat? -->
       
       <nmwg:parameters id="p1">
-        <!-- OPTIONAL: may include list of supported messages. For example this will be useful for domains that don't want to implement user signaling right away but still want to support resource scheduling functions -->
+        <!-- may include list of supported messages. For example this will be useful for domains that don't want to implement user signaling right away but still want to support resource scheduling functions. In general it should be a best common practice to publish these...maybe we should even make it required? -->
         <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmwg:parameter>
        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmwg:parameter>
-     <!-- Notify message is of a type defined in the WS-Notification spec but its presence in the IDC protocol is defined in the standard IDC WSDL -->
-     <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#Notify</nmwg:parameter>
+     <!-- It accepts Notify messages from other services to which its subscribed -->
+     <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
       </nmwg:parameters>
     </nmwg:metadata>
 
@@ -269,16 +329,14 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here (this an e
       <!-- other eventTypes for backwards compat? -->
       
       <nmwg:parameters id="p1">
-
-<!-- would this still be necessary? -->
-
+        <!-- implements the messages that allow people to subscribe -->
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
 <!-- Topics i am willing to share -->
-    <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
-    <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
-    <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+        <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+        <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
+        <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
       </nmwg:parameters>
     </nmwg:metadata>
     
@@ -361,15 +419,15 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
       <!-- other eventTypes for backwards compat? -->
       
       <nmwg:parameters id="p1">
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
-       <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
-       <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#PauseSubscription</nmwg:parameter>
-       <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#ResumeSubscription</nmwg:parameter>
-       <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#RegisterPublisher</nmwg:parameter>
-      <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#DestroyRegistration</nmwg:parameter>
-      </nmwg:parameters>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#PauseSubscription</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#ResumeSubscription</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#RegisterPublisher</nmwg:parameter>
+          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#DestroyRegistration</nmwg:parameter>
+       </nmwg:parameters>
     </nmwg:metadata>
     
   </nmwg:data>
@@ -382,17 +440,11 @@ Some questions to be answered:
  * What is the namespace of the _metadata_'s _subject_?  I have this as *DCN* tooling in the *NM-WG* namespace, do we want to use something else?
  * Is the topology _service_ element what we want to use here?
  * Is there more we can/should represent in the _service_ element (e.g. is there a _contact_ address for general info on the *IDC*)
- * The two EndPoints is unfortunate, it would be cleaner if:
-   * The IDC had a _catch all_ url
-   * There was a _status_ url or something that could redirect
-   * IDC had only one endPoint for both the notify and the IDC functions
  * What would a neighbors/peers/subscribers/publishers list look like?
  * What is the format for message names (URN like?)
  * How many eventTypes (not that it matters)
- * What needs the X509 info, what does that look like?
+* Should the domain _name_ element be a URN?
 
 == Last Updated ==
 
 $Id$
-
-
