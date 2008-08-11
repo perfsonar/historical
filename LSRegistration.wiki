@@ -345,7 +345,6 @@ Below is a case where the IDC implements all the Subscription messages locally a
       <!-- I am alone in the world (no NB to speak of) therefore I will let
            others subscribe to me directly -->
       <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
-      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
 
       <nmwg:parameters id="p1">
         <!-- may include list of supported messages. For example this will be 
@@ -364,6 +363,26 @@ Below is a case where the IDC implements all the Subscription messages locally a
         <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmwg:parameter>
 
+      </nmwg:parameters>
+    </nmwg:metadata>    
+
+    <nmwg:metadata id="m2">
+      <nmwg:subject id="s2">
+
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+
+        </nmtb:node>
+             
+      </nmwg:subject>
+      
+      <!-- I am alone in the world (no NB to speak of) therefore I will let
+           others subscribe to me directly -->
+      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
+
+      <nmwg:parameters id="p1">
+
         <!-- implements the messages that allow people to subscribe -->
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
         <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
@@ -378,7 +397,7 @@ Below is a case where the IDC implements all the Subscription messages locally a
         <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
 
       </nmwg:parameters>
-    </nmwg:metadata>    
+    </nmwg:metadata>  
 
   </nmwg:data>
 }}}
