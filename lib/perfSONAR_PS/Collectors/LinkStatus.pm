@@ -14,9 +14,9 @@ use perfSONAR_PS::Collectors::LinkStatus::Link;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
+#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
+#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
+#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
 
 use perfSONAR_PS::SNMPWalk;
 
@@ -310,7 +310,7 @@ sub parseAgentElement {
         }
     }
 
-    if ($status_type ne "oper" and $status_type ne "operational" and $status_type ne "admin" and $status_type ne "administrative") {
+    if ($status_type ne "oper" and $status_type ne "operational" and $status_type ne "admin" and $status_type ne "administrative" and $status_type ne "oper/admin" and $status_type ne "admin/oper") {
         my $msg = "Agent's stated status_type is neither 'oper' nor 'admin'";
         $logger->error($msg);
         return (-1, $msg);
@@ -404,25 +404,45 @@ sub parseAgentElement {
 
             my ($status, $res) = snmpwalk($hostname, undef, "1.3.6.1.2.1.31.1.1.1.1", $community, $version);
             if ($status != 0) {
-                my $msg = "Error occurred while looking up ifIndex for specified ifName $ifName: $res";
-                $logger->error($msg);
-                return (-1, $msg);
-            }
+                my $msg = "Error occurred while looking up ifIndex for specified ifName $ifName in ifName table: $res";
+                $logger->warn($msg);
+            } else {
+                foreach my $oid_ref ( @{ $res } ) {
+                    my $oid = $oid_ref->[0];
+                    my $type = $oid_ref->[1];
+                    my $value = $oid_ref->[2];
 
-            foreach my $oid_ref ( @{ $res } ) {
-                my $oid = $oid_ref->[0];
-                my $type = $oid_ref->[1];
-                my $value = $oid_ref->[2];
-
-                $logger->debug("$oid = $type: $value($ifName)");
-                if ($value eq $ifName) {
-                    if ($oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x) {
-                        $ifIndex = $1;
+                    $logger->debug("$oid = $type: $value($ifName)");
+                    if ($value eq $ifName) {
+                        if ($oid =~ /1\.3\.6\.1\.2\.1\.31\.1\.1\.1\.1\.(\d+)/x) {
+                            $ifIndex = $1;
+                        }
                     }
                 }
             }
 
-            if (not defined $ifIndex or $ifIndex eq "") {
+            if (not $ifIndex) {
+                my ($status, $res) = snmpwalk($hostname, undef, "1.3.6.1.2.1.2.2.1.2", $community, $version);
+                if ($status != 0) {
+                    my $msg = "Error occurred while looking up ifIndex for ifName $ifName in ifDescr table: $res";
+                    $logger->warn($msg);
+                } else {
+                    foreach my $oid_ref ( @{ $res } ) {
+                        my $oid = $oid_ref->[0];
+                        my $type = $oid_ref->[1];
+                        my $value = $oid_ref->[2];
+
+                        $logger->debug("$oid = $type: $value($ifName)");
+                        if ($value eq $ifName) {
+                            if ($oid =~ /1\.3\.6\.1\.2\.1\.2\.2\.1\.2\.(\d+)/x) {
+                                $ifIndex = $1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (not $ifIndex) {
                 my $msg = "Didn't find ifName $ifName in host $hostname";
                 $logger->error($msg);
                 return (-1, $msg);

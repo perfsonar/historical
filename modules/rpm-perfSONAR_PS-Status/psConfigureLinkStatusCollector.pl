@@ -15,7 +15,7 @@ if ($was_installed) {
 }
 else {
     $confdir = ".";
-    $conffile = "daemon.conf";
+    $conffile = "collector.conf";
 }
 
 $DEFAULT_FILE = $confdir ."/". $conffile;
@@ -68,20 +68,20 @@ while (1) {
 			}
 		}
 
-		my %opts;
-		do {
-			$module = &ask("Enter collector module [linkstatus] ", "", $module, '');
-			$module = lc($module);
+#		my %opts;
+#		do {
+#			$module = &ask("Enter collector module [linkstatus] ", "linkstatus", $module, '');
+#			$module = lc($module);
+#
+#			if ($module eq "linkstatus") {
+#				$valid_module = 1;
+#			}
+#		} while($valid_module == 0);
 
-			if ($module eq "linkstatus") {
-				$valid_module = 1;
-			}
-		} while($valid_module == 0);
-
-		if ($module eq "linkstatus") {
+#		if ($module eq "linkstatus") {
 			$config{"collector"}->{$id}->{"module"} = "perfSONAR_PS::Collectors::LinkStatus";
 			config_linkstatus($config{"collector"}->{$id}, \%config);
-		}
+#		}
 	}
 }
 
@@ -96,11 +96,11 @@ sub config_linkstatus {
 	$config->{"ma_type"} = &ask("Enter the database type to read from ", "sqlite|mysql|ma", $config->{"ma_type"}, '(sqlite|mysql|ma)');
 
 	if ($config->{"ma_type"} eq "sqlite") {
-		$config->{"ma_file"} = &ask("Enter the filename of the SQLite database ", "", $config->{"ma_file"}, '.+');
+		$config->{"ma_file"} = &ask("Enter the filename of the SQLite database ", "$confdir/status.db", $config->{"ma_file"}, '.+');
 		$tmp = &ask("Enter the table in the database to use (leave blank for the default) ", "link_status", $config->{"ma_table"}, '');
 		$config->{"ma_table"} = $tmp if ($tmp ne "");
 	} elsif ($config->{"ma_type"} eq "mysql") {
-		$config->{"ma_name"} = &ask("Enter the name of the MySQL database ", "", $config->{"ma_name"}, '.+');
+		$config->{"ma_name"} = &ask("Enter the name of the MySQL database ", "linkstatus", $config->{"ma_name"}, '.+');
 		$tmp = &ask("Enter the host for the MySQL database ", "localhost", $config->{"ma_host"}, '');
 		$config->{"ma_host"} = $tmp if ($tmp ne "");
 		$tmp = &ask("Enter the port for the MySQL database (leave blank for the default) ", "", $config->{"ma_port"}, '^\d*$');

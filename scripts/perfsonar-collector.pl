@@ -313,7 +313,7 @@ The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
-sub lockPIDFile($$) {
+sub lockPIDFile {
     $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
     die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
@@ -340,7 +340,7 @@ sub lockPIDFile($$) {
 This file writes the pid of the call process to the filehandle passed in,
 unlocks the file and closes it.
 =cut
-sub unlockPIDFile($) {
+sub unlockPIDFile {
     my($filehandle) = @_;
 
     truncate($filehandle, 0);

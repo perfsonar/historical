@@ -649,14 +649,14 @@ sub config_status_ma {
     $config->{"status"}->{"db_type"} = &ask( "Enter the database type to read from ", "sqlite|mysql", $config->{"status"}->{"db_type"}, '(sqlite|mysql)' );
 
     if ( $config->{"status"}->{"db_type"} eq "sqlite" ) {
-        $config->{"status"}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "status.db", $config->{"status"}->{"db_file"}, '.+' );
+        $config->{"status"}->{"db_file"} = &ask( "Enter the filename of the SQLite database ", "$confdir/status.db", $config->{"status"}->{"db_file"}, '.+' );
         $tmp = &ask( "Enter the table in the database to use ", "link_status", $config->{"status"}->{"db_table"}, '.+' );
         $config->{"status"}->{"db_table"} = $tmp if ($tmp);
     }
     elsif ( $config->{"status"}->{"db_type"} eq "mysql" ) {
-        $config->{"status"}->{"db_name"} = &ask( "Enter the name of the MySQL database ",                               q{},         $config->{"status"}->{"db_name"}, '.+' );
-        $config->{"status"}->{"db_host"} = &ask( "Enter the host for the MySQL database ",                              "localhost", $config->{"status"}->{"db_host"}, '.+' );
-        $tmp                             = &ask( "Enter the port for the MySQL database (leave blank for the default)", q{},         $config->{"status"}->{"db_port"}, '^\d*$' );
+        $config->{"status"}->{"db_name"} = &ask( "Enter the name of the MySQL database ",                               "linkstatus", $config->{"status"}->{"db_name"}, '.+' );
+        $config->{"status"}->{"db_host"} = &ask( "Enter the host for the MySQL database ",                              "localhost",  $config->{"status"}->{"db_host"}, '.+' );
+        $tmp                             = &ask( "Enter the port for the MySQL database (leave blank for the default)", q{},          $config->{"status"}->{"db_port"}, '^\d*$' );
         $config->{"status"}->{"db_port"} = $tmp if ($tmp);
         $tmp = &ask( "Enter the username for the MySQL database (leave blank for none) ", q{}, $config->{"status"}->{"db_username"}, q{} );
         $config->{"status"}->{"db_username"} = $tmp if ($tmp);

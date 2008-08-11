@@ -104,9 +104,10 @@ echo "Building executable $EXECNAME"
 # -M perfSONAR_PS::XML::Document \
 # -M perfSONAR_PS::XML::Document_string \
 
+# -M DBD::mysql \
+# -M DBD::SQLite \
+
 COM="pp -I lib/ \
- -M DBD::mysql \
- -M DBD::SQLite \
  -M fields \
  -M base \
  -M Class::Accessor \

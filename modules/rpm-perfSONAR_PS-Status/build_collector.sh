@@ -17,9 +17,10 @@ MODULE=perfSONARBUOY
 EXECNAME=perfsonar-linkstatus-collector
 echo "Building executable $EXECNAME  for $MODULE MA and MP"
 
+# -M DBD::mysql \
+# -M DBD::SQLite \
+
 COM="pp -I lib/ \
- -M DBD::mysql \
- -M DBD::SQLite \
  -M fields \
  -M base \
  -M Class::Accessor \

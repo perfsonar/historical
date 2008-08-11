@@ -1,25 +1,34 @@
 #!/bin/bash
 #
-# Init file for perfSONARBUOY Daemon
+# Init file for perfSONAR_PS Status Collector
 #
 # chkconfig: 2345 60 20
-# description: perfSONARBUOY Daemon
+# description: Status Collector
 #
 
 PREFIX=../
-PSB_EXE=${PREFIX}/bin/perfsonar-linkstatus-collector
-PSB_CONF=${PREFIX}/etc/perfsonar-linkstatus-collector.conf
-PSB_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-collector-logger.conf
+STATUSCOLLECTOR_EXE=${PREFIX}/bin/perfsonar-linkstatus-collector
+STATUSCOLLECTOR_CONF=${PREFIX}/etc/perfsonar-linkstatus-collector.conf
+STATUSCOLLECTOR_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-collector-logger.conf
+STATUSCOLLECTOR_LOGDIR=`dirname $STATUSCOLLECTOR_LOGGER`
 PIDDIR=${PREFIX}/var
 
-PIDFILE=${PIDDIR}/perfsonar-linkstatus-collector.pid
+PIDFILE=perfsonar-linkstatus-collector.pid
 
-PERFSONAR="${PSB_EXE} --config ${PSB_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${PSB_LOGGER} "
+PERFSONAR="${STATUSCOLLECTOR_EXE} --config ${STATUSCOLLECTOR_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUSCOLLECTOR_LOGGER} "
 
 ERROR=0
 ARGV="$@"
 if [ "x$ARGV" = "x" ] ; then 
     ARGS="help"
+fi
+
+if [ ! -d ${STATUSCOLLECTOR_LOGDIR} ]; then
+	mkdir -p ${STATUSCOLLECTOR_LOGDIR}
+fi
+
+if [ ! -d ${PIDDIR} ]; then
+	mkdir -p ${PIDDIR}
 fi
 
 for ARG in $@ $ARGS

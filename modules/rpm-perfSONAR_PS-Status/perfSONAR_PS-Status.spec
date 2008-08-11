@@ -1,6 +1,6 @@
 Name:           perfSONAR_PS-Status
 Version:        0.09
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Status Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -59,10 +59,10 @@ pp -M RRDp -M File::Temp -M Module::Load -M Sys::Hostname -M Class::Accessor -M 
 
 %install
 # edit the paths in the init scripts
-awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=%{perfsonar_var_dir}\"); gsub(/^PSB_EXE=.*/,\"PSB_EXE=%{perfsonar_bin_dir}/perfsonar-linkstatus\"); gsub(/^PSB_CONF=.*/,\"PSB_CONF=%{daemon_conf_file}\");; gsub(/^PSB_LOGGER=.*/,\"PSB_LOGGER=%{daemon_logger_conf_file}\"); print}" perfsonar-linkstatus.init > perfsonar-linkstatus.new
+awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=%{perfsonar_var_dir}\"); gsub(/^STATUS_EXE=.*/,\"STATUS_EXE=%{perfsonar_bin_dir}/perfsonar-linkstatus\"); gsub(/^STATUS_CONF=.*/,\"STATUS_CONF=%{daemon_conf_file}\");; gsub(/^STATUS_LOGGER=.*/,\"STATUS_LOGGER=%{daemon_logger_conf_file}\"); print}" perfsonar-linkstatus.init > perfsonar-linkstatus.new
 mv perfsonar-linkstatus.new perfsonar-linkstatus.init
 
-awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=%{perfsonar_var_dir}\"); gsub(/^PSB_EXE=.*/,\"PSB_EXE=%{perfsonar_bin_dir}/perfsonar-linkstatus-collector\"); gsub(/^PSB_CONF=.*/,\"PSB_CONF=%{collector_conf_file}\");; gsub(/^PSB_LOGGER=.*/,\"PSB_LOGGER=%{collector_logger_conf_file}\"); print}" perfsonar-linkstatus-collector.init > perfsonar-linkstatus-collector.new
+awk "{gsub(/^PIDDIR=.*/,\"PIDDIR=%{perfsonar_var_dir}\"); gsub(/^STATUSCOLLECTOR_EXE=.*/,\"STATUSCOLLECTOR_EXE=%{perfsonar_bin_dir}/perfsonar-linkstatus-collector\"); gsub(/^STATUSCOLLECTOR_CONF=.*/,\"STATUSCOLLECTOR_CONF=%{collector_conf_file}\");; gsub(/^STATUSCOLLECTOR_LOGGER=.*/,\"STATUSCOLLECTOR_LOGGER=%{collector_logger_conf_file}\"); print}" perfsonar-linkstatus-collector.init > perfsonar-linkstatus-collector.new
 mv perfsonar-linkstatus-collector.new perfsonar-linkstatus-collector.init
 
 mkdir -p %{buildroot}/%{perfsonar_bin_dir}
@@ -87,7 +87,10 @@ install -p -m755 perfsonar-linkstatus.init %{buildroot}/etc/init.d/perfsonar-lin
 %defattr(-,root,root,-)
 %doc Changes LICENSE README
 %{perfsonar_bin_dir}/*
-%{perfsonar_conf_dir}/*
+%config %{elements_conf_file}
+%config %{e2emon_compat_file}
+%config %{collector_logger_conf_file}
+%config %{daemon_logger_conf_file}
 /etc/init.d/*
 
 %preun

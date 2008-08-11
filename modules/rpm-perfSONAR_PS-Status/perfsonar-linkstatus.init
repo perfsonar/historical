@@ -1,25 +1,34 @@
 #!/bin/bash
 #
-# Init file for perfSONARBUOY Daemon
+# Init file for perfSONAR_PS Status Service
 #
 # chkconfig: 2345 60 20
-# description: perfSONARBUOY Daemon
+# description: Status Service
 #
 
 PREFIX=../
-PSB_EXE=${PREFIX}/bin/perfsonar-linkstatus
-PSB_CONF=${PREFIX}/etc/perfsonar-linkstatus.conf
-PSB_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-logger.conf
+STATUS_EXE=${PREFIX}/bin/perfsonar-linkstatus
+STATUS_CONF=${PREFIX}/etc/perfsonar-linkstatus.conf
+STATUS_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-logger.conf
+STATUS_LOGDIR=`dirname $STATUS_LOGGER`
 PIDDIR=${PREFIX}/var
 
-PIDFILE=${PIDDIR}/perfsonar-linkstatus.pid
+PIDFILE=perfsonar-linkstatus.pid
 
-PERFSONAR="${PSB_EXE} --config ${PSB_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${PSB_LOGGER} "
+PERFSONAR="${STATUS_EXE} --config ${STATUS_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUS_LOGGER} "
 
 ERROR=0
 ARGV="$@"
 if [ "x$ARGV" = "x" ] ; then 
     ARGS="help"
+fi
+
+if [ ! -d ${STATUS_LOGDIR} ]; then
+	mkdir -p ${STATUS_LOGDIR}
+fi
+
+if [ ! -d ${PIDDIR} ]; then
+	mkdir -p ${PIDDIR}
 fi
 
 for ARG in $@ $ARGS

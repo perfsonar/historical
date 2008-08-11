@@ -29,10 +29,6 @@ lib/perfSONAR_PS/Collectors/LinkStatus/Link.pm
 lib/perfSONAR_PS/Collectors/LinkStatus.pm
 lib/perfSONAR_PS/Collectors/LinkStatus/Status.pm
 lib/perfSONAR_PS/Common.pm
-lib/perfSONAR_PS/DataModels/APIBuilder.pm
-lib/perfSONAR_PS/DataModels/DataModel.pm
-lib/perfSONAR_PS/DataModels/PingER_Model.pm
-lib/perfSONAR_PS/DataModels/PingER_Topology.pm
 lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/RRD.pm
 lib/perfSONAR_PS/DB/SQL.pm
