@@ -6,7 +6,8 @@ applicable.
 
 == Future Events ==
 
- * [20080811Video] - Video Conference for August 11, 2008
+ * [20080811Video] - Video Conference on the *LHC Disk* for August 11, 2008
+ * [20080818Video] - Video Conference for August 18, 2008
  * [20080908Meet] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
 
 == Past Meetings ==
