@@ -11,7 +11,7 @@
 
 The following article covers topics related to the perfSONAR-PS SNMP Measurement
 Archive.  This service functions as a standalone warehouse for SNMP gathered
-information, currently limited to:
+information, and is currently limited to:
 
  * Interface Utilization (e.g. interface octet counters)
  * Inteface Errors
@@ -20,14 +20,14 @@ information, currently limited to:
 Expansion to other MIB values is possible, but was not considered in the initial
 development.
 
-Data is normally stored in RRD database (e.g. the kind normally used for network
-monitoring tools such as [http://www.cacti.net Cacti], 
-[http://oss.oetiker.ch/mrtg/ MRTG] or [http://cricket.sourceforge.net/ Cricket].
-This software has extensions available to handle special case storage in SQL
-based databases (currently [http://www.mysql.com/ MySQL] and 
-[http://www.sqlite.org/ SQLite]) although these were tested with specific use 
-cases in mind.  Extension to your homegrown monitoring solution may require 
-some perl slinging.
+Data is normally stored in [http://oss.oetiker.ch/rrdtool/ RRD] database (e.g. 
+the kind normally used for network monitoring tools such as 
+[http://www.cacti.net Cacti], [http://oss.oetiker.ch/mrtg/ MRTG] or
+[http://cricket.sourceforge.net/ Cricket].  This software has extensions
+available to handle special case storage in SQL based databases (currently
+[http://www.mysql.com/ MySQL] and [http://www.sqlite.org/ SQLite]) although
+these were tested with specific use cases in mind.  Extension to your homegrown
+monitoring solution may require some perl slinging.
 
 As with all perfSONAR-PS tools the underlying communication and storage
 information is described in XML formats as specified by the Network
@@ -61,13 +61,15 @@ variables as needed.
 
 SQLite can be installed via your package manager (_apt_, _yum_, etc.) along with
 related database access methods (e.g. _DBI_, _DBD::SQLite_).  The alternative is
-to install from source and CPAN.
+to install from [http://www.sqlite.org/download.html source] and 
+[http://search.cpan.org/dist/DBD-SQLite/lib/DBD/SQLite.pm CPAN].
 
 ==== MySQL ====
 
 MySQL should be installed via your package manager (_apt_, _yum_, etc.) along with
 related database access methods (e.g. _DBI_, _DBD::mysql_).  The alternative is
-to install from source and CPAN.
+to install from [http://dev.mysql.com/downloads/ source] and 
+[http://search.cpan.org/~capttofu/DBD-mysql-4.007/lib/DBD/mysql.pm CPAN].
 
 ==== Oracle DB XML ====
 
@@ -275,7 +277,7 @@ A breakdown of each item in the *snmp* section follows:
 || _enable_registration_ || yes || boolean, 0 or 1 ||
 || _ls_instance_ || yes || string, LS instance to register to (instead of using gLS) ||
 || _ls_registration_interval_ || no, yes with _ls_instance_ || integer, how often (in minutes) to register to an LS ||
-|| _metadata_db_external_ || no || string, currently only *cacti* ||
+|| _metadata_db_external_ || yes || string, currently *none* or *cacti* ||
 || _metadata_db_external_source_ || no, yes w/ *metadata_db_external* || string, path to cactid.conf ||
 || _metadata_db_type_ || yes || string, either *file* or *xmldb* ||
 || _metadata_db_file_ || yes || string, when *metadata_db_type* is _xmldb_ this must end in *.dbxml*, when *metadata_db_type* is _file_ this should be a path to an XML file ||
@@ -346,7 +348,7 @@ have gone to some lengths to generate the information automatically:
  * Test Store File - an available option in the configuraiton
  * Existing Store File - used for upgrades
  * [CactiConfig] - Read the native Cacti databases.
- * !MRTGConfig - TBD
+ * MRTGConfig - TBD
  * !CricketConfig - TBD
 
 Once configured, the service can be safely tested.
