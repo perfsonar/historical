@@ -256,16 +256,20 @@ sub init {
     if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"} and 
          $self->{CONF}->{"snmp"}->{"metadata_db_external"} ) {
         if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
-            require perfSONAR_PS::DB::Cricket;
-            my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
-            $cricket->openDB();
-            $cricket->closeDB();
+            eval { load perfSONAR_PS::DB::Cricket; };
+            unless ( $EVAL_ERROR ) {
+                my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
+                $cricket->openDB();
+                $cricket->closeDB();
+            }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            require perfSONAR_PS::DB::Cricket;
-            my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
-            $cacti->openDB();
-            $cacti->closeDB();
+            eval { perfSONAR_PS::DB::Cacti; };
+            unless ( $EVAL_ERROR ) {
+                my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
+                $cacti->openDB();
+                $cacti->closeDB();
+            }
         }
         else {
             $self->{LOGGER}->error("External monitoring source \"".$self->{CONF}->{"snmp"}->{"metadata_db_external"}."\" not currently supported.");
