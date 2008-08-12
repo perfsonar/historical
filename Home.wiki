@@ -1,7 +1,6 @@
 = perfSONAR-PS Home =
 
-Welcome to the [https://wiki.internet2.edu/confluence/display/PSPS/Home perfSONAR-PS] 
-wiki.
+Welcome to the perfSONAR-PS wiki.
 
 == Overview ==
 
@@ -33,6 +32,10 @@ https://mail.internet2.edu/wws/info/i2-perfsonar
 == Meetings and Conference Calls ==
 
 A listing of the nodes from all meetings and conference calls can be found in [Meetings].
+
+== Legacy Wiki ==
+
+[https://wiki.internet2.edu/confluence/display/PSPS/Home perfSONAR-PS]
 
 == Last Updated ==
 
