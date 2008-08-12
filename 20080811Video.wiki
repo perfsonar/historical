@@ -28,25 +28,18 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Jason, Aaron, Rich, Joe, Jeff, Brian, Jarad, Maxim
  # LHC Disk
-   * Hardening
-     * PingER
-       * Warning handling
-     * hLS
-       * Database startup size (DB_CONFIG issues)
-     * SNMP MA
-       * Better startup/test procedures on cacti integration
-       * cricket/mrtg inclusion
-     * perfSONAR-BUOY
-       * OWAMP Collection Agent
-       * Conversion into pS space of collection agents
-       * MA Database handling
-       * Configuration
-   * SOC Improvement roll in (over next month or two)
-   * Community Involvement (Testing by Jon Dugan/Brian/MCNC/GT?)
-   * Extensions
-   * SVN for Source Code
+   * Timeline:
+     * Code Freeze: Aug 20
+     * Finish integration (testing by friends): Aug 29
+     * Complete ISO's available: Sept 4
+   * Actions by Aug 20:
+     * Aaron: Remove RAM disk, Evaluate convergence with GSoC version, Remote diagnostics availability, ls-registration updates, work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC
+     * Maxim: Remove excessive warnings, Add GUI, Expore gLS landmarks integration
+     * Jason: Release and Deploy 'production' gLS instances, gLS API support, pS-B owamp-star config changes
+     * Jeff: pS-B owamp start config, powstream - sender session support
+     * Joe: work with Aaron to create an ls-registration daemon for supporting LHC ping-able hosts
  # Next meeting will be August 18, 2008
 
 == Last Updated ==
