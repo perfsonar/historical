@@ -1,0 +1,47 @@
+#summary Developer Information for the NPtoolkit
+
+= Introduction =
+
+This page contains information necessary for anyone looking to help develop the NPtoolkit.
+
+= Disk Overview =
+The Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit]) is an modified version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk.
+
+= NPtoolkit Linux Distribution =
+The disk itself has been upgraded to [http://www.debian.org/releases/etch/ Debian Etch] as the bulk of the packages included in the Knoppix distribution that the NPtoolkit was originally based on came from the distribution that would become Debian Etch. There are still a large number of Knoppix packages on the disk, especially in the realm of hardware detection, but the goal is to minimize the number of these packages since we don't have a way to upgrade them. Any packages for network facing services along with any packages for tools/libraries depended on by network facing services should be from Debian etch so that updates can easily be performed.
+
+=perfSONAR-PS Services=
+
+There are four perfSONAR-PS Services installed on the disk: the PingerMA, the perfSONAR-BUOY MA, the SNMP MA and the hLS. The code base for all of these services is located in the /usr/local/perfSONAR-PS directory. Whenever a new disk is released, the most recent version of the perfSONAR-PS services should be in there. The easiest way to do this is to use the following commands:
+
+{{{
+chroot /path/to/NPtoolkit/root/directory
+svn export http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk /usr/local/perfSONAR-PS
+rm -rf /usr/local/perfSONAR-PS/modules
+}}}
+
+The init files for each service are located in /etc/init.d. These init files differ from the init files located in the perfSONAR-PS repository as they have added functionality to save the configuration files on shutdown and swap the access point to match the current external interface.
+
+= Pinger MA =
+
+= Pinger Web Admin =
+
+= perfSONAR-BUOY MA =
+
+= perfSONAR-BUOY Web Admin =
+
+= SNMP MA =
+
+= Cacti =
+
+= Cricket =
+
+= hLS =
+
+= BWCTL =
+
+= NDT =
+
+= NPAD =
+
+= OWAMP =
