@@ -183,8 +183,8 @@ sub sendReceive {
         alarm 0;
     };
     if ($@) {
-        $logger->error( "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm." ) unless $@ eq "alarm\n";
-        $$error = "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm.";
+        $logger->error( "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"".$timeout."\" seconds." ) unless $@ eq "alarm\n";
+        $$error = "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"".$timeout."\" seconds.";
         return "";
     }
     else {

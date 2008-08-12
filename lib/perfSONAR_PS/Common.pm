@@ -754,7 +754,7 @@ sub reMap {
     on failure.
 =cut
 sub consultArchive {
-    my ($host, $port, $endpoint, $request) = @_;
+    my ($host, $port, $endpoint, $request, $timeout) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
     # start a transport agent
@@ -763,7 +763,8 @@ sub consultArchive {
     my $envelope = makeEnvelope($request);
     my $error;
     my $start_time = time;
-    my $response = $sender->sendReceive($envelope, "", \$error);
+    $timeout = 30 unless $timeout; # 30 secondtimeout
+    my $response = $sender->sendReceive($envelope, $timeout, \$error);
     my $end_time = time;
 
     $logger->debug("Time to make request: ".($end_time - $start_time));
