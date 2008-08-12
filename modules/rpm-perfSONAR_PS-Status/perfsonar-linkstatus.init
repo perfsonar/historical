@@ -13,9 +13,12 @@ STATUS_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-logger.conf
 STATUS_LOGDIR=`dirname $STATUS_LOGGER`
 PIDDIR=${PREFIX}/var
 
+USER=perfsonar
+GROUP=perfsonar
+
 PIDFILE=perfsonar-linkstatus.pid
 
-PERFSONAR="${STATUS_EXE} --config ${STATUS_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUS_LOGGER} "
+PERFSONAR="${STATUS_EXE} --config ${STATUS_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUS_LOGGER}  --user=${USER} --group=${GROUP}"
 
 ERROR=0
 ARGV="$@"

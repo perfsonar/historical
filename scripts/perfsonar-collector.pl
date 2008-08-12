@@ -95,6 +95,8 @@ my $PIDDIR = '';
 my $PIDFILE = '';
 my $LOGOUTPUT = '';
 my $IGNORE_PID = '';
+my $RUNAS_USER = q{};
+my $RUNAS_GROUP = q{};
 
 my $status = GetOptions (
         'config=s' => \$CONFIG_FILE,
@@ -102,6 +104,8 @@ my $status = GetOptions (
         'output=s' => \$LOGOUTPUT,
         'piddir=s' => \$PIDDIR,
         'pidfile=s' => \$PIDFILE,
+        'user=s'    => \$RUNAS_USER,
+        'group=s'   => \$RUNAS_GROUP,
         'ignorepid' => \$IGNORE_PID,
         'verbose' => \$DEBUGFLAG,
         'help' => \$HELP);
@@ -226,6 +230,31 @@ foreach my $collectors (@{ $conf{"collector"} }) {
         $collector_info{"config"} = \%collector_conf;
         push @collectors, \%collector_info;
     }
+}
+
+# Check if the daemon should run as a specific user/group and then switch to
+# that user/group.
+if (not $RUNAS_GROUP) {
+    if ($conf{"group"}) {
+        $RUNAS_GROUP = $conf{"group"};
+    }
+}
+
+if (not $RUNAS_USER) {
+    if ($conf{"user"}) {
+        $RUNAS_USER = $conf{"user"};
+    }
+}
+
+if ($RUNAS_USER and $RUNAS_GROUP) {
+    if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
+        $logger->error("Couldn't drop priviledges");
+        exit(-1);
+    }
+} elsif ($RUNAS_USER or $RUNAS_GROUP) {
+    # they need to specify both the user and group
+    $logger->error("You need to specify both the user and group if you specify either");
+    exit(-1);
 }
 
 # Daemonize if not in debug mode. This must be done before forking off children
@@ -369,6 +398,70 @@ Kills all the children for the process and then exits
 sub signalHandler() {
     killChildren();
     exit(0);
+}
+
+=head2 setids
+Sets the user/group for the daemon to run as. Returns 0 on success and -1 on
+failure.
+=cut
+sub setids {
+    my(%args)   = @_;
+    my ($uid,$gid);
+    my ($unam,$gnam);
+    
+    $uid = $args{'USER'} if(defined $args{'USER'});
+    $gid = $args{'GROUP'} if(defined $args{'GROUP'});
+
+    if (not $uid) {
+        return -1;
+    }
+
+    # Don't do anything if we are not running as root.
+    return if ($> != 0);
+        
+    # set GID first to ensure we still have permissions to.
+    if (defined($gid)){
+        if($gid =~ /\D/){
+            # If there are any non-digits, it is a groupname.
+            $gid = getgrnam($gnam = $gid);
+            if (not $gid) {
+                $logger->error("Can't getgrnam($gnam): $!");
+                return -1;
+            }
+        }
+        elsif($gid < 0){
+            $gid = -$gid;
+        }
+
+        if (not getgrgid($gid)) {
+            $logger->error("Invalid GID: $gid");
+            return -1;
+        }
+
+        $) = $( = $gid;
+    }
+
+    # Now set UID
+    if($uid =~ /\D/){
+        # If there are any non-digits, it is a username.
+        $uid = getpwnam($unam = $uid);
+        if (not $uid) {
+            $logger->error("Can't getpwnam($unam): $!");
+            return -1;
+        }
+    }
+    elsif($uid < 0){
+        $uid = -$uid;
+    }
+
+    if (not getpwuid($uid)) {
+        $logger->error("Invalid UID: $uid");
+        return -1;
+    }
+
+    $> = $< = $uid;
+
+    return 0;
 }
 
 =head1 SEE ALSO

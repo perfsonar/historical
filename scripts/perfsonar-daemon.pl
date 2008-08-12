@@ -135,19 +135,23 @@ my $LOGGER_CONF  = q{};
 my $PIDDIR = q{};
 my $PIDFILE = q{};
 my $LOGOUTPUT = q{};
+my $RUNAS_USER = q{};
+my $RUNAS_GROUP = q{};
 
 my $status = GetOptions (
-        'config=s' => \$CONFIG_FILE,
-        'logger=s' => \$LOGGER_CONF,
-        'output=s' => \$LOGOUTPUT,
-        'piddir=s' => \$PIDDIR,
+        'config=s'  => \$CONFIG_FILE,
+        'logger=s'  => \$LOGGER_CONF,
+        'output=s'  => \$LOGOUTPUT,
+        'piddir=s'  => \$PIDDIR,
         'pidfile=s' => \$PIDFILE,
-        'verbose' => \$DEBUGFLAG,
-        'help' => \$HELP);
+        'user=s'    => \$RUNAS_USER,
+        'group=s'   => \$RUNAS_GROUP,
+        'verbose'   => \$DEBUGFLAG,
+        'help'      => \$HELP);
 
 if(not $status or $HELP) {
     print "$0: starts the MA daemon.\n";
-    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf]\n";
+    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --user=[user to run as] --group=[group to run as]\n";
     exit(1);
 }
 
@@ -380,6 +384,31 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
 if (scalar(keys %listeners) == 0) {
     $logger->error("No ports enabled");
+    exit(-1);
+}
+
+# Check if the daemon should run as a specific user/group and then switch to
+# that user/group.
+if (not $RUNAS_GROUP) {
+    if ($conf{"group"}) {
+        $RUNAS_GROUP = $conf{"group"};
+    }
+}
+
+if (not $RUNAS_USER) {
+    if ($conf{"user"}) {
+        $RUNAS_USER = $conf{"user"};
+    }
+}
+
+if ($RUNAS_USER and $RUNAS_GROUP) {
+    if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
+        $logger->error("Couldn't drop priviledges");
+        exit(-1);
+    }
+} elsif ($RUNAS_USER or $RUNAS_GROUP) {
+    # they need to specify both the user and group
+    $logger->error("You need to specify both the user and group if you specify either");
     exit(-1);
 }
 
@@ -836,6 +865,70 @@ sub REAPER {
     # may as well reuse it to clean up the exiting children as well.
 
     $SIG{CHLD} = \&REAPER;
+}
+
+=head2 setids
+Sets the user/group for the daemon to run as. Returns 0 on success and -1 on
+failure.
+=cut
+sub setids{
+    my(%args)   = @_;
+    my ($uid,$gid);
+    my ($unam,$gnam);
+    
+    $uid = $args{'USER'} if(defined $args{'USER'});
+    $gid = $args{'GROUP'} if(defined $args{'GROUP'});
+
+    if (not $uid) {
+        return -1;
+    }
+
+    # Don't do anything if we are not running as root.
+    return if ($> != 0);
+        
+    # set GID first to ensure we still have permissions to.
+    if (defined($gid)){
+        if($gid =~ /\D/){
+            # If there are any non-digits, it is a groupname.
+            $gid = getgrnam($gnam = $gid);
+            if (not $gid) {
+                $logger->error("Can't getgrnam($gnam): $!");
+                return -1;
+            }
+        }
+        elsif($gid < 0){
+            $gid = -$gid;
+        }
+
+        if (not getgrgid($gid)) {
+            $logger->error("Invalid GID: $gid");
+            return -1;
+        }
+
+        $) = $( = $gid;
+    }
+
+    # Now set UID
+    if($uid =~ /\D/){
+        # If there are any non-digits, it is a username.
+        $uid = getpwnam($unam = $uid);
+        if (not $uid) {
+            $logger->error("Can't getpwnam($unam): $!");
+            return -1;
+        }
+    }
+    elsif($uid < 0){
+        $uid = -$uid;
+    }
+
+    if (not getpwuid($uid)) {
+        $logger->error("Invalid UID: $uid");
+        return -1;
+    }
+
+    $> = $< = $uid;
+
+    return 0;
 }
 
 =head1 SEE ALSO

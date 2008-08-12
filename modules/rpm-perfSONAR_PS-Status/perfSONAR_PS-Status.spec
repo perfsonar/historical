@@ -93,6 +93,9 @@ install -p -m755 perfsonar-linkstatus.init %{buildroot}/etc/init.d/perfsonar-lin
 %config %{daemon_logger_conf_file}
 /etc/init.d/*
 
+%post
+/usr/sbin/useradd -r -s /bin/nologin -d /tmp perfsonar || :
+
 %preun
 /etc/init.d/perfsonar-linkstatus stop
 /etc/init.d/perfsonar-linkstatus-collector stop

@@ -13,9 +13,12 @@ STATUSCOLLECTOR_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-collector-logger.conf
 STATUSCOLLECTOR_LOGDIR=`dirname $STATUSCOLLECTOR_LOGGER`
 PIDDIR=${PREFIX}/var
 
+USER=perfsonar
+GROUP=perfsonar
+
 PIDFILE=perfsonar-linkstatus-collector.pid
 
-PERFSONAR="${STATUSCOLLECTOR_EXE} --config ${STATUSCOLLECTOR_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUSCOLLECTOR_LOGGER} "
+PERFSONAR="${STATUSCOLLECTOR_EXE} --config ${STATUSCOLLECTOR_CONF} --piddir=${PIDDIR} --pidfile=${PIDFILE} --logger=${STATUSCOLLECTOR_LOGGER} --user=${USER} --group=${GROUP}"
 
 ERROR=0
 ARGV="$@"
