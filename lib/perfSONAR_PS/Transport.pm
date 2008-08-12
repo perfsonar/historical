@@ -103,16 +103,11 @@ sub setContactEndPoint {
 
 sub sendReceive {
     my($self, $envelope, $timeout, $error) = @_;
+    $timeout = 10 unless $timeout;
     my $logger = get_logger("perfSONAR_PS::Transport");
     my $method_uri = "http://ggf.org/ns/nmwg/base/2.0/message/";
     my $httpEndpoint = &getHttpURI( $self->{CONTACT_HOST}, $self->{CONTACT_PORT}, $self->{CONTACT_ENDPOINT});
-    my $userAgent = "";
-    if(defined $timeout and $timeout ne "") {
-        $userAgent = LWP::UserAgent->new('timeout' => $timeout);
-    }
-    else {
-        $userAgent = LWP::UserAgent->new('timeout' => 3000);
-    }  
+    my $userAgent = LWP::UserAgent->new('timeout' => ($timeout*1000));
 
     $logger->debug("Sending information to \"".$httpEndpoint."\": $envelope"); 
 
@@ -121,21 +116,30 @@ sub sendReceive {
     $sendSoap->content_type  ('text/xml');
     $sendSoap->content_length(length($envelope));
 
-    my $httpResponse = $userAgent->request($sendSoap);
-
-    if (!($httpResponse->is_success)) {
-        $logger->debug("Send to \"".$httpEndpoint."\" failed: ".$httpResponse->status_line); 
-        $$error = $httpResponse->status_line if defined $error;
+    my $httpResponse;
+    eval {
+	local $SIG{ALRM} = sub { die "alarm\n" };
+	alarm $timeout;
+        $httpResponse = $userAgent->request($sendSoap);
+	alarm 0;
+    };
+    if ($@) {
+        $logger->error("Connection to \"".$httpEndpoint."\" terminiated due to alarm.") unless $@ eq "alarm\n";
+        $$error = "Connection to \"".$httpEndpoint."\" terminiated due to alarm.";
         return "";
     }
-
-    my $responseCode = $httpResponse->code();
-    my $responseContent = $httpResponse->content();
-
-    $logger->debug("Response returned: ".$responseContent); 
-
-    $$error = "" if defined $error;  
-    return $responseContent;
+    else {
+        if (!($httpResponse->is_success)) {
+            $logger->debug("Send to \"".$httpEndpoint."\" failed: ".$httpResponse->status_line); 
+            $$error = $httpResponse->status_line if defined $error;
+            return "";
+        }
+        my $responseCode = $httpResponse->code();
+        my $responseContent = $httpResponse->content();
+        $logger->debug("Response returned: ".$responseContent); 
+        $$error = "" if defined $error;  
+        return $responseContent;
+    }
 }
 
 
