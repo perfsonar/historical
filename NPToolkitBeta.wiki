@@ -4,18 +4,26 @@
 
  * Jason
    * gLS
-     # Client API + Update existing GUIs     # Registration API + Integration into SNMP MA
+     # Client API + Update existing GUIs
+     # Registration API + Integration into SNMP MA
      # Performance/DB XML Trouble Shooting
    * pSB
-     # Port master/collector to perfSONAR (w/ JB)         # Fix BWCTL DB Abstraction
+     # Port master/collector to perfSONAR (w/ JB)    
+     # Fix BWCTL DB Abstraction
      # OWAMP DB Abstraction (Pending JB)
-   * SNMP MA     # Cricket/Cacti/MRTG Integration (about 1/2 done thus far)
-   * Disk at Large     # Address some strange behavior when auto finding host/iv4/ipv6 information
+   * SNMP MA
+     # Cricket/Cacti/MRTG Integration (about 1/2 done thus far)
+   * Disk at Large
+     # Address some strange behavior when auto finding host/iv4/ipv6 information
      # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
  * Aaron
    # Have the perfSONAR daemons run as user "perfsonar" instead of root (*DONE*)
-   # Remove use of ramdisk to better handle the root partition filling up   # LS Registration Daemon     # Verify that it is doing IPv6 reverse dns correctly     # Modify the approach to use PID checking instead of using startup scripts for service liveness
+   # Remove use of ramdisk to better handle the root partition filling up
+   # LS Registration Daemon
+     # Verify that it is doing IPv6 reverse dns correctly
+     # Modify the approach to use PID checking instead of using startup scripts for service liveness
    # Port PingER GUI to Disk (w/ Maxim)
+   # Work with Dan to integrate some or all of his scripts into the disk and integrate the q+a that's been added to the disk into his framework. 
  * Jeff
    # Port master/collector to perfSONAR (w/ JZ)
    # Latency Star Abstraction
@@ -27,13 +35,20 @@
    * gLS
      # Documentation (Minor)
      # Installation/Burn in of true gLS
-   * pSB     # Documentation (Minor)
+   * pSB
+     # Documentation (Minor)
      # System stuff to start/restart the service after configuration?
    * SNMP MA
      # System stuff to start/restart the service after configuration?
-   * Disk at Large     # Modify pSB to continuously poll for 'new' bwctl/owamp daemons and add the to the mesh automatically, restart necessary tools
-     # pSB Configuration GUIs     # gLS integration into the services.cgi (e.g. perfAdmin improvements)     # Testing Coordination        * GT (Will contact Warren, we could get more than a single deployment out of him)        * ESnet (I can coordinate Brian/Joe/Jon)
-        * BNL w/ Bigrow        * Wild Cards (SLAC/UDel/IU/UMich/Caltech/CERN)
+   * Disk at Large
+     # Modify pSB to continuously poll for 'new' bwctl/owamp daemons and add the to the mesh automatically, restart necessary tools
+     # pSB Configuration GUIs
+     # gLS integration into the services.cgi (e.g. perfAdmin improvements)
+     # Testing Coordination
+        * GT (Will contact Warren, we could get more than a single deployment out of him)
+        * ESnet (I can coordinate Brian/Joe/Jon)
+        * BNL w/ Bigrow
+        * Wild Cards (SLAC/UDel/IU/UMich/Caltech/CERN)
  * Aaron
    # /var/log exporting
    # Documentation of NPToolkit Internals
