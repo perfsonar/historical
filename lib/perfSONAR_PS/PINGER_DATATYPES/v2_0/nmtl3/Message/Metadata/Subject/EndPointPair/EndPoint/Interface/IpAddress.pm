@@ -346,19 +346,19 @@ sub  querySQL {
                     foreach my $classes (@{$query->{$table}{$entry}}) {
                          if($classes && $classes eq 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmtl3::Message::Metadata::Subject::EndPointPair::EndPoint::Interface::IpAddress') {
         
-                            if    ($self->value && ( (  ($entry eq 'ip_number')) )) {
+                            if    ($self->get_value && ( (  ($entry eq 'ip_number')) )) {
                                 $query->{$table}{$entry} =  $self->get_value;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_value);
                                 last;  
                             }
 
-                            elsif ($self->type && ( (  ($entry eq 'transport')) )) {
+                            elsif ($self->get_type && ( (  ($entry eq 'transport')) )) {
                                 $query->{$table}{$entry} =  $self->get_type;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_type);
                                 last;  
                             }
 
-                            elsif ($self->text && ( (  ($entry eq 'ip_number')) )) {
+                            elsif ($self->get_text && ( (  ($entry eq 'ip_number')) )) {
                                 $query->{$table}{$entry} =  $self->get_text;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_text);
                                 last;  

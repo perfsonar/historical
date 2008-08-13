@@ -11,15 +11,15 @@ ls_registration_interval     60
                 <pingermp>
                     db_name     pingerMA
                     service_description     FNAL Tier2 PingER MP
-                    configuration_file  /home/netadmin/LHCOPN/psps/branches/merge/modules/perfSONAR_PS-Services-PingER-v0.01/bin/pinger-landmarks.xml
+                    configuration_file  /home/netadmin/PS_DISTR/perfSONAR_PS-Services-PingER-0.09/etc/pinger-landmarks.xml
                     db_host     localhost
                     db_username     pinger
-                    service_accesspoint     http://tukki.fnal.gov:8075/perfSONAR_PS/services/pinger/mp
+                    service_accesspoint     http://localhost:8075/perfSONAR_PS/services/pinger/mp
                     enable_registration     0
                     service_name     PingER MP
                     query_size_limit     100000
                     db_type     mysql
-                    db_password     pinger_pass
+                    db_password     pinger2001
                     ls_registration_interval     60
                 </pingermp>
         </endpoint>
@@ -30,12 +30,12 @@ ls_registration_interval     60
                     service_description     FNAL Tier2 PingER MA
                     db_host     localhost
                     db_username     pinger
-                    service_accesspoint     http://tukki.fnal.gov:8075/perfSONAR_PS/services/pinger/ma
+                    service_accesspoint     http://localhost:8075/perfSONAR_PS/services/pinger/ma
                     enable_registration     0
                     service_name     PingER MA
                     query_size_limit     100000
                     db_type     mysql
-                    db_password     pinger_pass
+                    db_password     pinger2001
                     ls_registration_interval     60
                 </pingerma>
                 module     perfSONAR_PS::Services::MA::PingER

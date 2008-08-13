@@ -57,15 +57,16 @@ use Readonly;
     
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::Element qw(getElement);
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::NSMap;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::histogram::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata::Key::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::average::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::min::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::max::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::cdf::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::median::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::mean::Message::Metadata::Parameters;
+use perfSONAR_PS::PINGER_DATATYPES::v2_0::histogram::Message::Metadata::Parameters;
+use perfSONAR_PS::PINGER_DATATYPES::v2_0::average::Message::Metadata::Parameters;
+use perfSONAR_PS::PINGER_DATATYPES::v2_0::cdf::Message::Metadata::Parameters;
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::select::Message::Metadata::Parameters;
+use perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Metadata::Parameters;
 use fields qw(nsmap idmap LOGGER id parameters );
 
 

@@ -1,5 +1,7 @@
 package perfSONAR_PS::Services::MP::Agent::Ping;
 
+use strict;
+use warnings;
 use version; our $VERSION = 0.09; 
 
 =head1 NAME
@@ -39,7 +41,7 @@ be executed. This class overwrites the parse and
 
 # derive from teh base agent class
 use perfSONAR_PS::Services::MP::Agent::CommandLine;
-our @ISA = qw(perfSONAR_PS::Services::MP::Agent::CommandLine);
+use base qw(perfSONAR_PS::Services::MP::Agent::CommandLine);
 
 use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Ping' );
@@ -52,6 +54,7 @@ our $command = '/bin/ping -c %count% -i %interval% -s %packetSize% -t %ttl% %des
 Creates a new ping agent class
 
 =cut
+
 sub new
 {
 	my $package = shift;
@@ -74,27 +77,7 @@ sub new
 }
 
 
-=head2 init()
-
-inherited from parent classes. makes sure that the ping executable is existing.
-
-=cut
-
-
-=head2 command()
-
-accessor/mutator for the ping executable file
-
-=cut
-sub command
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'CMD'} = shift;
-	}
-	return $self->{'CMD'};
-}
-
+ 
 
 
 =head2 cont( $string )
@@ -203,6 +186,7 @@ sub transport
 parses the output from a command line measurement of pings
 
 =cut
+
 sub parse
 {
 	my $self = shift;
@@ -262,8 +246,7 @@ sub parse
     }
 
 	# get rest of results
-	my $sent = undef;
-	my $recv = undef;
+	my ($sent, $meanRtt, $maxRtt, $recv, $minRtt); 
 	# hires results from ping output
 	for( my $x = (scalar @$cmdOutput - 2); $x < (scalar @$cmdOutput) ; $x++ ) {
 		$logger->debug( "Analysing line: " . $cmdOutput->[$x]);
@@ -277,13 +260,12 @@ sub parse
  		}
 	}
 
-
 	# set the internal results
-	$self->results( {
-						'sent' => $sent, 'recv' => $recv,
-						'minRtt' => $minRtt, 'meanRtt' => $meanRtt, 'maxRtt' => $maxRtt,
-						'singletons' => \@pings, 'rtts' => \@rtts, 'seqs' => \@seqs
-					});
+	$self->results({
+			   'sent' => $sent, 'recv' => $recv,
+			   'minRtt' => $minRtt, 'meanRtt' => $meanRtt, 'maxRtt' => $maxRtt,
+			   'singletons' => \@pings, 'rtts' => \@rtts, 'seqs' => \@seqs
+		      });
 
 	return 0;
 }

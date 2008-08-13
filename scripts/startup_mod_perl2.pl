@@ -14,7 +14,8 @@ use lib qw(/home/netadmin/LHCOPN/perfSONAR-PS/trunk/lib);
  
 use Log::Log4perl qw( :easy );
  
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($INFO);
+$ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
 
  
 

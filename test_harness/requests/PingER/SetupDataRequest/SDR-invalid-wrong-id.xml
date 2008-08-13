@@ -17,7 +17,7 @@
   <nmwg:metadata id="meta2" metadataIdRef="meta1">
         <pinger:subject xmlns:pinger="http://ggf.org/ns/nmwg/tools/pinger/2.0/" id="subject1">
       <nmwgt:endPointPair xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/">
-         <nmwgt:src type="hostname" value="tukki.fnal.gov"/> 
+         <nmwgt:src type="hostname" value="newmon.bnl.gov"/> 
      </nmwgt:endPointPair>
     </pinger:subject>
    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/pinger/2.0/</nmwg:eventType>

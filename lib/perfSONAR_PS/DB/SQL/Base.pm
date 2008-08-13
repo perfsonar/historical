@@ -141,6 +141,7 @@ sub  openDB {
     };
     if ($EVAL_ERROR) {
         $self->ERRORMSG("Connect DB error \"" . $EVAL_ERROR . "\"." );
+	$self->LOGGER->error(" !!! Connect DB error \"" . $EVAL_ERROR . "\"." ); 
         return -1;
     }
     return 0;
@@ -180,8 +181,6 @@ sub closeDB {
 
 sub alive {
     my $self = shift;
-    # close database connection
-    # destroy objects classes in memory
     my $ping = -1;
     eval {
     	$ping = 0 if($self->handle && ref($self->handle) =~ /DBI/ && $self->handle->ping);
@@ -225,7 +224,7 @@ sub  getFromTable {
      # if select is provided then use names from select
      # if validation hash is not provided then we should use query  itself for the list of columns
      #
-    $self->LOGGER->debug("  SQL::  params  " . Dumper $param);
+    $self->LOGGER->debug("  SQL::  params  ", sub{Dumper($param)});
      if(defined $param->{select} && ref($param->{select}) eq 'ARRAY') {
          foreach my $name (@{$param->{select}}) { 
 	     push @array_of_names, $name;
@@ -260,6 +259,7 @@ sub  getFromTable {
          my $sql_query =  build_select( $param_to );
 	 $self->LOGGER->debug("  SQL:: $sql_query ");			      
 	 $self->openDB  if !($self->alive == 0);
+	 
 	 my $sth = $self->handle->prepare($sql_query);      
 	 $results = $self->handle->selectall_hashref($sth,  $param->{index});
 	 $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);	
@@ -267,6 +267,7 @@ sub  getFromTable {
      };
      if ($EVAL_ERROR) {
         $self->ERRORMSG("getFromTable  failed with error \"" . $EVAL_ERROR . "\"." );
+	$self->LOGGER->error(" !!! getFromTable  failed with error \"" . $EVAL_ERROR . "\"." );	
      } 
      return $results;
 }
@@ -501,7 +502,7 @@ sub  tableExists {
      	  # create the database table if necessary 
 	  $self->openDB  if !($self->alive == 0);	
 	  # next line will fail if table does not exist	  
-     	  ($result)  =  $self->handle->selectrow_array("select * from  $table where 1=0 " );  
+     	  ($result)  =  $self->handle->selectrow_array("select * from  $table where 1=0 ");  
     }; 
     $EVAL_ERROR?return 0:return 1;
 }

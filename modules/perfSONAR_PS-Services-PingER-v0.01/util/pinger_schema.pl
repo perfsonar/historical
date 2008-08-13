@@ -1,36 +1,36 @@
 #!/usr/local/bin/perl -w
- use lib qw(../lib);
- use warnings;
- use strict; 
- use File::Path;
- use Config::Interactive;
- 
- 
- 
- BEGIN {
-    use Log::Log4perl qw(get_logger);   
-    Log::Log4perl->init("../bin/logger.conf"); 
- };
- use   version;
+use lib qw(../lib);
+use warnings;
+use strict; 
+use File::Path;
+use Config::Interactive;
 
- use   perfSONAR_PS::DataModels::PingER_Topology  2.0 qw($pingertopo);        
- use   perfSONAR_PS::DataModels::PingER_Model 2.0 qw($message);
- use   perfSONAR_PS::DataModels::APIBuilder   2.0 qw(&buildAPI  $API_ROOT $TOP_DIR $SCHEMA_VERSION $DATATYPES_ROOT $TEST_DIR);
-    
+
+
+BEGIN {
+   use Log::Log4perl qw(get_logger);   
+   Log::Log4perl->init("../bin/logger.conf"); 
+};
+use   version;
+###use   perfSONAR_PS::DataModels::Sonar_Model 2.0 qw($sonar_metadata);
+use   perfSONAR_PS::DataModels::PingER_Topology  2.0 qw($pingertopo);	     
+use   perfSONAR_PS::DataModels::PingER_Model 2.0 qw($message);
+use   perfSONAR_PS::DataModels::APIBuilder   2.0 qw(&buildAPI  $API_ROOT $TOP_DIR $SCHEMA_VERSION $DATATYPES_ROOT $TEST_DIR);
    
-   my $logger = get_logger("pinger_schema");
   
-   my %CONF_PROMPTS = (   "METADATA_DB_TYPE" => "type of the internal metaData DB ( file| xmldb | sql ) ", 
-                          "METADATA_DB_NAME" => " name of the internal   metaData  DB ", 
-			  'TOP_DIR' =>    '  top directory   where to build API ',
-			  'API_ROOT'=>   ' root package name for the API', 
-			  'TEST_DIR' => ' top directory  where to build tests files ', 
-			  'DATATYPES_ROOT' => ' top directory name where to place versioned datatypes API',  
-			 
-		      );
-
-		# Read in configuration information
+  my $logger = get_logger("pinger_schema");
  
+  my %CONF_PROMPTS = (   "METADATA_DB_TYPE" => "type of the internal metaData DB ( file| xmldb | sql ) ", 
+			 "METADATA_DB_NAME" => " name of the internal	metaData  DB ", 
+        		 'TOP_DIR' =>	 '  top directory   where to build API ',
+        		 'API_ROOT'=>	' root package name for the API', 
+        		 'TEST_DIR' => ' top directory  where to build tests files ', 
+        		 'DATATYPES_ROOT' => ' top directory name where to place versioned datatypes API',  
+        		
+        	     );
+
+               # Read in configuration information
+
 #
 #   pinger configuration part is here
 # 
@@ -60,15 +60,24 @@
   
   mkpath ([ "$TOP_DIR"  ], 1, 0755) ; 
   $TOP_DIR .=  $API_ROOT;  
+
   eval {
-      buildAPI('message', $message,  '', '' )
+      buildAPI('message', $message,  '', '', '' )
   };
   if($@) {
        $logger->fatal(" Building API failed " . $@);
   }
+ 
   eval {
       buildAPI('topology', $pingertopo,  '', '', '' )
   };
    if($@) {
       $logger->fatal(" Building Topology API failed " . $@);
   }
+#  $DATATYPES_ROOT =   'SonarTypes';
+## eval {
+ #     buildAPI('metadata', $service,  '', '', '' )
+#  };
+#   if($@) {
+ #     $logger->fatal(" Building LS registration service API failed " . $@);
+ # }

@@ -1,5 +1,8 @@
 package perfSONAR_PS::Services::MP::Config::Schedule;
 
+use strict;
+use warnings;
+
 use version; our $VERSION = 0.09; 
 
 =head1 NAME
@@ -51,8 +54,7 @@ This module exposes the following methods.
 use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Ping' );
 
-use strict;
-
+ 
 =head2 new
 
 instantiate a new config object

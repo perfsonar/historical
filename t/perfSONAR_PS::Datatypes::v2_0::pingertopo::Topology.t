@@ -2,13 +2,12 @@ use warnings;
 use strict;    
 use Test::More 'no_plan';
 use Data::Dumper;
-use English qw( -no_match_vars);
 use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
 use_ok('perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology');
 use    perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology;
-use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain;
-Log::Log4perl->init("logger.conf"); 
+use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
+Log::Log4perl->init("/home/netadmin/LHCOPN/perfSONAR-PS/trunk/lib/perfSONAR_PS/logger.conf"); 
 
 my $obj1 = undef;
 #2
@@ -24,7 +23,7 @@ $obj1 = perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology->new({
 #4
  my  $obj_domain  = undef;
  eval {
-      $obj_domain  =  perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain->new({  'metadataIdRef' =>  'valuemetadataIdRef',  'id' =>  'valueid',});
+      $obj_domain  =  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain->new({  'id' =>  'valueid',});
     $obj1->addDomain($obj_domain);
   }; 
  ok( $obj_domain && !$EVAL_ERROR , "Create subelement object domain and set it  ..." . $EVAL_ERROR);

@@ -1,7 +1,9 @@
-
 package perfSONAR_PS::Services::MP::PingER;
 
+use strict;
+use warnings;
 use version; our $VERSION = 0.09; 
+use English qw( -no_match_vars);
 
 =head1 NAME
 
@@ -50,15 +52,17 @@ use perfSONAR_PS::DB::SQL::PingER;
 # agent class for pinger
 use perfSONAR_PS::Services::MP::Agent::PingER;
 
-# config and schedulign
+# config and scheduling
 use perfSONAR_PS::Services::MP::Config::PingER;
 
 use perfSONAR_PS::Client::LS::Remote;
 
-
+use Scalar::Util qw(blessed);
+use Data::Dumper;
 
 # inherit from the the scheduler class to enable random waits between tests
 use perfSONAR_PS::Services::MP::Scheduler;
+
 use base 'perfSONAR_PS::Services::MP::Scheduler';
 
 use fields qw( DATABASE LS_CLIENT eventTypes);
@@ -78,8 +82,10 @@ create a new MP instance from hash array $conf.
 
 =cut
 sub new {
-	my $package = shift;
-	my $self = $package->SUPER::new( @_ );
+	my $that = shift;
+	my $class = ref($that) || $that;
+	my $self = fields::new($class);
+	$self = $self->SUPER::new( @_ );
 	$self->{'DATABASE'} = undef;
 	$self->{'LS_CLIENT'} = undef; 
 	$self->{eventTypes} =  perfSONAR_PS::Datatypes::EventTypes->new(); 
@@ -100,7 +106,7 @@ sub init
 
 	# check handler type
 	$logger->logdie( "Handler is of incorrect type: $handler")
-		unless ( UNIVERSAL::can( $handler, 'isa') && $handler->isa( 'perfSONAR_PS::RequestHandler' ) );
+		unless ( blessed $handler && $handler->isa( 'perfSONAR_PS::RequestHandler' ) );
 
 	eval {
 		# setup defaults etc
@@ -127,15 +133,15 @@ sub init
 		# ls stuff
 		$self->configureConf( 'enable_registration', '0', $self->getConf('enable_registration') );
 	};
-	if ( $@ ) {
+	if ( $EVAL_ERROR ) {
 		$logger->logdie( "Configuration incorrect");
 		return -1;
 	}
 
 	# setup the config and schedule
 	$logger->info( "Initialising PingER MP" );
-	use Data::Dumper;
-	$logger->debug( Dumper $self->{CONF} );	
+	
+	#$logger->debug(sub{Dumper($self->{CONF})});	
 	
         my $config = perfSONAR_PS::Services::MP::Config::PingER->new();
 	$config->load( $self->getConf( 'configuration_file' ) );
@@ -166,7 +172,7 @@ sub database
 	if ( @_ ) {
 		$self->{DATABASE} = shift;
 	}
-	$logger->debug( "database: " . $self->{DATABASE} ) ;
+	#$logger->debug( "database: ", sub{Dumper($self->{DATABASE})}) ;
 	return $self->{DATABASE};
 }
 
@@ -372,18 +378,18 @@ sub setupDatabase
 			if( $status == 0 )  {
 			  $self->database( $dbo );
 			 } else {
-			   $logger->fatal(" Failed to open DB" . $dbo->ERRORMSG );
+			   $logger->logdie(" Failed to open DB" . $dbo->ERRORMSG );
 			   return -1;
 			 } 
 		};
-		if ( $@ ) {
+		if ( $EVAL_ERROR ) {
 			$logger->logdie( "Could not open database '" . $self->getConf( 'db_type') . "' for '"
 				. $self->getConf( 'db_name') 
-				. "' using '" . $self->getConf( 'db_username') ."'" . $@);
+				. "' using '" . $self->getConf( 'db_username') ."'$EVAL_ERROR");
 		}
 			
 	} else {
-		$logger->fatal( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
+		$logger->logdie( "Database type '" .  $self->getConf("db_type") . "' is not supported.");
 		return -1;
 	}
 	return 0;
@@ -408,8 +414,7 @@ sub storeData
 	my $testid = shift;
 
 	$logger->logdie( "Argument 'agent' is of wrong type")
-		unless UNIVERSAL::can( $agent, 'isa' ) 
-			&& $agent->isa( 'perfSONAR_PS::Services::MP::Agent::Base' );
+		unless blessed $agent && $agent->isa( 'perfSONAR_PS::Services::MP::Agent::Base' );
 
 	# remap the rtts and seqs
 	my $rtts = undef;
@@ -423,24 +428,25 @@ sub storeData
 		$seqs = join ',', @{$agent->results()->{'seqs'}};
 		$logger->debug( "construcing array from seqs '$seqs'");
 	}
-
-	 
-
+ 
 	# store results
-	my $src = $self->database()->soi_host({ ip_name => $agent->source(), ip_number => $agent->sourceIp() });
-	unless($src &&  $src =~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
+	my ( $src,$dst,$md,$data);
+	eval {
+	    $src = $self->database()->soi_host({ ip_name => $agent->source(), ip_number => $agent->sourceIp() });
+	};
+	if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
+	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	 
-		
-	my $dst = $self->database()->soi_host({ ip_name => $agent->destination(),ip_number => $agent->destinationIp() });
-	 
-	unless($dst  &&  $dst =~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
+	eval {	
+	   $dst = $self->database()->soi_host({ ip_name => $agent->destination(),ip_number => $agent->destinationIp() });
+	};
+	if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
+	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	  
-
-	my $md = $self->database()->soi_metadata( { ip_name_src => $src, ip_name_dst => $dst,  
+        eval {	
+	   $md = $self->database()->soi_metadata( { ip_name_src => $src, ip_name_dst => $dst,  
 					'transport'	  => 'ICMP',
 					'packetSize'  => $agent->packetSize(),
 					'count'		  => $agent->count(),
@@ -448,12 +454,13 @@ sub storeData
 					'ttl'		  => $agent->ttl(),
 				});
 	 
-	if(!$md ||   $md < 0) {
-	    $logger->error(  "Failed to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
+	};
+	if($EVAL_ERROR || !$md ||  $md < 0) {
+	    $logger->error(  "Failed: $EVAL_ERROR -  to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	   
-	
-	my $data = $self->database()->insertData( { metaID =>$md, 
+	eval {	
+	    $data = $self->database()->insertData( { metaID =>$md, 
 	
 					#time
 					'timestamp' => $agent->results()->{'startTime'},
@@ -485,9 +492,10 @@ sub storeData
 					'seqNums'	=> $seqs,
 					
 				});
-	if($data == -1 ){
+	};
+	if($EVAL_ERROR ||  $data == -1 ){
 	   
-	   $logger->error(  "Failed to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
+	   $logger->error(  "Failed: $EVAL_ERROR -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
 	    return -1;
 	 
 	}

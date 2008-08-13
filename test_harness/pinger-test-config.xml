@@ -34,22 +34,22 @@ expected output: a list of 1 or more xml tags that the reply should contain
   <test>
      <input>PingER/SetupDataRequest/SDR-dst.xml</input>
      <description> Test ... </description>
-     <expected_output attrib="value">datum</expected_output>
+     <expected_output>datum</expected_output>
   </test>
   <test>
      <input>PingER/SetupDataRequest/SDR-src.xml</input>
      <description> Test ... </description>
-     <expected_output attrib="value">datum</expected_output>
+     <expected_output>datum</expected_output>
   </test>
   <test>
      <input>PingER/SetupDataRequest/SDR-host-pair-merge.xml</input>
      <description> Test ... </description>
-     <expected_output attrib="value">datum</expected_output>
+     <expected_output>datum</expected_output>
   </test>
   <test>
      <input>PingER/SetupDataRequest/SDR-host-pair.xml</input>
      <description> Test ... </description>
-     <expected_output attrib="value">datum</expected_output>
+     <expected_output>datum</expected_output>
   </test>
  
 </perfSONAR-tests>

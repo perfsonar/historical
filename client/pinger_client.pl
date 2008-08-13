@@ -20,8 +20,9 @@ my $ok = GetOptions (
                 'help|?|h'          => \$help,
         );
 if(!$ok || !$url  || $help) {
-   print "$0: sends an  XML request over SOAP to the pinger MA and prints response \n";
-   print "    ./pinger_client.pl [--url=<pinger_MA_url, default is localhost> --debug|-d ] \n";
+   print " $0: sends an  XML request over SOAP to the pinger MA and prints response \n";
+   print " $0   [--url=<pinger_MA_url, default is localhost> --debug|-d ] \n";
+   exit 0;
 }
 my $level = $INFO;
 
@@ -43,7 +44,7 @@ my   $time_end   =	time();
 my $ptime = sub {strftime " %Y-%m-%d %H:%M", localtime(shift)};
 my %keys =();
 foreach  my $meta  (keys %{$metaids}) {
-    print "Metadata: src=$metaids->{$meta}{src_name} dst=$metaids->{$meta}{dst_name}  packetSize=$metaids->{$meta}{packetSize}\nMetadata Keys:";
+    print "Metadata: src=$metaids->{$meta}{src_name} dst=$metaids->{$meta}{dst_name}  packetSize=$metaids->{$meta}{packetSize}\nMetadata Key(s):";
     map { print " $_ :"} @{$metaids->{$meta}{keys}};
     print "\n";    
     map {$keys{$_}++} @{$metaids->{$meta}{keys}};

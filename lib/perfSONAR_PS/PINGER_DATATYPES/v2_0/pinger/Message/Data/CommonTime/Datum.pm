@@ -554,31 +554,31 @@ sub  querySQL {
                     foreach my $classes (@{$query->{$table}{$entry}}) {
                          if($classes && $classes eq 'perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Data::CommonTime::Datum') {
         
-                            if    ($self->ttl && ( (  ($entry eq 'ttl')) )) {
+                            if    ($self->get_ttl && ( (  ($entry eq 'ttl')) )) {
                                 $query->{$table}{$entry} =  $self->get_ttl;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_ttl);
                                 last;  
                             }
 
-                            elsif ($self->numBytes && ( (  ($entry eq 'numBytes')) )) {
+                            elsif ($self->get_numBytes && ( (  ($entry eq 'numBytes')) )) {
                                 $query->{$table}{$entry} =  $self->get_numBytes;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_numBytes);
                                 last;  
                             }
 
-                            elsif ($self->value && ( (  ( ($self->get_name eq 'minRtt')  && $entry eq 'minRtt') or  ( ($self->get_name eq 'maxRtt')  && $entry eq 'maxRtt') or  ( ($self->get_name eq 'outOfOrder')  && $entry eq 'outOfOrder') or  ($entry eq 'rtts') or  ( ($self->get_name eq 'medianRtt')  && $entry eq 'medianRtt') or  ( ($self->get_name eq 'clp')  && $entry eq 'clp') or  ( ($self->get_name eq 'meanRtt')  && $entry eq 'meanRtt') or  ( ($self->get_name eq 'maxIpd')  && $entry eq 'maxIpd') or  ( ($self->get_name eq 'duplicates')  && $entry eq 'duplicates') or  ( ($self->get_name eq 'minIpd')  && $entry eq 'minIpd') or  ( ($self->get_name eq 'meanIpd')  && $entry eq 'meanIpd') or  ( ($self->get_name eq 'iqrIpd')  && $entry eq 'iqrIpd') or  ( ($self->get_name eq 'lossPercent')  && $entry eq 'lossPercent')) )) {
+                            elsif ($self->get_value && ( (  ( ($self->get_name eq 'minRtt')  && $entry eq 'minRtt') or  ( ($self->get_name eq 'maxRtt')  && $entry eq 'maxRtt') or  ( ($self->get_name eq 'outOfOrder')  && $entry eq 'outOfOrder') or  ($entry eq 'rtts') or  ( ($self->get_name eq 'medianRtt')  && $entry eq 'medianRtt') or  ( ($self->get_name eq 'clp')  && $entry eq 'clp') or  ( ($self->get_name eq 'meanRtt')  && $entry eq 'meanRtt') or  ( ($self->get_name eq 'maxIpd')  && $entry eq 'maxIpd') or  ( ($self->get_name eq 'duplicates')  && $entry eq 'duplicates') or  ( ($self->get_name eq 'minIpd')  && $entry eq 'minIpd') or  ( ($self->get_name eq 'meanIpd')  && $entry eq 'meanIpd') or  ( ($self->get_name eq 'iqrIpd')  && $entry eq 'iqrIpd') or  ( ($self->get_name eq 'lossPercent')  && $entry eq 'lossPercent')) )) {
                                 $query->{$table}{$entry} =  $self->get_value;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_value);
                                 last;  
                             }
 
-                            elsif ($self->seqNum && ( (  ($entry eq 'seqNums')) )) {
+                            elsif ($self->get_seqNum && ( (  ($entry eq 'seqNums')) )) {
                                 $query->{$table}{$entry} =  $self->get_seqNum;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_seqNum);
                                 last;  
                             }
 
-                            elsif ($self->text && ( (  ( ($self->get_name eq 'minRtt')  && $entry eq 'minRtt') or  ( ($self->get_name eq 'maxRtt')  && $entry eq 'maxRtt') or  ( ($self->get_name eq 'outOfOrder')  && $entry eq 'outOfOrder') or  ( ($self->get_name eq 'medianRtt')  && $entry eq 'medianRtt') or  ( ($self->get_name eq 'clp')  && $entry eq 'clp') or  ( ($self->get_name eq 'meanRtt')  && $entry eq 'meanRtt') or  ( ($self->get_name eq 'duplicates')  && $entry eq 'duplicates') or  ( ($self->get_name eq 'maxIpd')  && $entry eq 'maxIpd') or  ( ($self->get_name eq 'minIpd')  && $entry eq 'minIpd') or  ( ($self->get_name eq 'meanIpd')  && $entry eq 'meanIpd') or  ( ($self->get_name eq 'iqrIpd')  && $entry eq 'iqrIpd') or  ( ($self->get_name eq 'lossPercent')  && $entry eq 'lossPercent')) )) {
+                            elsif ($self->get_text && ( (  ( ($self->get_name eq 'minRtt')  && $entry eq 'minRtt') or  ( ($self->get_name eq 'maxRtt')  && $entry eq 'maxRtt') or  ( ($self->get_name eq 'outOfOrder')  && $entry eq 'outOfOrder') or  ( ($self->get_name eq 'medianRtt')  && $entry eq 'medianRtt') or  ( ($self->get_name eq 'clp')  && $entry eq 'clp') or  ( ($self->get_name eq 'meanRtt')  && $entry eq 'meanRtt') or  ( ($self->get_name eq 'duplicates')  && $entry eq 'duplicates') or  ( ($self->get_name eq 'maxIpd')  && $entry eq 'maxIpd') or  ( ($self->get_name eq 'minIpd')  && $entry eq 'minIpd') or  ( ($self->get_name eq 'meanIpd')  && $entry eq 'meanIpd') or  ( ($self->get_name eq 'iqrIpd')  && $entry eq 'iqrIpd') or  ( ($self->get_name eq 'lossPercent')  && $entry eq 'lossPercent')) )) {
                                 $query->{$table}{$entry} =  $self->get_text;
                                 $self->get_LOGGER->debug(" Got value for SQL query $table.$entry: " . $self->get_text);
                                 last;  

@@ -1,5 +1,5 @@
 package perfSONAR_PS::Datatypes::Message;
-{
+
 =head1 NAME
 
  perfSONAR_PS::Datatypes::Message  -  this is a message handler object
@@ -20,7 +20,7 @@ package perfSONAR_PS::Datatypes::Message;
 
    it extends: 
      
-    use perfSONAR_PS::Datatypes::v2_0::nmwg::Message; 
+    use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message; 
    
    Namespaces will be added dynamically from the underlying data and metadata
    
@@ -56,26 +56,29 @@ package perfSONAR_PS::Datatypes::Message;
 
 use strict;
 use warnings;
+use version; our $VERSION = '0.09';
+use English qw( -no_match_vars);
 use Log::Log4perl qw(get_logger); 
 use Clone::Fast qw(clone);
-use XML::LibXML;
- 
+use XML::LibXML; 
 use Scalar::Util qw(blessed);
-use perfSONAR_PS::Datatypes::Namespace;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message; 
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
-use perfSONAR_PS::Datatypes::v2_0::nmwgr::Message::Data::Datum;
-
-use perfSONAR_PS::Datatypes::Element qw(getElement);
+use Data::Dumper;
  
-use perfSONAR_PS::Datatypes::NSMap;
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message'; 
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data';
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata';  
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwgr::Message::Data::Datum' => 'ResultDatum';
+ 
 use perfSONAR_PS::Datatypes::EventTypes;
-use base qw(perfSONAR_PS::Datatypes::v2_0::nmwg::Message);   
-use fields qw( eventTypes mdID dataID filters DBO);
-use constant  CLASSPATH =>  'perfSONAR_PS::Datatypes::Message';
-use constant  LOCALNAME => 'message';
-  
+
+
+use base qw(perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message);   
+use fields qw(eventTypes mdID dataID filters DBO); 
+
+
+Readonly::Scalar our   $CLASSPATH =>  'perfSONAR_PS::Datatypes::Message';  
+Readonly::Scalar our $LOCALNAME => 'message';
+
 =head2 new( )
    
       creates message object, accepts parameter in form of:
@@ -85,7 +88,7 @@ use constant  LOCALNAME => 'message';
  	 
      or DOM object or hashref with single key { xml => <xmlString>}
     it extends:
-     use perfSONAR_PS::Datatypes::v2_0::nmwg::Message 
+     use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message 
      All parameters will be passed first to superclass
   
 =cut
@@ -93,47 +96,19 @@ use constant  LOCALNAME => 'message';
 sub new { 
     my $that = shift;
     my $param = shift;
-    my $logger  = get_logger( CLASSPATH ); 
-    my $class = ref($that) || $that;
-    my $self =  fields::new($class );
-    $self->eventTypes(perfSONAR_PS::Datatypes::EventTypes->new()); 
- 
-    $self->mdID(1);
-    $self->dataID(1);
-   
     
-    $self->nsmap(perfSONAR_PS::Datatypes::NSMap->new()); 
-    $self->nsmap->mapname( LOCALNAME, 'nmwg');
-    if($param) {
-        if(blessed $param && $param->can('getName')  && ($param->getName =~ m/(${\LOCALNAME})$/x) ) {
-            return  $self->fromDOM($param);  
-	      
-        } elsif(ref($param) ne 'HASH')   {
-            $logger->error("ONLY hash ref accepted as param " . $param ); 
-            return undef;
-        }
-	if($param->{xml}) {
-	     my $parser = XML::LibXML->new();
-             my $dom;
-             eval {
-                  my $doc = $parser->parse_string( $param->{xml});
-		  $dom = $doc->getDocumentElement;
-             };
-             if($@) {
-                 $logger->error(" Failed to parse XML :" . $param->{xml} . " \n ERROR: \n" . $@);
-                 return undef;
-             }
-             return  $self->fromDOM( $dom );  
-	} 
-        $logger->debug("Parsing parameters: " . (join " : ", keys %{$param}));
-     
-        no strict 'refs';
-        map { $self->$_ ( $param->{$_} ) if $self->can($_)} keys %{$param}; ###  
-        use strict;     
-   
-        $logger->debug("Done ");     
-    }  
-    return   $self ;
+    my $class = ref($that) || $that;
+    my $self =  fields::new($class);
+    $self = $self->SUPER::new($param);          # init base fields
+    $self->eventTypes(perfSONAR_PS::Datatypes::EventTypes->new()); 
+    $self->set_LOGGER(get_logger( $CLASSPATH ));
+    $self->mdID(1);
+    $self->dataID(1);   
+    $self->set_nsmap(perfSONAR_PS::PINGER_DATATYPES::v2_0::NSMap->new());
+    $self->get_nsmap->mapname($LOCALNAME, 'nmwg');
+    #$self->get_LOGGER->debug("  nsmap = ". Dumper $self  );
+    
+    return   $self;
 }
  
 =head2 filters 
@@ -152,6 +127,29 @@ sub addFilter {
         return $self->{filters}; 
     }
 } 
+
+=head2  getDataByMetadataIdRef()
+
+ get specific element from the array of data elements by  MetadataIdRef ( if   MetadataIdRef is supported by this element )
+ Accepts single param -  MetadataIdRef 
+ 
+ if there is no array then it will return just an object
+
+=cut
+
+sub getDataByMetadataIdRef {
+    my ($self, $idref) = @_;
+
+    if(ref($self->get_data) eq 'ARRAY') {
+        foreach my $data (@{$self->get_data}) {
+            return $data  if $data->get_metadataIdRef eq $idref;
+	}
+    } elsif(!ref($self->get_data) || ref($self->get_data) ne 'ARRAY')  {
+        return $self->get_data;
+    }
+    $self->get_LOGGER->warn("Requested element for non-existent metadataIdRef: $idref");
+    return;
+}
 
 =head2 filters 
 
@@ -275,10 +273,9 @@ sub  dataID {
 sub getChain {
     my $self = shift;
     my $currentmd = shift;
-    my $logger  = get_logger( CLASSPATH ); 
     ## clone this metadata
     my $newmd = clone( $currentmd );
-    my $idref = $newmd->metadataIdRef;
+    my $idref = $newmd->get_metadataIdRef;
     ##check if its refered and eventType is the same
     ##if($newmd->key &&   $newmd->key->id) {
     ##    ## stop chaining since we found a key
@@ -286,13 +283,13 @@ sub getChain {
     ##} 
     if($idref) {
         my $checkmd =   $self->getMetadataById($idref);
-        if(($newmd->eventType  eq    $checkmd->eventType) || ($checkmd->eventType eq $self->eventTypes->ops->select)) {
+        if(($newmd->get_eventType  eq    $checkmd->get_eventType) || ($checkmd->get_eventType eq $self->eventTypes->ops->select)) {
             # recursion
             my  $newInChain = $self->getChain($checkmd);
             # merge according to implementation ( without filtering )
 	    $newmd->merge($newInChain);      
         } else {
-	    $logger->error(" Reffered wrong eventType in the chain: " . $checkmd->eventType->asString );
+	    $self->get_LOGGER->error(" Reffered wrong eventType in the chain: " . $checkmd->get_eventType->asString );
 	}
     }  
     return $newmd;  
@@ -312,11 +309,10 @@ sub getChain {
 =cut
 
 sub addIDMetadata {
-    my ($self, $md, $event) = @_; 
-    my $logger  = get_logger( CLASSPATH );
+    my ($self, $md, $event) = @_;
     my $current_mdid =  $self->mdID;
-    $md->id("meta" . $self->mdID);
-    $md->eventType( $event  );
+    $md->set_id("meta" . $self->mdID);
+    $md->set_eventType($event);
     $self->addMetadata($md);# send back original request
     $self->add_mdID;
     return  $current_mdid;
@@ -333,17 +329,18 @@ sub addIDMetadata {
 
 
 sub addResultData  {
-    my ($self, $params)    = @_;
-    my $logger  = get_logger( CLASSPATH ); 
+    my ($self, $params)    = @_;   
     unless($params && ref($params) eq 'HASH' && $params->{metadataID} ) {
-       $logger->error("Parameters missed:  addResultData Usage:: addResultData(\$params) where \$params is hashref");
-      return undef;
+        $self->get_LOGGER->error("Parameters missed:  addResultData Usage:: addResultData(\$params) where \$params is hashref");
+        return;
     }  
      
     $params->{message} = ' no message ' unless $params->{message};
-     my $current_id =  $self->dataID;
-    my $data  =  perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new({ id => "data" . $self->dataID, metadataIdRef => "meta" . $params->{metadataID}, 
-	                     datum =>  [perfSONAR_PS::Datatypes::v2_0::nmwgr::Message::Data::Datum->new({text =>  $params->{message}})] });
+    my $current_id =  $self->dataID;
+    my $data  =   Data->new({id => "data" . $self->dataID, 
+                             metadataIdRef => "meta" . $params->{metadataID}, 
+	                     datum =>  [ResultDatum->new({text =>  $params->{message}})] 
+			   });
     $self->addData($data);
     $self->add_dataID;
     return  $current_id;  
@@ -361,14 +358,13 @@ sub addResultData  {
 
 sub addResultResponse( ) {
     my ($self, $params)    = @_;
-    my $logger  = get_logger( CLASSPATH ); 
     unless($params && ref($params) eq 'HASH' && $params->{eventType} ) {
-       $logger->error("Parameters missed:  addResultResponse Usage:: addResultResponse(\$params) where \$params is hashref");
-      return undef;
+        $self->get_LOGGER->error("Parameters missed:  addResultResponse Usage:: addResultResponse(\$params) where \$params is hashref");
+        return;
     }  
     unless($params->{md} && blessed $params->{md}) {
-       $params->{md}  = perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new();
-       $logger->debug(" New md was generated ");
+        $params->{md}  =  Metadata->new();
+        $self->get_LOGGER->debug(" New md was generated ");
     }
     $params->{message} = ' no message ' unless $params->{message};
     my $md_id = $self->addIDMetadata(  $params->{md},    $params->{eventType}); 
@@ -386,12 +382,11 @@ sub addResultResponse( ) {
 =cut
 
 sub  MetadataKeyRequest {
-   my $self = shift;
-   my $response = shift;
-   my $logger  = get_logger( CLASSPATH );   
-   $logger->debug("MetadataKeyRequest  ...");
-   $logger->error("MetadataKeyRequest  handler  Not   implemented by the service ");
-   return  "MetadataKeyRequest  handler  Not   implemented by the service ";
+    my $self = shift;
+    my $response = shift;
+    $self->get_LOGGER->debug("MetadataKeyRequest  ...");
+    $self->get_LOGGER->error("MetadataKeyRequest  handler  Not   implemented by the service ");
+    return  "MetadataKeyRequest  handler  Not   implemented by the service ";
 }
 
 
@@ -405,9 +400,8 @@ sub  MetadataKeyRequest {
 sub  SetupDataRequest  {
     my $self = shift;
     my $response = shift;
-    my $logger  = get_logger( CLASSPATH ); 
-    $logger->debug("SetupDataRequest  ...");
-    $logger->error(" SetupDataRequest handler  Not   implemented by the service ");
+    $self->get_LOGGER->debug("SetupDataRequest  ...");
+    $self->get_LOGGER->error(" SetupDataRequest handler  Not   implemented by the service ");
     return  "SetupDataRequest handler  Not   implemented by the service";
 }
 
@@ -422,8 +416,7 @@ sub  SetupDataRequest  {
 sub  MeasurementArchiveStoreRequest {
     my $self = shift;
     my $response = shift;
-    my $logger  = get_logger( CLASSPATH );   
-    $logger->error(" MeasurementArchiveStoreRequest   handler Not   implemented by the service ");
+    $self->get_LOGGER->error(" MeasurementArchiveStoreRequest   handler Not   implemented by the service ");
     return  " MeasurementArchiveStoreRequest   handler Not   implemented by the service ";
    
 }
@@ -444,12 +437,11 @@ sub  buildQuery{
     my $self = shift;
     my $oper = shift;
     my $element = shift;
-    my $logger  = get_logger( CLASSPATH ); 
-    $logger->debug("  Quering...  ");
+    $self->get_LOGGER->debug("  Quering...  ");
      
     my $queryhash  =  {};
     $element->querySQL($queryhash);
-    $logger->debug("  Done  ");
+    $self->get_LOGGER->debug("  Done  ");
   
     foreach my $table  (keys %{$queryhash}) {
         foreach my $entry (keys %{$queryhash->{$table}}) {
@@ -473,19 +465,18 @@ sub  buildQuery{
 sub  processTime {
    my $self = shift;
    my $params = shift; 
-   my $logger  = get_logger( CLASSPATH ); 
    unless($params && ref($params) eq 'HASH' && 
             (($params->{timehash} && ref($params->{timehash}) eq 'HASH') ||
             ($params->{element} && blessed $params->{element} && $params->{element}->can("querySQL"))) )  {
-       $logger->error("Parameters missed: element or timequery  ");
+       $self->get_LOGGER->error("Parameters missed: element or timequery  ");
        return 1;
    } 
     
    my $One_DAY_inSec = 86400;
    $params->{element}->querySQL($params->{timehash}) unless   $params->{timehash};
   
-   require Data::Dumper;
-   $logger->debug("  -------> Timestamp=  " . Data::Dumper::Dumper  $params->{timehash}); 
+   
+   ##$self->get_LOGGER->debug("  -------> Timestamp=  ",  sub{Dumper($params->{timehash})}); 
    
    my %timequery =  (gt =>  time() -  $One_DAY_inSec, lt =>  time());
    
@@ -498,17 +489,17 @@ sub  processTime {
         %timequery = (eq  => $timequery{gt});
    }
    unless( $timequery{eq} || $timequery{gt}) {
-       $logger->error(" Failed to get time values,possible missed start time or timestamp from the data element commonTime  ");
-       return undef;
+       $self->get_LOGGER->error(" Failed to get time values,possible missed start time or timestamp from the data element commonTime  ");
+       return;
    } 
                         
    if($params->{timehash}{'cf'} && $params->{timehash}{'resolution'}) {
        $timequery{count} = $params->{timehash}->{'resolution'};
        $timequery{function} =  $params->{timehash}->{'cf'} eq 'AVERAGE'?'avg':$params->{timehash}->{'cf'};
    } else {
-       $logger->debug("  ---No cf -  full search : " . Data::Dumper::Dumper  $params); 
+       $self->get_LOGGER->debug("  ---No cf -  full search : ", sub{Dumper($params)}); 
    }
-   $logger->debug("  -------> Processed Timestamp=  " . Data::Dumper::Dumper %timequery); 
+   $self->get_LOGGER->debug("  -------> Processed Timestamp=  ", sub{Dumper(\%timequery)}); 
    return \%timequery;
 }
 
@@ -519,9 +510,8 @@ sub  processTime {
    Maxim Grigoriev (FNAL)   2007-2008
 
 =head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2007 by Internet2
-Copyright (C) 2007 by Fermitools, Fermilab
+ 
+Copyright (C) 2007-1008 by Fermitools, Fermilab
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
@@ -530,6 +520,5 @@ at your option, any later version of Perl 5 you may have available.
 
 
 =cut
-}
-
+ 
 1;

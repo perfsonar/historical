@@ -71,8 +71,9 @@ use perfSONAR_PS::SONAR_DATATYPES::v2_0::mean::Message::Metadata::Parameters;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::histogram::Message::Metadata::Parameters;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::average::Message::Metadata::Parameters;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::cdf::Message::Metadata::Parameters;
-use perfSONAR_PS::SONAR_DATATYPES::v2_0::select::Message::Metadata::Parameters;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::psservice::Message::Metadata::Parameters;
+use perfSONAR_PS::SONAR_DATATYPES::v2_0::select::Message::Metadata::Parameters;
+use perfSONAR_PS::SONAR_DATATYPES::v2_0::pinger::Message::Metadata::Parameters;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::nmwg::Message::Metadata;
 use perfSONAR_PS::SONAR_DATATYPES::v2_0::nmwg::Message::Data;
 use fields qw(nsmap idmap LOGGER type id parameters metadata data );
@@ -885,6 +886,17 @@ sub fromDOM {
         elsif ($tagname eq  'parameters' && $nsid eq 'histogram' && $self->can("get_$tagname")) {
                 eval {
                     $element = perfSONAR_PS::SONAR_DATATYPES::v2_0::histogram::Message::Metadata::Parameters->new($childnode)
+                };
+                if($EVAL_ERROR || !($element  && blessed $element)) {
+                    $self->get_LOGGER->logdie(" Failed to load and add  Parameters : " . $dom->toString . " error: " . $EVAL_ERROR);
+                     return;
+                }
+               ($self->get_parameters && ref($self->get_parameters) eq 'ARRAY')?push @{$self->get_parameters}, $element:
+                                                                                                        $self->set_parameters([$element]);; ### add another parameters  
+            } 
+        elsif ($tagname eq  'parameters' && $nsid eq 'pinger' && $self->can("get_$tagname")) {
+                eval {
+                    $element = perfSONAR_PS::SONAR_DATATYPES::v2_0::pinger::Message::Metadata::Parameters->new($childnode)
                 };
                 if($EVAL_ERROR || !($element  && blessed $element)) {
                     $self->get_LOGGER->logdie(" Failed to load and add  Parameters : " . $dom->toString . " error: " . $EVAL_ERROR);

@@ -1,11 +1,10 @@
-use XML::LibXML;
-use Data::Dumper;
-use perfSONAR_PS::Services::MP::Config::Schedule;
-
 package perfSONAR_PS::Services::MP::Config::PingER;
-use base "perfSONAR_PS::Services::MP::Config::Schedule";
+
+use strict;
+use warnings;
 
 use version; our $VERSION = 0.09; 
+
 
 =head1 NAME
 
@@ -47,53 +46,16 @@ In this implementation, we only handle the topology-like PingER schema.
 
 =cut
 
-use strict;
+use XML::LibXML;
+use Data::Dumper;
+use perfSONAR_PS::Services::MP::Config::Schedule;
 
+use base 'perfSONAR_PS::Services::MP::Config::Schedule';
+ 
 use Log::Log4perl qw( get_logger );
+
 our $logger = Log::Log4perl->get_logger( 'perfSONAR_PS::Services::MP::Config::PingER');
-
-
-=head2 new
-
-constructor for object
-
-=cut
-sub new {
-	my $self = shift;
-	return $self->SUPER::new( @_ );
-}
-
-=head2 configFile
-
-accessor/mutator method for the configuration file
-
-=cut
-sub configFile {
-	my $self = shift;
-	return $self->SUPER::configFile( @_ );
-}
-
-=head2 config
-
-accessor/mutator method for the configuration
-
-=cut
-sub config {
-	my $self = shift;
-	return $self->SUPER::config( @_ );
-}
-
-=head2 getAllTestIds()
-
-Returns a list of all the testids that have been parsed.
-
-=cut
-sub getAllTestIds {
-	my $self = shift;
-	return $self->SUPER::getAllTestIds( @_ );
-}
-
-
+ 
 =head2 load( $file )
 
 Loads and parses the configuration file with schedule information '$file'. If
@@ -105,6 +67,7 @@ Returns
   -1  = parsing and or loading failed.
 
 =cut
+
 sub load
 {
 	my $self = shift;
@@ -219,8 +182,7 @@ sub load
 				
 	}
 	
-	if ( $found ) {
-		$logger->debug( Data::Dumper::Dumper $config );
+	if ( $found ) { 
 		$self->config( $config );
 		$logger->debug( "Found $found unique tests");
 		return 0;
@@ -230,43 +192,5 @@ sub load
 		return -1;
 	}
 }
-
-=head2 getTestById( $testid )
-
-Returns the test information for $testid. Datastructure is a hash of the
-following format
-
-$hash->{$testid}->{packetSize} = n (bytes)
-$hash->{$testid}->{count} = n (packets)
-$hash->{$testid}->{ttl} = n (hops)
-$hash->{$testid}->{interval} = n (secs)
-$hash->{$testid}->{offset} = n (secs)
-$hash->{$testid}->{measurementPeriod} = n (secs)
-$hash->{$testid}->{measurementOffset} = n (secs)
-
-=cut
-sub getTestById
-{
-	my $self = shift;
-    $self->SUPER::getTestById( @_ );	
-}
-
-=head2 getTextNextTimeFromNow( $testid )
-
-Determines the amonut of time from now until the next test for $testid should
-start.
-
-Returns
-      n = seconds til next test
-  undef = testid does not exist
-
-=cut
-sub getTestNextTimeFromNowById
-{
-	my $self = shift;
-	$self->SUPER::getTestNextTimeFromNowById( @_ );
-}
-
-
-
+ 
 1;

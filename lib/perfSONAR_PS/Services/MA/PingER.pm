@@ -1,7 +1,9 @@
-
 package perfSONAR_PS::Services::MA::PingER;
 
+use strict;
+use warnings;
 use version; our $VERSION = 0.09; 
+use English qw( -no_match_vars);
 
 =head1 NAME
 
@@ -59,12 +61,11 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Services::MA::General; 
 
-use perfSONAR_PS::Datatypes::Namespace;
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata';
+use aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data'; 
 use perfSONAR_PS::Datatypes::EventTypes;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message; 
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
 use perfSONAR_PS::Datatypes::Message;
+
 use perfSONAR_PS::Datatypes::PingER;
 use perfSONAR_PS::DB::SQL::PingER;
 use perfSONAR_PS::ParameterValidation;
@@ -79,9 +80,7 @@ use Exporter;
 use Params::Validate qw(:all);
 
 use POSIX qw(strftime);
-  
 
- 
 use constant CLASSPATH => 'perfSONAR_PS::Services::MA::PingER';
 
 use Log::Log4perl qw(get_logger);
@@ -98,9 +97,10 @@ create a new instance of the PingER MA
 
 =cut
 sub new {
-	my $package = shift;
-	
-	my $self = $package->SUPER::new( @_ );
+	my $that = shift;
+	my $class = ref($that) || $that;
+        my $self =  fields::new($class);
+	$self = $self->SUPER::new( @_ );
 	$self->{'DATABASE'} = undef;
 	$self->{'LS_CLIENT'} = undef;
         $self->{eventTypes} =  perfSONAR_PS::Datatypes::EventTypes->new(); 
@@ -112,6 +112,7 @@ sub new {
 Initiate the MA; configure the configuration defaults, and message handlers.
 
 =cut
+
 sub init {
 	my ($self, $handler) = @_;
     
@@ -172,8 +173,8 @@ sub init {
 				database => $self->getConf( "db_name" ),
 				host	=> $self->getConf( "db_host"),
 				port	=> $self->getConf( "db_port"),
-				username	=> $self->getConf( "db_username" ),
-				password	=> $self->getConf( "db_password" ),
+				username   => $self->getConf( "db_username" ),
+				password   => $self->getConf( "db_password" ),
 			});
 		 
 		 
@@ -317,7 +318,7 @@ sub registerLS($)
 	foreach my  $metaid (sort keys %{$metas})
 	{
 		my $md =   $pingerMA->ressurectMd({ md_row =>  $metas->{$metaid}  });  
-                $md->eventType($self->{eventTypes}->tools->pinger); 
+                $md->set_eventType($self->{eventTypes}->tools->pinger); 
 		push @sendToLS, $md->getDOM()->toString() ;
 
 	}
@@ -372,7 +373,7 @@ sub handleEvent()
 	                                     $parameters->{"data"},  $parameters->{"filterChain"}->[0]  ,  $parameters->{"messageParameters"} );
 	
 	##### $response is  
-	foreach my $element (@{$response->metadata}, @{$response->data}) {
+	foreach my $element (@{$response->get_metadata}, @{$response->get_data}) {
 	  $parameters->{"output"}->addExistingXMLElement( $element->getDOM());
         }
 	
@@ -391,21 +392,20 @@ sub __handleEvent {
  	 
  	$logger->debug( "\n\n\nRequest:\n" .  Dumper $raw_request );
 	
-        $logger->debug( "  Type= $messageType md = " . $mds->[0]->toString  . " Data=" . $data->toString  . " filters= " .   (Dumper  $filters) . "  mparams= " .  (Dumper $message_parameters ) );
+        $logger->debug( "  Type= $messageType md = " . $mds->[0]->toString  . " Data=" . $data->toString);
  	
 	my $doc = $raw_request->getRequestDOM();
-
- 	$logger->info( "\n\nDOM:\n" . $doc->toString );
+  
 	my $arr_filters = [];
         if($filters && ref($filters) eq 'ARRAY') {
 	     foreach my $filter (@{$filters}) {
 	       $logger->debug( " Filter .... " .   $filter->toString);
-	        push @{$arr_filters}, perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new( $filter );
+	        push @{$arr_filters},  Metadata->new( $filter );
 	     }
 	}
 	$logger->info("Unmarshalling into PingER object");
-	my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new( {metadata => [perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata->new($mds->[0])],
-	                                                           data => [perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data->new($data)],
+	my $pingerRequest = perfSONAR_PS::Datatypes::PingER->new( {metadata => [ Metadata->new($mds->[0])],
+	                                                           data => [ Data->new($data)],
 								   filters =>  $arr_filters});
 	my $error_msg = '';
 	my $type =  $messageType;
@@ -415,14 +415,13 @@ sub __handleEvent {
 	my $messageIdReturn = "message." . perfSONAR_PS::Common::genuid(); 
 	(my $responseType = $type ) =~ s/Request/Response/;
      
- 	$logger->debug("Parsing request...Registering namespaces...");
+ 	 $logger->debug("Parsing request...Registering namespaces...");
 	$pingerRequest->registerNamespaces();
-	$logger->debug("Done...");
+	###$logger->debug("Done...");
    
 	### pass db handler down request object
 	$logger->debug("Creating PingER response");
-	my $pingerResponse =   perfSONAR_PS::Datatypes::Message->new(
-   		{type => $responseType , id =>   $messageIdReturn  }); # response message
+	my $pingerResponse =  perfSONAR_PS::Datatypes::Message->new( {type => $responseType , id => $messageIdReturn  }); # response message
 	$logger->debug("Done...");
    
 #	foreach my $field ($pingerResponse->show_fields('Public')) {
@@ -431,9 +430,8 @@ sub __handleEvent {
    
 	#### map namespaces on response
 	$logger->debug(" Mapping namespaces on response");
-	$pingerResponse->nsmap($pingerRequest->nsmap);
-	## merge chains and work with them in request
-        $logger->debug("Done...");
+	$pingerResponse->set_nsmap($pingerRequest->get_nsmap);
+	$logger->debug("Done...");
 	### 
    	 
 	my $evt = $pingerRequest->eventTypes;

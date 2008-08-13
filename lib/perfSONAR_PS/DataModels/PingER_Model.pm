@@ -114,7 +114,12 @@ $service_parameter->({ attrs => { name => 'enum:keyword,consolidationFunction,re
 			        	   },
 			      }
 		    });  	     
-
+$service_parameters->({ attrs  => {id => 'scalar',   xmlns => 'pinger'},
+                        elements => [
+		               [parameter =>  $service_parameter->()], 
+			      
+			     ], 
+	       }); 
 $service_datum->({ attrs => { value => 'scalar',  valueUnits => 'scalar',  seqNum => 'scalar',    numBytes => 'scalar', ttl => 'scalar',
 			      name => 'enum:minRtt,maxRtt,meanRtt,medianRtt,lossPercent,clp,minIpd,maxIpd,iqrIpd,meanIpd,duplicates,outOfOrder',
 			      timeType => 'scalar', timeValue => 'scalar', xmlns => 'pinger'},

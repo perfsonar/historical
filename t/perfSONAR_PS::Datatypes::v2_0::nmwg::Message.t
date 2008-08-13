@@ -2,17 +2,16 @@ use warnings;
 use strict;    
 use Test::More 'no_plan';
 use Data::Dumper;
-use English qw( -no_match_vars);
 use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
 use_ok('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
 use    perfSONAR_PS::Datatypes::v2_0::nmwg::Message;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data::Key::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters;
-use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters;
+use perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata;
 use perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data;
-Log::Log4perl->init("logger.conf"); 
+Log::Log4perl->init("/home/netadmin/LHCOPN/perfSONAR-PS/trunk/lib/perfSONAR_PS/logger.conf"); 
 
 my $obj1 = undef;
 #2
@@ -34,7 +33,7 @@ $obj1 = perfSONAR_PS::Datatypes::v2_0::nmwg::Message->new({
 #6
  my  $obj_parameters  = undef;
  eval {
-      $obj_parameters  =  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject::Parameters->new({  'id' =>  'valueid',});
+      $obj_parameters  =  perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters->new({  'id' =>  'valueid',});
     $obj1->addParameters($obj_parameters);
   }; 
  ok( $obj_parameters && !$EVAL_ERROR , "Create subelement object parameters and set it  ..." . $EVAL_ERROR);

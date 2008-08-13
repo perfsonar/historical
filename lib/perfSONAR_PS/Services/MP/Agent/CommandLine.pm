@@ -1,10 +1,7 @@
-use Net::Domain qw(hostfqdn);
-use Socket qw(:DEFAULT);
-use IO::Socket;
-use IO::Interface qw(:flags);
-
 package perfSONAR_PS::Services::MP::Agent::CommandLine;
 
+use strict;
+use warnings;
 use version; our $VERSION = 0.09; 
 
 =head1 NAME
@@ -52,10 +49,14 @@ understood data structure.
 
 
 =cut
+use Net::Domain qw(hostfqdn);
+use Socket qw(:DEFAULT);
+use IO::Socket;
+use IO::Interface qw(:flags);
 
 # derive from teh base agent class
 use perfSONAR_PS::Services::MP::Agent::Base;
-our @ISA = qw(perfSONAR_PS::Services::MP::Agent::Base);
+use base qw(perfSONAR_PS::Services::MP::Agent::Base);
 
 use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::CommandLine' );
@@ -149,7 +150,9 @@ sub options
 does anything necessary before running the collect() such as modifying the 
 options etc.
 Check to see that the command exists
+
 =cut
+
 sub init
 {
 	my $self = shift;
@@ -169,7 +172,7 @@ sub init
             push @ret_interfaces, $s->if_addr($if);
         }
 
-        $iaddr = Socket::inet_aton( $ret_interfaces[0] );
+        my $iaddr = Socket::inet_aton( $ret_interfaces[0] );
 	$self->source( gethostbyaddr($iaddr, Socket::AF_INET) );
 
 	# TODO: check to make sure we pick up correct ip

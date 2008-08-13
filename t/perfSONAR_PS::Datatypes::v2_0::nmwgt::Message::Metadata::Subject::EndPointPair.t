@@ -2,14 +2,13 @@ use warnings;
 use strict;    
 use Test::More 'no_plan';
 use Data::Dumper;
-use English qw( -no_match_vars);
 use FreezeThaw qw(cmpStr);
 use Log::Log4perl;
 use_ok('perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair');
 use    perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair;
 use perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Src;
 use perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Dst;
-Log::Log4perl->init("logger.conf"); 
+Log::Log4perl->init("/home/netadmin/LHCOPN/perfSONAR-PS/trunk/lib/perfSONAR_PS/logger.conf"); 
 
 my $obj1 = undef;
 #2

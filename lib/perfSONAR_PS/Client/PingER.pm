@@ -23,26 +23,26 @@ use English qw( -no_match_vars );
 use perfSONAR_PS::Common qw( genuid );
 use perfSONAR_PS::ParameterValidation;
 use perfSONAR_PS::Client::MA;
+use Data::Dumper;
 
 use  aliased 'perfSONAR_PS::Datatypes::EventTypes';
  
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message'; 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Data';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Key' => 'MetaKey';
+use  aliased 'perfSONAR_PS::Datatypes::Message'; 
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata::Key' => 'MetaKey';
  
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Parameters' => 'MessageParams';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Parameters' => 'PingerParams';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Metadata::Parameters' => 'PingerParams';
 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::pinger::Message::Metadata::Subject' => 'MetaSubj';  
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Metadata::Subject' => 'MetaSubj';  
 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Parameters' => 'SelectParams';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::select::Message::Metadata::Subject' => 'SelectSubj';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::select::Message::Metadata::Parameters' => 'SelectParams';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::select::Message::Metadata::Subject' => 'SelectSubj';
 
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwg::Message::Metadata::Parameters::Parameter';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Dst';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Src';
-use  aliased 'perfSONAR_PS::Datatypes::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Metadata::Parameters::Parameter';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Dst';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair::Src';
+use  aliased 'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwgt::Message::Metadata::Subject::EndPointPair';
 
 
 use base 'perfSONAR_PS::Client::MA';
@@ -72,10 +72,13 @@ Calls the MA instance with  request message DOM and returns the response message
 
 sub callMA {
     my ( $self, $message_dom ) = @_; 
-   my $msg = $self->SUPER::callMA( { message =>  $message_dom->asString  } );
-    unless ($msg) {
-        $self->{LOGGER}->error("Message element not found in return.");
-        return;
+    my $msg;
+    eval {
+        $msg = $self->SUPER::callMA( { message =>  $message_dom->asString  } );
+    };
+    if($EVAL_ERROR || !$msg) {
+        $self->{LOGGER}->error("Message element not found in return. $EVAL_ERROR");
+	return;
     }
     return  Message->new($msg);
 }
@@ -99,8 +102,9 @@ sub metadataKeyRequest {
     my $eventType =  EventTypes->new();
     my $metaid = genuid();
     my $message = Message->new( { 'type' =>  'MetadataKeyRequest', 'id' =>  'message.' .  genuid() });
+     $self->{LOGGER}->debug("Messagge: " . $message->asString);
     if($parameters->{xml})  {
-       $message = Message->new( { xml => $parameters->{xml}});
+       $message = Message->new({ xml => $parameters->{xml}});
     } else {
         $parameters->{id} = $metaid; 
 	$parameters->{eventType} = $eventType->tools->pinger; 
@@ -109,8 +113,8 @@ sub metadataKeyRequest {
 	# create the  element
 	my $data =  Data->new({ 'metadataIdRef' =>  "metaid$metaid", 	'id' =>  "data$metaid" });
 	 
-	$message->metadata( [$metadata] );	
-	$message->data( [$data] );
+	$message->set_metadata( [$metadata] );	
+	$message->set_data( [$data] );
     }	
     $self->{LOGGER}->debug("MDKR: " . $message->asString);
     return  $self->callMA($message);
@@ -141,6 +145,7 @@ sub getMetaSubj {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { id => 1, metadata => 0,  start => 0, end => 0, 
                                               eventType =>  1, subject => 0,  key => 0, idRef => 0,
+					      cf => 0, resolution => 0,
 					      src_name => 0, dst_name => 0,   parameters => 0 } );
   
     my $metaid = $parameters->{id};
@@ -165,32 +170,33 @@ sub getMetaSubj {
 
 	    if($parameters->{src_name} ||  $parameters->{dst_name}) {
 	      my $endpoint =  EndPointPair->new();	
-              $endpoint->src(Src->new({ value =>   $parameters->{src_name}, type => 'hostname'})) if $parameters->{src_name};
-              $endpoint->dst(Dst->new({ value =>  $parameters->{dst_name}, type => 'hostname'})) if $parameters->{dst_name};
-              $subject->endPointPair($endpoint); 
+              $endpoint->set_src(Src->new({ value =>   $parameters->{src_name}, type => 'hostname'})) if $parameters->{src_name};
+              $endpoint->set_dst(Dst->new({ value =>  $parameters->{dst_name}, type => 'hostname'})) if $parameters->{dst_name};
+              $subject->set_endPointPair($endpoint); 
 	    }
 	}
-	$md->subject( $subject );
+	$md->set_subject( $subject );
 	if($parameters->{parameters} && ref $parameters->{parameters} eq 'HASH') {
 	    my   @params;
 	    my $meta_params =  PingerParams->new({ id => "params$metaid" });
-	    foreach my $p ( qw/ count packetSize interval  / ) {
+	    foreach my $p ( qw/count packetSize interval/ ) {
         	if($parameters->{parameters}->{$p}) {
         	    my $param =  Parameter->new({ 'name' => $p });
-        	    $param->text( $parameters->{parameters}->{$p} );
+        	    $param->set_text($parameters->{parameters}->{$p});
         	    push @params, $param;
         	}
 	    }
 	      # add the params to the parameters
 	    if(@params) {   
-    		$meta_params->parameter( @params );
-    		$md->parameters( $meta_params );
+    		$meta_params->set_parameter(\@params);
+    		$md->addParameters($meta_params);
 	    }
 	} 	 
     }
-    $md->id("metaid". $parameters->{id});
-    $md->metadataIdRef("metaid".$parameters->{idRef}) if  $parameters->{idRef};
-    $md->eventType($parameters->{eventType});
+    $md->set_id("metaid". $parameters->{id});
+    $md->set_metadataIdRef("metaid".$parameters->{idRef}) if  $parameters->{idRef};
+    $md->set_eventType($parameters->{eventType});
+    $self->{LOGGER}->debug(" metamd= " . $md->asString);
     return $md;
 
 }
@@ -249,14 +255,14 @@ sub getMetaTime  {
         }
 	# add the params to the parameters
         if(@params) {	
-            $time_params->parameter( @params );
-            $md->parameters( $time_params );
+            $time_params->set_parameter( \@params );
+            $md->addParameters( $time_params );
         }  
 	 
     }
     unless($parameters->{md}) {
-        $md->id("metaid". $metaid);
-        $md->eventType($parameters->{eventType});
+        $md->set_id("metaid". $metaid);
+        $md->set_eventType($parameters->{eventType});
     }
     return $md;
 
@@ -277,7 +283,8 @@ Perform a SetupDataRequest, the result is returned  as message DOM
 
 sub setupDataRequest {
     my ( $self, @args ) = @_;   
-    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0,  keys => 0, cf => 0, 
+    my $parameters = validateParams( @args, { xml => 0, metadata => 0,  subject => 0, 
+                                              keys => 0, cf => 0, 
 					      resolution => 0, 
                                               start => 0, end => 0, src_name => 0, dst_name => 0,   parameters => 0 } );
     my $eventType =  EventTypes->new();
@@ -285,17 +292,18 @@ sub setupDataRequest {
     
     my $metaid = genuid();
     my $message = Message->new( { 'type' =>  'SetupDataRequest', 'id' =>  'message.' .  genuid() });
+     
     if($parameters->{xml})  {
        $message = Message->new( { xml => $parameters->{xml}});
     } else {
         $parameters->{id} = genuid();
         my $keys = $parameters->{keys}?delete $parameters->{keys}:undef;   
-	
-        if($keys && ref $keys eq 'ARRAY') {
-            $parameters->{message} =  $message;   
+	 
+        if($keys && ref $keys eq 'ARRAY') {          
 	    foreach my $key (@{$keys}) {
-	       $parameters->{key} = $key;	     
-	       $message = $self->getPair($parameters);
+	        $parameters->{message} =  $message;    
+	        $parameters->{key} = $key;	     
+	        $message = $self->getPair($parameters);
 	    }  
          } else {  
              my $md_time =  $self->getMetaTime( $parameters );
@@ -320,16 +328,19 @@ sub setupDataRequest {
 
 sub getPair {
     my ( $self, @args ) = @_;      
-     my $parameters = validateParams( @args, { message => 1,idRef => 0, id => 0, metadata => 0,  subject => 0,  key => 0, 
-                                              start => 0, end => 0, src_name => 0, dst_name => 0, eventType => 1,   parameters => 0 } );
+     my $parameters = validateParams( @args, { message => 1,idRef => 0, id => 0, metadata => 0,  
+                                              subject => 0,  key => 0, cf =>0,  resolution => 0,
+                                              start => 0, end => 0, src_name => 0, dst_name => 0, 
+					      eventType => 1,   parameters => 0 } );
           
           my $message =   delete $parameters->{message}; 
 	  $parameters->{id} = genuid();     
           my $md_pinger = $self->getMetaSubj( $parameters );	   	
 	  # create the  element
 	  my $data =  Data->new({ 'metadataIdRef' =>  "metaid$parameters->{id}", 	'id' =>  "data$parameters->{id}" });
-          $message->addMetadata($md_pinger);  	 	
-	  $message->addData($data);
+	  return unless $message;
+          $message->addMetadata($md_pinger) if $md_pinger;  	 	
+	  $message->addData($data) if $data;
 	  return $message;
  
 }
@@ -351,45 +362,48 @@ sub getPair {
 sub getMetaData {
     my ($self, $response) = @_;
     my $metaids = {};
-    $self->{LOGGER}->logdie(" Attempted to get metadata from empty response") unless $response;										         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
-    foreach my $md (@{$response->metadata}) {
-        unless ($md->key && $md->key->id && $md->subject) {
+    unless($response  && $response->isa('perfSONAR_PS::Datatypes::Message')) {	
+        $self->{LOGGER}->error(" Attempted to get metadata from empty response");
+	return;									       
+    }
+    foreach my $md (@{$response->get_metadata}) {
+        unless ($md->get_key   && $md->get_subject) {
 	    $self->{LOGGER}->info("Skipping metadata - key or subject is missing ");
 	    next;
 	}
        
-          my $key_id =  $md->key->id;
-	  my $subject = $md->subject; #first subj
-	  unless ($subject  && $subject->endPointPair) {
-	    $self->{LOGGER}->error("Malformed metadata in response -  subject is missing ");
-	     next;
-	  }
-          my $endpoint = $subject->endPointPair; # first endpoint
-          my $src = $endpoint->src->value;
-          my $dst= $endpoint->dst->value;
-          my $packetSize;  
-          # foreach my $params (@{$md->parameters}) {
-          foreach my $param (@{ $md->parameters->parameter}) {
-                if($param->name eq 'packetSize') {
-		    $packetSize = $param->value?$param->value:$param->text;
-		    last;
-		}
-	    }
-         #  }
-          my $composite_key = "$src:$dst:$packetSize";
-	  my $data_obj = $response->getDataByMetadataIdRef($md->id);
-	  $key_id =  $data_obj->key->id if !(defined $key_id) && $data_obj->key && $data_obj->key->id ;
-          if( exists $metaids->{$composite_key}) { 
-              push @{ $metaids->{$composite_key}{metaIDs}},  $md->id;
-	      push @{ $metaids->{$composite_key}{keys}},   $key_id; 
-          } else { 
-              $metaids->{$composite_key} = {
-	                        keys => [ ($key_id) ],
-                                src_name    => $src,
-                                dst_name    => $dst,
-                                packetSize =>  $packetSize,
-                                metaIDs     => [ ( $md->id) ]
-               };
+        my $key_id =  $md->get_key->get_id;
+        my $subject = $md->get_subject; #first subj
+        unless ($subject  && $subject->get_endPointPair) {
+          $self->{LOGGER}->get_error("Malformed metadata in response -  subject is missing ");
+           next;
+        }
+        my $endpoint = $subject->get_endPointPair; # first endpoint
+        my $src = $endpoint->get_src->get_value;
+        my $dst= $endpoint->get_dst->get_value;
+        my $packetSize;  
+        foreach my $params (@{$md->get_parameters}) {
+           foreach my $param (@{$params->get_parameter}) {
+              if($param->get_name eq 'packetSize') {
+	          $packetSize = $param->get_value?$param->get_value:$param->get_text;
+	          last;
+	      }
+          }
+        }
+        my $composite_key = "$src:$dst:$packetSize";
+        my $data_obj = $response->getDataByMetadataIdRef($md->get_id);
+        $key_id =  $data_obj->get_key->get_id if !(defined $key_id) && $data_obj->get_key && $data_obj->get_key->get_id ;
+        if( exists $metaids->{$composite_key}) { 
+            push @{ $metaids->{$composite_key}{metaIDs}}, $md->get_id;
+            push @{ $metaids->{$composite_key}{keys}}, $key_id; 
+        } else { 
+            $metaids->{$composite_key} = {
+        		      keys => [ ($key_id) ],
+        		      src_name    => $src,
+        		      dst_name    => $dst,
+        		      packetSize =>  $packetSize,
+        		      metaIDs	  => [ ( $md->get_id) ]
+             };
           }   
          
     }
@@ -417,9 +431,9 @@ sub getMetaData {
 sub getData {
     my ($self, $response) = @_;
  
-    $self->{LOGGER}->error("Must be perfSONAR_PS::Datatypes::v2_0::nmwg::Message object") unless $response && 
+    $self->{LOGGER}->error("Must be perfSONAR_PS::Datatypes::Message object") unless $response && 
                                                                                                  blessed $response &&
-											         $response->isa('perfSONAR_PS::Datatypes::v2_0::nmwg::Message');
+											         $response->isa('perfSONAR_PS::Datatypes::Message');
     my $metadata = $self->getMetaData($response);
     
     foreach my $uniq_key  (keys %{$metadata}) {
@@ -431,12 +445,12 @@ sub getData {
 	    my $key =  $metadata->{$uniq_key}{keys}->[$count]; 
 	    my $data_obj = $response->getDataByMetadataIdRef($metaid);
 	    next unless $data_obj;
-	    my $times =  $data_obj->commonTime;
+	    my $times =  $data_obj->get_commonTime;
 	    next unless  $times ;
 	    foreach my $ctime (@{$times}) {
-	    	my $timev = $ctime->value;
-            	foreach my $datum (@{$ctime->datum}) {
-	    	    $data->{$key}{$timev}{$datum->name} =   $datum->value; 
+	    	my $timev = $ctime->get_value;
+            	foreach my $datum (@{$ctime->get_datum}) {
+	    	    $data->{$key}{$timev}{$datum->get_name} =   $datum->get_value; 
 	    	}  
 	   
 	    } 

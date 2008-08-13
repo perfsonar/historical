@@ -69,7 +69,9 @@ $parameters =  { attrs  => {id => 'scalar',   xmlns => 'nmwg'},
 		               [parameter =>  $service_parameter->()], 
 			      
 			     ], 
-	       }; 	
+	       }; 
+	       
+	       	
 ### callback to add choice of different parameters elements    
 sub addParameters {  
     my $extras = [[$parameters]];

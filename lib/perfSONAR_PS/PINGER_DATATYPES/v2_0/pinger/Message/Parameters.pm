@@ -1,4 +1,4 @@
-package  perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key;
+package  perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters;
 
 use strict;
 use warnings;
@@ -8,19 +8,19 @@ use version; our $VERSION = 'v2.0';
 
 =head1 NAME
 
-perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key  -  this is data binding class for  'key'  element from the XML schema namespace nmwg
+perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters  -  this is data binding class for  'parameters'  element from the XML schema namespace pinger
 
 =head1 DESCRIPTION
 
-Object representation of the key element of the nmwg XML namespace.
+Object representation of the parameters element of the pinger XML namespace.
 Object fields are:
 
 
     Scalar:     id,
-    Object reference:   parameters => type ARRAY,
+    Object reference:   parameter => type ARRAY,
 
 
-The constructor accepts only single parameter, it could be a hashref with keyd  parameters hash  or DOM of the  'key' element
+The constructor accepts only single parameter, it could be a hashref with keyd  parameters hash  or DOM of the  'parameters' element
 Alternative way to create this object is to pass hashref to this hash: { xml => <xml string> }
 Please remember that namespace prefix is used as namespace id for mapping which not how it was intended by XML standard. The consequence of that
 is if you serve some XML on one end of the webservices pipeline then the same namespace prefixes MUST be used on the one for the same namespace URNs.
@@ -30,16 +30,16 @@ Note: this class utilizes L<Log::Log4perl> module, see corresponded docs on CPAN
 
 =head1 SYNOPSIS
 
-          use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key;
+          use perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters;
           use Log::Log4perl qw(:easy);
 
           Log::Log4perl->easy_init();
 
-          my $el =  perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key->new($DOM_Obj);
+          my $el =  perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters->new($DOM_Obj);
 
           my $xml_string = $el->asString();
 
-          my $el2 = perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key->new({xml => $xml_string});
+          my $el2 = perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters->new({xml => $xml_string});
 
 
           see more available methods below
@@ -57,17 +57,8 @@ use Readonly;
     
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::Element qw(getElement);
 use perfSONAR_PS::PINGER_DATATYPES::v2_0::NSMap;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::min::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::max::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::median::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::mean::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::histogram::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::average::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::cdf::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::select::Message::Metadata::Parameters;
-use perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Metadata::Parameters;
-use fields qw(nsmap idmap LOGGER id parameters );
+use perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Parameters::Parameter;
+use fields qw(nsmap idmap LOGGER id parameter );
 
 
 =head2 new({})
@@ -76,15 +67,15 @@ use fields qw(nsmap idmap LOGGER id parameters );
  keyd parameters:
 
          id   => undef,
-         parameters => ARRAY,
+         parameter => ARRAY,
 
 returns: $self
 
 =cut
 
 Readonly::Scalar our $COLUMN_SEPARATOR => ':';
-Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key';
-Readonly::Scalar our $LOCALNAME => 'key';
+Readonly::Scalar our $CLASSPATH =>  'perfSONAR_PS::PINGER_DATATYPES::v2_0::pinger::Message::Parameters';
+Readonly::Scalar our $LOCALNAME => 'parameters';
 
 sub new {
     my ($that, $param) = @_;
@@ -92,7 +83,7 @@ sub new {
     my $self =  fields::new($class );
     $self->set_LOGGER(get_logger( $CLASSPATH ));
     $self->set_nsmap(perfSONAR_PS::PINGER_DATATYPES::v2_0::NSMap->new());
-    $self->get_nsmap->mapname($LOCALNAME, 'nmwg');
+    $self->get_nsmap->mapname($LOCALNAME, 'pinger');
 
 
     if($param) {
@@ -129,13 +120,13 @@ sub new {
 =head2   getDOM ($parent)
 
  accepts parent DOM  serializes current object into the DOM, attaches it to the parent DOM tree and
- returns key object DOM
+ returns parameters object DOM
 
 =cut
 
 sub getDOM {
     my ($self, $parent) = @_;
-    my $key;
+    my $parameters;
     eval { 
         my @nss;    
         unless($parent) {
@@ -144,7 +135,7 @@ sub getDOM {
             push(@nss,  $self->get_nsmap->mapname( $LOCALNAME ));
         } 
         push  @nss, $self->get_nsmap->mapname( $LOCALNAME ) unless  @nss;
-        $key = getElement({name =>   $LOCALNAME, 
+        $parameters = getElement({name =>   $LOCALNAME, 
 	                      parent => $parent,
 			      ns  =>    \@nss,
                               attributes => [
@@ -158,16 +149,16 @@ sub getDOM {
          $self->get_LOGGER->logdie(" Failed at creating DOM: $EVAL_ERROR");
     }
 
-    if($self->get_parameters && ref($self->get_parameters) eq 'ARRAY') {
-        foreach my $subel (@{$self->get_parameters}) {
+    if($self->get_parameter && ref($self->get_parameter) eq 'ARRAY') {
+        foreach my $subel (@{$self->get_parameter}) {
             if(blessed $subel && $subel->can("getDOM")) {
-                my $subDOM = $subel->getDOM($key);
-                $subDOM?$key->appendChild($subDOM):$self->get_LOGGER->logdie("Failed to append  parameters element  with value:" .  $subDOM->toString);
+                my $subDOM = $subel->getDOM($parameters);
+                $subDOM?$parameters->appendChild($subDOM):$self->get_LOGGER->logdie("Failed to append  parameter element  with value:" .  $subDOM->toString);
             }
         }
     }
 
-      return $key;
+      return $parameters;
 }
 
 
@@ -306,35 +297,35 @@ sub set_id {
 
 
 
-=head2 get_parameters
+=head2 get_parameter
 
- accessor  for parameters, assumes hash based class
+ accessor  for parameter, assumes hash based class
 
 =cut
 
-sub get_parameters {
+sub get_parameter {
     my($self) = @_;
-    return $self->{parameters};
+    return $self->{parameter};
 }
 
-=head2 set_parameters
+=head2 set_parameter
 
-mutator for parameters, assumes hash based class
+mutator for parameter, assumes hash based class
 
 =cut
 
-sub set_parameters {
+sub set_parameter {
     my($self,$value) = @_;
     if($value) {
-        $self->{parameters} = $value;
+        $self->{parameter} = $value;
     }
-    return   $self->{parameters};
+    return   $self->{parameter};
 }
 
 
 
 
-=head2  addParameters()
+=head2  addParameter()
 
  if any of subelements can be an array then this method will provide
  facility to add another element to the  array and will return ref to such array
@@ -346,18 +337,18 @@ sub set_parameters {
 
 =cut
 
-sub addParameters {
+sub addParameter {
     my ($self,$new) = @_;
 
-    $self->get_parameters && ref($self->get_parameters) eq 'ARRAY'?push @{$self->get_parameters}, $new:$self->set_parameters([$new]);
-    $self->get_LOGGER->debug("Added new to parameters");
+    $self->get_parameter && ref($self->get_parameter) eq 'ARRAY'?push @{$self->get_parameter}, $new:$self->set_parameter([$new]);
+    $self->get_LOGGER->debug("Added new to parameter");
     $self->buildIdMap; ## rebuild index map
-    return $self->get_parameters;
+    return $self->get_parameter;
 }
 
-=head2  removeParametersById()
+=head2  removeParameterById()
 
- removes specific element from the array of parameters elements by id ( if id is supported by this element )
+ removes specific element from the array of parameter elements by id ( if id is supported by this element )
  Accepts:  single param - id - which is id attribute of the element
  
  if there is no array then it will return undef and warning
@@ -365,38 +356,38 @@ sub addParameters {
 
 =cut
 
-sub removeParametersById {
+sub removeParameterById {
     my ($self, $id) = @_;
-    if(ref($self->get_parameters) eq 'ARRAY' && $self->get_idmap->{parameters} &&  exists $self->get_idmap->{parameters}{$id}) {
-        undef $self->get_parameters->[$self->get_idmap->{parameters}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->parameters};
-        $self->set_parameters([@tmp]);
+    if(ref($self->get_parameter) eq 'ARRAY' && $self->get_idmap->{parameter} &&  exists $self->get_idmap->{parameter}{$id}) {
+        undef $self->get_parameter->[$self->get_idmap->{parameter}{$id}];
+        my @tmp =  grep { defined $_ } @{$self->parameter};
+        $self->set_parameter([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
-    } elsif(!ref($self->get_parameters)  || ref($self->get_parameters) ne 'ARRAY')  {
-        $self->get_LOGGER->warn("Failed to remove  element because parameters not an array for non-existent id:$id");
+    } elsif(!ref($self->get_parameter)  || ref($self->get_parameter) ne 'ARRAY')  {
+        $self->get_LOGGER->warn("Failed to remove  element because parameter not an array for non-existent id:$id");
     } else {
         $self->get_LOGGER->warn("Failed to remove element for non-existent id:$id");
     }
     return;
 }
 
-=head2  getParametersById()
+=head2  getParameterById()
 
- get specific element from the array of parameters elements by id ( if id is supported by this element )
+ get specific element from the array of parameter elements by id ( if id is supported by this element )
  Accepts single param - id
  
  if there is no array then it will return just an object
 
 =cut
 
-sub getParametersById {
+sub getParameterById {
     my ($self, $id) = @_;
 
-    if(ref($self->get_parameters) eq 'ARRAY' && $self->get_idmap->{parameters} && exists $self->get_idmap->{parameters}{$id} ) {
-        return $self->get_parameters->[$self->get_idmap->{parameters}{$id}];
-    } elsif(!ref($self->get_parameters) || ref($self->get_parameters) ne 'ARRAY')  {
-        return $self->get_parameters;
+    if(ref($self->get_parameter) eq 'ARRAY' && $self->get_idmap->{parameter} && exists $self->get_idmap->{parameter}{$id} ) {
+        return $self->get_parameter->[$self->get_idmap->{parameter}{$id}];
+    } elsif(!ref($self->get_parameter) || ref($self->get_parameter) ne 'ARRAY')  {
+        return $self->get_parameter;
     }
     $self->get_LOGGER->warn("Requested element for non-existent id:$id");
     return;
@@ -421,15 +412,15 @@ sub  querySQL {
     my ($self, $query) = @_;
 
 
-    foreach my $subname (qw/parameters/) {
+    foreach my $subname (qw/parameter/) {
         if($self->{$subname} && (ref($self->{$subname}) eq 'ARRAY' ||  blessed $self->{$subname})) {
             my @array = ref($self->{$subname}) eq 'ARRAY'?@{$self->{$subname}}:($self->{$subname});
             foreach my $el (@array) {
                 if(blessed $el && $el->can('querySQL'))  {
                     $el->querySQL($query);
-                    $self->get_LOGGER->debug("Querying key  for subclass $subname");
+                    $self->get_LOGGER->debug("Querying parameters  for subclass $subname");
                 } else {
-                    $self->get_LOGGER->logdie("Failed for key Unblessed member or querySQL is not implemented by subclass $subname");
+                    $self->get_LOGGER->logdie("Failed for parameters Unblessed member or querySQL is not implemented by subclass $subname");
                 }
            }
         }
@@ -452,7 +443,7 @@ sub  buildIdMap {
     my %map = ();
     
 
-    foreach my $field (qw/parameters/) {
+    foreach my $field (qw/parameter/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         my $i = 0;
         foreach my $el (@array)  {
@@ -469,7 +460,7 @@ sub  buildIdMap {
 =head2  asString()
 
  shortcut to get DOM and convert into the XML string
- returns nicely formatted XML string  representation of the  key object
+ returns nicely formatted XML string  representation of the  parameters object
 
 =cut
 
@@ -499,7 +490,7 @@ sub registerNamespaces {
     }
 
 
-    foreach my $field (qw/parameters/) {
+    foreach my $field (qw/parameter/) {
         my @array = ref($self->{$field}) eq 'ARRAY'?@{$self->{$field}}:($self->{$field});
         foreach my $el (@array) {
             if(blessed $el &&  $el->can('registerNamespaces') ) {
@@ -519,7 +510,7 @@ sub registerNamespaces {
 =head2  fromDOM ($)
 
  accepts parent XML DOM  element  tree as parameter
- returns key  object
+ returns parameters  object
 
 =cut
 
@@ -535,16 +526,27 @@ sub fromDOM {
         next unless($nsid && $tagname);
 	my $element;
 	
-        if ($tagname eq  'parameters' && $nsid eq 'nmwg' && $self->can("get_$tagname")) {
+        if ($tagname eq  'parameter' && $nsid eq 'nmwg' && $self->can("get_$tagname")) {
                 eval {
-                    $element = perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data::Key::Parameters->new($childnode)
+                    $element = perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Parameters::Parameter->new($childnode)
                 };
                 if($EVAL_ERROR || !($element  && blessed $element)) {
-                    $self->get_LOGGER->logdie(" Failed to load and add  Parameters : " . $dom->toString . " error: " . $EVAL_ERROR);
+                    $self->get_LOGGER->logdie(" Failed to load and add  Parameter : " . $dom->toString . " error: " . $EVAL_ERROR);
                      return;
                 }
-               ($self->get_parameters && ref($self->get_parameters) eq 'ARRAY')?push @{$self->get_parameters}, $element:
-                                                                                                        $self->set_parameters([$element]);; ### add another parameters  
+               ($self->get_parameter && ref($self->get_parameter) eq 'ARRAY')?push @{$self->get_parameter}, $element:
+                                                                                                        $self->set_parameter([$element]);; ### add another parameter  
+            } 
+        elsif ($tagname eq  'parameter' && $nsid eq 'nmwg' && $self->can("get_$tagname")) {
+                eval {
+                    $element = perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Parameters::Parameter->new($childnode)
+                };
+                if($EVAL_ERROR || !($element  && blessed $element)) {
+                    $self->get_LOGGER->logdie(" Failed to load and add  Parameter : " . $dom->toString . " error: " . $EVAL_ERROR);
+                     return;
+                }
+               ($self->get_parameter && ref($self->get_parameter) eq 'ARRAY')?push @{$self->get_parameter}, $element:
+                                                                                                        $self->set_parameter([$element]);; ### add another parameter  
             } 
     }
     $self->buildIdMap;
