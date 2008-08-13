@@ -497,14 +497,18 @@ Returns
 sub  tableExists {
     my  ($self, $table) = @_; 
     my $result = undef;
+    
     eval {
      	  $self->LOGGER->debug( "...testing presence of the table $table");
      	  # create the database table if necessary 
 	  $self->openDB  if !($self->alive == 0);	
-	  # next line will fail if table does not exist	  
-     	  ($result)  =  $self->handle->selectrow_array("select * from  $table where 1=0 ");  
+	  # next line will fail if table does not exist	 
+	  $self->handle->{RaiseError} = 0; 
+	  $self->handle->{PrintError} = 0;   	 
+	  $self->handle->selectrow_array("select * from  $table where 1=0 ");  
+	  $self->handle->{RaiseError} = 1;    	 
     }; 
-    $EVAL_ERROR?return 0:return 1;
+    $EVAL_ERROR || $self->handle->err?return  0:return 1;
 }
 
 
