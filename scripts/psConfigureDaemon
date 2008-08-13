@@ -357,7 +357,7 @@ sub config_gls {
 
     $config->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
     $config->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
-    $config->{"gls"}->{"reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"gls"}->{"reaper_interval"}, '^[01]$' );
+    $config->{"gls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"gls"}->{"reaper_interval"}, '^[01]$' );
     $config->{"gls"}->{"summarization_interval"} = &ask( "Enter the time between LS summarization [in minutes] ", "30", $config->{"gls"}->{"summarization_interval"}, '^\d+$' );
     if ( $config->{"gls"}->{"reaper_interval"} ) {
         $config->{"gls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
@@ -401,7 +401,7 @@ sub config_ls {
     }
     
     $config->{"ls"}->{"metadata_db_file"} = "lsstore.dbxml";
-    $config->{"ls"}->{"reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"reaper_interval"}, '^[01]$' );
+    $config->{"ls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"reaper_interval"}, '^[01]$' );
     if ( $config->{"ls"}->{"reaper_interval"} ) {
         $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
     }

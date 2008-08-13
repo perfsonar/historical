@@ -203,11 +203,19 @@ sub init {
         $self->{CONF}->{"gls"}->{"ls_ttl"} = 86400;
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
-        and $self->{CONF}->{"gls"}->{"reaper_interval"} )
+    unless ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
+        and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
     {
-        $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
-        $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
+        if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
+            and $self->{CONF}->{"gls"}->{"reaper_interval"} ) {
+            $self->{LOGGER}->info("Using legacy 'gls:reaper_interval' value: \"".$self->{CONF}->{"gls"}->{"reaper_interval"}."\".");
+            $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
+            delete $self->{CONF}->{"gls"}->{"reaper_interval"};
+        }
+        else {
+            $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
+            $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = 0;
+        }
     }
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",        $self );
@@ -1303,7 +1311,7 @@ sub cleanLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
 
-    return 0 if $self->{CONF}->{"gls"}->{"reaper_interval"} == 0;
+    return 0 if $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} == 0;
 
     my $error     = q{};
     my $errorFlag = 0;
