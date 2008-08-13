@@ -108,6 +108,7 @@ while (1) {
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
         $config{"root_hints_url"}           = &ask( "URL of the root.hints file ",                                                          "http://www.perfsonar.net/gls.root.hints",                    $config{"root_hints_url"},           '(^http|^$)' );      
+        $config{"root_hints_file"}          = &ask( "Where shold the root.hints file be stored ",                                           $confdir . "/gls.root.hints",                                 $config{"root_hints_file"},          '^\/' );
         $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed [in seconds] ",                             20,                                                           $config{"reaper_interval"},          '^\d+$' );
         $config{"pid_dir"}                  = &ask( "Enter pid dir location ",                                                              "/var/run",                                                   $config{"pid_dir"},                  q{} );
         $config{"pid_file"}                 = &ask( "Enter pid filename ",                                                                  "ps.pid",                                                     $config{"pid_file"},                 q{} );
@@ -335,22 +336,18 @@ sub config_gls {
     }
 
     $config->{"gls"}->{"root"} = "0";
-    $config->{"gls"}->{"root_hints_file"}          = &ask( "Where shold the root.hints file be stored ",                                           $confdir . "/gls.root.hints",                                 $config{"root_hints_file"},          '^\/' );
     $config->{"gls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"gls"}->{"ls_ttl"}, '\d+' );
-    $config->{"gls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"gls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"gls"}->{"metadata_db_name"} .= "/" unless $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/;
+    unless ( -d $config->{"gls"}->{"metadata_db_name"} ) {
+        system( "mkdir " . $config->{"gls"}->{"metadata_db_name"} );
+    }
 
-    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "1", "1", '^[01]$' );
-    if ($makeDBConfig) {
+    if ( not -e $config->{"gls"}->{"metadata_db_name"}."DB_CONFIG" ) {
         open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
         my @result = <RUN>;
         close(RUN);
         if ( $result[0] ) {
-            unless ( $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/ ) {
-                $config->{"gls"}->{"metadata_db_name"} .= "/";
-            }
-            if ( -f $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-                system( "mv " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG~" );
-            }
             system( "mv " . $result[0] . " " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" );
         }
         else {
@@ -385,20 +382,17 @@ sub config_ls {
     }
 
     $config->{"ls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
-    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"ls"}->{"metadata_db_name"} .= "/" unless $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/;
+    unless ( -d $config->{"ls"}->{"metadata_db_name"} ) {
+        system( "mkdir " . $config->{"ls"}->{"metadata_db_name"} );
+    }
 
-    my $makeDBConfig = &ask( "Automatically generate DB_CONFIG file for XMLDB (0 for no, 1 for yes) ", "1", "1", '^[01]$' );
-    if ($makeDBConfig) {
+    if ( not -e $config->{"ls"}->{"metadata_db_name"}."DB_CONFIG" ) {
         open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
         my @result = <RUN>;
         close(RUN);
         if ( $result[0] ) {
-            unless ( $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/ ) {
-                $config->{"ls"}->{"metadata_db_name"} .= "/";
-            }
-            if ( -f $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
-                system( "mv " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG~" );
-            }
             system( "mv " . $result[0] . " " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" );
         }
         else {
@@ -436,10 +430,27 @@ sub config_perfsonarbuoy_ma {
 
     if ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "file" ) {
         delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/dbxml$/mx;
-        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/store.xml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '\.xml$' );
+        $config->{"perfsonarbuoy"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $amiconfdir . "/psb-store.xml", $config->{"perfsonarbuoy"}->{"metadata_db_file"}, '\.xml$' );
     }
     elsif ( $config->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"perfsonarbuoy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/xmldb", $config->{"perfsonarbuoy"}->{"metadata_db_name"}, '.+' );
+        $config->{"perfsonarbuoy"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $amiconfdir . "/psb-xmldb", $config->{"perfsonarbuoy"}->{"metadata_db_name"}, '.+' );
+        $config->{"perfsonarbuoy"}->{"metadata_db_name"} .= "/" unless $config->{"perfsonarbuoy"}->{"metadata_db_name"} =~ m/\/$/;
+        unless ( -d $config->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
+            system( "mkdir " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} );
+        }
+
+        if ( not -e $config->{"perfsonarbuoy"}->{"metadata_db_name"}."DB_CONFIG" ) {
+            open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+            my @result = <RUN>;
+            close(RUN);
+            if ( $result[0] ) {
+                system( "mv " . $result[0] . " " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} . "DB_CONFIG" );
+            }
+            else {
+                return -1;
+            }
+        }
+
         delete $config->{"perfsonarbuoy"}->{"metadata_db_file"} if $config->{"perfsonarbuoy"}->{"metadata_db_file"} and $config->{"perfsonarbuoy"}->{"metadata_db_file"} =~ m/\.xml$/mx;
         $config->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
     }
@@ -490,11 +501,13 @@ sub config_snmp_ma {
         return -1;
     }
 
-    $config->{"snmp"}->{"rrdtool"} = &ask( "Enter the location of the RRD binary ", $rrdtool, $config->{"snmp"}->{"rrdtool"}, '.+' );
+    my @rrd = split(/ /, $rrdtool);
+    $config->{"snmp"}->{"rrdtool"} = &ask( "Enter the location of the RRD binary ", $rrd[0], $config->{"snmp"}->{"rrdtool"}, '.+' );
 
     $config->{"snmp"}->{"default_resolution"} = &ask( "Enter the default resolution of RRD queries ", "300", $config->{"snmp"}->{"default_resolution"}, '^\d+$' );
 
     my $makeStore = 0;
+    my @result = ();
     my $external = &ask( "Use external monitoring source [e.g. cacti, cricket, mrtg, etc.] for metadata creation? (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
     if ( $external ) {
         $config->{"snmp"}->{"metadata_db_external"} = &ask( "Enter external monitoring source (none | cacti | cricket | mrtg ) ", "none", $config->{"snmp"}->{"metadata_db_external"}, '^(none|cacti|mrtg|cricket)$' );
@@ -503,8 +516,9 @@ sub config_snmp_ma {
         }
     }
     else {
-        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-        my @result = ();
+        $config->{"snmp"}->{"metadata_db_external"} = "none";
+        $config->{"snmp"}->{"metadata_db_external_source"} = "";
+        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );        
         if ( $makeStore ) {
             open( RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
             @result = <RUN>;
@@ -519,8 +533,8 @@ sub config_snmp_ma {
 
     if ( $config->{"snmp"}->{"metadata_db_type"} eq "file" ) {
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/dbxml$/mx;
-        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $confdir . "/store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
-        if ( $makeStore and $result[0] ) {
+        $config->{"snmp"}->{"metadata_db_file"} = &ask( "Enter the filename of the XML file ", $confdir . "/snmp-store.xml", $config->{"snmp"}->{"metadata_db_file"}, '\.xml$' );
+        if ( $result[0] ) {
             if ( -f $config->{"snmp"}->{"metadata_db_file"} ) {
                 system( "mv " . $config->{"snmp"}->{"metadata_db_file"} . " " . $config->{"snmp"}->{"metadata_db_file"} . "~" );
             }
@@ -531,16 +545,33 @@ sub config_snmp_ma {
         delete $config->{"snmp"}->{"metadata_db_name"}          if $config->{"snmp"}->{"metadata_db_name"};
     }
     elsif ( $config->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
+        $config->{"snmp"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/snmp-xmldb", $config->{"snmp"}->{"metadata_db_name"}, '.+' );
+        $config->{"snmp"}->{"metadata_db_name"} .= "/" unless $config->{"snmp"}->{"metadata_db_name"} =~ m/\/$/;
+        unless ( -d $config->{"snmp"}->{"metadata_db_name"} ) {
+            system( "mkdir " . $config->{"snmp"}->{"metadata_db_name"} );
+        }
+
+        if ( not -e $config->{"snmp"}->{"metadata_db_name"}."DB_CONFIG" ) {
+            open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+            my @result = <RUN>;
+            close(RUN);
+            if ( $result[0] ) {
+                system( "mv " . $result[0] . " " . $config->{"snmp"}->{"metadata_db_name"} . "DB_CONFIG" );
+            }
+            else {
+                return -1;
+            }
+        }
+
         delete $config->{"snmp"}->{"metadata_db_file"} if $config->{"snmp"}->{"metadata_db_file"} and $config->{"snmp"}->{"metadata_db_file"} =~ m/\.xml$/mx;
         $config->{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
-        if ($makeStore) {
+        if ( $result[0] ) {
             $config->{"snmp"}->{"db_autoload"} = 1;
-            $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
+            $config->{"snmp"}->{"autoload_metadata_db_file"} = &ask( "Enter the filename of the base XML file to load ", $confdir . "/snmp-store.xml", $config->{"snmp"}->{"autoload_metadata_db_file"}, '\.xml$' );
             if ( -f $config->{"snmp"}->{"autoload_metadata_db_file"} ) {
                 system( "mv " . $config->{"snmp"}->{"autoload_metadata_db_file"} . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} . "~" );
             }
-            system( "mv " . $makeStore . " " . $config->{"snmp"}->{"metadata_db_file"} );
+            system( "mv " . $result[0] . " " . $config->{"snmp"}->{"autoload_metadata_db_file"} );
         }
         else {
             $config->{"snmp"}->{"db_autoload"} = &ask( "Would you like to auto-load the database [non-destructive] ? (0 for no, 1 for yes) ", "1", $config->{"snmp"}->{"db_autoload"}, '^[01]$' );
@@ -888,7 +919,7 @@ The perfSONAR-PS subversion repository is located at:
 Questions and comments can be directed to the author, or the mailing list.
 Bugs, feature requests, and improvements can be directed here:
 
-https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 

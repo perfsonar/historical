@@ -57,9 +57,8 @@ eval {
     my $answer = RRDp::read();
 
 };
-use strict;
-if ($EVAL_ERROR) {
-    return -1;
+if ( $EVAL_ERROR ) {
+    print "Store generation error: \"".$EVAL_ERROR."\"\n";
 }
 
 my ( $fileHandle, $fileName ) = tempfile();
