@@ -1,6 +1,6 @@
 package perfSONAR_PS::Client::gLS;
 
-use fields 'ROOTS', 'HINTS', 'LOGGER';
+use fields 'ROOTS', 'HINTS', 'LOGGER', 'FILE';
 
 use strict;
 use warnings;
@@ -39,7 +39,7 @@ Create new object, set the gls.hints URL and call init if applicable.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validateParams( @args, { url => 0 } );
+    my $parameters = validateParams( @args, { url => 0, file => 0 } );
 
     my $self = fields::new($package);
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::gLS");
@@ -52,6 +52,15 @@ sub new {
             $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
         }
     }
+    
+    if ( exists $parameters->{"file"} and -f $parameters->{"file"} ) {
+        $self->{FILE} = $parameters->{"file"};
+        $self->init();
+    }
+    else {
+        $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+    }
+        
     return $self;
 }
 
@@ -69,7 +78,28 @@ sub setURL {
         $self->init();
     }
     else {
-        $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+        $self->{LOGGER}->error("File does not exist.");
+        return -1;
+    }
+    return 0;
+}
+
+=head2 setFile( $self, { file } )
+
+Supply a file of gls roots.
+
+=cut
+
+sub setFile {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { file => { type => Params::Validate::SCALAR } } );
+
+    if ( -f $parameters->{"file"} ) {
+        $self->{FILE} = $parameters->{"file"};
+        $self->init();
+    }
+    else {
+        $self->{LOGGER}->error("File does not exist.");
         return -1;
     }
     return 0;
@@ -86,15 +116,40 @@ sub init {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    my $content = get $self->{HINTS};
-    if ($content) {
-        my @roots = split( /\n/, $content );
-        $self->orderRoots( { roots => \@roots } );
-    }
-    else {
-        $self->{LOGGER}->error( "There was an error accessing " . $self->{HINTS} . "." );
+    unless ( exists $self->{HINTS} or exists $self->{FILE} ) {
+        $self->{LOGGER}->error( "Cannot call init without setting hints URL or file." );
         return -1;
     }
+
+    my @roots = ();
+    if ( exists $self->{HINTS} ) {
+        my $content = get $self->{HINTS};
+        if ($content) {
+            @roots = split( /\n/, $content );
+        }
+        else {
+            $self->{LOGGER}->error( "There was an error accessing " . $self->{HINTS} . "." );
+            return -1;
+        }
+    }
+    
+    if ( exists $self->{FILE} ) {
+        if ( -f $self->{FILE} ) {
+            open(HINTS, $self->{FILE} );
+            while ( <HINTS> ) {
+                $_ =~ s/\n$//;
+                push @roots, $_ if $_;  
+            }
+            close(HINTS);
+        }
+        else {
+            $self->{LOGGER}->error( "There was an error accessing " . $self->{FILE} . "." );
+            return -1;
+        }
+    }
+    
+    $self->orderRoots( { roots => \@roots } );
+            
     return 0;
 }
 
@@ -118,6 +173,9 @@ sub orderRoots {
     }
     undef $self->{ROOTS};
 
+    # remove duplicates
+    my %rootHash   = map { $_, 1 } @roots;    @roots = keys %rootHash;
+
     my %list = ();
     my $ping = Net::Ping->new();
     $ping->hires();
@@ -125,12 +183,12 @@ sub orderRoots {
         $root =~ s/\s+//g;
         unless (  $self->verifyURL( { url => $root } ) == -1 ) {
             my $host = $root;
-	    if ($host =~ /^http/) {
+	        if ($host =~ /^http/) {
                 $host =~ s/^http:\/\///;
                 my ($unt_host) = $host =~ /^(.+):/; 
                 my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
                 $list{$duration} = $root if $ret or $duration;
-	    }
+	        }
         }
     }
     $ping->close();
@@ -140,6 +198,31 @@ sub orderRoots {
     }
     return;
 }
+
+=head2 addRoot( $self, { root } )
+
+Add a root gLS to the roots list.
+
+=cut
+
+sub addRoot {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            root =>  { type => Params::Validate::SCALAR }
+        }
+    );
+    
+    if ( $parameters->{root} =~ m/^http:\/\// ) {
+        push @{ $self->{ROOTS} }, $parameters->{root};
+    }
+    else {
+        $self->{LOGGER}->error( "Root must be of the form http://ADDRESS." );
+    }    
+    return -1;
+}
+
 
 =head2 verifyURL( $self, { url } )
 

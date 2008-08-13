@@ -21,22 +21,26 @@ handles specific messages from interested actors in search of data and services
 that are registered with the gLS.  There are four major message types that this
 service can act upon:
 
- - LSRegisterRequest   - Given the name of a service and the metadata it
-                         contains, register this information into the LS.
-                         Special considerations should be given to already
-                         registered services that wish to augment already
-                         registered data.
- - LSDeregisterRequest - Removes all or selective data about a specific
-                         service already registered in the LS.
- - LSKeepaliveRequest  - Given some info about already registered data
-                         (i.e. a 'key') update the internal state to
-                         reflect that this service and it's data are still
-                         alive and valid.
- - LSQueryRequest      - Given a descriptive query (written in the XPath or
-                         XQuery langugages) return any relevant data or a 
-                         descriptive error message.
- - LSKeyRequest        - Given a service description, return the stored 
-                         internal key for the dataset.
+ - LSRegisterRequest   -      Given the name of a service and the metadata it
+                              contains, register this information into the LS.
+                              Special considerations should be given to already
+                              registered services that wish to augment already
+                              registered data.
+ - LSDeregisterRequest -      Removes all or selective data about a specific
+                              service already registered in the LS.
+ - LSKeepaliveRequest  -      Given some info about already registered data
+                              (i.e. a 'key') update the internal state to
+                              reflect that this service and it's data are still
+                              alive and valid.
+ - LSQueryRequest
+   LSQueryRequest      -      Given a descriptive query (written in the XPath or
+                              XQuery langugages) return any relevant data or a 
+                              descriptive error message.
+ - LSKeyRequest        -      Given a service description, return the stored 
+                              internal key for the dataset.
+ - LSSynchronizationRequest - Message used between gLS instances to syncrhonize
+                              registered hLS instances.  This keeps the cloud
+                              current.
                          
 The LS in general offers a web services (WS) interface to the Berkeley/Oracle
 DB XML, a native XML database.   
@@ -49,7 +53,9 @@ use Params::Validate qw(:all);
 use Digest::MD5 qw(md5_hex);
 use Net::CIDR ':all';
 use Net::IPTrie;
+use Net::Ping;
 use LWP::Simple;
+use File::stat;
 
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
@@ -59,6 +65,7 @@ use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::ParameterValidation;
 use perfSONAR_PS::Client::LS;
+use perfSONAR_PS::Client::gLS;
 
 my %ls_namespaces = (
     nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -141,25 +148,24 @@ sub init {
     $self->{IPTRIE}    = ();
     $self->{CLAIMTREE} = ();
 
-    unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
-        $self->{LOGGER}->warn("Setting 'root' to '0'");
-        $self->{CONF}->{"gls"}->{"root"} = "0";
-    }
-
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
     }
-    
-    if ( exists $self->{CONF}->{"gls"}->{"root_hints_file"} ) {
+    if ( exists $self->{CONF}->{"root_hints_file"} ) {
         if ( exists $self->{DIRECTORY} ) {
-            unless ( $self->{CONF}->{"gls"}->{"root_hints_file"} =~ "^/" ) {
-                $self->{CONF}->{"gls"}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"root_hints_file"};
+            unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
+                $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
             }
         }
     } 
     else {
-        $self->{CONF}->{"gls"}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
+        $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
     }   
+
+    unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
+        $self->{LOGGER}->warn("Setting 'root' to '0'");
+        $self->{CONF}->{"gls"}->{"root"} = "0";
+    }
 
     unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"}
         and $self->{CONF}->{"gls"}->{"metadata_db_name"} )
@@ -227,19 +233,39 @@ sub init {
     }
     $summarydb->closeDB( { error => \$error } );
     
-    my $content = get $self->{CONF}->{"root_hints_url"};
-    unless ( $content ) {
-        $self->{LOGGER}->error( "There was an error accessing " . $self->{CONF}->{"root_hints_url"} . "." );
-        return -1;
-    }
-    open(HINTS, ">".$self->{CONF}->{"gls"}->{"root_hints_file"});
-    print HINTS $content;
-    close(HINTS);
+    $self->getHints();
     
     return 0;
 }
 
-=head2 prepareDatabase($self, $doc)
+=head2 getHints($self, {})
+
+Deletes an existing hints file, retrieves a new one from the hints url.
+
+=cut
+
+sub getHints {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { } );
+
+    if ( exists $self->{CONF}->{"root_hints_url"} and exists $self->{CONF}->{"root_hints_file"} ) {
+        my $content = get $self->{CONF}->{"root_hints_url"};
+        unless ( $content ) {
+            $self->{LOGGER}->error( "There was an error accessing " . $self->{CONF}->{"root_hints_url"} . "." );
+            return -1;
+        }
+        open(HINTS, ">".$self->{CONF}->{"root_hints_file"});
+        print HINTS $content;
+        close(HINTS);
+    }
+    else {
+        $self->{LOGGER}->error( "Missing gls.root.hints configuration information." );
+        return -1;
+    }
+    return;
+}
+
+=head2 prepareDatabase($self, { doc })
 
 Opens the XMLDB and returns the handle if there was not an error.
 
@@ -268,8 +294,8 @@ sub prepareDatabase {
 
 =head2 needLS($self)
 
-Stub function that would allow the LS to register with another LS (used in the
-gLS for synchronization as well).
+Stub function that would allow the LS to  synchronization with another LS
+isntance.
 
 =cut
 
@@ -294,38 +320,37 @@ sub registerLS {
 
     my $error = q{};
     my $eventType;
-    my $database;
-
-    # Try to compile a list of gLS root servers (the hints file, the local
-    # config values).
-    my %rootList = ();
-    if ( exists $self->{CONF}->{"gls"}->{"root_hints_file"} ) {
-        open(HINTS, $self->{CONF}->{"gls"}->{"root_hints_file"});
-        while ( <HINTS> ) {
-            $_ =~ s/\n$//;
-            next if $_ eq $self->{CONF}->{"gls"}->{"service_accesspoint"};
-            $rootList{$_} = 1 if $_;  
-        }
-        close(HINTS);
+    my $database;    
+    if ( -f $self->{CONF}->{"root_hints_file"} ) {
+        my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );        # Is the cache file more than an hour old?
+        if ( ( $hintsStats->mtime + 3600 ) < time ) {
+            $self->getHints();        }         
     }
+    else {
+        $self->getHints();
+    }
+
+    my $gls = perfSONAR_PS::Client::gLS->new( { file => $self->{CONF}->{"root_hints_file"} } );
 
     if ( exists $self->{CONF}->{"ls_instance"} ) {
-        my @temp = split(/ /, $self->{CONF}->{"ls_instance"});
+        my @temp = split(/\s+/, $self->{CONF}->{"ls_instance"});
         foreach my $t ( @temp ) {
             $t =~ s/\n$//;
             next if $t eq $self->{CONF}->{"gls"}->{"service_accesspoint"};
-            $rootList{$t} = 1 if $t; 
+            $gls->addRoot ( { root =>  $t } ) if $t;
         } 
     } 
-    
+ 
     if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} ) {
-        my @temp = split(/ /, $self->{CONF}->{"gls"}->{"ls_instance"});
+        my @temp = split(/\s+/, $self->{CONF}->{"gls"}->{"ls_instance"});
         foreach my $t ( @temp ) {
             $t =~ s/\n$//;
             next if $t eq $self->{CONF}->{"gls"}->{"service_accesspoint"};
-            $rootList{$t} = 1 if $t; 
+            $gls->addRoot ( { root =>  $t } ) if $t;
         }  
     }
+    $gls->orderRoots();
+
 
     if( $self->{CONF}->{"gls"}->{root} ) {
         # if we are a root, we are 'synchronizing'
@@ -347,7 +372,7 @@ sub registerLS {
                 
                 my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$doc->getDocumentElement->getAttribute("id")."\"]/nmwg:metadata", txn => q{}, error => \$error } );
 
-                foreach my $root ( keys %rootList ) {
+                foreach my $root ( @{ $gls->{ROOTS} } ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
                     my $result = $ls->keyRequestLS( { servicexml => $service->toString } );
                     if ( exists $result->{key} and $result->{key} ) {
@@ -417,7 +442,11 @@ sub registerLS {
             }
 
             if( $#metadataArray != -1 ) {
-                foreach my $root ( keys %rootList ) {
+
+                # limit how many gLS instanaces we register with (pick the 2 closest)
+                my $len = $#{ $gls->{ROOTS} };
+                $len = 2 if $len > 2;
+                for my $root ( 1..$len ) {
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
                 
                     my $result = $ls->keyRequestLS( { service => \%service } );
@@ -2613,11 +2642,12 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
-L<Net::CIDR>, L<Net::IPTrie>, L<LWP::Simple>,
+L<Log::Log4per>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
+L<Net::CIDR>, L<Net::IPTrie>, L<Net::Ping>, L<LWP::Simple>, L<File::stat>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>,
-L<perfSONAR_PS::Error_compat>
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::ParameterValidation>,
+L<perfSONAR_PS::Client::LS>, L<perfSONAR_PS::Client::gLS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -2630,7 +2660,7 @@ The perfSONAR-PS subversion repository is located at:
 Questions and comments can be directed to the author, or the mailing list.  Bugs,
 feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
