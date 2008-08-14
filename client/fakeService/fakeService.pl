@@ -51,7 +51,7 @@ my @cClass  = ();
 my %service = ();
 
 my $file = "./fakeService.conf";
-my $wordList = "/usr/share/dict/american-english-huge";
+my $wordList = "/usr/share/dict/words";
 if(defined $opts{CONF}) {
   $file = $opts{CONF};
 }
@@ -69,7 +69,7 @@ else {
 
     $config{"domain"}      = getWord(1, $wordList);
     $config{"ip"}          = getIP(1);
-    $config{"type"}        = &ask( "Enter the service type (snmp|pSB )", "snmp", $config{"type"}, '(snmp|pSB)' );
+    $config{"type"}        = &ask( "Enter the service type ( snmp | pSB | dcn )", "snmp", $config{"type"}, '(snmp|pSB|dcn)' );
     $config{"md_number"}   = &ask( "Enter the number of metadata ", "10", $config{"md_number"}, '\d+' );
     $config{"keywords"}        = &ask( "Enter any service keywords separated by commas (ex: LHC,Internet2)", "LHC", $config{"keywords"}, '.*' );
     $config{"ls"}          = &ask( "Enter the hLS to register with ", "http://localhost:8080/perfSONAR_PS/services/gLS", $config{"ls"}, '^http:\/\/' );
@@ -296,6 +296,67 @@ elsif ( $config{"type"} eq "pSB" ) {
         }
     }
 }
+elsif ( $config{"type"} eq "dcn" ) {
+
+    # set up the Service info...
+
+    %service = (
+        serviceName        => "DCN LS",
+        serviceType        => "LS",
+        accessPoint        => $config{"ls"}
+    );
+
+    @cClass = ();
+    for my $num ( 0 .. $numC ) {
+        push @cClass, ( int rand(253) + 1 );
+    }
+
+    for my $id ( 1 .. $config{"md_number"} ) {
+
+
+        my $host1;
+        my $sub = int rand($subnetOdds);
+        if ($sub) {
+            $sub   = int rand( $#subnets - 1 );
+            $host1 = $subnets[$sub] . "." . $config{"domain"};
+        }
+        else {
+            $host1 = $config{"domain"};
+        }
+
+        my $address1 = $config{"ip"};
+        my $c        = $cClass[ int rand( $#cClass - 1 ) ];
+        my $d        = int rand(253) + 1;
+        $address1 =~ s/c/$c/;
+        $address1 =~ s/d/$d/;
+
+        my $urn = "urn:ogf:network:domain=".$host1.":node=".getWord(0, $wordList).":port=".( int ( rand(65536) + 1 ) ).":link=".$address1;
+
+        my $host2;
+        $sub = int rand($subnetOdds);
+        if ($sub) {
+            $sub   = int rand( $#subnets - 1 );
+            $host2 = getWord(0, $wordList) . "." . $subnets[$sub] . "." . getWord(0, $wordList) . ".edu";
+        }
+        else {
+            $host2 = getWord(0, $wordList) . "." . getWord(0, $wordList) . ".edu";
+        }
+        my $friendlyName = $host2;
+
+        my $metadata = "    <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata." . $id . "\" >\n";
+        $metadata .= "      <dcn:subject xmlns:dcn=\"http://ggf.org/ns/nmwg/tools/dcn/2.0/\" id=\"subject." . $id . "\" >\n";
+        $metadata .= "        <nmtb:node xmlns:nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"node.".$id."\">\n";
+        $metadata .= "          <nmtb:address type=\"hostname\">".$friendlyName."</nmtb:address>\n";
+        $metadata .= "          <nmtb:relation type=\"connectionLink\">\n";
+        $metadata .= "            <nmtb:linkIdRef>".$urn."</nmtb:linkIdRef>\n";
+        $metadata .= "          </nmtb:relation>\n";
+        $metadata .= "        </nmtb:node>\n";
+        $metadata .= "      </dcn:subject>\n";
+        $metadata .= "      <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>\n";
+        $metadata .= "    </nmwg:metadata>\n";
+        push @metadataArray, $metadata;        
+    }
+}
 
 my $ls = new perfSONAR_PS::Client::LS( { instance => $config{"ls"} } );
 my $result = q{};
@@ -401,7 +462,7 @@ sub getWord {
     my $d = 0;
     while ( not $d ) {
         my @domain = $wl->get_words(1);
-        if ( not( $domain[0] =~ m/('|-|_)/ ) ) {
+        if ( not( $domain[0] =~ m/('|-|_|`|~)/ ) ) {
             if ($domain) {
                 $wl->close();
                 return lc( $domain[0] ) . ".edu";

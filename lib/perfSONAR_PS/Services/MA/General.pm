@@ -77,7 +77,7 @@ sub getSPXQuery {
 
                 # XXX Jason 2/25/06
                 # Would this be required elsewhere?
-                $path =~ s/\/.*:node//mx;
+#                $path =~ s/\/.*:node//mx;
                 $path =~ s/\[\d+\]//gmx;
                 $path =~ s/^\///gmx;
                 $path =~ s/nmwg:subject/*[local-name()=\"subject\"]/mx;

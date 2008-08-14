@@ -80,6 +80,7 @@ my %ls_namespaces = (
     snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
     select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    dcn           => "http://ggf.org/ns/nmwg/tools/dcn/2.0/",
     perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
     psservice     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
     xquery        => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
@@ -348,7 +349,6 @@ sub registerLS {
             $gls->addRoot ( { root =>  $t } ) if $t;
         } 
     } 
- 
     if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} ) {
         my @temp = split(/\s+/, $self->{CONF}->{"gls"}->{"ls_instance"});
         foreach my $t ( @temp ) {
@@ -358,7 +358,6 @@ sub registerLS {
         }  
     }
     $gls->orderRoots();
-
 
     if( $self->{CONF}->{"gls"}->{root} ) {
         # if we are a root, we are 'synchronizing'
@@ -451,10 +450,12 @@ sub registerLS {
 
             if( $#metadataArray != -1 ) {
 
-                # limit how many gLS instanaces we register with (pick the 2 closest)
+                # limit how many gLS instanaces we register with (pick the 3 closest)
                 my $len = $#{ $gls->{ROOTS} };
                 $len = 2 if $len > 2;
-                for my $root ( 1..$len ) {
+                for my $x ( 0..$len ) {
+                    my $root = $gls->{ROOTS}->[$x];
+
                     my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
                 
                     my $result = $ls->keyRequestLS( { service => \%service } );
@@ -569,6 +570,7 @@ sub summarizeLS {
                     return;
                 }
             }            
+# warning is thrown off
             my $serviceKey = md5_hex( $contactPoint.$contactName.$contactType );    
                         
             my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$service_mdId."\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
@@ -647,6 +649,13 @@ sub summarizeLS {
                             push @hosts, extract( find( $interface, "./*[local-name()='hostName']", 1 ), 0 );
                             $service_domains = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );    
                             $all_domains = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );                                
+                        
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $interface->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (port)
@@ -664,6 +673,13 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );    
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $port->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (node)
@@ -678,6 +694,14 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );   
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $node->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            push @urns, extract( find( $node, "./*[local-name()='relation' and \@type=\"connectionLink\"]/nmtb:linkIdRef", 1 ), 0 );                            
+                            $service_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (network)
@@ -696,6 +720,13 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );  
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $network->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (domain)
@@ -706,6 +737,13 @@ sub summarizeLS {
                             my @types    = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );    
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $domain->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (service)
@@ -721,6 +759,13 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );    
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $service->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (endPointPair)
@@ -735,6 +780,13 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                               
                             $all_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );     
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $endpointpair->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (endPointPair)
@@ -749,6 +801,13 @@ sub summarizeLS {
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             $service_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                             $all_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );    
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $endpointpair->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }
 
                         # topology junk (endPoint)
@@ -761,8 +820,15 @@ sub summarizeLS {
                                 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            
-                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );                                                   
+                            $service_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );                            
+                            $all_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );                                                   
+
+                            my @urns = ();
+                            @types = ( "urn", "URN" );
+                            my $id = $endpoint->getAttribute("id");
+                            push @urns, $id if $id and $id =~ m/^urn:ogf:network:/; 
+                            $service_domains = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );    
+                            $all_domains = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
                         }          
                     }        
                 }
@@ -996,6 +1062,50 @@ sub makeSummary {
     return $summary;
 }
 
+=head2 summarizeURN($self, { search, elements, types, urnarray, urns } );
+
+...
+
+=cut
+
+sub summarizeURN {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, urnarray => 1, urns => 1 } );
+
+    foreach my $element ( @{ $parameters->{elements} } ) {
+        foreach my $type ( @{ $parameters->{types} } ) {
+            my $temp_urns = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
+            foreach my $urn ( $temp_urns->get_nodelist ) {        
+                push @{ $parameters->{urnarray} }, extract( $urn, 0 );
+            }
+        }
+    }
+
+    foreach my $urn ( @{ $parameters->{urnarray} } ) {
+        $urn =~ s/^urn:ogf:network://;
+        my @fields = split(/:/, $urn);
+        foreach my $field ( @fields ) {
+            if ( $field =~ m/^domain=/ ) {
+                $field =~ s/^domain=//;                
+                my @urnArray = split( /\./, $field );
+                my $urn_len = $#urnArray;
+                for my $len ( 1 .. $urn_len ) {
+                    my $cat = q{};
+                    for my $len2 ( $len .. $urn_len ) {
+                        $cat .= "." . $urnArray[$len2];
+                    }
+                    $cat =~ s/^\.//;
+                    $parameters->{urns}->{$cat} = 1 if $cat;
+                }
+                
+                # we are stopping after domain for now...
+                last;
+            }
+        }
+    }
+
+    return $parameters->{urns};
+}
 
 =head2 summarizeAddress( $self, { search, elements, types, addresses } );
 
