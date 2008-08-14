@@ -41,6 +41,9 @@ IP Dialing Directions
  # Wiki Migration
  # GLIF Demo Update (Aaron/Jeff)
    * Status
+ # ISO status
+   * Everyone still inline to finish by the 20th? (See [20080811Video 20080811Video] for actions.)
+   * Who is available for integration testing?
  # FMM/SC08 Demo Planning
    * What should/could we do?
      * Use the Disks/gLS
