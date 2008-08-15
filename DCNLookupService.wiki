@@ -19,22 +19,20 @@
 
 == Architecture == 
 
-The architecture of the _perfSONAR_ *LS* has taken on two design through its use.  
-Originally planned as a centralized service, the *LS* would accept registrations and 
-manage the data for all services in a _perfSONAR_ framework.  This paradigm would 
-not scale to the multi-domain operation that was always assumed for the tools of 
-_perfSONAR_ forcing the introduction of a _Global Lookup Service_ (*gLS*).  This 
-new architecture allows for global discovery with minimal modifications to the
-original design.
+The architecture of the _perfSONAR_ *LS* has taken on two design through its use.  Originally planned as a centralized service, the *LS* would accept registrations and manage the data for all services in a _perfSONAR_ framework.  This paradigm would not scale to the multi-domain operation that was always assumed for the tools of _perfSONAR_ forcing the introduction of a _Global Lookup Service_ (*gLS*).  This new architecture allows for global discovery with minimal modifications to the original design.
 
 === Current === 
 
-The following illustrates the current LS architecture from the point of view of 
-both _perfSONAR_ and _DCN_ services.
+The following illustrates the current LS architecture from the point of view of both _perfSONAR_ and _DCN_ services.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/LS.png
 
-The centralized design has two clear benefits:
+The diagram illustrates some typical scenarios for this software:
+
+ # Services register the presence of data (e.g. the *MA* or the *DCN WebAdmin*)
+ # Services query for specific data (e.g. perfSONAR-UI is a client looking for a specific MA, the IDC is looking to translate a hostname to a linkid)
+
+This centralized design has two clear benefits:
 
  # All services know the location of the *LS*
  # Information is guaranteed to be there if it is present in the framework
@@ -45,59 +43,222 @@ The downsides however are very prohibitive:
  # Performance bottleneck
  # Does not scale to the cases where individuals would like to _run their own_
 
-The legacy *LS* is still available and supported as a product in the _perfSONAR_ 
-framework, but all effort regarding this information service has been refocused 
-to the *gLS*.
+The legacy *LS* is still available and supported as a product in the _perfSONAR_ framework, but all effort regarding this information service has been refocused to the *gLS*.
 
 === Proposed === 
 
-The *gLS* architecture is similar to that of the *LS* where individual services
-still maintain the information of registered services and respond to queries.  The major 
-difference is the existence of an _upper layer_ of *gLS* instances that propagate 
-summary information of each _lower level_ Home Lookup Service (*hLS*) into what
-has been termed the _*gLS* cloud_.  This cloud enables global discovery: the phase 
-where before finding exactly what you want (e.g. data for idc.internet2.edu), you first 
-find where it may live (e.g. the *hLS* for internet2.edu).
+The *gLS* architecture is similar to that of the *LS* where individual services still maintain the information of registered services and respond to queries.  The major difference is the existence of an _upper layer_ of *gLS* instances that propagate summary information of each _lower level_ Home Lookup Service (*hLS*) into what has been termed the _*gLS* cloud_.  This cloud enables global discovery: the phase where before finding exactly what you want (e.g. data for idc.internet2.edu), you first find where it may live (e.g. the *hLS* for internet2.edu).
 
 An example of the architecture follows.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/gLS.png
 
+Similar to the *LS* design, there are only minor differences to consider:
+
+ # There is not a central LS to contact where *ALL* data will live, but there is the *gLS Cloud*.
+   * The *gLS* cloud is really a collection of _well known_ instances.  We use a bootstrapping method similar to DNS where we keep this well known list published.
+   * Each *gLS* is synchronized meaning that all data that is known to one *gLS* will be shared with the others.
+   * Each *hLS* should register it's presence into the cloud, this can mean selecting one or many *gLS* isntances to contact.
+ # Query involves two steps now:
+   * Discovery (e.g. who has data for a specific person)
+   * Query (e.g. ask all that are returned from the first part if they have the data)
+
+This diagram also illustrates some typical scenarios for the *gLS*:
+
+ # Services register the presence of data to their *hLS* (e.g. the *MA* or the *DCN WebAdmin*)
+   * Note that this *hLS* can be configured, or the services _may_ use the *gLS* cloud to locate someone close.  This implementation detail is left up to the service.
+ # Services query for specific data
+   * The left-most IDC will query the *gLS cloud* first looking for information on some link.
+   * The *gLS cloud* will reply back with a list of *hLS* instances that have reported they contain information that may match.
+   * The IDC should then contact _each_ of the returned *hLS* values with the original query.  
+   * A similar procedure is trure for perfSONAR-UI
+   
+Some important things to note about the operation of *gLS* and *hLS* instances:
+
+ # The perfSONAR Consortium (ESnet, Geant2, Internet2, RNP) will be maintaining a *gLS cloud* open for public use.
+ # It is possible to set up other clouds: simply start a new *gLS* hints file and point people to use it.
+ # DCN adopters can deploy their own *hLS* if desired.  The software will be packaged along with a copy of the WebAdmin.
+ # Internet2 will maintain (an) *hLS* instance(s) for our needs.  DCN software is welcome to continue treating the Internet2 instance as a _central_ LS.
+ 
 == Hostname to Link URN Mappings == 
 
-TBD
+DCN software currently uses the LS to map hostnames (*friendly names*) to the usually non-friendly link urns.  This feature has two main parts:
+
+ # A _WebAdmin_ is used to register/delete the mappings (N.B.: Future plans may allow the IDC to do this)
+ # The IDC/Client applications that query to get the mappings/translate from one to the other.
+ 
+The general idea of this operation will not change, although to support the *gLS* there will be minor format changes discussed below. 
 
 === Current Usage === 
 
-TBD
+A current non-production version of the DCN WebAdmin can be found [https://dc211.internet2.edu/cgi-bin/dcn2.cgi here].  This is used to add and delete the link/host mappings to fit what is currently available in the DCN network.  Currently all DCN admins have access to this one interface on the only LS instance.  
 
 ==== Insertion ==== 
 
-TBD
+The WebAdmin handles all insertions internally by using the perfSONAR-PS LS API.  An example registration message follows:
+
+{{{
+<?xml version="1.0"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+              xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+              type="LSRegisterRequest" id="message.9661208">
+  
+  <nmwg:metadata id="metadata.10027846">
+    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>DCN LS</psservice:serviceName>
+        <psservice:accessPoint>http://localhost:9991/perfSONAR_PS/services/gLS</psservice:accessPoint>
+        <psservice:serviceType>LS</psservice:serviceType>
+      </psservice:service>
+    </perfsonar:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data metadataIdRef="metadata.10027846" id="data.4327190">
+    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" id="node.1">
+      <nmtb:address type="hostname">test.internet2.edu</nmtb:address>
+      <nmtb:relation type="connectionLink">
+        <nmtb:linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:node=BOS:port=8719:link=10.10.9.33</nmtb:linkIdRef>
+      </nmtb:relation>
+    </nmtb:node>
+  </nmwg:data>
+
+</nmwg:message>
+}}}
 
 ==== Deletion ==== 
 
-TBD
+The WebAdmin handles all deletions internally by using the perfSONAR-PS LS API. An example deletion message follows: 
+
+{{{
+<?xml version="1.0"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+              xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+              type="LSDeregisterRequest" id="message.9661208">
+  
+  <nmwg:metadata id="metadata.10027846">
+    <nmwg:key id="k.10027846">
+      <nmwg:parameters id="p.10027846">
+        <nmwg:parameter name="lsKey">45bc4921351aedd712438194ae7e637e</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+  </nmwg:metadata>
+  
+  <nmwg:data metadataIdRef="metadata.10027846" id="data.4327190">
+    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" id="node.1">
+      <nmtb:address type="hostname">test.internet2.edu</nmtb:address>
+      <nmtb:relation type="connectionLink">
+        <nmtb:linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:node=BOS:port=8719:link=10.10.9.33</nmtb:linkIdRef>
+      </nmtb:relation>
+    </nmtb:node>
+  </nmwg:data>
+
+</nmwg:message>
+}}}
 
 ==== Query ==== 
 
-TBD
+The IDC currently uses a query to convert from hostname to link id, an example appears below:
+
+{{{<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">    <SOAP-ENV:Header/>    <SOAP-ENV:Body>        <nmwg:message type="LSQueryRequest" 
+                      id="msg1" 
+                      xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">            <nmwg:metadata id="meta2">
+                <!--hostname value gets replaced with the name to lookup -->
+
+                <xquery:subject id="sub2">                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";                    /nmwg:store[@type="LSStore"]/nmwg:data/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]                </xquery:subject>                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>                <xquery:parameters id="param.1">                <nmwg:parameter name="lsOutput">native</nmwg:parameter>                 </xquery:parameters>            </nmwg:metadata>            <nmwg:data metadataIdRef="meta2" id="d2"/>        </nmwg:message>    </SOAP-ENV:Body></SOAP-ENV:Envelope> 
+}}}
+
 
 === Proposed Usage === 
 
-TBD
+Building on the current scheme, there are two major changes to the current use of the *LS* by the DCN software:
+
+ # Internal data format changes
+ # *gLS* integration
+
+The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is introduced [DCNLookupService#New_Format below].  *gLS* integration is simply using the *gLS* facilities to become aware of information regardless of what *hLS* it may be registered to.
 
 ==== New Format ==== 
 
-TBD
+An example in the changes required to the format is below, in the context of a registration message:
+
+{{{
+<?xml version="1.0"?>
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+              xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/" 
+              xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" 
+              xmlns:dcn="http://ggf.org/ns/nmwg/tools/dcn/2.0/"
+              type="LSRegisterRequest" id="message.9661208">
+  
+  <nmwg:metadata id="metadata.10027846">
+    <perfsonar:subject xmlns:perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/">
+      <psservice:service xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+        <psservice:serviceName>DCN LS</psservice:serviceName>
+        <psservice:accessPoint>http://localhost:9991/perfSONAR_PS/services/gLS</psservice:accessPoint>
+        <psservice:serviceType>LS</psservice:serviceType>
+      </psservice:service>
+    </perfsonar:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data metadataIdRef="metadata.10027846" id="data.4327190">
+    <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="metadata.1">
+      <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/dcn/2.0/" id="subject.1">
+        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" id="node.1">
+          <nmtb:address type="hostname">test.internet2.edu</nmtb:address>
+          <nmtb:relation type="connectionLink">
+            <nmtb:linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:node=BOS:port=8719:link=10.10.9.33</nmtb:linkIdRef>
+          </nmtb:relation>
+        </nmtb:node>
+      </dcn:subject>
+      <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
+    </nmwg:metadata>
+  </nmwg:data>
+
+</nmwg:message>
+}}}
+
+The changes can be summarized as:
+
+ # The node element can no longer be present directly in the data element.  For *gLS* interaction to be effective all registered information must follow the same pattern.  
+ # There will now be a metadata element, this element will contain:
+   # A DCN Subject.  This element will contain:
+     # The node, it will remain unchanged.
+   # An eventType.  This should contain some descriptive value for this type of 'data'.  Since these are connection mappings used by the IDC it should be the OSCARS namespace or peraps the DCN/DICE protocol designation.
+   # Parameters (optional and currently unused).
+ # The metadata element will be placed into the data as before.
+
+The modfied query that the IDC would be required to make is pictured next (note the only changes are to the XPath expression):
+
+{{{<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">    <SOAP-ENV:Header/>    <SOAP-ENV:Body>        <nmwg:message type="LSQueryRequest" 
+                      id="msg1" 
+                      xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">            <nmwg:metadata id="meta2">
+                <!--hostname value gets replaced with the name to lookup -->
+
+                <xquery:subject id="sub2">                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";                    /nmwg:store[@type="LSStore"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]                </xquery:subject>                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>                <xquery:parameters id="param.1">                <nmwg:parameter name="lsOutput">native</nmwg:parameter>                 </xquery:parameters>            </nmwg:metadata>            <nmwg:data metadataIdRef="meta2" id="d2"/>        </nmwg:message>    </SOAP-ENV:Body></SOAP-ENV:Envelope> 
+}}}
 
 ==== Required Changes ==== 
 
-TBD
+With the migration of DCN to the upcoming 0.4 release, the logical time to implement the above changes is when everyone is upgrading.  The proposed plan with regards to LS software is:
 
+ * Upload a patch for the LSQuery used in the IDC for all legacy applications, the 0.4 release will include this
+ * Cease operation of *packrat.internet2.edu:8005/perfSONAR_PS/services/LS* on a given flag day
+ * Begin operations of a new LS instance TBD, the 0.4 release will come configured to use this value
+ * Convert the IDC to use the *gLS cloud* as well as talk to any *hLS* and not just the centralized Internet2 instance
+ * Provide instructions for DCN participants who wish to use their own *hLS*, but still make the Internet2 version available.
+ 
 == Service Registration == 
 
-TBD
+This section is an internal work in progess, TBD really soon!
 
 === IDC === 
 
@@ -110,5 +271,4 @@ TBD
 == Last Updated ==
 
 $Id$
-
 
