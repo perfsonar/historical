@@ -21,11 +21,9 @@ Summer Joint Techs 2008, Lincoln NE
  # Carla Hunt (MCNC)
  # Drew (Broadband Census)
  # Rich (Internet2)
- # Mike VanNorman (UCLA)
+ # Mike !VanNorman (UCLA)
 
 == Agenda/Minutes ==
-
-Aaron,Maxim,Jason,Eric,Drew Clark (BroadbandCensus.com),Brian T, Mike VanNorman, Carla Hunt, Joe Metzger, Rich
 
 Code restructure:
    * Break it up in layers (http vs soap vs xml).
