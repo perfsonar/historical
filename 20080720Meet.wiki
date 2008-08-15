@@ -21,13 +21,50 @@ Summer Joint Techs 2008, Lincoln NE
  # Carla Hunt (MCNC)
  # Drew (Broadband Census)
  # Rich (Internet2)
- # Mike? (UCLA)
+ # Mike VanNorman (UCLA)
 
 == Agenda/Minutes ==
 
-TBD
+Aaron,Maxim,Jason,Eric,Drew Clark (BroadbandCensus.com),Brian T, Mike VanNorman, Carla Hunt, Joe Metzger, Rich
+
+Code restructure:
+    Break it up in layers (http vs soap vs xml).
+    Aaron will look at restructuring current daemon and figure out the
+        pieces.
+Wiki move:
+    We will be moving from Confluence to google code wiki.
+    Jason will move things as he can.
+
+Dash-board connectivity matrix (RSS FEEDS):
+
+Knoppix vs LiveCD:
+    Aaron will talk with Tom Throckmorton (MCNC) to explore with Rich.
+
+Configuration Services:
+    Everyone thinks it is a good idea.
+    - merge
+    * community configurations
+    * local configurations
+
+Topo V3 for gLS/hLS. - Yes - do it. JEFF ACTION - raise it with Maciej.
+
+Admin
+    Switch to an every other week for team updates, and interim weeks for
+    specific topics. (Data channel, AA, etc...)
+
+Data Channel
+    Need to get a small group applied to working on this issue.
+    Charge: present a couple of alternatives and analysis to back up
+        the recommendation.
+
+Papers
+    Happy-hour discussion: We should start putting a paper together. A
+    full architecture paper as well as a more deployment/data paper.
+    1st place - UDel tech report, also prepare for a journal entry.
+    If a reasonable conference comes up in the process we should do
+    it. *talk with Martin on this*
+
 
 == Last Updated ==
 
 $Id$
-
