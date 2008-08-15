@@ -28,6 +28,8 @@ COM="pp -I lib/ \
  -M Cwd \
  -M DBI \
  -M Digest::MD5 \
+ -M Digest::SHA1 \
+ -M Crypt::DES \
  -M English \
  -M Error::Simple \
  -M Exporter \
@@ -60,6 +62,7 @@ COM="pp -I lib/ \
  -M version \
  -M warnings \
  -M XML::LibXML \
+ -M Net::SNMP \
  -M perfSONAR_PS::Client::Echo \
  -M perfSONAR_PS::Client::LS::Remote \
  -M perfSONAR_PS::Client::Status::MA \
@@ -106,7 +109,7 @@ COM="pp -I lib/ \
  -M perfSONAR_PS::XML::Document_string \
  -l  $XMLLIB_A  \
  -l  $XMLLIB_SO  \
- -o $EXECNAME  perfsonar-collector.pl"
+ -o $EXECNAME  $EXECNAME.pl"
 
 echo -e " Building ... \n  $COM  \n "
 $COM

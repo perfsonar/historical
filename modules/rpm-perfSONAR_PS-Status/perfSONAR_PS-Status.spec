@@ -1,6 +1,6 @@
 Name:           perfSONAR_PS-Status
 Version:        0.09
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Status Measurement Archive
 License:        distributable, see LICENSE
 Group:          Development/Libraries

@@ -6,7 +6,7 @@
 # description: Status Service
 #
 
-PREFIX=../
+PREFIX=./
 STATUS_EXE=${PREFIX}/bin/perfsonar-linkstatus
 STATUS_CONF=${PREFIX}/etc/perfsonar-linkstatus.conf
 STATUS_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-logger.conf

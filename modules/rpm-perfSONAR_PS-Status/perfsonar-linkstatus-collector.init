@@ -6,7 +6,7 @@
 # description: Status Collector
 #
 
-PREFIX=../
+PREFIX=./
 STATUSCOLLECTOR_EXE=${PREFIX}/bin/perfsonar-linkstatus-collector
 STATUSCOLLECTOR_CONF=${PREFIX}/etc/perfsonar-linkstatus-collector.conf
 STATUSCOLLECTOR_LOGGER=${PREFIX}/etc/perfsonar-linkstatus-collector-logger.conf

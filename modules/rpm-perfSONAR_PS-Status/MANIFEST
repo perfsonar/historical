@@ -8,8 +8,8 @@ Makefile
 MANIFEST
 perfsonar-linkstatus.init
 perfsonar-linkstatus-collector.init
-perfsonar-daemon.pl
-perfsonar-collector.pl
+perfsonar-linkstatus.pl
+perfsonar-linkstatus-collector.pl
 perfSONAR_PS-Status.spec
 psConfigureLinkStatusCollector.pl
 psConfigureLinkStatus.pl
