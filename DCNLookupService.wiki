@@ -19,7 +19,7 @@
 
 == Architecture == 
 
-The architecture of the _perfSONAR_ *LS* has taken on two design through its use.  Originally planned as a centralized service, the *LS* would accept registrations and manage the data for all services in a _perfSONAR_ framework.  This paradigm would not scale to the multi-domain operation that was always assumed for the tools of _perfSONAR_ forcing the introduction of a _Global Lookup Service_ (*gLS*).  This new architecture allows for global discovery with minimal modifications to the original design.
+The _perfSONAR_ *gLS* is an extension of the original *LS*.  The original design paradigm was centered on offering services (data discovery/management) within a local setting.  Scalability to multi-domain operation can only be delivered through mechanisms that preserve this original design.  The *gLS* architecture works with existing *LS* instances  to distribute the information into a larger _*gLS* cloud_.  
 
 === Current === 
 
