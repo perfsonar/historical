@@ -62,12 +62,17 @@
    # Testing in AA
      # Verify we can access saved info
      # Verify 'upgrades' are smooth, can access existing measurement data
-   # work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC 
    # bwctl release (perhaps some documentation - edit passes for sure)
+ * Not Yet Claimed (for discussion during perf-team meeting)
+   # Ability to pull down 'centralized' configuration and merge with host config [[ISOAtlasCentralConfig|(see problem statement)]].
 
 == Overall Deadline ==
 
 _Pencils Down_ is Sept 4th (Thursday)
+
+== Things that can happen after Sept 5 release ==
+ * Aaron
+   # work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC 
 
 == Last Updated ==
 
