@@ -41,13 +41,13 @@ use Storable qw(lock_retrieve lock_store);
 use Log::Log4perl qw(get_logger :levels);
 use Config::General;
  
-use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology;
-use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain;
-use perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node;
-use perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Topology::Domain::Node::Parameters;
-use perfSONAR_PS::Datatypes::v2_0::nmwg::Topology::Domain::Node::Parameters::Parameter;
-use perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port;
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain::Node';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtb::Topology::Domain::Node::Name';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::Node::Parameters';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmwg::Topology::Domain::Node::Parameters::Parameter';
+use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::nmtl3::Topology::Domain::Node::Port';
 use constant URNBASE => 'urn:ogf:network';
 
 use constant BASEDIR => "$Bin/../..";
@@ -94,8 +94,7 @@ unless ($SESSION && !$SESSION->is_expired &&  $SESSION->param("DOMAINS")) {
 }
 else {
     $LANDMARKS_CONFIG = $SESSION->param("DOMAINS");
-    $TOPOLOGY_OBJ = perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology->new(
-        { xml => $LANDMARKS_CONFIG } );
+    $TOPOLOGY_OBJ =  Topology->new( { xml => $LANDMARKS_CONFIG } );
 
 }
 my $TEMPLATE_HEADER =
@@ -111,8 +110,7 @@ my $myhtml =
   . $TEMPLATE_FOOTER->output();    ##### get html
                                    #$ajax->DEBUG($DEBUG);
                                    #$ajax->JSDEBUG($DEBUG);
-print $ajax->build_html( $cgi, $myhtml,
-    { '-Expires' => '1d', '-cookie' => $COOKIE } );
+print $ajax->build_html( $cgi, $myhtml, { '-Expires' => '1d', '-cookie' => $COOKIE } );
 
 =head2 isParam 
 
@@ -140,8 +138,7 @@ sub fromFile {
         local ( $/, *FH );
         open( FH, $file ) or  die " Failed to open landmarks $file";
         my $text = <FH>;
-        $TOPOLOGY_OBJ =  perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology->new(
-            { xml => $text } );
+        $TOPOLOGY_OBJ =   Topology->new( { xml => $text } );
         $LANDMARKS_CONFIG = $text;
         close FH;
     };
@@ -227,20 +224,20 @@ sub displayGlobal {
     my @table2display = ();
     my %domain_names  = ();
     eval {
-	foreach my $domain ( @{ $TOPOLOGY_OBJ->domain } ) {
-            my $urn = $domain->id;
+	foreach my $domain ( @{ $TOPOLOGY_OBJ->get_domain } ) {
+            my $urn = $domain->get_id;
             if ($urn) {
         	my ($dname) = $urn =~ /\:domain\=([^\:]+)/;
-        	my $nodes = $domain->node;
+        	my $nodes = $domain->get_node;
         	my @nodenames = ();
         	foreach my $node ( @{$nodes} ) {
                     push @nodenames,
-                      { node_name => $node->name->text, urn => $node->id }
-                      if $node->name;
+                      { node_name => $node->get_name->get_text, urn => $node->get_id }
+                      if $node->get_name;
         	}
         	$domain_names{$dname} = {
                      domain_name  => $dname,
-                     urn          => $domain->id,
+                     urn          => $domain->get_id,
                      Nodes        => \@nodenames
         	};
             }
@@ -294,38 +291,31 @@ sub configureNode {
 
 sub displayNode {
     my $node = shift;
-    my $TEMPLATEn =
-      HTML::Template->new(
-        filename => BASEDIR . $GENERAL_CONFIG{what_template}->{'Nodes'} );
-    my @params   = ();
-    my $node_urn = $node->id;
+    my $TEMPLATEn =  HTML::Template->new(filename => BASEDIR . $GENERAL_CONFIG{what_template}->{'Nodes'} );
+    my @params = ();
+    my $node_urn = $node->get_id;
     eval {
-	push @params, { urn => $node_urn, what => 'hostName', valuen => $node->hostName->text} if $node->hostName;
-	my $test_params = $node->parameters;
-	foreach my $param ( @{ $test_params->parameter } ) {
-            push @params,
-              {
-        	urn    => $node_urn,
-        	what   => $param->name,
-        	valuen => $param->text
-              }
-              if $param->name && isParam( $param->name );
+	push @params, { urn => $node_urn, what => 'hostName', valuen => $node->get_hostName->get_text} if $node->get_hostName;
+	my $test_params = $node->get_parameters;
+	foreach my $param ( @{ $test_params->get_parameter } ) {
+            push @params, { urn => $node_urn, what => $param->get_name, valuen => $param->get_text}
+                               if $param->get_name && isParam( $param->get_name );
 	}
-	my $port     = $node->port;
-	my $port_urn = $port->id;
-	if ( $port->ipAddress ) {
+	my $port     = $node->get_port;
+	my $port_urn = $port->get_id;
+	if ( $port->get_ipAddress ) {
             push @params,
               {
         	urn    => $port_urn,
         	what   => 'ipAddress',
-        	valuen => $port->ipAddress->text
+        	valuen => $port->get_ipAddress->get_text
               };
-            my $type = $port->ipAddress->type ? $port->ipAddress->type : 'IPv4';
+            my $type = $port->get_ipAddress->get_type ? $port->get_ipAddress->get_type : 'IPv4';
             push @params, { urn => $port_urn, what => 'type', valuen => $type };
 	}
 	my ($domain_name) = $node_urn =~ /domain\=([^\:]+)/;
 	$TEMPLATEn->param( "domain_name" => $domain_name );
-	$TEMPLATEn->param( "node_name"   => $node->name->text );
+	$TEMPLATEn->param( "node_name"   => $node->get_name->get_text );
 	$TEMPLATEn->param( "urn"         => $node_urn );
 	$TEMPLATEn->param( "nodeparams"  => \@params );
     };
@@ -364,14 +354,14 @@ sub updateNode {
           if ( $param1 =~  $validation_regs{$item} ) {
         	eval{
 		  if ( $item =~ /ipAddress|type/ ) {
-                      my $port_obj = $node->port;
-                      if ( $port_obj && $port_obj->id eq $urn ) {
+                      my $port_obj = $node->get_port;
+                      if ( $port_obj && $port_obj->get_id eq $urn ) {
                 	  if ( $item eq 'ipAddress' ) {
-                              $port_obj->ipAddress->text($param1);
-                              $port_obj->id( $node_urn . ":port=$param1" );
+                              $port_obj->set_ipAddress->set_text($param1);
+                              $port_obj->set_id( $node_urn . ":port=$param1" );
                 	  }
                 	  else {
-                              $port_obj->ipAddress->type($param1);
+                              $port_obj->set_ipAddress->set_type($param1);
                 	  }
                       }
                       else {
@@ -381,13 +371,13 @@ sub updateNode {
         	  }
         	  elsif ( $item eq 'hostName' ) {
 		      
-		      $node->hostName->text($param1);
+		      $node->set_hostName->set_text($param1);
         	  }
         	  else {
-                      my $test_params = $node->parameters;
-                      foreach my $parameter ( @{ $test_params->parameter } ) {
-                	  $parameter->text($param1)
-                            if ( $parameter->name eq $item );
+                      my $test_params = $node->get_parameters;
+                      foreach my $parameter ( @{ $test_params->get_parameter } ) {
+                	  $parameter->set_text($param1)
+                            if ( $parameter->get_name eq $item );
                       }
 
         	  }
@@ -422,134 +412,125 @@ sub updateNode {
 =cut     
 
 sub updateGlobal {
-      my ( $action, $urn, $new_name ) = @_;
-      my $response = "OK";
-      my ( $act, $what ) =
-        $action =~ /^(update|remove|add)\_(domain|node(?:name)?)?/;
-      my ( $domain_urn, $node_name ) =
-        $urn =~ /^(.+\:domain\=[\w\-\.]+)(?:\:node\=([\w\-\.]+))?$/;
-      $logger->debug("action=$action   domain_urn=$domain_urn node_name=$node_name newname=$new_name");
-      my $node_out = '&nbsp;';
-      if ( $what =~ /domain/ ) {
-          my $new_urn =
-            ( $new_name =~ /^[\w\-\.]+$/ )
-            ? URNBASE . ":domain=$new_name"
-            : undef;
+    my ( $action, $urn, $new_name ) = @_;
+    my $response = "OK";
+    my ( $act, $what ) =
+      $action =~ /^(update|remove|add)\_(domain|node(?:name)?)?/;
+    my ( $domain_urn, $node_name ) =
+      $urn =~ /^(.+\:domain\=[\w\-\.]+)(?:\:node\=([\w\-\.]+))?$/;
+    $logger->debug("action=$action   domain_urn=$domain_urn node_name=$node_name newname=$new_name");
+    my $node_out = '&nbsp;';
+    if ( $what =~ /domain/ ) {
+	my $new_urn =
+	  ( $new_name =~ /^[\w\-\.]+$/ )
+	  ? URNBASE . ":domain=$new_name"
+	  : undef;
 
-          if ( $act eq 'add' && $new_urn ) {
-              my $domain_obj = $TOPOLOGY_OBJ->getDomainById($new_urn);
-              if ($domain_obj) {
-                  $response =
-                    " !!!ADD DOMAIN FAILED:  DOMAIN $new_name EXISTS !!!";
-              }
-              else {
-                  $TOPOLOGY_OBJ->addDomain(
-                      perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain
-                        ->new(
-                          { id => $new_urn }
-                        )
-                  );
-              }
-          }
-          elsif ( $act eq 'remove' && $domain_urn ) {
-              $TOPOLOGY_OBJ->removeDomainById($urn);
-          }
-          elsif ( $act eq 'update' && $domain_urn && $new_urn ) {
-              my $domain_obj = $TOPOLOGY_OBJ->getDomainById($urn);
-              $TOPOLOGY_OBJ->removeDomainById($urn);
-              $domain_obj = updateDomainId( $domain_obj, $new_urn );
-              $TOPOLOGY_OBJ->addDomain($domain_obj);
-          }
-          else {
-              $response = "!!!BAD CALL PARAM:$action urn=$urn  callParam=$new_name    !!!";
-          }
-      }
-      elsif ( $what =~ /node/ && $domain_urn ) {
-          my $domain_obj = $TOPOLOGY_OBJ->getDomainById($domain_urn);
+	if ( $act eq 'add' && $new_urn ) {
+	    my $domain_obj = $TOPOLOGY_OBJ->getDomainById($new_urn);
+	    if ($domain_obj) {
+		$response =
+		  " !!!ADD DOMAIN FAILED:  DOMAIN $new_name EXISTS !!!";
+	    }
+	    else {
+		$TOPOLOGY_OBJ->addDomain( Domain->new({ id => $new_urn }) );
+	    }
+	}
+	elsif ( $act eq 'remove' && $domain_urn ) {
+	    $TOPOLOGY_OBJ->removeDomainById($urn);
+	}
+	elsif ( $act eq 'update' && $domain_urn && $new_urn ) {
+	    my $domain_obj = $TOPOLOGY_OBJ->getDomainById($urn);
+	    $TOPOLOGY_OBJ->removeDomainById($urn);
+	    $domain_obj = updateDomainId( $domain_obj, $new_urn );
+	    $TOPOLOGY_OBJ->addDomain($domain_obj);
+	}
+	else {
+	    $response = "!!!BAD CALL PARAM:$action urn=$urn  callParam=$new_name    !!!";
+	}
+    }
+    elsif ( $what =~ /node/ && $domain_urn ) {
+	my $domain_obj = $TOPOLOGY_OBJ->getDomainById($domain_urn);
 
-          if ($domain_obj) {
-              my $node_obj = $urn =~ /\:node/?$domain_obj->getNodeById($urn):undef;
-              $TOPOLOGY_OBJ->removeDomainById($domain_urn);
-              my $new_urn =
-                ( $new_name =~ /^[\w\-\.]+$/ )
-                ? $domain_urn . ":node=$new_name"
-                : undef;
-              $logger->debug("action=$action - new_urn=$new_urn");
-              if ( $act eq 'add' && $new_urn ) {
-	          eval {
-                      $node_obj = perfSONAR_PS::Datatypes::v2_0::pingertopo::Topology::Domain::Node->new(
-                                  {
-                        	   id => $new_urn,
-			           name => perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name->new(
-                                	       { type => 'string', text => $new_name }
-                                	  ),
-				   hostName => perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::HostName->new(
-                                	       { text => $new_name }
-                                	  ),	  
-                        	   port => perfSONAR_PS::Datatypes::v2_0::nmtl3::Topology::Domain::Node::Port->new(
-                                	       { xml =>
-                                        	  "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=255.255.255.255\">
-                                        	      <nmtl3:ipAddress type=\"IPv4\">255.255.255.255</nmtl3:ipAddress>
-                                        	   </nmtl3:port>"
-                                	       }
-                                	 ),
-                        	  parameters => perfSONAR_PS::Datatypes::v2_0::nmwg::Topology::Domain::Node::Parameters->new(
-                                	      {  xml => '<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="paramid1">
-				            		      <nmwg:parameter name="packetSize">100</nmwg:parameter>
-                                            		      <nmwg:parameter name="count">10</nmwg:parameter>
-					   		      <nmwg:parameter name="packetInterval">300</nmwg:parameter>
-                                            		      <nmwg:parameter name="ttl">255</nmwg:parameter> 
-					   		      <nmwg:parameter name="measurementPeriod">10</nmwg:parameter>  
-                                            		      <nmwg:parameter name="measurementOffset">30</nmwg:parameter> 
-					   		 </nmwg:parameters>'
-                                	     }
-                                 )
-                               }
-                          ); 
-	             $logger->debug(" new node will be added " . Dumper $node_obj->asString);
-                     $domain_obj->addNode($node_obj);
-		  
-                     $node_out = displayNode($node_obj);
-		  };
-		  if($@) {
-		     $logger->logdie(" New node  failed: $@");
-		  } else {
-                     $logger->debug(" Added Domain :\n" . Dumper $domain_obj);
-		  }
-              }
-              elsif ( $act eq 'remove' && $node_name ) {
-                  $domain_obj->removeNodeById($urn);
-		  $logger->debug(" Removed Domain :\n" . Dumper $domain_obj);
-              }
-              elsif ( $act eq 'update' && $new_urn ) {
-                  eval {
-                      $domain_obj->removeNodeById($urn);
-                      $node_obj = updateNodeId( $node_obj, $new_urn );
-                      $domain_obj->addNode($node_obj);
-                      $node_out = displayNode($node_obj);
-		  };
-		  if($@) {
-		     $logger->logdie("Update global node failed $@  ");
-		  }
-              }
-              $TOPOLOGY_OBJ->addDomain($domain_obj);
+	if ($domain_obj) {
+	    my $node_obj = $urn =~ /\:node/?$domain_obj->getNodeById($urn):undef;
+	    $TOPOLOGY_OBJ->removeDomainById($domain_urn);
+	    my $new_urn =
+	      ( $new_name =~ /^[\w\-\.]+$/ )
+	      ? $domain_urn . ":node=$new_name"
+	      : undef;
+	    $logger->debug("action=$action - new_urn=$new_urn");
+	    if ( $act eq 'add' && $new_urn ) {
+        	eval {
+		    $node_obj =  Node->new(
+				{
+				 id => $new_urn,
+        			 name =>  Name->new(  { type => 'string', text => $new_name } ),
+        			 hostName =>  HostName->new( { text => $new_name } ),	
+				 port =>  Port->new(
+					     { xml =>
+						"<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=255.255.255.255\">
+						    <nmtl3:ipAddress type=\"IPv4\">255.255.255.255</nmtl3:ipAddress>
+						 </nmtl3:port>"
+					     }
+				       ),
+				parameters =>  Parameters->new(
+					    {  xml => '<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="paramid1">
+        						    <nmwg:parameter name="packetSize">100</nmwg:parameter>
+							    <nmwg:parameter name="count">10</nmwg:parameter>
+        						    <nmwg:parameter name="packetInterval">300</nmwg:parameter>
+							    <nmwg:parameter name="ttl">255</nmwg:parameter> 
+        						    <nmwg:parameter name="measurementPeriod">10</nmwg:parameter>  
+							    <nmwg:parameter name="measurementOffset">30</nmwg:parameter> 
+        					       </nmwg:parameters>'
+					   }
+			       )
+			     }
+			); 
+        	   $logger->debug(" new node will be added " . Dumper $node_obj->asString);
+		   $domain_obj->addNode($node_obj);
+        	
+		   $node_out = displayNode($node_obj);
+        	};
+        	if($@) {
+        	   $logger->logdie(" New node  failed: $@");
+        	} else {
+		   $logger->debug(" Added Domain :\n" . Dumper $domain_obj);
+        	}
+	    }
+	    elsif ( $act eq 'remove' && $node_name ) {
+		$domain_obj->removeNodeById($urn);
+        	$logger->debug(" Removed Domain :\n" . Dumper $domain_obj);
+	    }
+	    elsif ( $act eq 'update' && $new_urn ) {
+		eval {
+		    $domain_obj->removeNodeById($urn);
+		    $node_obj = updateNodeId( $node_obj, $new_urn );
+		    $domain_obj->addNode($node_obj);
+		    $node_out = displayNode($node_obj);
+        	};
+        	if($@) {
+        	   $logger->logdie("Update global node failed $@  ");
+        	}
+	    }
+	    $TOPOLOGY_OBJ->addDomain($domain_obj);
 
-          }
-          else {
-              $response = " !!!ADD NODE FAILED:  DOMAIN  $urn not found !!!";
-          }
+	}
+	else {
+	    $response = " !!!ADD NODE FAILED:  DOMAIN  $urn not found !!!";
+	}
 
-      }
-      else {
-          $response =
-            "!!! MISSED PARAM:$action  urn=$urn   callParam=$new_name  !!!";
-      }
-      if ( $response =~ /^OK/ ) {
-          storeSESSION($SESSION);
-      } else {
-          $logger->logdie("action=$action  failed: $response");
-      } 
-      return displayGlobal(), displayResponse($response), $node_out;
+    }
+    else {
+	$response =
+	  "!!! MISSED PARAM:$action  urn=$urn	callParam=$new_name  !!!";
+    }
+    if ( $response =~ /^OK/ ) {
+	storeSESSION($SESSION);
+    } else {
+	$logger->logdie("action=$action  failed: $response");
+    } 
+    return displayGlobal(), displayResponse($response), $node_out;
 
 }
 
@@ -560,20 +541,17 @@ sub updateGlobal {
 =cut
 
 sub updateNodeId {
-      my ( $node_obj, $new_node_urn ) = @_;
+    my ( $node_obj, $new_node_urn ) = @_;
 
-      my ($node_part) = $new_node_urn =~ /node\=([^\:]+)/;
-      $node_obj->name( perfSONAR_PS::Datatypes::v2_0::nmtb::Topology::Domain::Node::Name->new(
-                       { type => 'string', text => $node_part }
-                     )
-      );
-      $node_obj->id($new_node_urn);
-      my $port    = $node_obj->port;
-      my $port_id = $port->id;
-      $port_id =~ s/node\=([^\:]+)\:/node\=$node_part\:/;
-      $port->id($port_id);
-      ##$node_obj->port($port);
-      return $node_obj;
+    my ($node_part) = $new_node_urn =~ /node\=([^\:]+)/;
+    $node_obj->set_name( Name->new({ type => 'string', text => $node_part }) );
+    $node_obj->set_id($new_node_urn);
+    my $port	= $node_obj->get_port;
+    my $port_id = $port->get_id;
+    $port_id =~ s/node\=([^\:]+)\:/node\=$node_part\:/;
+    $port->set_id($port_id);
+    ##$node_obj->port($port);
+    return $node_obj;
 }
 
 =head2 updateDomainId 
@@ -583,21 +561,19 @@ sub updateNodeId {
 =cut
 
 sub updateDomainId {
-      my ( $domain_obj, $new_domain_urn ) = @_;
-
-      my ($domain_part) = $new_domain_urn =~ /domain\=([^\:]+)/;
-      $domain_obj->id($new_domain_urn);
-      foreach my $in_node ( @{ $domain_obj->node } ) {
-          my $node_id = $in_node->id;
-          $node_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
-          $in_node->id($node_id);
-          my $port    = $in_node->port;
-          my $port_id = $port->id;
-          $port_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
-          $port->id($port_id);
-
-      }
-      return $domain_obj;
+    my ( $domain_obj, $new_domain_urn ) = @_;
+    my ($domain_part) = $new_domain_urn =~ /domain\=([^\:]+)/;
+    $domain_obj->set_id($new_domain_urn);
+    foreach my $in_node ( @{ $domain_obj->get_node } ) {
+	my $node_id = $in_node->get_id;
+	$node_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
+	$in_node->set_id($node_id);
+	my $port    = $in_node->get_port;
+	my $port_id = $port->get_id;
+	$port_id =~ s/domain\=([^\:]+)\:/domain\=$domain_part\:/;
+	$port->set_id($port_id);
+    }
+    return $domain_obj;
 }
 
 =head2 findNode
@@ -607,38 +583,29 @@ sub updateDomainId {
 =cut
 
 sub findNode {
-      my ($params) = @_;
-      if (
-          $params
-          && ( ref($params) ne 'HASH'
-              || !( $params->{urn} || ( $params->{domain} && $params->{name} ) )
-          )
-        )
-      {
-          $logger->logdie(" Failed, only hashref parmaeter is accepted and 'domain' and 'urn' or 'name' must be supplied");
-      }
-      my ( $domain_query, $node_query ) =
-        ( $params->{domain}, $params->{name} );
-      if ( $params->{urn} ) {
-          ( $domain_query, $node_query ) =
-            $params->{urn} =~ /^.+\:domain\=([^\:]+)\:node\=(.+)$/;
-      }
-      foreach my $domain ( @{ $TOPOLOGY_OBJ->domain } ) {
-          my ($domain_part) = $domain->id =~ /domain\=([^\:]+)$/;
-	
-          if ( $domain_part eq $domain_query ) {
-              foreach my $node ( @{ $domain->node } ) {
-                  my ($node_part) = $node->id =~ /node\=([^\:]+)$/;
-	         $logger->debug(" quering for ::  $domain_query :: $node_query ---> $domain_part :: $node_part ");  	  
-                  if ( $node_part eq $node_query ) {
-                      $logger->debug(" Found node");
-                      return ($domain,$node);
-                  }
-              }
-              return undef;
-          }
-      }
-      return undef;
+    my ($params) = @_;
+    if ($params && ( ref $params ne 'HASH' || !( $params->{urn} || ( $params->{domain} && $params->{name} ) ))){
+	$logger->logdie(" Failed, only hashref parmaeter is accepted and 'domain' and 'urn' or 'name' must be supplied");
+    }
+    my ( $domain_query, $node_query ) = ( $params->{domain}, $params->{name} );
+    if ( $params->{urn} ) {
+	( $domain_query, $node_query ) =  $params->{urn} =~ /^.+\:domain\=([^\:]+)\:node\=(.+)$/;
+    }
+    foreach my $domain ( @{ $TOPOLOGY_OBJ->get_domain } ) {
+	my ($domain_part) = $domain->get_id =~ /domain\=([^\:]+)$/;       
+	if ( $domain_part eq $domain_query ) {
+	   foreach my $node ( @{ $domain->get_node } ) {
+	       my ($node_part) = $node->get_id =~ /node\=([^\:]+)$/;
+               $logger->debug(" quering for ::  $domain_query :: $node_query ---> $domain_part :: $node_part ");	
+		if ( $node_part eq $node_query ) {
+		    $logger->debug(" Found node");
+		    return ($domain,$node);
+		}
+	    }
+	    return;
+	}
+    }
+    return;
 }
 
 =head2 loadConfig
