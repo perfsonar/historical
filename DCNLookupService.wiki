@@ -29,7 +29,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/LS.png
 
 The diagram illustrates some typical scenarios for this software:
 
- # Services register the presence of data (e.g. the *MA* or the *DCN WebAdmin*)
+ # Services register the presence of data (e.g. the *MA* or the *DCN !WebAdmin*)
  # Services query for specific data (e.g. perfSONAR-UI is a client looking for a specific MA, the IDC is looking to translate a hostname to a linkid)
 
 This centralized design has two clear benefits:
@@ -65,7 +65,7 @@ Similar to the *LS* design, there are only minor differences to consider:
 
 This diagram also illustrates some typical scenarios for the *gLS*:
 
- # Services register the presence of data to their *hLS* (e.g. the *MA* or the *DCN WebAdmin*)
+ # Services register the presence of data to their *hLS* (e.g. the *MA* or the *DCN !WebAdmin*)
    * Note that this *hLS* can be configured, or the services _may_ use the *gLS* cloud to locate someone close.  This implementation detail is left up to the service.
  # Services query for specific data
    * The left-most IDC will query the *gLS cloud* first looking for information on some link.
@@ -77,25 +77,25 @@ Some important things to note about the operation of *gLS* and *hLS* instances:
 
  # The perfSONAR Consortium (ESnet, Geant2, Internet2, RNP) will be maintaining a *gLS cloud* open for public use.
  # It is possible to set up other clouds: simply start a new *gLS* hints file and point people to use it.
- # DCN adopters can deploy their own *hLS* if desired.  The software will be packaged along with a copy of the WebAdmin.
+ # DCN adopters can deploy their own *hLS* if desired.  The software will be packaged along with a copy of the !WebAdmin.
  # Internet2 will maintain (an) *hLS* instance(s) for our needs.  DCN software is welcome to continue treating the Internet2 instance as a _central_ LS.
  
 == Hostname to Link URN Mappings == 
 
 DCN software currently uses the LS to map hostnames (*friendly names*) to the usually non-friendly link urns.  This feature has two main parts:
 
- # A _WebAdmin_ is used to register/delete the mappings (N.B.: Future plans may allow the IDC to do this)
+ # A _!WebAdmin_ is used to register/delete the mappings (N.B.: Future plans may allow the IDC to do this)
  # The IDC/Client applications that query to get the mappings/translate from one to the other.
  
 The general idea of this operation will not change, although to support the *gLS* there will be minor format changes discussed below. 
 
 === Current Usage === 
 
-A current non-production version of the DCN WebAdmin can be found [https://dc211.internet2.edu/cgi-bin/dcn2.cgi here].  This is used to add and delete the link/host mappings to fit what is currently available in the DCN network.  Currently all DCN admins have access to this one interface on the only LS instance.  
+A current non-production version of the DCN !WebAdmin can be found [https://dc211.internet2.edu/cgi-bin/dcn2.cgi here].  This is used to add and delete the link/host mappings to fit what is currently available in the DCN network.  Currently all DCN admins have access to this one interface on the only LS instance.  
 
 ==== Insertion ==== 
 
-The WebAdmin handles all insertions internally by using the perfSONAR-PS LS API.  An example registration message follows:
+The !WebAdmin handles all insertions internally by using the perfSONAR-PS LS API.  An example registration message follows:
 
 {{{
 <?xml version="1.0"?>
@@ -128,7 +128,7 @@ The WebAdmin handles all insertions internally by using the perfSONAR-PS LS API.
 
 ==== Deletion ==== 
 
-The WebAdmin handles all deletions internally by using the perfSONAR-PS LS API. An example deletion message follows: 
+The !WebAdmin handles all deletions internally by using the perfSONAR-PS LS API. An example deletion message follows: 
 
 {{{
 <?xml version="1.0"?>
@@ -161,16 +161,35 @@ The WebAdmin handles all deletions internally by using the perfSONAR-PS LS API. 
 
 The IDC currently uses a query to convert from hostname to link id, an example appears below:
 
-{{{<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
                    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">    <SOAP-ENV:Header/>    <SOAP-ENV:Body>        <nmwg:message type="LSQueryRequest" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body>
+        <nmwg:message type="LSQueryRequest" 
                       id="msg1" 
                       xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
-                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">            <nmwg:metadata id="meta2">
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+            <nmwg:metadata id="meta2">
                 <!--hostname value gets replaced with the name to lookup -->
 
-                <xquery:subject id="sub2">                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";                    /nmwg:store[@type="LSStore"]/nmwg:data/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]                </xquery:subject>                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>                <xquery:parameters id="param.1">                <nmwg:parameter name="lsOutput">native</nmwg:parameter>                 </xquery:parameters>            </nmwg:metadata>            <nmwg:data metadataIdRef="meta2" id="d2"/>        </nmwg:message>    </SOAP-ENV:Body></SOAP-ENV:Envelope> 
+                <xquery:subject id="sub2">
+                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
+                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";
+                    /nmwg:store[@type="LSStore"]/nmwg:data/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]
+                </xquery:subject>
+                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
+                <xquery:parameters id="param.1">
+                <nmwg:parameter name="lsOutput">native</nmwg:parameter>
+                 </xquery:parameters>
+            </nmwg:metadata>
+            <nmwg:data metadataIdRef="meta2" id="d2"/>
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
 }}}
 
 
@@ -234,16 +253,35 @@ The changes can be summarized as:
 
 The modfied query that the IDC would be required to make is pictured next (note the only changes are to the XPath expression):
 
-{{{<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
                    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">    <SOAP-ENV:Header/>    <SOAP-ENV:Body>        <nmwg:message type="LSQueryRequest" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body>
+        <nmwg:message type="LSQueryRequest" 
                       id="msg1" 
                       xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
-                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">            <nmwg:metadata id="meta2">
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+            <nmwg:metadata id="meta2">
                 <!--hostname value gets replaced with the name to lookup -->
 
-                <xquery:subject id="sub2">                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";                    /nmwg:store[@type="LSStore"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]                </xquery:subject>                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>                <xquery:parameters id="param.1">                <nmwg:parameter name="lsOutput">native</nmwg:parameter>                 </xquery:parameters>            </nmwg:metadata>            <nmwg:data metadataIdRef="meta2" id="d2"/>        </nmwg:message>    </SOAP-ENV:Body></SOAP-ENV:Envelope> 
+                <xquery:subject id="sub2">
+                    declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
+                    declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";
+                    /nmwg:store[@type="LSStore"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()="<!--hostname-->"]]
+                </xquery:subject>
+                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
+                <xquery:parameters id="param.1">
+                <nmwg:parameter name="lsOutput">native</nmwg:parameter>
+                 </xquery:parameters>
+            </nmwg:metadata>
+            <nmwg:data metadataIdRef="meta2" id="d2"/>
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
 }}}
 
 ==== Required Changes ==== 
@@ -271,4 +309,3 @@ TBD
 == Last Updated ==
 
 $Id$
-
