@@ -16,6 +16,7 @@
    * Disk at Large
      # Address some strange behavior when auto finding host/iv4/ipv6 information
      # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
+
  * Aaron
    # Have the perfSONAR daemons run as user "perfsonar" instead of root (*DONE*)
    # Remove use of ramdisk to better handle the root partition filling up
@@ -24,11 +25,12 @@
      # Modify the approach to use PID checking instead of using startup scripts for service liveness
    # Port PingER GUI to Disk (w/ Maxim)
    # Work with Dan to integrate some or all of his scripts into the disk and integrate the q+a that's been added to the disk into his framework. 
+
  * Jeff
    # Port master/collector to perfSONAR (w/ JZ)
    # Latency Star Abstraction
      * powstream modification
-   # bwctl documentation
+   # Add AESKEY support to AMI-bwctl
    
 == Post Aug 20th, before Sept 4th (Thurs) ==
 
@@ -50,6 +52,7 @@
         * ESnet (I can coordinate Brian/Joe/Jon)
         * BNL w/ Bigrow
         * Wild Cards (SLAC/UDel/IU/UMich/Caltech/CERN)
+
  * Aaron
    # /var/log exporting
    # Documentation of NPToolkit Internals
@@ -63,6 +66,10 @@
      # Verify we can access saved info
      # Verify 'upgrades' are smooth, can access existing measurement data
    # bwctl release (perhaps some documentation - edit passes for sure)
+
+ * Jeff
+   # bwctl documentation
+
  * Not Yet Claimed (for discussion during perf-team meeting)
    # Ability to pull down 'centralized' configuration and merge with host config ([ISOAtlasCentralConfig see problem statement]).
    # owamp release
