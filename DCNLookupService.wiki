@@ -1,0 +1,114 @@
+= DCN Interactions with the Lookup Service =
+
+== TOC ==
+
+ * [DCNLookupService#Architecture Architecture]
+   * [DCNLookupService#Current Current]
+   * [DCNLookupService#Proposed Proposed]
+ * [DCNLookupService#Hostname_to_Link_URN_Mappings Hostname to Link URN Mappings]
+   * [DCNLookupService#Current_Usage Current Usage]
+     * [DCNLookupService#Insertion Insertion]
+     * [DCNLookupService#Deletion Deletion]
+     * [DCNLookupService#Query Query]
+   * [DCNLookupService#Proposed_Usage Proposed Usage]
+     * [DCNLookupService#New_Format New Format]
+     * [DCNLookupService#Required_Changes Required Changes]
+ * [DCNLookupService#Service_Registration Service Registration]
+   * [DCNLookupService#IDC IDC]
+   * [DCNLookupService#NB NB]
+
+== Architecture == 
+
+The architecture of the _perfSONAR_ *LS* has taken on two design through its use.  
+Originally planned as a centralized service, the *LS* would accept registrations and 
+manage the data for all services in a _perfSONAR_ framework.  This paradigm would 
+not scale to the multi-domain operation that was always assumed for the tools of 
+_perfSONAR_ forcing the introduction of a _Global Lookup Service_ (*gLS*).  This 
+new architecture allows for global discovery with minimal modifications to the
+original design.
+
+=== Current === 
+
+The following illustrates the current LS architecture from the point of view of 
+both _perfSONAR_ and _DCN_ services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/LS.png
+
+The centralized design has two clear benefits:
+
+ # All services know the location of the *LS*
+ # Information is guaranteed to be there if it is present in the framework
+ 
+The downsides however are very prohibitive:
+
+ # No redundancy
+ # Performance bottleneck
+ # Does not scale to the cases where individuals would like to _run their own_
+
+The legacy *LS* is still available and supported as a product in the _perfSONAR_ 
+framework, but all effort regarding this information service has been refocused 
+to the *gLS*.
+
+=== Proposed === 
+
+The *gLS* architecture is similar to that of the *LS* where individual services
+still maintain the information of registered services and respond to queries.  The major 
+difference is the existence of an _upper layer_ of *gLS* instances that propagate 
+summary information of each _lower level_ Home Lookup Service (*hLS*) into what
+has been termed the _*gLS* cloud_.  This cloud enables global discovery: the phase 
+where before finding exactly what you want (e.g. data for idc.internet2.edu), you first 
+find where it may live (e.g. the *hLS* for internet2.edu).
+
+An example of the architecture follows.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/gLS.png
+
+== Hostname to Link URN Mappings == 
+
+TBD
+
+=== Current Usage === 
+
+TBD
+
+==== Insertion ==== 
+
+TBD
+
+==== Deletion ==== 
+
+TBD
+
+==== Query ==== 
+
+TBD
+
+=== Proposed Usage === 
+
+TBD
+
+==== New Format ==== 
+
+TBD
+
+==== Required Changes ==== 
+
+TBD
+
+== Service Registration == 
+
+TBD
+
+=== IDC === 
+
+TBD
+
+=== NB === 
+
+TBD
+
+== Last Updated ==
+
+$Id$
+
+
