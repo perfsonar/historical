@@ -18,13 +18,14 @@ very valuable to dynamic services such as the LS.
 
 my ( $fileHandle, $fileName ) = tempfile();
 
-print $fileHandle "set_lock_timeout 1000000\n";
-print $fileHandle "set_txn_timeout 1000000\n";
-print $fileHandle "set_lk_max_lockers 1000000\n";
-print $fileHandle "set_lk_max_locks 1000000\n";
-print $fileHandle "set_lk_max_objects 1000000\n";
+print $fileHandle "set_lock_timeout 500000\n";
+print $fileHandle "set_txn_timeout 500000\n";
+print $fileHandle "set_lk_max_lockers 500000\n";
+print $fileHandle "set_lk_max_locks 500000\n";
+print $fileHandle "set_lk_max_objects 500000\n";
 print $fileHandle "set_lk_detect DB_LOCK_MINLOCKS\n";
 print $fileHandle "set_cachesize 0 33554432 0\n";
+print $fileHandle "set_flags DB_LOG_AUTOREMOVE\n";
 
 close($fileHandle);
 

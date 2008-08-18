@@ -26,11 +26,13 @@ not present.
 
 my $DEBUG = '';
 my $HELP = '';
+my $MUNGE = '';
 my %opts = ();
 GetOptions('verbose' => \$DEBUG,
            'help' => \$HELP,
            'config=s' => \$opts{CONF},
-           'list=s' => \$opts{WLIST});
+           'list=s' => \$opts{WLIST},
+           'munge' => \$MUNGE);
 
 if(!(defined $opts{CONF} or defined $opts{WLIST}) or $HELP) {
   print "$0: Runs fakeService with configuration file CONFIG\n";
@@ -401,6 +403,23 @@ while (1) {
         }
     }
     else {
+        if ( $MUNGE ) {
+            $result = $ls->deregisterRequestLS( { key => $config{"key"} } );
+            if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.deregister" ) {
+                print "Service successfully deregistered\n";
+            }
+            else {
+                print "Service deregistration failed";
+                if (exists $result->{eventType} and exists $result->{response} ) {
+                    print " - eventType:\t" . $result->{eventType} . "\nResponse:\t" . $result->{response};
+                }
+                else {
+                    print " - LS did not respond.";
+                }    
+                print "\n";
+            }
+        }
+        
         $result = $ls->keepaliveRequestLS( { key => $config{"key"} } );
         if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.keepalive" ) {
             print "Success!\n";
@@ -462,15 +481,16 @@ sub getWord {
     my $d = 0;
     while ( not $d ) {
         my @domain = $wl->get_words(1);
-        if ( not( $domain[0] =~ m/('|-|_|`|~)/ ) ) {
-            if ($domain) {
-                $wl->close();
-                return lc( $domain[0] ) . ".edu";
-            }
-            else {
-                $wl->close();
-                return lc( $domain[0] );
-            }
+        
+        my $okChar = '-a-zA-Z0-9\s';
+        $domain[0] =~  s/[^$okChar]//go;
+        if ($domain) {
+            $wl->close();
+            return lc( $domain[0] ) . ".edu";
+        }
+        else {
+            $wl->close();
+            return lc( $domain[0] );
         }
     }
 }

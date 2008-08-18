@@ -509,6 +509,48 @@ sub abortTransaction {
     return 0;
 }
 
+=head2 checkpoint($self, { error })
+
+Create a logging checkpoint.
+
+=cut
+
+sub checkpoint {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { error => 0 } );
+    $self->{LOGGER}->debug("Checkpoint started.");
+    eval { 
+         $self->{ENV}->txn_checkpoint(0,0,Db::DB_FORCE);
+    };
+    if ( my $e = catch std::exception ) {
+        my $msg = "Error \"" . $e->what() . "\".";
+        $msg =~ s/(\n+|\s+)/ /gmx;
+        $msg = escapeString($msg);
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
+    elsif ( $e = catch DbException ) {
+        my $msg = "Error \"" . $e->what() . "\".";
+        $msg =~ s/(\n+|\s+)/ /gmx;
+        $msg = escapeString($msg);
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
+    elsif ($EVAL_ERROR) {
+        my $msg = "Error \"" . $EVAL_ERROR . "\".";
+        $msg =~ s/(\n+|\s+)/ /gmx;
+        $msg = escapeString($msg);
+        $self->{LOGGER}->error($msg);
+        ${ $parameters->{error} } = $msg if ( defined $parameters->{error} );
+        return -1;
+    }
+    $self->{LOGGER}->debug("Checkpoint complete.");
+    ${ $parameters->{error} } = q{} if ( defined $parameters->{error} );
+    return 0;
+}
+
 =head2 query($self, { query, txn, error }) 
 
 The string $query must be an XPath expression to be sent to the database.

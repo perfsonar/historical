@@ -210,12 +210,20 @@ sub addRoot {
     my $parameters = validateParams(
         @args,
         {
+            priority => { type => Params::Validate::SCALAR, optional => 1 },
             root =>  { type => Params::Validate::SCALAR }
         }
     );
-    
+
     if ( $parameters->{root} =~ m/^http:\/\// ) {
-        push @{ $self->{ROOTS} }, $parameters->{root};
+        unless (  $self->verifyURL( { url => $parameters->{root} } ) == -1 ) {
+            if ( exists $parameters->{priority} and $parameters->{priority} ) {
+                unshift @{ $self->{ROOTS} }, $parameters->{root};
+            }
+            else {
+                push @{ $self->{ROOTS} }, $parameters->{root};
+            }
+        }
     }
     else {
         $self->{LOGGER}->error( "Root must be of the form http://ADDRESS." );

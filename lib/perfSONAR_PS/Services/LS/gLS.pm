@@ -152,6 +152,7 @@ sub init {
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
     }
+    
     if ( exists $self->{CONF}->{"root_hints_file"} ) {
         if ( exists $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
@@ -161,27 +162,27 @@ sub init {
     } 
     else {
         $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
-    }   
+    }
+    system( "touch ".$self->{CONF}->{"root_hints_file"} );
 
     unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
         $self->{LOGGER}->warn("Setting 'root' to '0'");
         $self->{CONF}->{"gls"}->{"root"} = "0";
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"}
-        and $self->{CONF}->{"gls"}->{"metadata_db_name"} )
-    {
-        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
-        return -1;
-    }
-    else {
+    if ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"}
+        and $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
         if ( exists $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} =~ "^/" ) {
                 $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
             }
         }
     }
-
+    else {
+        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+        return -1;
+    }
+    
     unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_file"}
         and $self->{CONF}->{"gls"}->{"metadata_db_file"} )
     {
@@ -228,14 +229,14 @@ sub init {
     $handler->registerFullMessageHandler( "LSSynchronizationRequest", $self );
 
     my $error = q{};
-    my $metadatadb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
+    my $metadatadb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
     unless ($metadatadb) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
     $metadatadb->closeDB( { error => \$error } );
 
-    my $summarydb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+    my $summarydb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
     unless ($summarydb) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
@@ -245,6 +246,42 @@ sub init {
     $self->getHints();
     
     return 0;
+}
+
+=head2 prepareDatabase($self, { doc })
+
+Opens the XMLDB and returns the handle if there was not an error.
+
+=cut
+
+sub prepareDatabase {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { recover => 0, container => 1, doc => 0 } );
+
+    my $error = q{};
+    my $db    = new perfSONAR_PS::DB::XMLDB(
+        {
+            env  => $self->{CONF}->{"gls"}->{"metadata_db_name"},
+            cont => $parameters->{container},
+            ns   => \%ls_namespaces,
+        }
+    );
+    if ( exists $parameters->{recover} and $parameters->{recover} ) {
+        unless ( $db->prep( { txn => q{}, error => \$error } ) == 0 ) {
+            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\": " . $error );
+            statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
+            return;
+        }
+    }
+    else {
+        unless ( $db->openDB( { txn => q{}, error => \$error } ) == 0 ) {
+            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\": " . $error );
+            statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
+            return;
+        }
+    }
+
+    return $db;
 }
 
 =head2 getHints($self, {})
@@ -272,33 +309,6 @@ sub getHints {
         return -1;
     }
     return;
-}
-
-=head2 prepareDatabase($self, { doc })
-
-Opens the XMLDB and returns the handle if there was not an error.
-
-=cut
-
-sub prepareDatabase {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { container => 1, doc => 0 } );
-
-    my $error = q{};
-    my $db    = new perfSONAR_PS::DB::XMLDB(
-        {
-            env  => $self->{CONF}->{"gls"}->{"metadata_db_name"},
-            cont => $parameters->{container},
-            ns   => \%ls_namespaces,
-        }
-    );
-    unless ( $db->openDB( { txn => q{}, error => \$error } ) == 0 ) {
-        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\": " . $error );
-        statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
-        return;
-    }
-
-    return $db;
 }
 
 =head2 needLS($self)
@@ -341,12 +351,16 @@ sub registerLS {
 
     my $gls = perfSONAR_PS::Client::gLS->new( { file => $self->{CONF}->{"root_hints_file"} } );
 
+    # order these first
+    $gls->orderRoots();
+
+    # any 'specified' ones we have need to be placed before the ordered ones (priority)
     if ( exists $self->{CONF}->{"ls_instance"} ) {
         my @temp = split(/\s+/, $self->{CONF}->{"ls_instance"});
         foreach my $t ( @temp ) {
             $t =~ s/\n$//;
             next if $t eq $self->{CONF}->{"gls"}->{"service_accesspoint"};
-            $gls->addRoot ( { root =>  $t } ) if $t;
+            $gls->addRoot ( { priority => 1, root =>  $t } ) if $t;
         } 
     } 
     if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} ) {
@@ -354,10 +368,9 @@ sub registerLS {
         foreach my $t ( @temp ) {
             $t =~ s/\n$//;
             next if $t eq $self->{CONF}->{"gls"}->{"service_accesspoint"};
-            $gls->addRoot ( { root =>  $t } ) if $t;
+            $gls->addRoot ( { priority => 1, root =>  $t } ) if $t;
         }  
     }
-    $gls->orderRoots();
 
     if( $self->{CONF}->{"gls"}->{root} ) {
         # if we are a root, we are 'synchronizing'
@@ -499,7 +512,7 @@ sub registerLS {
         
     }
     
-    $database->closeDB( { error => \$error } );
+    $database->closeDB( { error => \$error } );   
     return 0;
 }
 
@@ -560,8 +573,8 @@ sub summarizeLS {
             my $service_mdId = $doc->getDocumentElement->getAttribute("id");                     
          
             my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
-            my $contactName;
-            my $contactType;
+            my $contactName = q{};
+            my $contactType = q{};
             unless ( $contactPoint ) {
                 $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
                 $contactName = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='name']", 1 ), 0 );
@@ -570,7 +583,7 @@ sub summarizeLS {
                     return;
                 }
             }            
-# warning is thrown off
+
             my $serviceKey = md5_hex( $contactPoint.$contactName.$contactType );    
                         
             my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"".$service_mdId."\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
@@ -661,8 +674,13 @@ sub summarizeLS {
                         # topology junk (port)
                         my $temp_ports = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='port']", 0 );
                         foreach my $port ( $temp_ports->get_nodelist ) {
-# what do we do here...
                             my $netmask = extract( find( $port, "./*[local-name()='netmask']", 1 ), 0 );
+                            my @list = ();
+                            @list = Net::CIDR::cidradd($netmask, @list);
+                            foreach my $l ( @list ) {
+                                push @{$service_addresses}, $l if $l;
+                                push @{$all_addresses}, $l if $l;
+                            }
 
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
@@ -707,9 +725,14 @@ sub summarizeLS {
                         # topology junk (network)
                         my $temp_networks = find( $doc2->getDocumentElement, "./*[local-name()='subject']/*[local-name()='network']", 0 );
                         foreach my $network ( $temp_networks->get_nodelist ) {
-# what do we do here...
                             my $subaddress = extract( find( $network, "./*[local-name()='subnet']/*[local-name()='address']", 1 ), 0 );
                             my $subnetmask = extract( find( $network, "./*[local-name()='subnet']/*[local-name()='netmask']", 1 ), 0 );
+                            my @list = ();
+                            @list = Net::CIDR::cidradd($subaddress."/".$subnetmask, @list);
+                            foreach my $l ( @list ) {
+                                push @{$service_addresses}, $l if $l;
+                                push @{$all_addresses}, $l if $l;
+                            }
 
                             my @elements = ("name");
                             my @types = ( "ipv4", "IPv4" );
@@ -960,6 +983,7 @@ sub summarizeLS {
         if ($sum_errorFlag) {
             $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
             undef $sum_dbTr;
+            $summarydb->checkpoint( { error => \$error } );
             $summarydb->closeDB( { error => \$sum_error } );
             $self->{LOGGER}->error("Database errors prevented the transaction from completing.");
             return -1;
@@ -968,11 +992,13 @@ sub summarizeLS {
             my $status = $summarydb->commitTransaction( { txn => $sum_dbTr, error => \$sum_error } );
             if ( $status == 0 ) {
                 undef $sum_dbTr;
+                $summarydb->checkpoint( { error => \$error } );
                 $summarydb->closeDB( { error => \$sum_error } );
             }
             else {
                 $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
                 undef $sum_dbTr;
+                $summarydb->checkpoint( { error => \$error } );
                 $summarydb->closeDB( { error => \$sum_error } );
                 $self->{LOGGER}->error( "Database Error: \"" . $sum_error . "\"." );
                 return -1;
@@ -986,6 +1012,7 @@ sub summarizeLS {
     if ($errorFlag) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
+        $metadatadb->checkpoint( { error => \$error } );
         $metadatadb->closeDB( { error => \$error } );
         $self->{LOGGER}->error("Database errors prevented the transaction from completing.");
         return -1;
@@ -994,11 +1021,13 @@ sub summarizeLS {
         my $status = $metadatadb->commitTransaction( { txn => $dbTr, error => \$error } );
         if ( $status == 0 ) {
             undef $dbTr;
+            $metadatadb->checkpoint( { error => \$error } );
             $metadatadb->closeDB( { error => \$error } );
         }
         else {
             $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
+            $metadatadb->checkpoint( { error => \$error } );
             $metadatadb->closeDB( { error => \$error } );
             $self->{LOGGER}->error( "Database Error: \"" . $error . "\"." );
             return -1;
@@ -1064,7 +1093,7 @@ sub makeSummary {
 
 =head2 summarizeURN($self, { search, elements, types, urnarray, urns } );
 
-...
+Given a URN string, parse this to extract meaningful parts.  
 
 =cut
 
@@ -1190,7 +1219,12 @@ sub ipSummarization {
     if ( keys ( %{ $parameters->{addresses} } ) == 1) {
         my @temp = ();
         foreach my $host ( keys %{ $parameters->{addresses} } ) {
-            push @temp, $host."/32";
+            if ( $host =~ m/\/\d+$/ ) {
+                push @temp, $host;                
+            }
+            else {
+                push @temp, $host."/32";
+            }
         }
         return \@temp;
     }
@@ -1202,7 +1236,13 @@ sub ipSummarization {
     # of the 'base' addresses
     my $tr = Net::IPTrie->new( version => 4 );
     foreach my $host ( keys %{ $parameters->{addresses} } ) {
-        $tr->add( address => $host, prefix => "32" );
+        my @nm = split(/\//, $parameters->{addresses});
+        if ( $nm[0] and $nm[1] ) {
+            $tr->add( address => $nm[0], prefix => $nm[1] );
+        }
+        else {
+            $tr->add( address => $host, prefix => "32" );
+        }
     }
 
     my %tally = ();
@@ -1852,8 +1892,8 @@ sub lsRegisterRequestUpdateNew {
     my $dId       = "data." . genuid();
 
     my $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='accessPoint']", 1 ), 0 );
-    my $accessType;
-    my $accessName;
+    my $accessType = q{};
+    my $accessName = q{};
     unless ($accessPoint) {
         $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='address']", 1 ), 0 );
         $accessType = extract( find( $parameters->{service}, "./*[local-name()='type']", 1 ), 0 );
