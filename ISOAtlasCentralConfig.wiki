@@ -1,45 +1,30 @@
-#summary Problem statement for having a 'community' configuration server.
+= Summary Problem statement for having a 'community' configuration server =
 
-There was a bit of discussion at todays FERMI Wide Area Working group meeting
-about how the Atlas and CMS communities will manage configuration issues for
-the perfSONAR Appliances they will be deploying.
+There was a bit of discussion at todays FERMI Wide Area Working group meeting about how the Atlas and CMS communities will manage configuration issues for the perfSONAR Appliances they will be deploying.
 
-I think it is very important that we have some way of dynamically
-updating the configuration in a centralized way after the initial
-installation.
+I think it is very important that we have some way of dynamically updating the configuration in a centralized way after the initial installation.
 
-For example, the US Atlas community wants to maintain a full mesh between
-all the US Tier 2's and BNL.  We need to be able to update existing servers
-with new Tier 2's as they come up in some centralized fashion.
+For example, the US Atlas community wants to maintain a full mesh between all the US Tier 2's and BNL.  We need to be able to update existing servers with new Tier 2's as they come up in some centralized fashion.
 
 We could classify the appliance config into 4 different sources.
 
-# Config burned on the CD.
-  * hopefully this is very static.
-  * Changes are controlled by the perfSONAR team.
-
-# Config entered by the user
-  * hopefully this is very limited, and only needs to happen once.
-  * Changes are controlled by the local administrator.
-
-# Config derrived from the GLS
-  * Changes are driven by remote users deploying services.
+ # Config burned on the CD.
+   * hopefully this is very static.
+   * Changes are controlled by the perfSONAR team.
+ # Config entered by the user
+   * hopefully this is very limited, and only needs to happen once.
+   * Changes are controlled by the local administrator.
+ # Config derrived from the GLS
+   * Changes are driven by remote users deploying services.
      * Since the remote user is unauthenticated, this is very risky right now.
-
-# Config regularly downloaded from a trusted source
-  * I think we should seriously consider implementing this for the Sep 4th release!
-  * Changes are controlled by who-ever manages the config file on the web server.
+ # Config regularly downloaded from a trusted source
+   * I think we should seriously consider implementing this for the Sep 4th release!
+   * Changes are controlled by who-ever manages the config file on the web server.
      * This could be delegated to a responsible member of the target community!
      * ie a CMS pinger target list hosted on a FERMI server, and a Atlas T2 bandwidth test mesh file maintained by Shawn?
 
+Supporting a configuration method that draws communities together might also help us build the support organizations for each user community as well.
 
-Supporting a configuration method that draws communities together might
-also help us build the support organizations for each user community as well.
+== Last Updated ==
 
-
-
---Joe
-
-
-
-
+$Id$
