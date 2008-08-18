@@ -28,9 +28,8 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
- # Attendees: Brian, Jarad, Joe, Aaron, Jason, Jeff, Rich
- # Issue specific meeting
- # ISO Testing
+ # Attendees:
+ # Issue specific meeting: ISO Testing
  # Next meeting will be TBD
 
 == Last Updated ==
