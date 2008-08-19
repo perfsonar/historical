@@ -73,7 +73,7 @@ Run:
 
 This document is based on a fresh install of RHEL5.
 
-=== rpms
+=== rpms ===
 
 May need:
 
@@ -151,10 +151,12 @@ Download this [create_pingerMA_MySQL.sql], replace *CHANGE--------ME* with  ping
 
 = Service config ==
 
-You need to modify pinger_pass, service_accesspoint and service_description. Also, make sure that database type is chosen properly.
+You need to modify *pinger_pass*, *service_accesspoint* and *service_description*. Also, make sure that database type is chosen properly.
 
-In case of MySQL the db_name should be *pingerMA* and in case of SQLite it will be */tmp/pingerMA.sqlite3&nbsp;*
-{quote}
+In case of MySQL the db_name should be *pingerMA* and in case of SQLite it will be */tmp/pingerMA.db*.
+The *db_type* should be *mysql* or *SQLite*.
+ 
+{{{
 max_worker_lifetime 300
 pid_file pinger.pid
 disable_echo 0
@@ -197,55 +199,44 @@ ls_registration_interval 60
 module perfSONAR_PS::Services::MA::PingER
 </endpoint>
 </port>
-{quote}
+}}}
 
-h3. landmarks to ping
+=== landmarks to ping ===
 
-*_[*{_}pinger-landmarks.xml{_}*|^pinger-landmarks.xml]_* file is the XML representation of the list and montoring parameters of each monitored host. There is a webadmin interface to modify this file but it requires an extra deployment of the local CGI enabled webserver ( Apache, lighthttpd) and properly installed and configuired cgi script. For now the easiest way is to modify this file by hand.
-For example in order to start pinger monitoring of the *{_}pinger.slac.stanford.edu host{_}* one has to insert this records:
-{quote}
+*pinger-landmarks.xml* file is the XML representation of the list and montoring parameters of each monitored host. 
+There is a webadmin interface to modify this file but it requires an extra deployment of the local CGI enabled webserver (Apache, lighthttpd) 
+and properly installed and configuired cgi script. For now the easiest way is to modify this file by hand.
+For example in order to start pinger monitoring of the *pinger.slac.stanford.edu* host, one has to insert this records:
+
+{{{
 <pingertopo:domain id="urn:ogf:network:domain=slac.stanford.edu">
-
 <pingertopo:node id="urn:ogf:network:domain=slac.stanford.edu:node=pinger">
-
 <nmtb:name type="string">pinger</nmtb:name>
-
 <nmtb:hostName>pinger.slac.stanford.edu</nmtb:hostName>
-
 <nmtb:description></nmtb:description>
-
 <nmwg:parameters id="1000B">
-
 <nmwg:parameter name="packetSize">1000</nmwg:parameter>
-
 <nmwg:parameter name="count">10</nmwg:parameter>
-
 <nmwg:parameter name="packetInterval">1</nmwg:parameter>
-
 <nmwg:parameter name="ttl">255</nmwg:parameter>
-
 <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>
-
 <nmwg:parameter name="measurementOffset">0</nmwg:parameter>
-
 </nmwg:parameters>
-
 <nmtl3:port id="urn:ogf:network:domain=slac.stanford.edu:node=pinger:port=134.79.18.163">
-
 <nmtl3:ipAddress type="IPv4">134.79.240.30</nmtl3:ipAddress>
-
 </nmtl3:port>
-
 </pingertopo:node>
-
 </pingertopo:domain>
-{quote}
-Where there might be multiple pingertopo:node inserted later for the&nbsp; *_slac.stanford.edu_\*&nbsp; domain.
-The most important parameter is the&nbsp; \_measurementPeriod_. It defines in seconds the period between pings.
-The rest of parameters could be left untouched. Please make sure that node id is consistent with \_hostName\\\\\\\\\\\\\\\_ and port id.
+}}}
 
-h3. Start Service
+Where there might be multiple *pingertopo:node* inserted later for the  *slac.stanford.edu*  domain.
+The most important parameter is the  _measurementPeriod_. It defines in seconds the period between pings.
+The rest of parameters could be left untouched. Please make sure that node id is consistent with _hostName_ and port id.
 
-sudo required due to port 80 and can be avoided with ports from higher numbers range ( 8080, 9090 etc)
+=== Start Service ===
 
-*_$sudo perfsonar-daemon \--verbose \-c /etc/perfsonar/dae
+*sudo* is required due to port 80 and can be avoided with ports from higher numbers range ( 8080, 9090 etc)
+
+{{{
+>sudo perfsonar-daemon  --verbose  -config=pinger.conf
+}}}
