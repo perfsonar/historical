@@ -22,7 +22,7 @@ and installation/use help.
  * Lookup Service (Legacy)
  * Global Lookup Service
  * perfSONAR-BUOY Measurement Archive
- * PingER Measurement Archive/Measurement Point
+ * [PingerDeployment PingER Measurement Archive/Measurement Point]
  * Circuit Status Measurement Archive 
  * Status Measurement Archive
  * Topology Service
