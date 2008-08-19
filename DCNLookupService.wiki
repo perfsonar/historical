@@ -300,7 +300,7 @@ The modified query that the IDC would be required to make is pictured next (note
 With the migration of DCN to the upcoming 0.4 release, the logical time to implement the above changes is when everyone is upgrading.  The proposed plan with regards to *LS* software is:
 
  * Upload a patch for the _LSQuery_ used in the IDC for all legacy applications, the 0.4 release will include this
- * Cease operation of *http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS* on a given flag day
+ * Cease operation of *packrat.internet2.edu:8005/perfSONAR_PS/services/LS* on a given flag day
  * Begin operations of a new LS instance TBD, the 0.4 release will come configured to use this value
  * Convert the IDC to use the *gLS cloud* as well as talk to any *hLS* and not just the centralized Internet2 instance
  * Provide instructions for DCN participants who wish to use their own *hLS*, but still make the Internet2 version available.
