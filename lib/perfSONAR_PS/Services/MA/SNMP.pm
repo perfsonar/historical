@@ -264,7 +264,7 @@ sub init {
             }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            eval { perfSONAR_PS::DB::Cacti; };
+            eval { load perfSONAR_PS::DB::Cacti; };
             unless ( $EVAL_ERROR ) {
                 my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
                 $cacti->openDB();
