@@ -79,6 +79,7 @@ Some important things to note about the operation of *gLS* and *hLS* instances:
 
  # The perfSONAR Consortium (ESnet, Geant2, Internet2, RNP) will be maintaining a *gLS cloud* open for public use.
  # It is possible to set up other clouds: simply start a new *gLS* hints file and point people to use it.
+ # The current hints file is here: http://www.perfsonar.net/gls.root.hints
  # DCN adopters can deploy their own *hLS* if desired.  The software will be packaged along with a copy of the !WebAdmin.
  # Internet2 will maintain (an) *hLS* instance(s) for our needs.  DCN software is welcome to continue treating the Internet2 instance as a _central_ *LS*.
  
@@ -215,6 +216,8 @@ Building on the current scheme, there are two major changes to the current use o
 *gLS* integration refers to the use of a two part query system to take advantage of information discovery available through the _*gLS* cloud_.  This interaction is best placed in an API, although it may be treated simply as a two message system similar to how the IDC currently opperates.  The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is explained in detail below.
 
 ==== gLS Integration ==== 
+
+As in DNS, there is a bootstrapping issue of trying to locate participating *gLS* servers.  We have a solution similar to DNS where a _hints_ file is provided: http://www.perfsonar.net/gls.root.hints  This file should be checked regularly to ensure it is current, as *gLS* instances may come and leave the _cloud_ at any time.
 
 Each *gLS* is responsible for managing the summarized information of all *hLS* instances that choose to register.  The *hLS* instances will register a _summary_ (a condensed list of the data types, address ranges, and domains that correspond to _*their*_ registered information).  An example of the information propogation is pictured below:
 
