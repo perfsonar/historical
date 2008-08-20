@@ -208,12 +208,167 @@ The IDC currently uses a query to convert from hostname to link id, an example a
 
 Building on the current scheme, there are two major changes to the current use of the *LS* by the DCN software:
 
- # Internal data format changes
- # *gLS* integration
+ # [DCNLookupService#gLS_Integration gLS Integration]
+ # [DCNLookupService#Data_Format Data Format]
 
-The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is introduced [DCNLookupService#New_Format below].  *gLS* integration is simply using the *gLS* facilities to become aware of information regardless of what *hLS* it may be registered to.
+*gLS* integration refers to the use of a two part query system to take advantage of information discovery available through the _*gLS* cloud_.  This interaction is best placed in an API, although it may be treated simply as a two message system similar to how the IDC currently opperates.  The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is explained in detail below.
 
-==== New Format ==== 
+==== gLS Integration ==== 
+
+Each *gLS* is responsible for managing the summarized information of all *hLS* instances that choose to register.  The *hLS* instances will register a _summary_ (a condensed list of the data types, address ranges, and domains that correspond to _*their*_ registered information).  An example of the information propogation is pictured below:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/Info.png
+
+In this example there are 3 _perfSONAR_ *MA* services, and a *DCN WebAdmin*.  Each is responsible for some amount of information; note that this information _may_ overlap.  Each service interacts with a nearby *hLS*.  This *hLS* has the task of periodically examining all registered information from the *MA* and *WebAdmin* and making a _summary_ of what is available.  This simply means condensing all available IP addresses into a _*CDIR*_ style and making note of both the data types (not pictured) and domains.  The *hLS* instances then register this information up a level into the _*gLS* cloud_.  This diagram only shows a single *gLS* in the _cloud_, so summarization is simple (combine the two summary sets from the *hLS* instances).  In this case no additional summarziation can be done (the IP ranges are as _tight_ as they can be right now).  
+
+To take advantage of the _*gLS* cloud_ services must pose an initial query to any *gLS* instance that asks a less specific question e.g. instead of asking for a specific link or hostname, it is necessary to first ask *_where_* information on an IP range or domain will be present.  The *gLS* will respond with zero to many *hLS* instances that need to be contacted because they have the potential to posses information.  The _original_ query for a link/hostname may then be asked to all returned *hLS* instances to find the answer.  
+
+In the above example, if an IDC where looking for _*host2.a.edu*_ so it can find a link, it must first look for where data for _*a.edu*_ may exist.  An even more specific query would be where _*OSCARS*_ data (the designation we are using for the host/link mappings) for _*a.edu*_ lives.  In the case of the 1st query the *gLS* will return that _*both*_ *hLS* instances would have data on *a.edu*, the 2nd query would only return the second *hLS*.  Once a list of *hLS* instances has been returned, the IDC can proceed as it has done in the past: send the query to translate _*host2.a.edu*_ into a link to all of the *hLS* instances.  
+
+An example of the _warm up_ discovery query is pictured below:
+
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+      <SOAP-ENV:Body>
+        <nmwg:message type="LSQueryRequest" 
+                      id="msg1" 
+                      xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+
+            <nmwg:metadata id="meta1">
+                <xquery:subject id="sub1">
+
+                  <!--domain value gets replaced with the name to lookup -->
+
+  declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
+  declare namespace summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/";
+  declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";
+  declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";
+  declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";
+  for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata
+    let $metadata_id := $metadata/@id  
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id]
+    where $data/nmwg:metadata/nmwg:eventType[text()="http://oscars.es.net/OSCARS"] and $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type="dns" and text()="<!--domain-->"]
+    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint
+
+                </xquery:subject>
+                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
+                <xquery:parameters id="param1">
+                    <nmwg:parameter name="lsOutput">native</nmwg:parameter>
+                </xquery:parameters>
+            </nmwg:metadata>
+            
+            <nmwg:data metadataIdRef="meta1" id="data1"/>
+
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
+}}}
+
+Alternatively, this query could be used (omitting the domain lookup portion):
+
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+      <SOAP-ENV:Body>
+        <nmwg:message type="LSQueryRequest" 
+                      id="msg1" 
+                      xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                      xmlns:xquery="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/">
+
+            <nmwg:metadata id="meta1">
+                <xquery:subject id="sub1">
+
+  declare namespace nmwg="http://ggf.org/ns/nmwg/base/2.0/";
+  declare namespace summary="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/";
+  declare namespace perfsonar="http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/";
+  declare namespace psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/";
+  declare namespace nmtb="http://ogf.org/schema/network/topology/base/20070828/";
+  for $metadata in /nmwg:store[@type="LSStore"]/nmwg:metadata
+    let $metadata_id := $metadata/@id  
+    let $data := /nmwg:store[@type="LSStore"]/nmwg:data[@metadataIdRef=$metadata_id]
+    where $data/nmwg:metadata/nmwg:eventType[text()="http://oscars.es.net/OSCARS"]
+    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint
+
+                </xquery:subject>
+                <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>
+                <xquery:parameters id="param1">
+                    <nmwg:parameter name="lsOutput">native</nmwg:parameter>
+                </xquery:parameters>
+            </nmwg:metadata>
+            
+            <nmwg:data metadataIdRef="meta1" id="data1"/>
+
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
+}}}
+
+This would identify *hLS* instances that are known to have *DCN* data which can then be cached.  A _brute force_ approach would then be to update this cache periodically and always query these instances for the host/link mapping.
+
+The output of either of these queries will be the following on success:
+
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body>
+        <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                        messageIdRef="msg1" 
+                        id="message.12474424" 
+                        type="LSQueryResponse">
+            <nmwg:metadata metadataIdRef="meta1" id="metadata.1620043">
+                <nmwg:eventType>success.ls.query</nmwg:eventType>
+            </nmwg:metadata>
+            <nmwg:data metadataIdRef="metadata.1620043" id="data.15522751">
+                <psservice:datum xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">
+                    <psservice:accessPoint xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">http://localhost:9991/perfSONAR_PS/services/gLS</psservice:accessPoint>
+                    <psservice:accessPoint xmlns:psservice="http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/">http://localhost:9992/perfSONAR_PS/services/gLS</psservice:accessPoint>
+                </psservice:datum>
+            </nmwg:data>
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
+}}}
+
+And the following on failure:
+
+{{{
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+                   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+    <SOAP-ENV:Header/>
+    <SOAP-ENV:Body>
+        <nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" 
+                        messageIdRef="msg1" 
+                        id="message.12474424" 
+                        type="LSQueryResponse">
+            <nmwg:metadata metadataIdRef="meta1" id="metadata.1620043">
+                <nmwg:eventType>error.ls.query.empty_results</nmwg:eventType>
+            </nmwg:metadata>
+            <nmwg:data metadataIdRef="metadata.1620043" id="data.15522751">
+                <nmwgr:datum xmlns:nmwgr="http://ggf.org/ns/nmwg/result/2.0/">Nothing returned for search.</nmwgr:datum>
+            </nmwg:data>
+        </nmwg:message>
+    </SOAP-ENV:Body>
+</SOAP-ENV:Envelope> 
+}}}
+
+==== Data Format ==== 
 
 An example in the changes required to the format is below, in the context of a registration message:
 
