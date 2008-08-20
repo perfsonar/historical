@@ -431,18 +431,21 @@ sub storeData
  
 	# store results
 	my ( $src,$dst,$md,$data);
+	my $ip_name = $agent->source()?$agent->source():$agent->sourceIp();
+	
 	eval {
-	    $src = $self->database()->soi_host({ ip_name => $agent->source(), ip_number => $agent->sourceIp() });
+	    $src = $self->database()->soi_host({ ip_name => $ip_name, ip_number =>   $agent->sourceIp() });
 	};
 	if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host: " . $agent->source() . "  " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
+	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
-	}	 
+	}
+	$ip_name =  $agent->destination()?$agent->destination():$agent->destinationIp();	 
 	eval {	
-	   $dst = $self->database()->soi_host({ ip_name => $agent->destination(),ip_number => $agent->destinationIp() });
+	   $dst = $self->database()->soi_host({ ip_name => $ip_name,ip_number => $agent->destinationIp() });
 	};
 	if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  " . $agent->destination() . "  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
+	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
 	    return -1;
 	}	  
         eval {	
