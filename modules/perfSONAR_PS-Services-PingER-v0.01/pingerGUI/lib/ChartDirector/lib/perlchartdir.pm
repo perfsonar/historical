@@ -23,14 +23,19 @@ sub autoImport
 
 if ($] >= 5.008) {
 	use Config;
-	my $cdlibext = ($] >= 5.01) ? "510" : "58";
-	if ($Config{"use64bitint"} && (4 < $Config{"ivsize"})) {
-		$cdlibext .= "i64";
-	}
 	if (($Config{"useithreads"}) || ($Config{"use5005threads"})) {
-		$cdlibext .= "mt";
+		if ($Config{"use64bitint"}) {
+			autoImport("perlchartdir58i64mt");
+		} else {
+			autoImport("perlchartdir58mt");
+		}
+	} else {
+		if ($Config{"use64bitint"}) {
+			autoImport("perlchartdir58i64");
+		} else {
+			autoImport("perlchartdir58");
+		}
 	}
-	autoImport("perlchartdir".$cdlibext);
 }
 elsif ($] >= 5.006) {
 	use Config;

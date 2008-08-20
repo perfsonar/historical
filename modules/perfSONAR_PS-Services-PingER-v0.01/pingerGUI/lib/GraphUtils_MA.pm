@@ -1,6 +1,8 @@
 package GraphUtils_MA;
 use strict;
 use warnings;
+use English qw( -no_match_vars );
+use version; our $VERSION = '0.09';
 
 =head1 NAME
 
@@ -16,47 +18,37 @@ use warnings;
 =head1 SYNOPSIS
 
        
-     use GraphUtils_MA qw(&build_graph);
+     use GraphUtils_MA qw(build_graph);
     
-    my  $graphs = &build_graph({gtype => $gtype , 
-                                            upper_rtt => $upper_rt,
-                                            gpresent => $gpresent, 
-                                            time_start =>$time_start, 
-					    time_end => $time_end,  
-					    gmt_offset=> $gmt_off,
-					    time_label =>  $ret_gmt},
-					    \@links  );  
-    #returns array of such pairs :  { image => $local_filename};
-    
+     my $images =  build_graph(\%params, \@links); 
+         
       
 =head1 EXPORTED 
 
+
 =cut
 
-use FindBin qw($Bin);
-use lib "$Bin/../lib";  
-###use GD;
 use CGI qw(:standard);
 use GraphIt qw(graph_it2);
 use Data::Dumper;
- 
-use Exporter ();
-use base Exporter;
- 
+use Exporter ();  
+use base qw(Exporter);
+our @EXPORT = ();
 our @EXPORT_OK = qw(build_graph);
 use Time::gmtime;
-use PingerConf qw(%GENERAL_CONFIG $LOGGER  $COOKIE $SESSION $CGI $PARAMS $REMOTE_MA $MENU BASEDIR $LINKS  get_data  get_links  defaults
-	         %Y_label %legends  %mn2nm   storeSESSION %selection );
-use TimeUtils qw(max min);
+use PingerConf qw(%GENERAL_CONFIG $LOGGER  $LINKS  get_data  %Y_label %legends);
+use TimeUtils qw(max min get_time_hash);
 use POSIX qw(strftime);
 
-  
-=head2  build_graph 
-
-       accepts hash ref to the parameters and hashref to the links
-       returns arrayref to the {image => <URL> } 
  
-=cut
+=head2  build_graph
+
+   pre-processing and call for actual graphing function
+   accepts two parameters - hashref to parameyers and arrayref to the link pairs
+   returns arrayref with each arrays element as hashref of form:
+    { image => $local_filename, alt => $title}
+   
+=cut 
 
 sub build_graph {
     my ($params, $links) = @_;
@@ -105,6 +97,7 @@ sub build_graph {
 	my %summ  = ();   
         my $results = get_data({ link =>   $metaID_key, start =>  $tm_s, end => $tm_d } );
 	my $previous_ind = 0;
+	
 	foreach my $data_row (@{$results}) {
 	    my  $tm_st =  $data_row->[0];
 	    my  $datum_href =	$data_row->[1];
@@ -181,10 +174,10 @@ sub build_graph {
          $title
              = "Duplicated/Reordered packets\n $src_dest_string, pinged by $packet_size   bytes"
              if $gtype eq 'dupl';
- 
+         $LOGGER->info('DATA : ' . Dumper   \%summ);
          $new_fl = &graph_it2( $gpr, $title, $gtype, \@o_x,  \%summ,  "Date, $time_label", $Y_label{$gtype}, $filename);
         if ( $new_fl && !( -z $new_fl ) ) {
-            push  @img_flns, { image => $local_filename};
+            push  @img_flns, { image => $local_filename, alt => $title};
         }
     }   
     
@@ -199,11 +192,16 @@ sub build_graph {
 
     Maxim Grigoriev, 2004-2008, maxim@fnal.gov
     
+=head1 COPYRIGHT
 
-=head1 BUGS
+Copyright (c) 2008, Fermi Research Alliance (FRA)
 
-    Hopefully None
+=head1 LICENSE
+
+You should have received a copy of the Fermitool license along with this software.
+ 
 
  
+
 =cut
 

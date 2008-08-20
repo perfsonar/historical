@@ -1,0 +1,36 @@
+
+Instructions for Apache config:
+send any questions to Maxim Grigoriev, maxim_at_fnal_dot_gov
+-------------------------------
+
+If this file is located at /home/netadmin/LHCOPN/perfSONAR-PS/trunk/modules/perfSONAR_PS-Services-PingER-v0.01/pingerGUI/
+then you or sysadmi of the host should add next lines in the Apache httpd.conf.
+
+
+ScriptAlias /gui-bin/ "/home/netadmin/LHCOPN/perfSONAR-PS/trunk/modules/perfSONAR_PS-Services-PingER-v0.01/pingerGUI/cgi-bin/"
+Alias /stuff/   "/home/netadmin/LHCOPN/perfSONAR-PS/trunk/modules/perfSONAR_PS-Services-PingER-v0.01/pingerGUI/html/stuff/"
+Alias /graphsMA/   "/tmp/graphsMA"
+<Directory /gui-bin/>  
+    AllowOverride None
+    Options None
+    Order deny,allow
+    Deny from all
+##  allow only http requests from your.domain 
+    Allow from .your.domain
+</Directory>
+<Directory /graphsMA/>
+    AllowOverride None
+    Options None
+    Order deny,allow
+    Deny from all
+##  allow only http requests from your.domain 
+    Allow from .your.domain    
+</Directory>
+<Directory  /stuff/>
+    AllowOverride None
+    Options None
+    Order deny,allow
+    Deny from all
+##  allow only http requests from your.domain 
+    Allow from .your.domain    
+</Directory>

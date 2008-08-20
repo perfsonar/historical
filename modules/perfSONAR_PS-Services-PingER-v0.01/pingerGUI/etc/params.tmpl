@@ -1,4 +1,4 @@
-<div id="params">
+ <div id="params">
 <TABLE   class="main"  cols="6"> 
    <TR>
    <TD   colspan="6">
@@ -6,25 +6,41 @@
     </TD>
   </TR>
   <TR>
-      <TMPL_LOOP NAME=time_params>
-       <TD  colspan="2"> 
-             <TABLE class="params">	 
-	        <TR>
-		   <span class="snbld"><TMPL_VAR NAME=when></span>
-		   <TMPL_LOOP NAME=date_parts>   
-		     <TD class="smver_2"> 
-		         <SELECT ID="<TMPL_VAR NAME=when_type>"  NAME="<TMPL_VAR NAME=when_type>" class="fc_st">
-                              <TMPL_LOOP NAME=time_options>   
-                                <OPTION VALUE="<TMPL_VAR NAME=time_option>><TMPL_VAR NAME=time_option_label>
-			      </TMPL_LOOP>     
-                          </SELECT>
-		      </TD>
-		    </TMPL_LOOP>     
-                </TR>
-	     </TABLE>
-        </TD>
-     </TMPL_LOOP>
-     <TD   colspan="2">
+    <TD  colspan="2">
+    <input  type="text" id="Start_Time" name="Start_Time"/>
+    <button id="trigger1">Start Time</button>
+    <script type="text/javascript">
+    Calendar.setup(
+    { 
+      isPopup: "true",
+      timeFormat:   "24",
+      showsTime: "true",
+    
+      inputField  : "Start_Time",         // ID of the input field
+      ifFormat    : "%Y-%m-%dT%H:%M:%S",    // the date format
+      button      : "trigger1"       // ID of the button
+    }
+   );
+  </script>
+
+   
+    <TD   colspan="2">
+    <input  type="text" id="End_Time" name="End_Time"/>
+    <button id="trigger2">End Time</button>
+    <script type="text/javascript">
+    Calendar.setup(
+    { 
+      timeFormat:   "24",
+      showsTime: "true",
+     
+      inputField  : "End_Time",         // ID of the input field
+      ifFormat    : "%Y-%m-%dT%H:%M:%S",    // the date format
+      button      : "trigger2"       // ID of the button
+    }
+   );
+  </script>
+     </TD>  
+       <TD   colspan="2">
        <TABLE class="params">	 
 	        <TR>
 		   <span class="snbld">GMT offset</span>
@@ -37,7 +53,7 @@
                     </TD>
 	      </TR>
       </TABLE>    
-     </TD>         
+     </TD>             
   </TR>
    <TR>
    <TD   colspan="6">
@@ -80,15 +96,14 @@
   <input type="button"  class="buttons" 
 	  	        name="get_graph"  
 		        id="get_graph"
-                        onClick="displayGraph(['From:hour','From:day','From:month','From:year','To:hour','To:day','To:month','To:year',
-		                               'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'NO_CACHE'],['graph']);" 
+                        onClick="displayGraph(['Start_Time', 'End_Time',  'gmt_offset',  'gtype', 'upper_rt','gpresent',   'links', 'NO_CACHE'],['graph']);" 
                         value="Get Graph"/>
   </TD>   
   <TD colspan="3">
   <input type="button"  class="buttons" 
 	  	        name="resetSession"  
 		        id="resetSession"
-                        onClick="resetSession(['resetSession', 'NO_CACHE'],['remote_ma','matching', 'graph', 'linksdiv', 'params']);" 
+                        onClick="resetSession(['resetSession', 'NO_CACHE'],['remote_ma','matching', 'linksdiv' ]);" 
                         value="Reset Session"/>
   </TD> 
 </TR>

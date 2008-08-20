@@ -1,51 +1,49 @@
 package GraphIt;
 use strict;
-use FindBin qw($Bin);
-use lib  ("$Bin/../lib/ChartDirector/lib", "$Bin/../lib");
-use perlchartdir;
-
-use Exporter ();
-use base Exporter; 
- 
-our @EXPORT_OK = qw(graph_it2);
-use PingerConf  qw( %GENERAL_CONFIG $LOGGER  $COOKIE $SESSION $CGI  BASEDIR %Y_label %legends  %mn2nm  %selection);
+use warnings;
+use English qw( -no_match_vars );
+use version; our $VERSION = '0.09'; 
 
 =head1 NAME
 
      
-     GraphIt -  module to build graphs 
+    GraphIt  -  creates graphs
 
 =head1 DESCRIPTION
 
-       
-      GraphIt  module is main supplemental for pingerUI  CGI script, based on ChartDirector GUI API
+      GraphIt  -  creates various graphs by utilizing ChartDirector API
       
-      
-=head1 SYNOPSIS
-
-       
-     use GraphIt qw(graph_it2);
-     my $image_file_name = graph_it2( $gpr, $title, $gtyp, $ox, $summs, $x_l, $y_l, $fl_name );
       
 =head1 EXPORTED 
 
- 
-=head2  graph_it2 
-
-    accepts long list of params
-    $gpr - lines, bars , etc
-    $title - title of the graph
-    $gtyp - pinger depended type of the metrics combo
-    $ox - arrayref ot OX
-    $summs - arrayref to OYs 
-    $x_l - OX label
-    $y_l - OY label
-    $fl_name - base filename
-     
-    returns name of the image file on the local filesystem
-
 =cut
+ 
+use FindBin qw($Bin);
+use lib "$Bin/../lib/ChartDirector/lib";
+use perlchartdir;
+use PingerConf  qw( %GENERAL_CONFIG $LOGGER %Y_label %legends);
+ 
+use Exporter (); 
+use base qw(Exporter);
+our @EXPORT = ();
+our @EXPORT_OK = qw(graph_it2);
 
+=head2 graph_it2
+  
+         creates graph 
+	 accepts:
+	     $gpr  - type of the graph ( area, lines ..etc)
+	     $title - title of the graph 
+	     $gtyp - type of the metric ( rtt, rtloss, etc)
+	     $ox - arrayref ot the OX
+	     $summs - arrayref to the OY
+	     $x_l - OX label
+	     $y_l - OY label
+	     $fl_name  - base filename 
+	 returns filename of the PNG graph
+  
+=cut
+ 
 sub graph_it2 {
     my ( $gpr, $title, $gtyp, $ox, $summs, $x_l, $y_l, $fl_name ) = @_;
 
@@ -224,8 +222,8 @@ sub graph_it2 {
             $layer->addDataSet( $summs->{maxRtt}{count},  -1, 'MAX RTT' );
         }
     }
+
  
-    # output the chart
     $c->makeChart("$fl_name.png");
     return "$fl_name.png";
 }
@@ -234,14 +232,20 @@ sub graph_it2 {
 
 __END__
 
+
 =head1   AUTHOR
 
-    Maxim Grigoriev, 2006-2008, maxim@fnal.gov
+    Maxim Grigoriev,  2008, maxim@fnal.gov
     
+=head1 COPYRIGHT
 
-=head1 BUGS
+Copyright (c) 2008, Fermi Research Alliance (FRA)
 
-    Hopefully None
+=head1 LICENSE
+
+You should have received a copy of the Fermitool license along with this software.
+ 
 
  
+
 =cut

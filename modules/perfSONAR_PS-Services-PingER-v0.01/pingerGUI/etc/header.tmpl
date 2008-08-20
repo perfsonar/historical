@@ -7,21 +7,52 @@
  </noscript>
    <!--  <LINK HREF="/cdincludes/style.css" TYPE="text/css" REL="stylesheet"> -->
     <LINK HREF="/stuff/mystyle.css" TYPE="text/css" REL="stylesheet"> 
-     <script src="/stuff/scriptaculous-js-1.8.1/lib/prototype.js" type="text/javascript"></script>
-     <script src="/stuff/scriptaculous-js-1.8.1/src/scriptaculous.js" type="text/javascript"></script>
-     <script src="/stuff/gwidgets/js/base.js" type="text/javascript" charset="utf-8"></script>
-     <script src="/stuff/gwidgets/js/gwidgets.js" type="text/javascript" charset="utf-8"></script>
-  <link rel="stylesheet" href="/stuff/gwidgets/css/gwidgets.css" type="text/css" media="screen" title="gWidgets" charset="utf-8"/>
-  <script type="text/javascript" charset="utf-8">
-     var gWidget_Options = {
-	toggleEffect: 'appear',
-	msgClose:'done',
-	msgWaiting:'page is loading...',
-	msgError:'connection failed.',
-	useRefresh:false,
-	eventOn: 'click',
-	tipTitle: false};
-   </script>
+    <style type="text/css">@import url(/stuff/jscalendar-1.0/calendar-win2k-1.css);</style>
+    <script type="text/javascript" src="/stuff/jscalendar-1.0/calendar.js"></script>
+    <script type="text/javascript" src="/stuff/jscalendar-1.0/lang/calendar-en.js"></script>
+    <script type="text/javascript" src="/stuff/jscalendar-1.0/calendar-setup.js"></script>
+    <script type="text/javascript" src="/stuff/js/prototype/prototype.js"></script> 
+    <script type="text/javascript" >
+    function callInProgress (xmlhttp) {
+switch (xmlhttp.readyState) {
+case 1: case 2: case 3:
+return true;
+break;
+// Case 4 and 0
+default:
+return false;
+break;
+}
+}
+function showFailureMessage() {
+alert('uh oh, it looks like the network is down. Try again shortly');
+}
+// Register global responders that will occur on all AJAX requests
+Ajax.Responders.register({
+onCreate: function(request) {
+request['timeoutId'] = window.setTimeout(
+function() {
+// If we have hit the timeout and the AJAX request is active, abort it and let the user know
+if (callInProgress(request.transport)) {
+request.transport.abort();
+showFailureMessage();
+// Run the onFailure method if we set one up when creating the AJAX object
+if (request.options['onFailure']) {
+request.options['onFailure'](request.transport, request.json);
+}
+}
+},
+5000 // Five seconds
+);
+},
+onComplete: function(request) {
+// Clear the timeout, the request completed ok
+window.clearTimeout(request['timeoutId']);
+}
+});
+
+    </script>
+
     <title><TMPL_VAR NAME=Title></title>
   
 </head> 
