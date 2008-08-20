@@ -5,7 +5,7 @@ use base 'Exporter';
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -37,13 +37,13 @@ Creates a 'control' key for the control database that keeps track of time.
 sub createControlKey {
     my (@args) = @_;
     my $parameters = validateParams( @args, { key => 1, time => 1, auth => 0 } );
-    
+
     my $keyElement = "  <nmwg:metadata id=\"" . $parameters->{key} . "-control\" metadataIdRef=\"" . $parameters->{key} . "\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
     $keyElement = $keyElement . "    <nmwg:parameters id=\"control-parameters\">\n";
     $keyElement = $keyElement . "      <nmwg:parameter name=\"timestamp\">\n";
-    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $parameters->{time} . "</nmtm:time>\n";    
+    $keyElement = $keyElement . "        <nmtm:time type=\"unix\" xmlns:nmtm=\"http://ggf.org/ns/nmwg/time/2.0/\">" . $parameters->{time} . "</nmtm:time>\n";
     $keyElement = $keyElement . "      </nmwg:parameter>\n";
-    if ( exists $parameters->{auth} and $parameters->{auth} ) { 
+    if ( exists $parameters->{auth} and $parameters->{auth} ) {
         $keyElement = $keyElement . "      <nmwg:parameter name=\"authoritative\">yes</nmwg:parameter>\n";
     }
     else {
@@ -156,7 +156,8 @@ __END__
 
 =head1 SEE ALSO
 
-L<Params::Validate>, L<perfSONAR_PS::Common>
+L<Exporter>, L<Params::Validate>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -164,12 +165,12 @@ To join the 'perfSONAR-PS' mailing list, please visit:
 
 The perfSONAR-PS subversion repository is located at:
 
-  https://svn.internet2.edu/svn/perfSONAR-PS 
-  
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
+  https://svn.internet2.edu/svn/perfSONAR-PS
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -181,9 +182,8 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework
-along with this software.  If not, see
-<http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
@@ -192,5 +192,3 @@ Copyright (c) 2004-2008, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
-# vim: expandtab shiftwidth=4 tabstop=4
-

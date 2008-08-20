@@ -796,10 +796,10 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -811,9 +811,8 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework
-along with this software.  If not, see
-<http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 

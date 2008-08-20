@@ -7,7 +7,7 @@ use fields 'STATE', 'LOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -21,19 +21,23 @@ handles specific messages from interested actors in search of data and services
 that are registered with the LS.  There are four major message types that this
 service can act upon:
 
- - LSRegisterRequest   - Given the name of a service and the metadata it
-                         contains, register this information into the LS.
-                         Special considerations should be given to already
-                         registered services that wish to augment already
-                         registered data.
- - LSDeregisterRequest - Removes all or selective data about a specific service
-                         already registered in the LS.
- - LSKeepaliveRequest  - Given some info about already registered data (i.e. a 
-                         'key') update the internal state to reflect that this
-                         service and it's data are still alive and valid.
- - LSQueryRequest      - Given a descriptive query (written in the XPath or
-                         XQuery langugages) return any relevant data or a 
-                         descriptive error message.
+ - LSRegisterRequest   -      Given the name of a service and the metadata it
+                              contains, register this information into the LS.
+                              Special considerations should be given to already
+                              registered services that wish to augment already
+                              registered data.
+ - LSDeregisterRequest -      Removes all or selective data about a specific
+                              service already registered in the LS.
+ - LSKeepaliveRequest  -      Given some info about already registered data
+                              (i.e. a 'key') update the internal state to
+                              reflect that this service and it's data are still
+                              alive and valid.
+ - LSLookupRequest
+   LSQueryRequest      -      Given a descriptive query (written in the XPath or
+                              XQuery langugages) return any relevant data or a 
+                              descriptive error message.
+ - LSKeyRequest        -      Given a service description, return the stored 
+                              internal key for the dataset.
 
 The LS in general offers a web services (WS) interface to the Berkeley/Oracle
 DB XML, a native XML database.   
@@ -63,35 +67,53 @@ my %ls_namespaces = (
     netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
     neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
     netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",   
+    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
     select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
+    dcn           => "http://ggf.org/ns/nmwg/tools/dcn/2.0/",
     perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
     psservice     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/",
     xquery        => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/",
     xpath         => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xpath/1.0/",
-    nmwgt         => "http://ggf.org/ns/nmwg/topology/2.0/",
-    nmwgtopo3     => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",
     pinger        => "http://ggf.org/ns/nmwg/tools/pinger/2.0/",
     nmwgr         => "http://ggf.org/ns/nmwg/result/2.0/",
     traceroute    => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     tracepath     => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     ping          => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
-    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",        
-    ctrlplane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
-    CtrlPlane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
-    ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
-    ethernet      => "http://ogf.org/schema/network/topology/ethernet/20070828/",
-    ipv4          => "http://ogf.org/schema/network/topology/ipv4/20070828/",
-    ipv6          => "http://ogf.org/schema/network/topology/ipv6/20070828/",
+    nmwgt         => "http://ggf.org/ns/nmwg/topology/2.0/",
+    nmwgtopo3     => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmwgtopo3l4   => "http://ggf.org/ns/nmwg/topology/l4/3.0/",
+    nmwgtopo3l3   => "http://ggf.org/ns/nmwg/topology/l3/3.0/",
+    nmwgtopo3l2   => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
     nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtl2         => "http://ogf.org/schema/network/topology/l2/20070828/",
     nmtl3         => "http://ogf.org/schema/network/topology/l3/20070828/",
     nmtl4         => "http://ogf.org/schema/network/topology/l4/20070828/",
-    nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
-    nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
+    nmwgt3        => "http://ggf.org/ns/nmwg/topology/base/3.0/",
+    nmttcp        => "http://ogf.org/schema/network/topology/l4/20070828/tcp/20070828/",
+    nmtudt        => "http://ogf.org/schema/network/topology/l4/20070828/udt/20070828/",
+    ethernet      => "http://ogf.org/schema/network/topology/ethernet/20070828/",
+    ipv4          => "http://ogf.org/schema/network/topology/ipv4/20070828/",
+    ipv6          => "http://ogf.org/schema/network/topology/ipv6/20070828/",
     sonet         => "http://ogf.org/schema/network/topology/sonet/20070828/",
-    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"  
+    transport     => "http://ogf.org/schema/network/topology/transport/20070828/",
+    nmtb_jul      => "http://ogf.org/schema/network/topology/base/20070707/",
+    nmtopo_jul    => "http://ogf.org/schema/network/topology/base/20070707/",
+    nmtl2_jul     => "http://ogf.org/schema/network/topology/l2/20070707/",
+    nmtl3_jul     => "http://ogf.org/schema/network/topology/l3/20070707/",
+    nmtl4_jul     => "http://ogf.org/schema/network/topology/l4/20070707/",
+    nmttcp_jul    => "http://ogf.org/schema/network/topology/l4/20070707/tcp/20070707/",
+    nmtudt_jul    => "http://ogf.org/schema/network/topology/l4/20070707/udt/20070707/",
+    ethernet_jul  => "http://ogf.org/schema/network/topology/ethernet/20070707/",
+    ipv4_jul      => "http://ogf.org/schema/network/topology/ipv4/20070707/",
+    ipv6_jul      => "http://ogf.org/schema/network/topology/ipv6/20070707/",
+    sonet_jul     => "http://ogf.org/schema/network/topology/sonet/20070707/",
+    transport_jul => "http://ogf.org/schema/network/topology/transport/20070707/",
+    ctrlplane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
+    CtrlPlane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
+    ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/"
 );
 
 =head1 API
@@ -115,25 +137,25 @@ sub init {
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::LS::LS");
     $self->{STATE}  = ();
 
-    unless ( exists $self->{CONF}->{"ls"}->{"metadata_db_name"}
+    if ( exists $self->{CONF}->{"ls"}->{"metadata_db_name"}
         and $self->{CONF}->{"ls"}->{"metadata_db_name"} )
     {
-        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
-        return -1;
-    }
-    else {
         if ( exists $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"ls"}->{"metadata_db_name"} =~ "^/" ) {
                 $self->{CONF}->{"ls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_name"};
             }
         }
     }
+    else {
+        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+        return -1;
+    }
 
     unless ( exists $self->{CONF}->{"ls"}->{"metadata_db_file"}
         and $self->{CONF}->{"ls"}->{"metadata_db_file"} )
     {
-        $self->{LOGGER}->warn("Setting 'metadata_db_file' to 'store.dbxml'");
-        $self->{CONF}->{"ls"}->{"metadata_db_file"} = "store.dbxml";
+        $self->{LOGGER}->warn("Setting 'metadata_db_file' to 'lsstore.dbxml'");
+        $self->{CONF}->{"ls"}->{"metadata_db_file"} = "lsstore.dbxml";
     }
 
     if ( exists $self->{CONF}->{"ls"}->{"ls_ttl"} and $self->{CONF}->{"ls"}->{"ls_ttl"} ) {
@@ -148,8 +170,9 @@ sub init {
         and $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} )
     {
         if ( exists $self->{CONF}->{"ls"}->{"reaper_interval"}
-            and $self->{CONF}->{"ls"}->{"reaper_interval"} ) {
-            $self->{LOGGER}->info("Using legacy 'gls:reaper_interval' value: \"".$self->{CONF}->{"ls"}->{"reaper_interval"}."\".");
+            and $self->{CONF}->{"ls"}->{"reaper_interval"} )
+        {
+            $self->{LOGGER}->info( "Using legacy 'gls:reaper_interval' value: \"" . $self->{CONF}->{"ls"}->{"reaper_interval"} . "\"." );
             $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
             delete $self->{CONF}->{"ls"}->{"reaper_interval"};
         }
@@ -172,6 +195,7 @@ sub init {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
+    $metadatadb->checkpoint( { error => \$error } );
     $metadatadb->closeDB( { error => \$error } );
     return 0;
 }
@@ -323,7 +347,7 @@ Opens the XMLDB and returns the handle if there was not an error.
 
 sub prepareDatabases {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 0 } );
+    my $parameters = validateParams( @args, { recover => 0, doc => 0 } );
 
     my $error      = q{};
     my $metadatadb = new perfSONAR_PS::DB::XMLDB(
@@ -333,10 +357,19 @@ sub prepareDatabases {
             ns   => \%ls_namespaces,
         }
     );
-    unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
-        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
-        statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
-        return;
+    if ( exists $parameters->{recover} and $parameters->{recover} ) {
+        unless ( $metadatadb->prep( { txn => q{}, error => \$error } ) == 0 ) {
+            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+            statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
+            return;
+        }
+    }
+    else {
+        unless ( $metadatadb->openDB( { txn => q{}, error => \$error } ) == 0 ) {
+            $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"ls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"ls"}->{"metadata_db_file"} . "\": " . $error );
+            statusReport( $parameters->{doc}, "metadata." . genuid(), q{}, "data." . genuid(), "error.ls.xmldb", $error ) if $parameters->{doc};
+            return;
+        }
     }
     return $metadatadb;
 }
@@ -568,8 +601,8 @@ sub lsRegisterRequestUpdateNew {
     }
     $parameters->{metadatadb}->remove( { name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
     $parameters->{metadatadb}->remove( { name => $parameters->{mdKey}, txn => $parameters->{dbTr}, error => \$error } );
-    $self->{STATE}->{"messageKeys"}->{$parameters->{mdKey}} = 0;
-    
+    $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } = 0;
+
     unless ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2 ) {
         if ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} ) {
             $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
@@ -598,7 +631,7 @@ sub lsRegisterRequestUpdateNew {
                 my $insRes
                     = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( { dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                $dCount++ if $insRes == 0;
+                $dCount++    if $insRes == 0;
             }
         }
 
@@ -665,7 +698,7 @@ sub lsRegisterRequestUpdate {
                 my $insRes = $parameters->{metadatadb}
                     ->insertIntoContainer( { content => createLSData( { dataId => $parameters->{mdKey} . "/" . $cleanHash, metadataId => $parameters->{mdKey}, data => $d_content->toString } ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                $dCount++ if $insRes == 0;
+                $dCount++    if $insRes == 0;
             }
         }
     }
@@ -761,7 +794,7 @@ sub lsRegisterRequestNew {
             unless ($success) {
                 my $insRes = $parameters->{metadatadb}->insertIntoContainer( { content => createLSData( { dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                $dCount++ if $insRes == 0;
+                $dCount++    if $insRes == 0;
             }
         }
     }
@@ -1094,10 +1127,10 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>, 
-L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>, 
+L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
+L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>,
-L<perfSONAR_PS::Error_compat>
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -1110,7 +1143,7 @@ The perfSONAR-PS subversion repository is located at:
 Questions and comments can be directed to the author, or the mailing list.  Bugs,
 feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -1132,4 +1165,3 @@ Copyright (c) 2004-2008, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
-# vim: expandtab shiftwidth=4 tabstop=4
