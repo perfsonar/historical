@@ -117,16 +117,34 @@ sub init {
 	my ($self, $handler) = @_;
     
     eval {
-    	
+    	# ls stuff
+    	$self->configureConf( 'enable_registration', undef, $self->getConf( 'enable_registration') );
+
     	# info about service
     	$self->configureConf( 'service_name', $processName, $self->getConf('service_name') );
     	$self->configureConf( 'service_type', 'MA', $self->getConf('service_type') );
-    	$self->configureConf( 'service_description', $processName . ' Service', $self->getConf('service_description') );
-    	$self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
+
+        my $default_description = $processName . ' Service';
+        if ($self->getConf("site_name")) {
+            $default_description .= " at ".$self->getConf("site_name");
+        }
+        if ($self->getConf("site_location")) {
+            $default_description .= " in ".$self->getConf("site_location");
+        }
+    	$self->configureConf( 'service_description', $default_description, $self->getConf('service_description') );
+
+        my $default_accesspoint;
+        if ($self->getConf("external_address")) {
+            $default_accesspoint = 'http://'.$self->getConf("external_address").':'.$self->{PORT}.$self->{ENDPOINT};
+        }
+    	$self->configureConf( 'service_accesspoint', $default_accesspoint, $self->getConf('service_accesspoint') );
+        if ($self->getConf("enable_registration") and not $self->getConf("service_accesspoint")) {
+	    $logger->logdie("Must have either a service_accesspoint or an external address specified if you enable registration");
+	}
     	
     	$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
-	$self->configureConf( 'db_port', undef, $self->getConf('db_port') );
-	$self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+        $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+        $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
     	$self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
 
     	$self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
@@ -134,9 +152,6 @@ sub init {
     	# other
     	
         $self->configureConf( 'query_size_limit', undef, $self->getConf('query_size_limit') );
-    	# ls stuff
-    	$self->configureConf( 'enable_registration', undef, $self->getConf( 'enable_registration') );
-
 
     };
     if ( $@ ) {
@@ -231,7 +246,6 @@ sub configureConf
 				#$logger->info( "VALUE: $value,  SIZE: $index");
 
 				$value = $value->[$index];
-				$logger->fatal( "Value for '$key' set to '$value'");
 			}
 			$self->{CONF}->{$basename}->{$key} = $value;
 		} else {
@@ -254,9 +268,14 @@ sub configureConf
 
 sub getConf
 {
-	my $self = shift;
-	my $key = shift;
-	return $self->{'CONF'}->{$basename}->{$key};
+    my $self = shift;
+    my $key = shift;
+    if (defined $self->{'CONF'}->{$basename}->{$key}) {
+	$logger->info( "Value for '$basename/$key' is set" );
+        return $self->{'CONF'}->{$basename}->{$key};
+    } else {
+        return $self->{'CONF'}->{$key};
+    }
 }
 
 =head2 ls

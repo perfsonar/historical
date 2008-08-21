@@ -179,20 +179,17 @@ sub init {
         return -1;
     }
 
+    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
+        $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
+    }
+
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"}
         and $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} )
     {
         $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} = 0;
     }
 
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
-        {
-            $self->{LOGGER}->error("No access point specified for perfSONARBUOY service");
-            return -1;
-        }
-
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
         {
@@ -207,32 +204,40 @@ sub init {
             }
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
+        unless ( exists $self->{CONF}->{"snmp"}->{"ls_registration_interval"} )
         {
-            if ( defined $self->{CONF}->{"ls_registration_interval"}
-                and $self->{CONF}->{"ls_registration_interval"} )
-            {
-                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-            }
-            else {
-                $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
-                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = 1800;
-            }
+            $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = $self->{CONF}->{ls_registration_interval};
         }
 
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
+        if (not $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}) {
+            $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
+            $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 1800;
+        }
+
+        if ( not $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
         {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} = "http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT};
-            $self->{LOGGER}->warn( "Setting 'service_accesspoint' to 'http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT} . "'." );
+            unless ($self->{CONF}->{external_address}) {
+                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external address of the machine);
+                return -1;
+            }
+
+            my $accessPoint = "http://".$self->{CONF}->{external_address}.":".$self->{PORT}.$self->{ENDPOINT};
+            $self->{LOGGER}->info("Setting service access point to $accessPoint");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
         {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} = "perfSONAR_PS perfSONARBUOY MA";
-            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS perfSONARBUOY MA'.");
+            my $description = "perfSONAR_PS perfSONARBUOY MA";
+            if ($self->{CONF}->{site_name}) {
+                $description .= " at ".$self->{CONF}->{site_name};
+            }
+            if ($self->{CONF}->{site_location}) {
+                $description .= " in ".$self->{CONF}->{site_location};
+            }
+
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} = $description;
+            $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
@@ -1005,7 +1010,7 @@ sub needLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} );
+    return ($self->{CONF}->{"perfsonarbuoy"}->{enable_registration} or $self->{CONF}->{enable_registration});
 }
 
 =head2 registerLS($self $sleep_time)

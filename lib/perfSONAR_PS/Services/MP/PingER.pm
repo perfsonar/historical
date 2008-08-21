@@ -109,19 +109,38 @@ sub init
 		unless ( blessed $handler && $handler->isa( 'perfSONAR_PS::RequestHandler' ) );
 
 	eval {
+		# ls stuff
+		$self->configureConf( 'enable_registration', '0', $self->getConf('enable_registration') );
+
 		# setup defaults etc
 		$self->configureConf( 'service_name', $processName, $self->getConf('service_name') );
 		$self->configureConf( 'service_type', 'MP', $self->getConf('service_type') );
-		$self->configureConf( 'service_description', $processName . ' Service', $self->getConf('service_description') );
-    	        $self->configureConf( 'service_accesspoint', 'http://localhost:'.$self->{PORT}."/".$self->{ENDPOINT} , $self->getConf('service_accesspoint') );
 
-		$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
-	        $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
-	        $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
-    	        $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
+        my $default_description = $processName . ' Service';
+        if ($self->getConf("site_name")) {
+            $default_description .= " at ".$self->getConf("site_name");
+        }
+        if ($self->getConf("site_location")) {
+            $default_description .= " in ".$self->getConf("site_location");
+        }
+        $self->configureConf( 'service_description', $default_description, $self->getConf('service_description') );
 
-    	        $self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
-    	        $self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
+        my $default_accesspoint;
+        if ($self->getConf("external_address")) {
+            $default_accesspoint = 'http://'.$self->getConf("external_address").':'.$self->{PORT}.$self->{ENDPOINT} 
+        }
+    	$self->configureConf( 'service_accesspoint', $default_accesspoint, $self->getConf('service_accesspoint') );
+        if ($self->getConf("enable_registration") and not $self->getConf("service_accesspoint")) {
+	    $logger->logdie("Must have either a service_accesspoint or an external address specified if you enable registration");
+	}
+
+        $self->configureConf( 'db_host', undef, $self->getConf('db_host') );
+        $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+        $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+        $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
+
+        $self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
+        $self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
     
 		# die if we don't have the confi file
 		$self->configureConf( 'configuration_file', undef, $self->getConf('configuration_file'), 1 );
@@ -129,9 +148,6 @@ sub init
 		# agent stuff
 		$self->configureConf( 'max_worker_lifetime', 30, $self->getConf( 'max_worker_lifetime') || $self->{'CONF'}->{'max_worker_lifetime'} );
 		$self->configureConf( 'max_worker_processes', 5, $self->getConf( 'max_worker_processes') || $self->{'CONF'}->{'max_worker_processes'} );
-
-		# ls stuff
-		$self->configureConf( 'enable_registration', '0', $self->getConf('enable_registration') );
 	};
 	if ( $EVAL_ERROR ) {
 		$logger->logdie( "Configuration incorrect");
@@ -226,7 +242,11 @@ sub getConf
 {
 	my $self = shift;
 	my $key = shift;
-	return $self->{'CONF'}->{$basename}->{$key};
+	if (defined $self->{'CONF'}->{$basename}->{$key}) {
+		return $self->{'CONF'}->{$basename}->{$key};
+	} else {
+		return $self->{'CONF'}->{$key};
+	}
 }
 
 =head2 ls

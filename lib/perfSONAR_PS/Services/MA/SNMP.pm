@@ -177,6 +177,10 @@ sub init {
         $self->{LOGGER}->warn("Setting 'default_resolution' to '300'.");
     }
 
+    unless ( exists $self->{CONF}->{"snmp"}->{enable_registration} ) {
+        $self->{CONF}->{"snmp"}->{enable_registration} = $self->{CONF}->{enable_registration};
+    }
+
     unless ( exists $self->{CONF}->{"snmp"}->{"enable_registration"}
         and $self->{CONF}->{"snmp"}->{"enable_registration"} )
     {
@@ -184,13 +188,6 @@ sub init {
     }
 
     if ( $self->{CONF}->{"snmp"}->{"enable_registration"} ) {
-        unless ( exists $self->{CONF}->{"snmp"}->{"service_accesspoint"}
-            and $self->{CONF}->{"snmp"}->{"service_accesspoint"} )
-        {
-            $self->{LOGGER}->error("No access point specified for SNMP service");
-            return -1;
-        }
-
         unless ( exists $self->{CONF}->{"snmp"}->{"ls_instance"}
             and $self->{CONF}->{"snmp"}->{"ls_instance"} )
         {
@@ -218,18 +215,29 @@ sub init {
             }
         }
 
-        unless ( exists $self->{CONF}->{"snmp"}->{"service_accesspoint"}
-            and $self->{CONF}->{"snmp"}->{"service_accesspoint"} )
+        if ( not $self->{CONF}->{"snmp"}->{"service_accesspoint"} )
         {
-            $self->{CONF}->{"snmp"}->{"service_accesspoint"} = "http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT};
-            $self->{LOGGER}->warn( "Setting 'service_accesspoint' to 'http://localhost:" . $self->{PORT} . "/" . $self->{ENDPOINT} . "'." );
+            unless ($self->{CONF}->{external_address}) {
+                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
+                return -1;
+            }
+
+            my $accessPoint = "http://".$self->{CONF}->{external_address}.":".$self->{PORT}.$self->{ENDPOINT};
+            $self->{LOGGER}->info("Setting service access point to $accessPoint");
         }
 
         unless ( exists $self->{CONF}->{"snmp"}->{"service_description"}
             and $self->{CONF}->{"snmp"}->{"service_description"} )
         {
-            $self->{CONF}->{"snmp"}->{"service_description"} = "perfSONAR_PS SNMP MA";
-            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS SNMP MA'.");
+            my $description = "perfSONAR_PS SNMP MA";
+            if ($self->{CONF}->{site_name}) {
+                $description .= " at ".$self->{CONF}->{site_name};
+            }
+            if ($self->{CONF}->{site_location}) {
+                $description .= " in ".$self->{CONF}->{site_location};
+            }
+            $self->{CONF}->{"snmp"}->{"service_description"} = $description;
+            $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
         }
 
         unless ( exists $self->{CONF}->{"snmp"}->{"service_name"}
@@ -373,7 +381,7 @@ sub loadXMLDB {
             $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data->toString, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
             $self->{LOGGER}->debug( "Inserting \"" . $data->toString . "\" as \"" . $dHash . "\"." );
 
-            my $metadata = $dom->getDocumentElement->find( "./nmwg:metadata[\@id=\"" . $data->getAttribute("metadataIdRef") . "\"]" )->get_node(1);
+            my $metadata = find($dom->getDocumentElement, "./nmwg:metadata[\@id=\"" . $data->getAttribute("metadataIdRef") . "\"]" )->get_node(1);
             my $mdHash   = md5_hex( $metadata->toString );
             $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata->toString, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
             $self->{LOGGER}->debug( "Inserting \"" . $metadata->toString . "\" as \"" . $mdHash . "\"." );
@@ -476,7 +484,7 @@ sub needLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return ( $self->{CONF}->{"snmp"}->{"enable_registration"} );
+    return $self->{CONF}->{"snmp"}->{enable_registration};
 }
 
 =head2 registerLS($self $sleep_time)
@@ -1582,13 +1590,14 @@ sub setupDataRetrieveKey {
     }
 
     my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
-    $self->{LOGGER}->debug("Received hash key $hashKey which maps to $hashId");
     unless ($hashId) {
         my $msg = "Key error in metadata storage.";
         $self->{LOGGER}->error($msg);
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
+
+    $self->{LOGGER}->debug("Received hash key $hashKey which maps to $hashId");
 
     my $query = q{};
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
