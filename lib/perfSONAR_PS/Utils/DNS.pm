@@ -22,7 +22,6 @@ The API of perfSONAR_PS::Utils::DNS provides a simple set of functions for
 interacting with DNS servers.
 =cut
 
-
 use base 'Exporter';
 
 use strict;
@@ -30,34 +29,60 @@ use warnings;
 
 use Net::DNS;
 use NetAddr::IP;
+use Regexp::Common;
 
-our @EXPORT_OK = ( 'reverse_dns');
+our @EXPORT_OK = ('reverse_dns', 'resolve_address');
+
+sub resolve_address {
+    my ($name) = @_;
+
+    my $res = Net::DNS::Resolver->new;
+    my $query = $res->search($name);
+
+    if ($name !~ /$RE{net}{domain}/) {
+        print "Name $name is not a hostname\n";
+
+        my @dns = ();
+        push @dns, $name;
+        return @dns;
+    }
+
+    my @addresses = ();
+    foreach my $ans ($query->answer) {
+        next if ($ans->type ne "A");
+
+        push @addresses, $ans->address;
+    }
+
+    return @addresses;
+}
 
 =head2 reverse_dns ($ip)
     Does a reverse DNS lookup on the given ip address. The ip must be in IPv4
     dotted decimal or IPv6 colon-separated decimal form.
 =cut
+
 sub reverse_dns {
     my ($ip) = @_;
 
     my $tmp_ip = NetAddr::IP->new($ip);
-    if (not $tmp_ip) {
+    if ( not $tmp_ip ) {
         return;
     }
 
     my $addr = $tmp_ip->addr();
-    if (not $addr) {
+    if ( not $addr ) {
         return;
     }
 
-    my $res = Net::DNS::Resolver->new;
+    my $res   = Net::DNS::Resolver->new;
     my $query = $res->search("$addr");
-    if (not $query) {
+    if ( not $query ) {
         return;
     }
 
-    foreach my $ans ($query->answer) {
-        next if ($ans->type ne "PTR");
+    foreach my $ans ( $query->answer ) {
+        next if ( $ans->type ne "PTR" );
 
         return $ans->ptrdname;
     }
@@ -68,6 +93,7 @@ sub reverse_dns {
 1;
 
 __END__
+
 =head1 SEE ALSO
 
 L<Exporter>, L<Net::DNS>, L<NetAddr::IP>
@@ -97,7 +123,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 

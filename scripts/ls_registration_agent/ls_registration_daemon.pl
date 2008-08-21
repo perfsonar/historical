@@ -1,47 +1,96 @@
-#!/usr/bin/perl
-
-use lib 'lib';
-use lib '../lib';
-
-use File::Basename;
-use POSIX qw( setsid );
-use Fcntl qw(:DEFAULT :flock);
-use Log::Log4perl qw(:easy);
 use strict;
-use IO::Select;
-use Config::General;
+use warnings;
+
+use lib "../lib";
+use perfSONAR_PS::Common;
+use perfSONAR_PS::Utils::Daemon qw/daemonize setids lockPIDFile unlockPIDFile/;
+use perfSONAR_PS::Utils::Host qw(get_ips);
+
 use Getopt::Long;
+use Config::General;
+use Log::Log4perl qw/:easy/;
 
 my $CONFIG_FILE;
 my $LOGOUTPUT;
 my $PIDFILE;
 my $DEBUGFLAG;
-my $NAMED_PIPE;
 my $HELP;
+my $RUNAS_USER;
+my $RUNAS_GROUP;
 
-my $status = GetOptions (
-        'config=s' => \$CONFIG_FILE,
-        'output=s' => \$LOGOUTPUT,
-        'pidfile=s' => \$PIDFILE,
-        'verbose'  => \$DEBUGFLAG,
-        'pipe=s'   => \$NAMED_PIPE,
-        'help'     => \$HELP);
+my ( $status, $res );
 
-if (not $PIDFILE) {
-    $PIDFILE="/var/run/ls_registration_daemon.pid";
+$status = GetOptions(
+    'config=s'  => \$CONFIG_FILE,
+    'output=s'  => \$LOGOUTPUT,
+    'pidfile=s' => \$PIDFILE,
+    'verbose'   => \$DEBUGFLAG,
+    'user=s'    => \$RUNAS_USER,
+    'group=s'   => \$RUNAS_GROUP,
+    'help'      => \$HELP
+);
+
+if ( not $CONFIG_FILE ) {
+    print "Error: no configuration file specified\n";
+    exit(-1);
 }
 
-my $pidfile = lockPIDFile($PIDFILE);
+my %conf = Config::General->new($CONFIG_FILE)->getall();
+
+if ( not $PIDFILE ) {
+    $PIDFILE = $conf{"pid_file"};
+}
+
+if ( not $PIDFILE ) {
+    $PIDFILE = "/var/run/ls_registration_daemon.pid";
+}
+
+( $status, $res ) = lockPIDFile($PIDFILE);
+if ( $status != 0 ) {
+    print "Error: $res\n";
+    exit(-1);
+}
+
+my $fileHandle = $res;
+
+# Check if the daemon should run as a specific user/group and then switch to
+# that user/group.
+if ( not $RUNAS_GROUP ) {
+    if ( $conf{"group"} ) {
+        $RUNAS_GROUP = $conf{"group"};
+    }
+}
+
+if ( not $RUNAS_USER ) {
+    if ( $conf{"user"} ) {
+        $RUNAS_USER = $conf{"user"};
+    }
+}
+
+if ( $RUNAS_USER and $RUNAS_GROUP ) {
+    if ( setids( USER => $RUNAS_USER, GROUP => $RUNAS_GROUP ) != 0 ) {
+        print "Error: Couldn't drop priviledges\n";
+        exit(-1);
+    }
+}
+elsif ( $RUNAS_USER or $RUNAS_GROUP ) {
+
+    # they need to specify both the user and group
+    print "Error: You need to specify both the user and group if you specify either\n";
+    exit(-1);
+}
 
 my $output_level = $INFO;
+
 #if($DEBUGFLAG) {
-    $output_level = $DEBUG;
+$output_level = $DEBUG;
+
 #}
 
 my %logger_opts = (
-        level => $output_level,
-        layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
-        );
+    level  => $output_level,
+    layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
+);
 
 if ($LOGOUTPUT) {
     $logger_opts{file} = $LOGOUTPUT;
@@ -50,408 +99,384 @@ if ($LOGOUTPUT) {
 Log::Log4perl->easy_init( \%logger_opts );
 my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
 
-my %config = Config::General->new($CONFIG_FILE)->getall();
-
-if (not defined $config{"ls_instance"}) {
-    print "LS registration daemon needs to know which LS to register services with\n";
+if ( not $conf{"ls_instance"} ) {
+    $logger->error("LS registration daemon needs to know which LS to register services with");
     exit(-1);
 }
 
-if (not $config{"ls_interval"}) {
-    $config{"ls_interval"} = 24;
+if ( not $conf{"ls_interval"} ) {
+    $logger->error("No LS interval specified. Defaulting to 24 hours");
+    $conf{"ls_interval"} = 24;
 }
 
 # the interval is configured in hours
-$config{"ls_interval"} = $config{"ls_interval"} * 60 * 60;
+$conf{"ls_interval"} = $conf{"ls_interval"} * 60 * 60;
 
-if (not $NAMED_PIPE) {
-    $NAMED_PIPE = $config{"pipe_path"};
+my $site_confs = $conf{"site"};
+if ( not $site_confs ) {
+    $logger->error("No sites defined in configuration file");
+    exit(-1);
 }
 
-if (not $NAMED_PIPE) {
-    $NAMED_PIPE = "/var/run/ls_registration_agent.pipe";
+if ( ref($site_confs) ne "ARRAY" ) {
+    my @tmp = ();
+    push @tmp, $site_confs;
+    $site_confs = \@tmp;
 }
 
-unless (-p $NAMED_PIPE) {
-    # create the pipe
-    unlink $NAMED_PIPE;
-    system('mknod', $NAMED_PIPE, 'p') && die "Unable to create named pipe $NAMED_PIPE: $!";
+my @pids = ();
+
+my @site_children = ();
+
+foreach my $site_conf (@$site_confs) {
+    my $site_merge_conf = mergeConfig( \%conf, $site_conf );
+
+    my $services = init_site($site_merge_conf);
+
+    if ( not $services ) {
+        print "Couldn't initialize site. Exitting.";
+        exit(-1);
+    }
+
+    push @site_children, $services;
 }
 
-my $bwctl;
-if (not $config{bwctl}->{disabled}) {
-    $bwctl = perfSONAR_PS::Agent::LS::Registration::BWCTL->new();
-    if ($bwctl->init(\%config)) {
-        exit(-2);
+if ( not $DEBUG ) {
+    ( $status, $res ) = daemonize();
+    if ( $status != 0 ) {
+        $logger->error( "Couldn't daemonize: " . $res );
+        exit(-1);
     }
 }
 
-my $owamp;
-if (not $config{owamp}->{disabled}) {
-    $owamp = perfSONAR_PS::Agent::LS::Registration::OWAMP->new();
-    if ($owamp->init(\%config)) {
-        exit(-3);
+unlockPIDFile($fileHandle);
+
+foreach my $site (@site_children) {
+
+    # every site will register separately
+    my $pid = fork();
+    if ( $pid != 0 ) {
+        push @pids, $pid;
+        next;
+    }
+    else {
+        handle_site($site);
     }
 }
 
-my $ndt;
-if (not $config{ndt}->{disabled}) {
-    $ndt = perfSONAR_PS::Agent::LS::Registration::NDT->new();
-    if ($ndt->init(\%config)) {
-        exit(-4);
+foreach my $pid (@pids) {
+    waitpid( $pid, 0 );
+}
+
+sub init_site {
+    my ($site_conf) = @_;
+
+    my @services = ();
+
+    my $services_conf = $site_conf->{service};
+    if ( ref($services_conf) ne "ARRAY" ) {
+        my @tmp = ();
+        push @tmp, $services_conf;
+        $services_conf = \@tmp;
     }
-}
 
-my $npad;
-if (not $config{npad}->{disabled}) {
-    $npad = perfSONAR_PS::Agent::LS::Registration::NPAD->new();
-    if ($npad->init(\%config)) {
-        exit(-5);
-    }
-}
+    foreach my $curr_service_conf (@$services_conf) {
 
-my $ping;
-if (not $config{ping}->{disabled}) {
-    $ping = perfSONAR_PS::Agent::LS::Registration::Ping->new();
-    if ($ping->init(\%config)) {
-        exit(-2);
-    }
-}
+        my $service_conf = mergeConfig( $site_conf, $curr_service_conf );
 
-my $traceroute;
-if (not $config{traceroute}->{disabled}) {
-    $traceroute = perfSONAR_PS::Agent::LS::Registration::Traceroute->new();
-    if ($traceroute->init(\%config)) {
-        exit(-2);
-    }
-}
+        if ( not $service_conf->{type} ) {
 
-my $pipe_handle;
+            # complain
+            $logger->error("Error: No service type specified");
+            exit(-1);
+        }
+        elsif ( lc( $service_conf->{type} ) eq "bwctl" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::BWCTL->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-# open the named pipe both read and write so that it doesn't try to tell us
-# when the last person to write to the pipe closes. We really want to wait for
-# the next writer who may come.
-open($pipe_handle, "+<$NAMED_PIPE") || die("Couldn't open named pipe");
+                # complain
+                $logger->error("Error: Couldn't initialize bwctl watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        elsif ( lc( $service_conf->{type} ) eq "owamp" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::OWAMP->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-# Daemonize if not in debug mode. This must be done before forking off children
-# so that the children are daemonized as well.
-if(not $DEBUGFLAG) {
-# flush the buffer
-    $| = 1;
-        &daemonize;
-}
+                # complain
+                $logger->error("Error: Couldn't initialize owamp watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        elsif ( lc( $service_conf->{type} ) eq "ping" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::Ping->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-unlockPIDFile($pidfile);
+                # complain
+                $logger->error("Error: Couldn't initialize ping watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        elsif ( lc( $service_conf->{type} ) eq "traceroute" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::Traceroute->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-while(1) {
-    $bwctl->refresh() if ($bwctl);
-    $owamp->refresh() if ($owamp);
-    $ndt->refresh() if ($ndt);
-    $npad->refresh() if ($npad);
-    $ping->refresh() if ($ping);
-    $traceroute->refresh() if ($traceroute);
+                # complain
+                $logger->error("Error: Couldn't initialize traceroute watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        elsif ( lc( $service_conf->{type} ) eq "ndt" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::NDT->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-    my $select = IO::Select->new();
-    $select->add($pipe_handle);
+                # complain
+                $logger->error("Error: Couldn't initialize NDT watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        elsif ( lc( $service_conf->{type} ) eq "npad" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::NPAD->new();
+            if ( $service->init($service_conf) != 0 ) {
 
-    my @ready = $select->can_read(60);
+                # complain
+                $logger->error("Error: Couldn't initialize NPAD watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
+        else {
 
-    if ($#ready > -1) {
-        my $line = <$pipe_handle>;
-        chomp($line);
-        $logger->info("Received message: ".$line);
-        handle_message($line);
-    }
-}
-
-sub handle_message {
-    my ($msg) = @_;
-
-    my ($service, $status, @config_options) = split(' ', $msg);
-    if (lc($service) eq "bwctl") {
-        return $bwctl->handle_message($status, @config_options);
-    } elsif (lc($service) eq "owamp") {
-        return $owamp->handle_message($status, @config_options);
-    } elsif (lc($service) eq "ndt") {
-        return $ndt->handle_message($status, @config_options);
-    } elsif (lc($service) eq "npad") {
-        return $npad->handle_message($status, @config_options);
-    } else {
-        print "Got message for unknown service ".lc($service)."\n";
-    }
-}
-
-=head2 lockPIDFile($pidfile);
-The lockPIDFile function checks for the existence of the specified file in
-the specified directory. If found, it checks to see if the process in the
-file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
-=cut
-sub lockPIDFile {
-    my($pidfile) = @_;
-    my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
-    $logger->debug("Locking pid file: $pidfile");
-    die "Can't write pidfile: $pidfile\n" unless -w dirname($pidfile);
-    sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
-    flock(PIDFILE, LOCK_EX);
-    my $p_id = <PIDFILE>;
-    chomp($p_id) if (defined $p_id);
-    if(defined $p_id and $p_id ne q{}) {
-        open(PSVIEW, "ps -p ".$p_id." |");
-        my @output = <PSVIEW>;
-        close(PSVIEW);
-        if(!$?) {
-            die "$0 already running: $p_id\n";
+            # error
+            $logger->error( "Error: Unknown service type: " . $conf{type} . "" );
+            exit(-1);
         }
     }
 
-    $logger->debug("Locked pid file");
-
-    return *PIDFILE;
+    return \@services;
 }
 
-=head2 unlockPIDFile
-This file writes the pid of the call process to the filehandle passed in,
-unlocks the file and closes it.
-=cut
-sub unlockPIDFile {
-    my($filehandle) = @_;
-    my $logger = get_logger("perfSONAR_PS::LSRegistrationDaemon");
+sub handle_site {
+    my ($services) = @_;
 
-    truncate($filehandle, 0);
-    seek($filehandle, 0, 0);
-    print $filehandle "$$\n";
-    flock($filehandle, LOCK_UN);
-    close($filehandle);
-
-    $logger->debug("Unlocked pid file");
+    while (1) {
+        foreach my $service (@$services) {
+            $service->refresh();
+            sleep(60);
+        }
+    }
 
     return;
 }
 
-=head2 daemonize
-Sends the program to the background by eliminating ties to the calling terminal.
-=cut
-sub daemonize {
-    chdir '/' or die "Can't chdir to /: $!";
-    open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
-    open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
-    open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
-    defined(my $pid = fork) or die "Can't fork: $!";
-    exit if $pid;
-    setsid or die "Can't start a new session: $!";
-    umask 0;
-    return;
-}
+package perfSONAR_PS::LSRegistrationDaemon::Base;
 
+use Socket;
+use Socket6;
+use Log::Log4perl qw/get_logger/;
 
-
-
-
-package perfSONAR_PS::Agent::LS::Registration::Base;
-
+use perfSONAR_PS::Utils::DNS qw(reverse_dns);
 use perfSONAR_PS::Client::LS;
-use IO::Socket;
-use IO::Interface qw(:flags);
-use Log::Log4perl qw(:easy);
 
-use fields 'LS_CLIENT', 'KEY', 'STATUS', 'APP_STATUS', 'NEXT_REGISTRATION', 'CONF', 'APP_CONFIG', 'LOGGER';
+use fields 'CONF', 'STATUS', 'LOGGER', 'KEY', 'NEXT_REFRESH', 'LS_CLIENT';
 
 sub new {
-    my ( $package ) = @_;
+    my $class = shift;
 
-    my $self = fields::new($package);
+    my $self = fields::new($class);
 
     return $self;
 }
 
 sub init {
-    my ($self, $conf) = @_;
+    my ( $self, $conf ) = @_;
 
-    $self->{CONF} = $conf;
-
+    $self->{CONF}   = $conf;
     $self->{STATUS} = "UNREGISTERED";
-    $self->{APP_STATUS} = "STOPPED";
-    $self->{LS_CLIENT} = perfSONAR_PS::Client::LS->new(instance => $conf->{"ls_instance"});
+    $self->{LOGGER} = get_logger( ref($self) );
+
+    if ( not $conf->{ls_instance} ) {
+        $self->{LOGGER}->error("No ls instance available for this service to use");
+        exit(-1);
+    }
+
+    $self->{LS_CLIENT} = perfSONAR_PS::Client::LS->new( { instance => $conf->{ls_instance} } );
 
     return 0;
 }
 
-sub handle_message {
-    my ($self, $msg, @config_options) = @_;
-
-    if (lc($msg) eq "stop") {
-        if ($self->{STATUS} eq "REGISTERED") {
-            $self->unregister(@config_options);
-            $self->{STATUS} = "UNREGISTERED";
-        }
-
-        $self->{APP_STATUS} = "STOPPED";
-    } elsif (lc($msg) eq "start") {
-        if ($self->{STATUS} eq "REGISTERED") {
-            $self->unregister(@config_options);
-            $self->{STATUS} = "UNREGISTERED";
-        }
-
-        $self->register(@config_options);
-
-        $self->{APP_STATUS} = "STARTED";
-    }
-}
-
-sub register {
+sub service_name {
     my ($self) = @_;
 
-    die("must be overridden");
+    if ( $self->{CONF}->{service_name} ) {
+        return $self->{CONF}->{service_name};
+    }
+
+    my $retval = "";
+    if ( $self->{CONF}->{site_name} ) {
+        $retval .= $self->{CONF}->{site_name} . " ";
+    }
+    $retval .= $self->type();
+
+    return $retval;
 }
 
-sub unregister {
+sub service_desc {
     my ($self) = @_;
 
-    if ($self->{STATUS} eq "REGISTERED") {
-        $self->{LS_CLIENT}->deregisterRequestLS(key => $self->{KEY});
-        $self->{STATUS} = "UNREGISTERED";
+    if ( $self->{CONF}->{service_name} ) {
+        return $self->{CONF}->{service_name};
     }
+
+    my $retval = $self->type();
+    if ( $self->{CONF}->{site_name} ) {
+        $retval .= " at " . $self->{CONF}->{site_name};
+    }
+
+    if ( $self->{CONF}->{site_location} ) {
+        $retval .= " in " . $self->{CONF}->{site_location};
+    }
+
+    return $retval;
 }
 
 sub refresh {
     my ($self) = @_;
 
-    $self->{LOGGER}->debug("Refresh called");
-
-    if ($self->{APP_STATUS} eq "STARTED") {
-        $self->{LOGGER}->debug("Application is running");
-        if ($self->{STATUS} eq "REGISTERED" and time >= $self->{NEXT_REGISTRATION}) {
-            $self->{LOGGER}->debug("Application is registered and we need to register");
-            $self->{LS_CLIENT}->keepaliveRequestLS(key => $self->{KEY});
-        } elsif ($self->{STATUS} eq "UNREGISTERED") {
-            $self->{LOGGER}->debug("Application is unregistered");
-            $self->register($self->{APP_CONFIG});
-        } else {
-            $self->{LOGGER}->debug("Application is registered");
-        }
-    }
-}
-
-sub lookup_interfaces {
-    my @ret_interfaces = ();
-
-#    my $s = IO::Socket::INET6->new(Proto => 'tcp');
-#
-#    my @interfaces = $s->if_list;
-#    foreach my $if (@interfaces) {
-#        print "Found an interface\n";
-#        my $if_flags = $s->if_flags($if);
-#
-#        next if ($if_flags & IFF_LOOPBACK);
-#        print "Found a non-loopback interface\n";
-#        next if (not ($if_flags & IFF_RUNNING));
-#        print "Found a non-loopback, running interface\n";
-#
-#        push @ret_interfaces, $s->if_addr($if);
-#    }
-
-    open(IFCONFIG, "ifconfig |");
-    my $is_eth = 0;
-    while(<IFCONFIG>) {
-        if (/Link encap:([^ ]+)/) {
-            if (lc($1) eq "ethernet") {
-                $is_eth = 1;
-            } else {
-                $is_eth = 0;
-            }
-        }
-
-        next if (not $is_eth);
-
-        if (/inet addr:(\d+\.\d+\.\d+\.\d+)/) {
-            push @ret_interfaces, $1;
-        } elsif (/inet6 addr: (\d*:[^\/ ]*)(\/\d+)? +Scope:Global/) {
-            push @ret_interfaces, $1;
-        }
-    }
-    return @ret_interfaces;
-}
-
-sub __boote_read_app_config {
-    my ($self, $file) = @_;
-
-    my %conf = ();
-
-    open(FILE, $file);
-    while(my $line = <FILE>) {
-        $line =~ s/#.*//;  # get rid of any comment on the line
-        $line =~ s/^\S+//; # get rid of any leading whitespace
-        $line =~ s/\S+$//; # get rid of any trailing whitespace
-
-        my ($key, $value) = split(/\S+/, $line);
-        if (not $key) {
-            next;
-        }
-
-        if ($value) {
-            $conf{$key} = $value;
-        } else {
-            $conf{$key} = 1;
-        }
+    if ( $self->{STATUS} eq "BROKEN" ) {
+        $self->{LOGGER}->debug("Refreshing broken service");
+        return;
     }
 
-    return %conf;
+    $self->{LOGGER}->debug( "Refreshing: " . $self->service_desc . "" );
+
+    if ( $self->is_up ) {
+        $self->{LOGGER}->debug("Service is up");
+        if ( $self->{STATUS} ne "REGISTERED" ) {
+            $self->register();
+        }
+        elsif ( time >= $self->{NEXT_REFRESH} ) {
+            $self->keepalive();
+        }
+        else {
+            $self->{LOGGER}->debug("No need to refresh");
+        }
+    }
+    elsif ( $self->{STATUS} eq "REGISTERED" ) {
+        $self->{LOGGER}->debug("Service isn't");
+        $self->unregister();
+    }
+    else {
+        $self->{LOGGER}->debug("Service failed");
+    }
+
+    return;
 }
 
-sub create_event_type_md {
-    my ($self, $eventType, $projects) = @_;
+sub register {
+    my ($self) = @_;
+
+    my $addresses = $self->get_service_addresses();
+
+    my @metadata = ();
+    my %service  = ();
+    $service{nonPerfSONARService} = 1;
+    $service{name}                = $self->service_name();
+    $service{description}         = $self->service_desc();
+    $service{type}                = $self->service_type();
+    $service{addresses}           = $addresses;
+
+    my $ev       = $self->event_type();
+    my $projects = $self->{CONF}->{site_project};
+
+    my $node_addresses = $self->get_node_addresses();
 
     my $md = "";
-    $md .= "<nmwg:metadata id=\"".int(rand(9000000))."\">\n";
+    $md .= "<nmwg:metadata id=\"" . int( rand(9000000) ) . "\">\n";
     $md .= "  <nmwg:subject>\n";
-    $md .= $self->create_junk_node();
+    $md .= $self->create_node($node_addresses);
     $md .= "  </nmwg:subject>\n";
-    $md .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+    $md .= "  <nmwg:eventType>$ev</nmwg:eventType>\n";
     if ($projects) {
         $md .= "  <nmwg:parameters>\n";
-        foreach my $project (@$projects) {
-            $md .= "    <nmwg:parameter name=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
+        if ( ref($projects) eq "ARRAY" ) {
+            foreach my $project (@$projects) {
+                $md .= "    <nmwg:parameter name=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
+            }
+        }
+        else {
+            $md .= "    <nmwg:parameter name=\"keyword\">project:" . $projects . "</nmwg:parameter>\n";
         }
         $md .= "  </nmwg:parameters>\n";
     }
     $md .= "</nmwg:metadata>\n";
 
-    return $md;
+    push @metadata, $md;
+
+    my $res = $self->{LS_CLIENT}->registerRequestLS( service => \%service, data => \@metadata );
+    if ( $res and $res->{"key"} ) {
+        $self->{LOGGER}->debug( "Registration succeeded with key: " . $res->{"key"} );
+        $self->{STATUS}       = "REGISTERED";
+        $self->{KEY}          = $res->{"key"};
+        $self->{NEXT_REFRESH} = time + $self->{CONF}->{"ls_interval"};
+    }
+    else {
+        my $error;
+        if ( $res and $res->{error} ) {
+            $self->{LOGGER}->debug( "Registration failed: " . $res->{error} );
+        }
+        else {
+            $self->{LOGGER}->debug("Registration failed");
+        }
+    }
+
+    return;
 }
 
-sub lookup_hostname {
-	my $ip = shift;
-	my @h = gethostbyaddr(pack('C4',split('\.',$ip)),2);
-	return $h[0];
+sub keepalive {
+    my ($self) = @_;
+
+    my $res = $self->{LS_CLIENT}->keepaliveRequestLS( key => $self->{KEY} );
+    if ( $res->{eventType} ne "success.ls.keepalive" ) {
+        $self->{STATUS} = "UNREGISTERED";
+        $self->{LOGGER}->debug("Keepalive failed");
+    }
+
+    return;
 }
 
-sub create_junk_node {
-    my $self = shift;
+sub unregister {
+    my ($self) = @_;
+
+    $self->{LS_CLIENT}->deregisterRequestLS( key => $self->{KEY} );
+    $self->{STATUS} = "UNREGISTERED";
+
+    return;
+}
+
+sub create_node {
+    my ( $self, $addresses ) = @_;
     my $node = "";
-    my $nmtb = "http://ogf.org/schema/network/topology/base/20070828/";
+
+    my $nmtb  = "http://ogf.org/schema/network/topology/base/20070828/";
     my $nmtl3 = "http://ogf.org/schema/network/topology/l3/20070828/";
 
-    my @addresses = $self->lookup_interfaces();
-
     $node .= "<nmtb:node xmlns:nmtb=\"$nmtb\" xmlns:nmtl3=\"$nmtl3\">\n";
-    foreach my $addr (@addresses) {
-        my $name = lookup_hostname($addr);
+    foreach my $addr (@$addresses) {
+        my $name = reverse_dns( $addr->{value} );
         if ($name) {
             $node .= " <nmtb:name type=\"dns\">$name</nmtb:name>\n";
         }
     }
 
-    foreach my $addr (@addresses) {
-        my $addr_type;
-
-        if ($addr =~ /:/) {
-            $addr_type = "ipv6";
-        } else {
-            $addr_type = "ipv4";
-        }
-
+    foreach my $addr (@$addresses) {
         $node .= " <nmtl3:port>\n";
-        $node .= "   <nmtl3:address type=\"$addr_type\">$addr</nmtl3:address>\n";
+        $node .= "   <nmtl3:address type=\"" . $addr->{type} . "\">" . $addr->{value} . "</nmtl3:address>\n";
         $node .= " </nmtl3:port>\n";
     }
     $node .= "</nmtb:node>\n";
@@ -459,717 +484,689 @@ sub create_junk_node {
     return $node;
 }
 
-package perfSONAR_PS::Agent::LS::Registration::BWCTL;
+package perfSONAR_PS::LSRegistrationDaemon::TCP_Service;
 
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
+use perfSONAR_PS::Utils::DNS qw(resolve_address);
+use perfSONAR_PS::Utils::Host qw(get_ips);
 
-sub register {
-    my ($self, @config_options) = @_;
+use base 'perfSONAR_PS::LSRegistrationDaemon::Base';
 
-    my $config_file = $config_options[0];
-    if (not $config_file) {
-        return;
+use fields 'ADDRESSES', 'PORT';
+
+use IO::Socket;
+use IO::Socket::INET6;
+use IO::Socket::INET;
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    unless ( $conf->{address} or $conf->{local} ) {
+        $self->{STATUS} = "BROKEN";
+        return -1;
     }
 
-    $self->{APP_CONFIG} = $config_file;
+    my @addresses;
 
-    my %res = $self->read_app_config($config_file);
-
-    my $port = 4823;
-    if ($res{port}) {
-        $port = $res{port};
-    }
-   
-    my @addresses; 
-    if (not $res{addr}) {
-        # Grab the list of address from the server
-        @addresses = $self->lookup_interfaces();
-    } else {
+    if ( $conf->{address} ) {
         @addresses = ();
-        push @addresses, $res{addr};
-    }
 
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{bwctl}->{service_name};
-    $service{description} = $self->{CONF}->{bwctl}->{service_description};
-    $service{type} = $self->{CONF}->{bwctl}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
-        my %addr = ();
-        $addr{"type"} = "uri";
-        if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$port";
-        } else {
-            $addr{"value"} = "tcp://$address:$port";
+        my @tmp = ();
+        if ( ref( $conf->{address} ) eq "ARRAY" ) {
+            @tmp = @{ $conf->{address} };
         }
-        push @serv_addrs, \%addr;
-    }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{bwctl}->{site_project}) {
-        push @projects, $self->{CONF}->{bwctl}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/bwctl/1.0", \@projects);
+        else {
+            push @tmp, $conf->{address};
+        }
 
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
+        my %addr_map = ();
+        foreach my $addr (@tmp) {
+            my @addrs = resolve_address($addr);
+            foreach my $addr (@addrs) {
+                $addr_map{$addr} = 1;
+            }
+        }
+
+        @addresses = keys %addr_map;
     }
+    elsif ( $conf->{local} ) {
+        @addresses = get_ips();
+    }
+
+    $self->{ADDRESSES} = \@addresses;
+
+    if ( $conf->{port} ) {
+        $self->{PORT} = $conf->{port};
+    }
+
+    return $self->SUPER::init($conf);
 }
 
-sub read_app_config {
-    my ($self, $file) = @_;
+sub is_up {
+    my ($self) = @_;
 
-    my %conf = $self->__boote_read_app_config($file);
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        my $sock;
+
+        $self->{LOGGER}->debug( "Connecting to: " . $addr . ":" . $self->{PORT} . "" );
+
+        if ( $addr =~ /:/ ) {
+            $sock = IO::Socket::INET6->new( PeerAddr => $addr, PeerPort => $self->{PORT}, Proto => 'tcp', Timeout => 5 );
+        }
+        else {
+            $sock = IO::Socket::INET->new( PeerAddr => $addr, PeerPort => $self->{PORT}, Proto => 'tcp', Timeout => 5 );
+        }
+
+        if ($sock) {
+            $sock->close;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+sub get_service_addresses {
+    my ($self) = @_;
+
+    my @addresses = ();
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        my $uri;
+
+        $uri = "tcp://";
+        if ( $addr =~ /:/ ) {
+            $uri .= "[$addr]";
+        }
+        else {
+            $uri .= "$addr";
+        }
+
+        $uri .= ":" . $self->{PORT};
+
+        my %addr = ();
+        $addr{"value"} = $uri;
+        $addr{"type"}  = "uri";
+
+        push @addresses, \%addr;
+    }
+
+    return \@addresses;
+}
+
+sub get_node_addresses {
+    my ($self) = @_;
+
+    my @addrs = ();
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        unless ( $addr =~ /:/ or $addr =~ /\d+\.\d+\.\d+\.\d+/ ) {
+
+            # it's probably a hostname, try looking it up.
+        }
+
+        if ( $addr =~ /:/ ) {
+            my %addr = ();
+            $addr{"value"} = $addr;
+            $addr{"type"}  = "ipv6";
+            push @addrs, \%addr;
+        }
+        elsif ( $addr =~ /\d+\.\d+\.\d+\.\d+/ ) {
+            my %addr = ();
+            $addr{"value"} = $addr;
+            $addr{"type"}  = "ipv4";
+            push @addrs, \%addr;
+        }
+    }
+
+    return \@addrs;
+}
+
+package perfSONAR_PS::LSRegistrationDaemon::BWCTL;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
+
+use constant DEFAULT_PORT   => 4823;
+use constant DEFAULT_CONFIG => "/usr/local/etc/bwctld.conf";
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    my $res;
+    if ( $conf->{local} ) {
+        my $bwctl_config = $conf->{config_file};
+        if ( not $bwctl_config ) {
+            $bwctl_config = DEFAULT_CONFIG;
+        }
+
+        $res = read_bwctl_config($bwctl_config);
+        if ( $res->{error} ) {
+            $self->{STATUS} = "BROKEN";
+            return -1;
+        }
+    }
+    else {
+        my %tmp = ();
+        $res = \%tmp;
+    }
+
+    if ( not $conf->{port} and not $res->{port} ) {
+        $conf->{port} = DEFAULT_PORT;
+    }
+    elsif ( not $conf->{port} ) {
+        $conf->{port} = $res->{port};
+    }
+
+    if ( $res->{addr} ) {
+        my @tmp_addrs = ();
+        push @tmp_addrs, $res->{addr};
+
+        $conf->{address} = \@tmp_addrs;
+    }
+
+    return $self->SUPER::init($conf);
+}
+
+sub read_bwctl_config {
+    my ($file) = @_;
+
+    my %conf = ();
+
+    my $FH;
+    open( $FH, "<", $file ) or return \%conf;
+    while ( my $line = <$FH> ) {
+        $line =~ s/#.*//;     # get rid of any comment on the line
+        $line =~ s/^\S+//;    # get rid of any leading whitespace
+        $line =~ s/\S+$//;    # get rid of any trailing whitespace
+
+        my ( $key, $value ) = split( /\S+/, $line );
+        if ( not $key ) {
+            next;
+        }
+
+        if ($value) {
+            $conf{$key} = $value;
+        }
+        else {
+            $conf{$key} = 1;
+        }
+    }
+    close($FH);
+
     my $addr_to_parse;
 
-    if ($conf{"srcnode"}) {
+    if ( $conf{"srcnode"} ) {
         $addr_to_parse = $conf{"srcnode"};
-    } elsif ($conf{"src_node"}) {
+    }
+    elsif ( $conf{"src_node"} ) {
         $addr_to_parse = $conf{"src_node"};
     }
 
-    my ($addr, $port);
+    my ( $addr, $port );
 
-    if ($addr_to_parse and $addr_to_parse =~ /(.*):(.*)/) {
+    if ( $addr_to_parse and $addr_to_parse =~ /(.*):(.*)/ ) {
         $addr = $1;
         $port = $2;
     }
 
-    return ( addr => $addr, port => $port );
+    my %res = ();
+    if ($addr) {
+        $res{addr} = $addr;
+    }
+    $res{port} = $port;
+
+    return \%res;
 }
+
+sub type {
+    my ($self) = @_;
+
+    return "BWCTL Server";
+}
+
+sub service_type {
+    my ($self) = @_;
+
+    return "bwctl";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/bwctl/1.0";
+}
+
+package perfSONAR_PS::LSRegistrationDaemon::OWAMP;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
+
+use constant DEFAULT_PORT   => 861;
+use constant DEFAULT_CONFIG => "/usr/local/etc/owampd.conf";
 
 sub init {
-    my ($self, $conf) = @_;
+    my ( $self, $conf ) = @_;
 
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::BWCTL");
-
-    if (not $conf->{"bwctl"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "BWCTL Server";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
+    my $res;
+    if ( $conf->{local} ) {
+        my $owamp_config = $conf->{config_file};
+        if ( not $owamp_config ) {
+            $owamp_config = DEFAULT_CONFIG;
         }
 
-        $conf->{"bwctl"}->{"service_name"} = $name;
+        $res = read_owamp_config($owamp_config);
+        if ( $res->{error} ) {
+            $self->{STATUS} = "BROKEN";
+            return -1;
+        }
+    }
+    else {
+        my %tmp = ();
+        $res = \%tmp;
     }
 
-    if (not $conf->{"bwctl"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "BWCTL Server";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"bwctl"}->{"service_description"} = $desc;
+    if ( not $conf->{port} and not $res->{port} ) {
+        $conf->{port} = DEFAULT_PORT;
+    }
+    elsif ( not $conf->{port} ) {
+        $conf->{port} = $res->{port};
     }
 
-    if (not $conf->{"bwctl"}->{"service_type"}) {
-        $conf->{"bwctl"}->{"service_type"} = "bwctl";
+    if ( $res->{addr} ) {
+        my @tmp_addrs = ();
+        push @tmp_addrs, $res->{addr};
+
+        $conf->{address} = \@tmp_addrs;
     }
 
-    $self->SUPER::init($conf);
-
-    return 0;
+    return $self->SUPER::init($conf);
 }
 
-package perfSONAR_PS::Agent::LS::Registration::OWAMP;
+sub read_owamp_config {
+    my ($file) = @_;
 
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
+    my %conf = ();
 
-sub register {
-    my ($self, @config_options) = @_;
+    my $FH;
 
-    my $config_file = $config_options[0];
-    if (not $config_file) {
-        return;
-    }
+    open( $FH, "<", $file ) or return \%conf;
+    while ( my $line = <$FH> ) {
+        $line =~ s/#.*//;     # get rid of any comment on the line
+        $line =~ s/^\S+//;    # get rid of any leading whitespace
+        $line =~ s/\S+$//;    # get rid of any trailing whitespace
 
-    $self->{APP_CONFIG} = $config_file;
-
-    my %res = $self->read_app_config($config_file);
-
-    my $port = 861;
-    if ($res{port}) {
-        $port = $res{port};
-    }
-   
-    my @addresses; 
-    if (not $res{addr}) {
-        # Grab the list of address from the server
-        @addresses = $self->lookup_interfaces();
-    } else {
-        @addresses = ();
-        push @addresses, $res{addr};
-    }
-
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{owamp}->{service_name};
-    $service{description} = $self->{CONF}->{owamp}->{service_description};
-    $service{type} = $self->{CONF}->{owamp}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
-        my %addr = ();
-        $addr{"type"} = "uri";
-        if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$port";
-        } else {
-            $addr{"value"} = "tcp://$address:$port";
+        my ( $key, $value ) = split( /\S+/, $line );
+        if ( not $key ) {
+            next;
         }
-        push @serv_addrs, \%addr;
-    }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{owamp}->{site_project}) {
-        push @projects, $self->{CONF}->{owamp}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/owamp/1.0", \@projects);
 
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
+        if ($value) {
+            $conf{$key} = $value;
+        }
+        else {
+            $conf{$key} = 1;
+        }
     }
-}
+    close($FH);
 
-sub read_app_config {
-    my ($self, $file) = @_;
-
-    my %conf = $self->__boote_read_app_config($file);
     my $addr_to_parse;
 
-    if ($conf{"srcnode"}) {
+    if ( $conf{"srcnode"} ) {
         $addr_to_parse = $conf{"srcnode"};
-    } elsif ($conf{"src_node"}) {
+    }
+    elsif ( $conf{"src_node"} ) {
         $addr_to_parse = $conf{"src_node"};
     }
 
-    my ($addr, $port);
+    my ( $addr, $port );
 
-    if ($addr_to_parse and $addr_to_parse =~ /(.*):(.*)/) {
+    if ( $addr_to_parse and $addr_to_parse =~ /(.*):(.*)/ ) {
         $addr = $1;
         $port = $2;
     }
 
-    return ( addr => $addr, port => $port );
+    my %res = ();
+    if ($addr) {
+        $res{addr} = $addr;
+    }
+    $res{port} = $port;
+
+    return \%res;
 }
+
+sub type {
+    my ($self) = @_;
+
+    return "OWAMP Server";
+}
+
+sub service_type {
+    my ($self) = @_;
+
+    return "owamp";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/owamp/1.0";
+}
+
+package perfSONAR_PS::LSRegistrationDaemon::NDT;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
+
+use constant DEFAULT_PORT => 7123;
 
 sub init {
-    my ($self, $conf) = @_;
+    my ( $self, $conf ) = @_;
 
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::OWAMP");
-
-    if (not $conf->{"owamp"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "OWAMP Server";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
-        }
-
-        $conf->{"owamp"}->{"service_name"} = $name;
+    my $port = $conf->{port};
+    if ( not $port ) {
+        $conf->{port} = DEFAULT_PORT;
     }
 
-    if (not $conf->{"owamp"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "OWAMP Server";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"owamp"}->{"service_description"} = $desc;
-    }
-
-    if (not $conf->{"owamp"}->{"service_type"}) {
-        $conf->{"owamp"}->{"service_type"} = "owamp";
-    }
-
-    $self->SUPER::init($conf);
-
-    return 0;
+    return $self->SUPER::init($conf);
 }
 
-package perfSONAR_PS::Agent::LS::Registration::NDT;
+sub get_service_addresses {
+    my ($self) = @_;
 
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
+    # we override the TCP_Service addresses function so that we can generate
+    # URLs.
 
-sub register {
-    my ($self, @config_options) = @_;
+    my @addresses = ();
 
-    # This isn't easily modifiable so for now, assume they haven't changed ports on me.
-    my @addresses = $self->lookup_interfaces();
-    my $web_port  = 7123;
-    my $ctrl_port = 3001;
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        my $uri;
 
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{ndt}->{service_name};
-    $service{description} = $self->{CONF}->{ndt}->{service_description};
-    $service{type} = $self->{CONF}->{ndt}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
+        $uri = "http://";
+        if ( $addr =~ /:/ ) {
+            $uri .= "[$addr]";
+        }
+        else {
+            $uri .= "$addr";
+        }
+
+        $uri .= ":" . $self->{PORT};
+
         my %addr = ();
-        $addr{"type"} = "uri";
-        if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$ctrl_port";
-        } else {
-            $addr{"value"} = "tcp://$address:$ctrl_port";
-        }
-        push @serv_addrs, \%addr;
+        $addr{"value"} = $uri;
+        $addr{"type"}  = "url";
 
-        my %web_addr = ();
-        $web_addr{"type"} = "url";
-        if ($address =~ /:/) {
-            $web_addr{"value"} = "http://[$address]:$web_port";
-        } else {
-            $web_addr{"value"} = "http://$address:$web_port";
-        }
-        push @serv_addrs, \%web_addr;
+        push @addresses, \%addr;
     }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{ndt}->{site_project}) {
-        push @projects, $self->{CONF}->{ndt}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ndt/1.0", \@projects);
 
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
-    }
+    return \@addresses;
 }
+
+sub type {
+    my ($self) = @_;
+
+    return "NDT Server";
+}
+
+sub service_type {
+    my ($self) = @_;
+
+    return "ndt";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/ndt/1.0";
+}
+
+package perfSONAR_PS::LSRegistrationDaemon::NPAD;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
+
+use constant DEFAULT_PORT   => 8200;
+use constant DEFAULT_CONFIG => "/usr/local/npad-dist/config.xml";
 
 sub init {
-    my ($self, $conf) = @_;
+    my ( $self, $conf ) = @_;
 
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::NDT");
+    my $port = $conf->{port};
+    if ( not $port and not $conf->{local} ) {
+        $self->{STATUS} = "BROKEN";
+        return -1;
+    }
+    elsif ( not $port ) {
+        my $npad_config;
 
-    if (not $conf->{"ndt"}->{"service_type"}) {
-        $conf->{"ndt"}->{"service_type"} = "ndt";
+        $npad_config = $conf->{config_file};
+        if ( not $npad_config ) {
+            $npad_config = DEFAULT_CONFIG;
+        }
+
+        my $res = read_npad_config($npad_config);
+        if ( $res->{error} ) {
+            $self->{STATUS} = "BROKEN";
+            return -1;
+        }
+
+        if ( $res->{port} ) {
+            $conf->{port} = $res->{port};
+        }
+        else {
+            $conf->{port} = DEFAULT_PORT;
+        }
     }
 
-    if (not $conf->{"ndt"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "NDT Server";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
-        }
-
-        $conf->{"ndt"}->{"service_name"} = $name;
-    }
-
-    if (not $conf->{"ndt"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "NDT Server";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"ndt"}->{"service_description"} = $desc;
-    }
-
-    $self->SUPER::init($conf);
-
-    return 0;
+    return $self->SUPER::init($conf);
 }
 
-package perfSONAR_PS::Agent::LS::Registration::NPAD;
+sub read_npad_config {
+    my ($file) = @_;
 
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
+    my %conf;
 
-sub register {
-    my ($self, @config_options) = @_;
+    my $port;
 
-    my $config_file = $config_options[0];
-    if (not $config_file) {
-        return;
+    my $FH;
+    open( $FH, "<", $file ) or return \%conf;
+    while (<$FH>) {
+        if (/key="webPort".*value="\([^"]\)"/) {
+            $port = $1;
+        }
+    }
+    close($FH);
+
+    $conf{port} = $port;
+
+    return \%conf;
+}
+
+sub get_service_addresses {
+    my ($self) = @_;
+
+    # we override the TCP_Service addresses function so that we can generate
+    # URLs.
+
+    my @addresses = ();
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        my $uri;
+
+        $uri = "http://";
+        if ( $addr =~ /:/ ) {
+            $uri .= "[$addr]";
+        }
+        else {
+            $uri .= "$addr";
+        }
+
+        $uri .= ":" . $self->{PORT};
+
+        my %addr = ();
+        $addr{"value"} = $uri;
+        $addr{"type"}  = "url";
+
+        push @addresses, \%addr;
     }
 
-    $self->{APP_CONFIG} = $config_file;
+    return \@addresses;
+}
 
-    my %res = $self->read_app_config($config_file);
+sub type {
+    my ($self) = @_;
 
-    my $ctrl_port = 8100;
-    my $web_port  = 8200;
+    return "NPAD Server";
+}
 
-    if ($res{port}) {
-        $ctrl_port = $res{port};
+sub service_type {
+    my ($self) = @_;
+
+    return "npad";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/npad/1.0";
+}
+
+#### Traceroute/Ping Services ####
+
+package perfSONAR_PS::LSRegistrationDaemon::ICMP_Service;
+
+use Net::Ping;
+
+use perfSONAR_PS::Utils::DNS qw(reverse_dns resolve_address);
+use perfSONAR_PS::Utils::Host qw(get_ips);
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::Base';
+
+use fields 'ADDRESSES';
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    unless ( $conf->{address} or $conf->{local} ) {
+        $self->{STATUS} = "BROKEN";
+        return -1;
     }
-   
-    my @addresses; 
-    if (not $res{addr}) {
-        # Grab the list of address from the server
-        @addresses = $self->lookup_interfaces();
-    } else {
+
+    my @addresses;
+
+    if ( $conf->{address} ) {
         @addresses = ();
-        push @addresses, $res{addr};
+
+        my @tmp = ();
+        if ( ref( $conf->{address} ) eq "ARRAY" ) {
+            @tmp = @{ $conf->{address} };
+        }
+        else {
+            push @tmp, $conf->{address};
+        }
+
+        my %addr_map = ();
+        foreach my $addr (@tmp) {
+            my @addrs = resolve_address($addr);
+            foreach my $addr (@addrs) {
+                $addr_map{$addr} = 1;
+            }
+        }
+
+        @addresses = keys %addr_map;
+    }
+    elsif ( $conf->{local} ) {
+        @addresses = get_ips();
     }
 
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{npad}->{service_name};
-    $service{description} = $self->{CONF}->{npad}->{service_description};
-    $service{type} = $self->{CONF}->{npad}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
+    $self->{ADDRESSES} = \@addresses;
+
+    return $self->SUPER::init($conf);
+}
+
+sub get_service_addresses {
+    my ($self) = @_;
+
+    my @addrs = ();
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
         my %addr = ();
-        $addr{"type"} = "uri";
-        if ($address =~ /:/) {
-            $addr{"value"} = "tcp://[$address]:$ctrl_port";
-        } else {
-            $addr{"value"} = "tcp://$address:$ctrl_port";
-        }
-        push @serv_addrs, \%addr;
-
-        my %web_addr = ();
-        $web_addr{"type"} = "url";
-        if ($address =~ /:/) {
-            $web_addr{"value"} = "http://[$address]:$web_port";
-        } else {
-            $web_addr{"value"} = "http://$address:$web_port";
-        }
-        push @serv_addrs, \%web_addr;
-    }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{npad}->{site_project}) {
-        push @projects, $self->{CONF}->{npad}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/npad/1.0", \@projects);
-
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
-    }
-}
-
-sub read_app_config {
-    my ($self, $file) = @_;
-
-    my ($control_addr, $control_port);
-
-    open(NPAD_CONFIG, $file);
-    while(<NPAD_CONFIG>) {
-        if (/CONTROL_ADDR = (.*)/) {
-            $control_addr = $1;
-        } elsif (/CONTROL_PORT = (.*)/) {
-            $control_port = $1;
-        }
-    }
-
-    return ( addr => $control_addr, port => $control_port );
-}
-
-sub init {
-    my ($self, $conf) = @_;
-
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::NPAD");
-
-    if (not $conf->{"npad"}->{"service_type"}) {
-        $conf->{"npad"}->{"service_type"} = "npad";
-    }
-
-    if (not $conf->{"npad"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "NPAD Server";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
-        }
-
-        $conf->{"npad"}->{"service_name"} = $name;
-    }
-
-    if (not $conf->{"npad"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "NPAD Server";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"npad"}->{"service_description"} = $desc;
-    }
-
-    $self->SUPER::init($conf);
-
-    return 0;
-}
-
-package perfSONAR_PS::Agent::LS::Registration::Ping;
-
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
-
-sub register {
-    my ($self, @config_options) = @_;
-
-    # Grab the list of address from the server
-    my @addresses = $self->lookup_interfaces();
-
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{ping}->{service_name};
-    $service{description} = $self->{CONF}->{ping}->{service_description};
-    $service{type} = $self->{CONF}->{ping}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
-        my %addr = ();
-        $addr{"value"} = $address;
-        if ($address =~ /:/) {
+        $addr{"value"} = $addr;
+        if ( $addr =~ /:/ ) {
             $addr{"type"} = "ipv6";
-        } else {
+        }
+        else {
             $addr{"type"} = "ipv4";
         }
-        push @serv_addrs, \%addr;
-    }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{ping}->{site_project}) {
-        push @projects, $self->{CONF}->{ping}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/ping/1.0", \@projects);
 
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
+        push @addrs, \%addr;
     }
+
+    return \@addrs;
 }
 
-sub init {
-    my ($self, $conf) = @_;
+sub get_node_addresses {
+    my ($self) = @_;
 
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::Ping");
+    return $self->get_service_addresses();
+}
 
-    if (not $conf->{"ping"}->{"service_type"}) {
-        $conf->{"ping"}->{"service_type"} = "ping";
+sub is_up {
+    my ($self) = @_;
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        if ( $addr =~ /:/ ) {
+            next;
+        }
+        else {
+            $self->{LOGGER}->debug( "Pinging: " . $addr . "" );
+            my $ping = Net::Ping->new("external");
+            if ( $ping->ping( $addr, 1 ) ) {
+                return 1;
+            }
+        }
     }
-
-    if (not $conf->{"ping"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "Ping Responder";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
-        }
-
-        $conf->{"ping"}->{"service_name"} = $name;
-    }
-
-    if (not $conf->{"ping"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "Ping Responder";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"ping"}->{"service_description"} = $desc;
-    }
-
-    $self->SUPER::init($conf);
-
-    # Ping is always running
-    $self->{APP_STATUS} = "STARTED";
 
     return 0;
 }
 
-package perfSONAR_PS::Agent::LS::Registration::Traceroute;
+package perfSONAR_PS::LSRegistrationDaemon::Ping;
 
-use base 'perfSONAR_PS::Agent::LS::Registration::Base';
-use Log::Log4perl qw(:easy);
+use base 'perfSONAR_PS::LSRegistrationDaemon::ICMP_Service';
 
-sub register {
-    my ($self, @config_options) = @_;
+sub type {
+    my ($self) = @_;
 
-    # Grab the list of address from the server
-    my @addresses = $self->lookup_interfaces();
-
-    my @metadata = ();
-    my %service = ();
-    $service{nonPerfSONARService} = 1;
-    $service{name} = $self->{CONF}->{traceroute}->{service_name};
-    $service{description} = $self->{CONF}->{traceroute}->{service_description};
-    $service{type} = $self->{CONF}->{traceroute}->{service_type};
-    my @serv_addrs = ();
-    foreach my $address (@addresses) {
-        my %addr = ();
-        $addr{"value"} = $address;
-        if ($address =~ /:/) {
-            $addr{"type"} = "ipv6";
-        } else {
-            $addr{"type"} = "ipv4";
-        }
-        push @serv_addrs, \%addr;
-    }
-    $service{addresses} = \@serv_addrs;
-    my @projects = ();
-    if ($self->{CONF}->{site_project}) {
-        push @projects, $self->{CONF}->{site_project};
-    }
-    if ($self->{CONF}->{traceroute}->{site_project}) {
-        push @projects, $self->{CONF}->{traceroute}->{site_project};
-    }
-    $service{projects} = \@projects;
-    push @metadata, $self->create_event_type_md("http://ggf.org/ns/nmwg/tools/traceroute/1.0", \@projects);
-
-    my $res = $self->{LS_CLIENT}->registerRequestLS(service => \%service, data => \@metadata);
-    if ($res and $res->{"key"}) {
-        $self->{STATUS} = "REGISTERED";
-        $self->{KEY} = $res->{"key"};
-        $self->{NEXT_REGISTRATION} = time + $self->{CONF}->{"ls_interval"};
-    }
+    return "Ping Responder";
 }
 
-sub init {
-    my ($self, $conf) = @_;
+sub service_type {
+    my ($self) = @_;
 
-    $self->{LOGGER} = get_logger("package perfSONAR_PS::Agent::LS::Registration::Traceroute");
-
-    if (not $conf->{"traceroute"}->{"service_type"}) {
-        $conf->{"traceroute"}->{"service_type"} = "traceroute";
-    }
-
-    if (not $conf->{"traceroute"}->{"service_name"}) {
-        my $name = "";
-
-        $name .= "Traceroute Responder";
-
-        if ($conf->{"site_name"}) {
-            $name = $conf->{site_name} . " " . $name;
-        }
-
-        $conf->{"traceroute"}->{"service_name"} = $name;
-    }
-
-    if (not $conf->{"traceroute"}->{"service_description"}) {
-        my $desc = "";
-
-        $desc .= "Traceroute Responder";
-        if ($conf->{"project"}) {
-            $desc .= " for ".$conf->{site_project};
-        } elsif ($conf->{"site_project"}) {
-            $desc .= " for ".$conf->{site_project};
-        }
-
-        if ($conf->{"site_name"}) {
-            $desc .= " at ".$conf->{site_name};
-        }
-
-        if ($conf->{"site_location"}) {
-            $desc .= " in ".$conf->{site_location};
-        }
-
-        $conf->{"traceroute"}->{"service_description"} = $desc;
-    }
-
-    $self->SUPER::init($conf);
-
-    # Traceroute is always running
-    $self->{APP_STATUS} = "STARTED";
-
-    return 0;
+    return "ping";
 }
 
-# vim: expandtab shiftwidth=4 tabstop=4
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/ping/1.0";
+}
+
+package perfSONAR_PS::LSRegistrationDaemon::Traceroute;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::ICMP_Service';
+
+sub type {
+    my ($self) = @_;
+
+    return "Traceroute Responder";
+}
+
+sub service_type {
+    my ($self) = @_;
+
+    return "traceroute";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/traceroute/1.0";
+}
+
