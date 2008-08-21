@@ -12,7 +12,7 @@ use perfSONAR_PS::Client::gLS;
 use perfSONAR_PS::Common;
 
 my $parser = XML::LibXML->new();
-my $url = "http://dc211.internet2.edu/gls.root.hints";
+my $url = "http://192.168.69.131/gls.root.hints";
 
 my $gls = perfSONAR_PS::Client::gLS->new( { url => $url} );
 foreach my $root ( @{ $gls->{ROOTS} } ) {
@@ -24,6 +24,11 @@ unless ( $#{ $gls->{ROOTS} } > -1 ) {
     exit(1);
 }
 
+my $doc = q{};
+my $eT = q{};
+my $domain = q{};
+my $address = q{};
+
 # ------------------------------------------------------------------------------
 # level 0 tests - getLSDiscoverRaw/getLSQueryRaw to find services
 # ------------------------------------------------------------------------------
@@ -31,18 +36,23 @@ unless ( $#{ $gls->{ROOTS} } > -1 ) {
 my @hls = ();
 
 print "\nFinding all available hLS instances...\n";
-my $result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\"]]" } );
-if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
-    my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
-    my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-    foreach my $a ( $ap->get_nodelist ) {
-        my $value = extract( $a, 0 );
-        print "\thLS:\ " , $value , "\n" if $value;
-        push @hls, $value if $value;
+my $result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"gLS\"]]" } );
+if ( $result and $result->{eventType} =~ m/^success/ ) {
+    if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
+        $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+        my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+        foreach my $a ( $ap->get_nodelist ) {
+            my $value = extract( $a, 0 );
+            print "\thLS:\ " , $value , "\n" if $value;
+            push @hls, $value if $value;
+        }
+    }
+    else {
+        print "Query error.\n";
     }
 }
 else {
-    print "Query error.\n";
+   print "\tNothing Found.\n";
 }
 
 if ( $#hls > -1 ) {
@@ -51,7 +61,7 @@ if ( $#hls > -1 ) {
         print "\thLS:\ " , $h , "\n";
         my $result = $gls->getLSQueryRaw( { ls => $h, xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service]" } );
         if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
-            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+            $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
             my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
             foreach my $a ( $ap->get_nodelist ) {
                 my $value = extract( $a, 0 );
@@ -70,11 +80,16 @@ if ( $#hls > -1 ) {
 
 print "\nLevel 0: getLSDiscoverRaw for \"eventType\" @ the root...\n";
 $result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/nmwg:eventType" } );
-my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
-my $eT = find( $doc->getDocumentElement, ".//nmwg:eventType", 0 );
-foreach my $e ( $eT->get_nodelist ) {
-    my $value = extract( $e, 0 );
-    print "\teventType:\ " , $value , "\n" if $value;
+if ( $result and $result->{eventType} =~ m/^success/ ) {
+    $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+    $eT = find( $doc->getDocumentElement, ".//nmwg:eventType", 0 );
+    foreach my $e ( $eT->get_nodelist ) {
+        my $value = extract( $e, 0 );
+        print "\teventType:\ " , $value , "\n" if $value;
+    }
+}
+else {
+   print "\tNothing Found.\n";
 }
 
 if ( $#hls > -1 ) {
@@ -95,14 +110,19 @@ if ( $#hls > -1 ) {
 print "\nLevel 0: getLSDiscoverRaw for \"domain\" @ the gLS...\n";
 my $ds;
 $result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/summary:subject/nmtb:domain" } );
-$doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
-my $domain = find( $doc->getDocumentElement, ".//nmtb:domain/nmtb:name[\@type=\"dns\"]", 0 );
-foreach my $d ( $domain->get_nodelist ) {
-    my $value = extract( $d, 0 );
-    $ds->{$value} = 1 if $value;
+if ( $result and $result->{eventType} =~ m/^success/ ) {
+    $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+    $domain = find( $doc->getDocumentElement, ".//nmtb:domain/nmtb:name[\@type=\"dns\"]", 0 );
+    foreach my $d ( $domain->get_nodelist ) {
+        my $value = extract( $d, 0 );
+        $ds->{$value} = 1 if $value;
+    }
+    foreach my $d ( keys %{ $ds } ) {
+        print "\tdomain:\ " , $d , "\n";
+    }
 }
-foreach my $d ( keys %{ $ds } ) {
-    print "\tdomain:\ " , $d , "\n";
+else {
+   print "\tNothing Found.\n";
 }
 
 if ( $#hls > -1 ) {
@@ -127,19 +147,24 @@ if ( $#hls > -1 ) {
 
 print "\nLevel 0: getLSDiscoverRaw for \"addresses\" @ the gLS...\n";
 my $as;
-$result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/summary:subject/nmtl3:network" } );
-$doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
-my $address = find( $doc->getDocumentElement, ".//nmtl3:network/nmtl3:subnet", 0 );
-foreach my $a ( $address->get_nodelist ) {
-    my $value1 = extract( find($a, "./nmtl3:address", 1) , 0 );
-    my $value2 = extract( find($a, "./nmtl3:netmask", 1) , 0 );
-    $as->{$value1."/".$value2} = 1 if $value1 and $value2;
-}
-foreach my $a ( keys %{ $as } ) {
-    my @a2 = Net::CIDR::cidr2range($a);
-    foreach my $o (@a2) {
-      print "\trange: " , $o , "\n";
+$result = $gls->getLSDiscoverRaw( { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/summary:subject/*[local-name()=\"network\"]" } );
+if ( $result and $result->{eventType} =~ m/^success/ ) {
+    $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+    $address = find( $doc->getDocumentElement, ".//nmtl3:network/nmtl3:subnet", 0 );
+    foreach my $a ( $address->get_nodelist ) {
+        my $value1 = extract( find($a, "./nmtl3:address", 1) , 0 );
+        my $value2 = extract( find($a, "./nmtl3:netmask", 1) , 0 );
+        $as->{$value1."/".$value2} = 1 if $value1 and $value2;
     }
+    foreach my $a ( keys %{ $as } ) {
+        my @a2 = Net::CIDR::cidr2range($a);
+        foreach my $o (@a2) {
+          print "\trange: " , $o , "\n";
+        }
+    }
+}
+else {
+   print "\tNothing Found.\n";
 }
 
 if ( $#hls > -1 ) {
@@ -147,18 +172,23 @@ if ( $#hls > -1 ) {
         print "\nLevel 0: getLSDiscoverRaw for \"addresses\" @ the hLS \"".$h."\"...\n";
         undef $as;
         $result = $gls->getLSDiscoverRaw( { ls => $h, xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/summary:subject/nmtl3:network" } );
-        $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
-        $address = find( $doc->getDocumentElement, ".//nmtl3:network/nmtl3:subnet", 0 );
-        foreach my $a ( $address->get_nodelist ) {
-            my $value1 = extract( find($a, "./nmtl3:address", 1) , 0 );
-            my $value2 = extract( find($a, "./nmtl3:netmask", 1) , 0 );
-            $as->{$value1."/".$value2} = 1 if $value1 and $value2;
-        }
-        foreach my $a ( keys %{ $as } ) {
-            my @a2 = Net::CIDR::cidr2range($a);
-            foreach my $o (@a2) {
-              print "\trange: " , $o , "\n";
+        if ( $result and $result->{eventType} =~ m/^success/ ) {     
+            $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};        
+            $address = find( $doc->getDocumentElement, ".//nmtl3:network/nmtl3:subnet", 0 );
+            foreach my $a ( $address->get_nodelist ) {
+                my $value1 = extract( find($a, "./nmtl3:address", 1) , 0 );
+                my $value2 = extract( find($a, "./nmtl3:netmask", 1) , 0 );
+                $as->{$value1."/".$value2} = 1 if $value1 and $value2;
             }
+            foreach my $a ( keys %{ $as } ) {
+                my @a2 = Net::CIDR::cidr2range($a);
+                foreach my $o (@a2) {
+                    print "\trange: " , $o , "\n";
+                }
+            }
+        }
+        else {
+            print "\tNothing Found.\n";
         }
     }
 }

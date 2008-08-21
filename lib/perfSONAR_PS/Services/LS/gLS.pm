@@ -163,7 +163,6 @@ sub init {
     else {
         $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
     }
-    system( "touch " . $self->{CONF}->{"root_hints_file"} );
 
     unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
         $self->{LOGGER}->warn("Setting 'root' to '0'");
