@@ -48,11 +48,9 @@ sub get_ips {
         next if ( not $is_eth );
 
         if (/inet addr:(\d+\.\d+\.\d+\.\d+)/) {
-            print "IPv4: $_";
             push @ret_interfaces, $1;
         }
         elsif (/inet6 addr: (\d*:[^\/ ]*)(\/\d+)? +Scope:Global/) {
-            print "IPv6: $_";
             push @ret_interfaces, $1;
         }
     }

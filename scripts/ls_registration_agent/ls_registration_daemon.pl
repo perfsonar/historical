@@ -1,7 +1,11 @@
+#!/usr/bin/perl
+
 use strict;
 use warnings;
 
-use lib "../lib";
+use lib "../../lib";
+use lib "/usr/local/perfSONAR/lib";
+
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Utils::Daemon qw/daemonize setids lockPIDFile unlockPIDFile/;
 use perfSONAR_PS::Utils::Host qw(get_ips);
@@ -9,6 +13,11 @@ use perfSONAR_PS::Utils::Host qw(get_ips);
 use Getopt::Long;
 use Config::General;
 use Log::Log4perl qw/:easy/;
+
+my @child_pids = ();
+
+$SIG{INT}  = \&signalHandler;
+$SIG{TERM} = \&signalHandler;
 
 my $CONFIG_FILE;
 my $LOGOUTPUT;
@@ -105,8 +114,13 @@ if ( not $conf{"ls_instance"} ) {
 }
 
 if ( not $conf{"ls_interval"} ) {
-    $logger->error("No LS interval specified. Defaulting to 24 hours");
+    $logger->info("No LS interval specified. Defaulting to 24 hours");
     $conf{"ls_interval"} = 24;
+}
+
+if ( not $conf{"check_interval"} ) {
+    $logger->info("No service check interval specified. Defaulting to 5 minutes");
+    $conf{"check_interval"} = 300;
 }
 
 # the interval is configured in hours
@@ -124,9 +138,7 @@ if ( ref($site_confs) ne "ARRAY" ) {
     $site_confs = \@tmp;
 }
 
-my @pids = ();
-
-my @site_children = ();
+my @site_params = ();
 
 foreach my $site_conf (@$site_confs) {
     my $site_merge_conf = mergeConfig( \%conf, $site_conf );
@@ -138,10 +150,12 @@ foreach my $site_conf (@$site_confs) {
         exit(-1);
     }
 
-    push @site_children, $services;
+    my %params = ( conf => $site_merge_conf, services => $services );
+
+    push @site_params, \%params;
 }
 
-if ( not $DEBUG ) {
+if ( not $DEBUGFLAG ) {
     ( $status, $res ) = daemonize();
     if ( $status != 0 ) {
         $logger->error( "Couldn't daemonize: " . $res );
@@ -151,20 +165,20 @@ if ( not $DEBUG ) {
 
 unlockPIDFile($fileHandle);
 
-foreach my $site (@site_children) {
+foreach my $params (@site_params) {
 
     # every site will register separately
     my $pid = fork();
     if ( $pid != 0 ) {
-        push @pids, $pid;
+        push @child_pids, $pid;
         next;
     }
     else {
-        handle_site($site);
+        handle_site( $params->{conf}, $params->{services} );
     }
 }
 
-foreach my $pid (@pids) {
+foreach my $pid (@child_pids) {
     waitpid( $pid, 0 );
 }
 
@@ -262,16 +276,40 @@ sub init_site {
 }
 
 sub handle_site {
-    my ($services) = @_;
+    my ( $site_conf, $services ) = @_;
 
     while (1) {
         foreach my $service (@$services) {
             $service->refresh();
-            sleep(60);
         }
+
+        sleep( $site_conf->{"check_interval"} );
     }
 
     return;
+}
+
+=head2 killChildren
+Kills all the children for this process off. It uses global variables
+because this function is used by the signal handler to kill off all
+child processes.
+=cut
+
+sub killChildren {
+    foreach my $pid (@child_pids) {
+        kill( "SIGINT", $pid );
+    }
+
+    return;
+}
+
+=head2 signalHandler
+Kills all the children for the process and then exits
+=cut
+
+sub signalHandler {
+    killChildren;
+    exit(0);
 }
 
 package perfSONAR_PS::LSRegistrationDaemon::Base;
@@ -290,6 +328,8 @@ sub new {
 
     my $self = fields::new($class);
 
+    $self->{LOGGER} = get_logger($class);
+
     return $self;
 }
 
@@ -298,7 +338,6 @@ sub init {
 
     $self->{CONF}   = $conf;
     $self->{STATUS} = "UNREGISTERED";
-    $self->{LOGGER} = get_logger( ref($self) );
 
     if ( not $conf->{ls_instance} ) {
         $self->{LOGGER}->error("No ls instance available for this service to use");
@@ -500,7 +539,8 @@ use IO::Socket::INET;
 sub init {
     my ( $self, $conf ) = @_;
 
-    unless ( $conf->{address} or $conf->{local} ) {
+    unless ( $conf->{address} or $conf->{is_local} ) {
+        $self->{LOGGER}->error("Must specify an address or that the service is local");
         $self->{STATUS} = "BROKEN";
         return -1;
     }
@@ -528,7 +568,7 @@ sub init {
 
         @addresses = keys %addr_map;
     }
-    elsif ( $conf->{local} ) {
+    elsif ( $conf->{is_local} ) {
         @addresses = get_ips();
     }
 
@@ -633,7 +673,7 @@ sub init {
     my ( $self, $conf ) = @_;
 
     my $res;
-    if ( $conf->{local} ) {
+    if ( $conf->{is_local} ) {
         my $bwctl_config = $conf->{config_file};
         if ( not $bwctl_config ) {
             $bwctl_config = DEFAULT_CONFIG;
@@ -641,6 +681,7 @@ sub init {
 
         $res = read_bwctl_config($bwctl_config);
         if ( $res->{error} ) {
+            $self->{LOGGER}->error( "Problem reading bwctl configuation: " . $res->{error} );
             $self->{STATUS} = "BROKEN";
             return -1;
         }
@@ -747,7 +788,7 @@ sub init {
     my ( $self, $conf ) = @_;
 
     my $res;
-    if ( $conf->{local} ) {
+    if ( $conf->{is_local} ) {
         my $owamp_config = $conf->{config_file};
         if ( not $owamp_config ) {
             $owamp_config = DEFAULT_CONFIG;
@@ -755,6 +796,7 @@ sub init {
 
         $res = read_owamp_config($owamp_config);
         if ( $res->{error} ) {
+            $self->{LOGGER}->error( "Problem reading owamp configuation: " . $res->{error} );
             $self->{STATUS} = "BROKEN";
             return -1;
         }
@@ -928,7 +970,8 @@ sub init {
     my ( $self, $conf ) = @_;
 
     my $port = $conf->{port};
-    if ( not $port and not $conf->{local} ) {
+    if ( not $port and not $conf->{is_local} ) {
+        $self->{LOGGER}->error("Must specify an address or that the service is local");
         $self->{STATUS} = "BROKEN";
         return -1;
     }
@@ -942,6 +985,7 @@ sub init {
 
         my $res = read_npad_config($npad_config);
         if ( $res->{error} ) {
+            $self->{LOGGER}->error( "Problem reading npad configuation: " . $res->{error} );
             $self->{STATUS} = "BROKEN";
             return -1;
         }
@@ -1043,7 +1087,8 @@ use fields 'ADDRESSES';
 sub init {
     my ( $self, $conf ) = @_;
 
-    unless ( $conf->{address} or $conf->{local} ) {
+    unless ( $conf->{address} or $conf->{is_local} ) {
+        $self->{LOGGER}->error("Must specify an address or that the service is local");
         $self->{STATUS} = "BROKEN";
         return -1;
     }
@@ -1071,7 +1116,7 @@ sub init {
 
         @addresses = keys %addr_map;
     }
-    elsif ( $conf->{local} ) {
+    elsif ( $conf->{is_local} ) {
         @addresses = get_ips();
     }
 
