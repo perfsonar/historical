@@ -90,7 +90,7 @@ our $build_in_key = 'jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348or
 
 $GENERAL_CONFIG{scratch_dir} = '/tmp' unless  -d $GENERAL_CONFIG{scratch_dir};
 unless($CGI->param &&   $CGI->param('get_it') && $CGI->param('get_it') eq $build_in_key) {
-    $SESSION =  new CGI::Session("driver:File;serializer:Storable",  $CGI, {Directory =>  $GENERAL_CONFIG{scratch_dir}}); ## to keep our session 
+    $SESSION =  new CGI::Session("driver:File",  $CGI, {Directory =>  $GENERAL_CONFIG{scratch_dir}}); ## to keep our session 
     $COOKIE =   $CGI->cookie(CGISESSID => $SESSION->id);
     $COOKIE->path('/gui-bin/');
     unless($SESSION  && !$SESSION->is_expired && $SESSION->param( "LINKS" )) {
