@@ -298,20 +298,23 @@ sub getHints {
     my $parameters = validateParams( @args, {} );
 
     if ( exists $self->{CONF}->{"root_hints_url"} and exists $self->{CONF}->{"root_hints_file"} ) {
-        my $content = get $self->{CONF}->{"root_hints_url"};
-        unless ($content) {
-            $self->{LOGGER}->error( "There was an error accessing " . $self->{CONF}->{"root_hints_url"} . "." );
-            return -1;
+        my @url_array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
+        foreach my $url (@url_array) {
+            my $content = get $url;
+            unless ($content) {
+                $self->{LOGGER}->error( "There was an error accessing " . $url . "." );
+                next;
+            }
+            open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
+            print HINTS $content;
+            close( HINTS );
+            return;
         }
-        open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
-        print HINTS $content;
-        close( HINTS );
     }
     else {
         $self->{LOGGER}->error("Missing gls.root.hints configuration information.");
-        return -1;
     }
-    return;
+    return -1;
 }
 
 =head2 needLS($self)
