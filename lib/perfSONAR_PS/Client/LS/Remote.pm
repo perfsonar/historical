@@ -1,13 +1,806 @@
 package perfSONAR_PS::Client::LS::Remote;
 
+use fields 'LS_ORDER', 'LS_CONF', 'HINTS', 'LS', 'CONF', 'CHUNK', 'ALIVE', 'FIRST', 'LS_KEY', 'LOGGER';
+
+use strict;
+use warnings;
+
 =head1 NAME
 
 perfSONAR_PS::Client::LS::Remote - A module that provides a client API for an LS
 
 =head1 DESCRIPTION
 
-This module aims to offer simple methods for dealing with requests for information, and the
-related tasks of interacting with backend storage.
+This module aims to offer simple methods for dealing with requests for
+information, and the related tasks of interacting with backend storage.
+
+=cut
+
+use Log::Log4perl qw(get_logger);
+use English qw( -no_match_vars );
+use LWP::Simple;
+use Net::Ping;
+use XML::LibXML;
+use perfSONAR_PS::Common;
+use perfSONAR_PS::Transport;
+use perfSONAR_PS::Messages;
+use perfSONAR_PS::Client::Echo;
+use perfSONAR_PS::Client::gLS;
+
+our $VERSION = 0.10;
+
+=head2 new ($package, $uri, \%conf) 
+
+The parameters are the URI of the Lookup Service, a %conf describing the service for registration purposes.
+
+The %conf can have 4 keys:
+
+SERVICE_NAME - The name of the service registering data
+SERVICE_ACCESSPOINT - The URL for the service registering data
+SERVICE_TYPE - The type (MA, LS, etc) of the service registering data
+SERVICE_DESCRIPTION - A description of the service registering data
+
+=cut
+
+sub new {
+    my ( $package, $uri, $conf, $hints ) = @_;
+
+    my $self = fields::new($package);
+    $self->{LS_ORDER} = ();
+    $self->{LS_CONF}  = ();
+    $self->{HINTS}    = ();
+    $self->{CHUNK}    = 50;
+    $self->{ALIVE}    = 0;
+    $self->{FIRST}    = 1;
+    undef $self->{LS};
+    $self->{LOGGER} = get_logger("perfSONAR_PS::Client::LS::Remote");
+
+    if ( defined $uri and $uri ) {
+        if ( ref($uri) eq "ARRAY" ) {
+            foreach my $u ( @{$uri} ) {
+                if ( $u =~ m/^http:\/\// ) {
+                    $u =~ s/\s+//g;
+                    push @{ $self->{LS_CONF} }, $u;
+                }
+                else {
+                    $self->{LOGGER}->error( "URI \"" . $u . "\" must be of the form http://ADDRESS." );
+                }
+            }
+        }
+        else {
+            if ( $uri =~ m/^http:\/\// ) {
+                $uri =~ s/\s+//g;
+                push @{ $self->{LS_CONF} }, $uri;
+            }
+            else {
+                $self->{LOGGER}->error( "URI \"" . $uri . "\" must be of the form http://ADDRESS." );
+            }
+        }
+    }
+
+    if ( defined $hints and $hints ) {
+        if ( ref($hints) eq "ARRAY" ) {
+            foreach my $h ( @{$hints} ) {
+                if ( $h =~ m/^http:\/\// ) {
+                    $h =~ s/\s+//g;
+                    push @{ $self->{HINTS} }, $h;
+                }
+                else {
+                    $self->{LOGGER}->error( "HINTS \"" . $h . "\" must be of the form http://ADDRESS." );
+                }
+            }
+        }
+        else {
+            if ( $hints =~ m/^http:\/\// ) {
+                $hints =~ s/\s+//g;
+                push @{ $self->{HINTS} }, $hints;
+            }
+            else {
+                $self->{LOGGER}->error( "HINTS \"" . $hints . "\" must be of the form http://ADDRESS." );
+            }
+        }
+    }
+
+    $self->init() if $hints or $uri;
+
+    if ( defined $conf and $conf ) {
+        $self->{CONF} = \%{$conf};
+    }
+
+    return $self;
+}
+
+=head2 setURI ($self, $uri)
+
+(Re-)Sets the value for the LS URI.
+
+=cut
+
+sub setURI {
+    my ( $self, $uri ) = @_;
+
+    if ( defined $uri and $uri ) {
+        if ( ref($uri) eq "ARRAY" ) {
+            foreach my $u ( @{$uri} ) {
+                if ( $u =~ m/^http:\/\// ) {
+                    $u =~ s/\s+//g;
+                    push @{ $self->{LS_CONF} }, $u;
+                }
+                else {
+                    $self->{LOGGER}->error( "URI \"" . $u . "\" must be of the form http://ADDRESS." );
+                }
+            }
+        }
+        else {
+            if ( $uri =~ m/^http:\/\// ) {
+                $uri =~ s/\s+//g;
+                push @{ $self->{LS_CONF} }, $uri;
+            }
+            else {
+                $self->{LOGGER}->error( "URI \"" . $uri . "\" must be of the form http://ADDRESS." );
+            }
+        }
+        $self->init();
+    }
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+    }
+    return;
+}
+
+=head2 setHints ($self, $hints)
+
+(Re-)Sets the value for the hints file.
+
+=cut
+
+sub setHints {
+    my ( $self, $hints ) = @_;
+
+    if ( defined $hints and $hints ) {
+        if ( ref($hints) eq "ARRAY" ) {
+            foreach my $h ( @{$hints} ) {
+                if ( $h =~ m/^http:\/\// ) {
+                    $h =~ s/\s+//g;
+                    push @{ $self->{HINTS} }, $h;
+                }
+                else {
+                    $self->{LOGGER}->error( "Hints \"" . $h . "\" must be of the form http://ADDRESS." );
+                }
+            }
+        }
+        else {
+            if ( $hints =~ m/^http:\/\// ) {
+                $hints =~ s/\s+//g;
+                push @{ $self->{HINTS} }, $hints;
+            }
+            else {
+                $self->{LOGGER}->error( "Hints \"" . $hints . "\" must be of the form http://ADDRESS." );
+            }
+        }
+        $self->init();
+    }
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+    }
+    return;
+}
+
+=head2 setConf ($self, \%conf)
+
+(Re-)Sets the value for the 'conf' hash.
+
+=cut
+
+sub setConf {
+    my ( $self, $conf ) = @_;
+
+    if ( defined $conf and $conf ) {
+        $self->{CONF} = \%{$conf};
+    }
+    else {
+        $self->{LOGGER}->error("Missing argument.");
+    }
+    return;
+}
+
+=head2 clearURIs( $self, {} )
+
+Clear the URI list.
+
+=cut
+
+sub clearURIs {
+    my ($self) = @_;
+    undef $self->{LS_CONF};
+    return;
+}
+
+=head2 clearHints( $self, {} )
+
+Clear the Hints list.
+
+=cut
+
+sub clearHints {
+    my ($self) = @_;
+    undef $self->{HINTS};
+    return;
+}
+
+=head2 init( $self, { } )
+
+Used to extract gLS instances from some hints file, order the resulting gLS
+instances by connectivity.
+
+=cut
+
+sub init {
+    my ($self) = @_;
+
+    $self->{LS_ORDER} = ();
+    my %temp = ();
+    foreach my $ls ( @{ $self->{LS_CONF} } ) {
+        my $echo_service = perfSONAR_PS::Client::Echo->new($ls);
+        my ( $status, $res ) = $echo_service->ping();
+        next unless $status > -1;
+        push @{ $self->{LS_ORDER} }, $ls unless $temp{$ls};
+        $temp{$ls}++;
+    }
+
+    my $gls    = perfSONAR_PS::Client::gLS->new( { url    => $self->{HINTS} } );
+    my $result = $gls->getLSDiscoverRaw(         { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"]/*[local-name()=\"accessPoint\"]" } );
+    if ( $result and $result->{eventType} =~ m/^success/ ) {
+        my $parser = XML::LibXML->new();
+        my %temp2  = ();
+        my $ping   = Net::Ping->new();
+        $ping->hires();
+        if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
+            next unless exists $result->{response} and $result->{response};
+            my $doc = $parser->parse_string( $result->{response} );
+            my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+            foreach my $a ( $ap->get_nodelist ) {
+                my $value = extract( $a, 0 );
+                if ($value) {
+                    my $echo_service = perfSONAR_PS::Client::Echo->new($value);
+                    my ( $status, $res ) = $echo_service->ping();
+                    next unless $status > -1;
+
+                    my $value2 = $value;
+                    $value2 =~ s/^http:\/\///;
+                    my ($unt_host) = $value2 =~ /^(.+):/;
+                    my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
+                    $temp2{$duration} = $value if ( ( $ret or $duration ) and ( not $temp{$value} ) );
+                }
+            }
+        }
+        $ping->close();
+        foreach my $time ( sort keys %temp2 ) {
+            push @{ $self->{LS_ORDER} }, $temp2{$time};
+        }
+    }
+
+    if ( $self->{LS_ORDER}->[0] ) {
+        $self->{LS}    = $self->{LS_ORDER}->[0];
+        $self->{ALIVE} = 1;
+    }
+    else {
+        undef $self->{LS};
+        $self->{ALIVE} = 0;
+    }
+
+    return 0;
+}
+
+=head2 getLS( $self, { } )
+
+Extract the first usable ls.  In the event you exhaust the list, try
+again (once only, covers the case where a previously 'dead' ls may come back).
+
+=cut
+
+sub getLS {
+    my ($self) = @_;
+
+    my $flag = 0;
+    while ( $flag <= 1 ) {
+        foreach my $ls ( @{ $self->{LS_ORDER} } ) {
+            my $echo_service = perfSONAR_PS::Client::Echo->new($ls);
+            my ( $status, $res ) = $echo_service->ping();
+            if ( $status != -1 ) {
+                $self->{LS}    = $ls;
+                $self->{ALIVE} = 1;
+                return;
+            }
+            else {
+                $self->{LOGGER}->warn( "LS \"" . $ls . "\" was not reacheable..." );
+            }
+        }
+        $self->init();
+        $flag++;
+    }
+    undef $self->{LS};
+    $self->{ALIVE} = 0;
+    return;
+}
+
+=head2 getKey ($self)
+
+Returns the key, or failing that asks for the key from the LS.  
+
+=cut
+
+sub getKey {
+    my ($self) = @_;
+    return $self->{LS_KEY} if $self->{LS_KEY};
+    $self->sendKey();
+    if ( $self->{LS_KEY} ) {
+        return $self->{LS_KEY};
+    }
+    else {
+        return;
+    }
+}
+
+=head2 createKey ($self, $key)
+
+Creates a 'key' value that is used to access the LS.
+
+=cut
+
+sub createKey {
+    my ( $self, $lsKey ) = @_;
+    my $key = "    <nmwg:key id=\"key." . genuid() . "\">\n";
+    $key = $key . "      <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
+    if ( defined $lsKey and $lsKey ) {
+        $key = $key . "        <nmwg:parameter name=\"lsKey\">" . $lsKey . "</nmwg:parameter>\n";
+    }
+    else {
+        if ( $self->getKey ) {
+            $key = $key . "        <nmwg:parameter name=\"lsKey\">" . $self->getKey . "</nmwg:parameter>\n";
+        }
+        else {
+            $self->{LOGGER}->error("Cannot return key structure: value for key not found.");
+            return;
+        }
+    }
+    $key = $key . "      </nmwg:parameters>\n";
+    $key = $key . "    </nmwg:key>\n";
+    return $key;
+}
+
+=head2 createService ($self)
+
+Creates the 'service' subject (description of the service) for LS registration.
+
+=cut
+
+sub createService {
+    my ($self)  = @_;
+    my $logger  = get_logger("perfSONAR_PS::Client::LS::Remote");
+    my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\" id=\"subject." . genuid() . "\">\n";
+    $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
+    $service = $service . "        <psservice:serviceName>" . $self->{CONF}->{"SERVICE_NAME"} . "</psservice:serviceName>\n" if exists $self->{CONF}->{"SERVICE_NAME"};
+    $service = $service . "        <psservice:accessPoint>" . $self->{CONF}->{"SERVICE_ACCESSPOINT"} . "</psservice:accessPoint>\n" if exists $self->{CONF}->{"SERVICE_ACCESSPOINT"};
+    $service = $service . "        <psservice:serviceType>" . $self->{CONF}->{"SERVICE_TYPE"} . "</psservice:serviceType>\n" if exists $self->{CONF}->{"SERVICE_TYPE"};
+    $service = $service . "        <psservice:serviceDescription>" . $self->{CONF}->{"SERVICE_DESCRIPTION"} . "</psservice:serviceDescription>\n" if exists $self->{CONF}->{"SERVICE_DESCRIPTION"};
+    $service = $service . "      </psservice:service>\n";
+    $service = $service . "    </perfsonar:subject>\n";
+    return $service;
+}
+
+=head2 callLS ($self, $sender, $message)
+
+Given a message and a sender, contact an LS and parse the results.
+
+=cut
+
+sub callLS {
+    my ( $self, $sender, $message ) = @_;
+
+    my $error = q{};
+    my $responseContent = $sender->sendReceive( makeEnvelope($message), q{}, \$error );
+    if ($error) {
+        $self->{LOGGER}->error("sendReceive failed: $error");
+        return -1;
+    }
+
+    my $parser = XML::LibXML->new();
+    if ( $responseContent and ( not $responseContent =~ m/^\d+/mx ) ) {
+        my $doc = q{};
+        eval { $doc = $parser->parse_string($responseContent); };
+        if ($EVAL_ERROR) {
+            $self->{LOGGER}->error( "Parser failed: " . $EVAL_ERROR );
+            return -1;
+        }
+        else {
+            my $msg = $doc->getDocumentElement->getElementsByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "message" )->get_node(1);
+            if ($msg) {
+                my $eventType = findvalue( $msg, "./nmwg:metadata/nmwg:eventType" );
+                if ( $eventType and $eventType =~ m/success/mx ) {
+                    my $temp = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
+                    $self->{LS_KEY} = $temp if $temp;
+                    return 0;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+=head2 registerStatic ($self, \@data_ref)
+
+Performs registration of 'static' data with an LS.  Static in this sense
+indicates that the data in the underlying storage DOES NOT change.  This
+function uses special messages that intend to simply keep the data alive, not
+worrying at all if something comes in that is new or goes away that is old.
+
+=cut
+
+sub registerStatic {
+    my ( $self, $data_ref ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    if ( exists $self->{FIRST} and $self->{FIRST} ) {
+        if ( $self->sendDeregister() == 0 ) {
+            $self->{LOGGER}->debug("Nothing registered.");
+        }
+        else {
+            $self->{LOGGER}->debug("Removed old registration.");
+        }
+
+        my @resultsString = @{$data_ref};
+        if ( $#resultsString != -1 ) {
+            my ( $status, $res ) = $self->__register( createService($self), $data_ref );
+            if ( $status == -1 ) {
+                $self->{LOGGER}->error("Unable to register data with LS.");
+                $self->{ALIVE} = 0;
+            }
+        }
+    }
+    else {
+        if ( $self->sendKeepalive() == -1 ) {
+            my @resultsString = @{$data_ref};
+            if ( $#resultsString != -1 ) {
+                my ( $status, $res ) = $self->__register( createService($self), $data_ref );
+                if ( $status == -1 ) {
+                    $self->{LOGGER}->error("Unable to register data with LS.");
+                    $self->{ALIVE} = 0;
+                    return -1;
+                }
+            }
+        }
+    }
+
+    $self->{FIRST} = 0 if $self->{FIRST};
+    return 0;
+}
+
+=head2 registerDynamic ($self, \@data_ref)
+
+Performs registration of 'dynamic' data with an LS.  Dynamic in this sense
+indicates that the data in the underlying storage DOES change.  This function
+uses special messages that will remove all old data and insert everything brand
+new with each registration. 
+
+=cut
+
+sub registerDynamic {
+    my ( $self, $data_ref ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    if ( exists $self->{FIRST} and $self->{FIRST} ) {
+        if ( $self->sendDeregister() == 0 ) {
+            $self->{LOGGER}->debug("Nothing registered.");
+        }
+        else {
+            $self->{LOGGER}->debug("Removed old registration.");
+        }
+
+        my @resultsString = @{$data_ref};
+        if ( $#resultsString != -1 ) {
+            if ( $self->__register( createService($self), $data_ref ) == -1 ) {
+                $self->{LOGGER}->error("Unable to register data with LS.");
+                $self->{ALIVE} = 0;
+            }
+        }
+    }
+    else {
+        my @resultsString = @{$data_ref};
+        my $subject       = q{};
+        if ( $self->sendKeepalive() == -1 ) {
+            $subject = createService($self);
+        }
+        else {
+            $subject = createKey($self) . "\n" . createService($self);
+        }
+        print $subject , "\n";
+        if ( $#resultsString != -1 ) {
+            if ( $self->__register( $subject, $data_ref ) == -1 ) {
+                $self->{LOGGER}->error("Unable to register data with LS.");
+                $self->{ALIVE} = 0;
+                return -1;
+            }
+        }
+    }
+
+    $self->{FIRST} = 0 if ( $self->{FIRST} );
+    return 0;
+}
+
+=head2 __register ($self, $subject, $data_ref)
+
+Performs the actual data registration. Unlike the above registration functions,
+this function does not try to perform any of the keepalive/deregister
+registration tricks. It simply registers the specified data. As part of the
+registration, it splits the data into chunks and registers each independently.
+
+=cut
+
+sub __register {
+    my ( $self, $subject, $data_ref ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
+    unless ( $host and $port and $endpoint ) {
+        $self->{LOGGER}->error("URI conversion error.");
+        return -1;
+    }
+
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+
+    my @data       = @{$data_ref};
+    my $iterations = int( ( ( $#data + 1 ) / $self->{CHUNK} ) );
+    my $x          = 0;
+    my $len        = $iterations + 1;
+    for my $y ( 1 .. $len ) {
+        my $doc = perfSONAR_PS::XML::Document->new();
+        startMessage( $doc, "message." . genuid(), q{}, "LSRegisterRequest", q{}, { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" } );
+        my $mdID = "metadata." . genuid();
+        if ($subject) {
+            createMetadata( $doc, $mdID, q{}, $subject, undef );
+        }
+        else {
+            createMetadata( $doc, $mdID, q{}, createService($self), undef );
+        }
+        for ( ; $x < ( $y * $self->{CHUNK} ) and $x <= $#data; $x++ ) {
+            createData( $doc, "data." . genuid(), $mdID, $data[$x], undef );
+        }
+        endMessage($doc);
+        unless ( callLS( $self, $sender, $doc->getValue() ) == 0 ) {
+            $self->{LOGGER}->error("Unable to register data with LS.");
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+=head2 sendDeregister ($self, $key)
+
+Deregisters the data with the specified key
+
+=cut
+
+sub sendDeregister {
+    my ( $self, $key ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
+    unless ( $host and $port and $endpoint ) {
+        $self->{LOGGER}->error("URI conversion error.");
+        return -1;
+    }
+
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    my $doc = perfSONAR_PS::XML::Document->new();
+    startMessage( $doc, "message." . genuid(), q{}, "LSDeregisterRequest", q{}, { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" } );
+
+    my $mdID = "metadata." . genuid();
+    createMetadata( $doc, $mdID, q{}, createKey( $self, $key ), undef );
+    createData( $doc, "data." . genuid(), $mdID, q{}, undef );
+    endMessage($doc);
+
+    return callLS( $self, $sender, $doc->getValue() );
+}
+
+=head2 sendKeepalive ($self, $key)
+
+Sends a keepalive message for the data with the specified key
+
+=cut
+
+sub sendKeepalive {
+    my ( $self, $key ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
+    unless ( $host and $port and $endpoint ) {
+        $self->{LOGGER}->error("URI conversion error.");
+        return -1;
+    }
+
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    my $doc = perfSONAR_PS::XML::Document->new();
+    startMessage( $doc, "message." . genuid(), q{}, "LSKeepaliveRequest", q{}, { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" } );
+
+    my $mdID = "metadata." . genuid();
+    createMetadata( $doc, $mdID, q{}, createKey( $self, $key ), undef );
+    createData( $doc, "data." . genuid(), $mdID, q{}, undef );
+    endMessage($doc);
+
+    return callLS( $self, $sender, $doc->getValue() );
+}
+
+=head2 sendKey ($self)
+
+Sends a key request message.
+
+=cut
+
+sub sendKey {
+    my ($self) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
+    unless ( $host and $port and $endpoint ) {
+        $self->{LOGGER}->error("URI conversion error.");
+        return -1;
+    }
+
+    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    my $doc = perfSONAR_PS::XML::Document->new();
+    startMessage( $doc, "message." . genuid(), q{}, "LSKeyRequest", q{}, { perfsonar => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/" } );
+
+    my $mdID = "metadata." . genuid();
+    createMetadata( $doc, $mdID, q{}, createService($self), undef );
+    createData( $doc, "data." . genuid(), $mdID, q{}, undef );
+    endMessage($doc);
+
+    return callLS( $self, $sender, $doc->getValue() );
+}
+
+=head2 query ($self, \%queries)
+
+This function sends the specified queries to the LS and returns the results.
+The queries are given as a hash table with each key/value pair being an
+identifier/a query. Each query gets executed and the returned value is a hash
+containing the same identifiers as keys, but instead of pointing to queries,
+they point to an array containing a status and a result. The status is either
+0 or -1. If it's 0, the result is a pointer to the data element. If it's -1,
+the result is the error message.
+
+=cut
+
+sub query {
+    my ( $self, $queries ) = @_;
+
+    unless ( $self->{LS} and $self->{ALIVE} ) {
+        $self->getLS();
+        unless ( $self->{LS} and $self->{ALIVE} ) {
+            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            return -1;
+        }
+    }
+
+    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
+    unless ( $host and $port and $endpoint ) {
+        $self->{LOGGER}->error("URI conversion error.");
+        return -1;
+    }
+
+    my $request = "<nmwg:message type=\"LSQueryRequest\" id=\"msg1\"\n";
+    $request .= "     xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
+    $request .= "     xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    foreach my $query_id ( keys %{$queries} ) {
+        $request .= "  <nmwg:metadata id=\"perfsonar_ps.meta.$query_id\">\n";
+        $request .= "    <xquery:subject id=\"sub1\">\n";
+        $request .= $queries->{$query_id};
+        $request .= "    </xquery:subject>\n";
+        $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+        $request .= "  <xquery:parameters id=\"params.1\">\n";
+        $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
+        $request .= "  </xquery:parameters>\n";
+        $request .= "  </nmwg:metadata>\n";
+        $request .= "  <nmwg:data metadataIdRef=\"perfsonar_ps.meta.$query_id\" id=\"data.$query_id\"/>\n";
+    }
+    $request .= "</nmwg:message>\n";
+
+    my ( $status, $res ) = consultArchive( $host, $port, $endpoint, $request );
+    if ( $status != 0 ) {
+        my $msg = "Error consulting LS: $res";
+        $self->{LOGGER}->error($msg);
+        return -1;
+    }
+
+    $self->{LOGGER}->debug( "Response: " . $res->toString );
+
+    my %ret_structure = ();
+
+    foreach my $d ( $res->getChildrenByTagName("nmwg:data") ) {
+        foreach my $m ( $res->getChildrenByTagName("nmwg:metadata") ) {
+            my $md_id    = $m->getAttribute("id");
+            my $md_idref = $m->getAttribute("metadataIdRef");
+            my $d_idref  = $d->getAttribute("metadataIdRef");
+
+            if ( $md_id eq $d_idref ) {
+                my $query_id;
+                my $eventType = findvalue( $m, "nmwg:eventType" );
+
+                if ( defined $md_idref and $md_idref =~ /perfsonar_ps\.meta\.(.*)/mx ) {
+                    $query_id = $1;
+                }
+                elsif ( $md_id =~ /perfsonar_ps\.meta\.(.*)/mx ) {
+                    $query_id = $1;
+                }
+                else {
+                    my $msg = "Received unknown response: $md_id/$md_idref";
+                    $self->{LOGGER}->error($msg);
+                    next;
+                }
+
+                my @retval;
+                if ( defined $eventType and $eventType =~ /^error\./mx ) {
+                    my $error_msg = findvalue( $d, "./nmwgr:datum" );
+                    $error_msg = "Unknown error" unless $error_msg;
+                    @retval = ( -1, $error_msg );
+                }
+                else {
+                    @retval = ( 0, $d );
+                }
+
+                $ret_structure{$query_id} = \@retval;
+            }
+        }
+    }
+    return ( 0, \%ret_structure );
+}
+
+1;
+
+__END__
 
 =head1 SYNOPSIS
 
@@ -81,492 +874,11 @@ related tasks of interacting with backend storage.
       print "Results for res1: ".$query_res->toString()."\n";
     }
 
-=cut
-
-use fields 'URI', 'CONF', 'CHUNK', 'ALIVE', 'FIRST', 'LS_KEY';
-
-use strict;
-use warnings;
-use Log::Log4perl qw(get_logger);
-use perfSONAR_PS::Common;
-use perfSONAR_PS::Transport;
-use perfSONAR_PS::Messages;
-use perfSONAR_PS::Client::Echo;
-
-our $VERSION = 0.09;
-
-=head1 API
-
-The offered API is simple, but offers the key functions we need in a measurement archive.
-
-=head2 new ($package, $uri, \%conf) 
-
-The parameters are the URI of the Lookup Service, a %conf describing the service for registration purposes.
-
-The %conf can have 4 keys in it:
-
-SERVICE_NAME - The name of the service registering data
-SERVICE_ACCESSPOINT - The URL for the service registering data
-SERVICE_TYPE - The type (MA, LS, etc) of the service registering data
-SERVICE_DESCRIPTION - A description of the service registering data
-
-=cut
-
-sub new {
-    my ($package, $uri, $conf) = @_;
-
-    my $self = fields::new($package);
-
-    $self->{URI} = $uri;
-
-    if(defined $conf and $conf ne "") {
-        $self->{CONF} = \%{$conf};
-    }
-
-    $self->{CHUNK} = 50;
-
-    $self->{ALIVE} = 0;
-    $self->{FIRST} = 1;
-
-    return $self;
-}
-
-=head2 setURI ($self, $uri)
-	(Re-)Sets the value for the LS URI.
-=cut
-
-sub setURI {
-    my ($self, $uri) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if(defined $uri and $uri ne "") {
-        $self->{URI} = $uri;
-    }
-    else {
-        $logger->error("Missing argument.");
-    }
-    return;
-
-}
-
-=head2 setConf ($self, \%conf)
-    (Re-)Sets the value for the 'conf' hash.
-=cut
-sub setConf {
-    my ($self, $conf) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if(defined $conf and $conf ne "") {
-        $self->{CONF} = \%{$conf};
-    }
-    else {
-        $logger->error("Missing argument.");
-    }
-    return;
-}
-
-=head2 createKey ($self, $key)
-    Creates a 'key' value that is used to access the LS.
-=cut
-sub createKey {
-    my($self, $lsKey) = @_;
-    my $key = "    <nmwg:key id=\"key.".genuid()."\">\n";
-    $key = $key . "      <nmwg:parameters id=\"parameters.".genuid()."\">\n";
-    if (defined $lsKey and $lsKey ne "") {
-        $key = $key . "        <nmwg:parameter name=\"lsKey\">".$lsKey."</nmwg:parameter>\n";
-    } else {
-        $key = $key . "        <nmwg:parameter name=\"lsKey\">".$self->{LS_KEY}."</nmwg:parameter>\n";
-    }
-    $key = $key . "      </nmwg:parameters>\n";
-    $key = $key . "    </nmwg:key>\n";
-    return $key;
-}
-
-=head2 createService ($self)
-    Creates the 'service' subject (description of the service) for LS registration.
-=cut
-sub createService {
-    my($self) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-    my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
-    $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-    $service = $service . "        <psservice:serviceName>".$self->{CONF}->{"SERVICE_NAME"}."</psservice:serviceName>\n" if (defined $self->{CONF}->{"SERVICE_NAME"});
-    $service = $service . "        <psservice:accessPoint>".$self->{CONF}->{"SERVICE_ACCESSPOINT"}."</psservice:accessPoint>\n" if (defined $self->{CONF}->{"SERVICE_ACCESSPOINT"});
-    $service = $service . "        <psservice:serviceType>".$self->{CONF}->{"SERVICE_TYPE"}."</psservice:serviceType>\n" if (defined $self->{CONF}->{"SERVICE_TYPE"});
-    $service = $service . "        <psservice:serviceDescription>".$self->{CONF}->{"SERVICE_DESCRIPTION"}."</psservice:serviceDescription>\n" if (defined $self->{CONF}->{"SERVICE_DESCRIPTION"});
-    $service = $service . "      </psservice:service>\n";
-    $service = $service . "    </perfsonar:subject>\n";
-    return $service;
-}
-
-=head2 callLS ($self, $sender, $message)
-    Given a message and a sender, contact an LS and parse the results.
-=cut
-sub callLS {
-    my($self, $sender, $message) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-    my $error;
-    my $responseContent = $sender->sendReceive(makeEnvelope($message), "", \$error);
-    if($error ne "") {
-        $logger->error("sendReceive failed: $error");
-        return -1;
-    }
-    my $parser = XML::LibXML->new();
-    if(defined $responseContent and $responseContent ne "" and
-            not ($responseContent =~ m/^\d+/x)) {
-        my $doc = "";
-        eval {
-            $doc = $parser->parse_string($responseContent);
-        };
-        if($@) {
-            $logger->error("Parser failed: ".$@);
-            return -1;
-        }
-        else {
-            my $msg = $doc->getDocumentElement->getElementsByTagNameNS("http://ggf.org/ns/nmwg/base/2.0/", "message")->get_node(1);
-            if($msg) {
-                my $eventType = findvalue($msg, "./nmwg:metadata/nmwg:eventType");
-                if(defined $eventType and $eventType =~ m/success/x) {
-                    $self->{LS_KEY} = extract( find( $msg, "./nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
-                    return 0;
-                }
-            }
-        }
-    }
-    return -1;
-}
-
-=head2 sendDeregister ($self, $key)
-    Deregisters the data with the specified key
-=cut
-sub sendDeregister {
-    my ($self, $key) = @_;
-
-    if (not defined $self->{URI}) {
-        return -1;
-    }
-
-    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-    if (not defined $host and not defined $port and not defined $endpoint) {
-        return -1;
-    }
-
-    my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
-
-
-    my $doc = perfSONAR_PS::XML::Document->new();
-    startMessage($doc, "message.".genuid(), "", "LSDeregisterRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
-
-    my $mdID = "metadata.".genuid();
-    createMetadata($doc, $mdID, "", createKey($self, $key), undef);
-    createData($doc, "data.".genuid(), $mdID, "", undef);
-    endMessage($doc);
-
-    return callLS($self, $sender, $doc->getValue());
-}
-
-=head2 sendKeepalive ($self, $key)
-    Sends a keepalive message for the data with the specified key
-=cut
-sub sendKeepalive {
-    my ($self, $key) = @_;
-
-    if (not defined $self->{URI}) {
-        return -1;
-    }
-
-    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-    if (not defined $host and not defined $port and not defined $endpoint) {
-        return -1;
-    }
-
-    my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
-
-
-    my $doc = perfSONAR_PS::XML::Document->new();
-    startMessage($doc, "message.".genuid(), "", "LSKeepaliveRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
-
-    my $mdID = "metadata.".genuid();
-    createMetadata($doc, $mdID, "", createKey($self, $key), undef);
-    createData($doc, "data.".genuid(), $mdID, "", undef);
-    endMessage($doc);
-
-    return callLS($self, $sender, $doc->getValue());
-}
-
-=head2 registerStatic ($self, \@data_ref)
-    Performs registration of 'static' data with an LS.  Static in this sense
-    indicates that the data in the underlying storage DOES NOT change.  This
-    function uses special messages that intend to simply keep the data alive,
-    not worrying at all if something comes in that is new or goes away that is
-    old.
-=cut
-sub registerStatic {
-    my($self, $data_ref) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if (not defined $self->{URI}) {
-        return -1;
-    }
-
-    if(!$self->{ALIVE}) {
-        my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
-        my ($status, $res) = $echo_service->ping();
-        if ($status == -1) {
-            $logger->error("Ping to ".$self->{URI}." failed: $res");
-            return -1;
-        }
-        $self->{ALIVE} = 1;
-    }
-
-    if($self->{FIRST}) {
-        if ($self->sendDeregister() == 0) {
-            $logger->debug("Nothing registered.");
-        }
-        else {
-            $logger->debug("Removed old registration.");
-        }
-
-        my @resultsString = ();
-
-        @resultsString = @{$data_ref};
-
-        if($#resultsString != -1) {
-            my ($status, $res) = $self->__register(createService($self), $data_ref);
-            if ($status == -1) {
-                $logger->error("Unable to register data with LS.");
-                $self->{ALIVE} = 0;
-            }
-        }
-    }
-    else {
-        if ($self->sendKeepalive() == -1) {
-            my @resultsString = ();
-
-            @resultsString = @{$data_ref};
-
-            if($#resultsString != -1) {
-                my ($status, $res) = $self->__register(createService($self), $data_ref);
-                if ($status == -1) {
-                    $logger->error("Unable to register data with LS.");
-                    $self->{ALIVE} = 0;
-                    return -1;
-                }
-            }
-        }
-    }
-
-    $self->{FIRST} = 0 if $self->{FIRST};
-    return 0;
-}
-
-=head2 __register ($self, $subject, $data_ref)
-    Performs the actual data registration. Unlike the above registration
-    functions, this function does not try to perform any of the
-    keepalive/deregister registration tricks. It simply registers the specified
-    data. As part of the registration, it splits the data into chunks and
-    registers each independently.
-=cut
-sub __register {
-    my ($self, $subject, $data_ref) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if (not defined $self->{URI}) {
-        return -1
-    }
-
-    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-    if (not defined $host and not defined $port and not defined $endpoint) {
-        return -1
-    }
-
-    my $sender = new perfSONAR_PS::Transport($host, $port, $endpoint);
-
-    my @data = @{ $data_ref };
-    my $iterations = int((($#data+1)/$self->{CHUNK}));
-    my $x = 0;
-
-    for(my $y = 1; $y <= ($iterations+1); $y++) {
-        my $doc = perfSONAR_PS::XML::Document->new();
-        startMessage($doc, "message.".genuid(), "", "LSRegisterRequest", "", {perfsonar=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/", psservice=>"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/"});
-        my $mdID = "metadata.".genuid();
-        createMetadata($doc, $mdID, "", createService($self), undef);
-        for(; $x < ($y*$self->{CHUNK}) and $x <= $#data; $x++) {
-            createData($doc, "data.".genuid(), $mdID, $data[$x], undef);
-        }
-        endMessage($doc);
-        unless(callLS($self, $sender, $doc->getValue()) == 0) {
-            $logger->error("Unable to register data with LS.");
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
-=head2 registerDynamic ($self, \@data_ref)
-    Performs registration of 'dynamic' data with an LS.  Dynamic in this sense
-    indicates that the data in the underlying storage DOES change.  This
-    function uses special messages that will remove all old data and insert
-    everything brand new with each registration. 
-=cut
-sub registerDynamic {
-    my($self, $data_ref) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if (not defined $self->{URI}) {
-        return -1;
-    }
-
-    if(!$self->{ALIVE}) {
-        my $echo_service = perfSONAR_PS::Client::Echo->new($self->{URI});
-        my ($status, $res) = $echo_service->ping();
-        if ($status == -1) {
-            $logger->error("Ping to ".$self->{URI}." failed: $res");
-            return -1;
-        }
-
-        $self->{ALIVE} = 1;
-    }
-
-    if($self->{FIRST}) {
-        if ($self->sendDeregister() == 0) {
-            $logger->debug("Nothing registered.");
-        }
-        else {
-            $logger->debug("Removed old registration.");
-        }
-
-        my @resultsString = @{$data_ref};
-
-        if($#resultsString != -1) {
-            if ($self->__register(createService($self), $data_ref) == -1) {
-                $logger->error("Unable to register data with LS.");
-                $self->{ALIVE} = 0;
-            }
-        }
-    } else {
-        my @resultsString = @{$data_ref};
-
-        my $subject = "";
-        if ($self->sendKeepalive() == -1) {
-            $subject = createService($self);
-        }
-        else {
-            $subject = createKey($self)."\n".createService($self);
-        }
-
-        if($#resultsString != -1) {
-            if ($self->__register($subject, $data_ref) == -1) {
-                $logger->error("Unable to register data with LS.");
-                $self->{ALIVE} = 0;
-                return -1;
-            }
-        }
-    }
-
-    $self->{FIRST} = 0 if ($self->{FIRST});
-
-    return 0;
-}
-
-=head2 query ($self, \%queries)
-    This function sends the specified queries to the LS and returns the
-    results.  The queries are given as a hash table with each key/value pair
-    being an identifier/a query. Each query gets executed and the returned
-    value is a hash containing the same identifiers as keys, but instead of
-    pointing to queries, they point to an array containing a status and a
-    result. The status is either 0 or -1. If it's 0, the result is a pointer to
-    the data element. If it's -1, the result is the error message.
-=cut
-sub query {
-    my ($self, $queries) = @_;
-    my $logger = get_logger("perfSONAR_PS::Client::LS::Remote");
-
-    if (not defined $self->{URI}) {
-        return -1;
-    }
-
-    my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI($self->{URI});
-    if (not defined $host and not defined $port and not defined $endpoint) {
-        return -1;
-    }
-
-    my $request = "";
-    $request .= "<nmwg:message type=\"LSQueryRequest\" id=\"msg1\"\n";
-    $request .= "     xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"\n";
-    $request .= "     xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    foreach my $query_id (keys %{ $queries }) {
-        $request .= "  <nmwg:metadata id=\"perfsonar_ps.meta.$query_id\">\n";
-        $request .= "    <xquery:subject id=\"sub1\">\n";
-        $request .= $queries->{$query_id};
-        $request .= "    </xquery:subject>\n";
-        $request .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-        $request .= "  <xquery:parameters id=\"params.1\">\n";
-        $request .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-        $request .= "  </xquery:parameters>\n";
-        $request .= "  </nmwg:metadata>\n";
-        $request .= "  <nmwg:data metadataIdRef=\"perfsonar_ps.meta.$query_id\" id=\"data.$query_id\"/>\n";
-    }
-    $request .= "</nmwg:message>\n";
-
-    my ($status, $res) = consultArchive($host, $port, $endpoint, $request);
-    if ($status != 0) {
-        my $msg = "Error consulting LS: $res";
-        $logger->error($msg);
-        return -1;
-    }
-
-    $logger->debug("Response: ".$res->toString);
-
-    my %ret_structure = ();
-
-    foreach my $d ($res->getChildrenByTagName("nmwg:data")) {
-        foreach my $m ($res->getChildrenByTagName("nmwg:metadata")) {
-            my $md_id = $m->getAttribute("id");
-            my $md_idref = $m->getAttribute("metadataIdRef");
-            my $d_idref = $d->getAttribute("metadataIdRef");
-
-            if($md_id eq $d_idref) {
-                my $query_id;
-                my $eventType = findvalue($m, "nmwg:eventType");
-
-                if (defined $md_idref and $md_idref =~ /perfsonar_ps\.meta\.(.*)/x) {
-                    $query_id = $1;
-                } elsif ($md_id =~ /perfsonar_ps\.meta\.(.*)/x) {
-                    $query_id = $1;
-                } else {
-                    my $msg = "Received unknown response: $md_id/$md_idref";
-                    $logger->error($msg);
-                    next;
-                }
-
-                my @retval;
-                if (defined $eventType and $eventType =~ /^error\./x) {
-                    my $error_msg = findvalue($d, "./nmwgr:datum");
-                    $error_msg = "Unknown error" if (not defined $error_msg or $error_msg eq "");
-                    @retval = (-1, $error_msg);
-                } else {
-                    @retval = (0, $d);
-                }
-
-                $ret_structure{$query_id} = \@retval;
-            }
-        }
-    }
-
-    return (0, \%ret_structure);
-}
-
-1;
-
-
-__END__
-
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::Echo>
+L<Log::Log4perl>, L<English>, L<LWP::Simple>, L<XML::LibXML>, L<Net::Ping>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Messages>,
+L<perfSONAR_PS::Client::Echo>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -579,7 +891,7 @@ The perfSONAR-PS subversion repository is located at:
 Questions and comments can be directed to the author, or the mailing list.  Bugs,
 feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -587,8 +899,8 @@ $Id$
 
 =head1 AUTHOR
 
-Aaron Brown, aaron@internet2.edu
 Jason Zurawski, zurawski@internet2.edu
+Aaron Brown, aaron@internet2.edu
 
 =head1 LICENSE
 
@@ -602,4 +914,3 @@ Copyright (c) 2004-2008, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
-# vim: expandtab shiftwidth=4 tabstop=4
