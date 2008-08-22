@@ -4,9 +4,9 @@
 
  * Jason
    * gLS
-     # Client API + Update existing GUIs
+     # Client API + Update existing GUIs (*DONE*)
      # Registration API + Integration into SNMP MA
-     # Performance/DB XML Trouble Shooting
+     # Performance/DB XML Trouble Shooting (*DONE*)
    * pSB
      # Port master/collector to perfSONAR (w/ JB)    
      # Fix BWCTL DB Abstraction
@@ -14,7 +14,7 @@
    * SNMP MA
      # Cricket/Cacti/MRTG Integration (about 1/2 done thus far)
    * Disk at Large
-     # Address some strange behavior when auto finding host/iv4/ipv6 information
+     # Address some strange behavior when auto finding host/iv4/ipv6 information (*Taken over by Aaron, needs testing*)
      # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
 
  * Aaron
