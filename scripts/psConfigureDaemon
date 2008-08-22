@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/perl -w
 
 #use strict;
 use warnings;
@@ -42,7 +42,7 @@ print " - [press enter for the default choice] -\n\n";
 
 my $file = shift;
 
-if ( not $file ) {
+unless ($file) {
     $file = &ask( "What file should I write the configuration to? ", $DEFAULT_FILE, undef, '.+' );
 }
 
@@ -62,7 +62,7 @@ if ( -f $file ) {
 # make sure all the endpoints start with a "/".
 if ( defined $config{"port"} ) {
     foreach my $port ( keys %{ $config{"port"} } ) {
-        if ( defined $config{"port"}->{$port}->{"endpoint"} ) {
+        if ( exists $config{"port"}->{$port}->{"endpoint"} ) {
             foreach my $endpoint ( keys %{ $config{"port"}->{$port}->{"endpoint"} } ) {
                 my $new_endpoint = $endpoint;
 
@@ -107,7 +107,7 @@ while (1) {
         $config{"disable_echo"}             = &ask( "Disable echo by default (0 for no, 1 for yes) ",                                       0,                                                            $config{"disable_echo"},             '^[01]$' );
         $config{"ls_instance"}              = &ask( "The LS for MAs to register with ",                                                     "http://packrat.internet2.edu:8005/perfSONAR_PS/services/LS", $config{"ls_instance"},              '(^http|^$)' );
         $config{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ",                           60,                                                           $config{"ls_registration_interval"}, '^\d+$' );
-        $config{"root_hints_url"}           = &ask( "URL of the root.hints file ",                                                          "http://www.perfsonar.net/gls.root.hints",                    $config{"root_hints_url"},           '(^http|^$)' );      
+        $config{"root_hints_url"}           = &ask( "URL of the root.hints file ",                                                          "http://www.perfsonar.net/gls.root.hints",                    $config{"root_hints_url"},           '(^http|^$)' );
         $config{"root_hints_file"}          = &ask( "Where shold the root.hints file be stored ",                                           $confdir . "/gls.root.hints",                                 $config{"root_hints_file"},          '^\/' );
         $config{"reaper_interval"}          = &ask( "Interval between when children are repeaed [in seconds] ",                             20,                                                           $config{"reaper_interval"},          '^\d+$' );
         $config{"pid_dir"}                  = &ask( "Enter pid dir location ",                                                              "/var/run",                                                   $config{"pid_dir"},                  q{} );
@@ -118,19 +118,19 @@ while (1) {
         my %status   = ();
 
         foreach my $port ( sort keys %{ $config{"port"} } ) {
-            next if ( !defined $config{"port"}->{$port}->{"endpoint"} );
+            next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
             push @elements, $port;
 
-            if ( defined $config{"port"}->{$port}->{"disabled"} and $config{"port"}->{$port}->{"disabled"} == 1 ) {
+            if ( exists $config{"port"}->{$port}->{"disabled"} and $config{"port"}->{$port}->{"disabled"} == 1 ) {
                 $status{$port} = 1;
             }
         }
 
         foreach my $port ( sort keys %{ $config{"port"} } ) {
-            next if ( !defined $config{"port"}->{$port}->{"endpoint"} );
+            next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
             foreach my $endpoint ( sort keys %{ $config{"port"}->{$port}->{"endpoint"} } ) {
                 push @elements, "$port$endpoint";
-                if ( defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"}
+                if ( exists $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"}
                     and $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"disabled"} == 1 )
                 {
                     $status{"$port$endpoint"} = 1;
@@ -144,7 +144,7 @@ while (1) {
             my $len = $#elements;
             for my $i ( 0 .. $len ) {
                 print " $i) $elements[$i] ";
-                print " *" if ( defined $status{ $elements[$i] } );
+                print " *" if exists $status{ $elements[$i] };
                 print "\n";
             }
             print "\n";
@@ -157,7 +157,7 @@ while (1) {
 
             my $new_status;
 
-            if ( defined $status{ $elements[$input] } ) {
+            if ( exists $status{ $elements[$input] } ) {
                 $new_status = 0;
             }
             else {
@@ -186,7 +186,7 @@ while (1) {
     elsif ( $input == 2 ) {
         my @endpoints = ();
         foreach my $port ( sort keys %{ $config{"port"} } ) {
-            next if ( !defined $config{"port"}->{$port}->{"endpoint"} );
+            next unless ( exists $config{"port"}->{$port}->{"endpoint"} );
             foreach my $endpoint ( sort keys %{ $config{"port"}->{$port}->{"endpoint"} } ) {
                 push @endpoints, "$port$endpoint";
             }
@@ -207,7 +207,7 @@ while (1) {
             if ( $input =~ /^\d+$/mx ) {
                 $input = $endpoints[$input];
             }
-        } while ( !( $input =~ /\d+[\/].*/mx ) );
+        } while ( not( $input =~ /\d+[\/].*/mx ) );
 
         my ( $port, $endpoint );
         if ( $input =~ /(\d+)([\/].*)/mx ) {
@@ -215,18 +215,18 @@ while (1) {
             $endpoint = $2;
         }
 
-        if ( !defined $config{"port"} ) {
+        unless ( exists $config{"port"} ) {
             my %hash = ();
             $config{"port"} = \%hash;
         }
 
-        if ( !defined $config{"port"}->{$port} ) {
+        unless ( exists $config{"port"}->{$port} ) {
             my %hash = ();
             $config{"port"}->{$port} = \%hash;
             $config{"port"}->{$port}->{"endpoint"} = ();
         }
 
-        if ( !defined $config{"port"}->{$port}->{"endpoint"}->{$endpoint} ) {
+        unless ( exists $config{"port"}->{$port}->{"endpoint"}->{$endpoint} ) {
             $config{"port"}->{$port}->{"endpoint"}->{$endpoint} = ();
         }
 
@@ -281,7 +281,7 @@ while (1) {
             }
         } while ( $valid_module == 0 );
 
-        if ( !defined $hostname ) {
+        unless ($hostname) {
             $hostname = &ask( "Enter the external host or IP for this machine ", $hostname, $default_hostname, '.+' );
         }
 
@@ -331,22 +331,23 @@ while (1) {
 sub config_gls {
     my ( $config, $accesspoint, $def_config ) = @_;
 
-    if ( !defined $config->{"gls"} ) {
-        $config->{"gls"} = ();
-    }
+    $config->{"gls"} = () unless exists $config->{"gls"};
 
-    $config->{"gls"}->{"root"} = "0";
-    $config->{"gls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"gls"}->{"ls_ttl"}, '\d+' );
-    $config->{"gls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"gls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"gls"}->{"root"}                = "0";
+    $config->{"gls"}->{"enable_registration"} = 1;
+    $config > -{"gls"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", $config{"ls_registration_interval"}, $config > -{"gls"}->{"ls_registration_interval"}, '^\d+$' );
+    $config->{"gls"}->{"ls_ttl"}                     = &ask( "Enter default TTL for registered data [in minutes] ",        "60",                                $config->{"gls"}->{"ls_ttl"},                     '\d+' );
+    $config->{"gls"}->{"metadata_db_name"}           = &ask( "Enter the directory of the XML database ",                   $confdir . "/ls-xmldb",              $config->{"gls"}->{"metadata_db_name"},           '^\/' );
     $config->{"gls"}->{"metadata_db_name"} .= "/" unless $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/;
     unless ( -d $config->{"gls"}->{"metadata_db_name"} ) {
         system( "mkdir " . $config->{"gls"}->{"metadata_db_name"} );
     }
 
-    if ( not -e $config->{"gls"}->{"metadata_db_name"}."DB_CONFIG" ) {
-        open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-        my @result = <RUN>;
-        close(RUN);
+    if ( not -e $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+        my $RUN = q{};
+        open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+        my @result = <$RUN>;
+        close($RUN);
         if ( $result[0] ) {
             system( "mv " . $result[0] . " " . $config->{"gls"}->{"metadata_db_name"} . "DB_CONFIG" );
         }
@@ -355,12 +356,14 @@ sub config_gls {
         }
     }
 
-    $config->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
+    $config->{"gls"}->{"metadata_db_file"}         = "glsstore.dbxml";
     $config->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
-    $config->{"gls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"gls"}->{"reaper_interval"}, '^[01]$' );
+
     $config->{"gls"}->{"summarization_interval"} = &ask( "Enter the time between LS summarization [in minutes] ", "30", $config->{"gls"}->{"summarization_interval"}, '^\d+$' );
-    if ( $config->{"gls"}->{"reaper_interval"} ) {
-        $config->{"gls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
+
+    $config->{"gls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"gls"}->{"xmldb_reaper_interval"}, '^[01]$' );
+    if ( $config->{"gls"}->{"xmldb_reaper_interval"} ) {
+        $config->{"gls"}->{"xmldb_reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
     }
 
     $config->{"gls"}->{"service_name"} = &ask( "Enter a name for this service ", "Lookup Service", $config->{"gls"}->{"service_name"}, '.+' );
@@ -377,21 +380,21 @@ sub config_gls {
 sub config_ls {
     my ( $config, $accesspoint, $def_config ) = @_;
 
-    if ( !defined $config->{"ls"} ) {
-        $config->{"ls"} = ();
-    }
+    $config->{"ls"} = () unless exists $config->{"ls"};
 
-    $config->{"ls"}->{"ls_ttl"} = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
-    $config->{"ls"}->{"metadata_db_name"} = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
+    $config->{"ls"}->{"enable_registration"} = 1;
+    $config->{"ls"}->{"ls_ttl"}              = &ask( "Enter default TTL for registered data [in minutes] ", "60", $config->{"ls"}->{"ls_ttl"}, '\d+' );
+    $config->{"ls"}->{"metadata_db_name"}    = &ask( "Enter the directory of the XML database ", $confdir . "/ls-xmldb", $config->{"ls"}->{"metadata_db_name"}, '^\/' );
     $config->{"ls"}->{"metadata_db_name"} .= "/" unless $config->{"ls"}->{"metadata_db_name"} =~ m/\/$/;
     unless ( -d $config->{"ls"}->{"metadata_db_name"} ) {
         system( "mkdir " . $config->{"ls"}->{"metadata_db_name"} );
     }
 
-    if ( not -e $config->{"ls"}->{"metadata_db_name"}."DB_CONFIG" ) {
-        open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-        my @result = <RUN>;
-        close(RUN);
+    unless ( -e $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+        my $RUN = q{};
+        open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+        my @result = <$RUN>;
+        close($RUN);
         if ( $result[0] ) {
             system( "mv " . $result[0] . " " . $config->{"ls"}->{"metadata_db_name"} . "DB_CONFIG" );
         }
@@ -399,11 +402,12 @@ sub config_ls {
             return -1;
         }
     }
-    
+
     $config->{"ls"}->{"metadata_db_file"} = "lsstore.dbxml";
-    $config->{"ls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"reaper_interval"}, '^[01]$' );
-    if ( $config->{"ls"}->{"reaper_interval"} ) {
-        $config->{"ls"}->{"reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
+
+    $config->{"ls"}->{"xmldb_reaper_interval"} = &ask( "Should the LS periodically remove old registration information (0 for no, 1 for yes) ", "0", $config->{"ls"}->{"xmldb_reaper_interval"}, '^[01]$' );
+    if ( $config->{"ls"}->{"xmldb_reaper_interval"} ) {
+        $config->{"ls"}->{"xmldb_reaper_interval"} = &ask( "Enter the time between LS removal [in minutes] ", "30", "30", '^\d+$' );
     }
 
     $config->{"ls"}->{"service_name"} = &ask( "Enter a name for this service ", "Lookup Service", $config->{"ls"}->{"service_name"}, '.+' );
@@ -421,9 +425,10 @@ sub config_perfsonarbuoy_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
     my $amiconfdir = $confdir;
+    $config->{"perfsonarbuoy"} = () unless exists $config->{"perfsonarbuoy"};
 
     $config->{"perfsonarbuoy"}->{"owmesh"} = &ask( "Enter the directory *LOCATION* of the 'owmesh.conf' file: ", $amiconfdir, $config->{"perfsonarbuoy"}->{"owmesh"}, '.+' );
-    $amiconfdir = $config->{"perfsonarbuoy"}->{"owmesh"};
+    $amiconfdir                            = $config->{"perfsonarbuoy"}->{"owmesh"};
     $config->{"perfsonarbuoy"}->{"legacy"} = "0";
 
     $config->{"perfsonarbuoy"}->{"metadata_db_type"} = &ask( "Enter the database type to read from (file or xmldb) ", "file", $config->{"perfsonarbuoy"}->{"metadata_db_type"}, '(file|xmldb)' );
@@ -439,10 +444,11 @@ sub config_perfsonarbuoy_ma {
             system( "mkdir " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} );
         }
 
-        if ( not -e $config->{"perfsonarbuoy"}->{"metadata_db_name"}."DB_CONFIG" ) {
-            open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-            my @result = <RUN>;
-            close(RUN);
+        unless ( -e $config->{"perfsonarbuoy"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+            my $RUN = q{};
+            open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+            my @result = <$RUN>;
+            close($RUN);
             if ( $result[0] ) {
                 system( "mv " . $result[0] . " " . $config->{"perfsonarbuoy"}->{"metadata_db_name"} . "DB_CONFIG" );
             }
@@ -456,15 +462,17 @@ sub config_perfsonarbuoy_ma {
     }
 
     $config->{"perfsonarbuoy"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"perfsonarbuoy"}->{"enable_registration"}, '^[01]$' );
-
+    my $registration_interval = $def_config->{"ls_registration_interval"};
+    $registration_interval = $config->{"perfsonarbuoy"}->{"ls_registration_interval"} if exists $config->{"perfsonarbuoy"}->{"ls_registration_interval"};
+    my $ls_instance = $def_config->{"ls_instance"};
+    $ls_instance = $config->{"perfsonarbuoy"}->{"ls_instance"} if exists $config->{"perfsonarbuoy"}->{"ls_instance"};
     if ( $config->{"perfsonarbuoy"}->{"enable_registration"} eq "1" ) {
-        my $registration_interval = $def_config->{"ls_registration_interval"};
-        $registration_interval = $config->{"perfsonarbuoy"}->{"ls_registration_interval"} if ( defined $config->{"perfsonarbuoy"}->{"ls_registration_interval"} );
         $config->{"perfsonarbuoy"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-
-        my $ls_instance = $def_config->{"ls_instance"};
-        $ls_instance = $config->{"perfsonarbuoy"}->{"ls_instance"} if ( defined $config->{"perfsonarbuoy"}->{"ls_instance"} );
         $config->{"perfsonarbuoy"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
+    }
+    else {
+        $config->{"perfsonarbuoy"}->{"ls_instance"}              = $ls_instance           if $ls_instance;
+        $config->{"perfsonarbuoy"}->{"ls_registration_interval"} = $registration_interval if $registration_interval;
     }
 
     $config->{"perfsonarbuoy"}->{"service_name"} = &ask( "Enter a name for this service ", "perfSONARBUOY MA", $config->{"perfsonarbuoy"}->{"service_name"}, '.+' );
@@ -481,19 +489,22 @@ sub config_perfsonarbuoy_ma {
 sub config_snmp_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
+    $config->{"snmp"} = () unless exists $config->{"snmp"};
+
     my $rrdtool = q{};
-    if ( open( RRDTOOL, "which rrdtool |" ) ) {
-        $rrdtool = <RRDTOOL>;
+    my $RRDTOOL = q{};
+    if ( open( $RRDTOOL, "which rrdtool |" ) ) {
+        $rrdtool = <$RRDTOOL>;
         $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
-        $rrdtool =~ s/\n//gmx if $rrdtool;
-        close(RRDTOOL);
+        $rrdtool =~ s/\n//gmx         if $rrdtool;
+        close($RRDTOOL);
     }
 
-    if ( open( RRDTOOL, "whereis rrdtool |" ) ) {
-        $rrdtool = <RRDTOOL>;
+    if ( open( $RRDTOOL, "whereis rrdtool |" ) ) {
+        $rrdtool = <$RRDTOOL>;
         $rrdtool =~ s/rrdtool:\s+//mx if $rrdtool;
-        $rrdtool =~ s/\n//gmx if $rrdtool;
-        close(RRDTOOL);
+        $rrdtool =~ s/\n//gmx         if $rrdtool;
+        close($RRDTOOL);
     }
 
     unless ($rrdtool) {
@@ -501,28 +512,29 @@ sub config_snmp_ma {
         return -1;
     }
 
-    my @rrd = split(/ /, $rrdtool);
+    my @rrd = split( / /, $rrdtool );
     $config->{"snmp"}->{"rrdtool"} = &ask( "Enter the location of the RRD binary ", $rrd[0], $config->{"snmp"}->{"rrdtool"}, '.+' );
 
     $config->{"snmp"}->{"default_resolution"} = &ask( "Enter the default resolution of RRD queries ", "300", $config->{"snmp"}->{"default_resolution"}, '^\d+$' );
 
     my $makeStore = 0;
-    my @result = ();
-    my $external = &ask( "Use external monitoring source [e.g. cacti, cricket, mrtg, etc.] for metadata creation? (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
-    if ( $external ) {
+    my @result    = ();
+    my $external  = &ask( "Use external monitoring source [e.g. cacti, cricket, mrtg, etc.] for metadata creation? (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+    if ($external) {
         $config->{"snmp"}->{"metadata_db_external"} = &ask( "Enter external monitoring source (none | cacti | cricket | mrtg ) ", "none", $config->{"snmp"}->{"metadata_db_external"}, '^(none|cacti|mrtg|cricket)$' );
-        if (exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
+        if ( exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
             $config->{"snmp"}->{"metadata_db_external_source"} = &ask( "Enter cacti configuration file location (/path/to/file) ", "/etc/cacti/cactid.conf", $config->{"snmp"}->{"metadata_db_external_source"}, '\.conf$' );
         }
     }
     else {
-        $config->{"snmp"}->{"metadata_db_external"} = "none";
+        $config->{"snmp"}->{"metadata_db_external"}        = "none";
         $config->{"snmp"}->{"metadata_db_external_source"} = "";
-        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );        
-        if ( $makeStore ) {
-            open( RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
-            @result = <RUN>;
-            close(RUN);
+        my $makeStore = &ask( "Automatically generate a 'test' metadata database (0 for no, 1 for yes) ", "0", "0", '^[01]$' );
+        if ($makeStore) {
+            my $RUN = q{};
+            open( $RUN, "perl " . $dirname . "makeStore.pl " . $confdir . " |" );
+            @result = <$RUN>;
+            close($RUN);
             unless ( $result[0] ) {
                 return -1;
             }
@@ -551,10 +563,11 @@ sub config_snmp_ma {
             system( "mkdir " . $config->{"snmp"}->{"metadata_db_name"} );
         }
 
-        if ( not -e $config->{"snmp"}->{"metadata_db_name"}."DB_CONFIG" ) {
-            open( RUN, "perl " . $dirname . "makeDBConfig.pl |" );
-            my @result = <RUN>;
-            close(RUN);
+        unless ( -e $config->{"snmp"}->{"metadata_db_name"} . "DB_CONFIG" ) {
+            my $RUN = q{};
+            open( $RUN, "perl " . $dirname . "makeDBConfig.pl |" );
+            my @result = <$RUN>;
+            close($RUN);
             if ( $result[0] ) {
                 system( "mv " . $result[0] . " " . $config->{"snmp"}->{"metadata_db_name"} . "DB_CONFIG" );
             }
@@ -581,16 +594,18 @@ sub config_snmp_ma {
         }
     }
 
-    $config->{"snmp"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes) ", "0", $config->{"snmp"}->{"enable_registration"}, '^[01]$' );
-
+    $config->{"snmp"}->{"enable_registration"} = &ask( "Will this service register with an LS (0 for no, 1 for yes)", "0", $config->{"snmp"}->{"enable_registration"}, '^[01]$' );
+    my $registration_interval = $def_config->{"ls_registration_interval"};
+    $registration_interval = $config->{"snmp"}->{"ls_registration_interval"} if exists $config->{"snmp"}->{"ls_registration_interval"};
+    my $ls_instance = $def_config->{"ls_instance"};
+    $ls_instance = $config->{"snmp"}->{"ls_instance"} if exists $config->{"snmp"}->{"ls_instance"};
     if ( $config->{"snmp"}->{"enable_registration"} eq "1" ) {
-        my $registration_interval = $def_config->{"ls_registration_interval"};
-        $registration_interval = $config->{"snmp"}->{"ls_registration_interval"} if ( defined $config->{"snmp"}->{"ls_registration_interval"} );
         $config->{"snmp"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", "30", $registration_interval, '^\d+$' );
-
-        my $ls_instance = $def_config->{"ls_instance"};
-        $ls_instance = $config->{"snmp"}->{"ls_instance"} if ( defined $config->{"snmp"}->{"ls_instance"} );
         $config->{"snmp"}->{"ls_instance"} = &ask( "URL of an LS to register with ", q{}, $ls_instance, '^http:\/\/' );
+    }
+    else {
+        $config->{"snmp"}->{"ls_instance"}              = $ls_instance           if $ls_instance;
+        $config->{"snmp"}->{"ls_registration_interval"} = $registration_interval if $registration_interval;
     }
 
     $config->{"snmp"}->{"service_name"} = &ask( "Enter a name for this service ", "SNMP MA", $config->{"snmp"}->{"service_name"}, '.+' );
@@ -607,6 +622,7 @@ sub config_snmp_ma {
 sub config_pinger {
     my ( $config, $accesspoint, $def_config, $modulename ) = @_;
     my $moduletype = ( $modulename =~ /ma$/ ? "MA" : "MP" );
+    $config->{$modulename} = () unless exists $config->{$modulename};
 
     $config->{$modulename}->{"db_type"} = &ask( "Enter the database type to read from (sqlite,mysql) ", "mysql", $config->{$modulename}->{"db_type"}, '^(sqlite|mysql)$' );
 
@@ -652,6 +668,7 @@ sub config_pinger {
 sub config_status_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
+    $config->{"status"} = () unless exists $config->{"status"};
     $config->{"status"}->{"read_only"} = &ask( "Is this service read-only  (0 for no, 1 for yes) ", "0", $config->{"status"}->{"read_only"}, '^[01]$' );
 
     $config->{"status"}->{"db_type"} = &ask( "Enter the database type to read from ", "sqlite|mysql", $config->{"status"}->{"db_type"}, '(sqlite|mysql)' );
@@ -699,6 +716,7 @@ sub config_status_ma {
 sub config_circuitstatus_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
+    $config->{"circuitstatus"} = () unless exists $config->{"circuitstatus"};
     $config->{"circuitstatus"}->{"circuits_file_type"} = "file";
 
     $config->{"circuitstatus"}->{"circuits_file"} = &ask( "Enter the file to get link information from ", q{}, $config->{"circuitstatus"}->{"circuits_file"}, '.+' );
@@ -753,6 +771,7 @@ sub config_circuitstatus_ma {
 sub config_topology_ma {
     my ( $config, $accesspoint, $def_config ) = @_;
 
+    $config->{"topology"} = () unless exists $config->{"topology"};
     $config->{"topology"}->{"db_type"} = "xml";
 
     $config->{"topology"}->{"read_only"} = &ask( "Is this service read-only (0 for no, 1 for yes) ", "1", $config->{"topology"}->{"read_only"}, '^[01]$' );
