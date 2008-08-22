@@ -51,12 +51,38 @@ sub new {
 
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::DCN");
     if ( exists $parameters->{"instance"} and $parameters->{"instance"} ) {
+        if ( $parameters->{"instance"} =~ m/^http:\/\// ) {
+            $self->{INSTANCE}            = $parameters->{"instance"};
+            $self->{CONF}->{accessPoint} = $parameters->{"instance"};
+            $self->{LS_KEY}              = $self->getLSKey;
+        }
+        else {
+            $self->{LOGGER}->error("Instance must be of the form http://ADDRESS.");
+        }
+    }
+    return $self;
+}
+
+=head2 setInstance($self { instance })
+
+Required argument 'instance' is the LS instance to be contacted for queries.  
+
+=cut
+
+sub setInstance {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { instance => 1 } );
+
+    $self->{ALIVE} = 0;
+    if ( $parameters->{"instance"} =~ m/^http:\/\// ) {
         $self->{INSTANCE}            = $parameters->{"instance"};
         $self->{CONF}->{accessPoint} = $parameters->{"instance"};
         $self->{LS_KEY}              = $self->getLSKey;
     }
-
-    return $self;
+    else {
+        $self->{LOGGER}->error("Instance must be of the form http://ADDRESS.");
+    }
+    return;
 }
 
 =head2 getLSKey($self { })
@@ -93,15 +119,10 @@ sub nameToId {
     my $metadata   = q{};
     my %ns         = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
 
-    $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-    $metadata .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node[nmtb:address/text()=\"" . $parameters->{name} . "\"]\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q        .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $q        .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node[nmtb:address/text()=\"" . $parameters->{name} . "\"]\n";
+    $metadata .= $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -142,15 +163,10 @@ sub idToName {
     my $metadata   = q{};
     my %ns         = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
 
-    $metadata .= "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-    $metadata .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node[nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef[text()=\"" . $parameters->{id} . "\"]]\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q        .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $q        .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node[nmtb:relation[\@type=\"connectionLink\"]/nmtb:linkIdRef[text()=\"" . $parameters->{id} . "\"]]\n";
+    $metadata .= $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -297,15 +313,11 @@ sub getMappings {
     my @lookup = ();
 
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
-    my $metadata = "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-    $metadata .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q        .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $q        .= "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()='subject']/nmtb:node\n";
+    my $metadata = $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -404,21 +416,16 @@ sub getDomainKey {
     my @domains = ();
 
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
-    my $metadata = "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
-    $metadata .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
-    $metadata .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
-    $metadata .= "  let \$metadata_id := \$metadata/\@id\n";
-    $metadata .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
-    $metadata .= "  where \$metadata_id=\"" . $parameters->{key} . "\"\n";
-    $metadata .= "  return \$data/nmwg:metadata/*[local-name()='subject']/nmtb:domain\n\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q        .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $q        .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $q        .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    $q        .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+    $q        .= "  let \$metadata_id := \$metadata/\@id\n";
+    $q        .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+    $q        .= "  where \$metadata_id=\"" . $parameters->{key} . "\"\n";
+    $q        .= "  return \$data/nmwg:metadata/*[local-name()='subject']/nmtb:domain\n\n";
+    my $metadata = $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -460,27 +467,22 @@ sub getDomainService {
     my @domains = ();
 
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
-    my $metadata = "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
-    $metadata .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n\n";
-    $metadata .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
-    $metadata .= "  let \$metadata_id := \$metadata/\@id\n";
-    $metadata .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
-    $metadata .= "  where \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint' and text()=\"" . $parameters->{accessPoint} . "\"]\n";
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $q .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $q .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n\n";
+    $q .= "for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
+    $q .= "  let \$metadata_id := \$metadata/\@id\n";
+    $q .= "  let \$data := /nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\$metadata_id]\n";
+    $q .= "  where \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint' and text()=\"" . $parameters->{accessPoint} . "\"]\n";
     if ( $parameters->{serviceType} ) {
-        $metadata .= "        and \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='serviceType' and text()=\"" . $parameters->{serviceType} . "\"]\n";
+        $q .= "        and \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='serviceType' and text()=\"" . $parameters->{serviceType} . "\"]\n";
     }
     if ( $parameters->{serviceName} ) {
-        $metadata .= "        and \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='serviceName' and text()=\"" . $parameters->{serviceName} . "\"]\n";
+        $q .= "        and \$metadata/*[local-name()='subject']/*[local-name()='service']/*[local-name()='serviceName' and text()=\"" . $parameters->{serviceName} . "\"]\n";
     }
-    $metadata .= "  return \$data/nmwg:metadata/*[local-name()='subject']/nmtb:domain\n\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+    $q .= "  return \$data/nmwg:metadata/*[local-name()='subject']/nmtb:domain\n\n";
+    my $metadata = $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -523,25 +525,20 @@ sub getTopologyServices {
     my %services = ();
 
     my %ns = ( xquery => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/" );
-    my $metadata = "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $metadata .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
-    $metadata .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
-    $metadata .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
+    my $q = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $q .= "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n";
+    $q .= "declare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n";
+    $q .= "declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n";
     if ( $parameters->{domain} ) {
-        $metadata .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/*[local-name()='subject']/nmtb:domain[\@id=\"urn:ogf:network:domain=" . $parameters->{domain} . "\"]]\n";
+        $q .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/*[local-name()='subject']/nmtb:domain[\@id=\"urn:ogf:network:domain=" . $parameters->{domain} . "\"]]\n";
     }
     else {
-        $metadata .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/*[local-name()='subject']/nmtb:domain]\n";
+        $q .= "for \$data in /nmwg:store[\@type=\"LSStore\"]/nmwg:data[./nmwg:metadata/*[local-name()='subject']/nmtb:domain]\n";
     }
-    $metadata .= " let \$metadataidref := \$data/\@metadataIdRef\n";
-    $metadata .= " let \$metadata := /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\$metadataidref]\n";
-    $metadata .= " return \$metadata/*[local-name()='subject']/*[local-name()='service']\n\n";
-    $metadata .= "    </xquery:subject>\n";
-    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
-    $metadata .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
-    $metadata .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
-    $metadata .= "  </xquery:parameters>\n";
+    $q        .= " let \$metadataidref := \$data/\@metadataIdRef\n";
+    $q        .= " let \$metadata := /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\$metadataidref]\n";
+    $q        .= " return \$metadata/*[local-name()='subject']/*[local-name()='service']\n\n";
+    my $metadata = $self->queryWrapper( { query => $q } );
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSQueryRequest", ns => \%ns, metadata => $metadata } ) } );
     unless ($msg) {
@@ -647,6 +644,26 @@ sub queryTS {
         }
     }
     return \%result;
+}
+
+=head2 queryWrapper($self { })
+
+Given some XQuery/Xpath expression, insert this into a 'canned' subject/parameter/eventType for an LSQueryRequest
+
+=cut
+
+sub queryWrapper {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, { query => 0 } );
+
+    my $query = "    <xquery:subject id=\"subject." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $query .= $parameters->{query};
+    $query .= "    </xquery:subject>\n";
+    $query .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>\n";
+    $query .= "  <xquery:parameters id=\"parameters." . genuid() . "\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
+    $query .= "    <nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>\n";
+    $query .= "  </xquery:parameters>\n";
+    return $query;
 }
 
 1;

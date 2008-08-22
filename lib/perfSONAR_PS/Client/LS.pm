@@ -44,7 +44,12 @@ sub new {
     $self->{ALIVE}  = 0;
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::LS");
     if ( exists $parameters->{"instance"} and $parameters->{"instance"} ) {
-        $self->{INSTANCE} = $parameters->{"instance"};
+        if ( $parameters->{"instance"} =~ m/^http:\/\// ) {
+            $self->{INSTANCE} = $parameters->{"instance"};
+        }
+        else {
+            $self->{LOGGER}->error("Instance must be of the form http://ADDRESS.");
+        }
     }
     return $self;
 }
@@ -59,8 +64,13 @@ sub setInstance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { instance => 1 } );
 
-    $self->{ALIVE}    = 0;
-    $self->{INSTANCE} = $parameters->{"instance"};
+    $self->{ALIVE} = 0;
+    if ( $parameters->{"instance"} =~ m/^http:\/\// ) {
+        $self->{INSTANCE} = $parameters->{"instance"};
+    }
+    else {
+        $self->{LOGGER}->error("Instance must be of the form http://ADDRESS.");
+    }
     return;
 }
 
@@ -90,7 +100,7 @@ sub callLS {
     }
 
     my ( $host, $port, $endpoint ) = perfSONAR_PS::Transport::splitURI( $self->{INSTANCE} );
-    unless ( defined $host and defined $port and defined $endpoint ) {
+    unless ( $host and $port and $endpoint ) {
         return;
     }
 
@@ -110,7 +120,7 @@ sub callLS {
 
     my $msg    = q{};
     my $parser = XML::LibXML->new();
-    if ( defined $responseContent and $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
+    if ( $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
         my $doc = q{};
         eval { $doc = $parser->parse_string($responseContent); };
         if ($EVAL_ERROR) {
@@ -161,8 +171,8 @@ sub registerRequestLS {
         $metadata .= "  <nmwg:eventType>" . $parameters->{eventType} . "</nmwg:eventType>\n";
     }
 
-    if ( $parameters->{service}->{projects} ) {
-        $metadata .= "  <nmwg:parameters>\n";
+    if ( exists $parameters->{service} and exists $parameters->{service}->{projects} and $parameters->{service}->{projects} ) {
+        $metadata .= "  <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
         foreach my $project ( @{ $parameters->{service}->{projects} } ) {
             $metadata .= "    <nmwg:parameter type=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
         }
@@ -270,6 +280,14 @@ sub registerClobberRequestLS {
 
     if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
         $metadata .= "  <nmwg:eventType>" . $parameters->{eventType} . "</nmwg:eventType>\n";
+    }
+
+    if ( exists $parameters->{service} and exists $parameters->{service}->{projects} and $parameters->{service}->{projects} ) {
+        $metadata .= "  <nmwg:parameters id=\"parameters." . genuid() . "\">\n";
+        foreach my $project ( @{ $parameters->{service}->{projects} } ) {
+            $metadata .= "    <nmwg:parameter type=\"keyword\">project:" . $project . "</nmwg:parameter>\n";
+        }
+        $metadata .= "  </nmwg:parameters>\n";
     }
 
     my $msg = $self->callLS( { message => $self->createLSMessage( { type => "LSRegisterRequest", ns => \%ns, metadata => $metadata, data => $parameters->{data} } ) } );
@@ -434,9 +452,7 @@ sub queryRequestLS {
 
     my $metadata = q{};
     my %ns       = ();
-    if (    ( exists $parameters->{query} and $parameters->{query} )
-        and ( exists $parameters->{subject} and $parameters->{subject} ) )
-    {
+    if ( ( exists $parameters->{query} and $parameters->{query} ) and ( exists $parameters->{subject} and $parameters->{subject} ) ) {
         $self->{LOGGER}->error("Choose either 'query' XOR 'subject' parameter.");
         return;
     }
@@ -449,7 +465,6 @@ sub queryRequestLS {
         );
 
         $metadata .= $parameters->{subject};
-
         if ( exists $parameters->{eventType} and $parameters->{eventType} ) {
             $metadata .= "    <nmwg:eventType>" . $parameters->{eventType} . "</nmwg:eventType>\n";
         }
@@ -529,32 +544,28 @@ sub createService {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { service => 1 } );
 
-    my $service = "";
-
-    if ( $parameters->{service}->{nonPerfSONARService} ) {
-        $service .= "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
+    my $service = "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\" id=\"subject." . genuid() . "\">\n";
+    if ( exists $parameters->{service}->{nonPerfSONARService} and $parameters->{service}->{nonPerfSONARService} ) {
         $service .= "      <nmtb:service xmlns:nmtb=\"http://ogf.org/schema/network/base/20070828/\">\n";
-        $service .= "        <nmtb:name>" . $parameters->{service}->{name} . "</nmtb:name>\n" if ( defined $parameters->{service}->{name} );
-        $service .= "        <nmtb:type>" . $parameters->{service}->{type} . "</nmtb:type>\n" if ( defined $parameters->{service}->{type} );
-        $service .= "        <nmtb:description>" . $parameters->{service}->{description} . "</nmtb:description>\n" if ( defined $parameters->{service}->{description} );
-        if ( $parameters->{service}->{addresses} ) {
+        $service .= "        <nmtb:name>" . $parameters->{service}->{name} . "</nmtb:name>\n" if exists $parameters->{service}->{name};
+        $service .= "        <nmtb:type>" . $parameters->{service}->{type} . "</nmtb:type>\n" if exists $parameters->{service}->{type};
+        $service .= "        <nmtb:description>" . $parameters->{service}->{description} . "</nmtb:description>\n" if exists $parameters->{service}->{description};
+        if ( exists $parameters->{service}->{addresses} and $parameters->{service}->{addresses} ) {
             foreach my $address ( @{ $parameters->{service}->{addresses} } ) {
                 $service .= "        <nmtb:address type=\"" . $address->{type} . "\">" . $address->{value} . "</nmtb:address>\n";
             }
         }
         $service .= "      </nmtb:service>\n";
-        $service .= "    </perfsonar:subject>\n";
     }
     else {
-        $service = $service . "    <perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">\n";
         $service = $service . "      <psservice:service xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">\n";
-        $service = $service . "        <psservice:serviceName>" . $parameters->{service}->{serviceName} . "</psservice:serviceName>\n" if ( defined $parameters->{service}->{serviceName} );
-        $service = $service . "        <psservice:accessPoint>" . $parameters->{service}->{accessPoint} . "</psservice:accessPoint>\n" if ( defined $parameters->{service}->{accessPoint} );
-        $service = $service . "        <psservice:serviceType>" . $parameters->{service}->{serviceType} . "</psservice:serviceType>\n" if ( defined $parameters->{service}->{serviceType} );
-        $service = $service . "        <psservice:serviceDescription>" . $parameters->{service}->{serviceDescription} . "</psservice:serviceDescription>\n" if ( defined $parameters->{service}->{serviceDescription} );
+        $service = $service . "        <psservice:serviceName>" . $parameters->{service}->{serviceName} . "</psservice:serviceName>\n" if exists $parameters->{service}->{serviceName};
+        $service = $service . "        <psservice:accessPoint>" . $parameters->{service}->{accessPoint} . "</psservice:accessPoint>\n" if exists $parameters->{service}->{accessPoint};
+        $service = $service . "        <psservice:serviceType>" . $parameters->{service}->{serviceType} . "</psservice:serviceType>\n" if exists $parameters->{service}->{serviceType};
+        $service = $service . "        <psservice:serviceDescription>" . $parameters->{service}->{serviceDescription} . "</psservice:serviceDescription>\n" if exists $parameters->{service}->{serviceDescription};
         $service = $service . "      </psservice:service>\n";
-        $service = $service . "    </perfsonar:subject>\n";
     }
+    $service .= "    </perfsonar:subject>\n";
     return $service;
 }
 
@@ -604,18 +615,18 @@ sub createLSMessage {
         }
     }
     $request .= ">\n";
-    $request .= "  <nmwg:metadata id=\"" . $mdId . "\">\n";
+    $request .= "  <nmwg:metadata id=\"metadata." . $mdId . "\">\n";
     $request .= $parameters->{metadata};
     $request .= "  </nmwg:metadata>\n";
     if ( exists $parameters->{data} and $parameters->{data} ) {
-        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\">\n";
+        $request .= "  <nmwg:data metadataIdRef=\"metadata." . $mdId . "\" id=\"data." . genuid() . "\">\n";
         foreach my $data ( @{ $parameters->{data} } ) {
             $request .= $data;
         }
         $request .= "  </nmwg:data>\n";
     }
     else {
-        $request .= "  <nmwg:data metadataIdRef=\"" . $mdId . "\" id=\"data." . genuid() . "\" />\n";
+        $request .= "  <nmwg:data metadataIdRef=\"metadata." . $mdId . "\" id=\"data." . genuid() . "\" />\n";
     }
     $request .= "</nmwg:message>\n";
 
@@ -786,7 +797,8 @@ __END__
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Params::Validate>, L<English>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Client::Echo>
+L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Client::Echo>,
+L<perfSONAR_PS::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

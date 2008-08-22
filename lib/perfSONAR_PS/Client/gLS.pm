@@ -40,21 +40,43 @@ Create new object, set the gls.hints URL and call init if applicable.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validateParams( @args, { url => 0, file => 0 } );
+    my $parameters = validateParams(
+        @args,
+        {
+            url  => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF | Params::Validate::SCALAR, optional => 1 },
+            file => { type => Params::Validate::SCALAR | Params::Validate::UNDEF,                              optional => 1 }
+        }
+    );
 
     my $self = fields::new($package);
+    $self->{HINTS}  = ();
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::gLS");
-    if ( exists $parameters->{"url"} ) {
-        if ( $parameters->{"url"} =~ m/^http:\/\// ) {
-            $self->{HINTS} = $parameters->{"url"};
-            $self->init();
+    if ( exists $parameters->{"url"} and $parameters->{"url"} ) {
+        if ( ref( $parameters->{"url"} ) eq "ARRAY" ) {
+            my $complete = 0;
+            foreach my $url ( @{ $parameters->{"url"} } ) {
+                if ( $url =~ m/^http:\/\// ) {
+                    push @{ $self->{HINTS} }, $url;
+                    $complete++;
+                }
+                else {
+                    $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+                }
+            }
+            $self->init() if $complete;
         }
         else {
-            $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+            if ( $parameters->{"url"} =~ m/^http:\/\// ) {
+                push @{ $self->{HINTS} }, $parameters->{"url"};
+                $self->init();
+            }
+            else {
+                $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+            }
         }
     }
 
-    if ( exists $parameters->{"file"} and -f $parameters->{"file"} ) {
+    if ( exists $parameters->{"file"} and $parameters->{"file"} and -f $parameters->{"file"} ) {
         $self->{FILE} = $parameters->{"file"};
         $self->init();
     }
@@ -62,22 +84,50 @@ sub new {
     return $self;
 }
 
-=head2 setURL( $self, { url } )
+=head2 clearURLs( $self, {} )
+
+Clear the URL list.
+
+=cut
+
+sub clearURLs {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, {} );
+    undef $self->{HINTS};
+    return;
+}
+
+=head2 addURL( $self, { url } )
 
 Set the gls.hints url and call init if applicable.
 
 =cut
 
-sub setURL {
+sub addURL {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { url => { type => Params::Validate::SCALAR } } );
-    if ( $parameters->{"url"} =~ m/^http:\/\// ) {
-        $self->{HINTS} = $parameters->{"url"};
-        $self->init();
+    my $parameters = validateParams( @args, { url => { type => Params::Validate::ARRAYREF | Params::Validate::UNDEF | Params::Validate::SCALAR } } );
+
+    if ( ref( $parameters->{"url"} ) eq "ARRAY" ) {
+        my $complete = 0;
+        foreach my $url ( @{ $parameters->{"url"} } ) {
+            if ( $url =~ m/^http:\/\// ) {
+                push @{ $self->{HINTS} }, $url;
+                $complete++;
+            }
+            else {
+                $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+            }
+        }
+        $self->init() if $complete;
     }
     else {
-        $self->{LOGGER}->error("URL does not exist.");
-        return -1;
+        if ( $parameters->{"url"} =~ m/^http:\/\// ) {
+            push @{ $self->{HINTS} }, $parameters->{"url"};
+            $self->init();
+        }
+        else {
+            $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
+        }
     }
     return 0;
 }
@@ -92,7 +142,7 @@ sub setFile {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { file => { type => Params::Validate::SCALAR } } );
 
-    if ( -f $parameters->{"file"} ) {
+    if ( $parameters->{"file"} and -f $parameters->{"file"} ) {
         $self->{FILE} = $parameters->{"file"};
         $self->init();
     }
@@ -121,12 +171,20 @@ sub init {
 
     my @roots = ();
     if ( exists $self->{HINTS} and $self->{HINTS} ) {
-        my $content = get $self->{HINTS};
-        if ($content) {
-            @roots = split( /\n/, $content );
+        my $complete = 0;
+        foreach my $url ( @{ $self->{HINTS} } ) {
+            my $content = get $url;
+            if ($content) {
+                @roots = split( /\n/, $content );
+                $complete++;
+                last;
+            }
+            else {
+                $self->{LOGGER}->error( "There was an error accessing " . $self->{HINTS} . "." );
+            }
         }
-        else {
-            $self->{LOGGER}->error( "There was an error accessing " . $self->{HINTS} . "." );
+        unless ($complete) {
+            $self->{LOGGER}->error("There was an error accessing the hints file(s), exiting.");
             return -1;
         }
     }
@@ -163,7 +221,7 @@ sub orderRoots {
     my $parameters = validateParams( @args, { roots => 0 } );
 
     my @roots = ();
-    if ( exists $parameters->{roots} ) {
+    if ( exists $parameters->{roots} and $parameters->{roots} ) {
         @roots = @{ $parameters->{roots} };
     }
     else {
@@ -243,9 +301,7 @@ sub verifyURL {
     if ( $parameters->{url} =~ m/^http:\/\// ) {
         my $echo_service = perfSONAR_PS::Client::Echo->new( $parameters->{url} );
         my ( $status, $res ) = $echo_service->ping();
-        if ( $status > -1 ) {
-            return 0;
-        }
+        return 0 if $status > -1;
     }
     else {
         $self->{LOGGER}->error("URL must be of the form http://ADDRESS.");
@@ -353,7 +409,6 @@ sub summaryToXQuery {
     );
 
     my $qflag = 0;
-
     my $query = "  declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
     $query .= "  for \$metadata in /nmwg:store[\@type=\"LSStore\"]/nmwg:metadata\n";
     $query .= "    let \$metadata_id := \$metadata/\@id\n";
@@ -361,7 +416,6 @@ sub summaryToXQuery {
 
     my @size = keys %{ $parameters->{service} };
     if ( $#size > -1 ) {
-
         $query .= "    where \$metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"";
         foreach my $element ( keys %{ $parameters->{service} } ) {
             $query .= " and ./*[local-name()=\"" . $element . "\" and text()=\"" . $parameters->{service}->{$element} . "\"]";
@@ -535,8 +589,8 @@ sub getLSDiscoverRaw {
             xquery => { type => Params::Validate::SCALAR }
         }
     );
-    my $ls = perfSONAR_PS::Client::LS->new();
 
+    my $ls = perfSONAR_PS::Client::LS->new();
     if ( exists $parameters->{ls} and $parameters->{ls} =~ m/^http:\/\// ) {
         unless ( $self->verifyURL( { url => $parameters->{ls} } ) == 0 ) {
             $self->{LOGGER}->error( "Supplied server \"" . $parameters->{ls} . "\" could not be contacted." );
@@ -1126,11 +1180,11 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Params::Validate>, L<English>, L<LWP::Simple>, L<Net::Ping>,
-L<XML::LibXML>, L<perfSONAR_PS::ParameterValidation>,
-L<perfSONAR_PS::Client::Echo>, L<perfSONAR_PS::Client::LS>,
-L<perfSONAR_PS::Common>
-
+L<Log::Log4perl>, L<Params::Validate>, L<English>, L<LWP::Simple>,
+L<Net::Ping>, L<XML::LibXML>, L<Digest::MD5>,
+L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::Client::Echo>,
+L<perfSONAR_PS::Client::LS>, L<perfSONAR_PS::Common>
+ 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
   https://mail.internet2.edu/wws/info/i2-perfsonar
