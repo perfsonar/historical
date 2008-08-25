@@ -36,7 +36,7 @@
 || OSCARS.pm || Module to interact with the OSCARS IDC ||
 || owdb.pm || Module for interacting with OWAMP databases ||
 || OWP.pm || A set of utility functions used by perfSONARBUOY ||
-|| ParameterValidation.pm || A wrapper for the *Params::Validate* that turns off validation when *--verbose* mode is off ||
+|| ParameterValidation.pm || A wrapper for the `Params::Validate` that turns off validation when *--verbose* mode is off ||
 || RequestHandler.pm || Forms the core of the daemon. Allows modules to register message, metadata and equivalence handlers. Parses and properly redirects requests ||
 || Request.pm || Object that represents the incoming soap request ||
 || SNMPWalk.pm || A simple API that allows one to perform an SNMP walk of a router ||
@@ -76,7 +76,7 @@
 || DB/ || root dir for any DB helper/wrapper framework ||
 || DB/SQL/ || root dir for sql db frameworks ||
 || DB/XML/ || root dir for xmldb framework and other helper modules ||
-|| Datatypes/ || root dir for any XML -> Perl object data binding framework. For example Datatypes/EventTypes/ is handling eventTypes binding. Basically, if there is a need for abstration layer around any XML entity then it should go here. ||
+|| Datatypes/ || root dir for any XML `->` Perl object data binding framework. For example Datatypes/EventTypes/ is handling eventTypes binding. Basically, if there is a need for abstration layer around any XML entity then it should go here. ||
 || DataModels/ || root dir for any metadata/data model descriptive framework ||
 || DataModels/RelaxNG || any relaxng(compact) based descriptive data models ||
 || DataModels/XML || any XML schema descriptive data models (  module which uses perl data structures to represent XML schema) ||
