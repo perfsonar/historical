@@ -28,7 +28,7 @@ to the pinger db account password and in case of MySQL run:
 
 === Service installation and Config ===
 
-Download pinger [http://tukki.fnal.gov perfSONAR_PS-Services-PingER-0.09-bin.tgz].  
+Download pinger [perfSONAR_PS-Services-PingER-0.09-bin.tgz].  
 
 Run:
 {{{
