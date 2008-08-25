@@ -19,11 +19,12 @@
  * Aaron
    # Have the perfSONAR daemons run as user "perfsonar" instead of root (*DONE*)
    # Remove use of ramdisk to better handle the root partition filling up (*DONE*)
-   # LS Registration Daemon (*MOSTLY DONE*)
+   # LS Registration Daemon (*DONE*)
      # Verify that it is doing IPv6 reverse dns correctly
-     # Modify the approach to use service connection checking instead of using startup scripts for service liveness (*DONE*)
+     # Modify the approach to use service connection checking instead of using startup scripts for service liveness
    # Port PingER GUI to Disk (w/ Maxim)
-   # Work with Dan to integrate some or all of his scripts into the disk and integrate the q+a that's been added to the disk into his framework. (*MOSTLY DONE*)
+   # Get JOWPing working on the disk (*DONE*)
+   # Work with Dan to integrate some or all of his scripts into the disk and integrate the q+a that's been added to the disk into his framework. (*DONE*)
 
  * Jeff
    # Port master/collector to perfSONAR (w/ JZ)
@@ -67,6 +68,8 @@
      # Verify we can access saved info
      # Verify 'upgrades' are smooth, can access existing measurement data
    # bwctl release (perhaps some documentation - edit passes for sure)
+   # Upgrade PingER Web Admin to most recent version (*PARTIALLY DONE*)
+   # OWAMP testing
 
  * Jeff
    # bwctl documentation
