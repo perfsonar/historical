@@ -5,17 +5,16 @@
  * Jason
    * gLS
      # Client API + Update existing GUIs (*DONE*)
-     # Registration API + Integration into SNMP MA
+     # Registration API + Integration into SNMP MA (*DONE pending testing of SNMP MA/pSB*)
      # Performance/DB XML Trouble Shooting (*DONE*)
    * pSB
-     # Port master/collector to perfSONAR (w/ JB)    
+     # Port master/collector to perfSONAR (*Abandonded*)  
      # Fix BWCTL DB Abstraction
      # OWAMP DB Abstraction (Pending JB)
    * SNMP MA
-     # Cricket/Cacti/MRTG Integration (about 1/2 done thus far)
+     # Cricket/Cacti/MRTG Integration (*MRTG/Cricket Abandonded, Cacti complete*)  
    * Disk at Large
      # Address some strange behavior when auto finding host/iv4/ipv6 information (*Taken over by Aaron, needs testing*)
-     # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
 
  * Aaron
    # Have the perfSONAR daemons run as user "perfsonar" instead of root (*DONE*)
@@ -45,6 +44,7 @@
    * SNMP MA
      # System stuff to start/restart the service after configuration?
    * Disk at Large
+     # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
      # Modify pSB to continuously poll for 'new' bwctl/owamp daemons and add the to the mesh automatically, restart necessary tools
      # pSB Configuration GUIs
      # gLS integration into the services.cgi (e.g. perfAdmin improvements)
