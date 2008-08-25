@@ -29,9 +29,9 @@
  * Jeff
    # Port master/collector to perfSONAR (w/ JZ)
    # Latency Star Abstraction
-     * powstream modification
-   # Add AESKEY support to AMI-bwctl
-   # AMI/pSB - Add 'central invocation' to mesh-config
+     * powstream modification (*DONE*)
+   # Add AESKEY support to AMI-bwctl (*DROPPING*)
+
    
 == Post Aug 20th, before Sept 4th (Thurs) ==
 
@@ -85,6 +85,8 @@ _Pencils Down_ is Sept 4th (Thursday)
 == Things that can happen after Sept 5 release ==
  * Aaron
    # work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC (*DONE*)
+ * Jeff
+   # AMI/pSB - Add 'central invocation' to mesh-config (i.e. Backbone config)
 
 == Last Updated ==
 
