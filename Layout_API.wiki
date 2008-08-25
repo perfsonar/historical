@@ -102,7 +102,7 @@ You have SNMP_MA.pl as an example. Will script files be in these directories or 
 request/response handling is done a few files (Request.pm, RequestHandler.pm and EventTypeEquivalence.pm)
 which I'm not sure splits up nicely between Request/Response directories.
 
-* *Maxim:* they report some status and not specifally error. So I cant agree on this one. Collector is some kind of aggregation agent which
+ * *Maxim:* they report some status and not specifally error. So I cant agree on this one. Collector is some kind of aggregation agent which
  can get some info from the LS or Topology service and then gather some data from remote MAs. I suggest for scripts we need just bin directory in the trunk.
 
 For request/response I can suggest  to add Transport dir and then Transport/Request and Transport/Response. Where the Trnasport will signify anything 
@@ -111,22 +111,22 @@ related to HTTP/SOAP and prior the XML parsing. If  EventTypeEquivalence.pm is a
 Or may be Interfaces dir ? Then Interfaces/Response(Request) would make sense and any future web additions like visualization would end up in the
  Interface/UI or Interfaces/CGI ?
 
-* *Jeff:* I would prefer to remove the MP/MA level. Just give the service name. If it implements the MA protocol and MP protocol both - fine. 
+ * *Jeff:* I would prefer to remove the MP/MA level. Just give the service name. If it implements the MA protocol and MP protocol both - fine. 
 It might make sense to put an MA/MP (or other protocols) under a protocols directory and put the Request/Response stuff in there as well. 
 I would move Agents and Config out from Services (make them top level dirs parallel with Services - then have specific things to individual 
 services under that with the same names as the corresponding service under Services).
 
-* *Maxim:* yes you can replace Services with Protocols but keep underlying structure the same. Then with Interfaces dir  it will look 
+ * *Maxim:* yes you can replace Services with Protocols but keep underlying structure the same. Then with Interfaces dir  it will look 
 almost as the structure of the required docs for the MDM release :-)
 
 MA and MP level is already  introduced throught the API and that will involve a lot of refactoring in order to provide unique names for the classes. 
  We can add Services/Measurement and put agent there or keep Agent as a subdir name if you prefer this name. 
 
-* *Jason:* I am not particularly fond of 'Client' being under services. There is a blurry line right now separating MPs and MAs and other services, 
+ * *Jason:* I am not particularly fond of 'Client' being under services. There is a blurry line right now separating MPs and MAs and other services, 
 do we want to stick with this level of indirection (i.e. stick what it is or isn't directly into the PM name?). Do Request/Response need their 
 own directories? Wouldn't something more generic (including Message.pm) be more sensible?
 
-* *Maxim:*  Message.pm serves purely utility function. What is wrong with moving it under Utils/XML. The whole idea is to have very explicit 
+ * *Maxim:*  Message.pm serves purely utility function. What is wrong with moving it under Utils/XML. The whole idea is to have very explicit 
 API and move few generic "god modules" into the one location. I dont like to see many such modules because its extremely hard to reuse those 
 and they polluting the API namespace.
 
