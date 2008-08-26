@@ -26,7 +26,7 @@ Plan is to test in three phases:
  # Friendly intended customers: Sean McKee, CalTech, CERN...
 
 === Logistics ===
- # Next meeting will be Sept 2, 2:30 EST
+ # Next meeting will be Sept 2, 12:00 EST
 
 == Where ==
 
