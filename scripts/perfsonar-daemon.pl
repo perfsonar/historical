@@ -601,7 +601,20 @@ sub registerLS {
     my $service = $args->{"service"};
     $logger->debug("Starting '".$$."' for LS registration");
 
-    my $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
+    my $sleep_time = q{};
+    if ( $args->{"conf"}->{"ls_registration_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
+    }
+    elsif ( $args->{"conf"}->{"ls"}->{"ls_registration_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"ls"}->{"ls_registration_interval"};
+    }
+    elsif ( $args->{"conf"}->{"gls"}->{"ls_registration_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"gls"}->{"ls_registration_interval"};
+    }
+    else {
+        $sleep_time = 3600;
+    }
+
     while(1) {
         if (not $sleep_time) { 
             $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
@@ -630,14 +643,26 @@ sub cleanLS {
     my $service = $args->{"service"};
     
     my $sleep_time;
-    if( $args->{"conf"}->{"ls"}->{"reaper_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"} * 60;
+    
+    # compat changes for new name
+    if ( $args->{"conf"}->{"ls"}->{"reaper_interval"} or $args->{"conf"}->{"gls"}->{"reaper_interval"} ) {
+        if ( $args->{"conf"}->{"ls"}->{"reaper_interval"} ) {
+            $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"};
+        }
+        else {
+            $sleep_time = $args->{"conf"}->{"gls"}->{"reaper_interval"};
+        }        
     }
-    elsif ( $args->{"conf"}->{"gls"}->{"reaper_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"gls"}->{"reaper_interval"} * 60;
+    elsif ( $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"} or $args->{"conf"}->{"gls"}->{"xmldb_reaper_interval"} ) {
+        if ( $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"} ) {
+            $sleep_time = $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"};        
+        }
+        else {
+            $sleep_time = $args->{"conf"}->{"gls"}->{"xmldb_reaper_interval"};        
+        }  
     }
     else {
-        $sleep_time = 300;
+        $sleep_time = 3600;
     }
     
     my $error = q{};
@@ -677,10 +702,10 @@ sub summarizeLS {
     my $error = q{};
     my $sleep_time;
     if( $args->{"conf"}->{"ls"}->{"summarization_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"ls"}->{"summarization_interval"} * 60;
+        $sleep_time = $args->{"conf"}->{"ls"}->{"summarization_interval"};
     }
     elsif ( $args->{"conf"}->{"gls"}->{"summarization_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"gls"}->{"summarization_interval"} * 60;
+        $sleep_time = $args->{"conf"}->{"gls"}->{"summarization_interval"};
     }
     else {
         $sleep_time = 300;

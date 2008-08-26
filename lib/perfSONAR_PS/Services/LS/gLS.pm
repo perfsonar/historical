@@ -205,6 +205,40 @@ sub init {
         $self->{CONF}->{"gls"}->{"ls_ttl"} = 86400;
     }
 
+    if ( exists $self->{CONF}->{"ls_registration_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+            $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"} * 60;
+            $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
+            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+        }
+        else {
+            $self->{LOGGER}->warn("");
+            $self->{CONF}->{"ls_registration_interval"} *= 60;
+            $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+        }
+    }
+    else {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+            $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
+            $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
+            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+        }
+        else {
+            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to 1 hour.");
+            $self->{CONF}->{"ls_registration_interval"} = 3600;
+            $self->{CONF}->{"gls"}->{"ls_registration_interval"} = 3600;
+        }
+    }
+    
+    if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"}  ) {
+        $self->{CONF}->{"gls"}->{"summarization_interval"} *= 60;
+    }
+    else {
+        $self->{CONF}->{"gls"}->{"summarization_interval"} = 1800;
+        $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"summarization_interval"}."'.");
+    }
+    
     unless ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
         and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
     {
