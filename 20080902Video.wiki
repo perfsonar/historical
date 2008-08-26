@@ -12,7 +12,7 @@
    # SLAC
    # FNAL
    # MCNC
- # Project organization
+ # Project organization (Maxim sql scripts etc question)
    # Source code locations
    # Distribution locations
  # Wiki Migration
