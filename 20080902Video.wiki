@@ -33,8 +33,10 @@ GDS Dialing Directions:
 
 Dialing Directions:
 To join the call, do one of the following:
- * Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT), +1-866-411-0013 (toll free US/Canada Only) or
-+1-800-392-6130 (alternate toll free US/Canada Only) and enter access code 0145258
+ * Dial +1-734-615-7474 (NON-US/CA USERS MUST USE THIS NUMBER - SYSTEM WILL NOT CALL OUT)
+ * Dial +1-866-411-0013 (toll free US/Canada Only)
+ * Dial +1-800-392-6130 (alternate toll free US/Canada Only)
+ * Enter access code 0145258
 
 == Last Updated ==
 
