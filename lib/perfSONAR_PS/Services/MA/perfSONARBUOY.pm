@@ -217,7 +217,7 @@ sub init {
         if ( not $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
         {
             unless ($self->{CONF}->{external_address}) {
-                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external address of the machine);
+                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external address of the machine");
                 return -1;
             }
 
