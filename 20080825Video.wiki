@@ -28,9 +28,23 @@ IP Dialing Directions
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Brian, Jason, Bobby Brown (Vandy), Martin, Aaron, Joe, Maxim, Jeff
  # Issue specific meeting: ISO Testing
- # Next meeting will be TBD
+
+=== Current ISO status ===
+ * Aaron: Better configuration scripts, RAM disk issues handled, LS-reg daemon checks for 'live' processes, j-owping beta added, pS updates so services more unified (all determine accesspoint from same place now instead of being tool specific), state saves are very different - works for whole 'system' instead of being specific to each tool.
+ * Jason: Updates for gLS api, fixes for gLS performance issues, modifications for pS-B. Will be working on more pS-B changes and GUI's for showing latency/throughput together.
+ * Jeff: Modifications to lower-level owamp to support sender-side initiated tests for the star-config.
+Jason and Jeff are not ready for code-freeze yet on pS-B. All other portions are now frozen, but pS-B development will continue for a couple of more days. Anything that is not complete this week will not make it in.
+=== gLS deployments ===
+Internet2 will have a deployment on ndb1.internet2.edu in the next week. ESnet already has a temporary gLS deployment ready (although it is expected that it will need to move in October). Internet2 will be looking for a second location. Additionally, Jeff and Jason are working with Dante to ensure a compatible gLS instance will be installed somewhere in Europe in the next month.
+=== ISO testing ===
+Plan is to test in three phases:
+ # Our closest friends: Brian, Warren
+ # Our closest friends who know little about pS and the ISO: Jon D? (ESnet), IU, Danno (Internet2)
+ # Friendly intended customers: Sean McKee, CalTech, CERN...
+=== Logistics ===
+ # Next meeting will be Sept 2, 2:30 EST
 
 == Last Updated ==
 
