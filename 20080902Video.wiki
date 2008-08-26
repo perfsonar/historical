@@ -1,0 +1,36 @@
+﻿=  September 2 2008 Conference Call =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet 
+   # SLAC
+   # FNAL
+   # MCNC
+ # Project organization
+   # Source code locations
+   # Distribution locations
+ # Wiki Migration
+ # GLIF Demo Update (Aaron/Jeff)
+ # ISO status
+ # Next meeting will in Ann Arbor at the Internet2 offices on Sept 8, 8:30 am
+
+== When ==
+
+ September 2 2008 - 12:00 EDT
+
+== Where ==
+
+GDS Dialing Directions:
+ # Register with a GDS-enabled Gatekeeper.  To borrow space see: http://commons.internet2.edu/reggate.html
+ # Make sure you are connecting at 384 kbps.
+ # Dial 001189 130 0505 (no spaces)
+
+== Last Updated ==
+
+$Id: 20080818Video.wiki 135 2008-08-18 23:52:18Z boote@internet2.edu $
