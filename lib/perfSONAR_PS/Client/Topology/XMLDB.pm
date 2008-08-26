@@ -158,65 +158,16 @@ sub getAll {
 
     return (-1, "Database not open") if ($self->{DB_OPEN} == 0);
 
-    my $content = "";
-
-    $content .= "<nmtopo:topology";
-    foreach my $ns (keys %{ $self->{DB_NAMESPACES} }) {
-        $content .= " xmlns:$ns=\"".$self->{DB_NAMESPACES}->{$ns}."\"";
-    }
-    $content .= ">";
-
-    @results = $self->{DATADB}->query({ query => "/*:domain", txn => undef, error => \$error });
+    @results = $self->{DATADB}->query({ query => "//*", txn => undef, error => \$error });
     if ($error ne "") {
         my $msg = "Couldn't get list of domains from database: $error";
         $logger->error($msg);
         return (-1, $msg);
     }
 
-    $content .= join("", @results);
+    my $content = "";
 
-    @results = $self->{DATADB}->query({ query => "/*:node", txn => undef, error => \$error });
-    if ($error ne "") {
-        my $msg = "Couldn't get list of nodes from database: $error";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
-
-    $content .= join("", @results);
-
-    @results = $self->{DATADB}->query({ query => "/*:port", txn => undef, error => \$error });
-    if ($error ne "") {
-        my $msg = "Couldn't get list of ports from database: $error";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
-
-    $content .= join("", @results);
-
-    @results = $self->{DATADB}->query({ query => "/*:link", txn => undef, error => \$error });
-    if ($error ne "") {
-        my $msg = "Couldn't get list of links from database: $error";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
-
-    $content .= join("", @results);
-
-    @results = $self->{DATADB}->query({ query => "/*:network", txn => undef, error => \$error });
-    if ($error ne "") {
-        my $msg = "Couldn't get list of networks from database: $error";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
-
-    $content .= join("", @results);
-
-    @results = $self->{DATADB}->query({ query => "/*:path", txn => undef, error => \$error });
-    if ($error ne "") {
-        my $msg = "Couldn't get list of paths from database: $error";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
+    $content .= "<nmtopo:topology xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\">\n";
 
     $content .= join("", @results);
 
@@ -238,7 +189,7 @@ sub getAll {
     return (0, $topology);
 }
 
-sub getUniqueIDs {
+sub getSummary {
     my ($self) = @_;
     my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
     my $error;

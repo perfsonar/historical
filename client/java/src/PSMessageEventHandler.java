@@ -1,4 +1,4 @@
-package net.es.oscars.perfsonar;
+package edu.internet2.perfsonar;
 
 import org.jdom.*;
 import java.util.HashMap;

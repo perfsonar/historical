@@ -242,7 +242,7 @@ while (1) {
             elsif ( $module eq "perfSONAR_PS::Services::MA::CircuitStatus" ) {
                 $module = "circuitstatus";
             }
-            elsif ( $module eq "perfSONAR_PS::Services::MA::Topology" ) {
+            elsif ( $module eq "perfSONAR_PS::Services::TS::TS" ) {
                 $module = "topology";
             }
             elsif ( $module eq "perfSONAR_PS::Services::LS::LS" ) {
@@ -300,7 +300,7 @@ while (1) {
             config_circuitstatus_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
         elsif ( $module eq "topology" ) {
-            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::MA::Topology";
+            $config{"port"}->{$port}->{"endpoint"}->{$endpoint}->{"module"} = "perfSONAR_PS::Services::TS::TS";
             config_topology_ma( $config{"port"}->{$port}->{"endpoint"}->{$endpoint}, $accesspoint, \%config );
         }
         elsif ( $module eq "ls" ) {
@@ -335,7 +335,7 @@ sub config_gls {
 
     $config->{"gls"}->{"root"}                = "0";
     $config->{"gls"}->{"enable_registration"} = 1;
-    $config > -{"gls"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", $config{"ls_registration_interval"}, $config > -{"gls"}->{"ls_registration_interval"}, '^\d+$' );
+    $config->{"gls"}->{"ls_registration_interval"} = &ask( "Interval between when LS registrations occur [in minutes] ", $config{"ls_registration_interval"}, $config->{"gls"}->{"ls_registration_interval"}, '^\d+$' );
     $config->{"gls"}->{"ls_ttl"}                     = &ask( "Enter default TTL for registered data [in minutes] ",        "60",                                $config->{"gls"}->{"ls_ttl"},                     '\d+' );
     $config->{"gls"}->{"metadata_db_name"}           = &ask( "Enter the directory of the XML database ",                   $confdir . "/ls-xmldb",              $config->{"gls"}->{"metadata_db_name"},           '^\/' );
     $config->{"gls"}->{"metadata_db_name"} .= "/" unless $config->{"gls"}->{"metadata_db_name"} =~ m/\/$/;

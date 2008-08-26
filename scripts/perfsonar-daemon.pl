@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl -w -I lib
+#!/usr/bin/perl -w -I lib
 
 =head1 NAME
 

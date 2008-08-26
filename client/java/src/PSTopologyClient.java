@@ -1,4 +1,4 @@
-package net.es.oscars.perfsonar;
+package edu.internet2.perfsonar;
 
 import java.util.*;
 import java.io.*;
@@ -40,9 +40,9 @@ public class PSTopologyClient implements PSMessageEventHandler {
             "</nmwg:message>";
 
     private String topo_replace_str =
-            "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">" +
+            "<nmwg:message type=\"TSReplaceRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">" +
             "  <nmwg:metadata id=\"meta0\">" +
-            "    <nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/replace/20070809</nmwg:eventType>" +
+            "    <nmwg:eventType>http://ggf.org/ns/nmwg/topology/20070809</nmwg:eventType>" +
             "  </nmwg:metadata>" +
             "  <nmwg:data id=\"data0\" metadataIdRef=\"meta0\">" +
             "     <!--topology-->" +
@@ -71,7 +71,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
             "</"+this.topoNs.getPrefix()+":topology>";
         String request = new String(topo_replace_str).replaceAll("<!--topology-->", topoStr);
 
-	this.log.info("Request post replaceAll: "+request);
+        this.log.info("Request post replaceAll: "+request);
 
         this.addReplaceSuccess = false;
 
@@ -106,7 +106,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
             }
 
             this.topology = topo;
-        } else if (messageType.equals("TopologyChangeResponse")) {
+        } else if (messageType.equals("TSReplaceResponse")) {
             Element eventType_elm = metadata.getChild("eventType", nmwgNs);
             if (eventType_elm == null) {
                 this.log.error("Received a metadata/data pair without an event type");

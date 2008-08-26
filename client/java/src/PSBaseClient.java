@@ -1,6 +1,5 @@
-package net.es.oscars.perfsonar;
+package edu.internet2.perfsonar;
 
-import net.es.oscars.perfsonar.*;
 import java.util.*;
 import java.io.*;
 

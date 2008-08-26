@@ -113,17 +113,6 @@ sub topologyNormalize_links {
                 }
             }
 
-            if (not defined $type or $type eq "") {
-                $type = "unidirectional";
-                $link->setAttribute("type", $type);
-            }
-
-            if ($type ne "unidirectional" and $type ne "bidirectional") {
-                my $msg = "Link $id has an invalid type: $type";
-                $logger->error($msg);
-                return (-1, $msg);
-            }
-
             my $n = idIsFQ($id, "link");
             if ($n == -1) {
                 my $msg = "Link $id has an invalid fully-qualified id";
@@ -134,10 +123,6 @@ sub topologyNormalize_links {
 
                 if ($root->localname eq "port" and $type eq "bidirectional") {
                     my $msg = "Link $id is bidirectional, but is not fully qualified and is located beneath a port";
-                    $logger->error($msg);
-                    return (-1, $msg);
-                } elsif ($root->localname eq "domain" and $type eq "unidirectional") {
-                    my $msg = "Link $id is unidirectional, but is not fully qualified and is located beneath a domain";
                     $logger->error($msg);
                     return (-1, $msg);
                 } elsif ($root->localname ne "domain" and $root->localname ne "port") {
@@ -693,19 +678,6 @@ sub validateDomain {
         my $msg = "Found domain with domain in it";
         $logger->error($msg);
         return (-1, $msg);
-    }
-
-    $find_res = find($domain, "./*[local-name()='link']", 0);
-    if ($find_res) {
-        foreach my $link ($find_res->get_nodelist) {
-            my $type = $link->getAttribute("type");
-
-            if (not defined $type or $type eq "unidirectional") {
-                my $msg = "Found domain with unidirectional link in it";
-                $logger->error($msg);
-                return (-1, $msg);
-            }
-        }
     }
 
     return (0, "");

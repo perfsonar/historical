@@ -54,54 +54,43 @@ sub getURIString {
     return $self->{URI_STRING};
 }
 
-sub buildGetAllRequest {
+sub buildQueryRequest {
+    my ($xquery) = shift;
+
     my $request = "";
 
-    $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-    $request .= "<nmwg:metadata id=\"meta0\">\n";
-    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/all/20070809</nmwg:eventType>\n";
-    $request .= "</nmwg:metadata>\n";
-    $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
-    $request .= "</nmwg:message>\n";
-
-    return ("", $request);
-}
-
-sub buildXqueryRequest {
-    my ($xquery) = @_;
-    my $request = "";
-
-    $request .= "<nmwg:message type=\"SetupDataRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
-    $request .= "<nmwg:metadata id=\"meta0\">\n";
-    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/xquery/20070809</nmwg:eventType>\n";
+    $request .= "<nmwg:message type=\"QueryRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+    if ($xquery) {
     $request .= "  <xquery:subject id=\"sub1\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/\">\n";
     $request .= $xquery;
     $request .= "  </xquery:subject>\n";
+    }
+    $request .= "<nmwg:metadata id=\"meta0\">\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/20070809</nmwg:eventType>\n";
     $request .= "</nmwg:metadata>\n";
     $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\" />\n";
     $request .= "</nmwg:message>\n";
 
     return ("", $request);
-
 }
 
-sub buildChangeTopologyRequest {
+sub buildChangeRequest {
     my ($type, $topology) = @_;
-    my $eventType;
+    my $msgType;
 
     if ($type eq "add") {
-        $eventType = "http://ggf.org/ns/nmwg/topology/change/add/20070809";
+        $msgType = "TSAddRequest";
     } elsif ($type eq "update") {
-        $eventType = "http://ggf.org/ns/nmwg/topology/change/update/20070809";
+        $msgType = "TSUpdateRequest";
     } elsif ($type eq "replace") {
-        $eventType = "http://ggf.org/ns/nmwg/topology/change/replace/20070809";
+        $msgType = "TSReplaceRequest";
     }
 
     my $request = "";
 
-	$request .= "<nmwg:message type=\"TopologyChangeRequest\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
+	$request .= "<nmwg:message type=\"$msgType\" xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\">\n";
 	$request .= "<nmwg:metadata id=\"meta0\">\n";
-	$request .= "  <nmwg:eventType>$eventType</nmwg:eventType>\n";
+    $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/topology/20070809</nmwg:eventType>\n";
     $request .= "</nmwg:metadata>\n";
     $request .= "<nmwg:data id=\"data0\" metadataIdRef=\"meta0\">\n";
     my $elm = $topology->cloneNode(1);
@@ -121,7 +110,7 @@ sub xQuery {
     my $error;
     my ($status, $res, $request);
 
-    ($status, $request) = buildXqueryRequest($xquery);
+    ($status, $request) = buildQueryRequest($xquery);
 
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
@@ -168,7 +157,7 @@ sub getAll {
     my $error;
     my ($status, $res);
 
-    my $request = buildGetAllRequest();
+    my $request = buildQueryRequest("");
 
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
@@ -216,7 +205,7 @@ sub changeTopology {
     my $error;
     my ($status, $res);
 
-    my $request = buildChangeTopologyRequest($type, $topology);
+    my $request = buildChangeRequest($type, $topology);
 
     $logger->debug("Change Request: ".$request);
 
