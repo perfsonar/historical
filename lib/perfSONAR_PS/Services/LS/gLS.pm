@@ -177,6 +177,9 @@ sub init {
                 $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
             }
         }
+        unless ( -d $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
+            system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
+        }
     }
     else {
         $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");

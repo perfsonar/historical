@@ -570,6 +570,8 @@ registration, it splits the data into chunks and registers each independently.
 
 sub __register {
     my ( $self, $subject, $data_ref ) = @_;
+    my $success = 0;
+    my %lsHash = map { $_, 1 } @{ $self->{LS_CONF} };
 
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
@@ -578,14 +580,6 @@ sub __register {
             return -1;
         }
     }
-
-    my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $self->{LS} );
-    unless ( $host and $port and $endpoint ) {
-        $self->{LOGGER}->error("URI conversion error.");
-        return -1;
-    }
-
-    my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
 
     my @data       = @{$data_ref};
     my $iterations = int( ( ( $#data + 1 ) / $self->{CHUNK} ) );
@@ -605,12 +599,25 @@ sub __register {
             createData( $doc, "data." . genuid(), $mdID, $data[$x], undef );
         }
         endMessage($doc);
-        unless ( callLS( $self, $sender, $doc->getValue() ) == 0 ) {
-            $self->{LOGGER}->error("Unable to register data with LS.");
-            return -1;
+        
+        foreach my $ls ( @{ $self->{LS_ORDER} } ) {
+            if ( exists $lsHash{$ls} or ( not $success ) ) {            
+                my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ls );
+                unless ( $host and $port and $endpoint ) {
+                    $self->{LOGGER}->error("URI conversion error.");
+                    return -1;
+                }
+
+                my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
+    
+                unless ( $self->callLS( $sender, $doc->getValue() ) == 0 ) {
+                    $self->{LOGGER}->error("Unable to register data with LS \"".$ls."\".");
+                    return -1;
+                }
+                $success++;
+            }
         }
     }
-
     return 0;
 }
 

@@ -106,6 +106,11 @@ sub init {
     my ( $self, $handler ) = @_;
     $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::perfSONARBUOY");
 
+    unless ( exists $self->{CONF}->{"root_hints_url"} ) {
+        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+        $self->{LOGGER}->warn("gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\".");
+    }
+
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
         $self->{LOGGER}->error("Setting value for 'legacy' to 0");
         $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} = 0;
@@ -157,21 +162,24 @@ sub init {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} )
         {
-            $self->{LOGGER}->error("Value for 'metadata_db_file' is not set.");
-            return -1;
+            $self->{LOGGER}->warn("Value for 'metadata_db_file' is not set, setting to 'psbstore.dbxml'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
         }
-        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} )
-        {
-            $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
-            return -1;
-        }
-        else {
+        
+        if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
             if ( defined $self->{DIRECTORY} ) {
                 unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} =~ "^/" ) {
                     $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"};
                 }
             }
+            unless ( -d $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
+                system( "mkdir " . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} );
+            }
+        }
+        else {
+            $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+            return -1;
         }
     }
     else {
@@ -189,7 +197,7 @@ sub init {
         $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} = 0;
     }
 
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
         {
@@ -199,43 +207,42 @@ sub init {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->error("No LS instance specified for perfSONARBUOY service");
-                return -1;
+                $self->{LOGGER}->warn("No LS instance specified for perfSONAR-BUOY service");
             }
         }
 
-        unless ( exists $self->{CONF}->{"snmp"}->{"ls_registration_interval"} )
+        unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
         {
-            $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = $self->{CONF}->{ls_registration_interval};
+            if ( defined $self->{CONF}->{"ls_registration_interval"}
+                and $self->{CONF}->{"ls_registration_interval"} )
+            {
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+            }
+            else {
+                $self->{LOGGER}->warn("Setting registration interval to 4 hours");
+                $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = 14400;
+            }
         }
 
-        if (not $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}) {
-            $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
-            $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 1800;
-        }
-
-        if ( not $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} )
-        {
-            unless ($self->{CONF}->{external_address}) {
-                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external address of the machine");
+        if ( not $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} ) {
+            unless ( $self->{CONF}->{external_address} ) {
+                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
                 return -1;
             }
-
-            my $accessPoint = "http://".$self->{CONF}->{external_address}.":".$self->{PORT}.$self->{ENDPOINT};
-            $self->{LOGGER}->info("Setting service access point to $accessPoint");
+            $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
         {
-            my $description = "perfSONAR_PS perfSONARBUOY MA";
-            if ($self->{CONF}->{site_name}) {
-                $description .= " at ".$self->{CONF}->{site_name};
+            my $description = "perfSONAR_PS SNMP MA";
+            if ( $self->{CONF}->{site_name} ) {
+                $description .= " at " . $self->{CONF}->{site_name};
             }
-            if ($self->{CONF}->{site_location}) {
-                $description .= " in ".$self->{CONF}->{site_location};
+            if ( $self->{CONF}->{site_location} ) {
+                $description .= " in " . $self->{CONF}->{site_location};
             }
-
             $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} = $description;
             $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
         }
@@ -243,8 +250,8 @@ sub init {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} )
         {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "perfSONARBUOY MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONARBUOY MA'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "SNMP MA";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'SNMP MA'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}
@@ -1024,11 +1031,27 @@ We then sleep for some amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
-    #    my ( $self, @args ) = @_;
-    #    my $parameters = validateParams( @args, { sleep_time => 0 } );
-
     my ( $status, $res );
     my $ls = q{};
+    
+    my @ls_array = ();
+    my @array = split( /\s+/, $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
+    }
+    @array = split( /\s+/, $self->{CONF}->{"ls_instance"} );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
+    }
+
+    my @hints_array = ();
+    @array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
+    foreach my $h (@array) {
+        $h =~ s/(\s|\n)*//g;
+        push @hints_array, $h if $h;
+    }
 
     if ( !defined $self->{LS_CLIENT} ) {
         my %ls_conf = (
@@ -1037,7 +1060,7 @@ sub registerLS {
             SERVICE_DESCRIPTION => $self->{CONF}->{"perfsonarbuoy"}->{"service_description"},
             SERVICE_ACCESSPOINT => $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"},
         );
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}, \%ls_conf, $self->{NAMESPACES} );
+        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( \@ls_array, \%ls_conf, \@hints_array );
     }
 
     $ls = $self->{LS_CLIENT};

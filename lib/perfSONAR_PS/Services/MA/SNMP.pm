@@ -7,7 +7,7 @@ use fields 'LS_CLIENT', 'NAMESPACES', 'METADATADB', 'LOGGER', 'NETLOGGER';
 use strict;
 use warnings;
 
-our $VERSION = 0.09;
+our $VERSION = 0.10;
 
 =head1 NAME
 
@@ -102,13 +102,14 @@ ways:
 
 sub init {
     my ( $self, $handler ) = @_;
-    $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::SNMP");
+    $self->{LOGGER}    = get_logger("perfSONAR_PS::Services::MA::SNMP");
     $self->{NETLOGGER} = get_logger("NetLogger");
 
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+        $self->{LOGGER}->warn("gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\".");
     }
-    
+
     unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_type"}
         and $self->{CONF}->{"snmp"}->{"metadata_db_type"} )
     {
@@ -141,21 +142,24 @@ sub init {
         unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_file"}
             and $self->{CONF}->{"snmp"}->{"metadata_db_file"} )
         {
-            $self->{LOGGER}->error("Value for 'metadata_db_file' is not set.");
-            return -1;
+            $self->{LOGGER}->warn("Value for 'metadata_db_file' is not set, setting to 'snmpstore.dbxml'.");
+            $self->{CONF}->{"snmp"}->{"metadata_db_file"} = "snmpstore.dbxml";
         }
-        unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_name"}
-            and $self->{CONF}->{"snmp"}->{"metadata_db_name"} )
-        {
-            $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
-            return -1;
-        }
-        else {
+        
+        if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_name"}
+            and $self->{CONF}->{"snmp"}->{"metadata_db_name"} ) {
             if ( defined $self->{DIRECTORY} ) {
                 unless ( $self->{CONF}->{"snmp"}->{"metadata_db_name"} =~ "^/" ) {
                     $self->{CONF}->{"snmp"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"snmp"}->{"metadata_db_name"};
                 }
             }
+            unless ( -d $self->{CONF}->{"snmp"}->{"metadata_db_name"} ) {
+                system( "mkdir " . $self->{CONF}->{"snmp"}->{"metadata_db_name"} );
+            } 
+        }
+        else {
+            $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+            return -1;
         }
     }
     else {
@@ -197,7 +201,7 @@ sub init {
                 $self->{CONF}->{"snmp"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->error("No LS instance specified for SNMP service");
+                $self->{LOGGER}->warn("No LS instance specified for SNMP service");
             }
         }
 
@@ -210,31 +214,28 @@ sub init {
                 $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             }
             else {
-                $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
-                $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 1800;
+                $self->{LOGGER}->warn("Setting registration interval to 4 hours");
+                $self->{CONF}->{"snmp"}->{"ls_registration_interval"} = 14400;
             }
         }
 
-        if ( not $self->{CONF}->{"snmp"}->{"service_accesspoint"} )
-        {
-            unless ($self->{CONF}->{external_address}) {
+        if ( not $self->{CONF}->{"snmp"}->{"service_accesspoint"} ) {
+            unless ( $self->{CONF}->{external_address} ) {
                 $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
                 return -1;
             }
-
-            my $accessPoint = "http://".$self->{CONF}->{external_address}.":".$self->{PORT}.$self->{ENDPOINT};
-            $self->{LOGGER}->info("Setting service access point to $accessPoint");
+            $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
         }
 
         unless ( exists $self->{CONF}->{"snmp"}->{"service_description"}
             and $self->{CONF}->{"snmp"}->{"service_description"} )
         {
             my $description = "perfSONAR_PS SNMP MA";
-            if ($self->{CONF}->{site_name}) {
-                $description .= " at ".$self->{CONF}->{site_name};
+            if ( $self->{CONF}->{site_name} ) {
+                $description .= " at " . $self->{CONF}->{site_name};
             }
-            if ($self->{CONF}->{site_location}) {
-                $description .= " in ".$self->{CONF}->{site_location};
+            if ( $self->{CONF}->{site_location} ) {
+                $description .= " in " . $self->{CONF}->{site_location};
             }
             $self->{CONF}->{"snmp"}->{"service_description"} = $description;
             $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
@@ -258,14 +259,18 @@ sub init {
     $self->{CONF}->{"snmp"}->{"ls_chunk"} = 50;
     $handler->registerMessageHandler( "SetupDataRequest",   $self );
     $handler->registerMessageHandler( "MetadataKeyRequest", $self );
-    $handler->registerMessageHandler( "DataInfoRequest", $self );
-    
+    $handler->registerMessageHandler( "DataInfoRequest",    $self );
+
     my $error = q{};
-    if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"} and 
-         $self->{CONF}->{"snmp"}->{"metadata_db_external"} ) {
-        if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+    if ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external"}
+        and $self->{CONF}->{"snmp"}->{"metadata_db_external"} )
+    {
+        if ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "none" ) {
+            # do nothing
+        }
+        elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
             eval { load perfSONAR_PS::DB::Cricket; };
-            unless ( $EVAL_ERROR ) {
+            unless ($EVAL_ERROR) {
                 my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
                 $cricket->openDB();
                 $cricket->closeDB();
@@ -273,16 +278,16 @@ sub init {
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
             eval { load perfSONAR_PS::DB::Cacti; };
-            unless ( $EVAL_ERROR ) {
+            unless ($EVAL_ERROR) {
                 my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
                 $cacti->openDB();
                 $cacti->closeDB();
             }
         }
         else {
-            $self->{LOGGER}->error("External monitoring source \"".$self->{CONF}->{"snmp"}->{"metadata_db_external"}."\" not currently supported.");
+            $self->{LOGGER}->error( "External monitoring source \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external"} . "\" not currently supported." );
             return -1;
-        }           
+        }
     }
 
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
@@ -381,8 +386,8 @@ sub loadXMLDB {
             $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $data->toString, type => "MAStore" } ), name => $dHash, txn => $dbTr, error => \$error } );
             $self->{LOGGER}->debug( "Inserting \"" . $data->toString . "\" as \"" . $dHash . "\"." );
 
-            my $metadata = find($dom->getDocumentElement, "./nmwg:metadata[\@id=\"" . $data->getAttribute("metadataIdRef") . "\"]" )->get_node(1);
-            my $mdHash   = md5_hex( $metadata->toString );
+            my $metadata = find( $dom->getDocumentElement, "./nmwg:metadata[\@id=\"" . $data->getAttribute("metadataIdRef") . "\"]" )->get_node(1);
+            my $mdHash = md5_hex( $metadata->toString );
             $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $metadata->toString, type => "MAStore" } ), name => $mdHash, txn => $dbTr, error => \$error } );
             $self->{LOGGER}->debug( "Inserting \"" . $metadata->toString . "\" as \"" . $mdHash . "\"." );
         }
@@ -498,67 +503,44 @@ We then sleep for some amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
-    #    my ( $self, @args ) = @_;
-    #    my $parameters = validateParams( @args, { sleep_time => 0 } );
-
-    my @ls = ();
-    if ( exists $self->{CONF}->{"snmp"}->{"ls_instance"} and $self->{CONF}->{"snmp"}->{"ls_instance"} ) {
-        my @array = split(/ /, $self->{CONF}->{"snmp"}->{"ls_instance"});
-        foreach my $l ( @array ) {
-            $l =~ s/(\s|\n)*//g;
-            push @ls, $l if $l;
-        }
+    my ( $status, $res );
+    my $ls = q{};
+    
+    my @ls_array = ();
+    my @array = split( /\s+/, $self->{CONF}->{"snmp"}->{"ls_instance"} );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
     }
-    elsif ( exists $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ) {
-        my @array = split(/ /, $self->{CONF}->{"ls_instance"});
-        foreach my $l ( @array ) {
-            $l =~ s/(\s|\n)*//g;
-            push @ls, $l if $l;
-        }
-    }
-    else {
-        if ( exists $self->{CONF}->{"root_hints_url"} and $self->{CONF}->{"root_hints_url"} ) {
-            use perfSONAR_PS::Client::gLS;
-            use perfSONAR_PS::Client::Echo;
-            my $gls = perfSONAR_PS::Client::gLS->new( { url => $self->{CONF}->{"root_hints_url"} } );
-            my $result = $gls->getLSQueryRaw( { ls => $gls->{ROOTS}->[0], xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/perfsonar:subject/psservice:service[./psservice:serviceType[text()=\"hLS\" or text()=\"LS\" or \@value=\"hLS\" or \@value=\"LS\"]]" } );
-            my $parser = XML::LibXML->new();
-            
-            if ( exists $result->{response} or exists $result->{eventType} ) {
-                if ( $result->{eventType} =~ m/error/ ) {
-                    $self->{LOGGER}->error("LS instances not found in gLS, aborting.");
-                    return -1;
-                }            
-                my $doc = $parser->parse_string( $result->{response} );        
-                my $service = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-                foreach my $s ( $service->get_nodelist ) {
-                    my $value = extract( $s, 0 );
-                    if ( $value ) {
-                        my $echo_service = perfSONAR_PS::Client::Echo->new( $value );
-                        my ( $status, $res ) = $echo_service->ping(); 
-                        push @ls, $value if $status != -1;                
-                    }
-                }
-            }
-            else {
-                $self->{LOGGER}->error("Response from gLS not found, aborting.");
-                return -1;
-            }
-        }
+    @array = split( /\s+/, $self->{CONF}->{"ls_instance"} );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
     }
 
-    my %service = (
-        serviceName        => $self->{CONF}->{"snmp"}->{"service_name"},
-        serviceType        => $self->{CONF}->{"snmp"}->{"service_type"},
-        serviceDescription => $self->{CONF}->{"snmp"}->{"service_description"},
-        accessPoint        => $self->{CONF}->{"snmp"}->{"service_accesspoint"}
-    );
-    my $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0";
+    my @hints_array = ();
+    @array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
+    foreach my $h (@array) {
+        $h =~ s/(\s|\n)*//g;
+        push @hints_array, $h if $h;
+    }
+
+    if ( !defined $self->{LS_CLIENT} ) {
+        my %ls_conf = (
+            SERVICE_TYPE        => $self->{CONF}->{"snmp"}->{"service_type"},
+            SERVICE_NAME        => $self->{CONF}->{"snmp"}->{"service_name"},
+            SERVICE_DESCRIPTION => $self->{CONF}->{"snmp"}->{"service_description"},
+            SERVICE_ACCESSPOINT => $self->{CONF}->{"snmp"}->{"service_accesspoint"},
+        );
+        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote( \@ls_array, \%ls_conf, \@hints_array );
+    }
+
+    $ls = $self->{LS_CLIENT};
 
     my $error         = q{};
-    my @metadataArray = ();
+    my @resultsString = ();
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "file" ) {
-        @metadataArray = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
+        @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         my $metadatadb = $self->prepareDatabases;
@@ -566,7 +548,7 @@ sub registerLS {
             $self->{LOGGER}->error("Database could not be opened.");
             return -1;
         }
-        @metadataArray = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
+        @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"MAStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
         $metadatadb->closeDB( { error => \$error } );
     }
     else {
@@ -574,66 +556,11 @@ sub registerLS {
         return -1;
     }
 
-    my @mdMatrix = ();
-    my $counter = 0;
-    my @row = ();
-    foreach my $md ( @metadataArray ) {
-        unless ( $counter < $self->{CONF}->{"snmp"}->{"ls_chunk"} ) {
-            push @mdMatrix, [@row];
-            $counter = 0;
-            @row = ();
-        }
-        push @row, $md;
-        $counter++;
-    }
-    push @mdMatrix, [@row] if $#row > -1;
- 
-    if ( $#metadataArray > -1 ) {
-        foreach my $instance ( @ls ) {
-            my $ls = perfSONAR_PS::Client::LS->new( { instance => $instance } );
-            my $result = $ls->keyRequestLS( { service => \%service } );
-            if ( exists $result->{key} and $result->{key} ) {
-                my $key = $result->{key};
-                foreach my $chunk ( @mdMatrix ) {
-                    $result = $ls->registerUpdateRequestLS( { key => $key, eventType => $eventType, data => \@{$chunk} } );                        
-                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
-                        my $msg = "Success from LS";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->debug( $msg );
-                    }
-                    else {
-                        my $msg = "Error in LS Registration";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->error( $msg );
-                    }
-                }
-            }
-            else {
-                foreach my $chunk ( @mdMatrix ) {
-                    $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@{$chunk} } );
-                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
-                        my $msg = "Success from LS";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->debug( $msg );
-                    }
-                    else {
-                        my $msg = "Error in LS Registration";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response} if exists $result->{response} and $result->{response};
-                        $self->{LOGGER}->error( $msg );
-                    }
-                }
-            }
-        }
-    }
-    else {
+    if ( $#resultsString == -1 ) {
         $self->{LOGGER}->error("No data to register with LS");
         return -1;
     }
-
+    $ls->registerStatic( \@resultsString );
     return 0;
 }
 
@@ -708,10 +635,8 @@ sub handleEvent {
             doOutputMetadata  => 1,
         }
     );
-    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.handleEvent.start",
-             {messageType=>$parameters->{messageType},});
+    my $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.handleEvent.start", { messageType => $parameters->{messageType}, } );
     $self->{NETLOGGER}->debug($msg);
-
 
     my @subjects = @{ $parameters->{subject} };
     my @filters  = @{ $parameters->{filterChain} };
@@ -1287,15 +1212,14 @@ sub dataInfoRetrieveKey {
         $mdIdRef = $parameters->{metadata}->getAttribute("id");
     }
 
-
     my $key2 = $results->get_node(1)->cloneNode(1);
     my $params = find( $key2, ".//nmwg:parameters", 1 );
-        
-    my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
-    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
+
+    my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
+    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
     $rrd->openDB;
     my $first = $rrd->firstValue();
-    my $last = $rrd->lastValue();
+    my $last  = $rrd->lastValue();
 
     if ( $rrd->getErrorMessage ) {
         my $msg = "Data storage error";
@@ -1305,21 +1229,21 @@ sub dataInfoRetrieveKey {
     else {
         createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
 
-        my $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        my $thing = XML::LibXML::Element->new("parameter");
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
         $thing->setAttribute( "name", "firstTime" );
-        $thing->appendTextNode( $first );
-        $params->addChild($thing);  
-        $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        $thing->appendTextNode($first);
+        $params->addChild($thing);
+        $thing = XML::LibXML::Element->new("parameter");
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
         $thing->setAttribute( "name", "lastTime" );
-        $thing->appendTextNode( $last );
-        $params->addChild($thing);        
-        $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+        $thing->appendTextNode($last);
+        $params->addChild($thing);
+        $thing = XML::LibXML::Element->new("parameter");
+        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
         $thing->setAttribute( "name", "maKey" );
-        $thing->appendTextNode( $hashKey );
-        $params->addChild($thing);        
+        $thing->appendTextNode($hashKey);
+        $params->addChild($thing);
 
         $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
         createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
@@ -1419,11 +1343,11 @@ sub dataInfoRetrieveMetadataData {
             my $key2 = $d->cloneNode(1);
             my $params = find( $key2, ".//nmwg:parameters", 1 );
 
-            my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1);
-            my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );    
+            my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
+            my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
             $rrd->openDB;
             my $first = $rrd->firstValue();
-            my $last = $rrd->lastValue();
+            my $last  = $rrd->lastValue();
 
             if ( $rrd->getErrorMessage ) {
                 my $msg = "Data storage error";
@@ -1433,23 +1357,23 @@ sub dataInfoRetrieveMetadataData {
             else {
                 $parameters->{output}->addExistingXMLElement($md_temp);
 
-                my $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                my $thing = XML::LibXML::Element->new("parameter");
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
                 $thing->setAttribute( "name", "firstTime" );
-                $thing->appendTextNode( $first );
-                $params->addChild($thing);  
-                $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing->appendTextNode($first);
+                $params->addChild($thing);
+                $thing = XML::LibXML::Element->new("parameter");
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
                 $thing->setAttribute( "name", "lastTime" );
-                $thing->appendTextNode( $last );
-                $params->addChild($thing);        
-                $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/" , "nmwg", 1 );
+                $thing->appendTextNode($last);
+                $params->addChild($thing);
+                $thing = XML::LibXML::Element->new("parameter");
+                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
                 $thing->setAttribute( "name", "maKey" );
-                $thing->appendTextNode( $hashKey );
-                $params->addChild($thing);        
+                $thing->appendTextNode($hashKey);
+                $params->addChild($thing);
 
-                $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );      
+                $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
                 createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
             }
             $rrd->closeDB;
@@ -1683,7 +1607,7 @@ sub setupDataRetrieveMetadataData {
 
     my $mdId = q{};
     my $dId  = q{};
-    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start");
+    my $msg  = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start");
     $self->{NETLOGGER}->debug($msg);
 
     my $queryString = q{};
@@ -2086,8 +2010,7 @@ sub retrieveRRD {
     $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.retrieveRRD.setup.end");
     $self->{NETLOGGER}->debug($msg);
 
-    $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.getDataRRD.start",
-        {rrdfile=>$rrd_file,});
+    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.getDataRRD.start", { rrdfile => $rrd_file, } );
     $self->{NETLOGGER}->debug($msg);
 
     my %rrd_result = getDataRRD( { directory => $self->{DIRECTORY}, file => $rrd_file, timeSettings => $timeSettings, rrdtool => $self->{CONF}->{"snmp"}->{"rrdtool"} } );
@@ -2217,10 +2140,11 @@ __END__
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
-L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>, 
+L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
-L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>,
+L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::NetLogger>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -2230,10 +2154,10 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -2245,9 +2169,8 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework
-along with this software.  If not, see
-<http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
@@ -2256,4 +2179,3 @@ Copyright (c) 2004-2008, Internet2 and the University of Delaware
 All rights reserved.
 
 =cut
-
