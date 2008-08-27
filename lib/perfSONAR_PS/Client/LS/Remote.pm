@@ -7,7 +7,9 @@ use warnings;
 
 =head1 NAME
 
-perfSONAR_PS::Client::LS::Remote - A module that provides a client API for an LS
+perfSONAR_PS::Client::LS::Remote - Provides functionality to services that wish
+to register with an hLS instance.  Capability exists to auto-discovery an hLS
+or supply a known instance.
 
 =head1 DESCRIPTION
 
@@ -29,9 +31,11 @@ use perfSONAR_PS::Client::gLS;
 
 our $VERSION = 0.10;
 
-=head2 new ($package, $uri, \%conf) 
+=head2 new ($package, ( $uri | \@uri ), \%conf, ( $hints | \@hints ) ) 
 
-The parameters are the URI of the Lookup Service, a %conf describing the service for registration purposes.
+The parameters are the URI of the Lookup Service (scalar or arrayref), a conf
+hashref describing the service for registration purposes, and a hints URL of 
+gLS instances (scalar or arrayref) that can be used to auto-discover any LS.
 
 The %conf can have 4 keys:
 
@@ -110,9 +114,9 @@ sub new {
     return $self;
 }
 
-=head2 setURI ($self, $uri)
+=head2 setURI ($self, ( $uri | \@uri ) )
 
-(Re-)Sets the value for the LS URI.
+(Re-)Sets the value for the LS URI, this can be a scalar or arrayref
 
 =cut
 
@@ -148,9 +152,9 @@ sub setURI {
     return;
 }
 
-=head2 setHints ($self, $hints)
+=head2 setHints ($self, ( $hints | \@hints ) )
 
-(Re-)Sets the value for the hints file.
+(Re-)Sets the value for the hints file, this can be a scalar or an arrayref
 
 =cut
 
@@ -212,7 +216,7 @@ Clear the URI list.
 
 sub clearURIs {
     my ($self) = @_;
-    undef $self->{LS_CONF};
+    $self->{LS_CONF} = ();
     return;
 }
 
@@ -230,8 +234,8 @@ sub clearHints {
 
 =head2 init( $self, { } )
 
-Used to extract gLS instances from some hints file, order the resulting gLS
-instances by connectivity.
+Used to extract gLS instances from some hints file, order the resulting hLS
+instances (and specified hLSs) by connectivity.
 
 =cut
 
@@ -303,8 +307,7 @@ sub init {
 
 =head2 getLS( $self, { } )
 
-Extract the first usable ls.  In the event you exhaust the list, try
-again (once only, covers the case where a previously 'dead' ls may come back).
+Extract the first usable hLS.
 
 =cut
 
@@ -358,7 +361,7 @@ sub getKey {
 
 =head2 createKey ($self, $key)
 
-Creates a 'key' value that is used to access the LS.
+Creates a 'key' structure that is used to access the LS.
 
 =cut
 
@@ -385,7 +388,7 @@ sub createKey {
 
 =head2 createService ($self)
 
-Creates the 'service' subject (description of the service) for LS registration.
+Creates the 'service' strcture (description of the service) for LS registration.
 
 =cut
 
@@ -619,7 +622,8 @@ Deregisters the data with the specified key
 
 sub sendDeregister {
     my ( $self, $key ) = @_;
-
+    $self->{LOGGER}->error("Key value not supplied.") and return -1 unless $key;
+    
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
@@ -654,7 +658,8 @@ Sends a keepalive message for the data with the specified key
 
 sub sendKeepalive {
     my ( $self, $key ) = @_;
-
+    $self->{LOGGER}->error("Key value not supplied.") and return -1 unless $key;
+    
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
@@ -730,7 +735,8 @@ the result is the error message.
 
 sub query {
     my ( $self, $queries ) = @_;
-
+    $self->{LOGGER}->error("Query value not supplied.") and return -1 unless $queries;
+    
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
@@ -821,78 +827,90 @@ __END__
     use perfSONAR_PS::Client::LS::Remote;
 
     my %conf = ();
-    $conf{"SERVICE_ACCESSPOINT"} = "http://someorganization.org:8080/perfSONAR_PS/services/service";
-    $conf{"SERVICE_NAME"} = "Some Organization's Service MA"
-    $conf{"SERVICE_TYPE"} = "MA"
-    $conf{"SERVICE_DESCRIPTION"} = "Service MA"
+    $conf{"SERVICE_ACCESSPOINT"} = "http://localhost:1234/perfSONAR_PS/services/TEST";
+    $conf{"SERVICE_NAME"} = "TEST MA";
+    $conf{"SERVICE_TYPE"} = "MA";
+    $conf{"SERVICE_DESCRIPTION"} = "TEST MA";
 
-    my $ls = "http://someorganization.org:8080/perfSONAR_PS/services/LS";
+    my @rdata = ();
+    $rdata[0] .= "    <nmwg:metadata id=\"meta\">\n";
+    $rdata[0] .= "      <netutil:subject id=\"subj\" xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\">\n";
+    $rdata[0] .= "        <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+    $rdata[0] .= "          <nmwgt:hostName>localhost</nmwgt:hostName>\n";
+    $rdata[0] .= "          <nmwgt:ifName>eth0</nmwgt:ifName>\n";
+    $rdata[0] .= "          <nmwgt:ifAddress type=\"ipv4\">127.0.0.1</nmwgt:ifAddress>\n";
+    $rdata[0] .= "          <nmwgt:direction>in</nmwgt:direction>\n";
+    $rdata[0] .= "        </nmwgt:interface>\n";
+    $rdata[0] .= "      </netutil:subject>\n";
+    $rdata[0] .= "      <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>\n";
+    $rdata[0] .= "    </nmwg:metadata>\n";
 
-    my $ls_client = perfSONAR_PS::Client::LS::Remote->new($ls, \%conf, \%ns);
+    my $ls1 = "http://localhost:9999/perfSONAR_PS/services/gLS";
+    my $ls2 = "http://localhost:3432/perfSONAR_PS/services/gLS";
+    my @ls = ( $ls1, $ls2 );
+    my $hints1 = "http://l1ocalhost/gls.root.hints";
+    my $hints2 = "http://localhost/gls.root.hints";
+    my @hints = ( $hints1, $hints2 );
 
-    # or
-    # $ls_client = perfSONAR_PS::Client::LS::Remote->new;
-    # $ls_client->setURI($ls);
-    # $ls_client->setConf(\%conf);
-    # $ls_client->setNamespaces(\%ns);
+    # common case:
+    my $ls_client = perfSONAR_PS::Client::LS::Remote->new( $ls1, \%conf );
+    
+    # starting with an array of LS instances:
+    # $ls_client = perfSONAR_PS::Client::LS::Remote->new( \@ls, \%conf );
+    # 
+    # or starting with a hints file:
+    # $ls_client = perfSONAR_PS::Client::LS::Remote->new( $ls1, \%conf, $hints1 );
+    # 
+    # the hints file can be an array as well:
+    # $ls_client = perfSONAR_PS::Client::LS::Remote->new( $ls1, \%conf, \@hints );
+    
+    # Set the conf info
+    # $ls_client->setConf( \%conf );
+    
+    # Adding an LS (single)
+    # $ls_client->setURI( $ls2 );
+    #
+    # Adding an LS (array)
+    # $ls_client->setURI( \@ls );
+    #
+    # Adding a hints file (single)
+    # $ls_client->setHints( $hints2 );
+    #
+    # Adding a hints file (array)
+    # $ls_client->setHints( \@hints );
+    
+    # cleaing the LS list
+    # $ls_client->clearURIs;
+    #
+    # clearng the hints files
+    # $ls_client->clearHints;
 
-    $ls_client->registerStatic(\@data);
 
-    $ls_client->sendKeepalive($conf{"SERVICE_ACCESSPOINT"});
+    # Use this for services where the metadata set *does not* change (uses keepalives)    
+    $ls_client->registerStatic(\@rdata);
+    
+    # Use this for services where the metadata set *may* change (does not use keepalives)
+    # $ls_client->registerStatic(\@rdata);
 
-    $ls_client->sendDeregister($conf{"SERVICE_ACCESSPOINT"});
+    # Show the key for the service
+    print $ls_client->getKey() , "\n";
 
-    my $ls2 = "http://otherorganization.org:8080/perfSONAR_PS/services/LS";
+    # keepalive some key
+    $ls_client->sendKeepalive($ls_client->getKey());
 
-    my $ls_client2 = perfSONAR_PS::Client::LS::Remote->new($ls2);
-
+    # deregister some key
+    $ls_client->sendDeregister($ls_client->getKey());
+    
+    # Send an aribitrary query
     my %queries = ();
-
-    $queries{"req1"} = "";
-    $queries{"req1"} .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $queries{"req1"} .= "for \$data in /nmwg:store/nmwg:data\n";
-    $queries{"req1"} .= "  let \$metadata_id := \$data/\@metadataIdRef\n";
-    $queries{"req1"} .= "  where \$data//*:link[\@id=\"link1\"] and \$data//nmwg:eventType[text()=\"http://ggf.org/ns/nmwg/characteristic/link/status/20070809\"]\n";
-    $queries{"req1"} .= " return /nmwg:store/nmwg:metadata[\@id=\$metadata_id]\n";
-
-    $queries{"req2"} = "";
-    $queries{"req2"} .= "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-    $queries{"req2"} .= "for \$data in /nmwg:store/nmwg:data\n";
-    $queries{"req2"} .= "  let \$metadata_id := \$data/\@metadataIdRef\n";
-    $queries{"req2"} .= "  where \$data//*:link[\@id=\"link2\"] and \$data//nmwg:eventType[text()=\"http://ggf.org/ns/nmwg/characteristic/link/status/20070809\"]\n";
-    $queries{"req2"} .= " return /nmwg:store/nmwg:metadata[\@id=\$metadata_id]\n";
-
-    my ($status, $res) = $ls_client2->query(\%queries);
-    if ($status != 0 or not defined $res{"req1"} or not defined $res{"req2"}) {
-      print "Error: querying $ls2 failed\n";
-      exit(-1);
-    }
-
-    my ($query_status, $query_res);
-
-    ($query_status, $query_res) = $res{"req1"};
-
-    if ($query_status != 0) {
-      print "Couldn't get information on query req1: ".$query_res."\n";
-      exit(-1);
-    } else {
-      print "Results for res1: ".$query_res->toString()."\n";
-    }
-
-    ($query_status, $query_res) = $res{"req2"};
-
-    if ($query_status != 0) {
-      print "Couldn't get information on query req2: ".$query_res."\n";
-      exit(-1);
-    } else {
-      print "Results for res1: ".$query_res->toString()."\n";
-    }
+    $queryies{"1"} = "/nmwg:store/nmwg:metadata";
+    $ls_client->sendDeregister( \%queries );    
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<English>, L<LWP::Simple>, L<XML::LibXML>, L<Net::Ping>,
+L<Log::Log4perl>, L<English>, L<LWP::Simple>, L<Net::Ping>, L<XML::LibXML>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Messages>,
-L<perfSONAR_PS::Client::Echo>
+L<perfSONAR_PS::Client::Echo>, L<perfSONAR_PS::Client::gLS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
