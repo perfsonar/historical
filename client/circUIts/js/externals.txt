@@ -1,2 +1,2 @@
-PlotKit https://svn.internet2.edu/svn/perfSONAR-PS/tags/trunk_2008-04-07/vendor/plotkit/PlotKit
-MochiKit https://svn.internet2.edu/svn/perfSONAR-PS/tags/trunk_2008-04-07/vendor/MochiKit/lib/MochiKit/
+PlotKit http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/trunk_2008-04-07/vendor/plotkit/PlotKit
+MochiKit http://anonsvn.internet2.edu/svn/perfSONAR-PS/tags/trunk_2008-04-07/vendor/MochiKit/lib/MochiKit/
