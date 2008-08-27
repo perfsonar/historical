@@ -14,12 +14,12 @@
 use inc::Module::Install;
 
 name             'perfSONAR_PS-Services-PingER';
-author_from      'lib/perfSONAR_PS/Datatypes/PingER.pm';
+author_from      '../../lib/perfSONAR_PS/Datatypes/PingER.pm';
 license_from     'LICENSE';
 license          'perl';
 version          '0.09';
 perl_version     '5.008';
-all_from 	 'lib/perfSONAR_PS/';
+all_from 	 '../../lib/perfSONAR_PS/';
 
 build_requires  'Test::Exception' => 0;
 
@@ -41,9 +41,6 @@ requires  'XML::LibXML::Common'  => '0.13';
 
 requires  'Log::Log4perl' => 0;
 
-requires  'Class::Accessor'  => 0;
-requires  'Class::Fields'  => 0; 
-
 requires  'Config::General'  => 0; 
 requires  'Statistics::Descriptive'  => 0; 
 
@@ -63,9 +60,6 @@ requires  'FreezeThaw' => 0;
 requires  'Readonly' => 0;
 requires  'Params::Validate' => '0.70';
 requires  'Module::Load' => 0;
-
-#requires  'Rose::DB'  => 0; 
-#requires  'Rose::DB::Object'  => 0; 
 
 # perfsonar dependencies
 requires 'perfSONAR_PS::Common' => 0.09;
