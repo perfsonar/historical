@@ -151,6 +151,7 @@ sub init {
 
     unless ( exists $self->{CONF}->{"root_hints_url"} ) {
         $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+        $self->{LOGGER}->warn("gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\".");
     }
 
     if ( exists $self->{CONF}->{"root_hints_file"} ) {

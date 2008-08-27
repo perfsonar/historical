@@ -133,7 +133,9 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { load perfSONAR_PS::DB::XMLDB; };
+        eval { 
+            load perfSONAR_PS::DB::XMLDB; 
+        };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
             return -1;
@@ -182,13 +184,14 @@ sub init {
     }
 
     unless ( exists $self->{CONF}->{"snmp"}->{enable_registration} ) {
-        $self->{CONF}->{"snmp"}->{enable_registration} = $self->{CONF}->{enable_registration};
-    }
-
-    unless ( exists $self->{CONF}->{"snmp"}->{"enable_registration"}
-        and $self->{CONF}->{"snmp"}->{"enable_registration"} )
-    {
-        $self->{CONF}->{"snmp"}->{"enable_registration"} = 0;
+        if (  exists  $self->{CONF}->{enable_registration} and $self->{CONF}->{enable_registration} ) {
+            $self->{CONF}->{"snmp"}->{enable_registration} = $self->{CONF}->{enable_registration};
+        }
+        else {
+             $self->{CONF}->{enable_registration} = 0;
+             $self->{CONF}->{"snmp"}->{enable_registration} = 0;
+        }
+        $self->{LOGGER}->warn("Setting 'enable_registration' to \"".$self->{CONF}->{"snmp"}->{enable_registration}."\".");
     }
 
     if ( $self->{CONF}->{"snmp"}->{"enable_registration"} ) {
@@ -269,7 +272,9 @@ sub init {
             # do nothing
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
-            eval { load perfSONAR_PS::DB::Cricket; };
+            eval { 
+                load perfSONAR_PS::DB::Cricket; 
+            };
             unless ($EVAL_ERROR) {
                 my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
                 $cricket->openDB();
@@ -277,7 +282,9 @@ sub init {
             }
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
-            eval { load perfSONAR_PS::DB::Cacti; };
+            eval { 
+                load perfSONAR_PS::DB::Cacti; 
+            };
             unless ($EVAL_ERROR) {
                 my $cacti = new perfSONAR_PS::DB::Cacti( { conf => $self->{CONF}->{"snmp"}->{"metadata_db_external_source"}, file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
                 $cacti->openDB();

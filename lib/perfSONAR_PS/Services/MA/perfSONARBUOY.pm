@@ -116,18 +116,17 @@ sub init {
         $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} = 0;
     }
 
-    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
-        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} )
-    {
-        $self->{LOGGER}->error("Value for 'owmesh' is not set.");
-        return -1;
-    }
-    else {
+    if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
+        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
         if ( defined $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} =~ "^/" ) {
                 $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"};
             }
         }
+    }
+    else {
+        $self->{LOGGER}->error("Value for 'owmesh' is not set.");
+        return -1;
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"}
@@ -153,7 +152,9 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval { load perfSONAR_PS::DB::XMLDB; };
+        eval {
+            load perfSONAR_PS::DB::XMLDB;
+        };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
             return -1;
@@ -192,18 +193,15 @@ sub init {
     }
 
     unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"}
-        and $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} )
-    {
+        and $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
         $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} = 0;
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
-        {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} ) {
             if ( defined $self->{CONF}->{"ls_instance"}
-                and $self->{CONF}->{"ls_instance"} )
-            {
+                and $self->{CONF}->{"ls_instance"} ) {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
@@ -212,11 +210,9 @@ sub init {
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
-        {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} ) {
             if ( defined $self->{CONF}->{"ls_registration_interval"}
-                and $self->{CONF}->{"ls_registration_interval"} )
-            {
+                and $self->{CONF}->{"ls_registration_interval"} ) {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             }
             else {
@@ -234,8 +230,7 @@ sub init {
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
-        {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} ) {
             my $description = "perfSONAR_PS SNMP MA";
             if ( $self->{CONF}->{site_name} ) {
                 $description .= " at " . $self->{CONF}->{site_name};
@@ -248,15 +243,13 @@ sub init {
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} )
-        {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} ) {
             $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "SNMP MA";
             $self->{LOGGER}->warn("Setting 'service_name' to 'SNMP MA'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} )
-        {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} ) {
             $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
         }
