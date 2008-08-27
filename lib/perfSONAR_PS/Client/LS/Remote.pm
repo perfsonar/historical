@@ -101,7 +101,7 @@ sub new {
         }
     }
 
-    $self->init() if $hints or $uri;
+    $self->init();
 
     if ( defined $conf and $conf ) {
         $self->{CONF} = \%{$conf};
@@ -224,7 +224,7 @@ Clear the Hints list.
 
 sub clearHints {
     my ($self) = @_;
-    undef $self->{HINTS};
+    $self->{HINTS} = ();
     return;
 }
 
@@ -243,40 +243,48 @@ sub init {
     foreach my $ls ( @{ $self->{LS_CONF} } ) {
         my $echo_service = perfSONAR_PS::Client::Echo->new($ls);
         my ( $status, $res ) = $echo_service->ping();
-        next unless $status > -1;
-        push @{ $self->{LS_ORDER} }, $ls unless $temp{$ls};
-        $temp{$ls}++;
+        if ( $status > -1 ) {
+            $self->{LOGGER}->info( "Adding LS \"" . $ls . "\" to the contact list." );
+            push @{ $self->{LS_ORDER} }, $ls unless $temp{$ls};
+            $temp{$ls}++;
+        }
+        else {
+            $self->{LOGGER}->warn( "LS \"" . $ls . "\" was not reacheable..." );
+            next;
+        }
     }
 
-    my $gls    = perfSONAR_PS::Client::gLS->new( { url    => $self->{HINTS} } );
-    my $result = $gls->getLSDiscoverRaw(         { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"]/*[local-name()=\"accessPoint\"]" } );
-    if ( $result and $result->{eventType} =~ m/^success/ ) {
-        my $parser = XML::LibXML->new();
-        my %temp2  = ();
-        my $ping   = Net::Ping->new();
-        $ping->hires();
-        if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
-            next unless exists $result->{response} and $result->{response};
-            my $doc = $parser->parse_string( $result->{response} );
-            my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-            foreach my $a ( $ap->get_nodelist ) {
-                my $value = extract( $a, 0 );
-                if ($value) {
-                    my $echo_service = perfSONAR_PS::Client::Echo->new($value);
-                    my ( $status, $res ) = $echo_service->ping();
-                    next unless $status > -1;
+    if ( $#{ $self->{HINTS} } > -1 ) {
+        my $gls    = perfSONAR_PS::Client::gLS->new( { url    => $self->{HINTS} } );
+        my $result = $gls->getLSDiscoverRaw(         { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"]/*[local-name()=\"accessPoint\"]" } );
+        if ( $result and $result->{eventType} =~ m/^success/ ) {
+            my $parser = XML::LibXML->new();
+            my %temp2  = ();
+            my $ping   = Net::Ping->new();
+            $ping->hires();
+            if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
+                next unless exists $result->{response} and $result->{response};
+                my $doc = $parser->parse_string( $result->{response} );
+                my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+                foreach my $a ( $ap->get_nodelist ) {
+                    my $value = extract( $a, 0 );
+                    if ($value) {
+                        my $echo_service = perfSONAR_PS::Client::Echo->new($value);
+                        my ( $status, $res ) = $echo_service->ping();
+                        next unless $status > -1;
 
-                    my $value2 = $value;
-                    $value2 =~ s/^http:\/\///;
-                    my ($unt_host) = $value2 =~ /^(.+):/;
-                    my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
-                    $temp2{$duration} = $value if ( ( $ret or $duration ) and ( not $temp{$value} ) );
+                        my $value2 = $value;
+                        $value2 =~ s/^http:\/\///;
+                        my ($unt_host) = $value2 =~ /^(.+):/;
+                        my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
+                        $temp2{$duration} = $value if ( ( $ret or $duration ) and ( not $temp{$value} ) );
+                    }
                 }
             }
-        }
-        $ping->close();
-        foreach my $time ( sort keys %temp2 ) {
-            push @{ $self->{LS_ORDER} }, $temp2{$time};
+            $ping->close();
+            foreach my $time ( sort keys %temp2 ) {
+                push @{ $self->{LS_ORDER} }, $temp2{$time};
+            }
         }
     }
 
@@ -287,6 +295,7 @@ sub init {
     else {
         undef $self->{LS};
         $self->{ALIVE} = 0;
+        $self->{LOGGER}->warn("Could not find an active LS, add one or use the gLS for discovery.");
     }
 
     return 0;
@@ -302,8 +311,7 @@ again (once only, covers the case where a previously 'dead' ls may come back).
 sub getLS {
     my ($self) = @_;
 
-    my $flag = 0;
-    while ( $flag <= 1 ) {
+    if ( $#{ $self->{LS_ORDER} } > -1 ) {
         foreach my $ls ( @{ $self->{LS_ORDER} } ) {
             my $echo_service = perfSONAR_PS::Client::Echo->new($ls);
             my ( $status, $res ) = $echo_service->ping();
@@ -316,11 +324,16 @@ sub getLS {
                 $self->{LOGGER}->warn( "LS \"" . $ls . "\" was not reacheable..." );
             }
         }
-        $self->init();
-        $flag++;
+    
+        $self->{LOGGER}->error("Could not contact LS in supplied list.");
+        undef $self->{LS};
+        $self->{ALIVE} = 0;
     }
-    undef $self->{LS};
-    $self->{ALIVE} = 0;
+    else {
+        $self->{LOGGER}->error("LS List is emtpty, did you run init()?");
+        undef $self->{LS};
+        $self->{ALIVE} = 0;        
+    }
     return;
 }
 
@@ -338,6 +351,7 @@ sub getKey {
         return $self->{LS_KEY};
     }
     else {
+        $self->{LOGGER}->error("Key not found.");
         return;
     }
 }
@@ -443,7 +457,7 @@ sub registerStatic {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -498,7 +512,7 @@ sub registerDynamic {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -557,7 +571,7 @@ sub __register {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -609,7 +623,7 @@ sub sendDeregister {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -644,7 +658,7 @@ sub sendKeepalive {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -679,7 +693,7 @@ sub sendKey {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
@@ -720,7 +734,7 @@ sub query {
     unless ( $self->{LS} and $self->{ALIVE} ) {
         $self->getLS();
         unless ( $self->{LS} and $self->{ALIVE} ) {
-            $self->{LOGGER}->error("LS cannot be reached, trying running init().");
+            $self->{LOGGER}->error("LS cannot be reached, supply alternate or consult gLS.");
             return -1;
         }
     }
