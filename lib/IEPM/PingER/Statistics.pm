@@ -215,7 +215,7 @@ sub calculate
   $logger->debug( "Size: $size"); 
     
   if ( $pktRcvd !=  $size ) {
-    $logger->warn( "pkts recvd ($pktRcvd) is not equal to size $size of array $stringified_arr ");
+    $logger->debug( "pkts recvd ($pktRcvd) is not equal to size $size of array $stringified_arr ");
     return undef;
   }
   ### lookup hash with sequence numbers as keys and sequence numbers + 1 as values 
