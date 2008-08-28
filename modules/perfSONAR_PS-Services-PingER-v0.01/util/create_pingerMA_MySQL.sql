@@ -1,18 +1,24 @@
 #
-#  pinger beacons ( basically everything about Beacon site  )
-#     
-#     alias is an alias of the site name  for pingtables ( something like FNAL.GOV for pinger.fnal.gov)
-#     dataurl is URL to ping_data.pl CGI sciprt for now, then LS will take over this function
-#     traceurl is URL to traceroute.pl CGI sciprt for now, then LS will take over this function
-#    
-#   Notes: tinyint(1) is used for boolean ( since some DB lacks support for boolean type)
-#          If DB supports serial ( auto_increment ) type then all primary keys named as xxx_id should be 
-#          changed to serial ( auto_increment)
-#  
+#   run this script as:
+#   mysql -u root -p'mysql_root_password' < create_pingerMA_MySQL.sql 
 #
-# 
 #
-CREATE  TABLE beacons (
+#
+#
+create  database if not exists pingerMA;
+grant all privileges on pingerMA.* to 'pinger'@'localhost' identified by 'CHANGEME_NOW';
+flush privileges;
+
+use pingerMA;
+drop  table if exists beacons;
+drop  table if exists address; 
+drop  table if exists regions; 
+drop  table if exists contacts; 
+drop  table if exists host; 
+drop  table if exists metaData; 
+drop  table if exists data; 
+
+CREATE  TABLE   beacons (
   ip_name varchar(52) NOT NULL,
   alias    varchar(20),   
   address_id   int,   
@@ -29,7 +35,7 @@ CREATE  TABLE beacons (
 #
 #   the full address of the site , could be couple of sites per address
 #
-CREATE  TABLE address (
+CREATE  TABLE  address (
   address_id  int AUTO_INCREMENT,
   institution  varchar(100),
   address_line varchar(200),
@@ -42,7 +48,7 @@ CREATE  TABLE address (
 #
 #   each site can be assigned to some region of the world( Asia, Europe, North_America etc)
 #
-CREATE TABLE regions (
+CREATE TABLE   regions (
   region_id  smallint AUTO_INCREMENT,
   name varchar(20),
   PRIMARY KEY (region_id));
@@ -62,7 +68,7 @@ CREATE TABLE contacts (
 # ipaddr  table to keep track on what ip address was assigned with pinger hostname
 #   ip_number has length of 64 - to accomodate possible IPv6 
 #
-CREATE TABLE host (
+CREATE TABLE   host (
  ip_name varchar(52) NOT NULL, 
  ip_number varchar(64) NOT NULL,
  comments text, 
@@ -71,7 +77,7 @@ CREATE TABLE host (
 #
 #     meta data table ( [eriod is an interval, since interval is reserved word )
 #
-CREATE TABLE  metaData  (
+CREATE TABLE   metaData  (
  metaID BIGINT NOT NULL AUTO_INCREMENT,
  ip_name_src varchar(52) NOT NULL,
  ip_name_dst varchar(52) NOT NULL,
@@ -92,7 +98,7 @@ CREATE TABLE  metaData  (
 #   inherited from the current pinger data table
 #   its named data_yyyyMM to separate from old format - pairs_yyyyMM
 #
-CREATE TABLE  data  (
+CREATE TABLE   data  (
  metaID   BIGINT   NOT NULL,
  minRtt float,
  meanRtt float,
