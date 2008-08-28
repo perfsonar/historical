@@ -119,3 +119,4 @@
   * Should the parameter names be hierarchically defined?
   * When are parameters protocol specific and when are they service specific?
   * Should there be a hierarchical serviceType element that the protocols are contained within? If so, are we simply creating a service within a service?
+  * How should the type of service interact with the protocols that service can speak?
