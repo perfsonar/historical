@@ -1,6 +1,11 @@
 #summary A proposal for what the 'service' element that gets registered in the LS might look like
+= Use Cases =
+  * A service speaks two versions of a protocol
+  * A service speaks two separate protocols
+  * An OWAMP service wants to register some of its settings to allow clients to make better decisions
 
-= BWCTL =
+= Examples =
+== BWCTL ==
 {{{
 <!-- BWCTL Service. Speaks version 1.3 of the protocol -->
 <nmtb:service id="ogf:network:domain=internet2.edu:service=BWCTL">
@@ -28,7 +33,7 @@
 </nmtb:service>
 }}}
 
-= OWAMP =
+== OWAMP ==
 {{{
 <!-- OWAMP Service. Running on same node as the bwctl service. Specifies what service modes are available (Open, Authenticated, Encrypted) -->
 <nmtb:service id="ogf:network:domain=internet2.edu:node=bwctl.chic.net:service=OWAMP">
@@ -55,7 +60,7 @@
 </nmtb:service>
 }}}
 
-= IDC =
+== IDC ==
 {{{
 <!-- IDC Service. -->
 <nmtb:service id="ogf:network:domain=internet2.edu:service=OSCARS">
