@@ -109,7 +109,7 @@ or
 
 {{{
 
->cd trunk/modules/perfSONAR_PS-Services-PingER-v0.09
+>cd trunk/modules/perfSONAR_PS-Services-PingER-v0.01
 
 >perl Makefile.PL
 }}}
@@ -118,7 +118,9 @@ Answer *yes*  on any questions about installing pre-requisites.
 
 === Compile ===
 
-*>sudo make*
+{{{
+>sudo make
+}}}
 
 It may take a while. Some questions might be asked depending on your CPAN config, please answer yes to all of them.
 
@@ -130,10 +132,12 @@ Two configuration files need to be customized. One is the service description, a
 
 == Create the database ==
 
+SQL sripts are located under modules/perfSONAR_PS-Services-PingER-v0.01/utils in case of SVN install. Or under *sql* directory in case of binary package.
 
 === SQLite ===
 
-Download this [create_pingerMA_SQLite.sql] and run:
+
+Or download this [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/modules/perfSONAR_PS-Services-PingER-v0.01/util/create_pingerMA_SQLite.sql create_pingerMA_SQLite.sql] and run:
 {{{
 >sqlite3 /tmp/pingerMA.db < util/create_pingerMA_SQLite.sql
 }}}
@@ -141,8 +145,8 @@ Download this [create_pingerMA_SQLite.sql] and run:
 === MySQL ===
 
  
-
-Download this [create_pingerMA_MySQL.sql], replace *CHANGE--------ME* with  pinger db account password and run:
+ 
+Or download this [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/modules/perfSONAR_PS-Services-PingER-v0.01/util/create_pingerMA_MySQL.sql create_pingerMA_MySQL.sql], replace *CHANGE--------ME* with  pinger db account password and run:
 
 {{{
 >mysql -u root -p'<root_pass>' < create_pingerMA_MySQL.sql
@@ -236,7 +240,8 @@ The rest of parameters could be left untouched. Please make sure that node id is
 === Start Service ===
 
 *sudo* is required due to port 80 and can be avoided with ports from higher numbers range ( 8080, 9090 etc)
+Default port is 8077
 
 {{{
->sudo perfsonar-daemon  --verbose  -config=pinger.conf
+>perfsonar-daemon.pl  --verbose  -config=modules/perfSONAR_PS-Services-PingER-v0.01/etc/pinger.conf
 }}}
