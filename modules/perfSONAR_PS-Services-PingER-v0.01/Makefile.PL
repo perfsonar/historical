@@ -62,16 +62,16 @@ requires  'Params::Validate' => '0.70';
 requires  'Module::Load' => 0;
 
 # perfsonar dependencies
-# requires 'perfSONAR_PS::Common' => 0.09;
-# requires 'perfSONAR_PS::Transport' => 0.09;
-# requires 'perfSONAR_PS::Messages' => 0.09;
-# requires 'perfSONAR_PS::DB::SQL' => 0.09;
-# requires 'perfSONAR_PS::DB::File' => 0.09;
-# requires 'perfSONAR_PS::Services::Base' => 0.09;
-# requires 'perfSONAR_PS::Services::MA::General' => 0.09;
-# requires 'perfSONAR_PS::XML::Document_string' => 0.09;
-# requires 'perfSONAR_PS::Error_compat' => 0.09;
-# requires 'perfSONAR_PS::Client::LS::Remote' => 0.09;
+ requires 'perfSONAR_PS::Common' => 0.09;
+ requires 'perfSONAR_PS::Transport' => 0.09;
+ requires 'perfSONAR_PS::Messages' => 0.09;
+ requires 'perfSONAR_PS::DB::SQL' => 0.09;
+ requires 'perfSONAR_PS::DB::File' => 0.09;
+ requires 'perfSONAR_PS::Services::Base' => 0.09;
+ requires 'perfSONAR_PS::Services::MA::General' => 0.09;
+ requires 'perfSONAR_PS::XML::Document_string' => 0.09;
+ requires 'perfSONAR_PS::Error_compat' => 0.09;
+ requires 'perfSONAR_PS::Client::LS::Remote' => 0.09;
 
 
 ###requires_external_bin 'mysql';
