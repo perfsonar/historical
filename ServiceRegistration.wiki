@@ -60,6 +60,43 @@
 </nmtb:service>
 }}}
 
+== PingER ==
+{{{
+<!-- PingER MA/MP -->
+<nmtb:service id="ogf:network:domain=internet2.edu:service=PingER">
+    <nmtb:name>Internet2 PingER MA/MP</nmtb:name>
+    <nmtb:description>PingER MA/MP at Internet2 in Ann Arbor, MI USA</nmtb:description>
+
+   <nmtb:relation type="runsOn">
+        <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=lab244</nmtb:urn>
+   </nmtb:relation>
+
+    <!-- speaks version 1.3 of the protocol -->
+    <nmtb:protocol>
+        <nmtb:type>http://perfsonar.net/ma/1.0</nmtb:type>
+
+        <nmtb:address type="url">http://lab244.internet2.edu:8075/perfSONAR_PS/services/pinger/ma</nmtb:address>
+
+        <nmtb:parameters>
+            <nmtb:parameter name="supportedMessage">SetupDataRequest</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">MetadataKeyRequest</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">MetadataQueryRequest</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+
+    <nmtb:protocol>
+        <nmtb:type>http://perfsonar.net/mp/1.0</nmtb:type>
+
+        <nmtb:address type="url">http://lab244.internet2.edu:8075/perfSONAR_PS/services/pinger/mp</nmtb:address>
+
+        <nmtb:parameters>
+            <nmtb:parameter name="supportedMessage">SetupDataRequest</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">MetadataKeyRequest</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+</nmtb:service>
+}}}
+
 == IDC ==
 {{{
 <!-- IDC Service. -->
