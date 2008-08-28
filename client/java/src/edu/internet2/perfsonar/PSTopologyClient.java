@@ -1,25 +1,10 @@
 package edu.internet2.perfsonar;
 
 import java.util.*;
-import java.io.*;
 
 import org.apache.log4j.*;
 
 import org.jdom.*;
-import org.jdom.input.SAXBuilder;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
-
-import org.xml.sax.SAXException;
-import java.lang.Exception;
-import org.jdom.xpath.XPath;
 
 public class PSTopologyClient implements PSMessageEventHandler {
     String url;
