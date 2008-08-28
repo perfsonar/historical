@@ -211,304 +211,89 @@ A _very_ basic mockup of the _metadata_ / _data_ relationship where the IDC reli
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                  id="meta1">
     <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
-      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
-        <nmtb:name>Internet2 IDC</nmtb:name>
-        <nmtb:type>IDC</nmtb:type>
-        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
-        <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-        <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
-      </nmtb:service>
-    </dcn:subject>
-  </nmwg:metadata>
-  
-  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-             id="data1" 
-             metadataIdRef="meta1">
+      <nmtb:service id="ogf:network:domain=internet2.edu:service=OSCARS_IDC">
 
-    <nmwg:metadata id="m1">
-      <nmwg:subject id="s1">
+        <nmtb:name>Internet2 OSCARS Server</nmtb:name>
+        <nmtb:description>OSCARS Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
+        <nmtb:type>http://dice.controlplane.net/idc</nmtb:type>
 
-        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-        
-          <!-- future: list of neighbors -->
-        
-        </nmtb:node>
-        
-        <!-- domains controlled (could be many of these) -->
-        <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
-          <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=anna-lab1</nmtb:urn>
+        </nmtb:relation>
 
-          <!-- could also be:
-            <nmtb:name type="urn">urn:ogf:network:domain=dcn.internet2.edu</nmtb:name>
-          -->
-           
-        </nmtb:domain>  
+        <nmtp:port>
+          <nmtb:address type="url"> https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+            
+          <nmtb:protocol>
+            <nmtb:type>http://dice.controlplane.net/idc/1.0</nmtb:type>
 
-      </nmwg:subject>
-      
-      <!-- I am outsourcing the subscription service to my NB, so I am *JUST* an
-           IDC -->
-      <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
+            <!-- protocol parameters -->
+            <nmtb:parameters>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#createPath</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmtb:parameter>
+            </nmtb:parameters>
+          </nmtp:port>
+        </nmtb:protocol>
 
-      <nmwg:parameters id="p1">
-        <!-- may include list of supported messages. For example this will be 
-             useful for domains that don't want to implement user signaling
-             right away but still want to support resource scheduling functions.
-             In general it should be a best common practice to publish
-             these...maybe we should even make it required? -->
-             
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmwg:parameter>
-        
-      </nmwg:parameters>
-    </nmwg:metadata>
-
-    <nmwg:metadata id="m2">
-      <nmwg:subject id="s2">
-
-        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-
-          <!-- NotificationBroker to which this IDC publishes  Note: Since this
-               is something that is a property of the node ('I' am publishing
-               to 'You') it should go in here -->
-     
-          <nmtb:relation type="publisher">
-            <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARSNotify</nmtb:address>
-          </nmtb:relation>
-
-        </nmtb:node>
-        
-      </nmwg:subject>
-      
-      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
-
-      <nmwg:parameters id="p2">
-
-        <!-- It accepts Notify messages from other services to which it's 
-             subscribed, but doesnt accept other subscriptions -->
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
-        
-      </nmwg:parameters>
-    </nmwg:metadata>
-
-  </nmwg:data>
-
-}}}
-
-Below is a case where the IDC implements all the Subscription messages locally and does not use an external NotificationBroker service:
-
-{{{
-  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-                 id="meta1">
-    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
-      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
-        <nmtb:name>Internet2 IDC</nmtb:name>
-        <nmtb:type>IDC</nmtb:type>
-        <nmtb:description>DCN IDC, Ann Arbor, MI USA</nmtb:description>
-        <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-        <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
-      </nmtb:service>
-    </dcn:subject>
-  </nmwg:metadata>
-  
-  <nmwg:data xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
-             id="data1" 
-             metadataIdRef="meta1">
-
-    <nmwg:metadata id="m1">
-      <nmwg:subject id="s1">
-
-        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-        
-          <!-- future: list of neighbors -->
-        
-        </nmtb:node>
-        
-        <!-- domains controlled (could be many of these) -->
-        <nmtb:domain xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/">
-          <nmtb:name type="dns">dcn.internet2.edu</nmtb:name>
-
-          <!-- could also be: -->
-          <nmtb:name type="urn">urn:ogf:network:domain=dcn.internet2.edu</nmtb:name>
-
-        </nmtb:domain>  
-             
-      </nmwg:subject>
-      
-      <nmwg:eventType>http://oscars.es.net/OSCARS</nmwg:eventType>
-
-      <nmwg:parameters id="p1">
-        <!-- may include list of supported messages. For example this will be 
-             useful for domains that don't want to implement user signaling
-             right away but still want to support resource scheduling functions.
-             In general it should be a best common practice to publish
-             these...maybe we should even make it required? -->
-             
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmwg:parameter>
-
-      </nmwg:parameters>
-    </nmwg:metadata>    
-
-    <nmwg:metadata id="m2">
-      <nmwg:subject id="s2">
-
-        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-
-        </nmtb:node>
-             
-      </nmwg:subject>
-      
-      <!-- I am alone in the world (no NB to speak of) therefore I will let
-           others subscribe to me directly -->
-      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
-
-      <nmwg:parameters id="p2">
-
-        <!-- It accepts Notify messages from other services to which it's subscribed -->
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
-
-        <!-- implements the messages that allow people to subscribe -->
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
-        <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
-      
-        <!-- Topics I am willing to publish to my direct subscribers-->
-        <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
-        <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
-        <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
-
-      </nmwg:parameters>
-    </nmwg:metadata>  
-
-  </nmwg:data>
-}}}
-
-==== Notification Broker Service ==== 
-
-The Notification Broker will have the following information available that it may want to share:
-
- # Service URL (form: http://HOSTNAME:PORT/END/POINT)
- # Protocol versions supported (will be a namespace URL, ws-notify maybe)
- # Protocol Messages supported or WSDL location
- # Where can users/services subscribe to my notifications (see 1)
- # Who I send notifications of stat to
- # List of services that send it notifications
+        <!-- service parameters -->
+        <nmtb:parameters>
+          <nmtb:parameter name="publisher">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:parameter>
+        </nmtb:parameters>
  
-This is the proposed way forward:
-
- * *Metadata*
-   * One _Metadata_ / _Service_ block.
-   * _Service_ info similar to perfSONAR/topology use case, information may vary
-   * eventTypes/parameters not necessary
- * Data
-   * Linked to a service block, may be many, contains at least one (possibly more) metadata blocks
-   * Each metadata block describes a capability/service of the aforementioned service block
-   * Follows the perfSONAR/NM-WG format (using NML-WG topology)
-   * Use Subject/eventTypes/parameters as needed
-   * Examples:
-     # NB host:port/endPoint for communication
-       * eventType(s) for protocol(s)
-       * list of subscribers
-       * list of publishers
-
-A _very_ basic mockup of the _metadata_ / _data_ relationship is here:
-
-{{{
+      </nmtb:service>
+    </dcn:subject>
+  <nmwg:metadata>
+      
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                  id="meta1">
     <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
-      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/">
-        <nmtb:name>Internet2 Notification Broker</nmtb:name>
-        <nmtb:type>NB</nmtb:type>
-        <nmtb:description>DCN NB, Ann Arbor, MI USA</nmtb:description>
-        <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARSNotify</nmtb:address>
-        <nmtb:address type="uri">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARSNotify</nmtb:address>
+      <nmtb:service id="ogf:network:domain=internet2.edu:service=OSCARS_NB">
+        <nmtb:name>Internet2 OSCARS Server</nmtb:name>
+        <nmtb:description>OSCARS Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
+
+        <nmtb:type>http://dice.controlplane.net/nb</nmtb:type>
+
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=anna-lab1</nmtb:urn>
+        </nmtb:relation>
+
+        <nmtp:port>
+          <nmtb:address type="url"> https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+            
+          <nmtb:protocol>
+            <nmtb:type>http://dice.controlplane.net/nb/1.0</nmtb:type>
+
+            <!-- protocol parameters -->
+            <nmtb:parameters>
+              <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmtb:parameter>
+              <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmtb:parameter>
+
+              <nmtb:parameter name="availableTopic">idc:INFO</nmtb:parameter>
+              <nmtb:parameter name="availableTopic">idc:DEBUG</nmtb:parameter>
+              <nmtb:parameter name="availableTopic">idc:ERROR</nmtb:parameter>
+            </nmtb:parameters>
+          </nmtb:protocol>
+        </nmtp:port>
       </nmtb:service>
     </dcn:subject>
-  </nmwg:metadata>
-  
-  <nmwg:data id="data1" 
-             metadataIdRef="meta1"
-             xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
+  <nmwg:metadata>
 
-    <nmwg:metadata id="m1">
-      <nmwg:subject id="s1">
-        
-        <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-                   xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARSNotify</nmtb:address>
+  <nmwg:data id="data1" metadataIdRef="meta1" />
 
-          <nmtb:relation type="subscriber">
-            <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
-          </nmtb:relation>
+  <nmwg:data id="data2" metadataIdRef="meta2" />
 
-          <nmtb:relation type="publisher">
-            <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
-          </nmtb:relation>
 
-          <nmtb:relation type="publisher">
-            <nmtb:address type="uri">http://packrat.internet2.edu:8090/perfSONAR_PS/services/IDCMA</nmtb:address>
-          </nmtb:relation>
-                
-        </nmtb:node>
-      </nmwg:subject>
-      
-      <nmwg:eventType>http://docs.oasis-open.org/wsn/b-2</nmwg:eventType>
-      <nmwg:eventType>http://docs.oasis-open.org/wsn/br-2</nmwg:eventType>
-      <!-- other eventTypes for backwards compat? -->
-      
-      <nmwg:parameters id="p1">
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#PauseSubscription</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#ResumeSubscription</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#RegisterPublisher</nmwg:parameter>
-          <nmwg:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/br-2#DestroyRegistration</nmwg:parameter>
-
-        <!-- Topics available (these would need to be gleaed from the IDCs I am 
-             managing -->
-        <nmwg:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
-        <nmwg:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
-        <nmwg:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
-        
-      </nmwg:parameters>
-    </nmwg:metadata>
-    
-  </nmwg:data>
 }}}
 
-=== Questions ===
-
-Some questions to be answered:
-
- * What is the namespace of the _metadata_'s _subject_?  I have this as *DCN* tooling in the *NM-WG* namespace, do we want to use something else?
- * Is the topology _service_ element what we want to use here?
- * Should the domain _name_ element be a URN?
 
 == Last Updated ==
 
