@@ -18,19 +18,25 @@
         <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=ndt</nmtb:urn>
     </nmtb:relation>
 
-    <nmtb:protocol>
-        <nmtb:type>http://e2epi.internet2.edu/ndt/http/3.1</nmtb:type>
-
+    <nmtb:port>
         <nmtb:address type="url">http://207.75.164.244:7123</nmtb:address>
         <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:7123</nmtb:address>
-    </nmtb:protocol>
 
-    <nmtb:protocol>
-        <nmtb:type>http://e2epi.internet2.edu/ndt/nonhttp/3.1</nmtb:type>
+        <nmtb:protocol>
+            <nmtb:type>http://e2epi.internet2.edu/ndt/http/3.1</nmtb:type>
 
+             <!-- optional parameters bag -->
+        </nmtb:protocol>
+    </nmtb:port>
+
+     <nmtb:port>
         <nmtb:address type="uri">tcp://207.75.164.244:3000</nmtb:address>
         <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:3000</nmtb:address>
-    </nmtb:protocol>
+
+        <nmtb:protocol>
+            <nmtb:type>http://e2epi.internet2.edu/ndt/nonhttp/3.1</nmtb:type>
+        </nmtb:protocol>
+    </nmtb:port>
 </nmtb:service>
 }}}
 
