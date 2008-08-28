@@ -146,9 +146,9 @@ included.
 Starting PingER
 ------------------------------------------------------------------------------
 
-To start the PingER suite, change to the bin/ directory and simply run:
+To start the PingER suite, change to the ../../ directory and  run:
 
-  $ perfsonar-daemon.pl --config=../etc/pinger.conf --verbose
+  $ perfsonar-daemon.pl --config=modules/perfSONAR_PS-Services-PingER-v0.01/etc/pinger.conf --verbose
 
 This will parse the pinger.conf file and initiate the PingER services as
 defined for the MA and MP.

@@ -79,7 +79,7 @@ requires_external_bin 'sqlite3';
 #requires_external_bin 'xml2-config';
 
 no_index directory  => 't';
-install_scripts => 'bin/';
+###install_scripts => 'bin/';
 
 auto_install;
 WriteAll;
