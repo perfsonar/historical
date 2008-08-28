@@ -22,12 +22,28 @@
         <nmtb:address type="url">http://207.75.164.244:7123</nmtb:address>
         <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:7123</nmtb:address>
 
+        <nmtb:relation name="runsOn">
+            <nmtb:idRef type="port">urn:ogf:network:domain=internet2.edu:node=ndt:port=tcp_7123</nmtb:idRef>
+        </nmtb:relation>
+
         <nmtb:protocol>
             <nmtb:type>http://e2epi.internet2.edu/ndt/http/3.1</nmtb:type>
 
              <!-- optional parameters bag -->
         </nmtb:protocol>
     </nmtb:port>
+
+    <nmtb:port id="urn:ogf:network:domain=internet2.edu:node=ndt:port=tcp_7123">
+        <nmtb:address type="uri">tcp://207.75.164.244:7123</nmtb:address>
+        <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:7123</nmtb:address>
+
+        <nmtb:protocol>
+            <nmtb:type>http://protocols/tcp/1.0</nmtb:type>
+
+             <!-- optional parameters bag -->
+        </nmtb:protocol>
+    </nmtb:port>
+
 
      <nmtb:port>
         <nmtb:address type="uri">tcp://207.75.164.244:3000</nmtb:address>
@@ -180,7 +196,7 @@
     </perfsonar:relation>
     
     <perfsonar:relation type="siblings">
-        <perfsonar:idRef type="node">ogf:network:domain=internet2.edu:service=PingER_MA</perfsonar:urn>
+        <perfsonar:idRef type="service">ogf:network:domain=internet2.edu:service=PingER_MA</perfsonar:idRef>
     </perfsonar:relation>
     
     <perfsonar:protocol>
@@ -208,7 +224,7 @@
    </nmtb:relation>
 
    <nmtb:relation type="siblings">
-        <nmtb:idRef type="node">ogf:network:domain=internet2.edu:service=OSCARS_NB</nmtb:urn>
+        <nmtb:idRef type="service">ogf:network:domain=internet2.edu:service=OSCARS_NB</nmtb:idRef>
    </nmtb:relation>
 
     <!-- service parameters -->
