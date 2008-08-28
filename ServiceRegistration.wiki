@@ -1,0 +1,116 @@
+#summary A proposal for what the 'service' element that gets registered in the LS might look like
+
+= BWCTL =
+{{{
+<!-- BWCTL Service. Speaks version 1.3 of the protocol -->
+<nmtb:service id="ogf:network:domain=internet2.edu:service=BWCTL">
+    <nmtb:name>Internet2 BWCTL Server</nmtb:name>
+    <nmtb:description>BWCTL Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
+
+   <nmtb:relation type="runsOn">
+        <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=bwctl.chic.net</nmtb:urn>
+   </nmtb:relation>
+
+    <!-- speaks version 1.3 of the protocol -->
+    <nmtb:protocol>
+        <nmtb:type>http://e2epi.internet2.edu/bwctl/1.3</nmtb:type>
+
+        <nmtb:address type="uri">tcp://207.75.164.244:4823</nmtb:address>
+        <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:4823</nmtb:address>
+
+        <!-- what do capabilities look like -->
+        <nmtb:parameters>
+            <nmtb:parameter name="tool">http://dast.nlanr.net/Projects/Iperf/2.0.2</nmtb:parameter>
+            <nmtb:parameter name="tool">http://www.lcp.nrl.navy.mil/nuttcp/5.5.5</nmtb:parameter>
+            <nmtb:parameter name="tool">http://e2epi.internet2.edu/thrulay/0.9</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+</nmtb:service>
+}}}
+
+= OWAMP =
+{{{
+<!-- OWAMP Service. Running on same node as the bwctl service. Specifies what service modes are available (Open, Authenticated, Encrypted) -->
+<nmtb:service id="ogf:network:domain=internet2.edu:node=bwctl.chic.net:service=OWAMP">
+    <nmtb:name>Internet2 OWAMP Server</nmtb:name>
+    <nmtb:description>OWAMP Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
+
+   <nmtb:relation type="runsOn">
+        <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=bwctl.chic.net</nmtb:urn>
+   </nmtb:relation>
+
+    <nmtb:serviceType>
+    <nmtb:protocol>
+        <nmtb:type>http://e2epi.internet2.edu/owamp/1.0</nmtb:type>
+
+        <nmtb:address type="uri">tcp://207.75.164.244:861</nmtb:address>
+        <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:861</nmtb:address>
+
+        <nmtb:parameters>
+            <nmtb:parameter name="serviceMode">open</nmtb:parameter>
+            <nmtb:parameter name="serviceMode">authenticated</nmtb:parameter>
+            <nmtb:parameter name="serviceMode">encrypted</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+</nmtb:service>
+}}}
+
+= IDC =
+{{{
+<!-- IDC Service. -->
+<nmtb:service id="ogf:network:domain=internet2.edu:service=OSCARS">
+    <nmtb:name>Internet2 OSCARS Server</nmtb:name>
+    <nmtb:description>OSCARS Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
+   
+   <nmtb:relation type="runsOn">
+        <nmtb:idRef type="node">ogf:network:domain=internet2.edu:node=anna-lab1</nmtb:urn>
+   </nmtb:relation>
+    
+    <nmtb:address type="url"> https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+    
+    <!-- service parameters -->
+    <nmtb:parameters>
+        <nmtb:parameter name="publisher">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:parameter>
+    </nmtb:parameters>
+    
+    <nmtb:protocol> 
+        <nmtb:type>http://dice.controlplane.net/idc/1.0</nmtb:type>
+        
+        <!-- protocol parameters -->
+        <nmtb:parameters>        
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#createPath</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+    
+    <nmtb:protocol>
+        <nmtb:type>http://dice.controlplane.net/nb/1.0</nmtb:type>
+        
+        <!-- protocol parameters -->
+        <nmtb:parameters>
+            <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmtb:parameter>
+            <nmtb:parameter name="supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmtb:parameter>
+            
+            <nmtb:parameter name="availableTopic">idc:INFO</nmtb:parameter> 
+            <nmtb:parameter name="availableTopic">idc:DEBUG</nmtb:parameter>
+            <nmtb:parameter name="availableTopic">idc:ERROR</nmtb:parameter>
+        </nmtb:parameters>
+    </nmtb:protocol>
+
+</nmtb:service>
+}}}
+
+= Open Questions =
+  * Should the parameters bags be typed?
+  * Should the parameter names be hierarchically defined?
+  * When are parameters protocol specific and when are they service specific?
+  * Should there be a hierarchical serviceType element that the protocols are contained within? If so, are we simply creating a service within a service?
