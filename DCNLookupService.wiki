@@ -1,10 +1,11 @@
-= DCN Interactions with the Lookup Service =
+= DCN Interactions with the perfSONAR Global Lookup Service =
 
-== TOC ==
+The following article outlines DCN interactions with the _perfSONAR_ *Lookup Service*.  Topics covered include the legacy support as well as the new way forward with respect to the *gLS* architecture.  
 
  * [DCNLookupService#Architecture Architecture]
    * [DCNLookupService#Current Current]
    * [DCNLookupService#Proposed Proposed]
+   * [DCNLookupService#Caveats Caveats]
  * [DCNLookupService#Hostname_to_Link_URN_Mappings Hostname to Link URN Mappings]
    * [DCNLookupService#Current_Usage Current Usage]
      * [DCNLookupService#Insertion Insertion]
@@ -15,12 +16,13 @@
      * [DCNLookupService#Data_Format Data Format]
      * [DCNLookupService#Required_Changes Required Changes]
  * [DCNLookupService#Service_Registration Service Registration]
-   * [DCNLookupService#IDC IDC]
-   * [DCNLookupService#NB NB]
-
+   * [DCNLookupService#Example_1 IDC implements NB functionality itself]
+   * [DCNLookupService#Example_2 IDC uses a seperate NB (could be local or remote) but still could function as as notification source itself]
+   * [DCNLookupService#Example_3 IDC uses a seperate NB (could be local or remote) and does not implement NB stuff on its own]
+ 
 == Architecture == 
 
-The _perfSONAR_ *gLS* is an extension of the original *LS*.  The original design paradigm was centered on offering services (data discovery/management) within a local setting.  Scalability to multi-domain operation can only be delivered through mechanisms that preserve this original design from the point of view of service and client applications.  The *gLS* architecture works with existing *LS* instances  to distribute the information into a larger _*gLS* cloud_ through the use of data summarization and propagation.  
+The _perfSONAR_ *gLS* is an extension of the original *LS*.  The original design paradigm of the *LS* was centered on offering services (data discovery/management) within a local setting.  Scalability to multi-domain operation can only be delivered through mechanisms that preserve this original design from the point of view of service and client applications.  The *gLS* architecture works with existing *LS* instances  to distribute the information into a larger _*gLS* cloud_ through the use of data summarization and propagation.  
 
 === Current === 
 
@@ -30,8 +32,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/DCNLookupService/LS.png
 
 The diagram illustrates some typical scenarios for this software:
 
- # Services register the presence of lokup data (e.g. the *MA* registers measurement data or the *DCN !WebAdmin* registers host to link mappings)
- # Services query for specific data (e.g. perfSONAR-UI is a client looking for specific measurement data from a given domain, the IDC is looking to translate a hostname to a linkid)
+ # Services register the presence of lookup data (e.g. the *MA* registers measurement data or the *DCN !WebAdmin* registers host to link mappings)
+ # Services query for specific data (e.g. perfSONAR-UI is a client looking for specific measurement data from a given domain, the *IDC* is looking to translate a hostname to a linkid)
 
 This centralized design has two clear benefits:
 
@@ -43,13 +45,13 @@ The downsides however are very prohibitive:
  # *LS* location is fixed
  # No redundancy
  # Performance bottleneck
- # Does not scale to the cases where individuals would like to run their own
+ # Does not scale to the cases where individuals would like to run their own *LS* instance
 
 The legacy *LS* is still available and supported as a product in the _perfSONAR_ framework, but all effort regarding this information service has been refocused to the *gLS*.
 
 === Proposed === 
 
-The *gLS* architecture is similar to that of the *LS* where individual services still maintain the information of registered services and respond to queries.  The major difference is the existence of an _upper layer_ of *gLS* instances that propagate summarized information of each _lower level_ Home Lookup Service (*hLS*) into what has been termed the _*gLS* cloud_.  This cloud enables global discovery: the phase where before finding exactly what you want (e.g. data for idc.internet2.edu), you first find where it may live (e.g. the *hLS* for internet2.edu).
+The *gLS* architecture is similar to that of the *LS* where individual services instances (now referred to as *hLS* or *Home Lookup Services*) still maintain the information of registered services and respond to queries.  The major difference is the existence of an _upper layer_ of *gLS* instances that propagate summarized information of each _lower level_ *hLS* into what has been termed the _*gLS* cloud_.  This cloud enables global discovery: the phase where before finding exactly what you want (e.g. data for idc.internet2.edu), you first find where it may live (e.g. the *hLS* for internet2.edu).
 
 An example of the architecture follows.
 
@@ -59,6 +61,7 @@ Similar to the *LS* design, there are only minor differences to consider:
 
  # There is not a central *LS* to contact where *ALL* data will live, but there is the *gLS cloud* that can be contacted from many points.
    * The *gLS* cloud is really a collection of _well known_ instances.  We use a bootstrapping method similar to DNS where a well known list is published.
+     * An example of this list can be found at http://www.perfsonar.net/gls.root.hints.
    * Each *gLS* is synchronized; all data that is known to one *gLS* will be shared with the others.  This also enables hot backup of data and geographic redundancy.
    * Each *hLS* should register it's presence into the cloud, this can mean selecting one or many *gLS* instances to contact.
  # Query involves two steps now:
@@ -70,24 +73,38 @@ This diagram also illustrates some typical scenarios for the *gLS*:
  # Services register the presence of data to their *hLS* (e.g. the *MA* registers measurement data or the *DCN !WebAdmin* registers host to link mappings)
    * Note that this *hLS* can be configured, or the services _may_ use the *gLS* cloud to locate a close *hLS*.  This implementation detail is left up to the service.
  # Services query for specific data
-   * The left-most IDC will query the *gLS cloud* first looking for information on some link.
+   * The left-most *IDC* will query the *gLS cloud* first looking for information on some link.
    * The *gLS cloud* will reply back with a list of *hLS* instances that have reported they contain information that may match.
-   * The IDC should then contact _each_ of the returned *hLS* values with the original query.  
+   * The *IDC* should then contact _each_ of the returned *hLS* values with the original query.  
    * A similar procedure is true for perfSONAR-UI
    
 Some important things to note about the operation of *gLS* and *hLS* instances:
 
  # The perfSONAR Consortium (ESnet, Geant2, Internet2, RNP) will be maintaining a *gLS cloud* open for public use.
  # It is possible to set up other clouds: simply start a new *gLS* hints file and point people to use it.
- # The current hints file is here: http://www.perfsonar.net/gls.root.hints
+   * The current hints file is here: http://www.perfsonar.net/gls.root.hints
+   * An example of an _alternative_ cloud is at http://www.perfsonar.net/dcn.root.hints.  This second cloud was set up to enable pre-beta testing of the DCN software and consists of two *gLS* instances isolated from the _perfSONAR_ instances. 
  # DCN adopters can deploy their own *hLS* if desired.  The software will be packaged along with a copy of the !WebAdmin.
  # Internet2 will maintain (an) *hLS* instance(s) for our needs.  DCN software is welcome to continue treating the Internet2 instance as a _central_ *LS*.
+
+=== Caveats === 
+
+In general there are several associated delays with information discovery:
+
+ # Service regsters to *hLS*.  The data is available, but must wait to be _summarized_.
+ # Summarization interval will vary by *hLS*.  We are recommending this time be frequent, perhaps in the range of 10 to 30 minutes.  After summarization the data will be passed to the *gLS*.
+ # The *gLS* interaction interval will also vary by *hLS*.  We are recommending this be on the same order as the _suammrization_, around 10 to 30 minutes.  After registration the *gLS* takes over.
+ # The gLS must then _summarize_ the data of all registered *hLS* instances.  This should be less frequent than *hLS* summarization and could be anywhere from 10 minutes to an hour.  Finally the result will need to be propagated to all other *gLS* instances.
+  # The synchronization interval will vary as well, but due to the low impact we are anticipating this can run frequently. We anticipate this will run every 5 to 20 minutes.
+
+Taking into account these delays data may take more than an hour to propagate worldwide.  Due to the *DCN* requirement of instant knowledge it would be worthwhile to use the *gLS* as a tool to find *hLS* instances, and query flood for the info as often as needed.
  
 == Hostname to Link URN Mappings == 
 
-DCN software currently uses the *LS* to map hostnames (*friendly names*) to the usually non-friendly link urns.  This feature has two main parts:
+DCN software currently uses the *LS* to map *hostnames* (_friendly names_) to the usually longer *link urns*.  This feature has two main parts:
 
- # A _!WebAdmin_ is used to register/delete the mappings (N.B.: Future plans may allow the IDC to do this)
+ # A _!WebAdmin_ is used to register/delete the mappings (N.B.: Future plans may allow the *IDC* to do this)
+   * See an example web admin [https://dc211.internet2.edu/cgi-bin/dcn2.cgi here].
  # The IDC/Client applications query to get the mappings/translate from one to the other.
  
 The general idea of this operation will not change, although to support the *gLS* there will be minor format changes discussed below. 
@@ -134,7 +151,7 @@ The message identifies two parts:
  # The metadata including a _service_ subject
  # The data containing the actual link to host mapping.
  
-The metadata contains a service.  This paradigm is a hold over from _perfSONAR_ where all framework pieces are in fact a part of a larger service oriented architecture.  It is anticipated in the future that the IDC or DC will be the _service_ for these mappings, but the current use is to simply impart some _fake_ meaning to keep the pattern the same.  The data must always contain the host to link mapping informatio, in the form of a node relation. 
+The metadata contains a service.  This paradigm is a hold over from _perfSONAR_ where all framework pieces are in fact a part of a larger service oriented architecture.  It is anticipated in the future that the *IDC* or *DC* will be the _service_ for these mappings, but the current use is to simply impart some _fake_ meaning to keep the pattern the same.  The data must always contain the host to link mapping information, in the form of a node relation. 
 
 ==== Deletion ==== 
 
@@ -171,7 +188,7 @@ The major difference between this message and the [DCNLookupService#Insertion In
 
 ==== Query ==== 
 
-The IDC currently uses a query to convert from hostname to link id, an example appears below:
+The *IDC* currently uses a query to convert from hostname to link id, an example appears below:
 
 {{{
 <?xml version='1.0' encoding='UTF-8'?>
@@ -213,11 +230,11 @@ Building on the current scheme, there are two major changes to the current use o
  # [DCNLookupService#gLS_Integration gLS Integration]
  # [DCNLookupService#Data_Format Data Format]
 
-*gLS* integration refers to the use of a two part query system to take advantage of information discovery available through the _*gLS* cloud_.  This interaction is best placed in an API, although it may be treated simply as a two message system similar to how the IDC currently opperates.  The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is explained in detail below.
+*gLS* integration refers to the use of a two part query system to take advantage of information discovery available through the _*gLS* cloud_.  This interaction is best placed in an API, although it may be treated simply as a two message system similar to how the *IDC* currently operates.  The data format is required take advantage of the data distribution mechanism that the *gLS* offers.  This is a minor format change and is explained in detail below.
 
 ==== gLS Integration ==== 
 
-As in DNS, there is a bootstrapping issue of trying to locate participating *gLS* servers.  We have a solution similar to DNS where a _hints_ file is provided: http://www.perfsonar.net/gls.root.hints  This file should be checked regularly to ensure it is current, as *gLS* instances may come and leave the _cloud_ at any time.
+As in DNS, there is a bootstrapping issue of trying to locate participating *gLS* servers.  We have a solution similar to DNS where a _hints_ file is provided: http://www.perfsonar.net/gls.root.hints  This file should be checked regularly to ensure it is current, as *gLS* instances may come and leave the _cloud_ at any time.  It is recommended that any implementation age this file, or check it new each time.  Note that due to _synchronization_, all *gLS* instances are equal and any can be used (e.g. select one due to closeness etc.).
 
 Each *gLS* is responsible for managing the summarized information of all *hLS* instances that choose to register.  The *hLS* instances will register a _summary_ (a condensed list of the data types, address ranges, and domains that correspond to _*their*_ registered information).  An example of the information propogation is pictured below:
 
@@ -227,7 +244,7 @@ In this example there are 3 _perfSONAR_ *MA* services, and a *DCN !WebAdmin*.  E
 
 To take advantage of the _*gLS* cloud_ services must pose an initial query to any *gLS* instance that asks a less specific question e.g. instead of asking for a specific link or hostname, it is necessary to first ask *_where_* information on an IP range or domain will be present.  The *gLS* will respond with zero to many *hLS* instances that need to be contacted because they have the potential to posses information.  The _original_ query for a link/hostname may then be asked to all returned *hLS* instances to find the answer.  
 
-In the above example, if an IDC where looking for _*host2.a.edu*_ so it can find a link, it must first look for where data for _*a.edu*_ may exist.  An even more specific query would be where _*OSCARS*_ data (the designation we are using for the host/link mappings) for _*a.edu*_ lives.  In the case of the 1st query the *gLS* will return that _*both*_ *hLS* instances would have data on *a.edu*, the 2nd query would only return the second *hLS*.  Once a list of *hLS* instances has been returned, the IDC can proceed as it has done in the past: send the query to translate _*host2.a.edu*_ into a link to all of the *hLS* instances.  
+In the above example, if an *IDC* where looking for _*host2.a.edu*_ so it can find a link, it must first look for where data for _*a.edu*_ may exist.  An even more specific query would be where _*OSCARS*_ data (the designation we are using for the host/link mappings) for _*a.edu*_ lives.  In the case of the 1st query the *gLS* will return that _*both*_ *hLS* instances would have data on *a.edu*, the 2nd query would only return the second *hLS*.  Once a list of *hLS* instances has been returned, the *IDC* can proceed as it has done in the past: send the query to translate _*host2.a.edu*_ into a link to all of the *hLS* instances.  
 
 An example of the _warm up_ discovery query is pictured below:
 
@@ -317,7 +334,9 @@ Alternatively, this query could be used (omitting the domain lookup portion):
 </SOAP-ENV:Envelope> 
 }}}
 
-This would identify *hLS* instances that are known to have *DCN* data which can then be cached.  A _brute force_ approach would then be to update this cache periodically and always query these instances for the host/link mapping.
+This would identify *hLS* instances that are known to have *DCN* data which can then be cached.  
+
+A _brute force_ approach would then be to update this cache periodically and always query these instances for the host/link mapping.  This approach is particularly appealing for *DCN* applications due to the inherent _delay_ that will be present in the transfer of data from the *hLS* to the *gLS*.  See also [DCNLookupService#Caveats this section] for information on this potential issue.
 
 The output of either of these queries will be the following on success:
 
@@ -417,11 +436,11 @@ The changes can be summarized as:
  # There will now be a metadata element, this element will contain:
    # A DCN Subject.  This element will contain:
      # The node, it will remain unchanged.
-   # An eventType.  This should contain some descriptive value for this type of 'data'.  Since these are connection mappings used by the IDC it should be the OSCARS namespace or perhaps the DCN/DICE protocol designation.  This can be left up to the DCN designers although once chosen it should remain consistent.
+   # An eventType.  This should contain some descriptive value for this type of 'data'.  Since these are connection mappings used by the *IDC* it should be the OSCARS namespace or perhaps the DCN/DICE protocol designation.  This can be left up to the DCN designers although once chosen it should remain consistent.
    # Parameters (optional and currently unused).
  # The metadata element will be placed into the data as before.
 
-The modified query that the IDC would be required to make is pictured next (note the only changes are to the XPath expression):
+The modified query that the *IDC* would be required to make is pictured next (note the only changes are to the XPath expression):
 
 {{{
 <?xml version='1.0' encoding='UTF-8'?>
@@ -458,23 +477,724 @@ The modified query that the IDC would be required to make is pictured next (note
 
 With the migration of DCN to the upcoming 0.4 release, the logical time to implement the above changes is when everyone is upgrading.  The proposed plan with regards to *LS* software is:
 
- * Upload a patch for the _LSQuery_ used in the IDC for all legacy applications, the 0.4 release will include this
+ * Upload a patch for the _LSQuery_ used in the *IDC* for all legacy applications, the 0.4 release will include this
  * Cease operation of *packrat.internet2.edu:8005/perfSONAR_PS/services/LS* on a given flag day
- * Begin operations of a new LS instance TBD, the 0.4 release will come configured to use this value
- * Convert the IDC to use the *gLS cloud* as well as talk to any *hLS* and not just the centralized Internet2 instance
+ * Begin operations of a new LS instance, the 0.4 release will come configured to use this value
+   * Test services are currently listed on [https://dc211.internet2.edu/cgi-bin/DCN/tree.cgi this] page.
+   * There are 2 test *gLS* instances and 2 test *hLS* instances.  These will simulate two domains deploying their own *hLS* instances and the use of the global _*gLS* cloud_ (consisting of two distributed *gLS* instances).
+ * Convert the *IDC* to use the *gLS cloud* as well as talk to any *hLS* and not just the centralized Internet2 instance
  * Provide instructions for DCN participants who wish to use their own *hLS*, but still make the Internet2 version available.
  
 == Service Registration == 
 
-This section is an internal work in progess, TBD really soon!
+The Internet2 Dynamic Circuit Network (*DCN*) features several autonomous units that work together to perform the tasks necessary to dynamically allocate network resources across domains.  These units are interested in both registering themselves to the LS as well as querying the LS for information on resources they may require to function (instead of relying on static configuration).  There are two services that we will explore for LS integration:
 
-=== IDC === 
+ * Interdomain Controller Service (*IDC*)
+ * Notification Broker Service
 
-TBD
+Each of these services will be required to register their _presence_ (e.g. that they exist and can be contacted at a certain address) along with any capabilities (e.g. services, data) they may offer.  There are three examples for the DCN world that we will present here:
+  
+ # [DCNLookupService#Example_1 IDC implements NB functionality itself]
+ # [DCNLookupService#Example_2 IDC uses a seperate NB (could be local or remote) but still could function as as notification source itself]
+ # [DCNLookupService#Example_3 IDC uses a seperate NB (could be local or remote) and does not implement NB stuff on its own]
+ 
+===  Example 1  ===
 
-=== NB === 
+In this example the IDC implements the functions of an NB, but is not a seperate NB.  This represents what the *IDC* will be registering along with the required *node* element:
 
-TBD
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/" id="sub1">
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
+                    id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC">
+                    
+        <nmtb:name>OSCARS IDC</nmtb:name>
+        <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+            <!-- TBD pending DICE meeting ...     
+                 http://dice.controlplane.net/idc/0.4 ? -->
+        <nmtb:type>IDC</nmtb:type>
+
+            <!-- This is how we map to a node, this node should exist in the
+                 topo/LS either before we start, or we register it -->
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=test-idc</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- IDC needs to advertise domains it controls -->
+        <nmtb:relation name="controls">
+          <nmtb:idRef type="domain">urn:ogf:network:domain=dcn.internet2.edu</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- The IDC can subscribe to the notifications of other IDCs/NBs (look for the 'notify' message below) -->
+        <nmtb:relation type="subscriber">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=es.net:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well, i guess (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+
+            <!-- The IDC must always publish (even if its to itself) for clients to be down with it, the 
+                 NB/IDC in question should support subscriptions -->
+        <nmtb:relation type="publisher">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+
+ 
+
+            <!-- I am above all an IDC, here is what i am down with: -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/idc/0.4 ? -->
+            <nmtb:type>http://oscars.es.net/OSCARS</nmtb:type>
+
+            <nmtb:parameters>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmtb:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+                <!-- I like notifications, I accept notifications from the folks i am 'subscribed' to above (NBs/IDCS) -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- It accepts Notify messages from other services to 
+                       which it's subscribed, note look for the 'subscriber' above to see if we need this... -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+
+              <!-- I publish notifications, people can subscribe to me, and i list who i am pushing to via the 'publishers' -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- implements the messages that allow people to subscribe -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
+      
+                  <!-- Topics I am willing to publish to my subscribers-->
+              <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+              <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>
+              <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+      </nmtb:service>
+
+            <!-- optional parameters -->
+      <nmtb:parameters>          
+        <!-- note, i am not publishing these through the NB, but i keep track of these --> 
+            
+        <nmtb:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
+        <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+        <nmtb:parameter name="keyword:topic">idc:FATAL</nmwg:parameter>
+      </nmtb:parameters>               
+        
+    </dcn:subject>
+    
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+The node registration:
+
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
+           id="urn:ogf:network:domain=internet2.edu:node=lab244">
+
+      <nmtb:name type="dns">test-idc.internet2.edu</nmtb:name>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv4">207.75.164.204</nmtl3:address>
+      </nmtl3:port>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+      </nmtl3:port>
+
+    </nmtb:node>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+===  Example 2  ===
+
+This example demonstrates how the IDC will push notifications out to an NB, but *could* still act as one itself (picture the above, with the addition of a seperate NB).  In addition to the node, the last message is what the NB would register.
+
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/" id="sub1">
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
+                    id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC">
+                    
+        <nmtb:name>OSCARS IDC</nmtb:name>
+        <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+            <!-- TBD pending DICE meeting ...     
+                 http://dice.controlplane.net/idc/0.4 ? -->
+        <nmtb:type>IDC</nmtb:type>
+
+            <!-- This is how we map to a node, this node should exist in the
+                 topo/LS either before we start, or we register it -->
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=test-idc</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- IDC needs to advertise domains it controls -->
+        <nmtb:relation name="controls">
+          <nmtb:idRef type="domain">urn:ogf:network:domain=dcn.internet2.edu</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- The IDC can subscribe to the notifications of other IDCs/NBs (look for the 'notify' message below) -->
+        <nmtb:relation type="subscriber">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=es.net:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well, i guess (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+ 
+            <!-- The IDC must always publish (even if its to itself) for clients to be down with it, the 
+                 NB/IDC in question should support subscriptions -->
+        <nmtb:relation type="publisher">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_NB</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="uri">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+        </nmtb:relation>
+ 
+ 
+            <!-- I am above all an IDC, here is what i am down with: -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/idc/0.4 ? -->
+            <nmtb:type>http://oscars.es.net/OSCARS</nmtb:type>
+
+            <nmtb:parameters>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmtb:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+                <!-- I like notifications, I accept notifications from the folks i am 'subscribed' to above (NBs/IDCS) -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- It accepts Notify messages from other services to 
+                       which it's subscribed, note look for the 'subscriber' above to see if we need this... -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+
+              <!-- I publish notifications, people can subscribe to me, and i list who i am pushing to via the 'publishers' -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- implements the messages that allow people to subscribe -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
+      
+                  <!-- Topics I am willing to publish to my subscribers-->
+              <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+              <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>
+              <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+      </nmtb:service>
+
+            <!-- optional parameters -->
+      <nmtb:parameters>          
+        <!-- note, i am not publishing these through the NB, but i keep track of these --> 
+            
+        <nmtb:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
+        <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+        <nmtb:parameter name="keyword:topic">idc:FATAL</nmwg:parameter>
+      </nmtb:parameters>               
+        
+    </dcn:subject>
+    
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+The node registration:
+
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
+           id="urn:ogf:network:domain=internet2.edu:node=lab244">
+
+      <nmtb:name type="dns">test-idc.internet2.edu</nmtb:name>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv4">207.75.164.204</nmtl3:address>
+      </nmtl3:port>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+      </nmtl3:port>
+
+    </nmtb:node>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+The NB section:
+
+{{{
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
+                    id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_NB">
+                    
+        <nmtb:name>OSCARS NB</nmtb:name>
+        <nmtb:description>OSCARS NB, Ann Arbor, MI USA</nmtb:description>
+
+             <!-- TBD pending DICE meeting ... 
+                   http://dice.controlplane.net/nb/0.4 ? -->
+        <nmtb:type>NB</nmtb:type>
+
+            <!-- This is how we map to a node, this node should exist in the topo/LS either
+                 before we start, or we register it -->
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=test-idc</nmtb:idRef>
+        </nmtb:relation>
+
+              <!-- The NB can subscribe to the notifications of other IDCs/NBs (look for the 
+                   'notify' message below), note i am only listening to one -->
+        <nmtb:relation type="subscriber">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well, i guess (can just do a lookup on the above) -->
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+
+            <!-- The NB might not care about listing who it is pushing too, so this is blank for now -->
+        <nmtb:relation type="publisher">
+            <!-- maybe? -->
+        </nmtb:relation>
+
+                <!-- I like notifications, I accept notifications from the cats i am 'subscribed' to above (NBs/IDCS) -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- It accepts Notify messages from other services to 
+                       which it's subscribed, note look for the 'subscriber' above to see if we need this... -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+                <!-- I publish notifications, people can subscribe to me, but I am not listing publishers -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- implements the messages that allow people to subscribe -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
+      
+                  <!-- Topics I am willing to publish to my subscribers-->
+              <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+              <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>
+              <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+      </nmtb:service>
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+===  Example 3  ===
+
+This example demonstrates how the IDC will push notifications out to an NB and does not have the ability to notify on its own.
+
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/" id="sub1">
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
+                    id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC">
+                    
+        <nmtb:name>OSCARS IDC</nmtb:name>
+        <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+            <!-- TBD pending DICE meeting ...     
+                 http://dice.controlplane.net/idc/0.4 ? -->
+        <nmtb:type>IDC</nmtb:type>
+
+            <!-- This is how we map to a node, this node should exist in the
+                 topo/LS either before we start, or we register it -->
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=test-idc</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- IDC needs to advertise domains it controls -->
+        <nmtb:relation name="controls">
+          <nmtb:idRef type="domain">urn:ogf:network:domain=dcn.internet2.edu</nmtb:idRef>
+        </nmtb:relation>
+
+            <!-- The IDC can subscribe to the notifications of other IDCs/NBs (look for the 'notify' message below) -->
+        <nmtb:relation type="subscriber">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=es.net:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well, i guess (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+ 
+            <!-- The IDC must always publish (even if its to itself) for clients to be down with it, the 
+                 NB/IDC in question should support subscriptions -->
+        <nmtb:relation type="publisher">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_NB</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well (can just do a lookup on the above) -->
+          <nmtb:address type="uri">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+        </nmtb:relation>
+ 
+ 
+            <!-- I am above all an IDC, here is what i am down with: -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/idc/0.4 ? -->
+            <nmtb:type>http://oscars.es.net/OSCARS</nmtb:type>
+
+            <nmtb:parameters>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#modifyReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#cancelReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#createPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#refreshPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#teardownPath</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#queryReservation</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#listReservations</nmtb:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://oscars.es.net/OSCARS#getNetworkTopology</nmtb:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+                <!-- I like notifications, I accept notifications from the folks i am 'subscribed' to above (NBs/IDCS) -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- It accepts Notify messages from other services to 
+                       which it's subscribed, note look for the 'subscriber' above to see if we need this... -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+      </nmtb:service>
+
+            <!-- optional parameters -->
+      <nmtb:parameters>          
+        <!-- note, i am not publishing these through the NB, but i keep track of these --> 
+            
+        <nmtb:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
+        <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>  
+        <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+        <nmtb:parameter name="keyword:topic">idc:FATAL</nmwg:parameter>
+      </nmtb:parameters>               
+        
+    </dcn:subject>
+    
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+The node registration:
+
+{{{
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
+           id="urn:ogf:network:domain=internet2.edu:node=lab244">
+
+      <nmtb:name type="dns">test-idc.internet2.edu</nmtb:name>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv4">207.75.164.204</nmtl3:address>
+      </nmtl3:port>
+
+      <nmtl3:port>
+        <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+      </nmtl3:port>
+
+    </nmtb:node>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
+
+The NB section:
+
+{{{
+
+<nmwg:message xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              id="msg1"
+              type="LSRegisterRequest">
+
+  <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+
+      <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
+                    id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_NB">
+                    
+        <nmtb:name>OSCARS NB</nmtb:name>
+        <nmtb:description>OSCARS NB, Ann Arbor, MI USA</nmtb:description>
+
+             <!-- TBD pending DICE meeting ... 
+                   http://dice.controlplane.net/nb/0.4 ? -->
+        <nmtb:type>NB</nmtb:type>
+
+            <!-- This is how we map to a node, this node should exist in the topo/LS either
+                 before we start, or we register it -->
+        <nmtb:relation type="runsOn">
+          <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=test-idc</nmtb:idRef>
+        </nmtb:relation>
+
+                <!-- The NB can subscribe to the notifications of other IDCs/NBs
+                     (look for the 'notify' message below), in this case there are two -->
+        <nmtb:relation type="subscriber">
+              <!-- this seems more natural
+                   <nmtb:idRef type="service">urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+                   <nmtb:idRef type="service">urn:ogf:network:domain=es.net:node=test-idc:service=OSCARS_IDC</nmtb:idRef>
+              -->
+            
+              <!-- this works just as well, i guess (can just do a lookup on the above) -->
+          <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
+          <nmtb:address type="uri">https://test-idc.es.net:7564/axis2/services/OSCARS</nmtb:address>
+        </nmtb:relation>
+
+            <!-- The NB might not care about listing who it is pushing too, so this is blank for now -->
+        <nmtb:relation type="publisher">
+            <!-- maybe? -->
+        </nmtb:relation>
+
+                <!-- I like notifications, I accept notifications from the cats i am 'subscribed' to above (NBs/IDCS) -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- It accepts Notify messages from other services to 
+                       which it's subscribed, note look for the 'subscriber' above to see if we need this... -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Notify</nmwg:parameter>
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+
+                <!-- I publish notifications, people can subscribe to me, but I am not listing publishers -->
+        <nmtb:port>
+          <nmtb:address type="url">https://test-idc.internet2.edu:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+          <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:2345/axis2/services/OSCARSNotificationBroker</nmtb:address>
+    
+          <nmtb:protocol>
+                <!-- TBD pending DICE meeting ... 
+                     http://dice.controlplane.net/nb/0.4 ? -->
+
+            <nmtb:type>http://docs.oasis-open.org/wsn/b-2</nmtb:type>
+
+            <nmtb:parameters>
+                  <!-- implements the messages that allow people to subscribe -->
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
+              <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
+      
+                  <!-- Topics I am willing to publish to my subscribers-->
+              <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
+              <nmtb:parameter name="keyword:topic">idc:WARN</nmwg:parameter>
+              <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
+            </nmtb:parameters>        
+          </nmtb:protocol>
+        </nmtb:port>
+
+      </nmtb:service>
+    </dcn:subject>
+  </nmwg:metadata>
+  
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+
+</nmwg:message>
+}}}
 
 == Last Updated ==
 
