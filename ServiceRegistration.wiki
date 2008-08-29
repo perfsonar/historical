@@ -3,15 +3,29 @@
 A proposal for what the _*service*_ element that gets registered in the *hLS*
 might look like for various service cases.
 
-= Use Cases =
+ * [ServiceRegistration#Use_Cases Use Cases]
+ * [ServiceRegistration#Examples Examples]
+ ** [ServiceRegistration#The_Node The Node]
+ ** [ServiceRegistration#NDT NDT]
+ ** [ServiceRegistration#BWCTL BWCTL]
+ ** [ServiceRegistration#OWAMP OWAMP]
+ ** [ServiceRegistration#PingER PingER]
+ ** [ServiceRegistration#DCN DCN]
+ ***  [ServiceRegistration#Example_1 IDC implementing NB protocol]
+ ***  [ServiceRegistration#Example_2 IDC publishing to NB and implementing NB protocol]
+ ***  [ServiceRegistration#Example_3 IDC publishing to NB]
+ * [ServiceRegistration#Open_Questions Open Questions]
+ * [ServiceRegistration#Last_Updated Last Udated]
+
+== Use Cases ==
 
   * A service speaks two versions of a protocol for the same function
   * A service speaks two distinct protocols for distinct functions
   * An service wants to register some of its settings (either per protocol, or service wide) 
 
-= Examples =
+== Examples ==
 
-== The Node ==
+=== The Node ===
 
 The node istself needs to be registered by _someone_.  Each service should have the logic to:
 
@@ -44,7 +58,7 @@ The following is a simple node example:
 </nmtb:node>
 }}}
 
-== NDT ==
+=== NDT ===
 
 First a simple example:
 
@@ -144,7 +158,7 @@ The next example fills in some gaps and takes the idea of the port one step furt
 </nmtb:service>
 }}}
 
-== BWCTL ==
+=== BWCTL ===
 
 BWCTL will work in the same manner.  This particular example does feature the extended port idea.
 
@@ -197,7 +211,7 @@ BWCTL will work in the same manner.  This particular example does feature the ex
 </nmtb:service>
 }}}
 
-== OWAMP ==
+=== OWAMP ===
 
 The OWAMP example as a couple of protocol options.  
 
@@ -233,7 +247,7 @@ The OWAMP example as a couple of protocol options.
 </nmtb:service>
 }}}
 
-== PingER ==
+=== PingER ===
 
 PingER is the first perfSONAR service, but note we are using the _generic_ service element here too.  I the future all services (regardless of affiliation) should be made in this manner.
 
@@ -334,7 +348,7 @@ And for the PingER MP.
 </nmtb:service>
 }}}
 
-== DCN ==
+=== DCN ===
 
 There are three examples for the DCN world:
   
@@ -342,7 +356,7 @@ There are three examples for the DCN world:
  # [ServiceRegistration#Example_2 IDC uses a seperate NB (could be local or remote) but still could function as as notification source itself]
  # [ServiceRegistration#Example_3 IDC uses a seperate NB (could be local or remote) and does not implement NB stuff on its own]
  
-===  Example 1  ===
+====  Example 1  ====
 
 In this example the IDC implements the functions of an NB, but is not a seperate NB.
 
@@ -495,7 +509,7 @@ In this example the IDC implements the functions of an NB, but is not a seperate
 </nmwg:metadata>
 }}}
 
-===  Example 2  ===
+====  Example 2  ====
 
 This example demonstrates how the IDC will push notifications out to an NB, but *could* still act as one itself (picture the above, with the addition of a seperate NB).
 
@@ -751,7 +765,7 @@ The NB section:
 </nmwg:metadata>
 }}}
 
-===  Example 3  ===
+====  Example 3  ====
 
 This example demonstrates how the IDC will push notifications out to an NB and does not have the ability to notify on its own.
 
@@ -977,10 +991,14 @@ The NB section:
 </nmwg:metadata>
 }}}
 
-= Open Questions =
+== Open Questions ==
 
   * What is the 1.0 version of the perfsonar protocol?
   * Should the parameter names be hierarchically defined?
   * When are parameters protocol specific and when are they service specific?
   * Should there be a hierarchical serviceType element that the protocols are contained within? If so, are we simply creating a service within a service?
   * How should the type of service interact with the protocols that service can speak?
+
+== Last Updated ==
+
+$Id: LSRegistration.wiki 178 2008-08-28 18:58:19Z jwzurawski $
