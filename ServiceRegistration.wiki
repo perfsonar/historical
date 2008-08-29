@@ -681,6 +681,15 @@ An example showing the IDC and NB as being completely seperate.
                 <nmtb:address type="uri">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
             </nmtb:relation>
 
+
+           <nmtb:parameters>
+                            <!-- Topics the IDC publishes-->
+
+                        <nmtb:parameter name="publishedTopic">idc:INFO</nmwg:parameter>  
+                        <nmtb:parameter name="publishedTopic">idc:DEBUG</nmwg:parameter>
+                        <nmtb:parameter name="publishedTopic">idc:ERROR</nmwg:parameter> 
+           </nmtb:parameters>
+
             <nmtb:port>
                 <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
                 <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
@@ -746,12 +755,6 @@ An example showing the IDC and NB as being completely seperate.
                         <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Subscribe</nmwg:parameter>
                         <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Renew</nmwg:parameter>
                         <nmtb:parameter name="keyword:supportedMessage">http://docs.oasis-open.org/wsn/b-2#Unsubscribe</nmwg:parameter>
-      
-                            <!-- Topics I am willing to publish to my direct 
-                                 subscribers-->
-                        <nmtb:parameter name="keyword:topic">idc:INFO</nmwg:parameter>  
-                        <nmtb:parameter name="keyword:topic">idc:DEBUG</nmwg:parameter>
-                        <nmtb:parameter name="keyword:topic">idc:ERROR</nmwg:parameter> 
                     </nmtb:parameters>        
                 </nmtb:protocol>
             </nmtb:port>
