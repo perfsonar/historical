@@ -16,10 +16,9 @@ import java.lang.Exception;
 import org.jdom.xpath.XPath;
 
 public class PSBaseClient {
-    String url;
-    Namespace nmwgNs;
-
-    private Logger log;
+    protected String url;
+    protected Namespace nmwgNs;
+    protected Logger log;
 
     public PSBaseClient(String url) {
         this.url = url;
@@ -54,7 +53,7 @@ public class PSBaseClient {
     public Element sendMessage(String request) {
         Element message = null;
 
-	this.log.info("Sending request: "+request);
+        this.log.info("Sending request: "+request);
 
         if (request.indexOf("SOAP-ENV") == -1) {
             request = this.addSoapEnvelope(request);
@@ -77,7 +76,7 @@ public class PSBaseClient {
 
             String response = postMethod.getResponseBodyAsString();
             ByteArrayInputStream in = new ByteArrayInputStream(response.getBytes());
-	    this.log.info("Received response: "+response);
+            this.log.info("Received response: "+response);
             this.log.info("Parsing start");
             Document responseMessage = xmlParser.build(in);
             this.log.info("Parsing done");
@@ -97,18 +96,10 @@ public class PSBaseClient {
 
         return message;
     }
+    
+    public HashMap <String, Element> createMetaDataMap(List<Element> metadata_elms){
+    	HashMap <String, Element> metadataMap = new HashMap<String, Element>();
 
-    public void parseMessage(Element message, PSMessageEventHandler ev, Object arg) {
-        this.log.info("Looking for metadata");
-
-        String messageType = message.getAttributeValue("type");
-        if (messageType == null) {
-            messageType = "";
-        }
-
-        HashMap <String, Element> metadataMap = new HashMap<String, Element>();
-
-        List<Element> metadata_elms = message.getChildren("metadata", nmwgNs);
         for (Element metadata : metadata_elms) {
             String md_id = metadata.getAttributeValue("id");
             if (md_id == null)
@@ -116,6 +107,20 @@ public class PSBaseClient {
 
             metadataMap.put(md_id, metadata);
         }
+        
+        return metadataMap;
+    }
+    
+    public void parseMessage(Element message, PSMessageEventHandler ev, Object arg) {
+        this.log.info("Looking for metadata");
+
+        String messageType = message.getAttributeValue("type");
+        if (messageType == null) {
+            messageType = "";
+        }
+        
+        List<Element> metadata_elms = message.getChildren("metadata", nmwgNs);
+        HashMap <String, Element> metadataMap = this.createMetaDataMap(metadata_elms);
 
         for (Element metadata : metadata_elms) {
             String md_id = metadata.getAttributeValue("id");
