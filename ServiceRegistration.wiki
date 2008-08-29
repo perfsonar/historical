@@ -366,6 +366,13 @@ In this example the IDC implements the functions of an NB, but is not a seperate
                     
             <nmtb:name>OSCARS IDC</nmtb:name>
             <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+
+             <!-- TBD pending DICE meeting ... 
+                    
+                        http://dice.controlplane.net/nb ?
+                    
+             -->
             <nmtb:type>IDC</nmtb:type>
 
             <!-- This is how we map to a node, this node should exist in the topo/LS either
@@ -512,6 +519,13 @@ This example demonstrates how the IDC will push notifications out to an NB, but 
                     
             <nmtb:name>OSCARS IDC</nmtb:name>
             <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+
+             <!-- TBD pending DICE meeting ... 
+                    
+                        http://dice.controlplane.net/idc ?
+                    
+             -->
             <nmtb:type>IDC</nmtb:type>
 
             <!-- This is how we map to a node, this node should exist in the topo/LS either
@@ -660,6 +674,12 @@ The NB section:
                     
             <nmtb:name>OSCARS NB</nmtb:name>
             <nmtb:description>OSCARS NB, Ann Arbor, MI USA</nmtb:description>
+
+             <!-- TBD pending DICE meeting ... 
+                    
+                        http://dice.controlplane.net/nb ?
+                    
+             -->
             <nmtb:type>NB</nmtb:type>
 
             <!-- This is how we map to a node, this node should exist in the topo/LS either
@@ -756,6 +776,12 @@ This example demonstrates how the IDC will push notifications out to an NB and d
                     
             <nmtb:name>OSCARS IDC</nmtb:name>
             <nmtb:description>OSCARS IDC, Ann Arbor, MI USA</nmtb:description>
+
+             <!-- TBD pending DICE meeting ... 
+                    
+                        http://dice.controlplane.net/idc ?
+                    
+             -->
             <nmtb:type>IDC</nmtb:type>
 
             <!-- This is how we map to a node, this node should exist in the topo/LS either
@@ -873,6 +899,12 @@ The NB section:
                     
             <nmtb:name>OSCARS NB</nmtb:name>
             <nmtb:description>OSCARS NB, Ann Arbor, MI USA</nmtb:description>
+
+             <!-- TBD pending DICE meeting ... 
+                    
+                        http://dice.controlplane.net/nb ?
+                    
+             -->
             <nmtb:type>NB</nmtb:type>
 
             <!-- This is how we map to a node, this node should exist in the topo/LS either
@@ -963,4 +995,3 @@ The NB section:
   * When are parameters protocol specific and when are they service specific?
   * Should there be a hierarchical serviceType element that the protocols are contained within? If so, are we simply creating a service within a service?
   * How should the type of service interact with the protocols that service can speak?
-
