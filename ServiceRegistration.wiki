@@ -15,44 +15,32 @@ might look like for various service cases.
 
 The node istself needs to be registered by _someone_.  Each service should have the logic to:
 
- # Determine with the *gLS* or *hLS* if the node has been registered already.  
+ # Determine with the *gLS*/*hLS* if the node has been registered already
  ## If it cannot be _reasonably_ determined, make/register a new node definition
- ### Reasonable can mean if no results come back for search criteria.
- ### Reasonable can also mean if *too many* results come back to determine if any are correct.
- ## Use one of the returned results, specifically the URI, in your service registration as the node you are on.
+ ### Reasonable can mean if no results come back for search criteria
+ ### Reasonable can also mean if *too many* results come back to determine if any are correct
+ ## Use one of the returned results, specifically the URI, in your service registration as the node you are on
  # Potentially determine if an existing registration exists that matches (if the serivice were rebooted after a configuration change, it should re-register the new info)
 
-Note that this example is taking into consideration the use of the *gLS* as the registration/lookup medium instead of some other form of local resolution (e.g. services trying to determine what other services are on the same machine and coordinating with them).  
+Note that this example is taking into consideration the use of the *gLS* as the registration/lookup medium instead of some other form of local resolution (e.g. services trying to determine what other services are on the same machine and coordinating with them).
 
 The following is a simple node example:
 
 {{{
-<nmtb:node id="vogf:network:domain=internet2.edu:node=lab244"
-           xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-  <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
-  <nmtl3:port>
-    <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
-  </nmtl3:port>
-  <nmtl3:port>
-    <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
-  </nmtl3:port>
-</nmtb:node>
-}}}
+<nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
+           id="urn:ogf:network:domain=internet2.edu:node=lab244">
 
-Another example with more information:
+    <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
 
-{{{
-<nmtb:node id="vogf:network:domain=internet2.edu:node=lab244"
-           xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/">
-  <nmtb:name type="dns">lab244.internet2.edu</nmtb:name>
-  <nmtl3:port>
-    <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
-  </nmtl3:port>
-  <nmtl3:port>
-    <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
-  </nmtl3:port>
+    <nmtl3:port>
+        <nmtl3:address type="ipv4">207.75.164.244</nmtl3:address>
+    </nmtl3:port>
+
+    <nmtl3:port>
+        <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+    </nmtl3:port>
+
 </nmtb:node>
 }}}
 
@@ -114,7 +102,9 @@ The next example fills in some gaps and takes the idea of the port one step furt
         <nmtb:idRef type="node">urn:ogf:network:domain=internet2.edu:node=ndt</nmtb:idRef>
     </nmtb:relation>
 
-        <!-- this is a little more exact, we are defining an actual port here (many things may run on this) -->
+        <!-- this is a little more exact, we are defining an actual port here
+             (many things may run on this), it could also be a topo lookup if
+             it existed already -->
     <nmtb:port id="urn:ogf:network:domain=internet2.edu:node=ndt:port=tcp_7123">
         <nmtb:address type="uri">tcp://207.75.164.244:7123</nmtb:address>
         <nmtb:address type="uri">tcp://[2001:468:1420:3:214:22ff:fe72:8ae6]:7123</nmtb:address>
@@ -128,7 +118,7 @@ The next example fills in some gaps and takes the idea of the port one step furt
         <nmtb:address type="url">http://207.75.164.244:7123</nmtb:address>
         <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:7123</nmtb:address>
         
-            <!-- we wold reference it here, it could also be a topo lookup if it existed already -->
+            <!-- we would reference the port here -->
         <nmtb:relation name="runsOn">
             <nmtb:idRef type="port">urn:ogf:network:domain=internet2.edu:node=ndt:port=tcp_7123</nmtb:idRef>
         </nmtb:relation>
@@ -159,7 +149,6 @@ The next example fills in some gaps and takes the idea of the port one step furt
 BWCTL will work in the same manner.  This particular example does feature the extended port idea.
 
 {{{
-<!-- BWCTL Service. Speaks version 1.3 of the protocol -->
 <nmtb:service id="urn:ogf:network:domain=internet2.edu:node=lab244:service=BWCTL">
     <nmtb:name>Internet2 BWCTL Server</nmtb:name>
     <nmtb:description>BWCTL Server at Internet2 in Ann Arbor, MI USA</nmtb:description>
@@ -178,7 +167,7 @@ BWCTL will work in the same manner.  This particular example does feature the ex
     <nmtb:port> 
         <nmtb:address type="uri">tcp://64.57.17.34:4823</nmtb:address>
         
-            <!-- we wold reference it here, it could also be a topo lookup if it existed already -->
+            <!-- we wold reference it here -->
         <nmtb:relation name="runsOn">
             <nmtb:idRef type="port">urn:ogf:network:domain=internet2.edu:node=lab244:port=tcp_4823</nmtb:idRef>
         </nmtb:relation>
@@ -304,9 +293,11 @@ PingER is the first perfSONAR service, but note we are using the _generic_ servi
     </nmtb:port>    
 
 </nmtb:service>
+}}}
 
+And for the PingER MP.
 
-
+{{{
 <nmtb:service id="urn:ogf:network:domain=internet2.edu:node=lab244:service=PingER_MP">
 
     <nmtb:name>Internet2 PingER MP</nmtb:name>
@@ -359,7 +350,8 @@ In this example the IDC implements the functions of an NB, but is not a seperate
 <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                id="meta1">
 
-    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/"
+                 id="sub1">
 
         <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
                       id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC">
@@ -370,8 +362,7 @@ In this example the IDC implements the functions of an NB, but is not a seperate
 
              <!-- TBD pending DICE meeting ... 
                     
-                        http://dice.controlplane.net/nb ?
-                    
+                        http://dice.controlplane.net/idc/0.4 ?
              -->
             <nmtb:type>IDC</nmtb:type>
 
@@ -438,7 +429,7 @@ In this example the IDC implements the functions of an NB, but is not a seperate
             </nmtb:port>
 
 
-                <!-- I like notifications, I accept notifications from the cats i am 'subscribed' to above (NBs/IDCS) -->
+                <!-- I like notifications, I accept notifications from the folks i am 'subscribed' to above (NBs/IDCS) -->
             <nmtb:port>
                 <nmtb:address type="url">https://test-idc.internet2.edu:8443/axis2/services/OSCARS</nmtb:address>
                 <nmtb:address type="url">http://[2001:468:1420:3:214:22ff:fe72:8ae6]:8443/axis2/services/OSCARS</nmtb:address>
@@ -524,7 +515,6 @@ This example demonstrates how the IDC will push notifications out to an NB, but 
              <!-- TBD pending DICE meeting ... 
                     
                         http://dice.controlplane.net/idc ?
-                    
              -->
             <nmtb:type>IDC</nmtb:type>
 
@@ -677,7 +667,7 @@ The NB section:
 
              <!-- TBD pending DICE meeting ... 
                     
-                        http://dice.controlplane.net/nb ?
+                        http://dice.controlplane.net/nb/0.4 ?
                     
              -->
             <nmtb:type>NB</nmtb:type>
@@ -769,7 +759,8 @@ This example demonstrates how the IDC will push notifications out to an NB and d
 <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                id="meta1">
 
-    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/"
+                 id="sub1">
 
         <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
                       id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_IDC">
@@ -779,8 +770,7 @@ This example demonstrates how the IDC will push notifications out to an NB and d
 
              <!-- TBD pending DICE meeting ... 
                     
-                        http://dice.controlplane.net/idc ?
-                    
+                        http://dice.controlplane.net/idc/0.4 ?
              -->
             <nmtb:type>IDC</nmtb:type>
 
@@ -892,7 +882,8 @@ The NB section:
 <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
                id="meta1">
 
-    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/"
+                 id="sub1">
 
         <nmtb:service xmlns:nmtb="http://ogf.org/schema/network/base/20070828/"
                       id="urn:ogf:network:domain=internet2.edu:node=test-idc:service=OSCARS_NB">
@@ -902,8 +893,7 @@ The NB section:
 
              <!-- TBD pending DICE meeting ... 
                     
-                        http://dice.controlplane.net/nb ?
-                    
+                        http://dice.controlplane.net/nb/0.4 ?
              -->
             <nmtb:type>NB</nmtb:type>
 
@@ -990,7 +980,6 @@ The NB section:
 = Open Questions =
 
   * What is the 1.0 version of the perfsonar protocol?
-  * Should the parameters bags be typed?
   * Should the parameter names be hierarchically defined?
   * When are parameters protocol specific and when are they service specific?
   * Should there be a hierarchical serviceType element that the protocols are contained within? If so, are we simply creating a service within a service?
