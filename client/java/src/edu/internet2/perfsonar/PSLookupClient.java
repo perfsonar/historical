@@ -15,10 +15,11 @@ import org.jdom.Namespace;
  * A generic client for sending requests to the Lookup Service.
  */
 public class PSLookupClient extends PSBaseClient{
-	private Namespace nmwgNs;
-	private Namespace psNs;
-	private Namespace psServiceNs;
-	private Namespace xqueryNs;
+	protected Namespace nmwgNs;
+	protected Namespace psNs;
+	protected Namespace psServiceNs;
+	protected Namespace xqueryNs;
+	protected Namespace nmwgrNs;
 	
 	private final String REGISTER_REQ = 
 		"<nmwg:message xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"" +
@@ -42,6 +43,7 @@ public class PSLookupClient extends PSBaseClient{
 	public PSLookupClient(String url) {
 		super(url);
 		this.nmwgNs = Namespace.getNamespace("nmwg", "http://ggf.org/ns/nmwg/base/2.0/");
+		this.nmwgrNs = Namespace.getNamespace("nmwgr", "http://ggf.org/ns/nmwg/result/2.0/");
 		this.psNs = Namespace.getNamespace("perfsonar", "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/");
 		this.psServiceNs = Namespace.getNamespace("psservice", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/");
 		this.xqueryNs = Namespace.getNamespace("xquery", "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0/");
@@ -89,8 +91,7 @@ public class PSLookupClient extends PSBaseClient{
 		String request = QUERY_REQ;
 		String msgId = "message" + msgBody.hashCode() + "-" + System.currentTimeMillis();
 		request = request.replaceAll("<!--msgId-->", msgId);
-		request = request.replaceAll("<!--body-->", msgBody);
-		
+		request = request.replaceAll("<!--body-->", msgBody.replaceAll("[\\$]", "\\\\\\$"));
 		return this.sendMessage(request);
 	}
 	
@@ -124,9 +125,11 @@ public class PSLookupClient extends PSBaseClient{
 	 * 
 	 * @param url the location of the hints file
 	 * @return the list of gLS instances in the same order as listed in the hints file
+	 * @throws IOException 
+	 * @throws HttpException 
 	 */
-	public String[] getGlobalHints(String url){
-		return this.getGlobalHints(url, false);
+	public static String[] getGlobalHints(String url) throws HttpException, IOException{
+		return PSLookupClient.getGlobalHints(url, false);
 	}
 	
 	/**
@@ -137,24 +140,21 @@ public class PSLookupClient extends PSBaseClient{
 	 * @param url the location of the hints file
 	 * @param randomOrder if true then will randomly re-order gLS in hints file, if false then they are returned in the same order as listed in the file
 	 * @return the list of gLS instances
+	 * @throws IOException 
+	 * @throws HttpException 
 	 */
-	public String[] getGlobalHints(String url, boolean randomOrder){
+	public static String[] getGlobalHints(String url, boolean randomOrder) throws HttpException, IOException{
 		String[] glsList = new String[0];
 		HttpClient client = new HttpClient();
 		PostMethod postMethod = new PostMethod(url);
-		try {
-			int status = client.executeMethod(postMethod);
-			if(status != 200){
-				throw new HttpException("Bad status returned: " + status);
-			}
-			String response = postMethod.getResponseBodyAsString();
-			glsList = response.split("\n");
-		} catch (HttpException e) {
-			this.log.error(e);
-		} catch (IOException e) {
-			this.log.error(e);
-		}
 		
+		int status = client.executeMethod(postMethod);
+		if(status != 200){
+			throw new HttpException("Bad status returned: " + status);
+		}
+		String response = postMethod.getResponseBodyAsString();
+		glsList = response.split("\n");
+	
 		if(randomOrder){
 			ArrayList<String> tmp = new ArrayList<String>();
 			Random rand = new Random();
@@ -172,7 +172,14 @@ public class PSLookupClient extends PSBaseClient{
 	public Namespace getNmwgNs() {
 		return nmwgNs;
 	}
-
+	
+	/**
+	 * @return the namespace for the NMWG result schema
+	 */
+	public Namespace getNmwgrNs() {
+		return nmwgrNs;
+	}
+	
 	/**
 	 * @return the namespace for the perfSONAR schema
 	 */

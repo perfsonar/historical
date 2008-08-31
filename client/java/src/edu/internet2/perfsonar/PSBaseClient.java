@@ -140,4 +140,13 @@ public class PSBaseClient {
             }
         }
     }
+    
+    public Element parseDatum(Element message, Namespace ns) throws PSException{
+    	Element data = message.getChild("data", this.nmwgNs);
+    	if(data == null){
+    		return null;
+    	}
+    	Element datum = data.getChild("datum", ns);
+    	return datum;
+     }
 }
