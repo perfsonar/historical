@@ -11,6 +11,7 @@ import org.jdom.Element;
 
 import edu.internet2.perfsonar.PSException;
 import edu.internet2.perfsonar.PSLookupClient;
+import edu.internet2.perfsonar.PSNamespaces;
 
 /**
  * Performs lookup operations useful for dynamic circuits netwoking (DCN)
@@ -22,6 +23,7 @@ public class DCNLookupClient{
 	private String[] gLSList;
 	private String[] hLSList;
 	private boolean tryAllGlobal;
+	private PSNamespaces psNS;
 	
 	private String REQUEST = "<nmwg:metadata id=\"meta1\">" +
 		"<xquery:subject id=\"sub1\">" +
@@ -65,6 +67,7 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = null;
 		this.tryAllGlobal = false;
+		this.psNS = new PSNamespaces();
 	}
 	
 	/**
@@ -125,7 +128,7 @@ public class DCNLookupClient{
         	this.log.info("hLS: " + hLS);
         	PSLookupClient lsClient = new PSLookupClient(hLS);
         	Element response = lsClient.query(request);
-        	Element datum = lsClient.parseDatum(response, lsClient.getPsServiceNs());
+        	Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
         	if(datum != null && urn != datum.getText()){
         		urn = datum.getText();
         		break;
@@ -155,16 +158,16 @@ public class DCNLookupClient{
 			try{
 				PSLookupClient lsClient = new PSLookupClient(this.gLSList[a]);
 		        Element response = lsClient.query(request);
-		        Element metaData = response.getChild("metadata", lsClient.getNmwgNs());
+		        Element metaData = response.getChild("metadata", psNS.NMWG);
 		        
 		        if(metaData == null){
 		        	throw new PSException("No metadata element in discovery response");
 		        }
-		        Element eventType = metaData.getChild("eventType", lsClient.getNmwgNs());
+		        Element eventType = metaData.getChild("eventType", psNS.NMWG);
 		        if(eventType == null){
 		        	throw new PSException("No eventType returned");
 		        }else if(eventType.getText().startsWith("error.ls")){
-		        	Element errDatum = lsClient.parseDatum(response, lsClient.getNmwgrNs());
+		        	Element errDatum = lsClient.parseDatum(response, psNS.NMWG_RESULT);
 		        	String errMsg = (errDatum == null ? "An unknown error occurred" : errDatum.getText());
 		        	this.log.error(eventType.getText() + ": " + errMsg);
 		        	throw new PSException("Global discovery error: " + errMsg);
@@ -173,11 +176,11 @@ public class DCNLookupClient{
 		        						  "returned an unrecognized status");
 		        }
 		        
-		        Element datum = lsClient.parseDatum(response, lsClient.getPsServiceNs());
+		        Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
 		        if(datum == null){
 		        	throw new PSException("No service datum returned from discovery request");
 		        }
-		        List<Element> accessPointElems = datum.getChildren("accessPoint", lsClient.getPsServiceNs());
+		        List<Element> accessPointElems = datum.getChildren("accessPoint", psNS.PS_SERVICE);
 		        for(int i = 0; i < accessPointElems.size(); i++){
 		        	apMap.put(accessPointElems.get(i).getTextTrim(), true);
 		        }

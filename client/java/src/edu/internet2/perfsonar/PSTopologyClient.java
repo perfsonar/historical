@@ -10,10 +10,9 @@ public class PSTopologyClient implements PSMessageEventHandler {
     String url;
     Element topology;
     PSBaseClient ps_client;
-    Namespace nmwgNs;
-    Namespace topoNs;
     boolean addReplaceSuccess;
-
+    PSNamespaces psNS;
+    
     private Logger log;
     private String topo_get_all_str =
             "<nmwg:message type=\"QueryRequest\" "+
@@ -37,8 +36,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
     public PSTopologyClient(String url) {
         this.ps_client = new PSBaseClient(url);
         this.log = Logger.getLogger(this.getClass());
-        this.nmwgNs = Namespace.getNamespace("nmwg", "http://ggf.org/ns/nmwg/base/2.0/");
-        this.topoNs = Namespace.getNamespace("nmtopo", "http://ogf.org/schema/network/topology/base/20070828/");
+        this.psNS = new PSNamespaces();
     }
 
     public Element getTopology() {
@@ -51,9 +49,9 @@ public class PSTopologyClient implements PSMessageEventHandler {
 
     public boolean addReplaceDomain(String domStr) {
         String topoStr =
-            "<"+this.topoNs.getPrefix()+":topology xmlns:"+this.topoNs.getPrefix()+"=\""+this.topoNs.getURI()+"\">\n" +
+            "<"+this.psNS.TOPO.getPrefix()+":topology xmlns:"+this.psNS.TOPO.getPrefix()+"=\""+this.psNS.TOPO.getURI()+"\">\n" +
             domStr +
-            "</"+this.topoNs.getPrefix()+":topology>";
+            "</"+this.psNS.TOPO.getPrefix()+":topology>";
         String request = new String(topo_replace_str).replaceAll("<!--topology-->", topoStr);
 
         this.log.info("Request post replaceAll: "+request);
@@ -72,7 +70,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
     public void handleMetadataDataPair(Element metadata, Element data, HashMap <String, Element> metadataMap, String messageType, Object arg) {
 
         if (messageType.equals("QueryResponse")) {
-            Element eventType_elm = metadata.getChild("eventType", nmwgNs);
+            Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
             if (eventType_elm == null) {
                 this.log.info("The metadata/data pair doesn't have an event type");
                 return;
@@ -83,7 +81,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
                 return;
             }
 
-            Element topo = data.getChild("topology", topoNs);
+            Element topo = data.getChild("topology", this.psNS.TOPO);
 
             if (topo == null) {
                 this.log.info("No topology located in data");
@@ -92,7 +90,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
 
             this.topology = topo;
         } else if (messageType.equals("TSReplaceResponse")) {
-            Element eventType_elm = metadata.getChild("eventType", nmwgNs);
+            Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
             if (eventType_elm == null) {
                 this.log.error("Received a metadata/data pair without an event type");
             }

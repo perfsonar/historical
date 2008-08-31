@@ -17,13 +17,13 @@ import org.jdom.xpath.XPath;
 
 public class PSBaseClient {
     protected String url;
-    protected Namespace nmwgNs;
     protected Logger log;
-
+    protected PSNamespaces psNS;
+    
     public PSBaseClient(String url) {
         this.url = url;
         this.log = Logger.getLogger(this.getClass());
-        this.nmwgNs = Namespace.getNamespace("nmwg", "http://ggf.org/ns/nmwg/base/2.0/");
+        this.psNS = new PSNamespaces();
     }
 
     private String addSoapEnvelope(String request) {
@@ -83,7 +83,7 @@ public class PSBaseClient {
 
             this.log.info("Looking for message");
             XPath xpath = XPath.newInstance("//nmwg:message");
-            xpath.addNamespace(this.nmwgNs.getPrefix(), this.nmwgNs.getURI());
+            xpath.addNamespace(psNS.NMWG);
 
             message = (Element) xpath.selectSingleNode(responseMessage.getRootElement());
         } catch (Exception e) {
@@ -119,7 +119,7 @@ public class PSBaseClient {
             messageType = "";
         }
         
-        List<Element> metadata_elms = message.getChildren("metadata", nmwgNs);
+        List<Element> metadata_elms = message.getChildren("metadata", psNS.NMWG);
         HashMap <String, Element> metadataMap = this.createMetaDataMap(metadata_elms);
 
         for (Element metadata : metadata_elms) {
@@ -127,7 +127,7 @@ public class PSBaseClient {
             if (md_id == null)
                 continue;
 
-            List<Element> data_elms = message.getChildren("data", nmwgNs);
+            List<Element> data_elms = message.getChildren("data", psNS.NMWG);
             for (Element data : data_elms) {
                 String md_idRef = data.getAttributeValue("metadataIdRef");
 
@@ -142,7 +142,7 @@ public class PSBaseClient {
     }
     
     public Element parseDatum(Element message, Namespace ns) throws PSException{
-    	Element data = message.getChild("data", this.nmwgNs);
+    	Element data = message.getChild("data", psNS.NMWG);
     	if(data == null){
     		return null;
     	}
