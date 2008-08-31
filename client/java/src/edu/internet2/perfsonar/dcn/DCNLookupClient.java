@@ -1,6 +1,11 @@
 package edu.internet2.perfsonar.dcn;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,10 +13,16 @@ import java.util.List;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+import org.jdom.output.XMLOutputter;
+import org.jdom.xpath.XPath;
 
+import edu.internet2.perfsonar.NodeRegistration;
 import edu.internet2.perfsonar.PSException;
 import edu.internet2.perfsonar.PSLookupClient;
 import edu.internet2.perfsonar.PSNamespaces;
+import edu.internet2.perfsonar.ServiceRegistration;
 
 /**
  * Performs lookup operations useful for dynamic circuits netwoking (DCN)
@@ -23,18 +34,15 @@ public class DCNLookupClient{
 	private String[] gLSList;
 	private String[] hLSList;
 	private boolean tryAllGlobal;
+	private boolean useGlobalLS;
 	private PSNamespaces psNS;
 	
-	private String REQUEST = "<nmwg:metadata id=\"meta1\">" +
-		"<xquery:subject id=\"sub1\">" +
-		"<!--xquery-->" +
-		"</xquery:subject>" +
-		"<nmwg:eventType>http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0</nmwg:eventType>" +
-		"<xquery:parameters id=\"param1\">" +
-		"<nmwg:parameter name=\"lsOutput\">native</nmwg:parameter>" +
-		"</xquery:parameters>" +
-		"</nmwg:metadata>" +
-		"<nmwg:data metadataIdRef=\"meta1\" id=\"data1\"/>";
+	static final private String IDC_SERVICE_TYPE = "IDC";
+	static final private String PROTO_OSCARS = "http://oscars.es.net/OSCARS";
+	static final private String PROTO_WSN = "http://docs.oasis-open.org/wsn/b-2";
+	static final private String PARAM_SUPPORTED_MSG = "keyword:supportedMessage";
+	static final private String PARAM_TOPIC = "keyword:topic";
+
 	private String HOST_DISC_XQUERY = 
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
 		"declare namespace summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\";\n" +
@@ -67,6 +75,29 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = null;
 		this.tryAllGlobal = false;
+		this.useGlobalLS = true;
+		this.psNS = new PSNamespaces();
+	}
+	
+	/**
+	 * Creates a new client with the list of Global lookup services to 
+	 * contact determined by reading the hints file at the provided URL.
+	 * The result returned by the list file will be randomly re-ordered.
+	 * All registration requests will use the home lookup services listed
+	 * in the second parameter
+	 * 
+	 * @param hintsFile the URL of the hints file to use to populate the list of global lookup services
+	 * @param hLSList the list of home lookup services to which to send register requests
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	public DCNLookupClient(String hintsFile, String[] hLSList) throws HttpException, IOException {
+		this.log = Logger.getLogger(this.getClass());
+		String[] gLSList = PSLookupClient.getGlobalHints(hintsFile, true);
+		this.gLSList = gLSList;
+		this.hLSList = hLSList;
+		this.tryAllGlobal = false;
+		this.useGlobalLS = true;
 		this.psNS = new PSNamespaces();
 	}
 	
@@ -111,19 +142,18 @@ public class DCNLookupClient{
 	public String lookupHost(String name) throws PSException{
 		String urn = null;
 		String[] hLSMatches = this.hLSList;
-		if(hLSList == null){
-			String discoveryReq = REQUEST;
+		if(useGlobalLS || hLSList == null){
 			String discoveryXQuery = HOST_DISC_XQUERY;
-			String domain = name.replaceFirst("(.+\\.)?", "");
+			String domain = name.replaceFirst(".+?\\.", "");
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
-			discoveryReq = discoveryReq.replaceAll("<!--xquery-->", discoveryXQuery.replaceAll("[\\$]", "\\\\\\$"));
-			hLSMatches = this.discover(discoveryReq);
+			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
+			hLSMatches = this.discover(this.requestString(discReqElem, null));
 		}
 		
-        String request = REQUEST;
         String xquery = HOST_XQUERY;
         xquery = xquery.replaceAll("<!--hostname-->", name);
-        request = request.replaceAll("<!--xquery-->", xquery);
+        Element reqElem = this.createQueryMetaData(xquery);
+        String request = this.requestString(reqElem, null);
         for(String hLS : hLSMatches){
         	this.log.info("hLS: " + hLS);
         	PSLookupClient lsClient = new PSLookupClient(hLS);
@@ -137,7 +167,7 @@ public class DCNLookupClient{
         
         return urn;
 	}
-	
+
 	/**
 	 * Contacts a global lookup service(s) to get the list of home lookup
 	 * services possible containing desired data. If the "tryAllGlobals"
@@ -209,7 +239,124 @@ public class DCNLookupClient{
 		
 		return accessPoints;
 	}
-
+	
+	/**
+	 * Registers a "Node" element with the lookup service
+	 * 
+	 * @param reg a NodeRegistration object with the information to register
+	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @throws PSException
+	 */
+	public HashMap<String,String> registerNode(NodeRegistration reg) throws PSException{
+		Element metaDataElem = this.createMetaData(null);
+		metaDataElem.addContent(reg.getNodeElem());
+		return this.register(metaDataElem);
+	}
+	
+	/**
+	 * Registers a service such as an IDC or NotificationBroker with the lookup service
+	 * 
+	 * @param reg a ServiceRegistration object with the details to register
+	 * @returna HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @throws PSException
+	 */
+	public HashMap<String,String> registerService(ServiceRegistration reg) throws PSException{
+		Element metaDataElem = this.createMetaData(this.psNS.DCN);
+		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
+		subjElem.addContent(reg.getServiceElem());
+		if(reg.getOptionalParamsElem() != null){
+			subjElem.addContent(reg.getOptionalParamsElem());
+		}
+		
+		return this.register(metaDataElem);
+	}
+	
+	/**
+	 * General registration method that handles creating the top-level metadata and data
+	 * and inserts the given metadata to register and an empty data element into the 
+	 * top-level structure.
+	 * 
+	 * @param metaDataElem the metaData to register
+	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @throws PSException
+	 */
+	private HashMap<String, String> register(Element metaDataElem) throws PSException{
+		HashMap<String,String> keys = new HashMap<String,String>();
+		if(hLSList == null){
+			throw new PSException("No home lookup services specified!");
+		}
+		
+		ArrayList<Element> elems = new ArrayList<Element>(2);
+		elems.add(metaDataElem);
+		//Create empty data
+		Element emptyDataElem = new Element("data", this.psNS.NMWG);
+		emptyDataElem.setAttribute("metadataIdRef", metaDataElem.getAttributeValue("id"));
+		emptyDataElem.setAttribute("id", "data"+emptyDataElem.hashCode());
+		elems.add(emptyDataElem);
+		
+		for(String hLS : hLSList){
+			Element regMetaData = this.createRegisterMetadata(hLS);
+			String request = this.requestString(regMetaData, elems);
+			PSLookupClient lsClient = new PSLookupClient(hLS);
+			Element response = lsClient.register(request, null);
+			Element metaData = response.getChild("metadata", psNS.NMWG);
+	        if(metaData == null){
+	        	throw new PSException("No metadata element in registration response");
+	        }
+	        Element eventType = metaData.getChild("eventType", psNS.NMWG);
+	        if(eventType == null){
+	        	throw new PSException("No eventType returned");
+	        }else if(eventType.getText().startsWith("error.ls")){
+	        	Element errDatum = lsClient.parseDatum(response, psNS.NMWG_RESULT);
+	        	String errMsg = (errDatum == null ? "An unknown error occurred" : errDatum.getText());
+	        	this.log.error(eventType.getText() + ": " + errMsg);
+	        	throw new PSException("Registration error: " + errMsg);
+	        }else if(!"success.ls.register".equals(eventType.getText())){
+	        	throw new PSException("Registration returned an unrecognized status");
+	        }
+	        
+	        //Get keys
+	        XPath xpath;
+			try {
+				xpath = XPath.newInstance("nmwg:metadata/nmwg:key/nmwg:parameters/nmwg:parameter[@name='lsKey']");
+				xpath.addNamespace(psNS.NMWG);
+	            Element keyParam = (Element) xpath.selectSingleNode(response);
+	            if(keyParam == null){
+	            	throw new PSException("No key in the response");
+	            }
+	            keys.put(hLS, keyParam.getText());
+	            this.log.debug(hLS +"="+keyParam.getText());
+			} catch (JDOMException e) {
+				this.log.error(e);
+				throw new PSException(e);
+			}
+		}
+		
+		return keys;
+	}
+	
+	/**
+	 * Creates the topo-level metadata with the home LS information
+	 * reuired for registering any data
+	 * 
+	 * @param hLS the URL of the home LS
+	 * @return the generated metadat element
+	 */
+	private Element createRegisterMetadata(String hLS){
+		Element regMetaElem = this.createMetaData(this.psNS.PS);
+		Element serviceElem = new Element("service", this.psNS.PS_SERVICE);
+		Element ap = new Element("accessPoint", this.psNS.PS_SERVICE);
+		ap.setText(hLS);
+		serviceElem.addContent(ap);
+		Element type = new Element("serviceType", this.psNS.PS_SERVICE);
+		type.setText("LS");
+		serviceElem.addContent(type);
+		regMetaElem.getChild("subject",this.psNS.PS).addContent(serviceElem);
+		
+		return regMetaElem;
+		
+	}
+	
 	/**
 	 * @return the list of global lookup services
 	 */
@@ -252,5 +399,85 @@ public class DCNLookupClient{
 	 */
 	public void setTryAllGlobal(boolean tryAllGlobal) {
 		this.tryAllGlobal = tryAllGlobal;
+	}
+	
+	/**
+	 * @return true if uses global LS to discover hLS for queries
+	 */
+	public boolean usesGlobalLS() {
+		return useGlobalLS;
+	}
+
+	/**
+	 * @param useGlobalLS true if uses global LS to discover hLS for queries
+	 */
+	public void setUseGlobalLS(boolean useGlobalLS) {
+		this.useGlobalLS = useGlobalLS;
+	}
+	
+	/**
+	 * Generates a new metadata element
+	 * 
+	 * @param ns the namespace of the subject. if null then no subject
+	 * @return the generated metadata
+	 */
+	private Element createMetaData(Namespace ns){
+		Element metaDataElem = new Element("metadata", this.psNS.NMWG);
+		metaDataElem.setAttribute("id", "meta" + metaDataElem.hashCode());
+		if(ns != null){
+			Element subjElem = new Element("subject", ns);
+			subjElem.setAttribute("id", "subj"+subjElem.hashCode());
+			metaDataElem.addContent(subjElem);
+		}
+		return metaDataElem;
+	}
+	
+	/**
+	 * Generates a new query metadata element
+	 * 
+	 * @param query the XQuery to send
+	 * @return the generated metadata
+	 */
+	private Element createQueryMetaData(String query){
+		Element metaDataElem = this.createMetaData(this.psNS.XQUERY);
+		metaDataElem.getChild("subject", this.psNS.XQUERY).setText(query);
+		Element eventType = new Element("eventType", this.psNS.NMWG);
+		eventType.setText("http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0");
+		metaDataElem.addContent(eventType);
+		Element paramsElem = new Element("parameters", this.psNS.XQUERY);
+		paramsElem.setAttribute("id", "params"+paramsElem.hashCode());
+		Element paramElem = new Element("parameter", this.psNS.NMWG);
+		paramElem.setAttribute("name", "lsOutput");
+		paramElem.setText("native");
+		paramsElem.addContent(paramElem);
+		metaDataElem.addContent(paramsElem);
+		return metaDataElem;
+	}
+	
+	/**
+	 * Converts a metadata element to a String
+	 * 
+	 * @param elem the metadata element to convert to a string
+	 * @param addData if true then add empty data element
+	 * @return the metadata and data as a string
+	 */
+	private String requestString(Element metaData, List<Element> data) {
+		XMLOutputter xmlOut = new XMLOutputter();
+		StringWriter sw = new StringWriter();
+		String result = "";
+		
+		try {
+			xmlOut.output(metaData, sw);
+			Element dataElem = new Element("data", this.psNS.NMWG);
+			dataElem.setAttribute("metadataIdRef", metaData.getAttributeValue("id"));
+			dataElem.setAttribute("id", "data"+dataElem.hashCode());
+			if(data != null){
+				dataElem.addContent(data);
+			}
+			xmlOut.output(dataElem, sw);
+			result = sw.toString();
+		} catch (IOException e) {}
+		
+		return result;
 	}
 }
