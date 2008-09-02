@@ -329,7 +329,7 @@ sub removeEndPointById {
     my ($self, $id) = @_;
     if(ref($self->get_endPoint) eq 'ARRAY' && $self->get_idmap->{endPoint} &&  exists $self->get_idmap->{endPoint}{$id}) {
         undef $self->get_endPoint->[$self->get_idmap->{endPoint}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->endPoint};
+        my @tmp =  grep { defined $_ } @{$self->get_endPoint};
         $self->set_endPoint([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

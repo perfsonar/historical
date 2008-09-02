@@ -469,7 +469,7 @@ sub removeCommonTimeById {
     my ($self, $id) = @_;
     if(ref($self->get_commonTime) eq 'ARRAY' && $self->get_idmap->{commonTime} &&  exists $self->get_idmap->{commonTime}{$id}) {
         undef $self->get_commonTime->[$self->get_idmap->{commonTime}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->commonTime};
+        my @tmp =  grep { defined $_ } @{$self->get_commonTime};
         $self->set_commonTime([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
@@ -540,7 +540,7 @@ sub removeDatumById {
     my ($self, $id) = @_;
     if(ref($self->get_datum) eq 'ARRAY' && $self->get_idmap->{datum} &&  exists $self->get_idmap->{datum}{$id}) {
         undef $self->get_datum->[$self->get_idmap->{datum}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->datum};
+        my @tmp =  grep { defined $_ } @{$self->get_datum};
         $self->set_datum([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

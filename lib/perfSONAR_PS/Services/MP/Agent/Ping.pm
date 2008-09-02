@@ -55,25 +55,24 @@ Creates a new ping agent class
 
 =cut
 
-sub new
-{
-	my $package = shift;
-	
-	my %hash = ();
-	# grab from the global variable
+sub new {
+    my $package = shift;
+
+    my %hash = ();
+     # grab from the global variable
     if(defined $command and $command ne "") {
-      $hash{"CMD"} = $command;
+        $hash{"CMD"} = $command;
     }
     $hash{"OPTIONS"} = {
-		'transport'	=> 'ICMP',
-		'count'		=> 10,
-		'interval'	=> 1,
-		'packetSize'	=> 1000,
-		'ttl'	=> 255,
-	};
-  	%{$hash{"RESULTS"}} = ();
+		         'transport'	=> 'ICMP',
+		         'count'		=> 10,
+		         'interval'	=> 1,
+		         'packetSize'	=> 1000,
+		         'ttl'	=> 255,
+	               };
+    %{$hash{"RESULTS"}} = ();
 
-  	bless \%hash => $package;
+    bless \%hash => $package;
 }
 
 
@@ -85,13 +84,13 @@ sub new
 accessor/mutator method to set the number of packets to ping to
 
 =cut
-sub count
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{count} = shift;
-	}
-	return $self->{'OPTIONS'}->{count};
+
+sub count {
+    my $self = shift;
+    if ( @_ ) {
+    	$self->{'OPTIONS'}->{count} = shift;
+    }
+    return $self->{'OPTIONS'}->{count};
 }
 
 =head2 interval( $string )
@@ -99,13 +98,13 @@ sub count
 accessor/mutator method to set the period between packet pings
 
 =cut
-sub interval
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{interval} = shift;
-	}
-	return $self->{'OPTIONS'}->{interval};
+
+sub interval{
+    my $self = shift;
+    if ( @_ ) {
+ 	$self->{'OPTIONS'}->{interval} = shift;
+    }
+    return $self->{'OPTIONS'}->{interval};
 }
 
 
@@ -114,10 +113,10 @@ sub interval
 accessor/mutator method to set the period between packet pings
 
 =cut
-sub packetInterval
-{
-	my $self = shift;
-	return $self->interval( @_ );
+
+sub packetInterval {
+    my $self = shift;
+    return $self->interval( @_ );
 }
 
 
@@ -127,13 +126,12 @@ sub packetInterval
 accessor/mutator method to set the deadline value of the pings
 
 =cut
-sub deadline
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{deadline} = shift;
-	}
-	return $self->{'OPTIONS'}->{deadline};
+sub deadline {
+    my $self = shift;
+    if ( @_ ) {
+    	$self->{'OPTIONS'}->{deadline} = shift;
+    }
+    return $self->{'OPTIONS'}->{deadline};
 }
 
 =head2 packetSize( $string )
@@ -141,13 +139,12 @@ sub deadline
 accessor/mutator method to set the packetSize of the pings
 
 =cut
-sub packetSize
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{packetSize} = shift;
-	}
-	return $self->{'OPTIONS'}->{packetSize};
+sub packetSize {
+    my $self = shift;
+    if ( @_ ) {
+    	$self->{'OPTIONS'}->{packetSize} = shift;
+    }
+    return $self->{'OPTIONS'}->{packetSize};
 }
 
 =head2 ttl( $string )
@@ -155,14 +152,13 @@ sub packetSize
 accessor/mutator method to set the ttl of the pings
 
 =cut
-sub ttl
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{ttl} = shift;
-	}
+sub ttl {
+    my $self = shift;
+    if ( @_ ) {
+ 	$self->{'OPTIONS'}->{ttl} = shift;
+    }
 
-	return $self->{'OPTIONS'}->{ttl};
+    return $self->{'OPTIONS'}->{ttl};
 }
 
 =head2 ttl( $string )
@@ -170,13 +166,12 @@ sub ttl
 accessor/mutator method to set the ttl of the pings
 
 =cut
-sub transport
-{
-	my $self = shift;
-	if ( @_ ) {
-		$self->{'OPTIONS'}->{ttl} = shift;
-	}
-	return $self->{'OPTIONS'}->{ttl};
+sub transport {
+    my $self = shift;
+    if ( @_ ) {
+    	$self->{'OPTIONS'}->{ttl} = shift;
+    }
+    return $self->{'OPTIONS'}->{ttl};
 }
 
 
@@ -187,87 +182,83 @@ parses the output from a command line measurement of pings
 
 =cut
 
-sub parse
-{
-	my $self = shift;
-	my $cmdOutput = shift;
+sub parse {
+    my $self = shift;
+    my $cmdOutput = shift;
     # use this as indication of the start of the test in epoch secs
     my $time = shift; # work out start time of time
-	my $endtime = shift;
-	
-	my $cmdRan = shift;
+    my $endtime = shift;
+    my $cmdRan = shift;
 
-	my @pings = ();
-	my @rtts = ();
-	my @seqs = ();
-	
-    for( my $x = 1; $x < scalar @$cmdOutput - 4; $x++ ) {
-    	
+    my @pings = ();
+    my @rtts = ();
+    my @seqs = ();
+
+    for( my $x = 1; $x < scalar @$cmdOutput - 4; $x++ ) {  	
     	$logger->debug( "Analysing line: " . $cmdOutput->[$x] );
     	my @string = split /:/, $cmdOutput->[$x];
     	my $v = {};
     	
-		( $v->{'bytes'} = $string[0] ) =~ s/\s*bytes.*$//;
-		if ( $string[0] =~ m/ from(.*)\((.*)\)/ ) {
-			my $dest = $1;
-			$dest =~ s/\s//g;
-			$self->destination( $dest )
-				if $dest ne '';
-			$self->destinationIp( $2 );
-			$logger->debug( "reformatting destination to '" . $self->destination() 
-					. "' and destination ip '" . $self->destinationIp() . "'" );
-		} 
-			
-		foreach my $t ( split /\s+/, $string[1] ) {
-		  $logger->debug( "looking at $t");
-          if( $t =~ m/(.*)=(\s*\d+\.?\d*)/ ) { 
-	        $v->{$1} = $2;
-	        $logger->debug( "  found $1 with $2");
-          } else {
-            $v->{'units'} = $t; 
-          }
-		}
-		push @pings, { 
-			'timeValue' => $time + eval($v->{'time'}/1000), #timestamp,
-			'value' => $v->{'time'}, # rtt
-			'seqNum' => $v->{'icmp_seq'}, #seq
-			'ttl' => $v->{'ttl'}, #ttl
-			'numBytes' => $v->{'bytes'}, #bytes
-			'units' => $v->{'units'} || 'ms',
-		};
+	( $v->{'bytes'} = $string[0] ) =~ s/\s*bytes.*$//;
+	if ( $string[0] =~ m/ from(.*)\((.*)\)/ ) {
+	    my $dest = $1;
+	    $dest =~ s/\s//g;
+	    $self->destination( $dest )  if $dest ne '';
+	    $self->destinationIp( $2 );
+	    $logger->debug( "reformatting destination to '" . $self->destination() 
+	  		     . "' and destination ip '" . $self->destinationIp() . "'" );
+	} 
+	if($string[1]) { 	 
+	    foreach my $t ( split /\s+/, $string[1] ) {
+		$logger->debug( "looking at $t");
+        	if( $t =~ m/(.*)=(\s*\d+\.?\d*)/ ) { 
+	            $v->{$1} = $2;
+	            $logger->debug( "  found $1 with $2");
+        	 } else {
+                    $v->{'units'} = $t; 
+        	 }
+	    }
+	}
+	my $ms_time = $v->{'time'}?$v->{'time'}:0;
+	push( @rtts,  $ms_time);	 
+  	# next time stamp
+     	$time = $time +  ($ms_time/1000);
 	
-		push( @rtts, $v->{'time'} );
-		push( @seqs, $v->{'icmp_seq'} )
- 			if $v->{'icmp_seq'} =~ /^\d+$/;
-	        	
-  		# next time stamp
-     	$time = $time + eval($v->{'time'}/1000);
-    
+	push @pings, { 
+		'timeValue' => $time, #timestamp,
+		'value' =>  $ms_time, # rtt
+		'seqNum' => $v->{'icmp_seq'}, #seq
+		'ttl' => $v->{'ttl'}, #ttl
+		'numBytes' => $v->{'bytes'}, #bytes
+		'units' => $v->{'units'} || 'ms',
+	};
+        push( @seqs, $v->{'icmp_seq'} ) if $v->{'icmp_seq'} =~ /^\d+$/;
+   
     }
 
-	# get rest of results
-	my ($sent, $meanRtt, $maxRtt, $recv, $minRtt); 
-	# hires results from ping output
-	for( my $x = (scalar @$cmdOutput - 2); $x < (scalar @$cmdOutput) ; $x++ ) {
-		$logger->debug( "Analysing line: " . $cmdOutput->[$x]);
- 		if ( $cmdOutput->[$x] =~ /^(\d+) packets transmitted, (\d+) received/ ) {
-			$sent = $1;
-			$recv = $2;
-        } elsif ( $cmdOutput->[$x] =~ /^rtt min\/avg\/max\/mdev \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
-    		$minRtt = $1; 
-			$meanRtt = $2;
-			$maxRtt = $3;
- 		}
-	}
+    # get rest of results
+    my ($sent, $meanRtt, $maxRtt, $recv, $minRtt); 
+    # hires results from ping output
+    for( my $x = (scalar @$cmdOutput - 2); $x < (scalar @$cmdOutput) ; $x++ ) {
+        $logger->debug( "Analysing line: " . $cmdOutput->[$x]);
+        if ( $cmdOutput->[$x] =~ /(\d+) packets transmitted, (\d+) (packets )?received/ ) {
+      	    $sent = $1;
+      	    $recv = $2;
+        } elsif ( $cmdOutput->[$x] =~ /(rtt|round-trip) min\/avg\/max\/(mdev|stddev) \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
+  	    $minRtt = $1; 
+  	    $meanRtt = $2;
+  	    $maxRtt = $3;
+        }
+    }
 
-	# set the internal results
-	$self->results({
-			   'sent' => $sent, 'recv' => $recv,
-			   'minRtt' => $minRtt, 'meanRtt' => $meanRtt, 'maxRtt' => $maxRtt,
-			   'singletons' => \@pings, 'rtts' => \@rtts, 'seqs' => \@seqs
-		      });
+    # set the internal results
+    $self->results({
+  		       'sent' => $sent, 'recv' => $recv,
+  		       'minRtt' => $minRtt, 'meanRtt' => $meanRtt, 'maxRtt' => $maxRtt,
+  		       'singletons' => \@pings, 'rtts' => \@rtts, 'seqs' => \@seqs
+  		  });
 
-	return 0;
+    return 0;
 }
 
 

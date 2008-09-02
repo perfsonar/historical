@@ -308,7 +308,7 @@ sub registerLS($)
 	# add empty string to register MP
 	push @sendToLS, '';
 	
-	# register with teh ls the info
+	# register with LS
 	return $self->ls()->registerStatic(\@sendToLS);
 }
 
@@ -427,102 +427,101 @@ Returns
   -1 = somethign went wrong
 
 =cut
-sub storeData
-{
-	my $self = shift;
-	my $agent = shift;
-	my $testid = shift;
+sub storeData {
+    my $self = shift;
+    my $agent = shift;
+    my $testid = shift;
 
-	$logger->logdie( "Argument 'agent' is of wrong type")
-		unless blessed $agent && $agent->isa( 'perfSONAR_PS::Services::MP::Agent::Base' );
+    $logger->logdie( "Argument 'agent' is of wrong type")
+    	    unless blessed $agent && $agent->isa( 'perfSONAR_PS::Services::MP::Agent::Base' );
 
-	# remap the rtts and seqs
-	my $rtts = undef;
-	if ( ref $agent->results()->{'rtts'} eq 'ARRAY' ) {
-		$rtts = join ',', @{$agent->results()->{'rtts'}};
-		$logger->debug( "construcing array from rtts '$rtts'");
-	} 
+    # remap the rtts and seqs
+    my $rtts;
+    my $seqs;
+    if($agent->results()) {
+    	if ($agent->results()->{'rtts'} && ref $agent->results()->{'rtts'} eq 'ARRAY' ) {
+    	    $rtts = join ',', @{$agent->results()->{'rtts'}};
+    	    $logger->debug( "construcing array from rtts '$rtts'");
+    	} 
+	if ($agent->results()->{'seqs'} && ref $agent->results()->{'seqs'} eq 'ARRAY' ) {
+    	    $seqs = join ',', @{$agent->results()->{'seqs'}};
+    	    $logger->debug( "construcing array from seqs '$seqs'");
+    	}
+    }
+    # store results
+    my ( $src,$dst,$md,$data);
+    my $ip_name = $agent->source()?$agent->source():$agent->sourceIp();
 
-	my $seqs = undef;
-	if ( ref $agent->results()->{'seqs'} eq 'ARRAY' ) {
-		$seqs = join ',', @{$agent->results()->{'seqs'}};
-		$logger->debug( "construcing array from seqs '$seqs'");
-	}
- 
-	# store results
-	my ( $src,$dst,$md,$data);
-	my $ip_name = $agent->source()?$agent->source():$agent->sourceIp();
-	
-	eval {
-	    $src = $self->database()->soi_host({ ip_name => $ip_name, ip_number =>   $agent->sourceIp() });
-	};
-	if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
-	    return -1;
-	}
-	$ip_name =  $agent->destination()?$agent->destination():$agent->destinationIp();	 
-	eval {	
-	   $dst = $self->database()->soi_host({ ip_name => $ip_name,ip_number => $agent->destinationIp() });
-	};
-	if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-	    $logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
-	    return -1;
-	}	  
-        eval {	
-	   $md = $self->database()->soi_metadata( { ip_name_src => $src, ip_name_dst => $dst,  
-					'transport'	  => 'ICMP',
-					'packetSize'  => $agent->packetSize(),
-					'count'		  => $agent->count(),
-					'packetInterval' => $agent->interval(),
-					'ttl'		  => $agent->ttl(),
-				});
-	 
-	};
-	if($EVAL_ERROR || !$md ||  $md < 0) {
-	    $logger->error(  "Failed: $EVAL_ERROR -  to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
-	    return -1;
-	}	   
-	eval {	
-	    $data = $self->database()->insertData( { metaID =>$md, 
-	
-					#time
-					'timestamp' => $agent->results()->{'startTime'},
-					
-					# rtt
-					'minRtt'	=> $agent->results()->{'minRtt'},
-					'maxRtt'	=> $agent->results()->{'maxRtt'},
-					'meanRtt'	=> $agent->results()->{'meanRtt'},
-					
-					# ipd
-					'minIpd'	=> $agent->results()->{'minIpd'},
-					'meanIpd'	=> $agent->results()->{'meanIpd'},
-					'maxIpd'	=> $agent->results()->{'maxIpd'},
-					
-					# jitter
-					'iqrIpd'	=> $agent->results()->{'iqrIpd'},
-					'medianRtt' => $agent->results()->{'medianRtt'},
-					
-					# other
-					'duplicates' => $agent->results()->{'duplicates'},
-					'outOfOrder' => $agent->results()->{'outOfOrder'},
-					
-					# loss
-					'lossPercent'	=> $agent->results()->{'lossPercent'},
-					'clp'	=> $agent->results()->{'clp'},
+    eval {
+    	$src = $self->database()->soi_host({ ip_name => $ip_name, ip_number =>   $agent->sourceIp() });
+    };
+    if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
+    	$logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
+    	return -1;
+    }
+    $ip_name =  $agent->destination()?$agent->destination():$agent->destinationIp();	     
+    eval {  
+       $dst = $self->database()->soi_host({ ip_name => $ip_name,ip_number => $agent->destinationIp() });
+    };
+    if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
+    	$logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
+    	return -1;
+    }	      
+    eval {  
+       $md = $self->database()->soi_metadata( { ip_name_src => $src, ip_name_dst => $dst,  
+    				    'transport'       => 'ICMP',
+    				    'packetSize'  => $agent->packetSize(),
+    				    'count'	      => $agent->count(),
+    				    'packetInterval' => $agent->interval(),
+    				    'ttl'	      => $agent->ttl(),
+    			    });
+     
+    };
+    if($EVAL_ERROR || !$md ||  $md < 0) {
+    	$logger->error(  "Failed: $EVAL_ERROR -  to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
+    	return -1;
+    }	       
+    eval {  
+    	$data = $self->database()->insertData( { metaID =>$md, 
 
-					# raw
-					'rtts'	=> $rtts,
-					'seqNums'	=> $seqs,
-					
-				});
-	};
-	if($EVAL_ERROR ||  $data == -1 ){
-	   
-	   $logger->error(  "Failed: $EVAL_ERROR -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
-	    return -1;
-	 
-	}
-	return 0;
+    				    #time
+    				    'timestamp' => $agent->results()->{'startTime'},
+    				    
+    				    # rtt
+    				    'minRtt'	    => $agent->results()->{'minRtt'},
+    				    'maxRtt'	    => $agent->results()->{'maxRtt'},
+    				    'meanRtt'	    => $agent->results()->{'meanRtt'},
+    				    
+    				    # ipd
+    				    'minIpd'	    => $agent->results()->{'minIpd'},
+    				    'meanIpd'	    => $agent->results()->{'meanIpd'},
+    				    'maxIpd'	    => $agent->results()->{'maxIpd'},
+    				    
+    				    # jitter
+    				    'iqrIpd'	    => $agent->results()->{'iqrIpd'},
+    				    'medianRtt' => $agent->results()->{'medianRtt'},
+    				    
+    				    # other
+    				    'duplicates' => $agent->results()->{'duplicates'},
+    				    'outOfOrder' => $agent->results()->{'outOfOrder'},
+    				    
+    				    # loss
+    				    'lossPercent'   => $agent->results()->{'lossPercent'},
+    				    'clp'   => $agent->results()->{'clp'},
+
+    				    # raw
+    				    'rtts'  => ($rtts?$rtts:''),
+    				    'seqNums'	    => ($seqs?$seqs:''),
+    				    
+    			    });
+    };
+    if($EVAL_ERROR ||  $data == -1 ){
+       
+       $logger->error(  "Failed: $EVAL_ERROR -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
+    	return -1;
+     
+    }
+    return 0;
 }
 
 
@@ -551,10 +550,10 @@ sub getAgent {
 	$agent->destination( $test->{destination} );
 	$agent->destinationIp( $test->{destinationIp} );
 	
-	$agent->count( $test->{count} );
-	$agent->packetSize( $test->{packetSize} );
-	$agent->ttl( $test->{ttl} );
-	$agent->interval( $test->{interval} );
+	$agent->count( $test->{count} ) if $test->{count};
+	$agent->packetSize( $test->{packetSize} ) if $test->{packetSize};
+	$agent->ttl( $test->{ttl} ) if $test->{ttl};
+	$agent->interval( $test->{interval} ) if $test->{interval};
 	
 	# timeouts
 	$agent->timeout( $self->getConf('max_worker_lifetime') );

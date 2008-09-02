@@ -526,7 +526,7 @@ sub removeDatumById {
     my ($self, $id) = @_;
     if(ref($self->get_datum) eq 'ARRAY' && $self->get_idmap->{datum} &&  exists $self->get_idmap->{datum}{$id}) {
         undef $self->get_datum->[$self->get_idmap->{datum}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->datum};
+        my @tmp =  grep { defined $_ } @{$self->get_datum};
         $self->set_datum([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

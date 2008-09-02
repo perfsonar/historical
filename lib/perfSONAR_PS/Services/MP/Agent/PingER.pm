@@ -101,11 +101,10 @@ deadline is not supported in pinger
 
 =cut 
 
-sub deadline
-{
-	my $self = shift;
-	$logger->logdie( "Deadline is not supported in PingER");
-	return;
+sub deadline {
+    my $self = shift;
+    $logger->logdie( "Deadline is not supported in PingER");
+    return;
 }
 
 
@@ -124,50 +123,50 @@ We do something a bit more involved with PingER as we wish to prime the network
 by running a single independent ping prior to the real test.
 
 =cut
-sub collectMeasurements
-{
-	my $self = shift;
-	
-	# keep a temp variable count then set it back after priming
-	my $count = $self->count();
-	
-	# set the up the appropiate destinations
-	# if we have an ip address, use this as the destination
-	my $cmd = $self->command();
-	#$logger->debug( "DEST: " . $self->destination() . " / " . $self->destinationIp() );
-	if ( $self->destinationIp() ) {
-		$logger->debug( "using destination ip '" . $self->destinationIp() 
-				. "' instead of '" . $self->destination() . "'");
-		$cmd =~ s/\%destination\%/\%destinationIp\%/g;
-	} elsif ( ! defined $self->destination() ) {
-		$logger->fatal( "No destination defined!");
-		return -1;
-	}
-	
-	# set it back
-	$self->command( $cmd );
 
-	if ( $self->pingPriming() ) {
-		# prime a single packet
-		$self->count( 1 );
-		
-		$logger->debug( "Priming caches by running singleton ping..." );
+sub collectMeasurements {
+    my $self = shift;
 
-		# we don't care about the results, so don't bother
-		# TODO: this parses the unwanted variables tho...
-		$self->SUPER::collectMeasurements();
+    # keep a temp variable count then set it back after priming
+    my $count = $self->count();
 
-		# don't forget to reset the countesr
-		delete $self->{RESULTS};
-		$self->{RESULTS} = {};
-		
-		$logger->debug( "Continuing test..." )
+    # set the up the appropiate destinations
+    # if we have an ip address, use this as the destination
+    my $cmd = $self->command();
+    #$logger->debug( "DEST: " . $self->destination() . " / " . $self->destinationIp() );
+    if ( $self->destinationIp() ) {
+    	    $logger->debug( "using destination ip '" . $self->destinationIp() 
+    			    . "' instead of '" . $self->destination() . "'");
+    	    $cmd =~ s/\%destination\%/\%destinationIp\%/g;
+    } elsif ( ! defined $self->destination() ) {
+    	    $logger->fatal( "No destination defined!");
+    	    return -1;
+    }
 
-	}
-	
-	$self->count( $count );
+    # set it back
+    $self->command( $cmd );
 
-	return $self->SUPER::collectMeasurements( );
+    if ( $self->pingPriming() ) {
+    	    # prime a single packet
+    	    $self->count( 1 );
+    	    
+    	    $logger->debug( "Priming caches by running singleton ping..." );
+
+    	    # we don't care about the results, so don't bother
+    	    # TODO: this parses the unwanted variables tho...
+    	    $self->SUPER::collectMeasurements();
+
+    	    # don't forget to reset the countesr
+    	    delete $self->{RESULTS};
+    	    $self->{RESULTS} = {};
+    	    
+    	    $logger->debug( "Continuing test..." )
+
+    }
+
+    $self->count( $count );
+
+    return $self->SUPER::collectMeasurements( );
 }
 
 =head2 parse()
@@ -353,6 +352,7 @@ sub toAPI
 returns the object as a LibXML dom
 
 =cut
+
 sub toDOM {
 	my $self = shift;
 	my $message = $self->toAPI();

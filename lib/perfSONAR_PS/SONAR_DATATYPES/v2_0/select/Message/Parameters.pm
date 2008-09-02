@@ -360,7 +360,7 @@ sub removeParameterById {
     my ($self, $id) = @_;
     if(ref($self->get_parameter) eq 'ARRAY' && $self->get_idmap->{parameter} &&  exists $self->get_idmap->{parameter}{$id}) {
         undef $self->get_parameter->[$self->get_idmap->{parameter}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->parameter};
+        my @tmp =  grep { defined $_ } @{$self->get_parameter};
         $self->set_parameter([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

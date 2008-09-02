@@ -522,7 +522,7 @@ sub removeSubjectById {
     my ($self, $id) = @_;
     if(ref($self->get_subject) eq 'ARRAY' && $self->get_idmap->{subject} &&  exists $self->get_idmap->{subject}{$id}) {
         undef $self->get_subject->[$self->get_idmap->{subject}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->subject};
+        my @tmp =  grep { defined $_ } @{$self->get_subject};
         $self->set_subject([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
@@ -593,7 +593,7 @@ sub removeParametersById {
     my ($self, $id) = @_;
     if(ref($self->get_parameters) eq 'ARRAY' && $self->get_idmap->{parameters} &&  exists $self->get_idmap->{parameters}{$id}) {
         undef $self->get_parameters->[$self->get_idmap->{parameters}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->parameters};
+        my @tmp =  grep { defined $_ } @{$self->get_parameters};
         $self->set_parameters([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

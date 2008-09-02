@@ -480,7 +480,7 @@ sub removeParametersById {
     my ($self, $id) = @_;
     if(ref($self->get_parameters) eq 'ARRAY' && $self->get_idmap->{parameters} &&  exists $self->get_idmap->{parameters}{$id}) {
         undef $self->get_parameters->[$self->get_idmap->{parameters}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->parameters};
+        my @tmp =  grep { defined $_ } @{$self->get_parameters};
         $self->set_parameters([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
@@ -551,7 +551,7 @@ sub removeMetadataById {
     my ($self, $id) = @_;
     if(ref($self->get_metadata) eq 'ARRAY' && $self->get_idmap->{metadata} &&  exists $self->get_idmap->{metadata}{$id}) {
         undef $self->get_metadata->[$self->get_idmap->{metadata}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->metadata};
+        my @tmp =  grep { defined $_ } @{$self->get_metadata};
         $self->set_metadata([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
@@ -622,7 +622,7 @@ sub removeDataById {
     my ($self, $id) = @_;
     if(ref($self->get_data) eq 'ARRAY' && $self->get_idmap->{data} &&  exists $self->get_idmap->{data}{$id}) {
         undef $self->get_data->[$self->get_idmap->{data}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->data};
+        my @tmp =  grep { defined $_ } @{$self->get_data};
         $self->set_data([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
