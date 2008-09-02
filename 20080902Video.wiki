@@ -27,7 +27,7 @@
    # Ga Tech
    # ESnet
      * Joe:
-       * pingER now running on ESnet owamp hosts. Would like better configuration file solutions. Perhaps something as easy as 'include' file syntax for all config files. (* Will attempt to make time to discuss during ps-dev next week.)
+       * pingER now running on ESnet owamp hosts. Would like better configuration file solutions. Perhaps something as easy as 'include' file syntax for all config files. (* Will attempt to make time to discuss during ps-dev next week.*)
      * Brian:
        * Issues with perl/pingER logging too much information to the console in error states. (Maxim will look into it.)
        * PAM CFP came out today. (Brian will bring a few ideas to the meeting next week for us all to discuss.)
