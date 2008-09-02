@@ -174,44 +174,40 @@ TBD
  * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.
 
  * *Q: How do I add other administrative users? *
-Add a user using the following command:
-
-  adduser [[new_user]]
-
-Once you've added the users information, run the command:
-
-  addgroup [[new_user]] admin
-
-This user will be able to ssh into the machine as well as use the administrative web GUIs. 
+ * *A:* 
+   * Add a user using the following command:
+     * *adduser NEWUSER*
+   * Once you've added the users information, run the command:
+     * *addgroup NEWUSER admin*
+   * This user will be able to ssh into the machine as well as use the administrative web GUIs. 
 
  * *Q: Can I Use a Firewall? *
-To enable the firewall, add all the desired rules to the firewall, and then run the command "/etc/init.d/iptables save". The firewall should then automatically come up when next you boot.
-
-There are some caveats to enabling a firewall, however. If you're going to disable access by default, there are a large number of firewall holes that you'll need to open, and configure changes you'll need to make.
-
-    * SNMP MA
+ * *A:* 
+   * To enable the firewall, add all the desired rules to the firewall, and then run the command "/etc/init.d/iptables save". The firewall should then automatically come up when next you boot.
+   * There are some caveats to enabling a firewall. If you're going to disable access by default, there are a large number of firewall holes that you'll need to open, and configure changes you'll need to make.
+     * SNMP MA
        * open port tcp/8065
-    * PingER
+     * PingER
        * open port tcp/8075
-    * perfSONAR-BUOY
+     * perfSONAR-BUOY
        * open port tcp/8085
-    * Lookup Service
+     * Lookup Service
        * open port tcp/8095
-    * bwctl
+     * bwctl
        * open port tcp/4823
        * Edit /usr/local/etc/bwctld.conf, set peer_port to a value, and open the tcp port for that value
-    * owamp
+     * owamp
        * open port tcp/861
        * Edit /usr/local/etc/owampd.conf, set testports to range, and open the tcp ports for that range
-    * NDT
+     * NDT
        * open port tcp/3001
        * open port tcp/7123
-    * NPAD
+     * NPAD
        * open port tcp/8100
        * open port tcp/8200
-    * Apache HTTP Server
+     * Apache HTTP Server
        * open port tcp/443
-    * SSH
+     * SSH
        * open port tcp/22
 
 == Last Updated ==
