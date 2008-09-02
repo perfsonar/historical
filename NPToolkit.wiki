@@ -176,11 +176,11 @@ TBD
  * *Q: How do I add other administrative users? *
 Add a user using the following command:
 
-  adduser [new_user]
+  adduser [[new_user]]
 
 Once you've added the users information, run the command:
 
-  addgroup [new_user] admin
+  addgroup [[new_user]] admin
 
 This user will be able to ssh into the machine as well as use the administrative web GUIs. 
 
@@ -211,6 +211,8 @@ There are some caveats to enabling a firewall, however. If you're going to disab
        * open port tcp/8200
     * Apache HTTP Server
        * open port tcp/443
+    * SSH
+       * open port tcp/22
 
 == Last Updated ==
 
