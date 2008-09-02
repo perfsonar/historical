@@ -329,7 +329,7 @@ sub removeDomainById {
     my ($self, $id) = @_;
     if(ref($self->get_domain) eq 'ARRAY' && $self->get_idmap->{domain} &&  exists $self->get_idmap->{domain}{$id}) {
         undef $self->get_domain->[$self->get_idmap->{domain}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->domain};
+        my @tmp =  grep { defined $_ } @{$self->get_domain};
         $self->set_domain([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;

@@ -155,6 +155,64 @@ if(not $status or $HELP) {
     exit(1);
 }
 
+
+
+if (not defined $CONFIG_FILE or $CONFIG_FILE eq q{}) {
+    $CONFIG_FILE = $confdir."/daemon.conf";
+}
+
+# Read in configuration information
+my $config =  new Config::General($CONFIG_FILE);
+my %conf = $config->getall;
+
+#
+# Check/open the PID file while we're still running as root
+#
+if (not defined $PIDDIR or $PIDDIR eq q{}) {
+    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne q{}) {
+        $PIDDIR = $conf{"pid_dir"};
+    } else {
+        $PIDDIR = "/tmp";
+    }
+}
+
+if (not defined $PIDFILE or $PIDFILE eq q{}) {
+    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne q{}) {
+        $PIDFILE = $conf{"pid_file"};
+    } else {
+        $PIDFILE = "ps.pid";
+    }
+}
+
+my $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
+
+# Check if the daemon should run as a specific user/group and then switch to
+# that user/group.
+if (not $RUNAS_GROUP) {
+    if ($conf{"group"}) {
+        $RUNAS_GROUP = $conf{"group"};
+    }
+}
+
+if (not $RUNAS_USER) {
+    if ($conf{"user"}) {
+        $RUNAS_USER = $conf{"user"};
+    }
+}
+
+if ($RUNAS_USER and $RUNAS_GROUP) {
+    if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
+        print "Error: Couldn't drop priviledges\n";
+        exit(-1);
+    }
+} elsif ($RUNAS_USER or $RUNAS_GROUP) {
+    # they need to specify both the user and group
+    print "Error: You need to specify both the user and group if you specify either\n";
+    exit(-1);
+}
+
+# Now that we've dropped privileges, create the logger. If we do it in reverse
+# order, the daemon won't be able to write to the logger.
 my $logger;
 if (not defined $LOGGER_CONF or $LOGGER_CONF eq q{}) {
     use Log::Log4perl qw(:easy);
@@ -188,14 +246,6 @@ if (not defined $LOGGER_CONF or $LOGGER_CONF eq q{}) {
     $logger->level($output_level);
 }
 
-if (not defined $CONFIG_FILE or $CONFIG_FILE eq q{}) {
-    $CONFIG_FILE = $confdir."/daemon.conf";
-}
-
-# Read in configuration information
-my $config =  new Config::General($CONFIG_FILE);
-my %conf = $config->getall;
-
 if (not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{}) {
     $logger->warn("Setting maximum worker lifetime at 60 seconds");
     $conf{"max_worker_lifetime"} = 60;
@@ -223,24 +273,6 @@ if (not defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq q{}) {
     $logger->warn("Setting reaper interval to 20 seconds");
     $conf{"reaper_interval"} = 20;
 }
-
-if (not defined $PIDDIR or $PIDDIR eq q{}) {
-    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne q{}) {
-        $PIDDIR = $conf{"pid_dir"};
-    } else {
-        $PIDDIR = "/var/run";
-    }
-}
-
-if (not defined $PIDFILE or $PIDFILE eq q{}) {
-    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne q{}) {
-        $PIDFILE = $conf{"pid_file"};
-    } else {
-        $PIDFILE = "ps.pid";
-    }
-}
-
-my $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
 
 $logger->debug("Starting '".$$."'");
 
@@ -384,31 +416,6 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
 if (scalar(keys %listeners) == 0) {
     $logger->error("No ports enabled");
-    exit(-1);
-}
-
-# Check if the daemon should run as a specific user/group and then switch to
-# that user/group.
-if (not $RUNAS_GROUP) {
-    if ($conf{"group"}) {
-        $RUNAS_GROUP = $conf{"group"};
-    }
-}
-
-if (not $RUNAS_USER) {
-    if ($conf{"user"}) {
-        $RUNAS_USER = $conf{"user"};
-    }
-}
-
-if ($RUNAS_USER and $RUNAS_GROUP) {
-    if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
-        $logger->error("Couldn't drop priviledges");
-        exit(-1);
-    }
-} elsif ($RUNAS_USER or $RUNAS_GROUP) {
-    # they need to specify both the user and group
-    $logger->error("You need to specify both the user and group if you specify either");
     exit(-1);
 }
 
@@ -819,7 +826,6 @@ the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
 sub lockPIDFile {
-    $logger->debug("Locking pid file");
     my($piddir, $pidfile) = @_;
     die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir ."/".$pidfile;
@@ -835,8 +841,6 @@ sub lockPIDFile {
             die "$0 already running: $p_id\n";
         }
     }
-
-    $logger->debug("Locked pid file");
 
     return *PIDFILE;
 }

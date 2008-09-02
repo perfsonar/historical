@@ -396,7 +396,7 @@ sub removeNodeById {
     my ($self, $id) = @_;
     if(ref($self->get_node) eq 'ARRAY' && $self->get_idmap->{node} &&  exists $self->get_idmap->{node}{$id}) {
         undef $self->get_node->[$self->get_idmap->{node}{$id}];
-        my @tmp =  grep { defined $_ } @{$self->node};
+        my @tmp =  grep { defined $_ } @{$self->get_node};
         $self->set_node([@tmp]);
         $self->buildIdMap; ## rebuild index map
         return $id;
