@@ -10,6 +10,22 @@ The following steps will explain the basic setup of Cacti on the NPToolkit
 (e.g. to have it poll a network device).  A user wishing to do more with the
 software should consult the documentation.  
 
+ * [CactiConfig#Step_1 Locate Cacti GUI and Login]
+ * [CactiConfig#Step_2 Create Network Device]
+ * [CactiConfig#Step_3 Add New Device]
+ * [CactiConfig#Step_4 Enter Device Info]
+ * [CactiConfig#Step_5 Create Graphs]
+ * [CactiConfig#Step_6 Select Graph Info]
+ * [CactiConfig#Step_7 Load Graph Data]
+ * [CactiConfig#Step_8 Edit Graph Tree]
+ * [CactiConfig#Step_9 Select Tree]
+ * [CactiConfig#Step_10 Add Graphs to Tree]
+ * [CactiConfig#Step_11 Select Graphs for Tree]
+ * [CactiConfig#Step_12 View Graphs]
+ * [CactiConfig#Step_13 Select Other Graphs]
+ * [CactiConfig#Step_14 Restart SNMP MA]
+ * [CactiConfig#Step_15 View perfSONAR Graphs]
+
 == Step 1 ==
 
 Visit the Cacti instance on the NPToolkit disk.  If you are using the GUI of
