@@ -1899,15 +1899,25 @@ sub lsRegisterRequest {
         }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-        if ($service) {
-
+        if ( $service ) {
             # 'clobber' registration case
-            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, service => $service, sec => $sec, eventType => $eventType, auth => $auth } );
+
+            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth } );
         }
         else {
+            # still the clobber case, but 'node' is acceptable here as well (will be more in the future, ugh...
 
-            # 'update' registration case
-            $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth } );
+            my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
+            if ( $node ) {
+                # 'clobber' registration case
+
+                $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec, eventType => $eventType, auth => $auth } );
+            }
+            else {
+                # 'update' registration case
+
+                $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth } );
+            }
         }
     }
     else {
@@ -1918,7 +1928,7 @@ sub lsRegisterRequest {
     return;
 }
 
-=head2 lsRegisterRequestUpdateNew($self, $doc, $request, $database, $m, $d, $mdKey, $service, $sec, $eventType, $auth)
+=head2 lsRegisterRequestUpdateNew($self, $doc, $request, $database, $m, $d, $mdKey, $topology, $sec, $eventType, $auth)
 
 As a subprocedure of the main LSRegisterRequest procedure, this is the special
 case of the 'clobber' update.  Namely there is data for a given key in the
@@ -1936,21 +1946,29 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequestUpdateNew {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, database => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, service => 1, sec => 1, eventType => 1, auth => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, database => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, topology => 1, sec => 1, eventType => 1, auth => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-    my $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='accessPoint']", 1 ), 0 );
+# XXX 9/2/08 - jason
+#
+# I dont think we want to go fumbling around here, but to get a 'valid' hashed
+# key we should focus on 'known' elements instead of the entire metadata block.
+# e.g. if we just hashed the md block, a single character space would cause a
+# new hashed key to be formed (which sucks).
+
+    my $accessPoint = q{};
+    $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='accessPoint']", 1 ), 0 );
     my $accessType  = q{};
     my $accessName  = q{};
-    unless ($accessPoint) {
-        $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='address']", 1 ), 0 );
-        $accessType  = extract( find( $parameters->{service}, "./*[local-name()='type']",    1 ), 0 );
-        $accessName  = extract( find( $parameters->{service}, "./*[local-name()='name']",    1 ), 0 );
-        unless ($accessPoint) {
+    unless ( $accessPoint ) {
+        $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='address']", 1 ), 0 );
+        $accessType  = extract( find( $parameters->{topology}, ".//*[local-name()='type']",    1 ), 0 );
+        $accessName  = extract( find( $parameters->{topology}, ".//*[local-name()='name']",    1 ), 0 );
+        unless ( $accessPoint or $accessType or $accessName ) {
             throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
             return;
         }
@@ -2002,7 +2020,7 @@ sub lsRegisterRequestUpdateNew {
             # its new to us, so add it
 
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
-            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">\n<perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">" . $parameters->{service}->toString . "</perfsonar:subject>\n</nmwg:metadata>\n";
+            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">\n<perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">" . $parameters->{topology}->toString . "</perfsonar:subject>\n</nmwg:metadata>\n";
             $parameters->{database}->insertIntoContainer( { content => $parameters->{database}->wrapStore( { content => $mdCopy, type => "LSStore" } ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$error } );
             $parameters->{database}->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
         }
@@ -2179,14 +2197,22 @@ sub lsRegisterRequestNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-    my $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
-    my $accessType;
-    my $accessName;
+# XXX 9/2/08 - jason
+#
+# I dont think we want to go fumbling around here, but to get a 'valid' hashed
+# key we should focus on 'known' elements instead of the entire metadata block.
+# e.g. if we just hashed the md block, a single character space would cause a
+# new hashed key to be formed (which sucks).
+
+    my $accessPoint = q{};
+    $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
+    my $accessType = q{};
+    my $accessName = q{};;
     unless ($accessPoint) {
-        $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
-        $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='type']",    1 ), 0 );
-        $accessName  = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='name']",    1 ), 0 );
-        unless ($accessPoint) {
+        $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
+        $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
+        $accessName  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
+        unless ( $accessPoint or $accessType or $accessName ) {
             throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
             return;
         }

@@ -545,11 +545,17 @@ sub lsRegisterRequest {
         }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-        if ($service) {
-            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, service => $service, sec => $sec } );
+        if ( $service ) {
+            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec } );
         }
         else {
-            $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, sec => $sec } );
+            my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
+            if ( $node ) {
+                $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec } );
+            }
+            else {
+                $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, sec => $sec } );
+            }
         }
     }
     else {
@@ -558,7 +564,7 @@ sub lsRegisterRequest {
     return;
 }
 
-=head2 lsRegisterRequestUpdateNew($self, $doc, $request, $metadatadb, $m, $d, $mdKey, $service, $sec)
+=head2 lsRegisterRequestUpdateNew($self, $doc, $request, $metadatadb, $m, $d, $mdKey, $topology, $sec)
 
 As a subprocedure of the main LSRegisterRequest procedure, this is the special
 case of the 'clobber' update.  Namely there is data for a given key in the
@@ -576,22 +582,35 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequestUpdateNew {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, service => 1, sec => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, metadatadb => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, topology => 1, sec => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
+    
+# XXX 9/2/08 - jason
+#
+# I dont think we want to go fumbling around here, but to get a 'valid' hashed
+# key we should focus on 'known' elements instead of the entire metadata block.
+# e.g. if we just hashed the md block, a single character space would cause a
+# new hashed key to be formed (which sucks).
 
-    my $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='accessPoint']", 1 ), 0 );
-    unless ($accessPoint) {
-        $accessPoint = extract( find( $parameters->{service}, "./*[local-name()='address']", 1 ), 0 );
-        unless ($accessPoint) {
+    my $accessPoint = q{};
+    $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='accessPoint']", 1 ), 0 );
+    my $accessType  = q{};
+    my $accessName  = q{};
+    unless ( $accessPoint ) {
+        $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='address']", 1 ), 0 );
+        $accessType  = extract( find( $parameters->{topology}, ".//*[local-name()='type']",    1 ), 0 );
+        $accessName  = extract( find( $parameters->{topology}, ".//*[local-name()='name']",    1 ), 0 );
+        unless ( $accessPoint or $accessType or $accessName ) {
             throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
             return;
         }
     }
-    my $mdKeyStorage = md5_hex($accessPoint);
+
+    my $mdKeyStorage = md5_hex( $accessPoint . $accessType . $accessName );
 
     my @resultsString = $parameters->{metadatadb}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => q{}, error => \$error } );
     my $len = $#resultsString;
@@ -611,7 +630,7 @@ sub lsRegisterRequestUpdateNew {
         }
         else {
             $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
-            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">" . $parameters->{service}->toString . "</nmwg:metadata>\n";
+            my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">" . $parameters->{topology}->toString . "</nmwg:metadata>\n";
             $parameters->{metadatadb}->insertIntoContainer( { content => $parameters->{metadatadb}->wrapStore( { content => $mdCopy, type => "LSStore" } ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$error } );
             $parameters->{metadatadb}->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"ls"}->{"ls_ttl"} ) } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$error } );
         }
@@ -751,15 +770,28 @@ sub lsRegisterRequestNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-    my $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
+# XXX 9/2/08 - jason
+#
+# I dont think we want to go fumbling around here, but to get a 'valid' hashed
+# key we should focus on 'known' elements instead of the entire metadata block.
+# e.g. if we just hashed the md block, a single character space would cause a
+# new hashed key to be formed (which sucks).
+
+    my $accessPoint = q{};
+    $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
+    my $accessType = q{};
+    my $accessName = q{};;
     unless ($accessPoint) {
-        $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
-        unless ($accessPoint) {
+        $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
+        $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
+        $accessName  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
+        unless ( $accessPoint or $accessType or $accessName ) {
             throw perfSONAR_PS::Error_compat( "error.ls.register.missing_value", "Cannont register data, accessPoint or address was not supplied." );
             return;
         }
     }
-    my $mdKey = md5_hex($accessPoint);
+
+    my $mdKey = md5_hex( $accessPoint . $accessType . $accessName );
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { metadatadb => $parameters->{metadatadb}, key => $mdKey } );
