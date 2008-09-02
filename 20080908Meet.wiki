@@ -1,7 +1,0 @@
-= September 8 - 10, 2008 Meeting =
-
-This meeting is a full perfsonar-developers meeting and is therefore organized on the perfsonar wiki at [http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08 http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08].
-
-Please RSVP there, and add any agenda topics you wish to have discussed.
-
-If you don't have a wiki account there, you can request one by sending a message to: mac@man.poznan.pl. Otherwise, feel free to contact Jeff or Jason and ask them to add things on that wiki for you.
