@@ -74,7 +74,7 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
    * [Tier2BCP#Configure_Local_Measurements Configure Local Measurements]
    * [Tier2BCP#Example_Configuration_Files Example Configuration Files]
  * [Tier2BCP#Conclusion Conclusion]
-   * [Tier2BCP#Non-Participant Non-Participant]
+   * [Tier2BCP#Non_Participant Non-Participant]
    * [Tier2BCP#Normal_Participant Normal Participant]
    * [Tier2BCP#Measurement_Champion Measurement Champion]
  * [Tier2BCP#Usage_Guide Usage Guide]
@@ -494,7 +494,7 @@ It is possible to participate in the network measurement infrastructure at diffe
 
 *_EXPAND STRAWMAN BELOW...._*
 
-=== Non-Participant ===
+=== Non Participant ===
 
 Non-participants do not expend any effort, and have no control of network measurements made from remote sites into the local infrastructure.
 Target
