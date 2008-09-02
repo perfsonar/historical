@@ -27,7 +27,7 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
    * [Tier2BCP#Tools Tools]
      * [Tier2BCP#Delay_Measurements Delay Measurements]
      * [Tier2BCP#Bandwidth_Measurements Bandwidth Measurements]
-     * [Tier2BCP#up/down_status_of_cross_domain_circuits up/down status of cross domain circuits]
+     * [Tier2BCP#up_down_status_of_cross_domain_circuits up/down status of cross domain circuits]
      * [Tier2BCP#link_capacity_utilization_errors link capacity, utilization, errors]
  * [Tier2BCP#Best_Practices Best Practices]
    * [Tier2BCP#Introduction Introduction]
@@ -39,7 +39,7 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
       * [Tier2BCP#Operations Operations]
      * [Tier2BCP#Delay_Measurement_Infrastructure Delay Measurement Infrastructure]
       *  [Tier2BCP#Clock_Synchronization Clock Synchronization]
-     * [Tier2BCP#NDT_&_NPAD_Measurement_Infrastructure NDT & NPAD Measurement Infrastructure]
+     * [Tier2BCP#NDT_and_NPAD_Measurement_Infrastructure NDT & NPAD Measurement Infrastructure]
       * [Tier2BCP#Passive_Measurement_Point Passive Measurement Point]
    * [Tier2BCP#Scheduled_Measurements Scheduled Measurements]
      * [Tier2BCP#Delay Delay]
@@ -68,14 +68,14 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
      * [Tier2BCP#Considerations_for_Publishing_Measurement_Results Considerations for Publishing Measurement Results]
  * [Tier2BCP#Implementation_Guide Implementation Guide]
    * [Tier2BCP#Setup_local_infrastructure_so_others_can_perform_robust_measurements_to_your_site Setup local infrastructure so others can perform robust measurements to your site]
-     * [Tier2BCP#Bootable_CD_Installation_(knoppix_disk) Bootable CD Installation (knoppix disk)]
+     * [Tier2BCP#Bootable_CD_Installation Bootable CD Installation]
      * [Tier2BCP#RHEL5_RPM_installation RHEL5 RPM installation]
    * [Tier2BCP#Identify_important_collaborators Identify important collaborators]
    * [Tier2BCP#Configure_Local_Measurements Configure Local Measurements]
    * [Tier2BCP#Example_Configuration_Files Example Configuration Files]
  * [Tier2BCP#Conclusion Conclusion]
    * [Tier2BCP#Non-Participant Non-Participant]
-   * [Tier2BCP#Normal_Participant_(NEED_A_BETTER_TITLE_HERE...) Normal Participant (NEED A BETTER TITLE HERE...)]
+   * [Tier2BCP#Normal_Participant Normal Participant]
    * [Tier2BCP#Measurement_Champion Measurement Champion]
  * [Tier2BCP#Usage_Guide Usage Guide]
  * [Tier2BCP#Authors Authors]
@@ -332,7 +332,7 @@ One way delay measurements protocols rely on the servers having both stable and 
 
 Obtaining this level of clock accuracy is not that difficult but it does require some planning. The Accuracy requirement can be achieved by synchronizing to a Stratum 1 time source such as  GPS or CDMA synchronized hardware clocks or NTP synchronizing with a Stratum 1 time source over a low jitter network path. Maintaining the error bounds within the recommended range requires NTP synchronization with 4 or 5 other stratum 1 time sources over low jitter paths.  This should be straight forward to achieve if most Delay Servers have their own hardware clocks, and they NTP peer with the Delay Servers that they are making regularly scheduled tests against, or a set of public clocks maintained by the community.
 
-==== NDT & NPAD Measurement Infrastructure ====
+==== NDT and NPAD Measurement Infrastructure ====
 
 ===== Passive Measurement Point ======
 
@@ -432,7 +432,7 @@ The hardware for a typical perfSONAR installation should contain at least 2 syst
 
 We anticipate 2 main deployment options.  One option is to use a bootable CD with all of the tools already installed. Another option is to use a set of Red Hat Enterprise Linux 5 RPMs.
 
-==== Bootable CD Installation (knoppix disk) ====
+==== Bootable CD Installation ====
 
 *_Insert URL to knoppix install here._*
 
@@ -506,7 +506,9 @@ You need to do the following to participate at this level:
   * use the <INSERT NAME HERE> Knoppix CD.
   * Or, install the following (a, b, c) from (src)
 
-=== Normal Participant (NEED A BETTER TITLE HERE...) ===
+=== Normal Participant ===
+
+*_(NEED A BETTER TITLE HERE...)_*
 
 Participating  at this level will allow a site to measure, document and understand the network characteristics between the local site and the important customers and providers, simplifying problem identification and resolution, and capacity planning.
 
