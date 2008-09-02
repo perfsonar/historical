@@ -57,6 +57,13 @@
 
  * Aaron
    # /var/log exporting
+   # Port PingER GUI to Disk (w/ Maxim) (*MOSTLY DONE*)
+      * Need to ask maxim about the scratch directory.
+   # Update PingER Web Admin to newst version (*DONE*)
+   # Put iptables into the boot order if users have configured it manually (*DONE*)
+   # Password protect the web gui (*DONE*)
+   # Get cacti working with http auth (*DONE*)
+   # Install the new version of owamp (*DONE*)
    # Documentation of NPToolkit Internals
      * All contributed scripts
      * Flow of bootup/save procedures
@@ -68,7 +75,6 @@
      # Verify we can access saved info
      # Verify 'upgrades' are smooth, can access existing measurement data
    # bwctl release (perhaps some documentation - edit passes for sure)
-   # Upgrade PingER Web Admin to most recent version (*PARTIALLY DONE*)
    # OWAMP testing
 
  * Jeff
