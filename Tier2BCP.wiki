@@ -14,81 +14,71 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
 
 == Table of Contents ==
 
-    * Introduction 
-                + Goals
-                + Use Cases
-                + Measurements
-                + General Diagnostics 
-                      # Continuously measure end-to-end delay
-                      # Make regular scheduled bandwidth measurements across paths of interest
-                      # Monitor up/down status of cross domain circuits
-                      # Monitor Link/Circuit Capacity, Utilization & Errors
-                + Diagnostics to look for specific known performance problems
-                + Tools
-                      # Delay Measurements
-                      # Bandwidth Measurements
-                      # up/down status of cross domain circuits
-                      # link capacity, utilization, errors
-    * Best Practices
-          o  
-          o Introduction 
-          o Measurement Infrastructure 
-                + General Guidelines 
-                + Bandwidth Measurement Infrastructure
-                            *
-                            * Hardware 
-                            * Protocols
-                            * Operations
-                + Delay Measurement Infrastructure
-                            * Clock Synchronization
-                      #
-                + NDT & NPAD Measurement Infrastructure
-          o Scheduled Measurements
-                + Delay 
-                      # One Way Delay Measurements
-                            * Protocols 
-                            *
-                            *  Schedule
-                            *
-                      # Round Trip Delay Measurements
-                            * Protocols
-                            * Schedule
-                + Bandwidth Measurements
-                            *
-                            * Schedule
-                            * Server Configuration
-          o Passive Measurements
-                + Interface Statistics
-                      # Utilization
-                      # Errors and Discards
-          o Adhoc Measurements 
-                + NDT
-                + NPAD
-                + Bandwidth
-                + Latency
-          o  Legal Issues 
-          o Security Considerations 
-                + Considerations for Deploying Measurement Systems
-                + Considerations for Sourcing and Sinking Active Measurements 
-                + Considerations for Publishing Measurement Results 
-    * Implementation Guide
-                + Setup local infrastructure so others can perform robust measurements to your site. 
-                            * Bootable CD Installation (knoppix disk) 
-                            * RHEL5 RPM installation 
-                            *
-                + Identify important collaborators
-                + Configure Local Measurements
-                + Example Configuration Files
-          o Conclusion
-    *
-                      # Non-Participant
-                      # Target
-                      # Normal Participant  (NEED A BETTER TITLE HERE...) 
-                      # Measurement Champion
-                +  
-    * Usage Guide 
-                      # Authors 
-    * DRAFT
+ * [Tier2BCP#Introduction Introduction]
+   * [Tier2BCP#Goals Goals]
+   * [Tier2BCP#Use_Cases Use Cases]
+   * [Tier2BCP#Measurements Measurements]
+   * [Tier2BCP#General_Diagnostics General Diagnostics]
+     * [Tier2BCP#Continuously_measure_end-to-end_delay Continuously measure end-to-end delay]
+     * [Tier2BCP#Make_regular_scheduled_bandwidth_measurements_across_paths_of_interest Make regular scheduled bandwidth measurements across paths of interest]
+     * [Tier2BCP#Monitor_up/down_status_of_cross_domain_circuits Monitor up/down status of cross domain circuits]
+     * [Tier2BCP#Monitor_Link/Circuit_Capacity,_Utilization_&_Errors Monitor Link/Circuit Capacity, Utilization & Errors]
+   * [Tier2BCP#Diagnostics_to_look_for_specific_known_performance_problems Diagnostics to look for specific known performance problems]
+   * [Tier2BCP#Tools Tools]
+     * [Tier2BCP#Delay_Measurements Delay Measurements]
+     * [Tier2BCP#Bandwidth_Measurements Bandwidth Measurements]
+     * [Tier2BCP#up/down_status_of_cross_domain_circuits up/down status of cross domain circuits]
+     * [Tier2BCP#link_capacity,_utilization,_errors link capacity, utilization, errors]
+ * [Tier2BCP#Best_Practices Best Practices]
+   * [Tier2BCP#Introduction Introduction]
+   * [Tier2BCP#Measurement_Infrastructure Measurement Infrastructure]
+     * [Tier2BCP#General_Guidelines General Guidelines]
+     * [Tier2BCP#Bandwidth_Measurement_Infrastructure Bandwidth Measurement Infrastructure]
+       * [Tier2BCP#Hardware Hardware]
+      * [Tier2BCP#Protocols Protocols]
+      * [Tier2BCP#Operations Operations]
+     * [Tier2BCP#Delay_Measurement_Infrastructure Delay Measurement Infrastructure]
+      *  [Tier2BCP#Clock_Synchronization Clock Synchronization]
+     * [Tier2BCP#NDT_&_NPAD_Measurement_Infrastructure NDT & NPAD Measurement Infrastructure]
+      * [Tier2BCP#Passive_Measurement_Point Passive Measurement Point]
+   * [Tier2BCP#Scheduled_Measurements Scheduled Measurements]
+     * [Tier2BCP#Delay Delay]
+      * [Tier2BCP#One_Way_Delay_Measurements One Way Delay Measurements]
+        * [Tier2BCP#Protocols Protocols]
+        * [Tier2BCP#Schedule Schedule]
+      * [Tier2BCP#Round_Trip_Delay_Measurements Round Trip Delay Measurements]
+        * [Tier2BCP#Protocols Protocols]
+        * [Tier2BCP#Schedule Schedule]
+     * [Tier2BCP#Bandwidth_Measurements Bandwidth Measurements]
+      * [Tier2BCP#Schedule Schedule]
+      * [Tier2BCP#Server_Configuration Server Configuration]
+   * [Tier2BCP#Passive_Measurements Passive Measurements]
+     * [Tier2BCP#Interface_Statistics Interface Statistics]
+     * [Tier2BCP#Utilization Utilization]
+     * [Tier2BCP#Errors_and_Discards Errors and Discards]
+   * [Tier2BCP#Adhoc_Measurements Adhoc Measurements]
+     * [Tier2BCP#NDT NDT]
+     * [Tier2BCP#NPAD NPAD]
+     * [Tier2BCP#Bandwidth Bandwidth]
+     * [Tier2BCP#Latency Latency]
+   * [Tier2BCP#Legal_Issues Legal Issues]
+   * [Tier2BCP#Security_Considerations Security Considerations]
+     * [Tier2BCP#Considerations_for_Deploying_Measurement_Systems Considerations for Deploying Measurement Systems]
+     * [Tier2BCP#Considerations_for_Sourcing_and_Sinking_Active_Measurements Considerations for Sourcing and Sinking Active Measurements]
+     * [Tier2BCP#Considerations_for_Publishing_Measurement_Results Considerations for Publishing Measurement Results]
+ * [Tier2BCP#Implementation_Guide Implementation Guide]
+   * [Tier2BCP#Setup_local_infrastructure_so_others_can_perform_robust_measurements_to_your_site Setup local infrastructure so others can perform robust measurements to your site]
+     * [Tier2BCP#Bootable_CD_Installation_(knoppix_disk) Bootable CD Installation (knoppix disk)]
+     * [Tier2BCP#RHEL5_RPM_installation RHEL5 RPM installation]
+   * [Tier2BCP#Identify_important_collaborators Identify important collaborators]
+   * [Tier2BCP#Configure_Local_Measurements Configure Local Measurements]
+   * [Tier2BCP#Example_Configuration_Files Example Configuration Files]
+ * [Tier2BCP#Conclusion Conclusion]
+   * [Tier2BCP#Non-Participant Non-Participant]
+   * [Tier2BCP#Normal_Participant_(NEED_A_BETTER_TITLE_HERE...) Normal Participant (NEED A BETTER TITLE HERE...)]
+   * [Tier2BCP#Measurement_Champion Measurement Champion]
+ * [Tier2BCP#Usage_Guide Usage Guide]
+ * [Tier2BCP#Authors Authors]
 
 Nothing in here should be considered formal, or official, until somebody says otherwise! 
 
@@ -516,7 +506,7 @@ You need to do the following to participate at this level:
   * use the <INSERT NAME HERE> Knoppix CD.
   * Or, install the following (a, b, c) from (src)
 
-=== Normal Participant  (NEED A BETTER TITLE HERE...) ===
+=== Normal Participant (NEED A BETTER TITLE HERE...) ===
 
 Participating  at this level will allow a site to measure, document and understand the network characteristics between the local site and the important customers and providers, simplifying problem identification and resolution, and capacity planning.
 
