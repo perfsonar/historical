@@ -1076,21 +1076,23 @@ The node registration:
               type="LSRegisterRequest">
 
   <nmwg:metadata xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="meta1">
-    <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
-           xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
-           id="urn:ogf:network:domain=internet2.edu:node=lab244">
+    <dcn:subject xmlns:dcn="http://ggf.org/ns/nmwg/tools/org/dcn/1.0/">
+      <nmtb:node xmlns:nmtb="http://ogf.org/schema/network/topology/base/20070828/" 
+             xmlns:nmtl3="http://ogf.org/schema/network/topology/l3/20070828/"
+             id="urn:ogf:network:domain=internet2.edu:node=lab244">
 
-      <nmtb:name type="dns">test-idc.internet2.edu</nmtb:name>
+        <nmtb:name type="dns">test-idc.internet2.edu</nmtb:name>
 
-      <nmtl3:port>
-        <nmtl3:address type="ipv4">207.75.164.204</nmtl3:address>
-      </nmtl3:port>
+        <nmtl3:port>
+          <nmtl3:address type="ipv4">207.75.164.204</nmtl3:address>
+        </nmtl3:port>
 
-      <nmtl3:port>
-        <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
-      </nmtl3:port>
+        <nmtl3:port>
+          <nmtl3:address type="ipv6">2001:468:1420:3:214:22ff:fe72:8ae6</nmtl3:address>
+        </nmtl3:port>
 
-    </nmtb:node>
+      </nmtb:node>
+    </dcn:subject>
   </nmwg:metadata>
   
   <nmwg:data id="data1" metadataIdRef="meta1" />
