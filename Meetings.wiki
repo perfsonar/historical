@@ -6,7 +6,7 @@ applicable.
 
 == Future Events ==
 
-   * [http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
+   * [http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08 20080908Meet] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
 
 == Past Meetings ==
 
