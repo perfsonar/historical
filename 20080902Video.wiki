@@ -35,6 +35,8 @@
      * Jarad:
        * Nothing to update, but will be at the meeting next week.
    # FNAL
+     * Maxim:
+       * pingER-UI/API fixes. Wiki moves. Looking and 'includes' for landmarks file and thinking about full context of those changes.
    # MCNC
  # Project organization (Maxim sql scripts etc question)
    # Source code locations
