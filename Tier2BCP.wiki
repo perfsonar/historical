@@ -19,16 +19,16 @@ Review all text in *_Bold Italics_* for appropriate parameters with subject area
    * [Tier2BCP#Use_Cases Use Cases]
    * [Tier2BCP#Measurements Measurements]
    * [Tier2BCP#General_Diagnostics General Diagnostics]
-     * [Tier2BCP#Continuously_measure_end-to-end_delay Continuously measure end-to-end delay]
+     * [Tier2BCP#Continuously_measure_end_to_end_delay Continuously measure end-to-end delay]
      * [Tier2BCP#Make_regular_scheduled_bandwidth_measurements_across_paths_of_interest Make regular scheduled bandwidth measurements across paths of interest]
-     * [Tier2BCP#Monitor_up/down_status_of_cross_domain_circuits Monitor up/down status of cross domain circuits]
-     * [Tier2BCP#Monitor_Link/Circuit_Capacity,_Utilization_&_Errors Monitor Link/Circuit Capacity, Utilization & Errors]
+     * [Tier2BCP#Monitor_up_down_status_of_cross_domain_circuits Monitor up/down status of cross domain circuits]
+     * [Tier2BCP#Monitor_Link_Circuit_Capacity_Utilization_and_Errors Monitor Link/Circuit Capacity, Utilization & Errors]
    * [Tier2BCP#Diagnostics_to_look_for_specific_known_performance_problems Diagnostics to look for specific known performance problems]
    * [Tier2BCP#Tools Tools]
      * [Tier2BCP#Delay_Measurements Delay Measurements]
      * [Tier2BCP#Bandwidth_Measurements Bandwidth Measurements]
      * [Tier2BCP#up/down_status_of_cross_domain_circuits up/down status of cross domain circuits]
-     * [Tier2BCP#link_capacity,_utilization,_errors link capacity, utilization, errors]
+     * [Tier2BCP#link_capacity_utilization_errors link capacity, utilization, errors]
  * [Tier2BCP#Best_Practices Best Practices]
    * [Tier2BCP#Introduction Introduction]
    * [Tier2BCP#Measurement_Infrastructure Measurement Infrastructure]
@@ -157,7 +157,7 @@ The network measurement infrastructure will support the following network measur
 
 === General Diagnostics ===
 
-==== Continuously measure end-to-end delay ====
+==== Continuously measure end to end delay ====
 
 What
 
@@ -189,7 +189,7 @@ Why
  * Document performance delivered
  * Demonstrate the performance achievable with tuned systems.
 
-==== Monitor up/down status of cross domain circuits ====
+==== Monitor up down status of cross domain circuits ====
 
 What
 
@@ -201,7 +201,7 @@ Why
  * Determine when circuits are available
  * Simplify debugging of end to end circuit problems
 
-==== Monitor Link/Circuit Capacity, Utilization & Errors ====
+==== Monitor Link Circuit Capacity Utilization and Errors ====
 
 What
 
@@ -266,11 +266,11 @@ bwctl
           o Synchronous administrator coordination not required
     * Disadvantages:
 
-==== up/down status of cross domain circuits ==== 
+==== up down status of cross domain circuits ==== 
 
 TBD
 
-==== link capacity, utilization, errors ====
+==== link capacity utilization errors ====
 
 TBD
 
