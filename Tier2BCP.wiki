@@ -6,7 +6,7 @@
 
 Restructure current content & expand into 3 Documents
 
-  * An Introduction document that describes why measurement is important and documents the value of well deployed measurement infrastructure
+  * An [Tier2MeasurementIntroduction Introduction document] that describes why measurement is important and documents the value of well deployed measurement infrastructure
   * A Best Practices document, styled after IETF BCP 15 that recommends specific measurements,  protocols and schedules for the US LHC 1/2/3 commmunity
   * An Implementation Guide that describes how to install, configure & maintain specific tools to implement the BCP.
 
