@@ -83,6 +83,7 @@ sub load
 	} 
 	
 	my $parser = XML::LibXML->new();
+	$parser->expand_xinclude(1);
 	my $doc = $parser->parse_file( $self->{CONFFILE} );
 
 

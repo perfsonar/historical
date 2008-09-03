@@ -97,6 +97,7 @@ sub new {
         }
         if($param->{xml}) {
             my $parser = XML::LibXML->new();
+	    $parser->expand_xinclude(1);
             my $dom;
             eval {
                 my $doc = $parser->parse_string($param->{xml});

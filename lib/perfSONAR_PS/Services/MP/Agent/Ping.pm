@@ -232,7 +232,7 @@ sub parse {
 		'numBytes' => $v->{'bytes'}, #bytes
 		'units' => $v->{'units'} || 'ms',
 	};
-        push( @seqs, $v->{'icmp_seq'} ) if $v->{'icmp_seq'} =~ /^\d+$/;
+        push( @seqs, $v->{'icmp_seq'} ) if $v->{'icmp_seq'} && $v->{'icmp_seq'} =~ /^\d+$/;
    
     }
 

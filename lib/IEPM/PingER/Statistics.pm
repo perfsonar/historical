@@ -1,5 +1,6 @@
 use Statistics::Descriptive;
 use Log::Log4perl qw(get_logger);
+use Data::Dumper;
 
 
 #######################################################################
@@ -20,7 +21,7 @@ use warnings;
 sub calculate {
     my $rtts = shift; # reference to list of rtts
     if (!$rtts || ref($rtts) ne 'ARRAY' || @$rtts<1) {
-        $logger->error( "Input needs to be a reference to an array of rtt values.");
+        $logger->debug( "Input needs to be a reference to an array of rtt values. - ", sub{Dumper($rtts)});
         return ( undef, undef, undef, undef );
     }
 
@@ -52,7 +53,7 @@ use warnings;
 sub calculate {
     my $rtts = shift; # reference to list of rtts
     if (!$rtts || ref($rtts) ne 'ARRAY' || @$rtts<2) {
-        $logger->error( "Input needs to be a reference to an array of rtt values.");
+        $logger->debug( "Input needs to be a reference to an array of rtt values. - ", sub{Dumper($rtts)});
         return ( undef, undef, undef, undef );
     }
  
@@ -102,7 +103,7 @@ sub calculate {
     # it is not know whether ooo nor dups are true or not
   
     if (!$seqs || ref($seqs) ne 'ARRAY' || @$seqs<2) {
-        $logger->error( "Input needs to be a reference to an  array of packet sequence values.");
+        $logger->debug( "Input needs to be a reference to an  array of packet sequence values. - ", sub{Dumper($seqs)});
         return ( undef, undef );
     }
     my $size = scalar @$seqs;
@@ -165,7 +166,7 @@ sub calculate {
     
     $recv = 0 unless defined $recv; 
     if (  !$sent ||  $sent < $recv ) {
-        $logger->error( "Error in parsing loss with sent ($sent), recieved ($recv)");
+        $logger->debug( "Error in parsing loss with sent ($sent), recieved ($recv)");
         return -1;
     }
     return 100. - 100. * ( $recv / $sent );
@@ -201,7 +202,7 @@ sub calculate {
  
     ### check if $seqs a reference to array
     if (!$seqs  ||  ref($seqs) ne  'ARRAY' || @$seqs < 1) {
-        $logger->error( "Input should be list of sequence numbers.");
+        $logger->debug( "Input should be list of sequence numbers. - ", sub{Dumper($seqs)});
         return undef;
    }
   

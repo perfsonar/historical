@@ -450,6 +450,10 @@ sub storeData {
     }
     # store results
     my ( $src,$dst,$md,$data);
+    unless($agent->sourceIp() && $agent->destinationIp()) {
+       $logger->warn(  " !!! Undefined source or destination IP ( unreachable host or parsing problem ?): ", sub{Dumper($agent)}); 
+       return -1;
+    }
     my $ip_name = $agent->source()?$agent->source():$agent->sourceIp();
 
     eval {
@@ -461,7 +465,7 @@ sub storeData {
     }
     $ip_name =  $agent->destination()?$agent->destination():$agent->destinationIp();	     
     eval {  
-       $dst = $self->database()->soi_host({ ip_name => $ip_name,ip_number => $agent->destinationIp() });
+       $dst = $self->database()->soi_host({ ip_name => $ip_name, ip_number => $agent->destinationIp() });
     };
     if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
     	$logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);

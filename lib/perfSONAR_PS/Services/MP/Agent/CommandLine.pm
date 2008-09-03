@@ -171,7 +171,10 @@ sub init
             next if (not ($if_flags & IO::Interface::IFF_RUNNING));
             push @ret_interfaces, $s->if_addr($if);
         }
-
+        unless( $ret_interfaces && @$ret_interfaces) {
+		$self->error( " No interfaces ???");
+		return -1;
+	}	
         my $iaddr = Socket::inet_aton( $ret_interfaces[0] );
 	$self->source( gethostbyaddr($iaddr, Socket::AF_INET) );
 
