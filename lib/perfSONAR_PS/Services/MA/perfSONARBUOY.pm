@@ -227,6 +227,7 @@ sub init {
                 return -1;
             }
             $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
@@ -244,8 +245,8 @@ sub init {
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} ) {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "SNMP MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'SNMP MA'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "perfSONAR-BUOY MA";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONAR-BUOY MA'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}

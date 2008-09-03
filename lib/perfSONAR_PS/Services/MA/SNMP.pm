@@ -228,6 +228,7 @@ sub init {
                 return -1;
             }
             $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+            $self->{CONF}->{"snmp"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
         }
 
         unless ( exists $self->{CONF}->{"snmp"}->{"service_description"}

@@ -259,6 +259,43 @@ sub init {
         }
     }
 
+    if ( not $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
+        unless ( $self->{CONF}->{external_address} ) {
+            $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
+            return -1;
+        }
+        $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+    }
+
+    unless ( exists $self->{CONF}->{"gls"}->{"service_description"}
+        and $self->{CONF}->{"gls"}->{"service_description"} )
+    {
+        my $description = "perfSONAR_PS Lookup Service";
+        if ( $self->{CONF}->{site_name} ) {
+            $description .= " at " . $self->{CONF}->{site_name};
+        }
+        if ( $self->{CONF}->{site_location} ) {
+            $description .= " in " . $self->{CONF}->{site_location};
+        }
+        $self->{CONF}->{"gls"}->{"service_description"} = $description;
+        $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
+    }
+
+    unless ( exists $self->{CONF}->{"gls"}->{"service_name"}
+        and $self->{CONF}->{"gls"}->{"service_name"} )
+    {
+        $self->{CONF}->{"gls"}->{"service_name"} = "Lookup Service";
+        $self->{LOGGER}->warn("Setting 'service_name' to 'Lookup Service'.");
+    }
+
+    unless ( exists $self->{CONF}->{"gls"}->{"service_type"}
+        and $self->{CONF}->{"gls"}->{"service_type"} )
+    {
+        $self->{CONF}->{"gls"}->{"service_type"} = "LS";
+        $self->{LOGGER}->warn("Setting 'service_type' to 'LS'.");
+    }
+
+
     $handler->registerFullMessageHandler( "LSRegisterRequest",        $self );
     $handler->registerFullMessageHandler( "LSDeregisterRequest",      $self );
     $handler->registerFullMessageHandler( "LSKeepaliveRequest",       $self );

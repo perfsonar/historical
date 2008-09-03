@@ -166,7 +166,11 @@ sub calculate {
     
     $recv = 0 unless defined $recv; 
     if (  !$sent ||  $sent < $recv ) {
-        $logger->debug( "Error in parsing loss with sent ($sent), recieved ($recv)");
+        if ($sent) {
+            $logger->debug( "Error in parsing loss with sent ($sent), recieved ($recv)");
+        } else {
+            $logger->debug( "Error nothing sent");
+        }
         return -1;
     }
     return 100. - 100. * ( $recv / $sent );
