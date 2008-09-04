@@ -19,7 +19,7 @@ understood data structure.
 =head1 SYNOPSIS
 
   # command line to run, variables are indicated with the '%...%' notation
-  my $command = '/bin/perl -c %count% %destination%';
+  my $command = '/bin/ping -c %count% %destination%';
   
   # options to use, the above keys defined in $command will be 
   # substituted with the following values
@@ -91,7 +91,7 @@ accessor/mutator function for the generic command to run (normally set in the
 constructor). This command should have variable fields marked up between '%'s.
 For example for a ping we would have something like:
 
-  '%ping_exec% -c %count% %destination%';
+  '/bin/ping -c %count% %destination%';
   
 This would then have the values to these variables substituted in at runtime.
 =cut
