@@ -76,7 +76,7 @@ use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Pinger' );
 
 # command line
-our $command = $perfSONAR_PS::Services::MP::Agent::Ping::command;
+our $default_command = $perfSONAR_PS::Services::MP::Agent::Ping::default_command;
   
  
 

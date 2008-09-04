@@ -46,8 +46,8 @@ use base qw(perfSONAR_PS::Services::MP::Agent::CommandLine);
 use Log::Log4perl qw(get_logger);
 our $logger = Log::Log4perl::get_logger( 'perfSONAR_PS::Services::MP::Agent::Ping' );
 
-# command line
-our $command = '/bin/ping -c %count% -i %interval% -s %packetSize% -t %ttl% %destination%';
+# default command line
+our $default_command = '/bin/ping -c %count% -i %interval% -s %packetSize% -t %ttl% %destination%';
 
 =head2 new( $command, $options, $namespace)
 
@@ -57,29 +57,30 @@ Creates a new ping agent class
 
 sub new {
     my $package = shift;
-
+    my $command = shift;
     my %hash = ();
-     # grab from the global variable
+    # grab from the global variable
     if(defined $command and $command ne "") {
         $hash{"CMD"} = $command;
+    } else {
+        $hash{"CMD"} = $default_command;
     }
     $hash{"OPTIONS"} = {
 		         'transport'	=> 'ICMP',
 		         'count'		=> 10,
 		         'interval'	=> 1,
 		         'packetSize'	=> 1000,
-		         'ttl'	=> 255,
+		         'ttl'	=> 255
 	               };
     %{$hash{"RESULTS"}} = ();
 
     bless \%hash => $package;
 }
 
-
  
 
 
-=head2 cont( $string )
+=head2 count( $string )
 
 accessor/mutator method to set the number of packets to ping to
 

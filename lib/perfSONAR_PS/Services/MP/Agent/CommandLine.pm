@@ -19,12 +19,12 @@ understood data structure.
 =head1 SYNOPSIS
 
   # command line to run, variables are indicated with the '%...%' notation
-  my $command = '/bin/ping -c %count% %destination%';
+  my $command = '/bin/perl -c %count% %destination%';
   
   # options to use, the above keys defined in $command will be 
   # substituted with the following values
   my %options = (
-      'count' => 10,
+       'count' => 10,
       'destination' => 'localhost',
   );
   
@@ -72,17 +72,17 @@ Creates a new agent class
 
 =cut
 sub new {
-  my ($package, $command, $options ) = @_; 
-  my %hash = ();
-  if(defined $command and $command ne "") {
-    $hash{"CMD"} = $command;
-  }
-  if(defined $options and $options ne "") {
-    $hash{"OPTIONS"} = $options;
-  } 
-  %{$hash{"RESULTS"}} = ();
+    my ($package, $command, $options ) = @_; 
+    my %hash = ();
+    if(defined $command and $command ne "") {
+        $hash{"CMD"} = $command;
+    }
+    if(defined $options and $options ne "") {
+        $hash{"OPTIONS"} = $options;
+    } 
+    %{$hash{"RESULTS"}} = ();
 
-  bless \%hash => $package;
+    bless \%hash => $package;
 }
 
 =head2 command( $string )
@@ -91,10 +91,11 @@ accessor/mutator function for the generic command to run (normally set in the
 constructor). This command should have variable fields marked up between '%'s.
 For example for a ping we would have something like:
 
-  '/bin/ping -c %count% %destination%';
+  '%ping_exec% -c %count% %destination%';
   
 This would then have the values to these variables substituted in at runtime.
 =cut
+
 sub command
 {
 	my $self = shift;

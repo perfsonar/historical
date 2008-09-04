@@ -447,7 +447,7 @@ sub __run
 		my $badExit = 0;
 		
 		# wait for a signal from a dead child or something
-		# if all children are occupised
+		# if all children are occupied
 
 		if ( $CHILDREN_OCCUPIED >= $self->maxChildren() ) {
 			$logger->warn("Scheduler at max forks (" . $self->maxChildren() . "); waiting...");

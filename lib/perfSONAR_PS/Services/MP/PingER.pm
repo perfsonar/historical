@@ -1,7 +1,7 @@
 package perfSONAR_PS::Services::MP::PingER;
 
 use strict;
-use warnings;
+#use warnings;
 use version; our $VERSION = 0.09; 
 use English qw( -no_match_vars);
 
@@ -74,7 +74,7 @@ our $logger = get_logger("perfSONAR_PS::Services::MP::PingER");
 our $basename = 'pingermp';
 
 our $processName = 'perfSONAR-PS PingER MP';
-
+our $ping_parameters = ' -c %count% -i %interval% -s %packetSize% -t %ttl% %destination%';
 
 =head2 new( $conf )
 
@@ -133,8 +133,10 @@ sub init
         if ($self->getConf("enable_registration") and not $self->getConf("service_accesspoint")) {
 	    $logger->logdie("Must have either a service_accesspoint or an external address specified if you enable registration");
 	}
-
-        $self->configureConf( 'db_host', undef, $self->getConf('db_host') );
+        $self->configureConf( 'ping_exec', '/bin/ping', $self->getConf('ping_exec') );
+        
+	$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
+	
         $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
         $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
         $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
@@ -459,16 +461,16 @@ sub storeData {
     eval {
     	$src = $self->database()->soi_host({ ip_name => $ip_name, ip_number =>   $agent->sourceIp() });
     };
-    if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-    	$logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
+    if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w\.]+$/) {
+    	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') . " - to find or insert soi_host:   $ip_name   " . $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
     	return -1;
     }
     $ip_name =  $agent->destination()?$agent->destination():$agent->destinationIp();	     
     eval {  
        $dst = $self->database()->soi_host({ ip_name => $ip_name, ip_number => $agent->destinationIp() });
     };
-    if($EVAL_ERROR || !$dst  ||  $dst !~ /^[\-\w]+\.[\-\w]+.[\-\w]+/) {
-    	$logger->error(  "Failed: $EVAL_ERROR - to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
+    if($EVAL_ERROR || !$dst  ||  $dst !~  /^[\-\w\.]+$/) {
+    	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') . "- to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
     	return -1;
     }	      
     eval {  
@@ -482,7 +484,7 @@ sub storeData {
      
     };
     if($EVAL_ERROR || !$md ||  $md < 0) {
-    	$logger->error(  "Failed: $EVAL_ERROR -  to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
+    	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') . "  -  to find or insert  soi_metadata: ". $agent->packetSize()  . "  " . $agent->count()  . "  " .$agent->interval()  . "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
     	return -1;
     }	       
     eval {  
@@ -521,7 +523,7 @@ sub storeData {
     };
     if($EVAL_ERROR ||  $data == -1 ){
        
-       $logger->error(  "Failed: $EVAL_ERROR -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
+       $logger->error(  "Failed:  " . ($EVAL_ERROR?$EVAL_ERROR:'') . " -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .  $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
     	return -1;
      
     }
@@ -547,7 +549,11 @@ sub getAgent {
 		unless defined $test;
 
 	# get the appropiate agent and init it.
-	my $agent = perfSONAR_PS::Services::MP::Agent::PingER->new();
+	my $command = '';
+	if($self->getConf('ping_exec') && -e $self->getConf('ping_exec')) {
+	    $command =  $self->getConf('ping_exec') . $ping_parameters;
+	}
+	my $agent = perfSONAR_PS::Services::MP::Agent::PingER->new( $command  );
 	$agent->init();
 	
 	# determine if we want to use the destination IP or the DNS
