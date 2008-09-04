@@ -1,5 +1,16 @@
 #summary Instructions for Deploying the perfSONAR-PS Status Service
 
+Table of Contents
+
+  * [DeployingStatusService#Status_Service_Overview Status Service Overview]
+  * [DeployingStatusService#Installation Installation]
+  * [DeployingStatusService#Standalone RPM Standalone RPM]
+  * [DeployingStatusService#CPAN CPAN]
+  * [DeployingStatusService#SVN SVN]
+  * [DeployingStatusService#Example_Configuration Example_Configuration]
+  * [DeployingStatusService#Configuring_which_elements_to_monitor Configuring which elements to monitor]
+  * [DeployingStatusService#Configuring_for_E2EMon_Compatibility Configuring for E2EMon Compatibility]
+
 =Status Service Overview=
 The perfSONAR project has developed infrastructure that enables clients to check on the status of circuits as they pass over a given domain.
 
@@ -42,6 +53,24 @@ The perfSONAR Status binary RPM contains two command line configuration scripts 
 
 Configuring the actual elements to be monitored and the E2EMon specifics can be in later sections.
 
+===Initializing The Database===
+
+Utility scripts can be downloaded to initialize the database.
+
+====SQLite====
+
+Download this [script|^db-sqlite.sql] and run:
+
+  * sqlite3 /tmp/status.db < db-sqlite.sql
+
+====MySQL====
+
+=====Create User and Database=====
+
+Download this [script|^db-mysql.sql], replace 'CHANGE--------ME' to the status db account password and in case of MySQL run:
+
+  * mysql -u root -p'<root_pass>' < db-mysql.sql
+
 ===Starting The Daemon===
 
 Once configured, you can run the command "/etc/init.d/perfsonar-linkstatus start" to start the perfSONAR Status daemon. You can start the collector by running "/etc/init.d/perfsonar-linkstatus-collector start".
@@ -73,6 +102,24 @@ The perfSONAR Status CPAN package contains two command line configuration script
 
 Configuring the actual elements to be monitored and the E2EMon specifics can be in later sections.
 
+===Initializing The Database===
+
+Utility scripts can be downloaded to initialize the database.
+
+====SQLite====
+
+Download this [script|^db-sqlite.sql] and run:
+
+  * sqlite3 /tmp/status.db < db-sqlite.sql
+
+====MySQL====
+
+=====Create User and Database=====
+
+Download this [script|^db-mysql.sql], replace 'CHANGE--------ME' to the status db account password and in case of MySQL run:
+
+  * mysql -u root -p'<root_pass>' < db-mysql.sql
+
 ===Starting The Daemon===
 
 After configuration has been completed, the service daemon can be started by running the command "/etc/init.d/perfsonar start". The collector daemon can be started by running the command "/etc/init.d/perfsonar-collector start".
@@ -86,28 +133,21 @@ Checkout the read-only version of our SVN repository:
 
 The perfSONAR Status subversion package contains two command line configuration scripts that will prompt the user with questions to configure the daemons. The tool to configure the collector daemon is "psConfigureCollectors" and the tool to configure the service daemon is "psConfigureDaemon". Both scripts will be located in the directory where you checked out the subversion repository.
 
+===Initializing The Database===
+
+A utility script, psCreateStatusDB is included in the scripts/status directory.
+
+====SQLite====
+
+  * scripts/psCreateStatusDB --type sqlite --file /path/to/status.db
+
+====MySQL====
+
+  * scripts/psCreateStatusDB --type mysql --name db_name [--host db_host] [--port db_port] --username [username] --password [password]
+
 ===Starting The Daemon===
 
-After configuration, you can start the service daemon by running the "perfsonar-daemon.pl" script in the directory where you checked out the subversion repository. The collector daemon can be started by running the "perfsonar-collector.pl" script in the same directory.
-
-==Initializing The Database==
-
-Utility scripts can be downloaded to initialize the database.
-
-===SQLite===
-
-Download this [script|^db-sqlite.sql] and run:
-
-  * sqlite3 /tmp/status.db < db-sqlite.sql
-
-===MySQL===
-
-====Create User and Database====
-
-Download this [script|^db-mysql.sql], replace 'CHANGE--------ME' to the status db account password and in case of MySQL run:
-
-  * mysql -u root -p'<root_pass>' < db-mysql.sql
-
+After configuration has been completed, the service daemon can be started by running the command "./perfsonar-daemon.pl  --output collector.log". The collector daemon can be started by running the command "./perfsonar-collector.pl --output collector.log".
 
 ==Example Configuration==
 There are some examples files that show a common configuration. In this configuration, there is a single circuit passing over the Internet2 domain. This circuit uses a script to measure status of the circuit segment as it crosses the domain and uses SNMP to measure the status of the ingress/egress points of the circuit. Also included is a configuration file to enable E2EMon services to retrieve information about the circuit as it passes over the Internet2 domain.
@@ -246,4 +286,7 @@ The knowledge property is an attribute of the link XML element. It is used to de
   <endpoint type="demarcpoint" name="RTRLOSA" />
 </link>
 }}}
+
+
+
 
