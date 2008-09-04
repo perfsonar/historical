@@ -3,10 +3,9 @@
 Table of Contents
 
   * [DeployingStatusService#Status_Service_Overview Status Service Overview]
-  * [DeployingStatusService#Installation Installation]
-  * [DeployingStatusService#Standalone RPM Standalone RPM]
-  * [DeployingStatusService#CPAN CPAN]
-  * [DeployingStatusService#SVN SVN]
+  * [DeployingStatusService#Standalone_RPM Standalone RPM Installation]
+  * [DeployingStatusService#CPAN CPAN Installation]
+  * [DeployingStatusService#SVN SVN Installation]
   * [DeployingStatusService#Example_Configuration Example_Configuration]
   * [DeployingStatusService#Configuring_which_elements_to_monitor Configuring which elements to monitor]
   * [DeployingStatusService#Configuring_for_E2EMon_Compatibility Configuring for E2EMon Compatibility]
@@ -286,7 +285,5 @@ The knowledge property is an attribute of the link XML element. It is used to de
   <endpoint type="demarcpoint" name="RTRLOSA" />
 </link>
 }}}
-
-
 
 
