@@ -215,20 +215,19 @@ sub init {
         if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"} * 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
-            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
-            $self->{LOGGER}->warn("");
             $self->{CONF}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
     }
     else {
         if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
-            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"ls_registration_interval"}."'.");
+            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
             $self->{LOGGER}->warn("Setting 'ls_registration_interval' to 1 hour.");
@@ -236,15 +235,15 @@ sub init {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = 3600;
         }
     }
-    
-    if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"}  ) {
+
+    if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
         $self->{CONF}->{"gls"}->{"summarization_interval"} *= 60;
     }
     else {
         $self->{CONF}->{"gls"}->{"summarization_interval"} = 1800;
-        $self->{LOGGER}->warn("Setting 'ls_registration_interval' to '".$self->{CONF}->{"gls"}->{"summarization_interval"}."'.");
+        $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"summarization_interval"} . "'." );
     }
-    
+
     unless ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
         and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
     {
@@ -261,12 +260,12 @@ sub init {
         }
     }
 
-    if ( not $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
+    unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
         unless ( $self->{CONF}->{external_address} ) {
             $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
             return -1;
         }
-        $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+        $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
         $self->{CONF}->{"gls"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
     }
 
@@ -297,7 +296,6 @@ sub init {
         $self->{CONF}->{"gls"}->{"service_type"} = "LS";
         $self->{LOGGER}->warn("Setting 'service_type' to 'LS'.");
     }
-
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",        $self );
     $handler->registerFullMessageHandler( "LSDeregisterRequest",      $self );
@@ -385,7 +383,7 @@ sub getHints {
             }
             open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
             print HINTS $content;
-            close( HINTS );
+            close(HINTS);
             return;
         }
     }
@@ -662,11 +660,11 @@ sub summarizeLS {
             my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
             my $contactName  = q{};
             my $contactType  = q{};
-            unless ( $contactPoint ) {
+            unless ($contactPoint) {
                 $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
                 $contactName  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
                 $contactType  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
-                unless ( $contactPoint or $contactName or $contactType) {
+                unless ( $contactPoint or $contactName or $contactType ) {
                     return;
                 }
             }
@@ -677,9 +675,9 @@ sub summarizeLS {
             my $service_domains;
             my $service_keywords;
 
-
             my $temp_nodes = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='node']", 0 );
             foreach my $node ( $temp_nodes->get_nodelist ) {
+
                 # extract the usful node stuffs
                 my @elements = ( "address", "ipAddress", "name" );
                 my @types = ( "ipv4", "IPv4" );
@@ -698,12 +696,17 @@ sub summarizeLS {
                 $service_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
                 $all_domains     = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
             }
-                        
+
             my $temp_services = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='service']", 0 );
             foreach my $service ( $temp_services->get_nodelist ) {
+
                 # extract the useful (new) service stuffs (keywords, types, addresses, uris, etc.)
 
-                my $temp_eventTypes = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='type']", 0 );
+                my $temp_eventTypes = find(
+                    $service,
+                    "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='type']",
+                    0
+                );
                 foreach my $e ( $temp_eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
                     if ($value) {
@@ -712,7 +715,11 @@ sub summarizeLS {
                     }
                 }
 
-                my $temp_keywords = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameters']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameter']", 0 );
+                my $temp_keywords = find(
+                    $service,
+                    "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameters']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameter']",
+                    0
+                );
                 foreach my $k ( $temp_keywords->get_nodelist ) {
                     my $name = $k->getAttribute("name");
                     next unless $name and $name =~ m/^keyword/;
@@ -721,19 +728,20 @@ sub summarizeLS {
                         $service_keywords->{$name}->{$value} = 1;
                         $all_keywords->{$name}->{$value}     = 1;
                     }
-                }                
+                }
 
                 my $temp_addresses = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='address' ]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $value = extract( $a, 0 );
-                    if ( $value ) {
-                        my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $value );
+                    if ($value) {
+                        my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI($value);
                         next unless $host;
-                        if( is_ipv4( $host ) ) {
+                        if ( is_ipv4($host) ) {
                             $service_addresses->{$host} = 1 unless exists $service_addresses->{$host};
-                            $all_addresses->{$host} = 1 unless exists $all_addresses->{$host};
+                            $all_addresses->{$host}     = 1 unless exists $all_addresses->{$host};
                         }
-                        elsif( &Net::IPv6Addr::is_ipv6( $host ) ) {
+                        elsif ( &Net::IPv6Addr::is_ipv6($host) ) {
+
                             # unused currently
                         }
                         else {
@@ -746,7 +754,7 @@ sub summarizeLS {
                                 }
                                 $cat =~ s/^\.//;
                                 $service_domains->{$cat} = 1 if $cat;
-                                $all_domains->{$cat} = 1 if $cat;
+                                $all_domains->{$cat}     = 1 if $cat;
                             }
                         }
                     }
@@ -754,27 +762,27 @@ sub summarizeLS {
 
                 my $temp_domains = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='relation' and ( \@type=\"controls\" or \@type=\"runsOn\" ) ]", 0 );
                 foreach my $d ( $temp_domains->get_nodelist ) {
-                    my @hosts = ();
+                    my @hosts    = ();
                     my @elements = ( "address", "name" );
-                    my @types = ( "node", "domain", "dns", "DNS" );
+                    my @types    = ( "node", "domain", "dns", "DNS" );
                     $service_domains = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
                     $all_domains     = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
 
                     my @urns = ();
                     push @elements, "idRef";
-                    push @types, "urn";
-                    push @types, "URN";
+                    push @types,    "urn";
+                    push @types,    "URN";
                     $service_domains = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
                     $all_domains     = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
-                }      
-            }                  
+                }
+            }
 
             my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $service_mdId . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             if ( $#resultsString != -1 ) {
                 my $len = $#resultsString;
-      
-                for my $x ( 0 .. $len ) {                    
+
+                for my $x ( 0 .. $len ) {
                     my $doc2 = $parser->parse_string( $resultsString[$x] );
 
                     # eventTypes common to both...
@@ -1039,8 +1047,7 @@ sub summarizeLS {
             }
             else {
                 $self->{LOGGER}->error( "Data not registered for service with metadataId \"" . $service_mdId . "\", cannot summarize at this time." );
-            }            
-
+            }
 
             # specific service done
             my $list1;
@@ -1255,17 +1262,17 @@ sub makeSummary {
         }
     }
     $summary .= "      </summary:subject>\n";
-    if ( exists $parameters->{eventTypes} and $parameters->{eventTypes} and exists $parameters->{keywords} and $parameters->{keywords}) {
+    if ( exists $parameters->{eventTypes} and $parameters->{eventTypes} and exists $parameters->{keywords} and $parameters->{keywords} ) {
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "      <nmwg:eventType>" . $et . "</nmwg:eventType>\n";
         }
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
-        }  
+        }
         foreach my $k ( sort keys %{ $parameters->{keywords} } ) {
             foreach my $k2 ( keys %{ $parameters->{keywords}->{$k} } ) {
-                $summary .= "        <nmwg:parameter name=\"". $k ."\" value=\"" . $k2 . "\" />\n";
+                $summary .= "        <nmwg:parameter name=\"" . $k . "\" value=\"" . $k2 . "\" />\n";
             }
         }
         $summary .= "      </summary:parameters>\n";
@@ -1277,14 +1284,14 @@ sub makeSummary {
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
-        }  
+        }
         $summary .= "      </summary:parameters>\n";
     }
     elsif ( exists $parameters->{keywords} and $parameters->{keywords} ) {
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $k ( sort keys %{ $parameters->{keywords} } ) {
             foreach my $k2 ( keys %{ $parameters->{keywords}->{$k} } ) {
-                $summary .= "        <nmwg:parameter name=\"". $k ."\" value=\"" . $k2 . "\" />\n";
+                $summary .= "        <nmwg:parameter name=\"" . $k . "\" value=\"" . $k2 . "\" />\n";
             }
         }
         $summary .= "      </summary:parameters>\n";
@@ -1483,7 +1490,7 @@ sub ipSummarization {
     # structure of the IPTrie is a little strange and actually allows this to
     # happen) so this ensures we hit the root last.
     foreach my $node ( reverse @{$list} ) {
-        my $me = "";
+        my $me = q{};
         $me = $node->[3] . "/" . $node->[5] if defined $node->[3] and defined $node->[5];
         next unless $me;
 
@@ -1491,7 +1498,7 @@ sub ipSummarization {
         # child list, and we will know who the parent is.
         my @temp = ();
         $self->{IPTRIE}{$me}{"C"} = \@temp;
-        $self->{IPTRIE}{$me}{"U"} = "";
+        $self->{IPTRIE}{$me}{"U"} = q{};
 
         # recursively search the tree, stop after you find a left and right
         # child though (N.B. this creates problems unfortunately, so we need
@@ -1500,7 +1507,7 @@ sub ipSummarization {
             "L" => 0,
             "R" => 0
         );
-        $self->extractIPNode( { parent => $me, node => $node, status => \%status, side => "" } );
+        $self->extractIPNode( { parent => $me, node => $node, status => \%status, side => q{} } );
     }
 
     # link all the parent information for each node and child
@@ -1516,7 +1523,7 @@ sub ipSummarization {
     foreach my $host ( keys %{ $parameters->{addresses} } ) {
         my $current = $host . "/32";
         while ($current) {
-            my $delete = "";
+            my $delete = q{};
             if ( $#{ $self->{IPTRIE}{ $self->{IPTRIE}{$current}{"U"} }{"C"} } == 0 and not( $current =~ m/\/32$/ ) and $#{ $self->{IPTRIE}{$current}{"C"} } == 0 ) {
                 $delete = $current;
                 foreach my $child ( @{ $self->{IPTRIE}{$current}{"C"} } ) {
@@ -1537,7 +1544,7 @@ sub ipSummarization {
     foreach my $host ( keys %{ $parameters->{addresses} } ) {
         my $current = $host . "/32";
         while ($current) {
-            my $delete = "";
+            my $delete = q{};
             if ( $#{ $self->{IPTRIE}{$current}{"C"} } == 0 ) {
                 $delete = $current;
                 foreach my $child ( @{ $self->{IPTRIE}{$delete}{"C"} } ) {
@@ -1640,7 +1647,7 @@ sub extractIPNode {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { parent => 1, node => 1, status => 1, side => 0 } );
 
-    my $me = "";
+    my $me = q{};
     $me = $parameters->{node}->[3] . "/" . $parameters->{node}->[5] if defined $parameters->{node}->[3] and defined $parameters->{node}->[5];
     if ( $me and $parameters->{side} and ( not $self->{CLAIMTREE}{$me} ) ) {
         push @{ $self->{IPTRIE}{ $parameters->{parent} }{"C"} }, $me;
@@ -2056,21 +2063,25 @@ sub lsRegisterRequest {
         }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-        if ( $service ) {
+        if ($service) {
+
             # 'clobber' registration case
 
             $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth } );
         }
         else {
+
             # still the clobber case, but 'node' is acceptable here as well (will be more in the future, ugh...
 
             my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
-            if ( $node ) {
+            if ($node) {
+
                 # 'clobber' registration case
 
                 $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec, eventType => $eventType, auth => $auth } );
             }
             else {
+
                 # 'update' registration case
 
                 $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth } );
@@ -2110,18 +2121,18 @@ sub lsRegisterRequestUpdateNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-# XXX 9/2/08 - jason
-#
-# I dont think we want to go fumbling around here, but to get a 'valid' hashed
-# key we should focus on 'known' elements instead of the entire metadata block.
-# e.g. if we just hashed the md block, a single character space would cause a
-# new hashed key to be formed (which sucks).
+    # XXX 9/2/08 - jason
+    #
+    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # key we should focus on 'known' elements instead of the entire metadata block.
+    # e.g. if we just hashed the md block, a single character space would cause a
+    # new hashed key to be formed (which sucks).
 
     my $accessPoint = q{};
     $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='accessPoint']", 1 ), 0 );
-    my $accessType  = q{};
-    my $accessName  = q{};
-    unless ( $accessPoint ) {
+    my $accessType = q{};
+    my $accessName = q{};
+    unless ($accessPoint) {
         $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{topology}, ".//*[local-name()='type']",    1 ), 0 );
         $accessName  = extract( find( $parameters->{topology}, ".//*[local-name()='name']",    1 ), 0 );
@@ -2354,17 +2365,17 @@ sub lsRegisterRequestNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-# XXX 9/2/08 - jason
-#
-# I dont think we want to go fumbling around here, but to get a 'valid' hashed
-# key we should focus on 'known' elements instead of the entire metadata block.
-# e.g. if we just hashed the md block, a single character space would cause a
-# new hashed key to be formed (which sucks).
+    # XXX 9/2/08 - jason
+    #
+    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # key we should focus on 'known' elements instead of the entire metadata block.
+    # e.g. if we just hashed the md block, a single character space would cause a
+    # new hashed key to be formed (which sucks).
 
     my $accessPoint = q{};
     $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
     my $accessType = q{};
-    my $accessName = q{};;
+    my $accessName = q{};
     unless ($accessPoint) {
         $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
@@ -2531,7 +2542,7 @@ sub lsDeregisterRequest {
     if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
         $summary++;
     }
-    my $database = "";
+    my $database = q{};
     if ($summary) {
         $database = $parameters->{summarydb};
     }
@@ -2664,7 +2675,7 @@ sub lsKeepaliveRequest {
     if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
         $summary++;
     }
-    my $database = "";
+    my $database = q{};
     if ($summary) {
         $database = $parameters->{summarydb};
     }
