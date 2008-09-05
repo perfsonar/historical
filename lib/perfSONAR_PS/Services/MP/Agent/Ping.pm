@@ -242,10 +242,10 @@ sub parse {
     # hires results from ping output
     for( my $x = (scalar @$cmdOutput - 2); $x < (scalar @$cmdOutput) ; $x++ ) {
         $logger->debug( "Analysing line: " . $cmdOutput->[$x]);
-        if ( $cmdOutput->[$x] =~ /(\d+) packets transmitted, (\d+) (packets )?received/ ) {
+        if ( $cmdOutput->[$x] =~ /(\d+) packets transmitted, (\d+) (?:packets )?received/ ) {
       	    $sent = $1;
       	    $recv = $2;
-        } elsif ( $cmdOutput->[$x] =~ /(rtt|round-trip) min\/avg\/max\/(mdev|stddev) \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
+        } elsif ( $cmdOutput->[$x] =~ /(?:rtt|round-trip) min\/avg\/max\/(?:mdev|stddev) \= (\d+\.\d+)\/(\d+\.\d+)\/(\d+\.\d+)\/\d+\.\d+ ms/ ) {
   	    $minRtt = $1; 
   	    $meanRtt = $2;
   	    $maxRtt = $3;
