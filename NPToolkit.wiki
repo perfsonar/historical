@@ -5,10 +5,9 @@
  * Introduction
  * Features
  * Purpose
- * Installation
-   * Cacti
-   * perfSONAR-BUOY
- * Code Tour
+ * Getting The NPToolkit
+ * Quick Start Guide
+ * Configuration
  * FAQ
 
 == Introduction ==
@@ -44,77 +43,109 @@ The original idea for the NPToolkit came from the [http://e2epi.internet2.edu/np
 
 To lower the bar on this complex topic, this disk offers a complete network performance suite pre-installed (and in most cases pre-configured) that is ready to be dropped directly into the network of a NOC of any size.  With the integration of [http://www.perfsonar.net perfSONAR] tools, the results of both passive and active measurements can be shared in a federated environment with your peers enabling the early detection of performance issues.
 
-== Installaton ==
-
-The initial steps are:
+== Getting The NPToolkit ==
 
  # Download the following:
    * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.iso]
    * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.md5]
  # Verify the MD5 sum:
-   * md5sum NPToolkit-2.0-beta1.iso 
-   * cat NPToolkit-2.0-beta1.md5
-   * The results should be the same, if they aren't please re-download the ISO.
+   * md5sum -c NPToolkit-2.0-beta1.iso 
  # Burn the ISO to a CD-ROM
  # Insert the CD-ROM into the tray and boot the system
- # After the boot process completes, enter the user name *_knoppix_* to access the system.
 
-During the boot process, you will notice that you are prompted to customize the tools. The customization process allows you to add specific information (i.e., physical location of the server or local link speed). After all the tools have been started, the boot process allows you to easily customize each tool. The customization files, along with log files, can be stored on an external drive (e.g., a USB thumb drive) or if chosen on the root partition of the internal hard drive.
+== Quick Start Guide ==
 
-=== Cacti ===
+  # Download and burn the CD as described above
+  # Configure your computer to boot from CD
+  # Startup your computer with the CD in the drive
+  # During the boot process, you'll be presented with a menu of options. Select "Configure drive to hold data/customizations".
+  # From the list, select which drive you would like to allow the disc to use to save data.
+  # Say yes to format the drive if asked
+  # After the drive is formatted, you will return to the original menu of options
+  # Select "Configure site settings". You'll be asked some information about the location and administration of this host.
+  # After configuring the site settings, you'll return to the original menu of options.
+  # Select "Manage Users"
+  # You'll see a new menu of options. Select "Change A User's Password"
+  # When asked for the username, type in "root" and hit enter, and then enter a password for the root user
+  # You'll be returned to the user management menu again
+  # Select "Change A User's Password" again
+  # When asked for the username, type in "knoppix" and hit enter, and then enter a password for the knoppix user
+  # You'll be returned to the user management menu again
+  # At this point, you can either select "Add A New User" or simply use the knoppix user as your admin user
+  # If you select "Add A New User", you'll be asked to enter in information about the user such as their username, whether they're an admin and a password
+  # Once you have finished adding users, select "Exit", and you will be returned to the original menu.
+  # Select "Enable/Disable Services"
+  # You will be brought to a menu containing the set of services for the NPToolkit. Everything, but ssh is enabled by default.
+  # Select which services you would like to enable/disable.
+  # When you are done disabling services, select "Exit", and you'll be returned to the original menu
+  # By default interface are configured for DHCP. If you need to configure a static IP address for your host, select "Configure Static IP". You will be prompted with a series of questions needed to configure the address.
+  # Once your interface is configured, select "Modify advertised interface". This is the interface that services will advertise for external clients to use.
+  # If you would like to configure BWCTL, OWAMP, NDT or NPAD, you may do so now by selecting the appropriate menu option
+  # Once you have finished configuration, select "exit".
+  # You will be asked to reboot. Select "yes".
+  # After your machine has rebooted, you will see the menu again. You can either select exit or wait 20 seconds for it to time out.
+  # Once your machine has finished booting, you can login either as a user you created or as the user knoppix.
+  # Unless you specifically disabled the service, a web interface will be available by connecting to https://HOST_ADDRESS/. This GUI contains links to the available tools, links to some administrative tools for configuring perfSONAR-BUOY, Cacti and PingER, as well as a listing of which services are running on the host.
 
-Step by step instructions for configuring Cacti are available on the [CactiConfig] page.
+== Host Configuration ==
+
+=== Hard Disk Configuration ===
+
+The hard disk is used to store permanent data like logs and measurements. Select '1' to configure the hard disk. You will then be given a list of hard disk or LVM partitions. Select which partition the toolkit should use. You will then be asked whether or not to format the drive. The drive must be formatted in order to use it.At this point, you can either exit and reboot or continue configuring the other services.
+
+=== Site Information Configuration ===
+
+The toolkit requires you to enter site information to help differentiate the many services that will be registering. Select '2' to configure the site information.
+
+=== Static IP Configuration ===
+
+By default, the toolkit uses DHCP to configure the interfaces. If need be, however, you can use configure a static ip address by selecting option '8'. Once the static ip is enabled, dhcp can be re-enabled by selecting "Configure Static IP" again, and answering yes to the prompt asking if you'd like to enable DHCP.
+
+=== External Address Configuration ===
+
+The external address is the address that will be advertised by services by default, and will be the address that external users will use to contact the various services. The toolkit attempts to guess a reasonable default. To change this default, select option 11 (Modify external access point).
+
+=== Set Passwords ===
+
+Selecting option 9 (Optional Tools) will bring about another menu. This menu contains an option to set passwords for the "knoppix" and "root" accounts.
+
+=== Enable SSH ===
+
+Selecting option 9 (Optional Tools) will bring about another menu. This menu contains an option to configure and start the SSH daemon
+
+== Service Configuration ==
+
+=== BWCTL Configuration ===
+
+BWCTL is a tool that allows clients to schedule acheivable bandwidth tests using tools like Iperf. After selecting option 3 (Configure BWCTL), there will be a series of prompts allowing you to configure various options, including the maximum amount of bandwidth available for tests, and what users or networks can perform BWCTL tests.
+
+=== OWAMP Configuration ===
+
+OWAMP is a tool that allows clients to schedule one-way delay measurements to and from the host. After selecting option 4 (Configure OWAMP), there will be a series of prompts allowing you to configure various options, including the maximum amount of bandwidth available for tests, and what users or networks can perform OWAMP tests.
+
+=== NDT Configuration ===
+
+NDT is a tool that allows clients to perform diagnostic tests from their machine to the host. Selecting option 5 (Configure NDT) will configure the NDT web page to use the site information entered previously.
+
+=== NPAD Configuration ===
+
+NPAD is a tool that allows clients to perform diagnostic tests from their machine to the host. Selecting option 6 (Configure NPAD) will configure the NPAD web page to use the site information entered previously.
+
+=== PingER Configuration ===
+
+PingER is a tool that performs regular ping tests, and stores it into a database, that is made available by a web services interface. Step-by-step instructions for configuring the set of hosts for PingER to ping are available on the [NPToolkit_PingER NPToolkit PingER] page.
+
+=== SNMP MA/Cacti ===
+
+Cacti is web-based tool for collecting SNMP statistics and making available graphs of the statistics through a web page. The SNMP MA is a service that makes the SNMP statistics collected by Cacti available through a standardized web services interface. Step by step instructions for configuring Cacti are available on the [CactiConfig] page.
 
 === perfSONAR-BUOY ===
 
 perfSONAR-BUOY is a framework aimed at collecting and exposing periodic tests of the BWCTL and OWAMP measurement tools.  There are a couple of quick configuration steps that must be taken before this software may run, namely to create a list of machines to test with and start the software after this configuration is done.
 
-==== Configuration ====
-
-After your machine is booted, visit the configuration web page (this can be done locally if you have console access to the freshly booted machine, or remotly):
-
-https://HOST/cgi-bin/perfSONAR-BUOY/pSB-config.cgi
-
-Being sure to replace *HOST*.  This should bring up a screen similar to this:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
-
-For now, only one choice works: *_BWCTL IPv4_* on the left side.  Click on this.  A screen
-similar to this will appear (note on this test machine the mesh is already set up so values will appear selected already).  Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with.  These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points.  
-
-_Enter test Description_ is optional, but helpful to enter.
-
-Finally select a test type (note currently we only support one test at a time).  There are two common options for tests:
-
- * Test every hour for 60 seconds
- * Test every 4 hours for 60 seconds
- 
-More test options will be available in future releases.  The screen will look like this after selection:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
-
-Press _Save_ and wait for the browser to display a message indicating success.  The browser can be closed and a terminal will be required to start the services:
-
- * /etc/init.d/pSB_master.sh restart
- * /etc/init.d/pSB_collector.sh restart
- * /etc/init.d/pSB.sh restart
-
-Due to the frequency of tests you have chosen, there may be a small lag when the results become available.  To test out your results the following test web page may be used:
-
-https://dc211.internet2.edu/cgi-bin/test.cgi?eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0&url=http://HOST:8085:/perfSONAR_PS/services/pSB
-
-Being sure to replace *HOST*.
-
-== Code Tour ==
-
-TBD
+A step-by-step guide to configuring perfSONAR-BUOY is available on the [NPToolkit_pSB NPToolkit perfSONAR-BUOY] page.
 
 == FAQ ==
-
- * *Q: Do I need to customize the disk?*
- * *A:* All of the performance tools operate correctly without any customization. Just drop the CD into the tray and power up the system. However, some of the tools, NDT, NPAD and the perfSONAR tools in particular, will provide more useful information if you customize them. Customization of these tools will allow these two tools to generate web pages that inform the end-users where they are testing to and will allow you to specify where trouble reports are sent.  You can also customize the BWCTL and OWAMP tools to provide additional access to authenticated remote users. Finally, you can also set the system to use either the default DHCP address or configure a static IP address.
-   * To change the customization options, boot the system and, at the end of the boot process, you are presented with a customization menu.
-   * When the NPToolkit image is booted, the standard Knoppix startup script searches all drives for this knoppix.sh file, if found it executes the script, restoring the customized files. 
 
  * *Q: How do I logon to the console?*
  * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. By default, there is no password for this account and no remote access is allowed.
@@ -172,14 +203,6 @@ TBD
 
  * *Q: I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_200807' doesn't exist at /some/path/to/Base.pm line XXX_.*
  * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.
-
- * *Q: How do I add other administrative users? *
- * *A:* 
-   * Add a user using the following command:
-     * *adduser NEWUSER*
-   * Once you've added the users information, run the command:
-     * *addgroup NEWUSER admin*
-   * This user will be able to ssh into the machine as well as use the administrative web GUIs. 
 
  * *Q: Can I Use a Firewall? *
  * *A:* 
