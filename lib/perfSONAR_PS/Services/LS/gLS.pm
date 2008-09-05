@@ -515,7 +515,6 @@ sub registerLS {
         }
     }
     else {
-
         # if we are not a root, send our summary to a root
 
         my %service = (
@@ -533,9 +532,9 @@ sub registerLS {
         }
 
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
+        my @metadataArray = ();
         if ( $#resultsString != -1 ) {
             my $md_len        = $#resultsString;
-            my @metadataArray = ();
             for my $x ( 0 .. $md_len ) {
                 $resultsString[$x] =~ s/^\{\}id=//;
                 $resultsString[$x] =~ s/\"//g;
@@ -545,56 +544,49 @@ sub registerLS {
                     push @metadataArray, $t if $t;
                 }
             }
+        }
 
-            if ( $#metadataArray != -1 ) {
+        # limit how many gLS instanaces we register with (pick the 3 closest)
+        my $len = $#{ $gls->{ROOTS} };
+        $len = 2 if $len > 2;
+        for my $x ( 0 .. $len ) {
+            my $root = $gls->{ROOTS}->[$x];
 
-                # limit how many gLS instanaces we register with (pick the 3 closest)
-                my $len = $#{ $gls->{ROOTS} };
-                $len = 2 if $len > 2;
-                for my $x ( 0 .. $len ) {
-                    my $root = $gls->{ROOTS}->[$x];
+            my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
 
-                    my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
-
-                    my $result = $ls->keyRequestLS( { service => \%service } );
-                    if ( exists $result->{key} and $result->{key} ) {
-                        my $key = $result->{key};
-                        $result = $ls->registerClobberRequestLS( { eventType => $eventType, service => \%service, key => $key, data => \@metadataArray } );
-                        if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
-                            my $msg = "Success from LS";
-                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                            $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
-                            $self->{LOGGER}->debug($msg);
-                        }
-                        else {
-                            my $msg = "Error in LS Registration";
-                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                            $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
-                            $self->{LOGGER}->error($msg);
-                        }
-                    }
-                    else {
-                        $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
-                        if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
-                            my $msg = "Success from LS";
-                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                            $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
-                            $self->{LOGGER}->debug($msg);
-                        }
-                        else {
-                            my $msg = "Error in LS Registration";
-                            $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                            $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
-                            $self->{LOGGER}->error($msg);
-                        }
-                    }
+            my $result = $ls->keyRequestLS( { service => \%service } );
+            if ( exists $result->{key} and $result->{key} ) {
+                my $key = $result->{key};
+                $result = $ls->registerClobberRequestLS( { eventType => $eventType, service => \%service, key => $key, data => \@metadataArray } );
+                if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                    my $msg = "Success from LS";
+                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $self->{LOGGER}->debug($msg);
+                }
+                else {
+                    my $msg = "Error in LS Registration";
+                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $self->{LOGGER}->error($msg);
+                }
+            }
+            else {
+                $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
+                if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                    my $msg = "Success from LS";
+                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $self->{LOGGER}->debug($msg);
+                }
+                else {
+                    my $msg = "Error in LS Registration";
+                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $self->{LOGGER}->error($msg);
                 }
             }
         }
-        else {
-            $self->{LOGGER}->error("Nothing to register at this time.");
-        }
-
     }
 
     $database->closeDB( { error => \$error } );
