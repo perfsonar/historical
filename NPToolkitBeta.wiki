@@ -1,15 +1,15 @@
 = NPToolkit Beta Workplan =
 
-== Plans Through Aug 20th (Weds) ==
+== Plans Through Sept 5th (Fri) ==
 
  * Jason
    * gLS
      # Client API + Update existing GUIs (*DONE*)
-     # Registration API + Integration into SNMP MA (*DONE pending testing of SNMP MA/pSB*)
+     # Registration API + Integration into SNMP MA (*DONE*)
      # Performance/DB XML Trouble Shooting (*DONE*)
    * pSB
      # Port master/collector to perfSONAR (*Abandonded*)  
-     # Fix BWCTL DB Abstraction
+     # Fix BWCTL DB Abstraction (*Pending Testing*)
      # OWAMP DB Abstraction (Pending JB)
    * SNMP MA
      # Cricket/Cacti/MRTG Integration (*MRTG/Cricket Abandonded, Cacti complete*)  
@@ -33,7 +33,7 @@
    # Add AESKEY support to AMI-bwctl (*DROPPING*)
 
    
-== Post Aug 20th, before Sept 4th (Thurs) ==
+== Post Sept 5th, before Sept 19th (Friday) ==
 
  * Jason
    * gLS
