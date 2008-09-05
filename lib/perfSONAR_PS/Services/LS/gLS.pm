@@ -244,23 +244,42 @@ sub init {
         $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"summarization_interval"} . "'." );
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
+    if ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
         and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
     {
+        $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} *= 60;
+        unless ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
+            and $self->{CONF}->{"gls"}->{"reaper_interval"} )
+        {
+            $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
+            $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
+        }
+    }
+    else {
         if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
             and $self->{CONF}->{"gls"}->{"reaper_interval"} )
         {
-            $self->{LOGGER}->info( "Using legacy 'gls:reaper_interval' value: \"" . $self->{CONF}->{"gls"}->{"reaper_interval"} . "\"." );
+            $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
             $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
-            delete $self->{CONF}->{"gls"}->{"reaper_interval"};
+            $self->{LOGGER}->info( "Using legacy 'gls:reaper_interval' value: \"" . $self->{CONF}->{"gls"}->{"reaper_interval"} . "\"." );
         }
         else {
-            $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
+            $self->{LOGGER}->warn("Setting 'xmldb_reaper_interval' to '0'.");
             $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = 0;
+            $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
         }
     }
-    $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
-    $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} *= 60;
+
+    if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
+        and $self->{CONF}->{"gls"}->{"reaper_interval"} )
+    {
+        $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
+        $self->{LOGGER}->warn("Setting 'reaper_interval' to '".$self->{CONF}->{"gls"}->{"reaper_interval"}."'.");
+    }
+    else {
+        $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
+        $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
+    }
 
     unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
         unless ( $self->{CONF}->{external_address} ) {
@@ -1073,7 +1092,7 @@ sub summarizeLS {
             unless ( $self->{STATE}->{"messageKeys"}->{$serviceKey} == 2 ) {
                 if ( $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
                     $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-                    $summarydb->updateByName( { content => createControlKey( { key => $serviceKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                    $summarydb->updateByName( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                     $sum_errorFlag++ if $sum_error;
                 }
                 else {
@@ -1082,7 +1101,7 @@ sub summarizeLS {
                     $doc->getDocumentElement->setAttribute( "id", $serviceKey );
                     $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $doc->getDocumentElement->toString, type => "LSStore" } ), name => $serviceKey, txn => $sum_dbTr, error => \$sum_error } );
                     $sum_errorFlag++ if $sum_error;
-                    $summarydb->insertIntoContainer( { content => createControlKey( { key => $serviceKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                    $summarydb->insertIntoContainer( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                     $sum_errorFlag++ if $sum_error;
                 }
                 $self->{STATE}->{"messageKeys"}->{$serviceKey} = 2;
@@ -1140,14 +1159,14 @@ sub summarizeLS {
         unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
             if ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
                 $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-                $summarydb->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                $summarydb->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
             }
             else {
                 $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
                 $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $service2, type => "LSStore-summary" } ), name => $mdKey, txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
-                $summarydb->insertIntoContainer( { content => createControlKey( { key => $mdKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                $summarydb->insertIntoContainer( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
             }
             $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
