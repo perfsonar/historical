@@ -259,6 +259,8 @@ sub init {
             $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = 0;
         }
     }
+    $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
+    $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} *= 60;
 
     unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
         unless ( $self->{CONF}->{external_address} ) {
