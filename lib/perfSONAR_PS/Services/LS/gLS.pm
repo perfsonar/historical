@@ -248,12 +248,7 @@ sub init {
         and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
     {
         $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} *= 60;
-        unless ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
-            and $self->{CONF}->{"gls"}->{"reaper_interval"} )
-        {
-            $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
-            $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
-        }
+        $self->{CONF}->{"gls"}->{"reaper_interval"} = $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"};
     }
     else {
         if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
@@ -268,17 +263,6 @@ sub init {
             $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = 0;
             $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
         }
-    }
-
-    if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
-        and $self->{CONF}->{"gls"}->{"reaper_interval"} )
-    {
-        $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
-        $self->{LOGGER}->warn("Setting 'reaper_interval' to '".$self->{CONF}->{"gls"}->{"reaper_interval"}."'.");
-    }
-    else {
-        $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
-        $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
     }
 
     unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
