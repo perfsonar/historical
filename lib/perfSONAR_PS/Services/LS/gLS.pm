@@ -56,6 +56,8 @@ use Net::IPTrie;
 use Net::Ping;
 use LWP::Simple;
 use File::stat;
+use Data::Validate::IP qw(is_ipv4);
+use Net::IPv6Addr;
 
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
@@ -657,30 +659,122 @@ sub summarizeLS {
 
             my $service_mdId = $doc->getDocumentElement->getAttribute("id");
 
-            my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
+            my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
             my $contactName  = q{};
             my $contactType  = q{};
-            unless ($contactPoint) {
-                $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='address']", 1 ), 0 );
-                $contactName  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='name']",    1 ), 0 );
-                $contactType  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='type']",    1 ), 0 );
-                unless ($contactPoint) {
+            unless ( $contactPoint ) {
+                $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
+                $contactName  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
+                $contactType  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
+                unless ( $contactPoint or $contactName or $contactType) {
                     return;
                 }
             }
-
             my $serviceKey = md5_hex( $contactPoint . $contactName . $contactType );
+
+            my $service_eventTypes;
+            my $service_addresses;
+            my $service_domains;
+            my $service_keywords;
+
+
+            my $temp_nodes = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='node']", 0 );
+            foreach my $node ( $temp_nodes->get_nodelist ) {
+                # extract the usful node stuffs
+                my @elements = ( "address", "ipAddress", "name" );
+                my @types = ( "ipv4", "IPv4" );
+                $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
+                $all_addresses     = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $all_addresses } );
+
+                my @hosts = ();
+                @types = ( "hostname", "hostName", "host", "dns", "DNS" );
+                $service_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
+                $all_domains     = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+
+                my @urns = ();
+                @types = ( "urn", "URN" );
+                my $id = $node->getAttribute("id");
+                push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
+                $service_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
+                $all_domains     = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+            }
+                        
+            my $temp_services = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='service']", 0 );
+            foreach my $service ( $temp_services->get_nodelist ) {
+                # extract the useful (new) service stuffs (keywords, types, addresses, uris, etc.)
+
+                my $temp_eventTypes = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='type']", 0 );
+                foreach my $e ( $temp_eventTypes->get_nodelist ) {
+                    my $value = extract( $e, 0 );
+                    if ($value) {
+                        $service_eventTypes->{$value} = 1;
+                        $all_eventTypes->{$value}     = 1;
+                    }
+                }
+
+                my $temp_keywords = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='protocol']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameters']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='parameter']", 0 );
+                foreach my $k ( $temp_keywords->get_nodelist ) {
+                    my $name = $k->getAttribute("name");
+                    next unless $name and $name =~ m/^keyword/;
+                    my $value = extract( $k, 0 );
+                    if ($value) {
+                        $service_keywords->{$name}->{$value} = 1;
+                        $all_keywords->{$name}->{$value}     = 1;
+                    }
+                }                
+
+                my $temp_addresses = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='address' ]", 0 );
+                foreach my $a ( $temp_addresses->get_nodelist ) {
+                    my $value = extract( $a, 0 );
+                    if ( $value ) {
+                        my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $value );
+                        next unless $host;
+                        if( is_ipv4( $host ) ) {
+                            $service_addresses->{$host} = 1 unless exists $service_addresses->{$host};
+                            $all_addresses->{$host} = 1 unless exists $all_addresses->{$host};
+                        }
+                        elsif( &Net::IPv6Addr::is_ipv6( $host ) ) {
+                            # unused currently
+                        }
+                        else {
+                            my @hostArray = split( /\./, $host );
+                            my $host_len = $#hostArray;
+                            for my $len ( 1 .. $host_len ) {
+                                my $cat = q{};
+                                for my $len2 ( $len .. $host_len ) {
+                                    $cat .= "." . $hostArray[$len2];
+                                }
+                                $cat =~ s/^\.//;
+                                $service_domains->{$cat} = 1 if $cat;
+                                $all_domains->{$cat} = 1 if $cat;
+                            }
+                        }
+                    }
+                }
+
+                my $temp_domains = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='relation' and ( \@type=\"controls\" or \@type=\"runsOn\" ) ]", 0 );
+                foreach my $d ( $temp_domains->get_nodelist ) {
+                    my @hosts = ();
+                    my @elements = ( "address", "name" );
+                    my @types = ( "node", "domain", "dns", "DNS" );
+                    $service_domains = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
+                    $all_domains     = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+
+                    my @urns = ();
+                    push @elements, "idRef";
+                    push @types, "urn";
+                    push @types, "URN";
+                    $service_domains = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
+                    $all_domains     = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                }      
+            }                  
 
             my @resultsString = $metadatadb->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $service_mdId . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             if ( $#resultsString != -1 ) {
                 my $len = $#resultsString;
-                my $service_eventTypes;
-                my $service_addresses;
-                my $service_domains;
-                my $service_keywords;
-
-                for my $x ( 0 .. $len ) {
+      
+                for my $x ( 0 .. $len ) {                    
                     my $doc2 = $parser->parse_string( $resultsString[$x] );
 
                     # eventTypes common to both...
@@ -701,12 +795,14 @@ sub summarizeLS {
                         }
                     }
 
-                    my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
+                    my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter", 0 );
                     foreach my $k ( $temp_keywords->get_nodelist ) {
+                        my $name = $k->getAttribute("name");
+                        next unless $name and $name =~ m/^keyword/;
                         my $value = extract( $k, 0 );
                         if ($value) {
-                            $service_keywords->{$value} = 1;
-                            $all_keywords->{$value}     = 1;
+                            $service_keywords->{$name}->{$value} = 1;
+                            $all_keywords->{$name}->{$value}     = 1;
                         }
                     }
 
@@ -940,63 +1036,64 @@ sub summarizeLS {
                     }
                 }
 
-                # specific service done
-
-                my $list1;
-                if ( $self->{CONF}->{"gls"}->{"root"} ) {
-                    foreach my $host ( keys %{$service_addresses} ) {
-                        push @{$list1}, $host;
-                    }
-                }
-                else {
-                    $list1 = $self->ipSummarization( { addresses => $service_addresses } ) if defined $service_addresses;
-                }
-                my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
-
-                unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
-                    $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $sum_dbTr } );
-                }
-
-                # delete the old data
-                $self->{LOGGER}->debug( "Removing data for \"" . $serviceKey . "\" so we can start clean." );
-                my @resultsString2 = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $serviceKey . "\"]", txn => $sum_dbTr, error => \$sum_error } );
-                $sum_errorFlag++ if $sum_error;
-                my $len2 = $#resultsString2;
-                for my $y ( 0 .. $len2 ) {
-                    $summarydb->remove( { name => $resultsString2[$y], txn => $sum_dbTr, error => \$sum_error } );
-                    $sum_errorFlag++ if $sum_error;
-                }
-
-                my $auth = 1;
-                unless ( $self->{STATE}->{"messageKeys"}->{$serviceKey} == 2 ) {
-                    if ( $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
-                        $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-                        $summarydb->updateByName( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
-                        $sum_errorFlag++ if $sum_error;
-                    }
-                    else {
-                        $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
-
-                        $doc->getDocumentElement->setAttribute( "id", $serviceKey );
-                        $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $doc->getDocumentElement->toString, type => "LSStore" } ), name => $serviceKey, txn => $sum_dbTr, error => \$sum_error } );
-                        $sum_errorFlag++ if $sum_error;
-                        $summarydb->insertIntoContainer( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
-                        $sum_errorFlag++ if $sum_error;
-                    }
-                    $self->{STATE}->{"messageKeys"}->{$serviceKey} = 2;
-                }
-
-                my $cleanHash = md5_hex($serviceSummary);
-                my $success = $summarydb->queryByName( { name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
-
-                $sum_errorFlag++ if $sum_error;
-                unless ($success) {
-                    my $insRes = $summarydb->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $serviceKey . "/" . $cleanHash, metadataId => $serviceKey, data => $serviceSummary } ), name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
-                    $sum_errorFlag++ if $sum_error;
-                }
             }
             else {
                 $self->{LOGGER}->error( "Data not registered for service with metadataId \"" . $service_mdId . "\", cannot summarize at this time." );
+            }            
+
+
+            # specific service done
+            my $list1;
+            if ( $self->{CONF}->{"gls"}->{"root"} ) {
+                foreach my $host ( keys %{$service_addresses} ) {
+                    push @{$list1}, $host;
+                }
+            }
+            else {
+                $list1 = $self->ipSummarization( { addresses => $service_addresses } ) if defined $service_addresses;
+            }
+            my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
+
+            unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
+                $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $sum_dbTr } );
+            }
+
+            # delete the old data
+            $self->{LOGGER}->debug( "Removing data for \"" . $serviceKey . "\" so we can start clean." );
+            my @resultsString2 = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $serviceKey . "\"]", txn => $sum_dbTr, error => \$sum_error } );
+            $sum_errorFlag++ if $sum_error;
+            my $len2 = $#resultsString2;
+            for my $y ( 0 .. $len2 ) {
+                $summarydb->remove( { name => $resultsString2[$y], txn => $sum_dbTr, error => \$sum_error } );
+                $sum_errorFlag++ if $sum_error;
+            }
+
+            my $auth = 1;
+            unless ( $self->{STATE}->{"messageKeys"}->{$serviceKey} == 2 ) {
+                if ( $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
+                    $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
+                    $summarydb->updateByName( { content => createControlKey( { key => $serviceKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                    $sum_errorFlag++ if $sum_error;
+                }
+                else {
+                    $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
+
+                    $doc->getDocumentElement->setAttribute( "id", $serviceKey );
+                    $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $doc->getDocumentElement->toString, type => "LSStore" } ), name => $serviceKey, txn => $sum_dbTr, error => \$sum_error } );
+                    $sum_errorFlag++ if $sum_error;
+                    $summarydb->insertIntoContainer( { content => createControlKey( { key => $serviceKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                    $sum_errorFlag++ if $sum_error;
+                }
+                $self->{STATE}->{"messageKeys"}->{$serviceKey} = 2;
+            }
+
+            my $cleanHash = md5_hex($serviceSummary);
+            my $success = $summarydb->queryByName( { name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
+
+            $sum_errorFlag++ if $sum_error;
+            unless ($success) {
+                my $insRes = $summarydb->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $serviceKey . "/" . $cleanHash, metadataId => $serviceKey, data => $serviceSummary } ), name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
+                $sum_errorFlag++ if $sum_error;
             }
         }
 
@@ -1042,15 +1139,14 @@ sub summarizeLS {
         unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
             if ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
                 $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
-                $summarydb->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                $summarydb->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
             }
             else {
                 $self->{LOGGER}->debug("New registration info, inserting service metadata and time information.");
-
                 $summarydb->insertIntoContainer( { content => $summarydb->wrapStore( { content => $service2, type => "LSStore-summary" } ), name => $mdKey, txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
-                $summarydb->insertIntoContainer( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
+                $summarydb->insertIntoContainer( { content => createControlKey( { key => $mdKey, time => ( $sec + ( $self->{CONF}->{"gls"}->{"summarization_interval"} * 3 ) ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
             }
             $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
@@ -1159,16 +1255,37 @@ sub makeSummary {
         }
     }
     $summary .= "      </summary:subject>\n";
-    if ( exists $parameters->{eventTypes} and $parameters->{eventTypes} ) {
+    if ( exists $parameters->{eventTypes} and $parameters->{eventTypes} and exists $parameters->{keywords} and $parameters->{keywords}) {
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "      <nmwg:eventType>" . $et . "</nmwg:eventType>\n";
         }
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
+        }  
+        foreach my $k ( sort keys %{ $parameters->{keywords} } ) {
+            foreach my $k2 ( keys %{ $parameters->{keywords}->{$k} } ) {
+                $summary .= "        <nmwg:parameter name=\"". $k ."\" value=\"" . $k2 . "\" />\n";
+            }
         }
-        foreach my $k ( keys %{ $parameters->{keywords} } ) {
-            $summary .= "        <nmwg:parameter name=\"keyword\" value=\"" . $k . "\" />\n";
+        $summary .= "      </summary:parameters>\n";
+    }
+    elsif ( exists $parameters->{eventTypes} and $parameters->{eventTypes} ) {
+        foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
+            $summary .= "      <nmwg:eventType>" . $et . "</nmwg:eventType>\n";
+        }
+        $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
+        foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
+            $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
+        }  
+        $summary .= "      </summary:parameters>\n";
+    }
+    elsif ( exists $parameters->{keywords} and $parameters->{keywords} ) {
+        $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
+        foreach my $k ( sort keys %{ $parameters->{keywords} } ) {
+            foreach my $k2 ( keys %{ $parameters->{keywords}->{$k} } ) {
+                $summary .= "        <nmwg:parameter name=\"". $k ."\" value=\"" . $k2 . "\" />\n";
+            }
         }
         $summary .= "      </summary:parameters>\n";
     }
@@ -1195,15 +1312,16 @@ sub summarizeURN {
         }
     }
 
-    foreach my $urn ( @{ $parameters->{urnarray} } ) {
-        $urn =~ s/^urn:ogf:network://;
+    my $counter = 0;
+    foreach my $u ( @{ $parameters->{urnarray} } ) {
+        ( my $urn = $u ) =~ s/^urn:ogf:network://;
         my @fields = split( /:/, $urn );
         foreach my $field (@fields) {
             if ( $field =~ m/^domain=/ ) {
                 $field =~ s/^domain=//;
                 my @urnArray = split( /\./, $field );
                 my $urn_len = $#urnArray;
-                for my $len ( 1 .. $urn_len ) {
+                for my $len ( 0 .. $urn_len ) {
                     my $cat = q{};
                     for my $len2 ( $len .. $urn_len ) {
                         $cat .= "." . $urnArray[$len2];
@@ -1216,6 +1334,7 @@ sub summarizeURN {
                 last;
             }
         }
+        $counter++;
     }
 
     return $parameters->{urns};

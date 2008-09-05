@@ -104,20 +104,67 @@ sub splitURI {
     my $host     = undef;
     my $port     = undef;
     my $endpoint = undef;
-    if ( $uri =~ /^http:\/\/([^\/]*)\/?(.*)$/ ) {
-        ( $host, $port ) = split( ':', $1 );
-        $endpoint = $2;
+    my $secure = 0;
+ 
+        # lop off the protocol, then split everthing up by :'s
+    $secure++ if $uri =~ m/^https:\/\//;
+    $uri =~ s/^https?:\/\///;
+    my @chunk = split(/:/, $uri);
+    my $len = $#chunk;
+
+        # assume the very last thing in line is the port/endPoint (this
+        #  isn't true w/ ipv6 of course)
+    $port = $chunk[$len];
+        # subtract the endPoint from the port, XOR to get the endPoint
+    $port =~ s/\/.*$//;
+    $endpoint =  substr $chunk[$len], length $port, length $chunk[$len];
+
+    if ( $port =~ m/^\d+$/ ) {    
+            # the fun part ... If its all numbers, it COULD be the port
+        $chunk[$len] = "";
+        unless ( $chunk[$len-1] =~ m/\]$/ ) {
+                # the last chunk is really what we thought was the port.
+            $chunk[$len] = $port if $port and $len > 1;
+        }
     }
+    else {  
+            # this is the case where we clearly have hex digits, or it ends
+            #  in ].  The last item in the array is not a port, but part of the
+            #  address, so set the port to nil.
+        $chunk[$len] =~ s/\/.*$//;
+        $port = "";
+    }
+    
+        # not ipv6
+    if ( $len == 0 ) {
+        $host = $port;
+        $port = "";
+    }
+        # combine the chunks back together
+    for my $x ( 0 .. $len ) {
+        $host .= ":" unless $x == 0;
+        $host .= $chunk[$x];
+    }
+
+        # clean up
+    $host =~ s/:$//;
+    $host =~ s/^\[//;
+    $host =~ s/\]$//;
+
+        # default port is 80 for http, and 443 for https
     if ( not defined $port or $port eq '' ) {
-        $port = 80;
+        if ( $secure ) { 
+            $port = 443;
+        }
+        else {
+            $port = 80;
+        }
     }
-    if ( $port =~ m/^:/ ) {
-        $port =~ s/^://g;
-    }
-    $endpoint = '/' . $endpoint unless $endpoint =~ /^\//;
+    
     $logger->debug( "Found host: " . $host . " port: " . $port . " endpoint: " . $endpoint );
     return ( $host, $port, $endpoint );
 }
+
 
 =head2 getHttpURI($host, $port, $endpoint)
 
