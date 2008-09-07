@@ -559,27 +559,50 @@ sub changeTopology {
 
     $logger->debug("Elements: ".Dumper(\%elements));
 
+    my $error;
+
+    my $dbTr = $self->{DATADB}->getTransaction( { error => \$error } );
+    unless ($dbTr) {
+        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        $self->{LOGGER}->error($msg);
+        return (-1, $msg);
+    }
+
     # update everything that is sitting at the top-level
     foreach my $id (keys %elements) {
         next if (defined $elements{$id}->parentNode->parentNode);
 
         $logger->debug("Inserting $id");
 
-    # This is a hack to force the namespace declaration into the
-    # node we're going to insert. A better solution would be to
-    # have each node declare its namespace, but I'm not sure how to
-    # finagle libxml into doing that.
+        # This is a hack to force the namespace declaration into the
+        # node we're going to insert. A better solution would be to
+        # have each node declare its namespace, but I'm not sure how to
+        # finagle libxml into doing that.
         $elements{$id}->unbindNode;
         $elements{$id}->setNamespace($elements{$id}->namespaceURI(), $elements{$id}->prefix, 1);
 
         $self->{DATADB}->remove({ name => $id });
 
-        if ($self->{DATADB}->insertIntoContainer({ content => $elements{$id}->toString, name => $id }) != 0) {
-            my $msg = "Error updating $id";
+        if ($self->{DATADB}->insertIntoContainer({ content => $elements{$id}->toString, name => $id, txn => $dbTr, error => \$error }) != 0) {
+            my $msg = "Error updating $id: $error";
             $logger->error($msg);
             return (-1, $msg);
         }
     }
+
+    my $status = $self->{DATADB}->commitTransaction( { txn => $dbTr, error => \$error } );
+    if ( $status != 0 ) {
+        $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        $self->{DATADB}->checkpoint( { error => \$error } );
+        $self->{DATADB}->closeDB( { error => \$error } );
+
+        my $msg = "Database Error: \"" . $error . "\".";
+        $self->{LOGGER}->error($msg);
+        return (-1, $msg);
+    }
+
+    $self->{DATADB}->checkpoint( { error => \$error } );
+    $self->{DATADB}->closeDB( { error => \$error } );
 
     return (0, "");
 }
