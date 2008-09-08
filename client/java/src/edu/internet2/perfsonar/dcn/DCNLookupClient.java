@@ -43,7 +43,7 @@ public class DCNLookupClient{
 	static final private String PARAM_SUPPORTED_MSG = "keyword:supportedMessage";
 	static final private String PARAM_TOPIC = "keyword:topic";
 
-	private String HOST_DISC_XQUERY = 
+	private String DISC_XQUERY = 
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
 		"declare namespace summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\";\n" +
 		"declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n" +
@@ -52,7 +52,7 @@ public class DCNLookupClient{
 		"for $metadata in /nmwg:store[@type=\"LSStore\"]/nmwg:metadata\n" +
 		"    let $metadata_id := $metadata/@id  \n" +
 		"    let $data := /nmwg:store[@type=\"LSStore\"]/nmwg:data[@metadataIdRef=$metadata_id]\n" +
-		"    where $data/nmwg:metadata/nmwg:eventType[text()=\"http://oscars.es.net/OSCARS\"] and $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type=\"dns\" and text()=\"<!--domain-->\"]\n" +
+		"    where $data/nmwg:metadata/nmwg:eventType[text()=\"http://oscars.es.net/OSCARS\"] and $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type=\"<!--type-->\" and text()=\"<!--domain-->\"]\n" +
 		"    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint\n";
 	
 	private String HOST_XQUERY = 
@@ -143,9 +143,10 @@ public class DCNLookupClient{
 		String urn = null;
 		String[] hLSMatches = this.hLSList;
 		if(useGlobalLS || hLSList == null){
-			String discoveryXQuery = HOST_DISC_XQUERY;
+			String discoveryXQuery = DISC_XQUERY;
 			String domain = name.replaceFirst(".+?\\.", "");
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
 			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
 			hLSMatches = this.discover(this.requestString(discReqElem, null));
 		}
@@ -182,7 +183,7 @@ public class DCNLookupClient{
 		String[] accessPoints = null;
 		HashMap<String, Boolean> apMap = new HashMap<String, Boolean>();
 		
-		int attempts = (this.tryAllGlobal ? gLSList.length : 1);
+		int attempts = gLSList.length;
 		String errLog = "";
 		for(int a = 0; a < attempts; a++){
 			try{
@@ -214,18 +215,13 @@ public class DCNLookupClient{
 		        for(int i = 0; i < accessPointElems.size(); i++){
 		        	apMap.put(accessPointElems.get(i).getTextTrim(), true);
 		        }
+		        if(!this.tryAllGlobal){
+		        	break;
+		        }
 			}catch(PSException e){
-				if(!this.tryAllGlobal){
-					throw e;
-				}else{
-					errLog += this.gLSList[a] + ": " + e.getMessage() + "\n\n";
-				}
+				errLog += this.gLSList[a] + ": " + e.getMessage() + "\n\n";
 			}catch(Exception e){
-				if(!this.tryAllGlobal){
-					throw new PSException(e);
-				}else{
-					errLog += this.gLSList[a] + ": " + e.getMessage() + "\n\n";
-				}
+				errLog += this.gLSList[a] + ": " + e.getMessage() + "\n\n";
 			}
 		}
 		
