@@ -1,6 +1,6 @@
-= DCN Interactions with the perfSONAR Global Lookup Service =
+= DCN Interactions with the Global Lookup Service =
 
-The following article outlines DCN interactions with the _perfSONAR_ *Lookup Service*.  Topics covered include the legacy support as well as the new way forward with respect to the *gLS* architecture.  
+The following article outlines DCN interactions with the *Lookup Service*.  Topics covered include the legacy support as well as the new way forward with respect to the *gLS* architecture.  
 
  * [DCNLookupService#Architecture Architecture]
    * [DCNLookupService#Current Current]
@@ -22,7 +22,7 @@ The following article outlines DCN interactions with the _perfSONAR_ *Lookup Ser
  
 == Architecture == 
 
-The _perfSONAR_ *gLS* is an extension of the original *LS*.  The original design paradigm of the *LS* was centered on offering services (data discovery/management) within a local setting.  Scalability to multi-domain operation can only be delivered through mechanisms that preserve this original design from the point of view of service and client applications.  The *gLS* architecture works with existing *LS* instances  to distribute the information into a larger _*gLS* cloud_ through the use of data summarization and propagation.  
+The *gLS* is an extension of the original *LS*.  The original design paradigm of the *LS* was centered on offering services (data discovery/management) within a local setting.  Scalability to multi-domain operation can only be delivered through mechanisms that preserve this original design from the point of view of service and client applications.  The *gLS* architecture works with existing *LS* instances  to distribute the information into a larger _*gLS* cloud_ through the use of data summarization and propagation.  
 
 === Current === 
 
