@@ -1,0 +1,10 @@
+#summary E2EMon Limitations
+
+= Current E2EMon Limitations =
+
+  * *Out Of Date Schema:* The perfSONAR and DICE groups are standardizing the schema they use to describe network topologies. The schema used by E2EMon uses an older version of this schema which is incompatible with the combined approach
+  * *Requires Web Interface For End Users:* It is difficult for clients to be written that can use the E2EMon infrastructure without the client grotting through the web interface. This is mainly due to the data not being in the global lookup infrastructure, meaning that the clients would have to know the service locations.
+  * *Difficult To Tie To Underlying Infrastructure:* The E2EMon schema was meant to provide a very high-level view of circuits. However, no provision was made for enabling sites to provide information to end users about what structure underlay the circuit. This makes it very difficult for sites to provide both abstracted and non-abstracted views of how the circuit crosses the domain.
+  * *Difficult To Tie To Monitoring Infrastructure:* The simplicity of the E2EMon schema makes it difficult to correlate the circuits with other measurements like SNMP data since there is no automated way for clients to tie the link information to physical infrastructure.
+  * *Requires Extra Configuration:* E2EMon provides a high-level view of the circuit, but requires that sites agree on node names above and beyond any configuration they needed to agree on for the dynamic or static circuits.
+  * *Dynamic Circuits:* Many of the above limitations have an impact on dynamic circuits. The out of date schema means E2EMon will be difficult to integrate with the dynamic circuit networks and perfSONAR services. The difficulty in writing clients impacts dynamic circuits more, since the end user has a greater interest in the status of short lived circuit instances they explicitly instantiate than those which are statically created and seen as simply a transparent part of the infrastructure. 
