@@ -7,7 +7,7 @@ use Params::Validate qw(:all);
 
 use perfSONAR_PS::Utils::TL1;
 
-use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME';
+use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'CONNECTED';
 
 sub new {
     my ($class) = @_;
@@ -48,6 +48,7 @@ sub initialize {
 
     $self->{CACHE_TIME} = 0;
     $self->{CACHE_DURATION} = $parameters->{cache_time};
+    $self->{CONNECTED} = 0;
 
     $self->{LOGGER} = $parameters->{logger};
 
@@ -140,10 +141,42 @@ sub getCacheTime {
 
 sub send_cmd {
     my ($self, $cmd) = @_;
+    my $disconnect;
 
+    $self->login();
+
+    print "SEND: '$cmd'\n";
     my $res = $self->{TL1AGENT}->send($cmd);
+    print "DONE SEND: '$cmd'\n";
+
+    $self->logout();
 
     return split('\n', $res);
+}
+
+sub login {
+    my ($self) = @_;
+
+    if (not $self->{CONNECTED}) {
+        $self->{TL1AGENT}->connect();
+        $self->{TL1AGENT}->login();
+    }
+
+    $self->{CONNECTED}++;
+
+    return 0;
+}
+
+sub logout {
+    my ($self) = @_;
+
+    $self->{CONNECTED}--;
+
+    if (not $self->{CONNECTED}) {
+        $self->{TL1AGENT}->disconnect();
+    }
+
+    return 0;
 }
 
 sub setMachineTime {

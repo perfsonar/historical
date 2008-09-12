@@ -5,6 +5,7 @@ use warnings;
 use Log::Log4perl qw(get_logger);
 use Time::HiRes qw( gettimeofday );
 use Module::Load;
+use Data::Dumper;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::DB::File;
@@ -14,9 +15,10 @@ use perfSONAR_PS::Collectors::LinkStatus::Link;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::SNMP;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
-#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
-#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
-#use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
 
 use perfSONAR_PS::SNMPWalk;
 
@@ -41,6 +43,8 @@ sub init {
     my $logger = get_logger("perfSONAR_PS::Collectors::LinkStatus");
 
     $logger->debug("init()");
+   
+    $logger->debug("INIT: ".Dumper($self->{CONF}));
 
     if (not defined $self->{CONF}->{"elements_file_type"} or $self->{CONF}->{"elements_file_type"} eq "") {
         $logger->error("no link file type specified");
@@ -546,6 +550,49 @@ sub parseAgentElement {
         if (not defined $tl1agent) {
             $self->{TL1AGENTS}->{$key} = $new_agent->agent;
         }   
+    } elsif ($type eq "tl1" and $agent->findvalue("device_type") and lc($agent->findvalue("device_type")) eq "ciena") {
+        my $username = $agent->findvalue('username');
+        my $password = $agent->findvalue('password');
+        my $address = $agent->findvalue('address');
+        my $port = $agent->findvalue('port');
+
+        my $element_id = $agent->findvalue('element_id');
+        my $element_id_type = $agent->findvalue('element_id_type');
+        my $element_type = $agent->findvalue('element_type');
+
+        if (not $address or not $port or not $username or not $password) {
+            $logger->info("Address: ".$address);
+            $logger->info("Port: ".$port);
+            $logger->info("Username: ".$username);
+            $logger->info("Password: ".$password);
+            my $msg = "Agent of type 'TL1' is missing elements to access the host. Required: type, address, port, username, password";
+            $logger->error($msg);
+            return (-1, $msg);
+        }
+ 
+        my $tl1agent;
+
+        my $key = $address."|".$port."|".$username."|".$password;
+
+        if (defined $self->{TL1AGENTS}->{$key}) {
+            $tl1agent = $self->{TL1AGENTS}->{$key};
+        }
+
+        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena->new(
+                        type => $status_type,
+                        address => $address,
+                        port => $port,
+                        username => $username,
+                        password => $password,
+                        agent => $tl1agent,
+                        element_id => $element_id,
+                        element_id_type => $element_id_type,
+                        element_type => $element_type,
+                     );
+
+        if (not defined $tl1agent) {
+            $self->{TL1AGENTS}->{$key} = $new_agent->agent;
+        }
     } elsif ($type eq "tl1") {
         my $type = $agent->findvalue("type");
         my $address = $agent->findvalue('address');

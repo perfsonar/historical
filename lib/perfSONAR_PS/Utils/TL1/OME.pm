@@ -202,8 +202,7 @@ sub __get_PM {
 sub readStats {
     my ($self) = @_;
 
-    $self->{TL1AGENT}->connect();
-    $self->{TL1AGENT}->login();
+    $self->login();
 
 #    if ($self->{READ_CRS}) {
 #        $self->readCRSs();
@@ -222,7 +221,8 @@ sub readStats {
     }
 
     $self->{CACHE_TIME} = time;
-    $self->{TL1AGENT}->disconnect();
+
+    $self->logout();
 
     return;
 }
