@@ -1,0 +1,152 @@
+#summary A brief proposal for a different style monitoring interface
+
+=Overall Architecture=
+In the DICE DCN model, each domain is responsible for the allocation of its segment of the circuit. The interdomain aspect of the model is responsible for coordinating the creation of the full end-to-end circuit. The idea behind our proposed circuit monitoring model is to use a similar domain/interdomain model to enable interested parties to monitor the status of these dynamically created circuits.
+
+In the model, as the circuit is being provisioned, a circuit descriptor would be built up. This descriptor would contain identifiers for each segment of the circuit. Each segment would correspond to a domain that the circuit is passing over. Each domain would have a measurement archive that, when given the identifier for the segment passing over that domain, would return the status of that segment. The domain would place a mapping into a lookup service enabling clients to locate the measurement archive able to give the status of that domain's segment when given the segment identifier. Interested clients could then look up the status of the whole circuit by looking up the status of each domain-specific segment of the circuit.
+
+Each domain would be able to implement its status monitoring in whichever way worked most effectively for it. There would be three capabilities required of each domain. It would need to be able to add its identifier to the circuit descriptor as the descriptor was being constructed. It would need to have a service able to respond to the identifiers it has added to the descriptors with the status of those circuits. Lastly, the domain would need to register the identifiers it has generated into a lookup service.
+
+=End-To-End Circuit Description=
+Each end-to-end circuit would have a circuit descriptor describing the domain-specific segments that make up the circuit. Each domain would be able to return the status for its portion of the path (all the links in the domain used by the circuit along with the its view of the circuit ingress/egress points).
+
+An example circuit descriptor:
+{{{
+<!-- MultiDomain Circuit Descriptor -->
+<link id="urn:ogf:network:domain=es.net:link=Circuit_Name">
+   <name>Common Name For The Circuit</name>
+   <capacity>1000000000</capacity>
+   <!-- we might need project information or something else in here. Maybe
+       source and destination? What kinds of things might people want
+       to lookup a circuit with? -->
+   <relation type="over">
+       <bidirectionalPath>
+           <path direction="upstream">
+               <hop id="esnet">
+                   <pathIdRef>urn:ogf:network:domain=es.net:path=Circuit_Name</pathIdRef>
+                   <nextHop>internet2</nextHop>
+               </hop>
+               <hop id="internet2">
+                   <pathIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Circuit_Name</pathIdRef>
+                   <nextHop>geant</nextHop>
+               </hop>
+               <hop id="geant">
+                   <pathIdRef>urn:ogf:network:domain=geant.eu:path=Circuit_Name</pathIdRef>
+               </hop>
+            </path>
+
+            <path direction="downstream" />
+        </bidirectionalPath>
+   </relation>
+</link>
+}}}
+
+Each "hop" element in the descriptor contains a [URN|URNs] identifier for each domain's segment.
+
+=High-Level Client Interactions=
+
+(Steps 1 and 2 may be unnecessary if the client already has a copy of the descriptor)
+1. lookup in an LS which TS has a circuit descriptor for the circuit of interest
+2. Obtain the circuit descriptor from that TS
+3. For each hop in the descriptor, lookup in an LS which MA has status information on that segment of the path
+4. Connect to each status service and download the status for that segment of the path.
+5. Display nicely
+
+{{{
+<!-- Get the status of ESnet's path segment -->
+<metadata>
+   <subject>
+       <path id="urn:ogf:network:domain=es.net:path=Circuit_Name" />
+   </subject>
+
+   <eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</eventType>
+</metadata>
+
+<data>
+   <ifevt:datum timeValue="2832937892" timeType="unix">
+       <ifevt:operStatus>up</ifevt:operStatus>
+       <ifevt:adminStatus>normaloperation</ifevt:adminStatus>
+   </ifevt:datum>
+</data>
+}}}
+
+=On Circuit Create=
+
+When a new circuit is created, someone in each domain (preferably it'd be automatic) would update their status checking to check on their segment of the circuit and store that information into a measurement archive along with the identifier in the circuit descriptor for that segment.
+
+=Identifier Selection=
+There are two ways to create the segment identifiers for each domain. In one case, each domain could create its own identifier for its segment of the path and pass it back with the IDC. The other option would be to piggyback on the globally-unique aspect of the circuit. In this case, each domain's identifier would simply be "urn:ogf:network:domain=$domain_name:path=$global_circuit_identifier" for the circuit identified by "urn:ogf:network:path=$global_circuit_identifier". The latter has the advantage of making it easy to calculate the identifiers for circuit segments while the former gives more flexibility to each domain.
+
+=Compatibility Issues with E2EMon=
+
+E2EMon has alot of extra information that would need to be replicated in order to ensure compatibility.
+
+==Domain name==
+E2EMon describes each segment by its domain name. A compatible client would need to include the E2EMon domain name in its responses. To do the mapping, one might consult the TS containing the domain information. Another alternative would be to simply pull out the domain id "es.net", "internet2.edu", etc. and that is the domain though domain may need to be only numbers and letters. Lastly, a name attribute could be added to the hop element which would include the E2EMon domain name for that domain.
+
+{{{
+   <hop id="0" name="INTERNET2>
+      <pathIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Some_Path</pathIdRef>
+   </hop>
+}}}
+
+==Nodes and Links==
+The architecture of the above consists of circuits and circuit segments. The E2EMon architecture is based around the concept of links and nodes. We would need to emulate these node and link elements to provide compatibility. The links internal to the domain will be easy to emulate since we can just create a fake link spanning the circuit segment. The nodes and interdomain links will be more difficult as they need to be agreed upon by neighboring domains. We could try autogenerating the node and link names based on the path segments being connected. e.g. the esnet's esnet-internet2 connector node might be named "NODE-$CIRCUIT_NAME-ESNET-INTERNET2" and internet2's esnet-internet2 connector node might be named "NODE-$CIRCUIT_NAME-INTERNET2-ESNET". Similarly, for link names, it'd be "LINK-$CIRCUIT_NAME-ESNET-INTERNET2". Cumbersome, but easily generatable.
+
+==One shot request==
+E2EMon grabs the entire set of circuits from a domain. The approach above does not mandate that all circuits for a domain appear in the same measurement archive (though it's likely they'll all be there) so we may need to collect all the segments to construct the domain state.
+
+==Segments where the SQLMA L2 Status MA or similar is being used==
+The above assumes that all domains have a Status service capable of responding to the above messages. However, most domains that have something deployed now are using the SQLMA. It might be useful to describe segments in the circuit descriptor as using the E2EMon-style MA so that we can grab that information. I'm not sure the best way to describe that though.
+
+=Benefits=
+
+  * Lookups can be done in parallel. Currently, E2EMon grabs the entire state of the world and tries to figure out what's going on.
+  * Domains don't need to know about the names of elements in other domains. Each domain would simply keep track of its knowledge of the circuit.
+  * You can lookup the path segments in the lookup service to find their constituent parts (if available). Like below:
+
+=Gathering Further Circuit Information=
+
+If a client wants to drill down to find more specifically which link is down:
+
+  # Take each segment of the path and lookup in an LS which TS contains the definition for that segment
+  # Download from the TS, that segment of the path
+  # Lookup in the LS which Status service contains information on each link in the segment
+  # Obtain the information about each link from the status service.
+
+The above information may not be available, however, depending on the privacy
+settings and configuration of the domain (e.g. they may not support perfsonar
+beyond a simple "up/down" on the circuits passing over them).
+
+Examples:
+
+Original circuit:
+{{{
+    <path direction="upstream">
+        ...
+       <hop id="internet2">
+          <pathIdRef>urn:ogf:network:domain=internet2.edu:path=oscars_idc1234"</pathIdRef>
+       </hop>
+        ...
+    </path>
+}}}
+
+"Resolved" circuit:
+{{{
+    <path direction="upstream">
+        ...
+        <hop id="internet2_1">
+            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node1:port=eth0:link=link1</linkIdRef>
+        </hop>
+        <hop id="internet2_2">
+            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node2:port=eth1:link=link1</linkIdRef>
+        </hop>
+        <hop id="internet2_3">
+            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node3:port=eth1:link=link1</linkIdRef>
+        </hop>
+        <hop id="internet2_4">
+            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node4:port=eth5:link=link1</linkIdRef>
+        </hop>
+        ...
+    </path>
+}}}
