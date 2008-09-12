@@ -1,0 +1,204 @@
+#summary A short description of the URN scheme
+=Benefits=
+Currently, each element has a global identifier of some kind. For example, layer3 Interfaces have IP addresses and E2EMon links have a global name. However, each new style of global identifier requires some added code in the LS to handle summarization. URNs offer a standard way to uniquely describe these resources without having each type of element or each project defining its own style of identifier.
+
+=Typical Use-Case=
+A user wishes to know what's occurring between two hosts. He looks up the traceroute between two hosts. He might then consult the gLS to find the TSs containing information about each of those IPs. Using the TS, he looks up the network resources that those links/interfaces depend on (e.g. the layer2 or layer1 elements under a layer3 link), grabbing the identifier for each resource. He can then look up which MAs contain information on each identifier.
+
+=URNs=
+URNs are globally unique identifiers that can be used to identify network elements no matter what technology they are.
+
+The identifiers are constructed as Uniform Resource Names (URNs) in the RFC 2141. The namespace for the URN is "ogf" and the subnamespace is "network". All identifiers must begin with "urn:ogf:network:" in this format. The remainder of the identifier consists of a series of "name" and "value" pairs. These fields provide the hierarchy and the flexibility offered by this schema.
+
+There are five major fields defined for network entities:
+
+  * domain
+  * node
+  * port
+  * link
+  * service
+
+The _domain_ field describes the "administrative domain" in which the _network_ element is located. If this field is included, it will always be positioned first. The value is the globally unique DNS name for the domain. While other options exist for this value (e.g. AS number), the simplicity and availability of the former makes this more desirable.
+
+The _node_ field may be a "host", "router", or even a larger  abstraction such as a "site".  The position of this element will always be second with respect to the _domain_.  There are no specific rules governing value of this element, allowing maximum flexibility when encoding.
+
+The _port_ field describes the interface between a _node_ and a _link_ and commonly describes Ethernet interfaces, IP
+interfaces, names, or listening TCP sockets.  The overall structure of the identifier will be dictated based on whether the interface is physical, logical constructed inside a single device or logically constructed across
+multiple devices. If the interface is physical or logically inside a single device, the field will appear after the _node_. If the interface is a logical interface for a domain, the field will appear after the _domain_. A prudent choice for the value is the physical interface from a networked device in the case of an interface in a physical device or a logical name for logical interfaces in a domain.
+
+The _link_ field can describe logical or physical _link_s, regardless of direction.  Bidirectional _link_s (both physical and logical) must appear directly after the _domain_ designation since they will logically connect multiple _node_s.  Unidirectional _link_s, regardless of direction, will appear after _port_ that is able to "write" that link. As in previous descriptions there is no constraint placed on the value but care should be taken to select a name with meaning to the overall infrastructure.
+
+The _path_ field can be used for circuits or other named paths. Named paths can occur globally or within a domain, the field can appear either first or immediately after the _domain_ field. The value can be anything but should be globally unique.
+
+The _service_ field is used in identifiers for software services offered by network elements. These can be used to describe high-level services like Web Services or low-level services like ICMP responders or optical
+converters. This field will appear after the field for the element providing the service. For example, a service offered by a domain would appear immediately after the _domain_ field. The value can be anything, but
+should be a human-readable description of the service provided.
+
+=Examples=
+||Type||URN||
+||Domain||urn:ogf:network:domain=internet2.edu||
+||Host||urn:ogf:network:domain=internet2.edu:node=packrat||
+||Bidirectional Link||urn:ogf:network:domain=internet2.edu:link=WASH_to_ATLA||
+||Interface||urn:ogf:network:domain=internet2.edu:node=packrat:port=eth0||
+||Logical Interface||urn:ogf:network:domain=internet2.edu:port=Interface_To_Geant||
+||Service||urn:ogf:network:domain=internet2.edu:node=packrat:service=Optical_Converter||
+||Unidirectional Link||urn:ogf:network:domain=internet2.edu:node=packrat:port=eth0:link=WASH_to_ATLA||
+||Circuit||urn:ogf:network:domain=internet2.edu:path=IN2P3_Circuit||
+
+
+=Schema Changes=
+Looking through the schema directory in the nmwg repo, I pulled out all the relevant subjects. There is a variety of ways to represent topology information in those files. There are two topology namespaces in use 2.0 and 3.0. None of the 2.0 elements have an identifier attribute. Most of the 3.0 elements have an 'id' field that could contain a URN. The notable exception is the L4Endpoint. The E2EMon subjects may be problematic since they use the 'id' field.
+
+Examples of the various subjects are below.
+
+From the look of it, an id attribute would be trivial to add to the 2.0 interface element. The endPoint element in the 2.0 schema could be extended to have an id attribute as well.
+
+The 3.0 endPoint schema is a bit harder to modify since the contents of the endPoint can be either an address or a full interface. The interface already has an id attribute, but the address element does not. The address element appears in other locations so adding an id attribute to only that element would make it differ from any other address element in the namespace. I'm not sure if there's a good way of saying "an id attribute can exist in the endPoint element, but only if the contents are not an interface. 
+
+
+Modified Instances:
+
+2.0 - EndPoint
+{{{
+<nmwgt:endPoint type="ipv4" port="80" value="10.0.0.51" id="urn:ogf:network:domain=dcn.internet2.edu:node=packrat:port=eth0" />
+}}}
+
+2.0 - Interface
+{{{
+<nmwgt:interface id="urn:ogf:network:domain=dcn.internet2.edu:node=packrat:port=eth0">
+}}}
+
+3.0 - endPoint
+{{{
+<nmwgt:endPoint role="src" port="80" protocol="tcp" id="urn:ogf:network:domain=dcn.internet2.edu:node=packrat:port=eth0">
+  <nmtl4:address type="ipv4" value="10.0.0.61" />
+</nmwgt:endPoint>
+}}}
+
+Normal Instances:
+
+2.0 - EndPointPair
+{{{
+<nmwgt:endPointPair>
+  <nmwgt:src type="ipv4" value="10.0.1.50" />
+  <nmwgt:dst type="ipv4" value="10.20.22.23" />
+</nmwgt:endPointPair>
+}}}
+
+2.0 - EndPoint
+{{{
+<nmwgt:endPoint type="ipv4" port="80" value="10.0.0.51" />
+}}}
+
+2.0 - Interface
+{{{
+<nmwgt:interface>
+  <nmwgt:ipAddress type="ipv4">10.0.0.1</nmwgt:ipAddress>
+  <nmwgt:hostName>mit.edu</nmwgt:hostName>
+  <nmwgt:ifDescription>OC129 to Internet2</nmwgt:ifDescription>
+  <nmwgt:ifAddress type="ipv4">10.50.5.1</nmwgt:ifAddress>
+  <nmwgt:ifHostName>something.es.net</nmwgt:ifHostName>
+  <nmwgt:ifIndex>10</nmwgt:ifIndex>
+  <nmwgt:type>?</nmwgt:type>>
+  <nmwgt:direction>?</nmwgt:direction>
+  <nmwgt:authRealm>?</nmwgt:authRealm>
+  <nmwgt:classOfService>?</nmwgt:classOfService>
+  <nmwgt:capacity>1000000000000</nmwgt:capacity>
+</nmwgt:interface>
+}}}
+
+3.0 - L4 EndPointPair (2 forms: 1 L3 interface, or 1 L4 address)
+{{{
+<nmwgt:endPointPair>
+  <nmwgt:endPoint role="src" port="80" protocol="tcp">
+    <nmtl4:address type="ipv4" value="10.0.0.61" />
+  </nmwgt:endPoint>
+  <nmwgt:endPoint role="dst" type="ipv4" value="blah.mit.edu">
+    <nmtl3:interface id="">
+      <nmtl3:ipAddress type="ipv4">10.0.0.1</nmtl3:ipAddress>
+      <nmtl3:netmask>255.255.255.0</nmtl3:netmask>
+      <nmtl3:ifName>eth0</nmtl3:ifName>
+      <nmtl3:ifDescription>OC129 to Internet2</nmtl3:ifDescription>
+      <nmtl3:ifAddress type="ipv4">10.50.5.1</nmtl3:ifAddress>
+      <nmtl3:ifHostName>something.es.net</nmtl3:ifHostName>
+      <nmtl3:ifIndex>10</nmtl3:ifIndex>
+      <nmtl3:type>?</nmtl3:type>
+      <nmtl3:capacity>1000000000000</nmtl3:capacity>
+    </nmtl3:interface>
+  </nmwgt:endPoint>
+</nmwgt:endPointPair>
+}}}
+
+3.0 - L4Endpoint - Two Forms
+{{{
+<nmwgt:endPoint role="src" port="80" protocol="tcp">
+  <nmtl4:address type="ipv4" value="10.0.0.61" />
+</nmwgt:endPoint>
+}}}
+                       or
+{{{
+<nmwgt:endPoint role="dst" type="ipv4" value="blah.mit.edu">
+  <nmtl3:interface id="">
+    <nmtl3:ipAddress type="ipv4">10.0.0.1</nmtl3:ipAddress>
+    <nmtl3:netmask>255.255.255.0</nmtl3:netmask>
+    <nmtl3:ifName>eth0</nmtl3:ifName>
+    <nmtl3:ifDescription>OC129 to Internet2</nmtl3:ifDescription>
+    <nmtl3:ifAddress type="ipv4">10.50.5.1</nmtl3:ifAddress>
+    <nmtl3:ifHostName>something.es.net</nmtl3:ifHostName>
+    <nmtl3:ifIndex>10</nmtl3:ifIndex>
+    <nmtl3:type>?</nmtl3:type>>
+    <nmtl3:capacity>1000000000000</nmtl3:capacity>
+  </nmtl3:interface>
+</nmwgt:endPoint>
+}}}
+
+3.0 - Base Interface
+{{{
+<nmtb:interface id="">
+  <nmtb:name type="logical">some port</nmtb:name>
+  <nmtb:type>?</nmtb:type>
+  <nmtb:hostName>something.es.net</nmtb:hostName>
+  <nmtb:ifName>eth0</nmtb:ifName>
+  <nmtb:ifDescription>OC129 to Internet2</nmtb:ifDescription>
+  <nmtb:ifIndex>10</nmtb:ifIndex>
+  <nmtb:capacity>1000000000000</nmtb:capacity>
+</nmtb:interface>
+}}}
+
+3.0 - L2 Interface
+{{{
+<nmtl2:interface id="">
+  <nmtl2:role>?</nmtl2:role>
+  <nmtl2:type>?</nmtl2:type>
+  <nmtl2:address type="ipv4">10.0.0.1</nmtl2:address>
+  <nmtl2:name type="logical">Some Port</nmtl2:name>
+  <nmtl2:description>OC129 to Internet2</nmtl2:description>
+  <nmtl2:ifHostName>something.es.net</nmtl2:ifHostName>
+  <nmtl2:ifIndex>10</nmtl2:ifIndex>
+  <nmtl2:capacity>1000000000000</nmtl2:capacity>
+</nmtl2:interface>
+}}}
+
+3.0 - L3 Interface
+{{{
+<nmtl3:interface id="">
+  <nmtl3:ipAddress type="ipv4">10.0.0.1</nmtl3:ipAddress>
+  <nmtl3:netmask>255.255.255.0</nmtl3:netmask>
+  <nmtl3:ifName>eth0</nmtl3:ifName>
+  <nmtl3:ifDescription>OC129 to Internet2</nmtl3:ifDescription>
+  <nmtl3:ifAddress type="ipv4">10.10.20.1</nmtl3:ifAddress>
+  <nmtl3:ifHostName>something.es.net</nmtl3:ifHostName>
+  <nmtl3:ifIndex>10</nmtl3:ifIndex>
+  <nmtl3:type>?</nmtl3:type>
+  <nmtl3:capacity>1000000000000</nmtl3:capacity>
+</nmtl3:interface>
+}}}
+
+Netflow Router
+{{{
+<netflow:router id="">
+  <netflow:name>some name</netflow:name>
+  <netflow:description>some router description</netflow:description>
+  <!-- one or more base, l2 or l3 interfaces -->
+</netflow:router>
+}}}
