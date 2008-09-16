@@ -225,7 +225,9 @@ sub orderRoots {
         @roots = @{ $parameters->{roots} };
     }
     else {
-        @roots = @{ $self->{ROOTS} };
+        if ( exists $self->{ROOTS} and $self->{ROOTS} ) {
+            @roots = @{ $self->{ROOTS} };
+        }
     }
     undef $self->{ROOTS};
 

@@ -126,14 +126,12 @@ if ( $config{"type"} eq "snmp" ) {
             $metadata .= "        <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
             $metadata .= "          <nmwgt:ifAddress type=\"ipv4\">" . $address . "</nmwgt:ifAddress>\n";
 
-            $metadata .= "          <nmwgt:hostName>" . $address . "</nmwgt:hostName>\n";
-
-#            if ( $sub ) {
-#                $metadata .= "          <nmwgt:hostName>" . $host . "." . $subnets[$sub] . "." . $config{"domain"} . "</nmwgt:hostName>\n";
-#            }
-#            else {
-#                $metadata .= "          <nmwgt:hostName>" . $host . "." . $config{"domain"} . "</nmwgt:hostName>\n";
-#            }
+            if ( $sub ) {
+                $metadata .= "          <nmwgt:hostName>" . $host . "." . $subnets[$sub] . "." . $config{"domain"} . "</nmwgt:hostName>\n";
+            }
+            else {
+                $metadata .= "          <nmwgt:hostName>" . $host . "." . $config{"domain"} . "</nmwgt:hostName>\n";
+            }
 
             $metadata .= "          <nmwgt:ifName>eth" . $id . "</nmwgt:ifName>\n";
             $metadata .= "          <nmwgt:ifIndex>" . $id . "</nmwgt:ifIndex>\n";

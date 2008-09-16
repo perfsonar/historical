@@ -381,7 +381,7 @@ sub getHints {
             }
             open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
             print HINTS $content;
-            close(HINTS);
+            close( HINTS );
             return;
         }
     }
@@ -398,11 +398,11 @@ cleaning) in this particular service.
 
 =cut
 
-sub maintenanceLS {
+sub maintenance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return;
+    return 1;
 }
 
 =head2 needLS( $self )
@@ -485,7 +485,7 @@ sub registerLS {
                 my $parser  = XML::LibXML->new();
                 my $doc     = $parser->parse_string( $resultsString[$x] );
                 my $service = find( $doc->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
-                print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
+print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
 
                 my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $doc->getDocumentElement->getAttribute("id") . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
 
@@ -1407,16 +1407,13 @@ sub summarizeHosts {
             my $temp_hosts = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
             foreach my $h ( $temp_hosts->get_nodelist ) {
                 my $host = extract( $h, 0 );
-                print "\n\n\n", $host;
-                unless ( is_ipv4($host) or &Net::IPv6Addr::is_ipv6($host) ) {
-                    print "\nHERE\n\n\n";
-                    push @{ $parameters->{hostarray} }, $host if $host;
-                }
+                push @{ $parameters->{hostarray} }, $host if $host;
             }
         }
     }
 
     foreach my $host ( @{ $parameters->{hostarray} } ) {
+        next if is_ipv4($host) or &Net::IPv6Addr::is_ipv6($host);
         my @hostArray = split( /\./, $host );
         my $host_len = $#hostArray;
         for my $len ( 1 .. $host_len ) {
@@ -1697,7 +1694,7 @@ sub cleanLS {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
-    my $status = $self->cleanLSAux( { database => $metadatadb, time => $sec } );
+    my $status = $self->cleanLSAux( { database => $metadatadb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"}."/".$self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
         return -1;
@@ -1708,7 +1705,7 @@ sub cleanLS {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
     }
-    $status = $self->cleanLSAux( { database => $summarydb, time => $sec } );
+    $status = $self->cleanLSAux( { database => $summarydb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"}."/".$self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\" could not be cleaned." );
         return -1;
@@ -1725,7 +1722,7 @@ Auxilary function to clean a specific container in the database.
 
 sub cleanLSAux {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { database => 1, time => 1 } );
+    my $parameters = validateParams( @args, { database => 1, time => 1, name => 0} );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -1750,7 +1747,7 @@ sub cleanLSAux {
                 my $key = $doc->getDocumentElement->getAttribute("id");
                 $key =~ s/-control$//mx;
                 if ( $time and $key and $parameters->{time} >= $time ) {
-                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\"." );
+                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"".$parameters->{name}."\"." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
                     my $len2 = $#resultsString2;
@@ -1775,7 +1772,7 @@ sub cleanLSAux {
         }
     }
     else {
-        $self->{LOGGER}->error("Nothing Registered, cannot clean at this time.");
+        $self->{LOGGER}->error("Nothing Registered with \"".$parameters->{name}."\", cannot clean at this time.");
     }
 
     if ($errorFlag) {
