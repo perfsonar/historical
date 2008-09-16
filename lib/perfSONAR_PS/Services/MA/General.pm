@@ -530,7 +530,7 @@ sub getFilterParameters {
             resolution         => 0
         }
     );
-
+    my $logger = get_logger("perfSONAR_PS::Services::MA::General");
     my %time = ();
 
     # We need to know the resolution before anything else since the gt or lt operators use it.
@@ -609,15 +609,20 @@ sub getFilterParameters {
         }
     }
 
-    foreach my $t ( keys %time ) {
-        $time{$t} =~ s/(\n)|(\s+)//gmx;
-    }
+    my @times = keys %time;
+    if ( $#times > -1 ) {
+        foreach my $t ( keys %time ) {
+            $time{$t} =~ s/(\n)|(\s+)//gmx;
+        }
 
-    if (    $time{"START"}
-        and $time{"END"}
-        and $time{"START"}->{"value"} > $time{"END"}->{"value"} )
-    {
-        return;
+        if (    $time{"START"}
+            and $time{"END"}
+            and $time{"START"}->{"value"} > $time{"END"}->{"value"} ) {
+            return;
+        }
+    }
+    else {
+        $logger->warn( "Time range not found for data set, is MA empty?" );
     }
 
     return \%time;

@@ -166,21 +166,25 @@ sub init {
         $self->{CONF}->{"ls"}->{"ls_ttl"} = 86400;
     }
 
-    unless ( exists $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"}
-        and $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} )
-    {
-        if ( exists $self->{CONF}->{"ls"}->{"reaper_interval"}
-            and $self->{CONF}->{"ls"}->{"reaper_interval"} )
-        {
-            $self->{LOGGER}->info( "Using legacy 'gls:reaper_interval' value: \"" . $self->{CONF}->{"ls"}->{"reaper_interval"} . "\"." );
-            $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
-            delete $self->{CONF}->{"ls"}->{"reaper_interval"};
+    unless ( exists $self->{CONF}->{"ls"}->{"maintenance_interval"} and $self->{CONF}->{"ls"}->{"maintenance_interval"} ) {
+        $self->{LOGGER}->info("Configuration value 'maintenance_interval' not searching for other values...");
+
+        if ( exists $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} and $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} ) {
+            $self->{CONF}->{"ls"}->{"maintenance_interval"} = $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"};
         }
-        else {
-            $self->{LOGGER}->warn("Setting 'reaper_interval' to '0'.");
-            $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} = 0;
+
+        if ( exists $self->{CONF}->{"ls"}->{"reaper_interval"} and $self->{CONF}->{"ls"}->{"reaper_interval"} ) {
+            if ( not $self->{CONF}->{"ls"}->{"maintenance_interval"} or $self->{CONF}->{"ls"}->{"reaper_interval"} < $self->{CONF}->{"ls"}->{"maintenance_interval"} ) {
+                $self->{CONF}->{"ls"}->{"maintenance_interval"} = $self->{CONF}->{"ls"}->{"reaper_interval"};
+            }
+        }
+
+        unless ( exists $self->{CONF}->{"ls"}->{"maintenance_interval"} ) {
+            $self->{CONF}->{"ls"}->{"maintenance_interval"} = 30;
         }
     }
+    $self->{LOGGER}->info( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"ls"}->{"maintenance_interval"} . "\" minutes." );
+    $self->{CONF}->{"ls"}->{"maintenance_interval"} *= 60;
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",   $self );
     $handler->registerFullMessageHandler( "LSDeregisterRequest", $self );
@@ -228,7 +232,7 @@ sub cleanLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
 
-    return 0 if $self->{CONF}->{"ls"}->{"xmldb_reaper_interval"} == 0;
+    return 0 if $self->{CONF}->{"ls"}->{"maintenance_interval"} == 0;
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -545,12 +549,12 @@ sub lsRegisterRequest {
         }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-        if ( $service ) {
+        if ($service) {
             $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec } );
         }
         else {
             my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
-            if ( $node ) {
+            if ($node) {
                 $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, metadatadb => $parameters->{metadatadb}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute("id"), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec } );
             }
             else {
@@ -588,19 +592,19 @@ sub lsRegisterRequestUpdateNew {
     my $errorFlag = 0;
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
-    
-# XXX 9/2/08 - jason
-#
-# I dont think we want to go fumbling around here, but to get a 'valid' hashed
-# key we should focus on 'known' elements instead of the entire metadata block.
-# e.g. if we just hashed the md block, a single character space would cause a
-# new hashed key to be formed (which sucks).
+
+    # XXX 9/2/08 - jason
+    #
+    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # key we should focus on 'known' elements instead of the entire metadata block.
+    # e.g. if we just hashed the md block, a single character space would cause a
+    # new hashed key to be formed (which sucks).
 
     my $accessPoint = q{};
     $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='accessPoint']", 1 ), 0 );
-    my $accessType  = q{};
-    my $accessName  = q{};
-    unless ( $accessPoint ) {
+    my $accessType = q{};
+    my $accessName = q{};
+    unless ($accessPoint) {
         $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{topology}, ".//*[local-name()='type']",    1 ), 0 );
         $accessName  = extract( find( $parameters->{topology}, ".//*[local-name()='name']",    1 ), 0 );
@@ -770,17 +774,17 @@ sub lsRegisterRequestNew {
     my $mdId      = "metadata." . genuid();
     my $dId       = "data." . genuid();
 
-# XXX 9/2/08 - jason
-#
-# I dont think we want to go fumbling around here, but to get a 'valid' hashed
-# key we should focus on 'known' elements instead of the entire metadata block.
-# e.g. if we just hashed the md block, a single character space would cause a
-# new hashed key to be formed (which sucks).
+    # XXX 9/2/08 - jason
+    #
+    # I dont think we want to go fumbling around here, but to get a 'valid' hashed
+    # key we should focus on 'known' elements instead of the entire metadata block.
+    # e.g. if we just hashed the md block, a single character space would cause a
+    # new hashed key to be formed (which sucks).
 
     my $accessPoint = q{};
     $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
     my $accessType = q{};
-    my $accessName = q{};;
+    my $accessName = q{};
     unless ($accessPoint) {
         $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );

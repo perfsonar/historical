@@ -1,19 +1,18 @@
-#!/usr/bin/perl -w -I lib
+#!/usr/bin/perl -w -I ./lib ../lib
 
 =head1 NAME
 
-perfsonar.pl - An basic MA (Measurement Archive) framework
+perfsonar-daemon.pl - The main daemon that dispatches requests to the backend
+perfSONAR-PS functionality.
 
 =head1 DESCRIPTION
 
-This script shows how a script for a given service should look.
+Each perfSONAR-PS module should be designed to be run by this daemon.  
 
 =head1 SYNOPSIS
 
-./perfsonar.pl [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid]\n";
+./perfsonar-daemon.pl [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger.conf --user=[user to run as] --group=[group to run as]]\n";
 
-The verbose flag allows lots of debug options to print to the screen.  If the option is
-omitted the service will run in daemon mode.
 =cut
 
 use warnings;
@@ -28,6 +27,8 @@ use Cwd;
 use Config::General;
 use Module::Load;
 use HTTP::Daemon;
+use English '-no_match_vars';
+use Carp;
 
 our $VERSION = 0.09;
 
@@ -39,33 +40,34 @@ my $dirname;
 # compile time so that "use lib" doesn't fail. To do this, we enclose the
 # calculation of it in a BEGIN block.
 BEGIN {
+
     # this value is set by the installation scripts
     my $was_installed = 0;
 
     if ($was_installed) {
+
         # In this case, libdir needs to be set to the directory that the modules
         # were installed to, and confdir needs to be set to the directory that
         # logger.conf et al. were installed in. The installation script
         # replaces the LIBDIR and CONFDIR portions with the actual directories
-        $libdir = "XXX_LIBDIR_XXX";
+        $libdir  = "XXX_LIBDIR_XXX";
         $confdir = "XXX_CONFDIR_XXX";
-        $dirname = "";
-    } else {
+        $dirname = q{};
+    }
+    else {
+
         # we need a fully-qualified directory name in case we daemonize so that we
         # can still access scripts or other files specified in configuration files
         # in a relative manner. Also, we need to know the location in reference to
         # the binary so that users can launch the daemon from wherever but specify
         # scripts and whatnot relative to the binary.
 
-        $dirname = dirname($0);
-
-        if (!($dirname =~ /^\//)) {
+        $dirname = dirname($PROGRAM_NAME);
+        if ( !( $dirname =~ /^\// ) ) {
             $dirname = getcwd . "/" . $dirname;
         }
-
         $confdir = $dirname;
-
-        $libdir = dirname($0)."/lib";
+        $libdir  = dirname($PROGRAM_NAME) . "/lib";
     }
 }
 
@@ -79,7 +81,7 @@ my %ns = (
     netutil       => "http://ggf.org/ns/nmwg/characteristic/utilization/2.0/",
     neterr        => "http://ggf.org/ns/nmwg/characteristic/errors/2.0/",
     netdisc       => "http://ggf.org/ns/nmwg/characteristic/discards/2.0/",
-    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",   
+    snmp          => "http://ggf.org/ns/nmwg/tools/snmp/2.0/",
     select        => "http://ggf.org/ns/nmwg/ops/select/2.0/",
     average       => "http://ggf.org/ns/nmwg/ops/average/2.0/",
     perfsonar     => "http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/",
@@ -93,7 +95,7 @@ my %ns = (
     traceroute    => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     tracepath     => "http://ggf.org/ns/nmwg/tools/traceroute/2.0/",
     ping          => "http://ggf.org/ns/nmwg/tools/ping/2.0/",
-    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",        
+    summary       => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/",
     ctrlplane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070707/",
     CtrlPlane     => "http://ogf.org/schema/network/topology/ctrlPlane/20070626/",
     ctrlplane_oct => "http://ogf.org/schema/network/topology/ctrlPlane/20071023/",
@@ -107,7 +109,7 @@ my %ns = (
     nmtopo        => "http://ogf.org/schema/network/topology/base/20070828/",
     nmtb          => "http://ogf.org/schema/network/topology/base/20070828/",
     sonet         => "http://ogf.org/schema/network/topology/sonet/20070828/",
-    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"  
+    transport     => "http://ogf.org/schema/network/topology/transport/20070828/"
 );
 
 use lib "$libdir";
@@ -124,88 +126,91 @@ my %child_pids = ();
 $SIG{CHLD} = \&REAPER;
 $SIG{PIPE} = 'IGNORE';
 $SIG{ALRM} = 'IGNORE';
-$SIG{INT} = \&signalHandler;
+$SIG{INT}  = \&signalHandler;
 $SIG{TERM} = \&signalHandler;
 
-my $DEBUGFLAG = q{};
-my $READ_ONLY = q{};
-my $HELP = q{};
-my $CONFIG_FILE  = q{};
-my $LOGGER_CONF  = q{};
-my $PIDDIR = q{};
-my $PIDFILE = q{};
-my $LOGOUTPUT = q{};
-my $RUNAS_USER = q{};
+my $DEBUGFLAG   = q{};
+my $READ_ONLY   = q{};
+my $HELP        = q{};
+my $CONFIG_FILE = q{};
+my $LOGGER_CONF = q{};
+my $PIDDIR      = q{};
+my $PIDFILE     = q{};
+my $LOGOUTPUT   = q{};
+my $RUNAS_USER  = q{};
 my $RUNAS_GROUP = q{};
 
-my $status = GetOptions (
-        'config=s'  => \$CONFIG_FILE,
-        'logger=s'  => \$LOGGER_CONF,
-        'output=s'  => \$LOGOUTPUT,
-        'piddir=s'  => \$PIDDIR,
-        'pidfile=s' => \$PIDFILE,
-        'user=s'    => \$RUNAS_USER,
-        'group=s'   => \$RUNAS_GROUP,
-        'verbose'   => \$DEBUGFLAG,
-        'help'      => \$HELP);
+my $status = GetOptions(
+    'config=s'  => \$CONFIG_FILE,
+    'logger=s'  => \$LOGGER_CONF,
+    'output=s'  => \$LOGOUTPUT,
+    'piddir=s'  => \$PIDDIR,
+    'pidfile=s' => \$PIDFILE,
+    'user=s'    => \$RUNAS_USER,
+    'group=s'   => \$RUNAS_GROUP,
+    'verbose'   => \$DEBUGFLAG,
+    'help'      => \$HELP
+);
 
-if(not $status or $HELP) {
+if ( not $status or $HELP ) {
     print "$0: starts the MA daemon.\n";
     print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --user=[user to run as] --group=[group to run as]\n";
     exit(1);
 }
 
-
-
-if (not defined $CONFIG_FILE or $CONFIG_FILE eq q{}) {
-    $CONFIG_FILE = $confdir."/daemon.conf";
+if ( not defined $CONFIG_FILE or $CONFIG_FILE eq q{} ) {
+    $CONFIG_FILE = $confdir . "/daemon.conf";
 }
 
 # Read in configuration information
-my $config =  new Config::General($CONFIG_FILE);
-my %conf = $config->getall;
+my $config = new Config::General($CONFIG_FILE);
+my %conf   = $config->getall;
 
 #
 # Check/open the PID file while we're still running as root
 #
-if (not defined $PIDDIR or $PIDDIR eq q{}) {
-    if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne q{}) {
+if ( not defined $PIDDIR or $PIDDIR eq q{} ) {
+    if ( defined $conf{"pid_dir"} and $conf{"pid_dir"} ne q{} ) {
         $PIDDIR = $conf{"pid_dir"};
-    } else {
+    }
+    else {
         $PIDDIR = "/tmp";
     }
 }
 
-if (not defined $PIDFILE or $PIDFILE eq q{}) {
-    if (defined $conf{"pid_file"} and $conf{"pid_file"} ne q{}) {
+if ( not defined $PIDFILE or $PIDFILE eq q{} ) {
+    if ( defined $conf{"pid_file"} and $conf{"pid_file"} ne q{} ) {
         $PIDFILE = $conf{"pid_file"};
-    } else {
+    }
+    else {
         $PIDFILE = "ps.pid";
     }
 }
 
-my $pidfile = lockPIDFile($PIDDIR, $PIDFILE);
+my $pidfile = lockPIDFile( $PIDDIR, $PIDFILE );
 
 # Check if the daemon should run as a specific user/group and then switch to
 # that user/group.
-if (not $RUNAS_GROUP) {
-    if ($conf{"group"}) {
+if ( not $RUNAS_GROUP ) {
+    if ( $conf{"group"} ) {
         $RUNAS_GROUP = $conf{"group"};
     }
 }
 
-if (not $RUNAS_USER) {
-    if ($conf{"user"}) {
+if ( not $RUNAS_USER ) {
+    if ( $conf{"user"} ) {
         $RUNAS_USER = $conf{"user"};
     }
 }
 
-if ($RUNAS_USER and $RUNAS_GROUP) {
-    if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
+if ( $RUNAS_USER and $RUNAS_GROUP ) {
+    if ( setids( USER => $RUNAS_USER, GROUP => $RUNAS_GROUP ) != 0 ) {
         print "Error: Couldn't drop priviledges\n";
         exit(-1);
     }
-} elsif ($RUNAS_USER or $RUNAS_GROUP) {
+}
+elsif ( $RUNAS_USER or $RUNAS_GROUP ) {
+
     # they need to specify both the user and group
     print "Error: You need to specify both the user and group if you specify either\n";
     exit(-1);
@@ -214,49 +219,50 @@ if ($RUNAS_USER and $RUNAS_GROUP) {
 # Now that we've dropped privileges, create the logger. If we do it in reverse
 # order, the daemon won't be able to write to the logger.
 my $logger;
-if (not defined $LOGGER_CONF or $LOGGER_CONF eq q{}) {
+if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
     use Log::Log4perl qw(:easy);
 
     my $output_level = $INFO;
-    if($DEBUGFLAG) {
+    if ($DEBUGFLAG) {
         $output_level = $DEBUG;
     }
 
     my %logger_opts = (
-        level => $output_level,
+        level  => $output_level,
         layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
     );
 
-    if (defined $LOGOUTPUT and $LOGOUTPUT ne q{}) {
+    if ( defined $LOGOUTPUT and $LOGOUTPUT ne q{} ) {
         $logger_opts{file} = $LOGOUTPUT;
     }
 
     Log::Log4perl->easy_init( \%logger_opts );
     $logger = get_logger("perfSONAR_PS");
-} else {
+}
+else {
     use Log::Log4perl qw(get_logger :levels);
 
     my $output_level = $INFO;
-    if($DEBUGFLAG) {
+    if ($DEBUGFLAG) {
         $output_level = $DEBUG;
     }
- 
+
     Log::Log4perl->init($LOGGER_CONF);
     $logger = get_logger("perfSONAR_PS");
     $logger->level($output_level);
 }
 
-if (not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{}) {
+if ( not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{} ) {
     $logger->warn("Setting maximum worker lifetime at 60 seconds");
     $conf{"max_worker_lifetime"} = 60;
 }
 
-if (not defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq q{}) {
+if ( not defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq q{} ) {
     $logger->warn("Setting maximum worker processes at 32");
     $conf{"max_worker_processes"} = 32;
 }
 
-if (not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq q{}) {
+if ( not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq q{} ) {
     $logger->warn("Setting LS registration interval at 60 minutes");
     $conf{"ls_registration_interval"} = 60;
 }
@@ -264,54 +270,53 @@ if (not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_inte
 # turn the interval from minutes to seconds
 $conf{"ls_registration_interval"} *= 60;
 
-if (not defined $conf{"disable_echo"} or $conf{"disable_echo"} eq q{}) {
+if ( not defined $conf{"disable_echo"} or $conf{"disable_echo"} eq q{} ) {
     $logger->warn("Enabling echo service for each endpoint unless specified otherwise");
     $conf{"disable_echo"} = 0;
 }
 
-if (not defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq q{}) {
+if ( not defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq q{} ) {
     $logger->warn("Setting reaper interval to 20 seconds");
     $conf{"reaper_interval"} = 20;
 }
 
-$logger->debug("Starting '".$$."'");
+$logger->debug( "Starting perfSONAR-PS daemon as '" . $PROCESS_ID . "'" );
 
 my @ls_services;
-my @ls_reaper;
-my @ls_sum;
+my @maintenance;
 
 my %loaded_modules = ();
-my $echo_module = "perfSONAR_PS::Services::Echo";
+my $echo_module    = "perfSONAR_PS::Services::Echo";
 
-my %handlers = ();
-my %listeners = ();
-my %modules_loaded = ();
-my %port_configs = ();
+my %handlers        = ();
+my %listeners       = ();
+my %modules_loaded  = ();
+my %port_configs    = ();
 my %service_configs = ();
 
-if (not defined $conf{"port"}) {
+if ( not defined $conf{"port"} ) {
     $logger->error("No ports defined");
     exit(-1);
 }
 
-foreach my $port (keys %{ $conf{"port"} }) {
-    my %port_conf = %{ mergeConfig(\%conf, $conf{"port"}->{$port}) };
+foreach my $port ( keys %{ $conf{"port"} } ) {
+    my %port_conf = %{ mergeConfig( \%conf, $conf{"port"}->{$port} ) };
 
-    next if (defined $port_conf{"disabled"} and $port_conf{"disabled"} == 1);
+    next if ( defined $port_conf{"disabled"} and $port_conf{"disabled"} == 1 );
 
     $service_configs{$port} = \%port_conf;
 
-    if (not defined $conf{"port"}->{$port}->{"endpoint"}) {
+    if ( not defined $conf{"port"}->{$port}->{"endpoint"} ) {
         $logger->warn("No endpoints specified for port $port");
         next;
     }
 
     my $listener = HTTP::Daemon->new(
-                        LocalPort => $port,
-                        ReuseAddr => 1,
-                        Timeout => $port_conf{"reaper_interval"},
-                    ); 
-    if (not defined $listener != 0) {
+        LocalPort => $port,
+        ReuseAddr => 1,
+        Timeout   => $port_conf{"reaper_interval"},
+    );
+    if ( not defined $listener != 0 ) {
         $logger->error("Couldn't start daemon on port $port");
         exit(-1);
     }
@@ -324,39 +329,40 @@ foreach my $port (keys %{ $conf{"port"} }) {
 
     my $num_endpoints = 0;
 
-    foreach my $key (keys %{ $conf{"port"}->{$port}->{"endpoint"} }) {
+    foreach my $key ( keys %{ $conf{"port"}->{$port}->{"endpoint"} } ) {
         my $fixed_endpoint = $key;
-        $fixed_endpoint = "/".$key if ($key =~ /^[^\/]/);
+        $fixed_endpoint = "/" . $key if ( $key =~ /^[^\/]/ );
 
-        my %endpoint_conf = %{ mergeConfig(\%port_conf, $conf{"port"}->{$port}->{"endpoint"}->{$key}) };
+        my %endpoint_conf = %{ mergeConfig( \%port_conf, $conf{"port"}->{$port}->{"endpoint"}->{$key} ) };
 
         $service_configs{$port}->{"endpoint"}->{$fixed_endpoint} = \%endpoint_conf;
 
-        next if (defined $endpoint_conf{"disabled"} and $endpoint_conf{"disabled"} == 1);
+        next if ( defined $endpoint_conf{"disabled"} and $endpoint_conf{"disabled"} == 1 );
 
         $logger->debug("Adding endpoint $fixed_endpoint to $port");
 
         $handlers{$port}->{$fixed_endpoint} = perfSONAR_PS::RequestHandler->new();
 
-        if (not defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq q{}) {
+        if ( not defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq q{} ) {
             $logger->error("No module specified for $port:$fixed_endpoint");
             exit(-1);
         }
 
         my @endpoint_modules = ();
 
-        if (ref $endpoint_conf{"module"} eq "ARRAY") {
+        if ( ref $endpoint_conf{"module"} eq "ARRAY" ) {
             @endpoint_modules = @{ $endpoint_conf{"module"} };
-        } else {
-            $logger->debug("Modules is not an array: ".ref($endpoint_conf{"module"}));
+        }
+        else {
+            $logger->debug( "Modules is not an array: " . ref( $endpoint_conf{"module"} ) );
             push @endpoint_modules, $endpoint_conf{"module"};
         }
 
         # the echo module is loaded by default unless otherwise specified
-        if (not $endpoint_conf{"disable_echo"} and not $conf{"disable_echo"}) {
+        if ( not $endpoint_conf{"disable_echo"} and not $conf{"disable_echo"} ) {
             my $do_load = 1;
             foreach my $curr_module (@endpoint_modules) {
-                if ($curr_module eq $echo_module) {
+                if ( $curr_module eq $echo_module ) {
                     $do_load = 0;
                 }
             }
@@ -367,124 +373,107 @@ foreach my $port (keys %{ $conf{"port"} }) {
         }
 
         foreach my $module (@endpoint_modules) {
-            if (not defined $modules_loaded{$module}) {
+            if ( not defined $modules_loaded{$module} ) {
                 load $module;
                 $modules_loaded{$module} = 1;
             }
 
-            my $service = $module->new(\%endpoint_conf, $port, $fixed_endpoint, $dirname);
-            if ($service->init($handlers{$port}->{$fixed_endpoint}) != 0) {
-                $logger->error("Failed to initialize module ".$module." on $port:$fixed_endpoint");
+            my $service = $module->new( \%endpoint_conf, $port, $fixed_endpoint, $dirname );
+            if ( $service->init( $handlers{$port}->{$fixed_endpoint} ) != 0 ) {
+                $logger->error( "Failed to initialize module " . $module . " on $port:$fixed_endpoint" );
                 exit(-1);
             }
 
-            if ($service->needLS()) {
+            if ( $service->needLS() ) {
                 my %ls_child_args = ();
-                $ls_child_args{"service"} = $service;
-                $ls_child_args{"conf"} = \%endpoint_conf;
-                $ls_child_args{"port"} = $port;
+                $ls_child_args{"service"}  = $service;
+                $ls_child_args{"conf"}     = \%endpoint_conf;
+                $ls_child_args{"port"}     = $port;
                 $ls_child_args{"endpoint"} = $fixed_endpoint;
                 push @ls_services, \%ls_child_args;
             }
 
-            if ($service->can("cleanLS")) {
-                my %ls_reaper_args = ();
-                $ls_reaper_args{"service"} = $service;
-                $ls_reaper_args{"conf"} = \%endpoint_conf;
-                push @ls_reaper, \%ls_reaper_args;
-            }
-
-            if ($service->can("summarizeLS")) {
-                my %ls_sum_args = ();
-                $ls_sum_args{"service"} = $service;
-                $ls_sum_args{"conf"} = \%endpoint_conf;
-                push @ls_sum, \%ls_sum_args;
+            if ( $service->can("maintenance") ) {
+                my %maintenance_args = ();
+                $maintenance_args{"service"} = $service;
+                $maintenance_args{"conf"}    = \%endpoint_conf;
+                push @maintenance, \%maintenance_args;
             }
         }
 
         $num_endpoints++;
     }
 
-    if ($num_endpoints == 0) {
+    if ( $num_endpoints == 0 ) {
         $logger->warn("No endpoints enabled for port $port");
 
-        delete($listeners{$port});
-        delete($handlers{$port});
-        delete($service_configs{$port});
+        delete( $listeners{$port} );
+        delete( $handlers{$port} );
+        delete( $service_configs{$port} );
     }
 }
 
-if (scalar(keys %listeners) == 0) {
+if ( scalar( keys %listeners ) == 0 ) {
     $logger->error("No ports enabled");
     exit(-1);
 }
 
 # Daemonize if not in debug mode. This must be done before forking off children
 # so that the children are daemonized as well.
-if(not $DEBUGFLAG) {
-# flush the buffer
-    $| = 1;
-	&daemonize;
+if ( not $DEBUGFLAG ) {
+
+    # flush the buffer
+    $OUTPUT_AUTOFLUSH = 1;
+    &daemonize;
 }
 
 $SIG{CHLD} = \&REAPER;
 
-$0 = "perfsonar.pl ($$)";
+$PROGRAM_NAME = "perfsonar.pl ($PROCESS_ID)";
 
-foreach my $port (keys %listeners) {
+foreach my $port ( keys %listeners ) {
     my $pid = fork();
-    if ($pid == 0) {
+    if ( $pid == 0 ) {
         %child_pids = ();
-        $0 .= " - Listener ($port)";
-        psService($listeners{$port}, $handlers{$port}, $service_configs{$port});
-         exit(0);
-    } elsif ($pid < 0) {
+        $PROGRAM_NAME .= " - Listener ($port)";
+        psService( $listeners{$port}, $handlers{$port}, $service_configs{$port} );
+        exit(0);
+    }
+    elsif ( $pid < 0 ) {
         $logger->error("Couldn't spawn listener child");
         killChildren();
         exit(-1);
-    } else {
+    }
+    else {
         $child_pids{$pid} = q{};
     }
 }
 
-foreach my $ls_sum_args (@ls_sum) {
-    my $ls_sum_pid = fork();
-    if ($ls_sum_pid == 0) {
+foreach my $maintenance_args (@maintenance) {
+    my $maintenance_pid = fork();
+    if ( $maintenance_pid == 0 ) {
         %child_pids = ();
-        $0 .= " - LS Summarizer";
-        summarizeLS( $ls_sum_args );
+        $PROGRAM_NAME .= " - Service Maintenance";
+        maintenance($maintenance_args);
         exit(0);
-    } elsif ($ls_sum_pid < 0) {
-        $logger->error("Couldn't spawn LS Summarizer");
+    }
+    elsif ( $maintenance_pid < 0 ) {
+        $logger->error("Couldn't spawn Service Maintenance");
         killChildren();
         exit(-1);
     }
-    $child_pids{$ls_sum_pid} = q{};
-}
-
-foreach my $ls_reaper_args (@ls_reaper) {
-    my $ls_reaper_pid = fork();
-    if ($ls_reaper_pid == 0) {
-        %child_pids = ();
-        $0 .= " - LS Reaper";
-        cleanLS( $ls_reaper_args );
-        exit(0);
-    } elsif ($ls_reaper_pid < 0) {
-        $logger->error("Couldn't spawn LS Reaper");
-        killChildren();
-        exit(-1);
-    }
-    $child_pids{$ls_reaper_pid} = q{};
+    $child_pids{$maintenance_pid} = q{};
 }
 
 foreach my $ls_args (@ls_services) {
     my $ls_pid = fork();
-    if ($ls_pid == 0) {
+    if ( $ls_pid == 0 ) {
         %child_pids = ();
-        $0 .= " - LS Registration (".$ls_args->{"port"}.":".$ls_args->{"endpoint"}.")";
+        $PROGRAM_NAME .= " - LS Registration (" . $ls_args->{"port"} . ":" . $ls_args->{"endpoint"} . ")";
         registerLS($ls_args);
         exit(0);
-    } elsif ($ls_pid < 0) {
+    }
+    elsif ( $ls_pid < 0 ) {
         $logger->error("Couldn't spawn LS");
         killChildren();
         exit(-1);
@@ -494,8 +483,8 @@ foreach my $ls_args (@ls_services) {
 
 unlockPIDFile($pidfile);
 
-foreach my $pid (keys %child_pids) {
-    waitpid($pid, 0);
+foreach my $pid ( keys %child_pids ) {
+    waitpid( $pid, 0 );
 }
 
 =head2 psService
@@ -505,20 +494,21 @@ process to handle the request and pass the request to the request handler.
 The function also tracks the processes spawned and kills them if they
 go on for too long, responding to the request with an error.
 =cut
+
 sub psService {
-    my ($listener, $handlers, $service_config) = @_;
+    my ( $listener, $handlers, $service_config ) = @_;
     my $max_worker_processes;
 
-    $logger->debug("Starting '".$$."' as the MA.");
+    $logger->debug( "Starting '" . $PROCESS_ID . "' as a service." );
 
     $max_worker_processes = $service_config->{"max_worker_processes"};
 
-    while(1) {
-        if ($max_worker_processes > 0) {
-            while (%child_pids and scalar(keys %child_pids) >= $max_worker_processes) {
+    while (1) {
+        if ( $max_worker_processes > 0 ) {
+            while ( %child_pids and scalar( keys %child_pids ) >= $max_worker_processes ) {
                 $logger->debug("Waiting for a slot to open");
-                my $kid = waitpid(-1, 0);
-                if ($kid > 0) {
+                my $kid = waitpid( -1, 0 );
+                if ( $kid > 0 ) {
                     delete $child_pids{$kid};
                 }
             }
@@ -527,24 +517,25 @@ sub psService {
         if (%child_pids) {
             my $time = time;
 
-            $logger->debug("Reaping children (total: " .scalar  (keys %child_pids) . ") at time " . $time );
+            $logger->debug( "Reaping children (total: " . scalar( keys %child_pids ) . ") at time " . $time );
 
             # reap any children that have finished or outlived their allotted time
-            foreach my $pid (keys %child_pids) {
-                if (waitpid($pid, WNOHANG))  {
+            foreach my $pid ( keys %child_pids ) {
+                if ( waitpid( $pid, WNOHANG ) ) {
                     $logger->debug("Child $pid exited.");
                     delete $child_pids{$pid};
-                } elsif ($child_pids{$pid}->{"timeout_time"} <= $time and $child_pids{$pid}->{"child_timeout_length"} > 0) {
+                }
+                elsif ( $child_pids{$pid}->{"timeout_time"} <= $time and $child_pids{$pid}->{"child_timeout_length"} > 0 ) {
                     $logger->error("Pid $pid timed out.");
                     kill 9, $pid;
 
-                    my $msg = "Timeout occurred, current limit is ".$child_pids{$pid}->{"child_timeout_length"}." seconds. Try decreasing the breadth of your search if possible.";
-                    my $resMsg = getErrorResponseMessage(eventType => "error.common.timeout", description => $msg);
+                    my $msg      = "Timeout occurred, current limit is " . $child_pids{$pid}->{"child_timeout_length"} . " seconds. Try decreasing the breadth of your search if possible.";
+                    my $resMsg   = getErrorResponseMessage( eventType => "error.common.timeout", description => $msg );
                     my $response = HTTP::Response->new();
                     $response->message("success");
-                    $response->header('Content-Type' => 'text/xml');
-                    $response->header('user-agent' => 'perfSONAR-PS/1.0b');
-                    $response->content(makeEnvelope($resMsg));
+                    $response->header( 'Content-Type' => 'text/xml' );
+                    $response->header( 'user-agent'   => 'perfSONAR-PS/1.0b' );
+                    $response->content( makeEnvelope($resMsg) );
                     $child_pids{$pid}->{"listener"}->send_response($response);
                     $child_pids{$pid}->{"listener"}->close();
                 }
@@ -552,44 +543,48 @@ sub psService {
         }
 
         my $handle = $listener->accept;
-        if (not defined $handle) {
+        if ( not defined $handle ) {
             my $msg = "Accept returned nothing, likely a timeout occurred or a child exited";
             $logger->debug($msg);
-        } else {
-            $logger->info("Received incoming connection from:\t".$handle->peerhost());
+        }
+        else {
+            $logger->info( "Received incoming connection from:\t" . $handle->peerhost() );
             my $pid = fork();
-            if ($pid == 0) {
+            if ( $pid == 0 ) {
                 %child_pids = ();
 
-                $0 .= " - ".$handle->peerhost();
+                $PROGRAM_NAME .= " - " . $handle->peerhost();
 
                 my $http_request = $handle->get_request;
-                if (not defined $http_request) {
-                    my $msg = "No HTTP Request received from host:\t".$handle->peerhost();
+                if ( not defined $http_request ) {
+                    my $msg = "No HTTP Request received from host:\t" . $handle->peerhost();
                     $logger->error($msg);
                     $handle->close;
                     exit(-1);
                 }
 
-                my $request = perfSONAR_PS::Request->new($handle, $http_request);
-                if (not defined $handlers->{$request->getEndpoint()}) {
-                    my $msg = "Received message with has invalid endpoint: ".$request->getEndpoint();
-                    $request->setResponse(getErrorResponseMessage(eventType => "error.common.transport", description => $msg));
+                my $request = perfSONAR_PS::Request->new( $handle, $http_request );
+                if ( not defined $handlers->{ $request->getEndpoint() } ) {
+                    my $msg = "Received message with has invalid endpoint: " . $request->getEndpoint();
+                    $request->setResponse( getErrorResponseMessage( eventType => "error.common.transport", description => $msg ) );
                     $request->finish();
-                } else {
-                    $0 .= " - ".$request->getEndpoint();
-                    handleRequest($handlers->{$request->getEndpoint()}, $request, $service_config->{"endpoint"}->{$request->getEndpoint()});
+                }
+                else {
+                    $PROGRAM_NAME .= " - " . $request->getEndpoint();
+                    handleRequest( $handlers->{ $request->getEndpoint() }, $request, $service_config->{"endpoint"}->{ $request->getEndpoint() } );
                 }
                 exit(0);
-            } elsif ($pid < 0) {
+            }
+            elsif ( $pid < 0 ) {
                 $logger->error("Error spawning child");
-            } else {
-                my $max_worker_lifetime =  $service_config->{"max_worker_lifetime"};
-                my %child_info = ();
-                $child_info{"listener"} = $handle;
-                $child_info{"timeout_time"} = time + $max_worker_lifetime;
+            }
+            else {
+                my $max_worker_lifetime = $service_config->{"max_worker_lifetime"};
+                my %child_info          = ();
+                $child_info{"listener"}             = $handle;
+                $child_info{"timeout_time"}         = time + $max_worker_lifetime;
                 $child_info{"child_timeout_length"} = $max_worker_lifetime;
-                $child_pids{$pid} = \%child_info;
+                $child_pids{$pid}                   = \%child_info;
             }
         }
     }
@@ -602,11 +597,12 @@ sub psService {
     is responsible for calling the specified service's 'registerLS'
     function regularly.
 =cut
+
 sub registerLS {
     my ($args) = @_;
 
     my $service = $args->{"service"};
-    $logger->debug("Starting '".$$."' for LS registration");
+    $logger->debug( "Starting '" . $PROCESS_ID . "' for LS registration" );
 
     my $sleep_time = q{};
     if ( $args->{"conf"}->{"ls_registration_interval"} ) {
@@ -622,15 +618,13 @@ sub registerLS {
         $sleep_time = 3600;
     }
 
-    while(1) {
-        if (not $sleep_time) { 
+    while (1) {
+        if ( not $sleep_time ) {
             $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
         }
 
-        eval {
-            $service->registerLS(\$sleep_time);
-        };
-        if ($@) {
+        eval { $service->registerLS( \$sleep_time ); };
+        if ($EVAL_ERROR) {
             $logger->error("Problem running register LS: $@");
         }
         $logger->debug("Sleeping for $sleep_time");
@@ -639,105 +633,47 @@ sub registerLS {
     return;
 }
 
-=head2 cleanLS($args)
-    The cleanLS function is (only by the LS) to periodically clean out the 
-    LS database.
+=head2 maintenance($args)
+    The maintenanceLS function is used (currently only by the LS) to perform
+    routine tasks.
 =cut
 
-sub cleanLS {
-    my ($args) = @_;
+sub maintenance {
+    my ($args)     = @_;
+    my $service    = $args->{"service"};
+    my $sleep_time = q{};
+    my $error      = q{};
 
-    my $service = $args->{"service"};
-    
-    my $sleep_time;
-    
-    # compat changes for new name
-    if ( $args->{"conf"}->{"ls"}->{"reaper_interval"} or $args->{"conf"}->{"gls"}->{"reaper_interval"} ) {
-        if ( $args->{"conf"}->{"ls"}->{"reaper_interval"} ) {
-            $sleep_time = $args->{"conf"}->{"ls"}->{"reaper_interval"};
-        }
-        else {
-            $sleep_time = $args->{"conf"}->{"gls"}->{"reaper_interval"};
-        }        
+    if ( exists $args->{"conf"}->{"gls"}->{"maintenance_interval"} and $args->{"conf"}->{"gls"}->{"maintenance_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"gls"}->{"maintenance_interval"};
     }
-    elsif ( $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"} or $args->{"conf"}->{"gls"}->{"xmldb_reaper_interval"} ) {
-        if ( $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"} ) {
-            $sleep_time = $args->{"conf"}->{"ls"}->{"xmldb_reaper_interval"};        
-        }
-        else {
-            $sleep_time = $args->{"conf"}->{"gls"}->{"xmldb_reaper_interval"};        
-        }  
+    elsif ( exists $args->{"conf"}->{"ls"}->{"maintenance_interval"} and $args->{"conf"}->{"ls"}->{"maintenance_interval"} ) {
+        $sleep_time = $args->{"conf"}->{"ls"}->{"maintenance_interval"};
     }
     else {
-        $sleep_time = 3600;
-    }
-    
-    my $error = q{};
-
-    unless ( $sleep_time ) {
-      return -1;
+        $sleep_time = 1800;
     }
 
-    while(1) {
-        my $status = q{};
+    while (1) {
+        my $cleanStatus = q{};
+        my $sumStatus   = q{};
         eval {
-            $status = $service->cleanLS( { error => \$error } );
+            $cleanStatus = $service->cleanLS(     { error => \$error } ) if $service->can("cleanLS");
+            $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
         };
-        if ($@) {
-            $logger->error("Problem cleaning LS: $@");
+        if ($EVAL_ERROR) {
+            $logger->error("Problem running service maintenance: $@");
         }
-        elsif ( $status == -1 ) {
-            $logger->error("Error returned: $error");        
+        elsif ( $cleanStatus == -1 ) {
+            $logger->error("Error returned: $error");
         }
-        
+        elsif ( $sumStatus == -1 ) {
+            $logger->error("Error returned: $error");
+        }
         $logger->debug("Sleeping for $sleep_time");
-
         sleep($sleep_time);
     }
-    return 0;
-}
 
-=head2 summarizeLS($args)
-    The summarizeLS function is used (only by the LS) to periodically summarize
-    the set of registered data.
-=cut
-
-sub summarizeLS {
-    my ($args) = @_;
-
-    my $service = $args->{"service"};
-    my $error = q{};
-    my $sleep_time;
-    if( $args->{"conf"}->{"ls"}->{"summarization_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"ls"}->{"summarization_interval"};
-    }
-    elsif ( $args->{"conf"}->{"gls"}->{"summarization_interval"} ) {
-        $sleep_time = $args->{"conf"}->{"gls"}->{"summarization_interval"};
-    }
-    else {
-        $sleep_time = 300;
-    }
-
-    unless ( $sleep_time ) {
-      return -1;
-    }
-
-    while(1) {
-        my $status = q{};
-        eval {
-            $status = $service->summarizeLS( { error => \$error } );
-        };
-        if ($@) {
-            $logger->error("Problem summarizing LS: $@");
-        }
-        elsif ( $status == -1 ) {
-            $logger->error("Error returned: $error");        
-        }
-        
-        $logger->debug("Sleeping for $sleep_time");
-
-        sleep($sleep_time);
-    }
     return 0;
 }
 
@@ -746,58 +682,59 @@ This function is a wrapper around the handler's handleRequest function.
 It's purpose is to ensure that if a crash occurs or a perfSONAR_PS::Error_compat
 message is thrown, the client receives a proper response.
 =cut
+
 sub handleRequest {
-    my ($handler, $request, $endpoint_conf) = @_;
+    my ( $handler, $request, $endpoint_conf ) = @_;
 
     my $messageId = q{};
 
     try {
         my $error;
 
-        if($request->getRawRequest->method ne "POST") {
+        if ( $request->getRawRequest->method ne "POST" ) {
             my $msg = "Received message with an invalid HTTP request, are you using a web browser?";
-            $logger->error($msg);     
-            throw perfSONAR_PS::Error_compat("error.common.transport", $msg);
+            $logger->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
         }
 
         my $action = $request->getRawRequest->headers->{"soapaction"};
-        if (!$action =~ m/^.*message\/$/) {
+        if ( !$action =~ m/^.*message\/$/ ) {
             my $msg = "Received message with an invalid soap action type.";
-            $logger->error($msg);     
-            throw perfSONAR_PS::Error_compat("error.common.transport", $msg);
+            $logger->error($msg);
+            throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
         }
 
-        $request->parse(\%ns, \$error);
-        if (defined $error and $error ne q{}) {
-            throw perfSONAR_PS::Error_compat("error.transport.parse_error", "Error parsing request: $error");
+        $request->parse( \%ns, \$error );
+        if ( defined $error and $error ne q{} ) {
+            throw perfSONAR_PS::Error_compat( "error.transport.parse_error", "Error parsing request: $error" );
         }
 
-        my $message = $request->getRequestDOM()->getDocumentElement();;
+        my $message = $request->getRequestDOM()->getDocumentElement();
         $messageId = $message->getAttribute("id");
-        $handler->handleMessage($message, $request, $endpoint_conf);
+        $handler->handleMessage( $message, $request, $endpoint_conf );
     }
     catch perfSONAR_PS::Error with {
         my $ex = shift;
 
-        my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
+        my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
         $logger->error($msg);
 
-        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage));
+        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
     catch perfSONAR_PS::Error_compat with {
         my $ex = shift;
 
-        my $msg = "Error handling request: ".$ex->eventType." => \"".$ex->errorMessage."\"";
+        my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
         $logger->error($msg);
 
-        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage));
+        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
-    otherwise { 
-        my $ex = shift;
+    otherwise {
+        my $ex  = shift;
         my $msg = "Unhandled exception or crash: $ex";
         $logger->error($msg);
 
-        $request->setResponse(getErrorResponseMessage(messageIdRef => $messageId, eventType => "error.common.internal_error", description => "An internal error occurred"));
+        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => "error.common.internal_error", description => "An internal error occurred" ) );
     };
 
     $request->finish();
@@ -808,14 +745,15 @@ sub handleRequest {
 =head2 daemonize
 Sends the program to the background by eliminating ties to the calling terminal.
 =cut
+
 sub daemonize {
-    chdir '/' or die "Can't chdir to /: $!";
-    open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
-    open STDOUT, '>>/dev/null' or die "Can't write to /dev/null: $!";
-    open STDERR, '>>/dev/null' or die "Can't write to /dev/null: $!";
-    defined(my $pid = fork) or die "Can't fork: $!";
+    chdir '/' or croak "Can't chdir to /: $!";
+    open STDIN,  '/dev/null'   or croak "Can't read /dev/null: $!";
+    open STDOUT, '>>/dev/null' or croak "Can't write to /dev/null: $!";
+    open STDERR, '>>/dev/null' or croak "Can't write to /dev/null: $!";
+    defined( my $pid = fork ) or croak "Can't fork: $!";
     exit if $pid;
-    setsid or die "Can't start a new session: $!";
+    setsid or croak "Can't start a new session: $!";
     umask 0;
     return;
 }
@@ -825,20 +763,21 @@ The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the
 file still exists. If there is no running process, it returns the filehandle for the open pidfile that has been flock(LOCK_EX).
 =cut
+
 sub lockPIDFile {
-    my($piddir, $pidfile) = @_;
-    die "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
-    $pidfile = $piddir ."/".$pidfile;
-    sysopen(PIDFILE, $pidfile, O_RDWR | O_CREAT);
-    flock(PIDFILE, LOCK_EX);
+    my ( $piddir, $pidfile ) = @_;
+    croak "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
+    $pidfile = $piddir . "/" . $pidfile;
+    sysopen( PIDFILE, $pidfile, O_RDWR | O_CREAT );
+    flock( PIDFILE, LOCK_EX );
     my $p_id = <PIDFILE>;
-    chomp($p_id) if (defined $p_id);
-    if(defined $p_id and $p_id ne q{}) {
-        open(PSVIEW, "ps -p ".$p_id." |");
+    chomp($p_id) if ( defined $p_id );
+    if ( defined $p_id and $p_id ne q{} ) {
+        open( PSVIEW, "ps -p " . $p_id . " |" );
         my @output = <PSVIEW>;
         close(PSVIEW);
-        if(!$?) {
-            die "$0 already running: $p_id\n";
+        if ( !$CHILD_ERROR ) {
+            croak "$PROGRAM_NAME already running: $p_id\n";
         }
     }
 
@@ -849,13 +788,14 @@ sub lockPIDFile {
 This file writes the pid of the call process to the filehandle passed in,
 unlocks the file and closes it.
 =cut
-sub unlockPIDFile {
-    my($filehandle) = @_;
 
-    truncate($filehandle, 0);
-    seek($filehandle, 0, 0);
-    print $filehandle "$$\n";
-    flock($filehandle, LOCK_UN);
+sub unlockPIDFile {
+    my ($filehandle) = @_;
+
+    truncate( $filehandle, 0 );
+    seek( $filehandle, 0, 0 );
+    print $filehandle "$PROCESS_ID\n";
+    flock( $filehandle, LOCK_UN );
     close($filehandle);
 
     $logger->debug("Unlocked pid file");
@@ -868,9 +808,10 @@ Kills all the children for this process off. It uses global variables
 because this function is used by the signal handler to kill off all
 child processes.
 =cut
+
 sub killChildren {
-    foreach my $pid (keys %child_pids) {
-        kill("SIGINT", $pid);
+    foreach my $pid ( keys %child_pids ) {
+        kill( "SIGINT", $pid );
     }
 
     return;
@@ -879,12 +820,14 @@ sub killChildren {
 =head2 signalHandler
 Kills all the children for the process and then exits
 =cut
+
 sub signalHandler {
     killChildren;
     exit(0);
 }
 
 sub REAPER {
+
     # We have to get the signal when children exit so that we can close our
     # reference to that child's socket. Otherwise, the TCP connection will
     # remain open until the accept call times out and the reaper kicks in.
@@ -900,89 +843,99 @@ sub REAPER {
 Sets the user/group for the daemon to run as. Returns 0 on success and -1 on
 failure.
 =cut
-sub setids{
-    my(%args)   = @_;
-    my ($uid,$gid);
-    my ($unam,$gnam);
-    
-    $uid = $args{'USER'} if(defined $args{'USER'});
-    $gid = $args{'GROUP'} if(defined $args{'GROUP'});
 
-    if (not $uid) {
+sub setids {
+    my (%args) = @_;
+    my ( $uid,  $gid );
+    my ( $unam, $gnam );
+
+    $uid = $args{'USER'}  if ( defined $args{'USER'} );
+    $gid = $args{'GROUP'} if ( defined $args{'GROUP'} );
+
+    if ( not $uid ) {
         return -1;
     }
 
     # Don't do anything if we are not running as root.
-    return if ($> != 0);
-        
+    return if ( $EFFECTIVE_USER_ID != 0 );
+
     # set GID first to ensure we still have permissions to.
-    if (defined($gid)){
-        if($gid =~ /\D/){
+    if ( defined $gid ) {
+        if ( $gid =~ /\D/ ) {
+
             # If there are any non-digits, it is a groupname.
-            $gid = getgrnam($gnam = $gid);
-            if (not $gid) {
+            $gid = getgrnam( $gnam = $gid );
+            if ( not $gid ) {
                 $logger->error("Can't getgrnam($gnam): $!");
                 return -1;
             }
         }
-        elsif($gid < 0){
+        elsif ( $gid < 0 ) {
             $gid = -$gid;
         }
 
-        if (not getgrgid($gid)) {
+        if ( not getgrgid($gid) ) {
             $logger->error("Invalid GID: $gid");
             return -1;
         }
 
-        $) = $( = $gid;
+        $EFFECTIVE_GROUP_ID = $REAL_GROUP_ID = $gid;
     }
 
     # Now set UID
-    if($uid =~ /\D/){
+    if ( $uid =~ /\D/ ) {
+
         # If there are any non-digits, it is a username.
-        $uid = getpwnam($unam = $uid);
-        if (not $uid) {
+        $uid = getpwnam( $unam = $uid );
+        if ( not $uid ) {
             $logger->error("Can't getpwnam($unam): $!");
             return -1;
         }
     }
-    elsif($uid < 0){
+    elsif ( $uid < 0 ) {
         $uid = -$uid;
     }
 
-    if (not getpwuid($uid)) {
+    if ( not getpwuid($uid) ) {
         $logger->error("Invalid UID: $uid");
         return -1;
     }
 
-    $> = $< = $uid;
+    $EFFECTIVE_USER_ID = $REAL_USER_ID = $uid;
 
     return 0;
 }
 
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Transport>,
-L<perfSONAR_PS::Client::Status::MA>, L<perfSONAR_PS::Client::Topology::MA>
+L<warnings>, L<strict>, L<Getopt::Long>, L<Time::HiRes>, L<POSIX>,
+L<File::Basename>, L<Fcntl>, L<POSIX>, L<Cwd>, L<Config::General>,
+L<Module::Load>, L<HTTP::Daemon>, L<English>, L<Carp>, L<perfSONAR_PS::Common>,
+L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Request>,
+L<perfSONAR_PS::RequestHandler>, L<perfSONAR_PS::Error_compat>,
+L<perfSONAR_PS::Error>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
-https://mail.internet2.edu/wws/info/i2-perfsonar
+  https://mail.internet2.edu/wws/info/i2-perfsonar
 
 The perfSONAR-PS subversion repository is located at:
 
-https://svn.internet2.edu/svn/perfSONAR-PS
+  https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
-$Id:$
+$Id$
 
 =head1 AUTHOR
 
 Aaron Brown, aaron@internet2.edu
+Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
@@ -991,7 +944,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2007, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
 
 All rights reserved.
 

@@ -160,46 +160,44 @@ sub init {
         if ( exists $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
                 $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
+                $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
             }
         }
     }
     else {
         $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/gls.root.hints";
+        $self->{LOGGER}->warn( "Setting 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
     }
 
     unless ( exists $self->{CONF}->{"gls"}->{"root"} ) {
-        $self->{LOGGER}->warn("Setting 'root' to '0'");
+        $self->{LOGGER}->warn("Setting 'root' to \"0\" (e.g. we are pretty sure you *DON'T* want to set up a root)");
         $self->{CONF}->{"gls"}->{"root"} = "0";
     }
 
-    if ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"}
-        and $self->{CONF}->{"gls"}->{"metadata_db_name"} )
-    {
+    if ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"} and $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
         if ( exists $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} =~ "^/" ) {
                 $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
+                $self->{LOGGER}->debug( "Setting full path to 'metadata_db_name': \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
             }
         }
         unless ( -d $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
             system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
+            $self->{LOGGER}->debug( "Creating 'metadata_db_name': \"mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
     }
     else {
-        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set.");
+        $self->{LOGGER}->error("Value for 'metadata_db_name' is not set, exiting.");
         return -1;
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_file"}
-        and $self->{CONF}->{"gls"}->{"metadata_db_file"} )
-    {
-        $self->{LOGGER}->warn("Setting 'metadata_db_file' to 'glsstore.dbxml'");
+    unless ( exists $self->{CONF}->{"gls"}->{"metadata_db_file"} and $self->{CONF}->{"gls"}->{"metadata_db_file"} ) {
+        $self->{LOGGER}->warn("Setting 'metadata_db_file' to \"glsstore.dbxml\"");
         $self->{CONF}->{"gls"}->{"metadata_db_file"} = "glsstore.dbxml";
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}
-        and $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} )
-    {
-        $self->{LOGGER}->warn("Setting 'metadata_summary_db_file' to 'glsstore-summary.dbxml'");
+    unless ( exists $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} and $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} ) {
+        $self->{LOGGER}->warn("Setting 'metadata_summary_db_file' to \"glsstore-summary.dbxml\"");
         $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} = "glsstore-summary.dbxml";
     }
 
@@ -207,76 +205,70 @@ sub init {
         $self->{CONF}->{"gls"}->{"ls_ttl"} *= 60;
     }
     else {
-        $self->{LOGGER}->warn("Setting 'ls_ttl' to '24hrs'.");
-        $self->{CONF}->{"gls"}->{"ls_ttl"} = 86400;
+        $self->{LOGGER}->warn("Setting 'ls_ttl' to \"48hrs\".");
+        $self->{CONF}->{"gls"}->{"ls_ttl"} = 172800;
     }
 
-    if ( exists $self->{CONF}->{"ls_registration_interval"} ) {
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+    if ( exists $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} and $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"} * 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
-            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
+            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
             $self->{CONF}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
+            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
     }
     else {
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} and $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
-            $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
+            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
-            $self->{LOGGER}->warn("Setting 'ls_registration_interval' to 1 hour.");
+            $self->{LOGGER}->info("Setting 'ls_registration_interval' to 1 hour.");
             $self->{CONF}->{"ls_registration_interval"} = 3600;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = 3600;
         }
     }
 
-    if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
-        $self->{CONF}->{"gls"}->{"summarization_interval"} *= 60;
-    }
-    else {
-        $self->{CONF}->{"gls"}->{"summarization_interval"} = 1800;
-        $self->{LOGGER}->warn( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"summarization_interval"} . "'." );
-    }
+    unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} and $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+        $self->{LOGGER}->info("Configuration value 'maintenance_interval' not searching for other values...");
+        if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} and $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
+            $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"summarization_interval"};
+        }
 
-    if ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"}
-        and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} )
-    {
-        $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} *= 60;
-        $self->{CONF}->{"gls"}->{"reaper_interval"} = $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"};
-    }
-    else {
-        if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"}
-            and $self->{CONF}->{"gls"}->{"reaper_interval"} )
-        {
-            $self->{CONF}->{"gls"}->{"reaper_interval"} *= 60;
-            $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
-            $self->{LOGGER}->info( "Using legacy 'gls:reaper_interval' value: \"" . $self->{CONF}->{"gls"}->{"reaper_interval"} . "\"." );
+        if ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} ) {
+            if ( not $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+                $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"};
+            }
         }
-        else {
-            $self->{LOGGER}->warn("Setting 'xmldb_reaper_interval' to '0'.");
-            $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} = 0;
-            $self->{CONF}->{"gls"}->{"reaper_interval"} = 0;
+
+        if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"} and $self->{CONF}->{"gls"}->{"reaper_interval"} ) {
+            if ( not $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+                $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
+            }
+        }
+
+        unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+            $self->{CONF}->{"gls"}->{"maintenance_interval"} = 30;
         }
     }
+    $self->{LOGGER}->info( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"gls"}->{"maintenance_interval"} . "\" minutes." );
+    $self->{CONF}->{"gls"}->{"maintenance_interval"} *= 60;
 
     unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
         unless ( $self->{CONF}->{external_address} ) {
-            $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
+            $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address, exiting.");
             return -1;
         }
         $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
         $self->{CONF}->{"gls"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"service_description"}
-        and $self->{CONF}->{"gls"}->{"service_description"} )
-    {
+    unless ( exists $self->{CONF}->{"gls"}->{"service_description"} and $self->{CONF}->{"gls"}->{"service_description"} ) {
         my $description = "perfSONAR_PS Lookup Service";
         if ( $self->{CONF}->{site_name} ) {
             $description .= " at " . $self->{CONF}->{site_name};
@@ -285,21 +277,22 @@ sub init {
             $description .= " in " . $self->{CONF}->{site_location};
         }
         $self->{CONF}->{"gls"}->{"service_description"} = $description;
-        $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
+        $self->{LOGGER}->warn( "Setting 'service_description' to \"" . $description . "\"." );
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"service_name"}
-        and $self->{CONF}->{"gls"}->{"service_name"} )
-    {
+    unless ( exists $self->{CONF}->{"gls"}->{"service_name"} and $self->{CONF}->{"gls"}->{"service_name"} ) {
         $self->{CONF}->{"gls"}->{"service_name"} = "Lookup Service";
-        $self->{LOGGER}->warn("Setting 'service_name' to 'Lookup Service'.");
+        $self->{LOGGER}->warn("Setting 'service_name' to \"Lookup Service\".");
     }
 
-    unless ( exists $self->{CONF}->{"gls"}->{"service_type"}
-        and $self->{CONF}->{"gls"}->{"service_type"} )
-    {
-        $self->{CONF}->{"gls"}->{"service_type"} = "LS";
-        $self->{LOGGER}->warn("Setting 'service_type' to 'LS'.");
+    unless ( exists $self->{CONF}->{"gls"}->{"service_type"} and $self->{CONF}->{"gls"}->{"service_type"} ) {
+        if ( $self->{CONF}->{"gls"}->{"root"} ) {
+            $self->{CONF}->{"gls"}->{"service_type"} = "gLS";
+        }
+        else {
+            $self->{CONF}->{"gls"}->{"service_type"} = "hLS";
+        }
+        $self->{LOGGER}->info( "Setting 'service_type' to \"" . $self->{CONF}->{"gls"}->{"service_type"} . "\"." );
     }
 
     $handler->registerFullMessageHandler( "LSRegisterRequest",        $self );
@@ -398,7 +391,21 @@ sub getHints {
     return -1;
 }
 
-=head2 needLS($self)
+=head2 maintenance( $self )
+
+Stub function indicating that we have 'maintenance' functions (e.g. summarization,
+cleaning) in this particular service.
+
+=cut
+
+sub maintenanceLS {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams( @args, {} );
+
+    return;
+}
+
+=head2 needLS( $self )
 
 Stub function that would allow the LS to  synchronization with another LS
 isntance.
@@ -477,7 +484,8 @@ sub registerLS {
             for my $x ( 0 .. $len ) {
                 my $parser  = XML::LibXML->new();
                 my $doc     = $parser->parse_string( $resultsString[$x] );
-                my $service = find( $doc->getDocumentElement, "./perfsonar:subject", 1 );
+                my $service = find( $doc->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
+                print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
 
                 my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $doc->getDocumentElement->getAttribute("id") . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
 
@@ -520,6 +528,7 @@ sub registerLS {
         }
     }
     else {
+
         # if we are not a root, send our summary to a root
 
         my %service = (
@@ -539,7 +548,7 @@ sub registerLS {
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
         my @metadataArray = ();
         if ( $#resultsString != -1 ) {
-            my $md_len        = $#resultsString;
+            my $md_len = $#resultsString;
             for my $x ( 0 .. $md_len ) {
                 $resultsString[$x] =~ s/^\{\}id=//;
                 $resultsString[$x] =~ s/\"//g;
@@ -607,8 +616,10 @@ Summarize the contents of the LSs registration dataset.
 sub summarizeLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
-    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
+    return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
+
+    my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $error      = q{};
     my $errorFlag  = 0;
     my $metadatadb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
@@ -1362,7 +1373,9 @@ sub summarizeAddress {
                 my $temp_addresses = find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $parameters->{addresses}->{$address} = 1 if $address;
+                    if ( is_ipv4($address) ) {
+                        $parameters->{addresses}->{$address} = 1 if $address;
+                    }
                 }
             }
             else {
@@ -1393,7 +1406,12 @@ sub summarizeHosts {
         foreach my $type ( @{ $parameters->{types} } ) {
             my $temp_hosts = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
             foreach my $h ( $temp_hosts->get_nodelist ) {
-                push @{ $parameters->{hostarray} }, extract( $h, 0 );
+                my $host = extract( $h, 0 );
+                print "\n\n\n", $host;
+                unless ( is_ipv4($host) or &Net::IPv6Addr::is_ipv6($host) ) {
+                    print "\nHERE\n\n\n";
+                    push @{ $parameters->{hostarray} }, $host if $host;
+                }
             }
         }
     }
@@ -1668,7 +1686,7 @@ sub cleanLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { error => 0 } );
 
-    return 0 if $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} == 0;
+    return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -1751,7 +1769,7 @@ sub cleanLSAux {
                     $errorFlag++ if $error;
                     $parameters->{database}->remove( { name => $key, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
-                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString3 + $#resultsString2 + 1 ) . "] data elements and service info for key \"" . $key . "\"." );
+                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString3 + $#resultsString2 + 2 ) . "] data elements and service info for key \"" . $key . "\"." );
                 }
             }
         }
