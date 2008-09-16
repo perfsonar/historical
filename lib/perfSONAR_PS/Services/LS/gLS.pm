@@ -1733,7 +1733,7 @@ sub cleanLSAux {
         undef $dbTr;
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
-
+    my %controlHash = ();
     my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
     if ( $#resultsString != -1 ) {
@@ -1746,6 +1746,7 @@ sub cleanLSAux {
             if ( $time =~ m/^\d+$/mx ) {
                 my $key = $doc->getDocumentElement->getAttribute("id");
                 $key =~ s/-control$//mx;
+                $controlHash{$key} = 1 unless exists $controlHash{$key};
                 if ( $time and $key and $parameters->{time} >= $time ) {
                     $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"".$parameters->{name}."\"." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
@@ -1774,6 +1775,39 @@ sub cleanLSAux {
     else {
         $self->{LOGGER}->error("Nothing Registered with \"".$parameters->{name}."\", cannot clean at this time.");
     }
+
+    @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    $errorFlag++ if $error;
+    if ( $#resultsString != -1 ) {
+        my $len = $#resultsString;
+        for my $x ( 0 .. $len ) {
+            my $parser = XML::LibXML->new();
+            my $doc    = $parser->parse_string( $resultsString[$x] );
+            my $mdid = $doc->getDocumentElement->getAttribute("id");
+            unless ( exists $controlHash{$mdid} ) {
+                $self->{LOGGER}->debug("Removing metadata \"".$mdid."\" beacuse it has no control mate.");
+                $parameters->{database}->remove( { name => $mdid, txn => $dbTr, error => \$error } );
+                $errorFlag++ if $error; 
+            }
+        }
+    }
+
+    @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
+    $errorFlag++ if $error;
+    if ( $#resultsString != -1 ) {
+        my $len = $#resultsString;
+        for my $x ( 0 .. $len ) {
+            my $parser = XML::LibXML->new();
+            my $doc    = $parser->parse_string( $resultsString[$x] );
+            my $did = $doc->getDocumentElement->getAttribute("id");
+            my $mdid = $doc->getDocumentElement->getAttribute("metadataIdRef");
+            unless ( exists $controlHash{$mdid} ) {
+                $self->{LOGGER}->debug("Removing data \"".$did."\" beacuse it has no control mate.");
+                $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
+                $errorFlag++ if $error; 
+            }
+        }
+    }     
 
     if ($errorFlag) {
         $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
