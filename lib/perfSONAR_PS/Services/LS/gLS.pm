@@ -436,7 +436,7 @@ sub registerLS {
     my $database;
     if ( -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file more than an hour old?
-        if ( ( $hintsStats->mtime + 3600 ) < time ) {
+        if ( ( $hintsStats->mtime + $self->{CONF}->{"gls"}->{"ls_ttl"} ) < time ) {
             $self->getHints();
         }
     }
@@ -560,9 +560,10 @@ print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
             }
         }
 
-        # limit how many gLS instanaces we register with (pick the 3 closest)
+            # limit how many gLS instanaces we register with (pick the 3 closest)
         my $len = $#{ $gls->{ROOTS} };
         $len = 2 if $len > 2;
+        
         for my $x ( 0 .. $len ) {
             my $root = $gls->{ROOTS}->[$x];
 
@@ -618,7 +619,8 @@ sub summarizeLS {
     my $parameters = validateParams( @args, { error => 0 } );
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
-
+    
+    $self->{STATE}->{"messageKeys"} = ();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $error      = q{};
     my $errorFlag  = 0;
@@ -1373,16 +1375,14 @@ sub summarizeAddress {
                 my $temp_addresses = find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    if ( is_ipv4($address) ) {
-                        $parameters->{addresses}->{$address} = 1 if $address;
-                    }
+                    $parameters->{addresses}->{$address} = 1 if $address and is_ipv4($address);
                 }
             }
             else {
                 my $temp_addresses = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $parameters->{addresses}->{$address} = 1 if $address;
+                    $parameters->{addresses}->{$address} = 1  if $address and is_ipv4($address);
                 }
             }
         }
@@ -1743,10 +1743,10 @@ sub cleanLSAux {
             my $doc    = $parser->parse_string( $resultsString[$x] );
 
             my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
-            if ( $time =~ m/^\d+$/mx ) {
+            if ( $time =~ m/^\d+$/ ) {
                 my $key = $doc->getDocumentElement->getAttribute("id");
-                $key =~ s/-control$//mx;
-                $controlHash{$key} = 1 unless exists $controlHash{$key};
+                $key =~ s/-control$//;
+
                 if ( $time and $key and $parameters->{time} >= $time ) {
                     $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"".$parameters->{name}."\"." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
@@ -1768,6 +1768,9 @@ sub cleanLSAux {
                     $parameters->{database}->remove( { name => $key, txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
                     $self->{LOGGER}->debug( "Removed [" . ( $#resultsString3 + $#resultsString2 + 2 ) . "] data elements and service info for key \"" . $key . "\"." );
+                }
+                else {
+                    $controlHash{$key} = 1 unless exists $controlHash{$key};
                 }
             }
         }
@@ -2205,7 +2208,7 @@ sub lsRegisterRequestUpdateNew {
 
     if ($update) {
 
-        # remove all the old stuff (its a 'clobber' after all)
+        # remove all the old stuff (it's a 'clobber' after all)
 
         my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => $parameters->{dbTr}, error => \$error } );
         my $len2 = $#resultsString2;

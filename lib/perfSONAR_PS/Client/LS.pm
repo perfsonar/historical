@@ -550,7 +550,7 @@ sub createService {
         $service .= "        <nmtb:name>" . $parameters->{service}->{name} . "</nmtb:name>\n" if exists $parameters->{service}->{name};
         $service .= "        <nmtb:type>" . $parameters->{service}->{type} . "</nmtb:type>\n" if exists $parameters->{service}->{type};
         $service .= "        <nmtb:description>" . $parameters->{service}->{description} . "</nmtb:description>\n" if exists $parameters->{service}->{description};
-        if ( exists $parameters->{service}->{addresses} and $parameters->{service}->{addresses} ) {
+        if ( exists $parameters->{service}->{addresses} and $parameters->{service}->{addresses} and $#{ $parameters->{service}->{addresses} } > -1 ) {
             foreach my $address ( @{ $parameters->{service}->{addresses} } ) {
                 $service .= "        <nmtb:address type=\"" . $address->{type} . "\">" . $address->{value} . "</nmtb:address>\n";
             }
@@ -618,7 +618,7 @@ sub createLSMessage {
     $request .= "  <nmwg:metadata id=\"metadata." . $mdId . "\">\n";
     $request .= $parameters->{metadata};
     $request .= "  </nmwg:metadata>\n";
-    if ( exists $parameters->{data} and $parameters->{data} ) {
+    if ( exists $parameters->{data} and $parameters->{data} and $#{ $parameters->{data} } > -1 ) {
         $request .= "  <nmwg:data metadataIdRef=\"metadata." . $mdId . "\" id=\"data." . genuid() . "\">\n";
         foreach my $data ( @{ $parameters->{data} } ) {
             $request .= $data;
