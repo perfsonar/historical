@@ -381,7 +381,7 @@ sub getHints {
             }
             open( HINTS, ">", $self->{CONF}->{"root_hints_file"} );
             print HINTS $content;
-            close( HINTS );
+            close(HINTS);
             return;
         }
     }
@@ -435,7 +435,7 @@ sub registerLS {
     my $eventType;
     my $database;
     if ( -f $self->{CONF}->{"root_hints_file"} ) {
-        my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file more than an hour old?
+        my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
         if ( ( $hintsStats->mtime + $self->{CONF}->{"gls"}->{"ls_ttl"} ) < time ) {
             $self->getHints();
         }
@@ -482,13 +482,12 @@ sub registerLS {
         if ( $#resultsString != -1 ) {
             my $len = $#resultsString;
             for my $x ( 0 .. $len ) {
-                my $parser  = XML::LibXML->new();
-                my $doc     = $parser->parse_string( $resultsString[$x] );
-                my $service = find( $doc->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
-print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
-
+                my $parser        = XML::LibXML->new();
+                my $doc           = $parser->parse_string( $resultsString[$x] );
+                my $service       = find( $doc->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
                 my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $doc->getDocumentElement->getAttribute("id") . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
 
+                # register w/ all gLS instances
                 foreach my $root ( @{ $gls->{ROOTS} } ) {
                     my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
                     my $result = $ls->keyRequestLS(             { servicexml => $service->toString } );
@@ -545,6 +544,7 @@ print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
             return -1;
         }
 
+        # build up our list of data to send off
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
         my @metadataArray = ();
         if ( $#resultsString != -1 ) {
@@ -560,10 +560,10 @@ print "\n\n\nSUBJECT:\n" . $service->toString . "\n\n\n";
             }
         }
 
-            # limit how many gLS instanaces we register with (pick the 3 closest)
+        # limit how many gLS instanaces we register with (pick the 3 closest)
         my $len = $#{ $gls->{ROOTS} };
         $len = 2 if $len > 2;
-        
+
         for my $x ( 0 .. $len ) {
             my $root = $gls->{ROOTS}->[$x];
 
@@ -619,7 +619,7 @@ sub summarizeLS {
     my $parameters = validateParams( @args, { error => 0 } );
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
-    
+
     $self->{STATE}->{"messageKeys"} = ();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $error      = q{};
@@ -1382,7 +1382,7 @@ sub summarizeAddress {
                 my $temp_addresses = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $parameters->{addresses}->{$address} = 1  if $address and is_ipv4($address);
+                    $parameters->{addresses}->{$address} = 1 if $address and is_ipv4($address);
                 }
             }
         }
@@ -1694,7 +1694,7 @@ sub cleanLS {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
-    my $status = $self->cleanLSAux( { database => $metadatadb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"}."/".$self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
+    my $status = $self->cleanLSAux( { database => $metadatadb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
         return -1;
@@ -1705,7 +1705,7 @@ sub cleanLS {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
     }
-    $status = $self->cleanLSAux( { database => $summarydb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"}."/".$self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
+    $status = $self->cleanLSAux( { database => $summarydb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\" could not be cleaned." );
         return -1;
@@ -1722,7 +1722,7 @@ Auxilary function to clean a specific container in the database.
 
 sub cleanLSAux {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { database => 1, time => 1, name => 0} );
+    my $parameters = validateParams( @args, { database => 1, time => 1, name => 0 } );
 
     my $error     = q{};
     my $errorFlag = 0;
@@ -1748,7 +1748,7 @@ sub cleanLSAux {
                 $key =~ s/-control$//;
 
                 if ( $time and $key and $parameters->{time} >= $time ) {
-                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"".$parameters->{name}."\"." );
+                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"" . $parameters->{name} . "\"." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
                     $errorFlag++ if $error;
                     my $len2 = $#resultsString2;
@@ -1776,7 +1776,7 @@ sub cleanLSAux {
         }
     }
     else {
-        $self->{LOGGER}->error("Nothing Registered with \"".$parameters->{name}."\", cannot clean at this time.");
+        $self->{LOGGER}->error( "Nothing Registered with \"" . $parameters->{name} . "\", cannot clean at this time." );
     }
 
     @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
@@ -1786,11 +1786,11 @@ sub cleanLSAux {
         for my $x ( 0 .. $len ) {
             my $parser = XML::LibXML->new();
             my $doc    = $parser->parse_string( $resultsString[$x] );
-            my $mdid = $doc->getDocumentElement->getAttribute("id");
+            my $mdid   = $doc->getDocumentElement->getAttribute("id");
             unless ( exists $controlHash{$mdid} ) {
-                $self->{LOGGER}->debug("Removing metadata \"".$mdid."\" beacuse it has no control mate.");
+                $self->{LOGGER}->debug( "Removing metadata \"" . $mdid . "\" beacuse it has no control mate." );
                 $parameters->{database}->remove( { name => $mdid, txn => $dbTr, error => \$error } );
-                $errorFlag++ if $error; 
+                $errorFlag++ if $error;
             }
         }
     }
@@ -1802,15 +1802,15 @@ sub cleanLSAux {
         for my $x ( 0 .. $len ) {
             my $parser = XML::LibXML->new();
             my $doc    = $parser->parse_string( $resultsString[$x] );
-            my $did = $doc->getDocumentElement->getAttribute("id");
-            my $mdid = $doc->getDocumentElement->getAttribute("metadataIdRef");
+            my $did    = $doc->getDocumentElement->getAttribute("id");
+            my $mdid   = $doc->getDocumentElement->getAttribute("metadataIdRef");
             unless ( exists $controlHash{$mdid} ) {
-                $self->{LOGGER}->debug("Removing data \"".$did."\" beacuse it has no control mate.");
+                $self->{LOGGER}->debug( "Removing data \"" . $did . "\" beacuse it has no control mate." );
                 $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
-                $errorFlag++ if $error; 
+                $errorFlag++ if $error;
             }
         }
-    }     
+    }
 
     if ($errorFlag) {
         $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
