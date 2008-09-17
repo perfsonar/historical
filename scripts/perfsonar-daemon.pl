@@ -129,6 +129,7 @@ $SIG{ALRM} = 'IGNORE';
 $SIG{INT}  = \&signalHandler;
 $SIG{TERM} = \&signalHandler;
 
+my $CLEANFLAG   = q{};
 my $DEBUGFLAG   = q{};
 my $READ_ONLY   = q{};
 my $HELP        = q{};
@@ -149,6 +150,7 @@ my $status = GetOptions(
     'user=s'    => \$RUNAS_USER,
     'group=s'   => \$RUNAS_GROUP,
     'verbose'   => \$DEBUGFLAG,
+    'noclean'   => \$CLEANFLAG,
     'help'      => \$HELP
 );
 
@@ -658,7 +660,9 @@ sub maintenance {
         my $cleanStatus = q{};
         my $sumStatus   = q{};
         eval {
-            $cleanStatus = $service->cleanLS(     { error => \$error } ) if $service->can("cleanLS");
+            unless ( $CLEANFLAG ) {
+                $cleanStatus = $service->cleanLS( { error => \$error } ) if $service->can("cleanLS");
+            }
             $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
         };
         if ($EVAL_ERROR) {
