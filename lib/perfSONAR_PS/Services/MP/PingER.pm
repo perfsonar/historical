@@ -148,7 +148,7 @@ sub init
 		$self->configureConf( 'configuration_file', undef, $self->getConf('configuration_file'), 1 );
 
 		# agent stuff
-		$self->configureConf( 'max_worker_lifetime', 30, $self->getConf( 'max_worker_lifetime') || $self->{'CONF'}->{'max_worker_lifetime'} );
+		$self->configureConf( 'service_timeout', 30, $self->getConf( 'service_timeout') || $self->{'CONF'}->{'service_timeout'} );
 		$self->configureConf( 'max_worker_processes', 5, $self->getConf( 'max_worker_processes') || $self->{'CONF'}->{'max_worker_processes'} );
 	};
 	if ( $EVAL_ERROR ) {
@@ -566,7 +566,7 @@ sub getAgent {
 	$agent->interval( $test->{interval} ) if $test->{interval};
 	
 	# timeouts
-	$agent->timeout( $self->getConf('max_worker_lifetime') );
+	$agent->timeout( $self->getConf('service_timeout') );
 	
 	return $agent;
 }
