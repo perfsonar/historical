@@ -2,24 +2,22 @@ package perfSONAR_PS::Utils::Daemon;
 
 =head1 NAME
 
-perfSONAR_PS::Utils::DNS - A module that provides utility methods for interacting with DNS servers.
+perfSONAR_PS::Utils::Daemon - A module that exposes common functions for 
+'daemonizing' a perl script.
 
 =head1 DESCRIPTION
 
-This module provides a set of methods for interacting with DNS servers. This
-module IS NOT an object, and the methods can be invoked directly. The methods
-need to be explicitly imported to use them.
+This module features functions that can be used to impart 'daemon' (e.g. 
+backgrounding, error handling) functions to a perl script.
 
 =head1 DETAILS
 
-The API for this module aims to be simple; note that this is not an object and
-each method does not have the 'self knowledge' of variables that may travel
-between functions.
+TBD
 
 =head1 API
 
-The API of perfSONAR_PS::Utils::DNS provides a simple set of functions for
-interacting with DNS servers.
+TBD
+
 =cut
 
 use base 'Exporter';
@@ -30,15 +28,18 @@ use warnings;
 use POSIX qw(setsid);
 use Fcntl qw(:DEFAULT :flock);
 use File::Basename;
+use English '-no_match_vars';
 
 our @EXPORT_OK = ( 'daemonize', 'setids', 'lockPIDFile', 'unlockPIDFile' );
 
 =head2 daemonize({ DEVNULL => /path/to/dev/null, UMASK => $umask, KEEPSTDERR => 1 })
-    Causes the calling application to daemonize. The calling application can
-    specify what file the child should send its output/receive its input from,
-    what the umask for the daemonized process will be and whether or not stderr
-    should be redirected to the same location as stdout or if it should keep
-    going to the screen. Returns (0, "") on success and (-1, $error_msg) on failure.
+
+Causes the calling application to daemonize. The calling application can specify
+what file the child should send its output/receive its input from, what the
+umask for the daemonized process will be and whether or not stderr should be
+redirected to the same location as stdout or if it should keep going to the
+screen. Returns (0, "") on success and (-1, $error_msg) on failure.
+
 =cut
 
 sub daemonize {
@@ -64,12 +65,14 @@ sub daemonize {
     setsid or return ( -1, "Can't start new session: $!" );
     umask $umask;
 
-    return ( 0, "" );
+    return ( 0, q{} );
 }
 
 =head2 setids
-    Sets the user/group for an application to run as. Returns 0 on success and
-    -1 on failure.
+
+Sets the user/group for an application to run as. Returns 0 on success and -1 on
+failure.
+
 =cut
 
 sub setids {
@@ -80,12 +83,10 @@ sub setids {
     $uid = $args{'USER'}  if ( defined $args{'USER'} );
     $gid = $args{'GROUP'} if ( defined $args{'GROUP'} );
 
-    if ( not $uid ) {
-        return -1;
-    }
+    return -1 unless $uid;
 
     # Don't do anything if we are not running as root.
-    return if ( $> != 0 );
+    return if ( $EFFECTIVE_USER_ID != 0 );
 
     # set GID first to ensure we still have permissions to.
     if ( defined($gid) ) {
@@ -109,7 +110,7 @@ sub setids {
             return -1;
         }
 
-        $) = $( = $gid;
+        $EFFECTIVE_GROUP_ID = $REAL_GROUP_ID = $gid;
     }
 
     # Now set UID
@@ -133,17 +134,19 @@ sub setids {
         return -1;
     }
 
-    $> = $< = $uid;
+    $EFFECTIVE_USER_ID = $REAL_USER_ID = $uid;
 
     return 0;
 }
 
 =head2 lockPIDFile($piddir, $pidfile);
+
 The lockPIDFile function checks for the existence of the specified file in
 the specified directory. If found, it checks to see if the process in the file
 still exists. If there is no running process, it returns the filehandle for the
 open pidfile that has been flock(LOCK_EX). Returns (0, "") on success and (-1,
 $error_msg) on failure.
+
 =cut
 
 sub lockPIDFile {
@@ -156,10 +159,10 @@ sub lockPIDFile {
     if ( defined $p_id and $p_id ne q{} ) {
         my $PSVIEW;
 
-        open( $PSVIEW, "-|", "ps -p " . $p_id );
+        open( $PSVIEW, "-|", "ps -p " . $p_id ) or return ( -1, "Open failed for pid: $p_id\n" );
         my @output = <$PSVIEW>;
-        close($PSVIEW);
-        if ( !$? ) {
+        close($PSVIEW) or return ( -1, "Close failed for pid: $p_id\n" );
+        unless ($CHILD_ERROR) {
             return ( -1, "Application is already running on pid: $p_id\n" );
         }
     }
@@ -168,8 +171,10 @@ sub lockPIDFile {
 }
 
 =head2 unlockPIDFile
+
 This file writes the pid of the calling process to the filehandle passed in,
 unlocks the file and closes it.
+
 =cut
 
 sub unlockPIDFile {
@@ -180,7 +185,6 @@ sub unlockPIDFile {
     print $filehandle "$$\n";
     flock( $filehandle, LOCK_UN );
     close($filehandle);
-
     return;
 }
 
@@ -190,7 +194,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<Exporter>, L<Net::DNS>, L<NetAddr::IP>
+L<Exporter>, L<Net::DNS>, L<NetAddr::IP>, L<English>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -200,7 +204,10 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -208,7 +215,8 @@ $Id$
 
 =head1 AUTHOR
 
-Aaron Brown <aaron@internet2.edu>, Jeff Boote <boote@internet2.edu>
+Aaron Brown <aaron@internet2.edu>,
+Jeff Boote <boote@internet2.edu>
 
 =head1 LICENSE
 
@@ -217,7 +225,7 @@ with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2004-2008, Internet2
 
 All rights reserved.
 

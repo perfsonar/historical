@@ -2,24 +2,22 @@ package perfSONAR_PS::Utils::Host;
 
 =head1 NAME
 
-perfSONAR_PS::Utils::DNS - A module that provides utility methods for interacting with DNS servers.
+perfSONAR_PS::Utils::Host - A module that extract the usable IP addresses
+from a host.  
 
 =head1 DESCRIPTION
 
-This module provides a set of methods for interacting with DNS servers. This
-module IS NOT an object, and the methods can be invoked directly. The methods
-need to be explicitly imported to get use them.
+This module provides a function that parses the ouput of the /sbin/ifconfig
+command on *nix systems looking for ip addresses.
 
 =head1 DETAILS
 
-The API for this module aims to be simple; note that this is not an object and
-each method does not have the 'self knowledge' of variables that may travel
-between functions.
+TBD
 
 =head1 API
 
-The API of perfSONAR_PS::Utils::DNS provides a simple set of functions for
-interacting with DNS servers.
+TBD
+
 =cut
 
 use base 'Exporter';
@@ -33,7 +31,7 @@ sub get_ips {
     my @ret_interfaces = ();
 
     my $IFCONFIG;
-    open( $IFCONFIG, "-|", "/sbin/ifconfig" );
+    open( $IFCONFIG, "-|", "/sbin/ifconfig" ) or return;
     my $is_eth = 0;
     while (<$IFCONFIG>) {
         if (/Link encap:([^ ]+)/) {
@@ -60,3 +58,45 @@ sub get_ips {
 }
 
 1;
+
+__END__
+
+=head1 SEE ALSO
+
+L<Exporter>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown <aaron@internet2.edu>
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2008, Internet2
+
+All rights reserved.
+
+=cut
+
+# vim: expandtab shiftwidth=4 tabstop=4
