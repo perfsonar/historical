@@ -109,47 +109,48 @@ sub init
 		unless ( blessed $handler && $handler->isa( 'perfSONAR_PS::RequestHandler' ) );
 
 	eval {
-		# ls stuff
-		$self->configureConf( 'enable_registration', '0', $self->getConf('enable_registration') );
+	    # ls stuff
+	    $self->configureConf( 'enable_registration', '0', $self->getConf('enable_registration') );
 
-		# setup defaults etc
-		$self->configureConf( 'service_name', $processName, $self->getConf('service_name') );
-		$self->configureConf( 'service_type', 'MP', $self->getConf('service_type') );
+	    # setup defaults etc
+	    $self->configureConf( 'service_name', $processName, $self->getConf('service_name') );
+	    $self->configureConf( 'service_type', 'MP', $self->getConf('service_type') );
 
-        my $default_description = $processName . ' Service';
-        if ($self->getConf("site_name")) {
-            $default_description .= " at ".$self->getConf("site_name");
-        }
-        if ($self->getConf("site_location")) {
-            $default_description .= " in ".$self->getConf("site_location");
-        }
-        $self->configureConf( 'service_description', $default_description, $self->getConf('service_description') );
+            my $default_description = $processName . ' Service';
+            if ($self->getConf("site_name")) {
+        	$default_description .= " at ".$self->getConf("site_name");
+            }
+            if ($self->getConf("site_location")) {
+        	$default_description .= " in ".$self->getConf("site_location");
+            }
+            $self->configureConf( 'service_description', $default_description, $self->getConf('service_description') );
 
-        my $default_accesspoint;
-        if ($self->getConf("external_address")) {
-            $default_accesspoint = 'http://'.$self->getConf("external_address").':'.$self->{PORT}.$self->{ENDPOINT} 
-        }
-    	$self->configureConf( 'service_accesspoint', $default_accesspoint, $self->getConf('service_accesspoint') );
-        if ($self->getConf("enable_registration") and not $self->getConf("service_accesspoint")) {
-	    $logger->logdie("Must have either a service_accesspoint or an external address specified if you enable registration");
-	}
-        $self->configureConf( 'ping_exec', '/bin/ping', $self->getConf('ping_exec') );
-        
-	$self->configureConf( 'db_host', undef, $self->getConf('db_host') );
-	
-        $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
-        $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
-        $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
+            my $default_accesspoint;
+            if ($self->getConf("external_address")) {
+        	$default_accesspoint = 'http://'.$self->getConf("external_address").':'.$self->{PORT}.$self->{ENDPOINT} 
+            }
+    	    $self->configureConf( 'service_accesspoint', $default_accesspoint, $self->getConf('service_accesspoint') );
+            if ($self->getConf("enable_registration") and not $self->getConf("service_accesspoint")) {
+		$logger->logdie("Must have either a service_accesspoint or an external address specified if you enable registration");
+	    }
+            $self->configureConf( 'ping_exec', '/bin/ping', $self->getConf('ping_exec') );
 
-        $self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
-        $self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
-    
-		# die if we don't have the confi file
-		$self->configureConf( 'configuration_file', undef, $self->getConf('configuration_file'), 1 );
+	    $self->configureConf( 'db_host', undef, $self->getConf('db_host') );
 
-		# agent stuff
-		$self->configureConf( 'service_timeout', 30, $self->getConf( 'service_timeout') || $self->{'CONF'}->{'service_timeout'} );
-		$self->configureConf( 'max_worker_processes', 5, $self->getConf( 'max_worker_processes') || $self->{'CONF'}->{'max_worker_processes'} );
+            $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
+            $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
+            $self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
+
+            $self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
+            $self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
+
+            # die if we don't have the confi file
+            $self->configureConf( 'configuration_file', undef, $self->getConf('configuration_file'), 1 );
+            $self->configureConf(  'root_hints_url', 'http://www.perfsonar.net/gls.root.hints', $self->getConf('root_hints_url') );
+
+            # agent stuff
+            $self->configureConf( 'service_timeout', 30, $self->getConf( 'service_timeout') || $self->{'CONF'}->{'service_timeout'} );
+            $self->configureConf( 'max_worker_processes', 5, $self->getConf( 'max_worker_processes') || $self->{'CONF'}->{'max_worker_processes'} );
 	};
 	if ( $EVAL_ERROR ) {
 		$logger->logdie( "Configuration incorrect");
@@ -282,36 +283,44 @@ Actually register with the LS information about the pinger mp service.
 in this case we only register the existance of the MP with teh LS.
 
 =cut
-sub registerLS($) 
-{
-	my $self = shift;
+sub registerLS($)  {
+    my $self = shift;
 
-	$0 = $processName . ' LS Registration';
+    $0 = $processName . ' LS Registration';
 	
-	$logger->info( "Registering PingER MP with LS");
+    $logger->info( "Registering PingER MP with LS"); 
+    my @ls_array = ();
+    my @array = split( /\s+/,  $self->getConf('ls_instance') );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
+    }
+    my @hints_array = ();
+    @array = split( /\s+/,    $self->getConf("root_hints_url"));
+    foreach my $h (@array) {
+        $h =~ s/(\s|\n)*//g;
+        push @hints_array, $h if $h;
+    }
 	# create new client if required
-	if ( ! defined $self->ls() ) {
-		my $ls_conf = {
-			'SERVICE_TYPE' => $self->getConf( 'service_type' ),
-			'SERVICE_NAME' => $self->getConf( 'service_name'),
-			'SERVICE_DESCRIPTION' => $self->getConf( 'service_description'),
-			'SERVICE_ACCESSPOINT' => $self->getConf( 'service_accesspoint' ),
-		};
-		my $ls = new perfSONAR_PS::Client::LS::Remote(
-				$self->getConf('ls_instance'),
-				$ls_conf,
-			);
-		$self->ls( $ls );
-	}
+    if ( ! defined $self->ls() ) {
+     	my $ls_conf = {
+        	'SERVICE_TYPE' => $self->getConf( 'service_type' ),
+        	'SERVICE_NAME' => $self->getConf( 'service_name'),
+        	'SERVICE_DESCRIPTION' => $self->getConf( 'service_description'),
+        	'SERVICE_ACCESSPOINT' => $self->getConf( 'service_accesspoint' ),
+     	};
+     	my $ls = new perfSONAR_PS::Client::LS::Remote(  \@ls_array, $ls_conf, \@hints_array ); 		
+     	$self->ls( $ls );
+    }
 
-	# register nothing but the service instance with teh LS
-	my @sendToLS = ();
-	
-	# add empty string to register MP
-	push @sendToLS, '';
-	
-	# register with LS
-	return $self->ls()->registerStatic(\@sendToLS);
+    # register nothing but the service instance with teh LS
+    my @sendToLS = ();
+
+    # add empty string to register MP
+    push @sendToLS, '';
+
+    # register with LS
+    return $self->ls()->registerStatic(\@sendToLS);
 }
 
 

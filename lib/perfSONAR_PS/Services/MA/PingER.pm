@@ -146,11 +146,12 @@ sub init {
         $self->configureConf( 'db_port', undef, $self->getConf('db_port') );
         $self->configureConf( 'db_type', 'SQLite', $self->getConf('db_type') );
     	$self->configureConf( 'db_name', 'pingerMA.sqlite3', $self->getConf('db_name') );
+	
 
     	$self->configureConf( 'db_username', undef, $self->getConf( 'db_username') );
     	$self->configureConf( 'db_password', undef, $self->getConf( 'db_password') );
     	# other
-    	
+        $self->configureConf(  'root_hints_url', 'http://www.perfsonar.net/gls.root.hints', $self->getConf('root_hints_url') );
         $self->configureConf( 'query_size_limit', undef, $self->getConf('query_size_limit') );
 
     };
@@ -307,46 +308,54 @@ sub needLS($) {
 register all the metadata that our ma contains to the LS
 
 =cut
-sub registerLS($)
-{
-	my $self = shift;
-	
-	$0 = $processName . ' LS Registration';
-	
-	$logger->info( "Registering PingER MA with LS");
+sub registerLS($) {
+    my $self = shift;
+
+    $0 = $processName . ' LS Registration';
+
+    $logger->info( "Registering PingER MA with LS");
+    my @ls_array = ();
+    my @array = split( /\s+/,  $self->getConf('ls_instance') );
+    foreach my $l (@array) {
+        $l =~ s/(\s|\n)*//g;
+        push @ls_array, $l if $l;
+    }
+    my @hints_array = ();
+    @array = split( /\s+/,    $self->getConf("root_hints_url"));
+    foreach my $h (@array) {
+        $h =~ s/(\s|\n)*//g;
+        push @hints_array, $h if $h;
+    }
 	# create new client if required
-	if ( ! defined $self->ls() ) {
-		my $ls_conf = {
-			'SERVICE_TYPE' => $self->getConf( 'service_type' ),
-			'SERVICE_NAME' => $self->getConf( 'service_name'),
-			'SERVICE_DESCRIPTION' => $self->getConf( 'service_description'),
-			'SERVICE_ACCESSPOINT' => $self->getConf( 'service_accesspoint' ),
-		};
-		my $ls = new perfSONAR_PS::Client::LS::Remote(
-				$self->getConf('ls_instance'),
-				$ls_conf,
-			);
-		$self->ls( $ls );
-	}
+    if ( ! defined $self->ls() ) {
+     	my $ls_conf = {
+        	'SERVICE_TYPE' => $self->getConf( 'service_type' ),
+        	'SERVICE_NAME' => $self->getConf( 'service_name'),
+        	'SERVICE_DESCRIPTION' => $self->getConf( 'service_description'),
+        	'SERVICE_ACCESSPOINT' => $self->getConf( 'service_accesspoint' ),
+     	};
+     	my $ls = new perfSONAR_PS::Client::LS::Remote(  \@ls_array, $ls_conf, \@hints_array ); 		
+     	$self->ls( $ls );
+    }
 	
-	my @sendToLS = ();
-	
-	# open db
-	my $metas = $self->database()->getMeta([],10000);
-	my $pingerMA =  perfSONAR_PS::Datatypes::PingER->new();
-	foreach my  $metaid (sort keys %{$metas})
-	{
-		my $md =   $pingerMA->ressurectMd({ md_row =>  $metas->{$metaid}  });  
-                $md->set_eventType($self->{eventTypes}->tools->pinger); 
-		push @sendToLS, $md->getDOM()->toString() ;
+    my @sendToLS = ();
 
-	}
-	
-	# foreach my $meta ( @sendToLS ) {
-	# 	$logger->debug( "Found metadata for LS registration: '" . $meta . "'" );
-	# }
+    # open db
+    my $metas = $self->database()->getMeta([],10000);
+    my $pingerMA =  perfSONAR_PS::Datatypes::PingER->new();
+    foreach my  $metaid (sort keys %{$metas})
+    {
+    	    my $md =   $pingerMA->ressurectMd({ md_row =>  $metas->{$metaid}  });  
+  	    $md->set_eventType($self->{eventTypes}->tools->pinger); 
+    	    push @sendToLS, $md->getDOM()->toString() ;
 
-	return $self->ls()->registerStatic(\@sendToLS);
+    }
+
+    # foreach my $meta ( @sendToLS ) {
+    #	    $logger->debug( "Found metadata for LS registration: '" . $meta . "'" );
+    # }
+
+    return $self->ls()->registerStatic(\@sendToLS);
 }
 
 
