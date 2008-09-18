@@ -476,12 +476,12 @@ sub updateGlobal {
 				       ),
 				parameters =>  Parameters->new(
 					    {  xml => '<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="paramid1">
-        						    <nmwg:parameter name="packetSize">100</nmwg:parameter>
+        						    <nmwg:parameter name="packetSize">1000</nmwg:parameter>
 							    <nmwg:parameter name="count">10</nmwg:parameter>
-        						    <nmwg:parameter name="packetInterval">300</nmwg:parameter>
+        						    <nmwg:parameter name="packetInterval">1</nmwg:parameter>
 							    <nmwg:parameter name="ttl">255</nmwg:parameter> 
-        						    <nmwg:parameter name="measurementPeriod">10</nmwg:parameter>  
-							    <nmwg:parameter name="measurementOffset">30</nmwg:parameter> 
+        						    <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>  
+							    <nmwg:parameter name="measurementOffset">0</nmwg:parameter> 
         					       </nmwg:parameters>'
 					   }
 			       )
