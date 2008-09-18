@@ -265,7 +265,6 @@ sub init {
             $self->{LOGGER}->error("Couldn't load the store file.");
             return -1;
         }
-
         $self->{METADATADB} = new perfSONAR_PS::DB::File( { file => $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} } );
         $self->{METADATADB}->openDB( { error => \$error } );
         unless ( $self->{METADATADB} ) {
@@ -312,7 +311,7 @@ sub createStorage {
     my $parameters = validateParams( @args, { metadatadb => 0 } );
 
     my %defaults = (
-        DBHOST  => hostname(),
+        DBHOST  => "localhost",
         CONFDIR => $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
     );
     my $conf = new perfSONAR_PS::Config::OWP::Conf(%defaults);
@@ -320,8 +319,8 @@ sub createStorage {
     my $error     = q{};
     my $errorFlag = 0;
     my $dbTr      = q{};
-    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
 
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         unless ( exists $parameters->{metadatadb} and $parameters->{metadatadb} ) {
             $parameters->{metadatadb} = $self->prepareDatabases;
             unless ( $parameters->{metadatadb} ) {
@@ -682,10 +681,10 @@ sub createStorage {
         }
     }
     else {
-
         my @measurementsets = $conf->get_sublist( LIST => 'MEASUREMENTSET' );
         my $id = 0;
         foreach my $m (@measurementsets) {
+
             my $addrType = $conf->get_val( MEASUREMENTSET => $m, ATTR => "ADDRTYPE" );
             my $group    = $conf->get_val( MEASUREMENTSET => $m, ATTR => "GROUP" );
 
