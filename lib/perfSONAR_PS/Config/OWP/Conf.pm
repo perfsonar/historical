@@ -374,15 +374,15 @@ sub init {
     #
     # Global conf file
     #
-    if(defined($ENV{$perfSONAR_PS::Config::Conf::GLOBALCONFENV})){
-        $file = $self->resolve_path($ENV{$perfSONAR_PS::Config::Conf::GLOBALCONFENV});
+    if(defined($ENV{$perfSONAR_PS::Config::OWP::Conf::GLOBALCONFENV})){
+        $file = $self->resolve_path($ENV{$perfSONAR_PS::Config::OWP::Conf::GLOBALCONFENV});
     }elsif(defined($confdir)){
         $file = $self->resolve_path($confdir.'/'.
-            $perfSONAR_PS::Config::Conf::GLOBALCONFNAME);
+            $perfSONAR_PS::Config::OWP::Conf::GLOBALCONFNAME);
     }
     else{
         $file = $self->resolve_path(
-            $DEFS{CONFDIR}.'/'.$perfSONAR_PS::Config::Conf::GLOBALCONFNAME);
+            $DEFS{CONFDIR}.'/'.$perfSONAR_PS::Config::OWP::Conf::GLOBALCONFNAME);
     }
     if(-e $file){
         $self->{'GLOBALCONF'} = $file;
