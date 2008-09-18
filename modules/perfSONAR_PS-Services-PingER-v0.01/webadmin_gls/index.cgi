@@ -841,12 +841,12 @@ sub updateGlobal {
                             parameters => Parameters->new(
                                 {
                                     xml => '<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="paramid1">
-                              <nmwg:parameter name="packetSize">100</nmwg:parameter>
+                              <nmwg:parameter name="packetSize">1000</nmwg:parameter>
                          <nmwg:parameter name="count">10</nmwg:parameter>
-                              <nmwg:parameter name="packetInterval">300</nmwg:parameter>
+                              <nmwg:parameter name="packetInterval">1</nmwg:parameter>
                          <nmwg:parameter name="ttl">255</nmwg:parameter> 
-                              <nmwg:parameter name="measurementPeriod">10</nmwg:parameter>  
-                         <nmwg:parameter name="measurementOffset">30</nmwg:parameter> 
+                              <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>  
+                         <nmwg:parameter name="measurementOffset">0</nmwg:parameter> 
                               </nmwg:parameters>'
                                 }
                             )
@@ -913,12 +913,12 @@ sub updateGlobal {
                         parameters => Parameters->new(
                             {
                                 xml => '<nmwg:parameters xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/" id="paramid1">
-                          <nmwg:parameter name="packetSize">100</nmwg:parameter>
+                          <nmwg:parameter name="packetSize">1000</nmwg:parameter>
                      <nmwg:parameter name="count">10</nmwg:parameter>
-                          <nmwg:parameter name="packetInterval">300</nmwg:parameter>
+                          <nmwg:parameter name="packetInterval">1</nmwg:parameter>
                      <nmwg:parameter name="ttl">255</nmwg:parameter> 
-                          <nmwg:parameter name="measurementPeriod">10</nmwg:parameter>  
-                     <nmwg:parameter name="measurementOffset">30</nmwg:parameter> 
+                          <nmwg:parameter name="measurementPeriod">60</nmwg:parameter>  
+                     <nmwg:parameter name="measurementOffset">0</nmwg:parameter> 
                           </nmwg:parameters>'
                             }
                         )
@@ -1002,32 +1002,6 @@ sub updateDomainId {
 =cut
 
 sub findNode {
-    my ($params) = @_;
-    if ( $params && ( ref $params ne 'HASH' || !( $params->{urn} || ( $params->{domain} && $params->{name} ) ) ) ) {
-        $logger->logdie(" Failed, only hashref parmaeter is accepted and 'domain' and 'urn' or 'name' must be supplied");
-    }
-    my ( $domain_query, $node_query ) = ( $params->{domain}, $params->{name} );
-    if ( $params->{urn} ) {
-        ( $domain_query, $node_query ) = $params->{urn} =~ /^.+\:domain\=([^\:]+)\:node\=(.+)$/;
-    }
-    foreach my $domain ( @{ $TOPOLOGY_OBJ->get_domain } ) {
-        my ($domain_part) = $domain->get_id =~ /domain\=([^\:]+)$/;
-        if ( $domain_part eq $domain_query ) {
-            foreach my $node ( @{ $domain->get_node } ) {
-                my ($node_part) = $node->get_id =~ /node\=([^\:]+)$/;
-                $logger->debug(" quering for ::  $domain_query :: $node_query ---> $domain_part :: $node_part ");
-                if ( $node_part eq $node_query ) {
-                    $logger->debug(" Found node");
-                    return ( $domain, $node );
-                }
-            }
-            return;
-        }
-    }
-    return;
-}
-
-sub findNodeByIP {
     my ($params) = @_;
     if ( $params && ( ref $params ne 'HASH' || !( $params->{urn} || ( $params->{domain} && $params->{name} ) ) ) ) {
         $logger->logdie(" Failed, only hashref parmaeter is accepted and 'domain' and 'urn' or 'name' must be supplied");
