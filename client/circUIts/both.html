@@ -82,6 +82,7 @@ log("Adding host: ",h);
     return;
 }
 
+
 addLoadEvent(initHost);
 addLoadEvent(initGraph);
 addLoadEvent(initSpeed);
@@ -91,6 +92,7 @@ var getHost = function(){
 
     return document.forms["options"].hostName.value;
 }
+
 var getInterface = function(){
     var ifIndex = document.forms["options"].ifIndex;
 
@@ -101,6 +103,15 @@ var getDirection = function(){
     var direction = document.forms["options"].direction;
 
     return direction.value;
+}
+
+var loadTime = new Date();
+var interestTime = 1191952800;
+
+var getRefTime = function(){
+    var now = new Date();
+
+    return Math.floor((now-loadTime)/1000 + interestTime);
 }
 
 </script>
@@ -130,6 +141,8 @@ var getDirection = function(){
                         style="border: 4px solid #aaa; background: #5a5a5a;">
                         </canvas>
                     <p id="speedo-value" align="center">-</p>
+                    <p id="speedo-time" align="center">-</p>
+                    <p id="speedo-date" align="center">-</p>
                     </div>
                 </td>
             </tr>
