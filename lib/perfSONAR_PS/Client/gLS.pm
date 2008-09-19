@@ -629,7 +629,8 @@ sub getLSQueryRaw {
         @args,
         {
             ls     => { type => Params::Validate::SCALAR },
-            xquery => { type => Params::Validate::SCALAR }
+            xquery => { type => Params::Validate::SCALAR },
+            eventType => 0
         }
     );
 
@@ -648,6 +649,10 @@ sub getLSQueryRaw {
     }
 
     my $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0";
+    if ( exists $parameters->{eventType} and ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/xquery/2.0" or $parameters->{eventType} eq "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0" ) ) {
+        $eventType = $parameters->{eventType};
+    }
+    
     $result = $ls->queryRequestLS( { query => $parameters->{xquery}, format => 1, eventType => $eventType } );
     return $result;
 }
