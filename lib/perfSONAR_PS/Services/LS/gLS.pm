@@ -436,7 +436,8 @@ sub registerLS {
     my $database;
     if ( -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
-        if ( ( $hintsStats->mtime + $self->{CONF}->{"gls"}->{"ls_ttl"} ) < time ) {
+            # update once an hour 
+        if ( ( $hintsStats->mtime + 3600 ) < time ) {
             $self->getHints();
         }
     }
