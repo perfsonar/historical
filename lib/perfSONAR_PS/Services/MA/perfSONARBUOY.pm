@@ -117,7 +117,8 @@ sub init {
     }
 
     if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"}
-        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} ) {
+        and $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} )
+    {
         if ( defined $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} =~ "^/" ) {
                 $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"owmesh"};
@@ -152,9 +153,7 @@ sub init {
         }
     }
     elsif ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
-        eval {
-            load perfSONAR_PS::DB::XMLDB;
-        };
+        eval { load perfSONAR_PS::DB::XMLDB; };
         if ($EVAL_ERROR) {
             $self->{LOGGER}->error("Couldn't load perfSONAR_PS::DB::XMLDB: $EVAL_ERROR");
             return -1;
@@ -166,9 +165,10 @@ sub init {
             $self->{LOGGER}->warn("Value for 'metadata_db_file' is not set, setting to 'psbstore.dbxml'.");
             $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_file"} = "psbstore.dbxml";
         }
-        
+
         if ( exists $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} ) {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} )
+        {
             if ( defined $self->{DIRECTORY} ) {
                 unless ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} =~ "^/" ) {
                     $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_name"};
@@ -192,27 +192,37 @@ sub init {
         $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
     }
 
-    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"}
-        and $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
-        $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} = 0;
+    unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} ) {
+        if ( exists $self->{CONF}->{enable_registration} and $self->{CONF}->{enable_registration} ) {
+            $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = $self->{CONF}->{enable_registration};
+        }
+        else {
+            $self->{CONF}->{enable_registration} = 0;
+            $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} = 0;
+        }
+        $self->{LOGGER}->warn( "Setting 'enable_registration' to \"" . $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} . "\"." );
     }
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"enable_registration"} ) {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} ) {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} )
+        {
             if ( defined $self->{CONF}->{"ls_instance"}
-                and $self->{CONF}->{"ls_instance"} ) {
+                and $self->{CONF}->{"ls_instance"} )
+            {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
             }
             else {
-                $self->{LOGGER}->warn("No LS instance specified for perfSONAR-BUOY service");
+                $self->{LOGGER}->warn("No LS instance specified for pSB service");
             }
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} ) {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} )
+        {
             if ( defined $self->{CONF}->{"ls_registration_interval"}
-                and $self->{CONF}->{"ls_registration_interval"} ) {
+                and $self->{CONF}->{"ls_registration_interval"} )
+            {
                 $self->{CONF}->{"perfsonarbuoy"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             }
             else {
@@ -226,12 +236,13 @@ sub init {
                 $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
                 return -1;
             }
-            $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+            $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
             $self->{CONF}->{"perfsonarbuoy"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} ) {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
+        {
             my $description = "perfSONAR_PS SNMP MA";
             if ( $self->{CONF}->{site_name} ) {
                 $description .= " at " . $self->{CONF}->{site_name};
@@ -244,13 +255,15 @@ sub init {
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} ) {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "perfSONAR-BUOY MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONAR-BUOY MA'.");
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} )
+        {
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "SNMP MA";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'SNMP MA'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}
-            and $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} ) {
+            and $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} )
+        {
             $self->{CONF}->{"perfsonarbuoy"}->{"service_type"} = "MA";
             $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
         }
@@ -863,7 +876,7 @@ sub createStorage {
 
 =head2 generateStoreParameters($self, { conf, paramHash, test, counter } )
 
-Given 
+Given the parameterse from an owmesh file, list these in nmwg form.
 
 =cut
 
@@ -1010,7 +1023,7 @@ sub needLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return ($self->{CONF}->{"perfsonarbuoy"}->{enable_registration} or $self->{CONF}->{enable_registration});
+    return ( $self->{CONF}->{"perfsonarbuoy"}->{enable_registration} or $self->{CONF}->{enable_registration} );
 }
 
 =head2 registerLS($self $sleep_time)
@@ -1026,9 +1039,9 @@ sub registerLS {
 
     my ( $status, $res );
     my $ls = q{};
-    
+
     my @ls_array = ();
-    my @array = split( /\s+/, $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} );
+    my @array = split( /\s+/, $self->{CONF}->{"snmp"}->{"ls_instance"} );
     foreach my $l (@array) {
         $l =~ s/(\s|\n)*//g;
         push @ls_array, $l if $l;
@@ -1736,11 +1749,11 @@ sub setupDataRetrieveKey {
         return;
     }
 
-# XXX Jul 22, 2008
-#
-# BEGIN Hack
-# 
-# I shouldn't have to do this, we need to store this in the key somewhere
+    # XXX Jul 22, 2008
+    #
+    # BEGIN Hack
+    #
+    # I shouldn't have to do this, we need to store this in the key somewhere
 
     my $md_id_val = $results->get_node(1)->getAttribute("metadataIdRef");
     my $query2    = q{};
@@ -1769,7 +1782,7 @@ sub setupDataRetrieveKey {
     my $dst   = extract( $dst_b, 0 );
     $dst .= ":" . $dst_p if $dst_p;
 
-# END Hack
+    # END Hack
 
     my $sentKey      = $parameters->{metadata}->cloneNode(1);
     my $results_temp = $results->get_node(1)->cloneNode(1);
@@ -1900,12 +1913,11 @@ sub setupDataRetrieveMetadataData {
         foreach my $md ( $results->get_nodelist ) {
             next if not $md->getAttribute("id");
 
-
-# XXX Jul 22, 2008
-#
-# BEGIN Hack
-# 
-# I shouldn't have to do this, we need to store this in the key somewhere
+            # XXX Jul 22, 2008
+            #
+            # BEGIN Hack
+            #
+            # I shouldn't have to do this, we need to store this in the key somewhere
 
             my $src_b = find( $md, "./*[local-name()='subject']/*[local-name()='endPointPair']/*[local-name()='src']", 1 );
             my $src_p = $src_b->getAttribute("port");
@@ -1917,7 +1929,7 @@ sub setupDataRetrieveMetadataData {
             my $dst   = extract( $dst_b, 0 );
             $dst .= ":" . $dst_p if $dst_p;
 
-# END Hack
+            # END Hack
 
             my %l_et                  = ();
             my $l_eventTypes          = find( $md, "./nmwg:eventType", 0 );
@@ -2093,10 +2105,9 @@ sub retrieveSQL {
     my $res;
     my $query = q{};
 
-
-# XXX Jul 22, 2008
-# 
-# Still need to worry about the legacy case
+    # XXX Jul 22, 2008
+    #
+    # Still need to worry about the legacy case
 
     if ( $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
         if ( $dataType eq "BWCTL" ) {
@@ -2191,9 +2202,15 @@ sub retrieveSQL {
     }
     else {
 
-# XXX Jul 22, 2008
-#
-# New case, watch that the names of the tables have changed
+        # XXX Jul 22, 2008
+        #
+        # New case, watch that the names of the tables have changed
+
+        # XXX Sept 19, 2008
+        #
+        # Want to limit the max amount of data returned (e.g. set an artificial limit at 1000 for now)
+        # we also need to worry about the joining of tables.  If we span multiple months this is a given,
+        # if we are trying to meet the 1000 limit this is also a givens
 
         # new data format
 
@@ -2211,29 +2228,29 @@ sub retrieveSQL {
                 getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
                 return;
             }
-            
+
             foreach my $row ( @{$result_d} ) {
                 my $year = $row->[0];
-                my $mon = $row->[1];
+                my $mon  = $row->[1];
                 $mon = "0" . $mon if $mon =~ m/^\d$/;
-     
+
                 $nodedb->openDB;
-                my $result1 = $nodedb->query( { query => "select distinct node_id from ".$year.$mon."_NODES where addr=\"" . $parameters->{src} . "\";" } );
-                my $result2 = $nodedb->query( { query => "select distinct node_id from ".$year.$mon."_NODES where addr=\"" . $parameters->{dst} . "\";" } );
+                my $result1 = $nodedb->query( { query => "select distinct node_id from " . $year . $mon . "_NODES where addr=\"" . $parameters->{src} . "\";" } );
+                my $result2 = $nodedb->query( { query => "select distinct node_id from " . $year . $mon . "_NODES where addr=\"" . $parameters->{dst} . "\";" } );
                 $nodedb->closeDB;
 
-                if( $#{$result1} == -1 or $#{$result2} == -1 ) {
+                if ( $#{$result1} == -1 or $#{$result2} == -1 ) {
                 }
                 else {
                     @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
-                    if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {                   
-                        if ( $query ) { 
-                            $query = " union select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+                    if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
+                        if ($query) {
+                            $query = " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
                         }
                         else {
-                            $query = "select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+                            $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
                         }
-   
+
                         my $queryCount = 0;
                         if ( $parameters->{time_settings}->{"START"}->{"internal"} ) {
                             $query = $query . " timestamp > " . $parameters->{time_settings}->{"START"}->{"internal"};
@@ -2249,11 +2266,11 @@ sub retrieveSQL {
                         }
                     }
                     else {
-                        if ( $query ) { 
-                            $query = " union select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
+                        if ($query) {
+                            $query = " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
                         }
                         else {
-                            $query = "select * from ".$year.$mon."_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
+                            $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
                         }
                     }
                 }
@@ -2291,9 +2308,9 @@ sub retrieveSQL {
             for my $a ( 0 .. $len ) {
                 my %attrs = ();
 
-# XXX Jul 22, 2008
-#
-# This needs to be cleaner too, until the legacy dies
+                # XXX Jul 22, 2008
+                #
+                # This needs to be cleaner too, until the legacy dies
 
                 if ( $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
                     if ( $timeType eq "unix" ) {
@@ -2354,10 +2371,9 @@ sub retrieveSQL {
             my $len = $#{$result};
             for my $a ( 0 .. $len ) {
 
-
-# XXX Jul 22, 2008
-#
-# Owamp needs to be brought up to date.
+                # XXX Jul 22, 2008
+                #
+                # Owamp needs to be brought up to date.
 
                 if ( $self->{CONF}->{"perfsonarbuoy"}->{"legacy"} ) {
                     my %attrs = ();
@@ -2465,11 +2481,12 @@ __END__
 
 L<Log::Log4perl>, L<Module::Load>, L<Digest::MD5>, L<English>,
 L<Params::Validate>, L<Sys::Hostname>, L<Fcntl>, L<Date::Manip>,
-L<Math::BigInt>, L<perfSONAR_PS::Config::OWP>, L<perfSONAR_PS::Config::OWP::Utils>,
-L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::Messages>, L<perfSONAR_PS::Client::LS::Remote>,
-L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::DB::File>,
-L<perfSONAR_PS::DB::SQL>
+L<Math::BigInt>, L<perfSONAR_PS::Config::OWP>,
+L<perfSONAR_PS::Config::OWP::Utils>, L<perfSONAR_PS::Services::MA::General>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
+L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
+L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::SQL>,
+L<perfSONAR_PS::ParameterValidatio>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -2479,10 +2496,10 @@ The perfSONAR-PS subversion repository is located at:
 
   https://svn.internet2.edu/svn/perfSONAR-PS
 
-Questions and comments can be directed to the author, or the mailing list.
-Bugs, feature requests, and improvements can be directed here:
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
 
-  https://bugs.internet2.edu/jira/browse/PSPS
+  http://code.google.com/p/perfsonar-ps/issues/list
 
 =head1 VERSION
 
@@ -2494,13 +2511,12 @@ Jason Zurawski, zurawski@internet2.edu
 
 =head1 LICENSE
 
-You should have received a copy of the Internet2 Intellectual Property Framework
-along with this software.  If not, see
-<http://www.internet2.edu/membership/ip.html>
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2008, Internet2 and the University of Delaware
+Copyright (c) 2007-2008, Internet2
 
 All rights reserved.
 

@@ -109,7 +109,7 @@ sub callLS {
         $self->{LOGGER}->error("LS could not be contaced.");
         return;
     }
-
+    
     my $error = q{};
     my $responseContent = $sender->sendReceive( makeEnvelope( $parameters->{message} ), q{}, \$error );
     if ($error) {
@@ -117,7 +117,7 @@ sub callLS {
         $self->{LOGGER}->error("sendReceive failed: $error");
         return;
     }
-
+    
     my $msg    = q{};
     my $parser = XML::LibXML->new();
     if ( $responseContent and ( not $responseContent =~ m/^\d+/xm ) ) {
