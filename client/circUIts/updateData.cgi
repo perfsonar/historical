@@ -7,15 +7,16 @@ use Getopt::Std;
 use CGI qw/:standard -any/;
 use CGI::Carp qw(fatalsToBrowser);
 use XML::LibXML;
+use XML::XPath;
 use Time::HiRes qw( gettimeofday );
 
-use perfSONAR_PS::Transport;
+#use perfSONAR_PS::Transport;
+use perfSONAR_PS::Client::MA;
+use perfSONAR_PS::Common;
 
 # Eventually get these from config (or even app)
-#my $server = "patdev0.internet2.edu";
-my $server = "packrat.internet2.edu";
-my $port = 8080;
-my $endpoint = "perfSONAR_PS/services/snmpMA";
+my $service = "http://packrat.internet2.edu:2008/perfSONAR_PS/services/snmpMA";
+
 my $filter = '//nmwg:message//nmwg:datum';
 
 my $cgi = new CGI;
@@ -26,8 +27,8 @@ my $fakeServiceMode = $cgi->param('fakeServiceMode');
 
 my $int = $cgi->param('resolution') || 10;
 my $maxValue = $cgi->param('maxValue') || 10000;
-my $host = $cgi->param('hostName') || "rtr129-93-239-128.unl.edu";
-my $index = $cgi->param('ifIndex') || 4;
+my $host = $cgi->param('hostName') || "192.65.196.254";
+my $ifname = $cgi->param('ifName') || "TenGigabitEthernet-1/2";
 my $direction = $cgi->param('direction') || "out";
 my $npoints = $cgi->param('npoints') || 5;
 my $refTime = $cgi->param('refTime') || "now";
@@ -43,12 +44,12 @@ my $sec;
 if(!$fakeServiceMode){
 #    warn "real data";
     $sec = getReferenceTime($refTime,1);
-    print fetchPerfsonarData($host, $index, $sec, $int, $direction, $npoints);
+    print fetchPerfsonarData($host, $ifname, $sec, $int, $direction, $npoints);
 }
 else{
 #    warn "fake data: $fakeServiceMode";
     $sec = getReferenceTime($refTime,0);
-    print fetchFakeData($host, $index, $sec, $int, $direction, $npoints);
+    print fetchFakeData($host, $ifname, $sec, $int, $direction, $npoints);
 }
 
 exit 0;
@@ -65,66 +66,10 @@ sub getReferenceTime{
     $sec;
 }
 
-# XXX: $host ignored for now, not needed for fmm07
-sub makeMessage {
-  my($host, $index, $time, $int, $direction, $npoints) = @_;
-  my $ret;
-  my $stime = $time-($int*$npoints);
-  my $etime = $time;
-
-  $ret =<<"ENDMESS";
-<nmwg:message type=\"SetupDataRequest\"
-	      id=\"msg1\"
-              xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\"
-              xmlns:neterr=\"http://ggf.org/ns/nmwg/characteristic/errors/2.0/\"
-              xmlns:netdisc=\"http://ggf.org/ns/nmwg/characteristic/discards/2.0/\"
-              xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"
-              xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\"
-              xmlns:select=\"http://ggf.org/ns/nmwg/ops/select/2.0/\"
-              xmlns:nmtm=\"http://ggf.org/ns/nmwg/ops/time/2.0/\"
-              xmlns:snmp=\"http://ggf.org/ns/nmwg/tools/snmp/2.0/\">
-
-  <nmwg:metadata id=\"m1\">
-    <netutil:subject id=\"s1\">
-      <nmwgt:interface>
-        <nmwgt:ifIndex>$index</nmwgt:ifIndex>
-        <nmwgt:direction>$direction</nmwgt:direction>
-      </nmwgt:interface>
-    </netutil:subject>
-
-    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:eventType>
-
-    <nmwg:parameters id=\"p-netutil\">
-        <nmwg:parameter name=\"supportedEventType\">http://ggf.org/ns/nmwg/characteristic/utilization/2.0</nmwg:parameter>
-    </nmwg:parameters>
-  </nmwg:metadata>
-
-  <nmwg:metadata id=\"m1c\">
-    <select:subject id=\"sub1c\" metadataIdRef=\"m1\"/>
-
-    <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType>
-
-    <select:parameters id=\"mc-p1\">
-      <select:parameter name=\"startTime\">$stime</select:parameter>
-      <select:parameter name=\"endTime\">$etime</select:parameter>
-      <select:parameter name=\"resolution\">$int</select:parameter>
-      <select:parameter name=\"consolidationFunction\">AVERAGE</select:parameter>
-    </select:parameters>
-
-  </nmwg:metadata>
-
-  <nmwg:data id=\"d1\" metadataIdRef=\"m1c\"/>
-</nmwg:message>
-ENDMESS
-
-  return $ret;
-}
-
 sub fetchFakeData{
-    my($host, $index, $time, $int, $direction, $npoints) = @_;
+    my($host, $name, $time, $int, $direction, $npoints) = @_;
 
     # Randomize from 0 to maxValue
-    # XXX: HERE!!!!
     my $data =  "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
     my $v = rand($maxValue);
     $data .= '        ['.$time."," . $v. '],'. "\n";
@@ -134,34 +79,41 @@ sub fetchFakeData{
 }
 
 sub fetchPerfsonarData{
-    my($host, $index, $time, $int, $direction, $npoints) = @_;
+    my($host, $name, $time, $int, $direction, $npoints) = @_;
+    my $stime = $time-($int*$npoints);
+    my $etime = $time;
 
-#    warn "Pre sender";
-    my $sender = new perfSONAR_PS::Transport("/tmp/pSerror.log", "", "", $server, $port, $endpoint);
-#    warn "Post sender";
+    warn "Pre sender";
+    my $ma = new perfSONAR_PS::Client::MA(
+        { instance => $service});
+    warn "Post sender";
 
-    my $mess = makeMessage($host, $index, $sec, $int, $direction, $npoints);
-#    warn $mess;
-    my $env = $sender->makeEnvelope($mess);
+    my $subject = <<"EOF";
+<netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s1\">
+  <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">
+    <nmwgt:ifName>$name</nmwgt:ifName>
+    <nmwgt:direction>$direction</nmwgt:direction>
+  </nmwgt:interface>
+</netutil:subject>
+EOF
+    my @eventTypes = ("http://ggf.org/ns/nmwg/characteristic/utilization/2.0");
 
-#    warn "Pre send data";
-    my $response = $sender->sendReceive($env);
-#    warn $response;
+    my $result = $ma->setupDataRequest(
+        {
+            subject => $subject,
+            eventTypes => \@eventTypes,
+
+            consolidationFunction => "AVERAGE",
+            resolution => $int,
+            start => $stime,
+            end => $etime,
+        });
+    warn $result->{"data"}->[0];
 #    warn "Post send data";
 
-# Turn the response into an XPath object
-    my $xp;
-    if( UNIVERSAL::can($response, "isa") ? "1" : "0" == 1
-        && $response->isa('XML::XPath')) {
-        $xp = $response;        
-    } else {
-        $xp = XML::XPath->new( xml => $response );
-    }
-
-# pull all the snmp:datum from the response
-#    warn "Pre find";
-    my $nodeset = $xp->find( $filter );
-#    warn "Post find";
+    my $parser = XML::LibXML->new();
+    my $doc = $parser->parse_string( $result->{"data"}->[0] );
+    my $nodeset = find( $doc->getDocumentElement, "./*[local-name()='datum']", 0);
     if($nodeset->size() <= 0) {
         die "Nothing found for xpath statement $filter.\n";
     }
@@ -172,10 +124,10 @@ sub fetchPerfsonarData{
         my $du = $d->getAttribute("valueUnits");
 
         if($tt ne "unix"){
-            die "Unsupported timeType in response: $tt";
+            die "Unsupported timeType in result: $tt";
         }
         if($du ne "Bps"){
-            die "Unsupported valueUnits in response: $du";
+            die "Unsupported valueUnits in result: $du";
         }
         my $t = int($d->getAttribute("timeValue"));
         # convert to mbps

@@ -382,7 +382,7 @@ function loadDataSpeed(req) {
 }
 
 var getHost;
-var getInterface;
+var getInterfaceName;
 var getDirection;
 
 function newDataSpeed(){
@@ -390,11 +390,13 @@ function newDataSpeed(){
 
     var query = "updateData.cgi";
     query +="?resolution="+defOptions.resolution+"&npoints="+defOptions.npoints+"&fakeServiceMode="+defOptions.fakeServiceMode+"&";
+    // If page defines getHost/getInterface/getInterfaceName/getDirection
+    // use those values here.
     if(!isNull(getHost)){
         query += "hostName="+getHost()+"&";
     }
-    if(!isNull(getInterface)){
-        query += "ifIndex="+getInterface()+"&";
+    if(!isNull(getInterfaceName)){
+        query += "ifName="+getInterfaceName()+"&";
     }
     if(!isNull(getDirection)){
         query += "direction="+getDirection()+"&";
@@ -422,8 +424,8 @@ function startStopSpeed(){
 
 // TODO: Fix hardcoded id names for start/stop
 var options = {
-    "canvasName": "speedo"
-//    "startStopName": "start-stop-speed"
+    "canvasName": "speedo",
+    "startStopName": "start-stop-speed"
 };
 
 
