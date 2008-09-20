@@ -9,9 +9,11 @@
  # Attendees: 
  # Issue specific meeting: PAM 2009 paper
 
-=== Current ISO status ===
+=== PAM 2009 Paper Submission ===
 
- * Discuss current state of paper. Please look at the latest version of the paper and be ready to discuss the status.
+ * Discuss current state of paper.
+ ** Please look at the latest version of the paper and be ready to discuss the status.
+ * Deadlines:
 
 === Logistics ===
  # Next meeting will be Sept 2, 12:00 EST
