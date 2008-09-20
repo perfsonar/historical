@@ -122,43 +122,21 @@ function loadDataUtil(req) {
     MochiKit.Async.callLater(defOptionsUtil.resolution,newDataUtil);
 }
 
-var getHost = function(){
-    return "rtr129-93-239-128.unl.edu";
-}
-
-var getInterface = function(){
-    return 4;
-}
-var getDirection = function(){
-    return "out";
-}
-var getRefTime;
-
 function newDataUtil(){
     if(!goUtil) return;
 
-    var now = new Date();
-
     var query = "updateData.cgi";
     query +="?resolution="+defOptionsUtil.resolution+"&npoints="+defOptionsUtil.npoints+"&fakeServiceMode="+defOptionsUtil.fakeServiceMode+"&";
-    if(!isNull(getHost)){
-        log("getHost=",getHost());
+    if(getHost){
         query += "hostName="+getHost()+"&";
     }
-    if(!isNull(getInterface)){
+    if(getInterface){
         query += "ifIndex="+getInterface()+"&";
     }
-    if(!isNull(getDirection)){
+    if(getDirection){
         query += "direction="+getDirection()+"&";
     }
-    if(!isNull(getRefTime)){
-//log("getRefTime()",getRefTime());
-//        var refTime = Math.floor((now-utilInitRefTime)/1000+getRefTime());
-//log("REFTIME=",refTime);
-        query += "refTime="+getRefTime()+"&";
-    }
-
-    log("Fetch Data: ", now);
+//    log("Fetch Data: ", Date());
     // TODO: Change to POST and specify args
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest(query);
     doreq.addCallback(loadDataUtil);
@@ -169,32 +147,29 @@ function startStopUtil(){
 
     if(goUtil){
         $('start-stop-util').value = "Stop";
-        log("Starting data loop", Date());
+//        log("Starting data loop", Date());
         newDataUtil();
     }
     else{
-        log("Stopping data loop", Date());
+//        log("Stopping data loop", Date());
         $('start-stop-util').value = "Start";
     }
 }
 
 var utilOptions = {
-    "plotCanvasName":   "plot",
-    "startStopName":    "start-stop-util"
+    "plotCanvasName":   "plot"
+//  "startStopName":    "start-stop-util"
 };
-
-var utilInitRefTime;
 
 function initGraph(){
     layout = new PlotKit.Layout("line",defOptionsUtil);
 
-    utilInitRefTime = new Date();
     newDataUtil();
 
     renderer = new SweetCanvasRenderer($(utilOptions.plotCanvasName),
             layout,defOptionsUtil);
-    if(utilOptions.startStopName !== undefined){
-        MochiKit.Signal.connect(utilOptions.startStopName, 'onclick',
-                                                            startStopUtil);
-    }
+//    if(utilOptions.startStopName !== undefined){
+//        MochiKit.Signal.connect(utilOptions.startStopName, 'onclick',
+//                                                            startStopUtil);
+//    }
 }

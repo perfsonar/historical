@@ -1,18 +1,13 @@
-#!/usr/bin/perl -w -I /usr/local/perfSONAR-PS/lib -I/Users/boote/dev/perfSONAR-PS/trunk/perfSONAR-PS/lib -I/home/boote/dev/perfSONAR-PS/trunk/perfSONAR-PS/lib
+#!/usr/bin/perl -w -I /usr/local/perfSONAR-PS/lib -I/Users/boote/dev/perfSONAR-PS/trunk/lib -I/home/boote/dev/perfSONAR-PS/trunk/lib
 
 use strict;
 use FindBin;
 
 use Getopt::Std;
-use POSIX;
-use FileHandle;
 use CGI qw/:standard -any/;
 use CGI::Carp qw(fatalsToBrowser);
 use XML::LibXML;
 use Time::HiRes qw( gettimeofday );
-use File::stat;
-use DB_File;
-use Fcntl qw(:flock);
 
 use perfSONAR_PS::Transport;
 
@@ -27,8 +22,7 @@ my $cgi = new CGI;
 
 # Test mode stuff
 # TODO: Modify default to false...
-#my $fakeServiceMode = $cgi->param('fakeServiceMode');
-my $fakeServiceMode = 1;
+my $fakeServiceMode = $cgi->param('fakeServiceMode');
 
 my $int = $cgi->param('resolution') || 10;
 my $maxValue = $cgi->param('maxValue') || 10000;
@@ -45,23 +39,22 @@ print $cgi->header(-type => "text/javascript",
     -expires=>'now',
     -pragma=>'no-cache');
 
-my $sec = getReferenceTime($refTime);
-my $stime = $sec-($int*$npoints);
-my $etime = $sec;
-
+my $sec;
 if(!$fakeServiceMode){
 #    warn "real data";
-    print fetchPerfsonarData($host, $index, $stime, $etime, $int, $direction);
+    $sec = getReferenceTime($refTime,1);
+    print fetchPerfsonarData($host, $index, $sec, $int, $direction, $npoints);
 }
 else{
 #    warn "fake data: $fakeServiceMode";
-    print fetchFakeData($host, $index, $stime, $etime, $int, $direction);
+    $sec = getReferenceTime($refTime,0);
+    print fetchFakeData($host, $index, $sec, $int, $direction, $npoints);
 }
 
 exit 0;
 
 sub getReferenceTime{
-    my($sec) = @_;
+    my($sec,$do_res_hack) = @_;
     my($frac);
 
     if($sec eq "now"){
@@ -74,8 +67,10 @@ sub getReferenceTime{
 
 # XXX: $host ignored for now, not needed for fmm07
 sub makeMessage {
-  my($host, $index, $stime, $etime, $int, $direction) = @_;
+  my($host, $index, $time, $int, $direction, $npoints) = @_;
   my $ret;
+  my $stime = $time-($int*$npoints);
+  my $etime = $time;
 
   $ret =<<"ENDMESS";
 <nmwg:message type=\"SetupDataRequest\"
@@ -126,61 +121,26 @@ ENDMESS
 }
 
 sub fetchFakeData{
-    my($host, $index, $stime, $etime, $int, $direction) = @_;
+    my($host, $index, $time, $int, $direction, $npoints) = @_;
 
-    my $fakeFile = "/tmp/circUItsFAKE.db";
-
-    # XXX: Open temp file for 'hash' of fake data
-    my $fh = new FileHandle $fakeFile.".lck",O_RDWR|O_CREAT;
-
-    die "Unable to lock $fakeFile.lck: $!" unless($fh && flock($fh,LOCK_EX));
-
-    # delete fakeData if it is older than 30 seconds
-    my $sb = stat($fakeFile);
-    my $fmodes = O_RDWR|O_CREAT;
-    if(($sb->mtime - time) > 30){
-        $fmodes |= O_TRUNC;
-    }
-
-    my %fakedb;
-    my $db = tie %fakedb,'DB_File',$fakeFile,$fmodes,
-            0660,$DB_HASH || die "Unable to open db /tmp/circUItsFAKE.db:$!";
-
-    # reduce range so start/end are even increments
-    if($stime % $int){
-        $stime -= ($stime  % $int) + $int;
-    }
-    if($etime % $int){
-        $etime -= ($etime % $int);
-    }
-
-    # turn data into JSON
+    # Randomize from 0 to maxValue
+    # XXX: HERE!!!!
     my $data =  "\{\"servdata\"\: \{\n    \"data\"\: \[\n";
-
-    my $k = $stime;
-    while($k <= $etime){
-        # create values in range if not currently defined.
-        # Randomize from 0 to maxValue
-        if(!$fakedb{$k}){
-            $fakedb{$k} = rand($maxValue);
-        }
-        $data .= '        ['.$k."," . $fakedb{$k}. '],'. "\n";
-
-        $k += $int;
-    }
+    my $v = rand($maxValue);
+    $data .= '        ['.$time."," . $v. '],'. "\n";
     $data .= "\n      \]\n    \}\n\}";
 
     return $data;
 }
 
 sub fetchPerfsonarData{
-    my($host, $index, $stime, $etime, $int, $direction, $npoints) = @_;
+    my($host, $index, $time, $int, $direction, $npoints) = @_;
 
 #    warn "Pre sender";
     my $sender = new perfSONAR_PS::Transport("/tmp/pSerror.log", "", "", $server, $port, $endpoint);
 #    warn "Post sender";
 
-    my $mess = makeMessage($host, $index, $stime, $etime, $int, $direction, $npoints);
+    my $mess = makeMessage($host, $index, $sec, $int, $direction, $npoints);
 #    warn $mess;
     my $env = $sender->makeEnvelope($mess);
 

@@ -35,9 +35,7 @@ function Speed(options){
         "useMaxValueSmoothing":   true,
         "maxValueSmoothingHistory":   4,
 
-        "splabelName":  "speedo-value",
-        "sptimeName":  "speedo-time",
-        "spdateName":  "speedo-date",
+        "labelName":  "speedo-value",
         "doIntro":  false
     };
 
@@ -90,7 +88,6 @@ function Speed(options){
     this.stale = true;
     this.steps = 0;
     this.currentValue = this.nextValue = 0;
-    this.currentDate = this.nextDate = new Date(0);
     this.maxHistoryValues = [];
 
     this.hc = this.canvas.height;
@@ -125,24 +122,10 @@ function Speed(options){
 
     // this.initCanvas();
 
-    if(this.options.splabelName){
-        this.splabel = $(this.options.splabelName);
-        if(this.splabel.tagName != "P"){
-            throw new Error("Speed: splabelName should indicate \'P\' element");
-        }
-    }
-
-    if(this.options.sptimeName){
-        this.sptime = $(this.options.sptimeName);
-        if(this.sptime.tagName != "P"){
-            throw new Error("Speed: sptimeName should indicate \'P\' element");
-        }
-    }
-
-    if(this.options.spdateName){
-        this.spdate = $(this.options.spdateName);
-        if(this.spdate.tagName != "P"){
-            throw new Error("Speed: spdateName should indicate \'P\' element");
+    if(this.options.labelName){
+        this.label = $(this.options.labelName);
+        if(this.label.tagName != "P"){
+            throw new Error("Speed: labelName should indicate \'P\' element");
         }
     }
 
@@ -194,11 +177,11 @@ Speed.prototype.appendData = function(a){
     }
 
     log("appendData: speedo data has ",this.data.length);
-//    if(this.data.length > 0){
-//        if(this.data[this.data.length-1].length){
+    if(this.data.length > 0){
+        if(this.data[this.data.length-1].length){
 //            log("lastdata: [",this.data[this.data.length-1][0],"][",this.data[this.data.length-1][1].toPrecision(9),"]");
-//        }
-//    }
+        }
+    }
 
     log("appendData: adding ",arr.length);
     if(!arr.length) return;
@@ -237,7 +220,6 @@ Speed.prototype.intro = function(){
 Speed.prototype.refresh = function(){
     // fetch data from beginning of this.data array
     var newValue;
-    var newDate;
 
     this.steps++;
 
@@ -245,6 +227,7 @@ Speed.prototype.refresh = function(){
         // take one more step toward the 'next' value.
 
         var valDiff = this.nextValue - this.currentValue;
+
         if(valDiff){
             newValue = this.currentValue +
                                 (valDiff * this.steps / this.minRefreshSteps);
@@ -252,8 +235,6 @@ Speed.prototype.refresh = function(){
         else{
             newValue = this.currentValue;
         }
-
-        newDate = this.currentDate;
 
     }
     else{
@@ -270,17 +251,12 @@ Speed.prototype.refresh = function(){
 
             // update currentValue and nextValue
             this.currentValue = this.nextValue;
-            this.currentDate = this.nextDate;
 
             // update nextValue
             var nextValue = this.data.shift();
 
             if(nextValue.length > 1){
-                this.nextDate = new Date(nextValue[0] * 1000);
                 nextValue = nextValue[1];
-            }
-            else{
-                this.nextDate = new Date();
             }
 
             // maxValue smoothing for 'nextValue'
@@ -296,7 +272,6 @@ Speed.prototype.refresh = function(){
                 this.nextValue = nextValue;
             }
             newValue = this.currentValue;
-            newDate = this.currentDate;
         }
         else{
             if(this.steps > this.maxRefreshSteps){
@@ -307,7 +282,6 @@ Speed.prototype.refresh = function(){
                 }
             }
             newValue = this.nextValue;
-            newDate = this.nextDate;
         }
     }
 
@@ -358,26 +332,9 @@ Speed.prototype.refresh = function(){
 
     this.ctx.restore();
 
-    if(this.splabel){
-        this.splabel.textContent = Math.floor(this.nextValue)/1000 + " Gbps";
-        this.splabel.innerText = Math.floor(this.nextValue)/1000 + " Gbps";
-    }
-
-    // XXX: Add label for 'date'
-    if(this.sptime && (newDate.valueOf() != 0)){
-//        this.sptime.textContent = newDate.toLocaleFormat("%T %Z");
-//        this.sptime.innerText = newDate.toLocaleFormat("%T %Z");
-//        var ltime = newDate.getHours() + ":" + newDate.getMinutes() +
-//            ":" + newDate.getSeconds() + " (browser TZ)";
-//        var ltime = newDate.toLocaleTimeString;
-        var ltime = String(newDate);
-        this.sptime.textContent = ltime;
-        this.sptime.innerText = ltime;
-    }
-
-    if(this.spdate && (newDate.valueOf() != 0)){
-        this.spdate.textContent = newDate.toLocaleDateString();
-        this.spdate.innerText = newDate.toLocaleDateString();
+    if(this.label){
+        this.label.textContent = Math.floor(this.nextValue)/1000 + " Gbps";
+        this.label.innerText = Math.floor(this.nextValue)/1000 + " Gbps";
     }
 
     return;
@@ -427,12 +384,9 @@ function loadDataSpeed(req) {
 var getHost;
 var getInterface;
 var getDirection;
-var getRefTime;
 
 function newDataSpeed(){
     if(!goSpeed) return;
-
-    var now = new Date();
 
     var query = "updateData.cgi";
     query +="?resolution="+defOptions.resolution+"&npoints="+defOptions.npoints+"&fakeServiceMode="+defOptions.fakeServiceMode+"&";
@@ -445,11 +399,8 @@ function newDataSpeed(){
     if(!isNull(getDirection)){
         query += "direction="+getDirection()+"&";
     }
-    if(!isNull(getRefTime)){
-        query += "refTime="+getRefTime()+"&";
-    }
 
-    log("Fetch Data: ", now);
+    log("Fetch Data: ", Date());
     // TODO: Change to POST and specify args
     var doreq = MochiKit.Async.doSimpleXMLHttpRequest(query);
     doreq.addCallback(loadDataSpeed);
@@ -471,12 +422,10 @@ function startStopSpeed(){
 
 // TODO: Fix hardcoded id names for start/stop
 var options = {
-    "canvasName": "speedo",
-    "startStopName": "start-stop-speed"
+    "canvasName": "speedo"
+//    "startStopName": "start-stop-speed"
 };
 
-
-var speedInitRefTime;
 
 function initSpeed(){
     // hack for names - eventually use 'type' attribute and fetch
@@ -486,7 +435,6 @@ function initSpeed(){
         log("options[",p,"]: ",options[p]);
     }
 
-    speedInitRefTime = new Date();
     speed = new Speed({"canvas": $(options.canvasName)});
     newDataSpeed();
 
