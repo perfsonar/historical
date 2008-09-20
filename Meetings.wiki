@@ -8,7 +8,7 @@ applicable.
 
    * [20080922Video] - Video Conference *Issue: PAM 2009 paper* for September 22, 2008
 
-== Past Meetings ==
+== Past Events ==
 
  * 2008
    * [http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08 20080908Meet] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
