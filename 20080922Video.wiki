@@ -10,11 +10,21 @@
  # Issue specific meeting: PAM 2009 paper
 
 === PAM 2009 Paper Submission ===
-
+==== Agenda ====
  * Discuss current state of paper.
  ** Please look at the latest version of the paper and be ready to discuss the status.
  * Deadlines:
  ** If we want Susan to edit, we need to let her know *when* and give her some time...
+==== Summary/Actions ====
+ * Final deadline is Oct 1, 6:00pm PST.
+ * Jeff will make an edit pass over much of the paper today and tomorrow.
+ * Martin will make an edit pass over the IS section, and a full pass following Jeff.
+ * Jason will work with Shawn to get a UMich endpoint working.
+ * Maxim will get a FNAL endpoint working.
+ * Maxim/Jason will work together to generate throughput data.
+ * Brian will continue to make edit passes throughout.
+ * Brian/Martin will make the final passes while together next week in Seattle.
+ * We will attempt to get Susan to make an edit pass Wednesday morning (due date).
 
 === Logistics ===
  # Next meeting will be Sept 29, 2:30 EST
