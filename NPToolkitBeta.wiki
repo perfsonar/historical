@@ -9,7 +9,7 @@
      # Performance/DB XML Trouble Shooting (*DONE*)
    * pSB
      # Port master/collector to perfSONAR (*Abandonded*)  
-     # Fix BWCTL DB Abstraction (*Pending Testing*)
+     # Fix BWCTL DB Abstraction (*Moved to future release*)
      # OWAMP DB Abstraction (Pending JB)
    * SNMP MA
      # Cricket/Cacti/MRTG Integration (*MRTG/Cricket Abandonded, Cacti complete*)  
@@ -45,23 +45,24 @@
 
  * Jason
    * gLS
-     # Documentation (Minor)
-     # Installation/Burn in of true gLS
+     # Documentation (Minor) (*in progress*)
+     # Installation/Burn in of true gLS (*DONE*)
    * pSB
-     # Documentation (Minor)
-     # System stuff to start/restart the service after configuration?
+     # Documentation (Minor) (*in progress*)
+     # System stuff to start/restart the service after configuration? (*postponed to next release*)
    * SNMP MA
-     # System stuff to start/restart the service after configuration?
+     # System stuff to start/restart the service after configuration? (*postponed to next release*)
    * Disk at Large
-     # Configuration 'Templates' approach for pSB specifically, all daemons/services in general
-     # Modify pSB to continuously poll for 'new' bwctl/owamp daemons and add the to the mesh automatically, restart necessary tools
-     # pSB Configuration GUIs
-     # gLS integration into the services.cgi (e.g. perfAdmin improvements)
-     # Testing Coordination
+     # Configuration 'Templates' approach for pSB specifically, all daemons/services in general (*postponed to next release*)
+     # Modify pSB to continuously poll for 'new' bwctl/owamp daemons and add the to the mesh automatically, restart necessary tools (*postponed to next release*)
+     # pSB Configuration GUIs (*DONE*)
+     # gLS integration into the services.cgi (e.g. perfAdmin improvements) (*3/4 DONE*)
+     # Testing Coordination (*In progress*)
         * GT (Will contact Warren, we could get more than a single deployment out of him)
         * ESnet (I can coordinate Brian/Joe/Jon)
         * BNL w/ Bigrow
         * Wild Cards (SLAC/UDel/IU/UMich/Caltech/CERN)
+
 
  * Aaron
    # /var/log exporting
@@ -87,9 +88,9 @@
 
 == Overall Deadline ==
 
-_Pencils Down_ is Sept 4th (Thursday)
+_Pencils Down_ is Sept 25th (Thursday)
 
-== Things that can happen after Sept 5 release ==
+== Things that can happen after Sept 25 release ==
  * Aaron
    # work with Joe to create a version of ls-registration that can maintain a list of 'ping-able' hosts for LHC (*DONE*)
  * Jeff
