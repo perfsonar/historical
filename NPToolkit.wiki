@@ -1,25 +1,71 @@
-= NPToolkit =
+= perfSONAR Network Performance Toolkit =
 
 == TOC ==
 
- * Introduction
- * Features
- * Purpose
- * Getting The NPToolkit
- * Quick Start Guide
- * Configuration
- * FAQ
+ * [NPToolkit#Introduction Introduction]
+ * [NPToolkit#Previous_Releases Previous Releases]
+   * [NPToolkit#Beta_1 Beta 1]
+   * [NPToolkit#Beta_2 Beta 2]
+ * [NPToolkit#Features Features]
+ * [NPToolkit#Purpose Purpose]
+ * [NPToolkit#Getting_The_NPToolkit Getting The NPToolkit]
+ * [NPToolkit#Quick_Start_Guide Quick Start Guide]
+   * [NPToolkit#Step_1_Getting_Started Step 1 Getting Started]
+   * [NPToolkit#Step_2_Console_Configuration Step 2 Console Configuration]
+   * [NPToolkit#Step_3_Checking_Status Step 3 Checking Status]
+   * [NPToolkit#Step_4 Step 4]
+   * [NPToolkit#Step_5 Step 5]
+   * [NPToolkit#Step_6 Step 6]
+   * [NPToolkit#Step_7 Step 7]
+   * [NPToolkit#Step_8 Step 8]
+   * [NPToolkit#Step_9 Step 9]
+   * [NPToolkit#Step_10 Step 10]
+   * [NPToolkit#Step_11 Step 11]
+   * [NPToolkit#Step_12 Step 12]
+ * [NPToolkit#Configuration Configuration]
+ * [NPToolkit#FAQ FAQ]
 
 == Introduction ==
 
-The Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit]) is an experimental version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk. The software consists of an [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.iso ISO] ([http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.md5 MD5] sum) that can be used in one of two ways:
+The _perfSONAR_ Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit]) is an experimental version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk. The software consists of an [http://www.perfsonar.net/download/bundles/pS-NPToolkit ISO] that can be used in one of two ways:
 
  * Burn the image to a disk (recommended)
  * Mount the ISO filesystem and run as a virtual machine
 
-After either step, the resulting system features a [http://web100.org/ Web100]-enhanced [http://www.kernel.org/pub/linux/kernel/v2.6/ChangeLog-2.6.23.9 Linux 2.6.23-9 kernel] and will start the network performance tools installed on this disk.  All servers start up using a default configuration, which can be customized if the need arises. The disk also brings up the [http://www.ntp.org/ NTP] daemon using a default configuration.
+After either step, the result is a fully configured system capable of running and using many advanced network tools and methodologies to serve as either a testing point or a means to solve performance issues.  
 
+When serving as a measurement point, a use case adopted by Large Hadron Collider (LHC) affiliated Tier 2 sites in the United States, the disk becomes a part of a global registry of _perfSONAR_ tools.  Affiliated sites and other interested parties may perform any number of tests (on demand, or in some cases reguarlly scheduled) to the installation including:
+
+ * Ping
+ * Traceroute
+ * OWAMP (One-way Ping)
+ * BWCTL
+   * Iperf
+   * Thurlay
+   * Nuttcp
+ * NDT
+ * NPAD
+
+When used in the role of a network debugging infrastructure, the various tools can be used to methodically find, diagnose, and aid in the correction of network performance issues.  Originally developed for use in a series of workshops ([http://e2epi.internet2.edu/npw/ Network Performance Workshop]) sponsored by Internet2, _perfSONAR_ Network Performance Toolkit continues the traditions started by the [http://e2epi.internet2.edu/network-performance-toolkit.html original].  
+
+== Previous Releases ==
+
+ * _perfSONAR_ NPToolkit 2.0 Beta 1 - July 31, 2008
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta1.iso]
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta1.md5]
+ * _perfSONAR_ NPToolkit 2.0 Beta 2 - September 22, 2008
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta2.iso]
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta2.md5]
+ * _perfSONAR_ NPToolkit 2.0 Beta 3 - September 25, 2008
+   * ISO
+   * MD5
+ * _perfSONAR_ NPToolkit 2.0 - September 29, 2008
+   * ISO
+   * MD5
+   
 == Features ==
+
+The main feature is a [http://web100.org/ Web100]-enhanced [http://www.kernel.org/pub/linux/kernel/v2.6/ChangeLog-2.6.23.9 Linux 2.6.23-9 kernel] that facilitates the use of several network tools without the need to configure and compile this advanced component.  
 
 This disk features several performance tools pre-installed and configured:
 
@@ -29,13 +75,19 @@ This disk features several performance tools pre-installed and configured:
  * [http://www.psc.edu/networking/projects/pathdiag/ NPAD]
  * [http://e2epi.internet2.edu/owamp/ OWAMP]
  * [http://www.internet2.edu/performance/pS-PS/ perfSONAR-PS Tools]
-   * [SNMPMA SNMP Measurement Archive]
-   * [PSBMA perfSONAR-BUOY Measurement Archive] and [PSBAGENT Collection Framework]
    * [HLS Lookup Service]
    * [PINGER PingER Measurement Archive and Measurement Point]
+   * [PSBMA perfSONAR-BUOY Measurement Archive] and [PSBAGENT Collection Framework]
+   * [SNMPMA SNMP Measurement Archive]
  * [http://e2epi.internet2.edu/thrulay/ Thrulay]
 
-Graphical and command line tools are available to aide in the customization process when necessary.
+All servers start up using a default configuration, which can be customized if the need arises.  Graphical and command line tools are available to aide in the customization process when necessary.  Additional supporting components include:
+
+ * [http://httpd.apache.org Apache2]
+ * [http://www.kde.org K Desktop Environment]
+ * [http://www.mysql.com MySQL]
+ * [http://www.ntp.org NTP]
+ * [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML]
 
 == Purpose ==
 
@@ -45,49 +97,158 @@ To lower the bar on this complex topic, this disk offers a complete network perf
 
 == Getting The NPToolkit ==
 
- # Download the following:
-   * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.iso]
-   * [http://www.perfsonar.net/download/bundles/NPToolkit-2.0-beta1.md5]
+ # Download the the latest from:
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.iso]
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.md5]
  # Verify the MD5 sum:
-   * md5sum -c NPToolkit-2.0-beta1.iso 
+   * md5sum -c pS-NPToolkit-2.0-beta2.iso 
  # Burn the ISO to a CD-ROM
  # Insert the CD-ROM into the tray and boot the system
 
 == Quick Start Guide ==
 
-  # Download and burn the CD as described above
+=== Step 1 Getting Started ===
+
+  # Prepare the CD as described in [NPToolkit#Getting_The_NPToolkit Getting The NPToolkit]
   # Configure your computer to boot from CD
-  # Startup your computer with the CD in the drive
-  # During the boot process, you'll be presented with a menu of options. Select "Configure drive to hold data/customizations".
-  # From the list, select which drive you would like to allow the disc to use to save data.
-  # Say yes to format the drive if asked
-  # After the drive is formatted, you will return to the original menu of options
-  # Select "Configure site settings". You'll be asked some information about the location and administration of this host.
-  # After configuring the site settings, you'll return to the original menu of options.
-  # Select "Manage Users"
-  # You'll see a new menu of options. Select "Change A User's Password"
-  # When asked for the username, type in "root" and hit enter, and then enter a password for the root user
-  # You'll be returned to the user management menu again
-  # Select "Change A User's Password" again
-  # When asked for the username, type in "knoppix" and hit enter, and then enter a password for the knoppix user
-  # You'll be returned to the user management menu again
-  # At this point, you can either select "Add A New User" or simply use the knoppix user as your admin user
-  # If you select "Add A New User", you'll be asked to enter in information about the user such as their username, whether they're an admin and a password
-  # Once you have finished adding users, select "Exit", and you will be returned to the original menu.
-  # Select "Enable/Disable Services"
-  # You will be brought to a menu containing the set of services for the NPToolkit. Everything, but ssh is enabled by default.
-  # Select which services you would like to enable/disable.
-  # When you are done disabling services, select "Exit", and you'll be returned to the original menu
-  # By default interface are configured for DHCP. If you need to configure a static IP address for your host, select "Configure Static IP". You will be prompted with a series of questions needed to configure the address.
-  # Once your interface is configured, select "Modify advertised interface". This is the interface that services will advertise for external clients to use.
-  # If you would like to configure BWCTL, OWAMP, NDT or NPAD, you may do so now by selecting the appropriate menu option
-  # Once you have finished configuration, select "exit".
-  # You will be asked to reboot. Select "yes".
-  # After your machine has rebooted, you will see the menu again. You can either select exit or wait 20 seconds for it to time out.
-  # Once your machine has finished booting, you can login either as a user you created or as the user knoppix.
-  # Unless you specifically disabled the service, a web interface will be available by connecting to https://HOST_ADDRESS/. This GUI contains links to the available tools, links to some administrative tools for configuring perfSONAR-BUOY, Cacti and PingER, as well as a listing of which services are running on the host.
+    * This may require changes to the computer's BIOS to ensure the CD is recognized before an existing harddisk
+    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult your manual if you are unsure or pay close attention to the boot process to enter _setup_).  
+  # Boot your computer with the CD in the drive
+    * A splash screen will appear and the computer should enter the boot and customization process.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_1_Spash.png
+    * The boot process will proceed after this screen.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_2_Boot.png
+    * 
+
+=== Step 2 Console Configuration ===
+
+During the boot process, you'll be presented with a menu of options. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_3_Menu.png
+
+Each step will be explained here.
+ 
+  # Step 1 is _Configure drive to hold data/customizations_
+    * From the list, select which drive you would like to allow the disc to use to save data
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_4_Option1_1.png
+    * You will have the option format the drive (if the disk is unreadable, you will be forced to format the drive)   
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_5_Option1_2.png
+    * If the disk is readable, you can skip the formatting step
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_6_Option1_3.png
+    * These steps may force an immediate reboot to save settings, this is normal.
+  # Step 2 is _Configure site settings_
+    * Answer the questions accurately, as this information is shared in a global directory
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_7_Option2.png
+  # Step 3 is _Enable/Disable Services_
+    * All services are enabled by default with the exception of SSH.  
+      * To use SSH you must either change the password for the _*knoppix*_ user or add a new user, see _Step 4_
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_8_Option3.png
+  # Step 4 is _Manage Users_
+    * Select option *3* to _Change A User's Password_
+      * Enter _root_
+      * Enter a new password
+      * While not required, this is a *_GOOD IDEA_* to do
+    * The same can be done for _knoppix_
+      * This should be done if you enabled SSH in _Step 3_
+    * To add a user select _Add a new user_
+      * Enter the name
+      * Allow/disallow SSH access
+      * Allow/disallow administrator status
+      * Enter user information
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_9_Option4.png
+  # Step 5 is _Configure BWCTL_
+    * Answer some basic questions about BWCTL, in most cases the defaults will be fine
+    * Use these options to limit access or increase/decrease the resources available for this tool
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_10_Option5.png
+  # Step 6 is _Configure NTP_
+    * Different NTP (time) servers can be configured for your geographical location
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_Option6.png
+    * Note that it is necessary to choose at least 3 servers.
+    * Note that it is not necessary to choose more than 5 servers.
+  # Step 7 is _Cofigure OWAMP_
+    * Answer some basic questions about OWAMP, in most cases the defaults will be fine
+    * Use these options to limit access or increase/decrease the resources available for this tool
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_12_Option7.png
+  # Step 8 is _Configure Static IP_
+    * This is an optional step in case there is not DHCP available.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_13_Option8.png
+  # Step 9 is _Change Timezone_
+    * Use this step to pick the correct timezone.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_14_Option9_1.png
+    * When choosing a new timezone there will be many options.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_15_Option9_2.png
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_16_Option9_3.png
+  # Step 10 is _Modify advertised interface_  
+    * If the machine has multiple interfaces, use this option to select the proper outlet
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_17_Option10.png
+
+After exiting the machine may require a reboot.  If this is the case do so, then simply exit the configuration the second time.  After performing all of these steps and exiting the menu the bootup process will start:
+      
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_18_Starting.png
+
+The user will be faced with a prompt:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_19_Prompt.png
+
+_*knoppix*_ is the default username, with a blank password unless this was changed in_Step 4_.  There are some additional steps that can now be taken to configure some other services, specifically the _perfSONAR_ services.  
+  
+=== Step 3 Checking Status  ===
+
+Once the machine has booted it is now accessible via the static IP or a DHCP address.  To see the address use the */sbin/ifconfig* command from the console:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
+
+Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
+
+There are several GUIs that can be used configure services (note you will be required to log in as the _knoppix_ or other users added in _Step 4_ above.  You _*cannot*_ log in as root):
+
+ * https://HOST_OR_ADDRESS/admin/pinger
+   * Used to configure hosts for the PingER tool
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_22_PingER_Start.png
+ * https://HOST_OR_ADDRESS/admin/perfsonarbuoy
+   * Used to configure hosts for the perfSONAR-BUOY Bandwidth and Latency Tester
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_23_pSB_Start.png
+ * https://HOST_OR_ADDRESS/admin/cacti
+   * Used to configure SNMP Hosts for the perfSONAR SNMP MA
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_24_Cacti.png
+
+[NPToolkit#Step_4_Additional_Configuration Step 4 Additional Configuration] explores configuring each of these services.  There are also several GUIs that can be used to view the status of services:
+
+ * https://HOST_OR_ADDRESS/gui/directory.cgi
+   * GUI to visualize all available _perfSONAR_ data sources world wide.
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_25_Directory.png
+ * https://HOST_OR_ADDRESS/gui/cacti
+   * GUI to visualize SNMP data
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_26_Cacti.png
+ * https://HOST_OR_ADDRESS/gui/pinger
+   * GUI to visualize PingER data
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_27_PingER.png
+ * https://HOST_OR_ADDRESS:8200
+   * NPAD test web page
+ * https://HOST_OR_ADDRESS:7123
+   * NDT test web page
+ * https://HOST_OR_ADDRESS/gui/jowping
+   * Java client for the OWAMP tool
+   * Designed to be run from a remote host (similar to NDT/NPAD)
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_28_Java_OWAMP.png
+ * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+   * Test the perfSONAR-BUOY service and bandwidth (Iperf) data
+ * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921
+   * Test the perfSONAR-BUOY service and delay (OWAMP) data
+ * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8075/perfSONAR_PS/services/pinger/ma&eventType=http://ggf.org/ns/nmwg/tools/pinger/2.0/
+   * Test the PingER service and data
+ * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8065/perfSONAR_PS/services/snmpMA&eventType=http://ggf.org/ns/nmwg/characteristic/utilization/2.0   
+   * Test the SNMP MA service and data
+      
+=== Step 4 Additional Configuration ===
+
+*TBD*
 
 == Host Configuration ==
+
+*insert info on asus machines*
 
 === Hard Disk Configuration ===
 
