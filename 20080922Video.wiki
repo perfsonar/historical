@@ -14,6 +14,7 @@
  * Discuss current state of paper.
  ** Please look at the latest version of the paper and be ready to discuss the status.
  * Deadlines:
+ ** If we want Susan to edit, we need to let her know *when* and give her some time...
 
 === Logistics ===
  # Next meeting will be Sept 29, 2:30 EST
