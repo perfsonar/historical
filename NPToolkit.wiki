@@ -685,17 +685,20 @@ There are also several GUIs linked directly form this page that can be used to v
      * bwctl
        * open port tcp/4823
        * Edit /usr/local/etc/bwctld.conf, set *peer_port* to a value, open the tcp port for that value
-       * Edit /usr/local/etc/bwctld.conf, set "iperf_port", "thrulay_port" and "nuttcp_port" to a specific range, and open the tcp/udp ports for those ranges. 
+       * Edit /usr/local/etc/bwctld.conf, set *iperf_port*, *thrulay_port* and *nuttcp_port* to a specific range, and open the tcp/udp ports for those ranges. 
      * owamp
        * open port tcp/861
        * Edit /usr/local/etc/owampd.conf, set *testports* to range, open the udp ports for that range
      * NDT
        * open port tcp/3001
+       * open port tcp/3002
+       * open port tcp/3003
        * open port tcp/7123
      * NPAD
        * open port tcp/8100
        * open port tcp/8200
      * Apache HTTP Server
+       * open port tcp/80
        * open port tcp/443
      * SSH
        * open port tcp/22
