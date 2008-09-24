@@ -24,6 +24,9 @@
 
      Maxim Grigoriev, maxim_at_fnal_gov   2007-2008        
      Aaron Brown, aaron_at_internet2_edu  2008
+     
+=head1 FUNCTIONS
+
 
 =cut
 
@@ -44,7 +47,10 @@ use Config::General;
 use Storable qw(freeze thaw);
 use perfSONAR_PS::Client::gLS;
 use perfSONAR_PS::Common;
-use perfSONAR_PS::Utils::DNS qw/reverse_dns/;
+use perfSONAR_PS::Utils::DNS qw/reverse_dns resolve_address/;
+use perfSONAR_PS::Datatypes::EventTypes;
+
+use aliased  'perfSONAR_PS::SONAR_DATATYPES::v2_0::psservice::Message::Metadata::Subject::Service';
 
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology';
 use aliased 'perfSONAR_PS::PINGERTOPO_DATATYPES::v2_0::pingertopo::Topology::Domain';
@@ -62,79 +68,7 @@ croak( "Please fix your deployment, basedir is not what pointing to the webadmin
 
 our $CONFIG_FILE    = BASEDIR . '/etc/GeneralSystem.conf';
 our %GENERAL_CONFIG = %{ loadConfig() };
-
-if ( not $GENERAL_CONFIG{LOGGER_CONF} ) {
-    $GENERAL_CONFIG{LOGGER_CONF} = "etc/logger.conf";
-}
-
-if ( $GENERAL_CONFIG{LOGGER_CONF} !~ /^\// ) {
-    $GENERAL_CONFIG{LOGGER_CONF} = BASEDIR . "/" . $GENERAL_CONFIG{LOGGER_CONF};
-}
-
-if ( $GENERAL_CONFIG{what_template}->{header} !~ /^\// ) {
-    $GENERAL_CONFIG{what_template}->{header} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{header};
-}
-
-if ( $GENERAL_CONFIG{what_template}->{footer} !~ /^\// ) {
-    $GENERAL_CONFIG{what_template}->{footer} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{footer};
-}
-
-if ( $GENERAL_CONFIG{what_template}->{Domains} !~ /^\// ) {
-    $GENERAL_CONFIG{what_template}->{Domains} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{Domains};
-}
-
-if ( $GENERAL_CONFIG{what_template}->{Nodes} !~ /^\// ) {
-    $GENERAL_CONFIG{what_template}->{Nodes} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{Nodes};
-}
-
-if ( $GENERAL_CONFIG{LANDMARKS} !~ /^\// ) {
-    $GENERAL_CONFIG{LANDMARKS} = BASEDIR . "/" . $GENERAL_CONFIG{LANDMARKS};
-}
-
-if ( $GENERAL_CONFIG{PROJECT} ) {
-    if ( ref( $GENERAL_CONFIG{PROJECT} ) ne "ARRAY" ) {
-        my @arr = ();
-        push @arr, $GENERAL_CONFIG{PROJECT};
-        $GENERAL_CONFIG{PROJECT} = \@arr;
-    }
-}
-
-# XXX: The following are meant for the NPToolkit where projects are defined as
-# 'site_project' instead of PROJECT and the name for the site is 'site_name',
-# not MYDOMAIN. Longer term, a common structure for projects and names should
-# be done.
-
-if ( $GENERAL_CONFIG{site_project} ) {
-    if ( ref( $GENERAL_CONFIG{site_project} ) ne "ARRAY" ) {
-        my @arr = ();
-        push @arr, $GENERAL_CONFIG{site_project};
-        $GENERAL_CONFIG{site_project} = \@arr;
-    }
-}
-
-# move everything from 'site_project' into 'PROJECT'
-if ( $GENERAL_CONFIG{site_project} ) {
-    my %tmp = ();
-
-    if ( $GENERAL_CONFIG{PROJECT} ) {
-        foreach my $project ( @{ $GENERAL_CONFIG{PROJECT} } ) {
-            $tmp{$project} = 1;
-        }
-    }
-
-    foreach my $project ( @{ $GENERAL_CONFIG{site_project} } ) {
-        $tmp{$project} = 1;
-    }
-
-    my @arr = keys %tmp;
-    $GENERAL_CONFIG{PROJECT} = \@arr;
-}
-
-# set "MYDOMAIN" if it doesn't exist but "site_name" does.
-if ( not $GENERAL_CONFIG{MYDOMAIN} and $GENERAL_CONFIG{site_name} ) {
-    $GENERAL_CONFIG{MYDOMAIN} = $GENERAL_CONFIG{site_name};
-}
-
+ 
 Log::Log4perl->init( $GENERAL_CONFIG{LOGGER_CONF} );
 my $logger = get_logger("configure");
 
@@ -187,6 +121,7 @@ my $myhtml = $TEMPLATE_HEADER->output() . displayGlobal() . $TEMPLATE_FOOTER->ou
 print $ajax->build_html( $cgi, $myhtml, { '-Expires' => '1d', '-cookie' => $COOKIE } );
 
 =head2 readgLSSites
+
   Reads the set of pingable sites from the gLS and stores it in the global variable $GLS_PROJECTS
 
 =cut
@@ -209,16 +144,14 @@ sub readgLSSites {
             $logger->debug( "Using default gLS hints URL: " . $default_url );
             $gls = perfSONAR_PS::Client::gLS->new( { url => $default_url } );
         }
-
-        my $parser = XML::LibXML->new();
-
+ 
         if ( not $gls->{ROOTS} ) {
             $logger->debug("No gLS Roots found!");
         }
         else {
-            $logger->debug("Found gLS roots, looking up 'ping' tools");
+            $logger->debug("Found gLS roots, looking up 'pinger' tools");
 
-            my @eventTypes = ("http://ggf.org/ns/nmwg/tools/ping/1.0");
+            my @eventTypes = ($GENERAL_CONFIG{EVENTTYPE}->tools->pinger);
 
             my @keywords = ();
             $logger->debug( "General Config: " . Dumper( \%GENERAL_CONFIG ) );
@@ -248,8 +181,8 @@ sub readgLSSites {
                 }
 
                 foreach my $s ( @{$result} ) {
-                    my $doc = $parser->parse_string($s);
-
+                    
+                    my $service = Service->new({ xml => $s })
                     my $res;
 
                     my $description = findvalue( $doc->getDocumentElement, ".//*[local-name()='description']", 0 );
@@ -825,7 +758,10 @@ sub updateGlobal {
                 : undef;
             $logger->debug("action=$action - new_urn=$new_urn");
             if ( $act eq 'add' && $new_urn ) {
+	        my $ip_resolved; '255.255.255.255';
                 eval {
+		    ($ip_resolved) = resolve_address($new_name);
+		    $ip_resolved = '255.255.255.255' unless $ip_resolved;
                     $node_obj = Node->new(
                         {
                             id   => $new_urn,
@@ -834,7 +770,7 @@ sub updateGlobal {
                             port     => Port->new(
                                 {
                                     xml => "<nmtl3:port xmlns:nmtl3=\"http://ogf.org/schema/network/topology/l3/20070707/\" id=\"$new_urn:port=255.255.255.255\">
-                      <nmtl3:ipAddress type=\"IPv4\">255.255.255.255</nmtl3:ipAddress>
+                      <nmtl3:ipAddress type=\"IPv4\">$ip_resolved</nmtl3:ipAddress>
                    </nmtl3:port>"
                                 }
                             ),
@@ -1043,6 +979,68 @@ sub loadConfig {
     );
     my %GENERAL_CONFIG = $conf_obj->getall;
     $logger->logdie("Problem with parsing config file: $CONFIG_FILE ") unless %GENERAL_CONFIG;
+    if ( not $GENERAL_CONFIG{LOGGER_CONF} ) {
+        $GENERAL_CONFIG{LOGGER_CONF} = "etc/logger.conf";
+    }
+
+    if ( $GENERAL_CONFIG{LOGGER_CONF} !~ /^\// ) {
+	$GENERAL_CONFIG{LOGGER_CONF} = BASEDIR . "/" . $GENERAL_CONFIG{LOGGER_CONF};
+    }
+
+    foreach my $templ (qw/header footer Domains Nodes/) { 
+	if ( $GENERAL_CONFIG{what_template}->{$templ} !~ /^\// ) {
+            $GENERAL_CONFIG{what_template}->{$templ} = BASEDIR . "/" . $GENERAL_CONFIG{what_template}->{$templ};
+	}
+    }
+
+    if ( $GENERAL_CONFIG{LANDMARKS} !~ /^\// ) {
+	$GENERAL_CONFIG{LANDMARKS} = BASEDIR . "/" . $GENERAL_CONFIG{LANDMARKS};
+    }
+
+    if ( $GENERAL_CONFIG{PROJECT} ) {
+	if ( ref( $GENERAL_CONFIG{PROJECT} ) ne "ARRAY" ) {
+            my @arr = ();
+            push @arr, $GENERAL_CONFIG{PROJECT};
+            $GENERAL_CONFIG{PROJECT} = \@arr;
+	}
+    }
+
+    # XXX: The following are meant for the NPToolkit where projects are defined as
+    # 'site_project' instead of PROJECT and the name for the site is 'site_name',
+    # not MYDOMAIN. Longer term, a common structure for projects and names should
+    # be done.
+
+    if ( $GENERAL_CONFIG{site_project} ) {
+	if ( ref( $GENERAL_CONFIG{site_project} ) ne "ARRAY" ) {
+            my @arr = ();
+            push @arr, $GENERAL_CONFIG{site_project};
+            $GENERAL_CONFIG{site_project} = \@arr;
+	}
+    }
+
+    # move everything from 'site_project' into 'PROJECT'
+    if ( $GENERAL_CONFIG{site_project} ) {
+	my %tmp = ();
+
+	if ( $GENERAL_CONFIG{PROJECT} ) {
+            foreach my $project ( @{ $GENERAL_CONFIG{PROJECT} } ) {
+        	$tmp{$project} = 1;
+            }
+	}
+
+	foreach my $project ( @{ $GENERAL_CONFIG{site_project} } ) {
+            $tmp{$project} = 1;
+	}
+
+	my @arr = keys %tmp;
+	$GENERAL_CONFIG{PROJECT} = \@arr;
+    }
+
+    # set "MYDOMAIN" if it doesn't exist but "site_name" does.
+    if ( not $GENERAL_CONFIG{MYDOMAIN} and $GENERAL_CONFIG{site_name} ) {
+	$GENERAL_CONFIG{MYDOMAIN} = $GENERAL_CONFIG{site_name};
+    }   
+    $GENERAL_CONFIG{EVENTTYPE} = perfSONAR_PS::Datatypes::EventTypes->new();
     return \%GENERAL_CONFIG;
 }
 
