@@ -61,7 +61,7 @@ public class PSBaseClient {
 
         //Generate and send response
         try {
-             SAXBuilder xmlParser = new SAXBuilder();
+            SAXBuilder xmlParser = new SAXBuilder();
 
             this.log.info("Connecting to "+this.url);
             PostMethod postMethod = new PostMethod(this.url);

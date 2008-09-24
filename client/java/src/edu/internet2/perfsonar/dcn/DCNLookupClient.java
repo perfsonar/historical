@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -168,6 +167,28 @@ public class DCNLookupClient{
         
         return urn;
 	}
+	
+	public String[] lookupIDC(String domain) throws PSException{
+		String[] hLSMatches = this.hLSList;
+/*		if(useGlobalLS || hLSList == null){
+			String discoveryXQuery = LSSTORE_XQUERY;
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
+			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
+			hLSMatches = this.discover(this.requestString(discReqElem, null));
+		}
+
+		String xquery = LSSTORE_XQUERY;
+        Element reqElem = this.createQueryMetaData(xquery);
+        String request = this.requestString(reqElem, null);
+        for(String hLS : hLSMatches){
+        	this.log.info("hLS: " + hLS);
+        	PSLookupClient lsClient = new PSLookupClient(hLS);
+        	Element response = lsClient.query(request);
+        	Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
+        } */
+		return hLSMatches;
+	}
 
 	/**
 	 * Contacts a global lookup service(s) to get the list of home lookup
@@ -244,8 +265,9 @@ public class DCNLookupClient{
 	 * @throws PSException
 	 */
 	public HashMap<String,String> registerNode(NodeRegistration reg) throws PSException{
-		Element metaDataElem = this.createMetaData(null);
-		metaDataElem.addContent(reg.getNodeElem());
+		Element metaDataElem = this.createMetaData(this.psNS.DCN);
+		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
+		subjElem.addContent(reg.getNodeElem());
 		return this.register(metaDataElem);
 	}
 	
@@ -282,17 +304,8 @@ public class DCNLookupClient{
 			throw new PSException("No home lookup services specified!");
 		}
 		
-		ArrayList<Element> elems = new ArrayList<Element>(2);
-		elems.add(metaDataElem);
-		//Create empty data
-		Element emptyDataElem = new Element("data", this.psNS.NMWG);
-		emptyDataElem.setAttribute("metadataIdRef", metaDataElem.getAttributeValue("id"));
-		emptyDataElem.setAttribute("id", "data"+emptyDataElem.hashCode());
-		elems.add(emptyDataElem);
-		
 		for(String hLS : hLSList){
-			Element regMetaData = this.createRegisterMetadata(hLS);
-			String request = this.requestString(regMetaData, elems);
+			String request = this.requestString(metaDataElem, null);
 			PSLookupClient lsClient = new PSLookupClient(hLS);
 			Element response = lsClient.register(request, null);
 			Element metaData = response.getChild("metadata", psNS.NMWG);
@@ -329,28 +342,6 @@ public class DCNLookupClient{
 		}
 		
 		return keys;
-	}
-	
-	/**
-	 * Creates the topo-level metadata with the home LS information
-	 * reuired for registering any data
-	 * 
-	 * @param hLS the URL of the home LS
-	 * @return the generated metadat element
-	 */
-	private Element createRegisterMetadata(String hLS){
-		Element regMetaElem = this.createMetaData(this.psNS.PS);
-		Element serviceElem = new Element("service", this.psNS.PS_SERVICE);
-		Element ap = new Element("accessPoint", this.psNS.PS_SERVICE);
-		ap.setText(hLS);
-		serviceElem.addContent(ap);
-		Element type = new Element("serviceType", this.psNS.PS_SERVICE);
-		type.setText("LS");
-		serviceElem.addContent(type);
-		regMetaElem.getChild("subject",this.psNS.PS).addContent(serviceElem);
-		
-		return regMetaElem;
-		
 	}
 	
 	/**
@@ -422,7 +413,7 @@ public class DCNLookupClient{
 		metaDataElem.setAttribute("id", "meta" + metaDataElem.hashCode());
 		if(ns != null){
 			Element subjElem = new Element("subject", ns);
-			subjElem.setAttribute("id", "subj"+subjElem.hashCode());
+			subjElem.setAttribute("id", "subj"+System.currentTimeMillis());
 			metaDataElem.addContent(subjElem);
 		}
 		return metaDataElem;
