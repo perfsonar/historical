@@ -344,6 +344,45 @@ public class DCNLookupClient{
 		return keys;
 	}
 	
+	public void deregister(String key) throws PSException{
+		if(hLSList == null){
+			throw new PSException("No home lookup services specified!");
+		}
+		
+		Element metaDataElem = this.createMetaData(null);
+		Element keyElem = new Element("key", this.psNS.NMWG);
+		Element paramsElem = new Element("parameters", this.psNS.NMWG);
+		Element paramElem = new Element("parameter", this.psNS.NMWG);
+		
+		keyElem.setAttribute("id", "k"+key.hashCode());
+		paramsElem.setAttribute("id", "p"+key.hashCode());
+		paramElem.setAttribute("name", "lsKey");
+		paramElem.setText(key);
+		paramsElem.addContent(paramElem);
+		keyElem.addContent(paramsElem);
+		metaDataElem.addContent(keyElem);
+		for(String hLS : hLSList){
+			String request = this.requestString(metaDataElem, null);
+			PSLookupClient lsClient = new PSLookupClient(hLS);
+			Element response = lsClient.deregister(request, null);
+			Element metaData = response.getChild("metadata", psNS.NMWG);
+	        if(metaData == null){
+	        	throw new PSException("No metadata element in deregistration response");
+	        }
+	        Element eventType = metaData.getChild("eventType", psNS.NMWG);
+	        if(eventType == null){
+	        	throw new PSException("No eventType returned");
+	        }else if(eventType.getText().startsWith("error.ls")){
+	        	Element errDatum = lsClient.parseDatum(response, psNS.NMWG_RESULT);
+	        	String errMsg = (errDatum == null ? "An unknown error occurred" : errDatum.getText());
+	        	this.log.error(eventType.getText() + ": " + errMsg);
+	        	throw new PSException("Deregistration error: " + errMsg);
+	        }else if(!"success.ls.deregister".equals(eventType.getText())){
+	        	throw new PSException("Registration returned an unrecognized status");
+	        }
+		}
+	}
+	
 	/**
 	 * @return the list of global lookup services
 	 */
