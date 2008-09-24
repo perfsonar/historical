@@ -2,10 +2,6 @@ package edu.internet2.perfsonar.dcn;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,11 +32,11 @@ public class DCNLookupClient{
 	private boolean useGlobalLS;
 	private PSNamespaces psNS;
 	
-	static final private String IDC_SERVICE_TYPE = "IDC";
-	static final private String PROTO_OSCARS = "http://oscars.es.net/OSCARS";
-	static final private String PROTO_WSN = "http://docs.oasis-open.org/wsn/b-2";
-	static final private String PARAM_SUPPORTED_MSG = "keyword:supportedMessage";
-	static final private String PARAM_TOPIC = "keyword:topic";
+	static final public String IDC_SERVICE_TYPE = "IDC";
+	static final public String PROTO_OSCARS = "http://oscars.es.net/OSCARS";
+	static final public String PROTO_WSN = "http://docs.oasis-open.org/wsn/b-2";
+	static final public String PARAM_SUPPORTED_MSG = "keyword:supportedMessage";
+	static final public String PARAM_TOPIC = "keyword:topic";
 
 	private String DISC_XQUERY = 
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
@@ -58,6 +54,14 @@ public class DCNLookupClient{
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
 		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
 		"/nmwg:store[@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()=\"subject\"]/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()=\"<!--hostname-->\"]]\n";
+	
+	private String IDC_XQUERY = 
+		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
+		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
+		"declare namespace dcn=\"http://ggf.org/ns/nmwg/tools/org/dcn/1.0/\";\n" +
+		"for $metadata in /nmwg:store[@type=\"LSStore\"]/nmwg:metadata\n" +
+		"    where $metadata/dcn:subject/nmtb:service/nmtb:type[text()=\"<!--type-->\"] and $metadata/dcn:subject/nmtb:service/nmtb:relation[@type=\"<!--relation-->\"]/nmtb:idRef[text()=\"<!--domain-->\"]\n" +
+		"    return $metadata/dcn:subject/nmtb:service<!--xpath-->\n";
 	
 	/**
 	 * Creates a new client with the list of Global lookup services to 
@@ -111,6 +115,7 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = null;
 		this.tryAllGlobal = false;
+		this.psNS = new PSNamespaces();
 	}
 
 	/**
@@ -129,6 +134,7 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = hLSList;
 		this.tryAllGlobal = false;
+		this.psNS = new PSNamespaces();
 	}
 	
 	/**
@@ -168,26 +174,90 @@ public class DCNLookupClient{
         return urn;
 	}
 	
-	public String[] lookupIDC(String domain) throws PSException{
+	/**
+	 * Retrieve a service element describing an IDC given a domain it controls
+	 * 
+	 * @param domain the domain as a URN or DNS name that the IDC controls
+	 * @return the &lt;service&gt; as a JDOM Element, null if not found
+	 * @throws PSException
+	 */
+	public Element lookupIDC(String domain) throws PSException{
+		Element datum = this.lookupService("IDC", domain, "controls", "");
+		if(datum == null){ return null; }		
+		Element idc = datum.getChild("service", this.psNS.TOPO);
+		return idc;
+	}
+	
+	/**
+	 * Retrieves a list of URLs associated with an IDC given the domain
+	 * @param domain the domain as a URN or DNS name
+	 * @return a list of URLs associated with the IDC, null if none found
+	 * @throws PSException
+	 */
+	public String[] lookupIDCUrl(String domain) throws PSException{
+		HashMap<String,Boolean> urls = new HashMap<String,Boolean>();
+		Element datum = this.lookupService("IDC", domain, "controls", "/nmtb:port/nmtb:address[@type=\"url\"]");
+		if(datum == null){ return null; }	
+		List<Element> addrElems = datum.getChildren("address", this.psNS.TOPO);
+		if(addrElems == null){ return null; }
+		for(Element addrElem : addrElems){
+			String key = addrElem.getText();
+			if(key == null){ continue; }
+			urls.put(key.trim(), true);
+		}
+		if(urls.size() == 0){ return null; }
+		
+		return urls.keySet().toArray(new String[urls.size()]);
+	}
+	
+	/**
+	 * General method used to find a service such as an IDC or NotificationBroker
+	 * 
+	 * @param type thetype of service to find
+	 * @param domain the domain of the service of interest
+	 * @param relation the relation of the service to that domain
+	 * @param xpath an xpath expression rooted at servcice that control what is returned
+	 * @return the element found (if any)
+	 * @throws PSException
+	 */
+	public Element lookupService(String type, String domain, String relation, String xpath) throws PSException{
+		this.log.debug("lookupIDC.domain=" + domain);
 		String[] hLSMatches = this.hLSList;
-/*		if(useGlobalLS || hLSList == null){
-			String discoveryXQuery = LSSTORE_XQUERY;
-			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
+		Element datum = null;
+		if(useGlobalLS || hLSList == null){
+			String discoveryXQuery = DISC_XQUERY;
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain.replaceAll("urn:ogf:network:domain=", ""));
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
 			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
 			hLSMatches = this.discover(this.requestString(discReqElem, null));
 		}
-
-		String xquery = LSSTORE_XQUERY;
+		String xquery = IDC_XQUERY;
+		xquery = xquery.replaceAll("<!--domain-->", domain);
+		xquery = xquery.replaceAll("<!--type-->", type);
+		xquery = xquery.replaceAll("<!--relation-->", relation);
+		xquery = xquery.replaceAll("<!--xpath-->", xpath);
         Element reqElem = this.createQueryMetaData(xquery);
         String request = this.requestString(reqElem, null);
         for(String hLS : hLSMatches){
         	this.log.info("hLS: " + hLS);
         	PSLookupClient lsClient = new PSLookupClient(hLS);
         	Element response = lsClient.query(request);
-        	Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
-        } */
-		return hLSMatches;
+        	datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
+        	Element metaData = response.getChild("metadata", psNS.NMWG);
+	        if(metaData == null){
+	        	throw new PSException("No metadata element in registration response");
+	        }
+	        Element eventType = metaData.getChild("eventType", psNS.NMWG);
+	        if(eventType == null){
+	        	continue;
+	        }else if(eventType.getText().startsWith("error.ls")){
+	        	continue;
+	        }else if(!"success.ls.query".equals(eventType.getText())){
+	        	continue;
+	        }else if(datum != null){ break; }
+        }
+        
+		return datum;
 	}
 
 	/**
