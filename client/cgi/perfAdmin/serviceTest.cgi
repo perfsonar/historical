@@ -177,7 +177,7 @@ sub display {
             $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
 
             $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "9", align => "center" } );
+            $html .= $cgi->start_th( { colspan => "8", align => "center" } );
             $html .= $eventType . " @ " . $service;
             $html .= $cgi->end_th;
             $html .= $cgi->end_Tr;
@@ -290,7 +290,7 @@ sub display {
             $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
 
             $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "6", align => "center" } );
+            $html .= $cgi->start_th( { colspan => "7", align => "center" } );
             $html .= $eventType . " @ " . $service;
             $html .= $cgi->end_th;
             $html .= $cgi->end_Tr;
@@ -417,7 +417,7 @@ sub display {
             $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
 
             $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "6", align => "center" } );
+            $html .= $cgi->start_th( { colspan => "5", align => "center" } );
             $html .= $eventType . " @ " . $service;
             $html .= $cgi->end_th;
             $html .= $cgi->end_Tr;
@@ -522,6 +522,12 @@ sub display {
             }
 
             $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "100%" } );
+
+            $html .= $cgi->start_Tr;
+            $html .= $cgi->start_th( { colspan => "5", align => "center" } );
+            $html .= $eventType . " @ " . $service;
+            $html .= $cgi->end_th;
+            $html .= $cgi->end_Tr;
 
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_th( { align => "center" } );
