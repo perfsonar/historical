@@ -591,7 +591,7 @@ sub display {
 
     my %etTotal = ();
     foreach my $root ( @{ $gls->{ROOTS} } ) {
-        my $result = $gls->getLSDiscoverRaw( { ls => $root, xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/nmwg:eventType" } );
+        my $result = $gls->getLSDiscoverRaw( { ls => $root, xquery => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/nmwg:eventType" } );
         if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
             my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
             my $eT = find( $doc->getDocumentElement, ".//nmwg:eventType", 0 );
