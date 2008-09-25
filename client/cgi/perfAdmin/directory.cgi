@@ -538,7 +538,9 @@ sub queryMA {
                     $html .= $cgi->start_td( { align => "center" } );
                     $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
                     $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                    $html .= "'http://tukki.fnal.gov/pinger/pingerUI.pl?ma=";
+
+                    #$html .= "'http://tukki.fnal.gov/pinger/pingerUI.pl?ma=";
+                    $html .= "'./pinger/index.cgi?ma=";
                     $html .= $service . "&get_it=jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7&link=";
                     $html .= $list{$src}{$dst}->{"src"} . ":" . $list{$src}{$dst}->{"dst"} . ":1000";
 
