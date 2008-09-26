@@ -64,7 +64,7 @@ if ( exists $opts{LENGTH} and $opts{LENGTH} ) {
 else {
 
     # default to 1 hour
-    $opts{LENGTH} = 3600;
+    $opts{LENGTH} = 3600*12;
 }
 
 if ( not $ok or $HELP ) {
