@@ -1,4 +1,5 @@
 = perfSONAR-PS Home =
+
 == Overview ==
 
 perfSONAR-PS is an effort to create a collection of easy to use and easy to 
@@ -18,11 +19,14 @@ A listing of the nodes from all meetings and conference calls can be found in [M
 Ongoing work can be viewed from our anonymous SVN repository: 
 http://anonsvn.internet2.edu/svn/perfSONAR-PS. 
 
- * The [NPToolkit] is available for Beta testing.
- * Take a [CodeTour tour] of the services, installation procedures, and source code.
- * Please adhere to the [CodeRules coding guidelines].
+ * The [NPToolkit] is nearing the first official release, download yours today!.
  * Installing perfSONAR-PS from SVN or CPAN for the first time? Maybe we can offer [FAQ some help].
  * [http://code.google.com/p/perfsonar-ps/issues/list Request new features] to the perfSONAR-PS framework.
+
+== For developers ==
+
+ * Take a [CodeTour tour] of the services, installation procedures, and source code.
+ * Please adhere to the [CodeRules coding guidelines].
 
 == Mailing List ==
 
