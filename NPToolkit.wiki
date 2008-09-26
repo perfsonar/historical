@@ -6,8 +6,10 @@
    * [NPToolkit#Background Background]
    * [NPToolkit#Purpose Purpose]
  * [NPToolkit#Previous_Releases Previous Releases]
-   * [NPToolkit#Beta_1 pS-NPToolkit Beta 1]
-   * [NPToolkit#Beta_2 pS-NPToolkit Beta 2]
+   * [NPToolkit#Beta_1 pS-NPToolkit 2.0 Beta 1]
+   * [NPToolkit#Beta_2 pS-NPToolkit 2.0 Beta 2]
+   * [NPToolkit#Release pS-NPToolkit 2.0]
+ * [NPToolkit#Installation_and_Configuration Installation and Configuration]
  * [NPToolkit#Disk_Contents Disk Contents]
    * [NPToolkit#Performance_Tools Performance Tools]
      * [NPToolkit#BWCTL BWCTL]
@@ -27,42 +29,34 @@
      * [NPToolkit#MySQL MySQL]
      * [NPToolkit#NTP NTP]
      * [NPToolkit#Oracle_DB_XML Oracle DB XML]
- * [NPToolkit#Installation_and_Configuration Installation and Configuration]
-   * [NPToolkit#First_Steps First Steps]
-   * [NPToolkit#Console_Configuration Console Configuration]
-   * [NPToolkit#Web_Configuration Web Configuration]
-     * [NPToolkit#Cacti_Configuration Cacti Configuration]
-     * [NPToolkit#perfSONAR_BUOY_Configuration perfSONAR-BUOY Configuration]
-     * [NPToolkit#PingER_Configuration PingER Configuration]
-   * [NPToolkit#Disk_Verification Disk Verification]
  * [NPToolkit#FAQ FAQ]
  * [NPToolkit#Last_Updated Last Updated]
 
 == Introduction ==
 
-The _perfSONAR_ Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit]) is an experimental version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk. The software consists of an [http://www.perfsonar.net/download/bundles/pS-NPToolkit ISO] that can be used in one of two ways:
+The _perfSONAR_ Network Performance Toolkit ([http://e2epi.internet2.edu/network-performance-toolkit.html NPToolkit]) is a customized version of a [http://www.knoppix.net/ Knoppix] Live-CD bootable disk. The software consists of an [http://www.perfsonar.net/download/bundles/pS-NPToolkit iso] disk image that can be used in one of two ways:
 
  * Burn the image to a disk (recommended)
- * Mount the ISO filesystem and run as a virtual machine
+ * Mount the ISO file system and run as a virtual machine (e.g. under [http://www.vmware.com VMware], [http://bellard.org/qemu QEMU], or [http://www.xen.org xen])
 
-After either step, the result is a fully configured system capable of running and using many advanced network tools and methodologies to serve as either a testing point or a means to solve performance issues.  
+After performing either step, the result is a fully configured system capable of running and using many advanced network tools and methodologies to serve as either a testing point or a means to solve performance issues.  
 
 ===  Background ===
 
-The original idea for the NPToolkit came from the [http://e2epi.internet2.edu/npw/ Network Performance Workshop] series sponsored by [http://www.internet2.edu Internet2].  The old format of this workshop consisted of a day of tool installation (e.g. installing the Web100 kernel and other performance tools) followed by some time to test and use them.  This particular format did not allow enough time to get to the primary reason many participants choose to sign up: solving network performance problems.
+The original idea for the NPToolkit came from the [http://e2epi.internet2.edu/npw/ Network Performance Workshop] series sponsored by [http://www.internet2.edu Internet2].  The old format of this workshop consisted of a day of tool installation (e.g. installing the [http://www.web100.org Web100]-enhanced kernel and other performance tools) followed by some time to test and use them.  This particular format did not allow enough time to get to the primary reason many participants choose to sign up: solving network performance problems.
 
-To lower the bar on this complex topic, this disk offers a complete network performance suite pre-installed (and in most cases pre-configured) that is ready to be dropped directly into a network operations center (*NOC*) of any size.  With the integration of [http://www.perfsonar.net perfSONAR] tools, the results of both passive and active measurements can be shared in a federated environment with your peers enabling the early detection of performance issues.
+To lower the bar on this complex topic, this product offers a complete network performance suite pre-installed (and in many cases pre-configured) that is ready to be dropped directly into a network operations center (*NOC*) of any size.  With the integration of [http://www.perfsonar.net perfSONAR] tools, the results of both passive and active measurements can be shared in a federated environment with your peers enabling the early detection of performance issues.
 
 === Purpose ===
 
-When serving as a measurement point, a use case adopted by Large Hadron Collider (LHC) affiliated Tier 2 sites in the United States, the disk becomes a part of a global registry of _perfSONAR_ tools.  Affiliated sites and other interested parties may perform any number of tests (on demand, or in some cases regularly scheduled) to the installation including:
+When serving as a measurement point, a use case adopted by Large Hadron Collider ([http://lhc.web.cern.ch/lhc/ LHC]) affiliated Tier 2 sites in the United States, the disk becomes a part of a global registry of _perfSONAR_ tools.  Affiliated sites and other interested parties may perform any number of tests (on demand, or in some cases regularly scheduled) to the installation including:
 
  * Ping
  * Traceroute
  * OWAMP (One-way Ping)
  * BWCTL
    * Iperf
-   * Thurlay
+   * Thrulay
    * Nuttcp
  * NDT
  * NPAD
@@ -88,6 +82,15 @@ The original version of the _perfSONAR_ Network Performance Toolkit was released
    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta2.iso]
    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0-beta2.md5]
 
+=== Release ===
+
+ * _perfSONAR_ NPToolkit 2.0 - September 30, 2008
+   * TBD
+
+== Installation and Configuration ==
+
+Please visit [NPToolkitQuickStart] for a complete set of instructions regarding installation and configuration.
+
 == Disk Contents ==
 
 The main feature is a [http://web100.org/ Web100]-enhanced [http://www.kernel.org/pub/linux/kernel/v2.6/ChangeLog-2.6.23.9 Linux 2.6.23-9 kernel] that facilitates the use of several network tools without the need to configure and compile this advanced component.  This disk features several performance tools pre-installed and configured to a working state:
@@ -104,21 +107,21 @@ The main feature is a [http://web100.org/ Web100]-enhanced [http://www.kernel.or
    * [SNMPMA SNMP Measurement Archive]
  * [http://e2epi.internet2.edu/thrulay/ Thrulay]
 
-All servers start up using a default configuration, which can be customized if the need arises.  Graphical and command line tools are available to aide in the customization process when necessary.  Additional supporting components include:
+Additional supporting components include:
 
- * [http://httpd.apache.org Apache2]
- * [http://www.kde.org K Desktop Environment]
- * [http://www.mysql.com MySQL]
- * [http://www.ntp.org NTP]
- * [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML]
+    * [http://httpd.apache.org Apache2]
+    * [http://www.kde.org K Desktop Environment]
+    * [http://www.mysql.com MySQL]
+    * [http://www.ntp.org NTP]
+    * [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML]
 
 === Performance Tools ===
 
-The following performance tools are packaged on the _perfSONAR_ Network Performance Toolkit.  Each tool comes configured to function with default options, although customization is possible and expected.  Certain tools have begun the steps necessary to participate in the [http://www.perfsonar.net perfSONAR] framework and we expect many more will follow in the future.
+The following performance tools are packaged on the _perfSONAR_ Network Performance Toolkit.  Each tool comes configured to function with default options, although customization is possible and encouraged.  Certain tools have begun the steps necessary to participate in the [http://www.perfsonar.net perfSONAR] framework by exporting data and utilizing the information services.  Wwe expect many more will follow in the future as adoption continues to grow.
 
 ==== BWCTL ====
 
-[http://e2epi.internet2.edu/bwctl/ BWCTL] is a command line client application and a scheduling and policy daemon that wraps tools such as [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thurlay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp].  Currently BWCTL wraps these tools by actually executing the respective command line program on the system. The _bwctl_ client application works by contacting a _bwctld_ process on the two test endpoint systems. BWCTL will work as a 3-party application. The client can arrange a test between two servers on two different systems. If the local system is intended to be one of the endpoints of the test a local _bwctld_ is not required, _bwctl_ will detect that there is no local server and execute the required _bwctld_ functionality directly. _bwctld_ manages and schedules the resources of the host on which it runs.
+[http://e2epi.internet2.edu/bwctl/ BWCTL] is a command line client application and a scheduling and policy daemon that wraps tools such as [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thrulay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp].  Currently BWCTL wraps these tools by actually executing the respective command line program on the system. The _bwctl_ client application works by invoking instances on the two test endpoint systems.  BWCTL will work as a 3-party application. The client can arrange a test between two servers on two different systems. If the local system is intended to be one of the endpoints of the test a local instance is not required, BWCTL will detect that there is no local server and execute the required functionality directly. The daemon manages and schedules the resources of the host on which it runs.
 
 The _perfSONAR_ Network Performance Toolkit contains a release candidate of version *1.3* of BWCTL.  The daemon is started by default with a wide open authentication and resource protection scheme.  It is recommended that the deploying party review this to ensure it matches local security policies. 
 
@@ -126,19 +129,19 @@ The _perfSONAR_ Network Performance Toolkit contains a release candidate of vers
 
 [http://www.cacti.net/ Cacti] is a complete network graphing solution designed to harness the power of [http://oss.oetiker.ch/rrdtool/ RRDTool]'s data storage and graphing functionality.  Cacti provides a easy to use interface that offers easy ways to pool data sources, manage the data, and graph the results.  
 
-The _perfSONAR_ Network Performance Toolkit contains version *0.8.7b* of Cacti.  Cacti is fully installed and will start by default.  It can be reached by visiting *http://HOST_OR_ADDRESS/admin/cacti*.  The interested use can follow the instructions in [NPToolkit#Cacti_Configuration Cacti Configuration] to poll a local or remote SNMP enabled network device to gather passive measurements.  The [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive] is configured by default to read the cacti data and deliver this data.  
+The _perfSONAR_ Network Performance Toolkit contains version *0.8.7b* of Cacti.  Cacti is fully installed and will start by default.  It can be reached by visiting *http://HOST_OR_ADDRESS/admin/cacti*.  The interested use can follow the instructions in [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration] to poll a local or remote SNMP enabled network device to gather passive measurements.  The [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive] is configured by default to read the cacti data and deliver this data.  
 
 ==== NDT ==== 
 
-The Network Diagnostic Tool ([http://e2epi.internet2.edu/ndt/ NDT]) is a client/server program that provides network configuration and performance testing to a users desktop or laptop computer.  The system is composed of a client program (command line or java applet) and a pair of server programs (a web server and a testing/analysis engine). Both command line and web-based clients communicate with a [http://web100.org/ Web100]-enhanced server to perform these diagnostic functions. Multi-level results allow novice and expert users to view and understand the test results.
+The Network Diagnostic Tool ([http://e2epi.internet2.edu/ndt/ NDT]) is a client/server program that provides network configuration and performance testing to a user's desktop or laptop computer.  The system is composed of a client program (command line or java applet) and a pair of server programs (a web server and a testing/analysis engine). Both command line and web-based clients communicate with a [http://web100.org/ Web100]-enhanced server to perform these diagnostic functions. Multi-level results allow novice and expert users to view and understand the test results.
 
-The _perfSONAR_ Network Performance Toolkit contains version of *3.4.4a* NDT.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkit#Console_Configuration Console Configuration].
+The _perfSONAR_ Network Performance Toolkit contains version of *3.4.4a* NDT.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Console_Configuration Console Configuration].
 
 ==== NPAD ==== 
 
 The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] diagnostic server, Pathdiag, is designed to easily and accurately diagnose problems in the last-mile network and end-systems that are the most common causes of all severe performance degradation over long end-to-end paths. The overall goal is to make the test procedures easy enough and the report it generates clear enough to be suitable for end-users who are not networking experts.
 
-The _perfSONAR_ Network Performance Toolkit contains version of *1.5.4* NPAD.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkit#Console_Configuration Console Configuration].
+The _perfSONAR_ Network Performance Toolkit contains version of *1.5.4* NPAD.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Console_Configuration Console Configuration].
 
 ==== OWAMP ==== 
 
@@ -163,7 +166,7 @@ Special features of thrulay include:
  * For *UDP*, the ability to send precisely positioned true Poisson streams (microsecond errors in sending times)
  * Human- and machine-readable output (ready to be fed to [http://www.gnuplot.info/ gnuplot]) 
 
-The _perfSONAR_ Network Performance Toolkit contains version *0.9* of thrulay.  Thrulay is offered as an add-on tester when used with BWCTL and the thurlay daemon is not started by default.
+The _perfSONAR_ Network Performance Toolkit contains version *0.9* of thrulay.  Thrulay is offered as an add-on tester when used with BWCTL and the thrulay daemon is not started as a service by default.
 
 === perfSONAR PS Services ===
 
@@ -181,13 +184,13 @@ The perfSONAR-PS Lookup Service (*LS*) addresses the always challenging problem 
 
 The advent of the _perfSONAR_ Global Lookup Service (*gLS*) now delivers a world wide view of all available _perfSONAR_ and selected performance tools.  Each *LS* instance is able to take an inventory of locally registered resources and share these with a well established infrastructure of globally deployed *gLS* services.  Through the use of established APIs service and client applications alike can gain access to this powerful information source.  
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkit#Console_Configuration Console Configuration] step.  
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  
 
 ==== PingER Measurement Archive and Measurement Point ==== 
 
 The PingER service is an evolution of the [http://www-iepm.slac.stanford.edu/pinger/ PingER] project with more than 10 years experience in collecting and analyzing network performance across the world. The _perfSONAR-PS_ PingER service is composed of both a storage backend (Measurement Archive) and measurement frontend (Measurement Point) to conduct and store ping measurements and to make available such data for consumption by interested parties. Network characteristics supported include availability, latency and jitter, which provide a broad spectrum of determining end-to-end network performance.
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkit#Console_Configuration Console Configuration] step.  A default set of pingable hosts are included on the installation, additional configuration can be performed via [NPToolkit#PingER_Configuration PingER Configuration].
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  A default set of ping-able hosts are included on the installation, additional configuration can be performed via [NPToolkitQuickStart#PingER_Configuration PingER Configuration].
 
 ==== perfSONAR BUOY Measurement Archive ==== 
 
@@ -195,13 +198,13 @@ The perfSONAR-BUOY Measurement Archive service (pSB MA) exposes active measureme
 
 Data collected is stored in a MySQL database. Active measurements between known hosts are particularly valuable when assuring connectivity, availability, and quality of the network. perfSONAR-BUOY allows for the easy configuration of a "mesh" of tests to hosts equipped with BWCTL or OWAMP. Based on a configurable schedule, the tests will be conducted autonomously and stored for consumption via the perfSONAR-BUOY interface as well as presentation through included web scripts. Using the same XML protocols as the the other _perfSONAR_ services, perfSONAR-BUOY provides uncomplicated access methods to retrieve the data in an unambiguous manner, thus eliminating the mystery associated with the backend storage.
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkit#Console_Configuration Console Configuration] step.  This software requires configuration via [NPToolkit#perfSONAR_BUOY_Configuration perfSONAR-BUOY Configuration] before it can be used.
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkiQuickStartt#Console_Configuration Console Configuration] step.  This software requires configuration via [NPToolkitQuickStart#perfSONAR_BUOY_Configuration perfSONAR-BUOY Configuration] before it can be used.
 
 ==== SNMP Measurement Archive ==== 
 
-The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in [http://oss.oetiker.ch/rrdtool/ Round Robin Databases] (RRD) archives. The measurements are collected through external means, normally through software such as [http://oss.oetiker.ch/mrtg/ MRTG], [http://www.cacti.net Cacti], or [http://cricket.sourceforge.net/ Cricket], and is commonly stored in RRD archives. A common way to diagnose network problems is to gain external access to commonly requested data items (such as interface utilization, errors, discards, etc.) remains challening due to physical and political boundaries.  The purpose of the SNMP MA is to deliver these items transparently and securely.  
+The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in [http://oss.oetiker.ch/rrdtool/ Round Robin Databases] (RRD) archives. The measurements are collected through external means, normally through software such as [http://oss.oetiker.ch/mrtg/ MRTG], [http://www.cacti.net Cacti], or [http://cricket.sourceforge.net/ Cricket], and is commonly stored in RRD archives. A common way to diagnose network problems is to gain external access to commonly requested data items (such as interface utilization, errors, discards, etc.) remains challenging due to physical and political boundaries.  The purpose of the SNMP MA is to deliver these items transparently and securely.  
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkit#Console_Configuration Console Configuration] step.  This software requires configuration via [NPToolkit#Cacti_Configuration Cacti Configuration] before it can be used.
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  This software requires configuration via [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration] before it can be used.
 
 === Supporting Software ===
 
@@ -227,7 +230,7 @@ By default MySQL is configured to listen *only* on the local interface and does 
 
 [http://www.ntp.org/ NTP] is a protocol designed to synchronize the clocks of computers over a network. NTP version 3 is an internet draft standard, formalized in [http://www.faqs.org/rfcs/rfc1305.html RFC 1305]. NTP version 4 is a significant revision of the NTP standard, and is the current development version, but has not been formalized in an RFC. Simple NTP (SNTP) version 4 is described in [http://www.faqs.org/rfcs/rfc2030.html RFC 2030]. 
 
-The _perfSONAR_ Network Performance Toolkit comes pre-loaded with several NTP servers, and users may adjust which servers their specific disk uses in the [NPToolkit#Console_Configuration Console Configuration] step.  Do note that a _sane_ configuration of NTP consists of *4* to *5* servers geographically close to the deployment location.
+The _perfSONAR_ Network Performance Toolkit comes pre-loaded with several NTP servers, and users may adjust which servers their specific disk uses in the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  Do note that a _sane_ configuration of NTP consists of *4* to *5* servers geographically close to the deployment location.
 
 ==== Oracle DB XML ====
 
@@ -235,408 +238,22 @@ The _perfSONAR_ Network Performance Toolkit comes pre-loaded with several NTP se
 
 Version 2.3.11 of this software comes pre-loaded, but does not need to be _started_ (it functions more as a library than an executable).  
 
-== Installation and Configuration ==
-
-The following guide describes in detail the steps required to set up the _perfSONAR_ Network Performance Toolkit.  It is important to follow each step in order.  If you get stuck consult the [NPToolkit#FAQ FAQ] at the end of this document.  
-
-=== First Steps ===
-
-  # Download the the latest from:
-    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.iso]
-    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.md5]
-  # Verify the MD5 sum:
-    * md5sum -c pS-NPToolkit-2.0-beta2.iso 
-  # Burn the ISO to a CD-ROM
-  # Configure your computer to boot from CD
-    * This may require changes to the computer's BIOS to ensure the CD is recognized before an existing harddisk
-    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult your manual if you are unsure or pay close attention to the boot process to enter _setup_).  
-  # Insert the CD-ROM into the tray and boot the system
-    * A splash screen will appear and the computer should enter the boot and customization process.
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_1_Spash.png
-    * The boot process will proceed after this screen.
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_2_Boot.png
-
-=== Console Configuration ===
-
-During the boot process, you'll be presented with a menu of options. 
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_3_Menu.png
-
-Each step will be explained here with pictures where applicable.  
- 
-  # Step 1 is _Configure drive to hold data/customizations_
-    * From the list, select which drive you would like to allow the disc to use to save data
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_4_Option1_1.png
-    * You will have the option format the drive (if the disk is unreadable, you will be forced to format the drive)   
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_5_Option1_2.png
-    * If the disk is readable, you can skip the formatting step
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_6_Option1_3.png
-    * These steps may force an immediate reboot to save settings, this is normal.
-  # Step 2 is _Configure site settings_
-    * Answer the questions accurately, as this information is shared in a [NPToolkit#Lookup_Service global information directory]
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_7_Option2.png
-  # Step 3 is _Enable/Disable Services_
-    * All services are enabled by default with the exception of SSH.  
-      * To use SSH you must either change the password for the _*knoppix*_ user or add a new user, see _Step 4_
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_8_Option3.png
-  # Step 4 is _Manage Users_
-    * Select option *3* to _Change A User's Password_
-      * Enter _root_
-      * Enter a new password
-      * While not required, this is a *_GOOD IDEA_* to do this
-    * The same can be done for _knoppix_
-      * This should be done if you enabled SSH in _Step 3_
-    * To add a user select _Add a new user_
-      * Enter the name
-      * Allow/disallow SSH access
-      * Allow/disallow administrator status
-      * Enter user information
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_9_Option4.png
-  # Step 5 is _Configure BWCTL_
-    * Answer some basic questions about BWCTL, in most cases the defaults will be fine
-    * Use these options to limit access or increase/decrease the resources available for this tool
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_10_Option5.png
-  # Step 6 is _Configure NTP_
-    * Different NTP (time) servers can be configured for your geographical location
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_Option6.png
-    * Note that it is necessary to choose at least 3 servers.
-    * Note that it is not necessary to choose more than 5 servers.
-  # Step 7 is _Cofigure OWAMP_
-    * Answer some basic questions about OWAMP, in most cases the defaults will be fine
-    * Use these options to limit access or increase/decrease the resources available for this tool
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_12_Option7.png
-  # Step 8 is _Configure Static IP_
-    * This is an _*optional*_ step in case there is not DHCP available.
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_13_Option8.png
-  # Step 9 is _Change Timezone_
-    * Use this step to pick the correct timezone.
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_14_Option9_1.png
-    * When choosing a new timezone there will be many options.
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_15_Option9_2.png
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_16_Option9_3.png
-  # Step 10 is _Modify advertised interface_  
-    * If the machine has multiple interfaces, use this option to select the proper outlet
-      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_17_Option10.png
-
-After exiting the menu, the machine may require a reboot.  If this is the case, please do so.  When the machine comes back up then simply exit the configuration.  After performing all of these steps and exiting the menu the bootup process will start:
-      
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_18_Starting.png
-
-The user will be faced with a prompt:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_19_Prompt.png
-
-_*knoppix*_ is the default user, with a blank password unless this was changed in [NPToolkit#Console_Configuration Step 4].  There are some additional steps that can now be taken to configure some other services, specifically the _perfSONAR_ services. 
-
-=== Web Configuration ===
-
-Once the machine has booted it is now accessible via the static IP or a DHCP address.  To see the address use the */sbin/ifconfig* command from the console:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
-
-Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
-
-There are several GUIs that can be used configure services (note you will be required to log in as the _knoppix_ or other users added in [NPToolkit#Console_Configuration Step 4] above.  You _*cannot*_ log in as root):
-
- * https://HOST_OR_ADDRESS/admin/pinger
-   * Used to configure hosts for the PingER tool
-   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_22_PingER_Start.png
- * https://HOST_OR_ADDRESS/admin/perfsonarbuoy
-   * Used to configure hosts for the perfSONAR-BUOY Bandwidth and Latency Tester
-   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_23_pSB_Start.png
- * https://HOST_OR_ADDRESS/admin/cacti
-   * Used to configure SNMP Hosts for the perfSONAR SNMP MA
-   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_24_Cacti.png
-
-==== Cacti Configuration ==== 
-
-Cacti is used to poll SNMP on network devices, and is a natural extension of the [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive].  The following steps will explain the basic setup of Cacti (e.g. to poll a network device).  A user wishing to do more with the software should consult the documentation.  
-
- * [NPToolkit#Cacti_Config_Step_1 Locate Cacti GUI and Login]
- * [NPToolkit#Cacti_Config_Step_2 Create Network Device]
- * [NPToolkit#Cacti_Config_Step_3 Add New Device]
- * [NPToolkit#Cacti_Config_Step_4 Enter Device Info]
- * [NPToolkit#Cacti_Config_Step_5 Create Graphs]
- * [NPToolkit#Cacti_Config_Step_6 Select Graph Info]
- * [NPToolkit#Cacti_Config_Step_7 Load Graph Data]
- * [NPToolkit#Cacti_Config_Step_8 Edit Graph Tree]
- * [NPToolkit#Cacti_Config_Step_9 Select Tree]
- * [NPToolkit#Cacti_Config_Step_10 Add Graphs to Tree]
- * [NPToolkit#Cacti_Config_Step_11 Select Graphs for Tree]
- * [NPToolkit#Cacti_Config_Step_12 View Graphs]
- * [NPToolkit#Cacti_Config_Step_13 Select Other Graphs]
- * [NPToolkit#Cacti_Config_Step_14 Restart SNMP MA]
- * [NPToolkit#Cacti_Config_Step_15 View perfSONAR Graphs]
-
-===== Cacti Config Step 1 =====
-
-Visit the Cacti instance.  If you are using the XWindows environment of the disk this can be as simple as viewing *_https://localhost/admin/cacti_*.  If you are configuring this remotely you will need to know the name of the host.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_1.png
-
-
-===== Cacti Config Step 2 =====
-
-After logging in you will see the _home_ screen.  In the middle there
-will be an option to *Create devices*.  This is where we will begin.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_2.png
-
-===== Cacti Config Step 3 =====
-
-The next screen shows the currently known devices.  The basic setup will
-*always* include _localhost_.  The example below shows a previously
-configured switch.  On the right side there is an *Add* _button_ (although
-it doesn't appear to be so).  Click this to add a new device.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_3.png
-
-===== Cacti Config Step 4 =====
-
-The next screen features many places to add information about your new
-network device.  Note that the red circles are representative of the most
-common places to make changes.  When you are finished press *Create*.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_4.png
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_5.png
-
-===== Cacti Config Step 5 =====
-
-By default Cacti will only poll the *System* information of the SNMP enabled
-host at this stage, just to see if it is alive.  To poll information such
-as network statistics it is necessary to create *Graphs*.  We will proceed
-by clicking on *Create graphs for this Host*.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_6.png
-
-===== Cacti Config Step 6 =====
-
-The next screen displays the possible interfaces that are available for 
-data display.  Note that this may be a *large* number.  In general it is
-efficient to simply click the *all* checkbox at the top unless there are 
-certain interfaces you wish you only poll or perhaps leave out.  After
-checking this, scroll to the bottom.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_7.png
-
-===== Cacti Config Step 7 =====
-
-At the bottom of the page is a drop down for the *format* of the data.  It is
-common to use the 64 bit counters (especially for backbone networks) and 
-display the information as bytes as shown here.  Other options are of course
-available.  When done click *Create*.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_8.png
-
-===== Cacti Config Step 8 =====
-
-The resulting page should show the success or failure of each interface.  At
-this point the following actions have happened:
-
- * RRD Files have been created for the interfaces in question
- * A Poller has been notified that these are values of interest (polling will occur by default every 5 minutes) 
- * Graph templates have been established
- 
-We now can organize this *set* into a graph tree for later display.  Select
-*Graph Trees* on the left hand side.  
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_9.png
-
-===== Cacti Config Step 9 =====
-
-Select *Default Tree*.  It is also possible to create your own tree at this
-stage if desired.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_10.png
-
-===== Cacti Config Step 10 =====
-
-As in _Step 3_ there is another *Add* button to click because we wish to add
-a new host to the tree.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_11.png
-
-===== Cacti Config Step 11 =====
-
-Select *Host* from the drop down.  This will automatically populate the
-next drop down with the network device you have set up.  When you are
-set click *Create*.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_12.png
-
-===== Cacti Config Step 12 =====
-
-The next menu shows that the device has been added.  To see the graphs
-click on *Graphs* on the top.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_13.png
-
-
-===== Cacti Config Step 13 =====
-
-By default you can view the _localhost_ statistics, but below this the new
-network device is present.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_14.png
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_15.png
-
-===== Cacti Config Step 14 =====
-
-Back on the NPTookit, it is necessary to (Re-)start the perfSONAR-PS SNMP
-MA daemon by entering _sudo /etc/init.d/snmpMA.sh restart_
-
-===== Cacti Config Step 15 =====
-
-Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkit#Disk_Verification Disk Verification].
-
-==== perfSONAR BUOY Configuration ==== 
-
-perfSONAR-BUOY is not configured to run by default: it requires knowledge of current and reachable BWCTL and OWAMP servers.  After your machine is booted, visit the configuration web page (this can be done locally if you have console access to the freshly booted machine, or remotly): https://HOST_OR_ADDRESS/admin/perfsonarbuoy/.  This should bring up a screen similar to this: 
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
-
-For now, only two choices work: *_BWCTL IPv4_* or *_BWCTL IPv6_* on the left side. Click on one of these (will illustrate with IPv4).  A screen similar to this will appear (note on this test machine the mesh is already set up so values will appear selected already). Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time). 
-
-There are three common options for tests: 
-
- * Test every *15* minutes for *10* seconds 
- * Test every *1* hour  for *60* seconds 
- * Test every *4* hours for *60* seconds 
-
-More test options will be available in future releases. The screen will look like this after selection: 
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
-
-Press _Save_ and wait for the browser to display a message indicating success. The browser can be closed and a terminal will be required to start the services: 
-
- * _/etc/init.d/pSB_master.sh restart_
- * _/etc/init.d/pSB_collector.sh restart_
- * _/etc/init.d/pSB.sh restart_
-
-Due to the frequency of tests you have chosen, there may be a small lag when the results become available. 
-
-Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkit#Disk_Verification Disk Verification].
-
-==== PingER Configuration ==== 
-
-[NPToolkit#PingER_Configuration PingER] comes pre-configured, but it is possible to add and delete from this basic list.  
-
- * [NPToolkit#Pinger_Config_Step_1 Start Configuration GUI]
- * [NPToolkit#Pinger_Config_Step_2 Initial Display]
- * [NPToolkit#Pinger_Config_Step_3 List Display]
- * [NPToolkit#Pinger_Config_Step_4 Adding a new Host]
- * [NPToolkit#Pinger_Config_Step_5 Save Hosts]
- * [NPToolkit#Pinger_Config_Step_6 Status Message]
- * [NPToolkit#Pinger_Config_Step_7 Project Display]
-
-===== PingER Config Step 1 =====
-
-Like most of the GUIs it is necessary to log in with the _*knoppix*_ user or some other configured username.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_1.png
-
-===== PingER Config Step 2 =====
-
-The GUI looks like this by default, populated with several services.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_2.png
-
-===== PingER Config Step 3 =====
-
-Mousing over any entry shows the exact host.  Changes may be made here.  
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_3.png
-
-===== PingER Config Step 4 =====
-
-A new host can be added at any time.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_4.png
-
-===== PingER Config Step 5 =====
-
-After entering information, save it.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_5.png
-
-===== PingER Config Step 6 =====
-
-The following status message appears after saving.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_6.png
-
-===== PingER Config Step 7 =====
-
-The bottom of the page lists project memberships.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_7.png
-
-If there are multiple associations, they will be listed.
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_8.png
-
-=== Disk Verification ===
-
-Once the machine has booted it is now accessible via the static IP or a DHCP address.  To see the address use the */sbin/ifconfig* command from the console:
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
-
-Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
-
-There are also several GUIs linked directly form this page that can be used to view the status of services:
-
-  * https://HOST_OR_ADDRESS/gui/directory.cgi
-    * GUI to visualize all available _perfSONAR_ data sources world wide by using the [NPToolkit#Lookup_Service gLS].
-    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_25_Directory.png
-  * https://HOST_OR_ADDRESS/gui/cacti
-    * GUI to visualize [NPToolkit#SNMP_Measurement_Archive SNMP] data
-    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_26_Cacti.png
-  * https://HOST_OR_ADDRESS/gui/pinger
-    * GUI to visualize [NPToolkit#PingER_Measurement_Archive_and_Measurement_Point PingER] data
-    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_27_PingER.png
-  * https://HOST_OR_ADDRESS:8200
-    * [NPToolkit#NPAD NPAD] test web page
-  * https://HOST_OR_ADDRESS:7123
-    * [NPToolkit#NDT NDT] test web page
-  * https://HOST_OR_ADDRESS/gui/jowping
-    * Java client for the [NPToolkit#OWAMP OWAMP]  tool
-    * Designed to be run from a remote host (similar to NDT/NPAD)
-    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_28_Java_OWAMP.png
-  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
-    * Test the [NPToolkit#perfSONAR_BUOY_Measurement_Archive perfSONAR-BUOY] service and bandwidth ([NPToolkit#BWCTL BWCTL]) data
-  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921
-    * Test the [NPToolkit#perfSONAR_BUOY_Measurement_Archive perfSONAR-BUOY] service and delay ([NPToolkit#OWAMP OWAMP]) data
-  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8075/perfSONAR_PS/services/pinger/ma&eventType=http://ggf.org/ns/nmwg/tools/pinger/2.0/
-    * Test the [NPToolkit#PingER_Measurement_Archive_and_Measurement_Point PingER] service and data
-  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8065/perfSONAR_PS/services/snmpMA&eventType=http://ggf.org/ns/nmwg/characteristic/utilization/2.0   
-    * Test the [NPToolkit#SNMP_Measurement_Archive SNMP MA] service and data
-
 == FAQ ==
-
- * *Q: How do I logon to the console?*
- * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. By default, there is no password for this account and no remote access is allowed.  See instructions in [NPToolkit#Console_Configuration Console Configuration] to change details regarding system users, or enable remote access.
-
- * *Q: How do I get an X-windows environment?*
- * *A:* The NPToolkit was designed for hands-off operations, so it boots into the console mode by default.  For users interested in working in an XWindows environment, [http://www.kde.org KDE] is available.  To bring the system up in X11 mode log in as *_knoppix_*, or any other valid user, and run the _startx_ command.
 
  * *Q: How do I run the NPAD system?*
  * *A:* The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] (Network Path and Application Diagnosis) is a client/server program developed by the network research group at Pittsburgh Supercomputer Center ([http://www.psc.edu PSC]). At boot time, the NPToolkit starts the NPAD server process and leaves it listening on TCP port *8200*. To use this server, a user starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:8200). The server automatically downloads a Java applet to the client. Then the user runs a test to begin the diagnostic process. Once the test has been completed, the server displays a results page on the clients browser. The user may examine these results and follow the recommendations to resolve problems. If the user is unable to repair a reported problem, the results page URL can be emailed to the appropriate system administrator or NOC operator.  The server retains a complete record of the test results and the raw data used to derive these results. This allows post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NPAD server.
 
  * *Q: How do I use BWCTL?*
- * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thurlay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp] testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients.  Additionally, the disk contains BWCTL client applications that can be used to test to remote instances.  The BWCTL server allows TCP tests with a maximum duration of *60* seconds. To run a test to a remote BWCTL server:
+ * *A:* [http://e2epi.internet2.edu/bwctl/ BWCTL] (Bandwidth Test Controller) is a client/server program developed to simplify [http://www.dast.nlanr.net/Projects/Iperf Iperf], [http://sourceforge.net/projects/thrulay thrulay], and [http://www.wcisd.hpc.mil/nuttcp nuttcp] testing between hosts. At boot time, the NPTookit starts a BWCTL server process and leaves it listening on TCP port *4823*. This server may then be accessed by remote BWCTL clients.  Additionally, the disk contains BWCTL client applications that can be used to test to remote instances.  The BWCTL server allows TCP tests with a maximum duration of *60* seconds. To run a test to a remote BWCTL server:
    # Logon to the NPToolkit server using the *_knoppix_* or other valid userid
    # Identify the remote server
-   # Run _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the localy instance to the remote BWCTL server. Results are displayed on our console or terminal window.
+   # Run _bwctl -s remote-bwctl-server_ command to stream data for 10 seconds from the locally instance to the remote BWCTL server. Results are displayed on our console or terminal window.
 
  * *Q: How do I run the NDT system?*
  * *A:* The [http://e2epi.internet2.edu/ndt/ NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the NPToolkit starts a pair of NDT server processes and leaves them listening on TCP ports *7123* and *3001*. To use this server, a client starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate NPToolkit administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
 
  * *Q: What is NTP?*
- * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkit#Console_Configuration Console Configuration] for information regarding changing the default time sources.
+ * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkitQuickStart#Console_Configuration Console Configuration] for information regarding changing the default time sources.
 
  * *Q: How do I use OWAMP?*
  * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two target computers. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients.  Additionally, the disk contains OWAMP client applications that can be used to test to remote instances (including a Java client and a console based application).  By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.
@@ -649,24 +266,6 @@ There are also several GUIs linked directly form this page that can be used to v
  * *A:* 
    * For questions, email to i2-perfsonar _at_ internet2 _dot_ edu
    * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description the issue involves the NPtoolkit.
-
- * *Q: How do I configure the SNMP MA?*
- * *A:* The SNMP MA is pre-configured to use the Cacti SNMP collection system. A step by step guide to configuring cacti is available in [NPToolkit#Cacti_Configuration Cacti Configuration].
-
- * *Q: How do I configure the hosts PingER pings?*
- * *A:* There's an included GUI for configuring the sites PingER should collect ping between. Navigate to https://HOST/admin/pinger/.  With this GUI, add/remove hosts and domains from testing. Press the _Save landmarks_ button when done and restart PingER by logging into the machine and running _sudo /etc/init.d/PingER.sh restart_.  A step by step guide to configuring cacti is available in [NPToolkit#PingER_Configuration PingER Configuration].
-
- * *Q: How do I configure the hosts perfSONAR-BUOY pings?*
- * *A:* There's an included GUI for configuring the sites perfSONAR-BUOY should perform OWAMP/BWCTL tests between. Navigate to https://HOST/admin/perfsonarbuoy/.  With this GUI, add/remove hosts and adjust other testing parameters. Press the _Save_ button when done and restart perfSONAR-BUOY by logging into the machine and running, _sudo /etc/init.d/pSB.sh restart_, _sudo /etc/init.d/pSB_collector.sh restart_ and _sudo /etc/init.d/pSB_master.sh restart_.  A step by step guide to configuration is available in [NPToolkit#perfSONAR_BUOY_Configuration perfSONAR BUOY Configuration].
-
- * *Q: How do I test that my services are working?*
- * *A:* There is a _self status_ page available on every installation: https://HOST/.  Each subsection of the disk features links to GUIs that validate the functionality of the services.  
-   
- * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
- * *A:* Not currently, but this is a consideration of future releases.
-
- * *Q: When I boot, it gives me the following error _Can't find knoppix filesystem, sorry. Dropping you to a very limited shell ...._*
- * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
 
  * *Q: I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_200809' doesn't exist at /some/path/to/Base.pm line XXX_.*
  * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.

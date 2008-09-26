@@ -1,0 +1,429 @@
+= perfSONAR Network Performance Toolkit Quick Start =
+
+== TOC ==
+
+ * [NPToolkitQuickStart#Installation_and_Configuration Installation and Configuration]
+   * [NPToolkitQuickStart#First_Steps First Steps]
+   * [NPToolkitQuickStart#Console_Configuration Console Configuration]
+   * [NPToolkitQuickStart#Web_Configuration Web Configuration]
+     * [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration]
+     * [NPToolkitQuickStart#perfSONAR_BUOY_Configuration perfSONAR-BUOY Configuration]
+     * [NPToolkitQuickStart#PingER_Configuration PingER Configuration]
+   * [NPToolkitQuickStart#Disk_Verification Disk Verification]
+ * [NPToolkitQuickStart#FAQ FAQ]
+ * [NPToolkitQuickStart#Last_Updated Last Updated]
+
+== Installation and Configuration ==
+
+The following guide describes in detail the steps required to set up the _perfSONAR_ Network Performance Toolkit.  It is important to follow each step in order.  If you get stuck consult the [NPToolkitQuickStart#FAQ FAQ] at the end of this document.  
+
+=== First Steps ===
+
+  # Download the the latest from:
+    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.iso]
+    * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/current.md5]
+  # Verify the MD5 sum:
+    * md5sum -c pS-NPToolkit-2.0-beta2.iso 
+  # Burn the ISO to a CD-ROM
+  # Configure your computer to boot from CD
+    * This may require changes to the computer's BIOS to ensure the CD is recognized before an existing harddisk
+    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult your manual if you are unsure or pay close attention to the boot process to enter _setup_).  
+  # Insert the CD-ROM into the tray and boot the system
+    * A splash screen will appear and the computer should enter the boot and customization process.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_1_Spash.png
+    * The boot process will proceed after this screen.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_2_Boot.png
+
+=== Console Configuration ===
+
+During the boot process, you'll be presented with a menu of options. 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_3_Menu.png
+
+Each step will be explained here with pictures where applicable.  
+ 
+  # Step 1 is _Configure drive to hold data/customizations_
+    * From the list, select which drive you would like to allow the disc to use to save data
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_4_Option1_1.png
+    * You will have the option format the drive (if the disk is unreadable, you will be forced to format the drive)   
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_5_Option1_2.png
+    * If the disk is readable, you can skip the formatting step
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_6_Option1_3.png
+    * These steps may force an immediate reboot to save settings, this is normal.
+  # Step 2 is _Configure site settings_
+    * Answer the questions accurately, as this information is shared in a [NPToolkit#Lookup_Service global information directory]
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_7_Option2.png
+  # Step 3 is _Enable/Disable Services_
+    * All services are enabled by default with the exception of SSH.  
+      * To use SSH you must either change the password for the _*knoppix*_ user or add a new user, see _Step 4_
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_8_Option3.png
+  # Step 4 is _Manage Users_
+    * Select option *3* to _Change A User's Password_
+      * Enter _root_
+      * Enter a new password
+      * While not required, this is a *_GOOD IDEA_* to do this
+    * The same can be done for _knoppix_
+      * This should be done if you enabled SSH in _Step 3_
+    * To add a user select _Add a new user_
+      * Enter the name
+      * Allow/disallow SSH access
+      * Allow/disallow administrator status
+      * Enter user information
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_9_Option4.png
+  # Step 5 is _Configure BWCTL_
+    * Answer some basic questions about BWCTL, in most cases the defaults will be fine
+    * Use these options to limit access or increase/decrease the resources available for this tool
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_10_Option5.png
+  # Step 6 is _Configure NTP_
+    * Different NTP (time) servers can be configured for your geographical location
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_Option6.png
+    * Note that it is necessary to choose at least 3 servers.
+    * Note that it is not necessary to choose more than 5 servers.
+  # Step 7 is _Configure OWAMP_
+    * Answer some basic questions about OWAMP, in most cases the defaults will be fine
+    * Use these options to limit access or increase/decrease the resources available for this tool
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_12_Option7.png
+  # Step 8 is _Configure Static IP_
+    * This is an _*optional*_ step in case there is not DHCP available.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_13_Option8.png
+  # Step 9 is _Change Timezone_
+    * Use this step to pick the correct timezone.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_14_Option9_1.png
+    * When choosing a new timezone there will be many options.
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_15_Option9_2.png
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_16_Option9_3.png
+  # Step 10 is _Modify advertised interface_  
+    * If the machine has multiple interfaces, use this option to select the proper outlet
+      * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_17_Option10.png
+
+After exiting the menu, the machine may require a reboot.  If this is the case, please do so.  When the machine comes back up then simply exit the configuration.  After performing all of these steps and exiting the menu the bootup process will start:
+      
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_18_Starting.png
+
+The user will be faced with a prompt:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_19_Prompt.png
+
+_*knoppix*_ is the default user, with a blank password unless this was changed in [NPToolkitQuickStart#Console_Configuration Step 4].  There are some additional steps that can now be taken to configure some other services, specifically the _perfSONAR_ services. 
+
+=== Web Configuration ===
+
+Once the machine has booted it is now accessible via the static IP or a DHCP address.  To see the address use the */sbin/ifconfig* command from the console:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
+
+Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
+
+There are several GUIs that can be used configure services (note you will be required to log in as the _knoppix_ or other users added in [NPToolkitQuickStart#Console_Configuration Step 4] above.  You _*cannot*_ log in as root):
+
+ * https://HOST_OR_ADDRESS/admin/pinger
+   * Used to configure hosts for the PingER tool
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_22_PingER_Start.png
+ * https://HOST_OR_ADDRESS/admin/perfsonarbuoy
+   * Used to configure hosts for the perfSONAR-BUOY Bandwidth and Latency Tester
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_23_pSB_Start.png
+ * https://HOST_OR_ADDRESS/admin/cacti
+   * Used to configure SNMP Hosts for the perfSONAR SNMP MA
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_24_Cacti.png
+
+==== Cacti Configuration ==== 
+
+Cacti is used to poll SNMP on network devices, and is a natural extension of the [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive].  The following steps will explain the basic setup of Cacti (e.g. to poll a network device).  A user wishing to do more with the software should consult the documentation.  
+
+ * [NPToolkitQuickStart#Cacti_Config_Step_1 Locate Cacti GUI and Login]
+ * [NPToolkitQuickStart#Cacti_Config_Step_2 Create Network Device]
+ * [NPToolkitQuickStart#Cacti_Config_Step_3 Add New Device]
+ * [NPToolkitQuickStart#Cacti_Config_Step_4 Enter Device Info]
+ * [NPToolkitQuickStart#Cacti_Config_Step_5 Create Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_6 Select Graph Info]
+ * [NPToolkitQuickStart#Cacti_Config_Step_7 Load Graph Data]
+ * [NPToolkitQuickStart#Cacti_Config_Step_8 Edit Graph Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_9 Select Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_10 Add Graphs to Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_11 Select Graphs for Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_12 View Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_13 Select Other Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_14 Restart SNMP MA]
+ * [NPToolkitQuickStart#Cacti_Config_Step_15 View perfSONAR Graphs]
+
+===== Cacti Config Step 1 =====
+
+Visit the Cacti instance.  If you are using the XWindows environment of the disk this can be as simple as viewing *_https://localhost/admin/cacti_*.  If you are configuring this remotely you will need to know the name of the host.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_1.png
+
+
+===== Cacti Config Step 2 =====
+
+After logging in you will see the _home_ screen.  In the middle there
+will be an option to *Create devices*.  This is where we will begin.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_2.png
+
+===== Cacti Config Step 3 =====
+
+The next screen shows the currently known devices.  The basic setup will
+*always* include _localhost_.  The example below shows a previously
+configured switch.  On the right side there is an *Add* _button_ (although
+it doesn't appear to be so).  Click this to add a new device.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_3.png
+
+===== Cacti Config Step 4 =====
+
+The next screen features many places to add information about your new
+network device.  Note that the red circles are representative of the most
+common places to make changes.  When you are finished press *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_5.png
+
+===== Cacti Config Step 5 =====
+
+By default Cacti will only poll the *System* information of the SNMP enabled
+host at this stage, just to see if it is alive.  To poll information such
+as network statistics it is necessary to create *Graphs*.  We will proceed
+by clicking on *Create graphs for this Host*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_6.png
+
+===== Cacti Config Step 6 =====
+
+The next screen displays the possible interfaces that are available for 
+data display.  Note that this may be a *large* number.  In general it is
+efficient to simply click the *all* checkbox at the top unless there are 
+certain interfaces you wish you only poll or perhaps leave out.  After
+checking this, scroll to the bottom.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_7.png
+
+===== Cacti Config Step 7 =====
+
+At the bottom of the page is a drop down for the *format* of the data.  It is
+common to use the 64 bit counters (especially for backbone networks) and 
+display the information as bytes as shown here.  Other options are of course
+available.  When done click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_8.png
+
+===== Cacti Config Step 8 =====
+
+The resulting page should show the success or failure of each interface.  At
+this point the following actions have happened:
+
+ * RRD Files have been created for the interfaces in question
+ * A Poller has been notified that these are values of interest (polling will occur by default every 5 minutes) 
+ * Graph templates have been established
+ 
+We now can organize this *set* into a graph tree for later display.  Select
+*Graph Trees* on the left hand side.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_9.png
+
+===== Cacti Config Step 9 =====
+
+Select *Default Tree*.  It is also possible to create your own tree at this
+stage if desired.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_10.png
+
+===== Cacti Config Step 10 =====
+
+As in _Step 3_ there is another *Add* button to click because we wish to add
+a new host to the tree.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_11.png
+
+===== Cacti Config Step 11 =====
+
+Select *Host* from the drop down.  This will automatically populate the
+next drop down with the network device you have set up.  When you are
+set click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_12.png
+
+===== Cacti Config Step 12 =====
+
+The next menu shows that the device has been added.  To see the graphs
+click on *Graphs* on the top.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_13.png
+
+
+===== Cacti Config Step 13 =====
+
+By default you can view the _localhost_ statistics, but below this the new
+network device is present.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_14.png
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_15.png
+
+===== Cacti Config Step 14 =====
+
+Back on the NPTookit, it is necessary to (Re-)start the perfSONAR-PS SNMP
+MA daemon by entering _sudo /etc/init.d/snmpMA.sh restart_
+
+===== Cacti Config Step 15 =====
+
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Disk_Verification Disk Verification].
+
+==== perfSONAR BUOY Configuration ==== 
+
+perfSONAR-BUOY is not configured to run by default: it requires knowledge of current and reachable BWCTL and OWAMP servers.  After your machine is booted, visit the configuration web page (this can be done locally if you have console access to the freshly booted machine, or remotely): https://HOST_OR_ADDRESS/admin/perfsonarbuoy/.  This should bring up a screen similar to this: 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
+
+For now, only two choices work: *_BWCTL IPv4_* or *_BWCTL IPv6_* on the left side. Click on one of these (will illustrate with IPv4).  A screen similar to this will appear (note on this test machine the mesh is already set up so values will appear selected already). Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time). 
+
+There are three common options for tests: 
+
+ * Test every *15* minutes for *10* seconds 
+ * Test every *1* hour  for *60* seconds 
+ * Test every *4* hours for *60* seconds 
+
+More test options will be available in future releases. The screen will look like this after selection: 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
+
+Press _Save_ and wait for the browser to display a message indicating success. The browser can be closed and a terminal will be required to start the services: 
+
+ * _/etc/init.d/pSB_master.sh restart_
+ * _/etc/init.d/pSB_collector.sh restart_
+ * _/etc/init.d/pSB.sh restart_
+
+Due to the frequency of tests you have chosen, there may be a small lag when the results become available. 
+
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Disk_Verification Disk Verification].
+
+==== PingER Configuration ==== 
+
+PingER comes pre-configured, but it is possible to add and delete from this basic list.  
+
+ * [NPToolkitQuickStart#Pinger_Config_Step_1 Start Configuration GUI]
+ * [NPToolkitQuickStart#Pinger_Config_Step_2 Initial Display]
+ * [NPToolkitQuickStart#Pinger_Config_Step_3 List Display]
+ * [NPToolkitQuickStart#Pinger_Config_Step_4 Adding a new Host]
+ * [NPToolkitQuickStart#Pinger_Config_Step_5 Save Hosts]
+ * [NPToolkitQuickStart#Pinger_Config_Step_6 Status Message]
+ * [NPToolkitQuickStart#Pinger_Config_Step_7 Project Display]
+
+===== PingER Config Step 1 =====
+
+Like most of the GUIs it is necessary to log in with the _*knoppix*_ user or some other configured username.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_1.png
+
+===== PingER Config Step 2 =====
+
+The GUI looks like this by default, populated with several services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_2.png
+
+===== PingER Config Step 3 =====
+
+Mousing over any entry shows the exact host.  Changes may be made here.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_3.png
+
+===== PingER Config Step 4 =====
+
+A new host can be added at any time.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_4.png
+
+===== PingER Config Step 5 =====
+
+After entering information, save it.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_5.png
+
+===== PingER Config Step 6 =====
+
+The following status message appears after saving.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_6.png
+
+===== PingER Config Step 7 =====
+
+The bottom of the page lists project memberships.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_7.png
+
+If there are multiple associations, they will be listed.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_8.png
+
+=== Disk Verification ===
+
+Once the machine has booted it is now accessible via the static IP or a DHCP address.  To see the address use the */sbin/ifconfig* command from the console:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
+
+Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
+
+There are also several GUIs linked directly form this page that can be used to view the status of services:
+
+  * https://HOST_OR_ADDRESS/gui/directory.cgi
+    * GUI to visualize all available _perfSONAR_ data sources world wide by using the [NPToolkit#Lookup_Service gLS].
+    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_25_Directory.png
+  * https://HOST_OR_ADDRESS/gui/cacti
+    * GUI to visualize [NPToolkit#SNMP_Measurement_Archive SNMP] data
+    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_26_Cacti.png
+  * https://HOST_OR_ADDRESS/gui/pinger
+    * GUI to visualize [NPToolkit#PingER_Measurement_Archive_and_Measurement_Point PingER] data
+    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_27_PingER.png
+  * https://HOST_OR_ADDRESS:8200
+    * [NPToolkit#NPAD NPAD] test web page
+  * https://HOST_OR_ADDRESS:7123
+    * [NPToolkit#NDT NDT] test web page
+  * https://HOST_OR_ADDRESS/gui/jowping
+    * Java client for the [NPToolkit#OWAMP OWAMP]  tool
+    * Designed to be run from a remote host (similar to NDT/NPAD)
+    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_28_Java_OWAMP.png
+  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/tools/iperf/2.0
+    * Test the [NPToolkit#perfSONAR_BUOY_Measurement_Archive perfSONAR-BUOY] service and bandwidth ([NPToolkit#BWCTL BWCTL]) data
+  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8085/perfSONAR_PS/services/pSB&eventType=http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921
+    * Test the [NPToolkit#perfSONAR_BUOY_Measurement_Archive perfSONAR-BUOY] service and delay ([NPToolkit#OWAMP OWAMP]) data
+  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8075/perfSONAR_PS/services/pinger/ma&eventType=http://ggf.org/ns/nmwg/tools/pinger/2.0/
+    * Test the [NPToolkit#PingER_Measurement_Archive_and_Measurement_Point PingER] service and data
+  * https://HOST_OR_ADDRESS/gui/serviceTest.cgi?url=http://HOST_OR_ADDRESS:8065/perfSONAR_PS/services/snmpMA&eventType=http://ggf.org/ns/nmwg/characteristic/utilization/2.0   
+    * Test the [NPToolkit#SNMP_Measurement_Archive SNMP MA] service and data
+    
+== FAQ ==
+
+ * *Q: How do I logon to the console?*
+ * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. By default, there is no password for this account and no remote access is allowed.  See instructions in [NPToolkitQuickStart#Console_Configuration Console Configuration] to change details regarding system users, or enable remote access.
+
+ * *Q: How do I get an X-windows environment?*
+ * *A:* The NPToolkit was designed for hands-off operations, so it boots into the console mode by default.  For users interested in working in an XWindows environment, [http://www.kde.org KDE] is available.  To bring the system up in X11 mode log in as *_knoppix_*, or any other valid user, and run the _startx_ command.
+
+ * *Q: Where can I ask questions or report bugs?*
+ * *A:* 
+   * For questions, email to i2-perfsonar _at_ internet2 _dot_ edu
+   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description the issue involves the NPtoolkit.
+
+ * *Q: How do I configure the SNMP MA?*
+ * *A:* The SNMP MA is pre-configured to use the Cacti SNMP collection system. A step by step guide to configuring cacti is available in [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration].
+
+ * *Q: How do I configure the hosts PingER pings?*
+ * *A:* There's an included GUI for configuring the sites PingER should collect ping between. Navigate to https://HOST/admin/pinger/.  With this GUI, add/remove hosts and domains from testing. Press the _Save landmarks_ button when done and restart PingER by logging into the machine and running _sudo /etc/init.d/PingER.sh restart_.  A step by step guide to configuring cacti is available in [NPToolkitQuickStart#PingER_Configuration PingER Configuration].
+
+ * *Q: How do I configure the hosts perfSONAR-BUOY pings?*
+ * *A:* There's an included GUI for configuring the sites perfSONAR-BUOY should perform OWAMP/BWCTL tests between. Navigate to https://HOST/admin/perfsonarbuoy/.  With this GUI, add/remove hosts and adjust other testing parameters. Press the _Save_ button when done and restart perfSONAR-BUOY by logging into the machine and running, _sudo /etc/init.d/pSB.sh restart_, _sudo /etc/init.d/pSB_collector.sh restart_ and _sudo /etc/init.d/pSB_master.sh restart_.  A step by step guide to configuration is available in [NPToolkitQuickStart#perfSONAR_BUOY_Configuration perfSONAR BUOY Configuration].
+
+ * *Q: How do I test that my services are working?*
+ * *A:* There is a _self status_ page available on every installation: https://HOST/.  Each subsection of the disk features links to GUIs that validate the functionality of the services.  
+   
+ * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
+ * *A:* Not currently, but this is a consideration of future releases.
+
+ * *Q: When I boot, it gives me the following error _Can't find knoppix file system, sorry. Dropping you to a very limited shell ...._*
+ * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
+
+== Last Updated ==
+
+$Id$
