@@ -277,7 +277,7 @@ Perform a SetupDataRequest, the results are returned as a data/metadata pair.
 
 sub setupDataRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { subject => 0, eventTypes => 1, parameters => 0, start => 0, end => 0, resolution => 0, consolidationFunction => 0 } );
+    my $parameters = validateParams( @args, { subject => 0, eventTypes => 1, parameterblock => 0, parameters => 0, start => 0, end => 0, resolution => 0, consolidationFunction => 0 } );
 
     my $mdId = "metadata." . genuid();
     my $dId = "data." . genuid();
@@ -290,13 +290,18 @@ sub setupDataRequest {
     foreach my $et ( @{ $parameters->{"eventTypes"} } ) {
         $content .= "    <nmwg:eventType>".$et."</nmwg:eventType>\n";
     }
-    if ( exists $parameters->{"parameters"} and $parameters->{"parameters"} ) {
+
+    if ( exists $parameters->{"parameterblock"} and $parameters->{"parameterblock"} ) {    
+        $content .= $parameters->{"parameterblock"};
+    }
+    elsif ( exists $parameters->{"parameters"} and $parameters->{"parameters"} ) {
         $content .= "    <nmwg:parameters id=\"parameters.".genuid()."\">\n";
         foreach my $p ( keys %{ $parameters->{"parameters"} } ) {
             $content .= "      <nmwg:parameter name=\"".$p."\">".$parameters->{"parameters"}->{$p}."</nmwg:parameter>\n";
         }
         $content .= "    </nmwg:parameters>\n";
     }
+    
     $content .= "  </nmwg:metadata>\n";
     
     if ( ( exists $parameters->{"start"} and $parameters->{"start"} ) or 
