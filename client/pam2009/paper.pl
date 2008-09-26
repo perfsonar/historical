@@ -353,7 +353,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
                             $temp =~ s/ /_/g;
 
                             open( CSV1, ">SNMP_" . $host_name . "_" . $host_port . "_" . $host_endpoint . "-" . $list{$host}{$name}->{"hostName"} . "_" . $temp . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
-                            print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M)\n";
+                            print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M),SNMP\n";
                             print CSV1 $list{$host}{$name}->{"ipAddress"}, ",", $list{$host}{$name}->{"hostName"}, ",", $list{$host}{$name}->{"ifName"}, ",", $list{$host}{$name}->{"ifDescription"}, ",", $list{$host}{$name}->{"ifAddress"}, ",",
                                 eval( $list{$host}{$name}->{"capacity"} / 1000000 ) . "\n\n";
 
@@ -477,7 +477,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
                             open( CSV, ">pSB_" . $host_name . "_" . $host_port . "_" . $host_endpoint . "-" . $src_addr . "_" . $dst_addr . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
-                            print CSV "source address, source host, destination address, destination host\n";
+                            print CSV "source address, source host, destination address, destination host,iperf\n";
                             print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, "\n\n";
 
                             my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
@@ -594,7 +594,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
                                     }
                                 }
 
-                                print CSV "unix time,iso time,minRtt,maxRtt,medianRtt,meanRtt,iqrIpd,maxIpd,meanIpd\n";
+                                print CSV "unix time,iso time,minRtt,maxRtt,medianRtt,meanRtt,iqrIpd,maxIpd,meanIpd,PingER\n";
                                 my @array = ( "minRtt", "maxRtt", "medianRtt", "meanRtt", "iqrIpd", "maxIpd", "meanIpd" );
                                 foreach my $time ( sort keys %store ) {
                                     next unless $time;
