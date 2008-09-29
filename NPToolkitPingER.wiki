@@ -1,0 +1,67 @@
+= perfSONAR Network Performance Toolkit PingER Configuration =
+
+== TOC ==
+
+ * [NPToolkitQuickStart#Pinger_Config_Step_1 Start Configuration GUI]
+ * [NPToolkitQuickStart#Pinger_Config_Step_2 Initial Display]
+ * [NPToolkitQuickStart#Pinger_Config_Step_3 List Display]
+ * [NPToolkitQuickStart#Pinger_Config_Step_4 Adding a new Host]
+ * [NPToolkitQuickStart#Pinger_Config_Step_5 Save Hosts]
+ * [NPToolkitQuickStart#Pinger_Config_Step_6 Status Message]
+ * [NPToolkitQuickStart#Pinger_Config_Step_7 Project Display]
+
+PingER comes pre-configured, but it is possible to add and delete from this basic list of hosts.
+
+== PingER Config Step 1 ==
+
+Like most of the GUIs it is necessary to log in with the _*knoppix*_ user or some other configured username.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_1.png
+
+== PingER Config Step 2 ==
+
+The GUI looks like this by default, populated with several services.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_2.png
+
+== PingER Config Step 3 ==
+
+Mousing over any entry shows the exact host.  Changes may be made here.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_3.png
+
+== PingER Config Step 4 ==
+
+A new host can be added at any time.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_4.png
+
+== PingER Config Step 5 ==
+
+After entering information, save it.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_5.png
+
+== PingER Config Step 6 ==
+
+The following status message appears after saving.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_6.png
+
+== PingER Config Step 7 ==
+
+The bottom of the page lists project memberships.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_7.png
+
+If there are multiple associations, they will be listed.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_8.png
+
+== PingER Config Step 8 ==
+
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Service_Test Disk Verification - Service Test].
+
+== Last Updated ==
+
+$Id$

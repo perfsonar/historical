@@ -1,0 +1,147 @@
+= perfSONAR Network Performance Toolkit Cacti Configuration =
+
+== TOC ==
+
+ * [NPToolkitQuickStart#Cacti_Config_Step_1 Locate Cacti GUI and Login]
+ * [NPToolkitQuickStart#Cacti_Config_Step_2 Create Network Device]
+ * [NPToolkitQuickStart#Cacti_Config_Step_3 Add New Device]
+ * [NPToolkitQuickStart#Cacti_Config_Step_4 Enter Device Info]
+ * [NPToolkitQuickStart#Cacti_Config_Step_5 Create Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_6 Select Graph Info]
+ * [NPToolkitQuickStart#Cacti_Config_Step_7 Load Graph Data]
+ * [NPToolkitQuickStart#Cacti_Config_Step_8 Edit Graph Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_9 Select Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_10 Add Graphs to Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_11 Select Graphs for Tree]
+ * [NPToolkitQuickStart#Cacti_Config_Step_12 View Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_13 Select Other Graphs]
+ * [NPToolkitQuickStart#Cacti_Config_Step_14 Restart SNMP MA]
+ * [NPToolkitQuickStart#Cacti_Config_Step_15 View perfSONAR Graphs]
+
+Cacti is used to poll SNMP on network devices, and is a natural extension of the [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive].  The following steps will explain the basic setup of Cacti (e.g. to poll a network device).  A user wishing to do more with the software should consult the documentation.  
+
+===== Cacti Config Step 1 =====
+
+Visit the Cacti instance.  If you are using the XWindows environment of the disk this can be as simple as viewing *_https://localhost/admin/cacti_*.  If you are configuring this remotely you will need to know the name of the host.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_1.png
+
+
+===== Cacti Config Step 2 =====
+
+After logging in you will see the _home_ screen.  In the middle there
+will be an option to *Create devices*.  This is where we will begin.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_2.png
+
+===== Cacti Config Step 3 =====
+
+The next screen shows the currently known devices.  The basic setup will
+*always* include _localhost_.  The example below shows a previously
+configured switch.  On the right side there is an *Add* _button_ (although
+it doesn't appear to be so).  Click this to add a new device.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_3.png
+
+===== Cacti Config Step 4 =====
+
+The next screen features many places to add information about your new
+network device.  Note that the red circles are representative of the most
+common places to make changes.  When you are finished press *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_4.png
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_5.png
+
+===== Cacti Config Step 5 =====
+
+By default Cacti will only poll the *System* information of the SNMP enabled
+host at this stage, just to see if it is alive.  To poll information such
+as network statistics it is necessary to create *Graphs*.  We will proceed
+by clicking on *Create graphs for this Host*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_6.png
+
+===== Cacti Config Step 6 =====
+
+The next screen displays the possible interfaces that are available for 
+data display.  Note that this may be a *large* number.  In general it is
+efficient to simply click the *all* checkbox at the top unless there are 
+certain interfaces you wish you only poll or perhaps leave out.  After
+checking this, scroll to the bottom.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_7.png
+
+===== Cacti Config Step 7 =====
+
+At the bottom of the page is a drop down for the *format* of the data.  It is
+common to use the 64 bit counters (especially for backbone networks) and 
+display the information as bytes as shown here.  Other options are of course
+available.  When done click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_8.png
+
+===== Cacti Config Step 8 =====
+
+The resulting page should show the success or failure of each interface.  At
+this point the following actions have happened:
+
+ * RRD Files have been created for the interfaces in question
+ * A Poller has been notified that these are values of interest (polling will occur by default every 5 minutes) 
+ * Graph templates have been established
+ 
+We now can organize this *set* into a graph tree for later display.  Select
+*Graph Trees* on the left hand side.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_9.png
+
+===== Cacti Config Step 9 =====
+
+Select *Default Tree*.  It is also possible to create your own tree at this
+stage if desired.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_10.png
+
+===== Cacti Config Step 10 =====
+
+As in _Step 3_ there is another *Add* button to click because we wish to add
+a new host to the tree.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_11.png
+
+===== Cacti Config Step 11 =====
+
+Select *Host* from the drop down.  This will automatically populate the
+next drop down with the network device you have set up.  When you are
+set click *Create*.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_12.png
+
+===== Cacti Config Step 12 =====
+
+The next menu shows that the device has been added.  To see the graphs
+click on *Graphs* on the top.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_13.png
+
+
+===== Cacti Config Step 13 =====
+
+By default you can view the _localhost_ statistics, but below this the new
+network device is present.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_14.png
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_15.png
+
+===== Cacti Config Step 14 =====
+
+Back on the NPTookit, it is necessary to (Re-)start the perfSONAR-PS SNMP
+MA daemon by entering _sudo /etc/init.d/snmpMA.sh restart_
+
+===== Cacti Config Step 15 =====
+
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Cacti Disk Verification - Cacti].
+
+
+== Last Updated ==
+
+$Id$

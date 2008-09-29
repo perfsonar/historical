@@ -95,29 +95,29 @@ Please visit [NPToolkitQuickStart] for a complete set of instructions regarding 
 
 The main feature is a [http://web100.org/ Web100]-enhanced [http://www.kernel.org/pub/linux/kernel/v2.6/ChangeLog-2.6.23.9 Linux 2.6.23-9 kernel] that facilitates the use of several network tools without the need to configure and compile this advanced component.  This disk features several performance tools pre-installed and configured to a working state:
 
- * [http://e2epi.internet2.edu/bwctl/ BWCTL]
- * [http://www.cacti.net/ Cacti]
- * [http://e2epi.internet2.edu/ndt/ NDT]
- * [http://www.psc.edu/networking/projects/pathdiag/ NPAD]
- * [http://e2epi.internet2.edu/owamp/ OWAMP]
+ * [http://e2epi.internet2.edu/bwctl/ BWCTL] - Bandwidth Test Controller
+ * [http://www.cacti.net/ Cacti] - Network data polling and graphing
+ * [http://e2epi.internet2.edu/ndt/ NDT] - Network Diagnostic Tool
+ * [http://www.psc.edu/networking/projects/pathdiag/ NPAD] - Automatic diagnostic server for troubleshooting end-systems and last-mile network problems
+ * [http://e2epi.internet2.edu/owamp/ OWAMP] - One-way Ping
  * [http://www.internet2.edu/performance/pS-PS/ perfSONAR-PS Tools]
-   * [HLS Lookup Service]
-   * [PINGER PingER Measurement Archive and Measurement Point]
-   * [PSBMA perfSONAR-BUOY Measurement Archive] and [PSBAGENT Collection Framework]
-   * [SNMPMA SNMP Measurement Archive]
- * [http://e2epi.internet2.edu/thrulay/ Thrulay]
+   * [HLS Lookup Service] - perfSONAR registration and discovery
+   * [PINGER PingER Measurement Archive and Measurement Point] - Perform and archive latency measurements
+   * [PSBMA perfSONAR-BUOY Measurement Archive] and [PSBAGENT Collection Framework] - Perform and archive bandwidth and one way latency measurements
+   * [SNMPMA SNMP Measurement Archive] - Archive SNMP data
+ * [http://e2epi.internet2.edu/thrulay/ Thrulay] - Network capacity tester
 
 Additional supporting components include:
 
-    * [http://httpd.apache.org Apache2]
-    * [http://www.kde.org K Desktop Environment]
-    * [http://www.mysql.com MySQL]
-    * [http://www.ntp.org NTP]
-    * [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML]
+    * [http://httpd.apache.org Apache2] - Web server with supporting modules and extensions
+    * [http://www.kde.org K Desktop Environment] - XWindows
+    * [http://www.mysql.com MySQL] - Relational database management system
+    * [http://www.ntp.org NTP] - Network Time Protocol
+    * [http://www.oracle.com/technology/products/berkeley-db/xml/index.html Oracle DB XML] - XML Database
 
 === Performance Tools ===
 
-The following performance tools are packaged on the _perfSONAR_ Network Performance Toolkit.  Each tool comes configured to function with default options, although customization is possible and encouraged.  Certain tools have begun the steps necessary to participate in the [http://www.perfsonar.net perfSONAR] framework by exporting data and utilizing the information services.  Wwe expect many more will follow in the future as adoption continues to grow.
+The following performance tools are packaged on the _perfSONAR_ Network Performance Toolkit.  Each tool comes configured to function with default options, although customization is possible and encouraged.  Certain tools have begun the steps necessary to participate in the [http://www.perfsonar.net perfSONAR] framework by exporting data and utilizing the information services.  We expect many more will follow in the future as adoption continues to grow.
 
 ==== BWCTL ====
 
@@ -267,7 +267,7 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
    * For questions, email to i2-perfsonar _at_ internet2 _dot_ edu
    * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description the issue involves the NPtoolkit.
 
- * *Q: I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_200809' doesn't exist at /some/path/to/Base.pm line XXX_.*
+ * *Q: I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_XXXXXX' doesn't exist at /some/path/to/Base.pm line XXX_.*
  * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.
 
  * *Q: Can I Use a Firewall? *
@@ -301,6 +301,12 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
        * open port tcp/443
      * SSH
        * open port tcp/22
+
+ * *Q: I'd like to PXE boot the NPToolkit. Is that possible?*
+ * *A:* Not currently, but this is a consideration of future releases.
+
+ * *Q: When I boot, it gives me the following error _Can't find knoppix file system, sorry. Dropping you to a very limited shell ...._*
+ * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
 
 == Last Updated ==
 
