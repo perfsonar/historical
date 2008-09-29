@@ -13,7 +13,9 @@
    # FNAL
    # MCNC
  # ISO - Naming
-http://code.google.com/p/perfsonar-ps/wiki/I2-PerfNode-CD-Label.png
+
+http://code.google.com/p/perfsonar-ps/wiki/perfnodelabel.png
+
  # ISO - Status (Outstanding bugs, etc)
  # Pam paper
    # Editing status
