@@ -23,13 +23,21 @@ For now, only two choices work: *_BWCTL IPv4_* or *_BWCTL IPv6_* on the left sid
 
 == Step 3 ==
 
-A screen similar to this will appear (note on this test machine the mesh is already set up so values will appear selected already):
+A screen similar to this will appear:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
+
+The bottom of the same screen is shown here:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB3.png
  
- http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
+The length of this screen will vary depending on how many BWCTL test instances are found.  Note that if you are _re-configuring_ you will see a screen similar to this:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB6.png
  
 == Step 4 ==
 
-Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time). 
+Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time).
 
 There are three common options for tests: 
 
@@ -37,13 +45,11 @@ There are three common options for tests:
  * Test every *1* hour  for *60* seconds 
  * Test every *4* hours for *60* seconds 
 
-More test options will be available in future releases.
+More test options will be available in future releases.  The following image demonstrates the selections:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB4.png
 
 == Step 5 ==
-
- The screen will look like this after selection: 
-
-http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB2.png
 
 Press _Save_ and wait for the browser to display a message indicating success. The browser can be closed and a terminal will be required to start the services: 
 
@@ -51,7 +57,9 @@ Press _Save_ and wait for the browser to display a message indicating success. T
  * _/etc/init.d/pSB_collector.sh restart_
  * _/etc/init.d/pSB.sh restart_
 
-Due to the frequency of tests you have chosen, there may be a small lag when the results become available. 
+Due to the frequency of tests you have chosen, there may be a small lag when the results become available.  The following image demonstrates the selections:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB5.png
 
 == Step 6 ==
 
