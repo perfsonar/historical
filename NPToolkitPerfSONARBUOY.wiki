@@ -2,18 +2,22 @@
 
 == TOC ==
 
- * [NPToolkitPerfSONARBUOY#Step_1 perfSONAR-BUOY Step 1]
- * [NPToolkitPerfSONARBUOY#Step_2 perfSONAR-BUOY Step 2]
- * [NPToolkitPerfSONARBUOY#Step_3 perfSONAR-BUOY Step 3]
- * [NPToolkitPerfSONARBUOY#Step_4 perfSONAR-BUOY Step 4]
- * [NPToolkitPerfSONARBUOY#Step_5 perfSONAR-BUOY Step 5]
- * [NPToolkitPerfSONARBUOY#Step_6 perfSONAR-BUOY Step 6]
+ * [NPToolkitPerfSONARBUOY#Step_1 Load Admin Page]
+ * [NPToolkitPerfSONARBUOY#Step_2 Configure Test Type]
+ * [NPToolkitPerfSONARBUOY#Step_3 Test Options]
+ * [NPToolkitPerfSONARBUOY#Step_4 Select Test Options]
+ * [NPToolkitPerfSONARBUOY#Step_5 Save Values]
+ * [NPToolkitPerfSONARBUOY#Step_6 Test Service]
 
 perfSONAR-BUOY is not configured to run by default: it requires knowledge of current and reachable BWCTL and OWAMP servers.  The above steps should be followd in order and will result in a configured service.
 
 == Step 1 ==
 
 After your machine is booted, visit the configuration web page (this can be done locally if you have console access to the freshly booted machine, or remotely): https://HOST_OR_ADDRESS/admin/perfsonarbuoy/.  This should bring up a screen similar to this: 
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB0.png
+
+After logging in the default configuration screen will be this:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB1.png
 
@@ -39,9 +43,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB6.png
 
 Under _Select IPv4 BWCTL Instances to Include in Measurements_, choose BWCTL instances to test with. These are separated into groups that are associated with the LHC project, as well as other registered BWCTL test points. _Enter test Description_ is optional, but helpful to enter. Finally select a test type (note currently we only support one test at a time).
 
-There are three common options for tests: 
-
- * Test every *15* minutes for *10* seconds 
+There are two common options for tests: 
+ 
  * Test every *1* hour  for *60* seconds 
  * Test every *4* hours for *60* seconds 
 
