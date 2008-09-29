@@ -13,7 +13,7 @@
    # FNAL
    # MCNC
  # ISO - Naming
-   # Draft of CD cover: http://code.google.com/p/perfsonar-ps/wiki/20080929Video/I2-PerfNode-CD-Label.png
+   # [http://code.google.com/p/perfsonar-ps/wiki/20080929Video/I2-PerfNode-CD-Label.png Draft of CD Cover]
  # ISO - Status (Outstanding bugs, etc)
  # Pam paper
    # Editing status
