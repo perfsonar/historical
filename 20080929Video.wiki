@@ -1,4 +1,4 @@
-=  September 29, 2008 Conference Call =
+=  September 29, 2008 Conference Call 2:30 pm EDT =
 
 == Agenda/Minutes ==
 
@@ -22,10 +22,6 @@
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.(likely won't have time for this, but I'm keeping it on the agenda as very high priority for the *next* version).
 
  # Next meeting will Oct 6, 2:30 pm Eastern Time
-
-== When ==
-
- September 2 2008 - 12:00 EDT
 
 == Where ==
 
