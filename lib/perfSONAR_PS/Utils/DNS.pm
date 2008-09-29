@@ -45,9 +45,7 @@ sub resolve_address {
     my $res   = Net::DNS::Resolver->new;
     my $query = $res->search($name);
 
-    if ( $name !~ /$RE{net}{domain}/ ) {
-        print "Name $name is not a hostname\n";
-
+    if ( not $query or $name !~ /$RE{net}{domain}/ ) {
         my @dns = ();
         push @dns, $name;
         return @dns;
