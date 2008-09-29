@@ -33,7 +33,7 @@
 
 == Installation and Configuration ==
 
-The following guide describes in detail the steps required to set up the _perfSONAR_ Network Performance Toolkit.  It is important to follow each step in order.  If you get stuck consult the [NPToolkitQuickStart#FAQ FAQ] at the end of this document.  
+The following guide describes in detail the steps required to set up the _perfSONAR_ Network Performance Toolkit.  It is important to follow each step in order.  Upon getting stuck, consult the [NPToolkitQuickStart#FAQ FAQ] at the end of this document.  
 
 === First Steps ===
 
@@ -43,18 +43,18 @@ The following guide describes in detail the steps required to set up the _perfSO
   # Verify the MD5 sum:
     * md5sum -c pS-NPToolkit-2.0-beta2.iso 
   # Burn the ISO to a CD-ROM
-  # Configure your computer to boot from CD
+  # Configure the computer to boot from CD
     * This may require changes to the computer's BIOS to ensure the CD is recognized before an existing harddisk
-    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult your manual if you are unsure or pay close attention to the boot process to enter _setup_).  
+    * The BIOS may be entered when the computer boots by using a key combination (*F12* in some cases, *Del* in others - consult a manual if unsure or pay close attention to the boot process to enter _setup_).  
   # Insert the CD-ROM into the tray and boot the system
-    * A splash screen will appear and the computer should enter the boot and customization process.
+    * The computer will boot with some typical messages, after this it will enter the boot and customization process.
       * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_1_Spash.png
     * The boot process will proceed after this screen.
       * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_2_Boot.png
 
 === Console Configuration ===
 
-During the boot process, you'll be presented with a menu of options. 
+During the boot process, there will be a menu of options. 
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_3_Menu.png
 
@@ -62,11 +62,11 @@ Each step will be explained here with pictures where applicable.
 
 ==== Step 1 ==== 
 
-  * From the list, select which drive you would like to allow the disc to use to save data
+  * From the list, select which drive should allow the disc to use to save data
     * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_4_Option1_1.png
-  * You will have the option format the drive (if the disk is unreadable, you will be forced to format the drive)   
+  * There will be an option format the drive (if the disk is unreadable, the drive will need to be formated)   
     * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_5_Option1_2.png
-  * If the disk is readable, you can skip the formatting step
+  * If the disk is readable, skip the formatting step
     * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_6_Option1_3.png
   * These steps may force an immediate reboot to save settings, this is normal.
 
@@ -78,7 +78,7 @@ Each step will be explained here with pictures where applicable.
 ==== Step 3 ====
 
   * All services are enabled by default with the exception of SSH.  
-    * To use SSH you must either change the password for the _*knoppix*_ user or add a new user, see _Step 4_
+    * To use SSH, the password for the _*knoppix*_ user _*must*_ be changed or a a new user _*must*_ be added, see _Step 4_
     * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_8_Option3.png
 
 ==== Step 4 ====
@@ -88,7 +88,7 @@ Each step will be explained here with pictures where applicable.
     * Enter a new password
     * While not required, this is a *_GOOD IDEA_* to do this
   * The same can be done for _knoppix_
-    * This should be done if you enabled SSH in _Step 3_
+    * This should be done if SSH was enabled in _Step 3_
   * To add a user select _Add a new user_
     * Enter the name
     * Allow/disallow SSH access
@@ -104,7 +104,7 @@ Each step will be explained here with pictures where applicable.
 
 ==== Step 6 ====
 
-  * Different NTP (time) servers can be configured for your geographical location
+  * Different NTP (time) servers can be configured for different geographical locations
     * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_Option6.png
   * Note that it is necessary to choose at least 3 servers.
   * Note that it is not necessary to choose more than 5 servers.
@@ -151,12 +151,11 @@ Once the machine has booted it is now accessible via the static IP or a DHCP add
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
 
-Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+Once the contact information is known, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
 
-There are several GUIs that can be used configure services (note you will be required to log in as the _knoppix_ or other users added in [NPToolkitQuickStart#Console_Configuration Step 4] above.  You _*cannot*_ log in as root):
-
+There are several GUIs that can be used configure services (note: to do this logging in as the _knoppix_ or other users added in [NPToolkitQuickStart#Console_Configuration Step 4] above is required.  Root _*cannot*_ log in):
  * https://HOST_OR_ADDRESS/admin/pinger
    * Used to configure hosts for the PingER tool
    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_22_PingER_Start.png
@@ -185,7 +184,7 @@ Once the machine has booted it is now accessible via the static IP or a DHCP add
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_ifconfig.png
 
-Once you know the contact information, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+Once he contact information is known, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_services_cgi.png
 
@@ -193,7 +192,7 @@ There are also several GUIs linked directly from this page that can be used to v
 
 ==== Global Service Directory ==== 
 
-Through the power of the perfSONAR Global Lookup Service (*gLS*) there are several GUIs available on the disk that can be used to display and locate services from around the world (including your own service after some requisite registration time).  There are two GUIs that may be examined:
+Through the power of the perfSONAR Global Lookup Service (*gLS*) there are several GUIs available on the disk that can be used to display and locate services from around the world (including the newly set up instance after some requisite registration time).  There are two GUIs that may be examined:
 
  * directory.cgi
    * View services by category

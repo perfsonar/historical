@@ -26,7 +26,6 @@ Visit the Cacti instance.  If you are using the XWindows environment of the disk
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/Cacti_1.png
 
-
 ===== Cacti Config Step 2 =====
 
 After logging in you will see the _home_ screen.  In the middle there
@@ -140,7 +139,6 @@ MA daemon by entering _sudo /etc/init.d/snmpMA.sh restart_
 ===== Cacti Config Step 15 =====
 
 Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Cacti Disk Verification - Cacti].
-
 
 == Last Updated ==
 

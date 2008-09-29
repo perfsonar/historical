@@ -2,13 +2,17 @@
 
 == TOC ==
 
- * [NPToolkitQuickStart#Pinger_Config_Step_1 Start Configuration GUI]
- * [NPToolkitQuickStart#Pinger_Config_Step_2 Initial Display]
- * [NPToolkitQuickStart#Pinger_Config_Step_3 List Display]
- * [NPToolkitQuickStart#Pinger_Config_Step_4 Adding a new Host]
- * [NPToolkitQuickStart#Pinger_Config_Step_5 Save Hosts]
- * [NPToolkitQuickStart#Pinger_Config_Step_6 Status Message]
- * [NPToolkitQuickStart#Pinger_Config_Step_7 Project Display]
+ * [NPToolkitPingER#Pinger_Config_Step_1 Start Configuration GUI]
+ * [NPToolkitPingER#Pinger_Config_Step_2 Initial Display]
+ * [NPToolkitPingER#Pinger_Config_Step_3 Select Existing Domain]
+ * [NPToolkitPingER#Pinger_Config_Step_4 Add New Node]
+ * [NPToolkitPingER#Pinger_Config_Step_5 Configure Node]
+ * [NPToolkitPingER#Pinger_Config_Step_6 Add A New Domain]
+ * [NPToolkitPingER#Pinger_Config_Step_7 Save File]
+ * [NPToolkitPingER#Pinger_Config_Step_8 Use Existing Resource]
+ * [NPToolkitPingER#Pinger_Config_Step_9 Add Exsting Resource]
+ * [NPToolkitPingER#Pinger_Config_Step_10 Configure Node]
+ * [NPToolkitPingER#Pinger_Config_Step_11 Test Configuration]
 
 PingER comes pre-configured, but it is possible to add and delete from this basic list of hosts.
 
@@ -26,39 +30,59 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_2.png
 
 == PingER Config Step 3 ==
 
-Mousing over any entry shows the exact host.  Changes may be made here.  
+To add a host to an existing domain, mouse over the domain to find an additional menu/
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_3.png
 
 == PingER Config Step 4 ==
 
-A new host can be added at any time.
+Enter in the _*node name*_, e.g. the hostname without the domain.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_4.png
 
 == PingER Config Step 5 ==
 
-After entering information, save it.
+Another menu will appear with specific information about test to perform.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_5.png
 
+If the system could not look up the _address_ of the host it will appear as _*255.255.255.255*_.  If this is the case, be sure to enter the proper address.  
+
 == PingER Config Step 6 ==
 
-The following status message appears after saving.
+If you would like to add a node to a domain that is not present, add the domain first.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_6.png
 
+Follow steps [NPToolkitPingER#Pinger_Config_Step_3 3], [NPToolkitPingER#Pinger_Config_Step_4 4], and [NPToolkitPingER#Pinger_Config_Step_5 5] to add a node to the new domain.
+
 == PingER Config Step 7 ==
 
-The bottom of the page lists project memberships.
+When you have added new hosts, use the _*Save MP Landmarks XML*_ button to save all changes.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_7.png
 
-If there are multiple associations, they will be listed.
+== PingER Config Step 8 ==
+
+To select _*dynamic*_ nodes from the perfSONAR infrastructure (e.g. other instances of the NPToolkit or other participating perfSONAR sites), navigate to the bottom of the page to see existing nodes.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_8.png
 
-== PingER Config Step 8 ==
+== PingER Config Step 9 ==
+
+After mousing over the instance, the ability to add it to the existing list will become available.  
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_9.png
+
+== PingER Config Step 10 ==
+
+After adding, a small menu will appear with options for this host, adjust any as necessary.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/PingER_10.png
+
+Be sure to save the configuration as in step [NPToolkitPingER#Pinger_Config_Step_7 7].
+
+== PingER Config Step 11 ==
 
 Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Service_Test Disk Verification - Service Test].
 
