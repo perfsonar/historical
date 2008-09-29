@@ -1,4 +1,4 @@
-=  September 29, 2008 Conference Call 2:30 pm EDT =
+﻿=  September 29, 2008 Conference Call 2:30 pm EDT =
 
 == Agenda/Minutes ==
 
@@ -13,6 +13,7 @@
    # FNAL
    # MCNC
  # ISO - Naming
+   # Draft of CD cover: http://code.google.com/p/perfsonar-ps/wiki/20080929Video/I2-PerfNode-CD-Label.png
  # ISO - Status (Outstanding bugs, etc)
  # Pam paper
    # Editing status
