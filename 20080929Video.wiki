@@ -5,6 +5,8 @@
  # Attendees: 
  # Team Updates
    # Internet2
+     * Aaron - lots of bug fixes for ISO release. (Services now restarted from web config)
+     * Jason - Arranging beta test deployments (12 remote sites tried it). Keeping track of bug reports and entering 'issues'. Fixed several outstanding bugs.
    # IU
    # UDEL
    # Ga Tech
@@ -13,17 +15,14 @@
    # FNAL
    # MCNC
  # ISO - Naming
-
-[http://perfsonar-ps.googlecode.com/svn/wiki/perfnodelabel.png CD Cover Image]
-
+   [http://perfsonar-ps.googlecode.com/svn/wiki/perfnodelabel.png CD Cover Image]
  # ISO - Status (Outstanding bugs, etc)
  # Pam paper
    # Editing status
    # Data status
  # GLIF Demo Update (Aaron/Jeff)
  # Central configuration service
-   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.(likely won't have time for this, but I'm keeping it on the agenda as very high priority for the *next* version).
-
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.(Likely won't have time to discuss this, but I'm keeping it on the agenda as very high priority for the *next* version).
  # Next meeting will Oct 6, 2:30 pm Eastern Time
 
 == Where ==
