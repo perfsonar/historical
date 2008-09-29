@@ -14,7 +14,7 @@
    # MCNC
  # ISO - Naming
 
-http://perfsonar-ps.googlecode.com/svn/wiki/perfnodelabel.png
+[http://perfsonar-ps.googlecode.com/svn/wiki/perfnodelabel.png CD Cover Image]
 
  # ISO - Status (Outstanding bugs, etc)
  # Pam paper
