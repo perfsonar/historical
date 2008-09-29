@@ -57,13 +57,13 @@ Press _Save_ and wait for the browser to display a message indicating success. T
  * _/etc/init.d/pSB_collector.sh restart_
  * _/etc/init.d/pSB.sh restart_
 
-Due to the frequency of tests you have chosen, there may be a small lag when the results become available.  The following image demonstrates the selections:
+The following image shows a _successful_ configuration (note that selections may not appear due to browser caching):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB5.png
 
 == Step 6 ==
 
-Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Service_Test Disk Verification - Service Test].
+Finally from either the NPToolkit or some other machine, visit a perfSONAR testing instance described in [NPToolkitQuickStart#Service_Test Disk Verification - Service Test].  Due to the frequency of tests you have chosen, there may be a small lag when the results become available.
 
 == Last Updated ==
 
