@@ -601,7 +601,7 @@ sub createStorage {
                     $metadata .= "      </nmwgt:endPointPair>\n";
                     $metadata .= "    </iperf:subject>\n";
                     $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:eventType>\n";
+                    $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:eventType>\n";
                     $metadata .= "    <nmwg:parameters id=\"parameters-" . $id . "\">\n";
 
                     if ( $conf->{ "MESH-" . $meshesBW{ $result_node_mesh_mapBW->[$x][0] }->{"mesh_name"} }->{"BWWINDOWSIZE"} ) {
@@ -649,7 +649,7 @@ sub createStorage {
                     $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
                     $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
                     $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:parameter>\n";
-                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:parameter>\n";
+                    $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:parameter>\n";
                     $data .= "        <nmwg:parameter name=\"type\">mysql</nmwg:parameter>\n";
                     $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceBW . "</nmwg:parameter>\n";
                     $data .= "        <nmwg:parameter name=\"user\">" . $dbuserBW . "</nmwg:parameter>\n" if $dbuserBW;
@@ -728,7 +728,7 @@ sub createStorage {
 
                         $metadata .= "    </iperf:subject>\n";
                         $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>\n";
-                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:eventType>\n";
+                        $metadata .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:eventType>\n";
 
                         my $test        = $conf->get_val( MEASUREMENTSET => $m,    ATTR => "TESTSPEC" );
                         my $testTypeTCP = $conf->get_val( TESTSPEC       => $test, ATTR => "BWTCP" );
@@ -759,7 +759,7 @@ sub createStorage {
                         $data .= "    <nmwg:key id=\"key-" . $id . "\">\n";
                         $data .= "      <nmwg:parameters id=\"parameters-key-" . $id . "\">\n";
                         $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:parameter>\n";
-                        $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0</nmwg:parameter>\n";
+                        $data .= "        <nmwg:parameter name=\"eventType\">http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0</nmwg:parameter>\n";
                         $data .= "        <nmwg:parameter name=\"db\">" . $dbsourceBW . "</nmwg:parameter>\n";
                         $data .= "        <nmwg:parameter name=\"user\">" . $dbuserBW . "</nmwg:parameter>\n" if $dbuserBW;
                         $data .= "        <nmwg:parameter name=\"pass\">" . $dbpassBW . "</nmwg:parameter>\n" if $dbpassBW;
