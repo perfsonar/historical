@@ -347,7 +347,7 @@ have gone to some lengths to generate the information automatically:
 
  * Test Store File - an available option in the configuraiton
  * Existing Store File - used for upgrades
- * [CactiConfig] - Read the native Cacti databases.
+ * [NPToolkitCacti] - Read the native Cacti databases.
  * MRTGConfig - TBD
  * !CricketConfig - TBD
 
