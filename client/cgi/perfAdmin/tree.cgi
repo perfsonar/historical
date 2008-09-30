@@ -419,7 +419,8 @@ __END__
 
 =head1 SEE ALSO
 
-L<>, 
+L<XML::LibXML>, L<CGI>, L<CGI::Ajax>, L<perfSONAR_PS::Client::MA>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Client::gLS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
