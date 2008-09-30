@@ -17,6 +17,7 @@ import org.jdom.xpath.XPath;
  * and String representations of the service element.
  */
 public class ServiceRegistration {
+	private Element keyElem;
 	private Element serviceElem;
 	private Element optionalParamsElem;
 	private PSNamespaces psNS;
@@ -29,14 +30,13 @@ public class ServiceRegistration {
 	 * @param type the type of service
 	 * @param description a secription of the service instance
 	 */
-	public ServiceRegistration(String id, String name, String type, String description){
+	public ServiceRegistration(String name, String type){
 		this.psNS = new PSNamespaces();
 		this.serviceElem = new Element("service", this.psNS.TOPO);
 		this.serviceElem.addContent(this.txtNode("name", name, this.psNS.TOPO));
-		this.serviceElem.addContent(this.txtNode("description", description, this.psNS.TOPO));
 		this.serviceElem.addContent(this.txtNode("type", type, this.psNS.TOPO));
 	}
-	
+
 	/**
 	 * @return the URN of the service
 	 */
@@ -63,6 +63,13 @@ public class ServiceRegistration {
 	 */
 	public String getDescription(){
 		return this.serviceElem.getChildText("type", this.psNS.TOPO);
+	}
+	
+	/**
+	 * @param a descripton of the service
+	 */
+	public void setDescription(String description){
+		this.serviceElem.addContent(this.txtNode("description", description, this.psNS.TOPO));
 	}
 	
 	/**
@@ -382,6 +389,21 @@ public class ServiceRegistration {
 	 */
 	public void setServiceElem(Element serviceElem) {
 		this.serviceElem = serviceElem;
+	}
+	
+	public Element getKeyElem() {
+		return keyElem;
+	}
+
+	public void setKeyElem(String key) {
+		this.keyElem = new Element("key", this.psNS.NMWG);
+		Element params =  new Element("parameters", this.psNS.NMWG);
+		Element param =  new Element("parameter", this.psNS.NMWG);
+		params.setAttribute("id", "keyParams1");
+		param.setAttribute("name", "lsKey");
+		param.setText(key);
+		params.addContent(param);
+		this.keyElem.addContent(params);
 	}
 	
 	/** 

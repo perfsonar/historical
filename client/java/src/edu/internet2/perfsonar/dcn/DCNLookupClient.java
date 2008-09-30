@@ -20,7 +20,7 @@ import edu.internet2.perfsonar.PSNamespaces;
 import edu.internet2.perfsonar.ServiceRegistration;
 
 /**
- * Performs lookup operations useful for dynamic circuits netwoking (DCN)
+ * Performs lookup operations useful for dynamic circuits networking (DCN)
  * applications.
  *
  */
@@ -47,7 +47,7 @@ public class DCNLookupClient{
 		"for $metadata in /nmwg:store[@type=\"LSStore\"]/nmwg:metadata\n" +
 		"    let $metadata_id := $metadata/@id  \n" +
 		"    let $data := /nmwg:store[@type=\"LSStore\"]/nmwg:data[@metadataIdRef=$metadata_id]\n" +
-		"    where $data/nmwg:metadata/nmwg:eventType[text()=\"http://oscars.es.net/OSCARS\"] and $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type=\"<!--type-->\" and text()=\"<!--domain-->\"]\n" +
+		"    where $data/nmwg:metadata/nmwg:eventType[text()=\"http://oscars.es.net/OSCARS\"] and $data/nmwg:metadata/summary:subject/<!--addrPath-->[@type=\"<!--type-->\" and text()=\"<!--domain-->\"]\n" +
 		"    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint\n";
 	
 	private String HOST_XQUERY = 
@@ -55,12 +55,18 @@ public class DCNLookupClient{
 		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
 		"/nmwg:store[@type=\"LSStore\"]/nmwg:data/nmwg:metadata/*[local-name()=\"subject\"]/nmtb:node/nmtb:relation/nmtb:linkIdRef/text()[../../../nmtb:address[text()=\"<!--hostname-->\"]]\n";
 	
+	private String NODE_XQUERY = 
+		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
+		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
+		"declare namespace nmtl3=\"http://ogf.org/schema/network/topology/l3/20070828/\";\n" +
+		"/nmwg:store[@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/nmtb:node[./<!--type-->[text()=\"<!--addr-->\"]]\n";
+	
 	private String IDC_XQUERY = 
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
 		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
 		"declare namespace dcn=\"http://ggf.org/ns/nmwg/tools/org/dcn/1.0/\";\n" +
 		"for $metadata in /nmwg:store[@type=\"LSStore\"]/nmwg:metadata\n" +
-		"    where $metadata/dcn:subject/nmtb:service/nmtb:type[text()=\"<!--type-->\"] and $metadata/dcn:subject/nmtb:service/nmtb:relation[@type=\"<!--relation-->\"]/nmtb:idRef[text()=\"<!--domain-->\"]\n" +
+		"    where $metadata/dcn:subject/nmtb:service/nmtb:type[text()=\"<!--type-->\"] and $metadata/dcn:subject/nmtb:service/nmtb:relation[@type=\"<!--relation-->\"]/nmtb:<!--idType-->[text()=\"<!--id-->\"]\n" +
 		"    return $metadata/dcn:subject/nmtb:service<!--xpath-->\n";
 	
 	/**
@@ -150,6 +156,7 @@ public class DCNLookupClient{
 		if(useGlobalLS || hLSList == null){
 			String discoveryXQuery = DISC_XQUERY;
 			String domain = name.replaceFirst(".+?\\.", "");
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtb:domain/nmtb:name");
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
 			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
@@ -174,6 +181,55 @@ public class DCNLookupClient{
         return urn;
 	}
 	
+	/**
+	 * Finds the URN of a host with the given name. 
+	 * 
+	 * @param name the name of the host o lookup
+	 * @return the nmtb:node element
+	 * @throws PSException
+	 */
+	public Element lookupNode(String addr) throws PSException{
+		Element node = null;
+		String[] hLSMatches = this.hLSList;
+		
+		String addrPath = "nmtl3:network/nmtl3:subnet/nmtl3:address";
+		String type = "nmtl3:port/nmtl3:address";
+		String typeAttr = "ipv4";
+		String domain = addr;
+        if(addr.matches(".*\\.[a-zA-Z]+.*")){
+        	type = "nmtb:name";
+        	addrPath = "nmtb:domain/nmtb:name";
+        	typeAttr = "dns";
+        	domain = domain.replaceFirst(".+?\\.", "");
+        }
+		if(useGlobalLS || hLSList == null){
+			String discoveryXQuery = DISC_XQUERY;
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", addrPath);
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain);
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", typeAttr);
+			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
+			hLSMatches = this.discover(this.requestString(discReqElem, null));
+		}
+		
+        String xquery = NODE_XQUERY;
+        
+        xquery = xquery.replaceAll("<!--addr-->", addr);
+        xquery = xquery.replaceAll("<!--type-->", type);
+        Element reqElem = this.createQueryMetaData(xquery);
+        String request = this.requestString(reqElem, null);
+        for(String hLS : hLSMatches){
+        	this.log.info("hLS: " + hLS);
+        	PSLookupClient lsClient = new PSLookupClient(hLS);
+        	Element response = lsClient.query(request);
+        	Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
+        	if(datum != null && datum.getChild("node", this.psNS.TOPO) != null){
+        		node = datum.getChild("node", this.psNS.TOPO);
+        		break;
+        	}
+        }
+        
+        return node;
+	}
 	/**
 	 * Retrieve a service element describing an IDC given a domain it controls
 	 * 
@@ -216,25 +272,32 @@ public class DCNLookupClient{
 	 * @param type thetype of service to find
 	 * @param domain the domain of the service of interest
 	 * @param relation the relation of the service to that domain
-	 * @param xpath an xpath expression rooted at servcice that control what is returned
+	 * @param xpath an xpath expression rooted at service that control what is returned
 	 * @return the element found (if any)
 	 * @throws PSException
 	 */
-	public Element lookupService(String type, String domain, String relation, String xpath) throws PSException{
-		this.log.debug("lookupIDC.domain=" + domain);
+	public Element lookupService(String type, String id, String relation, String xpath) throws PSException{
+		this.log.debug("lookupIDC.id=" + id);
 		String[] hLSMatches = this.hLSList;
 		Element datum = null;
 		if(useGlobalLS || hLSList == null){
 			String discoveryXQuery = DISC_XQUERY;
-			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", domain.replaceAll("urn:ogf:network:domain=", ""));
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", id.replaceAll("urn:ogf:network:domain=", ""));
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtl3:port/nmtl3:address");
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
 			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
 			hLSMatches = this.discover(this.requestString(discReqElem, null));
 		}
+		
+		String idType = "address";
+		if(id.startsWith("urn:ogf:network")){
+			idType = "idRef";
+		}
 		String xquery = IDC_XQUERY;
-		xquery = xquery.replaceAll("<!--domain-->", domain);
+		xquery = xquery.replaceAll("<!--id-->", id);
 		xquery = xquery.replaceAll("<!--type-->", type);
 		xquery = xquery.replaceAll("<!--relation-->", relation);
+		xquery = xquery.replaceAll("<!--idType-->", idType);
 		xquery = xquery.replaceAll("<!--xpath-->", xpath);
         Element reqElem = this.createQueryMetaData(xquery);
         String request = this.requestString(reqElem, null);
@@ -336,6 +399,9 @@ public class DCNLookupClient{
 	 */
 	public HashMap<String,String> registerNode(NodeRegistration reg) throws PSException{
 		Element metaDataElem = this.createMetaData(this.psNS.DCN);
+		if(reg.getKeyElem() != null){
+			metaDataElem.addContent(0,reg.getKeyElem());
+		}
 		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
 		subjElem.addContent(reg.getNodeElem());
 		return this.register(metaDataElem);
@@ -345,12 +411,15 @@ public class DCNLookupClient{
 	 * Registers a service such as an IDC or NotificationBroker with the lookup service
 	 * 
 	 * @param reg a ServiceRegistration object with the details to register
-	 * @returna HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
 	 * @throws PSException
 	 */
 	public HashMap<String,String> registerService(ServiceRegistration reg) throws PSException{
 		Element metaDataElem = this.createMetaData(this.psNS.DCN);
 		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
+		if(reg.getKeyElem() != null){
+			metaDataElem.addContent(0, reg.getKeyElem());
+		}
 		subjElem.addContent(reg.getServiceElem());
 		if(reg.getOptionalParamsElem() != null){
 			subjElem.addContent(reg.getOptionalParamsElem());
