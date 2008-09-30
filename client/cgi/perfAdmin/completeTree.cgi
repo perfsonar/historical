@@ -5,12 +5,12 @@ use warnings;
 
 =head1 NAME
 
-tree.cgi - Contact a single gLS instances and dump the contents.  
+completeTree.cgi - Contact each know gLS instances and dump the contents.  
 
 =head1 DESCRIPTION
 
-For the closest gLS instance, dump it's known knowledge of hLS isntance, 
-and then dump each hLS's knowledge of registered services.
+For each gLS instance, dump it's known knowledge of hLS isntance, and then dump
+each hLS's knowledge of registered services.
 
 =cut
 
@@ -56,44 +56,112 @@ sub display {
 
     my $html = $cgi->start_html( -title => 'perfAdmin - Information Service Listing' );
 
+    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "75%" } );
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_th( { align => "left", width => "100\%", colspan => "3" } );
+    $html .= "Table Of Contents";
+    $html .= $cgi->end_th;
+    $html .= $cgi->end_Tr;
+
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_td( { align => "left", width => "5\%" } );
+    $html .= "<br>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->start_td( { colspan => "2", align => "left", width => "95\%" } );
+    $html .= "<a href=\"#gls\">gLS Listing</a>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->end_Tr;
+
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_td( { align => "left", width => "5\%" } );
+    $html .= "<br>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->start_td( { colspan => "2", align => "left", width => "95\%" } );
+    $html .= "<a href=\"#hls\">hLS &amp; Service Listing</a>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->end_Tr;
+
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_td( { align => "left", width => "5\%" } );
+    $html .= "<br>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->start_td( { colspan => "2", align => "left", width => "95\%" } );
+    $html .= "<a href=\"#missing\">gLS Knowledge Gaps</a>";
+    $html .= $cgi->end_td;
+    $html .= $cgi->end_Tr;
+
+    $html .= $cgi->end_table;
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+
     unless ( $#{ $gls->{ROOTS} } > -1 ) {
         $html .= "Internal Error: Try again later.";
         $html .= $cgi->br;
         $html .= $cgi->end_html;
         return $html;
     }
-        
-    my %hls = ();
-    my %matrix = ();
-    my $counter = 1;
-    my $root = $gls->{ROOTS}->[0];
-    my $result = $gls->getLSQueryRaw(
-        {
-            ls => $root,
-            xquery =>
-                "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
-        }
-    );
-    if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
-        my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-        my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-        foreach my $a ( $ap->get_nodelist ) {
-            my $value = extract( $a, 0 );
-            if ( $value ) {
-                $hls{$value} = 1;
-            }
-        }
-    }
-           
+
+    $html .= "<a name=\"gls\" />";
     $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "85%" } );
     $html .= $cgi->start_Tr;
     $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
-    $html .= "<font size=\"+3\">List of available hLS Services &amp; Their Registered Services</font>";
+    $html .= "<font size=\"+1\">List of available gLS Servers</font>";
     $html .= $cgi->end_th;
     $html .= $cgi->end_Tr;
     $html .= $cgi->start_Tr;
     $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
-    $html .= "<br><br><br>";
+    $html .= "<br><br>";
+    $html .= $cgi->end_th;
+    $html .= $cgi->end_Tr;
+        
+    my %hls = ();
+    my %matrix = ();
+    my $counter = 1;
+    foreach my $root ( @{ $gls->{ROOTS} } ) {
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_td( { colspan => "4", align => "left", width => "100\%" } );
+        $html .= $counter . ": &nbsp;&nbsp;&nbsp; " . $root;
+        $counter++;
+        $html .= $cgi->end_td;
+        $html .= $cgi->end_Tr;
+
+        my $result = $gls->getLSQueryRaw(
+            {
+                ls => $root,
+                xquery =>
+                    "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
+            }
+        );
+        if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
+            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
+            my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+            foreach my $a ( $ap->get_nodelist ) {
+                my $value = extract( $a, 0 );
+                if ( $value ) {
+                    $hls{$value} = 1;
+                    $matrix{$root}{$value} = 1;
+                }
+            }
+        }
+    }
+
+    $html .= $cgi->end_table;
+
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+        
+    $html .= "<a name=\"hls\" />";        
+    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "85%" } );
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
+    $html .= "<font size=\"+1\">List of available hLS Services &amp; Their Registered Services</font>";
+    $html .= $cgi->end_th;
+    $html .= $cgi->end_Tr;
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
+    $html .= "<br><br>";
     $html .= $cgi->end_th;
     $html .= $cgi->end_Tr;
 
@@ -283,6 +351,64 @@ sub display {
     $html .= $cgi->end_table;
 
     $html .= $cgi->br;
+    $html .= $cgi->br;
+    $html .= $cgi->br;
+    
+    $html .= "<a name=\"missing\" />";
+    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "85%" } );
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
+    $html .= "<font size=\"+1\">List of available gLS Services and the hLS isntances they <b><i><u>DON'T</u> know about (yet)</i></b></font>";
+    $html .= $cgi->end_th;
+    $html .= $cgi->end_Tr;
+    $html .= $cgi->start_Tr;
+    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
+    $html .= "<br><br>";
+    $html .= $cgi->end_th;
+    $html .= $cgi->end_Tr;
+    
+    foreach my $root ( @{ $gls->{ROOTS} } ) {
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_th( { colspan => "4", align => "left", width => "100\%" } );
+        $html .= $root;
+        $html .= $cgi->end_th;
+        $html .= $cgi->end_Tr;
+        
+        my $flag = 0;
+        foreach my $ls ( keys %hls ) {
+            unless (exists $matrix{$root}{$ls} and $matrix{$root}{$ls} == 1 ) {
+                $html .= $cgi->start_Tr;
+                $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
+                $html .= "<br>";
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
+                $html .= "<br>";
+                $html .= $cgi->end_td;
+                $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
+                $html .= "<font size=\"+1\" color=\"red\">has no record of ".$ls."</font>";
+                $html .= $cgi->end_td;
+                $html .= $cgi->end_Tr;
+                $flag++;
+            }
+        }
+        if ( not $flag ) {
+            $html .= $cgi->start_Tr;
+            $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
+            $html .= "<br>";
+            $html .= $cgi->end_td;
+            $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
+            $html .= "<br>";
+            $html .= $cgi->end_td;
+            $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
+            $html .= "<font size=\"+1\" color=\"green\">has a record of all hLS instances</font>";
+            $html .= $cgi->end_td;
+            $html .= $cgi->end_Tr;
+        }
+    }
+    
+    $html .= $cgi->end_table;
+
+    $html .= $cgi->br;
 
     $html .= $cgi->end_html;
     return $html;
@@ -311,7 +437,7 @@ feature requests, and improvements can be directed here:
 
 =head1 VERSION
 
-$Id$
+$Id: tree.cgi 2257 2008-09-30 13:49:36Z zurawski $
 
 =head1 AUTHOR
 
