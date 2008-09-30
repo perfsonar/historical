@@ -590,30 +590,41 @@ sub display {
     }
 
     my %etTotal = ();
-    foreach my $root ( @{ $gls->{ROOTS} } ) {
-        my $result = $gls->getLSDiscoverRaw( { ls => $root, xquery => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/nmwg:eventType" } );
-        if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
-            my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-            my $eT = find( $doc->getDocumentElement, ".//nmwg:eventType", 0 );
-            foreach my $e ( $eT->get_nodelist ) {
-                my $et_value = extract( $e, 0 );
-                $etTotal{$et_value} = 1 if $et_value;
-            }
-        }
-        else {
-            $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "85%" } );
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { colspan => "1", align => "left", width => "5\%" } );
-            $html .= "<br>";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { colspan => "3", align => "left", width => "95\%" } );
-            $html .= "<font size=\"+1\" color=\"red\">" . $result->{eventType} . "</font>";
-            $html .= $cgi->end_td;
-            $html .= $cgi->end_Tr;
-            $html .= $cgi->end_table;
-            return $html;
+
+    # staking our claim on a single gLS query (cuts down on time until caching is here
+    my $root = $gls->{ROOTS}->[0];
+
+    my $result = $gls->getLSDiscoverRaw( { ls => $root, xquery => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:data/nmwg:metadata/nmwg:eventType" } );
+    if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
+        my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
+        my $eT = find( $doc->getDocumentElement, ".//nmwg:eventType", 0 );
+        foreach my $e ( $eT->get_nodelist ) {
+            my $et_value = extract( $e, 0 );
+            $etTotal{$et_value} = 1 if $et_value;
         }
     }
+    elsif ( exists $result->{eventType} ) {
+        $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "85%" } );
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "95\%" } );
+        $html .= "<font size=\"+1\" color=\"red\">" . $result->{eventType} . "</font>";
+        $html .= $cgi->end_td;
+        $html .= $cgi->end_Tr;
+        $html .= $cgi->end_table;
+        return $html;
+    }
+    else {
+        $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "85%" } );
+        $html .= $cgi->start_Tr;
+        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "95\%" } );
+        $html .= "<font size=\"+1\" color=\"red\">Unknown Error - Aborting</font>";
+        $html .= $cgi->end_td;
+        $html .= $cgi->end_Tr;
+        $html .= $cgi->end_table;
+        return $html;
+    }
+
+    # make the cache here...
 
     $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "75%" } );
     $html .= $cgi->start_Tr;
@@ -695,7 +706,7 @@ sub display {
     $html .= $cgi->end_Tr;
 
     foreach my $e ( keys %etTotal ) {
-        if ( $e eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
+        if ( $e eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $e eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" ) {
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_td( { align => "left", width => "5\%" } );
             $html .= "<br>";
@@ -708,7 +719,7 @@ sub display {
             $html .= $cgi->end_td;
             $html .= $cgi->end_Tr;
         }
-        elsif ( $e eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
+        elsif ( $e eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" or $e eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" ) {
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_td( { align => "left", width => "5\%" } );
             $html .= "<br>";
@@ -721,7 +732,7 @@ sub display {
             $html .= $cgi->end_td;
             $html .= $cgi->end_Tr;
         }
-        elsif ( $e eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
+        elsif ( $e eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $e eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" or $e eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
             $html .= $cgi->start_Tr;
             $html .= $cgi->start_td( { align => "left", width => "5\%" } );
             $html .= "<br>";
