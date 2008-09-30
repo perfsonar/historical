@@ -39,23 +39,23 @@ my $ok = GetOptions(
     'verbose'  => \$DEBUGFLAG,
     'config=s' => \$opts{CONF},
     'logger=s' => \$opts{LOGGER},
-    'start=s'  => \$opts{START},
+    'end=s'  => \$opts{END},
     'len=s'    => \$opts{LENGTH},
     'help'     => \$HELP
 );
 
-if ( exists $opts{START} and $opts{START} ) {
-    my $date = ParseDateString( $opts{START} );
+if ( exists $opts{END} and $opts{END} ) {
+    my $date = ParseDateString( $opts{END} );
     my $sec  = UnixDate( $date, "%s" );
     my $val  = $sec % 3600;
     $sec -= $val;
-    $opts{START} = $sec;
+    $opts{END} = $sec;
 }
 else {
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $val = $sec % 3600;
     $sec -= $val;
-    $opts{START} = $sec;
+    $opts{END} = $sec;
 }
 
 if ( exists $opts{LENGTH} and $opts{LENGTH} ) {
@@ -64,7 +64,7 @@ if ( exists $opts{LENGTH} and $opts{LENGTH} ) {
 else {
 
     # default to 1 hour
-    $opts{LENGTH} = 3600*12;
+    $opts{LENGTH} = 3600*1;
 }
 
 if ( not $ok or $HELP ) {
@@ -73,7 +73,7 @@ if ( not $ok or $HELP ) {
     print "\t--help : This message\n";
     print "\t--logger=file : File w/ logging information\n";
     print "\t--config=URL : Config file of hosts to contact\n";
-    print "\t--start=time : Data Start Time\n";
+    print "\t--end=time : Data End Time\n";
     print "\t--len=URL : Length of time (in hours) from start time\n\n";
     exit(1);
 }
@@ -155,7 +155,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
             $subject .= "    </netutil:subject>\n";
             push @eventTypes, $eventType;
         }
-        elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
+        elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ) {
             $subject = "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject\">\n";
             $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
             foreach my $field ( keys %{ $conf{host}->{$host}->{metadata}->{$md} } ) {
@@ -222,6 +222,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
         }
         else {
             if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
+
                 my %lookup = ();
                 foreach my $d ( @{ $result->{"data"} } ) {
                     my $data          = $parser->parse_string($d);
@@ -231,18 +232,18 @@ foreach my $host ( keys %{ $conf{host} } ) {
                 }
 
                 my %list = ();
-                foreach my $md ( @{ $result->{"metadata"} } ) {
-                    my $metadata   = $parser->parse_string($md);
+                foreach my $md2 ( @{ $result->{"metadata"} } ) {
+                    my $metadata   = $parser->parse_string($md2);
                     my $metadataId = $metadata->getDocumentElement->getAttribute("id");
                     my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
-                    my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
+                    my $hostName       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
                     my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
-                    if ( $list{$host}{$name} ) {
+                    if ( $list{$hostName}{$name} ) {
                         if ( $dir eq "in" ) {
-                            $list{$host}{$name}->{"key1"} = $lookup{$metadataId};
+                            $list{$hostName}{$name}->{"key1"} = $lookup{$metadataId};
                         }
                         else {
-                            $list{$host}{$name}->{"key2"} = $lookup{$metadataId};
+                            $list{$hostName}{$name}->{"key2"} = $lookup{$metadataId};
                         }
                     }
                     else {
@@ -253,61 +254,61 @@ foreach my $host ( keys %{ $conf{host} } ) {
                         else {
                             $temp{"key2"} = $lookup{$metadataId};
                         }
-                        $temp{"hostName"}      = $host;
+                        $temp{"hostName"}      = $hostName;
                         $temp{"ifName"}        = $name;
                         $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
                         $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifDescription", 1 ), 0 );
                         $temp{"ifAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
                         $temp{"capacity"}      = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity", 1 ), 0 );
-                        $list{$host}{$name}    = \%temp;
+                        $list{$hostName}{$name}    = \%temp;
                     }
                 }
 
-                foreach my $host ( sort keys %list ) {
-                    foreach my $name ( sort keys %{ $list{$host} } ) {
+                foreach my $h ( sort keys %list ) {
+                    foreach my $name ( sort keys %{ $list{$h} } ) {
 
-                        my $t1 = ParseDateString( "epoch " . ( $opts{START} - $opts{LENGTH} ) );
+                        my $t1 = ParseDateString( "epoch " . ( $opts{END} - $opts{LENGTH} ) );
                         my $startTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
-                        $t1 = ParseDateString( "epoch " . $opts{START} );
+                        $t1 = ParseDateString( "epoch " . $opts{END} );
                         my $endTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
 
-                        if ( exists $list{$host}{$name}->{"hostName"} and $list{$host}{$name}->{"hostName"} ) {
-                            if ( is_ipv4( $list{$host}{$name}->{"hostName"} ) ) {
-                                unless ( exists $list{$host}{$name}->{"ipAddress"} and $list{$host}{$name}->{"ipAddress"} ) {
-                                    $list{$host}{$name}->{"ipAddress"} = $list{$host}{$name}->{"hostName"};
+                        if ( exists $list{$h}{$name}->{"hostName"} and $list{$h}{$name}->{"hostName"} ) {
+                            if ( is_ipv4( $list{$h}{$name}->{"hostName"} ) ) {
+                                unless ( exists $list{$h}{$name}->{"ipAddress"} and $list{$h}{$name}->{"ipAddress"} ) {
+                                    $list{$h}{$name}->{"ipAddress"} = $list{$h}{$name}->{"hostName"};
                                 }
 
-                                my $display = $list{$host}{$name}->{"hostName"};
+                                my $display = $list{$h}{$name}->{"hostName"};
                                 $display =~ s/:.*$//;
                                 my $iaddr = Socket::inet_aton($display);
                                 my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
                                 if ($shost) {
-                                    $list{$host}{$name}->{"hostName"} = $shost;
+                                    $list{$h}{$name}->{"hostName"} = $shost;
                                 }
                             }
                         }
 
-                        if ( exists $list{$host}{$name}->{"ipAddress"} and $list{$host}{$name}->{"ipAddress"} ) {
-                            unless ( is_ipv4( $list{$host}{$name}->{"ipAddress"} ) ) {
-                                unless ( exists $list{$host}{$name}->{"hostName"} and $list{$host}{$name}->{"hostName"} ) {
-                                    $list{$host}{$name}->{"hostName"} = $list{$host}{$name}->{"ipAddress"};
+                        if ( exists $list{$h}{$name}->{"ipAddress"} and $list{$h}{$name}->{"ipAddress"} ) {
+                            unless ( is_ipv4( $list{$h}{$name}->{"ipAddress"} ) ) {
+                                unless ( exists $list{$h}{$name}->{"hostName"} and $list{$h}{$name}->{"hostName"} ) {
+                                    $list{$h}{$name}->{"hostName"} = $list{$h}{$name}->{"ipAddress"};
                                 }
 
-                                my $packed_ip = gethostbyname( $list{$host}{$name}->{"ipAddress"} );
+                                my $packed_ip = gethostbyname( $list{$h}{$name}->{"ipAddress"} );
                                 if ( defined $packed_ip ) {
                                     my $ip_address = inet_ntoa($packed_ip);
-                                    $list{$host}{$name}->{"ipAddress"} = Socket::inet_ntoa($packed_ip);
+                                    $list{$h}{$name}->{"ipAddress"} = Socket::inet_ntoa($packed_ip);
                                 }
                             }
                         }
 
-                        if ( exists $list{$host}{$name}->{"ifAddress"} and $list{$host}{$name}->{"ifAddress"} ) {
-                            unless ( is_ipv4( $list{$host}{$name}->{"ifAddress"} ) ) {
+                        if ( exists $list{$h}{$name}->{"ifAddress"} and $list{$h}{$name}->{"ifAddress"} ) {
+                            unless ( is_ipv4( $list{$h}{$name}->{"ifAddress"} ) ) {
 
-                                my $packed_ip = gethostbyname( $list{$host}{$name}->{"ifAddress"} );
+                                my $packed_ip = gethostbyname( $list{$h}{$name}->{"ifAddress"} );
                                 if ( defined $packed_ip ) {
                                     my $ip_address = inet_ntoa($packed_ip);
-                                    $list{$host}{$name}->{"ifAddress"} = Socket::inet_ntoa($packed_ip);
+                                    $list{$h}{$name}->{"ifAddress"} = Socket::inet_ntoa($packed_ip);
                                 }
                             }
                         }
@@ -315,16 +316,21 @@ foreach my $host ( keys %{ $conf{host} } ) {
                         # 'in' data
                         my $subject1 = "  <nmwg:key id=\"key-1\">\n";
                         $subject1 .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
-                        $subject1 .= "      <nmwg:parameter name=\"maKey\">" . $list{$host}{$name}->{"key1"} . "</nmwg:parameter>\n";
+                        $subject1 .= "      <nmwg:parameter name=\"maKey\">" . $list{$h}{$name}->{"key1"} . "</nmwg:parameter>\n";
                         $subject1 .= "    </nmwg:parameters>\n";
                         $subject1 .= "  </nmwg:key>  \n";
 
+                        my $r = 5;
+                        $r = $conf{host}->{$host}->{metadata}->{$md}->{"res"} if $conf{host}->{$host}->{metadata}->{$md}->{"res"};
+                        my $c = "AVERAGE";
+                        $c = $conf{host}->{$host}->{metadata}->{$md}->{"cf"} if $conf{host}->{$host}->{metadata}->{$md}->{"cf"};
+
                         my $result = $ma->setupDataRequest(
                             {
-                                start                 => ( $opts{START} - $opts{LENGTH} ) - 15,
-                                end                   => $opts{START} - 15,
-                                resolution            => 15,
-                                consolidationFunction => "AVERAGE",
+                                start                 => ( $opts{END} - $opts{LENGTH} ) - 15,
+                                end                   => $opts{END} - 15,
+                                resolution            => $r,
+                                consolidationFunction => $c,
                                 subject               => $subject1,
                                 eventTypes            => \@eventTypes
                             }
@@ -333,29 +339,33 @@ foreach my $host ( keys %{ $conf{host} } ) {
                         # 'out' data
                         my $subject2 = "  <nmwg:key id=\"key-2\">\n";
                         $subject2 .= "    <nmwg:parameters id=\"parameters-key-2\">\n";
-                        $subject2 .= "      <nmwg:parameter name=\"maKey\">" . $list{$host}{$name}->{"key2"} . "</nmwg:parameter>\n";
+                        $subject2 .= "      <nmwg:parameter name=\"maKey\">" . $list{$h}{$name}->{"key2"} . "</nmwg:parameter>\n";
                         $subject2 .= "    </nmwg:parameters>\n";
                         $subject2 .= "  </nmwg:key>  \n";
                         my $result2 = $ma->setupDataRequest(
                             {
-                                start                 => ( $opts{START} - $opts{LENGTH} ) - 15,
-                                end                   => $opts{START} - 15,
-                                resolution            => 15,
-                                consolidationFunction => "AVERAGE",
+                                start                 => ( $opts{END} - $opts{LENGTH} ) - 15,
+                                end                   => $opts{END} - 15,
+                                resolution            => $r,
+                                consolidationFunction => $c,
                                 subject               => $subject2,
                                 eventTypes            => \@eventTypes
                             }
                         );
 
                         unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) or ( exists $result2->{eventType} and $result2->{eventType} =~ m/^error/ ) ) {
-                            my $temp = $list{$host}{$name}->{"ifName"};
+                            my $temp = $list{$h}{$name}->{"ifName"};
                             $temp =~ s/\///g;
                             $temp =~ s/ /_/g;
 
-                            open( CSV1, ">SNMP_" . $host_name . "_" . $host_port . "_" . $host_endpoint . "-" . $list{$host}{$name}->{"hostName"} . "_" . $temp . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
-                            print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M),SNMP\n";
-                            print CSV1 $list{$host}{$name}->{"ipAddress"}, ",", $list{$host}{$name}->{"hostName"}, ",", $list{$host}{$name}->{"ifName"}, ",", $list{$host}{$name}->{"ifDescription"}, ",", $list{$host}{$name}->{"ifAddress"}, ",",
-                                eval( $list{$host}{$name}->{"capacity"} / 1000000 ) . "\n\n";
+                            my $cap = eval( $list{$h}{$name}->{"capacity"} / 1000000 );
+                            $cap = 10000 if $cap == 4294.967295;
+
+print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv\n";
+
+                            open( CSV1, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M),data type\n";
+                            print CSV1 $list{$h}{$name}->{"ipAddress"}, ",", $list{$h}{$name}->{"hostName"}, ",", $list{$h}{$name}->{"ifName"}, ",", $list{$h}{$name}->{"ifDescription"}, ",", $list{$h}{$name}->{"ifAddress"}, ",", $cap , ",SNMP\n\n";
 
                             my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
                             my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
@@ -366,10 +376,10 @@ foreach my $host ( keys %{ $conf{host} } ) {
                             if ( $datum1 and $datum2 ) {
                                 my %store = ();
                                 foreach my $dt ( $datum1->get_nodelist ) {
-                                    $store{ $dt->getAttribute("timeValue") }{"in"} = $dt->getAttribute("value") if $dt->getAttribute("timeValue") and $dt->getAttribute("value");
+                                    $store{ $dt->getAttribute("timeValue") }{"in"} = $dt->getAttribute("value")*8 if $dt->getAttribute("timeValue") and $dt->getAttribute("value");
                                 }
                                 foreach my $dt ( $datum2->get_nodelist ) {
-                                    $store{ $dt->getAttribute("timeValue") }{"out"} = $dt->getAttribute("value") if $dt->getAttribute("timeValue") and $dt->getAttribute("value");
+                                    $store{ $dt->getAttribute("timeValue") }{"out"} = $dt->getAttribute("value")*8 if $dt->getAttribute("timeValue") and $dt->getAttribute("value");
                                 }
 
                                 print CSV1 "unix time,iso time,in bps, out bps\n";
@@ -398,7 +408,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
                     }
                 }
             }
-            elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
+            elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ) {
 
                 my %lookup = ();
                 foreach my $d ( @{ $result->{"data"} } ) {
@@ -409,8 +419,8 @@ foreach my $host ( keys %{ $conf{host} } ) {
                 }
 
                 my %list = ();
-                foreach my $md ( @{ $result->{"metadata"} } ) {
-                    my $metadata   = $parser->parse_string($md);
+                foreach my $md2 ( @{ $result->{"metadata"} } ) {
+                    my $metadata   = $parser->parse_string($md2);
                     my $metadataId = $metadata->getDocumentElement->getAttribute("id");
 
                     my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
@@ -429,9 +439,9 @@ foreach my $host ( keys %{ $conf{host} } ) {
                         my $src_host  = q{};
                         my $dst_addr  = q{};
                         my $dst_host  = q{};
-                        my $t1        = ParseDateString( "epoch " . ( $opts{START} - $opts{LENGTH} ) );
+                        my $t1        = ParseDateString( "epoch " . ( $opts{END} - $opts{LENGTH} ) );
                         my $startTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
-                        $t1 = ParseDateString( "epoch " . $opts{START} );
+                        $t1 = ParseDateString( "epoch " . $opts{END} );
                         my $endTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
 
                         $src_addr = $list{$src}{$dst}->{"src"};
@@ -468,17 +478,17 @@ foreach my $host ( keys %{ $conf{host} } ) {
 
                         my $result = $ma->setupDataRequest(
                             {
-                                start      => ( $opts{START} - $opts{LENGTH} ),
-                                end        => $opts{START},
+                                start      => ( $opts{END} - $opts{LENGTH} ),
+                                end        => $opts{END},
                                 subject    => $subject1,
                                 eventTypes => \@eventTypes
                             }
                         );
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
-                            open( CSV, ">pSB_" . $host_name . "_" . $host_port . "_" . $host_endpoint . "-" . $src_addr . "_" . $dst_addr . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
-                            print CSV "source address, source host, destination address, destination host,iperf\n";
-                            print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, "\n\n";
+                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            print CSV "source address, source host, destination address, destination host,data type\n";
+                            print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",iperf\n\n";
 
                             my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
                             my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
@@ -521,8 +531,8 @@ foreach my $host ( keys %{ $conf{host} } ) {
                 }
 
                 my %list = ();
-                foreach my $md ( @{ $result->{"metadata"} } ) {
-                    my $metadata   = $parser->parse_string($md);
+                foreach my $md2 ( @{ $result->{"metadata"} } ) {
+                    my $metadata   = $parser->parse_string($md2);
                     my $metadataId = $metadata->getDocumentElement->getAttribute("id");
 
                     my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
@@ -539,9 +549,9 @@ foreach my $host ( keys %{ $conf{host} } ) {
                     foreach my $dst ( sort keys %{ $list{$src} } ) {
                         my $src_host  = q{};
                         my $dst_host  = q{};
-                        my $t1        = ParseDateString( "epoch " . ( $opts{START} - $opts{LENGTH} ) );
+                        my $t1        = ParseDateString( "epoch " . ( $opts{END} - $opts{LENGTH} ) );
                         my $startTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
-                        $t1 = ParseDateString( "epoch " . $opts{START} );
+                        $t1 = ParseDateString( "epoch " . $opts{END} );
                         my $endTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
 
                         $src_host = $list{$src}{$dst}->{"src"};
@@ -557,8 +567,8 @@ foreach my $host ( keys %{ $conf{host} } ) {
                         $subject1 .= "<nmwg:key id=\"" . $list{$src}{$dst}->{"key"} . "\"/>\n";
 
                         my $parameter1 = "<pinger:parameters id=\"params\" xmlns:pinger=\"http://ggf.org/ns/nmwg/tools/pinger/2.0/\">\n";
-                        $parameter1 .= "  <nmwg:parameter name=\"startTime\">" . ( $opts{START} - $opts{LENGTH} ) . "</nmwg:parameter>\n";
-                        $parameter1 .= "  <nmwg:parameter name=\"endTime\">" . $opts{START} . "</nmwg:parameter>\n";
+                        $parameter1 .= "  <nmwg:parameter name=\"startTime\">" . ( $opts{END} - $opts{LENGTH} ) . "</nmwg:parameter>\n";
+                        $parameter1 .= "  <nmwg:parameter name=\"endTime\">" . $opts{END} . "</nmwg:parameter>\n";
                         $parameter1 .= "  <nmwg:parameter name=\"consolidationFunction\">AVERAGE</nmwg:parameter>\n";
                         $parameter1 .= "  <nmwg:parameter name=\"resolution\">100</nmwg:parameter>\n";
                         $parameter1 .= "</pinger:parameters>\n";
@@ -573,9 +583,9 @@ foreach my $host ( keys %{ $conf{host} } ) {
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
 
-                            open( CSV, ">PingER_" . $host_name . "_" . $host_port . "_" . $host_endpoint . "-" . $src_host . "_" . $dst_host . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
-                            print CSV "source host, destination host\n";
-                            print CSV $src_host, ",", $dst_host, "\n\n";
+                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            print CSV "source host, destination host, data type\n";
+                            print CSV $src_host, ",", $dst_host, ",PingER\n\n";
 
                             my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
                             my $ct1 = find( $doc1->getDocumentElement, "./*[local-name()='commonTime']", 0 );
@@ -594,7 +604,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
                                     }
                                 }
 
-                                print CSV "unix time,iso time,minRtt,maxRtt,medianRtt,meanRtt,iqrIpd,maxIpd,meanIpd,PingER\n";
+                                print CSV "unix time,iso time,minRtt,maxRtt,medianRtt,meanRtt,iqrIpd,maxIpd,meanIpd\n";
                                 my @array = ( "minRtt", "maxRtt", "medianRtt", "meanRtt", "iqrIpd", "maxIpd", "meanIpd" );
                                 foreach my $time ( sort keys %store ) {
                                     next unless $time;
