@@ -135,13 +135,13 @@ The _perfSONAR_ Network Performance Toolkit contains version *0.8.7b* of Cacti. 
 
 The Network Diagnostic Tool ([http://e2epi.internet2.edu/ndt/ NDT]) is a client/server program that provides network configuration and performance testing to a user's desktop or laptop computer.  The system is composed of a client program (command line or java applet) and a pair of server programs (a web server and a testing/analysis engine). Both command line and web-based clients communicate with a [http://web100.org/ Web100]-enhanced server to perform these diagnostic functions. Multi-level results allow novice and expert users to view and understand the test results.
 
-The _perfSONAR_ Network Performance Toolkit contains version of *3.4.4a* NDT.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Console_Configuration Console Configuration].
+The _perfSONAR_ Network Performance Toolkit contains version of *3.4.4a* NDT.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Step_2 Step 2 - Console Configuration].
 
 ==== NPAD ==== 
 
 The [http://www.psc.edu/networking/projects/pathdiag/ NPAD] diagnostic server, Pathdiag, is designed to easily and accurately diagnose problems in the last-mile network and end-systems that are the most common causes of all severe performance degradation over long end-to-end paths. The overall goal is to make the test procedures easy enough and the report it generates clear enough to be suitable for end-users who are not networking experts.
 
-The _perfSONAR_ Network Performance Toolkit contains version of *1.5.4* NPAD.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Console_Configuration Console Configuration].
+The _perfSONAR_ Network Performance Toolkit contains version of *1.5.4* NPAD.  All installation, including integration of the [http://web100.org/ Web100] enabled linux kernel, is complete and operational as the disk comes online.  Minor configuration is necessary, but is performed as a part of the general configuration steps described in [NPToolkitQuickStart#Step_2 Step 2 - Console Configuration].
 
 ==== OWAMP ==== 
 
@@ -184,13 +184,13 @@ The perfSONAR-PS Lookup Service (*LS*) addresses the always challenging problem 
 
 The advent of the _perfSONAR_ Global Lookup Service (*gLS*) now delivers a world wide view of all available _perfSONAR_ and selected performance tools.  Each *LS* instance is able to take an inventory of locally registered resources and share these with a well established infrastructure of globally deployed *gLS* services.  Through the use of established APIs service and client applications alike can gain access to this powerful information source.  
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via [NPToolkitQuickStart#Step_2 Step 2 - Console Configuration].  
 
 ==== PingER Measurement Archive and Measurement Point ==== 
 
 The PingER service is an evolution of the [http://www-iepm.slac.stanford.edu/pinger/ PingER] project with more than 10 years experience in collecting and analyzing network performance across the world. The _perfSONAR-PS_ PingER service is composed of both a storage backend (Measurement Archive) and measurement frontend (Measurement Point) to conduct and store ping measurements and to make available such data for consumption by interested parties. Network characteristics supported include availability, latency and jitter, which provide a broad spectrum of determining end-to-end network performance.
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  A default set of ping-able hosts are included on the installation, additional configuration can be performed via [NPToolkitQuickStart#PingER_Configuration PingER Configuration].
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via [NPToolkitQuickStart#Step_2 Step 2 - Console Configuration].  A default set of ping-able hosts are included on the installation, additional configuration can be performed via [NPToolkitQuickStart#PingER_Configuration PingER Configuration].
 
 ==== perfSONAR BUOY Measurement Archive ==== 
 
@@ -204,7 +204,7 @@ The _perfSONAR_ Network Performance Toolkit contains a version of this software 
 
 The perfSONAR-PS SNMP based Measurement Archive (SNMP MA) is able to expose data collected via variables from the Simple Network Management Protocol (SNMP) protocol found on networked devices and stored in [http://oss.oetiker.ch/rrdtool/ Round Robin Databases] (RRD) archives. The measurements are collected through external means, normally through software such as [http://oss.oetiker.ch/mrtg/ MRTG], [http://www.cacti.net Cacti], or [http://cricket.sourceforge.net/ Cricket], and is commonly stored in RRD archives. A common way to diagnose network problems is to gain external access to commonly requested data items (such as interface utilization, errors, discards, etc.) remains challenging due to physical and political boundaries.  The purpose of the SNMP MA is to deliver these items transparently and securely.  
 
-The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  This software requires configuration via [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration] before it can be used.
+The _perfSONAR_ Network Performance Toolkit contains a version of this software that starts up on disk boot.  Additional configuration is provided via [NPToolkitQuickStart#Step_2 Step 2 - Console Configuration].  This software requires configuration via [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration] before it can be used.
 
 === Supporting Software ===
 
@@ -230,7 +230,7 @@ By default MySQL is configured to listen *only* on the local interface and does 
 
 [http://www.ntp.org/ NTP] is a protocol designed to synchronize the clocks of computers over a network. NTP version 3 is an internet draft standard, formalized in [http://www.faqs.org/rfcs/rfc1305.html RFC 1305]. NTP version 4 is a significant revision of the NTP standard, and is the current development version, but has not been formalized in an RFC. Simple NTP (SNTP) version 4 is described in [http://www.faqs.org/rfcs/rfc2030.html RFC 2030]. 
 
-The _perfSONAR_ Network Performance Toolkit comes pre-loaded with several NTP servers, and users may adjust which servers their specific disk uses in the [NPToolkitQuickStart#Console_Configuration Console Configuration] step.  Do note that a _sane_ configuration of NTP consists of *4* to *5* servers geographically close to the deployment location.
+The _perfSONAR_ Network Performance Toolkit comes pre-loaded with several NTP servers, and users may adjust which servers their specific disk uses in the [NPToolkitQuickStart#Step_7 Step 7 - NTP ] step.  Do note that a _sane_ configuration of NTP consists of *4* to *5* servers geographically close to the deployment location.
 
 ==== Oracle DB XML ====
 
@@ -253,7 +253,7 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
  * *A:* The [http://e2epi.internet2.edu/ndt/ NDT] (Network Diagnostic Tool) is a client/server program developed to simplify testing to desktop/laptop computers. At boot time, the NPToolkit starts a pair of NDT server processes and leaves them listening on TCP ports *7123* and *3001*. To use this server, a client starts a Java-enabled web browser and points it at the NPToolkit server (http://HOST:7123). The server automatically downloads a Java applet to the client. The end-user can run a test to begin the diagnostic process.  Once the test has been completed, the server displays a results page on the clients browser. The end-user may examine these results and follow the recommendations to resolve problems. If the end-user is unable to repair a reported problem, the user may click the _Report Problems_ button to generate an email that will be addressed to the appropriate NPToolkit administrator.  The server retains a record of the test results to allow the post-processing of interesting results to determine what went wrong and to improve the reporting capabilities of the NDT server.
 
  * *Q: What is NTP?*
- * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkitQuickStart#Console_Configuration Console Configuration] for information regarding changing the default time sources.
+ * *A:* [http://www.ntp.org NTP] (Network Time Protocol) is a program that synchronizes a computers clock to a global time source. An accurate clock is essential for running many of the measurement tests including [http://e2epi.internet2.edu/bwctl/ BWCTL] and [http://e2epi.internet2.edu/owamp/ OWAMP]. The NTP daemon must connect to several, at least four (4), remote time servers to obtain accurately set the local clock. By default the NPToolkit server will synchronize to both Internet2 and public time sources.  See [NPToolkitQuickStart#Step_7 Step 7 - NTP] for information regarding changing the default time sources.
 
  * *Q: How do I use OWAMP?*
  * *A:* [http://e2epi.internet2.edu/owamp/ OWAMP] (One-Way Ping) is a client server program that was developed to provide delay and jitter measurements between two target computers. At boot time, the NPToolkit starts an OWAMP server process and leaves it listening on TCP port *861*. This server may then be used by remote clients.  Additionally, the disk contains OWAMP client applications that can be used to test to remote instances (including a Java client and a console based application).  By default, the OWAMP server sends a low-level data stream in each direction and measures the one-way delay and jitter between the two hosts. Separate measurements, one for each direction, are reported to the user at the end of the test.

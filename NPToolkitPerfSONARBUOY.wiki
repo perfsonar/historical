@@ -54,13 +54,7 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB4.png
 
 == Step 5 ==
 
-Press _Save_ and wait for the browser to display a message indicating success. The browser can be closed and a terminal will be required to start the services: 
-
- * _/etc/init.d/pSB_master.sh restart_
- * _/etc/init.d/pSB_collector.sh restart_
- * _/etc/init.d/pSB.sh restart_
-
-The following image shows a _successful_ configuration (note that selections may not appear due to browser caching):
+Press _Save_ and wait for the browser to display a message indicating success.  The following image shows a _successful_ configuration (note that selections may not appear due to browser caching):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/pSB5.png
 

@@ -2,21 +2,21 @@
 
 == TOC ==
 
- * [NPToolkitQuickStart#Cacti_Config_Step_1 Locate Cacti GUI and Login]
- * [NPToolkitQuickStart#Cacti_Config_Step_2 Create Network Device]
- * [NPToolkitQuickStart#Cacti_Config_Step_3 Add New Device]
- * [NPToolkitQuickStart#Cacti_Config_Step_4 Enter Device Info]
- * [NPToolkitQuickStart#Cacti_Config_Step_5 Create Graphs]
- * [NPToolkitQuickStart#Cacti_Config_Step_6 Select Graph Info]
- * [NPToolkitQuickStart#Cacti_Config_Step_7 Load Graph Data]
- * [NPToolkitQuickStart#Cacti_Config_Step_8 Edit Graph Tree]
- * [NPToolkitQuickStart#Cacti_Config_Step_9 Select Tree]
- * [NPToolkitQuickStart#Cacti_Config_Step_10 Add Graphs to Tree]
- * [NPToolkitQuickStart#Cacti_Config_Step_11 Select Graphs for Tree]
- * [NPToolkitQuickStart#Cacti_Config_Step_12 View Graphs]
- * [NPToolkitQuickStart#Cacti_Config_Step_13 Select Other Graphs]
- * [NPToolkitQuickStart#Cacti_Config_Step_14 Restart SNMP MA]
- * [NPToolkitQuickStart#Cacti_Config_Step_15 View perfSONAR Graphs]
+ * [NPToolkitCacti#Cacti_Config_Step_1 Locate Cacti GUI and Login]
+ * [NPToolkitCacti#Cacti_Config_Step_2 Create Network Device]
+ * [NPToolkitCacti#Cacti_Config_Step_3 Add New Device]
+ * [NPToolkitCacti#Cacti_Config_Step_4 Enter Device Info]
+ * [NPToolkitCacti#Cacti_Config_Step_5 Create Graphs]
+ * [NPToolkitCacti#Cacti_Config_Step_6 Select Graph Info]
+ * [NPToolkitCacti#Cacti_Config_Step_7 Load Graph Data]
+ * [NPToolkitCacti#Cacti_Config_Step_8 Edit Graph Tree]
+ * [NPToolkitCacti#Cacti_Config_Step_9 Select Tree]
+ * [NPToolkitCacti#Cacti_Config_Step_10 Add Graphs to Tree]
+ * [NPToolkitCacti#Cacti_Config_Step_11 Select Graphs for Tree]
+ * [NPToolkitCacti#Cacti_Config_Step_12 View Graphs]
+ * [NPToolkitCacti#Cacti_Config_Step_13 Select Other Graphs]
+ * [NPToolkitCacti#Cacti_Config_Step_14 Restart SNMP MA]
+ * [NPToolkitCacti#Cacti_Config_Step_15 View perfSONAR Graphs]
 
 Cacti is used to poll SNMP on network devices, and is a natural extension of the [NPToolkit#SNMP_Measurement_Archive SNMP Measurement Archive].  The following steps will explain the basic setup of Cacti (e.g. to poll a network device).  A user wishing to do more with the software should consult the documentation.  
 

@@ -10,12 +10,12 @@
      * [NPToolkitQuickStart#Step_3 Step 3 - Set built-in account passwords]
      * [NPToolkitQuickStart#Step_4 Step 4 - Enable/Disable Services]
      * [NPToolkitQuickStart#Step_5 Step 5 - Manage Users]     
-     * [NPToolkitQuickStart#Step_5 Step 6 - Configure BWCTL]
-     * [NPToolkitQuickStart#Step_6 Step 7 - Configure NTP]
-     * [NPToolkitQuickStart#Step_7 Step 8 - Configure OWAMP]
-     * [NPToolkitQuickStart#Step_8 Step 9 - Configure Static IP]
-     * [NPToolkitQuickStart#Step_9 Step 10 - Change Timezone]
-     * [NPToolkitQuickStart#Step_10 Step 11 - Modify advertised interface]
+     * [NPToolkitQuickStart#Step_6 Step 6 - Configure BWCTL]
+     * [NPToolkitQuickStart#Step_7 Step 7 - Configure NTP]
+     * [NPToolkitQuickStart#Step_8 Step 8 - Configure OWAMP]
+     * [NPToolkitQuickStart#Step_9 Step 9 - Configure Static IP]
+     * [NPToolkitQuickStart#Step_10 Step 10 - Change Timezone]
+     * [NPToolkitQuickStart#Step_11 Step 11 - Modify advertised interface]
      * [NPToolkitQuickStart#Post_Configuration Post Configuration]
    * [NPToolkitQuickStart#Web_Configuration Web Configuration]
      * [NPToolkitQuickStart#Cacti_Configuration Cacti Configuration]
@@ -335,8 +335,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
 == FAQ ==
 
  * *Q: How do I logon to the console?*
- * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. By default, there is no password for this account and no remote access is allowed.  See instructions in [NPToolkitQuickStart#Console_Configuration Console Configuration] to change details regarding system users, or enable remote access.
-
+ * *A:* The NPToolkit console is accessed by logging in as the user *_knoppix_*. In [NPToolkitQuickStart#Step_3 Step 3] it was required that the password for this user and _*root*_ were changed; use the values entered here to log in.  If other users were entered in [NPToolkitQuickStart#Step_5 Step 5] they may also log in.
+ 
  * *Q: How do I get an X-windows environment?*
  * *A:* The NPToolkit was designed for hands-off operations, so it boots into the console mode by default.  For users interested in working in an XWindows environment, [http://www.kde.org KDE] is available.  To bring the system up in X11 mode log in as *_knoppix_*, or any other valid user, and run the _startx_ command.
 
@@ -349,13 +349,13 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
  * *A:* The SNMP MA is pre-configured to use the Cacti SNMP collection system. A step by step guide to configuring cacti is available in [NPToolkitCacti].
 
  * *Q: How do I configure the hosts PingER pings?*
- * *A:* There's an included GUI for configuring the sites PingER should collect ping between. Navigate to https://HOST/admin/pinger/.  With this GUI, add/remove hosts and domains from testing. Press the _Save landmarks_ button when done and restart PingER by logging into the machine and running _sudo /etc/init.d/PingER.sh restart_.  A step by step guide to configuring PingER is available in [NPToolkitPingER].
+ * *A:* There's an included GUI for configuring the sites PingER should collect ping between. A step by step guide to configuring PingER is available in [NPToolkitPingER].
 
  * *Q: How do I configure the hosts perfSONAR-BUOY pings?*
- * *A:* There's an included GUI for configuring the sites perfSONAR-BUOY should perform OWAMP/BWCTL tests between. Navigate to https://HOST/admin/perfsonarbuoy/.  With this GUI, add/remove hosts and adjust other testing parameters. Press the _Save_ button when done and restart perfSONAR-BUOY by logging into the machine and running, _sudo /etc/init.d/pSB.sh restart_, _sudo /etc/init.d/pSB_collector.sh restart_ and _sudo /etc/init.d/pSB_master.sh restart_.  A step by step guide to configuration is available in [NPToolkitPerfSONARBUOY].
+ * *A:* There's an included GUI for configuring the sites perfSONAR-BUOY should perform OWAMP/BWCTL tests between. A step by step guide to configuration is available in [NPToolkitPerfSONARBUOY].
 
  * *Q: How do I test that my services are working?*
- * *A:* There is a _self status_ page available on every installation: https://HOST.  Each subsection of the disk features links to GUIs that validate the functionality of the services.  
+ * *A:* There is a _self status_ page available on every installation: https://HOST.  See also [NPToolkitQuickStart#Service_Test Service Test] for information on the self testing.
 
  * *Q: What should I enter for the _Communities of interest_ configuration question?*
  * *A:* 
