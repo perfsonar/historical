@@ -2240,12 +2240,16 @@ sub retrieveSQL {
                 $nodedb->closeDB;
 
                 if ( $#{$result1} == -1 or $#{$result2} == -1 ) {
+                    my $msg = "Cannot find data range tables in database, aborting.";
+                    $self->{LOGGER}->error($msg);
+                    getResultCodeData( $parameters->{output}, $id, $parameters->{mid}, $msg, 1 );
+                    return;
                 }
                 else {
                     @dbSchema = ( "send_id", "recv_id", "tspec_id", "ti", "timestamp", "throughput", "jitter", "lost", "sent" );
                     if ( $parameters->{time_settings}->{"START"}->{"internal"} or $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                        if ($query) {
-                            $query = " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
+                        if ( $query ) {
+                            $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
                         }
                         else {
                             $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\" and";
@@ -2257,7 +2261,7 @@ sub retrieveSQL {
                             $queryCount++;
                         }
                         if ( $parameters->{time_settings}->{"END"}->{"internal"} ) {
-                            if ($queryCount) {
+                            if ( $queryCount ) {
                                 $query = $query . " and timestamp < " . $parameters->{time_settings}->{"END"}->{"internal"};
                             }
                             else {
@@ -2266,16 +2270,16 @@ sub retrieveSQL {
                         }
                     }
                     else {
-                        if ($query) {
-                            $query = " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
+                        if ( $query ) {
+                            $query = $query . " union select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
                         }
                         else {
                             $query = "select * from " . $year . $mon . "_DATA where send_id=\"" . $result1->[0][0] . "\" and recv_id=\"" . $result2->[0][0] . "\"";
                         }
                     }
                 }
-                $query = $query . ";" if $query;
             }
+            $query = $query . ";" if $query;
         }
         else {
             my $msg = "Improper eventType found.";
