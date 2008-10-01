@@ -9,7 +9,7 @@
      * [NPToolkitQuickStart#Step_2 Step 2 - Configure site settings]
      * [NPToolkitQuickStart#Step_3 Step 3 - Set built-in account passwords]
      * [NPToolkitQuickStart#Step_4 Step 4 - Enable/Disable Services]
-     * [NPToolkitQuickStart#Step_4 Step 5 - Manage Users]     
+     * [NPToolkitQuickStart#Step_5 Step 5 - Manage Users]     
      * [NPToolkitQuickStart#Step_5 Step 6 - Configure BWCTL]
      * [NPToolkitQuickStart#Step_6 Step 7 - Configure NTP]
      * [NPToolkitQuickStart#Step_7 Step 8 - Configure OWAMP]
@@ -87,6 +87,15 @@ There are some basic items that are useful to all services from both a customiza
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_7_option2.png
 
+A particular question, _Enter the communities of interest_, can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
+
+ * *Internet2* - The data made available somehow connects the Internet2 backbone
+ * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
+ * *eVLBI* - The disk is a part of the larger telescope community
+ * *MAX* - A connector of member of the MAX gigapop
+
+Use as many community names as necessary to properly categorize the data from the installation.  The menu will appear after this step is completed.
+
 ==== Step 3 ====
 
 There are built in accounts for this installation:
@@ -94,9 +103,11 @@ There are built in accounts for this installation:
  * _*knoppix*_ - user level permissions
  * _*root*_ - administrator permissions
 
-These accounts must be set before leaving the configuration as they can be a security risk if let untouched.
+These accounts must have the password set before leaving the configuration as they can be a security risk if let untouched.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_8_option3.png
+
+After this step, the menu will appear again.
 
 ==== Step 4 ====
 
@@ -108,44 +119,101 @@ This is the appearance after enabling SSH.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_10_option4_2.png
 
-Note that there are packages available on the disk that are capable of running ssh through kerebos (a requirement of many LHC site installations).  If the installation site has such requirements, ssh may be enabled after some configuration.
+Note that there are packages available on the disk that are capable of running ssh through [http://web.mit.edu/Kerberos/ Kerberos] (a requirement of many LHC site installations).  If the installation site has such requirements, ssh may be enabled after some configuration.
+
+*_Information on Kerberos TBD_*
 
 ==== Step 5 ====
 
+Section 5 allows a finer grain of control over user accounts.  The first screen lists the available options.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_option5_1.png
+
+The first option is to add a new user, pictured below:
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_12_option5_2.png
+
+The second option removes users.  Note that when a user does not exist the option will respond appropriately.  
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_13_option5_3.png
+
+This shows a proper removal of a user.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_14_option5_4.png
+
+The last option is to change the password for a user.  Note that in the event a user doesn't exist a proper error message will be displayed.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_15_option5_5.png
+
+The final image shows a proper password change.  
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_16_option5_6.png
+
+After done, the menu will re-appear.
    
 ==== Step 6 ====
 
+In this step the BWCTL tool will be configured. It is recommended that very liberal and permissive rules are entered to allow maximum functionality. 
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_17_option6.png
+
+After finishing, the menu will appear again.
 
 ==== Step 7 ====
 
+To properly run several measurement tools, NTP is required.  This step allows the user to pick NTP services from a list.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_18_option7_1.png
+
+It is recommended that 3 to 4 _close_ servers are selected for timekeeping.  Do not choose _*more*_ than this because it may confuse NTP.  
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_19_option7_2.png
+
+After selection is completed, the menu will re-appear.
 
 ==== Step 8 ====
 
+In this step the OWAMP tool will be configured.  It is recommended that very liberal and permissive rules are entered to allow maximum functionality. 
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_option8.png
+
+After finishing, the menu will appear again.
 
 ==== Step 9 ====
 
+This is an optional step that can be called to configure a static IP address (instead of DHCP).  Note that this step will take some time to complete due to use of various network configuration tools.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_option9.png
+
+The menu will come back after completion.  
 
 ==== Step 10 ====
 
+This step is also optional, and allows the user to change the timezone.  The first image shows that the default is EST/EDT: 
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_22_option10_1.png
+
+The screen below shows the first stage after choosing the change the zone, selecting a region.  
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_23_option10_2.png
+
+After selecting a region, localities will be printed to the screen.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_24_option10_3.png
+
+Finally we choose a new (or in this case the same) timezone.
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_25_option10_4.png
+
+The menu will appear after this.
 
 ==== Step 11 ====
 
+The final step allows the user to select the _advertised_ interface.  This simply means the interface that will be registered to the global directories.  
+
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_26_option11.png
+
+After this step the menu will appear again.
 
 ==== Post Configuration ====
 
@@ -153,15 +221,15 @@ After exiting the menu, the machine may require a reboot.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_27_exit.png
 
-If this is the case, please do so.  When the machine comes back up then simply exit the configuration.  After performing all of these steps and exiting the menu the bootup process will start:
+If this is the case, please do so.  When the machine comes back up then simply exit the configuration (all menu items should be _green_ or _magenta_).  After performing all of these steps and exiting the menu the bootup process will start:
       
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_28_reboot.png
 
-The user will be faced with a prompt:
+The user will be faced with a prompt where loggin through the user accounts is possible:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_29_prompt.png
 
-_*knoppix*_ is the default user, with a blank password unless this was changed in [NPToolkitQuickStart#Console_Configuration Step 4].  There are some additional steps that can now be taken to configure some other services, specifically the _perfSONAR_ services. 
+There are some additional steps that can now be taken to configure some other services, specifically the _perfSONAR_ services. 
 
 === Web Configuration ===
 
@@ -169,11 +237,12 @@ Once the machine has booted it is now accessible via the static IP or a DHCP add
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_30_ifconfig.png
 
-Once the contact information is known, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (https is the default, and all communication will be redirected there anyway):
+Once the contact information is known, use a web browser to view the status of the disk, e.g. visit *http://HOST_OR_ADDRESS* or *https://HOST_OR_ADDRESS* (_*https*_ is the default, and all communication will be redirected to there):
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_31_services_cgi.png
 
-There are several GUIs that can be used configure services (note: to do this logging in as the _knoppix_ or other users added in [NPToolkitQuickStart#Console_Configuration Step 4] above is required.  Root _*cannot*_ log in):
+There are several GUIs that can be used configure services (note: to do this logging in as the _knoppix_ or other users added in [NPToolkitQuickStart#Step_5 Step 5] above is required.  Root _*cannot*_ log in):
+
  * https://HOST_OR_ADDRESS/admin/pinger
    * Used to configure hosts for the PingER tool
    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_32_PingER_Start.png
@@ -210,13 +279,13 @@ There are also several GUIs linked directly from this page that can be used to v
 
 ==== Global Service Directory ==== 
 
-Through the power of the perfSONAR Global Lookup Service (*gLS*) there are several GUIs available on the disk that can be used to display and locate services from around the world (including the newly set up instance after some requisite registration time).  The main interface is _directory.cgi_:
+Through the power of the Global Lookup Service (*gLS*) there are several GUIs available on the disk that can be used to display and locate services from around the world (including the newly set up instance after some requisite registration time).  The main interface is _directory.cgi_:
 
  * View services by category
  * Includes links to GUIs when applicable
  * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_35_Directory.png
 
-Note that both GUIs take advantage of caching techniques to limit the scope and frequency of the information queries: e.g. do not use this as a _real-time_ information source.
+Note that many GUIs take advantage of caching techniques to limit the scope and frequency of the information queries: e.g. do not use this as a _real-time_ information source.
 
 ====  Cacti ==== 
 
@@ -258,8 +327,10 @@ The _serviceTest.cgi_ script is able to test simple perfSONAR tasks to a variety
    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_42_PingER.png
  * SNMP MA
    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_43_SNMP.png
- * Error Condition
-   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
+
+Also note that if something is not configured properly, the following error condition can be seen:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
    
 == FAQ ==
 
@@ -285,6 +356,15 @@ The _serviceTest.cgi_ script is able to test simple perfSONAR tasks to a variety
 
  * *Q: How do I test that my services are working?*
  * *A:* There is a _self status_ page available on every installation: https://HOST.  Each subsection of the disk features links to GUIs that validate the functionality of the services.  
+
+ * *Q: What should I enter for the _Communities of interest_ configuration question?*
+ * *A:* 
+   * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
+     * *Internet2* - The data made available somehow connects the Internet2 backbone
+     * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
+     * *eVLBI* - The disk is a part of the larger telescope community
+     * *MAX* - A connector of member of the MAX gigapop
+   * Use as many community names as necessary to properly categorize the data from the installation. 
    
 == Last Updated ==
 

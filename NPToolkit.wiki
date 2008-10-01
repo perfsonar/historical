@@ -308,6 +308,15 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
  * *Q: When I boot, it gives me the following error _Can't find knoppix file system, sorry. Dropping you to a very limited shell ...._*
  * *A:* This can be attributed to a bad CD burn or a bad ISO image. Check the MD5 sum of the ISO and match this to the posted MD5 value.
 
+ * *Q: What should I enter for the _Communities of interest_ configuration question?*
+ * *A:* 
+   * This question can be confusing to answer for new users.  The goal is to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
+     * *Internet2* - The data made available somehow connects the Internet2 backbone
+     * *LHC* (*CMS*, *ATLAS*, etc.) - The disk is part of the LHC deployment structure
+     * *eVLBI* - The disk is a part of the larger telescope community
+     * *MAX* - A connector of member of the MAX gigapop
+   * Use as many community names as necessary to properly categorize the data from the installation. 
+
 == Last Updated ==
 
 $Id$
