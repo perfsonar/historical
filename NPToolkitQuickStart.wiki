@@ -354,8 +354,8 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
 
  * *Q: Where can I ask questions or report bugs?*
  * *A:* 
-   * For questions, email to i2-perfsonar _at_ internet2 _dot_ edu
-   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description the issue involves the NPtoolkit.
+   * For questions, email to performance-node-users _at_ internet2 _dot_ edu.  You may also join the mailing list by visiting https://mail.internet2.edu/wws/subrequest/performance-node-users
+   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as _*Component-NPToolkit*_, or state in the bug description the issue involves the NPToolkit.
 
  * *Q: How do I configure the SNMP MA?*
  * *A:* The SNMP MA is pre-configured to use the Cacti SNMP collection system. A step by step guide to configuring cacti is available in [NPToolkitCacti].

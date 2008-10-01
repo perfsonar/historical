@@ -5,6 +5,7 @@
  * [NPToolkit#Introduction Introduction]
    * [NPToolkit#Background Background]
    * [NPToolkit#Purpose Purpose]
+   * [NPToolkit#More_Information More Information]
  * [NPToolkit#Previous_Releases Previous Releases]
    * [NPToolkit#Beta_1 pS-NPToolkit 2.0 Beta 1]
    * [NPToolkit#Beta_2 pS-NPToolkit 2.0 Beta 2]
@@ -62,6 +63,28 @@ When serving as a measurement point, a use case adopted by Large Hadron Collider
  * NPAD
 
 When used in the role of a network debugging infrastructure, the various tools can be used to methodically find, diagnose, and aid in the correction of network performance issues.  
+
+=== More Information ===
+
+For information regarding upcoming releases or important notices concerning quality assurance and security we encourage subscription to our announcement mailing list:
+
+ * *_Address_* 
+   * performance-node-announce _*at*_ internet2 _*dot*_ edu
+ * *_Subscription Link_*
+   * https://mail.internet2.edu/wws/subrequest/performance-node-announce
+
+This list is expected to be low volume and subscription is open.  To get (or contribute) help within the Performance Node community we encourage subscription to our users mailing list:
+
+ * *_Address_* 
+   * performance-node-users _*at*_ internet2 _*dot*_ edu
+ * *_Subscription Link_*
+   * https://mail.internet2.edu/wws/subrequest/performance-node-users
+
+Non-subscribing users may still post without being a member.  This list will be of a higher volume than the announcement list, and should be used as the first stop for help regarding installation, configuration, and use of the Performance Node software.  A final piece of information is the developer's issue tracker which can be used to find, track, and file bugs related to this software:
+
+ * http://code.google.com/p/perfsonar-ps/issues/list
+ 
+If your solution is not easily solved by members of the mailing list, we encourage the use of this tool to inform the developers of potential problems.  Note that before filing a bug it is customary to search open issues to be sure something isn't being duplicated.  Also be sure to use a the _*Component-NPToolkit*_ tag or indicate somewhere in the report that the bug is related to this product.
 
 == Previous Releases ==
 
@@ -265,8 +288,8 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
 
  * *Q: Where can I ask questions or report bugs?*
  * *A:* 
-   * For questions, email to i2-perfsonar _at_ internet2 _dot_ edu
-   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as "Component-NPToolkit", or state in the bug description the issue involves the NPtoolkit.
+   * For questions, email to performance-node-users _at_ internet2 _dot_ edu.  You may also join the mailing list by visiting https://mail.internet2.edu/wws/subrequest/performance-node-users
+   * For bugs, report at http://code.google.com/p/perfsonar-ps/issues/list . Label the bug as _*Component-NPToolkit*_, or state in the bug description the issue involves the NPToolkit.
 
  * *Q: I get an error similar to _DBD::mysql::db selectrow_array failed: Table 'pingerMA.data_XXXXXX' doesn't exist at /some/path/to/Base.pm line XXX_.*
  * *A:* Ignore this. Depending on OS scheduling, PingER might try to use a table before creation. It should only happen occasionally.
