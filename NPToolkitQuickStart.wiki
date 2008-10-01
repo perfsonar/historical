@@ -7,8 +7,10 @@
    * [NPToolkitQuickStart#Console_Configuration Console Configuration]
      * [NPToolkitQuickStart#Step_1 Step 1 - Configure drive to hold data/customizations]
      * [NPToolkitQuickStart#Step_2 Step 2 - Configure site settings]
+       * [NPToolkitQuickStart#Community_Keywords Community Keywords]
      * [NPToolkitQuickStart#Step_3 Step 3 - Set built-in account passwords]
      * [NPToolkitQuickStart#Step_4 Step 4 - Enable/Disable Services]
+       * [NPToolkitQuickStart#Kerberosed_SSH Kerberosed SSH]
      * [NPToolkitQuickStart#Step_5 Step 5 - Manage Users]     
      * [NPToolkitQuickStart#Step_6 Step 6 - Configure BWCTL]
      * [NPToolkitQuickStart#Step_7 Step 7 - Configure NTP]
@@ -87,6 +89,8 @@ There are some basic items that are useful to all services from both a customiza
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_7_option2.png
 
+===== Community Keywords =====
+
 A particular question, _Enter the communities of interest_, can be confusing to answer for new users.  This particular question is trying to associate some _loosely coupled_ labels to the data that the perfSONAR NPToolkit disk will be making available to the larger world.  Think of this step similar to assigning labels to photos or music.  Some examples of valid answers are:
 
  * *Internet2* - The data made available somehow connects the Internet2 backbone
@@ -119,19 +123,17 @@ This is the appearance after enabling SSH.
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_10_option4_2.png
 
+===== Kerberosed SSH =====
+
 Note that there are packages available on the disk that are capable of running ssh through [http://web.mit.edu/Kerberos/ Kerberos] (a requirement of many LHC site installations).  If the installation site has such requirements, ssh may be enabled after some configuration.
 
-*_Information on Kerberos_*
+The requirement for kerberized SSH means that your Institution runs own PKI infrastructure. If your are not the sysadmin of the monitoring box then please consult with responsible person about PKi credentials for this host.
 
-The requirement for kerberized SSH means that your Institution runs own PKI infrastructure. If your are not the sysadmin of the monitoring box then please
-consult with responsible person about PKi credentials for this host.
 If you are the sysadmin:
 
  * If you deployed this disk on already configured linux box with existing  host credentials then mount host system root disk ( usually */UNIONFS/dev/sda1* or */UNIONFS/dev/hda1* ) as */UNIONFS/media/sda1* and copy */UNIONFS/media/sda1/etc/krb5.conf* and */UNIONFS/media/sda1/etc/krb5.keytab* files to */etc/* directory. Then edit /etc/ssh/sshd_config file according to your Institution's security policy.
 For example in case of Fermilab it is required to prohibit all kinds of authentication except for Kerberos ticket exchange and GSSAPI.
-
  * If you deployed this disk on fresh box without any OS or without any host credentials then you should comply with your home Institution's security policy and apply for host registration and host's Kerberos credentials. Usually that means downloading *krb5.conf* file from some inranet location in the */etc/* deirectory and creating */etc/krb5.keytab*.  
-
 
 ==== Step 5 ====
 
