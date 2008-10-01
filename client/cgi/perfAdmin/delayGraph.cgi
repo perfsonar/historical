@@ -52,28 +52,18 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
         }
     );
 
-    print "<html>\n";
-    print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
-    print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
-    print "    <script type=\"text/javascript\">\n";
-    print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
-    print "      google.setOnLoadCallback(drawChart);\n";
-    print "      function drawChart() {\n";
-    print "        var data = new google.visualization.DataTable();\n";
-
     my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
 
     my $flag1 = 0;
     my $flag2 = 0;
-    if ($datum1) {
-        my $counter = 0;
+    my %store = ();
+    my $counter = 0;
+    if ( $datum1 ) {
         foreach my $dt ( $datum1->get_nodelist ) {
             $counter++;
         }
-
-        my %store = ();
+        
         foreach my $dt ( $datum1->get_nodelist ) {
             my $s_secs = UnixDate( $dt->getAttribute("startTime"), "%s" );
             my $e_secs = UnixDate( $dt->getAttribute("endTime"),   "%s" );
@@ -86,12 +76,25 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
             my $dups = eval( $dt->getAttribute("duplicates") );
             $flag2++ if $dups;
 
-            $store{$e_secs}{"min"}  = $min;
-            $store{$e_secs}{"max"}  = $max;
-            $store{$e_secs}{"loss"} = $loss;
-            $store{$e_secs}{"dups"} = $dups;
-            $store{$e_secs}{"sent"} = $sent;
+            $store{$e_secs}{"min"}  = $min if $e_secs and $min;
+            $store{$e_secs}{"max"}  = $max if $e_secs and $max;
+            $store{$e_secs}{"loss"} = $loss if $e_secs and $loss;
+            $store{$e_secs}{"dups"} = $dups if $e_secs and $dups;
+            $store{$e_secs}{"sent"} = $sent if $e_secs and $sent;
         }
+    }
+
+    print "<html>\n";
+    print "  <head>\n";
+    print "    <title>perfSONAR-PS perfAdmin Delay Graph</title>\n";
+    
+    if ( scalar keys %store > 0 ) {
+        print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
+        print "    <script type=\"text/javascript\">\n";
+        print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
+        print "      google.setOnLoadCallback(drawChart);\n";
+        print "      function drawChart() {\n";
+        print "        var data = new google.visualization.DataTable();\n";
 
         print "        data.addColumn('date', 'Time');\n";
         print "        data.addColumn('number', 'Min Delay');\n";
@@ -129,20 +132,28 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
             }
             $counter++;
         }
-    }
-
-    print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-    if ( $flag1 or $flag2 ) {
-        print "        chart.draw(data, {displayAnnotations: true});\n";
+    
+        print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
+        if ( $flag1 or $flag2 ) {
+            print "        chart.draw(data, {displayAnnotations: true});\n";
+        }
+        else {
+            print "        chart.draw(data, {});\n";
+        }
+        print "      }\n";
+        print "    </script>\n";
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
     }
     else {
-        print "        chart.draw(data, {});\n";
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <br><br>\n";
+        print "    <h2 align=\"center\">Internal Error - Try again later.</h2>\n";
+        print "    <br><br>\n";
     }
-    print "      }\n";
-    print "    </script>\n";
-    print "  </head>\n";
-    print "  <body>\n";
-    print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
+
     print "  </body>\n";
     print "</html>\n";
 }

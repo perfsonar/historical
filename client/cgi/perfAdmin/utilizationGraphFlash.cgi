@@ -72,40 +72,44 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
         }
     );
 
-    print "<html>\n";
-    print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin Utilization Graph</title>\n";
-    print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
-    print "    <script type=\"text/javascript\">\n";
-    print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
-    print "      google.setOnLoadCallback(drawChart);\n";
-    print "      function drawChart() {\n";
-    print "        var data = new google.visualization.DataTable();\n";
-    print "        data.addColumn('date', 'Time');\n";
-    print "        data.addColumn('number', 'In');\n";
-    print "        data.addColumn('number', 'Out');\n";
-
     my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
 
     my $doc2 = $parser->parse_string( $result2->{"data"}->[0] );
     my $datum2 = find( $doc2->getDocumentElement, "./*[local-name()='datum']", 0 );
 
+    my %store = ();
+    my $counter = 0;
     if ( $datum1 and $datum2 ) {
-        my $counter = 0;
         foreach my $dt ( $datum1->get_nodelist ) {
             $counter++;
         }
-        print "        data.addRows(" . $counter . ");\n";
 
-        my %store = ();
         foreach my $dt ( $datum1->get_nodelist ) {
             $store{ $dt->getAttribute("timeValue") }{"in"} = eval( $dt->getAttribute("value") );
         }
         foreach my $dt ( $datum2->get_nodelist ) {
             $store{ $dt->getAttribute("timeValue") }{"out"} = eval( $dt->getAttribute("value") );
         }
+    }
 
+    print "<html>\n";
+    print "  <head>\n";
+    print "    <title>perfSONAR-PS perfAdmin Utilization Graph</title>\n";
+
+    if ( scalar keys %store > 0 ) {
+        print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
+        print "    <script type=\"text/javascript\">\n";
+        print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
+        print "      google.setOnLoadCallback(drawChart);\n";
+        print "      function drawChart() {\n";
+        print "        var data = new google.visualization.DataTable();\n";
+        print "        data.addColumn('date', 'Time');\n";
+        print "        data.addColumn('number', 'In');\n";
+        print "        data.addColumn('number', 'Out');\n";
+
+        print "        data.addRows(" . $counter . ");\n";
+ 
         $counter = 0;
         foreach my $time ( sort keys %store ) {
             my $date  = ParseDateString( "epoch " . $time );
@@ -121,15 +125,24 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
 
             $counter++;
         }
-    }
+    
 
-    print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-    print "        chart.draw(data, {});\n";
-    print "      }\n";
-    print "    </script>\n";
-    print "  </head>\n";
-    print "  <body>\n";
-    print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
+        print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
+        print "        chart.draw(data, {});\n";
+        print "      }\n";
+        print "    </script>\n";
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
+    }
+    else {
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <br><br>\n";
+        print "    <h2 align=\"center\">Internal Error - Try again later.</h2>\n";
+        print "    <br><br>\n";
+    }   
+    
     print "  </body>\n";
     print "</html>\n";
 }

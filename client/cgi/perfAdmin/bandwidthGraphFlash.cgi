@@ -52,35 +52,38 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
         }
     );
 
-    print "<html>\n";
-    print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin Bandwidth Graph</title>\n";
-    print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
-    print "    <script type=\"text/javascript\">\n";
-    print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
-    print "      google.setOnLoadCallback(drawChart);\n";
-    print "      function drawChart() {\n";
-    print "        var data = new google.visualization.DataTable();\n";
-    print "        data.addColumn('date', 'Time');\n";
-    print "        data.addColumn('number', 'Bandwidth');\n";
-
     my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
     my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
 
-    if ($datum1) {
-        my $counter = 0;
+    my %store = ();
+    my $counter = 0;
+    if ( $datum1 ) {
         foreach my $dt ( $datum1->get_nodelist ) {
             $counter++;
         }
-        print "        data.addRows(" . $counter . ");\n";
 
-        my %store = ();
         foreach my $dt ( $datum1->get_nodelist ) {
             my $secs = UnixDate( $dt->getAttribute("timeValue"), "%s" );
-            $store{$secs} = eval( $dt->getAttribute("throughput") );
+            $store{$secs} = eval( $dt->getAttribute("throughput") ) if $secs and $dt->getAttribute("throughput");
         }
+    }
 
-        $counter = 0;
+    print "<html>\n";
+    print "  <head>\n";
+    print "    <title>perfSONAR-PS perfAdmin Bandwidth Graph</title>\n";
+    
+    if ( scalar keys %store > 0 ) {
+        print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
+        print "    <script type=\"text/javascript\">\n";
+        print "      google.load(\"visualization\", \"1\", {packages:[\"annotatedtimeline\"]});\n";
+        print "      google.setOnLoadCallback(drawChart);\n";
+        print "      function drawChart() {\n";
+        print "        var data = new google.visualization.DataTable();\n";
+        print "        data.addColumn('date', 'Time');\n";
+        print "        data.addColumn('number', 'Bandwidth');\n";
+
+        print "        data.addRows(" . $counter . ");\n";
+        
         foreach my $time ( sort keys %store ) {
             my $date  = ParseDateString( "epoch " . $time );
             my $date2 = UnixDate( $date, "%Y-%m-%d %H:%M:%S" );
@@ -92,15 +95,23 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
             print "        data.setValue(" . $counter . ", 1, " . $store{$time} . ");\n" if $store{$time};
             $counter++;
         }
+    
+        print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
+        print "        chart.draw(data, {});\n";
+        print "      }\n";
+        print "    </script>\n";
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
     }
-
-    print "        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));\n";
-    print "        chart.draw(data, {});\n";
-    print "      }\n";
-    print "    </script>\n";
-    print "  </head>\n";
-    print "  <body>\n";
-    print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
+    else {
+        print "  </head>\n";
+        print "  <body>\n";
+        print "    <br><br>\n";
+        print "    <h2 align=\"center\">Internal Error - Try again later.</h2>\n";
+        print "    <br><br>\n";
+    }
+    
     print "  </body>\n";
     print "</html>\n";
 }
