@@ -85,7 +85,8 @@ The original version of the _perfSONAR_ Network Performance Toolkit was released
 === Release ===
 
  * _perfSONAR_ NPToolkit 2.0 - September 30, 2008
-   * TBD
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0.iso]
+   * [http://www.perfsonar.net/download/bundles/pS-NPToolkit/pS-NPToolkit-2.0.md5]
 
 == Installation and Configuration ==
 
