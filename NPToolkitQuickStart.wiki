@@ -63,7 +63,7 @@ Each step will be explained here with pictures where applicable.
 
 ==== Step 1 ==== 
 
-To properly store configuration information and stored measurement data, a drive must be configured to act as storage.  Normally we would expect the onboard disk to serve in this roll, but optionally a external drive such as a USB flash device may be used.  There are minimal requirements for the storage:
+To properly store configuration information and stored measurement data, a drive must be configured to act as storage.  Normally we would expect the onboard disk to fill this role, but optionally a external drive such as a USB flash device may be used.  There are minimal requirements for the storage:
 
  * Should be large enough to hold configuration files and measurement data
    * Minimum of a gigabyte for short term use
@@ -112,50 +112,29 @@ Note that there are packages available on the disk that are capable of running s
 
 ==== Step 5 ====
 
-  * Select option *3* to _Change A User's Password_
-    * Enter _root_
-    * Enter a new password
-    * While not required, this is a *_GOOD IDEA_* to do this
-  * The same can be done for _knoppix_
-    * This should be done if SSH was enabled in _Step 3_
-  * To add a user select _Add a new user_
-    * Enter the name
-    * Allow/disallow SSH access
-    * Allow/disallow administrator status
-    * Enter user information
-    * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_9_Option4.png
-    
-
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_11_option5_1.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_12_option5_2.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_13_option5_3.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_14_option5_4.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_15_option5_5.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_16_option5_6.png
-
    
 ==== Step 6 ====
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_17_option6.png
-
 
 ==== Step 7 ====
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_18_option7_1.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_19_option7_2.png
 
-
-
 ==== Step 8 ====
 
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_20_option8.png
 
-
 ==== Step 9 ====
 
-
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_21_option9.png
-
 
 ==== Step 10 ====
 
@@ -164,12 +143,9 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_23_option10_2.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_24_option10_3.png
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_25_option10_4.png
 
-
 ==== Step 11 ====
 
-
 http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_26_option11.png
-
 
 ==== Post Configuration ====
 
@@ -264,20 +240,26 @@ http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_38_Java_OWAMP.png
 
 In addition to being a performance tool, NPAD features a web interface that can be used to locate the results of past tests.
 
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_39_NPAD.png
+
 ==== NDT ==== 
 
 In addition to being a performance tool, NDT features a web interface that contains other relevant information.
+
+http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_40_NDT.png
 
 ==== Service Test ==== 
 
 The _serviceTest.cgi_ script is able to test simple perfSONAR tasks to a variety of services; namely the three services included on this disk:
 
- * PingER
-   * 
- * SNMP MA
-   * 
  * perfSONAR-BUOY
-   * 
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_41_pSB.png
+ * PingER
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_42_PingER.png
+ * SNMP MA
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_43_SNMP.png
+ * Error Condition
+   * http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/NPK_44_Error.png
    
 == FAQ ==
 
