@@ -127,8 +127,7 @@ The requirement for kerberized SSH means that your Institution runs own PKI infr
 consult with responsible person about PKi credentials for this host.
 If you are the sysadmin:
 
- * If you deployed this disk on already configured linux box with existing  host credentials then mount host system root disk ( usually */UNIONFS/dev/sda1* or */UNIONFS/dev/hda1* ) as */UNIONFS/media/sda1* and copy */UNIONFS/media/sda1/etc/krb5.conf* and */UNIONFS/media/sda1/etc/krb5.keytab* files to */etc/* directory.
-Then edit /etc/ssh/sshd_config file according to your Institution's security policy.
+ * If you deployed this disk on already configured linux box with existing  host credentials then mount host system root disk ( usually */UNIONFS/dev/sda1* or */UNIONFS/dev/hda1* ) as */UNIONFS/media/sda1* and copy */UNIONFS/media/sda1/etc/krb5.conf* and */UNIONFS/media/sda1/etc/krb5.keytab* files to */etc/* directory. Then edit /etc/ssh/sshd_config file according to your Institution's security policy.
 For example in case of Fermilab it is required to prohibit all kinds of authentication except for Kerberos ticket exchange and GSSAPI.
 
  * If you deployed this disk on fresh box without any OS or without any host credentials then you should comply with your home Institution's security policy and apply for host registration and host's Kerberos credentials. Usually that means downloading *krb5.conf* file from some inranet location in the */etc/* deirectory and creating */etc/krb5.keytab*.  
