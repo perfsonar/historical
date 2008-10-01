@@ -3,6 +3,17 @@
 use strict;
 use warnings;
 
+=head1 NAME
+
+ls_registration_daemin.pl - Registers services (e.g. daemons such as owamp,
+bwctl) into the global information service.
+
+=head1 DESCRIPTION
+
+TBD
+
+=cut
+
 use lib "../../lib";
 use lib "/usr/local/perfSONAR/lib";
 
@@ -267,7 +278,7 @@ sub init_site {
         else {
 
             # error
-            $logger->error( "Error: Unknown service type: " . $conf{type} . "" );
+            $logger->error( "Error: Unknown service type: " . $conf{type} );
             exit(-1);
         }
     }
@@ -356,7 +367,7 @@ sub service_name {
         return $self->{CONF}->{service_name};
     }
 
-    my $retval = "";
+    my $retval = q{};
     if ( $self->{CONF}->{site_name} ) {
         $retval .= $self->{CONF}->{site_name} . " ";
     }
@@ -435,7 +446,7 @@ sub register {
 
     my $node_addresses = $self->get_node_addresses();
 
-    my $md = "";
+    my $md = q{};
     $md .= "<nmwg:metadata id=\"" . int( rand(9000000) ) . "\">\n";
     $md .= "  <nmwg:subject>\n";
     $md .= $self->create_node($node_addresses);
@@ -481,7 +492,7 @@ sub keepalive {
     my ($self) = @_;
 
     my $res = $self->{LS_CLIENT}->keepaliveRequestLS( key => $self->{KEY} );
-    if ( $res->{eventType} ne "success.ls.keepalive" ) {
+    if ( exists $res->{eventType} and $res->{eventType} ne "success.ls.keepalive" ) {
         $self->{STATUS} = "UNREGISTERED";
         $self->{LOGGER}->debug("Keepalive failed");
     }
@@ -500,7 +511,7 @@ sub unregister {
 
 sub create_node {
     my ( $self, $addresses ) = @_;
-    my $node = "";
+    my $node = q{};
 
     my $nmtb  = "http://ogf.org/schema/network/topology/base/20070828/";
     my $nmtl3 = "http://ogf.org/schema/network/topology/l3/20070828/";
@@ -587,7 +598,7 @@ sub is_up {
     foreach my $addr ( @{ $self->{ADDRESSES} } ) {
         my $sock;
 
-        $self->{LOGGER}->debug( "Connecting to: " . $addr . ":" . $self->{PORT} . "" );
+        $self->{LOGGER}->debug( "Connecting to: " . $addr . ":" . $self->{PORT} );
 
         if ( $addr =~ /:/ ) {
             $sock = IO::Socket::INET6->new( PeerAddr => $addr, PeerPort => $self->{PORT}, Proto => 'tcp', Timeout => 5 );
@@ -1215,3 +1226,44 @@ sub event_type {
     return "http://ggf.org/ns/nmwg/tools/traceroute/1.0";
 }
 
+__END__
+
+=head1 SEE ALSO
+
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Utils::Daemon>,
+L<perfSONAR_PS::Utils::Host>, L<use Getopt::Long>, L<Config::General>,
+L<Log::Log4perl>
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.  Bugs,
+feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+=head1 VERSION
+
+$Id$
+
+=head1 AUTHOR
+
+Aaron Brown, aaron@internet2.edu
+
+=head1 LICENSE
+
+You should have received a copy of the Internet2 Intellectual Property Framework along
+with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008, Internet2
+
+All rights reserved.
+
+=cut
