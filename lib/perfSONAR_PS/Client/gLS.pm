@@ -81,6 +81,9 @@ sub new {
         $self->init();
     }
 
+    my @temp = ();
+    $self->{ROOTS} = \@temp;
+
     return $self;
 }
 
@@ -311,7 +314,7 @@ sub verifyURL {
     return -1;
 }
 
-=head2 ( $self, { } )
+=head2 getRoot( $self, { } )
 
 Extract the first usable root element.  In the event you exhaust the list, try
 again (once only, covers the case where a previously 'dead' root may come back).
