@@ -17,18 +17,18 @@ import org.jdom.xpath.XPath;
  * and String representations of the service element.
  */
 public class ServiceRegistration {
-	private Element keyElem;
 	private Element serviceElem;
 	private Element optionalParamsElem;
 	private PSNamespaces psNS;
 	
+	final public static String IDC_TYPE = "IDC";
 	/**
 	 * Creates a new service element
 	 * 
 	 * @param id the urn of the service
 	 * @param name the name of the service
 	 * @param type the type of service
-	 * @param description a secription of the service instance
+	 * @param description a description of the service instance
 	 */
 	public ServiceRegistration(String name, String type){
 		this.psNS = new PSNamespaces();
@@ -389,21 +389,6 @@ public class ServiceRegistration {
 	 */
 	public void setServiceElem(Element serviceElem) {
 		this.serviceElem = serviceElem;
-	}
-	
-	public Element getKeyElem() {
-		return keyElem;
-	}
-
-	public void setKeyElem(String key) {
-		this.keyElem = new Element("key", this.psNS.NMWG);
-		Element params =  new Element("parameters", this.psNS.NMWG);
-		Element param =  new Element("parameter", this.psNS.NMWG);
-		params.setAttribute("id", "keyParams1");
-		param.setAttribute("name", "lsKey");
-		param.setText(key);
-		params.addContent(param);
-		this.keyElem.addContent(params);
 	}
 	
 	/** 

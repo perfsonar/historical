@@ -10,7 +10,6 @@ import org.jdom.output.XMLOutputter;
  * Store the details for registering a Node with lookup service
  */
 public class NodeRegistration {
-	private Element keyElem;
 	private Element nodeElem;
 	private PSNamespaces psNS;
 	
@@ -22,7 +21,6 @@ public class NodeRegistration {
 		this.psNS = new PSNamespaces();
 		this.nodeElem = new Element("node", this.psNS.TOPO);
 		this.nodeElem.setAttribute("id", id);
-		this.keyElem = null;
 	}
 	
 	/**
@@ -80,21 +78,6 @@ public class NodeRegistration {
 	 */
 	public void setNodeElem(Element nodeElem) {
 		this.nodeElem = nodeElem;
-	}
-	
-	public Element getKeyElem() {
-		return keyElem;
-	}
-
-	public void setKeyElem(String key) {
-		this.keyElem = new Element("key", this.psNS.NMWG);
-		Element params =  new Element("parameters", this.psNS.NMWG);
-		Element param =  new Element("parameter", this.psNS.NMWG);
-		params.setAttribute("id", "keyParams1");
-		param.setAttribute("name", "lsKey");
-		param.setText(key);
-		params.addContent(param);
-		this.keyElem.addContent(params);
 	}
 	
 	/**

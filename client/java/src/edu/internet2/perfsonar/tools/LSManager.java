@@ -64,11 +64,13 @@ public class LSManager extends JFrame{
 		this.regFields = new HashMap<String,Container>();
 		this.getContentPane().setLayout(null);
 		JPanel regPanel = this.createRegPanel();
+		JPanel lookupPanel = this.createLookupPlanel();
 		JPanel settingsPanel = this.createSettingsPanel();
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setBounds(10, 10, 680, 560);
 		tabbedPane.addTab("Register", regPanel);
+		tabbedPane.addTab("Lookup", lookupPanel);
 		tabbedPane.addTab("Settings", settingsPanel);
 		this.getContentPane().add(tabbedPane);
 		
@@ -316,7 +318,7 @@ public class LSManager extends JFrame{
 				mgr.reportError(ERR_TYPE, e.getMessage());
 			}
 		}
-		/* try {
+		try {
 			Element nodeElem = lsClient.lookupNode(new URL(urls[0]).getHost());
 			if(nodeElem == null){
 				lsClient.registerNode(nodeReg);
@@ -327,8 +329,7 @@ public class LSManager extends JFrame{
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} */
-		reg.setKeyElem("SJKLFJSFLSJFLK");
+		}
 		System.out.println(reg);
 	}
 	
@@ -514,7 +515,34 @@ public class LSManager extends JFrame{
 			return;
 		}
 	}
-
+	
+	public JPanel createLookupPlanel(){
+		JPanel panel = new JPanel();
+		JLabel lbl1 = new JLabel("Lookup");
+		JLabel lbl2 = new JLabel("that controls domain");
+		String[] types = {"IDC", "NotifcationBroker", "Host", "Node", "Custom"};
+		JComboBox type = new JComboBox(types);
+		JTextArea query = new JTextArea();
+		JTextArea response = new JTextArea();
+		response.setEditable(false);
+		JButton submitButton = new JButton("Lookup");
+		
+		/* Set Position */
+		final int SET_TEXT_WIDTH=500;
+		final int SET_TEXT_HEIGHT=20;
+		final int SET_MARGIN=10;
+		final int SET_PAD=5;
+		
+		panel.add(lbl1);
+		panel.add(type);
+		panel.add(lbl2);
+		panel.add(query);
+		panel.add(submitButton);
+		panel.add(response);
+		
+		return panel;
+	}
+	
 	/**
 	 * @return the protoList
 	 */

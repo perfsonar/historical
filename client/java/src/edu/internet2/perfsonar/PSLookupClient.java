@@ -7,6 +7,7 @@ import java.util.Random;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.jdom.Content;
 import org.jdom.Element;
 
 /**
@@ -124,7 +125,7 @@ public class PSLookupClient extends PSBaseClient{
 	
 	/**
 	 * Returns a list of Global Lookup Service instances from a hints file 
-	 * at the gievn URL. The hosts may be randomly re-ordered depending on
+	 * at the given URL. The hosts may be randomly re-ordered depending on
 	 * the value of randomOrder.
 	 * 
 	 * @param url the location of the hints file
@@ -154,5 +155,18 @@ public class PSLookupClient extends PSBaseClient{
 			}
 		}
 		return glsList;
+	}
+
+	public Element createKeyElem(String key) {
+		Element keyElem = new Element("key", this.psNS.NMWG);
+		Element params =  new Element("parameters", this.psNS.NMWG);
+		Element param =  new Element("parameter", this.psNS.NMWG);
+		params.setAttribute("id", "keyParams1");
+		param.setAttribute("name", "lsKey");
+		param.setText(key);
+		params.addContent(param);
+		keyElem.addContent(params);
+		
+		return keyElem;
 	}
 }

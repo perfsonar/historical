@@ -31,7 +31,8 @@ public class DCNLookupClient{
 	private boolean tryAllGlobal;
 	private boolean useGlobalLS;
 	private PSNamespaces psNS;
-	
+	private boolean retryOnKeyNotFound;
+
 	static final public String IDC_SERVICE_TYPE = "IDC";
 	static final public String PROTO_OSCARS = "http://oscars.es.net/OSCARS";
 	static final public String PROTO_WSN = "http://docs.oasis-open.org/wsn/b-2";
@@ -85,6 +86,7 @@ public class DCNLookupClient{
 		this.hLSList = null;
 		this.tryAllGlobal = false;
 		this.useGlobalLS = true;
+		this.retryOnKeyNotFound = false;
 		this.psNS = new PSNamespaces();
 	}
 	
@@ -107,6 +109,7 @@ public class DCNLookupClient{
 		this.hLSList = hLSList;
 		this.tryAllGlobal = false;
 		this.useGlobalLS = true;
+		this.retryOnKeyNotFound = false;
 		this.psNS = new PSNamespaces();
 	}
 	
@@ -121,6 +124,7 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = null;
 		this.tryAllGlobal = false;
+		this.retryOnKeyNotFound = false;
 		this.psNS = new PSNamespaces();
 	}
 
@@ -140,6 +144,7 @@ public class DCNLookupClient{
 		this.gLSList = gLSList;
 		this.hLSList = hLSList;
 		this.tryAllGlobal = false;
+		this.retryOnKeyNotFound = false;
 		this.psNS = new PSNamespaces();
 	}
 	
@@ -398,13 +403,22 @@ public class DCNLookupClient{
 	 * @throws PSException
 	 */
 	public HashMap<String,String> registerNode(NodeRegistration reg) throws PSException{
-		Element metaDataElem = this.createMetaData(this.psNS.DCN);
-		if(reg.getKeyElem() != null){
-			metaDataElem.addContent(0,reg.getKeyElem());
-		}
-		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
+		return this.registerNode(reg, null);
+	}
+	
+	/**
+	 * Registers a "Node" element with the lookup service using the given set of keys
+	 * 
+	 * @param reg a NodeRegistration object with the information to register
+	 * @param keys a HashMap indexed by URL of the keys to use when registering data
+	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @throws PSException
+	 */
+	public HashMap<String,String> registerNode(NodeRegistration reg, HashMap<String, String> keys) throws PSException{
+		Element subjElem = new Element("subject", this.psNS.DCN);
+		subjElem.setAttribute("id", "subj"+System.currentTimeMillis());
 		subjElem.addContent(reg.getNodeElem());
-		return this.register(metaDataElem);
+		return this.register(subjElem, keys);
 	}
 	
 	/**
@@ -415,17 +429,26 @@ public class DCNLookupClient{
 	 * @throws PSException
 	 */
 	public HashMap<String,String> registerService(ServiceRegistration reg) throws PSException{
-		Element metaDataElem = this.createMetaData(this.psNS.DCN);
-		Element subjElem = metaDataElem.getChild("subject", this.psNS.DCN);
-		if(reg.getKeyElem() != null){
-			metaDataElem.addContent(0, reg.getKeyElem());
-		}
+		return this.registerService(reg, null);
+	}
+	
+	/**
+	 * Registers a service such as an IDC or NotificationBroker with the lookup service
+	 * 
+	 * @param reg a ServiceRegistration object with the details to register
+	 * @param keys a HashMap indexed by URL of the keys to use when registering data
+	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
+	 * @throws PSException
+	 */
+	public HashMap<String,String> registerService(ServiceRegistration reg, HashMap<String, String> keys) throws PSException{
+		Element subjElem = new Element("subject", this.psNS.DCN);
+		subjElem.setAttribute("id", "subj"+System.currentTimeMillis());
 		subjElem.addContent(reg.getServiceElem());
 		if(reg.getOptionalParamsElem() != null){
 			subjElem.addContent(reg.getOptionalParamsElem());
 		}
 		
-		return this.register(metaDataElem);
+		return this.register(subjElem, keys);
 	}
 	
 	/**
@@ -437,15 +460,22 @@ public class DCNLookupClient{
 	 * @return a HashMap indexed by each home LS contacted and containing the key returned by each
 	 * @throws PSException
 	 */
-	private HashMap<String, String> register(Element metaDataElem) throws PSException{
-		HashMap<String,String> keys = new HashMap<String,String>();
+	private HashMap<String, String> register(Element subjElem, HashMap<String, String> keys) throws PSException{
 		if(hLSList == null){
 			throw new PSException("No home lookup services specified!");
 		}
+		if(keys == null){
+			keys = new HashMap<String,String>();
+		}
 		
 		for(String hLS : hLSList){
-			String request = this.requestString(metaDataElem, null);
 			PSLookupClient lsClient = new PSLookupClient(hLS);
+			Element metaDataElem = this.createMetaData(null);
+			metaDataElem.addContent(subjElem);
+			if(keys.containsKey(hLS)){
+				metaDataElem.addContent(0, lsClient.createKeyElem(keys.get(hLS)));
+			}
+			String request = this.requestString(metaDataElem, null);
 			Element response = lsClient.register(request, null);
 			Element metaData = response.getChild("metadata", psNS.NMWG);
 	        if(metaData == null){
@@ -454,7 +484,24 @@ public class DCNLookupClient{
 	        Element eventType = metaData.getChild("eventType", psNS.NMWG);
 	        if(eventType == null){
 	        	throw new PSException("No eventType returned");
-	        }else if(eventType.getText().startsWith("error.ls")){
+	        }
+	        
+	        //Try again without the key
+	        if((eventType.getText().equals("error.ls.register.key_not_found")) && 
+	        		this.retryOnKeyNotFound){
+	        	metaDataElem.removeContent(0);
+	        	request = this.requestString(metaDataElem, null);
+	        	response = lsClient.register(request, null);
+	        	metaData = response.getChild("metadata", psNS.NMWG);
+		        if(metaData == null){
+		        	throw new PSException("No metadata element in registration response");
+		        }
+		       eventType = metaData.getChild("eventType", psNS.NMWG);
+		        if(eventType == null){
+		        	throw new PSException("No eventType returned");
+		        }
+	        }
+	        if(eventType.getText().startsWith("error.ls")){
 	        	Element errDatum = lsClient.parseDatum(response, psNS.NMWG_RESULT);
 	        	String errMsg = (errDatum == null ? "An unknown error occurred" : errDatum.getText());
 	        	this.log.error(eventType.getText() + ": " + errMsg);
@@ -644,5 +691,19 @@ public class DCNLookupClient{
 		} catch (IOException e) {}
 		
 		return result;
+	}
+	
+	/**
+	 * @return boolean value indicating if register requests using keys will retry without a key after 'error.ls.register.key_not_found' event
+	 */
+	public boolean getRetryOnKeyNotFound() {
+		return retryOnKeyNotFound;
+	}
+	
+	/**
+	 * @param retryOnKeyNotFound value indicating if register requests using keys will retry without a key after 'error.ls.register.key_not_found' event
+	 */
+	public void setRetryOnKeyNotFound(boolean retryOnKeyNotFound) {
+		this.retryOnKeyNotFound = retryOnKeyNotFound;
 	}
 }
