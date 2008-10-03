@@ -436,7 +436,7 @@ sub registerLS {
     my $database;
     if ( -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
-            # update once an hour 
+                                                                        # update once an hour
         if ( ( $hintsStats->mtime + 3600 ) < time ) {
             $self->getHints();
         }
@@ -469,11 +469,12 @@ sub registerLS {
     }
 
     if ( $#{ $gls->{ROOTS} } <= -1 ) {
-        $self->{LOGGER}->warn( "No gLS Root services to contact, exiting." );
+        $self->{LOGGER}->warn("No gLS Root services to contact, exiting.");
         return -1;
     }
 
     if ( $self->{CONF}->{"gls"}->{root} ) {
+
         # if we are a root, we are 'synchronizing'
 
         $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
@@ -1731,6 +1732,7 @@ sub cleanLSAux {
 
     my $error     = q{};
     my $errorFlag = 0;
+    my $parser    = XML::LibXML->new();
 
     my $dbTr = $parameters->{database}->getTransaction( { error => \$error } );
     unless ($dbTr) {
@@ -1739,180 +1741,96 @@ sub cleanLSAux {
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
 
-
-
-    my $parser = XML::LibXML->new();
-
-    # XXX 10/2/08 - JZ
-    # 
-    # Lots of wrangling here to make sure things are being deleted...
-    
-
-
-    my %dataTracker = ();
-    my %dataTrackerLookup = ();
     my @allData = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
-    my $len = $#allData;
+
+    my @allMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    $errorFlag++ if $error;
+
+    my @controlMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    $errorFlag++ if $error;
+
+    my %dataTracker       = ();
+    my %dataTrackerLookup = ();
+    my $len               = $#allData;
     if ( $len != -1 ) {
         for my $x ( 0 .. $len ) {
-            my $doc    = $parser->parse_string( $allData[$x] );
-            my $did    = $doc->getDocumentElement->getAttribute("id");
-print "\n\nFOUND 1:\n";
-            if ( $did ) {
-print "D:\t" , $did , "\n";
-                my $mdid   = $doc->getDocumentElement->getAttribute("metadataIdRef");
-                if ( $mdid ) {
-print "MD:\t" , $mdid , "\n";
-                    $dataTracker{ $did } = $mdid if not exists $dataTracker{ $did };
-                    if ( exists $dataTrackerLookup{ $mdid } ) {
-                        push @{ $dataTrackerLookup{ $mdid } }, $did;
-                    } 
-                    else {
-                        my @temp = ( $did );
-                        $dataTrackerLookup{ $mdid } = \@temp;
-                    }
+            my $doc = $parser->parse_string( $allData[$x] );
+            my $did = $doc->getDocumentElement->getAttribute("id");
+            next unless $did;
+            my $mdid = $doc->getDocumentElement->getAttribute("metadataIdRef");
+            if ($mdid) {
+                $dataTracker{$did} = $mdid if not exists $dataTracker{$did};
+                if ( exists $dataTrackerLookup{$mdid} ) {
+                    push @{ $dataTrackerLookup{$mdid} }, $did;
                 }
                 else {
-                    $self->{LOGGER}->info( "Removing data \"" . $did . "\" beacuse it is missing a metadataIdRef." );
-                    $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
+                    my @temp = ($did);
+                    $dataTrackerLookup{$mdid} = \@temp;
                 }
             }
             else {
-                $self->{LOGGER}->error( "Data element missing \"id\": " . $allData[$x] );
+                $self->{LOGGER}->info( "Removing data \"" . $did . "\" beacuse it is missing a metadataIdRef." );
+                $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
+                $errorFlag++ if $error;
             }
         }
     }
 
-
-
     my %metadataTracker = ();
-    my @allMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-    $errorFlag++ if $error;
     $len = $#allMetadata;
     if ( $len != -1 ) {
         for my $x ( 0 .. $len ) {
-            my $doc    = $parser->parse_string( $allMetadata[$x] );
-            my $mid    = $doc->getDocumentElement->getAttribute("id");
-print "\n\nFOUND 2:\n";
-            if ( $mid ) {
-print "M:\t" , $mid , "\n";
-                $metadataTracker{ $mid } = 1 if not exists $metadataTracker{ $mid };
-            }
-            else {
-                $self->{LOGGER}->error( "Metadata element missing \"id\": " . $allMetadata[$x] );
-            } 
+            my $doc = $parser->parse_string( $allMetadata[$x] );
+            my $mid = $doc->getDocumentElement->getAttribute("id");
+            next unless $mid;
+            $metadataTracker{$mid}++;
         }
     }
 
-
-
     my %controlTracker = ();
-    my %controlTrackerLookup = ();
-    my @controlMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-    $errorFlag++ if $error;
     $len = $#controlMetadata;
     if ( $len != -1 ) {
         for my $x ( 0 .. $len ) {
-            my $doc    = $parser->parse_string( $controlMetadata[$x] );
-            my $mid    = $doc->getDocumentElement->getAttribute("id");
-print "\n\nFOUND 3:\n";
-            if ( $mid ) {
-print "M:\t" , $mid , "\n";
-                my $midr   = $doc->getDocumentElement->getAttribute("metadataIdRef");
-                if ( $midr ) {
-print "MR:\t" , $midr , "\n";
-                    $controlTracker{ $mid } = $midr if not exists $controlTracker{ $mid };
-                    $controlTrackerLookup{ $midr } = $mid if not exists $controlTrackerLookup{ $midr };
-                }
-                else {
-                    $self->{LOGGER}->info( "Removing control metadata \"" . $mid . "\" beacuse it is missing a metadataIdRef." );
-                    $parameters->{database}->remove( { name => $mid, txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
+            my $doc = $parser->parse_string( $controlMetadata[$x] );
+            my $mid = $doc->getDocumentElement->getAttribute("id");
+            next unless $mid;
+
+            my $midr = $doc->getDocumentElement->getAttribute("metadataIdRef");
+            if ($midr) {
+                my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
+                if ( $time =~ m/^\d+$/ ) {
+                    if ( $parameters->{time} >= $time ) {
+                        $self->{LOGGER}->debug( "Removing all info for control id \"" . $mid . "\" from \"" . $parameters->{name} . "\"." );
+                        my $dataCounter = 0;
+                        foreach my $data ( @{ $dataTrackerLookup{$midr} } ) {
+                            $self->{LOGGER}->debug( "Removing data \"" . $data . "\" due to expiration" );
+                            $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+                            $errorFlag++ if $error;
+                            delete $dataTracker{$data};
+                            $dataCounter++;
+                        }
+                        delete $metadataTracker{$midr};
+                        delete $dataTrackerLookup{$midr};
+                        $parameters->{database}->remove( { name => $midr, txn => $dbTr, error => \$error } );
+                        $self->{LOGGER}->debug( "Removing metadata \"" . $midr . "\" due to expiration." );
+                        $errorFlag++ if $error;
+
+                        $parameters->{database}->remove( { name => $mid, txn => $dbTr, error => \$error } );
+                        $self->{LOGGER}->debug( "Removing control metadata \"" . $mid . "\" due to expiration." );
+                        $errorFlag++ if $error;
+
+                        $self->{LOGGER}->info( "Removed [" . ( $dataCounter + 2 ) . "] data elements and service info for key \"" . $mid . "\"." );
+                    }
+                    else {
+                        $controlTracker{$mid} = $midr if not exists $controlTracker{$mid};
+                    }
                 }
             }
             else {
-                $self->{LOGGER}->error( "Control metadata element missing \"id\": " . $controlMetadata[$x] );
-            }
-        }
-    }
-
-
-
-
-    foreach my $data ( keys %dataTracker ) {
-        unless ( exists $metadataTracker{ $dataTracker{$data} } and $metadataTracker{ $dataTracker{$data} } ) {
-            $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate." );
-            $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
-            $errorFlag++ if $error;
-            delete $dataTracker{ $data };
-        }
-    }
-
-    foreach my $metadata ( keys %metadataTracker ) {
-        unless ( exists $controlTrackerLookup{ $metadata } and $controlTrackerLookup{ $metadata } ) {
-            $self->{LOGGER}->debug( "Removing metadata \"" . $metadata . "\" beacuse it has no control metadata mate." );
-            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
-            $errorFlag++ if $error;
-            foreach my $data ( @{ $dataTrackerLookup{ $metadata } } ) {
-                $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate, whom had no control metadata mate." );
-                $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+                $self->{LOGGER}->info( "Removing control metadata \"" . $mid . "\" beacuse it is missing a metadataIdRef." );
+                $parameters->{database}->remove( { name => $mid, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
-                delete $dataTracker { $data };
-            }             
-            delete $metadataTracker{ $metadata };
-        }
-    }
-
-    foreach my $metadata ( keys %controlTracker ) {
-        unless( exists $metadataTracker{ $controlTracker{$metadata} } and $metadataTracker{ $controlTracker{$metadata} } ) {
-            $self->{LOGGER}->debug( "Removing control metadata \"" . $metadata . "\" beacuse it has no metadata mate." );
-            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
-            $errorFlag++ if $error;
-            delete $controlTracker{ $metadata };
-        }
-    } 
-
-    my %controlHash = ();
-    my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-    $errorFlag++ if $error;
-    if ( $#resultsString != -1 ) {
-        my $len = $#resultsString;
-        for my $x ( 0 .. $len ) {
-            my $parser = XML::LibXML->new();
-            my $doc    = $parser->parse_string( $resultsString[$x] );
-
-            my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
-            if ( $time =~ m/^\d+$/ ) {
-                my $key = $doc->getDocumentElement->getAttribute("id");
-                $key =~ s/-control$//;
-
-                if ( $time and $key and $parameters->{time} >= $time ) {
-                    $self->{LOGGER}->debug( "Removing all info for \"" . $key . "\" from \"" . $parameters->{name} . "\"." );
-                    my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-                    my $len2 = $#resultsString2;
-                    for my $y ( 0 .. $len2 ) {
-                        $parameters->{database}->remove( { name => $resultsString2[$y], txn => $dbTr, error => \$error } );
-                        $errorFlag++ if $error;
-                    }
-                    my @resultsString3 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore-summary\"]/nmwg:data[\@metadataIdRef=\"" . $key . "\"]", txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-                    my $len3 = $#resultsString3;
-                    for my $y ( 0 .. $len3 ) {
-                        $parameters->{database}->remove( { name => $resultsString3[$y], txn => $dbTr, error => \$error } );
-                        $errorFlag++ if $error;
-                    }
-                    $parameters->{database}->remove( { name => $key . "-control", txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-                    $parameters->{database}->remove( { name => $key, txn => $dbTr, error => \$error } );
-                    $errorFlag++ if $error;
-                    $self->{LOGGER}->debug( "Removed [" . ( $#resultsString3 + $#resultsString2 + 2 ) . "] data elements and service info for key \"" . $key . "\"." );
-                }
-                else {
-                    $controlHash{$key} = 1 unless exists $controlHash{$key};
-                }
             }
         }
     }
@@ -1920,36 +1838,38 @@ print "MR:\t" , $midr , "\n";
         $self->{LOGGER}->error( "Nothing Registered with \"" . $parameters->{name} . "\", cannot clean at this time." );
     }
 
-    @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-    $errorFlag++ if $error;
-    if ( $#resultsString != -1 ) {
-        my $len = $#resultsString;
-        for my $x ( 0 .. $len ) {
-            my $parser = XML::LibXML->new();
-            my $doc    = $parser->parse_string( $resultsString[$x] );
-            my $mdid   = $doc->getDocumentElement->getAttribute("id");
-            unless ( exists $controlHash{$mdid} ) {
-                $self->{LOGGER}->debug( "Removing metadata \"" . $mdid . "\" beacuse it has no control mate." );
-                $parameters->{database}->remove( { name => $mdid, txn => $dbTr, error => \$error } );
-                $errorFlag++ if $error;
-            }
+    foreach my $data ( keys %dataTracker ) {
+        unless ( exists $metadataTracker{ $dataTracker{$data} } and $metadataTracker{ $dataTracker{$data} } ) {
+            $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate." );
+            $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            delete $dataTracker{$data};
         }
     }
 
-    @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
-    $errorFlag++ if $error;
-    if ( $#resultsString != -1 ) {
-        my $len = $#resultsString;
-        for my $x ( 0 .. $len ) {
-            my $parser = XML::LibXML->new();
-            my $doc    = $parser->parse_string( $resultsString[$x] );
-            my $did    = $doc->getDocumentElement->getAttribute("id");
-            my $mdid   = $doc->getDocumentElement->getAttribute("metadataIdRef");
-            unless ( exists $controlHash{$mdid} ) {
-                $self->{LOGGER}->debug( "Removing data \"" . $did . "\" beacuse it has no control mate." );
-                $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
+    my %controlTrackerR = reverse %controlTracker;
+    foreach my $metadata ( keys %metadataTracker ) {
+        unless ( exists $controlTrackerR{$metadata} and $controlTrackerR{$metadata} ) {
+            $self->{LOGGER}->debug( "Removing metadata \"" . $metadata . "\" beacuse it has no control metadata mate." );
+            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            foreach my $data ( @{ $dataTrackerLookup{$metadata} } ) {
+                $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate, whom had no control metadata mate." );
+                $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
+                delete $dataTracker{$data};
             }
+            delete $metadataTracker{$metadata};
+            delete $dataTrackerLookup{$metadata};
+        }
+    }
+
+    foreach my $metadata ( keys %controlTracker ) {
+        unless ( exists $metadataTracker{ $controlTracker{$metadata} } and $metadataTracker{ $controlTracker{$metadata} } ) {
+            $self->{LOGGER}->debug( "Removing control metadata \"" . $metadata . "\" beacuse it has no metadata mate." );
+            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            delete $controlTracker{$metadata};
         }
     }
 
