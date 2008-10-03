@@ -2,6 +2,7 @@ package edu.internet2.perfsonar;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
 
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
@@ -13,6 +14,10 @@ public class NodeRegistration {
 	private Element nodeElem;
 	private PSNamespaces psNS;
 	
+	static public final String[] LOCATION_FIELDS = {"country", "zipcode", "state", "institution", 
+													"city", "streetAddress", "floor", "room","cage", 
+													"rack", "shelf", "latitude", "longitude", 
+													"continent"};
 	/**
 	 * Create a new node registration for a node with the given ID
 	 * @param id the ID of the node to register
@@ -53,7 +58,7 @@ public class NodeRegistration {
 	}
 	
 	/** 
-	 * Adds a Layer 3 (IP) address in a port to node defintion
+	 * Adds a Layer 3 (IP) address in a port to node definition
 	 * @param address the address to add
 	 * @param ipv6 true if address is IPv6, false otherwise
 	 */
@@ -64,6 +69,30 @@ public class NodeRegistration {
 		addrElem.setText(address);
 		portElem.addContent(addrElem);	
 		this.nodeElem.addContent(portElem);
+	}
+	
+	/** 
+	 * Adds location information to the node
+	 * 
+	 * @param locationInfo a HashMap keyed by field name and value
+	 * @return true if location set, false otherwise
+	 */
+	public boolean setLocation(HashMap<String,String> locationInfo){
+		Element locationElem = new Element("location",this.psNS.TOPO);
+		boolean result = false;
+		for(String key : NodeRegistration.LOCATION_FIELDS){
+			if(locationInfo.containsKey(key)){
+				Element elem = new Element(key, this.psNS.TOPO);
+				elem.setText(locationInfo.get(key));
+				locationElem.addContent(elem);
+			}
+		}
+		if(!locationElem.getContent().isEmpty()){
+			this.nodeElem.addContent(locationElem);
+			result = true;
+		}
+		
+		return result;
 	}
 	
 	/**
