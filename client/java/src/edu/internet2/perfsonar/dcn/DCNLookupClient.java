@@ -2,6 +2,7 @@ package edu.internet2.perfsonar.dcn;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -310,8 +311,15 @@ public class DCNLookupClient{
 		Element datum = null;
 		if(useGlobalLS || hLSList == null){
 			String discoveryXQuery = DISC_XQUERY;
-			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", id.replaceAll("urn:ogf:network:domain=", ""));
-			discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtl3:port/nmtl3:address");
+			String lookupId = id.replaceAll("urn:ogf:network:domain=", "");
+			try{
+				URL url = new URL(lookupId);
+				if(!lookupId.matches("\\d?\\d?\\d\\.\\d?\\d?\\d\\.\\d?\\d?\\d\\.\\d?\\d?\\d")){
+					lookupId = url.getHost().replaceFirst(".+?\\.", "");
+				}
+			}catch(Exception e){}
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--domain-->", lookupId);
+			discoveryXQuery = discoveryXQuery.replaceAll("<!--addrPath-->", "nmtb:domain/nmtb:name");
 			discoveryXQuery = discoveryXQuery.replaceAll("<!--type-->", "dns");
 			Element discReqElem = this.createQueryMetaData(discoveryXQuery);
 			hLSMatches = this.discover(this.requestString(discReqElem, null));
