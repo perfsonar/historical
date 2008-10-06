@@ -31,6 +31,7 @@ public class DCNLookupClient{
 	private boolean tryAllGlobal;
 	private boolean useGlobalLS;
 	private PSNamespaces psNS;
+
 	private boolean retryOnKeyNotFound;
 
 	static final public String IDC_SERVICE_TYPE = "IDC";
@@ -63,13 +64,18 @@ public class DCNLookupClient{
 		"declare namespace nmtl3=\"http://ogf.org/schema/network/topology/l3/20070828/\";\n" +
 		"/nmwg:store[@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/nmtb:node[./<!--type-->[text()=\"<!--addr-->\"]]\n";
 	
-	private String IDC_XQUERY = 
+	private String SERV_REL_XQUERY = 
 		"declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
 		"declare namespace nmtb=\"http://ogf.org/schema/network/topology/base/20070828/\";\n" +
 		"declare namespace dcn=\"http://ggf.org/ns/nmwg/tools/org/dcn/1.0/\";\n" +
 		"for $metadata in /nmwg:store[@type=\"LSStore\"]/nmwg:metadata\n" +
-		"    where $metadata/dcn:subject/nmtb:service/nmtb:type[text()=\"<!--type-->\"] and $metadata/dcn:subject/nmtb:service/nmtb:relation[@type=\"<!--relation-->\"]/nmtb:<!--idType-->[text()=\"<!--id-->\"]\n" +
-		"    return $metadata/dcn:subject/nmtb:service<!--xpath-->\n";
+		"    where ($metadata/*[local-name()=\"subject\"]/nmtb:service/nmtb:type[text()=\"<!--type-->\"] and $metadata/*[local-name()=\"subject\"]/nmtb:service/nmtb:relation[@type=\"<!--relation-->\"]/nmtb:<!--idType-->[text()=\"<!--id-->\"])<!--where-->\n" +
+		"    return $metadata/*[local-name()=\"subject\"]/nmtb:service<!--xpath-->\n";
+	
+	private String SUPP_MSG_WHERE = " or \\$metadata/*[local-name()=\"subject\"]/" +
+			"nmtb:service[nmtb:type[text()=\"IDC\"]]/nmtb:port[nmtb:address[text()=\"<!--addr-->\"]]" +
+			"/nmtb:protocol/nmtb:parameters/nmtb:parameter[@name=\"keyword:supportedMessage\" and " +
+			"text()=\"http://docs.oasis-open.org/wsn/b-2#Subscribe\"]";
 	
 	/**
 	 * Creates a new client with the list of Global lookup services to 
@@ -132,8 +138,8 @@ public class DCNLookupClient{
 	/**
 	 * Creates a new client with an explicitly set list of global and/or
 	 * home lookup services. One of the parameters may be null. If the first 
-	 * parameter is null then no global lookup servioces will be contacted
-	 * only the given home lookup services will be used. If the second paramter is
+	 * parameter is null then no global lookup services will be contacted
+	 * only the given home lookup services will be used. If the second parameter is
 	 * null the given set of global lookup services will be used to find the home
 	 * lookup service.
 	 * 
@@ -236,6 +242,7 @@ public class DCNLookupClient{
         
         return node;
 	}
+	
 	/**
 	 * Retrieve a service element describing an IDC given a domain it controls
 	 * 
@@ -244,7 +251,7 @@ public class DCNLookupClient{
 	 * @throws PSException
 	 */
 	public Element lookupIDC(String domain) throws PSException{
-		Element datum = this.lookupService("IDC", domain, "controls", "");
+		Element datum = this.lookupService("IDC", domain, "controls", "", "");
 		if(datum == null){ return null; }		
 		Element idc = datum.getChild("service", this.psNS.TOPO);
 		return idc;
@@ -258,7 +265,7 @@ public class DCNLookupClient{
 	 */
 	public String[] lookupIDCUrl(String domain) throws PSException{
 		HashMap<String,Boolean> urls = new HashMap<String,Boolean>();
-		Element datum = this.lookupService("IDC", domain, "controls", "/nmtb:port/nmtb:address[@type=\"url\"]");
+		Element datum = this.lookupService("IDC", domain, "controls", "", "/nmtb:port/nmtb:address[@type=\"url\"]");
 		if(datum == null){ return null; }	
 		List<Element> addrElems = datum.getChildren("address", this.psNS.TOPO);
 		if(addrElems == null){ return null; }
@@ -275,12 +282,13 @@ public class DCNLookupClient{
 	/**
 	 * Retrieve a service element describing an NB given its URL
 	 * 
-	 * @param url the URL of the NB to lookup
+	 * @param idcUrl the URL of a subscriber
 	 * @return the &lt;service&gt; as a JDOM Element, null if not found
 	 * @throws PSException
 	 */
-	public Element lookupNB(String url) throws PSException{
-		Element datum = this.lookupService("NB", url, "subscriber", "");
+	public Element lookupNB(String idcUrl) throws PSException{
+		String where = SUPP_MSG_WHERE.replaceAll("<!--addr-->", idcUrl);
+		Element datum = this.lookupService("NB", idcUrl, "subscriber", where, "");
 		if(datum == null){ return null; }		
 		Element idc = datum.getChild("service", this.psNS.TOPO);
 		return idc;
@@ -289,14 +297,14 @@ public class DCNLookupClient{
 	/**
 	 * General method used to find a service such as an IDC or NotificationBroker
 	 * 
-	 * @param type thetype of service to find
+	 * @param type the type of service to find
 	 * @param domain the domain of the service of interest
 	 * @param relation the relation of the service to that domain
 	 * @param xpath an xpath expression rooted at service that control what is returned
 	 * @return the element found (if any)
 	 * @throws PSException
 	 */
-	public Element lookupService(String type, String id, String relation, String xpath) throws PSException{
+	public Element lookupService(String type, String id, String relation, String where, String xpath) throws PSException{
 		this.log.debug("lookupIDC.id=" + id);
 		String[] hLSMatches = this.hLSList;
 		Element datum = null;
@@ -313,12 +321,14 @@ public class DCNLookupClient{
 		if(id.startsWith("urn:ogf:network")){
 			idType = "idRef";
 		}
-		String xquery = IDC_XQUERY;
+		String xquery = SERV_REL_XQUERY;
 		xquery = xquery.replaceAll("<!--id-->", id);
 		xquery = xquery.replaceAll("<!--type-->", type);
 		xquery = xquery.replaceAll("<!--relation-->", relation);
 		xquery = xquery.replaceAll("<!--idType-->", idType);
+		xquery = xquery.replaceAll("<!--where-->", where);
 		xquery = xquery.replaceAll("<!--xpath-->", xpath);
+
         Element reqElem = this.createQueryMetaData(xquery);
         String request = this.requestString(reqElem, null);
         for(String hLS : hLSMatches){
@@ -720,5 +730,19 @@ public class DCNLookupClient{
 	 */
 	public void setRetryOnKeyNotFound(boolean retryOnKeyNotFound) {
 		this.retryOnKeyNotFound = retryOnKeyNotFound;
+	}
+	
+	/**
+	 * @return the psNS
+	 */
+	public PSNamespaces getPsNS() {
+		return psNS;
+	}
+
+	/**
+	 * @param psNS the psNS to set
+	 */
+	public void setPsNS(PSNamespaces psNS) {
+		this.psNS = psNS;
 	}
 }

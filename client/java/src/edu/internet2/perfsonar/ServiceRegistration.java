@@ -2,6 +2,7 @@ package edu.internet2.perfsonar;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -61,14 +62,14 @@ public class ServiceRegistration {
 	}
 	
 	/**
-	 * @return a descripton of the service
+	 * @return a description of the service
 	 */
 	public String getDescription(){
 		return this.serviceElem.getChildText("type", this.psNS.TOPO);
 	}
 	
 	/**
-	 * @param a descripton of the service
+	 * @param a description of the service
 	 */
 	public void setDescription(String description){
 		this.serviceElem.addContent(this.txtNode("description", description, this.psNS.TOPO));
@@ -136,7 +137,12 @@ public class ServiceRegistration {
 	public void setSubscriberRel(String[] subscribers){
 		HashMap<String, String> idRefs = new HashMap<String, String>();
 		for(String subscriber : subscribers){
-			idRefs.put(subscriber, "uri");
+			String type = "uri";
+			try{
+				new URL(subscriber);
+				type = "url";
+			}catch(Exception e){}
+			idRefs.put(subscriber, type);
 		}
 		this.serviceElem.addContent(this.relationNode("subscriber", idRefs));
 	}
@@ -156,7 +162,12 @@ public class ServiceRegistration {
 	public void setPublisherRel(String[] publishers){
 		HashMap<String, String> idRefs = new HashMap<String, String>();
 		for(String publisher : publishers){
-			idRefs.put(publisher, "uri");
+			String type = "uri";
+			try{
+				new URL(publisher);
+				type = "url";
+			}catch(Exception e){}
+			idRefs.put(publisher, type);
 		}
 		this.serviceElem.addContent(this.relationNode("publisher", idRefs));
 	}
@@ -319,7 +330,7 @@ public class ServiceRegistration {
 	}
 	
 	/** 
-	 * Sets optional paramters that go after service description but at the end of the subject
+	 * Sets optional parameters that go after service description but at the end of the subject
 	 * 
 	 * @param params the parameters map to convert
 	 */
@@ -358,7 +369,12 @@ public class ServiceRegistration {
 		Element relElem = new Element("relation", this.psNS.TOPO);
 		relElem.setAttribute("type", type);
 		for(String ref : refs.keySet()){
-			Element idRefElem = new Element("idRef", this.psNS.TOPO);
+			Element idRefElem = null;
+			if(refs.get(ref).equals("url")){
+				idRefElem = new Element("address", this.psNS.TOPO);
+			}else{
+				idRefElem = new Element("idRef", this.psNS.TOPO);
+			}
 			idRefElem.setAttribute("type", refs.get(ref));
 			idRefElem.setText(ref);
 			relElem.addContent(idRefElem);
