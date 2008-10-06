@@ -36,6 +36,7 @@ public class DCNLookupClient{
 	static final public String IDC_SERVICE_TYPE = "IDC";
 	static final public String PROTO_OSCARS = "http://oscars.es.net/OSCARS";
 	static final public String PROTO_WSN = "http://docs.oasis-open.org/wsn/b-2";
+	static final public String PROTO_WSNB = "http://docs.oasis-open.org/wsn/br-2";
 	static final public String PARAM_SUPPORTED_MSG = "keyword:supportedMessage";
 	static final public String PARAM_TOPIC = "keyword:topic";
 
@@ -269,6 +270,20 @@ public class DCNLookupClient{
 		if(urls.size() == 0){ return null; }
 		
 		return urls.keySet().toArray(new String[urls.size()]);
+	}
+	
+	/**
+	 * Retrieve a service element describing an NB given its URL
+	 * 
+	 * @param url the URL of the NB to lookup
+	 * @return the &lt;service&gt; as a JDOM Element, null if not found
+	 * @throws PSException
+	 */
+	public Element lookupNB(String url) throws PSException{
+		Element datum = this.lookupService("NB", url, "subscriber", "");
+		if(datum == null){ return null; }		
+		Element idc = datum.getChild("service", this.psNS.TOPO);
+		return idc;
 	}
 	
 	/**

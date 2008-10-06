@@ -22,6 +22,8 @@ public class ServiceRegistration {
 	private PSNamespaces psNS;
 	
 	final public static String IDC_TYPE = "IDC";
+	final public static String NB_TYPE = "NB";
+	
 	/**
 	 * Creates a new service element
 	 * 
@@ -131,7 +133,7 @@ public class ServiceRegistration {
 	 * Sets list of services that subscribe to this service's notifications
 	 * @param subscribers the list of services that subscribe to this service's notifications
 	 */
-	public void setSubscribers(String[] subscribers){
+	public void setSubscriberRel(String[] subscribers){
 		HashMap<String, String> idRefs = new HashMap<String, String>();
 		for(String subscriber : subscribers){
 			idRefs.put(subscriber, "uri");
@@ -142,7 +144,7 @@ public class ServiceRegistration {
 	/**
 	 * @return the list of services that subscribe to this service's notifications
 	 */
-	public String[] getSubscribers(){
+	public String[] getSubscriberRel(){
 		return this.getRelationRefs("subscriber");
 	}
 	
@@ -151,7 +153,7 @@ public class ServiceRegistration {
 	 * 
 	 * @param publishers the list of services that send notifications to this service
 	 */
-	public void setPublishers(String[] publishers){
+	public void setPublisherRel(String[] publishers){
 		HashMap<String, String> idRefs = new HashMap<String, String>();
 		for(String publisher : publishers){
 			idRefs.put(publisher, "uri");
@@ -162,7 +164,7 @@ public class ServiceRegistration {
 	/**
 	 * @return the list of services that send notifications to this service
 	 */
-	public String[] getPublishers(){
+	public String[] getPublisherRel(){
 		return this.getRelationRefs("publisher");
 	}
 	

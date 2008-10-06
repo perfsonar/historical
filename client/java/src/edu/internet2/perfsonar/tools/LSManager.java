@@ -261,13 +261,13 @@ public class LSManager extends JFrame{
 		String subscrStr = ((JTextArea)mgr.getRegFields().get("Subscribers")).getText();
 		if(subscrStr != null && (!"".equals(subscrStr.trim()))){
 			String[] subscribers = subscrStr.split("\n");
-			reg.setSubscribers(subscribers);
+			reg.setSubscriberRel(subscribers);
 		}
 		
 		String pubStr = ((JTextArea)mgr.getRegFields().get("Publishers")).getText();
 		if(pubStr != null && (!"".equals(pubStr.trim()))){
 			String[] publishers = pubStr.split("\n");
-			reg.setPublishers(publishers);
+			reg.setPublisherRel(publishers);
 		}
 		
 		for(String proto : mgr.getMsgs().keySet()){
