@@ -283,7 +283,7 @@ public class DCNLookupClient{
 	/**
 	 * Retrieve a service element describing an NB given its URL
 	 * 
-	 * @param idcUrl the URL of a subscriber
+	 * @param idcUrl the URL of a publishing IDC
 	 * @return the &lt;service&gt; as a JDOM Element, null if not found
 	 * @throws PSException
 	 */
@@ -293,6 +293,31 @@ public class DCNLookupClient{
 		if(datum == null){ return null; }		
 		Element idc = datum.getChild("service", this.psNS.TOPO);
 		return idc;
+	}
+	
+	/**
+	 * Retrieve a list of URLs that accept notification subscriptions for the IDC at
+	 * the given URL 
+	 * 
+	 * @param idcUrl the URL of a publishing IDC
+	 * @return an array of the URLs where clients can subscribe to notifications
+	 * @throws PSException
+	 */
+	public String[] lookupNBUrl(String idcUrl) throws PSException{
+		HashMap<String,Boolean> urls = new HashMap<String,Boolean>();
+		String where = SUPP_MSG_WHERE.replaceAll("<!--addr-->", idcUrl);
+		Element datum = this.lookupService("NB", idcUrl, "subscriber", where, "/nmtb:port/nmtb:address[@type=\"url\"]");
+		if(datum == null){ return null; }		
+		List<Element> addrElems = datum.getChildren("address", this.psNS.TOPO);
+		if(addrElems == null){ return null; }
+		for(Element addrElem : addrElems){
+			String key = addrElem.getText();
+			if(key == null){ continue; }
+			urls.put(key.trim(), true);
+		}
+		if(urls.size() == 0){ return null; }
+		
+		return urls.keySet().toArray(new String[urls.size()]);
 	}
 	
 	/**
