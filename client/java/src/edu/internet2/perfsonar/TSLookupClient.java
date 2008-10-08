@@ -75,6 +75,9 @@ public class TSLookupClient implements PSMessageEventHandler {
             "<nmwg:message type=\"QueryRequest\" "+
             "   xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"> "+
             "    <nmwg:metadata id=\"meta1\">" +
+            "      <xquery:subject id=\"sub1\" xmlns:xquery=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/xquery/1.0/\">" +
+            "        //*[@id=\"<!--domain_id-->\"]" +
+            "      </xquery:subject>" +
             "      <nmwg:eventType>"+TOPOLOGY_EVENT_TYPE+"</nmwg:eventType>" +
             "   </nmwg:metadata>" +
             "   <nmwg:data id=\"data1\" metadataIdRef=\"meta1\"/> "+
@@ -149,6 +152,7 @@ public class TSLookupClient implements PSMessageEventHandler {
 
         // check if we have a cached version and that its sufficiently up to date
         if (this.cacheTime.get(domainId) != null &&  this.cacheTime.get(domainId).longValue() + this.MAXIMUM_CACHE_LENGTH > System.currentTimeMillis()) {
+            this.log.debug("We've got a cached version of "+domainId+" so we're going to use it");
             useCached = true;
         }
 
@@ -220,7 +224,10 @@ public class TSLookupClient implements PSMessageEventHandler {
         for(String ts_url : TSMatches) {
             PSBaseClient pSClient = new PSBaseClient(ts_url);
 
-            pSClient.sendMessage_CB(TS_QUERY, this, null);
+            String xquery = TS_QUERY;
+            xquery = xquery.replaceAll("<!--domain_id-->", domainId);
+
+            pSClient.sendMessage_CB(xquery, this, null);
             if (this.retrievedTopology != null) {
                 Element origTopology = (Element) this.retrievedTopology.clone();
 
@@ -443,19 +450,19 @@ public class TSLookupClient implements PSMessageEventHandler {
         if (messageType.equals("QueryResponse")) {
             Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
             if (eventType_elm == null) {
-                this.log.info("The metadata/data pair doesn't have an event type");
+                this.log.error("The metadata/data pair doesn't have an event type");
                 return;
             }
 
             if (!eventType_elm.getValue().equals("http://ggf.org/ns/nmwg/topology/20070809")) {
-                this.log.info("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
+                this.log.error("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
                 return;
             }
 
             Element topo = data.getChild("topology", this.psNS.TOPO);
 
             if (topo == null) {
-                this.log.info("No topology located in data");
+                this.log.error("No topology located in data");
                 return;
             }
 

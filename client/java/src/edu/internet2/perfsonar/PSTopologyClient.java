@@ -54,7 +54,7 @@ public class PSTopologyClient implements PSMessageEventHandler {
             "</"+this.psNS.TOPO.getPrefix()+":topology>";
         String request = new String(topo_replace_str).replaceAll("<!--topology-->", topoStr);
 
-        this.log.info("Request post replaceAll: "+request);
+        this.log.debug("Request post replaceAll: "+request);
 
         this.addReplaceSuccess = false;
 
@@ -72,19 +72,19 @@ public class PSTopologyClient implements PSMessageEventHandler {
         if (messageType.equals("QueryResponse")) {
             Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
             if (eventType_elm == null) {
-                this.log.info("The metadata/data pair doesn't have an event type");
+                this.log.debug("The metadata/data pair doesn't have an event type");
                 return;
             }
 
             if (!eventType_elm.getValue().equals("http://ggf.org/ns/nmwg/topology/20070809")) {
-                this.log.info("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
+                this.log.debug("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
                 return;
             }
 
             Element topo = data.getChild("topology", this.psNS.TOPO);
 
             if (topo == null) {
-                this.log.info("No topology located in data");
+                this.log.debug("No topology located in data");
                 return;
             }
 

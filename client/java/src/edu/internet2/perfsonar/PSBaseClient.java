@@ -53,7 +53,7 @@ public class PSBaseClient {
     public Element sendMessage(String request) {
         Element message = null;
 
-        this.log.info("Sending request: "+request);
+        this.log.debug("Sending request: "+request);
 
         if (request.indexOf("SOAP-ENV") == -1) {
             request = this.addSoapEnvelope(request);
@@ -63,25 +63,25 @@ public class PSBaseClient {
         try {
             SAXBuilder xmlParser = new SAXBuilder();
 
-            this.log.info("Connecting to "+this.url);
+            this.log.debug("Connecting to "+this.url);
             PostMethod postMethod = new PostMethod(this.url);
             StringRequestEntity entity = new StringRequestEntity(request, "text/xml",null);
             postMethod.setRequestEntity(entity);
 
             HttpClient client = new HttpClient();
 
-            this.log.info("Sending post");
+            this.log.debug("Sending post");
             int statusCode = client.executeMethod(postMethod);
-            this.log.info("Post done");
+            this.log.debug("Post done");
 
             String response = postMethod.getResponseBodyAsString();
             ByteArrayInputStream in = new ByteArrayInputStream(response.getBytes());
-            this.log.info("Received response: "+response);
-            this.log.info("Parsing start");
+            this.log.debug("Received response: "+response);
+            this.log.debug("Parsing start");
             Document responseMessage = xmlParser.build(in);
-            this.log.info("Parsing done");
+            this.log.debug("Parsing done");
 
-            this.log.info("Looking for message");
+            this.log.debug("Looking for message");
             XPath xpath = XPath.newInstance("//nmwg:message");
             xpath.addNamespace(psNS.NMWG);
 
@@ -91,7 +91,7 @@ public class PSBaseClient {
         }
 
         if (message == null) {
-            this.log.info("No message in response");
+            this.log.debug("No message in response");
         }
 
         return message;
@@ -112,7 +112,7 @@ public class PSBaseClient {
     }
     
     public void parseMessage(Element message, PSMessageEventHandler ev, Object arg) {
-        this.log.info("Looking for metadata");
+        this.log.debug("Looking for metadata");
 
         String messageType = message.getAttributeValue("type");
         if (messageType == null) {
@@ -132,7 +132,7 @@ public class PSBaseClient {
                 String md_idRef = data.getAttributeValue("metadataIdRef");
 
                 if (md_idRef.equals(md_id) == false) {
-                    this.log.info("metadata: "+md_id+" data_mdIdref: "+md_idRef);
+                    this.log.debug("metadata: "+md_id+" data_mdIdref: "+md_idRef);
                     continue;
                 }
 
