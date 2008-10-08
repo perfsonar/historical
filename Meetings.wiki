@@ -6,11 +6,13 @@ applicable.
 
 == Future Events ==
 
-   * [20080929Video] - Video Conference for September 29, 2008
+   * [20081013Video] - Video Conference *Issue: CHEP2009 Paper* for October 13, 2008
+   * [20081020Video] - Video Conference for October 20, 2008
 
 == Past Events ==
 
  * 2008
+   * [20080929Video] - Video Conference for September 29, 2008
    * [20080922Video] - Video Conference *Issue: PAM 2009 paper* for September 22, 2008
    * [http://wiki.perfsonar.net/jra1-wiki/index.php/PerfSONAR_developer_meeting_-_in_Ann_Arbor_08 20080908Meet] - perfSONAR Developers Meeting, Ann Arbor MI, September 8 - 10, 2008
    * [20080902Video] - Video Conference for September 2, 2008
