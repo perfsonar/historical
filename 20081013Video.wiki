@@ -11,7 +11,11 @@
 
 === CHEP 2009 Paper Submission ===
 ==== Agenda ====
- * maxim, please fill in
+ * Proposals on abstract submission for CHEP2009, deadline is 11/13
+
+=== Minor stuff ==
+
+ * recent issues ? 
 
 === Logistics ===
  # Next meeting will be October 20, 2:30 EST
