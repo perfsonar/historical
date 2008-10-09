@@ -20,8 +20,12 @@ installed and available.
 use CGI;
 use XML::LibXML;
 use Date::Manip;
+use Socket;
+use POSIX;
+use Data::Validate::IP qw(is_ipv4);
 
-use lib "/usr/local/perfSONAR-PS/lib";
+use lib "/home/zurawski/perfSONAR-PS/lib";
+#use lib "/usr/local/perfSONAR-PS/lib";
 
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );
@@ -133,6 +137,63 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
         print "    </script>\n";
         print "  </head>\n";
         print "  <body>\n";
+        if ( $cgi->param('host') and $cgi->param('interface') ) {
+
+            my $host = q{};
+            if ( is_ipv4( $cgi->param('host') ) ) {
+                my $iaddr = Socket::inet_aton( $cgi->param('host') );
+                if ( defined $iaddr and $iaddr ) {
+                    $host = gethostbyaddr( $iaddr, Socket::AF_INET );
+                }
+            }
+            else {
+                my $packed_ip = gethostbyname( $cgi->param('host') );
+                if ( defined $packed_ip and $packed_ip ) {
+                    $host = inet_ntoa( $packed_ip );
+                }
+            }
+
+            print "    <table border=\"0\" cellpadding=\"0\" width=\"75%\" align=\"center\">";
+            print "      <tr>\n";
+            print "        <td align=\"right\" width=\"30%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <th align=\"left\" width=\"10%\">\n";
+            print "          <font size=\"-1\"><i>Host</i>:</font>\n";
+            print "        </th>\n";
+            print "        <td align=\"left\" width=\"10%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <td align=\"left\" width=\"60%\">\n";
+            print "          <font size=\"-1\">".$cgi->param('host')."</font>\n";
+            print "        </td>\n";
+            print "      </tr>\n";            
+            if ( $host ) {
+                print "      <tr>\n";
+                print "        <td align=\"right\" width=\"40%\" colspan=3>\n";
+                print "          <br>\n";
+                print "        </td>\n";
+                print "        <td align=\"left\" width=\"60%\">\n";
+                print "          <font size=\"-1\">".$host."</font>\n";
+                print "        </td>\n";
+                print "      </tr>\n";   
+            }             
+            print "      <tr>\n";
+            print "        <td align=\"right\" width=\"30%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <th align=\"left\" width=\"10%\">\n";
+            print "          <font size=\"-1\"><i>Name</i>:</font>\n";
+            print "        </th>\n";
+            print "        <td align=\"left\" width=\"10%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <td align=\"left\" width=\"60%\">\n";
+            print "          <font size=\"-1\">".$cgi->param('interface')."</font>\n";
+            print "        </td>\n";
+            print "      </tr>\n";  
+            print "    </table>\n";
+        }
         print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
     }
     else {

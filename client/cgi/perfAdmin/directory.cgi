@@ -27,7 +27,8 @@ use IO::Socket;
 use IO::Socket::INET;
 use IO::Interface qw(:flags);
 
-use lib "/usr/local/perfSONAR-PS/lib";
+use lib "/home/zurawski/perfSONAR-PS/lib";
+#use lib "/usr/local/perfSONAR-PS/lib";
 
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Client::gLS;

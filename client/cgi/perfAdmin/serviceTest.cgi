@@ -26,7 +26,8 @@ use IO::Socket;
 use IO::Socket::INET;
 use IO::Interface qw(:flags);
 
-use lib "/usr/local/perfSONAR-PS/lib";
+use lib "/home/zurawski/perfSONAR-PS/lib";
+#use lib "/usr/local/perfSONAR-PS/lib";
 
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );
@@ -60,7 +61,6 @@ sub drawGauge {
 
     my $html = q{};
     if ( defined $load and $load ) {
-
         #    $html .= $key_in."<br>".$key_out."<br>\n";
     }
     return $html;
@@ -214,38 +214,38 @@ sub display {
                 foreach my $name ( sort keys %{ $list{$host} } ) {
                     $html .= $cgi->start_Tr;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ipAddress"}, "\n";
+                    $html .= $list{$host}{$name}->{"ipAddress"}. "\n" if $list{$host}{$name}->{"ipAddress"};
                     $html .= $cgi->end_td;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"hostName"}, "\n";
+                    $html .= $list{$host}{$name}->{"hostName"}. "\n" if $list{$host}{$name}->{"hostName"};
                     $html .= $cgi->end_td;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifName"}, "\n";
+                    $html .= $list{$host}{$name}->{"ifName"}. "\n" if $list{$host}{$name}->{"ifName"};
                     $html .= $cgi->end_td;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifDescription"}, "\n";
+                    $html .= $list{$host}{$name}->{"ifDescription"}. "\n" if $list{$host}{$name}->{"ifDescription"};
                     $html .= $cgi->end_td;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifAddress"}, "\n";
+                    $html .= $list{$host}{$name}->{"ifAddress"}. "\n" if $list{$host}{$name}->{"ifAddress"};
                     $html .= $cgi->end_td;
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= eval( $list{$host}{$name}->{"capacity"} / 1000000 ) . " M\n";
+                    $html .= eval( $list{$host}{$name}->{"capacity"} / 1000000 ) . " M\n" if $list{$host}{$name}->{"capacity"};
                     $html .= $cgi->end_td;
 
                     $html .= $cgi->start_td( { align => "center" } );
                     $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
                     $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
                     $html .= "'utilizationGraph.cgi?url=" . $service . "&key1=" . $list{$host}{$name}->{"key1"};
-                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=450,status=yes,scrollbars=yes,resizable=yes')\" />\n";
+                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "&host=".$list{$host}{$name}->{"hostName"}."&interface=".$list{$host}{$name}->{"ifName"}."','graphwindow." . $counter . "','width=950,";
+                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
                     $html .= $cgi->end_td;
 
                     $html .= $cgi->start_td( { align => "center" } );
                     $html .= "<input type=\"submit\" value=\"Graph\" id=\"if2." . $counter . "\" ";
                     $html .= "name=\"if2." . $counter . "\" onClick=\"window.open(";
                     $html .= "'utilizationGraphFlash.cgi?url=" . $service . "&key1=" . $list{$host}{$name}->{"key1"};
-                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=450,status=yes,scrollbars=yes,resizable=yes')\" />\n";
+                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "&host=".$list{$host}{$name}->{"hostName"}."&interface=".$list{$host}{$name}->{"ifName"}."','graphwindow." . $counter . "','width=950,";
+                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
                     $html .= $cgi->end_td;
 
                     $html .= $cgi->end_Tr;
@@ -326,7 +326,7 @@ sub display {
                         $html .= $cgi->start_Tr;
 
                         $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"src"}, "\n";
+                        $html .= $list{$src}{$dst}{$type}->{"src"}. "\n" if $list{$src}{$dst}{$type}->{"src"};
                         $html .= $cgi->end_td;
 
                         my $display = $list{$src}{$dst}{$type}->{"src"};
@@ -338,43 +338,43 @@ sub display {
                             $html .= $shost . "\n";
                         }
                         else {
-                            $html .= $list{$src}{$dst}{$type}->{"src"}, "\n";
+                            $html .= $list{$src}{$dst}{$type}->{"src"}. "\n" if $list{$src}{$dst}{$type}->{"src"};
                         }
                         $html .= $cgi->end_td;
 
                         $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"dst"}, "\n";
+                        $html .= $list{$src}{$dst}{$type}->{"dst"}. "\n" if $list{$src}{$dst}{$type}->{"dst"};
                         $html .= $cgi->end_td;
 
                         my $display2 = $list{$src}{$dst}{$type}->{"dst"};
                         $display2 =~ s/:.*$//;
-                        my $iaddr = Socket::inet_aton($display2);
+                        $iaddr = Socket::inet_aton($display2);
                         my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
                         $html .= $cgi->start_td( { align => "center" } );
                         if ($dhost) {
                             $html .= $dhost . "\n";
                         }
                         else {
-                            $html .= $list{$src}{$dst}{$type}->{"dst"}, "\n";
+                            $html .= $list{$src}{$dst}{$type}->{"dst"}. "\n" if $list{$src}{$dst}{$type}->{"dst"};
                         }
                         $html .= $cgi->end_td;
 
                         $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"type"}, "\n";
+                        $html .= $list{$src}{$dst}{$type}->{"type"}. "\n" if $list{$src}{$dst}{$type}->{"type"};
                         $html .= $cgi->end_td;
 
                         $html .= $cgi->start_td( { align => "center" } );
                         $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
                         $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                        $html .= "'bandwidthGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "','graphwindow." . $counter . "','width=950,";
-                        $html .= "height=450,status=yes,scrollbars=yes,resizable=yes')\" />\n";
+                        $html .= "'bandwidthGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "&src=".$list{$src}{$dst}{$type}->{"src"}."&dst=".$list{$src}{$dst}{$type}->{"dst"}."&type=".$list{$src}{$dst}{$type}->{"type"}."','graphwindow." . $counter . "','width=950,";
+                        $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
                         $html .= $cgi->end_td;
 
                         $html .= $cgi->start_td( { align => "center" } );
                         $html .= "<input type=\"submit\" value=\"Graph\" id=\"if2." . $counter . "\" ";
                         $html .= "name=\"if2." . $counter . "\" onClick=\"window.open(";
-                        $html .= "'bandwidthGraphFlash.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "','graphwindow." . $counter . "','width=950,";
-                        $html .= "height=450,status=yes,scrollbars=yes,resizable=yes')\" />\n";
+                        $html .= "'bandwidthGraphFlash.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "&src=".$list{$src}{$dst}{$type}->{"src"}."&dst=".$list{$src}{$dst}{$type}->{"dst"}."&type=".$list{$src}{$dst}{$type}->{"type"}."','graphwindow." . $counter . "','width=950,";
+                        $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
                         $html .= $cgi->end_td;
 
                         $html .= $cgi->end_Tr;
@@ -446,7 +446,7 @@ sub display {
                     $html .= $cgi->start_Tr;
 
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"src"}, "\n";
+                    $html .= $list{$src}{$dst}->{"src"}. "\n" if $list{$src}{$dst}->{"src"};
                     $html .= $cgi->end_td;
 
                     my $display = $list{$src}{$dst}->{"src"};
@@ -458,32 +458,32 @@ sub display {
                         $html .= $shost . "\n";
                     }
                     else {
-                        $html .= $list{$src}{$dst}->{"src"}, "\n";
+                        $html .= $list{$src}{$dst}->{"src"}. "\n" if $list{$src}{$dst}->{"src"};
                     }
+                    $html .= $cgi->end_td;
+
+                    $html .= $cgi->start_td( { align => "center" } );
+                    $html .= $list{$src}{$dst}->{"dst"}. "\n" if $list{$src}{$dst}->{"dst"};
                     $html .= $cgi->end_td;
 
                     my $display2 = $list{$src}{$dst}->{"dst"};
                     $display2 =~ s/:.*$//;
-                    my $iaddr = Socket::inet_aton($display2);
+                    $iaddr = Socket::inet_aton($display2);
                     my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
                     $html .= $cgi->start_td( { align => "center" } );
                     if ($dhost) {
                         $html .= $dhost . "\n";
                     }
                     else {
-                        $html .= $list{$src}{$dst}->{"dst"}, "\n";
+                        $html .= $list{$src}{$dst}->{"dst"}. "\n" if $list{$src}{$dst}->{"dst"};
                     }
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"dst"}, "\n";
                     $html .= $cgi->end_td;
 
                     $html .= $cgi->start_td( { align => "center" } );
                     $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
                     $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                    $html .= "'delayGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}->{"key"} . "','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=450,status=yes,scrollbars=yes,resizable=yes')\" />\n";
+                    $html .= "'delayGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}->{"key"} . "&src=".$list{$src}{$dst}->{"src"}."&dst=".$list{$src}{$dst}->{"dst"}."','graphwindow." . $counter . "','width=950,";
+                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
                     $html .= $cgi->end_td;
                     $html .= $cgi->end_Tr;
                     $html .= $cgi->start_Tr;
@@ -563,38 +563,42 @@ sub display {
                         $html .= Socket::inet_ntoa($packed_ip) . "\n";
                     }
                     else {
-                        $html .= $list{$src}{$dst}->{"src"} . "\n";
+                        $html .= $list{$src}{$dst}->{"src"} . "\n" if $list{$src}{$dst}->{"src"};
                     }
                     $html .= $cgi->end_td;
 
                     # src host
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"src"} . "\n";
+                    $html .= $list{$src}{$dst}->{"src"} . "\n" if $list{$src}{$dst}->{"src"};
                     $html .= $cgi->end_td;
 
                     # dst ip
                     $html .= $cgi->start_td( { align => "center" } );
-                    my $packed_ip = gethostbyname( $list{$src}{$dst}->{"dst"} );
+                    $packed_ip = gethostbyname( $list{$src}{$dst}->{"dst"} );
                     if ( defined $packed_ip ) {
                         my $ip_address = inet_ntoa($packed_ip);
                         $html .= Socket::inet_ntoa($packed_ip) . "\n";
                     }
                     else {
-                        $html .= $list{$src}{$dst}->{"dst"} . "\n";
+                        $html .= $list{$src}{$dst}->{"dst"} . "\n" if $list{$src}{$dst}->{"dst"};
                     }
                     $html .= $cgi->end_td;
 
                     # dst host
                     $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"dst"} . "\n";
+                    $html .= $list{$src}{$dst}->{"dst"} . "\n" if $list{$src}{$dst}->{"dst"};
                     $html .= $cgi->end_td;
 
                     $html .= $cgi->start_td( { align => "center" } );
                     $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
                     $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
 
-                    #$html .= "'http://tukki.fnal.gov/pinger/pingerUI.pl?ma=";
-                    $html .= "'./pinger/index.cgi?ma=";
+                    if ( -f "./pinger/index.cgi" ) {
+                        $html .= "'./pinger/index.cgi?ma=";
+                    }
+                    else {
+                        $html .= "'http://tukki.fnal.gov/pinger/pingerUI.pl?ma=";
+                    }
                     $html .= $service . "&get_it=jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7&link=";
                     $html .= $list{$src}{$dst}->{"src"} . ":" . $list{$src}{$dst}->{"dst"} . ":1000";
 

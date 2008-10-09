@@ -18,8 +18,8 @@ use XML::LibXML;
 use CGI;
 use CGI::Ajax;
 
+use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
-use lib "/home/jason/perfSONAR-PS/lib";
 
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );

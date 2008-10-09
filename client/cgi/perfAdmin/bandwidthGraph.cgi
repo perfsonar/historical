@@ -18,8 +18,11 @@ result) graph using the Google graph API.
 use CGI;
 use XML::LibXML;
 use Date::Manip;
+use Socket;
+use POSIX;
 
-use lib "/usr/local/perfSONAR-PS/lib";
+use lib "/home/zurawski/perfSONAR-PS/lib";
+#use lib "/usr/local/perfSONAR-PS/lib";
 
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );
@@ -68,7 +71,11 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
 
     print "<html>\n";
     print "  <head>\n";
-    print "    <title>perfSONAR-PS perfAdmin Bandwidth Graph</title>\n";
+    print "    <title>perfSONAR-PS perfAdmin Bandwidth Graph";
+    if ( $cgi->param('type') ) {
+        print " ".$cgi->param('type');
+    }
+    print "</title>\n";
 
     if ( scalar keys %store > 0 ) {
         print "    <script type=\"text/javascript\" src=\"http://www.google.com/jsapi\"></script>\n";
@@ -104,6 +111,68 @@ if ( $cgi->param('key') and $cgi->param('url') ) {
         print "    </script>\n";
         print "  </head>\n";
         print "  <body>\n";
+
+        if ( $cgi->param('src') and $cgi->param('dst') ) {
+
+            my $display = $cgi->param('src');
+            my $iaddr = Socket::inet_aton($display);
+            my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
+            $display = $cgi->param('dst');
+            $iaddr = Socket::inet_aton($display);
+            my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
+
+            print "    <table border=\"0\" cellpadding=\"0\" width=\"75%\" align=\"center\">";
+            print "      <tr>\n";
+            print "        <td align=\"right\" width=\"30%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <th align=\"left\" width=\"10%\">\n";
+            print "          <font size=\"-1\"><i>Source</i>:</font>\n";
+            print "        </th>\n";
+            print "        <td align=\"left\" width=\"10%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <td align=\"left\" width=\"60%\">\n";
+            print "          <font size=\"-1\">".$cgi->param('src')."</font>\n";
+            print "        </td>\n";
+            print "      </tr>\n";            
+            if ( $shost ) {
+                print "      <tr>\n";
+                print "        <td align=\"right\" width=\"40%\" colspan=3>\n";
+                print "          <br>\n";
+                print "        </td>\n";
+                print "        <td align=\"left\" width=\"60%\">\n";
+                print "          <font size=\"-1\">".$shost."</font>\n";
+                print "        </td>\n";
+                print "      </tr>\n";   
+            }             
+            print "      <tr>\n";
+            print "        <td align=\"right\" width=\"30%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <th align=\"left\" width=\"10%\">\n";
+            print "          <font size=\"-1\"><i>Destination</i>:</font>\n";
+            print "        </th>\n";
+            print "        <td align=\"left\" width=\"10%\">\n";
+            print "          <br>\n";
+            print "        </td>\n";
+            print "        <td align=\"left\" width=\"60%\">\n";
+            print "          <font size=\"-1\">".$cgi->param('dst')."</font>\n";
+            print "        </td>\n";
+            print "      </tr>\n";
+            if ( $dhost ) {
+                print "      <tr>\n";
+                print "        <td align=\"right\" width=\"40%\" colspan=3>\n";
+                print "          <br>\n";
+                print "        </td>\n";
+                print "        <td align=\"left\" width=\"60%\">\n";
+                print "          <font size=\"-1\">".$dhost."</font>\n";
+                print "        </td>\n";
+                print "      </tr>\n";   
+            }   
+            print "    </table>\n";
+        }
+
         print "    <div id=\"chart_div\" style=\"width: 900px; height: 400px;\"></div>\n";
     }
     else {
