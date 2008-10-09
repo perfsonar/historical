@@ -449,6 +449,7 @@ sub getData {
 	    next unless  $times ;
 	    foreach my $ctime (@{$times}) {
 	    	my $timev = $ctime->get_value;
+		next unless $ctime->get_datum && ref $ctime->get_datum eq 'ARRAY'; 
             	foreach my $datum (@{$ctime->get_datum}) {
 	    	    $data->{$key}{$timev}{$datum->get_name} =   $datum->get_value; 
 	    	}  
