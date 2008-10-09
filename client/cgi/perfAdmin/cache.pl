@@ -18,6 +18,8 @@ applications.
 
 use XML::LibXML;
 use Carp;
+use Getopt::Long;
+use Data::Dumper;
 
 use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
@@ -25,9 +27,25 @@ use lib "/home/zurawski/perfSONAR-PS/lib";
 use perfSONAR_PS::Common qw( extract find );
 use perfSONAR_PS::Client::gLS;
 
+my $DEBUGFLAG   = q{};
+my $HELP        = q{};
+
+my $status = GetOptions(
+    'verbose'   => \$DEBUGFLAG,
+    'help'      => \$HELP
+);
+
+if ( $HELP ) {
+    print "$0: starts the gLS cache script.\n";
+    print "\t$0 [--verbose --help]\n";
+    exit(1);
+}
+
 my $parser = XML::LibXML->new();
 my $hints  = "http://www.perfsonar.net/gls.root.hints";
-my $base   = "/var/lib/hLS/cache";
+
+#my $base   = "/var/lib/hLS/cache";
+my $base   = "/home/zurawski/perfSONAR-PS/client/cgi/perfAdmin/cache";
 
 my %hls = ();
 my $gls = perfSONAR_PS::Client::gLS->new( { url => $hints } );
@@ -36,6 +54,7 @@ croak "roots not found" unless ( $#{ $gls->{ROOTS} } > -1 );
 
 for my $root ( 0 .. 2 ) {
     next unless $gls->{ROOTS}->[$root];
+    print "Root:\t" , $root , "\n" if $DEBUGFLAG;
     my $result = $gls->getLSQueryRaw(
         {
             ls => $gls->{ROOTS}->[$root],
@@ -44,19 +63,29 @@ for my $root ( 0 .. 2 ) {
         }
     );
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
+        print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
         my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
         my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
         foreach my $a ( $ap->get_nodelist ) {
             my $value = extract( $a, 0 );
             $hls{$value} = 1 if $value;
+            print "\t\thLS:\t" , $value , "\n" if $DEBUGFLAG and $value;
+        }
+    }
+    else {
+        if ( $DEBUGFLAG ) {
+            print "\tResult:\t" , Dumper($result) , "\n";
         }
     }
 }
+
+print "\n" if $DEBUGFLAG;
 
 my %list = ();
 open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
 foreach my $h ( keys %hls ) {
     print HLS $h, "\n";
+    print "hLS:\t" , $h , "\n" if $DEBUGFLAG;
 
     my $ls = new perfSONAR_PS::Client::LS( { instance => $h } );
     my $result = $ls->queryRequestLS(
@@ -68,6 +97,7 @@ foreach my $h ( keys %hls ) {
     );
 
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
+        print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
         my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
 
         my $md = find( $doc->getDocumentElement, "./nmwg:store/nmwg:metadata", 0 );
@@ -99,6 +129,11 @@ foreach my $h ( keys %hls ) {
                 }
                 last;
             }
+        }
+    }
+    else {
+        if ( $DEBUGFLAG ) {
+            print "\tResult:\t" , Dumper($result) , "\n";
         }
     }
 }
@@ -140,6 +175,7 @@ foreach my $et ( keys %list ) {
     open( OUT, ">" . $base . "/" . $file ) or croak "can't open $base/$file.";
     foreach my $host ( @{ $list{$et} } ) {
         print OUT $host, "\n";
+        print $file , " - " ,$host , "\n" if $DEBUGFLAG;
     }
     close(OUT);
 }
