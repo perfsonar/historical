@@ -49,6 +49,8 @@ sub new {
     );
 
     my $self = fields::new($package);
+    my @temp = ();
+    $self->{ROOTS} = \@temp;
     $self->{HINTS}  = ();
     $self->{LOGGER} = get_logger("perfSONAR_PS::Client::gLS");
     if ( exists $parameters->{"url"} and $parameters->{"url"} ) {
@@ -80,9 +82,6 @@ sub new {
         $self->{FILE} = $parameters->{"file"};
         $self->init();
     }
-
-    my @temp = ();
-    $self->{ROOTS} = \@temp;
 
     return $self;
 }
