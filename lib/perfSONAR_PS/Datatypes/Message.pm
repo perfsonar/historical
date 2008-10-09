@@ -106,8 +106,10 @@ sub new {
     $self->dataID(1);   
     $self->set_nsmap(perfSONAR_PS::PINGER_DATATYPES::v2_0::NSMap->new());
     $self->get_nsmap->mapname($LOCALNAME, 'nmwg');
-    $self->filters($param->{filters}) if $param->{filters};
-    $self->DBO($param->{DBO}) if $param->{DBO};
+    if($param && ref $param eq 'HASH') {
+        $self->filters($param->{filters}) if $param->{filters};
+        $self->DBO($param->{DBO}) if $param->{DBO};
+    }
     #$self->get_LOGGER->debug("  nsmap = ". Dumper $self  );
     
     return   $self;
