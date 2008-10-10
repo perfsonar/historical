@@ -52,12 +52,11 @@ my $gls = perfSONAR_PS::Client::gLS->new( { url => $hints } );
 
 croak "roots not found" unless ( $#{ $gls->{ROOTS} } > -1 );
 
-for my $root ( 0 .. 2 ) {
-    next unless $gls->{ROOTS}->[$root];
+for my $root ( @{ $gls->{ROOTS} } ) {
     print "Root:\t" , $root , "\n" if $DEBUGFLAG;
     my $result = $gls->getLSQueryRaw(
         {
-            ls => $gls->{ROOTS}->[$root],
+            ls => $root,
             xquery =>
                 "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
         }
@@ -105,11 +104,22 @@ foreach my $h ( keys %hls ) {
 
         foreach my $m1 ( $md->get_nodelist ) {
             my $id = $m1->getAttribute("id");
+            
             my $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
             unless ($contactPoint) {
                 $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
                 next unless $contactPoint;
             }
+            my $serviceName = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceName']", 1 ), 0 );
+            unless ($serviceName) {
+                $serviceName = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='name']", 1 ), 0 );
+            }
+            my $serviceType = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceType']", 1 ), 0 );
+            unless ($serviceType) {
+                $serviceType = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='type']", 1 ), 0 );
+            }
+            my $serviceDescription = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceDescription']", 1 ), 0 );
+
             foreach my $d1 ( $d->get_nodelist ) {
                 my $metadataIdRef = $d1->getAttribute("metadataIdRef");
                 next unless $id eq $metadataIdRef;
@@ -119,10 +129,10 @@ foreach my $h ( keys %hls ) {
                     my $value = extract( $e, 0 );
                     if ($value) {
                         if ( exists $list{$value} ) {
-                            push @{ $list{$value} }, $contactPoint;
+                            push @{ $list{$value} }, { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
                         }
                         else {
-                            my @temp = ($contactPoint);
+                            my @temp = ( { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
                             $list{$value} = \@temp;
                         }
                     }
@@ -174,8 +184,14 @@ foreach my $et ( keys %list ) {
     next unless $file;
     open( OUT, ">" . $base . "/" . $file ) or croak "can't open $base/$file.";
     foreach my $host ( @{ $list{$et} } ) {
-        print OUT $host, "\n";
-        print $file , " - " ,$host , "\n" if $DEBUGFLAG;
+        print OUT $host->{"CONTACT"}, "|";
+        print OUT $host->{"NAME"} if $host->{"NAME"};
+        print OUT "|";
+        print OUT $host->{"TYPE"} if $host->{"TYPE"};
+        print OUT "|";
+        print OUT $host->{"DESC"} if $host->{"DESC"};
+        print OUT "\n";
+        print $file , " - " ,$host->{"CONTACT"} , "\n" if $DEBUGFLAG;
     }
     close(OUT);
 }
