@@ -135,19 +135,22 @@ foreach my $h ( keys %hls ) {
             my $id = $m1->getAttribute("id");
             
             my $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
-            unless ($contactPoint) {
+            unless ( $contactPoint ) {
                 $contactPoint = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
                 next unless $contactPoint;
             }
             my $serviceName = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceName']", 1 ), 0 );
-            unless ($serviceName) {
+            unless ( $serviceName ) {
                 $serviceName = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='name']", 1 ), 0 );
             }
             my $serviceType = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceType']", 1 ), 0 );
-            unless ($serviceType) {
+            unless ( $serviceType ) {
                 $serviceType = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='type']", 1 ), 0 );
             }
             my $serviceDescription = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='serviceDescription']", 1 ), 0 );
+            unless ( $serviceDescription ) {
+                $serviceDescription = extract( find( $m1, "./*[local-name()='subject']//*[local-name()='description']", 1 ), 0 );
+            }
 
             foreach my $d1 ( $d->get_nodelist ) {
                 my $metadataIdRef = $d1->getAttribute("metadataIdRef");
