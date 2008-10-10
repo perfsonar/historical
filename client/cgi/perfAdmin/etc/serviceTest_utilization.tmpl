@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <title>perfAdmin - Service Display - SNMP Data</title>
+  </head>
+  <body>
+    <table width="95%" align="center" cellpadding="1" border="2">
+      <tr>
+        <th align="center" colspan="8"><tmpl_var name=EVENTTYPE> @ <tmpl_var name=SERVICE></th>
+      </tr>
+      <tr>
+        <th align="center">Address</th>
+        <th align="center">Host Name</th>
+        <th align="center">If. Name</th>
+        <th align="center">Description</th>
+        <th align="center">If. Address</th>
+        <th align="center">Capacity</th>
+        <th align="center">Graph</th>
+        <th align="center">Flash Graph</th>
+      </tr>
+      <tmpl_loop name=INTERFACES>
+      <tr>
+        <td align="center">
+          <tmpl_var name=ADDRESS>
+        </td>
+        <td align="center">
+          <tmpl_var name=HOST>
+        </td>
+        <td align="center">
+          <tmpl_var name=IFNAME>
+        </td>
+        <td align="center">
+          <tmpl_var name=DESC>
+        </td>
+        <td align="center">
+          <tmpl_var name=IFADDRESS>
+        </td>
+        <td align="center">
+          <tmpl_var name=CAPACITY>
+        </td>
+        <td align="center">
+          <input type="submit" value="Graph" id="graph1.<tmpl_var name=COUNT>" name="graph1.<tmpl_var name=COUNT>" onClick="window.open('./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>','graph1.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')" />
+        </td>    
+        <td align="center">
+          <input type="submit" value="Graph" id="graph2.<tmpl_var name=COUNT>" name="graph2.<tmpl_var name=COUNT>" onClick="window.open('./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>','graph2.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')" />
+        </td>        
+      </tr>
+      </tmpl_loop>
+    </table>
+  </body>
+</html>

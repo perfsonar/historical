@@ -15,16 +15,10 @@ available for the data type).
 
 =cut
 
-use XML::LibXML;
 use CGI;
-use CGI::Ajax;
-use CGI::Carp qw( fatalsToBrowser );
-
+use HTML::Template;
+use XML::LibXML;
 use Socket;
-use POSIX;
-use IO::Socket;
-use IO::Socket::INET;
-use IO::Interface qw(:flags);
 
 use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
@@ -32,15 +26,21 @@ use lib "/home/zurawski/perfSONAR-PS/lib";
 use perfSONAR_PS::Client::MA;
 use perfSONAR_PS::Common qw( extract find );
 
-my $cgi = new CGI;
-my $pjx = new CGI::Ajax( 'draw_func' => \&drawGauge );
+my $template = q{};
+my $cgi = CGI->new();
+print $cgi->header();
 
 my $service;
 if ( $cgi->param('url') ) {
     $service = $cgi->param('url');
 }
 else {
-    die "Service URL not provided.\n";
+    $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+    $template->param( 
+        ERROR => "Service URL not provided."
+    );
+    print $template->output;
+    exit(1);
 }
 
 my $eventType;
@@ -49,602 +49,325 @@ if ( $cgi->param('eventType') ) {
     $eventType =~ s/(\s|\n)*//g;
 }
 else {
-    die "Service eventType not provided.\n";
+    $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+    $template->param( 
+        ERROR => "Service eventType not provided."
+    );
+    print $template->output;
+    exit(1);
 }
 
 my $ma = new perfSONAR_PS::Client::MA( { instance => $service } );
 
-print $pjx->build_html( $cgi, \&display );
-
-sub drawGauge {
-    my ( $load, $key_in, $key_out ) = @_;
-
-    my $html = q{};
-    if ( defined $load and $load ) {
-        #    $html .= $key_in."<br>".$key_out."<br>\n";
-    }
-    return $html;
+my $subject;
+my @eventTypes = ();
+push @eventTypes, $eventType;
+if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
+    $subject = "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s\">\n";
+    $subject .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
+    $subject .= "    </netutil:subject>\n";
+}
+elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ) {
+    $subject = "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject\">\n";
+    $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
+    $subject .= "    </iperf:subject>\n";
+}
+elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
+    $subject = "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject\">\n";
+    $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
+    $subject .= "    </owamp:subject>\n";
+}
+elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
+    $subject = "    <pinger:subject xmlns:pinger=\"http://ggf.org/ns/nmwg/tools/pinger/2.0/\" id=\"subject\">\n";
+    $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
+    $subject .= "    </pinger:subject>\n";
+}
+else {
+    $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+    $template->param( 
+        ERROR => "Unrecognized eventType: \"" . $eventType . "\"."
+    );
+    print $template->output;
+    exit(1);
 }
 
-sub display {
+my $parser = XML::LibXML->new();
+my $result = $ma->metadataKeyRequest(
+    {
+        subject    => $subject,
+        eventTypes => \@eventTypes
+    }
+);
 
-    my $html = $cgi->start_html( -title => 'MA Output' );
-
-    $html .= $cgi->br;
-    $html .= $cgi->br;
-
-    my $subject;
-    my @eventTypes = ();
-    push @eventTypes, $eventType;
-    if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
-        $subject = "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"s\">\n";
-        $subject .= "      <nmwgt:interface xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
-        $subject .= "    </netutil:subject>\n";
-    }
-    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
-        $subject = "    <iperf:subject xmlns:iperf=\"http://ggf.org/ns/nmwg/tools/iperf/2.0/\" id=\"subject\">\n";
-        $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
-        $subject .= "    </iperf:subject>\n";
-    }
-    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
-        $subject = "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject\">\n";
-        $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
-        $subject .= "    </owamp:subject>\n";
-    }
-    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
-        $subject = "    <pinger:subject xmlns:pinger=\"http://ggf.org/ns/nmwg/tools/pinger/2.0/\" id=\"subject\">\n";
-        $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
-        $subject .= "    </pinger:subject>\n";
-    }
-    else {
-        $html .= "<center><h2><b><i>" . $eventType . "</b></i> is not yet supported.</h2></center>\n";
-        $html .= $cgi->br;
-        $html .= $cgi->br;
-        $html .= $cgi->end_html;
-        return $html;
-    }
-
-    my $parser = XML::LibXML->new();
-    my $result = $ma->metadataKeyRequest(
-        {
-            subject    => $subject,
-            eventTypes => \@eventTypes
-        }
+unless ( $#{ $result->{"metadata"} } > -1 ) {
+    $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+    $template->param( 
+        ERROR => "MA <b><i>" . $service . "</i></b> experienced an error, is it functioning?"
     );
+    print $template->output;
+    exit(1);
+}
 
-    unless ( $#{ $result->{"metadata"} } > -1 ) {
-        $html .= "<center><h2>MA <b><i>" . $service . "</i></b> experienced an error, is it functioning?</h2></center>\n";
-        $html .= $cgi->br;
-        $html .= $cgi->br;
-        $html .= $cgi->end_html;
-        return $html;
-    }
+my $metadata = $parser->parse_string( $result->{"metadata"}->[0] );
+my $et = extract( find( $metadata->getDocumentElement, ".//nmwg:eventType", 1 ), 0 );
 
-    my $metadata = $parser->parse_string( $result->{"metadata"}->[0] );
-    my $et = extract( find( $metadata->getDocumentElement, ".//nmwg:eventType", 1 ), 0 );
+if ( $et eq "error.ma.storage" ) {
+    $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+    $template->param( 
+        ERROR => "MA <b><i>" . $service . "</i></b> experienced an error, be sure it is configured and populated with data."
+    );
+}
+else {
+    if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
+        $template = HTML::Template->new( filename => "etc/serviceTest_utilization.tmpl" );
 
-    if ( $et eq "error.ma.storage" ) {
-        $html .= "<center><h2>MA <b><i>" . $service . "</i></b> experienced an error, be sure it is configured and populated with data.</h2></center>\n";
-        $html .= $cgi->br;
-        $html .= $cgi->br;
-        $html .= $cgi->end_html;
-        return $html;
-    }
-    else {
-        if ( $eventType eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" ) {
+        my %lookup = ();
+        foreach my $d ( @{ $result->{"data"} } ) {
+            my $data          = $parser->parse_string($d);
+            my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
+            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+        }
 
-            my %lookup = ();
-            foreach my $d ( @{ $result->{"data"} } ) {
-                my $data          = $parser->parse_string($d);
-                my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
-                my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-                $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
-            }
-
-            my %list = ();
-            foreach my $md ( @{ $result->{"metadata"} } ) {
-                my $metadata   = $parser->parse_string($md);
-                my $metadataId = $metadata->getDocumentElement->getAttribute("id");
-                my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
-                my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
-                my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
-                if ( $list{$host}{$name} ) {
-                    if ( $dir eq "in" ) {
-                        $list{$host}{$name}->{"key1"} = $lookup{$metadataId};
-                    }
-                    else {
-                        $list{$host}{$name}->{"key2"} = $lookup{$metadataId};
-                    }
+        my %list = ();
+        foreach my $md ( @{ $result->{"metadata"} } ) {
+            my $metadata   = $parser->parse_string($md);
+            my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+            my $dir        = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:direction", 1 ), 0 );
+            my $host       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:hostName", 1 ), 0 );
+            my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
+            if ( $list{$host}{$name} ) {
+                if ( $dir eq "in" ) {
+                    $list{$host}{$name}->{"key1"} = $lookup{$metadataId};
                 }
                 else {
-                    my %temp = ();
-                    if ( $dir eq "in" ) {
-                        $temp{"key1"} = $lookup{$metadataId};
-                    }
-                    else {
-                        $temp{"key2"} = $lookup{$metadataId};
-                    }
-                    $temp{"hostName"}      = $host;
-                    $temp{"ifName"}        = $name;
-                    $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
-                    $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifDescription", 1 ), 0 );
-                    $temp{"ifAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
-                    $temp{"capacity"}      = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity", 1 ), 0 );
-                    $list{$host}{$name}    = \%temp;
+                    $list{$host}{$name}->{"key2"} = $lookup{$metadataId};
                 }
             }
-
-            $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "8", align => "center" } );
-            $html .= $eventType . " @ " . $service;
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "ifName\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Descr.\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "ifAddress\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Capacity\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Flash Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            my $counter = 0;
-            foreach my $host ( sort keys %list ) {
-                foreach my $name ( sort keys %{ $list{$host} } ) {
-                    $html .= $cgi->start_Tr;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ipAddress"}. "\n" if $list{$host}{$name}->{"ipAddress"};
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"hostName"}. "\n" if $list{$host}{$name}->{"hostName"};
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifName"}. "\n" if $list{$host}{$name}->{"ifName"};
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifDescription"}. "\n" if $list{$host}{$name}->{"ifDescription"};
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$host}{$name}->{"ifAddress"}. "\n" if $list{$host}{$name}->{"ifAddress"};
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= eval( $list{$host}{$name}->{"capacity"} / 1000000 ) . " M\n" if $list{$host}{$name}->{"capacity"};
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
-                    $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                    $html .= "'utilizationGraph.cgi?url=" . $service . "&key1=" . $list{$host}{$name}->{"key1"};
-                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "&host=".$list{$host}{$name}->{"hostName"}."&interface=".$list{$host}{$name}->{"ifName"}."','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= "<input type=\"submit\" value=\"Graph\" id=\"if2." . $counter . "\" ";
-                    $html .= "name=\"if2." . $counter . "\" onClick=\"window.open(";
-                    $html .= "'utilizationGraphFlash.cgi?url=" . $service . "&key1=" . $list{$host}{$name}->{"key1"};
-                    $html .= "&key2=" . $list{$host}{$name}->{"key2"} . "&host=".$list{$host}{$name}->{"hostName"}."&interface=".$list{$host}{$name}->{"ifName"}."','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->end_Tr;
-                    $html .= $cgi->start_Tr;
-                    $html .= $cgi->start_td( { colspan => 9, align => "center" } );
-                    $html .= "<div id=\"resultdiv." . $counter . "\"></div>\n";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->end_Tr;
-
-                    $counter++;
-                }
-            }
-
-        }
-        elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
-
-            my %lookup = ();
-            foreach my $d ( @{ $result->{"data"} } ) {
-                my $data          = $parser->parse_string($d);
-                my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
-                my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-                $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
-            }
-
-            my %list = ();
-            foreach my $md ( @{ $result->{"metadata"} } ) {
-                my $metadata   = $parser->parse_string($md);
-                my $metadataId = $metadata->getDocumentElement->getAttribute("id");
-
-                my $src  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src",                           1 ), 0 );
-                my $dst  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst",                           1 ), 0 );
-                my $type = extract( find( $metadata->getDocumentElement, "./*[local-name()='parameters']/*[local-name()='parameter' and \@name=\"protocol\"]", 1 ), 0 );
-
+            else {
                 my %temp = ();
-                $temp{"key"}             = $lookup{$metadataId};
-                $temp{"src"}             = $src;
-                $temp{"dst"}             = $dst;
-                $temp{"type"}            = $type;
-                $list{$src}{$dst}{$type} = \%temp;
-            }
-
-            $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "7", align => "center" } );
-            $html .= $eventType . " @ " . $service;
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Protocol\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Flash Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            my $counter = 0;
-            foreach my $src ( sort keys %list ) {
-                foreach my $dst ( sort keys %{ $list{$src} } ) {
-                    foreach my $type ( sort keys %{ $list{$src}{$dst} } ) {
-                        $html .= $cgi->start_Tr;
-
-                        $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"src"}. "\n" if $list{$src}{$dst}{$type}->{"src"};
-                        $html .= $cgi->end_td;
-
-                        my $display = $list{$src}{$dst}{$type}->{"src"};
-                        $display =~ s/:.*$//;
-                        my $iaddr = Socket::inet_aton($display);
-                        my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                        $html .= $cgi->start_td( { align => "center" } );
-                        if ($shost) {
-                            $html .= $shost . "\n";
-                        }
-                        else {
-                            $html .= $list{$src}{$dst}{$type}->{"src"}. "\n" if $list{$src}{$dst}{$type}->{"src"};
-                        }
-                        $html .= $cgi->end_td;
-
-                        $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"dst"}. "\n" if $list{$src}{$dst}{$type}->{"dst"};
-                        $html .= $cgi->end_td;
-
-                        my $display2 = $list{$src}{$dst}{$type}->{"dst"};
-                        $display2 =~ s/:.*$//;
-                        $iaddr = Socket::inet_aton($display2);
-                        my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                        $html .= $cgi->start_td( { align => "center" } );
-                        if ($dhost) {
-                            $html .= $dhost . "\n";
-                        }
-                        else {
-                            $html .= $list{$src}{$dst}{$type}->{"dst"}. "\n" if $list{$src}{$dst}{$type}->{"dst"};
-                        }
-                        $html .= $cgi->end_td;
-
-                        $html .= $cgi->start_td( { align => "center" } );
-                        $html .= $list{$src}{$dst}{$type}->{"type"}. "\n" if $list{$src}{$dst}{$type}->{"type"};
-                        $html .= $cgi->end_td;
-
-                        $html .= $cgi->start_td( { align => "center" } );
-                        $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
-                        $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                        $html .= "'bandwidthGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "&src=".$list{$src}{$dst}{$type}->{"src"}."&dst=".$list{$src}{$dst}{$type}->{"dst"}."&type=".$list{$src}{$dst}{$type}->{"type"}."','graphwindow." . $counter . "','width=950,";
-                        $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                        $html .= $cgi->end_td;
-
-                        $html .= $cgi->start_td( { align => "center" } );
-                        $html .= "<input type=\"submit\" value=\"Graph\" id=\"if2." . $counter . "\" ";
-                        $html .= "name=\"if2." . $counter . "\" onClick=\"window.open(";
-                        $html .= "'bandwidthGraphFlash.cgi?url=" . $service . "&key=" . $list{$src}{$dst}{$type}->{"key"} . "&src=".$list{$src}{$dst}{$type}->{"src"}."&dst=".$list{$src}{$dst}{$type}->{"dst"}."&type=".$list{$src}{$dst}{$type}->{"type"}."','graphwindow." . $counter . "','width=950,";
-                        $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                        $html .= $cgi->end_td;
-
-                        $html .= $cgi->end_Tr;
-                        $html .= $cgi->start_Tr;
-                        $html .= $cgi->start_td( { colspan => 7, align => "center" } );
-                        $html .= "<div id=\"resultdiv." . $counter . "\"></div>\n";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->end_Tr;
-
-                        $counter++;
-                    }
+                if ( $dir eq "in" ) {
+                    $temp{"key1"} = $lookup{$metadataId};
                 }
-            }
-        }
-        elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
-
-            my %lookup = ();
-            foreach my $d ( @{ $result->{"data"} } ) {
-                my $data          = $parser->parse_string($d);
-                my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
-                my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-                $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
-            }
-
-            my %list = ();
-            foreach my $md ( @{ $result->{"metadata"} } ) {
-                my $metadata   = $parser->parse_string($md);
-                my $metadataId = $metadata->getDocumentElement->getAttribute("id");
-
-                my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
-                my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
-
-                my %temp = ();
-                $temp{"key"}      = $lookup{$metadataId};
-                $temp{"src"}      = $src;
-                $temp{"dst"}      = $dst;
-                $list{$src}{$dst} = \%temp;
-            }
-
-            $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "95%" } );
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "5", align => "center" } );
-            $html .= $eventType . " @ " . $service;
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            my $counter = 0;
-            foreach my $src ( sort keys %list ) {
-                foreach my $dst ( sort keys %{ $list{$src} } ) {
-                    $html .= $cgi->start_Tr;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"src"}. "\n" if $list{$src}{$dst}->{"src"};
-                    $html .= $cgi->end_td;
-
-                    my $display = $list{$src}{$dst}->{"src"};
-                    $display =~ s/:.*$//;
-                    my $iaddr = Socket::inet_aton($display);
-                    my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                    $html .= $cgi->start_td( { align => "center" } );
-                    if ($shost) {
-                        $html .= $shost . "\n";
-                    }
-                    else {
-                        $html .= $list{$src}{$dst}->{"src"}. "\n" if $list{$src}{$dst}->{"src"};
-                    }
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"dst"}. "\n" if $list{$src}{$dst}->{"dst"};
-                    $html .= $cgi->end_td;
-
-                    my $display2 = $list{$src}{$dst}->{"dst"};
-                    $display2 =~ s/:.*$//;
-                    $iaddr = Socket::inet_aton($display2);
-                    my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
-                    $html .= $cgi->start_td( { align => "center" } );
-                    if ($dhost) {
-                        $html .= $dhost . "\n";
-                    }
-                    else {
-                        $html .= $list{$src}{$dst}->{"dst"}. "\n" if $list{$src}{$dst}->{"dst"};
-                    }
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
-                    $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-                    $html .= "'delayGraph.cgi?url=" . $service . "&key=" . $list{$src}{$dst}->{"key"} . "&src=".$list{$src}{$dst}->{"src"}."&dst=".$list{$src}{$dst}->{"dst"}."','graphwindow." . $counter . "','width=950,";
-                    $html .= "height=500,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->end_Tr;
-                    $html .= $cgi->start_Tr;
-                    $html .= $cgi->start_td( { colspan => 8, align => "center" } );
-                    $html .= "<div id=\"resultdiv." . $counter . "\"></div>\n";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->end_Tr;
-
-                    $counter++;
+                else {
+                    $temp{"key2"} = $lookup{$metadataId};
                 }
+                $temp{"hostName"}      = $host;
+                $temp{"ifName"}        = $name;
+                $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
+                $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifDescription", 1 ), 0 );
+                $temp{"ifAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
+                $temp{"capacity"}      = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity", 1 ), 0 );
+                $list{$host}{$name}    = \%temp;
             }
         }
-        elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" ) {
 
-            my %lookup = ();
-            foreach my $d ( @{ $result->{"data"} } ) {
-                my $data          = $parser->parse_string($d);
-                my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
-                my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-                $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
-            }
+        my @interfaces = ();
+        my $counter = 0;
+        foreach my $host ( sort keys %list ) {
+            foreach my $name ( sort keys %{ $list{$host} } ) {
 
-            my %list = ();
-            foreach my $md ( @{ $result->{"metadata"} } ) {
-                my $metadata   = $parser->parse_string($md);
-                my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => eval( $list{$host}{$name}->{"capacity"} / 1000000 ), KEY1 => $list{$host}{$name}->{"key1"}, KEY2 => $list{$host}{$name}->{"key2"}, COUNT => $counter, SERVICE => $service };
 
-                my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
-                my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
-
-                my %temp = ();
-                $temp{"key"}      = $lookup{$metadataId};
-                $temp{"src"}      = $src;
-                $temp{"dst"}      = $dst;
-                $list{$src}{$dst} = \%temp;
-            }
-
-            $html .= $cgi->start_table( { border => "2", cellpadding => "1", align => "center", width => "100%" } );
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { colspan => "5", align => "center" } );
-            $html .= $eventType . " @ " . $service;
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Source Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Address\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Destination Host\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->start_th( { align => "center" } );
-            $html .= "Graph\n";
-            $html .= $cgi->end_th;
-            $html .= $cgi->end_Tr;
-
-            my $counter = 0;
-            foreach my $src ( sort keys %list ) {
-                foreach my $dst ( sort keys %{ $list{$src} } ) {
-                    $html .= $cgi->start_Tr;
-
-                    # xxx 7/30/08
-                    # needs fixed
-
-                    # src ip
-                    $html .= $cgi->start_td( { align => "center" } );
-                    my $packed_ip = gethostbyname( $list{$src}{$dst}->{"src"} );
-                    if ( defined $packed_ip ) {
-                        my $ip_address = inet_ntoa($packed_ip);
-                        $html .= Socket::inet_ntoa($packed_ip) . "\n";
-                    }
-                    else {
-                        $html .= $list{$src}{$dst}->{"src"} . "\n" if $list{$src}{$dst}->{"src"};
-                    }
-                    $html .= $cgi->end_td;
-
-                    # src host
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"src"} . "\n" if $list{$src}{$dst}->{"src"};
-                    $html .= $cgi->end_td;
-
-                    # dst ip
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $packed_ip = gethostbyname( $list{$src}{$dst}->{"dst"} );
-                    if ( defined $packed_ip ) {
-                        my $ip_address = inet_ntoa($packed_ip);
-                        $html .= Socket::inet_ntoa($packed_ip) . "\n";
-                    }
-                    else {
-                        $html .= $list{$src}{$dst}->{"dst"} . "\n" if $list{$src}{$dst}->{"dst"};
-                    }
-                    $html .= $cgi->end_td;
-
-                    # dst host
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= $list{$src}{$dst}->{"dst"} . "\n" if $list{$src}{$dst}->{"dst"};
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->start_td( { align => "center" } );
-                    $html .= "<input type=\"submit\" value=\"Graph\" id=\"if." . $counter . "\" ";
-                    $html .= "name=\"if." . $counter . "\" onClick=\"window.open(";
-
-                    if ( -f "./pinger/index.cgi" ) {
-                        $html .= "'./pinger/index.cgi?ma=";
-                    }
-                    else {
-                        $html .= "'http://tukki.fnal.gov/pinger/pingerUI.pl?ma=";
-                    }
-                    $html .= $service . "&get_it=jh34587wuhlkh789hbyf78343gort03idjuhf3785t0gfgofbf78o4348orgofg7o4fg7&link=";
-                    $html .= $list{$src}{$dst}->{"src"} . ":" . $list{$src}{$dst}->{"dst"} . ":1000";
-
-                    my $p_time = time - 43200;
-                    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
-                    my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
-                    $p_time += 43200;
-                    ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
-                    my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
-                    $html .= "&time_start=" . $p_start;
-                    $html .= "&time_end=" . $p_end;
-
-                    $html .= "&upper_rtt=auto&gmt_offset=-5&gtype=rt&gpresent=lines'";
-                    $html .= ",'graphwindow." . $counter . "','width=460,";
-                    $html .= "height=250,status=yes,scrollbars=yes,resizable=yes')\" />\n";
-                    $html .= $cgi->end_td;
-
-                    $html .= $cgi->end_Tr;
-
-                    $counter++;
-                }
+                $counter++;
             }
         }
-        else {
-            $html .= "<center><h2><b><i>" . $eventType . "</b></i> is not yet supported.</h2></center>\n";
-            $html .= $cgi->br;
-            $html .= $cgi->br;
-            $html .= $cgi->end_html;
-            return $html;
-        }
+
+        $template->param( 
+            EVENTTYPE => $eventType,
+            SERVICE => $service,
+            INTERFACES => \@interfaces
+        );
+
     }
+    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0" ) {
+        $template = HTML::Template->new( filename => "etc/serviceTest_psb_bwctl.tmpl" );
 
-    $html .= $cgi->br;
 
-    $html .= $cgi->end_html;
-    return $html;
+        my %lookup = ();
+        foreach my $d ( @{ $result->{"data"} } ) {
+            my $data          = $parser->parse_string($d);
+            my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
+            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+        }
+
+        my %list = ();
+        foreach my $md ( @{ $result->{"metadata"} } ) {
+            my $metadata   = $parser->parse_string($md);
+            my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+
+            my $src  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src",                           1 ), 0 );
+            my $dst  = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst",                           1 ), 0 );
+            my $type = extract( find( $metadata->getDocumentElement, "./*[local-name()='parameters']/*[local-name()='parameter' and \@name=\"protocol\"]", 1 ), 0 );
+
+            my %temp = ();
+            $temp{"key"}             = $lookup{$metadataId};
+            $temp{"src"}             = $src;
+            $temp{"dst"}             = $dst;
+            $temp{"type"}            = $type;
+            $list{$src}{$dst}{$type} = \%temp;
+        }
+
+        my @pairs = ();
+        my $counter = 0;
+        foreach my $src ( sort keys %list ) {
+            foreach my $dst ( sort keys %{ $list{$src} } ) {
+                foreach my $type ( sort keys %{ $list{$src}{$dst} } ) {
+
+                    my $display = $list{$src}{$dst}{$type}->{"src"};
+                    $display =~ s/:.*$//;
+                    my $iaddr = Socket::inet_aton( $display );
+                    my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                    $shost = $list{$src}{$dst}{$type}->{"src"} unless $shost;
+
+                    $display = $list{$src}{$dst}{$type}->{"dst"};
+                    $display =~ s/:.*$//;
+                    $iaddr = Socket::inet_aton( $display );
+                    my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                    $dhost = $list{$src}{$dst}{$type}->{"dst"} unless $dhost;
+                                            
+                    push @pairs, { SADDRESS => $list{$src}{$dst}{$type}->{"src"}, SHOST => $shost, DADDRESS => $list{$src}{$dst}{$type}->{"dst"}, DHOST => $dhost, PROTOCOL => $list{$src}{$dst}{$type}->{"type"}, KEY => $list{$src}{$dst}{$type}->{"key"}, COUNT => $counter, SERVICE => $service };
+                    $counter++;
+                }
+            }
+        }
+
+        $template->param( 
+            EVENTTYPE => $eventType,
+            SERVICE => $service,
+            PAIRS => \@pairs
+        );
+    }
+    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
+        $template = HTML::Template->new( filename => "etc/serviceTest_psb_owamp.tmpl" );
+
+        my %lookup = ();
+        foreach my $d ( @{ $result->{"data"} } ) {
+            my $data          = $parser->parse_string($d);
+            my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
+            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+        }
+
+        my %list = ();
+        foreach my $md ( @{ $result->{"metadata"} } ) {
+            my $metadata   = $parser->parse_string($md);
+            my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+
+            my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
+            my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
+
+            my %temp = ();
+            $temp{"key"}      = $lookup{$metadataId};
+            $temp{"src"}      = $src;
+            $temp{"dst"}      = $dst;
+            $list{$src}{$dst} = \%temp;
+        }
+
+        my @pairs = ();
+        my $counter = 0;
+        foreach my $src ( sort keys %list ) {
+            foreach my $dst ( sort keys %{ $list{$src} } ) {
+            
+                my $display = $list{$src}{$dst}->{"src"};
+                $display =~ s/:.*$//;
+                my $iaddr = Socket::inet_aton( $display );
+                my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                $shost = $list{$src}{$dst}->{"src"} unless $shost;
+
+                $display = $list{$src}{$dst}->{"dst"};
+                $display =~ s/:.*$//;
+                $iaddr = Socket::inet_aton( $display );
+                my $dhost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                $dhost = $list{$src}{$dst}->{"dst"} unless $dhost;
+                                            
+                push @pairs, { SADDRESS => $list{$src}{$dst}->{"src"}, SHOST => $shost, DADDRESS => $list{$src}{$dst}->{"dst"}, DHOST => $dhost, KEY => $list{$src}{$dst}->{"key"}, COUNT => $counter, SERVICE => $service };
+                $counter++;
+            }
+        }
+
+        $template->param( 
+            EVENTTYPE => $eventType,
+            SERVICE => $service,
+            PAIRS => \@pairs
+        );
+    }
+    elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
+        $template = HTML::Template->new( filename => "etc/serviceTest_pinger.tmpl" );
+
+        my %lookup = ();
+        foreach my $d ( @{ $result->{"data"} } ) {
+            my $data          = $parser->parse_string($d);
+            my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
+            my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+        }
+
+        my %list = ();
+        foreach my $md ( @{ $result->{"metadata"} } ) {
+            my $metadata   = $parser->parse_string($md);
+            my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+
+            my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
+            my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
+
+            my %temp = ();
+            $temp{"key"}      = $lookup{$metadataId};
+            $temp{"src"}      = $src;
+            $temp{"dst"}      = $dst;
+            $list{$src}{$dst} = \%temp;
+        }
+
+        my @pairs = ();
+        my $counter = 0;
+        foreach my $src ( sort keys %list ) {
+            foreach my $dst ( sort keys %{ $list{$src} } ) {
+
+                my $packed_ip = gethostbyname( $list{$src}{$dst}->{"src"} );
+                my $sip_address = $list{$src}{$dst}->{"src"};
+                $sip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
+                
+                $packed_ip = gethostbyname( $list{$src}{$dst}->{"src"} );
+                my $dip_address = $list{$src}{$dst}->{"src"};
+                $dip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
+                
+                my $present = 0;
+                $present++ if -f "./pinger/index.cgi";
+
+                my $p_time = time - 43200;
+                my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
+                my $p_start = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
+                $p_time += 43200;
+                ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
+                my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
+                                            
+                push @pairs, { SHOST => $list{$src}{$dst}->{"src"}, SADDRESS => $sip_address, DHOST => $list{$src}{$dst}->{"dst"}, DADDRESS => $dip_address, COUNT => $counter, SERVICE => $service, PRESENT => $present, STARTTIME => $p_start, ENDTIME => $p_end };
+                $counter++;
+            }
+        }
+
+        $template->param( 
+            EVENTTYPE => $eventType,
+            SERVICE => $service,
+            PAIRS => \@pairs
+        );
+    }
+    else {
+        $template = HTML::Template->new( filename => "etc/serviceTest_error.tmpl" );
+        $template->param( 
+            ERROR => "Unrecognized eventType: \"" . $eventType . "\"."
+        );
+    }
 }
 
+print $template->output;
 
 __END__
 
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<CGI>, L<CGI::Ajax>, L<CGI::Carp>, L<Socket>, L<POSIX>,
-L<IO::Socket>, L<IO::Socket::INET>, L<IO::Interface>,
-L<perfSONAR_PS::Client::MA>, L<perfSONAR_PS::Common>
+L<C>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -679,4 +402,3 @@ Copyright (c) 2007-2008, Internet2
 All rights reserved.
 
 =cut
-
