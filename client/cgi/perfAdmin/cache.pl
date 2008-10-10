@@ -20,6 +20,9 @@ use XML::LibXML;
 use Carp;
 use Getopt::Long;
 use Data::Dumper;
+use Data::Validate::IP qw(is_ipv4);
+use Net::IPv6Addr;
+use Net::CIDR;
 
 use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
@@ -44,6 +47,8 @@ if ( $HELP ) {
 my $parser = XML::LibXML->new();
 my $hints  = "http://www.perfsonar.net/gls.root.hints";
 
+my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
+
 #my $base   = "/var/lib/hLS/cache";
 my $base   = "/home/zurawski/perfSONAR-PS/client/cgi/perfAdmin/cache";
 
@@ -67,8 +72,33 @@ for my $root ( @{ $gls->{ROOTS} } ) {
         my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
         foreach my $a ( $ap->get_nodelist ) {
             my $value = extract( $a, 0 );
-            $hls{$value} = 1 if $value;
-            print "\t\thLS:\t" , $value , "\n" if $DEBUGFLAG and $value;
+            
+            if ( $value ) {
+                print "\t\thLS:\t" , $value , "\n" if $DEBUGFLAG;
+                my $test = $value;
+                $test =~ s/^http:\/\///;
+                my ($unt_test) = $test =~ /^(.+):/;
+                if ( is_ipv4( $unt_test ) ) {
+                    if ( Net::CIDR::cidrlookup( $unt_test, @private_list ) ) {
+                        print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
+                    }
+                    else {
+                        $hls{$value} = 1
+                    }
+                }
+                elsif ( &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
+                    # do noting (for now)
+                    $hls{$value} = 1;
+                }
+                else {
+                    if ( $unt_test =~ m/^localhost/ ) {
+                        print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
+                    }
+                    else {
+                        $hls{$value} = 1
+                    }
+                }
+            }
         }
     }
     else {
@@ -81,9 +111,8 @@ for my $root ( @{ $gls->{ROOTS} } ) {
 print "\n" if $DEBUGFLAG;
 
 my %list = ();
-open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
+my %dups = ();
 foreach my $h ( keys %hls ) {
-    print HLS $h, "\n";
     print "hLS:\t" , $h , "\n" if $DEBUGFLAG;
 
     my $ls = new perfSONAR_PS::Client::LS( { instance => $h } );
@@ -127,13 +156,20 @@ foreach my $h ( keys %hls ) {
                 my $eventTypes = find( $d1, "./nmwg:metadata/nmwg:eventType", 0 );
                 foreach my $e ( $eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
-                    if ($value) {
-                        if ( exists $list{$value} ) {
-                            push @{ $list{$value} }, { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
-                        }
-                        else {
-                            my @temp = ( { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
-                            $list{$value} = \@temp;
+                    if ( $value ) {
+
+# we should be tracking things here, eliminate duplicates
+                        unless ( exists $dups{$value}{$contactPoint} and $dups{$value}{$contactPoint} ) {
+                            $dups{$value}{$contactPoint} = 1;
+
+                            if ( exists $list{$value} ) {
+                                push @{ $list{$value} }, { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
+                            }
+                            else {
+                                my @temp = ( { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription } );
+                                $list{$value} = \@temp;
+                            }
+
                         }
                     }
                 }
@@ -142,10 +178,17 @@ foreach my $h ( keys %hls ) {
         }
     }
     else {
+        delete $hls{$h};
         if ( $DEBUGFLAG ) {
             print "\tResult:\t" , Dumper($result) , "\n";
         }
     }
+}
+
+# should we do some verification/validation here?
+open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
+foreach my $h ( keys %hls ) {
+    print HLS $h, "\n";
 }
 close(HLS);
 
