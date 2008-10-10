@@ -101,8 +101,18 @@ my %daemonMap = (
 my @daemonList = ();
 my @serviceList = ();
 my @anchors = ();
+my $lastMod = "at an unknown time...";
+
 if ( -d $base ) {
+
+    my $hLSFile = $base . "/list.hls";
+    if ( -f $hLSFile ) {
+        my ($mtime) = (stat ( $hLSFile ) )[9];
+        $lastMod = "on " . gmtime( $mtime ) . " UTC";
+    }
+
     my @anch = ();
+    my $counter1 = 0;
     foreach my $file ( keys %daemonMap ) {
         if ( -f $base . "/" . $file ) {
             open( READ, "<" . $base . "/" . $file ) or next;
@@ -110,13 +120,24 @@ if ( -d $base ) {
             close( READ );
 
             my @temp = ();          
+            my $counter2 = 0;
+            my $viewFlag = 0;
             foreach my $c ( @content ) {
                 my @daemon = split(/\|/, $c);
-                push @temp, { DAEMON => $daemon[0], NAME => $daemon[1], TYPE => $daemon[2], DESC => $daemon[3] };
+                if ( $daemon[0] =~ m/^http:\/\// ) {
+                    push @temp, { DAEMON => $daemon[0], NAME => $daemon[1], TYPE => $daemon[2], DESC => $daemon[3], COUNT1 => $counter1, COUNT2 => $counter2, VIEW => 1 };
+                    $viewFlag++;
+                }
+                else {
+                    push @temp, { DAEMON => $daemon[0], NAME => $daemon[1], TYPE => $daemon[2], DESC => $daemon[3], COUNT1 => $counter1, COUNT2 => $counter2, VIEW => 0 };
+                }
+                $counter2++;
             }
-            push @daemonList, { TYPE => $daemonMap{ $file }{ "TYPE" }, CONTENTS => \@temp };
+            push @daemonList, { TYPE => $daemonMap{ $file }{ "TYPE" }, CONTENTS => \@temp, VIEW => $viewFlag };
+
         }
         push @anch, { ANCHOR => $daemonMap{ $file }{ "TYPE" }, NAME => $daemonMap{ $file }{ "TYPE" }." Daemon" };
+        $counter1++;
     }
     push @anchors, { ANCHOR => "daemons", TYPE => "Measurement Tools", ANCHORITEMS => \@anch };
 
@@ -146,6 +167,7 @@ if ( -d $base ) {
 print $CGI->header();
 
 $template->param(
+    MOD => $lastMod,
     ANCHORTYPES => \@anchors,
     DAEMONS => \@daemonList,
     SERVICES => \@serviceList
