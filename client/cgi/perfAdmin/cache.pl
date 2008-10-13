@@ -124,6 +124,23 @@ foreach my $h ( keys %hls ) {
         }
     );
 
+    if ( exists $result->{eventType} and $result->{eventType} eq "error.ls.query.ls_output_not_accepted" ) {
+        # java hLS case...
+
+        # XXX: JZ 10/13
+        #
+        # Need to use this eT:
+        #
+        # http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0
+
+        $result = $ls->queryRequestLS(
+            {
+                query     => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]\n",
+                eventType => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0"
+            }
+        );
+    }
+    
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
         print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
         my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
