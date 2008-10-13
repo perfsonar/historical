@@ -328,8 +328,8 @@ else {
                 my $sip_address = $list{$src}{$dst}->{"src"};
                 $sip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
                 
-                $packed_ip = gethostbyname( $list{$src}{$dst}->{"src"} );
-                my $dip_address = $list{$src}{$dst}->{"src"};
+                $packed_ip = gethostbyname( $list{$src}{$dst}->{"dst"} );
+                my $dip_address = $list{$src}{$dst}->{"dst"};
                 $dip_address = inet_ntoa( $packed_ip ) if defined $packed_ip;
                 
                 my $present = 0;
