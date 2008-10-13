@@ -504,6 +504,10 @@ sub queryRequestLS {
         return;
     }
 
+    unless ( exists $parameters->{format} and $parameters->{format} ) {
+        $msg = unescapeString( $msg );
+    }
+
     my %result = ();
     my $eventType = extract( find( $msg, "./nmwg:metadata/nmwg:eventType", 1 ), 0 );
     if ($eventType) {
