@@ -32,22 +32,24 @@ import edu.internet2.perfsonar.utils.*;
  * applications.
  *
  */
-public class TSLookupClient implements PSMessageEventHandler {
-    private Logger log;
-    private String[] gLSList;
-    private String[] hLSList;
-    private String[] TSList;
-    private boolean tryAllGlobal;
-    private boolean useGlobalLS;
-    private PSNamespaces psNS;
-    private Element retrievedTopology;
-    private HashMap <String, Element> cachedTopologies;
-    private HashMap <String, Long> cacheTime;
+public class TSLookupClient {
+    protected Logger log;
+    protected String[] gLSList;
+    protected String[] hLSList;
+    protected String[] TSList;
+    protected boolean tryAllGlobal;
+    protected PSNamespaces psNS;
+    protected List <TSCacheElement> cache;
 
-    static final private long MAXIMUM_CACHE_LENGTH = 300000; // 5 minutes
-    static final private String TOPOLOGY_EVENT_TYPE = "http://ggf.org/ns/nmwg/topology/20070809";
+    protected long CACHE_LENGTH = 3600; // One hour
+    protected long FAILURE_CACHE_LENGTH = 300; // Five minutes
 
-    private String GLS_XQUERY = 
+    protected boolean cacheTopologes = true;
+    protected boolean cacheFailures = true;
+
+    static final protected String TOPOLOGY_EVENT_TYPE = "http://ggf.org/ns/nmwg/topology/20070809";
+
+    protected String GLS_XQUERY =
         "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
         "declare namespace summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\";\n" +
         "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n" +
@@ -59,7 +61,7 @@ public class TSLookupClient implements PSMessageEventHandler {
         "    where $data/nmwg:metadata/nmwg:eventType[text()=\""+TOPOLOGY_EVENT_TYPE+"\"] and $data/nmwg:metadata/summary:subject/nmtb:domain/nmtb:name[@type=\"dns\" and text()=\"<!--domain_name-->\"]\n" +
         "    return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint\n";
 
-    private String HLS_XQUERY = 
+    protected String HLS_XQUERY =
             "   declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n" +
             "   declare namespace summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\";\n" +
             "   declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n" +
@@ -71,7 +73,7 @@ public class TSLookupClient implements PSMessageEventHandler {
             "       where $data/nmwg:metadata/nmwg:eventType[text()=\""+TOPOLOGY_EVENT_TYPE+"\"] and $data/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"domain\" and @id=\"<!--domain_id-->\"]\n" +
             "       return $metadata/perfsonar:subject/psservice:service/psservice:accessPoint\n";
 
-    private String TS_QUERY =
+    protected String TS_QUERY =
             "<nmwg:message type=\"QueryRequest\" "+
             "   xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"> "+
             "    <nmwg:metadata id=\"meta1\">" +
@@ -82,12 +84,31 @@ public class TSLookupClient implements PSMessageEventHandler {
             "   </nmwg:metadata>" +
             "   <nmwg:data id=\"data1\" metadataIdRef=\"meta1\"/> "+
             "</nmwg:message>";
-
     /**
-     * Creates a new client with the list of Global lookup services to 
+     * Creates a new client with the list of Global lookup services to
      * contact determined by reading the hints file at the provided URL.
      * The result returned by the list file will be randomly re-ordered.
-     * 
+     *
+     * @param hintsFile the URL of the hints file to use to populate the list of global lookup services
+     * @throws HttpException
+     * @throws IOException
+     */
+    public TSLookupClient() throws HttpException, IOException {
+        this.log = Logger.getLogger(this.getClass());
+        String[] gLSList = PSLookupClient.getGlobalHints("http://www.perfsonar.net/gls.root.hints", true);
+        this.gLSList = gLSList;
+        this.hLSList = null;
+        this.TSList = null;
+        this.tryAllGlobal = false;
+        this.psNS = new PSNamespaces();
+        this.cache = new ArrayList<TSCacheElement>();
+    }
+
+    /**
+     * Creates a new client with the list of Global lookup services to
+     * contact determined by reading the hints file at the provided URL.
+     * The result returned by the list file will be randomly re-ordered.
+     *
      * @param hintsFile the URL of the hints file to use to populate the list of global lookup services
      * @throws HttpException
      * @throws IOException
@@ -97,21 +118,20 @@ public class TSLookupClient implements PSMessageEventHandler {
         String[] gLSList = PSLookupClient.getGlobalHints(hintsFile, true);
         this.gLSList = gLSList;
         this.hLSList = null;
+        this.TSList = null;
         this.tryAllGlobal = false;
-        this.useGlobalLS = true;
         this.psNS = new PSNamespaces();
-        this.cachedTopologies = new HashMap<String, Element>();
-        this.cacheTime = new HashMap<String, Long>();
+        this.cache = new ArrayList<TSCacheElement>();
     }
-    
+
     /**
      * Creates a new client with an explicitly set list of global and/or
-     * home lookup services. One of the parameters may be null. If the first 
+     * home lookup services. One of the parameters may be null. If the first
      * parameter is null then no global lookup servioces will be contacted
      * only the given home lookup services will be used. If the second paramter is
      * null the given set of global lookup services will be used to find the home
      * lookup service.
-     * 
+     *
      * @param gLSList the list of global lookup services to use
      * @param hLSList the list of home lookup services to use
      */
@@ -122,13 +142,12 @@ public class TSLookupClient implements PSMessageEventHandler {
         this.TSList = TSList;
         this.tryAllGlobal = false;
         this.psNS = new PSNamespaces();
-        this.cachedTopologies = new HashMap<String, Element>();
-        this.cacheTime = new HashMap<String, Long>();
+        this.cache = new ArrayList<TSCacheElement>();
     }
-    
+
     /**
-     * Finds the URN of a host with the given name. 
-     * 
+     * Finds the URN of a host with the given name.
+     *
      * @param name the name of the host o lookup
      * @return the Topology of the domain given by the specified domain identifier
      * @throws PSException
@@ -148,113 +167,127 @@ public class TSLookupClient implements PSMessageEventHandler {
             return null;
         }
 
-        boolean useCached = false;
-
-        // check if we have a cached version and that its sufficiently up to date
-        if (this.cacheTime.get(domainId) != null &&  this.cacheTime.get(domainId).longValue() + this.MAXIMUM_CACHE_LENGTH > System.currentTimeMillis()) {
-            this.log.debug("We've got a cached version of "+domainId+" so we're going to use it");
-            useCached = true;
-        }
-
-        // now check if our cached version has the same namespace as the one
-        // we're being asked for.
-        if (useCached && namespace != null) {
-            Element topology = (Element) this.cachedTopologies.get(domainId);
-            List<Element> children = this.getElementChildren(topology, "domain");
-
-            for (Element child : children) {
-                String newDomainId = child.getAttributeValue("id");
-
-                if (newDomainId != null && domainId.equals(newDomainId) == true) {
-                    if (child.getNamespace().getURI().equals(namespace) == false) {
-                        useCached = false;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // if our cached version is up to date and matches the namespace
-        // specified, return it.
-        if (useCached) {
-            Element retTopology = (Element) this.cachedTopologies.get(domainId).clone();
-
-            List<Element> children = this.getElementChildren(retTopology, "domain");
-
-            for (Element child : children) {
-                String newDomainId = child.getAttributeValue("id");
-
-                if (newDomainId != null && domainId.equals(newDomainId) == false) {
-                    retTopology.removeContent(child);
-                }
-            }
-
-            return retTopology;
-        }
-
-
         String domainName = urnInfo.get("domainValue");
 
-        String urn = null;
-        String[] TSMatches  = this.TSList;
-        if (useGlobalLS || this.TSList == null) {
-            String[] hLSMatches = this.hLSList;
-            if(useGlobalLS || this.hLSList == null){
+        long currentTime = System.currentTimeMillis();
+
+        TSCacheElement cacheElement = this.getCache(domainId, namespace);
+        if (cacheElement != null) {
+            if (cacheElement.topology == null) {
+                if (currentTime < (cacheElement.retrieveTime + this.FAILURE_CACHE_LENGTH * 1000)) {
+                    return cacheElement.topology;
+                }
+            } else {
+                if (currentTime < (cacheElement.retrieveTime + this.CACHE_LENGTH * 1000)) {
+                    return cacheElement.topology;
+                }
+            }
+
+            if (cacheElement.TS != null) {
+                Element topology = this.getDomainQueryTS(cacheElement.TS, domainId, namespace);
+                if (topology != null) {
+                    String currNamespace;
+
+                    if (namespace != null) {
+                        currNamespace = namespace;
+                    } else {
+                        List<Element> children = this.getElementChildren(topology, "domain");
+                        for (Element child : children) {
+                            currNamespace = child.getNamespace().getURI();
+                            break;
+                        }
+                        currNamespace = namespace;
+                    }
+
+                    this.addCache(domainId, currNamespace, currentTime, cacheElement.TS, topology);
+
+                    return topology;
+                }
+            }
+        }
+
+        String [] TSMatches = this.getTSList();
+        if (TSMatches == null) {
+            String[] hLSMatches = this.getHLSList();
+            if(hLSMatches == null){
                 try {
                     String discoveryXQuery = GLS_XQUERY;
                     discoveryXQuery = discoveryXQuery.replaceAll("<!--domain_name-->", domainName);
                     Element discReqElem = this.createQueryMetaData(discoveryXQuery);
-                    hLSMatches = this.findServices(this.gLSList, this.tryAllGlobal, this.requestString(discReqElem, null));
-                } catch (PSException e) {
-                    // no hLS elements returned
-                    return null;
-                }
+                    String [] gLSs = this.getGLSList();
+                    hLSMatches = this.findServices(gLSs, this.isTryAllGlobal(), this.requestString(discReqElem, null));
+                } catch (PSException e) {}
             }
 
-            try {
-                String xquery = HLS_XQUERY;
-                xquery = xquery.replaceAll("<!--domain_id-->", domainId);
-                Element reqElem = this.createQueryMetaData(xquery);
-                TSMatches = this.findServices(hLSMatches, true, this.requestString(reqElem, null));
-            } catch (PSException e) {
-                return null;
+            if (hLSMatches != null) {
+                try {
+                    String xquery = HLS_XQUERY;
+                    xquery = xquery.replaceAll("<!--domain_id-->", domainId);
+                    Element reqElem = this.createQueryMetaData(xquery);
+                    TSMatches = this.findServices(hLSMatches, true, this.requestString(reqElem, null));
+                } catch (PSException e) {}
             }
         }
 
-        for(String ts_url : TSMatches) {
-            PSBaseClient pSClient = new PSBaseClient(ts_url);
+        if (TSMatches != null) {
+            for(String ts_url : TSMatches) {
+                Element topology = getDomainQueryTS(ts_url, domainId, namespace);
+                if (topology != null) {
+                    String currNamespace;
 
-            String xquery = TS_QUERY;
-            xquery = xquery.replaceAll("<!--domain_id-->", domainId);
-
-            pSClient.sendMessage_CB(xquery, this, null);
-            if (this.retrievedTopology != null) {
-                Element origTopology = (Element) this.retrievedTopology.clone();
-
-                boolean foundDomain = false;
-
-                List<Element> children = this.getElementChildren(this.retrievedTopology, "domain");
-                for (Element child : children) {
-                    // construct the domain topology identifier
-                    String newDomainId = child.getAttributeValue("id");
-
-                    this.cachedTopologies.put(newDomainId, origTopology);
-                    this.cacheTime.put(newDomainId, new Long(System.currentTimeMillis()));
-
-                    if (domainId.equals(newDomainId) == false) {
-                        this.retrievedTopology.removeContent(child);
-                    } else if (namespace == null || child.getNamespace().getURI().equals(namespace) == true) {
-                        foundDomain = true;
+                    if (namespace != null) {
+                        currNamespace = namespace;
+                    } else {
+                        List<Element> children = this.getElementChildren(topology, "domain");
+                        for (Element child : children) {
+                            currNamespace = child.getNamespace().getURI();
+                            break;
+                        }
+                        currNamespace = namespace;
                     }
-                }
 
-                if (foundDomain) {
-                    return this.retrievedTopology;
+                    this.addCache(domainId, currNamespace, currentTime, ts_url, topology);
+
+                    return topology;
                 }
+            }
+        }
+
+        if (this.cacheFailures) {
+            if (namespace != null) {
+                this.addCache(domainId, namespace, currentTime, null, null);
             }
         }
 
         return null;
+    }
+
+    private Element getDomainQueryTS(String TSUrl, String domainId, String namespace) throws PSException {
+        Element retTopology = null;
+
+        PSBaseClient pSClient = new PSBaseClient(TSUrl);
+
+        String xquery = TS_QUERY;
+        xquery = xquery.replaceAll("<!--domain_id-->", domainId);
+
+        TSClientCallback cb = new TSClientCallback();
+        pSClient.sendMessage_CB(xquery, cb, null);
+        Element topo = cb.getRetrievedTopology();
+        if (topo != null) {
+            List<Element> children = this.getElementChildren(topo, "domain");
+            for (Element child : children) {
+                // construct the domain topology identifier
+                String newDomainId = child.getAttributeValue("id");
+
+                if (domainId.equals(newDomainId) == false || (namespace != null && child.getNamespace().getURI().equals(namespace) == false)) {
+                    topo.removeContent(child);
+                } else if (namespace == null || child.getNamespace().getURI().equals(namespace) == true) {
+                    retTopology = topo;
+                }
+            }
+        }
+
+        return retTopology;
     }
 
     /**
@@ -262,7 +295,7 @@ public class TSLookupClient implements PSMessageEventHandler {
      * services possible containing desired data. If the "tryAllGlobals"
      * property is set to true then it will contact every global to build
      * its list of home lookup services.
-     * 
+     *
      * @param request the discovery request
      * @return the list of matching home lookup services
      * @throws PSException
@@ -270,14 +303,14 @@ public class TSLookupClient implements PSMessageEventHandler {
     public String[] findServices(String [] lookupServices, boolean tryAll, String request) throws PSException{
         String[] accessPoints = null;
         HashMap<String, Boolean> apMap = new HashMap<String, Boolean>();
-       
+
         String errLog = "";
-        for (String ls : lookupServices) { 
+        for (String ls : lookupServices) {
             try{
                 PSLookupClient lsClient = new PSLookupClient(ls);
                 Element response = lsClient.query(request);
                 Element metaData = response.getChild("metadata", psNS.NMWG);
-                
+
                 if(metaData == null){
                     throw new PSException("No metadata element in discovery response");
                 }
@@ -293,7 +326,7 @@ public class TSLookupClient implements PSMessageEventHandler {
                     throw new PSException("Hostname not found because lookup " +
                                           "returned an unrecognized status");
                 }
-                
+
                 Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
                 if(datum == null){
                     throw new PSException("No service datum returned from discovery request");
@@ -311,50 +344,65 @@ public class TSLookupClient implements PSMessageEventHandler {
                 errLog += ls + ": " + e.getMessage() + "\n\n";
             }
         }
-        
+
         if(apMap.isEmpty()){
             throw new PSException("No services found after trying lookup services:\n" + errLog);
         }
 
         accessPoints = new String[apMap.size()];
         apMap.keySet().toArray(accessPoints);
-        
+
         return accessPoints;
     }
 
     /**
      * @return the list of global lookup services
      */
-    public String[] getGLSList() {
+    public synchronized String[] getGLSList() {
         return gLSList;
     }
 
     /**
      * @param list the list of global lookup services to set
      */
-    public void setGLSList(String[] list) {
+    public synchronized void setGLSList(String[] list) {
         gLSList = list;
     }
 
     /**
      * @return the list of home lookup services
      */
-    public String[] getHLSList() {
+    public synchronized String[] getHLSList() {
         return hLSList;
     }
 
     /**
      * @param list the list of home lookup services to set
      */
-    public void setHLSList(String[] list) {
+    public synchronized void setHLSList(String[] list) {
         hLSList = list;
     }
+
+    /**
+     * @return the list of home lookup services
+     */
+    public synchronized String[] getTSList() {
+        return TSList;
+    }
+
+    /**
+     * @param list the list of home lookup services to set
+     */
+    public synchronized void setTSList(String[] list) {
+        TSList = list;
+    }
+
 
     /**
      * @return if true then every global lookup services will be used to
      *  find the home LS, otherwise just the first entry will be used
      */
-    public boolean isTryAllGlobal() {
+    public synchronized boolean isTryAllGlobal() {
         return tryAllGlobal;
     }
 
@@ -362,27 +410,13 @@ public class TSLookupClient implements PSMessageEventHandler {
      * @param tryAllGlobal if true then every global lookup services will be used to
      *  find the home LS, otherwise just the first entry will be used
      */
-    public void setTryAllGlobal(boolean tryAllGlobal) {
+    public synchronized void setTryAllGlobal(boolean tryAllGlobal) {
         this.tryAllGlobal = tryAllGlobal;
-    }
-    
-    /**
-     * @return true if uses global LS to discover hLS for queries
-     */
-    public boolean usesGlobalLS() {
-        return useGlobalLS;
     }
 
     /**
-     * @param useGlobalLS true if uses global LS to discover hLS for queries
-     */
-    public void setUseGlobalLS(boolean useGlobalLS) {
-        this.useGlobalLS = useGlobalLS;
-    }
-    
-    /**
      * Generates a new metadata element
-     * 
+     *
      * @param ns the namespace of the subject. if null then no subject
      * @return the generated metadata
      */
@@ -396,10 +430,10 @@ public class TSLookupClient implements PSMessageEventHandler {
         }
         return metaDataElem;
     }
-    
+
     /**
      * Generates a new query metadata element
-     * 
+     *
      * @param query the XQuery to send
      * @return the generated metadata
      */
@@ -418,10 +452,10 @@ public class TSLookupClient implements PSMessageEventHandler {
         metaDataElem.addContent(paramsElem);
         return metaDataElem;
     }
-    
+
     /**
      * Converts a metadata element to a String
-     * 
+     *
      * @param elem the metadata element to convert to a string
      * @param addData if true then add empty data element
      * @return the metadata and data as a string
@@ -430,7 +464,7 @@ public class TSLookupClient implements PSMessageEventHandler {
         XMLOutputter xmlOut = new XMLOutputter();
         StringWriter sw = new StringWriter();
         String result = "";
-        
+
         try {
             xmlOut.output(metaData, sw);
             Element dataElem = new Element("data", this.psNS.NMWG);
@@ -442,35 +476,10 @@ public class TSLookupClient implements PSMessageEventHandler {
             xmlOut.output(dataElem, sw);
             result = sw.toString();
         } catch (IOException e) {}
-        
+
         return result;
     }
 
-    public void handleMetadataDataPair(Element metadata, Element data, HashMap <String, Element> metadataMap, String messageType, Object arg) {
-        if (messageType.equals("QueryResponse")) {
-            Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
-            if (eventType_elm == null) {
-                this.log.error("The metadata/data pair doesn't have an event type");
-                return;
-            }
-
-            if (!eventType_elm.getValue().equals("http://ggf.org/ns/nmwg/topology/20070809")) {
-                this.log.error("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
-                return;
-            }
-
-            Element topo = data.getChild("topology", this.psNS.TOPO);
-
-            if (topo == null) {
-                this.log.error("No topology located in data");
-                return;
-            }
-
-            this.retrievedTopology = topo;
-        } else {
-            this.log.error("Received a metadata/data pair from an unknown message type: "+messageType);
-        }
-    }
 
     private List<Element> getElementChildren(Element e, String name) {
         ArrayList<Element> filteredChildren = new ArrayList<Element>();
@@ -484,5 +493,89 @@ public class TSLookupClient implements PSMessageEventHandler {
         }
 
         return filteredChildren;
+    }
+
+    private class TSClientCallback implements PSMessageEventHandler {
+        private Logger log;
+        private Element retrievedTopology;
+    	private PSNamespaces psNS;
+
+        public TSClientCallback() {
+            this.log = Logger.getLogger(this.getClass());
+            this.psNS = new PSNamespaces();
+        }
+
+        public Element getRetrievedTopology() {
+            return this.retrievedTopology;
+        }
+
+        public void handleMetadataDataPair(Element metadata, Element data, HashMap <String, Element> metadataMap, String messageType, Object arg) {
+            if (messageType.equals("QueryResponse")) {
+                Element eventType_elm = metadata.getChild("eventType", this.psNS.NMWG);
+                if (eventType_elm == null) {
+                    this.log.error("The metadata/data pair doesn't have an event type");
+                    return;
+                }
+
+                if (!eventType_elm.getValue().equals("http://ggf.org/ns/nmwg/topology/20070809")) {
+                    this.log.error("The metadata/data pair has an unknown event type: "+eventType_elm.getValue());
+                    return;
+                }
+
+                Element topo = data.getChild("topology", this.psNS.TOPO);
+
+                if (topo == null) {
+                    this.log.error("No topology located in data");
+                    return;
+                }
+
+                this.retrievedTopology = topo;
+            } else {
+                this.log.error("Received a metadata/data pair from an unknown message type: "+messageType);
+            }
+        }
+    }
+
+    private synchronized TSCacheElement getCache(String id, String namespace) {
+        for(TSCacheElement elm : this.cache) {
+            if (elm.id.equals(id) == false) {
+                continue;
+            }
+
+            if (namespace != null && elm.namespace.equals(namespace) == false) {
+                continue;
+            }
+
+            return elm;
+        }
+
+        return null;
+    }
+
+    private synchronized void addCache(String id, String namespace, long retrieveTime, String TS, Element topology) {
+        if (namespace == null) {
+            // XXX: error
+            return;
+        }
+
+        TSCacheElement cacheElement = getCache(id, namespace);
+        if (cacheElement == null) {
+            cacheElement = new TSCacheElement(); 
+            this.cache.add(cacheElement);
+        }
+
+        cacheElement.id = id;
+        cacheElement.namespace = namespace;
+        cacheElement.retrieveTime = retrieveTime;
+        cacheElement.topology = topology;
+        cacheElement.TS = TS;
+    }
+
+    private class TSCacheElement {
+        public String namespace;
+        public String id;
+        public Element topology;
+        public String TS;
+        public long retrieveTime;
     }
 }
