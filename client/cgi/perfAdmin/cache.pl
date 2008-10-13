@@ -53,6 +53,8 @@ my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 my $base   = "/home/zurawski/perfSONAR-PS/client/cgi/perfAdmin/cache";
 
 my %hls = ();
+my %matrix1 = ();
+my %matrix2 = ();
 my $gls = perfSONAR_PS::Client::gLS->new( { url => $hints } );
 
 croak "roots not found" unless ( $#{ $gls->{ROOTS} } > -1 );
@@ -83,19 +85,22 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                     else {
-                        $hls{$value} = 1
+                        $hls{$value} = 1;
+                        $matrix1{$root}{$value} = 1;
                     }
                 }
                 elsif ( &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
                     # do noting (for now)
                     $hls{$value} = 1;
+                    $matrix1{$root}{$value} = 1;
                 }
                 else {
                     if ( $unt_test =~ m/^localhost/ ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                     else {
-                        $hls{$value} = 1
+                        $hls{$value} = 1;
+                        $matrix1{$root}{$value} = 1;
                     }
                 }
             }
@@ -181,6 +186,7 @@ foreach my $h ( keys %hls ) {
 # we should be tracking things here, eliminate duplicates
                         unless ( exists $dups{$value}{$contactPoint} and $dups{$value}{$contactPoint} ) {
                             $dups{$value}{$contactPoint} = 1;
+                            $matrix2{$h}{$contactPoint} = 1;
 
                             if ( exists $list{$value} ) {
                                 push @{ $list{$value} }, { CONTACT => $contactPoint, NAME => $serviceName, TYPE => $serviceType, DESC => $serviceDescription };
@@ -204,6 +210,40 @@ foreach my $h ( keys %hls ) {
         }
     }
 }
+
+open( FILE, ">" . $base . "/list.glsmap" ) or croak "can't open glsmap list";
+foreach my $g ( keys %matrix1 ) {
+    print FILE $g;
+    my $counter = 0;
+    foreach my $h ( keys %{ $matrix1{ $g } } ) {
+        if ( $counter ) {
+            print FILE "," , $h;
+        }
+        else {
+            print FILE "|" , $h;
+        }
+        $counter++;
+    }
+    print FILE "\n";
+}
+close(FILE);
+
+open( FILE2, ">" . $base . "/list.hlsmap" ) or croak "can't open hls list";
+foreach my $h ( keys %matrix2 ) {
+    print FILE2 $h;
+    my $counter = 0;
+    foreach my $s ( keys %{ $matrix2{ $h } } ) {
+        if ( $counter ) {
+            print FILE2 "," , $s;
+        }
+        else {
+            print FILE2 "|" , $s;
+        }
+        $counter++;
+    }
+    print FILE2 "\n";
+}
+close(FILE2);
 
 # should we do some verification/validation here?
 open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
