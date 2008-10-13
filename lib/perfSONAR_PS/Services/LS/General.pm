@@ -109,7 +109,7 @@ sub extractQuery {
     my $parameters = validateParams( @args, { node => 1 } );
 
     my $query = q{};
-    if ( $parameters->{node}->hasChildNodes() ) {
+    if ( exists $parameters->{node} and $parameters->{node} and $parameters->{node}->hasChildNodes() ) {
         foreach my $c ( $parameters->{node}->childNodes ) {
             if ( $c->nodeType == 3 ) {
                 $query = $query . $c->textContent;
