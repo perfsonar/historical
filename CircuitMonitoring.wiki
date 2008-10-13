@@ -23,15 +23,15 @@ An example circuit descriptor:
        <bidirectionalPath>
            <path direction="upstream">
                <hop id="esnet">
-                   <pathIdRef>urn:ogf:network:domain=es.net:path=Circuit_Name</pathIdRef>
+                   <linkIdRef>urn:ogf:network:domain=es.net:path=Circuit_Name_segment</linkIdRef>
                    <nextHop>internet2</nextHop>
                </hop>
                <hop id="internet2">
-                   <pathIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Circuit_Name</pathIdRef>
+                   <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Circuit_Name_segment</linkIdRef>
                    <nextHop>geant</nextHop>
                </hop>
                <hop id="geant">
-                   <pathIdRef>urn:ogf:network:domain=geant.eu:path=Circuit_Name</pathIdRef>
+                   <linkIdRef>urn:ogf:network:domain=geant.eu:path=Circuit_Name_segment</linkIdRef>
                </hop>
             </path>
 
@@ -56,7 +56,7 @@ Each "hop" element in the descriptor contains a [URN|URNs] identifier for each d
 <!-- Get the status of ESnet's path segment -->
 <metadata>
    <subject>
-       <path id="urn:ogf:network:domain=es.net:path=Circuit_Name" />
+       <link id="urn:ogf:network:domain=es.net:path=Circuit_Name" />
    </subject>
 
    <eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</eventType>
@@ -86,7 +86,7 @@ E2EMon describes each segment by its domain name. A compatible client would need
 
 {{{
    <hop id="0" name="INTERNET2>
-      <pathIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Some_Path</pathIdRef>
+      <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Some_Circuit_segment</linkIdRef>
    </hop>
 }}}
 
@@ -125,7 +125,7 @@ Original circuit:
     <path direction="upstream">
         ...
        <hop id="internet2">
-          <pathIdRef>urn:ogf:network:domain=internet2.edu:path=oscars_idc1234"</pathIdRef>
+          <linkIdRef>urn:ogf:network:domain=internet2.edu:path=oscars_idc1234"</linkIdRef>
        </hop>
         ...
     </path>
@@ -137,15 +137,19 @@ Original circuit:
         ...
         <hop id="internet2_1">
             <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node1:port=eth0:link=link1</linkIdRef>
+            <nextHop>internet2_2</nextHop>
         </hop>
         <hop id="internet2_2">
             <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node2:port=eth1:link=link1</linkIdRef>
+            <nextHop>internet2_3</nextHop>
         </hop>
         <hop id="internet2_3">
             <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node3:port=eth1:link=link1</linkIdRef>
+            <nextHop>internet2_4</nextHop>
         </hop>
         <hop id="internet2_4">
             <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node4:port=eth5:link=link1</linkIdRef>
+
         </hop>
         ...
     </path>
