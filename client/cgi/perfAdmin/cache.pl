@@ -71,36 +71,41 @@ for my $root ( @{ $gls->{ROOTS} } ) {
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
         print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
         my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-        my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-        foreach my $a ( $ap->get_nodelist ) {
-            my $value = extract( $a, 0 );
-            
-            if ( $value ) {
-                print "\t\thLS:\t" , $value , "\n" if $DEBUGFLAG;
-                my $test = $value;
+        my $service = find( $doc->getDocumentElement, ".//*[local-name()='service']", 0 );
+
+        foreach my $s ( $service->get_nodelist ) {
+
+            my $accessPoint = extract( find( $s, ".//*[local-name()='accessPoint']", 1 ), 0 );
+            my $serviceName = extract( find( $s, ".//*[local-name()='serviceName']", 1 ), 0 );
+            my $serviceType = extract( find( $s, ".//*[local-name()='serviceType']", 1 ), 0 );
+            my $serviceDescription = extract( find( $s, ".//*[local-name()='serviceDescription']", 1 ), 0 );
+
+            if ( $accessPoint ) {
+                print "\t\thLS:\t" , $accessPoint , "\n" if $DEBUGFLAG;
+                my $test = $accessPoint;
                 $test =~ s/^http:\/\///;
-                my ($unt_test) = $test =~ /^(.+):/;
+                my ( $unt_test ) = $test =~ /^(.+):/;
                 if ( is_ipv4( $unt_test ) ) {
                     if ( Net::CIDR::cidrlookup( $unt_test, @private_list ) ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                     else {
-                        $hls{$value} = 1;
-                        $matrix1{$root}{$value} = 1;
+                        $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                        $matrix1{$root}{$accessPoint} = 1;
                     }
                 }
                 elsif ( &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
                     # do noting (for now)
-                    $hls{$value} = 1;
-                    $matrix1{$root}{$value} = 1;
+                    $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                    $matrix1{$root}{$accessPoint} = 1;
                 }
                 else {
                     if ( $unt_test =~ m/^localhost/ ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                     else {
-                        $hls{$value} = 1;
-                        $matrix1{$root}{$value} = 1;
+                        $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                        $matrix1{$root}{$accessPoint} = 1;
                     }
                 }
             }
@@ -248,7 +253,7 @@ close(FILE2);
 # should we do some verification/validation here?
 open( HLS, ">" . $base . "/list.hls" ) or croak "can't open hls list";
 foreach my $h ( keys %hls ) {
-    print HLS $h, "\n";
+    print HLS $hls{$h}, "\n";
 }
 close(HLS);
 

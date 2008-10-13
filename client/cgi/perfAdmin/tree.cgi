@@ -5,296 +5,104 @@ use warnings;
 
 =head1 NAME
 
-tree.cgi - Contact a single gLS instances and dump the contents.  
+tree.cgi - Contact each know gLS instances and dump the contents.  
 
 =head1 DESCRIPTION
 
-For the closest gLS instance, dump it's known knowledge of hLS isntance, 
-and then dump each hLS's knowledge of registered services.
+For each gLS instance, dump it's known knowledge of hLS isntance, and then dump
+each hLS's knowledge of registered services.
 
 =cut
-
-use XML::LibXML;
+use HTML::Template;
 use CGI;
-use CGI::Ajax;
+use CGI::Carp;
 
 use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
 
-use perfSONAR_PS::Client::MA;
-use perfSONAR_PS::Common qw( extract find );
-use perfSONAR_PS::Client::gLS;
+my $base   = "/home/zurawski/perfSONAR-PS/client/cgi/perfAdmin/cache";
+my $template = HTML::Template->new( filename => "etc/tree.tmpl" );
+my $CGI = CGI->new();
 
-my $url = "http://www.perfsonar.net/gls.root.hints";
+my $lastMod = "at an unknown time...";
 
-my @hls    = ();
-my $gls    = perfSONAR_PS::Client::gLS->new( { url => $url } );
-my $parser = XML::LibXML->new();
+my $gLSFile = $base . "/list.glsmap";
+my $hLSMapFile = $base . "/list.hlsmap";
+my $hLSFile = $base . "/list.hls";
+my @glslist = ();
+my @hlslist = ();
+my @list = ();
+if ( -f $gLSFile and $hLSMapFile  and $hLSFile ) {
+    my ($mtime) = (stat ( $gLSFile ) )[9];
+    $lastMod = "on " . gmtime( $mtime ) . " UTC";
 
-my @ipaddresses = ();
-my @eventTypes  = ();
-my @domains     = ();
-my @keywords    = ();
-my %service     = ();
+    open( READ, "<" . $gLSFile ) or croak "Can't open gLS Map File";
+    my @glscontent = <READ>;
+    close( READ );
 
-my $cgi = new CGI;
-my $pjx = new CGI::Ajax( 'draw_func' => \&stub, );
+    open( READ2, "<" . $hLSMapFile ) or croak "Can't open hLS Map File";
+    my @hlscontent = <READ2>;
+    close( READ2 );
 
-print $pjx->build_html( $cgi, \&display );
-
-sub stub {
-
-    #  my() = @_;
+    open( READ3, "<" . $hLSFile ) or croak "Can't open hLS File";
+    my @hlscontent2 = <READ3>;
+    close( READ3 );
     
-    # reserved for future use
-    
-    my $html = q{};
-    return $html;
-}
-
-sub display {
-
-    my $html = $cgi->start_html( -title => 'perfAdmin - Information Service Listing' );
-
-    unless ( $#{ $gls->{ROOTS} } > -1 ) {
-        $html .= "Internal Error: Try again later.";
-        $html .= $cgi->br;
-        $html .= $cgi->end_html;
-        return $html;
-    }
-        
-    my %hls = ();
-    my %matrix = ();
     my $counter = 1;
-    my $root = $gls->{ROOTS}->[0];
-    my $result = $gls->getLSQueryRaw(
-        {
-            ls => $root,
-            xquery =>
-                "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
+    foreach my $c ( @glscontent ) {
+        $c =~ s/\n//g;
+        my @gls = split(/\|/, $c);
+        my @hls = split(/,/, $gls[1]);
+        my @hls_list = ();
+        foreach my $h ( @hls ) {
+            my @service_list  = ();
+            foreach my $c2 ( @hlscontent ) {
+                $c2 =~ s/\n//g;
+                my @hls2 = split(/\|/, $c2);
+                next unless $h eq $hls2[0];
+                my @services = split(/,/, $hls2[1]);
+                foreach my $s ( @services ) {          
+                    next unless $s =~ m/^http:\/\//;      
+                    push @service_list, { NAME => $s };
+                }
+                last;
+            }
+            push @hls_list, { NAME => $h, SERVICES => \@service_list };
         }
-    );
-    if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
-        my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
-        my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-        foreach my $a ( $ap->get_nodelist ) {
-            my $value = extract( $a, 0 );
-            if ( $value ) {
-                $hls{$value} = 1;
-            }
-        }
-    }
-           
-    $html .= $cgi->start_table( { border => "0", cellpadding => "1", align => "center", width => "85%" } );
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
-    $html .= "<font size=\"+3\">List of available hLS Services &amp; Their Registered Services</font>";
-    $html .= $cgi->end_th;
-    $html .= $cgi->end_Tr;
-    $html .= $cgi->start_Tr;
-    $html .= $cgi->start_th( { colspan => "4", align => "center", width => "100\%" } );
-    $html .= "<br><br><br>";
-    $html .= $cgi->end_th;
-    $html .= $cgi->end_Tr;
-
-    foreach my $ls ( keys %hls ) {
-        $html .= $cgi->start_Tr;
-        $html .= $cgi->start_th( { colspan => "4", align => "left", width => "100\%" } );
-        $html .= $ls;
-        $html .= $cgi->end_th;
-        $html .= $cgi->end_Tr;
-
-        my $result2 = $gls->getLSQueryRaw(
-            {
-                ls => $ls,
-                xquery =>
-                    "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./*[local-name()='subject']/*[local-name()='service']]"
-            }
-        );
-
-        if ( exists $result2->{eventType} and $result2->{eventType} eq "error.ls.querytype_not_suported" ) {
-            $result2 = $gls->getLSQueryRaw(
-                {
-                    eventType => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0",
-                    ls        => $ls,
-                    xquery    => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./*[local-name()='subject']/*[local-name()='service']]"
-                }
-            );
-            if ( exists $result2->{eventType} and not( $result2->{eventType} =~ m/^error/ ) ) {
-                my $doc2 = $parser->parse_string( $result2->{response} ) if exists $result2->{response};
-                my $ap2 = find( $doc2->getDocumentElement, ".//psservice:accessPoint", 0 );
-                foreach my $a2 ( $ap2->get_nodelist ) {
-                    my $value2 = extract( $a2, 0 );
-                    if ($value2) {
-                        $html .= $cgi->start_Tr;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                        $html .= $value2;
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->end_Tr;
-                    }
-                }
-                my $ad = find( $doc2->getDocumentElement, ".//nmtb:address[\@type=\"uri\"]", 0 );
-                foreach my $a2 ( $ad->get_nodelist ) {
-                    my $value2 = extract( $a2, 0 );
-                    ( my $temp = $value2 ) =~ s/^(tcp|udp):\/\///;
-                    next if not( $temp =~ m/^\[/ ) and $temp =~ m/^10\./;
-                    next if not( $temp =~ m/^\[/ ) and $temp =~ m/^192\.168\./;
-                    if ($value2) {
-                        $html .= $cgi->start_Tr;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                        $html .= $value2;
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->end_Tr;
-                    }
-                }
-            }
-            elsif ( not exists $result2->{eventType} and exists $result2->{response} and $result2->{response} ) {
-                my $doc2 = $parser->parse_string( $result2->{response} ) if exists $result2->{response};
-                my $ap2 = find( $doc2->getDocumentElement, ".//psservice:accessPoint", 0 );
-                foreach my $a2 ( $ap2->get_nodelist ) {
-                    my $value2 = extract( $a2, 0 );
-                    if ($value2) {
-                        $html .= $cgi->start_Tr;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                        $html .= $value2;
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->end_Tr;
-                    }
-                }
-                my $ad = find( $doc2->getDocumentElement, ".//nmtb:address[\@type=\"uri\"]", 0 );
-                foreach my $a2 ( $ad->get_nodelist ) {
-                    my $value2 = extract( $a2, 0 );
-                    ( my $temp = $value2 ) =~ s/^(tcp|udp):\/\///;
-                    next if not( $temp =~ m/^\[/ ) and $temp =~ m/^10\./;
-                    next if not( $temp =~ m/^\[/ ) and $temp =~ m/^192\.168\./;
-                    if ($value2) {
-                        $html .= $cgi->start_Tr;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                        $html .= "<br>";
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                        $html .= $value2;
-                        $html .= $cgi->end_td;
-                        $html .= $cgi->end_Tr;
-                    }
-                }
-            }
-            else {
-                $html .= $cgi->start_Tr;
-                $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                $html .= "<br>";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                $html .= "<br>";
-                $html .= $cgi->end_td;
-                $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                $html .= "<font size=\"+1\" color=\"red\">ERROR:" . $result2->{eventType} . "</font>";
-                $html .= $cgi->end_td;
-                $html .= $cgi->end_Tr;
-            }
-        }
-        elsif ( exists $result2->{eventType} and not( $result2->{eventType} =~ m/^error/ ) ) {
-            my $doc2 = $parser->parse_string( $result2->{response} ) if exists $result2->{response};
-            my $ap2 = find( $doc2->getDocumentElement, ".//psservice:accessPoint", 0 );
-            foreach my $a2 ( $ap2->get_nodelist ) {
-                my $value2 = extract( $a2, 0 );
-                if ($value2) {
-                    $html .= $cgi->start_Tr;
-                    $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                    $html .= "<br>";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                    $html .= "<br>";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                    $html .= $value2;
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->end_Tr;
-                }
-            }
-            my $ad = find( $doc2->getDocumentElement, ".//nmtb:address[\@type=\"uri\"]", 0 );
-            foreach my $a2 ( $ad->get_nodelist ) {
-                my $value2 = extract( $a2, 0 );
-
-                ( my $temp = $value2 ) =~ s/^(tcp|udp):\/\///;
-                next if not( $temp =~ m/^\[/ ) and $temp =~ m/^10\./;
-                next if not( $temp =~ m/^\[/ ) and $temp =~ m/^192\.168\./;
-
-                if ($value2) {
-                    $html .= $cgi->start_Tr;
-                    $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                    $html .= "<br>";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-                    $html .= "<br>";
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                    $html .= $value2;
-                    $html .= $cgi->end_td;
-                    $html .= $cgi->end_Tr;
-                }
-            }
-        }
-        else {
-            $html .= $cgi->start_Tr;
-            $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-            $html .= "<br>";
-            $html .= $cgi->end_td;
-            $html .= $cgi->start_td( { colspan => "1", align => "left", width => "10\%" } );
-            $html .= "<br>";
-            $html .= $cgi->end_td;
-            if ( ( exists $result2->{eventType} and $result2->{eventType} ) or ( exists $result2->{response} and $result2->{response} ) ) {
-                $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                $html .= "<font size=\"+1\" color=\"red\">" . $result2->{eventType} . " - " . $result2->{response} . "</font>";
-                $html .= $cgi->end_td;
-            }
-            else {
-                $html .= $cgi->start_td( { colspan => "3", align => "left", width => "80\%" } );
-                $html .= "<font size=\"+1\" color=\"red\">Service cannot be reached.</font>";
-                $html .= $cgi->end_td;
-            }
-            $html .= $cgi->end_Tr;
-        }
-        
+        push @glslist, { NAME => $gls[0], COUNT => $counter };
+        push @list, { NAME => $gls[0], HLS => \@hls_list };
+        $counter++;
     }
 
+    $counter = 1;
+    foreach my $c ( @hlscontent2 ) {
+        $c =~ s/\n//g;
+        my @fields = split(/\|/, $c);
+        push @hlslist, { NAME => $fields[0], COUNT => $counter, DESC => $fields[3] };
+        $counter++;
+    }
 
-    $html .= $cgi->end_table;
-
-    $html .= $cgi->br;
-
-    $html .= $cgi->end_html;
-    return $html;
+}
+else {
+    # do something...
 }
 
+print $CGI->header();
+
+$template->param(
+    MOD => $lastMod,
+    GLS => \@list,
+    GLSINSTANCES => \@glslist,
+    HLSINSTANCES => \@hlslist
+);
+
+print $template->output;
 
 __END__
 
 =head1 SEE ALSO
 
-L<XML::LibXML>, L<CGI>, L<CGI::Ajax>, L<perfSONAR_PS::Client::MA>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Client::gLS>
+L<C>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 
@@ -329,4 +137,3 @@ Copyright (c) 2007-2008, Internet2
 All rights reserved.
 
 =cut
-

@@ -97,7 +97,6 @@ my %daemonMap = (
     }
 );
 
-
 my @daemonList = ();
 my @serviceList = ();
 my @anchors = ();
