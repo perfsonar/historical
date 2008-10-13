@@ -23,15 +23,15 @@ An example circuit descriptor:
        <bidirectionalPath>
            <path direction="upstream">
                <hop id="esnet">
-                   <linkIdRef>urn:ogf:network:domain=es.net:path=Circuit_Name_segment</linkIdRef>
+                   <linkIdRef>urn:ogf:network:domain=es.net:link=Circuit_Name_segment</linkIdRef>
                    <nextHop>internet2</nextHop>
                </hop>
                <hop id="internet2">
-                   <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Circuit_Name_segment</linkIdRef>
+                   <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:link=Circuit_Name_segment</linkIdRef>
                    <nextHop>geant</nextHop>
                </hop>
                <hop id="geant">
-                   <linkIdRef>urn:ogf:network:domain=geant.eu:path=Circuit_Name_segment</linkIdRef>
+                   <linkIdRef>urn:ogf:network:domain=geant.eu:link=Circuit_Name_segment</linkIdRef>
                </hop>
             </path>
 
