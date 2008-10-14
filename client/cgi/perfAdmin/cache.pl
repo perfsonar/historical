@@ -289,6 +289,9 @@ foreach my $et ( keys %list ) {
     elsif ( $et eq "http://ggf.org/ns/nmwg/tools/ping/1.0" ) {
         $file = "list.ping";
     }
+    elsif ( $et eq "http://ggf.org/ns/nmwg/tools/phoebus/1.0" ) {
+        $file = "list.phoebus";
+    }
     next unless $file;
     open( OUT, ">" . $base . "/" . $file ) or croak "can't open $base/$file.";
     foreach my $host ( @{ $list{$et} } ) {

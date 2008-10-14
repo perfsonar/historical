@@ -94,6 +94,12 @@ my %daemonMap = (
             "http://ggf.org/ns/nmwg/tools/bwctl/1.0"
         ],
         "TYPE" => "BWCTL"
+    },
+    "list.phoebus" => {
+        "EVENTTYPE" => [
+            "http://ggf.org/ns/nmwg/tools/phoebus/1.0"
+        ],
+        "TYPE" => "PHOEBUS"
     }
 );
 
