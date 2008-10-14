@@ -27,9 +27,6 @@ public class URNParser {
 
         topoIdent = topoIdent.trim();
 
-//    	System.out.println("looking at: ["+topoIdent+"]");
-
-
         Hashtable<String, String> regexps = new Hashtable<String, String>();
         regexps.put("domainFull", "^urn:ogf:network:domain=([^:]+)$");
         regexps.put("domain", "^urn:ogf:network:([^:=]+)$");
@@ -48,7 +45,7 @@ public class URNParser {
         String portValue = "";
         String linkValue = "";
 
-        String matched = "";
+        String matched = null;
 
         Matcher matcher = null;
 
@@ -95,7 +92,6 @@ public class URNParser {
         if(matched == null){
             try {
                 InetAddress[] addrs = InetAddress.getAllByName(topoIdent);
-                 System.out.print("[Success]:");
                  for (int i =0; i < addrs.length;i++){
                      addressType = addrs[i].getClass().getName();
                  }
@@ -174,7 +170,7 @@ public class URNParser {
             result.put("portFQID", portFqti);
             result.put("nodeFQID", nodeFqti);
             result.put("domainFQID", domainFqti);
-        }
+	}
          return result;
     }
 }

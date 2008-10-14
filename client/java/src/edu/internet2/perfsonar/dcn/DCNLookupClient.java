@@ -35,6 +35,7 @@ public class DCNLookupClient{
     private PSNamespaces psNS;
     private Map<String, DCNHostCacheElement> hostCache;
     private Map<String, DCNDomainCacheElement> domainCache;
+    private boolean disableCaching;
 
     private long HOST_CACHE_LENGTH = 86400; // One day
     private long DOMAIN_CACHE_LENGTH = 86400; // One day
@@ -103,6 +104,8 @@ public class DCNLookupClient{
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
         this.hostCache = new HashMap<String, DCNHostCacheElement>();
+        this.domainCache = new HashMap<String, DCNDomainCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -127,6 +130,8 @@ public class DCNLookupClient{
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
         this.hostCache = new HashMap<String, DCNHostCacheElement>();
+        this.domainCache = new HashMap<String, DCNDomainCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -143,6 +148,8 @@ public class DCNLookupClient{
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
         this.hostCache = new HashMap<String, DCNHostCacheElement>();
+        this.domainCache = new HashMap<String, DCNDomainCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -164,6 +171,8 @@ public class DCNLookupClient{
         this.retryOnKeyNotFound = false;
         this.psNS = new PSNamespaces();
         this.hostCache = new HashMap<String, DCNHostCacheElement>();
+        this.domainCache = new HashMap<String, DCNDomainCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -181,15 +190,6 @@ public class DCNLookupClient{
             if (currentTime <= (hostCacheElement.retrieveTime + this.HOST_CACHE_LENGTH * 1000)) {
                 return hostCacheElement.urn;
             }
-
-            if (hostCacheElement.hLS != null) {
-                String urn = this.lookupHostQueryHLS(hostCacheElement.hLS, name);
-                if (urn != null) {
-                    this.addHostCache(name, currentTime, hostCacheElement.hLS, urn);
-
-                    return urn;
-                }
-            }
         }
 
         String domain = name.replaceFirst(".+?\\.", "");
@@ -197,10 +197,8 @@ public class DCNLookupClient{
         String[] hLSMatches = null;
 
         DCNDomainCacheElement domainCacheElement = this.getDomainCache(domain);
-        if (domainCacheElement != null) {
-            if (currentTime <= (domainCacheElement.retrieveTime + this.DOMAIN_CACHE_LENGTH * 1000)) {
-                hLSMatches = domainCacheElement.hLSs;
-            }
+        if (domainCacheElement != null && currentTime <= (domainCacheElement.retrieveTime + this.DOMAIN_CACHE_LENGTH * 1000)) {
+            hLSMatches = domainCacheElement.hLSs;
         } else {
             if (this.usesGlobalLS() == false) {
                 hLSMatches = this.getHLSList();
@@ -228,11 +226,11 @@ public class DCNLookupClient{
             }
         }
 
-        return null;
+        throw new PSException("Couldn't find a mapping for "+domain);
     }
 
     private String lookupHostQueryHLS(String hLS, String name) throws PSException{
-        this.log.info("hLS: " + hLS);
+        this.log.debug("hLS: " + hLS);
 
         String xquery = HOST_XQUERY;
         xquery = xquery.replaceAll("<!--hostname-->", name);
@@ -286,7 +284,7 @@ public class DCNLookupClient{
         Element reqElem = this.createQueryMetaData(xquery);
         String request = this.requestString(reqElem, null);
         for(String hLS : hLSMatches){
-            this.log.info("hLS: " + hLS);
+            this.log.debug("hLS: " + hLS);
             PSLookupClient lsClient = new PSLookupClient(hLS);
             Element response = lsClient.query(request);
             Element datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
@@ -420,7 +418,7 @@ public class DCNLookupClient{
         Element reqElem = this.createQueryMetaData(xquery);
         String request = this.requestString(reqElem, null);
         for(String hLS : hLSMatches){
-            this.log.info("hLS: " + hLS);
+            this.log.debug("hLS: " + hLS);
             PSLookupClient lsClient = new PSLookupClient(hLS);
             Element response = lsClient.query(request);
             datum = lsClient.parseDatum(response, psNS.PS_SERVICE);
@@ -843,11 +841,21 @@ public class DCNLookupClient{
         this.psNS = psNS;
     }
 
+    public void setDisableCaching(boolean disabled) {
+        this.disableCaching = disabled;
+    }
+
     private synchronized DCNHostCacheElement getHostCache(String id) {
+        if (this.disableCaching)
+            return null;
+
         return this.hostCache.get(id);
     }
 
     private synchronized void addHostCache(String name, long retrieveTime, String hLS, String urn) {
+        if (this.disableCaching)
+            return;
+
         DCNHostCacheElement cacheElement = cacheElement = new DCNHostCacheElement(); 
 
         cacheElement.name = name;
@@ -866,10 +874,16 @@ public class DCNLookupClient{
     }
 
     private synchronized DCNDomainCacheElement getDomainCache(String id) {
+        if (this.disableCaching)
+            return null;
+
         return this.domainCache.get(id);
     }
 
     private synchronized void addDomainCache(String name, long retrieveTime, String [] hLSs) {
+        if (this.disableCaching)
+            return;
+
         DCNDomainCacheElement cacheElement = new DCNDomainCacheElement(); 
 
         cacheElement.name = name;

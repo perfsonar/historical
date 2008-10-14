@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Iterator;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.Logger;
@@ -40,9 +41,12 @@ public class TSLookupClient {
     protected boolean tryAllGlobal;
     protected PSNamespaces psNS;
     protected List <TSCacheElement> cache;
+    protected boolean disableCaching;
 
-    protected long CACHE_LENGTH = 3600; // One hour
-    protected long FAILURE_CACHE_LENGTH = 300; // Five minutes
+    protected long TOPOLOGY_CACHE_LENGTH = 3600; // One hour
+    protected long FAILURE_TOPOLOGY_CACHE_LENGTH = 300; // Five minutes
+    protected long DOMAIN_CACHE_LENGTH = 86400; // One hour
+    protected long FAILURE_DOMAIN_CACHE_LENGTH = 300; // Five minutes
 
     protected boolean cacheTopologes = true;
     protected boolean cacheFailures = true;
@@ -102,6 +106,7 @@ public class TSLookupClient {
         this.tryAllGlobal = false;
         this.psNS = new PSNamespaces();
         this.cache = new ArrayList<TSCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -122,6 +127,7 @@ public class TSLookupClient {
         this.tryAllGlobal = false;
         this.psNS = new PSNamespaces();
         this.cache = new ArrayList<TSCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -143,6 +149,7 @@ public class TSLookupClient {
         this.tryAllGlobal = false;
         this.psNS = new PSNamespaces();
         this.cache = new ArrayList<TSCacheElement>();
+        this.disableCaching = false;
     }
 
     /**
@@ -159,10 +166,6 @@ public class TSLookupClient {
     public Element getDomain(String domainId, String namespace) throws PSException{
         Hashtable<String, String> urnInfo = URNParser.parseTopoIdent(domainId);
 
-        if (urnInfo.get("type").equals("empty") == true) {
-            return null;
-        }
-
         if (urnInfo.get("type").equals("domain") == false) {
             return null;
         }
@@ -173,20 +176,22 @@ public class TSLookupClient {
 
         TSCacheElement cacheElement = this.getCache(domainId, namespace);
         if (cacheElement != null) {
+            this.log.debug("Got cached instance of "+domainId);
+
             if (cacheElement.topology == null) {
-                if (currentTime < (cacheElement.retrieveTime + this.FAILURE_CACHE_LENGTH * 1000)) {
+                if (currentTime < (cacheElement.retrieveTime + this.FAILURE_TOPOLOGY_CACHE_LENGTH * 1000)) {
                     return cacheElement.topology;
                 }
             } else {
-                if (currentTime < (cacheElement.retrieveTime + this.CACHE_LENGTH * 1000)) {
+                if (currentTime < (cacheElement.retrieveTime + this.TOPOLOGY_CACHE_LENGTH * 1000)) {
                     return cacheElement.topology;
                 }
             }
 
-            if (cacheElement.TS != null) {
+            if (cacheElement.TS != null && currentTime < (cacheElement.retrieveTime + this.DOMAIN_CACHE_LENGTH * 1000)) {
                 Element topology = this.getDomainQueryTS(cacheElement.TS, domainId, namespace);
                 if (topology != null) {
-                    String currNamespace;
+                    String currNamespace = null;
 
                     if (namespace != null) {
                         currNamespace = namespace;
@@ -196,14 +201,16 @@ public class TSLookupClient {
                             currNamespace = child.getNamespace().getURI();
                             break;
                         }
-                        currNamespace = namespace;
                     }
 
-                    this.addCache(domainId, currNamespace, currentTime, cacheElement.TS, topology);
+                    if (currNamespace != null)
+                        this.addCache(domainId, currNamespace, currentTime, cacheElement.TS, topology);
 
                     return topology;
                 }
             }
+        } else {
+            this.log.debug("Got cached instance of "+domainId);
         }
 
         String [] TSMatches = this.getTSList();
@@ -233,7 +240,7 @@ public class TSLookupClient {
             for(String ts_url : TSMatches) {
                 Element topology = getDomainQueryTS(ts_url, domainId, namespace);
                 if (topology != null) {
-                    String currNamespace;
+                    String currNamespace = null;
 
                     if (namespace != null) {
                         currNamespace = namespace;
@@ -243,10 +250,10 @@ public class TSLookupClient {
                             currNamespace = child.getNamespace().getURI();
                             break;
                         }
-                        currNamespace = namespace;
                     }
 
-                    this.addCache(domainId, currNamespace, currentTime, ts_url, topology);
+                    if (currNamespace != null)
+                        this.addCache(domainId, currNamespace, currentTime, ts_url, topology);
 
                     return topology;
                 }
@@ -414,6 +421,10 @@ public class TSLookupClient {
         this.tryAllGlobal = tryAllGlobal;
     }
 
+    public void setDisableCaching(boolean disabled) {
+        this.disableCaching = disabled;
+    }
+
     /**
      * Generates a new metadata element
      *
@@ -537,7 +548,26 @@ public class TSLookupClient {
     }
 
     private synchronized TSCacheElement getCache(String id, String namespace) {
+        if (this.disableCaching == true) {
+            this.log.debug("Caching is disabled");
+            return null;
+        }
+
+        long currentTime = System.currentTimeMillis();
+
+        // clean out the old versions
+        Iterator<TSCacheElement> iter = this.cache.iterator();
+        while(iter.hasNext()) {
+            TSCacheElement elm = iter.next();
+
+            if (currentTime > elm.retrieveTime + this.DOMAIN_CACHE_LENGTH * 1000) {
+                this.log.debug("Removing "+elm.id+" from cache");
+                iter.remove();
+            }
+        }
+ 
         for(TSCacheElement elm : this.cache) {
+
             if (elm.id.equals(id) == false) {
                 continue;
             }
@@ -553,22 +583,31 @@ public class TSLookupClient {
     }
 
     private synchronized void addCache(String id, String namespace, long retrieveTime, String TS, Element topology) {
+        if (this.disableCaching == true) {
+            this.log.debug("Caching is disabled");
+            return;
+        }
+
+        this.log.debug("Adding "+id+" to the cache");
+
         if (namespace == null) {
             // XXX: error
             return;
         }
 
         TSCacheElement cacheElement = getCache(id, namespace);
-        if (cacheElement == null) {
-            cacheElement = new TSCacheElement(); 
-            this.cache.add(cacheElement);
+        if (cacheElement != null) {
+            this.cache.remove(cacheElement);
         }
 
+        cacheElement = new TSCacheElement();
         cacheElement.id = id;
         cacheElement.namespace = namespace;
         cacheElement.retrieveTime = retrieveTime;
         cacheElement.topology = topology;
         cacheElement.TS = TS;
+
+        this.cache.add(cacheElement);
     }
 
     private class TSCacheElement {
