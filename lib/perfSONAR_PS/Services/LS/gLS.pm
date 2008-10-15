@@ -185,6 +185,18 @@ sub init {
             system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
             $self->{LOGGER}->debug( "Creating 'metadata_db_name': \"mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
+        unless ( -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
+            open( CONF, ">".$self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
+            print CONF "set_lock_timeout 500000\n";
+            print CONF "set_txn_timeout 500000\n";
+            print CONF "set_lk_max_lockers 500000\n";
+            print CONF "set_lk_max_locks 500000\n";
+            print CONF "set_lk_max_objects 500000\n";
+            print CONF "set_lk_detect DB_LOCK_MINLOCKS\n";
+            print CONF "set_cachesize 0 33554432 0\n";
+            print CONF "set_flags DB_LOG_AUTOREMOVE\n";
+            close( CONF );
+        }
     }
     else {
         $self->{LOGGER}->error("Value for 'metadata_db_name' is not set, exiting.");
