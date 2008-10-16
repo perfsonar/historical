@@ -445,8 +445,11 @@ sub storeData {
 
     $logger->logdie( "Argument 'agent' is of wrong type")
     	    unless blessed $agent && $agent->isa( 'perfSONAR_PS::Services::MP::Agent::Base' );
-
-    # remap the rtts and seqs
+    unless ( $self && $self->database() ) {
+        $logger->error(  "!!! Database handler was lost, check database server");
+	return -1; 
+    }
+    #  remap the rtts and seqs
     my $rtts;
     my $seqs;
     if($agent->results()) {
@@ -471,8 +474,7 @@ sub storeData {
     	$src = $self->database()->soi_host({ ip_name => $ip_name, ip_number =>   $agent->sourceIp() });
     };
     if($EVAL_ERROR || !$src  ||  $src !~ /^[\-\w\.]+$/) {
-        $logger->logdie(  "!!! Database handler was lost, check database serve: $EVAL_ERROR") unless $self && $self->database();
-    	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') .
+       $logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') .
 	                  " - to find or insert soi_host:   $ip_name   " . 
 			  $agent->sourceIp() . " Reason: " .  $self->database()->ERRORMSG);
     	return -1;
@@ -482,8 +484,7 @@ sub storeData {
        $dst = $self->database()->soi_host({ ip_name => $ip_name, ip_number => $agent->destinationIp() });
     };
     if($EVAL_ERROR || !$dst  ||  $dst !~  /^[\-\w\.]+$/) {
-        $logger->logdie(  "!!! Database handler was lost, check database serve: $EVAL_ERROR") unless $self && $self->database();
-     	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') . 
+        $logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') . 
 	"- to find or insert soi_host:  $ip_name  " . $agent->destinationIp() . " Reason: " .  $self->database()->ERRORMSG);
     	return -1;
     }	      
@@ -498,8 +499,7 @@ sub storeData {
      
     };
     if($EVAL_ERROR || !$md ||  $md < 0) {
-        $logger->logdie(  "!!! Database handler was lost, check database serve: $EVAL_ERROR") unless $self && $self->database();
-    	$logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') .
+        $logger->error(  "Failed: " . ($EVAL_ERROR?$EVAL_ERROR:'') .
 	                 "  -  to find or insert  soi_metadata: ". $agent->packetSize()  . 
 			 "  " . $agent->count()  . "  " .$agent->interval()  . 
 			 "  " . $agent->ttl(). " Reason: " .  $self->database()->ERRORMSG);
@@ -540,8 +540,7 @@ sub storeData {
     			    });
     };
     if($EVAL_ERROR ||  $data == -1 ){
-       $logger->logdie(  "!!! Database handler was lost, check database server: $EVAL_ERROR") unless $self && $self->database();
-       $logger->error(  "Failed:  " . ($EVAL_ERROR?$EVAL_ERROR:'') . 
+        $logger->error(  "Failed:  " . ($EVAL_ERROR?$EVAL_ERROR:'') . 
        " -   to find or insert  insertdata: " . $md . ", " . $agent->results()->{'startTime'} . ",  " .
       $agent->results()->{'meanRtt'} . " Reason: " .  $self->database()->ERRORMSG );
     	return -1;
