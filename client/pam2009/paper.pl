@@ -112,7 +112,29 @@ unless ( exists $opts{CONF} and $opts{CONF} ) {
     exit(1);
 }
 
-system( "rm -f *csv" );
+my $base = "./data";
+die "Cannot find data directory" if not -d $base;
+
+my $t1 = ParseDateString( "epoch " . ( $opts{END} - $opts{LENGTH} ) );
+my $yearDir = UnixDate( $t1, "%Y" );
+my $monthDir = UnixDate( $t1, "%m" );
+my $dayDir = UnixDate( $t1, "%d" );
+my $hourDir = UnixDate( $t1, "%H" );
+
+unless ( -d $base."/".$yearDir ) {
+    system( "mkdir ".$base."/".$yearDir );
+} 
+unless ( -d $base."/".$yearDir."/".$monthDir ) {
+    system( "mkdir ".$base."/".$yearDir."/".$monthDir );
+} 
+unless ( -d $base."/".$yearDir."/".$monthDir."/".$dayDir ) {
+    system( "mkdir ".$base."/".$yearDir."/".$monthDir."/".$dayDir );
+} 
+unless ( -d $base."/".$yearDir."/".$monthDir."/".$dayDir."/".$hourDir ) {
+    system( "mkdir ".$base."/".$yearDir."/".$monthDir."/".$dayDir."/".$hourDir );
+} 
+
+my $storage = $base."/".$yearDir."/".$monthDir."/".$dayDir."/".$hourDir."/";
 
 my $parser = XML::LibXML->new();
 my $config = new Config::General( $opts{CONF} );
@@ -378,7 +400,7 @@ foreach my $host ( keys %{ $conf{host} } ) {
 
 print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv\n";
 
-                            open( CSV1, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            open( CSV1, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M),data type\n";
                             print CSV1 $list{$h}{$name}->{"ipAddress"}, ",", $list{$h}{$name}->{"hostName"}, ",", $list{$h}{$name}->{"ifName"}, ",", $list{$h}{$name}->{"ifDescription"}, ",", $list{$h}{$name}->{"ifAddress"}, ",", $cap , ",SNMP\n\n";
 
@@ -501,7 +523,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                         );
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
-                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source address, source host, destination address, destination host,data type\n";
                             print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",iperf\n\n";
 
@@ -598,7 +620,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
 
-                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source host, destination host, data type\n";
                             print CSV $src_host, ",", $dst_host, ",PingER\n\n";
 
@@ -721,7 +743,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                         );
 
                         unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
-                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source address, source host, destination address, destination host,data type\n";
                             print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",owamp\n\n";
 
