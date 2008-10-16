@@ -171,6 +171,9 @@ foreach my $host ( keys %{ $conf{host} } ) {
             }
             $subject .= "      </nmwgt:endPointPair>\n";
             $subject .= "    </iperf:subject>\n";
+            $subject .= "    <nmwg:parameters>\n";
+            $subject .= "      <nmwg:parameter name=\"protocol\">".$conf{host}->{$host}->{metadata}->{$md}->{type}."</nmwg:parameter>\n";
+            $subject .= "    </nmwg:parameters>\n";
             push @eventTypes, $eventType;
         }
         elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" or $eventType eq "http://ggf.org/ns/nmwg/tools/pinger/2.0" ) {
@@ -193,7 +196,19 @@ foreach my $host ( keys %{ $conf{host} } ) {
         }
         elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
             $subject = "    <owamp:subject xmlns:owamp=\"http://ggf.org/ns/nmwg/tools/owamp/2.0/\" id=\"subject\">\n";
-            $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\" />\n";
+            $subject .= "      <nmwgt:endPointPair xmlns:nmwgt=\"http://ggf.org/ns/nmwg/topology/2.0/\">\n";
+            foreach my $field ( keys %{ $conf{host}->{$host}->{metadata}->{$md} } ) {
+                if ( $field eq "src" or $field eq "dst" ) {
+                    foreach my $field2 ( keys %{ $conf{host}->{$host}->{metadata}->{$md}->{$field} } ) {
+                        $subject .= "       <nmwgt:" . $field . " value=\"" . $field2 . "\" ";
+                        foreach my $field3 ( keys %{ $conf{host}->{$host}->{metadata}->{$md}->{$field}->{$field2} } ) {
+                            $subject .= $field3 . "=\"" . $conf{host}->{$host}->{metadata}->{$md}->{$field}->{$field2}->{$field3} . "\" ";
+                        }
+                        $subject .= "/>\n";
+                    }
+                }
+            }
+            $subject .= "      </nmwgt:endPointPair>\n";
             $subject .= "    </owamp:subject>\n";
             push @eventTypes, $eventType;
         }
@@ -628,8 +643,135 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                 }
             }
             elsif ( $eventType eq "http://ggf.org/ns/nmwg/tools/owamp/2.0" or $eventType eq "http://ggf.org/ns/nmwg/characteristic/delay/summary/20070921" ) {
-                $logger->error( "No support for eventType \"" . $eventType . "\" yet" );
-                exit(1);
+
+
+                my %lookup = ();
+                foreach my $d ( @{ $result->{"data"} } ) {
+                    my $data          = $parser->parse_string($d);
+                    my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
+                    my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
+                    $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+                }
+
+                my %list = ();
+                foreach my $md2 ( @{ $result->{"metadata"} } ) {
+                    my $metadata   = $parser->parse_string($md2);
+                    my $metadataId = $metadata->getDocumentElement->getAttribute("id");
+
+                    my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
+                    my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
+
+                    my %temp = ();
+                    $temp{"key"}      = $lookup{$metadataId};
+                    $temp{"src"}      = $src;
+                    $temp{"dst"}      = $dst;
+                    $list{$src}{$dst} = \%temp;
+                }
+
+                foreach my $src ( sort keys %list ) {
+                    foreach my $dst ( sort keys %{ $list{$src} } ) {
+                        my $src_addr  = q{};
+                        my $src_host  = q{};
+                        my $dst_addr  = q{};
+                        my $dst_host  = q{};
+                        my $t1        = ParseDateString( "epoch " . ( $opts{END} - $opts{LENGTH} ) );
+                        my $startTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
+                        $t1 = ParseDateString( "epoch " . $opts{END} );
+                        my $endTime = UnixDate( $t1, "%Y-%m-%d_%H:%M:%S" );
+
+                        $src_addr = $list{$src}{$dst}->{"src"};
+
+                        my $display = $list{$src}{$dst}->{"src"};
+                        $display =~ s/:.*$//;
+                        my $iaddr = Socket::inet_aton($display);
+                        my $shost = gethostbyaddr( $iaddr, Socket::AF_INET );
+                        if ($shost) {
+                            $src_host = $shost;
+                        }
+                        else {
+                            $src_host = $list{$src}{$dst}->{"src"};
+                        }
+
+                        $dst_addr = $list{$src}{$dst}->{"dst"};
+
+                        my $display2 = $list{$src}{$dst}->{"dst"};
+                        $display2 =~ s/:.*$//;
+                        my $iaddr2 = Socket::inet_aton($display2);
+                        my $dhost = gethostbyaddr( $iaddr2, Socket::AF_INET );
+                        if ($dhost) {
+                            $dst_host = $dhost;
+                        }
+                        else {
+                            $dst_host = $list{$src}{$dst}->{"dst"};
+                        }
+
+                        my $subject1 = "  <nmwg:key id=\"key-1\">\n";
+                        $subject1 .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
+                        $subject1 .= "      <nmwg:parameter name=\"maKey\">" . $list{$src}{$dst}->{"key"} . "</nmwg:parameter>\n";
+                        $subject1 .= "    </nmwg:parameters>\n";
+                        $subject1 .= "  </nmwg:key>  \n";
+
+                        my $result = $ma->setupDataRequest(
+                            {
+                                start      => ( $opts{END} - $opts{LENGTH} ),
+                                end        => $opts{END},
+                                subject    => $subject1,
+                                eventTypes => \@eventTypes
+                            }
+                        );
+
+                        unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
+                            open( CSV, ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv" ) or croak "Can't open: $!";
+                            print CSV "source address, source host, destination address, destination host,data type\n";
+                            print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",owamp\n\n";
+
+
+                            my $doc1 = $parser->parse_string( $result->{"data"}->[0] );
+                            my $datum1 = find( $doc1->getDocumentElement, "./*[local-name()='datum']", 0 );
+
+                            if ( $datum1 ) {
+                                my %store = ();
+
+                                foreach my $dt ( $datum1->get_nodelist ) {
+                                    my $s_secs = UnixDate( $dt->getAttribute("startTime"), "%s" );
+
+                                    $store{$s_secs}{"start"} = $s_secs;
+                                    $store{$s_secs}{"end"} = UnixDate( $dt->getAttribute("endTime"), "%s" );
+                                    $store{$s_secs}{"min_delay"} = eval( $dt->getAttribute("min_delay") );
+                                    $store{$s_secs}{"max_delay"} = eval( $dt->getAttribute("max_delay") );
+                                    $store{$s_secs}{"maxError"} = eval( $dt->getAttribute("maxError") );
+                                    $store{$s_secs}{"sent"} = $dt->getAttribute("sent");
+                                    $store{$s_secs}{"duplicates"} = $dt->getAttribute("duplicates");
+                                    $store{$s_secs}{"loss"} = $dt->getAttribute("loss");    
+                                }
+                                
+                                my @list = ( "min_delay", "max_delay", "maxError", "sent", "duplicates", "loss" );
+                                
+                                print CSV "unix time (start),iso time (start),unix time (end),iso time (end),min delay (sec),max delay (sec),max error,sent (packets),duplicates (packets),loss (packets)\n";
+
+                                foreach my $time ( sort keys %store ) {
+                                    next unless $time;
+  
+                                    my $date = ParseDateString( "epoch " . $store{$time}{"start"} );
+                                    my $date2 = UnixDate( $date, "%Y-%m-%d %H:%M:%S" );
+                                    print CSV $store{$time}{"start"}, ",", $date2, ",";
+                                    
+                                    $date = ParseDateString( "epoch " . $store{$time}{"end"} );
+                                    $date2 = UnixDate( $date, "%Y-%m-%d %H:%M:%S" );
+                                    print CSV $store{$time}{"end"}, ",", $date2;
+                                    foreach my $l ( @list ) {
+                                        print CSV ",";
+                                        if ( exists $store{$time}{$l} ) {
+                                            print CSV $store{$time}{$l};
+                                        }
+                                    }
+                                    print CSV "\n"; 
+                                }
+                            }
+                            close(CSV);
+                        }
+                    }
+                }
             }
             else {
                 $logger->error( "No support for eventType \"" . $eventType . "\" yet" );
