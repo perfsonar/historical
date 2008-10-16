@@ -390,15 +390,13 @@ foreach my $host ( keys %{ $conf{host} } ) {
                             }
                         );
 
-                        unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) or ( exists $result2->{eventType} and $result2->{eventType} =~ m/^error/ ) ) {
+                        unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) or ( exists $result2->{eventType} and $result2->{eventType} =~ m/^error/ ) and ( exists $result->{data} and $result->{data} =~ m/^error/ ) or ( exists $result2->{data} and $result2->{data} =~ m/^error/ ) ) {
                             my $temp = $list{$h}{$name}->{"ifName"};
                             $temp =~ s/\///g;
                             $temp =~ s/ /_/g;
 
                             my $cap = eval( $list{$h}{$name}->{"capacity"} / 1000000 );
                             $cap = 10000 if $cap == 4294.967295;
-
-print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTime . "_" . $endTime . ".csv\n";
 
                             open( CSV1, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV1 "ipAddress,hostName,ifName,ifDescription,ifAddress,capacity (M),data type\n";
@@ -522,7 +520,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                             }
                         );
 
-                        unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
+                        unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) and ( exists $result->{data} and $result->{data} =~ m/^error/ ) ){
                             open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source address, source host, destination address, destination host,data type\n";
                             print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",iperf\n\n";
@@ -618,7 +616,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                             }
                         );
 
-                        unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
+                        unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) and ( exists $result->{data} and $result->{data} =~ m/^error/ ) ){
 
                             open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source host, destination host, data type\n";
@@ -742,7 +740,7 @@ print ">" . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . "-" . $startTim
                             }
                         );
 
-                        unless ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) {
+                        unless ( ( exists $result->{eventType} and $result->{eventType} =~ m/^error/ ) and ( exists $result->{data} and $result->{data} =~ m/^error/ ) ) {
                             open( CSV, ">" . $storage . $conf{host}->{$host}->{metadata}->{$md}->{"title"} . ".csv" ) or croak "Can't open: $!";
                             print CSV "source address, source host, destination address, destination host,data type\n";
                             print CSV $src_addr, ",", $src_host, ",", $dst_addr, ",", $dst_host, ",owamp\n\n";
