@@ -29,12 +29,17 @@
  # Required attributes in service requests
    * See http://code.google.com/p/perfsonar-ps/issues/detail?id=62 for context.
    * General question, how should metadata matching work?
- # Central configuration service
-   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
  # SC plans
    * SCinet Monitoring/ Internet2 Booth/ What else?
+     * Will setup regular scheduled tests between SCinet and Internet2/ESnet/others.
+     * Will work with others (caltech) to monitor other interesting data.
+     * Will reach out to BNL/FNAL for monitoring as well.
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+     * Will talk about this next week when Brian is available.
  # Deployment Status Listings
    * How do we decide what goes in the list? Everything? Do we attempt to validate?
+     * Joe will send out comments from Jason Lee to start this discussion.
  # Next meeting will Oct 27, 2:30 pm Eastern Time
 
 == Where ==
