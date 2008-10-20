@@ -2,13 +2,18 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Jason, Joe, Rich, Aaron, Jeff, 
+ # Attendees: Jason, Joe, Rich, Aaron, Jeff, Maxim.
  # Team Updates
    # Internet2
+    * Jason: Support role for FMM demos, Managing bugs for Disk, Work with Brian on pingER instances on ESnet (and other services too). Bug fixes setup for LS/SNMP MA.
+    * Aaron: Working w/ DCN to fix path finder things. Working on pS pathfinder. Fixes for knoppix toolkit. Looking at different approaches to automate ISO release rolling. For a stop-gap, much of toolkit is now in svn.
+    * Jeff: FMM Performance Update/ perfSONAR BOF
    # IU
    # UDEL
    # Ga Tech
    # ESnet
+    * Brian: pingER deployments, working on other deployments and hit lots of hardware related snags.
+    * Joe: LHCOPN meeting - MDM - 3 signed MOU agreements, 2 boxes - 1 sun, 1 linux. 14 week deployment cycle. 1 day of training, site survey, planned to extensive detail! EGEE monitoring/ alarming from DFN looking at perfSONAR. Small sub-group will look at this proposal (alarms based on 'interesting data').
    # SLAC
    # FNAL
    # MCNC
