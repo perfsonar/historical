@@ -19,6 +19,9 @@
    # MCNC
  # LHC ISOs
    * Status (outstanding bugs? good/bad experiences?)
+     * lots of tiny bugs, only a couple of major bugs
+       * unmount filesystems underneath - believe it is fixed.
+     * mysql logging are large
    * Next steps
  # Required attributes in service requests
    * See http://code.google.com/p/perfsonar-ps/issues/detail?id=61 for context.
