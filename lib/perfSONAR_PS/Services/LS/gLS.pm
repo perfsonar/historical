@@ -443,6 +443,8 @@ amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
+    my $start_time = [Time::HiRes::gettimeofday];
+
     my $error = q{};
     my $eventType;
     my $database;
@@ -623,6 +625,10 @@ sub registerLS {
     }
 
     $database->closeDB( { error => \$error } );
+
+    my $end_time = [Time::HiRes::gettimeofday];
+    my $diff = Time::HiRes::tv_interval $start_time, $end_time;
+    $self->{LOGGER}->info("LS Registration Time:\t" . $diff . " seconds." );
     return 0;
 }
 
@@ -637,6 +643,9 @@ sub summarizeLS {
     my $parameters = validateParams( @args, { error => 0 } );
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
+
+    my $start_time = [Time::HiRes::gettimeofday];
+
 
     $self->{STATE}->{"messageKeys"} = ();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -1270,6 +1279,11 @@ sub summarizeLS {
             return -1;
         }
     }
+
+    my $end_time = [Time::HiRes::gettimeofday];
+    my $diff = Time::HiRes::tv_interval $start_time, $end_time;
+    $self->{LOGGER}->info("Summarization Time:\t" . $diff . " seconds." );
+
     return 0;
 }
 
