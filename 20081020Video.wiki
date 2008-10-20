@@ -27,7 +27,7 @@
      * release management process (aaron)
      * yum server
  # Required attributes in service requests
-   * See http://code.google.com/p/perfsonar-ps/issues/detail?id=61 for context.
+   * See http://code.google.com/p/perfsonar-ps/issues/detail?id=62 for context.
    * General question, how should metadata matching work?
  # Central configuration service
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
