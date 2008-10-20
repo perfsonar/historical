@@ -23,6 +23,9 @@
        * unmount filesystems underneath - believe it is fixed.
      * mysql logging are large
    * Next steps
+     * functional specification (jeff/aaron/rich)
+     * release management process (aaron)
+     * yum server
  # Required attributes in service requests
    * See http://code.google.com/p/perfsonar-ps/issues/detail?id=61 for context.
    * General question, how should metadata matching work?
