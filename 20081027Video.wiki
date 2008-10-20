@@ -1,0 +1,49 @@
+﻿=  October 27, 2008 Conference Call 2:30 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees:
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # SLAC
+   # FNAL
+   # MCNC
+ # SC status
+ # Central configuration service
+   * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+ # Deployment Status Listings
+   * How do we decide what goes in the list? Everything? Do we attempt to validate?
+     * Joe will send out comments from Jason Lee to start this discussion.
+ # ISO - Functional Specification
+   * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
+ # Next meeting will Nov 3, 2:30 pm Eastern Time
+
+== Where ==
+
+Number of sites: 10
+Mode: Voice Switched
+
+Phone Ports: 10
+Phone Bridge Information: (Scheduled through December 2008 due to scheduling limitations.)
+Dial +1-614-247-6427
+At the prompt, enter the Conference ID: 9746 followed by the pound (#) key.
+
+GDS Dialing Directions:
+ # Register with a GDS-enabled Gatekeeper.  To borrow space see: http://commons.internet2.edu/reggate.html
+ # Make sure you are connecting at 384 kbps.
+ # Dial 001189 783 9746 (no spaces)
+
+IP Dialing Directions
+ # Dial 192.148.244.143.
+ # Enable FAR END camera control.
+ # DOWN ARROW until you highlight Internet2 9746
+ # Use the RIGHT ARROW to enter that conference.
+ # Do not forget to disable the FAR END camera control.
+
+== Last Updated ==
+
+$Id$
