@@ -2,7 +2,7 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Jason, Joe, Rich, Aaron, Jeff, 
  # Team Updates
    # Internet2
    # IU
@@ -22,6 +22,8 @@
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
  # SC plans
    * SCinet Monitoring/ Internet2 Booth/ What else?
+ # Deployment Status Listings
+   * How do we decide what goes in the list? Everything? Do we attempt to validate?
  # Next meeting will Oct 27, 2:30 pm Eastern Time
 
 == Where ==
