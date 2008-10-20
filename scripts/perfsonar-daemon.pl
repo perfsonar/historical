@@ -625,8 +625,13 @@ sub registerLS {
             $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
         }
 
-        eval { $service->registerLS( \$sleep_time ); };
-        if ($EVAL_ERROR) {
+        eval { 
+            $service->registerLS( \$sleep_time ); 
+        };
+        if ( my $e = catch std::exception ) {
+            $logger->error("Problem running register LS: " . $e->what() );
+        }
+        elsif ( $EVAL_ERROR ) {
             $logger->error("Problem running register LS: $@");
         }
         $logger->debug("Sleeping for $sleep_time");
@@ -665,7 +670,10 @@ sub maintenance {
             }
             $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
         };
-        if ($EVAL_ERROR) {
+        if ( my $e = catch std::exception ) {
+            $logger->error("Problem running register LS: " . $e->what() );
+        }
+        elsif ( $EVAL_ERROR ) {
             $logger->error("Problem running service maintenance: $@");
         }
         elsif ( $cleanStatus == -1 ) {
@@ -716,6 +724,14 @@ sub handleRequest {
         my $message = $request->getRequestDOM()->getDocumentElement();
         $messageId = $message->getAttribute("id");
         $handler->handleMessage( $message, $request, $endpoint_conf );
+    }
+    catch std::exception with {
+        my $ex = shift;
+
+        my $msg = "Error handling request: error.common.internal_error => \"" . $ex->what() . "\"";
+        $logger->error($msg);
+
+        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
     catch perfSONAR_PS::Error with {
         my $ex = shift;

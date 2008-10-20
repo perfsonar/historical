@@ -92,7 +92,7 @@ sub parse {
     &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $namespace_map, $dom->getDocumentElement, 0);
 
     my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    if (!defined $nmwg_prefix) {
+    unless ( exists $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"} and $nmwg_prefix ) {
         my $msg = "Received message with incorrect message URI";
         $logger->error($msg);
         $$error = $msg if (defined $error);
@@ -247,8 +247,6 @@ sub finish {
         my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.end");
         $self->{NETLOGGER}->debug($msg);
 
-    } else {
-        $logger->error("Call not established.");
     }
     return;
 }

@@ -456,6 +456,12 @@ sub handleMessage {
             $self->__handleMessage({ output => $ret_message, messageId => $messageId, messageType => $messageType, message => $message, rawRequest => $raw_request });
             $raw_request->setResponse($ret_message->getValue());
         }
+        catch std::exception with {
+            my $ex = shift;
+
+            $errorEventType = "error.common.internal_error";
+            $errorMessage = $ex->what();
+        }
         catch perfSONAR_PS::Error_compat with {
             my $ex = shift;
 
@@ -506,19 +512,16 @@ sub handleMessage {
     my $msgParams = find($message, "./*[local-name()='parameters' and namespace-uri()='http://ggf.org/ns/nmwg/base/2.0/']", 1);
     if (defined $msgParams) {
         my $find_res = find($msgParams, "./*[local-name()='parameter']", 0);
-        if ($find_res) {
-        foreach my $p ($find_res->get_nodelist) {
-            my ($name, $value);
+        if ( $find_res ) {
+            foreach my $p ($find_res->get_nodelist) {
+                my ($name, $value);
 
-            $name = $p->getAttribute("name");
-            $value = extract($p, 0);
+                $name = $p->getAttribute("name");
+                $value = extract($p, 0);
+                next unless $name;
 
-            if (not defined $name or $name eq "") {
-                next;
+                $message_parameters{$name} = $value;
             }
-
-            $message_parameters{$name} = $value;
-        }
         }
     }
 
@@ -639,6 +642,12 @@ sub handleMessage {
                                         rawRequest => $raw_request, doOutputMetadata => \$doOutputMetadata
                                         });
             }
+            catch std::exception with {
+                my $ex = shift;
+
+                $errorEventType = "error.common.internal_error";
+                $errorMessage = $ex->what();
+            }
             catch perfSONAR_PS::Error_compat with {
                 my $ex = shift;
 
@@ -757,6 +766,12 @@ sub parseChains {
                 $mdChains{"data"} = $d;
 
                 push @chains, \%mdChains;
+            }
+            catch std::exception with {
+                my $ex = shift;
+
+                $errorEventType = "error.common.internal_error";
+                $errorMessage = $ex->what();
             }
             catch perfSONAR_PS::Error_compat with {
                 my $ex = shift;

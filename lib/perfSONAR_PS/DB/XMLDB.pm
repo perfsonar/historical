@@ -223,12 +223,12 @@ sub openDB {
             my $dbUC = $self->{MANAGER}->createUpdateContext();
             $self->{INDEX} = $self->{CONTAINER}->addIndex( $dbTr, "http://ggf.org/ns/nmwg/base/2.0/", "store", "node-element-equality-string", $dbUC );
         }
-        if ($atomic) {
-            $dbTr->commit;
-            undef $dbTr;
-        }
     };
 
+    if ( $atomic ) {
+        $dbTr->commit;
+        undef $dbTr;
+    }
     $dbTr->abort if ( $dbTr and $atomic );
     undef $dbTr;
 

@@ -709,13 +709,15 @@ sub summarizeLS {
                 # extract the usful node stuffs
                 my @elements = ( "address", "ipAddress", "name" );
                 my @types = ( "ipv4", "IPv4" );
-                $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                $all_addresses     = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
+                $service_addresses = ( $service_addresses, $extractedAddress );
+                $all_addresses = ( $all_addresses, $extractedAddress );                
 
                 my @hosts = ();
                 @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                $service_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                $all_domains     = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                my $extractedDomains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                $service_domains = ( $service_domains, $extractedDomains );
+                $all_domains = ( $all_domains, $extractedDomains );
 
                 my @urns = ();
                 @types = ( "urn", "URN" );
@@ -793,8 +795,9 @@ sub summarizeLS {
                     my @hosts    = ();
                     my @elements = ( "address", "name" );
                     my @types    = ( "node", "domain", "dns", "DNS" );
-                    $service_domains = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                    $all_domains     = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                    my $extractedDomains = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                    $service_domains = ( $service_domains, $extractedDomains );
+                    $all_domains = ( $all_domains, $extractedDomains );
 
                     my @urns = ();
                     push @elements, "idRef";
@@ -870,15 +873,17 @@ sub summarizeLS {
                         foreach my $interface ( $temp_interfaces->get_nodelist ) {
                             my @elements = ( "address", "ipAddress", "ifAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             push @hosts, extract( find( $interface, "./*[local-name()='hostName']", 1 ), 0 );
-                            $service_domains = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
-
+                            my $extractedDomains = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
+                    
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $interface->getAttribute("id");
@@ -900,13 +905,15 @@ sub summarizeLS {
 
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $port, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $port, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $port, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -921,13 +928,15 @@ sub summarizeLS {
                         foreach my $node ( $temp_nodes->get_nodelist ) {
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -952,13 +961,15 @@ sub summarizeLS {
 
                             my @elements = ("name");
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $network, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $network, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $network, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -974,8 +985,9 @@ sub summarizeLS {
                             my @hosts    = ();
                             my @elements = ("name");
                             my @types    = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -991,13 +1003,16 @@ sub summarizeLS {
                         foreach my $service ( $temp_services->get_nodelist ) {
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
+
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -1012,13 +1027,15 @@ sub summarizeLS {
                         foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -1033,13 +1050,15 @@ sub summarizeLS {
                         foreach my $endpointpair ( $temp_endpointpairs->get_nodelist ) {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types, addresses => $all_addresses } );
-
+                            my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -1054,13 +1073,15 @@ sub summarizeLS {
                         foreach my $endpoint ( $temp_endpoints->get_nodelist ) {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
-                            $service_addresses = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types, addresses => $service_addresses } );
-                            $all_addresses     = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types, addresses => $all_addresses } );
+                            my $extractedAddress = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types } );
+                            $service_addresses = ( $service_addresses, $extractedAddress );
+                            $all_addresses = ( $all_addresses, $extractedAddress );  
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
-                            $service_domains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $service_domains } );
-                            $all_domains     = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts, hosts => $all_domains } );
+                            my $extractedDomains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts } );
+                            $service_domains = ( $service_domains, $extractedDomains );
+                            $all_domains = ( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
@@ -1074,7 +1095,7 @@ sub summarizeLS {
 
             }
             else {
-                $self->{LOGGER}->error( "Data not registered for service with metadataId \"" . $service_mdId . "\", cannot summarize at this time." );
+                $self->{LOGGER}->info( "Data not registered for service with metadataId \"" . $service_mdId . "\", cannot summarize at this time." );
             }
 
             # specific service done
@@ -1385,27 +1406,28 @@ these into CIDR ranges.
 
 sub summarizeAddress {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, addresses => 1 } );
+    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1 } );
 
+    my $addresses = q{};
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             if ( $element eq "." ) {
                 my $temp_addresses = find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $parameters->{addresses}->{$address} = 1 if $address and is_ipv4($address);
+                    $addresses->{$address} = 1 if $address and is_ipv4( $address );
                 }
             }
             else {
                 my $temp_addresses = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $parameters->{addresses}->{$address} = 1 if $address and is_ipv4($address);
+                    $addresses->{$address} = 1 if $address and is_ipv4( $address );
                 }
             }
         }
     }
-    return $parameters->{addresses};
+    return $addresses;
 }
 
 =head2 summarizeHosts($self, { search, elements, types, hostarray, hosts } );
@@ -1418,8 +1440,9 @@ domain name) and return them in a hash reference.
 
 sub summarizeHosts {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, hostarray => 1, hosts => 1 } );
+    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, hostarray => 1 } );
 
+    my $hosts = q{};
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             my $temp_hosts = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
@@ -1440,11 +1463,11 @@ sub summarizeHosts {
                 $cat .= "." . $hostArray[$len2];
             }
             $cat =~ s/^\.//;
-            $parameters->{hosts}->{$cat} = 1 if $cat;
+            $hosts->{$cat} = 1 if $cat;
         }
     }
 
-    return $parameters->{hosts};
+    return $hosts;
 }
 
 =head2 ipSummarization( $self, { addresses } )
