@@ -92,7 +92,7 @@ sub parse {
     &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $namespace_map, $dom->getDocumentElement, 0);
 
     my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    unless ( exists $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"} and $nmwg_prefix ) {
+    if (!defined $nmwg_prefix) {
         my $msg = "Received message with incorrect message URI";
         $logger->error($msg);
         $$error = $msg if (defined $error);

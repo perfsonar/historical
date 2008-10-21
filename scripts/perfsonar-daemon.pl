@@ -628,11 +628,8 @@ sub registerLS {
         eval { 
             $service->registerLS( \$sleep_time ); 
         };
-        if ( my $e = catch std::exception ) {
-            $logger->error("Problem running register LS: " . $e->what() );
-        }
-        elsif ( $EVAL_ERROR ) {
-            $logger->error("Problem running register LS: $@");
+        if ( $EVAL_ERROR ) {
+            $logger->error( "Problem running register LS: " . $EVAL_ERROR );
         }
         $logger->debug("Sleeping for $sleep_time");
         sleep($sleep_time);
@@ -670,18 +667,14 @@ sub maintenance {
             }
             $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
         };
-        if ( my $e = catch std::exception ) {
-            $logger->error("Problem running register LS: " . $e->what() );
+        if ( $EVAL_ERROR ) {
+            $logger->error( "Problem running service maintenance: " . $EVAL_ERROR );
         }
-        elsif ( $EVAL_ERROR ) {
-            $logger->error("Problem running service maintenance: $@");
-        }
-        elsif ( $cleanStatus == -1 ) {
+        
+        if ( $cleanStatus == -1 or $sumStatus == -1 ) {
             $logger->error("Error returned: $error");
         }
-        elsif ( $sumStatus == -1 ) {
-            $logger->error("Error returned: $error");
-        }
+
         $logger->debug("Sleeping for $sleep_time");
         sleep($sleep_time);
     }
@@ -725,15 +718,7 @@ sub handleRequest {
         $messageId = $message->getAttribute("id");
         $handler->handleMessage( $message, $request, $endpoint_conf );
     }
-    catch std::exception with {
-        my $ex = shift;
-
-        my $msg = "Error handling request: error.common.internal_error => \"" . $ex->what() . "\"";
-        $logger->error($msg);
-
-        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
-    }
-    catch perfSONAR_PS::Error with {
+    catch perfSONAR_PS::Error_compat with {
         my $ex = shift;
 
         my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
@@ -741,7 +726,7 @@ sub handleRequest {
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
-    catch perfSONAR_PS::Error_compat with {
+    catch perfSONAR_PS::Error with {
         my $ex = shift;
 
         my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
