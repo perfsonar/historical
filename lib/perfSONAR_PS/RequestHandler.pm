@@ -17,6 +17,7 @@ use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLER
 
 use strict;
 use warnings;
+use diagnostics;
 
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
@@ -467,6 +468,14 @@ sub handleMessage {
 
             $errorEventType = $ex->eventType;
             $errorMessage = $ex->errorMessage;
+        }
+        catch std::exception with {
+            my $ex = shift;
+
+            $self->{LOGGER}->error( "Error handling message block: " . $ex->what() );
+
+            $errorEventType = "error.common.internal_error";
+            $errorMessage = $ex->what();
         }
         otherwise {
             my $ex = shift;

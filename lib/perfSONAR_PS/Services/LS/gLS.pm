@@ -6,6 +6,7 @@ use fields 'STATE', 'LOGGER', 'IPTRIE', 'CLAIMTREE';
 
 use strict;
 use warnings;
+use diagnostics;
 
 our $VERSION = 0.10;
 
@@ -58,6 +59,7 @@ use LWP::Simple;
 use File::stat;
 use Data::Validate::IP qw(is_ipv4);
 use Net::IPv6Addr;
+use Hash::Merge qw( merge );
 
 use perfSONAR_PS::Services::MA::General;
 use perfSONAR_PS::Services::LS::General;
@@ -156,8 +158,8 @@ sub init {
         $self->{LOGGER}->warn("gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\".");
     }
 
-    if ( exists $self->{CONF}->{"root_hints_file"} ) {
-        if ( exists $self->{DIRECTORY} ) {
+    if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} ) {
+        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"root_hints_file"} =~ "^/" ) {
                 $self->{CONF}->{"root_hints_file"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"root_hints_file"};
                 $self->{LOGGER}->debug( "Setting full path to 'root_hints_file': \"" . $self->{CONF}->{"root_hints_file"} . "\"" );
@@ -175,17 +177,17 @@ sub init {
     }
 
     if ( exists $self->{CONF}->{"gls"}->{"metadata_db_name"} and $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
-        if ( exists $self->{DIRECTORY} ) {
+        if ( exists $self->{DIRECTORY} and $self->{DIRECTORY} ) {
             unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} =~ "^/" ) {
                 $self->{CONF}->{"gls"}->{"metadata_db_name"} = $self->{DIRECTORY} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_name"};
                 $self->{LOGGER}->debug( "Setting full path to 'metadata_db_name': \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
             }
         }
-        unless ( -d $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
+        unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -d $self->{CONF}->{"gls"}->{"metadata_db_name"} ) {
             system( "mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} );
             $self->{LOGGER}->debug( "Creating 'metadata_db_name': \"mkdir " . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "\"" );
         }
-        unless ( -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
+        unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
             open( CONF, ">".$self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
             print CONF "set_lock_timeout 500000\n";
             print CONF "set_txn_timeout 500000\n";
@@ -271,8 +273,8 @@ sub init {
     $self->{LOGGER}->info( "Setting 'maintenance_interval' to \"" . $self->{CONF}->{"gls"}->{"maintenance_interval"} . "\" minutes." );
     $self->{CONF}->{"gls"}->{"maintenance_interval"} *= 60;
 
-    unless ( $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
-        unless ( $self->{CONF}->{external_address} ) {
+    unless ( exists $self->{CONF}->{"gls"}->{"service_accesspoint"} and $self->{CONF}->{"gls"}->{"service_accesspoint"} ) {
+        unless ( exists $self->{CONF}->{external_address} and $self->{CONF}->{external_address} ) {
             $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address, exiting.");
             return -1;
         }
@@ -317,7 +319,7 @@ sub init {
 
     my $error = q{};
     my $metadatadb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ($metadatadb) {
+    unless ( $metadatadb ) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
@@ -325,7 +327,7 @@ sub init {
     $metadatadb->closeDB( { error => \$error } );
 
     my $summarydb = $self->prepareDatabase( { recover => 1, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-    unless ($summarydb) {
+    unless ( $summarydb ) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
     }
@@ -385,9 +387,9 @@ sub getHints {
 
     if ( exists $self->{CONF}->{"root_hints_url"} and exists $self->{CONF}->{"root_hints_file"} ) {
         my @url_array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
-        foreach my $url (@url_array) {
+        foreach my $url ( @url_array ) {
             my $content = get $url;
-            unless ($content) {
+            unless ( $content ) {
                 $self->{LOGGER}->error( "There was an error accessing " . $url . "." );
                 next;
             }
@@ -443,12 +445,10 @@ amount of time and do it again.
 sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
-    my $start_time = [Time::HiRes::gettimeofday];
-
     my $error = q{};
     my $eventType;
     my $database;
-    if ( -f $self->{CONF}->{"root_hints_file"} ) {
+    if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} and -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
                                                                         # update once an hour
         if ( ( $hintsStats->mtime + 3600 ) < time ) {
@@ -465,7 +465,7 @@ sub registerLS {
     $gls->orderRoots();
 
     # any 'specified' ones we have need to be placed before the ordered ones (priority)
-    if ( exists $self->{CONF}->{"ls_instance"} ) {
+    if ( exists $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ) {
         my @temp = split( /\s+/, $self->{CONF}->{"ls_instance"} );
         foreach my $t (@temp) {
             $t =~ s/\n$//;
@@ -473,7 +473,7 @@ sub registerLS {
             $gls->addRoot( { priority => 1, root => $t } ) if $t;
         }
     }
-    if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} ) {
+    if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} and $self->{CONF}->{"gls"}->{"ls_instance"} ) {
         my @temp = split( /\s+/, $self->{CONF}->{"gls"}->{"ls_instance"} );
         foreach my $t (@temp) {
             $t =~ s/\n$//;
@@ -487,13 +487,13 @@ sub registerLS {
         return -1;
     }
 
-    if ( $self->{CONF}->{"gls"}->{root} ) {
+    if ( exists $self->{CONF}->{"gls"}->{root} and $self->{CONF}->{"gls"}->{root} ) {
 
         # if we are a root, we are 'synchronizing'
 
         $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
         $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-        unless ($database) {
+        unless ( $database ) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
             return -1;
         }
@@ -559,7 +559,7 @@ sub registerLS {
 
         $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0";
         $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-        unless ($database) {
+        unless ( $database ) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
             return -1;
         }
@@ -625,10 +625,6 @@ sub registerLS {
     }
 
     $database->closeDB( { error => \$error } );
-
-    my $end_time = [Time::HiRes::gettimeofday];
-    my $diff = Time::HiRes::tv_interval $start_time, $end_time;
-    $self->{LOGGER}->info("LS Registration Time:\t" . $diff . " seconds." );
     return 0;
 }
 
@@ -644,21 +640,18 @@ sub summarizeLS {
 
     return 0 if $self->{CONF}->{"gls"}->{"maintenance_interval"} == 0;
 
-    my $start_time = [Time::HiRes::gettimeofday];
-
-
     $self->{STATE}->{"messageKeys"} = ();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $error      = q{};
     my $errorFlag  = 0;
     my $metadatadb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ($metadatadb) {
+    unless ( $metadatadb ) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
 
     my $dbTr = $metadatadb->getTransaction( { error => \$error } );
-    unless ($dbTr) {
+    unless ( $dbTr ) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
@@ -676,13 +669,13 @@ sub summarizeLS {
         my $sum_error     = q{};
         my $sum_errorFlag = 0;
         my $summarydb     = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-        unless ($summarydb) {
+        unless ( $summarydb ) {
             $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $sum_error );
             return -1;
         }
 
         my $sum_dbTr = $summarydb->getTransaction( { error => \$sum_error } );
-        unless ($sum_dbTr) {
+        unless ( $sum_dbTr ) {
             $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
             undef $sum_dbTr;
             $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $sum_error . "\"." );
@@ -697,7 +690,7 @@ sub summarizeLS {
             my $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
             my $contactName  = q{};
             my $contactType  = q{};
-            unless ($contactPoint) {
+            unless ( $contactPoint ) {
                 $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
                 $contactName  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
                 $contactType  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
@@ -719,21 +712,22 @@ sub summarizeLS {
                 my @elements = ( "address", "ipAddress", "name" );
                 my @types = ( "ipv4", "IPv4" );
                 my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
-                $service_addresses = ( $service_addresses, $extractedAddress );
-                $all_addresses = ( $all_addresses, $extractedAddress );                
+                $service_addresses = merge( $service_addresses, $extractedAddress );
+                $all_addresses = merge( $all_addresses, $extractedAddress ); 
 
                 my @hosts = ();
                 @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                 my $extractedDomains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                $service_domains = ( $service_domains, $extractedDomains );
-                $all_domains = ( $all_domains, $extractedDomains );
+                $service_domains = merge( $service_domains, $extractedDomains );
+                $all_domains = merge( $all_domains, $extractedDomains );
 
                 my @urns = ();
                 @types = ( "urn", "URN" );
                 my $id = $node->getAttribute("id");
                 push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                $service_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                $all_domains     = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                my $extractedDomains2 = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns } );
+                $service_domains = merge( $service_domains, $extractedDomains2 );
+                $all_domains = merge( $all_domains, $extractedDomains2 );
             }
 
             my $temp_services = find( $doc->getDocumentElement, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='service']", 0 );
@@ -748,7 +742,7 @@ sub summarizeLS {
                 );
                 foreach my $e ( $temp_eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
-                    if ($value) {
+                    if ( $value ) {
                         $service_eventTypes->{$value} = 1;
                         $all_eventTypes->{$value}     = 1;
                     }
@@ -763,7 +757,7 @@ sub summarizeLS {
                     my $name = $k->getAttribute("name");
                     next unless $name and $name =~ m/^keyword/;
                     my $value = extract( $k, 0 );
-                    if ($value) {
+                    if ( $value ) {
                         $service_keywords->{$name}->{$value} = 1;
                         $all_keywords->{$name}->{$value}     = 1;
                     }
@@ -772,14 +766,14 @@ sub summarizeLS {
                 my $temp_addresses = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='address' ]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $value = extract( $a, 0 );
-                    if ($value) {
-                        my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI($value);
+                    if ( $value ) {
+                        my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $value );
                         next unless $host;
-                        if ( is_ipv4($host) ) {
+                        if ( is_ipv4( $host ) ) {
                             $service_addresses->{$host} = 1 unless exists $service_addresses->{$host};
                             $all_addresses->{$host}     = 1 unless exists $all_addresses->{$host};
                         }
-                        elsif ( &Net::IPv6Addr::is_ipv6($host) ) {
+                        elsif ( &Net::IPv6Addr::is_ipv6( $host ) ) {
 
                             # unused currently
                         }
@@ -805,15 +799,16 @@ sub summarizeLS {
                     my @elements = ( "address", "name" );
                     my @types    = ( "node", "domain", "dns", "DNS" );
                     my $extractedDomains = $self->summarizeHosts( { search => $d, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                    $service_domains = ( $service_domains, $extractedDomains );
-                    $all_domains = ( $all_domains, $extractedDomains );
+                    $service_domains = merge( $service_domains, $extractedDomains );
+                    $all_domains = merge( $all_domains, $extractedDomains );
 
                     my @urns = ();
                     push @elements, "idRef";
                     push @types,    "urn";
                     push @types,    "URN";
-                    $service_domains = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                    $all_domains     = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                    my $extractedDomains2 = $self->summarizeURN( { search => $d, elements => \@elements, types => \@types, urnarray => \@urns } );
+                    $service_domains = merge( $service_domains, $extractedDomains2 );
+                    $all_domains = merge( $all_domains, $extractedDomains2 );
                 }
             }
 
@@ -830,17 +825,15 @@ sub summarizeLS {
                     my $temp_supportedEventTypes = find( $doc2->getDocumentElement, ".//nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
                     foreach my $e ( $temp_eventTypes->get_nodelist ) {
                         my $value = extract( $e, 0 );
-                        if ($value) {
-                            $service_eventTypes->{$value} = 1;
-                            $all_eventTypes->{$value}     = 1;
-                        }
+                        next unless $value;
+                        $service_eventTypes->{$value} = 1;
+                        $all_eventTypes->{$value}     = 1;
                     }
                     foreach my $se ( $temp_supportedEventTypes->get_nodelist ) {
                         my $value = extract( $se, 0 );
-                        if ($value) {
-                            $service_eventTypes->{$value} = 1;
-                            $all_eventTypes->{$value}     = 1;
-                        }
+                        next unless $value;
+                        $service_eventTypes->{$value} = 1;
+                        $all_eventTypes->{$value}     = 1;
                     }
 
                     my $temp_keywords = find( $doc2->getDocumentElement, ".//nmwg:parameter", 0 );
@@ -848,18 +841,18 @@ sub summarizeLS {
                         my $name = $k->getAttribute("name");
                         next unless $name and $name =~ m/^keyword/;
                         my $value = extract( $k, 0 );
-                        if ($value) {
+                        if ( $value ) {
                             $service_keywords->{$name}->{$value} = 1;
                             $all_keywords->{$name}->{$value}     = 1;
                         }
                     }
 
-                    if ( $self->{CONF}->{"gls"}->{"root"} ) {
+                    if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
                         my $temp_networks = find( $doc2->getDocumentElement, "./summary:subject/nmtl3:network", 0 );
                         foreach my $n ( $temp_networks->get_nodelist ) {
                             my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
                             my $mask    = extract( find( $n, "./nmtl3:subnet/nmtl3:netmask", 1 ), 0 );
-                            if ($address) {
+                            if ( $address ) {
                                 $address .= "/" . $mask if $mask;
                                 $service_addresses->{$address} = 1;
                                 $all_addresses->{$address}     = 1;
@@ -869,7 +862,7 @@ sub summarizeLS {
                         my $temp_domains = find( $doc2->getDocumentElement, "./summary:subject/nmtb:domain", 0 );
                         foreach my $d ( $temp_domains->get_nodelist ) {
                             my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
-                            if ($name) {
+                            if ( $name ) {
                                 $service_domains->{$name} = 1;
                                 $all_domains->{$name}     = 1;
                             }
@@ -883,22 +876,23 @@ sub summarizeLS {
                             my @elements = ( "address", "ipAddress", "ifAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $interface, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress ); 
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             push @hosts, extract( find( $interface, "./*[local-name()='hostName']", 1 ), 0 );
                             my $extractedDomains = $self->summarizeHosts( { search => $interface, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
-                    
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
+
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $interface->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $interface, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (port)
@@ -915,21 +909,22 @@ sub summarizeLS {
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $port, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $port, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $port->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $port, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (node)
@@ -938,22 +933,23 @@ sub summarizeLS {
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $node, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $node, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $node->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
                             push @urns, extract( find( $node, "./*[local-name()='relation' and \@type=\"connectionLink\"]/nmtb:linkIdRef", 1 ), 0 );
-                            $service_domains = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $node, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (network)
@@ -971,21 +967,22 @@ sub summarizeLS {
                             my @elements = ("name");
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $network, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $network, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $network->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $network, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (domain)
@@ -995,15 +992,16 @@ sub summarizeLS {
                             my @elements = ("name");
                             my @types    = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $domain, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $domain->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $domain, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (service)
@@ -1013,22 +1011,22 @@ sub summarizeLS {
                             my @elements = ( "address", "ipAddress", "name" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $service, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
-
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $service, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $service->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $service, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (endPointPair)
@@ -1037,21 +1035,22 @@ sub summarizeLS {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $endpointpair->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (endPointPair)
@@ -1060,21 +1059,22 @@ sub summarizeLS {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $endpointpair, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
-                            
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
+
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $endpointpair, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $endpointpair->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $endpointpair, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
 
                         # topology junk (endPoint)
@@ -1083,21 +1083,22 @@ sub summarizeLS {
                             my @elements = ( ".", "address", "ipAddress", "name", "src", "dst" );
                             my @types = ( "ipv4", "IPv4" );
                             my $extractedAddress = $self->summarizeAddress( { search => $endpoint, elements => \@elements, types => \@types } );
-                            $service_addresses = ( $service_addresses, $extractedAddress );
-                            $all_addresses = ( $all_addresses, $extractedAddress );  
+                            $service_addresses = merge( $service_addresses, $extractedAddress );
+                            $all_addresses = merge( $all_addresses, $extractedAddress );
 
                             my @hosts = ();
                             @types = ( "hostname", "hostName", "host", "dns", "DNS" );
                             my $extractedDomains = $self->summarizeHosts( { search => $endpoint, elements => \@elements, types => \@types, hostarray => \@hosts } );
-                            $service_domains = ( $service_domains, $extractedDomains );
-                            $all_domains = ( $all_domains, $extractedDomains );
+                            $service_domains = merge( $service_domains, $extractedDomains );
+                            $all_domains = merge( $all_domains, $extractedDomains );
 
                             my @urns = ();
                             @types = ( "urn", "URN" );
                             my $id = $endpoint->getAttribute("id");
                             push @urns, $id if $id and $id =~ m/^urn:ogf:network:/;
-                            $service_domains = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns, urns => $service_domains } );
-                            $all_domains     = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns, urns => $all_domains } );
+                            my $extractedDomains2 = $self->summarizeURN( { search => $endpoint, elements => \@elements, types => \@types, urnarray => \@urns } );
+                            $service_domains = merge( $service_domains, $extractedDomains2 );
+                            $all_domains = merge( $all_domains, $extractedDomains2 );
                         }
                     }
                 }
@@ -1109,7 +1110,7 @@ sub summarizeLS {
 
             # specific service done
             my $list1;
-            if ( $self->{CONF}->{"gls"}->{"root"} ) {
+            if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
                 foreach my $host ( keys %{$service_addresses} ) {
                     push @{$list1}, $host;
                 }
@@ -1119,7 +1120,7 @@ sub summarizeLS {
             }
             my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $service_domains, eventTypes => $service_eventTypes, keywords => $service_keywords } );
 
-            unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
+            unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
                 $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $sum_dbTr } );
             }
 
@@ -1134,8 +1135,8 @@ sub summarizeLS {
             }
 
             my $auth = 1;
-            unless ( $self->{STATE}->{"messageKeys"}->{$serviceKey} == 2 ) {
-                if ( $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
+            unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} == 2 ) {
+                if ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
                     $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
                     $summarydb->updateByName( { content => createControlKey( { key => $serviceKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $serviceKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                     $sum_errorFlag++ if $sum_error;
@@ -1152,11 +1153,11 @@ sub summarizeLS {
                 $self->{STATE}->{"messageKeys"}->{$serviceKey} = 2;
             }
 
-            my $cleanHash = md5_hex($serviceSummary);
+            my $cleanHash = md5_hex( $serviceSummary );
             my $success = $summarydb->queryByName( { name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
 
             $sum_errorFlag++ if $sum_error;
-            unless ($success) {
+            unless ( $success ) {
                 my $insRes = $summarydb->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $serviceKey . "/" . $cleanHash, metadataId => $serviceKey, data => $serviceSummary } ), name => $serviceKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
             }
@@ -1175,7 +1176,7 @@ sub summarizeLS {
         my $service2 = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKey . "\">\n" . $ls_client->createService( { service => \%service_conf } ) . "  </nmwg:metadata>\n";
 
         my $list2;
-        if ( $self->{CONF}->{"gls"}->{"root"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
             foreach my $host ( keys %{$all_addresses} ) {
                 push @{$list2}, $host;
             }
@@ -1186,7 +1187,7 @@ sub summarizeLS {
 
         my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $all_domains, eventTypes => $all_eventTypes, keywords => $all_keywords } );
 
-        unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+        unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
             $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $sum_dbTr } );
         }
 
@@ -1201,8 +1202,8 @@ sub summarizeLS {
         }
 
         my $auth = 1;
-        unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
-            if ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+        unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
+            if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
                 $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
                 $summarydb->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $sum_dbTr, error => \$sum_error } );
                 $sum_errorFlag++ if $sum_error;
@@ -1217,16 +1218,16 @@ sub summarizeLS {
             $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
         }
 
-        my $cleanHash = md5_hex($totalSummary);
+        my $cleanHash = md5_hex( $totalSummary );
         my $success = $summarydb->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
 
         $sum_errorFlag++ if $sum_error;
-        unless ($success) {
+        unless ( $success ) {
             my $insRes = $summarydb->insertIntoContainer( { content => createLSData( { type => "LSStore-summary", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $totalSummary } ), name => $mdKey . "/" . $cleanHash, txn => $sum_dbTr, error => \$sum_error } );
             $sum_errorFlag++ if $sum_error;
         }
 
-        if ($sum_errorFlag) {
+        if ( $sum_errorFlag ) {
             $summarydb->abortTransaction( { txn => $sum_dbTr, error => \$sum_error } ) if $sum_dbTr;
             undef $sum_dbTr;
             $summarydb->checkpoint( { error => \$error } );
@@ -1255,7 +1256,7 @@ sub summarizeLS {
         $self->{LOGGER}->error("Services not registered, cannot summarize at this time.");
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $metadatadb->checkpoint( { error => \$error } );
@@ -1279,11 +1280,6 @@ sub summarizeLS {
             return -1;
         }
     }
-
-    my $end_time = [Time::HiRes::gettimeofday];
-    my $diff = Time::HiRes::tv_interval $start_time, $end_time;
-    $self->{LOGGER}->info("Summarization Time:\t" . $diff . " seconds." );
-
     return 0;
 }
 
@@ -1371,8 +1367,9 @@ Given a URN string, parse this to extract meaningful parts.
 
 sub summarizeURN {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, urnarray => 1, urns => 1 } );
+    my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, urnarray => 1 } );
 
+    my %urns = ();
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             my $temp_urns = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
@@ -1397,7 +1394,7 @@ sub summarizeURN {
                         $cat .= "." . $urnArray[$len2];
                     }
                     $cat =~ s/^\.//;
-                    $parameters->{urns}->{$cat} = 1 if $cat;
+                    $urns{$cat} = 1 if $cat;
                 }
 
                 # we are stopping after domain for now...
@@ -1407,7 +1404,7 @@ sub summarizeURN {
         $counter++;
     }
 
-    return $parameters->{urns};
+    return \%urns;
 }
 
 =head2 summarizeAddress( $self, { search, elements, types, addresses } );
@@ -1422,26 +1419,26 @@ sub summarizeAddress {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1 } );
 
-    my $addresses = q{};
+    my %addresses = ();
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             if ( $element eq "." ) {
                 my $temp_addresses = find( $parameters->{search}, ".//*[\@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $addresses->{$address} = 1 if $address and is_ipv4( $address );
+                    $addresses{$address} = 1 if $address and is_ipv4( $address );
                 }
             }
             else {
                 my $temp_addresses = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
                 foreach my $a ( $temp_addresses->get_nodelist ) {
                     my $address = extract( $a, 0 );
-                    $addresses->{$address} = 1 if $address and is_ipv4( $address );
+                    $addresses{$address} = 1 if $address and is_ipv4( $address );
                 }
             }
         }
     }
-    return $addresses;
+    return \%addresses;
 }
 
 =head2 summarizeHosts($self, { search, elements, types, hostarray, hosts } );
@@ -1456,7 +1453,7 @@ sub summarizeHosts {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { search => 1, elements => 1, types => 1, hostarray => 1 } );
 
-    my $hosts = q{};
+    my %hosts = ();
     foreach my $element ( @{ $parameters->{elements} } ) {
         foreach my $type ( @{ $parameters->{types} } ) {
             my $temp_hosts = find( $parameters->{search}, ".//*[local-name()='" . $element . "' and \@type=\"" . $type . "\"]", 0 );
@@ -1477,11 +1474,11 @@ sub summarizeHosts {
                 $cat .= "." . $hostArray[$len2];
             }
             $cat =~ s/^\.//;
-            $hosts->{$cat} = 1 if $cat;
+            $hosts{$cat} = 1 if $cat;
         }
     }
 
-    return $hosts;
+    return \%hosts;
 }
 
 =head2 ipSummarization( $self, { addresses } )
@@ -1745,7 +1742,7 @@ sub cleanLS {
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
     my $metadatadb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ($metadatadb) {
+    unless ( $metadatadb ) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
         return -1;
     }
@@ -1756,7 +1753,7 @@ sub cleanLS {
     }
 
     my $summarydb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-    unless ($summarydb) {
+    unless ( $summarydb ) {
         $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
         return -1;
     }
@@ -1784,7 +1781,7 @@ sub cleanLSAux {
     my $parser    = XML::LibXML->new();
 
     my $dbTr = $parameters->{database}->getTransaction( { error => \$error } );
-    unless ($dbTr) {
+    unless ( $dbTr ) {
         $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
@@ -1808,7 +1805,7 @@ sub cleanLSAux {
             my $did = $doc->getDocumentElement->getAttribute("id");
             next unless $did;
             my $mdid = $doc->getDocumentElement->getAttribute("metadataIdRef");
-            if ($mdid) {
+            if ( $mdid ) {
                 $dataTracker{$did} = $mdid if not exists $dataTracker{$did};
                 if ( exists $dataTrackerLookup{$mdid} ) {
                     push @{ $dataTrackerLookup{$mdid} }, $did;
@@ -1846,7 +1843,7 @@ sub cleanLSAux {
             next unless $mid;
 
             my $midr = $doc->getDocumentElement->getAttribute("metadataIdRef");
-            if ($midr) {
+            if ( $midr ) {
                 my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
                 if ( $time =~ m/^\d+$/ ) {
                     if ( $parameters->{time} >= $time ) {
@@ -1922,7 +1919,7 @@ sub cleanLSAux {
         }
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $self->{LOGGER}->error("Database errors prevented the transaction from completing.");
@@ -2001,7 +1998,7 @@ sub isValidKey {
         $result = $parameters->{database}->queryByName( { name => $parameters->{key}, txn => q{}, error => \$error } );
     }
 
-    if ($result) {
+    if ( $result ) {
         $self->{LOGGER}->debug( "Key \"" . $parameters->{key} . "\" found in database." );
         return 1;
     }
@@ -2027,7 +2024,7 @@ sub handleMessage {
     ( my $messageTypeReturn = $parameters->{messageType} ) =~ s/Request/Response/xm;
 
     my $msgParams = find( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement, "./nmwg:parameters", 1 );
-    if ($msgParams) {
+    if ( $msgParams ) {
         $msgParams = $self->handleMessageParameters( { msgParams => $msgParams } );
         $parameters->{output}->addExistingXMLElement($msgParams);
     }
@@ -2035,12 +2032,12 @@ sub handleMessage {
     startMessage( $parameters->{output}, $messageIdReturn, $parameters->{messageId}, $messageTypeReturn, q{}, undef );
 
     my $metadatadb = $self->prepareDatabase( { doc => $parameters->{output}, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ($metadatadb) {
+    unless ( $metadatadb ) {
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Metadata Database could not be opened." );
         return;
     }
     my $summarydb = $self->prepareDatabase( { doc => $parameters->{output}, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-    unless ($summarydb) {
+    unless ( $summarydb ) {
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Summary Database could not be opened." );
         return;
     }
@@ -2052,28 +2049,26 @@ sub handleMessage {
         my $errorMessage   = q{};
         my $m              = find( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement, "./nmwg:metadata[\@id=\"" . $d->getAttribute("metadataIdRef") . "\"]", 1 );
         try {
-            unless ($m) {
+            unless ( $m ) {
                 throw perfSONAR_PS::Error_compat( "error.ls.data_trigger", "Matching metadata not found for data trigger \"" . $d->getAttribute("id") . "\"" );
             }
 
-            if ( $parameters->{messageType} eq "LSRegisterRequest" ) {
+            if ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSRegisterRequest" ) {
                 $self->{LOGGER}->debug("Parsing LSRegister request.");
                 $self->lsRegisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, database => $metadatadb } );
             }
-            elsif ( $parameters->{messageType} eq "LSDeregisterRequest" ) {
+            elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSDeregisterRequest" ) {
                 $self->{LOGGER}->debug("Parsing LSDeregister request.");
                 $self->lsDeregisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, metadatadb => $metadatadb, summarydb => $summarydb } );
             }
-            elsif ( $parameters->{messageType} eq "LSKeepaliveRequest" ) {
+            elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeepaliveRequest" ) {
                 $self->{LOGGER}->debug("Parsing LSKeepalive request.");
                 $self->lsKeepaliveRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
             }
-            elsif ($parameters->{messageType} eq "LSQueryRequest"
-                or $parameters->{messageType} eq "LSLookupRequest" )
-            {
+            elsif ( exists $parameters->{messageType} and $parameters->{messageType} and ( $parameters->{messageType} eq "LSQueryRequest" or $parameters->{messageType} eq "LSLookupRequest" ) ) {
                 $self->lsQueryRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
             }
-            elsif ( $parameters->{messageType} eq "LSKeyRequest" ) {
+            elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeyRequest" ) {
                 $self->lsKeyRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
             }
             else {
@@ -2100,7 +2095,7 @@ sub handleMessage {
             $errorEventType = "error.ls.internal_error";
             $errorMessage   = "An internal error occurred.";
         };
-        if ($errorEventType) {
+        if ( $errorEventType ) {
             my $mdIdRef = q{};
             if ( $m and $m->getAttribute("id") ) {
                 $mdIdRef = $m->getAttribute("id");
@@ -2114,7 +2109,7 @@ sub handleMessage {
 
     $metadatadb->closeDB( { error => \$error } );
     $summarydb->closeDB(  { error => \$error } );
-    unless ($counter) {
+    unless ( $counter ) {
         throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." );
     }
 
@@ -2151,13 +2146,13 @@ sub lsRegisterRequest {
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    if ( $self->{"CONF"}->{"gls"}->{"root"} ) {
-        if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0" ) {
+    if ( exists $self->{"CONF"}->{"gls"}->{"root"} and $self->{"CONF"}->{"gls"}->{"root"} ) {
+        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/summary/2.0" ) {
 
             # comes from an hLS to a gLS, this is authoratative
             $auth = 1;
         }
-        elsif ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+        elsif ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
 
             # comes from an gLS to a gLS, this is NOT authoratative
             $auth = 0;
@@ -2188,8 +2183,8 @@ sub lsRegisterRequest {
         # hLS should have no eventType, or the service registration eventType.
         # Everything else is rejected, and these previous two interactions are
         # authoratative.
-        unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
-            if ($eventType) {
+        unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
+            if ( $eventType ) {
                 throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
             }
         }
@@ -2205,15 +2200,15 @@ sub lsRegisterRequest {
     }
 
     my $dbTr = $parameters->{database}->getTransaction( { error => \$error } );
-    unless ($dbTr) {
+    unless ( $dbTr ) {
         $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start summary database transaction, database responded with \"" . $error . "\"." );
     }
 
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
-    if ($mdKey) {
-        unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+    if ( $mdKey ) {
+        unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
             $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $parameters->{database}, key => $mdKey } );
         }
 
@@ -2222,7 +2217,7 @@ sub lsRegisterRequest {
         }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-        if ($service) {
+        if ( $service ) {
 
             # 'clobber' registration case
 
@@ -2233,7 +2228,7 @@ sub lsRegisterRequest {
             # still the clobber case, but 'node' is acceptable here as well (will be more in the future, ugh...
 
             my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
-            if ($node) {
+            if ( $node ) {
 
                 # 'clobber' registration case
 
@@ -2291,7 +2286,7 @@ sub lsRegisterRequestUpdateNew {
     $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='accessPoint']", 1 ), 0 );
     my $accessType = q{};
     my $accessName = q{};
-    unless ($accessPoint) {
+    unless ( $accessPoint ) {
         $accessPoint = extract( find( $parameters->{topology}, ".//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{topology}, ".//*[local-name()='type']",    1 ), 0 );
         $accessName  = extract( find( $parameters->{topology}, ".//*[local-name()='name']",    1 ), 0 );
@@ -2304,7 +2299,7 @@ sub lsRegisterRequestUpdateNew {
     my $mdKeyStorage = md5_hex( $accessPoint . $accessType . $accessName );
 
     my $update = 1;
-    if ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+    if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
         my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => q{}, error => \$error } );
         $errorFlag++ if $error;
         if ( lc( $resultsString[0] ) eq "yes" ) {
@@ -2316,7 +2311,7 @@ sub lsRegisterRequestUpdateNew {
         }
     }
 
-    if ($update) {
+    if ( $update ) {
 
         # remove all the old stuff (it's a 'clobber' after all)
 
@@ -2331,9 +2326,9 @@ sub lsRegisterRequestUpdateNew {
         $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } = 0;
     }
 
-    unless ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2 ) {
-        if ( $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} ) {
-            if ($update) {
+    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} and $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} == 2 ) {
+        if ( exists $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} and $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} ) {
+            if ( $update ) {
 
                 # update the key (if we are allowed to)
 
@@ -2355,7 +2350,7 @@ sub lsRegisterRequestUpdateNew {
     }
 
     my $dCount = 0;
-    if ($update) {
+    if ( $update ) {
 
         # add the data (if we are allowed to)
         foreach my $d_content ( $parameters->{d}->childNodes ) {
@@ -2366,7 +2361,7 @@ sub lsRegisterRequestUpdateNew {
 
                 my $success = $parameters->{database}->queryByName( { name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                unless ($success) {
+                unless ( $success ) {
                     my $insRes = $parameters->{database}
                         ->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                     $errorFlag++ if $error;
@@ -2376,7 +2371,7 @@ sub lsRegisterRequestUpdateNew {
         }
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         undef $parameters->{dbTr};
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
@@ -2417,7 +2412,7 @@ sub lsRegisterRequestUpdate {
     my $dId       = "data." . genuid();
 
     my $update = 1;
-    if ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+    if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
         my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$error } );
         $errorFlag++ if $error;
         if ( lc( $resultsString[0] ) eq "yes" ) {
@@ -2430,11 +2425,11 @@ sub lsRegisterRequestUpdate {
     }
 
     my $dCount = 0;
-    if ($update) {
+    if ( $update ) {
 
         # only update if we are allowed to do so
 
-        if ( $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } == 1 ) {
+        if ( exists $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } and $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } == 1 ) {
             $self->{LOGGER}->debug("Key already exists, but updating control time information anyway.");
             $parameters->{database}
                 ->updateByName( { content => createControlKey( { key => $parameters->{mdKey}, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$error } );
@@ -2443,7 +2438,7 @@ sub lsRegisterRequestUpdate {
         }
         $self->{LOGGER}->debug("Key already exists and was already updated in this message, skipping.");
 
-        if ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+        if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
 
             # special case: we always want to clobber the summary data
             # (e.g. it may be different from time to time, therefore
@@ -2466,7 +2461,7 @@ sub lsRegisterRequestUpdate {
 
                 my $success = $parameters->{database}->queryByName( { name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                unless ($success) {
+                unless ( $success ) {
                     my $insRes = $parameters->{database}->insertIntoContainer(
                         { content => createLSData( { type => "LSStore", dataId => $parameters->{mdKey} . "/" . $cleanHash, metadataId => $parameters->{mdKey}, data => $d_content->toString } ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                     $errorFlag++ if $error;
@@ -2476,7 +2471,7 @@ sub lsRegisterRequestUpdate {
         }
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         undef $parameters->{dbTr};
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
@@ -2535,7 +2530,7 @@ sub lsRegisterRequestNew {
     $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']/*[local-name()='accessPoint']", 1 ), 0 );
     my $accessType = q{};
     my $accessName = q{};
-    unless ($accessPoint) {
+    unless ( $accessPoint ) {
         $accessPoint = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
         $accessType  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
         $accessName  = extract( find( $parameters->{m}, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
@@ -2551,7 +2546,7 @@ sub lsRegisterRequestNew {
     }
 
     my $update = 1;
-    if ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+    if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
         my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $mdKey . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$error } );
         $errorFlag++ if $error;
         if ( lc( $resultsString[0] ) eq "yes" ) {
@@ -2563,10 +2558,10 @@ sub lsRegisterRequestNew {
         }
     }
 
-    unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
-        if ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-            if ( $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
-                if ($update) {
+    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} == 2 ) {
+        if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+            if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
+                if ( $update ) {
                     $parameters->{database}->updateByName( { content => createControlKey( { key => $mdKey, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$error } );
                     $errorFlag++ if $error;
 
@@ -2612,7 +2607,7 @@ sub lsRegisterRequestNew {
     }
 
     my $dCount = 0;
-    if ($update) {
+    if ( $update ) {
 
         # add only if we are allowed to
 
@@ -2623,7 +2618,7 @@ sub lsRegisterRequestNew {
                 my $cleanHash = md5_hex( $cleanNode->toString );
                 my $success = $parameters->{database}->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                 $errorFlag++ if $error;
-                unless ($success) {
+                unless ( $success ) {
                     my $insRes
                         = $parameters->{database}->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$error } );
                     $errorFlag++ if $error;
@@ -2633,7 +2628,7 @@ sub lsRegisterRequestNew {
         }
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
         undef $parameters->{dbTr};
@@ -2684,32 +2679,32 @@ sub lsDeregisterRequest {
     my $dId   = "data." . genuid();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
-    unless ($mdKey) {
+    unless ( $mdKey ) {
         throw perfSONAR_PS::Error_compat( "error.ls.deregister.key_not_found", "Key not found in message." );
     }
 
     my $summary = 0;
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0"
+    unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0"
         or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" )
     {
-        if ($eventType) {
+        if ( $eventType ) {
             throw perfSONAR_PS::Error_compat( "error.ls.deregister.eventType", "Incorrect eventType for LSDeregisterRequest." );
         }
     }
 
-    if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
+    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
         $summary++;
     }
     my $database = q{};
-    if ($summary) {
+    if ( $summary ) {
         $database = $parameters->{summarydb};
     }
     else {
         $database = $parameters->{metadatadb};
     }
 
-    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
     }
 
@@ -2718,7 +2713,7 @@ sub lsDeregisterRequest {
     }
 
     my $dbTr = $database->getTransaction( { error => \$error } );
-    unless ($dbTr) {
+    unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start database transaction, database responded with \"" . $error . "\"." );
@@ -2752,7 +2747,7 @@ sub lsDeregisterRequest {
         foreach my $d_md (@deregs) {
 
             my $removeQuery = q{};
-            if ($mdFlag) {
+            if ( $mdFlag ) {
                 @resultsString = $database->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]/nmwg:metadata[" . getMetadataXQuery( { node => $d_md } ) . "]", txn => $dbTr, error => \$error } );
             }
             else {
@@ -2767,7 +2762,7 @@ sub lsDeregisterRequest {
         $msg = "Removed [" . ( $#resultsString + 1 ) . "] data elements for key \"" . $mdKey . "\".";
     }
 
-    if ($errorFlag) {
+    if ( $errorFlag ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
@@ -2817,32 +2812,32 @@ sub lsKeepaliveRequest {
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
-    unless ($mdKey) {
+    unless ( $mdKey ) {
         throw perfSONAR_PS::Error_compat( "error.ls.keepalive.key_not_found", "Key not found in message." );
     }
 
     my $summary = 0;
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0"
+    unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0"
         or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" )
     {
-        if ($eventType) {
+        if ( $eventType ) {
             throw perfSONAR_PS::Error_compat( "error.ls.keepalive.eventType", "Incorrect eventType for LSKeepaliveRequest." );
         }
     }
 
-    if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
+    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
         $summary++;
     }
     my $database = q{};
-    if ($summary) {
+    if ( $summary ) {
         $database = $parameters->{summarydb};
     }
     else {
         $database = $parameters->{metadatadb};
     }
 
-    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
     }
 
@@ -2850,10 +2845,10 @@ sub lsKeepaliveRequest {
         throw perfSONAR_PS::Error_compat( "error.ls.keepalive.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
     }
 
-    if ( $self->{STATE}->{"messageKeys"}->{$mdKey} == 1 ) {
+    if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} == 1 ) {
 
         my $database;
-        if ($summary) {
+        if ( $summary ) {
             $database = $parameters->{summarydb};
         }
         else {
@@ -2861,7 +2856,7 @@ sub lsKeepaliveRequest {
         }
 
         my $dbTr = $database->getTransaction( { error => \$error } );
-        unless ($dbTr) {
+        unless ( $dbTr ) {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start database transaction, database responded with \"" . $error . "\"." );
@@ -2936,11 +2931,11 @@ sub lsQueryRequest {
 
     my $database;
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    if ( $eventType and $summary_map{$eventType} ) {
+    if ( $eventType and exists $summary_map{$eventType} and $summary_map{$eventType} ) {
         $database = $parameters->{summarydb};
     }
     else {
-        if ( $eventType and $query_map{$eventType} ) {
+        if ( $eventType and exists $query_map{$eventType} and $query_map{$eventType} ) {
             $database = $parameters->{metadatadb};
         }
         else {
@@ -2949,15 +2944,15 @@ sub lsQueryRequest {
     }
 
     # special case discovery message
-    if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
+    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
         my $sum_parameters = find( $parameters->{m}, "./summary:parameters", 1 );
 
         my $subject = find( $parameters->{m}, "./summary:subject", 1 );
-        unless ($subject) {
+        unless ( $subject ) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." );
         }
 
-        if ( $self->{CONF}->{"gls"}->{"root"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
 
             # special case for 'self' summary in the hLS instances
             $database = $parameters->{metadatadb};
@@ -2973,7 +2968,7 @@ sub lsQueryRequest {
             $sent->{"eventType"}->{$value} = 1;
         }
 
-        if ($sum_parameters) {
+        if ( $sum_parameters ) {
             my $l2_eventTypes = find( $sum_parameters, ".//nmwg:parameter[\@name=\"eventType\" or \@name=\"supportedEventType\"]", 0 );
             foreach my $e ( $l2_eventTypes->get_nodelist ) {
                 my $value = extract( $e, 0 );
@@ -2998,7 +2993,7 @@ sub lsQueryRequest {
 
         # pull out items from the summary parameters
 
-        if ($sum_parameters) {
+        if ( $sum_parameters ) {
             my $l_keywords = find( $sum_parameters, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
             foreach my $k ( $l_keywords->get_nodelist ) {
                 my $value = extract( $k, 0 );
@@ -3023,7 +3018,7 @@ sub lsQueryRequest {
             $store{"keyword"}   = 0 if exists $sent->{"keyword"};
 
             # gather eventTypes
-            if ( exists $store{"eventType"} ) {
+            if ( exists $store{"eventType"} and $store{"eventType"} ) {
                 my $l_eventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:eventType", 0 );
                 my $l_supportedEventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
                 foreach my $e ( $l_eventTypes->get_nodelist ) {
@@ -3039,7 +3034,7 @@ sub lsQueryRequest {
             }
 
             # gather the domains
-            if ( exists $store{"domain"} ) {
+            if ( exists $store{"domain"} and $store{"domain"} ) {
                 my $l_domains = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
                 foreach my $d ( $l_domains->get_nodelist ) {
                     my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
@@ -3049,14 +3044,14 @@ sub lsQueryRequest {
             }
 
             #gather the networks
-            if ( exists $store{"address"} ) {
+            if ( exists $store{"address"} and $store{"address"} ) {
 
                 my $l_networks = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
                 my @cidr_list = ();
                 foreach my $n ( $l_networks->get_nodelist ) {
                     my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
                     my $mask    = extract( find( $n, "./nmtl3:subnet/nmtl3:netmask", 1 ), 0 );
-                    if ($address) {
+                    if ( $address ) {
                         $address .= "/" . $mask if $mask;
                         @cidr_list = Net::CIDR::cidradd( $address, @cidr_list );
                     }
@@ -3069,7 +3064,7 @@ sub lsQueryRequest {
             }
 
             # gather keywords
-            if ( exists $store{"keyword"} ) {
+            if ( exists $store{"keyword"} and $store{"keyword"} ) {
                 my $l_keywords = find( $doc->getDocumentElement, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
                 foreach my $k ( $l_keywords->get_nodelist ) {
                     my $value = extract( $k, 0 );
@@ -3085,7 +3080,7 @@ sub lsQueryRequest {
                 last if $flag <= 0;
             }
 
-            if ($flag) {
+            if ( $flag ) {
                 my $query2         = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute("metadataIdRef") . "\"]";
                 my @resultsString2 = $database->query( { query => $query2, txn => q{}, error => \$error } );
                 my $len2           = $#resultsString2;
@@ -3109,20 +3104,20 @@ sub lsQueryRequest {
     else {
 
         # deny the 'control' eventTypes for now
-        if (   $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0"
+        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0"
             or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" )
         {
-            throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Sent evnentType not supported." );
+            throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Sent eventType not supported." );
         }
 
         my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
-        unless ($query) {
+        unless ( $query ) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
         }
         $query =~ s/\s+\// collection('CHANGEME')\//gmx;
 
         my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
-        if ($error) {
+        if ( $error ) {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
         }
 
@@ -3131,18 +3126,18 @@ sub lsQueryRequest {
         for my $x ( 0 .. $len ) {
             $dataString = $dataString . $resultsString[$x];
         }
-        unless ($dataString) {
+        unless ( $dataString ) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
         }
 
         createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute("id"), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
         my $mdPparameters = q{};
         $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
-        if ( not $mdPparameters ) {
+        unless ( $mdPparameters ) {
             $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./nmwg:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
         }
 
-        if ( $mdPparameters eq "native" ) {
+        if ( $mdPparameters and $mdPparameters eq "native" ) {
             createData( $parameters->{doc}, $dId, $mdId, "<psservice:datum xmlns:psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\">" . $dataString . "</psservice:datum>\n", undef );
         }
         else {
@@ -3170,34 +3165,33 @@ sub lsKeyRequest {
     my $summary   = 0;
     my $et        = find( $parameters->{m}, "./nmwg:eventType", 1 );
     my $eventType = extract( $et, 0 );
-    unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0"
+    unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0"
         or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" )
     {
-        if ($eventType) {
+        if ( $eventType ) {
             throw perfSONAR_PS::Error_compat( "error.ls.key.eventType", "Incorrect eventType for LSKeyRequest." );
         }
     }
 
-    if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
+    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
         $summary++;
     }
 
     my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
-    if ($service) {
+    if ( $service ) {
         my $junk = q{};
         $junk = $parameters->{m}->removeChild($et) if $et;
         my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
 
         my @resultsString = ();
-
-        if ($summary) {
+        if ( $summary ) {
             @resultsString = $parameters->{summarydb}->query( { query => $queryString, txn => q{}, error => \$error } );
         }
         else {
             @resultsString = $parameters->{metadatadb}->query( { query => $queryString, txn => q{}, error => \$error } );
         }
 
-        if ($error) {
+        if ( $error ) {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
         }
 

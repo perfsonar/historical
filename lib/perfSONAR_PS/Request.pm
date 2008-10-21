@@ -4,8 +4,11 @@ use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME',
 
 use strict;
 use warnings;
+use diagnostics;
+
 use Log::Log4perl qw(get_logger);
 use XML::LibXML;
+use English qw( -no_match_vars );
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::NetLogger;
@@ -62,28 +65,28 @@ sub parse {
     my ($self, $namespace_map, $error) = @_;
     my $logger = get_logger("perfSONAR_PS::Request");
 
-    if (!defined $self->{REQUEST}) {
+    unless ( exists $self->{REQUEST} ) {
         my $msg = "No request to parse";
-        $logger->error($msg);
+        $logger->error( $msg );
         $$error = $msg;
         return -1;
     }
 
-    $logger->debug("Parsing request: ".$self->{REQUEST}->content); 
+    $logger->debug( "Parsing request: " . $self->{REQUEST}->content ); 
 
     my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.start");
-    $self->{NETLOGGER}->debug($msg);
+    $self->{NETLOGGER}->debug( $msg );
 
     my $parser = XML::LibXML->new();
-    my $dom;
+    my $dom = q{};
     eval {
-        $dom = $parser->parse_string($self->{REQUEST}->content);
+        $dom = $parser->parse_string( $self->{REQUEST}->content );
     };
-    if($@) {
-        my $msg = escapeString("Parse failed: ".$@);
+    if( $EVAL_ERROR ) {
+        my $msg = escapeString( "Parse failed: " . $EVAL_ERROR );
 
-        $logger->error($msg);
-        $$error = $msg if (defined $error);
+        $logger->error( $msg );
+        $$error = $msg if $error;
         return -1;
     }
 
@@ -92,36 +95,36 @@ sub parse {
     &perfSONAR_PS::Common::reMap($self->{NAMESPACES}, $namespace_map, $dom->getDocumentElement, 0);
 
     my $nmwg_prefix = $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"};
-    if (!defined $nmwg_prefix) {
+    unless ( exists $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"} and $self->{NAMESPACES}->{"http://ggf.org/ns/nmwg/base/2.0/"} ) {
         my $msg = "Received message with incorrect message URI";
-        $logger->error($msg);
-        $$error = $msg if (defined $error);
+        $logger->error( $msg );
+        $$error = $msg if $error;
         return -1;
     }
 
-    my $messages = find($dom->getDocumentElement, ".//nmwg:message", 0);
+    my $messages = find( $dom->getDocumentElement, ".//nmwg:message", 0 );
 
-    if (not defined $messages or $messages->size() <= 0) {
+    unless ( $messages or $messages->size() <= 0 ) {
         my $msg = "Couldn't find message element in request";
-        $logger->error($msg);
-        $$error = $msg if (defined $error);
+        $logger->error( $msg );
+        $$error = $msg if $error;
         return -1;
     }
 
-    if($messages->size() > 1) {
+    if( $messages->size() > 1 ) {
         my $msg = "Too many message elements found within request";
-        $logger->error($msg);
-        $$error = $msg if (defined $error);
+        $logger->error( $msg );
+        $$error = $msg if $error;
         return -1;
     }
 
-    my $new_dom;
-    $new_dom = $parser->parse_string($messages->get_node(1)->toString);
+    my $new_dom = q{};
+    $new_dom = $parser->parse_string( $messages->get_node(1)->toString );
 
-    $logger->debug("Parsed incoming request: ".$new_dom->toString);
+    $logger->debug( "Parsed incoming request: " . $new_dom->toString );
 
     $self->{REQUESTDOM} = $new_dom;
-    $$error = "";
+    $$error = q{};
     return 0;
 }
 
@@ -206,7 +209,6 @@ sub setNamespaces {
     }
     return;
 }
-
 
 sub getNamespaces {
     my ($self) = @_;

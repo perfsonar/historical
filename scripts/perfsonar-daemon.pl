@@ -17,6 +17,8 @@ Each perfSONAR-PS module should be designed to be run by this daemon.
 
 use warnings;
 use strict;
+use diagnostics;
+
 use Getopt::Long;
 use Time::HiRes qw( gettimeofday );
 use POSIX qw( setsid );
@@ -226,7 +228,7 @@ if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
 
     my $output_level = $INFO;
     if ($DEBUGFLAG) {
-        $output_level = $DEBUG;
+#        $output_level = $DEBUG;
     }
 
     my %logger_opts = (
@@ -246,7 +248,7 @@ else {
 
     my $output_level = $INFO;
     if ($DEBUGFLAG) {
-        $output_level = $DEBUG;
+#        $output_level = $DEBUG;
     }
 
     Log::Log4perl->init($LOGGER_CONF);
@@ -628,7 +630,10 @@ sub registerLS {
         eval { 
             $service->registerLS( \$sleep_time ); 
         };
-        if ( $EVAL_ERROR ) {
+        if ( my $e = catch std::exception ) {
+            $logger->error( "Problem running register LS: " . $e->what() );
+        }
+        elsif ( $EVAL_ERROR ) {
             $logger->error( "Problem running register LS: " . $EVAL_ERROR );
         }
         $logger->debug("Sleeping for $sleep_time");
@@ -667,7 +672,10 @@ sub maintenance {
             }
             $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
         };
-        if ( $EVAL_ERROR ) {
+        if ( my $e = catch std::exception ) {
+            $logger->error( "Problem running service maintenance: " . $e->what() );
+        }
+        elsif ( $EVAL_ERROR ) {
             $logger->error( "Problem running service maintenance: " . $EVAL_ERROR );
         }
         
@@ -692,30 +700,27 @@ sub handleRequest {
     my ( $handler, $request, $endpoint_conf ) = @_;
 
     my $messageId = q{};
-
     try {
-        my $error;
+        my $error = q{};
 
         if ( $request->getRawRequest->method ne "POST" ) {
             my $msg = "Received message with an invalid HTTP request, are you using a web browser?";
-            $logger->error($msg);
+            $logger->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
         }
 
         my $action = $request->getRawRequest->headers->{"soapaction"};
-        if ( !$action =~ m/^.*message\/$/ ) {
+        unless ( $action =~ m/^.*message\/$/ ) {
             my $msg = "Received message with an invalid soap action type.";
-            $logger->error($msg);
+            $logger->error( $msg );
             throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
         }
 
         $request->parse( \%ns, \$error );
-        if ( defined $error and $error ne q{} ) {
-            throw perfSONAR_PS::Error_compat( "error.transport.parse_error", "Error parsing request: $error" );
-        }
+        throw perfSONAR_PS::Error_compat( "error.transport.parse_error", "Error parsing request: $error" ) if $error;
 
         my $message = $request->getRequestDOM()->getDocumentElement();
-        $messageId = $message->getAttribute("id");
+        $messageId = $message->getAttribute( "id" );
         $handler->handleMessage( $message, $request, $endpoint_conf );
     }
     catch perfSONAR_PS::Error_compat with {
@@ -734,6 +739,13 @@ sub handleRequest {
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
+    catch std::exception with {
+        my $ex  = shift;
+        my $msg = "Unhandled exception or crash: " . $ex->what();
+        $logger->error($msg);
+
+        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => "error.common.internal_error", description => $ex->what() ) );
+    }
     otherwise {
         my $ex  = shift;
         my $msg = "Unhandled exception or crash: $ex";
@@ -743,7 +755,6 @@ sub handleRequest {
     };
 
     $request->finish();
-
     return;
 }
 
