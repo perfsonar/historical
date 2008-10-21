@@ -2,7 +2,7 @@ package  perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwg::Message::Data;
 
 use strict;
 use warnings;
-#use utf8;
+use utf8;
 use English qw(-no_match_vars);
 use version; our $VERSION = 'v2.0';
 

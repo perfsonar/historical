@@ -2,7 +2,7 @@ package  perfSONAR_PS::PINGER_DATATYPES::v2_0::nmwgt::Message::Metadata::Subject
 
 use strict;
 use warnings;
-#use utf8;
+use utf8;
 use English qw(-no_match_vars);
 use version; our $VERSION = 'v2.0';
 
@@ -145,7 +145,7 @@ sub getDOM {
 
                                                      ['value' =>  $self->get_value],
 
-                                           ['type' =>  (($self->get_type    =~ m/(hostname)$/)?$self->get_type:undef)],
+                                           ['type' =>  (($self->get_type    =~ m/(hostname|ipv4)$/)?$self->get_type:undef)],
 
                                                      ['port' =>  $self->get_port],
 
@@ -473,7 +473,7 @@ sub fromDOM {
     $self->set_value($dom->getAttribute('value')) if($dom->getAttribute('value'));
 
     $self->get_LOGGER->debug(" Attribute value= ". $self->get_value) if $self->get_value;
-    $self->set_type($dom->getAttribute('type')) if($dom->getAttribute('type') && ($dom->getAttribute('type')   =~ m/(hostname)$/));
+    $self->set_type($dom->getAttribute('type')) if($dom->getAttribute('type') && ($dom->getAttribute('type')   =~ m/(hostname|ipv4)$/));
 
     $self->get_LOGGER->debug(" Attribute type= ". $self->get_type) if $self->get_type;
     $self->set_port($dom->getAttribute('port')) if($dom->getAttribute('port'));
