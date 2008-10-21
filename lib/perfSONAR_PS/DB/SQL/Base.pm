@@ -262,8 +262,8 @@ sub  getFromTable {
 	 
 	 my $sth = $self->handle->prepare($sql_query);      
 	 $results = $self->handle->selectall_hashref($sth,  $param->{index});
-	 $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);	
-	 die $DBI::errstr if  $DBI::err;
+	 $self->LOGGER->logdie("SQL error:  $DBI::errstr") if  $DBI::err; 
+	 $self->LOGGER->debug("  RESULTS dump:: " . Dumper $results);
      };
      if ($EVAL_ERROR) {
         $self->ERRORMSG("getFromTable  failed with error \"" . $EVAL_ERROR . "\"." );
