@@ -630,10 +630,7 @@ sub registerLS {
         eval { 
             $service->registerLS( \$sleep_time ); 
         };
-        if ( my $e = catch std::exception ) {
-            $logger->error( "Problem running register LS: " . $e->what() );
-        }
-        elsif ( $EVAL_ERROR ) {
+        if ( $EVAL_ERROR ) {
             $logger->error( "Problem running register LS: " . $EVAL_ERROR );
         }
         $logger->debug("Sleeping for $sleep_time");
