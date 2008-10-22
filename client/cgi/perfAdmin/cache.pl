@@ -21,6 +21,7 @@ use Carp;
 use Getopt::Long;
 use Data::Dumper;
 use Data::Validate::IP qw(is_ipv4);
+use Data::Validate::Domain qw( is_domain );
 use Net::IPv6Addr;
 use Net::CIDR;
 
@@ -85,7 +86,7 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                 my $test = $accessPoint;
                 $test =~ s/^http:\/\///;
                 my ( $unt_test ) = $test =~ /^(.+):/;
-                if ( is_ipv4( $unt_test ) ) {
+                if ( $unt_test and is_ipv4( $unt_test ) ) {
                     if ( Net::CIDR::cidrlookup( $unt_test, @private_list ) ) {
                         print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
@@ -94,18 +95,23 @@ for my $root ( @{ $gls->{ROOTS} } ) {
                         $matrix1{$root}{$accessPoint} = 1;
                     }
                 }
-                elsif ( &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
+                elsif ( $unt_test and &Net::IPv6Addr::is_ipv6( $unt_test ) ) {
                     # do noting (for now)
                     $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
                     $matrix1{$root}{$accessPoint} = 1;
                 }
                 else {
-                    if ( $unt_test =~ m/^localhost/ ) {
-                        print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
+                    if ( is_domain( $unt_test ) ) {
+                        if ( $unt_test =~ m/^localhost/ ) {
+                            print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
+                        }
+                        else {
+                            $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
+                            $matrix1{$root}{$accessPoint} = 1;
+                        }  
                     }
                     else {
-                        $hls{$accessPoint} = $accessPoint."|".$serviceName."|".$serviceType."|".$serviceDescription;
-                        $matrix1{$root}{$accessPoint} = 1;
+                        print "\t\t\tReject:\t" , $unt_test , "\n" if $DEBUGFLAG;
                     }
                 }
             }
