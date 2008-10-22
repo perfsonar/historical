@@ -228,7 +228,7 @@ if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
 
     my $output_level = $INFO;
     if ($DEBUGFLAG) {
-#        $output_level = $DEBUG;
+        $output_level = $DEBUG;
     }
 
     my %logger_opts = (
@@ -248,7 +248,7 @@ else {
 
     my $output_level = $INFO;
     if ($DEBUGFLAG) {
-#        $output_level = $DEBUG;
+        $output_level = $DEBUG;
     }
 
     Log::Log4perl->init($LOGGER_CONF);
@@ -735,13 +735,6 @@ sub handleRequest {
         $logger->error($msg);
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
-    }
-    catch std::exception with {
-        my $ex  = shift;
-        my $msg = "Unhandled exception or crash: " . $ex->what();
-        $logger->error($msg);
-
-        $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => "error.common.internal_error", description => $ex->what() ) );
     }
     otherwise {
         my $ex  = shift;
