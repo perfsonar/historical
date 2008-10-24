@@ -1,0 +1,345 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>perfSONAR Google Maps Asynchronous XML Example</title>
+    <link rel="stylesheet" href="gmaps.css" type="text/css" />
+
+    <script type="text/javascript" src="http://www.google.com/jsapi?key=[% GOOGLEMAPKEY %]"></script>
+    <script type="text/javascript" src="dragDrop.js"></script>
+    <script type="text/javascript" src="markers.js"></script>  
+    <script type="text/javascript" src="sidebar.js"></script>  
+
+    <script type="text/javascript" src="checktree.js"></script>  
+    <link rel="stylesheet" href="checktree.css" type="text/css" />
+
+    <script type="text/javascript">
+
+    google.load("maps", "2.x");
+
+    var map; 
+    var nodesDOM = new Object(); // keep the xml in memory for parsing
+    var servicesDOM = new Object();
+    var checkmenu = undefined;
+
+    // template for info window; use some regexp to replace values
+    var infoWindowGraph = '<img width="497" height="168" src="?mode=graph&using=__TYPE__&uri=__URI__&urn=__URN__"/>';
+
+    /* ****************************************************************
+      XML Polling
+     **************************************************************** */
+
+    function getServices( ) {
+      
+      var gLS =  document.getElementById( 'gLS' ).value;
+      
+      google.maps.Log.write( "Querying global LS '" + gLS + "' for registered services.")
+      
+      var uri = '/gmaps.cgi?mode=services&gLS=' + gLS;
+      
+      // fetch it!
+      
+      // deal with timeouts etc
+      google.maps.DownloadUrl( uri, function(doc,response) {
+
+        // downloaded okay
+        if ( response == 200 ) {
+
+          if ( typeof servicesDOM[uri] == "object" ) {
+            // wipe out the out one to reload
+            servicesDOM[uri] = undefined;
+            google.maps.Log.write("Clearing xml cache of '" + uri + "'" );
+          }
+          servicesDOM[uri] = google.maps.Xml.parse(doc);
+          var services = servicesDOM[uri].documentElement.getElementsByTagName("service");
+
+          google.maps.Log.write( "Addings services..." );
+          var list = '';
+          for (var i = 0; i < services.length; i++) {
+            var service = services[i].getAttribute("service");
+            var type = services[i].getAttribute("type");
+            var name = services[i].getAttribute("name");
+
+            // write out the services to the palatte
+            // gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology
+            var url = 'gmaps.cgi?mode=topology&using=' + type + '&uri=' + service;
+            item = "<input type=\"submit\" onclick=\"getMarkers( '" + url + "' )\" value=\"" + name  + "\"/>";
+            google.maps.Log.write( "Got: " + item );
+            
+            list += item;
+          }
+          google.maps.Log.write( "Done fetching " + services.length + " services from '" + uri + "'");          
+          
+          document.getElementById( "service_list" ).innerHTML = list;
+                    
+          // timeout
+        } else if ( response == -1 ) {
+          google.maps.Log.write( "Request for '" + uri + "' timed out" );
+        } else {
+          google.maps.Log.write( "unknown response code returned " + response );
+        }
+      });  
+      
+    }
+
+    function getMarkers( uri ) {
+
+      google.maps.Log.write( "Fetching markers from '" + uri + "'");      
+
+      // deal with timeouts etc
+      google.maps.DownloadUrl( uri, function(doc,response) {
+        
+        // downloaded okay
+        if ( response == 200 ) {
+          
+          sidebar.clear();
+          sidebar.setContent('<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="spinner.gif"/></p>' );
+          sidebar.refresh();
+
+          if ( typeof nodesDOM[uri] == "object" ) {
+            // wipe out the out one to reload
+            nodesDOM[uri] = undefined;
+            google.maps.Log.write("Clearing xml cache of '" + uri + "'" );
+          }
+          nodesDOM[uri] = google.maps.Xml.parse(doc);
+          var nodes = nodesDOM[uri].documentElement.getElementsByTagName("node");
+          google.maps.Log.write( "Done fetching " + nodes.length + " markers from '" + uri + "'");
+        
+          google.maps.Log.write( "Addings markers..." );
+          var count = 0;
+          for (var i = 0; i < nodes.length; i++) {
+            var lat = nodes[i].getAttribute("lat");
+            var long = nodes[i].getAttribute("long");
+            var urn = nodes[i].getAttribute("urn");
+
+            // if there is no determinable long/lat, place it in the bermuda triagle
+            if ( ( lat == "" || lat == 'NULL' ) || ( long == "" || long == 'NULL' ) ) {
+              lat = '26.511129';
+              long = '-71.48186';
+              google.maps.Log.write( "Marker '" + urn + "' does not contain valid coordinates, placing in Bermuda Triangle" );
+            }
+
+            // create the marker
+            var obj = markers.add( lat, long, urn );
+            if ( typeof obj == "undefined" ) {
+              // didn't return anything; ie the node already exists or in invalid
+            } else {
+              sidebar.add( urn );
+              map.addOverlay( obj );
+              count++;
+            }
+          }
+          google.maps.Log.write( "Done adding " + count + " new markers" );
+
+          sidebar.show();
+
+          // timeout
+        } else if ( response == -1 ) {
+          google.maps.Log.write( "Request for '" + uri + "' timed out" );
+        } else {
+          google.maps.Log.write( "unknown response code returned " + response );
+        }
+      });
+
+    }
+ 
+
+    function frameResize() {
+      //document.getElementById("side_bar").style.height = window.innerHeight - 200;
+      map.checkResize();
+    }
+
+    function initMap() {
+
+      if (google.maps.BrowserIsCompatible()) {
+
+        map = new google.maps.Map2(document.getElementById("map"));
+        var mapDiv = document.getElementById("map"); 
+       	map.addControl(new google.maps.LargeMapControl());
+        map.addControl(new google.maps.MapTypeControl());
+        map.addControl(new google.maps.OverviewMapControl());        
+        map.setCenter(new google.maps.LatLng(40,0), 2);
+        map.enableScrollWheelZoom();
+        
+        // Monitor the window resize event and let the map know when it occurs
+        if (window.attachEvent) { 
+          window.attachEvent("onresize", function() { frameResize() } );
+        } else {
+          window.addEventListener("resize", function() { frameResize() } , false);
+        }
+
+      }
+      else {
+        alert( "Sorry, your browser is not compatible with GoogleMaps." );
+      } 
+    }
+    
+    function init() {
+      google.maps.Log.write( "Initiating markers" );
+      markers.init();
+
+      google.maps.Log.write( "Initiating sidebar" );
+      sidebar.init( 'side_bar' );
+
+      google.maps.Log.write( "Initiating palettes" );
+      dragDrop.initElement( 'palette', 'title' );
+      dragDrop.initElement( 'comms', 'title' );
+
+      google.maps.Log.write( "Initiating map" );
+      initMap();
+        
+      setInterval( "markers.refreshInfoWindow();", 60 * 1000 );
+
+    }
+
+
+    // toggles static list of services
+    function toggleStaticServiceList() {
+      var div = document.getElementById( 'static_service_list' );
+      var toggle = document.getElementById( 'staticServiceListToggle' );
+      if ( div.style.visibility == 'hidden' ) {
+        toggle.innerHTML = 'hide static service list';
+        div.style.visibility = 'visible';
+      } else {
+        toggle.innerHTML = 'show static service list';
+        div.style.visibility = 'hidden';
+      }
+    }
+
+    </script>
+    
+  </head>
+  
+  <body onload="init(); document.getElementById( 'static_service_list' ).style.visibility = 'hidden';" onunload="google.maps.Unload();">
+  
+    <div id="map"></div>
+
+    <div id="palette">
+      <div id="title">Interactive Palette</div>
+      <div id="palette_shadow"></div>
+      <div id="side_bar">Please use the communications palette to begin</div>
+    </div>
+    
+    <div id="comms">
+      <div id="title">Communications Palette</div>
+      <div id="status_bar">
+
+      <p>Enter URL of a perfSONAR global lookup service, or select a service from the static list</p> 
+
+      <b>Global Lookup Location:</b>
+      <p>
+        <input id="gLS" type="search" value="http://ndb0-aami.internet2.edu:9090/perfSONAR_PS/services/gLS"/>
+        <input type="submit" value="Query" onclick="getServices()"/>
+        <table><tr><td>
+          <div id="service_list"></div>
+        </td></tr></table>
+      </p>
+
+      <hr/>
+
+      <a id="staticServiceListToggle" href="#" onclick="toggleStaticServiceList()">show static service list</a>
+      <p/>
+      <div id="static_service_list">
+
+        <b>PingER</b>
+        <p>      
+          <input type="submit"
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=pinger&uri=http%3A%2F%2Fchapuza.cern.ch:80%2FperfSONAR_PS%2Fservices%2Fpinger%2Fma' )"
+            value="CERN PingER MA"/>
+          <input type="submit"
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=pinger&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8075%2FperfSONAR_PS%2Fservices%2Fpinger%2Fma' )"
+            value="FNAL PingER MA"/>
+        </p>
+
+        <b>OWAMP</b>
+        <p>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=owamp&uri=http%3A%2F%2Fdc211.internet2.edu%3A9099%2FperfSONAR_PS%2Fservices%2FpSB' )" 
+            value="Internet2 perfSONARBUOY"/>
+        </p>
+
+        <b>Topology</b>
+        <p>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A5800%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
+            value="Internet2 Topology"/>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8083%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
+            value="FNAL PingER Topology"/>
+        </p>
+
+        <b>Utilisation</b>
+        <p>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
+            value="SC07 Demo SNMP MA"/>
+  <!--
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
+            value="Internet2 Topology"/> 
+
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
+            value="DICE DCN Topology"/>
+    -->
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Futil.net.internet2.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
+            value="Internet2 SNMP MA"/>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fmea1.es.net%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
+            value="ES.net SNMP MA"/>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fstats.geant2.net%3A80%2Fperfsonar%2FRRDMA-access%2FMeasurementArchiveService' )" 
+            value="GEANT RRDMA"/>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8091%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
+            value="FERMI Lab SNMP MA"/>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fbunsen.rnoc.gatech.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
+            value="Georgia Tech SNMP MA"/>
+        </p>
+
+        <b>BWCTL</b>
+        <p>
+          <input type="submit" 
+            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=bwctl&uri=http%3A%2F%2Fndb0-aami.internet2.edu%3A8099%2FperfSONAR_PS%2Fservices%2FpSB' )" 
+            value="Internet2 perfSONARBUOY"/>
+        </p>
+      
+        <!-- <p>
+        Or select from the following list:<br>
+
+        <select id="utilisation" size="5">
+          <option value="http%3A%2F%2Fstats.geant2.net%2Fperfsonar%2FRRDMA-access%2FMeasurementArchiveService">GEANT2 RRD MA</option>
+          <option value="http%3A%2F%2Fleonidas.cynet.ac.cy%3A8080%2FperfSONAR-RRD-MA-2.0%2Fservices%2FMeasurementArchiveService">Cynet RRD MA</option>
+          <option value="http%3A%2F%2Fsrv4.dir.garr.it%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">GARR-new RRD MA</option>
+          <option value="http%3A%2F%2Fgridmachine.admin.grnet.gr%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">GRNET RRD MA</option>
+          <option value="http%3A%2F%2Fselena.acad.bg%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">ISTF-J RRD MA</option>
+          <option value="http%3A%2F%2Fperfsonar.cg.ac.yu%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">MREN RRD MA</option>
+          <option value="http%3A%2F%2Frrdma.perfsonar.pionier.net.pl%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">PIONIER-RRD RRD MA</option>
+          <option value="http%3A%2F%2Fperfsonar.renater.fr%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">RENATER RRD MA</option>
+          <option value="http%3A%2F%2Fadmin.seeren.org%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">SEEREN RRD MA</option>
+          <option value="http%3A%2F%2Fsonar1.amsterdam.surfnet.nl%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">SURFnet RRD MA</option>
+          <option value="http%3A%2F%2Farchive.sonar.net.switch.ch%3A8180%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">SWITCH RRD MA</option>
+          <option value="http%3A%2F%2Fmi5.uninett.no%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">Uninett RRD MA</option>
+          <option value="http%3A%2F%2Fmea1.es.net%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA">ESnet_PS RRD MA</option>
+          <option value="http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8091%2FperfSONAR_PS%2Fservices%2FsnmpMA">Fermilab RRD MA</option>
+          <option value="http%3A%2F%2Fserver2-saopaulo.lan.redclara.net%3A8085%2Fperfsonar-RRDMA%2Fservices%2FMeasurementArchiveService">RedCLARA RRD MA</option>
+          <option value="http%3A%2F%2Frnp-rrd-ma.gt-med.ufsc.br%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">RNP RRD MA</option>
+        </select>
+        <input type="submit" value="Fetch" onclick="fetch('utilisation')"/> -->
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div id="slac_logo"><img src="images/slac_logo_small.png"/></div>
+    <div id="internet2_logo"><img src="images/internet2_logo_small.png"/></div>
+    <div id="perfsonar_logo"><img src="images/perfsonar_logo_small.png"/></div>
+
+  </body>
+
+</html>

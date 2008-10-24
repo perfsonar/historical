@@ -1,0 +1,130 @@
+html, body {
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+}
+html {
+  overflow: hidden;
+}
+body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #CCCCCC;
+}
+div#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+
+div.dragged {
+	cursor: all-scroll !important;
+	border-color: #000000 !important;
+	z-index: 999999 !important;
+}
+
+div#palette, div#comms {
+	border-top: 1px solid #000000;
+	border-right: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+	border-left: 1px solid #000000;
+	cellpadding: 0px 0px 0px 0px;
+	position: absolute;
+	cursor: pointer;
+}
+
+div#palette_shadow {
+  position: absolute;
+  left: 2px;
+  top: 2px; background-color: black;
+  opacity: 0.35;
+  width: 100%
+  height: 100%;
+}
+
+
+div#palette {
+	max-width: 33%;
+	max-height: 90%;
+	top: 36px;
+	right: 6px;
+	z-index: 100000;
+  overflow-y: auto;
+  overflow-x: none;
+}
+
+div#comms {
+  width: 18%;
+	top: 10px;
+	left: 80px;
+	z-index: 200000;
+}
+
+
+#side_bar, #status_bar {
+  offset: 0px 0px 0px 0px;
+  padding-bottom: 1px;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-top: 1px;  
+  -moz-user-select: none;
+  background-color: #ffffff;  
+  font-size: 75%;
+  filter: alpha(opacity=80);
+  -moz-opacity: .80;
+  opacity: .80;
+}
+
+#side_bar {
+  text-align: left;
+}
+
+#status_bar {
+  text-align: left;
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+}
+
+#title {
+  font-family: Verdana,Arial,sans-serif;
+  font-size: 85%;
+  color: white;
+  -moz-user-select: none;
+  background-color: #979797;  
+  padding-bottom: 2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 2px;
+  position: relative;
+}
+
+
+#slac_logo {
+  position: absolute;
+  left: 12px;
+  bottom: 110px;
+  z-index: 99998;
+}
+#internet2_logo {
+  position: absolute;
+  left: 38px;
+  bottom: 60px;
+  z-index: 99997;
+}
+#perfsonar_logo {
+  position: absolute;
+  left: 25px;
+  bottom: 27px;
+  z-index: 99996;
+}
+  
+#invert_markers, #select_all_markers, #select_none_markers {
+  font-size: 6pt;
+}
+  
+  
