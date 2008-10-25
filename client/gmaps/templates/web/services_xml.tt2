@@ -3,7 +3,7 @@
   [%- FOREACH service = SERVICES %]
   <service 
     service="[% service.accessPoint %]"
-    type="[% service.serviceType %]"
+    eventType="[% service.eventType %]"
     name="[% service.serviceName %]"
   />
   [%- END %]

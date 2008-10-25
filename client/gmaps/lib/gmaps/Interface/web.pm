@@ -79,6 +79,8 @@ sub setup {
     $self->mode_param('mode');
     $self->run_modes(
 		
+		'getGLS'    => 'getGLS', # returns a list of glss
+		
 		'services'  => 'getServices', # returns an xml of the service endpoints from teh given gLS
 		
 		'topology'	=> 'topology',	# does the actual perfsonar topology discovery from a service
@@ -182,6 +184,18 @@ sub getMarkers
 	
 }
 
+
+=head2 getGLS
+
+=cut
+sub getGLS
+{
+    my $self = shift;
+    my $list = $self::SUPER->getGLS();
+    
+    
+    
+}
 
 
 =head2 getServices

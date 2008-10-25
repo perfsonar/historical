@@ -25,7 +25,7 @@ sub new
 	$self->{DB} = perfSONAR_PS::DB::SQL->new();
 
 
-	@{$self->{DBSCHEMA}} = ( 'urn', 'latitude', 'longitude', 'last_updated' );
+	@{$self->{DBSCHEMA}} = ( 'ip', 'latitude', 'longitude', 'last_updated' );
 	$self->{DBTABLE} = 'data';
 
 	$self->{DB}->setName( name => 'DBI:SQLite:dbname=' . $dbfile );
@@ -39,14 +39,14 @@ sub new
 		# create the table and db if not exist
 		my $table = $self->{DB}->query( query => 'SELECT name FROM SQLite_Master WHERE name=\'' . $self->{DBTABLE} . "'"  );
 
-		$logger->debug( "TABLE EXISTS? " . scalar @$table );
+		#$logger->debug( "TABLE EXISTS? " . scalar @$table );
 		if ( scalar @$table == 0 ) {
-			my $res = $self->{DB}->query( query => "CREATE TABLE " . $self->table() . " ( urn TEXT PRIMARY KEY, latitude DOUBLE, longitude DOUBLE, last_updated DATE ); " );
-			$logger->debug( "Creating table." );
+			my $res = $self->{DB}->query( query => "CREATE TABLE " . $self->table() . " ( ip TEXT PRIMARY KEY, latitude DOUBLE, longitude DOUBLE, last_updated DATE ); " );
+			$logger->debug( "Creating table in database '$dbfile'" );
 		}
 		return $self;
 	} else {
-	    $logger->error( "could not open db " );
+	    $logger->error( "Could not open db: '$result'" );
 		return undef;
 	}
 }
@@ -68,21 +68,17 @@ sub getLatLong
 {
 	my $self = shift;
 	
-	my $urn = shift;
-	my $libXml = shift; # not used.
-	
 	my $dns = shift; # not used
-	my $ip = shift; # not used
+	my $ip = shift;
 	
 	my $domain = undef;
 	my $host = undef;
-
 
     if ($self->db()->openDB == -1) {
       $logger->fatal( "Error opening database" );
     }
 
-    my $result = $self->db()->query( query => "SELECT latitude, longitude FROM " . $self->table() . "  WHERE urn='$urn'" );
+    my $result = $self->db()->query( query => "SELECT latitude, longitude FROM " . $self->table() . "  WHERE ip='$ip'" );
     while ( my $row = shift @{$result} ) {
 	return ( $row->[0], $row->[1] );
     }
@@ -96,34 +92,34 @@ sub getLatLong
 sub setLatLong{
 	my $self = shift;
 	my $insert = {
-		'urn' => shift,
+		'ip' => shift,
 		'latitude' => shift,
 		'longitude' => shift,
 		'last_updated' => 'NOW()',
 	};
 
 	# count
-	my $count = $self->db()->count( query => "SELECT * from " . $self->table() . " WHERE urn='" . $insert->{urn} . "'" );
+	my $count = $self->db()->count( query => "SELECT * from " . $self->table() . " WHERE ip='" . $insert->{ip} . "'" );
 	$logger->debug( "Count " . $count );
 	
 	# insert
 	if ( $count == 0 ) {
 		my $status = $self->db()->insert( table => $self->table(), argvalues => $insert );
 		if ( $status == -1 ) {
-			$logger->warn( "Error inserting urn '" . $insert->{urn} . "'" );
+			$logger->warn( "Error inserting ip '" . $insert->{ip} . "'" );
 			return undef;
 		}
 		return 1;
 
 	} else {
 	# update
-		my $urn = $insert->{urn};
-		delete $insert->{urn};
+		my $ip = $insert->{ip};
+		delete $insert->{ip};
 		while ( my ( $k,$v ) = each %$insert ) {
 			$insert->{$k} = "'" . $v . "'";	
 		}
-		if ( $self->db()->update( table => $self->table(), wherevalues =>  { 'urn' => "'" . $urn . "'" }, updatevalues => $insert )  == -1 ) {
-			$logger->warn( "Error updating urn '" . $urn . "'" );
+		if ( $self->db()->update( table => $self->table(), wherevalues =>  { 'ip' => "'" . $ip . "'" }, updatevalues => $insert )  == -1 ) {
+			$logger->warn( "Error updating ip '" . $ip . "'" );
 			return undef;
 		}
 		return 1;

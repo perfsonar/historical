@@ -36,7 +36,7 @@ Installation
 cgi/gmaps.pl should be copied to /var/www/cgi (or whether your apache
 configuraiton allows cgi scripts to be invoked).
 
-The script cgi/gmaps.pl should be edited and configured to point to the paths
+The script html/gmaps.cgi should be edited and configured to point to the paths
 of the relevant libraries and directories need for gmaps to function:
 
   # base directory for distribution's libraries
@@ -49,6 +49,15 @@ of the relevant libraries and directories need for gmaps to function:
   my $baseTemplatePath = '/afs/slac.stanford.edu/u/sf/ytl/Work/perfSONAR/gmaps/trunk/lib/gmaps/templates/';
 
 Ensure that your apache/web server has permissions to read the lib directory.
+
+The use of Google Maps requires that each instance of gmaps requires it's url to be registered with Google.
+For example, if the following message appears when you try to load gmaps:
+
+  The Google Maps API key used on this web site was registered for a different web site. 
+  You can generate a new key for this web site at http://code.google.com/apis/maps/.
+
+Then please visit the above link and apply the Google Maps Key to html/gmaps.cgi
+
 
 
 Usage

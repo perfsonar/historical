@@ -12,7 +12,7 @@
 
     <netutil:subject id="#netutil1">
       <topo:interface>
-        <topo:direction>in</topo:direction>
+        <!-- <topo:direction>in</topo:direction> -->
       </topo:interface>
     </netutil:subject>
 

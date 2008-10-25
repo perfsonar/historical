@@ -115,45 +115,29 @@ retrieves the data for the urn
 =cut
 sub fetch
 {
-	my $self = shift;
-	my $urn = shift;
-	
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift || 60;
-	my $cf = shift;
-	
-	
-	( $startTime, $endTime ) = $self->checkTimeRange( $startTime, $endTime );
-    
-	
-	my ( $domain, $node, $port ) = &utils::urn::fromUrn( $urn );
-	$logger->debug( "Fetching '$urn': domain='$domain' node='$node' port='$port'" );
+	my ( $self, @args ) = @_;
+	my $params = perfSONAR_PS::ParameterValidation::validateParams( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 
-	# determine if the port is a ip address
-	my $vars = {
-			'ifName' => $port,
-			'authRealm' => $domain,
-			'hostName'  => $node,
-		};
 
-	if ( defined $eventType ) {
-		$vars->{'eventType'} => $eventType,
-	}
+    if ( defined $params->{key} ) {
+        
+        # FIXME: how to deal with only single keys (ie in or out) - query on and return on single column.
+        
+        # assume that the key is composed of keyIn,KeyOut
+        ( $params->{keyIn}, $params->{keyOut} ) = split /\,/, $params->{key};
+        
+    } else {
 
-	# time range
-	$vars->{"ENDTIME"} = $endTime
-		if defined $endTime;
-	$vars->{'STARTTIME'} = $startTime
-		if defined $startTime;
+        my $hash = &utils::urn::toHash( $params->{urn} );
 
-	if ( defined $cf ) {
-		$vars->{'CF'} = $cf;
-	}
-	if ( defined $resolution ) {
-		$vars->{'RESOLUTION'} = $resolution;
-	}
+    	# determine if the port is a ip address
+    	$params->{ifName} = $hash->{port};
+    	$params->{hostName} = $hash->{node};
+    	
+    	if ( $hash->{domain} ne 'unknown' ) {
+	   	    $params->{authRealm} = $hash->{domain};
+    	}
+    }
 
 	# fetch the data form the ma
 	my $requestXML = 'Utilisation/fetch_xml.tt2';
@@ -161,7 +145,7 @@ sub fetch
 	
 	# we only get one message back, so 
 	my @temp = ();
-	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $vars, $filter );
+	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $params, $filter );
 
 	my $idRef = $self->getDataId( $message );	
 	$logger->debug( "Found metadata ids for in=" . $idRef->{in} . ' and out=' . $idRef->{out} );
@@ -188,95 +172,197 @@ sub getPorts
 	my $urn = shift;
 	
 	my $requestXML = 'Utilisation/query-all-ports_xml.tt2';
-	my $filter = '//nmwg:message/nmwg:metadata[@id]/netutil:subject/nmwgt:interface';
+	my $filter = '//nmwg:message'; # /nmwg:metadata[@id]/netutil:subject/nmwgt:interface
 
 	# overload query
 	my $vars = {
-		'EVENTTYPE' => $eventType,
+		'eventType' => $eventType,
 	};
 	my @ans = $self->processAndQuery( $requestXML, $vars, $filter );
 		
-	my @out = ();
-	foreach my $meta ( @ans ) {
+	my $data = {};
+	
+	foreach my $element ( @ans ) {
 
-		my $hash = {
-			'hostName' => undef,
-			'description' => undef,
-			'domain' => undef,
-			'name' => undef,
-			
-			'longitude' => undef,
-			'latitude' => undef,
-			
-			'urn' => $urn,
-			'ipAddress' => undef,
-			'ifName' => undef,
-			'netmask' => undef,
-			'ifDescription' => undef,
-			'capacity' => undef,
-			
-			# mas
-			'mas' => [],
-		};
-			
-		foreach my $node ( $meta->childNodes() ) 
+    	foreach my $top ( $element->childNodes() ) 
 		{
-			if ( $node->localname() eq 'hostName' ) {
-				$hash->{node} = $node->to_literal();
-				$hash->{hostName} = $node->to_literal();
-				$hash->{name} = $node->to_literal();
-			} elsif ( $node->localname() eq 'ifAddress' ) {
-				$hash->{ipAddress} = $node->to_literal();
-			} elsif ( $node->localname() eq 'ifName' ) {
-				$hash->{ifName} = $node->to_literal();
-			} elsif ( $node->localname() eq 'ifDescription' ) {
-				$hash->{ifDescription} = $node->to_literal();	
-			} elsif ( $node->localname() eq 'capacity' ) {
-				$hash->{capacity} = $node->to_literal();
-			} elsif ( $node->localname() eq 'authRealm' ) {
-				$hash->{domain} = $node->to_literal();
-			}
-		}
+        
+            $logger->debug( 'TOP ' . $top->localname() );
+            if ( $top->localname() eq 'metadata' ) {
+                
+                my $id = $top->getAttribute( 'id' );
+                $logger->debug( " GOT ID: $id");
+                my $hash = $data->{$id};
+                
+                
+                foreach my $meta ( $top->childNodes() ) {
+                    
+                    $logger->debug( "  " . $meta->localname() );
+                    if ( $meta->localname() eq 'subject') {
+                        
+                        foreach my $subject ( $meta->childNodes() ) {
 
-		# problem is that some of the services out there are all layer 3 - however, 
-		# are configured incorrectly such that the only discernable difference between
-		# metadata is that of the ifName as the ipAddress points at the management ip
-		# rather than the router/gateway ip.
-		# determine layer
-		if ( $hash->{ipAddress} && $hash->{ifName} ) {
-			$hash->{port} = $hash->{ifName};
-		} elsif( ! $hash->{ifName} ) {
-			$hash->{port} = $hash->{ipAddress};
-		} else {
-			$hash->{port} = $hash->{ifName};
-		}
+                            $logger->debug( "   " . $subject->localname() );
+                            if ( $subject->localname() eq 'interface') {
+                            
+                        		foreach my $node ( $subject->childNodes() ) 
+                        		{
+                        			if ( $node->localname() eq 'hostName' ) {
+                        				$data->{$id}->{node} = $node->to_literal();
+                        				$data->{$id}->{hostName} = $node->to_literal();
+                        				$data->{$id}->{name} = $node->to_literal();
+                        			} elsif ( $node->localname() eq 'ifAddress' ) {
+                        				$data->{$id}->{ipAddress} = $node->to_literal();
+                        			} elsif ( $node->localname() eq 'ifName' ) {
+                        				$data->{$id}->{ifName} = $node->to_literal();
+                        			} elsif ( $node->localname() eq 'ifDescription' ) {
+                        				$data->{$id}->{ifDescription} = $node->to_literal();	
+                        			} elsif ( $node->localname() eq 'capacity' ) {
+                        				$data->{$id}->{capacity} = $node->to_literal();
+                        			} elsif ( $node->localname() eq 'authRealm' ) {
+                        				$data->{$id}->{domain} = $node->to_literal();
+                        			} elsif ( $node->localname() eq 'direction' ) {
+                        				$data->{$id}->{direction} = $node->to_literal();
+                        			}
+                        		}
 
-		# if null domain
-		if ( ! defined $hash->{domain} ) {
-			$hash->{domain} = ${utils::urn::unknown};
-		}
+                        		# problem is that some of the services out there are all layer 3 - however, 
+                        		# are configured incorrectly such that the only discernable difference between
+                        		# metadata is that of the ifName as the ipAddress points at the management ip
+                        		# rather than the router/gateway ip.
+                        		# determine layer
+                        		if ( $data->{$id}->{ipAddress} && $data->{$id}->{ifName} ) {
+                        			$data->{$id}->{port} = $data->{$id}->{ifName};
+                        		} elsif( ! $data->{$id}->{ifName} ) {
+                        			$data->{$id}->{port} = $data->{$id}->{ipAddress};
+                        		} else {
+                        			$data->{$id}->{port} = $data->{$id}->{ifName};
+                        		}
 
-		# don't bother if we don't have a valid port for this node
-		next unless ( $hash->{port} );
+                        		# if null domain
+                        		if ( ! defined $data->{$id}->{domain} ) {
+                        			$data->{$id}->{domain} = ${utils::urn::unknown};
+                        		}
 
-		# add own ma
-		push ( @{$hash->{mas}}, { 'type'=> 'utilisation', 'uri' => $self->uri() } ); 
-
-		# determine urn for node
-		$hash->{urn} = &utils::urn::toUrn( { 'domain' => $hash->{domain}, 'node' => $hash->{node}, 'port' => $hash->{port}});
-
-		# determine coordinate posisionts
-		# TODO: host name may need to be qualified
-		#$logger->debug( "fetch location: " . $hash->{urn} . " @ " . $hash->{hostName} . ', ' . $hash->{ipAddress} );
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $hash->{urn}, undef, $hash->{hostName}, $hash->{ipAddress} );
-
-#		$logger->debug( "Constructed URN: $urn\n" . Dumper $hash );	
-
-		# add it
-		push @out, $hash;
+                                
+                            }
+                            
+                        }
+                        
+                    }
+                    
+                }
+            
+            } elsif ( $top->localname() eq 'data' ) {
+            # link keys into the hash
+            
+                my $id = $top->getAttribute( 'metadataIdRef');
+                $logger->debug( " GOT ID $id");
+            
+                foreach my $key ( $top->childNodes() ) {
+                    
+                    $logger->debug( " " . $key->localname() );
+                    foreach my $params ( $key->childNodes() ) {
+                        
+                        $logger->debug( "  " . $params->localname() );
+                        foreach my $param ( $params->childNodes() ) {
+                            
+                            $logger->debug( "   " . $param->localname() . " id = " . $param->getAttribute( 'name') );
+                            if ( $param->getAttribute('name') eq 'maKey' ) {
+                                $logger->debug( "    setting key to " . $param->to_literal() );
+                                $data->{$id}->{key} = $param->to_literal();
+                            }
+                             
+                        }
+                    }
+                    
+                }
+                
+                
+            }
+        
+        }
 
 	}
-	#$logger->info( "Found ports: @out");
+	
+    
+    # a problem is that the snmp ma reports two separate meta data for in and out traffic for the same interface
+    # as a result, in order to get a full view of an interface, one needs to actually query two separate
+    # metadata to get both in and out.
+    # we solve this by iterating through the list of metadataId's and determining if the
+    # urn's match (ie, it's the same interface we're looking at). need to build the relevant keys for that interface
+    # we use the key names keyIn and keyOut to signify the relevant in and out keys for the interface (assumes two metadata)
+    
+    # add new data to each metadata
+    my %seen = ();
+    foreach my $id ( keys %$data ) {
+        
+        # don't bother if we don't have a valid port for this node
+		next unless ( $data->{$id}->{port} );
+        
+		# determine urn for node
+		$data->{$id}->{urn} = &utils::urn::toUrn( { 'domain' => $data->{$id}->{domain}, 'node' => $data->{$id}->{node}, 'port' => $data->{$id}->{port}});
+        # build array of matching
+        push @{$seen{$data->{$id}->{urn}}}, $id;
+
+
+        # FIXME: not very efficient having it here...
+    
+        # add own ma
+        push ( @{$data->{$id}->{mas}}, { 'type'=> 'utilisation', 'uri' => $self->uri() } ); 
+    
+    
+        # determine coordinate posisionts
+        # TODO: host name may need to be qualified
+        ( $data->{$id}->{latitude}, $data->{$id}->{longitude} ) = gmaps::Location->getLatLong( $data->{$id}->{hostName}, $data->{$id}->{ipAddress}, undef, $data->{$id}->{urn} );
+
+
+    }
+
+
+    my $final = {};
+    # determine same interfaces and work out in and out metadata blocks
+    foreach my $urn ( keys %seen ) {
+        
+        foreach my $id ( @{$seen{$urn}} ) {
+
+            if ( defined $data->{$id}->{key} ) {
+                
+                my $keyDir = 'key' . ucfirst( $data->{$id}->{direction} );
+                
+                $logger->warn( "merging data from $id to $urn with $keyDir key " . $data->{$id}->{key});
+
+                # copy hash, not reference as we need to add data
+                while( my ( $k, $v ) = each %{$data->{$id}} ) {
+                    next if defined $final->{$urn}->{$k};
+                    $final->{$urn}->{$k} = $v;
+                }
+                
+                $final->{$urn}->{$keyDir} = $data->{$id}->{key};
+                
+                delete $final->{$urn}->{key};
+            }
+
+
+        }
+    }
+
+    # add to final out
+    my @out = ();
+
+    foreach my $urn ( keys %$final ) {
+        
+        # modify urn to have keys
+        $final->{$urn}->{urn} .= ':key=' . $final->{$urn}->{keyIn} . ',' . $final->{$urn}->{keyOut};
+        
+        $logger->debug( Data::Dumper::Dumper( $final->{$urn} ) );
+
+
+        push @out, $final->{$urn};
+        
+        
+    }
+
 	return \@out;
 }
 
@@ -314,10 +400,10 @@ sub getDataId
         foreach my $meta ( $message->findnodes( "//nmwg:metadata[\@id]" ) ) {
                 $logger->debug( "META: $meta \n" . $meta->toString() );
                 # get attribute
-                if ( $meta->getAttribute( 'metadataIdRef') eq '#in' ) {
+                if ( $meta->getAttribute( 'metadataIdRef') eq '#metaIn' ) {
                         $idRef->{in} = $meta->getAttribute( 'id' );
                 }
-                elsif ( $meta->getAttribute( 'metadataIdRef') eq '#out' ) {
+                elsif ( $meta->getAttribute( 'metadataIdRef') eq '#metaOut' ) {
                         $idRef->{out} = $meta->getAttribute( 'id' );
                 }
 

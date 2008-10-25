@@ -256,15 +256,11 @@ sub getPorts
 		# add own ma
 		push ( @{$hash->{mas}}, { 'type'=> 'LS', 'uri' => $self->uri() } ); 
 
-        my $url = $hash->{accessPoint};
-        $url =~ s/%3A/\:/g;
-        $url =~ s/%2F/\//g;
-        my ( $host, undef, undef ) = &perfSONAR_PS::Transport::splitURI( $url );
-
+        my ( $host, undef, undef ) = &perfSONAR_PS::Transport::splitURI( utils::xml::unescape( $hash->{accessPoint} ) );
 
 		# determine coordinate posisionts
 		# get urns for source and dst for location lookups etc
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $hash->{urn}, undef, $host, undef );
+		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, $hash->{urn} );
 
         #$logger->warn( "ENTRY: " . Data::Dumper::Dumper $hash );
 

@@ -14,10 +14,13 @@ use gmaps::Graph::RRD::PingER;
 use gmaps::Graph::RRD::Throughput;
 use gmaps::Graph::RRD::Latency;
 
+use gmaps::EventType2Service;
+
 use URI::Escape;
 
 use utils::urn;
 
+use perfSONAR_PS::ParameterValidation;
 use Template;
 use Data::Dumper;
 
@@ -68,8 +71,6 @@ The offered API is simple, but offers the key functions we need in a measurement
 package gmaps::Interface;
 
 use fields qw( TEMPLATE );
-
-our $gLSRoot = 'http://www.perfsonar.net/gls.root.hints';
 
 our $logger = Log::Log4perl::get_logger( 'gmaps::Interface');
 
@@ -139,21 +140,22 @@ sub discover
 	my $self = shift;
 	
 	my $uri =shift;
-	my $using = shift;
-	lc( $using );
+	my $eventType = shift;
+	
+	$logger->debug( "Attempting discovery of uri '$uri' with eventType '$eventType'");	
 	if ( ! defined $uri ) {
 		$uri = $self->query()->param( 'uri' );
 	}
 	$uri = utils::xml::unescape( $uri );
 	$logger->debug( "url: $uri");
 
-	my ( $using, $service ) = $self->createService( $uri, $using );
-	$logger->debug( "Discovery mechanism '$using'.");		
+	my $service = $self->createService( $uri, $eventType );
+	
 	
 	# return just list of urns
 	my $data =  $service->discover();
 	if ( scalar @$data < 1 ) {
-		$logger->fatal( "No urns were found on '$using' service '$uri'");
+		$logger->fatal( "No urns were found on service '$uri' using eventType '$eventType'");
 	}
 
 	return $data;	
@@ -168,21 +170,21 @@ sub topology
 	my $self = shift;
 	
 	my $uri =shift;
-	my $using = shift;
-	lc( $using );
+	my $eventType = shift;
+
 	if ( ! defined $uri ) {
 		$uri = $self->query()->param( 'uri' );
 	}
 	$uri = utils::xml::unescape( $uri );
 	$logger->debug( "url: $uri");
 
-	my ( $using,  $service ) = $self->createService( $uri, $using );
-	$logger->debug( "Discovery mechanism '$using'.");		
+	my $service = $self->createService( $uri, $eventType );
+	$logger->debug( "Discovery mechanism '$eventType'.");		
 		
 	# return just list of urns
 	my $data =  $service->topology();
 	if ( scalar @$data < 1 ) {
-		$logger->fatal( "No urns were found on '$using' service '$uri'");
+		$logger->fatal( "No urns were found on service '$uri' using eventType '$eventType'");
 	}
 
 	return $data;	
@@ -200,21 +202,45 @@ sub getGLS
 {
     my $self  = shift;
     
+    $logger->debug( "Fetching GLS list from '" . ${gmaps::paths::gLSRoot} . "'" );
     my $ua = LWP::UserAgent->new;
     $ua->agent( ${gmaps::paths::version} );
 
-    my $req = HTTP::Request->new(POST => $gLSRoot);
+    my $req = HTTP::Request->new(POST => ${gmaps::paths::gLSRoot} );
     my $res = $ua->request($req);
     
     my @gLS = ();
     if ($res->is_success) {
-        push @gLS, split /\s+/, $res->content;
+        
+        foreach my $accessPoint ( split /\s+/, $res->content ) {
+            push @gLS, $accessPoint;
+        }
     }
     else {
-        $logger->logdie( "Could get list of global Lookup services from '$gLSRoot'.");
+        $logger->logdie( "Could get list of global Lookup services from '" . ${gmaps::paths::gLSRoot} .  "'");
     }
 
+    $logger->debug( "Got gLS: @gLS");
+    
     return \@gLS;
+}
+
+
+=head2 getGLSUrn
+
+get's a list of urns for the global lookup services
+
+=cut
+sub getGLSUrn
+{
+    
+    my $self = shift;
+    my @urns = ();
+    foreach my $accessPoint ( @{$self->getGLS()} ) {
+        $accessPoint = 'urn:ogf:network:serviceType=gLS:serviceName=Lookup Service:accessPoint=' . URI::Escape::uri_escape( $accessPoint );
+        push @urns, $accessPoint;
+    }
+    return \@urns;
 }
 
 
@@ -260,7 +286,7 @@ sub getServicesFromHLS
     my $self = shift;
     my $hlsURL = shift;
     
-    my $list = $self->discover( $hlsURL, 'lookup' );
+    my $list = $self->discover( $hlsURL, "CRAP" );
 	
 	my @services = ();
 	
@@ -271,9 +297,9 @@ sub getServicesFromHLS
 
         # need to dtermine the approrpiate service Type
         if ( $hash->{serviceType} eq 'hLS' ) {
-            $hash->{serviceType} = 'lookup';
+            $hash->{eventType} = 'lookup';
         } else {
-            $hash->{serviceType} = $self->autoDetermineServiceType( $hash->{accessPoint} );
+            $hash->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $hash->{accessPoint} );
         }
         
         # need to add two service types for perfsonar buay
@@ -304,10 +330,6 @@ sub getServices
     my $self = shift;
     my $gLS = shift;
     
-    # get top level LS list
-    $gLS = $self->getGLS()->[0]
-        if ! defined $gLS;
-
     # list of urn's of the endpoint services
     my @services = ();
 
@@ -350,39 +372,110 @@ retrieve a table of information from the urn
 =cut
 sub fetch
 {
-	my $self = shift;
-	
-	my $uri =shift;
-	my $using = shift;
-	my $urn = shift;
-	
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift;
-	my $cf = shift;
-	
-	$uri = utils::xml::unescape( $uri );
-	$urn = utils::xml::unescape( $urn );
-	
-	$logger->debug( "url: $uri, urn: $urn: start: $startTime, end: $endTime, res: $resolution, cd: $cf");
+	my ( $self, @args ) = @_;
+    my $fetchArgs = $self->validateParams( @args );
 
-	my $service = undef;
-	( $using, $service ) = $self->createService( $uri, $using );
-	
 	# retrieve numeric data from service
-	my $data = $service->fetch( $urn, 
-	                            $startTime, $endTime, 
-	                            $resolution, $cf );
-	
+	my $service = $self->createService( $fetchArgs->{uri}, $fetchArgs->{eventType} );
+	my $uri = $fetchArgs->{uri};
+	delete $fetchArgs->{uri};
+	my $data = $service->fetch( $fetchArgs );
+
 	# TODO: This shoudl throw an exception instead 
 	if ( scalar keys %$data < 1 ) {
-		$logger->fatal( "No data was found on '$using' service '$uri' for '$urn'");
+	    if ( defined $fetchArgs->{key} ) {
+    		$logger->fatal( "No data was found on service '" . $uri . "' for key '" . $fetchArgs->{key} . "' using eventType '". $fetchArgs->{eventType} . "'");
+	    } else {
+		    $logger->fatal( "No data was found on service '" . $uri . "' for '" . $fetchArgs->{urn} . "' using eventType '". $fetchArgs->{eventType} . "'");
+		}
 		exit;
 	}
-	
+
 	return ( $service->fields(), $data );
 }
+
+
+sub validateParams
+{
+    my ( $self, @args ) = @_;
+	my $params = perfSONAR_PS::ParameterValidation::validateParams( @args, { uri => 1, eventType => 0, urn => 0, key => 0, startTime => 0, endTime => 0, period => 0, resolution => 0, consolidationFunction => 0 });
+
+	$params->{uri} = utils::xml::unescape( $params->{uri} );
+	$params->{urn} = utils::xml::unescape( $params->{urn} );
+	
+	if ( ! defined $params->{eventType} ) {
+	    $logger->fatal( "HERE " . $params->{eventType});
+	    $params->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $params->{uri} );
+	}
+	
+	$logger->debug( "url: " . $params->{uri} . ", urn: " . $params->{urn} . ", eventType: " . $params->{eventType} . ", key: " . $params->{key} . "; start: " . $params->{startTime} . ", end: " . $params->{endTime} . ", res: " . $params->{resolution} . ", cf: " . $params->{consolidationFunction} );
+	
+	# do some time calculations to make things consistent
+	my $fetchArgs = {
+	    
+	     uri => $params->{uri},
+	     eventType => $params->{eventType},
+	     
+	     urn => $params->{urn},
+ 	     key => $params->{key},
+ 	     
+	     resolution => $params->{resolution} || 300,
+         consolidationFunction => $params->{consolidationFunction}
+	};
+	
+    if ( ! defined $params->{period} ) {
+        $params->{period} = 3600;
+    }
+    ( $fetchArgs->{startTime}, $fetchArgs->{endTime} ) = $self->checkTimeRange( $params->{startTime}, $params->{endTime}, $params->{period} );
+
+    # throw an error if no metadata is defined to fetch
+    if ( ! defined $params->{urn} && ! defined $params->{key} ) {
+        $logger->logdie( "Could not determine metadata to fetch for service PingER");
+    }
+    
+    return $fetchArgs;
+}
+
+
+
+=head2 getTimeRange( $startTime, $endTime )
+
+returns the 
+=cut
+sub checkTimeRange
+{
+	my $self = shift;
+	my $startTime = shift;
+	my $endTime = shift;
+	my $period = shift;
+	
+	$logger->debug( "start: $startTime, end: $endTime, period: $period");
+	
+	# parse the times into epoch secs if not already
+	# TODO
+
+	# if no times defined, return undef	
+	if ( ! defined $startTime && ! defined $endTime ) {
+		$startTime = undef;
+		$endTime = time();
+	}
+	elsif ( defined $startTime && ! defined $endTime ) {
+		$endTime = time();
+	}
+
+	if( ( defined $startTime && defined $endTime )
+		&& $startTime >= $endTime ) {
+		$logger->error( "Start time ($startTime) is not chronologically before end time ($endTime).\n");
+		exit 0;
+	}		
+
+    if ( ! defined $startTime && defined $period ) {
+        $startTime = $endTime - $period;
+    }
+
+	return ( $startTime, $endTime );	
+}
+
 
 
 =head2 graph( uri, using, urn )
@@ -390,45 +483,27 @@ generates a rrd graph
 =cut
 sub graph
 {
-	my $self = shift;
-	
-	my $uri = shift;
-	my $using = shift;
-	my $urn = shift;
+	my ( $self, @args ) = @_;
+    my $fetchArgs = $self->validateParams( @args );
     
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift;
-	my $cf = shift;
-	
-	# default
-	$using = $self->autoDetermineServiceType( $uri )
-		if ! defined $using;
-
+    my $serviceType = gmaps::EventType2Service::autoDetermineService( $fetchArgs->{uri} );
 
 	# determine the correct grpah type to create
 	my $class = 'gmaps::Graph::RRD';
-	if ( $using eq 'utilisation' ) {
+	if ( $serviceType eq 'Utilisation' ) {
 		$class .= '::Utilisation';
-	} elsif ( $using eq 'pinger' ) {
+	} elsif ( $serviceType eq 'PingER' ) {
 		$class .= '::PingER';
-	} elsif ( $using eq 'bwctl' ) {
+	} elsif ( $serviceType eq 'BWCTL' ) {
 	    $class .= '::Throughput';
-         $resolution = $resolution || 1800;
-    } elsif ( $using eq 'owamp' ) {
+    } elsif ( $serviceType eq 'OWAMP' ) {
         $class .= '::Latency';
 	} else {
-		$logger->warn( "Could not determine appropriate graphing class to use");
+		$logger->warn( "Could not determine appropriate graphing class to use for uri '" . $fetchArgs->{uri} . "' using eventType '" . $fetchArgs->{eventType} . "'");
 	}
-	
-	# default resolution
-	$resolution = $resolution || 300;
-	
+		
 	# fetch the data	
-	my ( $fields, $data ) = $self->fetch( $uri, $using, $urn,
-                        	    $startTime, $endTime,
-                        		$resolution, $cf );
+	my ( $fields, $data ) = $self->fetch( $fetchArgs );
 	
 	### create the graph
 	# get the start and end
@@ -448,7 +523,7 @@ sub graph
 	# create temp rrd
 	my ( undef, $rrdFile ) = &File::Temp::tempfile( ) ; #UNLINK => 1 );	
 	no strict 'refs';
-	my $rrd = $class->new( $rrdFile, $start, $resolution, $entries, @$fields );
+	my $rrd = $class->new( $rrdFile, $start, $fetchArgs->{resolution}, $entries, @$fields );
 	use strict 'refs';
 	
 	# add the data into the rrd
@@ -496,30 +571,23 @@ sub createService
 {
 	my $self = shift;
 	my $uri = shift;
-	my $using = shift;
-	
-	# auto determine from uri if no using supplied
-	if ( ! defined $using ) {
-		$using = $self->autoDetermineServiceType( $uri );		
-	}
-	
-	# determine the class to use
-	my $class = undef;
-	if ( $using eq 'topology' ) {
-		$class = 'Topology';	
-	} elsif ( $using eq 'utilisation' ) {
-		$class = 'Utilisation';
-	} elsif ( $using eq 'pinger') {
-		$class = 'PingER';
-	} elsif ( $using eq 'bwctl' ) {
-		$class = 'BWCTL';
-	} elsif ( $using eq 'owamp' ) {
-		$class = 'OWAMP';
-	} elsif ( $using eq 'lookup' ) {
-		$class = 'Lookup';
+	my $eventType = shift;
+		
+	# auto determine the service class to use from uri if no using supplied
+	my $class = undef; # eventType mapping
+	if ( ! defined $eventType ) {
+		$class = gmaps::EventType2Service::autoDetermineService( $uri );
 	} else {
-		$logger->logdie( "Discovery mechanism '$using' is not supported.");		
+		# determine the class to use
+	    $class = gmaps::EventType2Service::getServiceFromEventType( $eventType );
 	}
+	
+	if ( ! $class ) {
+		$logger->logdie( "Could not determine service type from service '$uri' using eventType '$eventType'");		
+	}
+
+    $logger->debug("Mapped '$uri' using eventType '$eventType' to class '$class'");
+	
 	# create the service
 	my $method = 'gmaps::Services::' . $class;
 	no strict 'refs';
@@ -527,38 +595,8 @@ sub createService
 	use strict 'refs';
 	$logger->debug( "Created a " . $service . " for '$uri'");
 
-	return ( $using, $service );	
+	return $service;
 }
-
-
-=head2 autoDetermineServiceType( $uri )
-tries to determine the service type for hte uri provided
-=cut
-sub autoDetermineServiceType
-{
-	my $self = shift;
-	my $uri = shift;
-	
-	if ( $uri =~ /rrd/i or $uri =~ /snmp/ ) {
-		return 'utilisation';
-	} elsif ( $uri =~ /topology/i ) {
-			return 'topology';
-	} elsif ( $uri =~ /pinger/i ) {
-		return 'pinger';
-	} elsif ( $uri =~ /LS/i ) {
-		return 'lookup';
-	} elsif ( $uri =~ /pSB/i ) {
-	    return 'perfSONAR_BUOY';
-	} else {
-		$logger->logdie( "Cannot determine service type form uri '$uri'");
-	}
-	
-	return undef;
-}
-
-
-
-
 
 
 

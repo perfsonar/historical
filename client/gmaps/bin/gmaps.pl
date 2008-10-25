@@ -46,9 +46,11 @@ This API is a work in progress, and still does not reflect the general access ne
 
 our $LOG_PATTERN = '%d %C::%M - %m%n';
 
-my $psService = undef;
-my $psServiceType = undef;
+my $service = undef;
+my $eventType = undef;
+
 my @urn = ();
+my $key = undef;
 
 my $graph = undef;
 
@@ -64,9 +66,11 @@ my $debug = 0;
 
 my $ok = GetOptions (
 
-		'psService=s' => \$psService,
-		'psServiceType=s' => \$psServiceType,
+		'service=s' => \$service,
+		'eventType=s' => \$eventType,
+		
 		'urn=s' => sub{  push( @urn, $_[1] ); },
+        'key=s' => \$key,
 
         'period=s'  => \$period,
 		'startTime=i' => \$startTime,
@@ -151,10 +155,6 @@ Log::Log4perl->init( \%logging );
 
 our $logger = get_logger( 'gmaps.pl');
 
-# setup paths
-${gmaps::paths::templatePath} = '../templates/';
-
-
 # start a new instance of interface
 my $client = gmaps::commandline->new();
 
@@ -172,11 +172,11 @@ foreach my $u ( @urn ) {
     my $serviceDefinition = 0;
     
     if ( exists $hash->{'accessPoint'} ) {
-        $psService = $hash->{'accessPoint'};
+        $service = $hash->{'accessPoint'};
         $serviceDefinition=1;
     }
-    if ( exists $hash->{'serviceType'} ) {
-        $psServiceType = $hash->{'serviceType'};
+    if ( exists $hash->{'eventType'} ) {
+        $eventType = $hash->{'eventType'};
     }
     
     if ( ! $serviceDefinition ) {
@@ -187,38 +187,33 @@ foreach my $u ( @urn ) {
 ###
 # query the root LS for a list of services
 ###
-if ( ! defined $psService  && scalar @urn < 1 ) {
+if ( ! defined $service  && ( scalar @urn < 1 || ! defined $key ) ) {
     
-    my $services = $client->getServices(); 
-    
-    foreach my $service ( @$services ) {
-        $logger->info( "$service");
+    # get a list of gLSs
+    my $gLSes = $client->getGLSUrn();
+    foreach my $gLS ( @$gLSes ) {
+        print( $gLS . "\n");
     }
-
+    
     exit 0;
-    
-    
-    
+
 }
 
 ###
 # deal with a lookup service
 ###
+my $urnHash = utils::urn::toHash( $urn );
 
-if ( ! defined $psService && defined $urn  ) {
+if ( ! defined $service && ( defined $urn || defined $key ) ) {
 
-    my $hash = utils::urn::toHash( $urn );
-
-    $logger->info( Data::Dumper::Dumper ( $hash ) );
-
-    $psService = $hash->{accessPoint};
-    $psServiceType = $hash->{serviceType} unless defined $psServiceType;
+    $service = $urnHash->{accessPoint};
+    $eventType = $urnHash->{eventType} unless defined $eventType;
 
     # clear urn
     $urn = undef;
 
-    if ( ! defined $psService ) {
-        $logger->logdie( "psService not defined.")
+    if ( ! defined $service ) {
+        $logger->logdie( "Service not defined.")
     }
 
 }
@@ -226,25 +221,42 @@ if ( ! defined $psService && defined $urn  ) {
 ###    
 # query the specified service 
 ###
-
+if ( ! defined $eventType ) {
+    $eventType = gmaps::EventType2Service::autoDetermineEventType( $service );
+}
     
 # if no urn defined, get list of urns from service
-if ( ! defined $urn ) {
-	my $list = $client->discover( $psService, $psServiceType );
+if ( defined $service && ! ( defined $urn || defined $key ) ) {
+    
+	my $list = $client->discover( $service, $eventType );
 	foreach my $urn ( @$list ) {
-		$logger->info( $urn );
+		print( $urn ."\n");
 	}
 } 
 
-# branch on the service type
+
 else {
+
+    if ( ! defined $key ) {
+        $key = $urnHash->{key};
+    }
+
+
+    my $args = {    uri => $service, 
+                    eventType => $eventType,
+                    urn => $urn, 
+                    key => $key,
+                    startTime => $startTime, 
+                    endTime => $endTime,
+                    period => $period,
+                    resolution => $resolution, 
+                    consolidationFunction => $cf  };
+
 
 	# return a graph or text?
 	if ( $graph ) {
 
-		my $output = $client->graph( $psService, $psServiceType, $urn,
-		                                $startTime, $endTime,
-		                                $resolution, $cf );
+		my $output = $client->graph( $args );
 		print $$output;
 
 	} else {
@@ -252,10 +264,7 @@ else {
 		$endTime = time()
 			if ( ! defined $endTime );
 	
-		my ( $fields, $data ) = $client->fetch( $psService, $psServiceType, 
-											$urn, 
-											$startTime, $endTime,
-											$resolution, $cf );
+		my ( $fields, $data ) = $client->fetch( $args );
 
 		my $table = &formatAsTable( $data, @$fields );
 		foreach my $line ( @$table ) {
@@ -278,11 +287,12 @@ sub help
 {
 	print STDERR "$0: A command line interface to perfSONAR data (currently supports utilisation)\n";
     print STDERR "\n";
-	print STDERR "  Usage: $0 [--graph|--urn=STRING] --psService=URI\n";
+	print STDERR "  Usage: $0 [--graph|--urn=STRING] --service=URI\n";
     print STDERR "\n";
-	print STDERR "  --psService       URI of perfSONAR Service to interrogate\n";
-	print STDERR "  --psServiceType   type of perfSONAR Service to interrogate\n";
-	print STDERR "  --urn             urn of item in service\n";
+	print STDERR "  --service         URI of perfSONAR Service to interrogate\n";
+	print STDERR "  --eventType       eventType of perfSONAR Service to interrogate\n";
+	print STDERR "  --urn             urn of item in service to fetch\n";
+	print STDERR "  --key             key of item in service to fetch\n";
 	print STDERR "  --graph           generate a png graph of data\n";
 	print STDERR "  --period          fetch data from this period 1w, 1d etc\n";
 	print STDERR "  --startTime       fetch data from this time (epoch secs)\n";

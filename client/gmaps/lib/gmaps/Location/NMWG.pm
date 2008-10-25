@@ -27,16 +27,17 @@ sub new
 sub getLatLong
 {
 	my $self = shift;
-	
-	my $urn = shift; # don't really care
-	my $nodeEl = shift; # node element
 
 	# not used.
 	my $dns = shift;
 	my $ip = shift;
 	
-	# can be either in the bit directly underneath or in the location element
+	my $nodeEl = shift; # node element
+
+	my $urn = shift; # don't really care
+
 	
+	# can be either in the bit directly underneath or in the location element
 	my $long = undef;
 	my $lat = undef;
 	

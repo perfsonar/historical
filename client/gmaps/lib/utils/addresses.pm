@@ -11,31 +11,33 @@ our $logger = Log::Log4perl::get_logger( 'utils::addresses');
 
 sub getDNS
 {
-	my $ip = shift;
+	my $input = shift;
+	
+	my $ip = undef;
 	my $dns = undef;
 
-	$logger->debug( "IN: ip: $ip, dns: $dns");
+    $logger->debug( "Looking up ip and dns for '$input'" );
+
 	# ip is actual ip, get the dns
-	if ( &isIpAddress( $ip ) ) {
-		$logger->debug( "Fetching dns for ip $ip" );
+	if ( $ip = &isIpAddress( $input ) ) {
 		$dns = gethostbyaddr( inet_aton($ip), AF_INET )
 			unless $ip eq '172.16.12.1';	# blatant hack to reduce time for fnal lookup
 	}
 	# ip is dns, get the ip
 	else {
-		$dns = $ip;
-		$logger->debug("Fetching ip for dns $dns" );
+		$dns = $input;
+		$logger->debug("  fetching ip for dns $dns" );
 		my $i = inet_aton($dns);
 
 		if ( $i ne '' ) {
 			$ip = inet_ntoa( $i );
 		}
 		else {
-			$logger->warn( "unknown dns for ip $ip\n" );
+			$logger->debug( "  unknown dns for ip $ip\n" );
 		}
 	}
 
-	$logger->debug( "OUT: ip: $ip, dns: $dns" );
+	$logger->debug( "  resolved to ip: $ip, dns: $dns" );
 	undef $dns if $dns eq '';
 	undef $ip if $ip eq '';
 	return ( $ip, $dns );

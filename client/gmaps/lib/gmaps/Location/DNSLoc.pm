@@ -25,40 +25,31 @@ sub getLatLong
 {
 	my $self = shift;
 	
-	my $urn = shift;
-	my $libXml = shift; # not used.
-	
 	my $dns = shift;
 	my $ip = shift;
 	
 	my $domain = undef;
 	my $host = undef;
 
-	#if ( ( ! defined $dns || ! defined $ip ) && defined $urn ) {
-	#		( $domain, $host, $dns ) = &utils::urn::fromUrn( $urn );
-	#}
-	$logger->debug( "using DNS: urn=$urn dns=$dns ip=$ip" );
+	$logger->debug( "using DNSLoc: dns=$dns ip=$ip" );
 
 	# meed tje dms for lookups	
 	if ( ! defined $dns ) {
-		$logger->warn( "dns address must be supplied for urn '" . $urn . "'");
+		$logger->warn( "dns address must be supplied for DNSLoc lookup");
 		return ( undef, undef );
 	}
 		
 	# host only supports loc of dns address
-	if ( $dns =~ /\d+\.\d+\.\d+\.\d+/ ) {
-		$ip = $dns;
-		( undef , $dns ) = &utils::addresses::getDNS( $dns );
-	}
-	
 	unless ( defined $dns && $dns ne '' ) {
-		$logger->warn( "dns address of $ip could not be determined");
+		$logger->debug( "dns address of $ip could not be determined");
 		return (undef, undef);
 	}
 
 	# untaint the dns
 	if ( $dns =~ /\s*([\S\.]+)\s*/ ) {
 		$host = $1;
+	} else {
+	    $host = $ip;
 	}
 
 	my $uri = '/usr/bin/host -t LOC ' . $host;
@@ -85,7 +76,7 @@ sub getLatLong
 	}
 	undef $out;
 
-	return ( $lat, $long  );
+	return ( $lat, $long );
 
 }
 

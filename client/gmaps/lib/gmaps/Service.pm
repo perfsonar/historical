@@ -2,7 +2,7 @@ use utils::transport;
 use Template;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Transport;
-
+use perfSONAR_PS::ParameterValidation;
 
 
 =head1 NAME
@@ -290,20 +290,6 @@ sub isAlive
 		
 	}
 	return 0;
-	
-#	my $out = $self->processTemplate( $requestXML, $vars );
-#	
-#	my $response = &utils::transport::getString( 
-#		$self->host(), $self->port(), $self->endpoint(), 
-#		$out, 
-#		'//nmwg:message/nmwg:metadata/nmwg:eventType/text()');
-#
-#	#$logger->debug( "HERE: $response '"  . $response->nodeValue . "'");
-#	if ( $response = 'success.echo' ) {
-#		$logger->debug( "alive!");
-#		return 1;
-#	}
-#	return 0;
 }
 
 
@@ -330,17 +316,10 @@ is included with teh startTime, then it will get all data from that range inclus
 =cut
 sub fetch
 {
-	my $self = shift;
-	my $urn = shift;
-	
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift;
-	my $consolidationFunction = shift;
-	
+	my ( $self, @args ) = @_;
+	my $params = validateParams( @args, { urn => undef, key => undef, startTime => 0, endTime => 0, resolution => 300, consolidationFunction => undef } );
+		
 	$logger->logdie( "fetch must be inherieted");
-	
 }
 
 
@@ -348,41 +327,6 @@ sub fetch
 # utility functions
 #######################################################################
 
-=head2 getTimeRange( $startTime, $endTime )
-
-returns the 
-=cut
-sub checkTimeRange
-{
-	my $self = shift;
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	#$logger->warn( "INN START: $startTime, END: $endTime");
-	
-	# parse the times into epoch secs if not already
-	# TODO
-
-	# if no times defined, return undef	
-	if ( ! defined $startTime && ! defined $endTime ) {
-		$startTime = undef;
-		$endTime = time();
-	}
-	elsif ( defined $startTime && ! defined $endTime ) {
-		$endTime = time();
-	}
-
-	if( ( defined $startTime && defined $endTime )
-		&& $startTime >= $endTime ) {
-		$logger->error( "Start time ($startTime) is not chronologically before end time ($endTime).\n");
-		exit 0;
-	}		
-
-    my $diff = $endTime - $startTime;
-	#$logger->warn( "OUT START: $startTime, END: $endTime, DIFF: $diff " );
-
-	return ( $startTime, $endTime );	
-}
 
 
 

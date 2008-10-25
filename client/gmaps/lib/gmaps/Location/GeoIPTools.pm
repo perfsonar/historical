@@ -25,23 +25,12 @@ sub new
 sub getLatLong
 {
 	my $self = shift;
-	my $urn = shift;
-	my $libXML = shift; # not used;
 	
 	my $dns = shift;
 	my $ip = shift;
 
-
-	# prefer ip address
-	if ( defined $urn ) {
-		my ( $domain, $host, $port ) = utils::urn::fromUrn( $urn );
-		if ( utils::addresses::isIpAddress( $port ) ) {
-			$ip = $port;
-		}
-	}
-	
 	# TODO: remap from dns
-	$logger->debug( "using GeoIPTools: urn=$urn dns=$dns, ip=$ip");
+	$logger->debug( "using GeoIPTools: dns=$dns, ip=$ip");
 	
 	# prefer ip
 	my $host = undef;
@@ -51,7 +40,7 @@ sub getLatLong
 		$host = $dns;
 	} else {
 		# exit if we cna't determine what look up
-		$logger->warn( "No ip address could be determined for $urn");
+		$logger->warn( "could not determine input for lookup");
 		return (undef, undef);
 	}
 	
@@ -66,8 +55,6 @@ sub getLatLong
 	my $req = HTTP::Request->new( GET => $uri );
 	my $res = $ua->request( $req );
 	my $out = $res->content();
-
-	#$logger->debug( "OUT: $out");
 
 	my $lat = undef;
 	my $long = undef;	

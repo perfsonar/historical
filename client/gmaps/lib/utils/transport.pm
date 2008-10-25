@@ -68,7 +68,7 @@ sub get
 
 	if ( ! defined $response or $response eq '' ) {
 		
-		$logger->logdie( "No response from remote service at '" . perfSONAR_PS::Transport::getHttpURI( $host, $port, $endpoint ) . "'." );
+		$logger->logdie( "No response from remote service at '" . perfSONAR_PS::Transport::getHttpURI( $host, $port, $endpoint ) . "'\n" );
 
 	};
 	
@@ -118,6 +118,7 @@ sub get
 	#foreach my $node ( $nodelist->get_nodelist  ) {
 	#	$logger->debug( "-->" . $node->toString() );
 	#}
+
 		
 	return ( $nodelist->get_nodelist() );
 }

@@ -7,10 +7,6 @@ use base 'gmaps::Graph::RRD';
 our $logger = Log::Log4perl->get_logger("gmaps::Graph::RRD::PingER" );
 
 
-
-
-
-
 =head2 getGraphArgs
 returns the rrd graph arguments to produce a graph of utilisation data
 =cut

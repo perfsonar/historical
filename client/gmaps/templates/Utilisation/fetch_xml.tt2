@@ -1,5 +1,5 @@
 [%- DEFAULT
-  EVENTTYPE = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0"
+  eventType = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0"
 -%]
 <nmwg:message id="#message1"
               type="SetupDataRequest"		   
@@ -9,6 +9,17 @@
               xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/" >
 
   <nmwg:metadata id="#in">
+
+    [%- IF keyIn -%]
+    
+    <nmwg:key id="key#1">
+      <nmwg:parameters id="parameters-key-1">
+        <nmwg:parameter name="maKey">[% keyIn %]</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+
+    [%- ELSE -%]
+
     <netutil:subject id="#netutil1">
       <topo:interface>
         [% IF ifAddress %]<topo:ifAddress type="ipv4">[% ifAddress %]</topo:ifAddress>[% END %]
@@ -18,10 +29,24 @@
         <topo:direction>in</topo:direction>
       </topo:interface>
     </netutil:subject>
-    <nmwg:eventType>[% EVENTTYPE %]</nmwg:eventType>
+
+    [%- END -%]
+
+    <nmwg:eventType>[% eventType %]</nmwg:eventType>
   </nmwg:metadata>
 
   <nmwg:metadata id="#out">
+
+    [%- IF keyOut -%]
+  
+    <nmwg:key id="key#1">
+      <nmwg:parameters id="parameters-key-1">
+        <nmwg:parameter name="maKey">[% keyOut %]</nmwg:parameter>
+      </nmwg:parameters>
+    </nmwg:key>
+
+    [%- ELSE -%]
+
     <netutil:subject id="#netutil1">
       <topo:interface>
         [% IF ifAddress %]<topo:ifAddress type="ipv4">[% ifAddress %]</topo:ifAddress>[% END %]
@@ -31,19 +56,22 @@
         <topo:direction>out</topo:direction>
       </topo:interface>
     </netutil:subject>
-    <nmwg:eventType>[% EVENTTYPE %]</nmwg:eventType>
+
+    [%- END -%]
+    
+    <nmwg:eventType>[% eventType %]</nmwg:eventType>
   </nmwg:metadata>
 
 
-  [%- IF STARTTIME && ENDTIME -%]
+  [%- IF startTime && endTime -%]
   
   <nmwg:metadata id="#metaIn">
     <select:subject id="#periodIn" metadataIdRef="#in"/>
     <select:parameters id="#paramsIn">
-      <nmwg:parameter name="startTime">[% STARTTIME %]</nmwg:parameter>
-      <nmwg:parameter name="endTime">[% ENDTIME %]</nmwg:parameter>
-      [% IF CF %]<nmwg:parameter name="consolidationFunction">[% CF %]</nmwg:parameter>[% END %]
-      [% IF RESOLUTION %]<nmwg:parameter name="resolution">[% RESOLUTION %]</nmwg:parameter>[% END %]
+      <nmwg:parameter name="startTime">[% startTime %]</nmwg:parameter>
+      <nmwg:parameter name="endTime">[% endTime %]</nmwg:parameter>
+      [% IF consolidationFunction %]<nmwg:parameter name="consolidationFunction">[% consolidationFunction %]</nmwg:parameter>[% END %]
+      [% IF resolution %]<nmwg:parameter name="resolution">[% resolution %]</nmwg:parameter>[% END %]
     </select:parameters>
     <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType> 
   </nmwg:metadata>
@@ -51,10 +79,10 @@
   <nmwg:metadata id="#metaOut">
     <select:subject id="#periodOut" metadataIdRef="#out"/>
     <select:parameters id="#paramsOut">
-      [% IF STARTTIME %]<nmwg:parameter name="startTime">[% STARTTIME %]</nmwg:parameter>[% END %]
-      [% IF ENDTIME %]<nmwg:parameter name="endTime">[% ENDTIME %]</nmwg:parameter>[% END %]
-      [% IF CF %]<nmwg:parameter name="consolidationFunction">[% CF %]</nmwg:parameter>[% END %]
-      [% IF RESOLUTION %]<nmwg:parameter name="resolution">[% RESOLUTION %]</nmwg:parameter>[% END %]
+      [% IF startTime %]<nmwg:parameter name="startTime">[% startTime %]</nmwg:parameter>[% END %]
+      [% IF endTime %]<nmwg:parameter name="endTime">[% endTime %]</nmwg:parameter>[% END %]
+      [% IF consolidationFunction %]<nmwg:parameter name="consolidationFunction">[% consolidationFunction %]</nmwg:parameter>[% END %]
+      [% IF resolution %]<nmwg:parameter name="resolution">[% resolution %]</nmwg:parameter>[% END %]
     </select:parameters>
     <nmwg:eventType>http://ggf.org/ns/nmwg/ops/select/2.0</nmwg:eventType> 
   </nmwg:metadata>

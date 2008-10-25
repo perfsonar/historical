@@ -37,24 +37,44 @@ sub new
 sub getLatLong
 {
 	my $self = shift;
-	my $urn = shift;
-	my $nodeEl = shift; # libxml
+
 	my $dns = shift;
 	my $ip = shift;
+
+	my $nodeEl = shift; # libxml
+	my $urn = shift;
 
 	my @classes = ();
 
 	my $lat = undef;
 	my $long = undef;
 
-#	$logger->fatal( "get: $urn, $dns, $ip");
+	$logger->debug( "dns: $dns, ip: $ip, node: $nodeEl, urn: $urn");
 
 	# chekc to make sure we cant to do local caching
 	my $useDB = 1;
 	$useDB = 0
 		if ( ! defined ${gmaps::paths::locationCache} 
 			or ${gmaps::paths::locationCache} eq '' );
-        
+
+    # store only the ip address in the database
+    # determine the ip address
+    if ( defined $ip && utils::addresses::isIpAddress( $ip ) ) {
+      #good   
+    } else {
+        if ( ! defined $dns ) {
+            # work out from urn
+            my ( $domain, $host, $port ) = utils::urn::fromUrn( $urn );
+    		if ( utils::addresses::isIpAddress( $port ) ) {
+    			$ip = $port;
+    		}
+        }
+
+        ( $ip, $dns ) = utils::addresses::getDNS( $dns )
+            if $dns;
+
+    }
+
     my $db = undef;       
 	if ( $useDB )
 	{
@@ -62,9 +82,13 @@ sub getLatLong
 		$db = gmaps::Location::SQLite->new( ${gmaps::paths::locationCache} );
 
 		# try the cache first
-		( $lat, $long ) = $db->getLatLong( $urn );
-		return ( $lat, $long ) 
-		        if ( defined $lat && defined $long );
+		( $lat, $long ) = $db->getLatLong( $dns, $ip );
+
+        if ( defined $lat && defined $long ) {
+		    $logger->debug( "resolved node '$ip' to ( $lat, $long )");
+		    return ( $lat, $long ) 
+		}    
+		        
 	}
 
 	# if doesn't exist, find another way...
@@ -83,21 +107,21 @@ sub getLatLong
 		if ${gmaps::paths::locationDoDNSLoc};
 
 	foreach my $class ( @classes ) {
-		( $lat, $long ) = $class->getLatLong( $urn, $nodeEl, $dns, $ip );
-		$logger->debug( "Querying $class for location of 'urn $urn, dns $dns, ip $ip;' returned ($lat,$long)");
+		( $lat, $long ) = $class->getLatLong( $dns, $ip, $nodeEl, $urn );
+		$logger->debug( "Querying $class for location of dns $dns, ip $ip; returned ($lat,$long)");
 		last if defined $lat && defined $long;
 	}
 
 	 if ( ! defined $lat && ! defined $long  ) {
 		$lat = 'NULL';
 		$long = 'NULL';
-		$logger->warn( "Could not determine location for '$urn'" )
+		$logger->warn( "Could not determine location for dns '$dns' and ip '$ip'" )
 		   if scalar @classes > 1;
-	 }
-
-	 # store into cache
-	 $db->setLatLong( $urn, $lat, $long )
-	         if ( $useDB );
+	 } else {
+	     # store into cache
+    	 $db->setLatLong( $ip, $lat, $long )
+    	         if ( $useDB );
+    }
 
 	return ( $lat, $long );
 }

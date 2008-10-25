@@ -111,46 +111,34 @@ returns a hashof $hash->{$time}->{metric} values for the specified urn.
 =cut
 sub fetch
 {
-	my $self = shift;
-	my $urn = shift;
+	my ( $self, @args ) = @_;
+	my $params = perfSONAR_PS::ParameterValidation::validateParams( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 	
-	my $period = undef;
-	
-	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $urn; 
+	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $params->{urn}; 
 	$logger->debug( "PATH: $path, @params");
 	
-	my $src = undef;
-	my $dst = undef;
-	if( $path =~ m/^path\=(.*) to (.*)$/ ) {
-		$src = $1;
-		$dst = $2;
-	} else {
-		
-		$logger->logdie( "Could not determine source and destination or urn");
-		
-	}
-	$logger->debug( "Fetching '$urn': path='$src' to '$dst' params='@params'" );
+	if ( ! defined $params->{key} ) {
+    	my $src = undef;
+    	my $dst = undef;
+    	if( $path =~ m/^path\=(.*) to (.*)$/ ) {
+    		$src = $1;
+    		$dst = $2;
+    	} else {
+    		$logger->logdie( "Could not determine source and destination or urn '" . $params->{urn} . "'");
+    	}
+	
+    	$logger->debug( "Fetching '" . $params->{urn} . "': path='$src' to '$dst' params='@params'" );
 
-	# determine if the port is a ip address
-	my $vars = {
-			'src' => $src,
-			'dst' => $dst,
-		};
+    	# determine if the port is a ip address
+    	$params->{src} = $src;
+    	$params->{dst} = $dst;
+    } 
 
 	# form the parameters
 	foreach my $s ( @params ) {
 		my ( $k, $v ) = split /\=/, $s;
-		$vars->{$k} = $v;
+		$params->{$k} = $v;
 	}
-
-	if ( defined $period ) {
-		$vars->{'PERIOD'} = $period;
-	} else {
-		$vars->{'PERIOD'} = 86400;
-	}
-	# need to have real time becuase of problems with using N
-	$vars->{"ENDTIME"} = time();
-	$vars->{'STARTTIME'} = $vars->{'ENDTIME'} - $vars->{'PERIOD'};
 
 	# fetch the data form the ma
 	my $requestXML = 'PingER/fetch_xml.tt2';
@@ -158,7 +146,7 @@ sub fetch
 	
 	# we only get one message back, so 
 	my @temp = ();
-	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $vars, $filter );
+	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $params, $filter );
 	
 	# now get teh actually data elements
 	return $self->parseData( $message );
@@ -272,6 +260,9 @@ sub getPorts
 							}
 						}
 					}
+					elsif ( $node->localname() eq 'key' ) {
+					    $hash->{key} = $node->getAttribute('id');
+					}
 			# 	} #subnode
 			# }
 			
@@ -287,7 +278,6 @@ sub getPorts
 		# determine urn for item
 		# FIXME: frontends don't support path urn yet
 		$hash->{urn} = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
-		#$hash->{urn} = &utils::urn::toUrn( { 'node' => $hash->{dst}, 'port' => $hash->{src} });
 		
 		my @keys = ();
 		foreach my $k ( keys %$hash ) {
@@ -307,8 +297,8 @@ sub getPorts
 
 		# determine coordinate posisionts
 		# get urns for source and dst for location lookups etc
-		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{src} } ), undef, $hash->{src}, undef );
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{dst} } ), undef, $hash->{dst}, undef );
+		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( $hash->{src}, $hash->{src}, undef, undef );
+		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $hash->{dst}, $hash->{dst}, undef, undef );
 
 		#$logger->debug( "Constructed URN: $urn\n" . Dumper $hash );	
 
@@ -350,7 +340,7 @@ sub parseData
 			$logger->debug( "Found! <data/>" );
 			foreach my $commonTime ( $child->childNodes() ) {
 				if( $commonTime->localname() eq 'commonTime' ) {
-					$logger->debug("  commonTime" );
+					$logger->debug(" commonTime" );
 					my $time = $commonTime->getAttribute( 'value' );
 					next unless $time =~ /^\d+$/;
 	
@@ -361,11 +351,11 @@ sub parseData
 							# get the time of the datum
 								
 							my $param = $datum->getAttribute( 'name');
-							$logger->debug("  datum $param" );
 						
 							# get the value
 							my $value = $datum->getAttribute('value');
 							next if $value eq 'nan';
+							$logger->debug("  datum $param = $value" );
 							
 							# remap boolean values
 							if ( $value eq 'false' ) {
