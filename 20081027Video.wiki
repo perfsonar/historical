@@ -13,14 +13,21 @@
    # FNAL
    # MCNC
  # SC status
+   * New Weathermap proposal
+     * Still very basic: http://dc211.internet2.edu/SC08/
+     * Will hide/show DCN circuits via OSCARS MA
+     * Will use utilization from SNMP MA
+       * Interest in other metrics?
  # Central configuration service
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+     * *_JZ:_* We keep putting this off, but I would like to put it off a little more since this is a non-trivial problem, and the development/thinking cycles will be pretty sparse until after November.
  # Deployment Status Listings
    * How do we decide what goes in the list? Everything? Do we attempt to validate?
      * Joe will send out comments from Jason Lee to start this discussion.
  # ISO - Functional Specification
    * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
  # Discussion of middle-term goals
+   * Release management
    * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
    * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
  # Next meeting will Nov 3, 2:30 pm Eastern Time
