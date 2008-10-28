@@ -24,7 +24,7 @@ sub initialize {
 
     $parameters->{"type"} = "ciena";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena");
-    $parameters->{"prompt"} = ";" if (not $parameters->{"port"});
+    $parameters->{"prompt"} = ";" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "10201" if (not $parameters->{"port"});
 
     return $self->SUPER::initialize($parameters);
@@ -293,7 +293,7 @@ sub getEFLOW_PM {
 sub getVCG_PM {
     my ($self, $name, $type) = @_;
 
-    print "VCG: '$name'\n";
+    $self->{LOGGER}->debug("VCG: '$name'\n");
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-PM-VCG::\"$name\":".$self->{CTAG}."::;");
 
@@ -335,9 +335,9 @@ sub getOCN_PM {
 
     my %crss = ();
 
-    print "SEND_CMD: RTRV-PM-OCN\n";
+    $self->{LOGGER}->debug("SEND_CMD: RTRV-PM-OCN\n");
     my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::$aid:".$self->{CTAG}."::;");
-    print "DONE CMD: RTRV-PM-OCN\n";
+    $self->{LOGGER}->debug("DONE CMD: RTRV-PM-OCN\n");
 
     my %pm_results = ();
 
@@ -419,13 +419,13 @@ sub readStats {
 
     $self->disconnect();
 
-    print "CRS: ".Dumper($self->{CRSSBYNAME});
-    print "ETHS: ".Dumper($self->{ETHSBYAID});
-    print "GTPS: ".Dumper($self->{GTPSBYNAME});
-    print "OCNS: ".Dumper($self->{OCNSBYAID});
-    print "SNCS: ".Dumper($self->{SNCSBYNAME});
-    print "VCGS: ".Dumper($self->{VCGSBYNAME});
-    print "STS: ".Dumper($self->{STSSBYNAME});
+    $self->{LOGGER}->debug("CRS: ".Dumper($self->{CRSSBYNAME}));
+    $self->{LOGGER}->debug("ETHS: ".Dumper($self->{ETHSBYAID}));
+    $self->{LOGGER}->debug("GTPS: ".Dumper($self->{GTPSBYNAME}));
+    $self->{LOGGER}->debug("OCNS: ".Dumper($self->{OCNSBYAID}));
+    $self->{LOGGER}->debug("SNCS: ".Dumper($self->{SNCSBYNAME}));
+    $self->{LOGGER}->debug("VCGS: ".Dumper($self->{VCGSBYNAME}));
+    $self->{LOGGER}->debug("STS: ".Dumper($self->{STSSBYNAME}));
 
     return;
 }
@@ -437,10 +437,10 @@ sub readGTPs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-GTP::ALL:".$self->{CTAG}.";");
 
-    print "Got GTP Lines\n";
+    $self->{LOGGER}->debug("Got GTP Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
             my %status = ( pst => $2, sst => $3 );
@@ -461,10 +461,10 @@ sub readSTSs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-STSPC:::".$self->{CTAG}.";");
 
-    print "Got STSPC Lines\n";
+    $self->{LOGGER}->debug("Got STSPC Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
             my %status = ( pst => $2, sst => $3 );
@@ -485,10 +485,10 @@ sub readVCGs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-VCG::ALL:".$self->{CTAG}.";");
 
-    print "Got VCG Lines\n";
+    $self->{LOGGER}->debug("Got VCG Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),PST=([^,]*),.*SST=\[[a-zA-Z-]+[,a-zA-Z-]*\]/) {
             my %status = ( pst => $2, sst => $3 );
@@ -509,10 +509,10 @@ sub readSNCs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-SNC-STSPC::ALL:".$self->{CTAG}.";");
 
-    print "Got SNC Lines\n";
+    $self->{LOGGER}->debug("Got SNC Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*STATE=([^,]*).*"/) {
             my %status = ( pst => $2, state => $3 );
@@ -533,10 +533,10 @@ sub readOCNs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-OCN::ALL:".$self->{CTAG}.";");
 
-    print "Got OCN Lines\n";
+    $self->{LOGGER}->debug("Got OCN Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*"/) {
             my %status = ( pst => $2 );
@@ -557,10 +557,10 @@ sub readCRSs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-CRS:::".$self->{CTAG}.";");
 
-    print "Got CRS Lines\n";
+    $self->{LOGGER}->debug("Got CRS Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /NAME=([^,]*)/) {
             my ($pst, $sst, $name);
@@ -594,10 +594,10 @@ sub readPM_STSs {
 
     my %pm_results = ();
 
-    print "Got STS_PM Lines\n";
+    $self->{LOGGER}->debug("Got STS_PM Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^,]*),STSPC:([^,]*),([^,]*),([^,]*),([^,]),([^,]),([^,]*),.*"/) {
             my $aid = $1;
@@ -638,11 +638,11 @@ sub readPM_ETHs {
 
     my %pm_results = ();
 
-    print "Got ETH_PM Lines\n";
+    $self->{LOGGER}->debug("Got ETH_PM Lines\n");
 
 #   "1-A-1-1:OVER_SIZE,0,PRTL,15-MIN,08-01,16-00"
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*).*"/) {
             my $aid = $1;
@@ -679,10 +679,10 @@ sub readOCN_PMs {
 
     my %pm_results = ();
 
-    print "Got OCN_PM Lines\n";
+    $self->{LOGGER}->debug("Got OCN_PM Lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
      #   "1-A-3-1,OC192:OPR,0,PRTL,NEND,RCV,15-MIN,05-30,01-00,LOW,LOW,LOW,LOW,0"
 
@@ -738,6 +738,8 @@ sub login {
     if ($status != 1) {
         return -1;
     }
+
+    $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
 
     return 0;
 }

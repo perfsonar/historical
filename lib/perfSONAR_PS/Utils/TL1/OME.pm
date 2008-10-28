@@ -281,10 +281,10 @@ sub readETHs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-ETH::ETH-1-ALL:".$self->{CTAG}.";");
 
-    print "Got ETH line\n";    
+    $self->{LOGGER}->debug("Got ETH line\n");    
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -323,10 +323,10 @@ sub readOCNs {
     foreach my $i (3, 12, 48, 192) {
         my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i."::OC".$i."-1-ALL:".$self->{CTAG}.";");
 
-        print "Got OC$i line\n";    
+        $self->{LOGGER}->debug("Got OC$i line\n");    
 
         foreach my $line (@$results) {
-            print $line."\n";
+            $self->{LOGGER}->debug($line."\n");
 
             if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
                 $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -361,10 +361,10 @@ sub readPMs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-PM-ALL::ALL:".$self->{CTAG}."::,,,,,,,1:;");
 
-    print "Got PM line\n";    
+    $self->{LOGGER}->debug("Got PM line\n");    
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
 #       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
@@ -411,10 +411,10 @@ sub readAlarms {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
 
-    print "Got ALM line\n";    
+    $self->{LOGGER}->debug("Got ALM line\n");    
 
     foreach my $line (@$results) {
-        print "LINE: ".$line."\n";
+        $self->{LOGGER}->debug("LINE: ".$line."\n");
 
 #       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
@@ -425,7 +425,7 @@ sub readAlarms {
 #   "ETH10G-1-10-4,ETH10G:CR,LOS,SA,01-07,07-34-55,NEND,RCV:\"Loss Of Signal\",NONE:0100000295-0008-0673,:YEAR=2006,MODE=NONE"
 
         if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):([^,]*),([^:]*):([^,]*),([^:]*):YEAR=([^,]*),MODE=([^"]*)"/) {
-            print "Found a good line\n";
+            $self->{LOGGER}->debug("Found a good line\n");
 
             my $facility = $1;
             my $facility_type = $2;
@@ -443,9 +443,9 @@ sub readAlarms {
             my $year = $14;
             my $mode = $15;
 
-            print "DESCRIPTION: '$description'\n";
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
             $description =~ s/\\"//g;
-            print "DESCRIPTION: '$description'\n";
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
 
             my %alarm = (
                 facility => $facility,
@@ -579,13 +579,15 @@ sub readAlarms {
 sub login {
     my ($self) = @_;
 
-    print "PASSWORD: $self->{PASSWORD}\n";
+    $self->{LOGGER}->debug("PASSWORD: $self->{PASSWORD}\n");
 
     my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::\"".$self->{PASSWORD}."\";");
 
     if ($status != 1) {
         return -1;
     }
+
+    $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
 
     return 0;
 }

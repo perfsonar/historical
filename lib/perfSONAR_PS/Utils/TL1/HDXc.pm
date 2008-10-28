@@ -295,10 +295,10 @@ sub readSECTs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-SECT:::".$self->{CTAG}.";");
 
-    print "got SECT lines\n";
+    $self->{LOGGER}->debug("got SECT lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -340,10 +340,10 @@ sub readLINEs {
 
     $self->{LOGGER}->info("Return from readLin: ".$etime." -- ".($etime-$stime)."\n");
 
-    print "got LINE lines\n";
+    $self->{LOGGER}->debug("got LINE lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         $self->{LOGGER}->info("Received line: ".$line);
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
@@ -383,10 +383,10 @@ sub readOCNs {
     foreach my $i (3, 12, 48, 192) {
         my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i.":::".$self->{CTAG}.";");
 
-        print "got OC$i lines\n";
+        $self->{LOGGER}->debug("got OC$i lines\n");
 
         foreach my $line (@$results) {
-            print $line."\n";
+            $self->{LOGGER}->debug($line."\n");
 
             if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
                 $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -400,7 +400,7 @@ sub readOCNs {
 
                 if ($line =~ /LABEL=\\"([^\\]*)\\"/) {
                     $name = $1;
-                    print "Found name: $name\n";
+                    $self->{LOGGER}->debug("Found name: $name\n");
                 }
 
                 if ($line =~ /.*:([A-Z]*),([A-Z]*)"/) {
@@ -429,10 +429,10 @@ sub readCRSs {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-CRS-ALL:::".$self->{CTAG}.";");
 
-    print "got CRS lines\n";
+    $self->{LOGGER}->debug("got CRS lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -485,11 +485,11 @@ sub readLine_PM {
 
     $self->{LOGGER}->info("Return from readLin_PM: ".$etime." -- ".($etime-$stime)."\n");
 
-    print "got LINE_PM lines\n";
+    $self->{LOGGER}->debug("got LINE_PM lines\n");
 
     foreach my $line (@$results) {
 
-        print "LINE: $line";
+        $self->{LOGGER}->debug("LINE: $line");
 
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -539,10 +539,10 @@ sub readSect_PM {
         (my $successStatus, $results) = $self->send_cmd("RTRV-PM-SECT:::".$self->{CTAG}."::ALL-S:;");
     }
 
-    print "got SECT_PM lines\n";
+    $self->{LOGGER}->debug("got SECT_PM lines\n");
 
     foreach my $line (@$results) {
-        print $line."\n";
+        $self->{LOGGER}->debug($line."\n");
 
 #        "OC192S-1-501-2-1:SEFS-S,505,PRTL,NEND,RCV,15-MIN,06-16,14-15"
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
@@ -589,6 +589,8 @@ sub login {
     if ($status != 1) {
         return -1;
     }
+
+    $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
 
     return 0;
 }
