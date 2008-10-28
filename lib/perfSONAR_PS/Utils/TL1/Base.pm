@@ -35,8 +35,6 @@ sub initialize {
             ctag => 0,
             });
 
-    print Dumper($parameters);
-
     $self->{USERNAME} = $parameters->{username};
     $self->{PASSWORD} = $parameters->{password};
     $self->{TYPE} = $parameters->{type};
@@ -145,7 +143,7 @@ sub getCacheTime {
 sub connect {
     my ($self) = @_;
 
-    print Dumper($self->{ADDRESS});
+    $self->{LOGGER}->debug(Dumper($self->{ADDRESS}));
 
     if ($self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15)) {
         return 0;
@@ -180,7 +178,7 @@ sub send_cmd {
         return (-1, undef);
     }
 
-    print "Sending cmd: $cmd\n";
+    $self->{LOGGER}->debug("Sending cmd: $cmd\n");
 
     my $res = $self->{TELNET}->send($cmd);
 
@@ -189,7 +187,11 @@ sub send_cmd {
     my $successStatus = -1;
 
 	while(my $line = $self->{TELNET}->getline()) {
-        print "LINE: $line";
+        $self->{LOGGER}->debug("LINE: $line");
+
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+        }
 
 		next if ($line =~ /$cmd/);
 
@@ -204,7 +206,7 @@ sub send_cmd {
 
 			my ($prematch, $junk) = $self->{TELNET}->waitfor("/^".$self->{PROMPT}."/gm");
 
-            print "PREMATCH: $prematch\n";
+            $self->{LOGGER}->debug("PREMATCH: $prematch\n");
 
 			$res .= $prematch;
 
@@ -235,7 +237,7 @@ sub setMachineTime {
 
     $self->{MACHINE_TIME} = "$year-$month-$day $curr_time";
 
-    print "NEW MACHINE TIME: ".$self->{MACHINE_TIME}."\n";
+    $self->{LOGGER}->debug("NEW MACHINE TIME: ".$self->{MACHINE_TIME}."\n");
 }
 
 sub getMachineTime {
