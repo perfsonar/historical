@@ -1,4 +1,4 @@
-package perfSONAR_PS::Utils::TL1::Ciena;
+package perfSONAR_PS::Utils::TL1::CoreDirector;
 
 use warnings;
 use strict;
@@ -23,7 +23,7 @@ sub initialize {
             });
 
     $parameters->{"type"} = "ciena";
-    $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena");
+    $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector");
     $parameters->{"prompt"} = ";" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "10201" if (not $parameters->{"port"});
 
