@@ -8,7 +8,7 @@ use Params::Validate qw(:all);
 use Data::Dumper;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-use fields 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_ETH', 'READ_OCN', 'READ_PM', 'PMS';
+use fields 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_ETH', 'READ_OCN', 'READ_PM', 'PMS', 'READ_ALARMS', 'ALARMS';
 
 sub initialize {
     my ($self, @params) = @_;
@@ -16,7 +16,7 @@ sub initialize {
     my $parameters = validate(@params,
             {
             address => 1,
-            port => 1,
+            port => 0,
             username => 1,
             password => 1,
             cache_time => 1,
@@ -24,6 +24,8 @@ sub initialize {
 
     $parameters->{"type"} = "ome";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME");
+    $parameters->{"prompt"} = "<" if (not $parameters->{"prompt"});
+    $parameters->{"port"} = "23" if (not $parameters->{"port"});
 
     return $self->SUPER::initialize($parameters);
 }
@@ -123,6 +125,45 @@ sub getCrossconnect {
 #    return $self->{CRSSBYNAME}->{$name};
 }
 
+sub getAlarms {
+    my ($self) = shift;
+    my %args = @_;
+
+    my $do_reload_stats = 0;
+
+    if (not $self->{READ_ALARMS}) {
+        $do_reload_stats = 1;
+        $self->{READ_ALARMS} = 1;
+    }
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
+        $self->readStats();
+    }
+
+    if (not $self->{ALARMS}) {
+        return undef;
+    }
+
+    my @ret_alarms = ();
+
+    foreach my $alarm (@{ $self->{ALARMS} }) {
+        my $matches = 1;
+        foreach my $key (keys %args) {
+            if ($alarm->{$key}) {
+                if ($alarm->{$key} ne $args{$key}) {
+                    $matches = 1;
+                }
+            }
+        }
+
+        if ($matches) {
+            push @ret_alarms, $alarm;
+        }
+    }
+
+    return \@ret_alarms;
+}
+
 sub getETH_PM {
     my $self = shift;
     my %args = @_;
@@ -202,6 +243,7 @@ sub __get_PM {
 sub readStats {
     my ($self) = @_;
 
+    $self->connect();
     $self->login();
 
 #    if ($self->{READ_CRS}) {
@@ -220,9 +262,12 @@ sub readStats {
         $self->readPMs();
     }
 
-    $self->{CACHE_TIME} = time;
+    if ($self->{READ_ALARMS}) {
+        $self->readAlarms();
+    }
 
-    $self->logout();
+    $self->{CACHE_TIME} = time;
+    $self->disconnect();
 
     return;
 }
@@ -234,9 +279,13 @@ sub readETHs {
 
 # "ETH-1-1-4::AN=ENABLE,ANSTATUS=COMPLETED,ANETHDPX=FULL,ANSPEED=1000,ANPAUSETX=DISABLE,ANPAUSERX=DISABLE,ADVETHDPX=FULL,ADVSPEED=1000,ADVFLOWCTRL=ASYM,ETHDPX=FULL,SPEED=1000,FLOWCTRL=ASYM,PAUSETX=ENABLE,PAUSERX=DISABLE,PAUSERXOVERRIDE=ENABLE,MTU=9600,TXCON=ENABLE,PASSCTRL=DISABLE,PAUSETXOVERRIDE=DISABLE,RXIDLE=0,CFPRF=CFPRF-1-4,PHYSADDR=001158FF5354:IS"
 
-    my @results = $self->send_cmd("RTRV-ETH::ETH-1-ALL:1234;");
+    my ($successStatus, $results) = $self->send_cmd("RTRV-ETH::ETH-1-ALL:".$self->{CTAG}.";");
 
-    foreach my $line (@results) {
+    print "Got ETH line\n";    
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -272,9 +321,13 @@ sub readOCNs {
     my %ocns_name = ();
 
     foreach my $i (3, 12, 48, 192) {
-        my @results = $self->send_cmd("RTRV-OC".$i."::OC".$i."-1-ALL:1234;");
+        my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i."::OC".$i."-1-ALL:".$self->{CTAG}.";");
 
-        foreach my $line (@results) {
+        print "Got OC$i line\n";    
+
+        foreach my $line (@$results) {
+            print $line."\n";
+
             if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
                 $self->setMachineTime("$1-$2-$3 $4:$5:$6");
                 next;
@@ -306,9 +359,13 @@ sub readPMs {
     my ($self) = @_;
     my %pms = ();
 
-    my @results = $self->send_cmd("RTRV-PM-ALL::ALL:1234::,,,,,,,1:;");
+    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-ALL::ALL:".$self->{CTAG}."::,,,,,,,1:;");
 
-    foreach my $line (@results) {
+    print "Got PM line\n";    
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
 #       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -345,6 +402,72 @@ sub readPMs {
     }
 
     $self->{PMS} = \%pms;
+}
+
+sub readAlarms {
+    my ($self) = @_;
+
+    my @alarms = ();
+
+    my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
+
+    print "Got ALM line\n";    
+
+    foreach my $line (@$results) {
+        print "LINE: ".$line."\n";
+
+#       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
+#   "ETH10G-1-10-4,ETH10G:CR,LOS,SA,01-07,07-34-55,NEND,RCV:\"Loss Of Signal\",NONE:0100000295-0008-0673,:YEAR=2006,MODE=NONE"
+
+        if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):([^,]*),([^:]*):([^,]*),([^:]*):YEAR=([^,]*),MODE=([^"]*)"/) {
+            print "Found a good line\n";
+
+            my $facility = $1;
+            my $facility_type = $2;
+            my $severity = $3;
+            my $alarmType = $4;
+            my $serviceAffecting = $5;
+            my $date = $6;
+            my $time = $7;
+            my $location = $8;
+            my $direction = $9;
+            my $description = $10;
+            my $something1 = $11;
+            my $alarmId = $12;
+            my $something2 = $13;
+            my $year = $14;
+            my $mode = $15;
+
+            print "DESCRIPTION: '$description'\n";
+            $description =~ s/\\"//g;
+            print "DESCRIPTION: '$description'\n";
+
+            my %alarm = (
+                facility => $facility,
+                facility_type => $facility_type,
+                severity => $severity,
+                alarmType => $alarmType,
+                description => $description,
+                serviceAffecting => $serviceAffecting,
+                date => $date,
+                time => $time,
+                location => $location,
+                direction => $direction,
+                alarmId => $alarmId,
+                year => $year,
+                mode => $mode,
+            );
+
+            push @alarms, \%alarm;
+        }
+    }
+
+    $self->{ALARMS} = \@alarms;
 }
 
 # Possible monitoring types:
@@ -425,9 +548,9 @@ sub readPMs {
 #
 #    my %crss = ();
 #
-#    my @results = $self->send_cmd("RTRV-CRS-ALL:::1234;");
+#    my ($successStatus, $results) = $self->send_cmd("RTRV-CRS-ALL:::".$self->{CTAG}.";");
 #
-#    foreach my $line (@results) {
+#    foreach my $line (@$results) {
 #        if ($line =~ /LABEL=\\"([^\\]*)\\"/) {
 #            my ($pst, $sst, $name);
 #            $name = $1;
@@ -452,6 +575,20 @@ sub readPMs {
 #
 #    return;
 #}
+
+sub login {
+    my ($self) = @_;
+
+    print "PASSWORD: $self->{PASSWORD}\n";
+
+    my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::\"".$self->{PASSWORD}."\";");
+
+    if ($status != 1) {
+        return -1;
+    }
+
+    return 0;
+}
 
 1;
 

@@ -20,10 +20,13 @@ sub initialize {
             username => 1,
             password => 1,
             cache_time => 1,
+            prompt => 0,
             });
 
     $parameters->{"type"} = "hdxc";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc");
+    $parameters->{"prompt"} = ";" if (not $parameters->{prompt});
+    $parameters->{"port"} = "23" if (not $parameters->{port});
 
     $self->{READ_LINE_PM} = ();
     $self->{READ_SECT_PM} = ();
@@ -136,6 +139,7 @@ sub getLine {
     if (not $aid) {
         return $self->{LINESBYAID};
     } else {
+        $self->{LOGGER}->info("Reading information on aid '$aid': ".$self->{LINESBYAID}->{$aid}." -- ".Dumper($self->{LINESBYAID}));
         return $self->{LINESBYAID}->{$aid};
     }
 }
@@ -247,6 +251,7 @@ sub getSect_PM {
 sub readStats {
     my ($self) = @_;
 
+    $self->connect();
     $self->login();
 
     if ($self->{READ_CRS}) {
@@ -278,7 +283,7 @@ sub readStats {
     }
 
     $self->{CACHE_TIME} = time;
-    $self->logout();
+    $self->disconnect();
 
     return;
 }
@@ -288,9 +293,13 @@ sub readSECTs {
 
     my %sects = ();
 
-    my @results = $self->send_cmd("RTRV-SECT:::1234;");
+    my ($successStatus, $results) = $self->send_cmd("RTRV-SECT:::".$self->{CTAG}.";");
 
-    foreach my $line (@results) {
+    print "got SECT lines\n";
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -321,9 +330,22 @@ sub readLINEs {
     my %lines = ();
     my %lines_name = ();
 
-    my @results = $self->send_cmd("RTRV-LINE:::1234;");
+    my $stime = time;
 
-    foreach my $line (@results) {
+    $self->{LOGGER}->info("Sending readLin: ".$stime."\n");
+
+    my ($successStatus, $results) = $self->send_cmd("RTRV-LINE:::".$self->{CTAG}.";");
+
+    my $etime = time;
+
+    $self->{LOGGER}->info("Return from readLin: ".$etime." -- ".($etime-$stime)."\n");
+
+    print "got LINE lines\n";
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
+        $self->{LOGGER}->info("Received line: ".$line);
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -359,9 +381,13 @@ sub readOCNs {
     my %ocns_name = ();
 
     foreach my $i (3, 12, 48, 192) {
-        my @results = $self->send_cmd("RTRV-OC".$i.":::1234;");
+        my ($successStatus, $results) = $self->send_cmd("RTRV-OC".$i.":::".$self->{CTAG}.";");
 
-        foreach my $line (@results) {
+        print "got OC$i lines\n";
+
+        foreach my $line (@$results) {
+            print $line."\n";
+
             if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
                 $self->setMachineTime("$1-$2-$3 $4:$5:$6");
                 next;
@@ -401,9 +427,13 @@ sub readCRSs {
 
     my %crss = ();
 
-    my @results = $self->send_cmd("RTRV-CRS-ALL:::1234;");
+    my ($successStatus, $results) = $self->send_cmd("RTRV-CRS-ALL:::".$self->{CTAG}.";");
 
-    foreach my $line (@results) {
+    print "got CRS lines\n";
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -439,15 +469,28 @@ sub readLine_PM {
 
     my %pms = ();
 
-    my @results;
+    my $results;
+
+    my $stime = time;
+
+    $self->{LOGGER}->info("Sending readLin_PM: ".$stime."\n");
 
     if ($index) {
-        @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:INDEX=$index;");
+        (my $successStatus, $results) = $self->send_cmd("RTRV-PM-LINE:::".$self->{CTAG}."::ALL-L:INDEX=$index;");
     } else {
-        @results = $self->send_cmd("RTRV-PM-LINE:::1234::ALL-L:;");
+        (my $successStatus, $results) = $self->send_cmd("RTRV-PM-LINE:::".$self->{CTAG}."::ALL-L:;");
     }
 
-    foreach my $line (@results) {
+    my $etime = time;
+
+    $self->{LOGGER}->info("Return from readLin_PM: ".$etime." -- ".($etime-$stime)."\n");
+
+    print "got LINE_PM lines\n";
+
+    foreach my $line (@$results) {
+
+        print "LINE: $line";
+
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -488,14 +531,19 @@ sub readSect_PM {
     my ($self, $index) = @_;
     my %pms = ();
 
-    my @results;
+    my $results;
+
     if ($index) {
-        @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:INDEX=$index;");
+        (my $successStatus, $results) = $self->send_cmd("RTRV-PM-SECT:::".$self->{CTAG}."::ALL-S:INDEX=$index;");
     } else {
-        @results = $self->send_cmd("RTRV-PM-SECT:::1234::ALL-S:;");
+        (my $successStatus, $results) = $self->send_cmd("RTRV-PM-SECT:::".$self->{CTAG}."::ALL-S:;");
     }
 
-    foreach my $line (@results) {
+    print "got SECT_PM lines\n";
+
+    foreach my $line (@$results) {
+        print $line."\n";
+
 #        "OC192S-1-501-2-1:SEFS-S,505,PRTL,NEND,RCV,15-MIN,06-16,14-15"
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
@@ -531,6 +579,18 @@ sub readSect_PM {
     }
 
     $self->{SECT_PMS}->{$index} = \%pms;
+}
+
+sub login {
+    my ($self) = @_;
+
+    my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::".$self->{PASSWORD}.";");
+
+    if ($status != 1) {
+        return -1;
+    }
+
+    return 0;
 }
 
 1;

@@ -3,11 +3,12 @@ package perfSONAR_PS::Utils::TL1::Base;
 use warnings;
 use strict;
 
+use Net::Telnet;
+use Data::Dumper;
+
 use Params::Validate qw(:all);
 
-use perfSONAR_PS::Utils::TL1;
-
-use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'TL1AGENT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'CONNECTED';
+use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'PROMPT', 'CTAG', 'TELNET';
 
 sub new {
     my ($class) = @_;
@@ -30,25 +31,27 @@ sub initialize {
             password => 1,
             cache_time => 1,
             logger => 1,
+            prompt => 1,
+            ctag => 0,
             });
 
-    $self->{TL1AGENT} = perfSONAR_PS::Utils::TL1->new(
-            username => $parameters->{username},
-            password => $parameters->{password},
-            type => $parameters->{type},
-            host => $parameters->{address},
-            port => $parameters->{port}
-            );
+    print Dumper($parameters);
 
     $self->{USERNAME} = $parameters->{username};
-    $self->{PASSWORD} = $parameters->{passwd};
+    $self->{PASSWORD} = $parameters->{password};
     $self->{TYPE} = $parameters->{type};
     $self->{ADDRESS} = $parameters->{address};
     $self->{PORT} = $parameters->{port};
+    $self->{PROMPT} = $parameters->{prompt};
+
+    if ($parameters->{ctag}) {
+        $self->{CTAG} = $parameters->{ctag};
+    } else {
+        $self->{CTAG} = int(rand(1000));
+    }
 
     $self->{CACHE_TIME} = 0;
     $self->{CACHE_DURATION} = $parameters->{cache_time};
-    $self->{CONNECTED} = 0;
 
     $self->{LOGGER} = $parameters->{logger};
 
@@ -139,44 +142,79 @@ sub getCacheTime {
     return $self->{CACHE_TIME};
 }
 
-sub send_cmd {
-    my ($self, $cmd) = @_;
-    my $disconnect;
+sub connect {
+    my ($self) = @_;
 
-    $self->login();
+    print Dumper($self->{ADDRESS});
 
-    print "SEND: '$cmd'\n";
-    my $res = $self->{TL1AGENT}->send($cmd);
-    print "DONE SEND: '$cmd'\n";
+    if ($self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15)) {
+        return 0;
+    }
 
-    $self->logout();
+    $self->{TELNET} = undef;
 
-    return split('\n', $res);
+    return -1;
 }
 
 sub login {
-    my ($self) = @_;
-
-    if (not $self->{CONNECTED}) {
-        $self->{TL1AGENT}->connect();
-        $self->{TL1AGENT}->login();
-    }
-
-    $self->{CONNECTED}++;
-
-    return 0;
+    die("This method must be overriden by a subclass");
 }
 
-sub logout {
+sub disconnect {
     my ($self) = @_;
 
-    $self->{CONNECTED}--;
-
-    if (not $self->{CONNECTED}) {
-        $self->{TL1AGENT}->disconnect();
+    if (not $self->{TELNET}) {
+        return;
     }
 
-    return 0;
+    $self->{TELNET}->close;
+    $self->{TELNET} = undef;
+
+    return;
+}
+
+sub send_cmd {
+    my ($self, $cmd) = @_;
+    
+    if (not $self->{TELNET}) {
+        return (-1, undef);
+    }
+
+    print "Sending cmd: $cmd\n";
+
+    my $res = $self->{TELNET}->send($cmd);
+
+	my $buf;
+
+    my $successStatus = -1;
+
+	while(my $line = $self->{TELNET}->getline()) {
+        print "LINE: $line";
+
+		next if ($line =~ /$cmd/);
+
+		$buf .= $line;
+
+		if ($line =~ /^\s*M\s+$self->{CTAG}\s+(COMPLD|DENY)/) {
+            if ($1 eq "COMPLD") {
+                $successStatus = 1;
+            } elsif ($1 eq "DENY") {
+                $successStatus = 0;
+            }
+
+			my ($prematch, $junk) = $self->{TELNET}->waitfor("/^".$self->{PROMPT}."/gm");
+
+            print "PREMATCH: $prematch\n";
+
+			$res .= $prematch;
+
+            last;
+		}
+	}
+
+    my @lines = split('\n', $res);
+
+    return ($successStatus, \@lines);
 }
 
 sub setMachineTime {
@@ -196,6 +234,8 @@ sub setMachineTime {
     }
 
     $self->{MACHINE_TIME} = "$year-$month-$day $curr_time";
+
+    print "NEW MACHINE TIME: ".$self->{MACHINE_TIME}."\n";
 }
 
 sub getMachineTime {
