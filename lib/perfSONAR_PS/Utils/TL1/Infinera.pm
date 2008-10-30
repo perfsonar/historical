@@ -154,6 +154,11 @@ sub readAlarms {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
 
+    if ($successStatus != 1) {
+        $self->{ALARMS} = undef;
+        return;
+    }
+
     $self->{LOGGER}->debug("Got ALM line\n");    
 
     foreach my $line (@$results) {
@@ -209,6 +214,10 @@ sub readAlarms {
 
 sub login {
     my ($self) = @_;
+
+    if (not $self->{TELNET}) {
+        return -1;
+    }
 
     $self->{TELNET}->print("\n");
     $self->{TELNET}->waitfor(String => 'TL1');

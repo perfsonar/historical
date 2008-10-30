@@ -8,7 +8,7 @@ use Params::Validate qw(:all);
 use Data::Dumper;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-use fields 'CRSSBYNAME', 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'SECTSBYAID', 'LINESBYAID', 'LINESBYNAME', 'SECT_PMS', 'LINE_PMS', 'READ_CRS', 'READ_ETH', 'READ_OCN', 'READ_SECT', 'READ_LINE', 'READ_SECT_PM', 'READ_LINE_PM';
+use fields 'CRSSBYNAME', 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'SECTSBYAID', 'LINESBYAID', 'LINESBYNAME', 'SECT_PMS', 'LINE_PMS', 'READ_CRS', 'READ_ETH', 'READ_OCN', 'READ_SECT', 'READ_LINE', 'READ_SECT_PM', 'READ_LINE_PM', 'READ_ALARMS', 'ALARMS';
 
 sub initialize {
     my ($self, @params) = @_;
@@ -248,6 +248,45 @@ sub getSect_PM {
     return $self->{SECT_PMS}->{$index}->{$aid}->{$name};
 }
 
+sub getAlarms {
+    my ($self) = shift;
+    my %args = @_;
+
+    my $do_reload_stats = 0;
+
+    if (not $self->{READ_ALARMS}) {
+        $do_reload_stats = 1;
+        $self->{READ_ALARMS} = 1;
+    }
+
+    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
+        $self->readStats();
+    }
+
+    if (not $self->{ALARMS}) {
+        return undef;
+    }
+
+    my @ret_alarms = ();
+
+    foreach my $alarm (@{ $self->{ALARMS} }) {
+        my $matches = 1;
+        foreach my $key (keys %args) {
+            if ($alarm->{$key}) {
+                if ($alarm->{$key} ne $args{$key}) {
+                    $matches = 1;
+                }
+            }
+        }
+
+        if ($matches) {
+            push @ret_alarms, $alarm;
+        }
+    }
+
+    return \@ret_alarms;
+}
+
 sub readStats {
     my ($self) = @_;
 
@@ -280,6 +319,10 @@ sub readStats {
         foreach my $index (keys %{ $self->{READ_LINE_PM} }) {
             $self->readLine_PM($index);
         }
+    }
+
+    if ($self->{READ_ALARMS}) {
+        $self->readAlarms();
     }
 
     $self->{CACHE_TIME} = time;
@@ -579,6 +622,72 @@ sub readSect_PM {
     }
 
     $self->{SECT_PMS}->{$index} = \%pms;
+}
+
+sub readAlarms {
+    my ($self) = @_;
+
+    my @alarms = ();
+
+    my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
+
+    $self->{LOGGER}->debug("Got ALM line\n");    
+
+    foreach my $line (@$results) {
+        $self->{LOGGER}->debug("LINE: ".$line."\n");
+
+#       "OC192-1-5-1,OC192:OPR-OCH,-3.06,PRTL,NEND,RCV,15-MIN,06-16,15-15,0"
+        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+            $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+            next;
+        }
+
+#   "ETH10G-1-10-4,ETH10G:CR,LOS,SA,01-07,07-34-55,NEND,RCV:\"Loss Of Signal\",NONE:0100000295-0008-0673,:YEAR=2006,MODE=NONE"
+
+        if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):([^,]*),([^:]*):([^,]*),([^:]*):YEAR=([^,]*),MODE=([^"]*)"/) {
+            $self->{LOGGER}->debug("Found a good line\n");
+
+            my $facility = $1;
+            my $facility_type = $2;
+            my $severity = $3;
+            my $alarmType = $4;
+            my $serviceAffecting = $5;
+            my $date = $6;
+            my $time = $7;
+            my $location = $8;
+            my $direction = $9;
+            my $description = $10;
+            my $something1 = $11;
+            my $alarmId = $12;
+            my $something2 = $13;
+            my $year = $14;
+            my $mode = $15;
+
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+            $description =~ s/\\"//g;
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+
+            my %alarm = (
+                facility => $facility,
+                facility_type => $facility_type,
+                severity => $severity,
+                alarmType => $alarmType,
+                description => $description,
+                serviceAffecting => $serviceAffecting,
+                date => $date,
+                time => $time,
+                location => $location,
+                direction => $direction,
+                alarmId => $alarmId,
+                year => $year,
+                mode => $mode,
+            );
+
+            push @alarms, \%alarm;
+        }
+    }
+
+    $self->{ALARMS} = \@alarms;
 }
 
 sub login {

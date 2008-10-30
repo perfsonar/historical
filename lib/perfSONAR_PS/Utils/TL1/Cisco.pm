@@ -154,6 +154,11 @@ sub readAlarms {
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
 
+    if ($successStatus != 1) {
+        $self->{ALARMS} = undef;
+        return;
+    }
+
     $self->{LOGGER}->debug("Got ALM line\n");    
 
     foreach my $line (@$results) {

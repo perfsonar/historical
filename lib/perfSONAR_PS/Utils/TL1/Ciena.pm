@@ -134,14 +134,18 @@ sub getOCN_PM {
 sub readStats {
     my ($self) = @_;
 
+    $self->{LOGGER}->debug("Connecting");
     $self->connect();
+    $self->{LOGGER}->debug("Done");
     $self->login();
+    $self->{LOGGER}->debug("Logged In");
 
     if ($self->{READ_ALARMS}) {
         $self->readAlarms();
     }
 
     $self->{CACHE_TIME} = time;
+    $self->{LOGGER}->debug("Disconnecting");
     $self->disconnect();
 
     return;
@@ -153,6 +157,13 @@ sub readAlarms {
     my @alarms = ();
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
+
+    $self->{LOGGER}->debug("Results: ".Dumper($results));
+
+    if ($successStatus != 1) {
+        $self->{ALARMS} = undef;
+        return;
+    }
 
     $self->{LOGGER}->debug("Got ALM line\n");    
 
@@ -210,6 +221,7 @@ sub login {
     my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::".$self->{PASSWORD}.";");
 
     if ($status != 1) {
+        $self->{LOGGER}->debug("send_cmd failed\n");
         return -1;
     }
 

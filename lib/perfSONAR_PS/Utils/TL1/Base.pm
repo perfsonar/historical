@@ -145,7 +145,7 @@ sub connect {
 
     $self->{LOGGER}->debug(Dumper($self->{ADDRESS}));
 
-    if ($self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15)) {
+    if ($self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15, Errmode => "return")) {
         return 0;
     }
 
@@ -189,7 +189,7 @@ sub send_cmd {
 	while(my $line = $self->{TELNET}->getline()) {
         $self->{LOGGER}->debug("LINE: $line");
 
-        if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+        if ($line =~ /(\d\d\d?\d?)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
         }
 
