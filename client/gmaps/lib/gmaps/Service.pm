@@ -4,6 +4,9 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::ParameterValidation;
 
+use Params::Validate qw(:all);
+
+
 
 =head1 NAME
 
@@ -68,7 +71,7 @@ sub new
     # base from a single url
     my ( $host, $port, $endpoint ) = perfSONAR_PS::Transport::splitURI( $uri );
     
-    $logger->debug( "URI ($uri): $host, $port, $endpoint");
+    $logger->debug( "Creating service instance for '$uri' - host: $host, port: $port, endpoint: $endpoint");
     
     # see if we have a ref to the a templating class
     my $templateObj = shift;
@@ -292,36 +295,43 @@ sub isAlive
 	return 0;
 }
 
-
-
-
 =head2 discover( )
 retrieves a list of the urn's for the service
 =cut
 sub discover
 {
 	my $self = shift;
-	my $urn = shift;
+	my $params = shift;
 	
-	$logger->logdie( "discover must be inherieted");
-	
+	my $array = $self->getMetaData( $params );
+	return $array;	
 }
 
-=head2 fetch( urn, startTime, endTime, resolution, consolidationFunction )
-retrieves information about the urn. if the startTime and endTime are both excluded,
-then the service will fetch the last value (TODO) of from the MA. if only the
-startTime is included, it will fetch all data from that time upto NOW. if the endTime
-is included with teh startTime, then it will get all data from that range inclusive. 
+=head2 getData
+
+retrieves the data related to the metadata supplied
 
 =cut
-sub fetch
+sub getData
 {
 	my ( $self, @args ) = @_;
-	my $params = validateParams( @args, { urn => undef, key => undef, startTime => 0, endTime => 0, resolution => 300, consolidationFunction => undef } );
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType => 0, startTime => 0, endTime => 0, resolution => 300, consolidationFunction => undef } );
 		
 	$logger->logdie( "fetch must be inherieted");
 }
 
+=head2 getMetaData
+
+returns a hash of metadata elements contained at service
+
+=cut
+sub getMetaData
+{
+	my ( $self, @args ) = @_;
+	my $params = validateParams( @args, { urn => 0, key => 0, startTime => 0, endTime => 0, resolution => 300, consolidationFunction => undef } );
+		
+	$logger->logdie( "fetch must be inherieted");
+}
 
 #######################################################################
 # utility functions

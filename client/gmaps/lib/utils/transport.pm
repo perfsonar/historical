@@ -98,7 +98,7 @@ sub get
 				
 				# get the text from the id
 				my $err = ${utils::xml::xpc}->find( "//nmwg:data[\@metadataIdRef='$id']/nmwgr:datum" , $root );
-				$logger->logdie( "Remote error encountered to '" . perfSONAR_PS::Transport::getHttpURI( $host, $port, $endpoint )  . "': type '" . $child->textContent . "' - $err\n" );			
+				die( "Remote error encountered to '" . perfSONAR_PS::Transport::getHttpURI( $host, $port, $endpoint )  . "': type '" . $child->textContent . "' - $err\n" );			
 			}
 		}
 	}

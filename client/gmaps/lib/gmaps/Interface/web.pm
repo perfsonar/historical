@@ -47,16 +47,25 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 =cut
 
+use Params::Validate qw(:all);
+
+
+
+
 package gmaps::Interface::web;
 
 use CGI::Application;
 use gmaps::Interface;
 
+
 BEGIN{
 	@ISA = ( 'CGI::Application', 'gmaps::Interface' );
 }
 
+
+
 use CGI::Application::Plugin::TT;
+
 
 # logging
 use Log::Log4perl qw( get_logger );
@@ -69,6 +78,7 @@ use strict;
 # pre stuff
 #######################################################################
 
+
 ###
 # setup for mode switching
 ###
@@ -78,18 +88,20 @@ sub setup {
     $self->start_mode('map');
     $self->mode_param('mode');
     $self->run_modes(
-		
-		'getGLS'    => 'getGLS', # returns a list of glss
-		
-		'services'  => 'getServices', # returns an xml of the service endpoints from teh given gLS
-		
-		'topology'	=> 'topology',	# does the actual perfsonar topology discovery from a service
 
 		'map'		=> 'map',		# returns the googlemap with async. xml of nodes (createXml)
+				
+		'getGLS'    => 'getGLS', # returns a list of glses
+		
+		# 'services'  => 'getServices', # returns an xml of the service endpoints from teh given gLS
+		
+		'discover'	=> 'discover',	# does the actual perfsonar topology discovery from a service
 
-		'graph'		=> 'graph',	# returns the rrdma utilization graph
+		'graph'		=> 'graph',     # returns the for the data fetch graph
 
    	);
+
+    # instantiate the interface
 
    return undef;    
 }
@@ -148,54 +160,230 @@ sub map
 }
 
 
-sub topology
-{
-	my $self = shift;
-	
-	my $using = $self->query()->param('using');
-	lc( $using );
-	
-	my $uri = $self->query()->param('uri');
-	my $urn = $self->query()->param('urn');
-
-	my $markers = $self->SUPER::topology( $uri, $using, $urn );
-	
-	return $self->getMarkers( $markers );
-}
-
-
-
-###
-# given a list of hashes representing the nodes,
-# spit out the relevant xml for it
-###
-sub getMarkers
-{
-	my $self = shift;
-	my $data = shift;
-	
-	my $vars = {
-		'NODES' => $data,
-	};
-	$logger->info( "Found " . scalar @{$vars->{'NODES'}}  );
-	
-	my $template = 'web/markers_xml.tt2';
-	return $self->processTemplate( $template, $vars );
-	
-}
 
 
 =head2 getGLS
+
+returns the markers for the perfsonar top level GLS
 
 =cut
 sub getGLS
 {
     my $self = shift;
-    my $list = $self::SUPER->getGLS();
-    
-    
-    
+    $logger->warn( "Fetching list of gls $self");
+    my $gls = $self->SUPER::getGLS();
+	return $self->getMarkers( $gls );
 }
+
+=head2 discover
+
+determines the markers for all the metadata at the service uri
+
+=cut
+sub discover
+{
+	my $self = shift;
+	
+	my $accessPoint = $self->query()->param('accessPoint');
+	my $eventType = $self->query()->param('eventType');
+	my $urn = $self->query()->param('urn');
+    
+    #$logger->warn( "access: $accessPoint, event: $eventType");
+    
+    # if no eventType do automatic remap
+    if ( ! defined $eventType ) {
+        $eventType = gmaps::EventType2Service::autoDetermineEventType( $accessPoint );
+    }
+    
+	my $markers = undef;
+	$markers = $self->SUPER::discover( $accessPoint, $eventType );
+
+	
+	return $self->getMarkers( $markers );
+}
+
+
+sub showErrorPage
+{
+    my $self = shift;
+    my @error = @_;
+    
+    print "<html><head>";
+    print "<title>CGI Test</title>";
+    print "</head>";
+    print "<body><h2>Error Encounters</h2>@error";
+    print "</body></html>";
+    
+    return;
+}
+
+
+#######################################################################
+# utility methods
+#######################################################################
+
+
+sub getDomainFromFQDN
+{
+    my $self = shift;
+    my $node = shift;
+    
+    if ( utils::addresses::isIpAddress( $node ) ) {
+        return $node;
+    }
+    
+    my @bits = split /\./, $node;
+    
+    shift @bits;
+    
+    return join( '.', @bits );
+}
+
+
+
+sub getNode
+{
+    my $self = shift;
+    my $params = Params::Validate::validate( @_, { id => 1, domain => 1, latitude => 0, longitude => 0, services => 0, urns => 0 } );
+
+    return $params;
+}
+
+sub getLink
+{
+    my $self = shift;
+    my $params = Params::Validate::validate( @_, { src_id => 1, dst_id => 1, src_domain => 1, dst_domain => 1, eventType => 1, serviceType => 1, accessPoint => 1, urns => 1} );
+
+    return $params;
+}
+
+
+=head2 getMarkers
+
+ given a list of hashes representing the nodes,
+ spit out the relevant xml for it
+
+=cut
+sub getMarkers
+{
+	my $self = shift;
+	my $data = shift;
+	
+	# determine appropriate domain and path info
+	# if path stuff, then create a path
+
+	my $vars = {};
+
+    my %seen = {};
+
+	# if physical port for snmp, then
+	foreach my $hash ( @$data ) {
+	    
+    	#$logger->warn( "ENTRY: " . Data::Dumper::Dumper $hash );
+
+        # work out ma services
+        if ( ! exists $hash->{urns} ) {
+            
+            #$logger->warn( "Adding MA");
+            
+            my ( $host, undef, undef ) = &perfSONAR_PS::Transport::splitURI( utils::xml::unescape( $hash->{accessPoint} ) );
+            # try to resolve ip into a dns
+            if ( utils::addresses::isIpAddress( $host ) ) {
+                my ( $ip, $dns ) = utils::addresses::getDNS( $host );
+                if ( defined $dns ) {
+                    $host = $dns;
+                }
+            }
+
+            # don't bother adding if already seen
+            #$logger->warn( "HOST: $host, EVENT: " . $hash->{eventType} );
+            
+            my $services = ();
+            push @$services, { id => $host . ':' . $hash->{serviceType}, serviceType => $hash->{serviceType}, eventType => $hash->{eventType}, accessPoint => $hash->{accessPoint} };
+            my $item = $self->getNode( 
+                    { 
+                        id => $host,
+                        domain => $self->getDomainFromFQDN( $host ), 
+                        latitude => $hash->{latitude}, 
+                        longitude => $hash->{longitude}, 
+                        services => $services
+                        } );
+
+            push @{$vars->{NODES}}, $item
+                unless $seen{$host}++;
+            
+        } elsif ( exists $hash->{urns} ) {
+
+            #$logger->warn( "Adding URN");
+
+            # if there is a urn defined, then it's real data that can be fetched
+            # we consider links first (ie tools that supply src to dst)
+            # TODO: if it is of serviceType Utilisation, then we do something else
+            my $serviceType = gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+            my $item = {};
+
+            if ( $serviceType eq 'Utilisation' ) {
+                
+                # FIXME: id should be fqdn, try to reduce xml output?
+                my $item = $self->getNode( 
+                    { id => $hash->{node},
+                        domain => $self->getDomainFromFQDN( $hash->{node} ), 
+                        latitude => $hash->{latitude}, 
+                        longitude => $hash->{longitude}
+                    } );
+
+                $item->{eventType} = $hash->{eventType};
+                $item->{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+                $item->{accessPoint} = $hash->{accessPoint};
+                
+                $item->{urns} = $hash->{urns};
+                
+                push @{$vars->{NODES}}, $item;
+
+            } else {
+
+                push @{$vars->{NODES}}, $self->getNode( 
+                    { id => $hash->{src}, 
+                        domain => $self->getDomainFromFQDN( $hash->{src} ), 
+                        latitude => $hash->{srcLatitude}, 
+                        longitude => $hash->{dstLongitude} } )
+                    unless $seen{$hash->{src}}++;
+
+	            push @{$vars->{NODES}}, $self->getNode( 
+	                { id => $hash->{dst}, 
+	                    domain => $self->getDomainFromFQDN( $hash->{dst} ), 
+	                    latitude => $hash->{dstLatitude}, 
+	                    longitude => $hash->{dstLongitude} } )
+	                unless $seen{$hash->{dst}}++;
+
+                # create a id for the link
+                for( my $i=0; $i<scalar( @{$hash->{urns}} ); $i++ ) {
+                    $hash->{urns}->[$i]->{id} = $hash->{src} . ' to ' . $hash->{dst} . ':' . $serviceType;
+                }
+                push @{$vars->{LINKS}}, $self->getLink( 
+                    { src_id => $hash->{src}, 
+                        dst_id => $hash->{dst}, 
+                        src_domain => $self->getDomainFromFQDN( $hash->{src} ),
+                        dst_domain => $self->getDomainFromFQDN( $hash->{dst} ),
+                        serviceType => $serviceType,
+                        eventType => $hash->{eventType},
+                        accessPoint => $hash->{accessPoint},
+                        urns => $hash->{urns} } );
+                                
+            }
+                        
+        }
+	    
+	}
+
+	#$logger->info( "Found " . scalar @{$vars->{NODES}}  );
+	
+	my $template = 'web/data_xml.tt2';
+	return $self->processTemplate( $template, $vars );
+	
+}
+
+
 
 
 =head2 getServices
@@ -226,26 +414,20 @@ sub getServices
 sub graph
 {
 	my $self = shift;
-	my $using = $self->query()->param('using');
-	lc( $using );
+	my $args = {    uri => $self->query()->param('accessPoint'), 
+                    eventType => $self->query()->param('eventType') || undef,
+                    key => $self->query()->param('key') || undef,
+                    urn => $self->query()->param('urn') || undef,
+                    startTime => $self->query()->param('startTime') || undef, 
+                    endTime => $self->query()->param('endTime') || undef,
+                    period => $self->query()->param('period') || undef,
+                    resolution => $self->query()->param('resolution') || undef, 
+                    consolidationFunction => $self->query()->param('consolidationFunction') || undef
+                };
 	
-	my $resolution = $self->query()->param('resolution');
-	my $cf = $self->query()->param('cf');
-	
-	my $uri = $self->query()->param('uri');
-	my $urn = $self->query()->param('urn');
-	
-	my $endTime = $self->query()->param('end') || time();
-	my $period = $self->query()->param('period');
-	my $startTime = undef;
-	# def'd from period
-	if ( $period ) {
-	    $startTime = $endTime - $period
-    }
-    # else let the service work it out
-	
-	my $graph = $self->SUPER::graph( $uri, $using, $urn, $startTime, $endTime,
-	                                    $resolution, $cf );
+	#$logger->warn( "graph args: $args:" . Data::Dumper::Dumper($args) );
+	my $graph = $self->SUPER::graph( $args );
+
 	$self->header_add( -type => 'image/png' );
 	return $$graph;
 }

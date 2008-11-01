@@ -83,40 +83,15 @@ sub isAlive
 }
 
 
-=head2 discover
-retrieves as much information about the metadata of the service as possible
-and returns a list of urns
-=cut
-sub discover
-{
-	my $self = shift;
-	my @list = ();
-	foreach my $a ( @{$self->getPorts()} ) {
-		push @list, $a->{urn};
-	}
-	return \@list;
-}
-
-
-=head2 topology
-retrieves as much information about the metadata of the service as possible
-=cut
-sub topology
-{
-	my $self = shift;
-	my $array = $self->getPorts();
-	return $array;
-}
-
 
 
 =head2 fetch( uri, startTime, endTime )
 retrieves the data for the urn
 =cut
-sub fetch
+sub getData
 {
 	my ( $self, @args ) = @_;
-	my $params = perfSONAR_PS::ParameterValidation::validateParams( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 
 
     if ( defined $params->{key} ) {
@@ -166,11 +141,12 @@ sub fetch
 =head2 getPorts( urn )
  returns list of urns of monitorign ports
 =cut
-sub getPorts
+sub getMetaData
 {
 	my $self = shift;
-	my $urn = shift;
-	
+	my @args = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+
 	my $requestXML = 'Utilisation/query-all-ports_xml.tt2';
 	my $filter = '//nmwg:message'; # /nmwg:metadata[@id]/netutil:subject/nmwgt:interface
 
@@ -305,17 +281,7 @@ sub getPorts
         # build array of matching
         push @{$seen{$data->{$id}->{urn}}}, $id;
 
-
-        # FIXME: not very efficient having it here...
-    
-        # add own ma
-        push ( @{$data->{$id}->{mas}}, { 'type'=> 'utilisation', 'uri' => $self->uri() } ); 
-    
-    
-        # determine coordinate posisionts
-        # TODO: host name may need to be qualified
-        ( $data->{$id}->{latitude}, $data->{$id}->{longitude} ) = gmaps::Location->getLatLong( $data->{$id}->{hostName}, $data->{$id}->{ipAddress}, undef, $data->{$id}->{urn} );
-
+        $data->{$id}->{accessPoint} = $self->uri();
 
     }
 
@@ -353,8 +319,20 @@ sub getPorts
     foreach my $urn ( keys %$final ) {
         
         # modify urn to have keys
+        $final->{$urn}->{accessPoint} = $self->uri();
+        $final->{$urn}->{eventType} = $params->{eventType};
+        $final->{$urn}->{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $params->{eventType} );
+
+        # determine coordinate posisionts
+        # TODO: host name may need to be qualified
+        ( $final->{$urn}->{latitude}, $final->{$urn}->{longitude} ) = gmaps::Location->getLatLong( $final->{$urn}->{hostName}, $final->{$urn}->{ipAddress}, undef, undef );
+
         $final->{$urn}->{urn} .= ':key=' . $final->{$urn}->{keyIn} . ',' . $final->{$urn}->{keyOut};
-        
+
+        my $urns = ();
+        push @$urns, { id => $final->{$urn}->{port}, urn => $final->{$urn}->{urn} };
+        $final->{$urn}->{urns} = $urns;
+                
         $logger->debug( Data::Dumper::Dumper( $final->{$urn} ) );
 
 

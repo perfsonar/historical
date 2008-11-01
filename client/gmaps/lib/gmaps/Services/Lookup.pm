@@ -79,36 +79,10 @@ sub isAlive
 }
 
 
-=head2 discover
-Returns a list of urns that the service contains
-=cut
-sub discover
-{
-	my $self = shift;
-	my $data = $self->topology();
-	my @urns = ();
-	foreach my $urn ( @$data ) {
-		push @urns, $urn->{urn};
-	}
-	return \@urns;
-}
-
-
-=head2 topology
-retrieves as much information about the metadata of the service as possible
-=cut
-sub topology
-{
-	my $self = shift;
-	my $array = $self->getPorts();
-	return $array;
-}
-
-
 =head2 fetch( urn )
 returns a hashof $hash->{$time}->{metric} values for the specified urn.
 =cut
-sub fetch
+sub getData
 {
 	my $self = shift;
 	my $urn = shift;
@@ -174,10 +148,11 @@ sub fetch
 ###
 # returns list of urns of monitorign ports
 ###
-sub getPorts
+sub getMetaData
 {
 	my $self = shift;
-	my $urn = shift;
+	my @args = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0 } );
 	
 	my $requestXML = 'Lookup/query-all-ports_xml.tt2';
 	my $filter = '//nmwg:message/nmwg:data[@id]/nmwg:metadata';
@@ -193,19 +168,7 @@ sub getPorts
 	my @out = ();
 	foreach my $meta ( @ans ) {
 
-		my $hash = {
-			
-			'serviceName'	=> undef,
-			'accessPoint'	=> undef,
-						
-			'serviceType' => undef,
-			'serviceDescription' => undef,
-			
-			'urn' => $urn,
-			
-			# mas
-			'mas' => [],
-		};
+		my $hash = {};
 			
 		foreach my $node ( $meta->childNodes() ) 
 		{
@@ -240,29 +203,27 @@ sub getPorts
 		}
 
 		# don't bother if we don't have a valid port for this node
-		next unless ( $hash->{accessPoint} && $hash->{serviceType} && $hash->{serviceName});
-
+		next unless ( $hash->{accessPoint} );
 
         # remap accessPoint to URL
-        $hash->{accessPoint} = URI::Escape::uri_escape( $hash->{accessPoint} );
+        $hash->{accessPoint} = URI::Escape::uri_unescape( $hash->{accessPoint} );
         
 		# add params to urn (prob not what we want to do...)
-		$hash->{urn} = 'urn:ogf:network:serviceType=' . $hash->{serviceType} . ':serviceName=' . $hash->{serviceName} . ':accessPoint=' . $hash->{accessPoint};
+		# my $urn = 'urn:ogf:network:serviceType=' . $hash->{serviceType} . ':serviceName=' . $hash->{serviceName} . ':accessPoint=' . URI::Escape::uri_escape( $hash->{accessPoint} );
 
         # no point adding it more than once
-        $seen{$hash->{urn}}++;
-        next if $seen{$hash->{urn}} > 1;
+        $seen{$hash->{accessPoint}}++;
+        next if $seen{$hash->{accessPoint}} > 1;
         
-		# add own ma
-		push ( @{$hash->{mas}}, { 'type'=> 'LS', 'uri' => $self->uri() } ); 
+		# add ma
+		$hash->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $hash->{accessPoint} );
+        if ( $hash->{serviceType} eq 'MA' && defined $hash->{eventType}) {
+             $hash->{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+        }
 
+		# determine coordinates for host
         my ( $host, undef, undef ) = &perfSONAR_PS::Transport::splitURI( utils::xml::unescape( $hash->{accessPoint} ) );
-
-		# determine coordinate posisionts
-		# get urns for source and dst for location lookups etc
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, $hash->{urn} );
-
-        #$logger->warn( "ENTRY: " . Data::Dumper::Dumper $hash );
+		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, undef );
 
 		# add it
 		push @out, $hash

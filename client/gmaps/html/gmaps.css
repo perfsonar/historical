@@ -126,5 +126,18 @@ table {
 #invert_markers, #select_all_markers, #select_none_markers {
   font-size: 6pt;
 }
-  
-  
+
+.tooltip { text-align: center;
+	opacity: .70;
+	-moz-opacity:.70;
+	filter:Alpha(opacity=70);
+	white-space: nowrap;
+	margin: 0;
+	padding: 2px 0.5ex;
+	border: 1px solid #000;
+	font-weight: bold;
+	font-size: 9pt;
+	font-family: Verdana;
+	background-color: #fff;
+}
+

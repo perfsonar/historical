@@ -80,39 +80,14 @@ sub isAlive
 }
 
 
-=head2 discover
-Returns a list of urns that the service contains
-=cut
-sub discover
-{
-	my $self = shift;
-	my $data = $self->topology();
-	my @urns = ();
-	foreach my $urn ( @$data ) {
-		push @urns, $urn->{urn};
-	}
-	return \@urns;
-}
-
-
-=head2 topology
-retrieves as much information about the metadata of the service as possible
-=cut
-sub topology
-{
-	my $self = shift;
-	my $array = $self->getPorts();
-	return $array;
-}
-
 
 =head2 fetch( urn )
 returns a hashof $hash->{$time}->{metric} values for the specified urn.
 =cut
-sub fetch
+sub getData
 {
 	my ( $self, @args ) = @_;
-	my $params = perfSONAR_PS::ParameterValidation::validateParams( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 	
 	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $params->{urn}; 
 	$logger->debug( "PATH: $path, @params");
@@ -195,10 +170,12 @@ sub getGraphArgs
 ###
 # returns list of urns of monitorign ports
 ###
-sub getPorts
+sub getMetaData
 {
 	my $self = shift;
-	my $urn = shift;
+	my @args = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+
 	
 	my $requestXML = 'PingER/query-all-ports_xml.tt2';
 	my $filter = '//nmwg:message/nmwg:metadata[@id]';
@@ -209,23 +186,13 @@ sub getPorts
 	my @ans = $self->processAndQuery( $requestXML, $vars, $filter );
 		
 	my @out = ();
-	foreach my $meta ( @ans ) {
+	foreach my $item ( @ans ) {
 
-		my $hash = {
-			
-			'src'	=> undef,
-			'dst'	=> undef,
-						
-			'longitude' => undef,
-			'latitude' => undef,
-			
-			'urn' => $urn,
-			
-			# mas
-			'mas' => [],
-		};
-			
-		foreach my $node ( $meta->childNodes() ) 
+		my $hash = {};
+		
+		my $meta = {};
+		
+		foreach my $node ( $item->childNodes() ) 
 		{
 			# hostnames
 			# TODO: support other topology type (with ip address)
@@ -256,12 +223,12 @@ sub getPorts
 						foreach my $subnode ( $node->childNodes() ) {
 							if ( $subnode->localname() eq 'parameter' ) {
 								my $param = $subnode->getAttribute('name');
-								$hash->{$param} = $subnode->getAttribute('value');
+								$meta->{$param} = $subnode->getAttribute('value');
 							}
 						}
 					}
 					elsif ( $node->localname() eq 'key' ) {
-					    $hash->{key} = $node->getAttribute('id');
+					    $meta->{key} = $node->getAttribute('id');
 					}
 			# 	} #subnode
 			# }
@@ -272,35 +239,37 @@ sub getPorts
 		# don't bother if we don't have a valid port for this node
 		next unless ( $hash->{src} && $hash->{dst} );
 
-		# add own ma
-		push ( @{$hash->{mas}}, { 'type'=> 'pinger', 'uri' => $self->uri() } ); 
-	
 		# determine urn for item
-		# FIXME: frontends don't support path urn yet
-		$hash->{urn} = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
-		
+		my $urn = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
 		my @keys = ();
-		foreach my $k ( keys %$hash ) {
+		foreach my $k ( keys %$meta ) {
 			next if $k eq 'src' or $k eq 'dst' 
 			  or $k eq 'mas' or $k eq 'urn'
 			  or $k eq 'latitude' or $k eq 'longitude';
 			push @keys, $k;
 		}
-		
 		# add params to urn (prob not what we want to do...)
-		$hash->{urn} .= ':'
+		$urn .= ':'
 			if scalar @keys;
 		for( my $i=0; $i<scalar @keys; $i++ ) {
-			$hash->{urn} .= $keys[$i] . '=' . $hash->{$keys[$i]};
-			$hash->{urn} .= ':' unless $i eq scalar @keys - 1;
+			$urn .= $keys[$i] . '=' . $meta->{$keys[$i]};
+			$urn .= ':' unless $i eq scalar @keys - 1;
 		}
+
+		# add own ma
+		$hash->{eventType} = $params->{eventType};
+		$hash->{serviceType} => gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+		
+		my $urns = ();
+		push @$urns, { urn => $urn };
+        $hash->{urns} = $urns;
+
+        $hash->{accessPoint} = $self->uri();
 
 		# determine coordinate posisionts
 		# get urns for source and dst for location lookups etc
 		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( $hash->{src}, $hash->{src}, undef, undef );
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $hash->{dst}, $hash->{dst}, undef, undef );
-
-		#$logger->debug( "Constructed URN: $urn\n" . Dumper $hash );	
+		( $hash->{dstLatitude}, $hash->{dstLongitude} ) = gmaps::Location->getLatLong( $hash->{dst}, $hash->{dst}, undef, undef );
 
 		# add it
 		push @out, $hash;

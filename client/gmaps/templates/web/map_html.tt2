@@ -6,25 +6,27 @@
     <title>perfSONAR Google Maps Asynchronous XML Example</title>
     <link rel="stylesheet" href="gmaps.css" type="text/css" />
 
-    <script type="text/javascript" src="http://www.google.com/jsapi?key=[% GOOGLEMAPKEY %]"></script>
-    <script type="text/javascript" src="dragDrop.js"></script>
-    <script type="text/javascript" src="markers.js"></script>  
-    <script type="text/javascript" src="sidebar.js"></script>  
+    <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=[% GOOGLEMAPKEY %]"></script>
 
-    <script type="text/javascript" src="checktree.js"></script>  
+    <script type="text/javascript" src="dragDrop.js"></script>
+    <script type="text/javascript" src="checktree.js"></script>
+
+    <script type="text/javascript" src="Markers.js"></script>  
+    <script type="text/javascript" src="Links.js"></script>  
+    <script type="text/javascript" src="InfoWindow.js"></script>  
+    <script type="text/javascript" src="Sidebar.js"></script>  
+      
     <link rel="stylesheet" href="checktree.css" type="text/css" />
 
     <script type="text/javascript">
 
-    google.load("maps", "2.x");
-
     var map; 
+    var tooltip;
     var nodesDOM = new Object(); // keep the xml in memory for parsing
     var servicesDOM = new Object();
     var checkmenu = undefined;
 
-    // template for info window; use some regexp to replace values
-    var infoWindowGraph = '<img width="497" height="168" src="?mode=graph&using=__TYPE__&uri=__URI__&urn=__URN__"/>';
+    var services = new Array(); // number of service for index id
 
     /* ****************************************************************
       XML Polling
@@ -34,14 +36,14 @@
       
       var gLS =  document.getElementById( 'gLS' ).value;
       
-      google.maps.Log.write( "Querying global LS '" + gLS + "' for registered services.")
+      GLog.write( "Querying global LS '" + gLS + "' for registered services.")
       
       var uri = '/gmaps.cgi?mode=services&gLS=' + gLS;
       
       // fetch it!
       
       // deal with timeouts etc
-      google.maps.DownloadUrl( uri, function(doc,response) {
+      GLogDownloadUrl( uri, function(doc,response) {
 
         // downloaded okay
         if ( response == 200 ) {
@@ -49,12 +51,12 @@
           if ( typeof servicesDOM[uri] == "object" ) {
             // wipe out the out one to reload
             servicesDOM[uri] = undefined;
-            google.maps.Log.write("Clearing xml cache of '" + uri + "'" );
+            GLog.write("Clearing xml cache of '" + uri + "'" );
           }
-          servicesDOM[uri] = google.maps.Xml.parse(doc);
+          servicesDOM[uri] = GXml.parse(doc);
           var services = servicesDOM[uri].documentElement.getElementsByTagName("service");
 
-          google.maps.Log.write( "Addings services..." );
+          GLog.write( "Adding services..." );
           var list = '';
           for (var i = 0; i < services.length; i++) {
             var service = services[i].getAttribute("service");
@@ -62,83 +64,131 @@
             var name = services[i].getAttribute("name");
 
             // write out the services to the palatte
-            // gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology
-            var url = 'gmaps.cgi?mode=topology&using=' + type + '&uri=' + service;
+            var url = 'gmaps.cgi?mode=topoGLogy&using=' + type + '&uri=' + service;
             item = "<input type=\"submit\" onclick=\"getMarkers( '" + url + "' )\" value=\"" + name  + "\"/>";
-            google.maps.Log.write( "Got: " + item );
+            GLog.write( "Got: " + item );
             
             list += item;
           }
-          google.maps.Log.write( "Done fetching " + services.length + " services from '" + uri + "'");          
+          GLog.write( "Done fetching " + services.length + " services from '" + uri + "'");          
           
           document.getElementById( "service_list" ).innerHTML = list;
                     
           // timeout
         } else if ( response == -1 ) {
-          google.maps.Log.write( "Request for '" + uri + "' timed out" );
+          GLog.write( "Request for '" + uri + "' timed out" );
         } else {
-          google.maps.Log.write( "unknown response code returned " + response );
+          GLog.write( "unknown response code returned " + response );
         }
       });  
       
     }
 
-    function getMarkers( uri ) {
+    // retrieves a list of all the gls and plots them on the map
+    function getGLS() {
+      discover( '?mode=getGLS' );
+//      discover( '?mode=discover&accessPoint=http://tukki.fnal.gov:9990/perfSONAR_PS/services/gLS');
 
-      google.maps.Log.write( "Fetching markers from '" + uri + "'");      
+//      discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8095/perfSONAR_PS/services/hLS');
+//      discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8075/perfSONAR_PS/services/pinger/ma');
+    }
+
+    // retrieves the nodes for the uri
+    function discover( uri ) {
+
+      GLog.write( "Fetching markers from '" + uri + "'");      
 
       // deal with timeouts etc
-      google.maps.DownloadUrl( uri, function(doc,response) {
+      GDownloadUrl( uri, function(doc,response) {
         
         // downloaded okay
         if ( response == 200 ) {
           
-          sidebar.clear();
-          sidebar.setContent('<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="spinner.gif"/></p>' );
-          sidebar.refresh();
+          Sidebar.clear();
+          Sidebar.setContent('<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="spinner.gif"/></p>' );
+          Sidebar.refresh();
 
           if ( typeof nodesDOM[uri] == "object" ) {
             // wipe out the out one to reload
             nodesDOM[uri] = undefined;
-            google.maps.Log.write("Clearing xml cache of '" + uri + "'" );
+            GLog.write("Clearing xml cache of '" + uri + "'" );
           }
-          nodesDOM[uri] = google.maps.Xml.parse(doc);
+          nodesDOM[uri] = GXml.parse(doc);
+
+          GLog.write( "Adding Nodes..." );
           var nodes = nodesDOM[uri].documentElement.getElementsByTagName("node");
-          google.maps.Log.write( "Done fetching " + nodes.length + " markers from '" + uri + "'");
-        
-          google.maps.Log.write( "Addings markers..." );
+          GLog.write( "  completed fetching " + nodes.length + " markers from '" + uri + "'");
           var count = 0;
           for (var i = 0; i < nodes.length; i++) {
+            
             var lat = nodes[i].getAttribute("lat");
-            var long = nodes[i].getAttribute("long");
-            var urn = nodes[i].getAttribute("urn");
-
+            var lng = nodes[i].getAttribute("lng");
+            
+            var domain = nodes[i].getAttribute("domain");
+            var id = nodes[i].getAttribute("id");
+                        
             // if there is no determinable long/lat, place it in the bermuda triagle
-            if ( ( lat == "" || lat == 'NULL' ) || ( long == "" || long == 'NULL' ) ) {
+            if ( ( lat == "" || lat == 'NULL' ) || ( lng == "" || lng == 'NULL' ) ) {
               lat = '26.511129';
-              long = '-71.48186';
-              google.maps.Log.write( "Marker '" + urn + "' does not contain valid coordinates, placing in Bermuda Triangle" );
+              lng = '-71.48186';
+              GLog.write( "Marker '" + id + "' does not contain valid coordinates, placing in Bermuda Triangle" );
             }
 
-            // create the marker
-            var obj = markers.add( lat, long, urn );
-            if ( typeof obj == "undefined" ) {
-              // didn't return anything; ie the node already exists or in invalid
-            } else {
-              sidebar.add( urn );
-              map.addOverlay( obj );
-              count++;
+            Markers.add( lat, lng, id );
+            // if there are service element defined, then assume services on this node
+            var els = nodes[i].getElementsByTagName("service");
+            var n = 0;
+            for ( var j=0; j<els.length; j++ ) {
+              var serviceType = els[j].getAttribute( 'serviceType' );
+              Sidebar.add( domain, id, serviceType );
+              if ( typeof services[id] == "undefined" )
+                  services[id] = new Array();
+              services[id][serviceType] = 1;
+              for( var j in services[id] )
+                n++;
+              Markers.setService( id, n );
             }
+
+            // TODO: add urn's (utilisation)
+            count++;
+
           }
-          google.maps.Log.write( "Done adding " + count + " new markers" );
+          GLog.write( "Added " + count + " new markers" );
+          
+          GLog.write( "Adding Links..." );
+          var links = nodesDOM[uri].documentElement.getElementsByTagName("link");
+          GLog.write( "  completed fetching " + links.length + " links from '" + uri + "'");
+          count = 0;
+          for ( var i = 0; i < links.length; i++ ) {
 
-          sidebar.show();
+            var src_id = links[i].getAttribute("src");
+            var dst_id = links[i].getAttribute("dst");
+            var src_domain = links[i].getAttribute("srcDomain");
+            var dst_domain = links[i].getAttribute("dstDomain");
+
+            Links.add( src_id, dst_id );
+            Sidebar.add( src_domain, dst_domain, Links.getId( src_id, dst_id ) );
+
+            Markers.setType( src_id, 'src' );
+            Markers.setType( dst_id, 'dst' );
+
+          }
+          GLog.write( "Added " + count + " new links" );
+
+          Sidebar.show();
+
+          // can only update/how the markers here as we need to process links and services to determine
+          // the appropriate type fo the marker first
+          for (var i = 0; i < nodes.length; i++) {
+            var id = nodes[i].getAttribute("id");
+            Markers.show( id );
+          }
 
           // timeout
         } else if ( response == -1 ) {
-          google.maps.Log.write( "Request for '" + uri + "' timed out" );
+          GLog.write( "Request for '" + uri + "' timed out" );
         } else {
-          google.maps.Log.write( "unknown response code returned " + response );
+          GLog.write( "unknown response code returned " + response );
         }
       });
 
@@ -152,15 +202,20 @@
 
     function initMap() {
 
-      if (google.maps.BrowserIsCompatible()) {
+      if (GBrowserIsCompatible()) {
 
-        map = new google.maps.Map2(document.getElementById("map"));
+        map = new GMap2(document.getElementById("map"));
         var mapDiv = document.getElementById("map"); 
-       	map.addControl(new google.maps.LargeMapControl());
-        map.addControl(new google.maps.MapTypeControl());
-        map.addControl(new google.maps.OverviewMapControl());        
-        map.setCenter(new google.maps.LatLng(40,0), 2);
+       	map.addControl(new GLargeMapControl());
+        map.addControl(new GMapTypeControl());
+        map.addControl(new GOverviewMapControl());        
+        map.setCenter(new GLatLng(40,0), 2);
         map.enableScrollWheelZoom();
+
+        // tooltip layer
+        tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
+        map.getPane( G_MAP_MARKER_PANE ).appendChild( tooltip );
         
         // Monitor the window resize event and let the map know when it occurs
         if (window.attachEvent) { 
@@ -176,20 +231,26 @@
     }
     
     function init() {
-      google.maps.Log.write( "Initiating markers" );
-      markers.init();
+      GLog.write( "Initiating markers" );
+      Markers.init();
+      
+      GLog.write( "Initiating links" );
+      Links.init();
 
-      google.maps.Log.write( "Initiating sidebar" );
-      sidebar.init( 'side_bar' );
+      GLog.write( "Initiating sidebar" );
+      Sidebar.init( 'side_bar' );
 
-      google.maps.Log.write( "Initiating palettes" );
+      GLog.write( "Initiating palettes" );
       dragDrop.initElement( 'palette', 'title' );
-      dragDrop.initElement( 'comms', 'title' );
+      //dragDrop.initElement( 'comms', 'title' );
 
-      google.maps.Log.write( "Initiating map" );
+      GLog.write( "Initiating map" );
       initMap();
         
-      setInterval( "markers.refreshInfoWindow();", 60 * 1000 );
+      setInterval( "InfoWindow.refresh();", 60 * 1000 );
+
+      GLog.write( "Fetching list of Global Lookup Services" );
+      getGLS();
 
     }
 
@@ -211,7 +272,7 @@
     
   </head>
   
-  <body onload="init(); document.getElementById( 'static_service_list' ).style.visibility = 'hidden';" onunload="google.maps.Unload();">
+  <body onload="init();" onunload="GUnload()">
   
     <div id="map"></div>
 
@@ -221,120 +282,6 @@
       <div id="side_bar">Please use the communications palette to begin</div>
     </div>
     
-    <div id="comms">
-      <div id="title">Communications Palette</div>
-      <div id="status_bar">
-
-      <p>Enter URL of a perfSONAR global lookup service, or select a service from the static list</p> 
-
-      <b>Global Lookup Location:</b>
-      <p>
-        <input id="gLS" type="search" value="http://ndb0-aami.internet2.edu:9090/perfSONAR_PS/services/gLS"/>
-        <input type="submit" value="Query" onclick="getServices()"/>
-        <table><tr><td>
-          <div id="service_list"></div>
-        </td></tr></table>
-      </p>
-
-      <hr/>
-
-      <a id="staticServiceListToggle" href="#" onclick="toggleStaticServiceList()">show static service list</a>
-      <p/>
-      <div id="static_service_list">
-
-        <b>PingER</b>
-        <p>      
-          <input type="submit"
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=pinger&uri=http%3A%2F%2Fchapuza.cern.ch:80%2FperfSONAR_PS%2Fservices%2Fpinger%2Fma' )"
-            value="CERN PingER MA"/>
-          <input type="submit"
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=pinger&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8075%2FperfSONAR_PS%2Fservices%2Fpinger%2Fma' )"
-            value="FNAL PingER MA"/>
-        </p>
-
-        <b>OWAMP</b>
-        <p>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=owamp&uri=http%3A%2F%2Fdc211.internet2.edu%3A9099%2FperfSONAR_PS%2Fservices%2FpSB' )" 
-            value="Internet2 perfSONARBUOY"/>
-        </p>
-
-        <b>Topology</b>
-        <p>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A5800%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
-            value="Internet2 Topology"/>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8083%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
-            value="FNAL PingER Topology"/>
-        </p>
-
-        <b>Utilisation</b>
-        <p>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
-            value="SC07 Demo SNMP MA"/>
-  <!--
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
-            value="Internet2 Topology"/> 
-
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=topology&uri=http%3A%2F%2Fpackrat.internet2.edu%3A8089%2FperfSONAR_PS%2Fservices%2Ftopology' )" 
-            value="DICE DCN Topology"/>
-    -->
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Futil.net.internet2.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
-            value="Internet2 SNMP MA"/>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fmea1.es.net%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
-            value="ES.net SNMP MA"/>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fstats.geant2.net%3A80%2Fperfsonar%2FRRDMA-access%2FMeasurementArchiveService' )" 
-            value="GEANT RRDMA"/>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8091%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
-            value="FERMI Lab SNMP MA"/>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=utilisation&uri=http%3A%2F%2Fbunsen.rnoc.gatech.edu%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA' )" 
-            value="Georgia Tech SNMP MA"/>
-        </p>
-
-        <b>BWCTL</b>
-        <p>
-          <input type="submit" 
-            onclick="getMarkers( 'gmaps.cgi?mode=topology&using=bwctl&uri=http%3A%2F%2Fndb0-aami.internet2.edu%3A8099%2FperfSONAR_PS%2Fservices%2FpSB' )" 
-            value="Internet2 perfSONARBUOY"/>
-        </p>
-      
-        <!-- <p>
-        Or select from the following list:<br>
-
-        <select id="utilisation" size="5">
-          <option value="http%3A%2F%2Fstats.geant2.net%2Fperfsonar%2FRRDMA-access%2FMeasurementArchiveService">GEANT2 RRD MA</option>
-          <option value="http%3A%2F%2Fleonidas.cynet.ac.cy%3A8080%2FperfSONAR-RRD-MA-2.0%2Fservices%2FMeasurementArchiveService">Cynet RRD MA</option>
-          <option value="http%3A%2F%2Fsrv4.dir.garr.it%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">GARR-new RRD MA</option>
-          <option value="http%3A%2F%2Fgridmachine.admin.grnet.gr%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">GRNET RRD MA</option>
-          <option value="http%3A%2F%2Fselena.acad.bg%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">ISTF-J RRD MA</option>
-          <option value="http%3A%2F%2Fperfsonar.cg.ac.yu%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">MREN RRD MA</option>
-          <option value="http%3A%2F%2Frrdma.perfsonar.pionier.net.pl%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">PIONIER-RRD RRD MA</option>
-          <option value="http%3A%2F%2Fperfsonar.renater.fr%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">RENATER RRD MA</option>
-          <option value="http%3A%2F%2Fadmin.seeren.org%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">SEEREN RRD MA</option>
-          <option value="http%3A%2F%2Fsonar1.amsterdam.surfnet.nl%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">SURFnet RRD MA</option>
-          <option value="http%3A%2F%2Farchive.sonar.net.switch.ch%3A8180%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">SWITCH RRD MA</option>
-          <option value="http%3A%2F%2Fmi5.uninett.no%3A8080%2FperfSONAR-RRD-MA-2.2%2Fservices%2FMeasurementArchiveService">Uninett RRD MA</option>
-          <option value="http%3A%2F%2Fmea1.es.net%3A8080%2FperfSONAR_PS%2Fservices%2FsnmpMA">ESnet_PS RRD MA</option>
-          <option value="http%3A%2F%2Flhcopnmon1-mgm.fnal.gov%3A8091%2FperfSONAR_PS%2Fservices%2FsnmpMA">Fermilab RRD MA</option>
-          <option value="http%3A%2F%2Fserver2-saopaulo.lan.redclara.net%3A8085%2Fperfsonar-RRDMA%2Fservices%2FMeasurementArchiveService">RedCLARA RRD MA</option>
-          <option value="http%3A%2F%2Frnp-rrd-ma.gt-med.ufsc.br%3A8080%2Faxis%2Fservices%2FMeasurementArchiveService">RNP RRD MA</option>
-        </select>
-        <input type="submit" value="Fetch" onclick="fetch('utilisation')"/> -->
-
-        </div>
-
-      </div>
-
-    </div>
 
     <div id="slac_logo"><img src="images/slac_logo_small.png"/></div>
     <div id="internet2_logo"><img src="images/internet2_logo_small.png"/></div>

@@ -192,7 +192,7 @@ if ( ! defined $service  && ( scalar @urn < 1 || ! defined $key ) ) {
     # get a list of gLSs
     my $gLSes = $client->getGLSUrn();
     foreach my $gLS ( @$gLSes ) {
-        print( $gLS . "\n");
+        print( $gLS . "\n" );
     }
     
     exit 0;
@@ -228,7 +228,7 @@ if ( ! defined $eventType ) {
 # if no urn defined, get list of urns from service
 if ( defined $service && ! ( defined $urn || defined $key ) ) {
     
-	my $list = $client->discover( $service, $eventType );
+	my $list = $client->list( $service, $eventType );
 	foreach my $urn ( @$list ) {
 		print( $urn ."\n");
 	}
@@ -241,7 +241,6 @@ else {
         $key = $urnHash->{key};
     }
 
-
     my $args = {    uri => $service, 
                     eventType => $eventType,
                     urn => $urn, 
@@ -251,7 +250,6 @@ else {
                     period => $period,
                     resolution => $resolution, 
                     consolidationFunction => $cf  };
-
 
 	# return a graph or text?
 	if ( $graph ) {

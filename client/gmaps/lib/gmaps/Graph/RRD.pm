@@ -91,8 +91,8 @@ sub new {
 sub DESTROY
 {
 	my $self = shift;
-	unlink $self->{'FILENAME'};
-	#$logger->fatal( "FILE: " . $self->{FILENAME} );
+	#unlink $self->{'FILENAME'};
+	#$logger->warn( "PNG File: " . $self->{FILENAME} );
 	unlink $self->{'PNG'};
 	return;
 }
