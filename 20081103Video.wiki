@@ -2,15 +2,23 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees:Rich, Aaron, Joe, Brian, Maxim, Jeff, John
  # Team Updates
    # Internet2
+        * Aaron: MA for tl1 alarms working to monitor SCinet WAN gear. BWC entry with perfSONAR monitoring integrated. (CPU utilization, Network device values, Memory usage - lots of things that can be retrieved from /proc).
+        * Rich: LHC USATLAS about half-way deployed. Sites need better documentation on how to configure.
+        * Jeff: 
+        * Jason: 
    # IU
+        * John: Has 10g in LA. Working on nagios for SCinet monitoring. For Transpac: LOSA and Tokyo perfSONAR deployments are active.
    # UDEL
    # Ga Tech
    # ESnet
+        * Brian: Installed pingER MA on 10 owamp boxes. Refuse to register with hLSs.(Reported in Issue tracker, Jason is testing some fixes he believes will address the problem.) LOI - for perfSONAR proposal to SCiDAC.
+        * Joe: Working on owamp,bwctl deployments. Can have some available for SC.
    # SLAC
    # FNAL
+        * Maxim: Vacation... Focused on supporting hostname/type parameters for pingER queries and handling errors. Discussion of landmarks files configuration options. (size of pings, etc...) Interest in more functionality from the weathermap (additional metrics etc).
    # MCNC
  # SC status
    * New Weathermap proposal
@@ -30,7 +38,7 @@
    * Release management
    * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
    * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
- # Next meeting will be ??? Dec 1, 2:30 pm Eastern Time
+ # Next meeting will be Dec 1, 2:30 pm Eastern Time
 
 == Where ==
 
