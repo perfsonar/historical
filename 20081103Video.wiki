@@ -1,4 +1,4 @@
-﻿=  October 27, 2008 Conference Call 2:30 pm EDT =
+﻿=  November 3, 2008 Conference Call 2:30 pm EDT =
 
 == Agenda/Minutes ==
 
@@ -30,7 +30,7 @@
    * Release management
    * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
    * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
- # Next meeting will Nov 3, 2:30 pm Eastern Time
+ # Next meeting will be ??? Dec 1, 2:30 pm Eastern Time
 
 == Where ==
 
