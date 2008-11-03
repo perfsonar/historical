@@ -6,11 +6,12 @@ applicable.
 
 == Future Events ==
 
-   * [20081103Video] - Video Conference for November 3, 2008
+   * [20081201Video] - Video Conference for December 1, 2008
 
 == Past Events ==
 
  * 2008
+   * [20081103Video] - Video Conference for November 3, 2008
    * [20081020Video] - Video Conference for October 20, 2008
    * [20081013Video] - Video Conference *Issue: CHEP2009 Paper* for October 13, 2008
    * [20080929Video] - Video Conference for September 29, 2008
