@@ -89,15 +89,15 @@ sub setup {
     $self->mode_param('mode');
     $self->run_modes(
 
-		'map'		=> 'map',		# returns the googlemap with async. xml of nodes (createXml)
-				
-		'getGLS'    => 'getGLS', # returns a list of glses
+        'map'		=> 'map',		# returns the googlemap with async. xml of nodes (createXml)
 		
-		# 'services'  => 'getServices', # returns an xml of the service endpoints from teh given gLS
-		
-		'discover'	=> 'discover',	# does the actual perfsonar topology discovery from a service
+        'getGLS'    => 'getGLS', # returns a list of glses
 
-		'graph'		=> 'graph',     # returns the for the data fetch graph
+        # 'services'  => 'getServices', # returns an xml of the service endpoints from teh given gLS
+
+        'discover'	=> 'discover',	# does the actual perfsonar topology discovery from a service
+
+        'graph'		=> 'graph',     # returns the for the data fetch graph
 
    	);
 
@@ -105,6 +105,7 @@ sub setup {
 
    return undef;    
 }
+
 
 
 
@@ -170,7 +171,7 @@ returns the markers for the perfsonar top level GLS
 sub getGLS
 {
     my $self = shift;
-    $logger->warn( "Fetching list of gls $self");
+    $logger->debug( "Fetching list of gls $self");
     my $gls = $self->SUPER::getGLS();
 	return $self->getMarkers( $gls );
 }
@@ -411,6 +412,17 @@ sub getServices
 }
 
 
+sub catFile
+{
+    my $png = shift;
+    open( PNG, "<$png") or die( "Could not fetch graph: $!\n" );
+	my $out = undef;
+	while( <PNG> ) {
+		$out .= $_;
+	}
+	return \$out;
+}
+
 sub graph
 {
 	my $self = shift;
@@ -426,8 +438,16 @@ sub graph
                 };
 	
 	#$logger->warn( "graph args: $args:" . Data::Dumper::Dumper($args) );
-	my $graph = $self->SUPER::graph( $args );
-
+	my $graph = undef;
+	eval {
+	    $graph = $self->SUPER::graph( $args );
+    };
+    if ( my $err = "$@" ) {
+        $logger->fatal( "ERROR: $err" );
+        if ( $err =~ /No data/ ) {
+            $graph = &catFile( ${gmaps::paths::imagePath} . '/nodata.png' );
+        }
+    }
 	$self->header_add( -type => 'image/png' );
 	return $$graph;
 }

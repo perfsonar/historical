@@ -353,10 +353,11 @@ sub parseData
 	# add zero values for some params
 	foreach my $t ( keys %$tuples ) {
 		foreach my $param ( qw/ iqrIpd maxIpd meanIpd /) {
-			if ( ! exists $tuples->{$t}->{$param} || ! defined $tuples->{$t}->{$param} ) {
+			if ( ! exists $tuples->{$t}->{$param} ) {
 			#	$logger->warn( "$param @ $t -> 0");
 				$tuples->{$t}->{$param} = 0;
 			}
+			$seen{$param}++;
 		}
 	}
 

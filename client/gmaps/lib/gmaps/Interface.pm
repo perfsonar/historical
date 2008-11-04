@@ -254,9 +254,9 @@ sub fetch
 	# TODO: This shoudl throw an exception instead 
 	if ( scalar keys %$data < 1 ) {
 	    if ( defined $fetchArgs->{key} ) {
-    		$logger->fatal( "No data was found on service '" . $uri . "' for key '" . $fetchArgs->{key} . "' using eventType '". $fetchArgs->{eventType} . "'");
+    		die( "No data was found on service '" . $uri . "' for key '" . $fetchArgs->{key} . "' using eventType '". $fetchArgs->{eventType} . "'");
 	    } else {
-		    $logger->fatal( "No data was found on service '" . $uri . "' for urn '" . $fetchArgs->{urn} . "' using eventType '". $fetchArgs->{eventType} . "'");
+		    die( "No data was found on service '" . $uri . "' for urn '" . $fetchArgs->{urn} . "' using eventType '". $fetchArgs->{eventType} . "'");
 		}
 		exit;
 	}

@@ -30,10 +30,10 @@ sub graphArgs
 				'CDEF:jitterIqrStart=meanRtt,iqrIpd,-',
 				'CDEF:jitterMeanRange=meanIpd,2,*',
 				'CDEF:jitterMeanStart=meanRtt,meanIpd,-',
-				'LINE1:jitterIqrStart',
-				'AREA:jitterIqrRange#FF0000:iqrIpd:STACK',
 				'LINE1:jitterMeanStart',
 				'AREA:jitterMeanRange#FF9900:meanIpd:STACK',
+				'LINE1:jitterIqrStart',
+				'AREA:jitterIqrRange#FF0000:iqrIpd:STACK',
 				'LINE1:meanRtt#000000:meanRtt',
 				'LINE2:minRtt#00FF00:minRtt';
 	

@@ -19,7 +19,8 @@ Links = {
           array.shift();
           return array;
       } else {
-          GLog.write( "EPIC FAIL! on '" + id + "' for " + array );
+          if( debug )
+            GLog.write( "EPIC FAIL! on '" + id + "' for " + array );
       }
       return ( undefined, undefined );
   },
@@ -35,7 +36,8 @@ Links = {
   add: function ( src_id, dst_id ) {
 
     var this_id = Links.getId( src_id, dst_id );
-    GLog.write( "adding link id: '" + this_id + "', from '" + src_id + "' to '" + dst_id  + "'" );
+    if( debug )
+        GLog.write( "adding link id: '" + this_id + "', from '" + src_id + "' to '" + dst_id  + "'" );
 
 
     // check to make sure the marker doesn't already exist
@@ -55,8 +57,12 @@ Links = {
 
         // make single clicks the info box
         GEvent.addListener( Links.gLinks[this_id], "click", function() {
-            InfoWindow.refreshTab( this_id );
+            InfoWindow.showTab( this_id );
         });
+        GEvent.addListener( Links.gLinks[this_id], "mouseover", function() {
+            Help.link( this_id );
+        });
+
         // intiaially hide the links until the source is clicked on
         Links.hide( this_id );
     }
@@ -67,12 +73,15 @@ Links = {
     return Links.gLinks[id];  
   },
   initInfoWindow: function( id ) {
-    GLog.write( "  initiating tabs for link infoWindow " + id );
-    GEvent.addListener( Links.get(id), 'click', function(point) { 
-      GLog.write( "Showing infoWindow for link '" + id + "'");
+      if( debug )
+        GLog.write( "  initiating tabs for link infoWindow '" + id + "'" );
+    GEvent.addListener( Links.gLinks[id], 'click', function(point) { 
+    if( debug )
+        GLog.write( "Showing infoWindow for link '" + id + "'");
       var tabs = InfoWindow.get( id );
       var number = map.getInfoWindow().getSelectedTab();
-      GLog.write( "  links openinfowindow tab=" + number + " @ (" + point.lat() + ", " + point.lng() + ")" );
+      if( debug )
+        GLog.write( "  links openinfowindow tab=" + number + " @ (" + point.lat() + ", " + point.lng() + ")" );
       map.openInfoWindowTabsHtml( point, tabs, {selectedTab:number} ); 
     } );
   },
@@ -85,7 +94,8 @@ Links = {
       Links.get(id).hide();
   },
   setVisibility: function( id, state ) {
-      GLog.write( "setVisibilty of " + id + " to " + state );
+      if( debug )
+        GLog.write( "setVisibilty of " + id + " to " + state );
       if ( state == false ) {
           Links.show( id );
       } else {
@@ -93,9 +103,11 @@ Links = {
       }
   },
   setDomainVisibility: function( domain, state ) {
-      GLog.write("Links.setDomainVisibilty of " + domain + " to " + state );
+      if( debug )
+        GLog.write("Links.setDomainVisibilty of " + domain + " to " + state );
       for ( xmlUrl in nodesDOM ) {
-          GLog.write( "  going through " + xmlUrl );
+          if( debug )
+            GLog.write( "  going through " + xmlUrl );
           var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
           for( var i = 0; i < link.length; i++ ) {
             var this_srcDomain = link[i].getAttribute("srcDomain");
@@ -117,14 +129,15 @@ Links = {
       }
   },
   setDomainVisibilityFromMarker: function( src_id, state ) {
-      GLog.write("Links.setDomainVisibiltyFromMarker of " + src_id + " to " + state );
+      if( debug )
+        GLog.write("Links.setDomainVisibiltyFromMarker of " + src_id + " to " + state );
       for ( xmlUrl in nodesDOM ) {
-          GLog.write( "  going through " + xmlUrl );
+          if( debug )
+            GLog.write( "  going through " + xmlUrl );
           var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
           for( var i = 0; i < link.length; i++ ) {
             var this_src = link[i].getAttribute("src");
             var this_dst = link[i].getAttribute("dst");
-            // GLog.write( "    looking at link " + this_src + ", " + this_dst );
             var this_id = Links.getId( this_src, this_dst );
             
             // if this src_id matches, then show the link
@@ -139,23 +152,27 @@ Links = {
       }
   },
   hideAllLinks: function( ) {
-      GLog.write( "hideAllLinks");
+      if( debug )
+        GLog.write( "hideAllLinks");
       for ( xmlUrl in nodesDOM ) {
-          GLog.write( "  going through " + xmlUrl );
+          if( debug )
+            GLog.write( "  going through " + xmlUrl );
           var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
           for( var i = 0; i < link.length; i++ ) {
             var this_src = link[i].getAttribute("src");
             var this_dst = link[i].getAttribute("dst");
-            // GLog.write( "    looking at link " + this_src + ", " + this_dst );
             var this_id = Links.getId( this_src, this_dst );
             Links.hide( this_id );
         }
     }
   },
   focus: function( id ) {
-      GLog.write( "Focus on link '" + id + "'");
+      if( debug )
+        GLog.write( "Focus on link '" + id + "'");
       Links.show( id );
-      Sidebar.setCheckBox( 'check-' + id + ":Link" )
+      Sidebar.setCheckBox( 'check-' + id + ":Link" );
+      // TODO: popup infowindow
+      GEvent( Links.gLink[id], "click", new GLatLng( 40,-100 ) );
   }
 }
 

@@ -16,7 +16,8 @@ Sidebar = {
     	return str.replace( /\-/g, '' );
     },
     add: function( i, j, k ) {
-        GLog.write( "adding to sidebar " + i + ", " + j + ", " + k );
+        if( debug )
+            GLog.write( "adding to sidebar " + i + ", " + j + ", " + k );
 
         // init datastructures when necessary		
         if ( ! Sidebar.checkmenu[i] ) {
@@ -32,19 +33,22 @@ Sidebar = {
     },
     get: function( id ) {
         // TODO: add serviceType to node gather
-  	  GLog.write( "getting checkbox state '" + id + "'" );
+        if( debug )
+  	        GLog.write( "getting checkbox state '" + id + "'" );
   	  return document.getElementById( id );
     },
     getCheckBoxState: function( id ) {
         var sidebar_id = 'check-' + id;
         var ret = Sidebar.get( sidebar_id ).checked;
-        GLog.write( 'state of ' + sidebar_id + " is " + ret )
+        if( debug )
+            GLog.write( 'state of ' + sidebar_id + " is " + ret )
         return ret;
     },
 	setCheckBox: function( id, state ) {
         var sidebar_id = 'check-' + id;
         var checkbox = Sidebar.get( sidebar_id );
-        GLog.write( "setting checkbox '" + sidebar_id + "' to " + state);
+        if( debug )
+            GLog.write( "setting checkbox '" + sidebar_id + "' to " + state);
         if ( state == true ) {
           checkbox.checked = true;
         } else {
@@ -57,19 +61,20 @@ Sidebar = {
 	splitLinkId: function( sidebar_id ) {
         var id = sidebar_id.replace( ':Link', '' );
         return id;
-	},
-	getMarkerId: function( id, serviceType ) {
-	    return id + ":" + serviceType;
-	},
-	splitMarkerId: function( sidebar_id ) {
-	    var a = new Array();
+    },
+    getMarkerId: function( id, serviceType ) {
+        return id + ":" + serviceType;
+    },
+    splitMarkerId: function( sidebar_id ) {
+        var a = new Array();
         if ( a = /^(.*):(.*)$/.exec(sidebar_id) ) {
-	        return a[1];
-	    }
-	    return undefined;
-	},
-	setLink: function( sidebar_id, state ) {
-        GLog.write( "Sidebar.setLink: " + sidebar_id + " to " + state );
+            return a[1];
+        }
+        return undefined;
+    },
+    setLink: function( sidebar_id, state ) {
+        if( debug )
+            GLog.write( "Sidebar.setLink: " + sidebar_id + " to " + state );
         // strip out uid
         var id = Sidebar.splitLinkId( sidebar_id );
         if ( state ) {
@@ -82,42 +87,57 @@ Sidebar = {
 	},
 	updateChildren: function( sidebar_id ) {
         // goes through all of dom and updates the node/link show status
-        GLog.write( "updateChildren: looking for '" + sidebar_id + "'");
+        if( debug )
+            GLog.write( "updateChildren: looking for '" + sidebar_id + "'");
         // look for all inputs
         var treeId = 'tree-' + sidebar_id;
         var checkBoxState = Sidebar.getCheckBoxState( sidebar_id );
 
         var checkboxEls = Sidebar.get( treeId ).getElementsByTagName("input");
-        GLog.write( "  found " + checkboxEls.length + " check boxes for parent " + sidebar_id );
+        if( debug )
+            GLog.write( "  found " + checkboxEls.length + " check boxes for parent " + sidebar_id );
         for ( var i=0; i<checkboxEls.length; i++ ){
-            GLog.write( "  looking at index " + i );
+            if( debug )
+                GLog.write( "  looking at index " + i );
             var checkboxId = checkboxEls[i].getAttribute( "id" ).replace( /^check-/, "");
             if ( Markers.isMarker( checkboxId ) ) {
                 var id = Sidebar.splitMarkerId( checkboxId );          
-                GLog.write( "  changing marker visibiilty " + id + " to " + checkBoxState );
+                if( debug )
+                    GLog.write( "  changing marker visibiilty " + id + " to " + checkBoxState );
                 Markers.setVisibility( id, checkBoxState );
             } else {
-                GLog.write( "  changing link visibiilty of " + checkboxId + " to " + checkBoxState );                
+                if( debug )
+                    GLog.write( "  changing link visibiilty of " + checkboxId + " to " + checkBoxState );                
                 Sidebar.setLink( checkboxId, checkBoxState );
             }
         }
 	},
 	setDomainVisibility: function( id, state ) {
-	    GLog.write( "Sidebar.setDomainVisibility of " + id + " to " + state );
+        if( debug )
+	        GLog.write( "Sidebar.setDomainVisibility of " + id + " to " + state );
 	    // work out the sidebar id
 	    Markers.setDomainVisibility( id, state );
 	    Links.setDomainVisibility( id, state )
 	},
+	sort: function( hash ) {
+	    var sortable = new Array();
+	    for ( var i in hash ) {
+	        sortable[sortable.length] = i;
+	    }
+	    return sortable.sort();
+	},
     show: function( e ) {
-        GLog.write( "Sidebar:show");
+        if( debug )
+            GLog.write( "Sidebar:show");
 
         var allLinkIds = new Array();
 
         Sidebar.clear();
         Sidebar.contents =  '<ul id="tree-checkmenu" class="checktree">'; 
 
-        for ( var i in Sidebar.checkmenu ) {
-
+        var l1 = Sidebar.sort( Sidebar.checkmenu );
+        for ( var x=0; x<l1.length; x++ ) {
+            var i = l1[x];
             var l1Id = i;
             // determine if we have a domain at this level or a node
             var l1checkBoxCode = "var state = Sidebar.getCheckBoxState( '" + l1Id + "' ); Sidebar.setDomainVisibility( '" + l1Id + "', state );";
@@ -127,7 +147,9 @@ Sidebar = {
             	+ '<ul id="tree-' + l1Id + '">';
 
             // need unique id for this level's li's
-            for( var j in Sidebar.checkmenu[i] ) {
+            var l2 = Sidebar.sort( Sidebar.checkmenu[i] );
+            for( var y=0; y<l2.length; y++ ) {
+                var j = l2[y];
 
                 var l2Id = undefined;
                 if ( 1 ) {
@@ -198,7 +220,8 @@ Sidebar = {
 		return false;
 	},
 	refresh: function( e ) {
-	  GLog.write( "Refreshing sidebar: " + Sidebar.target );
+        if( debug )
+	        GLog.write( "Refreshing sidebar: " + Sidebar.target );
 	  var list = document.getElementById( Sidebar.target );
 	  list.innerHTML = Sidebar.contents;
 	  

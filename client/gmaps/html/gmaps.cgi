@@ -14,8 +14,10 @@ use lib '/afs/slac.stanford.edu/g/scs/net/netmon/perfSONAR/perfSONAR-PS/trunk/li
 use lib '/u/sf/ytl/lib/site_perl';
 
 # set the path to the template directory from the main distribution
+my $basePath = '/afs/slac.stanford.edu/g/scs/net/netmon/perfSONAR/perfSONAR-PS/trunk/client/gmaps/';
 #my $baseTemplatePath = '/home/ytl/svn-branches/yee/gmaps-with-topologyservice/templates/';
-my $baseTemplatePath = '/afs/slac.stanford.edu/g/scs/net/netmon/perfSONAR/perfSONAR-PS/trunk/client/gmaps/templates/';
+my $baseTemplatePath = $basePath . 'templates/';
+my $baseImagePath = $basePath . 'html/images/';
 
 # google maps api key
 # key for http://packrat.internet2.edu:8008
@@ -42,11 +44,14 @@ if ( -e ${gmaps::paths::logFile} ) {
 }
 
 ${gmaps::paths::templatePath} = $baseTemplatePath;
-${gmaps::paths::googleMapKey} = $key;
 ${gmaps::paths::locationCache} = $locationCache;
+
+${gmaps::paths::imagePath} = $baseImagePath;
+${gmaps::paths::googleMapKey} = $key;
 
 # start the web application
 my $app = gmaps::Interface::web->new( );
+
 $app->run();
 
 exit;

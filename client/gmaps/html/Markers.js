@@ -23,7 +23,8 @@ Markers = {
   },
   setType: function( id, type ) { // src, dst, both
       if ( typeof Markers.pType[id] == "undefined" ) {
-          GLog.write( "setType: " + id + " to " + type );
+          if( debug )
+            GLog.write( "setType: " + id + " to " + type );
           Markers.pType[id] = type;
       }
       // check not already set to something else
@@ -37,21 +38,21 @@ Markers = {
     return Markers.pService[id];
   },
   setService: function( id, number ) { // true or false
-      GLog.write( "setService: " + id + " to " + number );
+      if( debug )
+        GLog.write( "setService: " + id + " to " + number );
       Markers.pService[id] = number;
   },
   getId: function ( srcDomain, dstDomain, item ) {
-      // GLog.write( "getId: srcDomain=" + srcDomain + ", dstDomain=" + dstDomain + ", desc=" + item );
       return srcDomain + '__' + dstDomain + '__' + item;
   },
   splitId: function ( id ) {
       var array = undefined;
       if ( array = /^(.*)__(.*)__(.*)$/.exec(id) ) {
           array.shift();
-          // GLog.write( "splitId: srcDomain=" + array[0] + ", dstDomain=" + array[1] + ", desc=" + array[2] );
           return array;
       } else {
-          GLog.write( "EPIC FAIL! " + array);
+          if( debug )
+            GLog.write( "EPIC FAIL! " + array);
       }
       return ( undefined, undefined, undefined );
   },
@@ -64,13 +65,15 @@ Markers = {
   },
   create: function( id, point, image ) {
       
-      GLog.write( "Markers.create " + id );
+      if( debug )
+        GLog.write( "Markers.create " + id );
       // TOOD: work out if this maker has any services
       var icon = new GIcon(G_DEFAULT_ICON);
       if ( typeof image == "undefined" ) {
           icon.image = "images/blue.png";            
       } else {
-          GLog.write( "  using image " + image );
+          if( debug )
+            GLog.write( "  using image " + image );
           icon.image = image;
       }
       var markerOptions = { title:id, icon:icon };
@@ -83,8 +86,7 @@ Markers = {
       });
       // make single clicks the info box
       GEvent.addListener( Markers.gMarkers[id], "click", function() {
-          GLog.write( "marker click! infowindow");
-          InfoWindow.refreshTab( id );
+          InfoWindow.showTab( id );
           // show only links for this marker
           Links.hideAllLinks();
           Links.setDomainVisibilityFromMarker( id, true );
@@ -93,7 +95,8 @@ Markers = {
       // add tooltip
       GEvent.addListener( Markers.gMarkers[id], "mouseover", function() {
           Markers.showTooltip( id );
-      });
+          Help.marker( id );
+      })
       GEvent.addListener( Markers.gMarkers[id], "mouseout", function() {
           tooltip.style.display = "none";
       });
@@ -105,10 +108,12 @@ Markers = {
   },
   add: function ( lat, lng, this_id ) {
 
-    GLog.write( "adding marker '" + this_id + "' at (" + lat + "," + lng + ")" );
+      if( debug )
+        GLog.write( "adding marker '" + this_id + "' at (" + lat + "," + lng + ")" );
     // return if the marker is invalid
     if ( lat == "undefined" || lng == "undefined" ) {
-      GLog.write( "Error parsing marker '" + this_id + "' at (" + lat + "," + lng + ")" );
+        if( debug )
+            GLog.write( "Error parsing marker '" + this_id + "' at (" + lat + "," + lng + ")" );
       return undefined;
     }
     
@@ -119,14 +124,16 @@ Markers = {
 
     } else {
       // TODO: if the long lats are different, then move them
-      GLog.write( "FIXME: geo change on marker " + this_id );
+      if( debug )
+        GLog.write( "FIXME: geo change on marker " + this_id );
     }
     
     return Markers.gMarkers[this_id];    
   },
   get: function( id ) {
       if ( typeof( Markers.gMarkers[id] ) == "undefined" ) {
-          GLog.write( "Could not find marker with id " + id );
+          if( debug )
+            GLog.write( "Could not find marker with id " + id );
           return undefined;
       }
       return Markers.gMarkers[id];
@@ -145,7 +152,8 @@ Markers = {
   },
   show: function( id ) { // overload to determine the type of the marker
       // copy info from marker
-      GLog.write( "showing marker " + id + ", type=" + Markers.getType( id ) + ", service=" + Markers.getService( id ) );
+      if( debug )
+        GLog.write( "showing marker " + id + ", type=" + Markers.getType( id ) + ", service=" + Markers.getService( id ) );
       var this_marker = Markers.get(id);
       
       // colour the marker depending on the type
@@ -163,11 +171,12 @@ Markers = {
           colour = colour + Markers.getService(id);
       }
       icon = "images/" + colour + ".png";
-
       
-      GLog.write( "    colour=" + colour );
+      if( debug )
+        GLog.write( "    colour=" + colour );
       this_marker.hide();
       Markers.gMarkers[id] = Markers.create( id, this_marker.getLatLng(), icon );
+
       map.addOverlay( Markers.gMarkers[id] );
       Markers.gMarkers[id].show();
 
@@ -185,19 +194,19 @@ Markers = {
       }
   },
   setDomainVisibility: function( domain, state ) {  // sets all the nodes in the domain to visibility state
-      GLog.write( "Marker.setDomainVisibility of domain " + domain + " to " + state );
+      if( debug )
+        GLog.write( "Marker.setDomainVisibility of domain " + domain + " to " + state );
       for ( xmlUrl in nodesDOM ) {
-          GLog.write( "  searching through " + xmlUrl );
+          if( debug )
+            GLog.write( "  searching through " + xmlUrl );
           var nodes = nodesDOM[xmlUrl].documentElement.getElementsByTagName("node");
           for( var i = 0; i < nodes.length; i++ ) {
             var this_domain = nodes[i].getAttribute("domain");
             var id = nodes[i].getAttribute("id");
             if ( domain == this_domain ) {
                 if ( state == true ) {
-                    //GLog.write( "    showing " + id ); 
                     Markers.show( id );
                 } else {
-                    //GLog.write( "    hiding " + id );
                     Markers.hide( id );
                 }
             }
@@ -238,6 +247,11 @@ Markers = {
    var height = 10;
    var pos = new GControlPosition(G_ANCHOR_TOP_LEFT, new GSize(offset.x - point.x - anchor.x + width, offset.y - point.y -anchor.y - height)); 
    pos.apply(tooltip);
+  },
+  focus: function( id ) {
+      if( debug )
+        GLog.write( "Focus on marker '" + id + "'");
+      GEvent.trigger( Markers.get(id), 'click' );
   }
 }
 

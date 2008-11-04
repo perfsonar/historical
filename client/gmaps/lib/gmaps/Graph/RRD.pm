@@ -194,11 +194,11 @@ sub getGraph
 	RRDs::graph $png, @$graphArgs;
 	
 	my $ans = RRDs::error;
-	$logger->fatal( "Error graphing " . $self->{FILENAME} . " using '@$graphArgs': $ans" )
+	die( "Error graphing " . $self->{FILENAME} . " using '@$graphArgs': $ans" )
 		if $ans ne undef || $ans ne '';
 
 	# cat out the png to a variable
-	open( PNG, "<$png") or $logger->fatal( "Could not fetch graph: $!\n" );
+	open( PNG, "<$png") or die( "Could not fetch graph: $!\n" );
 	my $out = undef;
 	while( <PNG> ) {
 		$out .= $_;

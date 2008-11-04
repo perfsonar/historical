@@ -25,7 +25,7 @@ div.dragged {
 	z-index: 999999 !important;
 }
 
-div#palette, div#comms {
+div#list, div#comms, div#help {
 	border-top: 1px solid #000000;
 	border-right: 1px solid #000000;
 	border-bottom: 1px solid #000000;
@@ -44,8 +44,7 @@ div#palette_shadow {
   height: 100%;
 }
 
-
-div#palette {
+div#list {
 	max-width: 33%;
 	max-height: 90%;
 	top: 36px;
@@ -56,14 +55,20 @@ div#palette {
 }
 
 div#comms {
-  width: 18%;
+  width: 300px;
 	top: 10px;
 	left: 80px;
 	z-index: 200000;
 }
 
+div#help {
+  width: 190px;
+  bottom: 15px;
+    left: 190px;
+    z-index: 200000;
+}
 
-#side_bar, #status_bar {
+#comms_panel, #help_panel, #side_bar, #status_bar {
   offset: 0px 0px 0px 0px;
   padding-bottom: 1px;
   padding-left: 1px;
@@ -125,6 +130,10 @@ table {
   
 #invert_markers, #select_all_markers, #select_none_markers {
   font-size: 6pt;
+}
+
+.infoWindow {
+    font-size: 7pt;
 }
 
 .tooltip { text-align: center;

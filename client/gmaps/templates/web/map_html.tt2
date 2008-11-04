@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>perfSONAR Google Maps Asynchronous XML Example</title>
+    <title>SLAC National Accelerator Laboratory perfSONAR Google Maps Mashup</title>
     <link rel="stylesheet" href="gmaps.css" type="text/css" />
 
     <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=[% GOOGLEMAPKEY %]"></script>
@@ -15,7 +15,9 @@
     <script type="text/javascript" src="Links.js"></script>  
     <script type="text/javascript" src="InfoWindow.js"></script>  
     <script type="text/javascript" src="Sidebar.js"></script>  
-      
+    <script type="text/javascript" src="IO.js"></script>
+    <script type="text/javascript" src="Help.js"></script>
+    
     <link rel="stylesheet" href="checktree.css" type="text/css" />
 
     <script type="text/javascript">
@@ -23,189 +25,23 @@
     var map; 
     var tooltip;
     var nodesDOM = new Object(); // keep the xml in memory for parsing
-    var servicesDOM = new Object();
     var checkmenu = undefined;
-
+    
     var services = new Array(); // number of service for index id
 
-    /* ****************************************************************
-      XML Polling
-     **************************************************************** */
-
-    function getServices( ) {
-      
-      var gLS =  document.getElementById( 'gLS' ).value;
-      
-      GLog.write( "Querying global LS '" + gLS + "' for registered services.")
-      
-      var uri = '/gmaps.cgi?mode=services&gLS=' + gLS;
-      
-      // fetch it!
-      
-      // deal with timeouts etc
-      GLogDownloadUrl( uri, function(doc,response) {
-
-        // downloaded okay
-        if ( response == 200 ) {
-
-          if ( typeof servicesDOM[uri] == "object" ) {
-            // wipe out the out one to reload
-            servicesDOM[uri] = undefined;
-            GLog.write("Clearing xml cache of '" + uri + "'" );
-          }
-          servicesDOM[uri] = GXml.parse(doc);
-          var services = servicesDOM[uri].documentElement.getElementsByTagName("service");
-
-          GLog.write( "Adding services..." );
-          var list = '';
-          for (var i = 0; i < services.length; i++) {
-            var service = services[i].getAttribute("service");
-            var type = services[i].getAttribute("type");
-            var name = services[i].getAttribute("name");
-
-            // write out the services to the palatte
-            var url = 'gmaps.cgi?mode=topoGLogy&using=' + type + '&uri=' + service;
-            item = "<input type=\"submit\" onclick=\"getMarkers( '" + url + "' )\" value=\"" + name  + "\"/>";
-            GLog.write( "Got: " + item );
-            
-            list += item;
-          }
-          GLog.write( "Done fetching " + services.length + " services from '" + uri + "'");          
-          
-          document.getElementById( "service_list" ).innerHTML = list;
-                    
-          // timeout
-        } else if ( response == -1 ) {
-          GLog.write( "Request for '" + uri + "' timed out" );
-        } else {
-          GLog.write( "unknown response code returned " + response );
-        }
-      });  
-      
-    }
-
-    // retrieves a list of all the gls and plots them on the map
-    function getGLS() {
-      discover( '?mode=getGLS' );
-//      discover( '?mode=discover&accessPoint=http://tukki.fnal.gov:9990/perfSONAR_PS/services/gLS');
-
-//      discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8095/perfSONAR_PS/services/hLS');
-//      discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8075/perfSONAR_PS/services/pinger/ma');
-    }
-
-    // retrieves the nodes for the uri
-    function discover( uri ) {
-
-      GLog.write( "Fetching markers from '" + uri + "'");      
-
-      // deal with timeouts etc
-      GDownloadUrl( uri, function(doc,response) {
-        
-        // downloaded okay
-        if ( response == 200 ) {
-          
-          Sidebar.clear();
-          Sidebar.setContent('<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="spinner.gif"/></p>' );
-          Sidebar.refresh();
-
-          if ( typeof nodesDOM[uri] == "object" ) {
-            // wipe out the out one to reload
-            nodesDOM[uri] = undefined;
-            GLog.write("Clearing xml cache of '" + uri + "'" );
-          }
-          nodesDOM[uri] = GXml.parse(doc);
-
-          GLog.write( "Adding Nodes..." );
-          var nodes = nodesDOM[uri].documentElement.getElementsByTagName("node");
-          GLog.write( "  completed fetching " + nodes.length + " markers from '" + uri + "'");
-          var count = 0;
-          for (var i = 0; i < nodes.length; i++) {
-            
-            var lat = nodes[i].getAttribute("lat");
-            var lng = nodes[i].getAttribute("lng");
-            
-            var domain = nodes[i].getAttribute("domain");
-            var id = nodes[i].getAttribute("id");
-                        
-            // if there is no determinable long/lat, place it in the bermuda triagle
-            if ( ( lat == "" || lat == 'NULL' ) || ( lng == "" || lng == 'NULL' ) ) {
-              lat = '26.511129';
-              lng = '-71.48186';
-              GLog.write( "Marker '" + id + "' does not contain valid coordinates, placing in Bermuda Triangle" );
-            }
-
-            Markers.add( lat, lng, id );
-            // if there are service element defined, then assume services on this node
-            var els = nodes[i].getElementsByTagName("service");
-            var n = 0;
-            for ( var j=0; j<els.length; j++ ) {
-              var serviceType = els[j].getAttribute( 'serviceType' );
-              Sidebar.add( domain, id, serviceType );
-              if ( typeof services[id] == "undefined" )
-                  services[id] = new Array();
-              services[id][serviceType] = 1;
-              for( var j in services[id] )
-                n++;
-              Markers.setService( id, n );
-            }
-
-            // TODO: add urn's (utilisation)
-            count++;
-
-          }
-          GLog.write( "Added " + count + " new markers" );
-          
-          GLog.write( "Adding Links..." );
-          var links = nodesDOM[uri].documentElement.getElementsByTagName("link");
-          GLog.write( "  completed fetching " + links.length + " links from '" + uri + "'");
-          count = 0;
-          for ( var i = 0; i < links.length; i++ ) {
-
-            var src_id = links[i].getAttribute("src");
-            var dst_id = links[i].getAttribute("dst");
-            var src_domain = links[i].getAttribute("srcDomain");
-            var dst_domain = links[i].getAttribute("dstDomain");
-
-            Links.add( src_id, dst_id );
-            Sidebar.add( src_domain, dst_domain, Links.getId( src_id, dst_id ) );
-
-            Markers.setType( src_id, 'src' );
-            Markers.setType( dst_id, 'dst' );
-
-          }
-          GLog.write( "Added " + count + " new links" );
-
-          Sidebar.show();
-
-          // can only update/how the markers here as we need to process links and services to determine
-          // the appropriate type fo the marker first
-          for (var i = 0; i < nodes.length; i++) {
-            var id = nodes[i].getAttribute("id");
-            Markers.show( id );
-          }
-
-          // timeout
-        } else if ( response == -1 ) {
-          GLog.write( "Request for '" + uri + "' timed out" );
-        } else {
-          GLog.write( "unknown response code returned " + response );
-        }
-      });
-
-    }
- 
+    var debug = 0;  // global GLog output
 
     function frameResize() {
       //document.getElementById("side_bar").style.height = window.innerHeight - 200;
       map.checkResize();
     }
 
-    function initMap() {
+    function initMap( element ) {
 
       if (GBrowserIsCompatible()) {
 
-        map = new GMap2(document.getElementById("map"));
-        var mapDiv = document.getElementById("map"); 
+        map = new GMap2(document.getElementById( element ));
+        var mapDiv = document.getElementById( element ); 
        	map.addControl(new GLargeMapControl());
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
@@ -223,65 +59,72 @@
         } else {
           window.addEventListener("resize", function() { frameResize() } , false);
         }
+        
+        GEvent.addListener( map, 'dblclick', function() {
+          Help.map();
+        });
 
       }
       else {
         alert( "Sorry, your browser is not compatible with GoogleMaps." );
       } 
+      
     }
     
     function init() {
-      GLog.write( "Initiating markers" );
-      Markers.init();
       
-      GLog.write( "Initiating links" );
+      Markers.init();
       Links.init();
-
-      GLog.write( "Initiating sidebar" );
       Sidebar.init( 'side_bar' );
 
-      GLog.write( "Initiating palettes" );
-      dragDrop.initElement( 'palette', 'title' );
-      //dragDrop.initElement( 'comms', 'title' );
+      dragDrop.initElement( 'list', 'title' );
+      dragDrop.initElement( 'comms', 'title' );
+      dragDrop.initElement( 'help', 'title' );
 
-      GLog.write( "Initiating map" );
-      initMap();
+      Help.init( 'help_panel' );
+
+      initMap( 'map' );
         
-      setInterval( "InfoWindow.refresh();", 60 * 1000 );
+      setInterval( "InfoWindow.show();", 60 * 1000 );
 
-      GLog.write( "Fetching list of Global Lookup Services" );
-      getGLS();
+      IO.getGLS();
 
-    }
+      Help.map();
 
-
-    // toggles static list of services
-    function toggleStaticServiceList() {
-      var div = document.getElementById( 'static_service_list' );
-      var toggle = document.getElementById( 'staticServiceListToggle' );
-      if ( div.style.visibility == 'hidden' ) {
-        toggle.innerHTML = 'hide static service list';
-        div.style.visibility = 'visible';
-      } else {
-        toggle.innerHTML = 'show static service list';
-        div.style.visibility = 'hidden';
-      }
     }
 
     </script>
     
   </head>
   
-  <body onload="init();" onunload="GUnload()">
+  <body onload="init();" onunload="GUnload();">
   
     <div id="map"></div>
 
-    <div id="palette">
-      <div id="title">Interactive Palette</div>
+    <div id="list">
+      <div id="title">Interactive List</div>
       <div id="palette_shadow"></div>
-      <div id="side_bar">Please use the communications palette to begin</div>
+      <div id="side_bar"></div>
     </div>
     
+    <div id="comms">
+      <div id="title">Query a perfSONAR Service</div>
+      <div id="palette_shadow"></div>
+      <div id="comms_panel">
+        <table>
+          <tr>
+            <td>Access Point: <input id="accessPoint" type="text" name="accessPoint"/></td>
+            <td><input type="submit" value="Discover" onclick="var input = document.getElementById('accessPoint').value; var accessPoint = '?mode=discover&amp;accessPoint=' + input; IO.discover( accessPoint );"/></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div id="help">
+      <div id="title">Interactive Help</div>
+      <div id="palette_shadow"></div>
+      <div id="help_panel"><b>Loading help...</b></div>
+    </div>
 
     <div id="slac_logo"><img src="images/slac_logo_small.png"/></div>
     <div id="internet2_logo"><img src="images/internet2_logo_small.png"/></div>
