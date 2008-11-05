@@ -86,12 +86,12 @@ sub ping {
     my $timeout = 5;
 	my ($status, $res) = consultArchive($host, $port, $endpoint, $doc->getValue(), $timeout);
 	if ($status != 0) {
-		my $msg = "Error contacting service: $res";
+		my $msg = "Error contacting service \"" . $self->{URI} . "\" : $res";
 		$logger->error($msg);
 		return(-1, $msg);
 	}
 
-	$logger->debug("Response: ".$res->toString);
+	$logger->debug("Response from \"" . $self->{URI} . "\": ".$res->toString);
 
 	foreach my $d ($res->getChildrenByTagName("nmwg:data")) {
 		foreach my $m ($res->getChildrenByTagName("nmwg:metadata")) {
@@ -111,7 +111,7 @@ sub ping {
 		}
 	}
 
-	return (-1, "No successful return");;
+	return (-1, "No successful return for \"" . $self->{URI} . "\".");
 }
 
 1;

@@ -17,7 +17,6 @@ Each perfSONAR-PS module should be designed to be run by this daemon.
 
 use warnings;
 use strict;
-use diagnostics;
 
 use Getopt::Long;
 use Time::HiRes qw( gettimeofday );
@@ -661,8 +660,8 @@ sub maintenance {
     }
 
     while (1) {
-        my $cleanStatus = q{};
-        my $sumStatus   = q{};
+        my $cleanStatus = 0;
+        my $sumStatus   = 0;
         eval {
             unless ( $CLEANFLAG ) {
                 $cleanStatus = $service->cleanLS( { error => \$error } ) if $service->can("cleanLS");
