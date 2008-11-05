@@ -346,26 +346,31 @@ sub update {
     my $parameters = validateParams( @args, { table => 1, wherevalues => 1, updatevalues => 1 } );
 
     if ( $parameters->{table} and $parameters->{wherevalues} and $parameters->{updatevalues} ) {
-        my $first = q{};
+        my $first = "";
         my %w     = %{ $parameters->{wherevalues} };
         my %v     = %{ $parameters->{updatevalues} };
 
-        my $where = q{};
+        my $where = "";
         foreach my $var ( keys %w ) {
             $where .= " and " if ($where);
             $where .= $var . " = " . $w{$var};
         }
 
-        my $values = q{};
-        foreach my $var ( keys %v ) {
+        my $values = "";
+        foreach my $var ( sort keys %v ) {
             $values .= ", " if ($values);
-            $values .= $var . " = " . $v{$var};
+            $values .= $var . " = ?";
         }
 
         my $sql = "update " . $parameters->{table} . " set " . $values . " where " . $where;
         $self->{LOGGER}->debug( "Update \"" . $sql . "\" prepared." );
         eval {
             my $sth = $self->{HANDLE}->prepare($sql);
+            my $x = 0;
+            foreach my $name (sort keys %v) {
+                $sth->bind_param($x + 1, $v{$name});
+                $x++;
+            }
             $sth->execute() or $self->{LOGGER}->error( "Update error on statement \"" . $sql . "\"." );
         };
         if ($EVAL_ERROR) {
