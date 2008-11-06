@@ -581,10 +581,10 @@ sub registerLS {
             
                 my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
                 my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );
-                if ( exists $result->{key} and $result->{key} ) {
+                if ( $result and exists $result->{key} and $result->{key} ) {
                     my $key = $result->{key};
                     $result = $ls->registerClobberRequestLS( { key => $key, eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
-                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                    if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS \"" . $root . "\"";
                         $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                         $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
@@ -592,14 +592,14 @@ sub registerLS {
                     }
                     else {
                         my $msg = "Error in LS Registration to \"" . $root . "\"";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                        $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->error( $msg );
                     }
                 }
                 else {
                     $result = $ls->registerRequestLS( { eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
-                    if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                    if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS \"" . $root . "\"";
                         $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                         $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
@@ -607,14 +607,13 @@ sub registerLS {
                     }
                     else {
                         my $msg = "Error in LS Registration to \"" . $root . "\"";
-                        $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                        $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                        $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
+                        $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->error( $msg );
                     }
                 }
             }
         }
-
     }
     else {
 
@@ -670,10 +669,10 @@ sub registerLS {
             my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
 
             my $result = $ls->keyRequestLS( { service => \%service } );
-            if ( exists $result->{key} and $result->{key} ) {
+            if ( $result and exists $result->{key} and $result->{key} ) {
                 my $key = $result->{key};
                 $result = $ls->registerClobberRequestLS( { eventType => $eventType, service => \%service, key => $key, data => \@metadataArray } );
-                if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                     my $msg = "Success from LS \"" . $root . "\"";
                     $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                     $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
@@ -682,14 +681,14 @@ sub registerLS {
                 }
                 else {
                     my $msg = "Error in LS Registration to \"" . $root . "\"";
-                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                     $self->{LOGGER}->error( $msg );
                 }
             }
             else {
                 $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
-                if ( exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
+                if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                     my $msg = "Success from LS \"" . $root . "\"";
                     $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
                     $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
@@ -698,8 +697,8 @@ sub registerLS {
                 }
                 else {
                     my $msg = "Error in LS Registration to \"" . $root . "\"";
-                    $msg .= ", eventType: " . $result->{eventType} if exists $result->{eventType} and $result->{eventType};
-                    $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
+                    $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
+                    $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                     $self->{LOGGER}->error( $msg );
                 }
             }
@@ -1937,6 +1936,9 @@ sub cleanLSAux {
                 my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
                 if ( $time =~ m/^\d+$/ ) {
                     if ( $parameters->{time} >= $time ) {
+
+$self->{LOGGER}->info( "time:\t" . $parameters->{time} . " > " . $time );
+
                         $self->{LOGGER}->debug( "Removing all info for control id \"" . $mid . "\" from \"" . $parameters->{name} . "\"." );
                         my $dataCounter = 0;
                         foreach my $data ( @{ $dataTrackerLookup{$midr} } ) {
@@ -2273,8 +2275,13 @@ sub lsRegisterRequest {
         # hLS should have no eventType, or the service registration eventType.
         # Everything else is rejected, and these previous two interactions are
         # authoratative.
-        unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
-            throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
+        
+        if ( $eventType ) {
+            unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
+use Data::Dumper;
+print "\n\n" , Dumper($parameters->{request}) , "\n\n";
+                 throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
+            }
         }
 
         foreach my $d_content ( $parameters->{d}->childNodes ) {
@@ -2778,7 +2785,7 @@ sub lsDeregisterRequest {
         unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
             throw perfSONAR_PS::Error_compat( "error.ls.deregister.eventType", "Incorrect eventType for LSDeregisterRequest." );
         }
-        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
+        if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
             $summary++;
         }
     }
@@ -2907,7 +2914,7 @@ sub lsKeepaliveRequest {
         unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
             throw perfSONAR_PS::Error_compat( "error.ls.keepalive.eventType", "Incorrect eventType for LSKeepaliveRequest." ) if $eventType;
         }
-        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
+        if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
             $summary++;
         }
     }
@@ -3088,7 +3095,7 @@ sub lsQueryRequest {
         # extract our summaries
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => q{}, error => \$error } );
         my $len = $#resultsString;
-        throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service empty, query not found." ) if $len == -1;
+        throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." ) if $len == -1;
 
         for my $x ( 0 .. $len ) {
             my $parser = XML::LibXML->new();
@@ -3208,6 +3215,9 @@ sub lsQueryRequest {
             $dataString = $dataString . $resultsString[$x];
         }
         unless ( $dataString ) {
+            # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
+            #   just empty results after all.
+        
             throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
         }
 
