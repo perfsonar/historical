@@ -17,7 +17,6 @@ use fields 'EV_HANDLERS', 'EV_REGEX_HANDLERS', 'MSG_HANDLERS', 'FULL_MSG_HANDLER
 
 use strict;
 use warnings;
-use diagnostics;
 
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);

@@ -2274,9 +2274,7 @@ sub lsRegisterRequest {
         # Everything else is rejected, and these previous two interactions are
         # authoratative.
         unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
-            if ( $eventType ) {
-                throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
-            }
+            throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
         }
 
         foreach my $d_content ( $parameters->{d}->childNodes ) {
@@ -2776,17 +2774,15 @@ sub lsDeregisterRequest {
 
     my $summary = 0;
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0"
-        or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" )
-    {
-        if ( $eventType ) {
+    if ( $eventType ) {
+        unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
             throw perfSONAR_PS::Error_compat( "error.ls.deregister.eventType", "Incorrect eventType for LSDeregisterRequest." );
         }
+        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
+            $summary++;
+        }
     }
-
-    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/deregistration/summary/2.0" ) {
-        $summary++;
-    }
+    
     my $database = q{};
     if ( $summary ) {
         $database = $parameters->{summarydb};
@@ -2907,13 +2903,15 @@ sub lsKeepaliveRequest {
 
     my $summary = 0;
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
-    unless ( $eventType and ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.keepalive.eventType", "Incorrect eventType for LSKeepaliveRequest." ) if $eventType;
+    if ( $eventType ) {
+        unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
+            throw perfSONAR_PS::Error_compat( "error.ls.keepalive.eventType", "Incorrect eventType for LSKeepaliveRequest." ) if $eventType;
+        }
+        if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
+            $summary++;
+        }
     }
 
-    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/keepalive/summary/2.0" ) {
-        $summary++;
-    }
     my $database = q{};
     if ( $summary ) {
         $database = $parameters->{summarydb};
@@ -3189,9 +3187,7 @@ sub lsQueryRequest {
     else {
 
         # deny the 'control' eventTypes for now
-        if (   $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0"
-            or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" )
-        {
+        if ( $eventType and ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/query/control/xquery/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/control/xquery/2.0" ) ) {
             throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Sent eventType not supported." );
         }
 
@@ -3250,16 +3246,14 @@ sub lsKeyRequest {
     my $summary   = 0;
     my $et        = find( $parameters->{m}, "./nmwg:eventType", 1 );
     my $eventType = extract( $et, 0 );
-    unless ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0"
-        or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" )
-    {
-        if ( $eventType ) {
+    
+    if ( $eventType ) {
+        unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
             throw perfSONAR_PS::Error_compat( "error.ls.key.eventType", "Incorrect eventType for LSKeyRequest." );
         }
-    }
-
-    if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
-        $summary++;
+        if ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
+            $summary++;
+        }
     }
 
     my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );

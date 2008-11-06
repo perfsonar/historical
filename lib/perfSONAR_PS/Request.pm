@@ -4,7 +4,6 @@ use fields 'REQUEST', 'REQUESTDOM', 'RESPONSE', 'RESPONSEMESSAGE', 'START_TIME',
 
 use strict;
 use warnings;
-use diagnostics;
 
 use Log::Log4perl qw(get_logger);
 use XML::LibXML;
