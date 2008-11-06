@@ -25,6 +25,7 @@ service (specified by information at creation time).
 
 use LWP::UserAgent;
 use Log::Log4perl qw(get_logger :nowarn);
+use English qw( -no_match_vars );
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 
@@ -39,15 +40,15 @@ set via the various set functions.
 sub new {
     my ( $package, $contactHost, $contactPort, $contactEndPoint ) = @_;
 
-    my $self = fields::new($package);
+    my $self = fields::new( $package );
 
-    if ( defined $contactHost and $contactHost ne "" ) {
+    if ( defined $contactHost and $contactHost ) {
         $self->{"CONTACT_HOST"} = $contactHost;
     }
-    if ( defined $contactPort and $contactPort ne "" ) {
+    if ( defined $contactPort and $contactPort ) {
         $self->{"CONTACT_PORT"} = $contactPort;
     }
-    if ( defined $contactEndPoint and $contactEndPoint ne "" ) {
+    if ( defined $contactEndPoint and $contactEndPoint ) {
         $self->{"CONTACT_ENDPOINT"} = $contactEndPoint;
     }
 
@@ -63,12 +64,12 @@ hostname of a remote host that is supplying a service.
 
 sub setContactHost {
     my ( $self, $contactHost ) = @_;
-    my $logger = get_logger("perfSONAR_PS::Transport");
-    if ( defined $contactHost ) {
+    my $logger = get_logger( "perfSONAR_PS::Transport" );
+    if ( defined $contactHost and $contactHost ) {
         $self->{CONTACT_HOST} = $contactHost;
     }
     else {
-        $logger->error("Missing argument.");
+        $logger->error( "Missing argument." );
     }
     return;
 }
@@ -82,12 +83,12 @@ port on a remote host that is supplying a service.
 
 sub setContactPort {
     my ( $self, $contactPort ) = @_;
-    my $logger = get_logger("perfSONAR_PS::Transport");
-    if ( defined $contactPort ) {
+    my $logger = get_logger( "perfSONAR_PS::Transport" );
+    if ( defined $contactPort and $contactPort ) {
         $self->{CONTACT_PORT} = $contactPort;
     }
     else {
-        $logger->error("Missing argument.");
+        $logger->error( "Missing argument." );
     }
     return;
 }
@@ -99,72 +100,76 @@ Splits the contents of a URI into host, port, and endpoint.
 =cut
 
 sub splitURI {
-    my ($uri)    = @_;
-    my $logger   = get_logger("perfSONAR_PS::Transport");
+    my ( $uri )  = @_;
+    my $logger   = get_logger( "perfSONAR_PS::Transport" );
     my $host     = undef;
     my $port     = undef;
     my $endpoint = undef;
-    my $secure = 0;
- 
-        # lop off the protocol, then split everthing up by :'s
+    my $secure   = 0;
+
+    # lop off the protocol, then split everthing up by :'s
     $secure++ if $uri =~ m/^https:\/\//;
     $uri =~ s/^https?:\/\///;
-    my @chunk = split(/:/, $uri);
+    my @chunk = split( /:/, $uri );
     my $len = $#chunk;
 
-        # assume the very last thing in line is the port/endPoint (this
-        #  isn't true w/ ipv6 of course)
+    # assume the very last thing in line is the port/endPoint (this
+    #  isn't true w/ ipv6 of course)
     $port = $chunk[$len];
-        # subtract the endPoint from the port, XOR to get the endPoint
-    $port =~ s/\/.*$//;
-    $endpoint =  substr $chunk[$len], length $port, length $chunk[$len];
 
-    if ( $port =~ m/^\d+$/ ) {    
-            # the fun part ... If its all numbers, it COULD be the port
+    # subtract the endPoint from the port, XOR to get the endPoint
+    $port =~ s/\/.*$//;
+    $endpoint = substr $chunk[$len], length $port, length $chunk[$len];
+
+    if ( $port =~ m/^\d+$/ ) {
+
+        # the fun part ... If its all numbers, it COULD be the port
         $chunk[$len] = "";
-        unless ( $chunk[$len-1] =~ m/\]$/ ) {
-                # the last chunk is really what we thought was the port.
+        unless ( $chunk[ $len - 1 ] =~ m/\]$/ ) {
+
+            # the last chunk is really what we thought was the port.
             $chunk[$len] = $port if $port and $len > 1;
         }
     }
-    else {  
-            # this is the case where we clearly have hex digits, or it ends
-            #  in ].  The last item in the array is not a port, but part of the
-            #  address, so set the port to nil.
+    else {
+
+        # this is the case where we clearly have hex digits, or it ends
+        #  in ].  The last item in the array is not a port, but part of the
+        #  address, so set the port to nil.
         $chunk[$len] =~ s/\/.*$//;
         $port = "";
     }
-    
-        # not ipv6
+
+    # not ipv6
     if ( $len == 0 ) {
         $host = $port;
         $port = "";
     }
-        # combine the chunks back together
+
+    # combine the chunks back together
     for my $x ( 0 .. $len ) {
         $host .= ":" unless $x == 0;
         $host .= $chunk[$x];
     }
 
-        # clean up
+    # clean up
     $host =~ s/:$//;
     $host =~ s/^\[//;
     $host =~ s/\]$//;
 
-        # default port is 80 for http, and 443 for https
-    if ( not defined $port or $port eq '' ) {
-        if ( $secure ) { 
+    # default port is 80 for http, and 443 for https
+    unless ( defined $port or $port ) {
+        if ( $secure ) {
             $port = 443;
         }
         else {
             $port = 80;
         }
     }
-    
+
     $logger->debug( "Found host: " . $host . " port: " . $port . " endpoint: " . $endpoint );
     return ( $host, $port, $endpoint );
 }
-
 
 =head2 getHttpURI($host, $port, $endpoint)
 
@@ -174,7 +179,7 @@ Creates a URI from a host, port, and endpoint
 
 sub getHttpURI {
     my ( $host, $port, $endpoint ) = @_;
-    my $logger = get_logger("perfSONAR_PS::Transport");
+    my $logger = get_logger( "perfSONAR_PS::Transport" );
     $logger->debug( "Created URI: http://" . $host . ":" . $port . "/" . $endpoint );
     $endpoint = "/" . $endpoint if ( $endpoint =~ /^[^\/]/ );
     return 'http://' . $host . ':' . $port . $endpoint;
@@ -189,12 +194,12 @@ is the endPoint on a remote host that is supplying a service.
 
 sub setContactEndPoint {
     my ( $self, $contactEndPoint ) = @_;
-    my $logger = get_logger("perfSONAR_PS::Transport");
-    if ( defined $contactEndPoint ) {
+    my $logger = get_logger( "perfSONAR_PS::Transport" );
+    if ( defined $contactEndPoint and $contactEndPoint ) {
         $self->{CONTACT_ENDPOINT} = $contactEndPoint;
     }
     else {
-        $logger->error("Missing argument.");
+        $logger->error( "Missing argument." );
     }
     return;
 }
@@ -210,7 +215,7 @@ that message. If not, it is filled with "".
 sub sendReceive {
     my ( $self, $envelope, $timeout, $error ) = @_;
     $timeout = 10 unless $timeout;
-    my $logger       = get_logger("perfSONAR_PS::Transport");
+    my $logger       = get_logger( "perfSONAR_PS::Transport" );
     my $method_uri   = "http://ggf.org/ns/nmwg/base/2.0/message/";
     my $httpEndpoint = &getHttpURI( $self->{CONTACT_HOST}, $self->{CONTACT_PORT}, $self->{CONTACT_ENDPOINT} );
     my $userAgent    = LWP::UserAgent->new( 'timeout' => ( $timeout * 1000 ) );
@@ -219,23 +224,23 @@ sub sendReceive {
 
     my $sendSoap = HTTP::Request->new( 'POST', $httpEndpoint, new HTTP::Headers, $envelope );
     $sendSoap->header( 'SOAPAction' => $method_uri );
-    $sendSoap->content_type('text/xml');
-    $sendSoap->content_length( length($envelope) );
+    $sendSoap->content_type( 'text/xml' );
+    $sendSoap->content_length( length( $envelope ) );
 
     my $httpResponse;
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" };
         alarm $timeout;
-        $httpResponse = $userAgent->request($sendSoap);
+        $httpResponse = $userAgent->request( $sendSoap );
         alarm 0;
     };
-    if ($@) {
-        $logger->error( "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"".$timeout."\" seconds." ) unless $@ eq "alarm\n";
-        $$error = "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"".$timeout."\" seconds.";
+    if ( $EVAL_ERROR ) {
+        $logger->error( "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"" . $timeout . "\" seconds." ) unless $EVAL_ERROR eq "alarm\n";
+        $$error = "Connection to \"" . $httpEndpoint . "\" terminiated due to alarm after \"" . $timeout . "\" seconds.";
         return "";
     }
     else {
-        if ( !( $httpResponse->is_success ) ) {
+        unless ( $httpResponse->is_success ) {
             $logger->debug( "Send to \"" . $httpEndpoint . "\" failed: " . $httpResponse->status_line );
             $$error = $httpResponse->status_line if defined $error;
             return "";
