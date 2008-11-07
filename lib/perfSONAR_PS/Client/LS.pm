@@ -106,7 +106,7 @@ sub callLS {
 
     my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
     unless ($sender) {
-        $self->{LOGGER}->error("LS could not be contaced.");
+        $self->{LOGGER}->error("LS \"" . $self->{INSTANCE} . "\" could not be contaced.");
         return;
     }
     
@@ -114,7 +114,7 @@ sub callLS {
     my $responseContent = $sender->sendReceive( makeEnvelope( $parameters->{message} ), q{}, \$error );
     if ($error) {
         $self->{ALIVE} = 0;
-        $self->{LOGGER}->error("sendReceive failed: $error");
+        $self->{LOGGER}->error("sendReceive failed to LS \"" . $self->{INSTANCE} . "\": $error");
         return;
     }
     
@@ -124,7 +124,7 @@ sub callLS {
         my $doc = q{};
         eval { $doc = $parser->parse_string($responseContent); };
         if ($EVAL_ERROR) {
-            $self->{LOGGER}->error( "Parser failed: " . $EVAL_ERROR );
+            $self->{LOGGER}->error( "Parser failed for LS \"" . $self->{INSTANCE} . "\": " . $EVAL_ERROR );
         }
         else {
             $msg = $doc->getDocumentElement->getElementsByTagNameNS( "http://ggf.org/ns/nmwg/base/2.0/", "message" )->get_node(1);

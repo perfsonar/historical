@@ -1433,8 +1433,10 @@ sub makeSummary {
         }
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
+            # XXX: JZ 11/6 - do we need supportedEventType here as well?
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
-        }
+            $summary .= "        <nmwg:parameter name=\"supportedEventType\" value=\"" . $et . "\" />\n";
+        }        
         $summary .= "      </summary:parameters>\n";
     }
     elsif ( exists $parameters->{keywords} and $parameters->{keywords} ) {
@@ -1830,23 +1832,13 @@ sub cleanLS {
     my $errorFlag = 0;
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
-    my $metadatadb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ( $metadatadb ) {
-        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error );
-        return -1;
-    }
-    my $status = $self->cleanLSAux( { database => $metadatadb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
+    my $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
         return -1;
     }
-
-    my $summarydb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-    unless ( $summarydb ) {
-        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
-        return -1;
-    }
-    $status = $self->cleanLSAux( { database => $summarydb, name => $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
+    
+    $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\" could not be cleaned." );
         return -1;
@@ -1863,26 +1855,33 @@ Auxilary function to clean a specific container in the database.
 
 sub cleanLSAux {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { database => 1, time => 1, name => 0 } );
+    my $parameters = validateParams( @args, { container => 1, time => 1 } );
 
     my $error     = q{};
     my $errorFlag = 0;
+
+    my $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+    unless ( $database ) {
+        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
+        return -1;
+    }
+
     my $parser    = XML::LibXML->new();
 
-    my $dbTr = $parameters->{database}->getTransaction( { error => \$error } );
+    my $dbTr = $database->getTransaction( { error => \$error } );
     unless ( $dbTr ) {
-        $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
 
-    my @allData = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
+    my @allData = $database->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
 
-    my @allMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    my @allMetadata = $database->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
 
-    my @controlMetadata = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+    my @controlMetadata = $database->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
 
     my %dataTracker       = ();
@@ -1906,7 +1905,7 @@ sub cleanLSAux {
             }
             else {
                 $self->{LOGGER}->info( "Removing data \"" . $did . "\" beacuse it is missing a metadataIdRef." );
-                $parameters->{database}->remove( { name => $did, txn => $dbTr, error => \$error } );
+                $database->remove( { name => $did, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
             }
         }
@@ -1936,25 +1935,22 @@ sub cleanLSAux {
                 my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
                 if ( $time =~ m/^\d+$/ ) {
                     if ( $parameters->{time} >= $time ) {
-
-$self->{LOGGER}->info( "time:\t" . $parameters->{time} . " > " . $time );
-
-                        $self->{LOGGER}->debug( "Removing all info for control id \"" . $mid . "\" from \"" . $parameters->{name} . "\"." );
+                        $self->{LOGGER}->debug( "Removing all info for control id \"" . $mid . "\" from \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\"." );
                         my $dataCounter = 0;
                         foreach my $data ( @{ $dataTrackerLookup{$midr} } ) {
                             $self->{LOGGER}->debug( "Removing data \"" . $data . "\" due to expiration" );
-                            $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+                            $database->remove( { name => $data, txn => $dbTr, error => \$error } );
                             $errorFlag++ if $error;
                             delete $dataTracker{$data};
                             $dataCounter++;
                         }
                         delete $metadataTracker{$midr};
                         delete $dataTrackerLookup{$midr};
-                        $parameters->{database}->remove( { name => $midr, txn => $dbTr, error => \$error } );
+                        $database->remove( { name => $midr, txn => $dbTr, error => \$error } );
                         $self->{LOGGER}->debug( "Removing metadata \"" . $midr . "\" due to expiration." );
                         $errorFlag++ if $error;
 
-                        $parameters->{database}->remove( { name => $mid, txn => $dbTr, error => \$error } );
+                        $database->remove( { name => $mid, txn => $dbTr, error => \$error } );
                         $self->{LOGGER}->debug( "Removing control metadata \"" . $mid . "\" due to expiration." );
                         $errorFlag++ if $error;
 
@@ -1967,19 +1963,19 @@ $self->{LOGGER}->info( "time:\t" . $parameters->{time} . " > " . $time );
             }
             else {
                 $self->{LOGGER}->info( "Removing control metadata \"" . $mid . "\" beacuse it is missing a metadataIdRef." );
-                $parameters->{database}->remove( { name => $mid, txn => $dbTr, error => \$error } );
+                $database->remove( { name => $mid, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
             }
         }
     }
     else {
-        $self->{LOGGER}->error( "Nothing Registered with \"" . $parameters->{name} . "\", cannot clean at this time." );
+        $self->{LOGGER}->error( "Nothing Registered with \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\", cannot clean at this time." );
     }
 
     foreach my $data ( keys %dataTracker ) {
         unless ( exists $metadataTracker{ $dataTracker{$data} } and $metadataTracker{ $dataTracker{$data} } ) {
             $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate." );
-            $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+            $database->remove( { name => $data, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             delete $dataTracker{$data};
         }
@@ -1989,11 +1985,11 @@ $self->{LOGGER}->info( "time:\t" . $parameters->{time} . " > " . $time );
     foreach my $metadata ( keys %metadataTracker ) {
         unless ( exists $controlTrackerR{$metadata} and $controlTrackerR{$metadata} ) {
             $self->{LOGGER}->debug( "Removing metadata \"" . $metadata . "\" beacuse it has no control metadata mate." );
-            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
+            $database->remove( { name => $metadata, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             foreach my $data ( @{ $dataTrackerLookup{$metadata} } ) {
                 $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate, whom had no control metadata mate." );
-                $parameters->{database}->remove( { name => $data, txn => $dbTr, error => \$error } );
+                $database->remove( { name => $data, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
                 delete $dataTracker{$data};
             }
@@ -2005,29 +2001,16 @@ $self->{LOGGER}->info( "time:\t" . $parameters->{time} . " > " . $time );
     foreach my $metadata ( keys %controlTracker ) {
         unless ( exists $metadataTracker{ $controlTracker{$metadata} } and $metadataTracker{ $controlTracker{$metadata} } ) {
             $self->{LOGGER}->debug( "Removing control metadata \"" . $metadata . "\" beacuse it has no metadata mate." );
-            $parameters->{database}->remove( { name => $metadata, txn => $dbTr, error => \$error } );
+            $database->remove( { name => $metadata, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             delete $controlTracker{$metadata};
         }
     }
 
-    if ( $errorFlag ) {
-        $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-        undef $dbTr;
-        $self->{LOGGER}->error( "Database errors prevented the transaction from completing." );
+    unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
+        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\"." );
+        $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         return -1;
-    }
-    else {
-        my $status = $parameters->{database}->commitTransaction( { txn => $dbTr, error => \$error } );
-        if ( $status == 0 ) {
-            undef $dbTr;
-        }
-        else {
-            $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            $self->{LOGGER}->error( "Database Error: \"" . $error . "\"." );
-            return -1;
-        }
     }
     return 0;
 }
@@ -2123,17 +2106,6 @@ sub handleMessage {
 
     startMessage( $parameters->{output}, $messageIdReturn, $parameters->{messageId}, $messageTypeReturn, q{}, undef );
 
-    my $metadatadb = $self->prepareDatabase( { doc => $parameters->{output}, container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
-    unless ( $metadatadb ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Metadata Database could not be opened." );
-        return;
-    }
-    my $summarydb = $self->prepareDatabase( { doc => $parameters->{output}, container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
-    unless ( $summarydb ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Summary Database could not be opened." );
-        return;
-    }
-
     foreach my $d ( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS( $ls_namespaces{"nmwg"}, "data" ) ) {
         $counter++;
 
@@ -2141,27 +2113,25 @@ sub handleMessage {
         my $errorMessage   = q{};
         my $m              = find( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement, "./nmwg:metadata[\@id=\"" . $d->getAttribute( "metadataIdRef" ) . "\"]", 1 );
         try {
-            unless ( $m ) {
-                throw perfSONAR_PS::Error_compat( "error.ls.data_trigger", "Matching metadata not found for data trigger \"" . $d->getAttribute( "id" ) . "\"" );
-            }
-
+            throw perfSONAR_PS::Error_compat( "error.ls.data_trigger", "Matching metadata not found for data trigger \"" . $d->getAttribute( "id" ) . "\"" ) unless $m;
+            
             if ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSRegisterRequest" ) {
                 $self->{LOGGER}->debug( "Parsing LSRegister request." );
-                $self->lsRegisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, database => $metadatadb } );
+                $self->lsRegisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSDeregisterRequest" ) {
                 $self->{LOGGER}->debug( "Parsing LSDeregister request." );
-                $self->lsDeregisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d, metadatadb => $metadatadb, summarydb => $summarydb } );
+                $self->lsDeregisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeepaliveRequest" ) {
                 $self->{LOGGER}->debug( "Parsing LSKeepalive request." );
-                $self->lsKeepaliveRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
+                $self->lsKeepaliveRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and ( $parameters->{messageType} eq "LSQueryRequest" or $parameters->{messageType} eq "LSLookupRequest" ) ) {
-                $self->lsQueryRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
+                $self->lsQueryRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m } );
             }
             elsif ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSKeyRequest" ) {
-                $self->lsKeyRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, metadatadb => $metadatadb, summarydb => $summarydb } );
+                $self->lsKeyRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m } );
             }
             else {
                 throw perfSONAR_PS::Error_compat( "error.ls.messages", "Unrecognized message type" );
@@ -2198,12 +2168,8 @@ sub handleMessage {
             getResultCodeData( $parameters->{output}, "data." . genuid(), $mdId, $errorMessage, 1 );
         }
     }
-
-    $metadatadb->closeDB( { error => \$error } );
-    $summarydb->closeDB(  { error => \$error } );
-    unless ( $counter ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." );
-    }
+    
+    throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." ) unless $counter;
 
     endMessage( $parameters->{output} );
     return;
@@ -2231,7 +2197,7 @@ The following is a brief outline of the procedures:
 
 sub lsRegisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1, database => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
 
     my $error = q{};
     my $auth;
@@ -2278,8 +2244,6 @@ sub lsRegisterRequest {
         
         if ( $eventType ) {
             unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
-use Data::Dumper;
-print "\n\n" , Dumper($parameters->{request}) , "\n\n";
                  throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
             }
         }
@@ -2294,29 +2258,38 @@ print "\n\n" , Dumper($parameters->{request}) , "\n\n";
         $auth = 1;
     }
 
-    my $dbTr = $parameters->{database}->getTransaction( { error => \$error } );
+    my $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_db_file"} } );
+    unless ( $database ) {
+        my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\": " . $error;
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
+    }
+
+    my $dbTr = $database->getTransaction( { error => \$error } );
     unless ( $dbTr ) {
-        $parameters->{database}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start summary database transaction, database responded with \"" . $error . "\"." );
+        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
     }
 
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
     if ( $mdKey ) {
         unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-            $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $parameters->{database}, key => $mdKey } );
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
         }
 
-        unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.register.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
-        }
+        throw perfSONAR_PS::Error_compat( "error.ls.register.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." ) unless $self->{STATE}->{"messageKeys"}->{$mdKey};        
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
         if ( $service ) {
 
             # 'clobber' registration case
 
-            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth } );
+            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth } );
         }
         else {
 
@@ -2328,21 +2301,22 @@ print "\n\n" , Dumper($parameters->{request}) , "\n\n";
                 # 'clobber' registration case
 
                 $self->lsRegisterRequestUpdateNew(
-                    { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec, eventType => $eventType, auth => $auth } );
+                    { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec, eventType => $eventType, auth => $auth } );
             }
             else {
 
                 # 'update' registration case
 
-                $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth } );
+                $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth } );
             }
         }
     }
     else {
 
         # 'new' registration case
-        $self->lsRegisterRequestNew( { doc => $parameters->{doc}, database => $parameters->{database}, dbTr => $dbTr, m => $parameters->{m}, d => $parameters->{d}, sec => $sec, eventType => $eventType, auth => $auth } );
+        $self->lsRegisterRequestNew( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, m => $parameters->{m}, d => $parameters->{d}, sec => $sec, eventType => $eventType, auth => $auth } );
     }
+    
     return;
 }
 
@@ -2470,6 +2444,8 @@ sub lsRegisterRequestUpdateNew {
     if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         undef $parameters->{dbTr};
+        $parameters->{database}->checkpoint( { error => \$error } );
+        $parameters->{database}->closeDB( { error => \$error } );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
     }
     else {
@@ -2478,10 +2454,14 @@ sub lsRegisterRequestUpdateNew {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( { key => $mdKeyStorage, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKeyStorage . "]\" />\n", undef );
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
         }
         else {
             $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
@@ -2570,6 +2550,8 @@ sub lsRegisterRequestUpdate {
     if ( $errorFlag ) {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         undef $parameters->{dbTr};
+        $parameters->{database}->checkpoint( { error => \$error } );
+        $parameters->{database}->closeDB( { error => \$error } );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
     }
     else {
@@ -2578,10 +2560,14 @@ sub lsRegisterRequestUpdate {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( { key => $parameters->{mdKey}, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been updated with key [" . $parameters->{mdKey} . "]\" />\n", undef );
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
         }
         else {
             $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
@@ -2728,6 +2714,8 @@ sub lsRegisterRequestNew {
         $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing." );
         undef $parameters->{dbTr};
+        $parameters->{database}->checkpoint( { error => \$error } );
+        $parameters->{database}->closeDB( { error => \$error } );
     }
     else {
         my $status = $parameters->{database}->commitTransaction( { txn => $parameters->{dbTr}, error => \$error } );
@@ -2735,10 +2723,14 @@ sub lsRegisterRequestNew {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), createLSKey( { key => $mdKey, eventType => "success.ls.register" } ), undef );
             createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKey . "]\" />\n", undef );
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
         }
         else {
             $parameters->{database}->abortTransaction( { txn => $parameters->{dbTr}, error => \$error } ) if $parameters->{dbTr};
             undef $parameters->{dbTr};
+            $parameters->{database}->checkpoint( { error => \$error } );
+            $parameters->{database}->closeDB( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
@@ -2767,10 +2759,11 @@ The following is a brief outline of the procedures:
 
 sub lsDeregisterRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1, metadatadb => 1, summarydb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
 
     my $msg   = q{};
     my $error = q{};
+    my $errorFlag = 0;
     my $mdId  = "metadata." . genuid();
     my $dId   = "data." . genuid();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -2790,31 +2783,40 @@ sub lsDeregisterRequest {
         }
     }
     
-    my $database = q{};
+    my $dbContainer = q{};
     if ( $summary ) {
-        $database = $parameters->{summarydb};
+        $dbContainer = $self->{CONF}->{"gls"}->{"metadata_summary_db_file"};
     }
     else {
-        $database = $parameters->{metadatadb};
-    }
-
-    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
-    }
-
-    unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.deregister.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
+        $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
+    }    
+    
+    my $database = $self->prepareDatabase( { container => $dbContainer } );
+    unless ( $database ) {
+        my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
     }
 
     my $dbTr = $database->getTransaction( { error => \$error } );
     unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
-        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
     }
 
+    unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
+        $errorFlag++ if $error;
+    }
+
+    throw perfSONAR_PS::Error_compat( "error.ls.deregister.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." ) unless $self->{STATE}->{"messageKeys"}->{$mdKey};
+
     my @resultsString = ();
-    my $errorFlag     = 0;
     my @deregs        = $parameters->{d}->getElementsByTagNameNS( $ls_namespaces{"nmwg"}, "metadata" );
     my $mdFlag        = 1;
     if ( $#deregs == -1 ) {
@@ -2859,6 +2861,8 @@ sub lsDeregisterRequest {
     if ( $errorFlag ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
+        $database->checkpoint( { error => \$error } );
+        $database->closeDB( { error => \$error } );
         throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database errors prevented the transaction from completing:" . $error );
     }
     else {
@@ -2866,10 +2870,14 @@ sub lsDeregisterRequest {
         if ( $status == 0 ) {
             statusReport( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $dId, "success.ls.deregister", $msg );
             undef $dbTr;
+            $database->checkpoint( { error => \$error } );
+            $database->closeDB( { error => \$error } );
         }
         else {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
+            $database->checkpoint( { error => \$error } );
+            $database->closeDB( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
         }
     }
@@ -2896,13 +2904,13 @@ The following is a brief outline of the procedures:
 
 sub lsKeepaliveRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1, summarydb => 1 } );
-
-    my $error = q{};
-    my $mdId  = "metadata." . genuid();
-    my $dId   = "data." . genuid();
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
 
     my $auth = 1;
+    my $error = q{};
+    my $errorFlag = 0;
+    my $mdId  = "metadata." . genuid();
+    my $dId   = "data." . genuid();
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
@@ -2919,63 +2927,73 @@ sub lsKeepaliveRequest {
         }
     }
 
-    my $database = q{};
+    my $dbContainer = q{};
     if ( $summary ) {
-        $database = $parameters->{summarydb};
+        $dbContainer = $self->{CONF}->{"gls"}->{"metadata_summary_db_file"};
     }
     else {
-        $database = $parameters->{metadatadb};
+        $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
+    }  
+
+    my $database = $self->prepareDatabase( { container => $dbContainer } );
+    unless ( $database ) {
+        my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
+    }
+
+    my $dbTr = $database->getTransaction( { error => \$error } );
+    unless ( $dbTr ) {
+        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        undef $dbTr;
+        my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+        return -1;
     }
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => q{}, database => $database, key => $mdKey } );
+        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
+        $errorFlag++ if $error;
     }
 
-    unless ( $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        throw perfSONAR_PS::Error_compat( "error.ls.keepalive.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
-    }
+    throw perfSONAR_PS::Error_compat( "error.ls.keepalive.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." ) unless $self->{STATE}->{"messageKeys"}->{$mdKey}; 
 
     if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} == 1 ) {
-
-        my $database;
-        if ( $summary ) {
-            $database = $parameters->{summarydb};
-        }
-        else {
-            $database = $parameters->{metadatadb};
-        }
-
-        my $dbTr = $database->getTransaction( { error => \$error } );
-        unless ( $dbTr ) {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Cound not start database transaction, database responded with \"" . $error . "\"." );
-        }
-
+        
         $self->{LOGGER}->debug( "Updating control time information." );
         my $status = $database->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $dbTr, error => \$error } );
-
+        $errorFlag++ if $error;
+        
         unless ( $status == 0 ) {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
+            $database->{database}->checkpoint( { error => \$error } );
+            $database->{database}->closeDB( { error => \$error } );
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
-        }
-
-        $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
-        if ( $status == 0 ) {
-            statusReport( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $dId, "success.ls.keepalive", "Key \"" . $mdKey . "\" was updated." );
-            $self->{STATE}->{"messageKeys"}->{$mdKey}++;
-            undef $dbTr;
-        }
-        else {
-            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
-            undef $dbTr;
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
-        }
+        }          
     }
     else {
         statusReport( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $dId, "success.ls.keepalive", "Key \"" . $mdKey . "\" was already updated in this exchange, skipping." );
     }
+
+    my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
+    if ( $status == 0 ) {
+        statusReport( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $dId, "success.ls.keepalive", "Key \"" . $mdKey . "\" was updated." );
+        $self->{STATE}->{"messageKeys"}->{$mdKey}++;
+        undef $dbTr;
+        $database->checkpoint( { error => \$error } );
+        $database->closeDB( { error => \$error } );
+    }
+    else {
+        $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+        undef $dbTr;
+        $database->checkpoint( { error => \$error } );
+        $database->closeDB( { error => \$error } );
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
+    }     
+
     return;
 }
 
@@ -3000,9 +3018,10 @@ Any database errors will cause the given metadata/data pair to fail.
 
 sub lsQueryRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1, summarydb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
 
     my $error = q{};
+    my $errorFlag = 0;
     my $mdId  = "metadata." . genuid();
     my $dId   = "data." . genuid();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -3019,14 +3038,14 @@ sub lsQueryRequest {
         "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0"        => 1
     );
 
-    my $database;
+    my $dbContainer = q{};
     my $eventType = extract( find( $parameters->{m}, "./nmwg:eventType", 1 ), 0 );
     if ( $eventType and exists $summary_map{$eventType} and $summary_map{$eventType} ) {
-        $database = $parameters->{summarydb};
+        $dbContainer = $self->{CONF}->{"gls"}->{"metadata_summary_db_file"};
     }
     else {
         if ( $eventType and exists $query_map{$eventType} and $query_map{$eventType} ) {
-            $database = $parameters->{metadatadb};
+            $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
         }
         else {
             throw perfSONAR_PS::Error_compat( "error.ls.query.eventType", "Given query type is missing or not supported." );
@@ -3037,15 +3056,13 @@ sub lsQueryRequest {
     if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
         my $sum_parameters = find( $parameters->{m}, "./summary:parameters", 1 );
 
-        my $subject = find( $parameters->{m}, "./summary:subject", 1 );
-        unless ( $subject ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." );
-        }
+        my $subject = find( $parameters->{m}, "./summary:subject", 1 ); 
+        throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." ) unless $subject;
 
         if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
 
             # special case for 'self' summary in the hLS instances
-            $database = $parameters->{metadatadb};
+            $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
         }
 
         # pull out items from the summary subject
@@ -3092,15 +3109,52 @@ sub lsQueryRequest {
             }
         }
 
-        # extract our summaries
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => q{}, error => \$error } );
+# ------
+
+        my $database = $self->prepareDatabase( { container => $dbContainer } );
+        unless ( $database ) {
+            my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
+        }
+
+        my $dbTr = $database->getTransaction( { error => \$error } );
+        unless ( $dbTr ) {
+            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            my $msg = "Cound not start database transaction, database responded with \"" . $error . "\".";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
+        }
+    
+        my %map = ();
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => $dbTr, error => \$error } );
         my $len = $#resultsString;
         throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." ) if $len == -1;
-
         for my $x ( 0 .. $len ) {
             my $parser = XML::LibXML->new();
             my $doc    = $parser->parse_string( $resultsString[$x] );
 
+            my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"metadata"} = $doc->getDocumentElement;
+            $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"} = \@resultsString2;
+        }            
+            
+        unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
+            my $msg = "There was an error closing \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\".";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
+        }
+
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error ) if $error or $errorFlag; 
+        
+# ------
+
+        foreach my $id ( keys %map ) {
             my %store = ();
             $store{"eventType"} = 0 if exists $sent->{"eventType"};
             $store{"address"}   = 0 if exists $sent->{"address"};
@@ -3109,8 +3163,8 @@ sub lsQueryRequest {
 
             # gather eventTypes
             if ( exists $store{"eventType"} and $store{"eventType"} ) {
-                my $l_eventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:eventType", 0 );
-                my $l_supportedEventTypes = find( $doc->getDocumentElement, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
+                my $l_eventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:eventType", 0 );
+                my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
                 foreach my $e ( $l_eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
                     next unless $value;
@@ -3125,7 +3179,7 @@ sub lsQueryRequest {
 
             # gather the domains
             if ( exists $store{"domain"} and $store{"domain"} ) {
-                my $l_domains = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
+                my $l_domains = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
                 foreach my $d ( $l_domains->get_nodelist ) {
                     my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
                     next unless $name;
@@ -3136,7 +3190,7 @@ sub lsQueryRequest {
             #gather the networks
             if ( exists $store{"address"} and $store{"address"} ) {
 
-                my $l_networks = find( $doc->getDocumentElement, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
+                my $l_networks = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
                 my @cidr_list = ();
                 foreach my $n ( $l_networks->get_nodelist ) {
                     my $address = extract( find( $n, "./nmtl3:subnet/nmtl3:address", 1 ), 0 );
@@ -3155,27 +3209,25 @@ sub lsQueryRequest {
 
             # gather keywords
             if ( exists $store{"keyword"} and $store{"keyword"} ) {
-                my $l_keywords = find( $doc->getDocumentElement, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
+                my $l_keywords = find( $map{$id}{"metadata"}, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
                 foreach my $k ( $l_keywords->get_nodelist ) {
                     my $value = extract( $k, 0 );
                     next unless $value;
                     $store{"keyword"}++ if $sent->{"keyword"}->{$value};
                 }
             }
-
+            
             # we have a mactch, get the contact service.
             my $flag = 1;
             foreach my $key ( keys %store ) {
                 $flag = $store{$key};
                 last if $flag <= 0;
             }
-
+            
             if ( $flag ) {
-                my $query2         = "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]";
-                my @resultsString2 = $database->query( { query => $query2, txn => q{}, error => \$error } );
-                my $len2           = $#resultsString2;
-                for my $y ( 0 .. $len2 ) {
-                    push @resultServices, $resultsString2[$y];
+                my $len2           = $#{ $map{$id}{"data"} };
+                for my $d ( @{ $map{$id}{"data"} } ) {
+                    push @resultServices, $d;
                 }
             }
         }
@@ -3199,27 +3251,41 @@ sub lsQueryRequest {
         }
 
         my $query = extractQuery( { node => find( $parameters->{m}, "./xquery:subject", 1 ) } );
-        unless ( $query ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." );
-        }
+        throw perfSONAR_PS::Error_compat( "error.ls.query.query_not_found", "Query not found in sent metadata." ) unless $query;
         $query =~ s/\s+\// collection('CHANGEME')\//gmx;
+# ------
+
+        my $database = $self->prepareDatabase( { container => $dbContainer } );
+        unless ( $database ) {
+            my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
+        }
 
         my @resultsString = $database->query( { query => $query, txn => q{}, error => \$error } );
-        if ( $error ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
+                    
+        unless ( $self->closeDatabase( { db => $database, dbTr => q{}, error => 0 } ) == 0 ) {
+            my $msg = "There was an error closing \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\".";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
         }
+        
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error ) if $error;
+
+# ------
 
         my $dataString = q{};
         my $len        = $#resultsString;
         for my $x ( 0 .. $len ) {
             $dataString = $dataString . $resultsString[$x];
         }
-        unless ( $dataString ) {
-            # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
-            #   just empty results after all.
+
+        # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
+        #   just empty results after all.
+        throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." ) unless $dataString;
         
-            throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." );
-        }
 
         createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
         my $mdPparameters = q{};
@@ -3250,7 +3316,7 @@ Any database errors will cause the given metadata/data pair to fail.
 
 sub lsKeyRequest {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, metadatadb => 1, summarydb => 1 } );
+    my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
 
     my $error     = q{};
     my $summary   = 0;
@@ -3272,22 +3338,36 @@ sub lsKeyRequest {
         $junk = $parameters->{m}->removeChild( $et ) if $et;
         my $queryString = "collection('CHANGEME')/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{m} } ) . "]";
 
-        my @resultsString = ();
+        my $dbContainer = q{};
         if ( $summary ) {
-            @resultsString = $parameters->{summarydb}->query( { query => $queryString, txn => q{}, error => \$error } );
+            $dbContainer = $self->{CONF}->{"gls"}->{"metadata_summary_db_file"};
         }
         else {
-            @resultsString = $parameters->{metadatadb}->query( { query => $queryString, txn => q{}, error => \$error } );
+            $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
         }
 
-        if ( $error ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error );
+# consider running this in a transaction?
+
+        my $database = $self->prepareDatabase( { container => $dbContainer } );
+        unless ( $database ) {
+            my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
         }
 
-        unless ( $#resultsString == 0 ) {
-            throw perfSONAR_PS::Error_compat( "error.ls.key.not_registered", "Service was not registered in this LS." );
+        my @resultsString = $database->query( { query => $queryString, txn => q{}, error => \$error } );        
+
+        unless ( $self->closeDatabase( { db => $database, dbTr => q{}, error => 0 } ) == 0 ) {
+            my $msg = "There was an error closing \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\".";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
+            return -1;
         }
 
+        throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $error ) if $error; 
+        throw perfSONAR_PS::Error_compat( "error.ls.key.not_registered", "Service was not registered in this LS." ) unless $#resultsString == 0;
+        
         my $parser   = XML::LibXML->new();
         my $metadata = $parser->parse_string( $resultsString[0] );
         if ( $metadata and $metadata->getDocumentElement->getAttribute( "id" ) ) {
@@ -3312,10 +3392,11 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4per>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
+L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
 L<Net::CIDR>, L<Net::IPTrie>, L<Net::Ping>, L<LWP::Simple>, L<File::stat>,
+L<Data::Validate::IP>, L<Net::IPv6Addr>, L<Hash::Merge>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
-L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>,
+L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>
 L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::ParameterValidation>,
 L<perfSONAR_PS::Client::LS>, L<perfSONAR_PS::Client::gLS>
 
