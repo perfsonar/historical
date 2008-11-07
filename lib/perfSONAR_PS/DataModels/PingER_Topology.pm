@@ -52,7 +52,7 @@ $port = { attrs  => {id => 'scalar', xmlns => 'nmtl3'},
         	      ], 
         }; 
             
-$parameter  =  { attrs  => { name => 'enum:count,packetInterval,packetSize,ttl,measurementPeriod,measurementOffset',  
+$parameter  =  { attrs  => { name => 'enum:count,packetInterval,packetSize,ttl,measurementPeriod,measurementOffset,project',  
                              value => 'scalar', xmlns => 'nmwg'},
 		 elements => [],
         	 text => 'unless:value',

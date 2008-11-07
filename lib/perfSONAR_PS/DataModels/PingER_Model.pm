@@ -72,7 +72,7 @@ $endPointL4->{sql}= { metaData => { 'ip_name_src' => {'value' => ['address', 'in
                  	           },
         	      }; 
   
-$endPoint->{attrs}->{type} = 'enum:hostname';  							  
+$endPoint->{attrs}->{type} = 'enum:hostname,ipv4';  							  
  
 $endPoint->{sql} = { metaData => { 'ip_name_src' =>   { value => ['value' , 'text'], if => 'type:hostname'}, 
         	 		   'ip_name_dst' =>   { value => ['value' , 'text'], if => 'type:hostname'}, 
