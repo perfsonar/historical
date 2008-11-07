@@ -576,9 +576,9 @@ sub registerLS {
 
             # register w/ all gLS instances
             foreach my $root ( @{ $gls->{ROOTS} } ) {
-                
+
                 $self->{LOGGER}->debug( "gLS synchronization to root \"" . $root . "\"." );
-            
+
                 my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
                 my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );
                 if ( $result and exists $result->{key} and $result->{key} ) {
@@ -663,9 +663,9 @@ sub registerLS {
         for my $x ( 0 .. $len ) {
             last if $regCounter > 2;
             my $root = $gls->{ROOTS}->[$x];
-            
+
             $self->{LOGGER}->debug( "hLS registration to root \"" . $root . "\"." );
-            
+
             my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
 
             my $result = $ls->keyRequestLS( { service => \%service } );
@@ -1219,7 +1219,7 @@ sub summarizeLS {
     #    a) Delete the old data/metadata/control
     #    b) Insert the new control, metadata, data
 
-        # Open the Database/prepare transactions
+    # Open the Database/prepare transactions
     my $summarydb = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
     unless ( $summarydb ) {
         undef %map;
@@ -1236,8 +1236,8 @@ sub summarizeLS {
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
 
-        # Go through the master of list of services, lets deal with the service
-        #   summaries first
+    # Go through the master of list of services, lets deal with the service
+    #   summaries first
     foreach my $serviceKey ( keys %map ) {
         my $list1 = q{};
         if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
@@ -1256,8 +1256,8 @@ sub summarizeLS {
             $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $dbTr } );
         }
 
-            # First delete the metadata + control items.  Insert the new ones right
-            #   after.
+        # First delete the metadata + control items.  Insert the new ones right
+        #   after.
         $self->{LOGGER}->debug( "Removing metadata for \"" . $serviceKey . "\" so we can start clean." );
         my @deleteMetadata = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-control\"]/nmwg:metadata[\@id=\"" . $serviceKey . "\" or \@metadataIdRef=\"" . $serviceKey . "\"]", txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
@@ -1275,7 +1275,7 @@ sub summarizeLS {
         $errorFlag++ if $error;
         $self->{STATE}->{"messageKeys"}->{$serviceKey} = 2;
 
-            # Then delete the related data, insert new right after.
+        # Then delete the related data, insert new right after.
         $self->{LOGGER}->debug( "Removing data for \"" . $serviceKey . "\" so we can start clean." );
         my @deleteData = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $serviceKey . "\"]", txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
@@ -1294,8 +1294,8 @@ sub summarizeLS {
         }
     }
 
-        # This is the summary of summaries next (follow the same pattern as
-        #   above)
+    # This is the summary of summaries next (follow the same pattern as
+    #   above)
     my %service_conf = (
         serviceName        => $self->{CONF}->{"gls"}->{"service_name"},
         serviceType        => $self->{CONF}->{"gls"}->{"service_type"},
@@ -1324,8 +1324,8 @@ sub summarizeLS {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $dbTr } );
     }
 
-        # First delete the metadata + control items.  Insert the new ones right
-        #   after.
+    # First delete the metadata + control items.  Insert the new ones right
+    #   after.
     $self->{LOGGER}->debug( "Removing metadata for \"" . $mdKey . "\" so we can start clean." );
     my @deleteMetadata = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-control\"]/nmwg:metadata[\@id=\"" . $mdKey . "\" or \@metadataIdRef=\"" . $mdKey . "\"]", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
@@ -1342,7 +1342,7 @@ sub summarizeLS {
     $errorFlag++ if $error;
     $self->{STATE}->{"messageKeys"}->{$mdKey} = 2;
 
-        # Then delete the related data, insert new right after.
+    # Then delete the related data, insert new right after.
     $self->{LOGGER}->debug( "Removing data for \"" . $mdKey . "\" so we can start clean." );
     my @deleteData = $summarydb->queryForName( { query => "/nmwg:store[\@type=\"LSStore-summary\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
@@ -1433,10 +1433,11 @@ sub makeSummary {
         }
         $summary .= "      <summary:parameters xmlns:summary=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/summarization/2.0/\" id=\"parameters." . $parameters->{key} . "\">\n";
         foreach my $et ( keys %{ $parameters->{eventTypes} } ) {
+
             # XXX: JZ 11/6 - do we need supportedEventType here as well?
             $summary .= "        <nmwg:parameter name=\"eventType\" value=\"" . $et . "\" />\n";
             $summary .= "        <nmwg:parameter name=\"supportedEventType\" value=\"" . $et . "\" />\n";
-        }        
+        }
         $summary .= "      </summary:parameters>\n";
     }
     elsif ( exists $parameters->{keywords} and $parameters->{keywords} ) {
@@ -1837,7 +1838,7 @@ sub cleanLS {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_db_file"} . "\" could not be cleaned." );
         return -1;
     }
-    
+
     $status = $self->cleanLSAux( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"}, time => $sec } );
     unless ( $status == 0 ) {
         $self->{LOGGER}->error( "Database \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\" could not be cleaned." );
@@ -1866,7 +1867,7 @@ sub cleanLSAux {
         return -1;
     }
 
-    my $parser    = XML::LibXML->new();
+    my $parser = XML::LibXML->new();
 
     my $dbTr = $database->getTransaction( { error => \$error } );
     unless ( $dbTr ) {
@@ -2114,7 +2115,7 @@ sub handleMessage {
         my $m              = find( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement, "./nmwg:metadata[\@id=\"" . $d->getAttribute( "metadataIdRef" ) . "\"]", 1 );
         try {
             throw perfSONAR_PS::Error_compat( "error.ls.data_trigger", "Matching metadata not found for data trigger \"" . $d->getAttribute( "id" ) . "\"" ) unless $m;
-            
+
             if ( exists $parameters->{messageType} and $parameters->{messageType} and $parameters->{messageType} eq "LSRegisterRequest" ) {
                 $self->{LOGGER}->debug( "Parsing LSRegister request." );
                 $self->lsRegisterRequest( { doc => $parameters->{output}, request => $parameters->{rawRequest}, m => $m, d => $d } );
@@ -2139,18 +2140,18 @@ sub handleMessage {
         }
         catch perfSONAR_PS::Error_compat with {
             my $ex = shift;
-            $errorEventType = $ex->eventType if $ex;
+            $errorEventType = $ex->eventType    if $ex;
             $errorMessage   = $ex->errorMessage if $ex;
         }
         catch perfSONAR_PS::Error with {
             my $ex = shift;
-            $errorEventType = $ex->eventType if $ex;
+            $errorEventType = $ex->eventType    if $ex;
             $errorMessage   = $ex->errorMessage if $ex;
         }
         catch Error::Simple with {
             my $ex = shift;
             $errorEventType = "error.ls.system";
-            $errorMessage   = $ex->{"-text"} if $ex;
+            $errorMessage = $ex->{"-text"} if $ex;
         }
         otherwise {
             my $ex = shift;
@@ -2168,7 +2169,7 @@ sub handleMessage {
             getResultCodeData( $parameters->{output}, "data." . genuid(), $mdId, $errorMessage, 1 );
         }
     }
-    
+
     throw perfSONAR_PS::Error_compat( "error.ls.register.data_trigger_missing", "No data triggers found in request." ) unless $counter;
 
     endMessage( $parameters->{output} );
@@ -2199,7 +2200,7 @@ sub lsRegisterRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
 
-    my $error = q{};
+    my $error     = q{};
     my $errorFlag = 0;
     my $auth;
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
@@ -2242,10 +2243,10 @@ sub lsRegisterRequest {
         # hLS should have no eventType, or the service registration eventType.
         # Everything else is rejected, and these previous two interactions are
         # authoratative.
-        
+
         if ( $eventType ) {
             unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/service/2.0" ) {
-                 throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
+                throw perfSONAR_PS::Error_compat( "error.hls.register", "hLS servers can only accept service registration." );
             }
         }
 
@@ -2289,14 +2290,16 @@ sub lsRegisterRequest {
             undef $dbTr;
             $database->checkpoint( { error => \$error } );
             $database->closeDB( { error => \$error } );
-            throw perfSONAR_PS::Error_compat( "error.ls.register.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." )     
-        }     
+            throw perfSONAR_PS::Error_compat( "error.ls.register.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
+        }
 
         my $service = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='service']", 1 );
         if ( $service ) {
+
             # 'clobber' registration case
 
-            $self->lsRegisterRequestUpdateNew( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
+            $self->lsRegisterRequestUpdateNew(
+                { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $service, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
         }
         else {
 
@@ -2304,23 +2307,27 @@ sub lsRegisterRequest {
 
             my $node = find( $parameters->{m}, "./*[local-name()='subject']/*[local-name()='node']", 1 );
             if ( $node ) {
+
                 # 'clobber' registration case
 
                 $self->lsRegisterRequestUpdateNew(
                     { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, topology => $node, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
             }
             else {
+
                 # 'update' registration case
 
-                $self->lsRegisterRequestUpdate( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
+                $self->lsRegisterRequestUpdate(
+                    { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, metadataId => $parameters->{m}->getAttribute( "id" ), d => $parameters->{d}, mdKey => $mdKey, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
             }
         }
     }
     else {
+
         # 'new' registration case
         $self->lsRegisterRequestNew( { doc => $parameters->{doc}, database => $database, dbTr => $dbTr, m => $parameters->{m}, d => $parameters->{d}, sec => $sec, eventType => $eventType, auth => $auth, error => $error, errorFlag => $errorFlag } );
     }
-    
+
     return;
 }
 
@@ -2344,8 +2351,8 @@ sub lsRegisterRequestUpdateNew {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, database => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, topology => 1, sec => 1, eventType => 1, auth => 1, error => 1, errorFlag => 1 } );
 
-    my $mdId      = "metadata." . genuid();
-    my $dId       = "data." . genuid();
+    my $mdId = "metadata." . genuid();
+    my $dId  = "data." . genuid();
 
     # XXX 9/2/08 - jason
     #
@@ -2388,11 +2395,12 @@ sub lsRegisterRequestUpdateNew {
     }
 
     if ( $update ) {
+
         # remove all the old stuff (it's a 'clobber' after all)
 
         my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         $parameters->{errorFlag}++ if $parameters->{error};
-        
+
         my $len2 = $#resultsString2;
         $self->{LOGGER}->debug( "Removing all info for \"" . $parameters->{mdKey} . "\"." );
         for my $y ( 0 .. $len2 ) {
@@ -2413,7 +2421,8 @@ sub lsRegisterRequestUpdateNew {
                 # update the key (if we are allowed to)
 
                 $self->{LOGGER}->debug( "Key already exists, but updating control time information anyway." );
-                $parameters->{database}->updateByName( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+                $parameters->{database}
+                    ->updateByName( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                 $parameters->{errorFlag}++ if $parameters->{error};
             }
         }
@@ -2425,7 +2434,8 @@ sub lsRegisterRequestUpdateNew {
             my $mdCopy = "<nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKeyStorage . "\">\n<perfsonar:subject xmlns:perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\">" . $parameters->{topology}->toString . "</perfsonar:subject>\n</nmwg:metadata>\n";
             $parameters->{database}->insertIntoContainer( { content => $parameters->{database}->wrapStore( { content => $mdCopy, type => "LSStore" } ), name => $mdKeyStorage, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
             $parameters->{errorFlag}++ if $parameters->{error};
-            $parameters->{database}->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+            $parameters->{database}
+                ->insertIntoContainer( { content => createControlKey( { key => $mdKeyStorage, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKeyStorage . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
             $parameters->{errorFlag}++ if $parameters->{error};
         }
         $self->{STATE}->{"messageKeys"}->{$mdKeyStorage} = 2;
@@ -2444,10 +2454,10 @@ sub lsRegisterRequestUpdateNew {
                 my $success = $parameters->{database}->queryByName( { name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                 $parameters->{errorFlag}++ if $parameters->{error};
                 unless ( $success ) {
-                    my $insRes = $parameters->{database}
-                        ->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+                    my $insRes = $parameters->{database}->insertIntoContainer(
+                        { content => createLSData( { type => "LSStore", dataId => $mdKeyStorage . "/" . $cleanHash, metadataId => $mdKeyStorage, data => $d_content->toString } ), name => $mdKeyStorage . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++ if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -2494,12 +2504,13 @@ sub lsRegisterRequestUpdate {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, database => 1, dbTr => 1, metadataId => 1, d => 1, mdKey => 1, sec => 1, eventType => 1, auth => 1, error => 1, errorFlag => 1 } );
 
-    my $mdId      = "metadata." . genuid();
-    my $dId       = "data." . genuid();
+    my $mdId = "metadata." . genuid();
+    my $dId  = "data." . genuid();
 
     my $update = 1;
     if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
-        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+        my @resultsString
+            = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
@@ -2517,8 +2528,8 @@ sub lsRegisterRequestUpdate {
 
         if ( exists $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } and $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} } == 1 ) {
             $self->{LOGGER}->debug( "Key already exists, but updating control time information anyway." );
-            $parameters->{database}
-                ->updateByName( { content => createControlKey( { key => $parameters->{mdKey}, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+            $parameters->{database}->updateByName(
+                { content => createControlKey( { key => $parameters->{mdKey}, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $parameters->{mdKey} . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
             $parameters->{errorFlag}++ if $parameters->{error};
             $self->{STATE}->{"messageKeys"}->{ $parameters->{mdKey} }++;
         }
@@ -2533,7 +2544,7 @@ sub lsRegisterRequestUpdate {
             $self->{LOGGER}->debug( "Removing data for \"" . $parameters->{mdKey} . "\" so we can start clean." );
             my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
             $parameters->{errorFlag}++ if $parameters->{error};
-            
+
             my $len2 = $#resultsString2;
             for my $y ( 0 .. $len2 ) {
                 $parameters->{database}->remove( { name => $resultsString2[$y], txn => $parameters->{dbTr}, error => \$parameters->{error} } );
@@ -2551,9 +2562,15 @@ sub lsRegisterRequestUpdate {
                 $parameters->{errorFlag}++ if $parameters->{error};
                 unless ( $success ) {
                     my $insRes = $parameters->{database}->insertIntoContainer(
-                        { content => createLSData( { type => "LSStore", dataId => $parameters->{mdKey} . "/" . $cleanHash, metadataId => $parameters->{mdKey}, data => $d_content->toString } ), name => $parameters->{mdKey} . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+                        {
+                            content => createLSData( { type => "LSStore", dataId => $parameters->{mdKey} . "/" . $cleanHash, metadataId => $parameters->{mdKey}, data => $d_content->toString } ),
+                            name    => $parameters->{mdKey} . "/" . $cleanHash,
+                            txn     => $parameters->{dbTr},
+                            error   => \$parameters->{error}
+                        }
+                    );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++    if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -2608,8 +2625,8 @@ sub lsRegisterRequestNew {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, database => 1, dbTr => 1, m => 1, d => 1, sec => 1, eventType => 1, auth => 1, error => 1, errorFlag => 1 } );
 
-    my $mdId      = "metadata." . genuid();
-    my $dId       = "data." . genuid();
+    my $mdId = "metadata." . genuid();
+    my $dId  = "data." . genuid();
 
     # XXX 9/2/08 - jason
     #
@@ -2659,7 +2676,8 @@ sub lsRegisterRequestNew {
         if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
             if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
                 if ( $update ) {
-                    $parameters->{database}->updateByName( { content => createControlKey( { key => $mdKey, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+                    $parameters->{database}
+                        ->updateByName( { content => createControlKey( { key => $mdKey, time => ( $parameters->{sec} + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $parameters->{auth} } ), name => $mdKey . "-control", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
 
                     # special case: we always want to clobber the summary data
@@ -2668,7 +2686,7 @@ sub lsRegisterRequestNew {
                     $self->{LOGGER}->debug( "Removing data for \"" . $mdKey . "\" so we can start clean." );
                     my @resultsString2 = $parameters->{database}->queryForName( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdKey . "\"]", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    
+
                     my $len2 = $#resultsString2;
                     for my $y ( 0 .. $len2 ) {
                         $parameters->{database}->remove( { name => $resultsString2[$y], txn => $parameters->{dbTr}, error => \$parameters->{error} } );
@@ -2677,6 +2695,7 @@ sub lsRegisterRequestNew {
                 }
             }
             else {
+
                 # simple update
 
                 $self->{LOGGER}->debug( "Key already exists, but updating control time information anyway." );
@@ -2717,10 +2736,10 @@ sub lsRegisterRequestNew {
                 my $success = $parameters->{database}->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                 $parameters->{errorFlag}++ if $parameters->{error};
                 unless ( $success ) {
-                    my $insRes
-                        = $parameters->{database}->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
+                    my $insRes = $parameters->{database}
+                        ->insertIntoContainer( { content => createLSData( { type => "LSStore", dataId => $mdKey . "/" . $cleanHash, metadataId => $mdKey, data => $d_content->toString } ), name => $mdKey . "/" . $cleanHash, txn => $parameters->{dbTr}, error => \$parameters->{error} } );
                     $parameters->{errorFlag}++ if $parameters->{error};
-                    $dCount++    if $insRes == 0;
+                    $dCount++                  if $insRes == 0;
                 }
             }
         }
@@ -2777,11 +2796,11 @@ sub lsDeregisterRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1, d => 1 } );
 
-    my $msg   = q{};
-    my $error = q{};
+    my $msg       = q{};
+    my $error     = q{};
     my $errorFlag = 0;
-    my $mdId  = "metadata." . genuid();
-    my $dId   = "data." . genuid();
+    my $mdId      = "metadata." . genuid();
+    my $dId       = "data." . genuid();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
     unless ( $mdKey ) {
@@ -2798,15 +2817,15 @@ sub lsDeregisterRequest {
             $summary++;
         }
     }
-    
+
     my $dbContainer = q{};
     if ( $summary ) {
         $dbContainer = $self->{CONF}->{"gls"}->{"metadata_summary_db_file"};
     }
     else {
         $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
-    }    
-    
+    }
+
     my $database = $self->prepareDatabase( { container => $dbContainer } );
     unless ( $database ) {
         my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
@@ -2834,7 +2853,7 @@ sub lsDeregisterRequest {
         undef $dbTr;
         $database->checkpoint( { error => \$error } );
         $database->closeDB( { error => \$error } );
-        throw perfSONAR_PS::Error_compat( "error.ls.deregister.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." ) 
+        throw perfSONAR_PS::Error_compat( "error.ls.deregister.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
     }
 
     my @resultsString = ();
@@ -2929,11 +2948,11 @@ sub lsKeepaliveRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
 
-    my $auth = 1;
-    my $error = q{};
+    my $auth      = 1;
+    my $error     = q{};
     my $errorFlag = 0;
-    my $mdId  = "metadata." . genuid();
-    my $dId   = "data." . genuid();
+    my $mdId      = "metadata." . genuid();
+    my $dId       = "data." . genuid();
 
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
@@ -2956,7 +2975,7 @@ sub lsKeepaliveRequest {
     }
     else {
         $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
-    }  
+    }
 
     my $database = $self->prepareDatabase( { container => $dbContainer } );
     unless ( $database ) {
@@ -2988,12 +3007,12 @@ sub lsKeepaliveRequest {
         $database->closeDB( { error => \$error } );
         throw perfSONAR_PS::Error_compat( "error.ls.keepalive.key_not_found", "Sent key \"" . $mdKey . "\" was not registered." );
         return -1;
-    } 
+    }
 
     if ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} == 1 ) {
         $self->{LOGGER}->debug( "Updating control time information." );
         my $status = $database->updateByName( { content => createControlKey( { key => $mdKey, time => ( $sec + $self->{CONF}->{"gls"}->{"ls_ttl"} ), auth => $auth } ), name => $mdKey . "-control", txn => $dbTr, error => \$error } );
-        $errorFlag++ if $error;      
+        $errorFlag++ if $error;
     }
     else {
         statusReport( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), $dId, "success.ls.keepalive", "Key \"" . $mdKey . "\" was already updated in this exchange, skipping." );
@@ -3051,10 +3070,10 @@ sub lsQueryRequest {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { doc => 1, request => 1, m => 1 } );
 
-    my $error = q{};
+    my $error     = q{};
     my $errorFlag = 0;
-    my $mdId  = "metadata." . genuid();
-    my $dId   = "data." . genuid();
+    my $mdId      = "metadata." . genuid();
+    my $dId       = "data." . genuid();
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
     my %query_map = (
@@ -3087,7 +3106,7 @@ sub lsQueryRequest {
     if ( $eventType and $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
         my $sum_parameters = find( $parameters->{m}, "./summary:parameters", 1 );
 
-        my $subject = find( $parameters->{m}, "./summary:subject", 1 ); 
+        my $subject = find( $parameters->{m}, "./summary:subject", 1 );
         throw perfSONAR_PS::Error_compat( "error.ls.query.subject_not_found", "Summary subject not found in metadata." ) unless $subject;
 
         if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
@@ -3157,11 +3176,11 @@ sub lsQueryRequest {
             throw perfSONAR_PS::Error_compat( "error.ls.xmldb", $msg );
             return -1;
         }
-    
+
         my %map = ();
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
-         
+
         if ( $errorFlag ) {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
@@ -3171,14 +3190,14 @@ sub lsQueryRequest {
         }
         else {
 
-            my $len = $#resultsString;  
+            my $len = $#resultsString;
             if ( $len == -1 ) {
                 $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
                 undef $dbTr;
                 $database->checkpoint( { error => \$error } );
                 $database->closeDB( { error => \$error } );
-                throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );  
-            } 
+                throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );
+            }
             else {
                 my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
                 if ( $status == 0 ) {
@@ -3193,8 +3212,8 @@ sub lsQueryRequest {
                         my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", txn => $dbTr, error => \$error } );
                         $errorFlag++ if $error;
                         $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"metadata"} = $doc->getDocumentElement;
-                        $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"} = \@resultsString2;
-                    }   
+                        $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
+                    }
 
                     foreach my $id ( keys %map ) {
                         my %store = ();
@@ -3258,16 +3277,16 @@ sub lsQueryRequest {
                                 $store{"keyword"}++ if $sent->{"keyword"}->{$value};
                             }
                         }
-            
+
                         # we have a mactch, get the contact service.
                         my $flag = 1;
                         foreach my $key ( keys %store ) {
                             $flag = $store{$key};
                             last if $flag <= 0;
                         }
-            
+
                         if ( $flag ) {
-                            my $len2           = $#{ $map{$id}{"data"} };
+                            my $len2 = $#{ $map{$id}{"data"} };
                             for my $d ( @{ $map{$id}{"data"} } ) {
                                 push @resultServices, $d;
                             }
@@ -3328,7 +3347,7 @@ sub lsQueryRequest {
 
         my @resultsString = $database->query( { query => $query, txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
-        
+
         if ( $errorFlag ) {
             $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
             undef $dbTr;
@@ -3352,7 +3371,7 @@ sub lsQueryRequest {
                 # XXX: JZ 11/6 - Is this really worthy of throwing an error?  It is
                 #   just empty results after all.
                 throw perfSONAR_PS::Error_compat( "error.ls.query.empty_results", "Nothing returned for search." ) unless $dataString;
-        
+
                 createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), "<nmwg:eventType>success.ls.query</nmwg:eventType>", undef );
                 my $mdPparameters = q{};
                 $mdPparameters = extractQuery( { node => find( $parameters->{m}, "./xquery:parameters/nmwg:parameter[\@name=\"lsOutput\"]", 1 ) } );
@@ -3398,7 +3417,7 @@ sub lsKeyRequest {
     my $summary   = 0;
     my $et        = find( $parameters->{m}, "./nmwg:eventType", 1 );
     my $eventType = extract( $et, 0 );
-    
+
     if ( $eventType ) {
         unless ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/service/2.0" or $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/key/summary/2.0" ) {
             throw perfSONAR_PS::Error_compat( "error.ls.key.eventType", "Incorrect eventType for LSKeyRequest." );
@@ -3442,7 +3461,7 @@ sub lsKeyRequest {
             return -1;
         }
 
-        my @resultsString = $database->query( { query => $queryString, txn => $dbTr, error => \$error } );        
+        my @resultsString = $database->query( { query => $queryString, txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
 
         if ( $errorFlag ) {
