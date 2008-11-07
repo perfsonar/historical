@@ -358,20 +358,10 @@ sub prepareDatabase {
     my $retry  = 0;
     my $return = q{};
     do {
-
-
-#print "\n\n-->" , $error , "<--\n\n" if $error;
-
-if ( $error and $error =~ m/DbEnv::open:\sDB_RUNRECOVERY:\sFatal\serror,\srun\sdatabase\srecovery/ ) {
-print "\n\nWOW\n\n";
-}
-
         if ( exists $parameters->{recover} and $parameters->{recover} or ( $error and $error =~ m/DbEnv::open:\sDB_RUNRECOVERY:\sFatal\serror,\srun\sdatabase\srecovery/ ) ) {
-print "\n\n1\n\n";
             $return = $db->prep( { txn => q{}, error => \$error } );
         }
         else {
-print "\n\n2\n\n";
             $return = $db->openDB( { txn => q{}, error => \$error } );
         }
 
