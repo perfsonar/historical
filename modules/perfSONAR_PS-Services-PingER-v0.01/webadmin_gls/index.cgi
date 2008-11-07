@@ -230,7 +230,7 @@ sub readgLSSites {
                     my $hostname;
                     my $domain;
                     foreach my $name (@dns_names) {
-                        if ( $name =~ /([^.]+).(.*)/ ) {
+                        if ( $name =~ /^([^\.]+)\.(.*)/ ) {
                             $hostname = $1;
                             $domain   = $2;
 
