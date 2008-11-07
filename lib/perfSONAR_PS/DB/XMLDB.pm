@@ -143,12 +143,20 @@ sub prep {
 
     eval {
         $self->{ENV} = new DbEnv(0);
-        $self->{ENV}->open( $self->{ENVIRONMENT}, Db::DB_JOINENV | Db::DB_INIT_MPOOL | Db::DB_CREATE | Db::DB_INIT_LOCK | Db::DB_INIT_LOG | Db::DB_INIT_TXN | Db::DB_RECOVER | Db::DB_REGISTER );
 
-        $self->{MANAGER} = new XmlManager( $self->{ENV}, DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN );
+        # XXX: JZ 11/7 - Old options
+        # Db::DB_CREATE | Db::DB_RECOVER | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN | Db::DB_JOINENV | Db::DB_REGISTER
+        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_RECOVER | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
+
+        # XXX: JZ 11/7 - Old options
+        # DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN
+        $self->{MANAGER} = new XmlManager( $self->{ENV} );
 
         $dbTr = $self->{MANAGER}->createTransaction() if $atomic;
-        $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL );
+
+        # XXX: JZ 11/7 - Old options
+        #  Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL
+        $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | DbXml::DBXML_TRANSACTIONAL );
 
         unless ( $self->{CONTAINER}->getIndexNodes ) {
             my $dbUC = $self->{MANAGER}->createUpdateContext();
@@ -208,12 +216,20 @@ sub openDB {
 
     eval {
         $self->{ENV} = new DbEnv(0);
-        $self->{ENV}->open( $self->{ENVIRONMENT}, Db::DB_JOINENV | Db::DB_INIT_MPOOL | Db::DB_CREATE | Db::DB_INIT_LOCK | Db::DB_INIT_LOG | Db::DB_INIT_TXN );
 
-        $self->{MANAGER} = new XmlManager( $self->{ENV}, DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN );
+        # XXX: JZ 11/7 - Old options
+        # Db::DB_JOINENV | Db::DB_INIT_MPOOL | Db::DB_CREATE | Db::DB_INIT_LOCK | Db::DB_INIT_LOG | Db::DB_INIT_TXN
+        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
+
+        # XXX: JZ 11/7 - Old options
+        # DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN
+        $self->{MANAGER} = new XmlManager( $self->{ENV} );
 
         $dbTr = $self->{MANAGER}->createTransaction() if $atomic;
-        $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL );
+
+        # XXX: JZ 11/7 - Old options
+        #  Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL
+        $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | DbXml::DBXML_TRANSACTIONAL );
 
         unless ( $self->{CONTAINER}->getIndexNodes ) {
             my $dbUC = $self->{MANAGER}->createUpdateContext();
