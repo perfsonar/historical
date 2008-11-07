@@ -143,7 +143,7 @@ sub getDOM {
 
                                                      ['value' =>  $self->get_value],
 
-                                           ['name' =>  (($self->get_name    =~ m/(count|packetInterval|packetSize|ttl|measurementPeriod|measurementOffset)$/)?$self->get_name:undef)],
+                                           ['name' =>  (($self->get_name    =~ m/(count|packetInterval|packetSize|ttl|measurementPeriod|measurementOffset|project)$/)?$self->get_name:undef)],
 
                                                ],
                                             'text' => (!($self->get_value)?$self->get_text:undef),
@@ -403,7 +403,7 @@ sub fromDOM {
     $self->set_value($dom->getAttribute('value')) if($dom->getAttribute('value'));
 
     $self->get_LOGGER->debug(" Attribute value= ". $self->get_value) if $self->get_value;
-    $self->set_name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(count|packetInterval|packetSize|ttl|measurementPeriod|measurementOffset)$/));
+    $self->set_name($dom->getAttribute('name')) if($dom->getAttribute('name') && ($dom->getAttribute('name')   =~ m/(count|packetInterval|packetSize|ttl|measurementPeriod|measurementOffset|project)$/));
 
     $self->get_LOGGER->debug(" Attribute name= ". $self->get_name) if $self->get_name;
     $self->set_text($dom->textContent) if(!($self->get_value) && $dom->textContent);
