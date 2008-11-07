@@ -223,13 +223,11 @@ sub init {
     }
 
     if ( exists $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ) {
+        $self->{CONF}->{"ls_registration_interval"} *= 60;
         if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} and $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
-            $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"} * 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
-            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
-            $self->{CONF}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
             $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
@@ -495,8 +493,10 @@ sub registerLS {
     my ( $self, $sleep_time ) = validateParamsPos( @_, 1, { type => SCALARREF }, );
 
     my $error = q{};
-    my $eventType;
-    my $database;
+    my $errorFlag = 0;
+    my $eventType = q{};
+    my $database = q{};
+    my $dbTr = q{};
     if ( exists $self->{CONF}->{"root_hints_file"} and $self->{CONF}->{"root_hints_file"} and -f $self->{CONF}->{"root_hints_file"} ) {
         my $hintsStats = stat( $self->{CONF}->{"root_hints_file"} );    # Is the cache file older than the data TTL?
                                                                         # update once an hour
@@ -550,11 +550,21 @@ sub registerLS {
             return -1;
         }
 
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => q{}, error => \$error } );
-        my $len = $#resultsString;
+        $dbTr = $database->getTransaction( { error => \$error } );
+        unless ( $dbTr ) {
+            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            $database->checkpoint( { error => \$error } );
+            $database->closeDB( { error => \$error } );
+            $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        }
+
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+        $errorFlag++ if $error;
 
         # build up our list of data to send off
         my %mapping = ();
+        my $len = $#resultsString;
         for my $x ( 0 .. $len ) {
             my $parser        = XML::LibXML->new();
             my $doc           = $parser->parse_string( $resultsString[$x] );
@@ -564,7 +574,7 @@ sub registerLS {
             $mapping{ $doc->getDocumentElement->getAttribute( "id" ) }{"service"} = $service->toString;
         }
 
-        unless ( $self->closeDatabase( { db => $database, dbTr => q{}, error => 0 } ) == 0 ) {
+        unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
             $self->{LOGGER}->error( "There was an error closing \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\"." );
             $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
             return -1;
@@ -634,8 +644,19 @@ sub registerLS {
             return -1;
         }
 
+        $dbTr = $database->getTransaction( { error => \$error } );
+        unless ( $dbTr ) {
+            $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
+            undef $dbTr;
+            $database->checkpoint( { error => \$error } );
+            $database->closeDB( { error => \$error } );
+            $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
+        }
+
         # build up our list of data to send off
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => q{}, error => \$error } );
+        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => $dbTr, error => \$error } );
+        $errorFlag++ if $error;
+        
         my @metadataArray = ();
         if ( $#resultsString != -1 ) {
             my $md_len = $#resultsString;
@@ -643,14 +664,15 @@ sub registerLS {
                 $resultsString[$x] =~ s/^\{\}id=//;
                 $resultsString[$x] =~ s/\"//g;
 
-                my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $resultsString[$x] . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
+                my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $resultsString[$x] . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+                $errorFlag++ if $error;
                 foreach my $t ( @temp ) {
                     push @metadataArray, $t if $t;
                 }
             }
         }
 
-        unless ( $self->closeDatabase( { db => $database, dbTr => q{}, error => 0 } ) == 0 ) {
+        unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
             $self->{LOGGER}->error( "There was an error closing \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\"." );
             $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
             return -1;
@@ -739,6 +761,8 @@ sub summarizeLS {
     unless ( $dbTr ) {
         $metadatadb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
+        $metadatadb->checkpoint( { error => \$error } );
+        $metadatadb->closeDB( { error => \$error } );
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
 
@@ -1233,6 +1257,8 @@ sub summarizeLS {
     unless ( $dbTr ) {
         $summarydb->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
+        $summarydb->checkpoint( { error => \$error } );
+        $summarydb->closeDB( { error => \$error } );
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
 
@@ -1254,6 +1280,7 @@ sub summarizeLS {
 
         unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
             $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $dbTr } );
+            $errorFlag++ if $error;
         }
 
         # First delete the metadata + control items.  Insert the new ones right
@@ -1322,6 +1349,7 @@ sub summarizeLS {
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $dbTr } );
+        $errorFlag++ if $error;
     }
 
     # First delete the metadata + control items.  Insert the new ones right
@@ -1867,14 +1895,16 @@ sub cleanLSAux {
         return -1;
     }
 
-    my $parser = XML::LibXML->new();
-
     my $dbTr = $database->getTransaction( { error => \$error } );
     unless ( $dbTr ) {
         $database->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         undef $dbTr;
+        $database->checkpoint( { error => \$error } );
+        $database->closeDB( { error => \$error } );
         $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
     }
+
+    my $parser = XML::LibXML->new();
 
     my @allData = $database->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
