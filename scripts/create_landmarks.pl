@@ -53,7 +53,7 @@
 =cut
 
 use strict;
-use warnings;
+###use warnings;
 use English qw(-no_match_vars);
 
 use FindBin qw($Bin);
