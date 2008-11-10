@@ -146,7 +146,7 @@ sub prep {
 
         # XXX: JZ 11/7 - Old options
         # Db::DB_CREATE | Db::DB_RECOVER | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN | Db::DB_JOINENV | Db::DB_REGISTER
-        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_RECOVER | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
+        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_RECOVER | Db::DB_JOINENV | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
 
         # XXX: JZ 11/7 - Old options
         # DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN
@@ -158,10 +158,12 @@ sub prep {
         #  Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL
         $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | DbXml::DBXML_TRANSACTIONAL );
 
-        unless ( $self->{CONTAINER}->getIndexNodes ) {
-            my $dbUC = $self->{MANAGER}->createUpdateContext();
-            $self->{INDEX} = $self->{CONTAINER}->addIndex( $dbTr, "http://ggf.org/ns/nmwg/base/2.0/", "store", "node-element-equality-string", $dbUC );
-        }
+# XXX: JZ 11/7 - Disable index for now
+#        unless ( $self->{CONTAINER}->getIndexNodes ) {
+#            my $dbUC = $self->{MANAGER}->createUpdateContext();
+#            $self->{INDEX} = $self->{CONTAINER}->addIndex( $dbTr, "http://ggf.org/ns/nmwg/base/2.0/", "store", "node-element-equality-string", $dbUC );
+#        }
+
         if ( $atomic ) {
             $dbTr->commit;
             undef $dbTr;
@@ -219,7 +221,7 @@ sub openDB {
 
         # XXX: JZ 11/7 - Old options
         # Db::DB_JOINENV | Db::DB_INIT_MPOOL | Db::DB_CREATE | Db::DB_INIT_LOCK | Db::DB_INIT_LOG | Db::DB_INIT_TXN
-        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
+        $self->{ENV}->open( $self->{ENVIRONMENT},  Db::DB_CREATE | Db::DB_JOINENV | Db::DB_INIT_LOG | Db::DB_INIT_LOCK | Db::DB_INIT_MPOOL | Db::DB_INIT_TXN );
 
         # XXX: JZ 11/7 - Old options
         # DbXml::DBXML_ALLOW_EXTERNAL_ACCESS | DbXml::DBXML_ALLOW_AUTO_OPEN
@@ -231,10 +233,12 @@ sub openDB {
         #  Db::DB_CREATE | Db::DB_DIRTY_READ | DbXml::DBXML_TRANSACTIONAL
         $self->{CONTAINER} = $self->{MANAGER}->openContainer( $dbTr, $self->{CONTAINERFILE}, Db::DB_CREATE | DbXml::DBXML_TRANSACTIONAL );
 
-        unless ( $self->{CONTAINER}->getIndexNodes ) {
-            my $dbUC = $self->{MANAGER}->createUpdateContext();
-            $self->{INDEX} = $self->{CONTAINER}->addIndex( $dbTr, "http://ggf.org/ns/nmwg/base/2.0/", "store", "node-element-equality-string", $dbUC );
-        }
+# XXX: JZ 11/7 - Disable index for now
+#        unless ( $self->{CONTAINER}->getIndexNodes ) {
+#            my $dbUC = $self->{MANAGER}->createUpdateContext();
+#            $self->{INDEX} = $self->{CONTAINER}->addIndex( $dbTr, "http://ggf.org/ns/nmwg/base/2.0/", "store", "node-element-equality-string", $dbUC );
+#        }
+
         if ( $atomic ) {
             $dbTr->commit;
             undef $dbTr;

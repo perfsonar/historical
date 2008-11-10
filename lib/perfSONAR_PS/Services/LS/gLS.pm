@@ -775,7 +775,6 @@ sub summarizeLS {
     my $numServices = $#serviceString;
     if ( $numServices > -1 ) {
         for my $x ( 0 .. $numServices ) {
-
             my $doc = $parser->parse_string( $serviceString[$x] );
 
             # XXX JZ: 11/5 (and previous) - The 'key' (also 'id') of the
@@ -813,7 +812,7 @@ sub summarizeLS {
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         return -1;
     }
-
+    
     # We can skip summarization if we are an empty DB.
     unless ( $numServices > -1 ) {
         undef %map;
@@ -831,7 +830,6 @@ sub summarizeLS {
 
     my %serviceSummaryMap = ();
     my %summaryMap        = ();
-
     foreach my $set ( keys %map ) {
         my $temp_nodes = find( $map{$set}{"metadata"}, "./*[local-name()='subject']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='node']", 0 );
 
@@ -884,8 +882,8 @@ sub summarizeLS {
                 next unless $name and $name =~ m/^keyword/;
                 my $value = extract( $k, 0 );
                 next unless $value;
-                $serviceSummaryMap{$set}{"keywors"}->{$name}->{$value} = 1;
-                $summaryMap{"keywors"}->{$name}->{$value} = 1;
+                $serviceSummaryMap{$set}{"keywords"}->{$name}->{$value} = 1;
+                $summaryMap{"keywords"}->{$name}->{$value} = 1;
             }
 
             my $temp_addresses = find( $service, "./*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='port']/*[namespace-uri()='http://ogf.org/schema/network/topology/base/20070828/' and local-name()='address' ]", 0 );
@@ -937,7 +935,6 @@ sub summarizeLS {
         }
 
         # Now we move on to the data elements for each service
-
         my $len = $#{ $map{$set}{"data"} };
         for my $x ( 0 .. $len ) {
             my $doc = $parser->parse_string( $map{$set}{"data"}->[$x] );
@@ -965,8 +962,8 @@ sub summarizeLS {
                 next unless $name and $name =~ m/^keyword/;
                 my $value = extract( $k, 0 );
                 next unless $value;
-                $serviceSummaryMap{$set}{"keywors"}->{$name}->{$value} = 1;
-                $summaryMap{"keywors"}->{$name}->{$value} = 1;
+                $serviceSummaryMap{$set}{"keywords"}->{$name}->{$value} = 1;
+                $summaryMap{"keywords"}->{$name}->{$value} = 1;
             }
 
             # Special case: If we are a root we need to summarize the summaries
@@ -1265,18 +1262,18 @@ sub summarizeLS {
     # Go through the master of list of services, lets deal with the service
     #   summaries first
     foreach my $serviceKey ( keys %map ) {
-        my $list1 = q{};
+        my $list1;
         if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
             foreach my $host ( keys %{ $serviceSummaryMap{$serviceKey}{"addresses"} } ) {
-                push @{$list1}, $host;
+                push @{$list1}, $host if $host;
             }
         }
         else {
             my @addLen = keys( %{ $serviceSummaryMap{$serviceKey}{"addresses"} } );
             $list1 = $self->ipSummarization( { addresses => $serviceSummaryMap{$serviceKey}{"addresses"} } ) if $#addLen > -1;
         }
-
-        my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $serviceSummaryMap{$serviceKey}{"domains"}, eventTypes => $serviceSummaryMap{$serviceKey}{"eventTypes"}, keywords => $serviceSummaryMap{$serviceKey}{"keywors"} } );
+        
+        my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $serviceSummaryMap{$serviceKey}{"domains"}, eventTypes => $serviceSummaryMap{$serviceKey}{"eventTypes"}, keywords => $serviceSummaryMap{$serviceKey}{"keywords"} } );
 
         unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
             $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $dbTr } );
@@ -1334,10 +1331,10 @@ sub summarizeLS {
     my $ls_client = perfSONAR_PS::Client::LS->new( { instance => $self->{CONF}->{"gls"}->{"service_accesspoint"} } );
     my $service2 = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"" . $mdKey . "\">\n" . $ls_client->createService( { service => \%service_conf } ) . "  </nmwg:metadata>\n";
 
-    my $list2 = q{};
+    my $list2;
     if ( exists $self->{CONF}->{"gls"}->{"root"} and $self->{CONF}->{"gls"}->{"root"} ) {
         foreach my $host ( keys %{ $summaryMap{"addresses"} } ) {
-            push @{$list2}, $host;
+            push @{$list2}, $host if $host;
         }
     }
     else {
@@ -1345,7 +1342,7 @@ sub summarizeLS {
         $list2 = $self->ipSummarization( { addresses => \%{ $summaryMap{"addresses"} } } ) if $#addLen > -1;
     }
 
-    my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $summaryMap{"domains"}, eventTypes => $summaryMap{"eventTypes"}, keywords => $summaryMap{"keywors"} } );
+    my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $summaryMap{"domains"}, eventTypes => $summaryMap{"eventTypes"}, keywords => $summaryMap{"keywords"} } );
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
         $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $dbTr } );
@@ -1379,7 +1376,7 @@ sub summarizeLS {
         $summarydb->remove( { name => $deleteData[$y], txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
     }
-
+    
     my $cleanHash = md5_hex( $totalSummary );
     my $success = $summarydb->queryByName( { name => $mdKey . "/" . $cleanHash, txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
@@ -1398,6 +1395,8 @@ sub summarizeLS {
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         return -1;
     }
+
+    $self->{LOGGER}->info( "Summarization complete" );
 
     return 0;
 }
@@ -1888,10 +1887,9 @@ sub cleanLSAux {
 
     my $error     = q{};
     my $errorFlag = 0;
-
-    my $database = $self->prepareDatabase( { container => $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} } );
+    my $database = $self->prepareDatabase( { container => $parameters->{container} } );
     unless ( $database ) {
-        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $self->{CONF}->{"gls"}->{"metadata_summary_db_file"} . "\": " . $error );
+        $self->{LOGGER}->error( "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\": " . $error );
         return -1;
     }
 
@@ -2000,7 +1998,7 @@ sub cleanLSAux {
         }
     }
     else {
-        $self->{LOGGER}->error( "Nothing Registered with \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\", cannot clean at this time." );
+        $self->{LOGGER}->info( "Nothing Registered with \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\", cannot clean at this time." );
     }
 
     foreach my $data ( keys %dataTracker ) {
