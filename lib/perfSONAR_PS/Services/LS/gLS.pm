@@ -188,8 +188,8 @@ sub init {
         }
         unless ( $self->{CONF}->{"gls"}->{"metadata_db_name"} and -f $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" ) {
             open( CONF, ">" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/DB_CONFIG" );
-            print CONF "set_lock_timeout 500000\n";
-            print CONF "set_txn_timeout 500000\n";
+            print CONF "set_lock_timeout 5000\n";
+            print CONF "set_txn_timeout 5000\n";
             print CONF "set_lk_max_lockers 500000\n";
             print CONF "set_lk_max_locks 500000\n";
             print CONF "set_lk_max_objects 500000\n";
@@ -588,7 +588,7 @@ sub registerLS {
             my $serviceKey = md5_hex( $contactPoint . $contactName . $contactType );
            
             my $service       = find( $doc2->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
-            my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdid . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
+            my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdid . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
 
             if ( $#metadataArray <= -1 ) {
                 push @metadataArray, $self->makeSummary( { key => $serviceKey, addresses => q{}, domains => q{}, eventTypes => q{}, keywords => q{} } );
@@ -2445,7 +2445,7 @@ sub lsRegisterRequestUpdateNew {
 
     my $update = 1;
     if ( exists $parameters->{eventType} and $parameters->{eventType} and $parameters->{eventType} eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0" ) {
-        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => q{}, error => \$parameters->{error} } );
+        my @resultsString = $parameters->{database}->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata[\@metadataIdRef=\"" . $parameters->{mdKey} . "\"]/nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]/text()", txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         $parameters->{errorFlag}++ if $parameters->{error};
         if ( lc( $resultsString[0] ) eq "yes" ) {
 
