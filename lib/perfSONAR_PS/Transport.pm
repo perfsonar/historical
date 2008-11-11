@@ -214,7 +214,7 @@ that message. If not, it is filled with "".
 
 sub sendReceive {
     my ( $self, $envelope, $timeout, $error ) = @_;
-    $timeout = 10 unless $timeout;
+    $timeout = 30 unless $timeout;
     my $logger       = get_logger( "perfSONAR_PS::Transport" );
     my $method_uri   = "http://ggf.org/ns/nmwg/base/2.0/message/";
     my $httpEndpoint = &getHttpURI( $self->{CONTACT_HOST}, $self->{CONTACT_PORT}, $self->{CONTACT_ENDPOINT} );
