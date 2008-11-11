@@ -47,12 +47,27 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
     $subject .= "    </nmwg:parameters>\n";
     $subject .= "  </nmwg:key>  \n";
 
-    my $time = 86400;
+    my $time;
+    if ( $cgi->param('length') ) {
+        $time = $cgi->param('length');
+    }
+    else {
+        $time = 86400;
+    }
+
+    my $res;
+    if ( $cgi->param('resolution') ) {
+        $res = $cgi->param('resolution');
+    }
+    else {
+        $res = 5;
+    }
+
     my $result = $ma->setupDataRequest(
         {
             start                 => ( $sec - $time ),
             end                   => $sec,
-            resolution            => 5,
+            resolution            => $res,
             consolidationFunction => "AVERAGE",
             subject               => $subject,
             eventTypes            => \@eventTypes
@@ -69,7 +84,7 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
         {
             start                 => ( $sec - $time ),
             end                   => $sec,
-            resolution            => 5,
+            resolution            => $res,
             consolidationFunction => "AVERAGE",
             subject               => $subject2,
             eventTypes            => \@eventTypes

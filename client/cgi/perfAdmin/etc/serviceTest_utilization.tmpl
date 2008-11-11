@@ -38,10 +38,22 @@
           <tmpl_var name=CAPACITY>&nbsp;
         </td>
         <td align="center">
-          <input type="submit" value="Graph" id="graph1.<tmpl_var name=COUNT>" name="graph1.<tmpl_var name=COUNT>" onClick="window.open('./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>','graph1.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')" />
+          <select name="graph1.<tmpl_var name=COUNT>" id="graph1.<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph1.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
+            <option selected value="./utilizationGraph.cgi">-- Select --</option>
+            <option value="./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=3600">1 Hour</option>
+            <option value="./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=14400">4 Hours</option>
+            <option value="./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=43200">12 Hours</option>
+            <option value="./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=86400">24 Hours</option>
+          </select>
         </td>    
         <td align="center">
-          <input type="submit" value="Graph" id="graph2.<tmpl_var name=COUNT>" name="graph2.<tmpl_var name=COUNT>" onClick="window.open('./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>','graph2.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')" />
+          <select name="graph2.<tmpl_var name=COUNT>" id="graph2.<tmpl_var name=COUNT>" onChange="window.open(options[selectedIndex].value,'graph2.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')">
+            <option selected value="./utilizationGraphFlash.cgi">-- Select --</option>
+            <option value="./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=3600">1 Hour</option>
+            <option value="./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=14400">4 Hours</option>
+            <option value="./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=43200">12 Hours</option>
+            <option value="./utilizationGraphFlash.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>&length=86400">24 Hours</option>
+          </select>
         </td>        
       </tr>
       </tmpl_loop>
