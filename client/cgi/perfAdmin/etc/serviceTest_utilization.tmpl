@@ -20,22 +20,22 @@
       <tmpl_loop name=INTERFACES>
       <tr>
         <td align="center">
-          <tmpl_var name=ADDRESS>
+          <tmpl_var name=ADDRESS>&nbsp;
         </td>
         <td align="center">
-          <tmpl_var name=HOST>
+          <tmpl_var name=HOST>&nbsp;
         </td>
         <td align="center">
-          <tmpl_var name=IFNAME>
+          <tmpl_var name=IFNAME>&nbsp;
         </td>
         <td align="center">
-          <tmpl_var name=DESC>
+          <tmpl_var name=DESC>&nbsp;
         </td>
         <td align="center">
-          <tmpl_var name=IFADDRESS>
+          <tmpl_var name=IFADDRESS>&nbsp;
         </td>
         <td align="center">
-          <tmpl_var name=CAPACITY>
+          <tmpl_var name=CAPACITY>&nbsp;
         </td>
         <td align="center">
           <input type="submit" value="Graph" id="graph1.<tmpl_var name=COUNT>" name="graph1.<tmpl_var name=COUNT>" onClick="window.open('./utilizationGraph.cgi?url=<tmpl_var name=SERVICE>&key1=<tmpl_var name=KEY1>&key2=<tmpl_var name=KEY2>&host=<tmpl_var name=HOST>&interface=<tmpl_var name=IFNAME>','graph1.<tmpl_var name=COUNT>','width=950,height=500,status=yes,scrollbars=yes,resizable=yes')" />
