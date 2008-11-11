@@ -162,6 +162,22 @@ else {
                 }
                 $temp{"ifAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifAddress", 1 ), 0 );
                 $temp{"capacity"}      = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:capacity", 1 ), 0 );
+                
+                if ( $temp{"capacity"} ) {
+                    $temp{"capacity"} /= 1000000;
+                    if ( $temp{"capacity"} < 1000 ) {
+                        $temp{"capacity"} .= " Mbps";
+                    }
+                    elsif ( $temp{"capacity"} < 1000000 ) {
+                        $temp{"capacity"} /= 1000;
+                        $temp{"capacity"} .= " Gbps";
+                    }
+                    elsif ( $temp{"capacity"} < 1000000000 ) {
+                        $temp{"capacity"} /= 1000000;
+                        $temp{"capacity"} .= " Tbps";
+                    }
+                }
+                
                 $list{$host}{$name}    = \%temp;
             }
         }
@@ -171,7 +187,7 @@ else {
         foreach my $host ( sort keys %list ) {
             foreach my $name ( sort keys %{ $list{$host} } ) {
 
-                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => eval( $list{$host}{$name}->{"capacity"} / 1000000 ), KEY1 => $list{$host}{$name}->{"key1"}, KEY2 => $list{$host}{$name}->{"key2"}, COUNT => $counter, SERVICE => $service };
+                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => $list{$host}{$name}->{"capacity"}, KEY1 => $list{$host}{$name}->{"key1"}, KEY2 => $list{$host}{$name}->{"key2"}, COUNT => $counter, SERVICE => $service };
 
                 $counter++;
             }
