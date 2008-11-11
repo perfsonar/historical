@@ -523,6 +523,7 @@ sub registerLS {
             $self->{LOGGER}->debug( "Adding root \"" . $t . "\" to the try list." );
         }
     }
+
     if ( exists $self->{CONF}->{"gls"}->{"ls_instance"} and $self->{CONF}->{"gls"}->{"ls_instance"} ) {
         my @temp = split( /\s+/, $self->{CONF}->{"gls"}->{"ls_instance"} );
         foreach my $t ( @temp ) {
@@ -537,9 +538,8 @@ sub registerLS {
         $self->{LOGGER}->warn( "No gLS Root services to contact, exiting." );
         return -1;
     }
-
+    
     if ( exists $self->{CONF}->{"gls"}->{root} and $self->{CONF}->{"gls"}->{root} ) {
-
         # if we are a root, we are 'synchronizing'
 
         $eventType = "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/registration/synchronization/2.0";
@@ -559,19 +559,43 @@ sub registerLS {
             $self->{LOGGER}->error( "Cound not start database transaction, database responded with \"" . $error . "\"." );
         }
 
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
-        $errorFlag++ if $error;
-
-        # build up our list of data to send off
         my %mapping = ();
-        my $len = $#resultsString;
+        my @controlMD = $database->query( { query => "/nmwg:store[\@type=\"LSStore-control\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
+        $errorFlag++ if $error;
+        my $len = $#controlMD;
         for my $x ( 0 .. $len ) {
             my $parser        = XML::LibXML->new();
-            my $doc           = $parser->parse_string( $resultsString[$x] );
-            my $service       = find( $doc->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
-            my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $doc->getDocumentElement->getAttribute( "id" ) . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
-            $mapping{ $doc->getDocumentElement->getAttribute( "id" ) }{"content"} = \@metadataArray;
-            $mapping{ $doc->getDocumentElement->getAttribute( "id" ) }{"service"} = $service->toString;
+            my $doc           = $parser->parse_string( $controlMD[$x] );
+          
+            my $auth = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"authoritative\"]", 1 ), 1 );
+            next if lc( $auth ) eq "no";
+            my $mdid = $doc->getDocumentElement->getAttribute( "metadataIdRef" );
+          
+            my @serviceList = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $mdid . "\"]", txn => $dbTr, error => \$error } );
+            $errorFlag++ if $error;
+            next unless $#serviceList == 0 and $serviceList[0];
+
+            my $doc2           = $parser->parse_string( $serviceList[0] );
+            my $contactPoint = extract( find( $doc2->getDocumentElement, "./*[local-name()='subject']//*[local-name()='accessPoint']", 1 ), 0 );
+            my $contactName  = q{};
+            my $contactType  = q{};
+            unless ( $contactPoint ) {
+                $contactPoint = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='address']", 1 ), 0 );
+                $contactName  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='name']",    1 ), 0 );
+                $contactType  = extract( find( $doc->getDocumentElement, "./*[local-name()='subject']//*[local-name()='type']",    1 ), 0 );
+                next unless $contactPoint or $contactName or $contactType;
+            }
+            my $serviceKey = md5_hex( $contactPoint . $contactName . $contactType );
+           
+            my $service       = find( $doc2->getDocumentElement, "./*[local-name()=\"subject\"]", 1 );
+            my @metadataArray = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $mdid . "\"]/nmwg:metadata", txn => q{}, error => \$error } );
+
+            if ( $#metadataArray <= -1 ) {
+                push @metadataArray, $self->makeSummary( { key => $serviceKey, addresses => q{}, domains => q{}, eventTypes => q{}, keywords => q{} } );
+            }
+          
+            $mapping{ $mdid }{"content"} = \@metadataArray;
+            $mapping{ $mdid }{"service"} = $service->toString;
         }
 
         unless ( $self->closeDatabase( { db => $database, dbTr => $dbTr, error => $errorFlag } ) == 0 ) {
@@ -586,11 +610,10 @@ sub registerLS {
 
             # register w/ all gLS instances
             foreach my $root ( @{ $gls->{ROOTS} } ) {
-
                 $self->{LOGGER}->debug( "gLS synchronization to root \"" . $root . "\"." );
 
                 my $ls     = perfSONAR_PS::Client::LS->new( { instance   => $root } );
-                my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );
+                my $result = $ls->keyRequestLS(             { servicexml => $mapping{$m}{"service"} } );               
                 if ( $result and exists $result->{key} and $result->{key} ) {
                     my $key = $result->{key};
                     $result = $ls->registerClobberRequestLS( { key => $key, eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
@@ -600,14 +623,14 @@ sub registerLS {
                         $msg .= ", response: " . $result->{response}   if exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->debug( $msg );
                     }
-                    else {
+                    else {  
                         my $msg = "Error in LS Registration to \"" . $root . "\"";
                         $msg .= ", eventType: " . $result->{eventType} if $result and exists $result->{eventType} and $result->{eventType};
                         $msg .= ", response: " . $result->{response}   if $result and exists $result->{response}  and $result->{response};
                         $self->{LOGGER}->error( $msg );
                     }
                 }
-                else {
+                elsif( $result ) {
                     $result = $ls->registerRequestLS( { eventType => $eventType, servicexml => $mapping{$m}{"service"}, data => $mapping{$m}{"content"} } );
                     if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                         my $msg = "Success from LS \"" . $root . "\"";
@@ -622,11 +645,13 @@ sub registerLS {
                         $self->{LOGGER}->error( $msg );
                     }
                 }
+                else {
+                    $self->{LOGGER}->error( "Skipping \"" . $root . "\" since a response was not received." );
+                }
             }
         }
     }
     else {
-
         # if we are not a root, send our summary to a root
 
         my %service = (
@@ -656,7 +681,7 @@ sub registerLS {
         # build up our list of data to send off
         my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/\@id", txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
-        
+
         my @metadataArray = ();
         if ( $#resultsString != -1 ) {
             my $md_len = $#resultsString;
@@ -666,6 +691,7 @@ sub registerLS {
 
                 my @temp = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[\@metadataIdRef=\"" . $resultsString[$x] . "\"]/nmwg:metadata", txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
+                
                 foreach my $t ( @temp ) {
                     push @metadataArray, $t if $t;
                 }
@@ -687,7 +713,6 @@ sub registerLS {
             my $root = $gls->{ROOTS}->[$x];
 
             $self->{LOGGER}->debug( "hLS registration to root \"" . $root . "\"." );
-
             my $ls = perfSONAR_PS::Client::LS->new( { instance => $root } );
 
             my $result = $ls->keyRequestLS( { service => \%service } );
@@ -708,7 +733,7 @@ sub registerLS {
                     $self->{LOGGER}->error( $msg );
                 }
             }
-            else {
+            elsif( $result ) {
                 $result = $ls->registerRequestLS( { eventType => $eventType, service => \%service, data => \@metadataArray } );
                 if ( $result and exists $result->{eventType} and $result->{eventType} eq "success.ls.register" ) {
                     my $msg = "Success from LS \"" . $root . "\"";
@@ -724,8 +749,14 @@ sub registerLS {
                     $self->{LOGGER}->error( $msg );
                 }
             }
+            else {
+                $self->{LOGGER}->error( "Skipping \"" . $root . "\" since a response was not received." );
+            }
         }
     }
+    
+    $self->{LOGGER}->info( "registerLS Complete." );
+    
     return 0;
 }
 
@@ -1872,6 +1903,7 @@ sub cleanLS {
         return -1;
     }
 
+    $self->{LOGGER}->info( "cleanLS complete" );
     return 0;
 }
 
@@ -1903,7 +1935,6 @@ sub cleanLSAux {
     }
 
     my $parser = XML::LibXML->new();
-
     my @allData = $database->query( { query => "/nmwg:store[\@type=\"LSStore\" or \@type=\"LSStore-summary\"]/nmwg:data", txn => $dbTr, error => \$error } );
     $errorFlag++ if $error;
 
@@ -1964,10 +1995,10 @@ sub cleanLSAux {
                 my $time = extract( find( $doc->getDocumentElement, "./nmwg:parameters/nmwg:parameter[\@name=\"timestamp\"]/nmtm:time[text()]", 1 ), 1 );
                 if ( $time =~ m/^\d+$/ ) {
                     if ( $parameters->{time} >= $time ) {
-                        $self->{LOGGER}->debug( "Removing all info for control id \"" . $mid . "\" from \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\"." );
+                        $self->{LOGGER}->info( "Removing all info for control id \"" . $mid . "\" from \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $parameters->{container} . "\"." );
                         my $dataCounter = 0;
                         foreach my $data ( @{ $dataTrackerLookup{$midr} } ) {
-                            $self->{LOGGER}->debug( "Removing data \"" . $data . "\" due to expiration" );
+                            $self->{LOGGER}->info( "Removing data \"" . $data . "\" due to expiration" );
                             $database->remove( { name => $data, txn => $dbTr, error => \$error } );
                             $errorFlag++ if $error;
                             delete $dataTracker{$data};
@@ -1976,11 +2007,11 @@ sub cleanLSAux {
                         delete $metadataTracker{$midr};
                         delete $dataTrackerLookup{$midr};
                         $database->remove( { name => $midr, txn => $dbTr, error => \$error } );
-                        $self->{LOGGER}->debug( "Removing metadata \"" . $midr . "\" due to expiration." );
+                        $self->{LOGGER}->info( "Removing metadata \"" . $midr . "\" due to expiration." );
                         $errorFlag++ if $error;
 
                         $database->remove( { name => $mid, txn => $dbTr, error => \$error } );
-                        $self->{LOGGER}->debug( "Removing control metadata \"" . $mid . "\" due to expiration." );
+                        $self->{LOGGER}->info( "Removing control metadata \"" . $mid . "\" due to expiration." );
                         $errorFlag++ if $error;
 
                         $self->{LOGGER}->info( "Removed [" . ( $dataCounter + 2 ) . "] data elements and service info for key \"" . $mid . "\"." );
@@ -2003,7 +2034,7 @@ sub cleanLSAux {
 
     foreach my $data ( keys %dataTracker ) {
         unless ( exists $metadataTracker{ $dataTracker{$data} } and $metadataTracker{ $dataTracker{$data} } ) {
-            $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate." );
+            $self->{LOGGER}->info( "Removing data \"" . $data . "\" beacuse it has no metadata mate." );
             $database->remove( { name => $data, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             delete $dataTracker{$data};
@@ -2013,11 +2044,11 @@ sub cleanLSAux {
     my %controlTrackerR = reverse %controlTracker;
     foreach my $metadata ( keys %metadataTracker ) {
         unless ( exists $controlTrackerR{$metadata} and $controlTrackerR{$metadata} ) {
-            $self->{LOGGER}->debug( "Removing metadata \"" . $metadata . "\" beacuse it has no control metadata mate." );
+            $self->{LOGGER}->info( "Removing metadata \"" . $metadata . "\" beacuse it has no control metadata mate." );
             $database->remove( { name => $metadata, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             foreach my $data ( @{ $dataTrackerLookup{$metadata} } ) {
-                $self->{LOGGER}->debug( "Removing data \"" . $data . "\" beacuse it has no metadata mate, whom had no control metadata mate." );
+                $self->{LOGGER}->info( "Removing data \"" . $data . "\" beacuse it has no metadata mate, whom had no control metadata mate." );
                 $database->remove( { name => $data, txn => $dbTr, error => \$error } );
                 $errorFlag++ if $error;
                 delete $dataTracker{$data};
@@ -2029,7 +2060,7 @@ sub cleanLSAux {
 
     foreach my $metadata ( keys %controlTracker ) {
         unless ( exists $metadataTracker{ $controlTracker{$metadata} } and $metadataTracker{ $controlTracker{$metadata} } ) {
-            $self->{LOGGER}->debug( "Removing control metadata \"" . $metadata . "\" beacuse it has no metadata mate." );
+            $self->{LOGGER}->info( "Removing control metadata \"" . $metadata . "\" beacuse it has no metadata mate." );
             $database->remove( { name => $metadata, txn => $dbTr, error => \$error } );
             $errorFlag++ if $error;
             delete $controlTracker{$metadata};
@@ -2041,6 +2072,9 @@ sub cleanLSAux {
         $self->{LOGGER}->error( "Error: \"" . $error . "\"" ) if $error;
         return -1;
     }
+
+    $self->{LOGGER}->info( "cleanLSAux complete for container \"" . $parameters->{container} . "\"." );
+
     return 0;
 }
 
