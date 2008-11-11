@@ -70,7 +70,7 @@ Calls the MA instance with the sent message and returns the response (if any).
 
 sub callMA {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { message => 1 } );
+    my $parameters = validateParams( @args, { message => 1, timeout => 0 } );
 
     unless ( $self->{INSTANCE} ) {
         $self->{LOGGER}->error("Instance not defined.");
@@ -99,7 +99,7 @@ sub callMA {
     }
 
     my $error = q{};
-    my $responseContent = $sender->sendReceive( makeEnvelope( $parameters->{message} ), q{}, \$error );
+    my $responseContent = $sender->sendReceive( makeEnvelope( $parameters->{message} ), $parameters->{timeout} , \$error );
     if ($error) {
         $self->{ALIVE} = 0;
         $self->{LOGGER}->error("sendReceive failed: $error");
@@ -182,7 +182,7 @@ sub metadataKeyRequest {
         $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
     }
 
-    my $msg = $self->callMA( { message => $self->createMAMessage( { type => "MetadataKeyRequest", content => $content } ) } );
+    my $msg = $self->callMA( { timeout => 30, message => $self->createMAMessage( { type => "MetadataKeyRequest", content => $content } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
         return;
@@ -241,7 +241,7 @@ sub dataInfoRequest {
     
     $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
     
-    my $msg = $self->callMA( { message => $self->createMAMessage( { type => "DataInfoRequest", content => $content } ) } );
+    my $msg = $self->callMA( { timeout => 30, message => $self->createMAMessage( { type => "DataInfoRequest", content => $content } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
         return;
@@ -332,7 +332,7 @@ sub setupDataRequest {
         $content .= "  <nmwg:data id=\"".$dId."\" metadataIdRef=\"".$mdId."\"/>\n";
     }
     
-    my $msg = $self->callMA( { message => $self->createMAMessage( { type => "SetupDataRequest", content => $content } ) } );
+    my $msg = $self->callMA( { timeout => 30, message => $self->createMAMessage( { type => "SetupDataRequest", content => $content } ) } );
     unless ($msg) {
         $self->{LOGGER}->error("Message element not found in return.");
         return;
