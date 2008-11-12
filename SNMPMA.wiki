@@ -2,10 +2,36 @@
 
 == TOC ==
 
- * Introduction
- * Installation
- * Code Tour
- * FAQ
+ * [SNMPMA#Introduction Introduction]
+ * [SNMPMA#Installation Installation]
+   * [SNMPMA#Pre_requisites Pre-requisites]
+     * [SNMPMA#RRD_Tool RRD Tool]
+       * [SNMPMA#RRD_Tool_Patch RRD Tool Patch]
+     * [SNMPMA#SQLite SQLite]
+     * [SNMPMA#MySQL MySQL]
+     * [SNMPMA#Oracle_DB_XML Oracle DB XML]
+   * [SNMPMA#SVN_Installation SVN Installation]
+   * [SNMPMA#CPAN_Instalation CPAN Instalation]
+   * [SNMPMA#Binary_Executable_Installation Binary Executable Installation]
+   * [SNMPMA#RPM_Installation RPM Installation]
+   * [SNMPMA#Deb_Installation Deb Installation]
+   * [SNMPMA#Configuration Configuration]
+     * [SNMPMA#Service_Configuration Service Configuration]
+     * [SNMPMA#Metadata_Configuration Metadata Configuration]
+   * [SNMPMA#Running Running]
+   * [SNMPMA#Testing Testing]
+ * [SNMPMA#Code_Tour Code Tour]
+   * [SNMPMA#Initialization Initialization]
+   * [SNMPMA#LS_Registration LS Registration]
+   * [SNMPMA#Communication_Entry Communication Entry]
+     * [SNMPMA#MetadataKeyRequest_Case MetadataKeyRequest Case]
+       * [SNMPMA#metadataKeyRetrieveMetadataData metadataKeyRetrieveMetadataData]
+       * [SNMPMA#metadataKeyRetrieveKey metadataKeyRetrieveKey]
+     * [SNMPMA#SetupDataRequest_Case SetupDataRequest Case]
+       * [SNMPMA#setupDataRetrieveMetadataData setupDataRetrieveMetadataData]
+       * [SNMPMA#setupDataRetrieveKey setupDataRetrieveKey]
+ * [SNMPMA#FAQ FAQ]
+ * [SNMPMA#Last_Updated Last Updated]
 
 == Introduction ==
 
@@ -38,7 +64,7 @@ Open Grid Forum ([http://www.ogf.org OGF]).
 
 The following covers several installation methods.
 
-=== Pre-requisites ===
+=== Pre requisites ===
 
 There are several dependencies, depending on how the SNMP MA is to be used to
 serve collected data.
@@ -56,6 +82,18 @@ installing from source be sure to use the *_--enable-perl-site-install_* flag.
 
 After installation be sure to adjust your *PATH* and *LD_LIBRARY_PATH*
 variables as needed.
+
+===== RRD Tool Patch =====
+
+RRDTool has a known bug in the Perl modules that form the API.  Normally a
+request to read a file that doesn't exist, or using a datasource or RRA name
+that is incorrect would produce an error.  There are hooks to bubble this
+error up through the perl module, but they cause an infinite loop.
+
+A patch has been prepared to handle this situation.  The patchfile and
+instructions regarding use are available here:
+
+http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/scripts/rrdtool/
 
 ==== SQLite ====
 
