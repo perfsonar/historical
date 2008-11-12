@@ -2645,7 +2645,7 @@ sub lsRegisterRequestUpdate {
         my $status = $parameters->{database}->commitTransaction( { txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         if ( $status == 0 ) {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{metadataId}, createLSKey( { key => $parameters->{mdKey}, eventType => "success.ls.register" } ), undef );
-            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been updated with key [" . $parameters->{mdKey} . "]\" />\n", undef );
+            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" value=\"[" . $dCount . "] Data elements have been updated with key [" . $parameters->{mdKey} . "]\" />\n", undef );
             undef $parameters->{dbTr};
             $parameters->{database}->checkpoint( { error => \$parameters->{error} } );
             $parameters->{database}->closeDB( { error => \$parameters->{error} } );
@@ -2822,7 +2822,7 @@ sub lsRegisterRequestNew {
         my $status = $parameters->{database}->commitTransaction( { txn => $parameters->{dbTr}, error => \$parameters->{error} } );
         if ( $status == 0 ) {
             createMetadata( $parameters->{doc}, $mdId, $parameters->{m}->getAttribute( "id" ), createLSKey( { key => $mdKey, eventType => "success.ls.register" } ), undef );
-            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKey . "]\" />\n", undef );
+            createData( $parameters->{doc}, $dId, $mdId, "<nmwg:datum xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" value=\"[" . $dCount . "] Data elements have been registered with key [" . $mdKey . "]\" />\n", undef );
             undef $parameters->{dbTr};
             $parameters->{database}->checkpoint( { error => \$parameters->{error} } );
             $parameters->{database}->closeDB( { error => \$parameters->{error} } );
