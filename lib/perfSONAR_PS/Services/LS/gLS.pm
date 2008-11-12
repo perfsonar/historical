@@ -2140,9 +2140,6 @@ sub handleMessage {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
 
-use Data::Dumper;
-print "\n\n" , Dumper($parameters->{"rawRequest"}->{"NAMESPACES"}) , "\n\n";
-
     my $error   = q{};
     my $counter = 0;
     $self->{STATE}->{"messageKeys"} = ();
