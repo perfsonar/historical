@@ -678,6 +678,13 @@ sub mapNamespaces {
     my ( $node, $namespaces ) = @_;
     my $logger = get_logger("perfSONAR_PS::Common");
 
+    my @nsList = $node->getNamespaces;
+    if ( $#nsList > -1 ) {
+        foreach my $ns ( @nsList ) {
+            $namespaces->{ $ns->getValue() } = $ns->getLocalName();
+        }
+    }
+
     my $uri    = $node->namespaceURI();
     my $prefix = $node->prefix();
     if ( defined $prefix and $prefix and $uri ) {
