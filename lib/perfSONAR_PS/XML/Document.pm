@@ -107,7 +107,7 @@ sub startElement {
     if ( defined $extra_namespaces and $extra_namespaces ) {
         foreach my $curr_prefix ( keys %{$extra_namespaces} ) {
             my $new_namespace = getNormalizedURI( $extra_namespaces->{$curr_prefix} );
-
+            next if $new_namespace =~ m/http:\/\/schemas\.xmlsoap\.org\/soap\/envelope/;
             if ( defined $namespaces{$curr_prefix} and $namespaces{$curr_prefix} ne $new_namespace ) {
                 $self->{LOGGER}->error( "Tried to redefine prefix $curr_prefix from " . $namespaces{$curr_prefix} . " to " . $new_namespace );
                 return -1;

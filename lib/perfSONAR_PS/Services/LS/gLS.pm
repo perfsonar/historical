@@ -222,43 +222,41 @@ sub init {
         $self->{CONF}->{"gls"}->{"ls_ttl"} = 172800;
     }
 
-    if ( exists $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ) {
+    if ( exists $self->{CONF}->{"ls_registration_interval"} ) {
         $self->{CONF}->{"ls_registration_interval"} *= 60;
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} and $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
         }
         else {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
     }
     else {
-        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} and $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"ls_registration_interval"} ) {
             $self->{CONF}->{"gls"}->{"ls_registration_interval"} *= 60;
             $self->{CONF}->{"ls_registration_interval"} = $self->{CONF}->{"gls"}->{"ls_registration_interval"};
-            $self->{LOGGER}->info( "Setting 'ls_registration_interval' to '" . $self->{CONF}->{"gls"}->{"ls_registration_interval"} . "'." );
         }
         else {
             $self->{LOGGER}->info( "Setting 'ls_registration_interval' to 1 hour." );
             $self->{CONF}->{"ls_registration_interval"} = 3600;
-            $self->{CONF}->{"gls"}->{"ls_registration_interval"} = 3600;
         }
     }
+    $self->{LOGGER}->info( "Setting 'gls->ls_registration_interval' to ".$self->{CONF}->{"gls"}->{"ls_registration_interval"} );
 
-    unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} and $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+    unless ( exists $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
         $self->{LOGGER}->info( "Configuration value 'maintenance_interval' not searching for other values..." );
-        if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} and $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"summarization_interval"} ) {
             $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"summarization_interval"};
         }
 
-        if ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} and $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} ) {
-            if ( not $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} ) {
+            unless ( $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
                 $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"xmldb_reaper_interval"};
             }
         }
 
-        if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"} and $self->{CONF}->{"gls"}->{"reaper_interval"} ) {
-            if ( not $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
+        if ( exists $self->{CONF}->{"gls"}->{"reaper_interval"} ) {
+            unless ( $self->{CONF}->{"gls"}->{"maintenance_interval"} or $self->{CONF}->{"gls"}->{"reaper_interval"} < $self->{CONF}->{"gls"}->{"maintenance_interval"} ) {
                 $self->{CONF}->{"gls"}->{"maintenance_interval"} = $self->{CONF}->{"gls"}->{"reaper_interval"};
             }
         }
@@ -378,7 +376,6 @@ sub prepareDatabase {
         }
         $retry++;
     } until ( $return == 0 );
-
     return $db;
 }
 
@@ -463,7 +460,7 @@ sub maintenance {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return 1;
+    return $self->{CONF}->{"gls"}->{"maintenance_interval"};
 }
 
 =head2 needLS( $self )
@@ -477,7 +474,7 @@ sub needLS {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, {} );
 
-    return 1;
+    return $self->{CONF}->{"gls"}->{"ls_registration_interval"};
 }
 
 =head2 registerLS($self $sleep_time)
@@ -1307,7 +1304,14 @@ sub summarizeLS {
         my $serviceSummary = $self->makeSummary( { key => $serviceKey, addresses => $list1, domains => $serviceSummaryMap{$serviceKey}{"domains"}, eventTypes => $serviceSummaryMap{$serviceKey}{"eventTypes"}, keywords => $serviceSummaryMap{$serviceKey}{"keywords"} } );
 
         unless ( exists $self->{STATE}->{"messageKeys"}->{$serviceKey} and $self->{STATE}->{"messageKeys"}->{$serviceKey} ) {
-            $self->{STATE}->{"messageKeys"}->{$serviceKey} = $self->isValidKey( { database => $summarydb, key => $serviceKey, txn => $dbTr } );
+            if ( $summarydb->queryByName( { name => $serviceKey, txn => $dbTr, error => \$error } ) ) {
+                $self->{STATE}->{"messageKeys"}->{$serviceKey} = 1;
+                $self->{LOGGER}->debug( "Key \"" . $serviceKey . "\" found in database." );
+            }
+            else {
+                $self->{STATE}->{"messageKeys"}->{$serviceKey} = 0;
+                $self->{LOGGER}->debug( "Key \"" . $serviceKey . "\" not found in database." );
+            }
             $errorFlag++ if $error;
         }
 
@@ -1376,7 +1380,14 @@ sub summarizeLS {
     my $totalSummary = $self->makeSummary( { key => $mdKey, addresses => $list2, domains => $summaryMap{"domains"}, eventTypes => $summaryMap{"eventTypes"}, keywords => $summaryMap{"keywords"} } );
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { database => $summarydb, key => $mdKey, txn => $dbTr } );
+        if ( $summarydb->queryByName( { name => $mdKey, txn => $dbTr, error => \$error } ) ) {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 1;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" found in database." );
+        }
+        else {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 0;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" not found in database." );
+        }
         $errorFlag++ if $error;
     }
 
@@ -2116,33 +2127,7 @@ sub handleMessageParameters {
     return $parameters->{msgParams};
 }
 
-=head2 isValidKey($self, $database, $key)
 
-This function will check to see if a key found in a request message is
-a valid key in the datbase.  
-
-=cut
-
-sub isValidKey {
-    my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { database => 1, key => 1, txn => 0 } );
-
-    my $error = q{};
-    my $result;
-    if ( exists $parameters->{txn} and $parameters->{txn} ) {
-        $result = $parameters->{database}->queryByName( { name => $parameters->{key}, txn => $parameters->{txn}, error => \$error } );
-    }
-    else {
-        $result = $parameters->{database}->queryByName( { name => $parameters->{key}, txn => q{}, error => \$error } );
-    }
-
-    if ( $result ) {
-        $self->{LOGGER}->debug( "Key \"" . $parameters->{key} . "\" found in database." );
-        return 1;
-    }
-    $self->{LOGGER}->debug( "Key \"" . $parameters->{key} . "\" not found in database." );
-    return 0;
-}
 
 =head2 handleMessage($self, $doc, $messageType, $message, $request)
 
@@ -2154,6 +2139,9 @@ the message to the appropriate location based on message type.
 sub handleMessage {
     my ( $self, @args ) = @_;
     my $parameters = validateParams( @args, { output => { type => ARRAYREF, isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => { type => ARRAYREF } } );
+
+use Data::Dumper;
+print "\n\n" , Dumper($parameters->{"rawRequest"}->{"NAMESPACES"}) , "\n\n";
 
     my $error   = q{};
     my $counter = 0;
@@ -2167,7 +2155,8 @@ sub handleMessage {
         $parameters->{output}->addExistingXMLElement( $msgParams );
     }
 
-    startMessage( $parameters->{output}, $messageIdReturn, $parameters->{messageId}, $messageTypeReturn, q{}, undef );
+    my %totalNS = reverse %{ $parameters->{"rawRequest"}->{"NAMESPACES"} };
+    startMessage( $parameters->{output}, $messageIdReturn, $parameters->{messageId}, $messageTypeReturn, q{}, \%totalNS );
 
     foreach my $d ( $parameters->{rawRequest}->getRequestDOM()->getDocumentElement->getChildrenByTagNameNS( $ls_namespaces{"nmwg"}, "data" ) ) {
         $counter++;
@@ -2343,7 +2332,14 @@ sub lsRegisterRequest {
     my $mdKey = extract( find( $parameters->{m}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"lsKey\"]", 1 ), 0 );
     if ( $mdKey ) {
         unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-            $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
+            if ( $database->queryByName( { name => $mdKey, txn => $dbTr, error => \$error } ) ) {
+                $self->{STATE}->{"messageKeys"}->{$mdKey} = 1;
+                $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" found in database." );
+            }
+            else {
+                $self->{STATE}->{"messageKeys"}->{$mdKey} = 0;
+                $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" not found in database." );
+            }
             $errorFlag++ if $error;
         }
 
@@ -2717,7 +2713,15 @@ sub lsRegisterRequestNew {
 
     my $mdKey = md5_hex( $accessPoint . $accessType . $accessName );
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $parameters->{dbTr}, database => $parameters->{database}, key => $mdKey } );
+        if ( $parameters->{database}->queryByName( { name => $mdKey, txn => $parameters->{dbTr}, error => \$parameters->{error} } ) ) {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 1;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" found in database." );
+        }
+        else {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 0;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" not found in database." );
+        }
+
         $parameters->{errorFlag}++ if $parameters->{error};
     }
 
@@ -2907,7 +2911,14 @@ sub lsDeregisterRequest {
     }
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
+        if ( $database->queryByName( { name => $mdKey, txn => $dbTr, error => \$error } ) ) {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 1;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" found in database." );
+        }
+        else {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 0;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" not found in database." );
+        }
         $errorFlag++ if $error;
     }
 
@@ -3058,7 +3069,14 @@ sub lsKeepaliveRequest {
     }
 
     unless ( exists $self->{STATE}->{"messageKeys"}->{$mdKey} and $self->{STATE}->{"messageKeys"}->{$mdKey} ) {
-        $self->{STATE}->{"messageKeys"}->{$mdKey} = $self->isValidKey( { txn => $dbTr, database => $database, key => $mdKey } );
+        if ( $database->queryByName( { name => $mdKey, txn => $dbTr, error => \$error } ) ) {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 1;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" found in database." );
+        }
+        else {
+            $self->{STATE}->{"messageKeys"}->{$mdKey} = 0;
+            $self->{LOGGER}->debug( "Key \"" . $mdKey . "\" not found in database." );
+        }
         $errorFlag++ if $error;
     }
 

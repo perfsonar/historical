@@ -45,7 +45,7 @@ BEGIN {
     # this value is set by the installation scripts
     my $was_installed = 0;
 
-    if ($was_installed) {
+    if ( $was_installed ) {
 
         # In this case, libdir needs to be set to the directory that the modules
         # were installed to, and confdir needs to be set to the directory that
@@ -63,12 +63,12 @@ BEGIN {
         # the binary so that users can launch the daemon from wherever but specify
         # scripts and whatnot relative to the binary.
 
-        $dirname = dirname($PROGRAM_NAME);
+        $dirname = dirname( $PROGRAM_NAME );
         if ( !( $dirname =~ /^\// ) ) {
             $dirname = getcwd . "/" . $dirname;
         }
         $confdir = $dirname;
-        $libdir  = dirname($PROGRAM_NAME) . "/lib";
+        $libdir  = dirname( $PROGRAM_NAME ) . "/lib";
     }
 }
 
@@ -143,22 +143,22 @@ my $RUNAS_USER  = q{};
 my $RUNAS_GROUP = q{};
 
 my $status = GetOptions(
+    'verbose'   => \$DEBUGFLAG,
+    'help'      => \$HELP,
     'config=s'  => \$CONFIG_FILE,
-    'logger=s'  => \$LOGGER_CONF,
-    'output=s'  => \$LOGOUTPUT,
     'piddir=s'  => \$PIDDIR,
     'pidfile=s' => \$PIDFILE,
+    'logger=s'  => \$LOGGER_CONF,
     'user=s'    => \$RUNAS_USER,
     'group=s'   => \$RUNAS_GROUP,
-    'verbose'   => \$DEBUGFLAG,
-    'noclean'   => \$CLEANFLAG,
-    'help'      => \$HELP
+    'output=s'  => \$LOGOUTPUT,
+    'noclean'   => \$CLEANFLAG
 );
 
 if ( not $status or $HELP ) {
     print "$0: starts the MA daemon.\n";
-    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --user=[user to run as] --group=[group to run as]\n";
-    exit(1);
+    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --user=[user to run as] --group=[group to run as] --output=/path/to/log/output --noclean\n";
+    exit( 1 );
 }
 
 if ( not defined $CONFIG_FILE or $CONFIG_FILE eq q{} ) {
@@ -166,7 +166,7 @@ if ( not defined $CONFIG_FILE or $CONFIG_FILE eq q{} ) {
 }
 
 # Read in configuration information
-my $config = new Config::General($CONFIG_FILE);
+my $config = new Config::General( $CONFIG_FILE );
 my %conf   = $config->getall;
 
 #
@@ -209,14 +209,14 @@ if ( not $RUNAS_USER ) {
 if ( $RUNAS_USER and $RUNAS_GROUP ) {
     if ( setids( USER => $RUNAS_USER, GROUP => $RUNAS_GROUP ) != 0 ) {
         print "Error: Couldn't drop priviledges\n";
-        exit(-1);
+        exit( -1 );
     }
 }
 elsif ( $RUNAS_USER or $RUNAS_GROUP ) {
 
     # they need to specify both the user and group
     print "Error: You need to specify both the user and group if you specify either\n";
-    exit(-1);
+    exit( -1 );
 }
 
 # Now that we've dropped privileges, create the logger. If we do it in reverse
@@ -226,7 +226,7 @@ if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
     use Log::Log4perl qw(:easy);
 
     my $output_level = $INFO;
-    if ($DEBUGFLAG) {
+    if ( $DEBUGFLAG ) {
         $output_level = $DEBUG;
     }
 
@@ -240,33 +240,33 @@ if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
     }
 
     Log::Log4perl->easy_init( \%logger_opts );
-    $logger = get_logger("perfSONAR_PS");
+    $logger = get_logger( "perfSONAR_PS" );
 }
 else {
     use Log::Log4perl qw(get_logger :levels);
 
     my $output_level = $INFO;
-    if ($DEBUGFLAG) {
+    if ( $DEBUGFLAG ) {
         $output_level = $DEBUG;
     }
 
-    Log::Log4perl->init($LOGGER_CONF);
-    $logger = get_logger("perfSONAR_PS");
-    $logger->level($output_level);
+    Log::Log4perl->init( $LOGGER_CONF );
+    $logger = get_logger( "perfSONAR_PS" );
+    $logger->level( $output_level );
 }
 
 if ( not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{} ) {
-    $logger->warn("Setting maximum worker lifetime at 60 seconds");
+    $logger->warn( "Setting maximum worker lifetime at 60 seconds" );
     $conf{"max_worker_lifetime"} = 60;
 }
 
 if ( not defined $conf{"max_worker_processes"} or $conf{"max_worker_processes"} eq q{} ) {
-    $logger->warn("Setting maximum worker processes at 32");
+    $logger->warn( "Setting maximum worker processes at 32" );
     $conf{"max_worker_processes"} = 32;
 }
 
 if ( not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_interval"} eq q{} ) {
-    $logger->warn("Setting LS registration interval at 60 minutes");
+    $logger->warn( "Setting LS registration interval at 60 minutes" );
     $conf{"ls_registration_interval"} = 60;
 }
 
@@ -274,12 +274,12 @@ if ( not defined $conf{"ls_registration_interval"} or $conf{"ls_registration_int
 $conf{"ls_registration_interval"} *= 60;
 
 if ( not defined $conf{"disable_echo"} or $conf{"disable_echo"} eq q{} ) {
-    $logger->warn("Enabling echo service for each endpoint unless specified otherwise");
+    $logger->warn( "Enabling echo service for each endpoint unless specified otherwise" );
     $conf{"disable_echo"} = 0;
 }
 
 if ( not defined $conf{"reaper_interval"} or $conf{"reaper_interval"} eq q{} ) {
-    $logger->warn("Setting reaper interval to 20 seconds");
+    $logger->warn( "Setting reaper interval to 20 seconds" );
     $conf{"reaper_interval"} = 20;
 }
 
@@ -298,8 +298,8 @@ my %port_configs    = ();
 my %service_configs = ();
 
 if ( not defined $conf{"port"} ) {
-    $logger->error("No ports defined");
-    exit(-1);
+    $logger->error( "No ports defined" );
+    exit( -1 );
 }
 
 foreach my $port ( keys %{ $conf{"port"} } ) {
@@ -310,7 +310,7 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
     $service_configs{$port} = \%port_conf;
 
     if ( not defined $conf{"port"}->{$port}->{"endpoint"} ) {
-        $logger->warn("No endpoints specified for port $port");
+        $logger->warn( "No endpoints specified for port $port" );
         next;
     }
 
@@ -320,8 +320,8 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
         Timeout   => $port_conf{"reaper_interval"},
     );
     if ( not defined $listener != 0 ) {
-        $logger->error("Couldn't start daemon on port $port");
-        exit(-1);
+        $logger->error( "Couldn't start daemon on port $port" );
+        exit( -1 );
     }
 
     $listeners{$port} = $listener;
@@ -342,13 +342,13 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
 
         next if ( defined $endpoint_conf{"disabled"} and $endpoint_conf{"disabled"} == 1 );
 
-        $logger->debug("Adding endpoint $fixed_endpoint to $port");
+        $logger->debug( "Adding endpoint $fixed_endpoint to $port" );
 
         $handlers{$port}->{$fixed_endpoint} = perfSONAR_PS::RequestHandler->new();
 
         if ( not defined $endpoint_conf{"module"} or $endpoint_conf{"module"} eq q{} ) {
-            $logger->error("No module specified for $port:$fixed_endpoint");
-            exit(-1);
+            $logger->error( "No module specified for $port:$fixed_endpoint" );
+            exit( -1 );
         }
 
         my @endpoint_modules = ();
@@ -364,18 +364,18 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
         # the echo module is loaded by default unless otherwise specified
         if ( not $endpoint_conf{"disable_echo"} and not $conf{"disable_echo"} ) {
             my $do_load = 1;
-            foreach my $curr_module (@endpoint_modules) {
+            foreach my $curr_module ( @endpoint_modules ) {
                 if ( $curr_module eq $echo_module ) {
                     $do_load = 0;
                 }
             }
 
-            if ($do_load) {
+            if ( $do_load ) {
                 push @endpoint_modules, $echo_module;
             }
         }
 
-        foreach my $module (@endpoint_modules) {
+        foreach my $module ( @endpoint_modules ) {
             if ( not defined $modules_loaded{$module} ) {
                 load $module;
                 $modules_loaded{$module} = 1;
@@ -384,7 +384,7 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
             my $service = $module->new( \%endpoint_conf, $port, $fixed_endpoint, $dirname );
             if ( $service->init( $handlers{$port}->{$fixed_endpoint} ) != 0 ) {
                 $logger->error( "Failed to initialize module " . $module . " on $port:$fixed_endpoint" );
-                exit(-1);
+                exit( -1 );
             }
 
             if ( $service->needLS() ) {
@@ -396,7 +396,7 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
                 push @ls_services, \%ls_child_args;
             }
 
-            if ( $service->can("maintenance") ) {
+            if ( $service->can( "maintenance" ) ) {
                 my %maintenance_args = ();
                 $maintenance_args{"service"} = $service;
                 $maintenance_args{"conf"}    = \%endpoint_conf;
@@ -408,7 +408,7 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
     }
 
     if ( $num_endpoints == 0 ) {
-        $logger->warn("No endpoints enabled for port $port");
+        $logger->warn( "No endpoints enabled for port $port" );
 
         delete( $listeners{$port} );
         delete( $handlers{$port} );
@@ -417,8 +417,8 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
 }
 
 if ( scalar( keys %listeners ) == 0 ) {
-    $logger->error("No ports enabled");
-    exit(-1);
+    $logger->error( "No ports enabled" );
+    exit( -1 );
 }
 
 # Daemonize if not in debug mode. This must be done before forking off children
@@ -440,51 +440,51 @@ foreach my $port ( keys %listeners ) {
         %child_pids = ();
         $PROGRAM_NAME .= " - Listener ($port)";
         psService( $listeners{$port}, $handlers{$port}, $service_configs{$port} );
-        exit(0);
+        exit( 0 );
     }
     elsif ( $pid < 0 ) {
-        $logger->error("Couldn't spawn listener child");
+        $logger->error( "Couldn't spawn listener child" );
         killChildren();
-        exit(-1);
+        exit( -1 );
     }
     else {
         $child_pids{$pid} = q{};
     }
 }
 
-foreach my $maintenance_args (@maintenance) {
+foreach my $maintenance_args ( @maintenance ) {
     my $maintenance_pid = fork();
     if ( $maintenance_pid == 0 ) {
         %child_pids = ();
         $PROGRAM_NAME .= " - Service Maintenance";
-        maintenance($maintenance_args);
-        exit(0);
+        maintenance( $maintenance_args );
+        exit( 0 );
     }
     elsif ( $maintenance_pid < 0 ) {
-        $logger->error("Couldn't spawn Service Maintenance");
+        $logger->error( "Couldn't spawn Service Maintenance" );
         killChildren();
-        exit(-1);
+        exit( -1 );
     }
     $child_pids{$maintenance_pid} = q{};
 }
 
-foreach my $ls_args (@ls_services) {
+foreach my $ls_args ( @ls_services ) {
     my $ls_pid = fork();
     if ( $ls_pid == 0 ) {
         %child_pids = ();
         $PROGRAM_NAME .= " - LS Registration (" . $ls_args->{"port"} . ":" . $ls_args->{"endpoint"} . ")";
-        registerLS($ls_args);
-        exit(0);
+        registerLS( $ls_args );
+        exit( 0 );
     }
     elsif ( $ls_pid < 0 ) {
-        $logger->error("Couldn't spawn LS");
+        $logger->error( "Couldn't spawn LS" );
         killChildren();
-        exit(-1);
+        exit( -1 );
     }
     $child_pids{$ls_pid} = q{};
 }
 
-unlockPIDFile($pidfile);
+unlockPIDFile( $pidfile );
 
 foreach my $pid ( keys %child_pids ) {
     waitpid( $pid, 0 );
@@ -506,10 +506,10 @@ sub psService {
 
     $max_worker_processes = $service_config->{"max_worker_processes"};
 
-    while (1) {
+    while ( 1 ) {
         if ( $max_worker_processes > 0 ) {
             while ( %child_pids and scalar( keys %child_pids ) >= $max_worker_processes ) {
-                $logger->debug("Waiting for a slot to open");
+                $logger->debug( "Waiting for a slot to open" );
                 my $kid = waitpid( -1, 0 );
                 if ( $kid > 0 ) {
                     delete $child_pids{$kid};
@@ -517,7 +517,7 @@ sub psService {
             }
         }
 
-        if (%child_pids) {
+        if ( %child_pids ) {
             my $time = time;
 
             $logger->debug( "Reaping children (total: " . scalar( keys %child_pids ) . ") at time " . $time );
@@ -525,21 +525,21 @@ sub psService {
             # reap any children that have finished or outlived their allotted time
             foreach my $pid ( keys %child_pids ) {
                 if ( waitpid( $pid, WNOHANG ) ) {
-                    $logger->debug("Child $pid exited.");
+                    $logger->debug( "Child $pid exited." );
                     delete $child_pids{$pid};
                 }
                 elsif ( $child_pids{$pid}->{"timeout_time"} <= $time and $child_pids{$pid}->{"child_timeout_length"} > 0 ) {
-                    $logger->error("Pid $pid timed out.");
+                    $logger->error( "Pid $pid timed out." );
                     kill 9, $pid;
 
                     my $msg      = "Timeout occurred, current limit is " . $child_pids{$pid}->{"child_timeout_length"} . " seconds. Try decreasing the breadth of your search if possible.";
                     my $resMsg   = getErrorResponseMessage( eventType => "error.common.timeout", description => $msg );
                     my $response = HTTP::Response->new();
-                    $response->message("success");
+                    $response->message( "success" );
                     $response->header( 'Content-Type' => 'text/xml' );
                     $response->header( 'user-agent'   => 'perfSONAR-PS/1.0b' );
-                    $response->content( makeEnvelope($resMsg) );
-                    $child_pids{$pid}->{"listener"}->send_response($response);
+                    $response->content( makeEnvelope( $resMsg ) );
+                    $child_pids{$pid}->{"listener"}->send_response( $response );
                     $child_pids{$pid}->{"listener"}->close();
                 }
             }
@@ -548,7 +548,7 @@ sub psService {
         my $handle = $listener->accept;
         if ( not defined $handle ) {
             my $msg = "Accept returned nothing, likely a timeout occurred or a child exited";
-            $logger->debug($msg);
+            $logger->debug( $msg );
         }
         else {
             $logger->info( "Received incoming connection from:\t" . $handle->peerhost() );
@@ -561,9 +561,9 @@ sub psService {
                 my $http_request = $handle->get_request;
                 if ( not defined $http_request ) {
                     my $msg = "No HTTP Request received from host:\t" . $handle->peerhost();
-                    $logger->error($msg);
+                    $logger->error( $msg );
                     $handle->close;
-                    exit(-1);
+                    exit( -1 );
                 }
 
                 my $request = perfSONAR_PS::Request->new( $handle, $http_request );
@@ -576,10 +576,10 @@ sub psService {
                     $PROGRAM_NAME .= " - " . $request->getEndpoint();
                     handleRequest( $handlers->{ $request->getEndpoint() }, $request, $service_config->{"endpoint"}->{ $request->getEndpoint() } );
                 }
-                exit(0);
+                exit( 0 );
             }
             elsif ( $pid < 0 ) {
-                $logger->error("Error spawning child");
+                $logger->error( "Error spawning child" );
             }
             else {
                 my $max_worker_lifetime = $service_config->{"max_worker_lifetime"};
@@ -602,7 +602,7 @@ sub psService {
 =cut
 
 sub registerLS {
-    my ($args) = @_;
+    my ( $args ) = @_;
 
     my $service = $args->{"service"};
     $logger->debug( "Starting '" . $PROCESS_ID . "' for LS registration" );
@@ -621,19 +621,22 @@ sub registerLS {
         $sleep_time = 3600;
     }
 
-    while (1) {
+    unless ( $sleep_time ) {
+        $logger->error( "LS Registration Disabled." );
+        return;
+    }
+
+    while ( 1 ) {
         if ( not $sleep_time ) {
             $sleep_time = $args->{"conf"}->{"ls_registration_interval"};
         }
 
-        eval { 
-            $service->registerLS( \$sleep_time ); 
-        };
+        eval { $service->registerLS( \$sleep_time ); };
         if ( $EVAL_ERROR ) {
             $logger->error( "Problem running register LS: " . $EVAL_ERROR );
         }
-        $logger->debug("Sleeping for $sleep_time");
-        sleep($sleep_time);
+        $logger->debug( "Sleeping for $sleep_time" );
+        sleep( $sleep_time );
     }
     return;
 }
@@ -644,29 +647,34 @@ sub registerLS {
 =cut
 
 sub maintenance {
-    my ($args)     = @_;
+    my ( $args )   = @_;
     my $service    = $args->{"service"};
     my $sleep_time = q{};
     my $error      = q{};
 
-    if ( exists $args->{"conf"}->{"gls"}->{"maintenance_interval"} and $args->{"conf"}->{"gls"}->{"maintenance_interval"} ) {
+    if ( exists $args->{"conf"}->{"gls"}->{"maintenance_interval"} ) {
         $sleep_time = $args->{"conf"}->{"gls"}->{"maintenance_interval"};
     }
-    elsif ( exists $args->{"conf"}->{"ls"}->{"maintenance_interval"} and $args->{"conf"}->{"ls"}->{"maintenance_interval"} ) {
+    elsif ( exists $args->{"conf"}->{"ls"}->{"maintenance_interval"} ) {
         $sleep_time = $args->{"conf"}->{"ls"}->{"maintenance_interval"};
     }
     else {
         $sleep_time = 1800;
     }
 
-    while (1) {
+    unless ( $sleep_time ) {
+        $logger->error( "LS Maintenance Disabled." );
+        return;
+    }
+
+    while ( 1 ) {
         my $cleanStatus = 0;
         my $sumStatus   = 0;
         eval {
             unless ( $CLEANFLAG ) {
-                $cleanStatus = $service->cleanLS( { error => \$error } ) if $service->can("cleanLS");
+                $cleanStatus = $service->cleanLS( { error => \$error } ) if $service->can( "cleanLS" );
             }
-            $sumStatus   = $service->summarizeLS( { error => \$error } ) if $service->can("summarizeLS");
+            $sumStatus = $service->summarizeLS( { error => \$error } ) if $service->can( "summarizeLS" );
         };
         if ( my $e = catch std::exception ) {
             $logger->error( "Problem running service maintenance: " . $e->what() );
@@ -674,13 +682,13 @@ sub maintenance {
         elsif ( $EVAL_ERROR ) {
             $logger->error( "Problem running service maintenance: " . $EVAL_ERROR );
         }
-        
+
         if ( $cleanStatus == -1 or $sumStatus == -1 ) {
-            $logger->error("Error returned: $error");
+            $logger->error( "Error returned: $error" );
         }
 
-        $logger->debug("Sleeping for $sleep_time");
-        sleep($sleep_time);
+        $logger->debug( "Sleeping for $sleep_time" );
+        sleep( $sleep_time );
     }
 
     return 0;
@@ -723,7 +731,7 @@ sub handleRequest {
         my $ex = shift;
 
         my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
-        $logger->error($msg);
+        $logger->error( $msg );
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
@@ -731,14 +739,14 @@ sub handleRequest {
         my $ex = shift;
 
         my $msg = "Error handling request: " . $ex->eventType . " => \"" . $ex->errorMessage . "\"";
-        $logger->error($msg);
+        $logger->error( $msg );
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => $ex->eventType, description => $ex->errorMessage ) );
     }
     otherwise {
         my $ex  = shift;
         my $msg = "Unhandled exception or crash: $ex";
-        $logger->error($msg);
+        $logger->error( $msg );
 
         $request->setResponse( getErrorResponseMessage( messageIdRef => $messageId, eventType => "error.common.internal_error", description => "An internal error occurred" ) );
     };
@@ -776,11 +784,11 @@ sub lockPIDFile {
     sysopen( PIDFILE, $pidfile, O_RDWR | O_CREAT );
     flock( PIDFILE, LOCK_EX );
     my $p_id = <PIDFILE>;
-    chomp($p_id) if ( defined $p_id );
+    chomp( $p_id ) if ( defined $p_id );
     if ( defined $p_id and $p_id ne q{} ) {
         open( PSVIEW, "ps -p " . $p_id . " |" );
         my @output = <PSVIEW>;
-        close(PSVIEW);
+        close( PSVIEW );
         if ( !$CHILD_ERROR ) {
             croak "$PROGRAM_NAME already running: $p_id\n";
         }
@@ -795,15 +803,15 @@ unlocks the file and closes it.
 =cut
 
 sub unlockPIDFile {
-    my ($filehandle) = @_;
+    my ( $filehandle ) = @_;
 
     truncate( $filehandle, 0 );
     seek( $filehandle, 0, 0 );
     print $filehandle "$PROCESS_ID\n";
     flock( $filehandle, LOCK_UN );
-    close($filehandle);
+    close( $filehandle );
 
-    $logger->debug("Unlocked pid file");
+    $logger->debug( "Unlocked pid file" );
 
     return;
 }
@@ -828,7 +836,7 @@ Kills all the children for the process and then exits
 
 sub signalHandler {
     killChildren;
-    exit(0);
+    exit( 0 );
 }
 
 sub REAPER {
@@ -850,7 +858,7 @@ failure.
 =cut
 
 sub setids {
-    my (%args) = @_;
+    my ( %args ) = @_;
     my ( $uid,  $gid );
     my ( $unam, $gnam );
 
@@ -871,7 +879,7 @@ sub setids {
             # If there are any non-digits, it is a groupname.
             $gid = getgrnam( $gnam = $gid );
             if ( not $gid ) {
-                $logger->error("Can't getgrnam($gnam): $!");
+                $logger->error( "Can't getgrnam($gnam): $!" );
                 return -1;
             }
         }
@@ -879,8 +887,8 @@ sub setids {
             $gid = -$gid;
         }
 
-        if ( not getgrgid($gid) ) {
-            $logger->error("Invalid GID: $gid");
+        if ( not getgrgid( $gid ) ) {
+            $logger->error( "Invalid GID: $gid" );
             return -1;
         }
 
@@ -893,7 +901,7 @@ sub setids {
         # If there are any non-digits, it is a username.
         $uid = getpwnam( $unam = $uid );
         if ( not $uid ) {
-            $logger->error("Can't getpwnam($unam): $!");
+            $logger->error( "Can't getpwnam($unam): $!" );
             return -1;
         }
     }
@@ -901,8 +909,8 @@ sub setids {
         $uid = -$uid;
     }
 
-    if ( not getpwuid($uid) ) {
-        $logger->error("Invalid UID: $uid");
+    if ( not getpwuid( $uid ) ) {
+        $logger->error( "Invalid UID: $uid" );
         return -1;
     }
 
