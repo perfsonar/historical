@@ -231,7 +231,7 @@ sub __handleMessage {
                 messageId => { type => SCALAR },
                 messageType => { type => SCALAR },
                 message => { type => SCALARREF },
-                rawRequest,
+                rawRequest => {},
             });
 
     my $messageType = $args->{"messageType"};
@@ -257,7 +257,7 @@ sub __handleMessageBegin {
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
                 message => { type => SCALARREF },
-                rawRequest,
+                rawRequest => {},
                 doOutputMessageHeader => { type => SCALARREF },
                 doOutputMetadata => { type => SCALARREF },
                 outputMessageType => { type => SCALARREF },
@@ -319,7 +319,7 @@ sub __handleEvent {
                 subject => { type => ARRAYREF },
                 filterChain => { type => ARRAYREF },
                 data => { type => SCALARREF },
-                rawRequest,
+                rawRequest => {},
                 doOutputMetadata => { type => SCALARREF },
             });
 

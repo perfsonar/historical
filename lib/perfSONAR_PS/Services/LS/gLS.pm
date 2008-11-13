@@ -2138,7 +2138,7 @@ the message to the appropriate location based on message type.
 
 sub handleMessage {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { output => { isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest } );
+    my $parameters = validateParams( @args, { output => { isa => "perfSONAR_PS::XML::Document" }, messageId => { type => SCALAR | UNDEF }, messageType => { type => SCALAR }, message => { type => SCALARREF }, rawRequest => {} } );
 
     my $error   = q{};
     my $counter = 0;
@@ -3276,21 +3276,21 @@ sub lsQueryRequest {
                 throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );
             }
             else {
+                for my $x ( 0 .. $len ) {
+                    my $parser = XML::LibXML->new();
+                    my $doc    = $parser->parse_string( $resultsString[$x] );
+
+                    my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", txn => $dbTr, error => \$error } );
+                    $errorFlag++ if $error;
+                    $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"metadata"} = $doc->getDocumentElement;
+                    $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
+                }
+
                 my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
                 if ( $status == 0 ) {
                     undef $dbTr;
                     $database->checkpoint( { error => \$error } );
                     $database->closeDB( { error => \$error } );
-
-                    for my $x ( 0 .. $len ) {
-                        my $parser = XML::LibXML->new();
-                        my $doc    = $parser->parse_string( $resultsString[$x] );
-
-                        my @resultsString2 = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[\@id=\"" . $doc->getDocumentElement->getAttribute( "metadataIdRef" ) . "\"]", txn => $dbTr, error => \$error } );
-                        $errorFlag++ if $error;
-                        $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"metadata"} = $doc->getDocumentElement;
-                        $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
-                    }
 
                     foreach my $id ( keys %map ) {
                         my %store = ();
