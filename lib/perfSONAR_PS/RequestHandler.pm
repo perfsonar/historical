@@ -227,11 +227,11 @@ sub __handleMessage {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => HASHREF, isa => "perfSONAR_PS::XML::Document" },
+                output => { isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR },
                 messageType => { type => SCALAR },
                 message => { type => SCALARREF },
-                rawRequest => { type => HASHREF },
+                rawRequest,
             });
 
     my $messageType = $args->{"messageType"};
@@ -252,12 +252,12 @@ sub __handleMessageBegin {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => HASHREF, isa => "perfSONAR_PS::XML::Document" },
+                output => { isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
                 message => { type => SCALARREF },
-                rawRequest => { type => HASHREF },
+                rawRequest,
                 doOutputMessageHeader => { type => SCALARREF },
                 doOutputMetadata => { type => SCALARREF },
                 outputMessageType => { type => SCALARREF },
@@ -282,7 +282,7 @@ sub __handleMessageEnd {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => HASHREF, isa => "perfSONAR_PS::XML::Document" },
+                output => { isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 message => { type => SCALARREF },
@@ -311,7 +311,7 @@ sub __handleEvent {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
-                output => { type => HASHREF, isa => "perfSONAR_PS::XML::Document" },
+                output => { isa => "perfSONAR_PS::XML::Document" },
                 messageId => { type => SCALAR | UNDEF },
                 messageType => { type => SCALAR },
                 messageParameters => { type => HASHREF | UNDEF },
@@ -319,7 +319,7 @@ sub __handleEvent {
                 subject => { type => ARRAYREF },
                 filterChain => { type => ARRAYREF },
                 data => { type => SCALARREF },
-                rawRequest => { type => HASHREF },
+                rawRequest,
                 doOutputMetadata => { type => SCALARREF },
             });
 
