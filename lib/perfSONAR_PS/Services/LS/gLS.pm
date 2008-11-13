@@ -3300,7 +3300,7 @@ sub lsQueryRequest {
                         $store{"keyword"}   = 0 if exists $sent->{"keyword"};
 
                         # gather eventTypes
-                        if ( exists $store{"eventType"} and $store{"eventType"} ) {
+                        if ( exists $store{"eventType"} ) {
                             my $l_eventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:eventType", 0 );
                             my $l_supportedEventTypes = find( $map{$id}{"metadata"}, "./nmwg:metadata/nmwg:parameter[\@name=\"supportedEventType\" or \@name=\"eventType\"]", 0 );
                             foreach my $e ( $l_eventTypes->get_nodelist ) {
@@ -3316,7 +3316,7 @@ sub lsQueryRequest {
                         }
 
                         # gather the domains
-                        if ( exists $store{"domain"} and $store{"domain"} ) {
+                        if ( exists $store{"domain"} ) {
                             my $l_domains = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtb:domain", 0 );
                             foreach my $d ( $l_domains->get_nodelist ) {
                                 my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
@@ -3326,7 +3326,7 @@ sub lsQueryRequest {
                         }
 
                         #gather the networks
-                        if ( exists $store{"address"} and $store{"address"} ) {
+                        if ( exists $store{"address"} ) {
 
                             my $l_networks = find( $map{$id}{"metadata"}, "./nmwg:metadata/summary:subject/nmtl3:network", 0 );
                             my @cidr_list = ();
@@ -3346,7 +3346,7 @@ sub lsQueryRequest {
                         }
 
                         # gather keywords
-                        if ( exists $store{"keyword"} and $store{"keyword"} ) {
+                        if ( exists $store{"keyword"} ) {
                             my $l_keywords = find( $map{$id}{"metadata"}, "./nmwg:metadata//nmwg:parameter[\@name=\"keyword\"]", 0 );
                             foreach my $k ( $l_keywords->get_nodelist ) {
                                 my $value = extract( $k, 0 );
