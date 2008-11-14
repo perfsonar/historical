@@ -39,7 +39,7 @@ The offered API is simple, but offers the key functions we need in a measurement
 
 package gmaps::Graph::RRD;
 
-use fields qw( FILENAME STARTTIME RESOLUTION ENTRIES FIELDS );
+use fields qw( FILENAME STARTTIME RESOLUTION ENTRIES FIELDS WIDTH HEIGHT );
 
 our $logger = Log::Log4perl->get_logger("gmaps::Graph::RRD" );
 
@@ -51,24 +51,30 @@ use strict;
 
 sub new {
     my gmaps::Graph::RRD $self = shift;
+    my @args  = @_;
+	my $params = Params::Validate::validate( @args, { filename => 1, startTime => 1, resolution => 1, entries => 1, fields => 1, width => 0, height => 0 } );
     
     unless ( ref $self ) {
 		$self = fields::new( $self );
     }
     
-	$self->{FILENAME} = shift;    
-    $self->{STARTTIME} = shift;
-    $self->{RESOLUTION} = shift;
-    $self->{ENTRIES} = shift;
-	@{$self->{FIELDS}} = @_;
-
+	$self->{FILENAME} = $params->{filename};    
+    $self->{STARTTIME} = $params->{startTime};
+    $self->{RESOLUTION} = $params->{resolution};
+    $self->{ENTRIES} = $params->{entries};
+	@{$self->{FIELDS}} = @{$params->{fields}};
+    $self->{WIDTH} = $params->{width} || 300;
+    $self->{HEIGHT} = $params->{height} || 55;
+    
     $logger->debug( "Creating rrd file $self->{FILENAME}, start time $self->{STARTTIME}, number of entries $self->{ENTRIES}, with @{$self->{FIELDS}}" );    
 
     # args
     my @args = ();
+
     my $start = $self->{STARTTIME} -1;
     push @args, "--start=" . $start;
 	push @args, "--step=" . $self->{RESOLUTION};
+    
     foreach my $field ( @{$self->{FIELDS}} ) {
 	    push @args, "DS:" . $field . ":GAUGE:" . $self->{RESOLUTION} . ":0:U";
     }
@@ -91,7 +97,7 @@ sub new {
 sub DESTROY
 {
 	my $self = shift;
-	#unlink $self->{'FILENAME'};
+	unlink $self->{'FILENAME'};
 	#$logger->warn( "PNG File: " . $self->{FILENAME} );
 	unlink $self->{'PNG'};
 	return;
@@ -152,6 +158,8 @@ sub graphArgs
 	push @args, '--end=' . $end;
 	push @args, '--start=' . $start;
 	push @args, '--vertical-label=units';
+    
+	
 	foreach my $field ( @{$self->{FIELDS}}) {
 		push @args, 'DEF:' . $field . '=' . $self->{FILENAME} . ':' . $field . ':AVERAGE';
 		push @args, 'CDEF:' . $field . 'RPN' . '=' . $field . $rpn;	
@@ -191,7 +199,15 @@ sub getGraph
 	if ( ! defined $graphArgs ) {
 		$graphArgs = $self->graphArgs( $start, $end );
 	}
-	RRDs::graph $png, @$graphArgs;
+	
+	my @args = ();
+#	push @args, "--full-size-mode";
+    push @args, "--width=" . $self->{WIDTH};
+    push @args, "--height=" . $self->{HEIGHT};
+	
+	push @args, @$graphArgs;
+	
+	RRDs::graph $png, @args;
 	
 	my $ans = RRDs::error;
 	die( "Error graphing " . $self->{FILENAME} . " using '@$graphArgs': $ans" )

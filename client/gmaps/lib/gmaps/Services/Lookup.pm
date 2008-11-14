@@ -215,21 +215,34 @@ sub getMetaData
         $seen{$hash->{accessPoint}}++;
         next if $seen{$hash->{accessPoint}} > 1;
         
-		# add ma
-		$hash->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $hash->{accessPoint} );
-        if ( $hash->{serviceType} eq 'MA' && defined $hash->{eventType}) {
-             $hash->{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
-        }
-
 		# determine coordinates for host
         my ( $host, undef, undef ) = &perfSONAR_PS::Transport::splitURI( utils::xml::unescape( $hash->{accessPoint} ) );
 		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, undef );
+        
+        # enumerate for each service the accessPoint provides
+        my $services = gmaps::EventType2Service::autoDetermineService( $hash->{accessPoint} );
 
-		# add it
-		push @out, $hash
+        foreach my $service ( @$services ) {
+            
+            # need to make copy of hash
+            my %this_hash = %$hash;
+            
+		    # add ma
+    		$this_hash{eventType} = gmaps::EventType2Service::getEventTypeFromService( $service );
+            if ( $this_hash{serviceType} eq 'MA' && defined $this_hash{eventType}) {
+                 $this_hash{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $this_hash{eventType} );
+            }
+
+		    # add it
+		    push @out, \%this_hash;
+        }
 
 	}
-	#$logger->info( "Found ports: @out");
+	
+    # $logger->info( "FOUND:");
+    # foreach my $item ( @out ) {
+    #       $logger->info( "item " . Data::Dumper::Dumper $item );      
+    # }
 	return \@out;
 }
 

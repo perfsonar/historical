@@ -296,7 +296,7 @@ sub getMetaData
                 
                 my $keyDir = 'key' . ucfirst( $data->{$id}->{direction} );
                 
-                $logger->warn( "merging data from $id to $urn with $keyDir key " . $data->{$id}->{key});
+                $logger->debug( "merging data from $id to $urn with $keyDir key " . $data->{$id}->{key});
 
                 # copy hash, not reference as we need to add data
                 while( my ( $k, $v ) = each %{$data->{$id}} ) {

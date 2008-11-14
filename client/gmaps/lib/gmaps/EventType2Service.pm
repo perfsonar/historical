@@ -75,27 +75,28 @@ sub autoDetermineService
 {
 	my $uri = shift;
 	
-	my $service = undef;
+	my @services = ();
+	
 	if ( $uri =~ /rrd/i or $uri =~ /snmp/ ) {
-		$service ='Utilisation';
+		push @services, 'Utilisation';
 	} elsif ( $uri =~ /topology/i ) {
-		$service = 'topology';
+		push @services, 'topology';
 	} elsif ( $uri =~ /pinger/i ) {
-		$service = 'PingER';
+		push @services, 'PingER';
 	} elsif ( $uri =~ /LS/i ) {
-		$service = 'Lookup';
-	} elsif ( $uri =~ /pSB/i ) {
-	    $service = 'BWCTL';
+		push @services, 'Lookup';
+    } elsif ( $uri =~ /perfSONARBOUY/ ) {
+        push @services, 'OWAMP';
+        push @services, 'BWCTL';
 	} else {
 		$logger->logdie( "Cannot determine service type form uri '$uri'");
 	}
 
 	$logger->logdie( "Could not auto determine the service from uri '$uri'\n")
-	    if ! $service;
+	    if scalar @services < 1;
 
-	return $service;
+	return \@services;
 }
-
 
 =head2 autoDetermineEventType( $uri )
 
@@ -106,9 +107,12 @@ sub autoDetermineEventType
 {
     my $uri = shift;
     
-    my $service = gmaps::EventType2Service::autoDetermineService( $uri );
-    
-    return gmaps::EventType2Service::getEventTypeFromService( $service );
+    my $services = gmaps::EventType2Service::autoDetermineService( $uri );
+    my @eventTypes = ();
+    foreach my $service ( @$services ) {
+        push @eventTypes, gmaps::EventType2Service::getEventTypeFromService( $service );
+    }
+    return \@eventTypes;
 }
 
 

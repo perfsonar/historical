@@ -193,13 +193,17 @@ sub discover
     
     # if no eventType do automatic remap
     if ( ! defined $eventType ) {
-        $eventType = gmaps::EventType2Service::autoDetermineEventType( $accessPoint );
+        my $evts = gmaps::EventType2Service::autoDetermineEventType( $accessPoint );
+        if ( scalar @$evts > 1 ) {
+            die "Too many eventTypes provided by '$accessPoint'";
+        } else {
+            $eventType = shift @$evts;
+        }
     }
     
 	my $markers = undef;
 	$markers = $self->SUPER::discover( $accessPoint, $eventType );
 
-	
 	return $self->getMarkers( $markers );
 }
 
@@ -274,7 +278,6 @@ sub getMarkers
 	# if path stuff, then create a path
 
 	my $vars = {};
-
     my %seen = {};
 
 	# if physical port for snmp, then
@@ -298,6 +301,7 @@ sub getMarkers
 
             # don't bother adding if already seen
             #$logger->warn( "HOST: $host, EVENT: " . $hash->{eventType} );
+            my $uniq = $host . ':' . $hash->{serviceType};
             
             my $services = ();
             push @$services, { id => $host . ':' . $hash->{serviceType}, serviceType => $hash->{serviceType}, eventType => $hash->{eventType}, accessPoint => $hash->{accessPoint} };
@@ -311,7 +315,7 @@ sub getMarkers
                         } );
 
             push @{$vars->{NODES}}, $item
-                unless $seen{$host}++;
+                unless $seen{$uniq}++;
             
         } elsif ( exists $hash->{urns} ) {
 

@@ -95,7 +95,7 @@ sub setLatLong{
 		'ip' => shift,
 		'latitude' => shift,
 		'longitude' => shift,
-		'last_updated' => 'NOW()',
+		'last_updated' => 'CURRENT_TIMESTAMP',
 	};
 
 	# count

@@ -81,79 +81,40 @@ sub isAlive
 }
 
 
-=head2 discover
-retrieves as much information about the metadata of the service as possible
-and returns a list of urns
-=cut
-sub discover
-{
-	my $self = shift;
-	my @list = ();
-	foreach my $a ( @{$self->getPorts()} ) {
-		push @list, $a->{urn};
-	}
-	return \@list;
-}
-
-
-=head2 topology
-retrieves as much information about the metadata of the service as possible
-=cut
-sub topology
-{
-	my $self = shift;
-	my $array = $self->getPorts();
-	return $array;
-}
-
-
-
 =head2 fetch( uri, startTime, endTime )
 retrieves the data for the urn
 =cut
-sub fetch
+sub getData
 {
-	my $self = shift;
-	my $urn = shift;
+	my ( $self, @args ) = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 	
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift || 3600;
-	my $cf = shift;
-	
-	( $startTime, $endTime ) = $self->checkTimeRange( $startTime, $endTime );
-	
-	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $urn; 
+	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $params->{urn}; 
 	$logger->debug( "PATH: $path, @params");
-	
-	my $src = undef;
-	my $dst = undef;
-	if( $path =~ m/^path\=(.*) to (.*)$/ ) {
-		$src = $1;
-		$dst = $2;
-	} else {
-		
-		$logger->logdie( "Could not determine source and destination or urn");
-		
-	}
-	$logger->debug( "Fetching '$urn': path='$src' to '$dst' params='@params'" );
 
-	# determine if the port is a ip address
-	my $vars = {
-			'src' => $src,
-			'dst' => $dst,
-		};
+	if ( ! defined $params->{key} ) {	
+    	my $src = undef;
+    	my $dst = undef;
+    	if( $path =~ m/^path\=(.*) to (.*)$/ ) {
+    		$src = $1;
+    		$dst = $2;
+    	} else {
+		
+    		$logger->logdie( "Could not determine source and destination or urn");
+		
+    	}
+    	# determine if the port is a ip address
+    	$params->{src} = $src;
+    	$params->{dst} = $dst;
+    	
+    	$logger->debug( "Fetching '" . $params->{urn} . "': path='$src' to '$dst' params='@params'" );
+    }
 
 	# form the parameters
 	foreach my $s ( @params ) {
 		my ( $k, $v ) = split /\=/, $s;
-		$vars->{$k} = $v;
+		$params->{$k} = $v;
 	}
-
-	# need to have real time becuase of problems with using N
-	$vars->{"ENDTIME"} = $endTime;
-	$vars->{'STARTTIME'} = $startTime || $endTime - 14*3600*24;
 
 	# fetch the data form the ma
 	my $requestXML = 'BWCTL/fetch_xml.tt2';
@@ -161,7 +122,7 @@ sub fetch
 	
 	# we only get one message back, so 
 	my @temp = ();
-	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $vars, $filter );
+	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $params, $filter );
 	
 	# now get teh actually data elements
 	return $self->parseData( $message );
@@ -176,11 +137,13 @@ sub fetch
 =head2 getPorts( urn )
  returns list of urns of monitorign ports
 =cut
-sub getPorts
+sub getMetaData
 {
 	my $self = shift;
-	my $urn = shift;
-	
+	my @args = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+
+
 	my $requestXML = 'BWCTL/query-all-ports_xml.tt2';
 	my $filter = '//nmwg:message/nmwg:metadata[@id]';
 
@@ -193,17 +156,6 @@ sub getPorts
 	foreach my $meta ( @ans ) {
 
 		my $hash = {
-			
-			'src'	=> undef,
-			'dst'	=> undef,
-						
-			'longitude' => undef,
-			'latitude' => undef,
-			
-			'urn' => $urn,
-			
-			# mas
-			'mas' => [],
 		};
 			
 		foreach my $node ( $meta->childNodes() ) 
@@ -249,31 +201,34 @@ sub getPorts
 		next unless ( $hash->{src} && $hash->{dst} );
 
 		# add own ma
-		push ( @{$hash->{mas}}, { 'type'=> 'bwctl', 'uri' => $self->uri() } );
-
-        # get urn for item
-		$hash->{urn} = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
-
+		my $urn = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
 		my @keys = ();
 		foreach my $k ( keys %$hash ) {
-			next if $k eq 'src' or $k eq 'dst' 
-			  or $k eq 'mas' or $k eq 'urn'
-			  or $k eq 'latitude' or $k eq 'longitude';
+			next if $k eq 'src' or $k eq 'dst' ;
 			push @keys, $k;
 		}
 		
 		# add params to urn (prob not what we want to do...)
-		$hash->{urn} .= ':'
-			if scalar @keys;
-			
+		$urn .= ':'
+		    if scalar @keys;
 
 		for( my $i=0; $i<scalar @keys; $i++ ) {
-			$hash->{urn} .= $keys[$i] . '=' . $hash->{$keys[$i]};
-			$hash->{urn} .= ':' unless $i eq scalar @keys - 1;
+			$urn .= $keys[$i] . '=' . $hash->{$keys[$i]};
+			$urn .= ':' unless $i eq scalar @keys - 1;
 		}
 
+		# add own ma
+		$hash->{eventType} = $params->{eventType};
+		$hash->{serviceType} => gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+
+		my $urns = ();
+		push @$urns, { urn => $urn };
+        $hash->{urns} = $urns;
+
+        $hash->{accessPoint} = $self->uri();
+
 		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{src} } ), undef, $hash->{src}, undef );
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{dst} } ), undef, $hash->{dst}, undef );
+		( $hash->{dstLatitude}, $hash->{dstLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{dst} } ), undef, $hash->{dst}, undef );
 
 		# add it
 		#$logger->debug( "Adding " . Data::Dumper::Dumper $hash );

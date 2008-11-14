@@ -2,6 +2,7 @@ use utils::urn;
 use gmaps::Location;
 use Log::Log4perl qw(get_logger);
 use Date::Parse;
+use utils::addresses;
 
 =head1 NAME
 
@@ -81,79 +82,32 @@ sub isAlive
 }
 
 
-=head2 discover
-retrieves as much information about the metadata of the service as possible
-and returns a list of urns
-=cut
-sub discover
-{
-	my $self = shift;
-	my @list = ();
-	foreach my $a ( @{$self->getPorts()} ) {
-		push @list, $a->{urn};
-	}
-	return \@list;
-}
-
-
-=head2 topology
-retrieves as much information about the metadata of the service as possible
-=cut
-sub topology
-{
-	my $self = shift;
-	my $array = $self->getPorts();
-	return $array;
-}
-
-
 
 =head2 fetch( uri, startTime, endTime )
 retrieves the data for the urn
 =cut
-sub fetch
+sub getData
 {
-	my $self = shift;
-	my $urn = shift;
-	
-	my $startTime = shift;
-	my $endTime = shift;
-	
-	my $resolution = shift;
-	my $cf = shift;
-	
-	( $startTime, $endTime ) = $self->checkTimeRange( $startTime, $endTime );
-	
-	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $urn; 
+	my ( $self, @args ) = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
+		
+	my ( $temp, $temp, $temp, $path, @params ) = split /\:/, $params->{urn}; 
 	$logger->debug( "PATH: $path, @params");
 	
-	my $src = undef;
-	my $dst = undef;
 	if( $path =~ m/^path\=(.*) to (.*)$/ ) {
-		$src = $1;
-		$dst = $2;
+        # TODO: check if ip address only
+		$params->{src} = $1;
+		$params->{dst} = $2;
 	} else {
-		
 		$logger->logdie( "Could not determine source and destination or urn");
-		
 	}
-	$logger->debug( "Fetching '$urn': path='$src' to '$dst' params='@params'" );
-
-	# determine if the port is a ip address
-	my $vars = {
-			'src' => $src,
-			'dst' => $dst,
-		};
+	$logger->debug( "Fetching '" . $params->{urn} . "': path='" . $params->{src} . "' to '" . $params->{dst} . "' params='@params'" );
 
 	# form the parameters
 	foreach my $s ( @params ) {
 		my ( $k, $v ) = split /\=/, $s;
-		$vars->{$k} = $v;
+		$params->{$k} = $v;
 	}
-
-	# need to have real time becuase of problems with using N
-	$vars->{"ENDTIME"} = $endTime;
-	$vars->{'STARTTIME'} = $startTime || $endTime - 14*3600*24;
 
 	# fetch the data form the ma
 	my $requestXML = 'OWAMP/fetch_xml.tt2';
@@ -161,7 +115,7 @@ sub fetch
 	
 	# we only get one message back, so 
 	my @temp = ();
-	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $vars, $filter );
+	my ( $message, @temp ) = $self->processAndQuery( $requestXML, $params, $filter );
 	
 	# now get teh actually data elements
 	return $self->parseData( $message );
@@ -176,10 +130,11 @@ sub fetch
 =head2 getPorts( urn )
  returns list of urns of monitorign ports
 =cut
-sub getPorts
+sub getMetaData
 {
 	my $self = shift;
-	my $urn = shift;
+	my @args = @_;
+	my $params = Params::Validate::validate( @args, { urn => 0, key => 0, eventType =>0, startTime => 0, endTime => 0, resolution => 0, consolidationFunction => 0 } );
 	
 	my $requestXML = 'OWAMP/query-all-ports_xml.tt2';
 	my $filter = '//nmwg:message/nmwg:metadata[@id]';
@@ -193,17 +148,6 @@ sub getPorts
 	foreach my $meta ( @ans ) {
 
 		my $hash = {
-			
-			'src'	=> undef,
-			'dst'	=> undef,
-						
-			'longitude' => undef,
-			'latitude' => undef,
-			
-			'urn' => $urn,
-			
-			# mas
-			'mas' => [],
 		};
 			
 		foreach my $node ( $meta->childNodes() ) 
@@ -248,50 +192,64 @@ sub getPorts
 		# don't bother if we don't have a valid port for this node
 		next unless ( $hash->{src} && $hash->{dst} );
 
-		# add own ma
-		push ( @{$hash->{mas}}, { 'type'=> 'owamp', 'uri' => $self->uri() } );
 
         # get urn for item
-		$hash->{urn} = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
+		my $urn = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
+
+        # try to resolve to useful dns names
+        my $src_ip = undef;
+        my $dst_ip = undef;
+        my $src_dns = undef;
+        my $dst_dns = undef;
+        
+        ( $src_ip, $src_dns )  = utils::addresses::getDNS( $hash->{src} );
+        ( $dst_ip, $dst_dns )  = utils::addresses::getDNS( $hash->{dst} );
+
+        if ( $src_dns ) {
+            $hash->{src} = $src_dns;
+        }
+        if ( $dst_dns ) {
+            $hash->{dst} = $dst_dns;
+        }
 
 		my @keys = ();
 		foreach my $k ( keys %$hash ) {
-			next if $k eq 'src' or $k eq 'dst' 
-			  or $k eq 'mas' or $k eq 'urn'
-			  or $k eq 'latitude' or $k eq 'longitude';
-			push @keys, $k;
+			next if $k eq 'src' or $k eq 'dst';
+				push @keys, $k;
 		}
 		
 		# add params to urn (prob not what we want to do...)
-		$hash->{urn} .= ':'
+		$urn .= ':'
 			if scalar @keys;
-			
 
 		for( my $i=0; $i<scalar @keys; $i++ ) {
-			$hash->{urn} .= $keys[$i] . '=' . $hash->{$keys[$i]};
-			$hash->{urn} .= ':' unless $i eq scalar @keys - 1;
+			$urn .= $keys[$i] . '=' . $hash->{$keys[$i]};
+			$urn .= ':' unless $i eq scalar @keys - 1;
 		}
 
-		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{src} } ), undef, $hash->{src}, undef );
-		( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{dst} } ), undef, $hash->{dst}, undef );
+		my $urns = ();
+		push @$urns, { urn => $urn };
+        $hash->{urns} = $urns;
+
+		# add own ma
+		if ( ! defined $params->{eventType} ) {
+		    $params->{eventType} = 'http://ggf.org/ns/nmwg/tools/owamp/2.0';
+	    }
+		$hash->{eventType} = $params->{eventType};
+		$hash->{serviceType} = gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+        $hash->{accessPoint} = $self->uri();
+
+		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( $hash->{src}, $src_ip, undef, undef );
+		( $hash->{dstLatitude}, $hash->{dstLongitude} ) = gmaps::Location->getLatLong( $hash->{dst}, $dst_ip, undef, undef );
 
 		# add it
-		#$logger->debug( "Adding " . Data::Dumper::Dumper $hash );
+		$logger->debug( "Adding " . Data::Dumper::Dumper $hash );
 		push @out, $hash;
 
 	}
 	#$logger->info( "Found ports: @out");
 	return \@out;
 }
-
-
-
-sub getDomains
-{
-	my $self = shift;
-
-}
-
 
 
 

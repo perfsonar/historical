@@ -27,6 +27,10 @@ use Data::Dumper;
 
 use LWP::UserAgent;
 
+use gmaps::InterfaceCache;
+use Storable qw/ freeze thaw /;
+
+
 =head1 NAME
 
 gmaps::Interface - An interface to interact with a remote service.  
@@ -122,13 +126,15 @@ sub list
     foreach my $item ( @$data ) {
         
         $logger->debug( Data::Dumper::Dumper( $item ) );
-        if ( exists $item->{urn} ) {
+        if ( exists $item->{urns} ) {
             # for ma stuff
-            $logger->debug( "  adding urn: " . $item->{urn} );
-	        push @urns, $item->{urn};
+            foreach my $urn ( @{$item->{urns}} ) {
+                $logger->debug( "  adding urn: " . $urn->{urn} );
+	            push @urns, $urn->{urn};
+            }
 	    } else {
             $logger->debug( "  adding access: " . $item->{accessPoint} );
-            push @urns, $item->{accessPoint};
+            push @urns, $item->{eventType} . ' @ ' . $item->{accessPoint};
 		}
 		
 	}
@@ -148,14 +154,51 @@ sub discover
 	my $accessPoint = shift;
 	my $eventType = shift;
 
-	#$logger->warn( "Attempting discover of service at '$accessPoint' with eventType '$eventType'");	
-	my $service = $self->createService( $accessPoint, $eventType );
-		
-	# return just list of urns
-	my $data =  $service->discover( { eventType => $eventType });
-	if ( scalar @$data < 1 ) {
-		$logger->fatal( "No urns were found at service '$accessPoint' using eventType '$eventType'");
-	}
+    my $gotResponse = 0;
+    
+    my $useDB = 1;
+	$useDB = 0
+		if ( ! defined ${gmaps::paths::discoverCache} 
+			or ${gmaps::paths::discoverCache} eq '' );
+
+    my $key = $accessPoint . '|' . $eventType;
+
+    # cache data
+    my $db = undef;       
+    my $data = undef;
+
+    my $response = undef;
+	# cache so that we don't have to worry about dynamic loksup
+    if ( $useDB ) {
+	    $db = gmaps::InterfaceCache->new( ${gmaps::paths::discoverCache} );
+        $response = $db->getResponse( $key );
+    }	
+
+	# try the cache first
+    if ( $response eq undef ) {
+
+    	$logger->debug( "Attempting live discovery of service at '$accessPoint' with eventType '$eventType'");	
+    	my $service = $self->createService( $accessPoint, $eventType );
+
+    	# return just list of urns
+    	$data =  $service->discover( { eventType => $eventType });
+    	if ( scalar @$data < 1 ) {
+    		$logger->fatal( "No urns were found at service '$accessPoint' using eventType '$eventType'");
+    	}
+
+        # freeze data
+        if ( $useDB ) {
+            my $serialized = Storable::freeze( $data );
+            $db->setResponse( $key, $serialized );
+        }
+        
+    } else {
+
+    	$logger->debug( "Attempting thawing of discover of service at '$accessPoint' with eventType '$eventType'");	
+        # thraw data
+        $data = Storable::thaw( $response );
+        
+    }
 
 	return $data;	
 }
@@ -193,18 +236,21 @@ sub getGLS
             #     }
             # }
 
-            my $eventType = gmaps::EventType2Service::autoDetermineEventType( $accessPoint );
-            my $hash = {
-                
-                accessPoint => $accessPoint,
-                #my $urn = 'urn:ogf:network:serviceType=gLS:serviceName=Lookup Service:accessPoint=' . URI::Escape::uri_escape( $accessPoint );
-                eventType => $eventType,
-                serviceType => gmaps::EventType2Service::getServiceFromEventType( $eventType )
-                
-            };
-            ( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, undef );
+            my $evts = gmaps::EventType2Service::autoDetermineEventType( $accessPoint );
             
-            push @gLS, $hash;
+            foreach my $eventType ( @$evts ) {
+                my $hash = {
+                
+                    accessPoint => $accessPoint,
+                    #my $urn = 'urn:ogf:network:serviceType=gLS:serviceName=Lookup Service:accessPoint=' . URI::Escape::uri_escape( $accessPoint );
+                    eventType => $eventType,
+                    serviceType => gmaps::EventType2Service::getServiceFromEventType( $eventType )
+                
+                };
+                ( $hash->{latitude}, $hash->{longitude} ) = gmaps::Location->getLatLong( $host, $host, undef, undef );
+            
+                push @gLS, $hash;
+            }
         }
     }
     else {
@@ -226,7 +272,7 @@ sub getGLSUrn
     my $self = shift;
     my @urns = ();
     foreach my $hash ( @{$self->getGLS()} ) {
-        push @urns, $hash->{accessPoint};
+        push @urns, $hash->{eventType} . ' @ ' . $hash->{accessPoint};
     }
     return \@urns;
 }
@@ -274,7 +320,12 @@ sub validateParams
 	$params->{urn} = utils::xml::unescape( $params->{urn} );
 	
 	if ( ! defined $params->{eventType} ) {
-	    $params->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $params->{uri} );
+	    my $evts = gmaps::EventType2Service::autoDetermineEventType( $params->{uri} );
+	    if ( scalar @$evts > 1 ) {
+	        die "Too many eventTypes provided by service '" . $params->{uri} . "'";
+	    } else {
+    	    $params->{eventType} = shift @$evts;
+	    }
 	}
 	
 	$logger->debug( "url: " . $params->{uri} . ", urn: " . $params->{urn} . ", eventType: " . $params->{eventType} . ", key: " . $params->{key} . "; start: " . $params->{startTime} . ", end: " . $params->{endTime} . ", res: " . $params->{resolution} . ", cf: " . $params->{consolidationFunction} );
@@ -293,7 +344,7 @@ sub validateParams
 	};
 	
     if ( ! defined $params->{period} ) {
-        $params->{period} = 3600;
+        $params->{period} = 21600;
     }
     ( $fetchArgs->{startTime}, $fetchArgs->{endTime} ) = $self->checkTimeRange( $params->{startTime}, $params->{endTime}, $params->{period} );
 
@@ -352,12 +403,22 @@ generates a rrd graph
 =cut
 sub graph
 {
-	my ( $self, @args ) = @_;
-    my $fetchArgs = $self->validateParams( @args );
+	my ( $self, $args ) = @_;
+    my $width = $args->{width};
+    delete $args->{width};
+    my $height = $args->{height};
+    delete $args->{height}; 
     
+    my $fetchArgs = $self->validateParams( ( $args ) );
+        
     my $serviceType = undef;
     if ( ! defined $fetchArgs->{eventType} ) {
-        $serviceType = gmaps::EventType2Service::autoDetermineService( $fetchArgs->{uri} );
+        my $evts = gmaps::EventType2Service::autoDetermineService( $fetchArgs->{uri} );
+        if ( scalar @$evts > 1 ) {
+            die "Too many services provided by '" . $fetchArgs->{uri} . "'";
+        } else {
+            $serviceType = shift @$evts;
+        }
     } else {
         $serviceType = gmaps::EventType2Service::getServiceFromEventType( $fetchArgs->{eventType} );
     }
@@ -373,7 +434,7 @@ sub graph
 	    } elsif ( $serviceType eq 'OWAMP' ) {
 	        $graphType = 'Latency';
 	    }
-	    $class .= '::' . $serviceType;
+	    $class .= '::' . $graphType;
 	}
 		
 	# fetch the data	
@@ -397,7 +458,13 @@ sub graph
 	# create temp rrd
 	my ( undef, $rrdFile ) = &File::Temp::tempfile( ) ; #UNLINK => 1 );	
 	no strict 'refs';
-	my $rrd = $class->new( $rrdFile, $start, $fetchArgs->{resolution}, $entries, @$fields );
+	my $rrd = $class->new( { filename => $rrdFile, 
+	                            startTime => $start,
+	                            resolution => $fetchArgs->{resolution}, 
+	                            width => $width,
+	                            height => $height,
+	                            entries => $entries, 
+	                            fields => $fields } );
 	use strict 'refs';
 	
 	# add the data into the rrd
@@ -450,7 +517,12 @@ sub createService
 	# auto determine the service class to use from uri if no using supplied
 	my $class = undef; # eventType mapping
 	if ( ! defined $eventType ) {
-		$class = gmaps::EventType2Service::autoDetermineService( $accessPoint );
+		my $evts = gmaps::EventType2Service::autoDetermineService( $accessPoint );
+		if ( scalar @$evts > 1 ) {
+		    die "Too may services provided by '$accessPoint'";
+		} else {
+		    $class = shift @$evts;
+		}
 	} else {
 		# determine the class to use
 	    $class = gmaps::EventType2Service::getServiceFromEventType( $eventType );
@@ -533,7 +605,12 @@ sub getServicesFromHLS
         if ( $hash->{serviceType} eq 'hLS' ) {
             $hash->{eventType} = 'lookup';
         } else {
-            $hash->{eventType} = gmaps::EventType2Service::autoDetermineEventType( $hash->{accessPoint} );
+            my $evts = gmaps::EventType2Service::autoDetermineEventType( $hash->{accessPoint} );
+            if ( scalar @$evts > 1 ) {
+                die "Too many services provided by '" . $hash->{accessPoint} . "'";
+            } else {
+                $hash->{eventType} = shift @$evts;
+            }
         }
         
         # need to add two service types for perfsonar buay
