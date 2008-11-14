@@ -6,13 +6,11 @@ Markers = {
   gMarkers: undefined,
   icons: undefined,
   pType: undefined,  // assoc. array (index id), indicating whether marker is a source or dest (or both)
-  pService: undefined, // assoc array (index id), indicating whether a service is availabel at the marker
   init: function () {
       
       //Markers
       Markers.gMarkers = new Array();
       Markers.pType = new Array();
-      Markers.pService = new Array();
 
   },
   getType: function( id ) {
@@ -21,7 +19,11 @@ Markers = {
       }
       return Markers.pType[id];
   },
-  setType: function( id, type ) { // src, dst, both
+  register: function( id, type, serviceTotal ) {
+      Markers.registerType( id, type );
+      Markers.registerService( id, serviceTotal );
+  },
+  registerType: function( id, type ) { // src, dst, both
       if ( typeof Markers.pType[id] == "undefined" ) {
           if( debug )
             GLog.write( "setType: " + id + " to " + type );
@@ -33,14 +35,6 @@ Markers = {
       } else {
           Markers.pType[id] = 'both';
       }
-  },
-  getService: function( id ) {
-    return Markers.pService[id];
-  },
-  setService: function( id, number ) { // true or false
-      if( debug )
-        GLog.write( "setService: " + id + " to " + number );
-      Markers.pService[id] = number;
   },
   getId: function ( srcDomain, dstDomain, item ) {
       return srcDomain + '__' + dstDomain + '__' + item;
@@ -65,31 +59,32 @@ Markers = {
   },
   create: function( id, point, image ) {
       
-      if( debug )
-        GLog.write( "Markers.create " + id );
-      // TOOD: work out if this maker has any services
       var icon = new GIcon(G_DEFAULT_ICON);
       if ( typeof image == "undefined" ) {
           icon.image = "images/blue.png";            
       } else {
-          if( debug )
-            GLog.write( "  using image " + image );
           icon.image = image;
       }
       var markerOptions = { title:id, icon:icon };
       
       Markers.gMarkers[id] = new GMarker( point, markerOptions );
       
-      // make double clicks center on the marker
-      GEvent.addListener( Markers.gMarkers[id], "dblclick", function() {
-          map.setCenter( point );
-      });
-      // make single clicks the info box
       GEvent.addListener( Markers.gMarkers[id], "click", function() {
-          InfoWindow.showTab( id );
+
+          Markers.gMarkers[id].openExtInfoWindow(
+              map,
+              ExtInfoWindowView.div,
+              '<p>loading</p>'
+            ); 
+
+        ExtInfoWindowView.showTab( id );
+
           // show only links for this marker
           Links.hideAllLinks();
           Links.setDomainVisibilityFromMarker( id, true );
+          
+        tooltip.style.display = "none";
+                    
       });
 
       // add tooltip
@@ -100,16 +95,14 @@ Markers = {
       GEvent.addListener( Markers.gMarkers[id], "mouseout", function() {
           tooltip.style.display = "none";
       });
-      GEvent.addListener( Markers.gMarkers[id], "click", function() {
-          tooltip.style.display = "none";
-      });
+
       
       return Markers.gMarkers[id];
   },
   add: function ( lat, lng, this_id ) {
 
-      if( debug )
-        GLog.write( "adding marker '" + this_id + "' at (" + lat + "," + lng + ")" );
+//      if( debug )
+//        GLog.write( "adding marker '" + this_id + "' at (" + lat + "," + lng + ")" );
     // return if the marker is invalid
     if ( lat == "undefined" || lng == "undefined" ) {
         if( debug )
@@ -122,12 +115,14 @@ Markers = {
 
         Markers.create( this_id, new GLatLng( lat,lng ) );
 
-    } else {
-      // TODO: if the long lats are different, then move them
+    } 
+    
+/*    else {
+     TODO: if the long lats are different, then move them
       if( debug )
         GLog.write( "FIXME: geo change on marker " + this_id );
     }
-    
+*/    
     return Markers.gMarkers[this_id];    
   },
   get: function( id ) {
@@ -152,8 +147,8 @@ Markers = {
   },
   show: function( id ) { // overload to determine the type of the marker
       // copy info from marker
-      if( debug )
-        GLog.write( "showing marker " + id + ", type=" + Markers.getType( id ) + ", service=" + Markers.getService( id ) );
+//      if( debug )
+//        GLog.write( "showing marker " + id + ", type=" + Markers.getType( id ) );
       var this_marker = Markers.get(id);
       
       // colour the marker depending on the type
@@ -167,13 +162,14 @@ Markers = {
       }
       
       // place a numeral if there are services on the marker
-      if ( Markers.getService( id ) ) {
-          colour = colour + Markers.getService(id);
+      var marker_services = MetaData.getNodeServiceTypes( id ).length;
+      if ( marker_services > 0 ) {
+          colour = colour + marker_services;
       }
       icon = "images/" + colour + ".png";
       
-      if( debug )
-        GLog.write( "    colour=" + colour );
+//      if( debug )
+//        GLog.write( "    colour=" + colour );
       this_marker.hide();
       Markers.gMarkers[id] = Markers.create( id, this_marker.getLatLng(), icon );
 
@@ -193,25 +189,31 @@ Markers = {
           Markers.hide(id);
       }
   },
+  setDomainVisibility_: function( list, domain, state ) {
+      for( var i = 0; i < list.length; i++ ) {
+          var this_id = list[i];
+          var this_domain = MetaData.getNodeDomain( this_id );
+          if ( domain == this_domain ) {
+              if ( state == true ) {
+                  Markers.show( this_id );
+              } else {
+                  Markers.hide( this_id );
+              }
+          }
+      }
+  },
   setDomainVisibility: function( domain, state ) {  // sets all the nodes in the domain to visibility state
       if( debug )
         GLog.write( "Marker.setDomainVisibility of domain " + domain + " to " + state );
-      for ( xmlUrl in nodesDOM ) {
-          if( debug )
-            GLog.write( "  searching through " + xmlUrl );
-          var nodes = nodesDOM[xmlUrl].documentElement.getElementsByTagName("node");
-          for( var i = 0; i < nodes.length; i++ ) {
-            var this_domain = nodes[i].getAttribute("domain");
-            var id = nodes[i].getAttribute("id");
-            if ( domain == this_domain ) {
-                if ( state == true ) {
-                    Markers.show( id );
-                } else {
-                    Markers.hide( id );
-                }
-            }
-          }
-      }
+
+    // hide data ndoes
+    var data_ids = MetaData.getNodeDataIds();
+    Markers.setDomainVisibility_( data_ids, domain, state );
+    
+    //hide service nodes
+    var service_ids = MetaData.getNodeServiceIds();
+    Markers.setDomainVisibility_( service_ids, domain, state );
+    
   },
   bounce: function( id ) {
       Markers.get(id).setPoint(center, {draggable: true});

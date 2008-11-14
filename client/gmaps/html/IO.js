@@ -4,20 +4,52 @@
 
 IO = {
     // retrieves a list of all the gls and plots them on the map
-    getGLS: function() {
-        IO.discover( '?mode=getGLS' );
-        //      discover( '?mode=discover&accessPoint=http://tukki.fnal.gov:9990/perfSONAR_PS/services/gLS');
-        //      discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8095/perfSONAR_PS/services/hLS');
-        //IO.discover( '?mode=discover&accessPoint=http://nptoolkit.grnoc.iu.edu:8075/perfSONAR_PS/services/pinger/ma');
-    },
+    fetchInitial: function() {
+        IO.discover( );
+
+/*
+        IO.discover( 'http://ndb1.internet2.edu:8005/perfSONAR_PS/services/hLS',
+                        'http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0',
+                        'ndb1.internet2.edu', 
+                        'Lookup' );
+*/
+
+        //IO.discover( '?mode=discover&accessPoint=http://tukki.fnal.gov:9990/perfSONAR_PS/services/gLS');
+
+/*
+         IO.discover(   'http://nptoolkit.grnoc.iu.edu:8095/perfSONAR_PS/services/hLS',
+                        'http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0',
+                        'nptoolkit.grnoc.iu.edu', 
+                        'Lookup' );
+*/
+/*
+        IO.discover( 'http://nptoolkit.grnoc.iu.edu:8075/perfSONAR_PS/services/pinger/ma',
+                        'http://ggf.org/ns/nmwg/tools/pinger/2.0/',
+                        'nptoolkit.grnoc.iu.edu',
+                        'PingER' );
+*/
+},
+
 
     // retrieves the nodes for the uri
-    discover: function( uri ) {
+    discover: function( access_point, eventType, service_node, serviceType ) {
 
+        var uri = "";
+        if ( typeof access_point == "undefined" ) {
+            uri = IO.getGlsUrl();
+        } else {
+            uri = IO.getDiscoverUrl( access_point, eventType );
+        }
         Help.discover( uri );
 
         if( debug )
-            GLog.write( "Fetching markers from '" + uri + "'");
+            GLog.write( "Discovering services from '" + uri + "'");
+
+        // add the calling node info if supplied
+        if ( typeof service_node != "undefined" ) {
+            GLog.write( "Registering calling service: " + service_node + ", serviceType=" + serviceType + ", eventType=" + eventType + ", accessPoint=" + access_point );
+            MetaData.registerNodeService( service_node, serviceType, eventType, access_point );
+        }
 
 
         // deal with timeouts etc
@@ -29,20 +61,14 @@ IO = {
             Sidebar.clear();
             Sidebar.setContent('<p align="center">Please wait.<br>Fetching perfSONAR information: <br>This could take some time...<br><img src="spinner.gif"/></p>' );
             Sidebar.refresh();
-
-            if ( typeof nodesDOM[uri] == "object" ) {
-              // wipe out the out one to reload
-              nodesDOM[uri] = undefined;
-              if( debug )
-                GLog.write("Clearing xml cache of '" + uri + "'" );
-            }
-            nodesDOM[uri] = GXml.parse(doc);
+                        
+            var dom = GXml.parse(doc);
 
             if( debug )
                 GLog.write( "Adding Nodes..." );
-            var nodes = nodesDOM[uri].documentElement.getElementsByTagName("node");
+            var nodes = dom.documentElement.getElementsByTagName("node");
             if( debug )
-                GLog.write( "  completed fetching " + nodes.length + " markers from '" + uri + "'");
+                GLog.write( "  got " + nodes.length + " markers from '" + uri + "'");
             var markerCount = 0;
             var serviceCount = 0;
             var linkCount = 0;
@@ -63,32 +89,57 @@ IO = {
                     GLog.write( "Marker '" + id + "' does not contain valid coordinates, placing in Bermuda Triangle" );
               }
 
+              // add marker
               Markers.add( lat, lng, id );
+              MetaData.registerNodeDomain( id, domain );
+              
               // if there are service element defined, then assume services on this node
               var els = nodes[i].getElementsByTagName("service");
+              //GLog.write( "  adding " + els.length + " services for node '" + id + "'");
               var n = 0;
               for ( var j=0; j<els.length; j++ ) {
-                var serviceType = els[j].getAttribute( 'serviceType' );
-                Sidebar.add( domain, id, serviceType );
-                if ( typeof services[id] == "undefined" )
-                    services[id] = new Array();
-                services[id][serviceType] = 1;
-                for( var j in services[id] )
-                  n++;
-                Markers.setService( id, n );
+                var this_serviceType = els[j].getAttribute( 'serviceType' );
+                var this_eventType = els[j].getAttribute( 'eventType' );
+                var this_access_point = els[j].getAttribute( 'accessPoint' );
+                
+                Sidebar.add( domain, id, this_serviceType + ' Service');
                 serviceCount++;
+                
+                MetaData.registerNodeService( id, this_serviceType, this_eventType, this_access_point );
               }
 
-              // TODO: add urn's (utilisation)
+              // add urn's for nodes (like utilisaiton etc)
+
+              els = nodes[i].getElementsByTagName("urn");
+              //GLog.write( "  adding " + els.length + " data for node '" + id + "'");
+              var m = 0;
+              for( var j=0; j<els.length; j++ ) {
+                  var this_serviceType = els[j].getAttribute( 'serviceType' );
+                  var this_eventType = els[j].getAttribute( 'eventType' );
+                  var this_access_point = els[j].getAttribute( 'accessPoint' );
+                  var this_urn_id = els[j].getAttribute( 'id' );              
+                  var this_urn = els[j].firstChild.nodeValue;
+                  
+                  MetaData.registerNodeData( id, this_serviceType, this_eventType, this_access_point, this_urn_id, this_urn );
+                  
+                  // register the fact that this data was found on service
+                  MetaData.registerNodeServiceMetaData( service_node, eventType, access_point, id, this_urn_id );
+                  
+                  Sidebar.add( domain, id, this_serviceType );
+              }
+
               markerCount++;
 
             } // for
-            if( debug )
-                GLog.write( "Added " + markerCount + " new markers" );
+            
+/*            if( debug ) {
+                MetaData.dumpNodeServices();
+                MetaData.dumpNodeData();
+            }*/
 
             if( debug )
                 GLog.write( "Adding Links..." );
-            var links = nodesDOM[uri].documentElement.getElementsByTagName("link");
+            var links = dom.documentElement.getElementsByTagName("link");
             if( debug )
                 GLog.write( "  completed fetching " + links.length + " links from '" + uri + "'");
             for ( var i = 0; i < links.length; i++ ) {
@@ -99,16 +150,33 @@ IO = {
               var dst_domain = links[i].getAttribute("dstDomain");
 
               Links.add( src_id, dst_id );
-              Sidebar.add( src_domain, dst_domain, Links.getId( src_id, dst_id ) );
+              var link_id = Links.getId( src_id, dst_id );
+              Sidebar.add( src_domain, dst_domain, link_id );
 
-              Markers.setType( src_id, 'src' );
-              Markers.setType( dst_id, 'dst' );
+              Markers.registerType( src_id, 'src' );
+              MetaData.registerNodeDomain( src_id, src_domain );
+              Markers.registerType( dst_id, 'dst' );
+              MetaData.registerNodeDomain( dst_id, dst_domain );
+                            
+              var els = links[i].getElementsByTagName( 'urn' );
+              for ( var j=0; j<els.length; j++ ) {
+                  var this_serviceType = els[j].getAttribute('serviceType');
+                  var this_eventType = els[j].getAttribute('eventType');
+                  var this_access_point = els[j].getAttribute('accessPoint');
+                  var this_urn_id = els[j].getAttribute('id');
+                  var this_urn = els[j].firstChild.nodeValue;
+                  
+                  MetaData.registerLinkData( link_id, this_serviceType, this_eventType, this_access_point, this_urn_id, this_urn );
+
+                  MetaData.registerNodeServiceMetaData( service_node, eventType, access_point, src_id, dst_id );
+
+              }
               
               linkCount++;
 
             }
-            if( debug )
-                GLog.write( "Added " + linkCount + " new links" );
+/*            if( debug )
+                MetaData.dumpLinkData();*/
 
             Sidebar.show();
 
@@ -120,7 +188,8 @@ IO = {
             }
 
             // refresh window
-            InfoWindow.show();
+            // FIXME?
+            ExtInfoWindowView.show();
 
             Help.discovered( uri, markerCount, linkCount, serviceCount );
 
@@ -135,6 +204,45 @@ IO = {
             Help.unknownResponse( uri, response );
           }
         });
+    },
+    getKeyFromUrn: function( urn ) {
+        //GLog.write( "matching urn '" + urn + "' for key");
+        var a = new Array();
+        a = urn.match( /key=((\w|\,)+):?/ );
+        if ( a == null ) {
+            return undefined;
+        } else if ( a.length > 0 ){
+            return a[1];
+        }
+    },
+    
+    getUrl: function( access_point, eventType, urn ) {
+        var uri = 'accessPoint=' + access_point;
+        if ( typeof eventType != "undefined" ) {
+            uri += '&eventType=' + eventType;
+        }
+        if( typeof urn != "undefined" ) {
+            // use the key if we have one
+            var key = IO.getKeyFromUrn( urn );
+            if ( typeof key == "undefined" ){
+                uri += '&urn=' + urn;
+            } else {
+                uri += '&key=' + key;
+            }
+        }
+        return uri;
+    },
+    getGraphUrl: function( access_point, eventType, urn ) {
+        var src = '?mode=graph&' + IO.getUrl( access_point, eventType, urn );
+        return src;
+    },
+    getDiscoverUrl: function( access_point, eventType ) {
+        var src = '?mode=discover&' + IO.getUrl( access_point, eventType );
+        return src;
+    },
+    getGlsUrl: function() {
+        var src = '?mode=getGLS';
+        return src;
     }
     
 }

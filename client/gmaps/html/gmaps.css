@@ -25,14 +25,17 @@ div.dragged {
 	z-index: 999999 !important;
 }
 
-div#list, div#comms, div#help {
+div#list, div#comms, div#help, 
+.tabs, .tab, .tabSelected {
 	border-top: 1px solid #000000;
 	border-right: 1px solid #000000;
 	border-bottom: 1px solid #000000;
 	border-left: 1px solid #000000;
-	cellpadding: 0px 0px 0px 0px;
-	position: absolute;
 	cursor: pointer;
+}
+div#list, div#comms, div#help {
+    cellpadding: 0px 0px 0px 0px;
+	position: absolute;
 }
 
 div#palette_shadow {
@@ -55,31 +58,48 @@ div#list {
 }
 
 div#comms {
-  width: 300px;
-	top: 10px;
-	left: 80px;
-	z-index: 200000;
+    width: 300px;
+    top: 10px;
+    left: 80px;
+    z-index: 200000;
 }
 
 div#help {
   width: 190px;
   bottom: 15px;
-    left: 190px;
-    z-index: 200000;
+  left: 190px;
+  z-index: 200000;
+  display: none;
 }
 
-#comms_panel, #help_panel, #side_bar, #status_bar {
-  offset: 0px 0px 0px 0px;
-  padding-bottom: 1px;
-  padding-left: 1px;
-  padding-right: 1px;
-  padding-top: 1px;  
+
+
+
+#comms_panel, #help_panel, #side_bar, #status_bar,
+.tabs, .tab, .tabSelected {
   -moz-user-select: none;
   background-color: #ffffff;  
   font-size: 75%;
   filter: alpha(opacity=80);
   -moz-opacity: .80;
   opacity: .80;
+  offset: 0px 0px 0px 0px;
+  padding-bottom: 1px;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-top: 1px;
+}
+
+.tabs {
+    -moz-opacity: .90;
+    opacity: 0.90;
+}
+
+div.tabs, div.title {
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
 }
 
 #side_bar {
@@ -95,9 +115,9 @@ table {
   width: 100%;
 }
 
-#title {
+#title, div.title {
   font-family: Verdana,Arial,sans-serif;
-  font-size: 85%;
+
   color: white;
   -moz-user-select: none;
   background-color: #979797;  
@@ -107,7 +127,12 @@ table {
   padding-top: 2px;
   position: relative;
 }
-
+div.title {
+    font-size: 8pt;
+}
+#title {
+  font-size: 85%;
+}
 
 #slac_logo {
   position: absolute;
@@ -150,3 +175,110 @@ table {
 	background-color: #fff;
 }
 
+button, select {
+    font-size: 7pt;
+}
+
+button {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+
+
+
+#info_window{
+  min-width: 200px;
+  width: 500px;
+  max-width: 500px;
+  background-color: #FFF;
+}
+
+#info_window_tl, #info_window_tr, #info_window_bl, #info_window_br{
+  width: 1px;
+  height: 1px;
+}
+
+#info_window_l, #info_window_r {
+  width: 1px;
+}
+#info_window_t, #info_window_b {
+  height: 1px;
+}
+
+#info_window_l, #info_window_r,
+#info_window_t, #info_window_b,
+#info_window_tl, #info_window_tr, #info_window_bl, #info_window_br{
+  position: relative;
+  border: 0px;
+  offset: 0px 0px 0px 0px;
+  padding-bottom: 1px;
+  padding-left: 1px;
+  padding-right: 1px;
+  padding-top: 1px;
+}
+
+
+#info_window_close{
+  width: 21px;
+  height: 21px;
+  margin-top: 1px;
+  background: url('../images/infoWindow/close.png') top left no-repeat transparent;
+  cursor: pointer;
+}
+
+#info_window_beak{
+  width: 100px;
+  height: 28px;
+  background: url('../images/infoWindow/beak.png') top left no-repeat transparent;
+}
+
+
+#info_window_contents, #info_window_contents .section1, #info_window_contents .section2{
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* styles for tabs part */
+.tabs_header{
+  position: absolute;
+  top: -20px;
+  left: 0px;
+  float: left;
+}
+
+
+.tab, .tabSelected {
+  float: left;
+  font-size: 12px;
+  cursor: pointer;
+  height: 18px;
+  padding-bottom: 0px;
+}  
+
+.tabSelected {
+    color: white;
+    -moz-user-select: none;
+    background-color: #979797;
+  font-weight: bold;
+}
+
+
+.tabs_header .tab p.contents,
+.tabs_header .tabSelected p.contents {
+  margin: 3px 10px 0 10px;
+  _margin-top: 5px;
+  padding: 0;
+}
+
+.tab_contents, .tab_content_first {
+  position: relative; 
+  top: 0;
+  left: 0;
+}
+.tab_content {
+  position: absolute;
+  display: none;
+}

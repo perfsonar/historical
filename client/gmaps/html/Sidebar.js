@@ -16,18 +16,26 @@ Sidebar = {
     	return str.replace( /\-/g, '' );
     },
     add: function( i, j, k ) {
-        if( debug )
-            GLog.write( "adding to sidebar " + i + ", " + j + ", " + k );
+//        if( debug )
+//            GLog.write( "adding to sidebar " + i + ", " + j + ", " + k );
 
         // init datastructures when necessary		
-        if ( ! Sidebar.checkmenu[i] ) {
+        if ( typeof Sidebar.checkmenu[i] == "undefined") {
         	Sidebar.checkmenu[i] = new Object;
         }
-        if ( ! Sidebar.checkmenu[i][j] ) {
+        if ( typeof Sidebar.checkmenu[i][j] == "undefined" ) {
         	Sidebar.checkmenu[i][j] = new Array();
         }
 
-        Sidebar.checkmenu[i][j].push( k );
+        // remove duplicate service and or paths
+        var add = 1;
+        for( var n=0; n<Sidebar.checkmenu[i][j].length; n++ ) {
+            if ( Sidebar.checkmenu[i][j][n] == k ) {
+                add = 0;
+            }
+        }
+        if ( add )
+            Sidebar.checkmenu[i][j].push( k );
 
         return false;
     },
@@ -139,7 +147,7 @@ Sidebar = {
         for ( var x=0; x<l1.length; x++ ) {
             var i = l1[x];
             var l1Id = i;
-            // determine if we have a domain at this level or a node
+            // domain at this level
             var l1checkBoxCode = "var state = Sidebar.getCheckBoxState( '" + l1Id + "' ); Sidebar.setDomainVisibility( '" + l1Id + "', state );";
             Sidebar.contents += '<li id="show-' + l1Id + '">'
             	+ '<input id="check-' + l1Id + '" type="checkbox" class="minus" onchange="' + l1checkBoxCode + '"/>' + i
@@ -182,13 +190,17 @@ Sidebar = {
                     var l3Id = undefined;
                     
                     if ( Markers.isMarker( Sidebar.checkmenu[i][j][k] ) ) {
+                        // is a marker
+                        
                         l3Id = Sidebar.getMarkerId( j, Sidebar.checkmenu[i][j][k] );
                         checkBoxCode = "javascript:var state = Sidebar.get( 'check-" + l3Id + "' ).checked; Markers.setVisibility( '" + j + "', state );";
                         // TODO: open specific serviceType tab on click
-                        clickCode = "javascript:InfoWindow.focus( '" + j + "' );"
+                        clickCode = "javascript:GEvent.trigger( Markers.get('" + j + "'), 'click' );"
                         l3checkBoxState = true;
 
                     } else {
+                        // is a link
+                        
                         l3Id = Sidebar.getLinkId( Sidebar.checkmenu[i][j][k] );
                         clickCode = "javascript: Sidebar.setLink( '" + l3Id + "', true ); Links.focus( '" + l3Id + "' );";
                         checkBoxCode = "javascript: var state = Sidebar.getCheckBoxState( '" + l3Id + "' ); Sidebar.setLink( '" + l3Id + "', state );";

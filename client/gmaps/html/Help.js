@@ -50,8 +50,8 @@ Help = {
     },
     marker: function( id ) {
         var type = Markers.pType[id];
-        var service = Markers.pService[id];
-        var str = '<p>The marker \'' + id + '\' contains ' + service + ' discovered service(s). Click on Marker to show available list of services.</p>';
+        var service = MetaData.getNodeServiceTypes(id);
+        var str = '<p>The marker \'' + id + '\' contains ' + service.length + ' discovered service(s). Click on Marker to show available list of services.</p>';
         if ( type == undefined ) {
             str = str + '<p>There are no data sources at this host.</p>';
         } else if ( type == 'src' ) {

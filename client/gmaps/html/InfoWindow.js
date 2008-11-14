@@ -67,11 +67,10 @@ InfoWindow = {
                           var src = '&eventType=' + eventType;
                           src = src + '&accessPoint=' + accessPoint;
 
-                          var html = '<table class="infoWindow"><tr><td>Access Point</td><td>' + accessPoint + '</td></tr><tr><td>EventType</td><td>' + eventType + '</td></tr></table><p><center>__CONTENT__</center></p>'
+                          var html = '<table class="infoWindow"><tr><td>Access Point</td><td>' + accessPoint + '</td></tr><tr><td>EventType</td><td>' + eventType + '</td></tr></table><p><center>__CONTENT__</center></p><div id="infoMetaData"></div>';
 
                           src = '?mode=discover' + src;
-                          html = html.replace( /__CONTENT__/g, "<p><input type=\"submit\" value=\"Query Service\" onclick=\"IO.discover('" + src + "');\" /></p>" );
-
+                          html = html.replace( /__CONTENT__/g, "<p><input type=\"submit\" value=\"Query Service\" onclick=\"IO.discover('" + src + "'); MetaDataView.register( '" + id + "', " + serviceType + ", " + src + "' )\"/></p>" );
                           if( debug )
                             GLog.write( '  building marker tab: ' + html ); 
                           tabs.push( new GInfoWindowTab( serviceType, html ) );
@@ -149,6 +148,10 @@ InfoWindow = {
             var tabs = InfoWindow.get( id );
             var number = map.getInfoWindow().getSelectedTab();
             Markers.get(id).openInfoWindowTabsHtml( tabs, {selectedTab:number} );
+            
+            // force update of the metadata view if available
+            //MetaDataView.show( id, serviceType );
+            
         } else {
             // not need to force the tab open as gevent should have already hooked in for click
             // Links.openInfoWindowTabHtml( id );

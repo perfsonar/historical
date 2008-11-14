@@ -39,7 +39,6 @@ Links = {
     if( debug )
         GLog.write( "adding link id: '" + this_id + "', from '" + src_id + "' to '" + dst_id  + "'" );
 
-
     // check to make sure the marker doesn't already exist
     if ( typeof Links.gLinks[this_id] == "undefined" ) {
 
@@ -57,7 +56,8 @@ Links = {
 
         // make single clicks the info box
         GEvent.addListener( Links.gLinks[this_id], "click", function() {
-            InfoWindow.showTab( this_id );
+            Links.initInfoWindow( this_id );
+            ExtInfoWindowView.showTab( this_id );
         });
         GEvent.addListener( Links.gLinks[this_id], "mouseover", function() {
             Help.link( this_id );
@@ -73,17 +73,29 @@ Links = {
     return Links.gLinks[id];  
   },
   initInfoWindow: function( id ) {
-      if( debug )
-        GLog.write( "  initiating tabs for link infoWindow '" + id + "'" );
+
+    GEvent.clearListeners( Links.gLinks[id], 'click' );
     GEvent.addListener( Links.gLinks[id], 'click', function(point) { 
     if( debug )
         GLog.write( "Showing infoWindow for link '" + id + "'");
-      var tabs = InfoWindow.get( id );
-      var number = map.getInfoWindow().getSelectedTab();
-      if( debug )
-        GLog.write( "  links openinfowindow tab=" + number + " @ (" + point.lat() + ", " + point.lng() + ")" );
-      map.openInfoWindowTabsHtml( point, tabs, {selectedTab:number} ); 
+      // create a new invisible marker for popup
+      // FIxME: add blank icon for show, hide prevents infowindow from showing
+      var icon = new GIcon(G_DEFAULT_ICON);
+      icon.image = 'image/blank.png';
+      var opts = { icon:icon };
+      var thisMarker = new GMarker( new GLatLng( point.lat(), point.lng() ), opts );
+        thisMarker.openExtInfoWindow(
+            map,
+            ExtInfoWindowView.div,
+            '<p>loading</p>',
+            {beakOffset: 0}
+          );
+          map.addOverlay( thisMarker );
+          //thisMarker.hide();
+          ExtInfoWindowView.showTab( id );
+          map.removeOverlay( thisMarker );
     } );
+    
   },
   show: function( id ) {
       Links.initInfoWindow( id );
@@ -103,68 +115,64 @@ Links = {
       }
   },
   setDomainVisibility: function( domain, state ) {
-      if( debug )
-        GLog.write("Links.setDomainVisibilty of " + domain + " to " + state );
-      for ( xmlUrl in nodesDOM ) {
-          if( debug )
-            GLog.write( "  going through " + xmlUrl );
-          var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
-          for( var i = 0; i < link.length; i++ ) {
-            var this_srcDomain = link[i].getAttribute("srcDomain");
-            
-            // if this src_id matches, then show the link
-            if ( this_srcDomain == domain ) {
-                
-                var this_src = link[i].getAttribute("src");
-                var this_dst = link[i].getAttribute("dst");
-                var this_id = Links.getId( this_src, this_dst );
-                
-                if ( state == true ) {
-                    Links.show( this_id );
-                } else {
-                    Links.hide( this_id );
-                }
+    if( debug )
+    GLog.write("Links.setDomainVisibilty of " + domain + " to " + state );
+
+    var link_ids = MetaData.getLinkDataIds();
+    for( var i = 0; i < link_ids.length; i++ ) {
+    
+        var this_id = link_ids[i];
+        var nodes = Links.splitId( this_id );
+    
+        var this_srcDomain = MetaData.getNodeDomain( nodes[0] );
+    
+        // if this src_id matches, then show the link
+        if ( this_srcDomain == domain ) {
+        
+            if ( state == true ) {
+                Links.show( this_id );
+            } else {
+                Links.hide( this_id );
             }
-          }
-      }
+        } // if domain
+    } // for
   },
   setDomainVisibilityFromMarker: function( src_id, state ) {
-      if( debug )
+    if( debug )
         GLog.write("Links.setDomainVisibiltyFromMarker of " + src_id + " to " + state );
-      for ( xmlUrl in nodesDOM ) {
-          if( debug )
-            GLog.write( "  going through " + xmlUrl );
-          var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
-          for( var i = 0; i < link.length; i++ ) {
-            var this_src = link[i].getAttribute("src");
-            var this_dst = link[i].getAttribute("dst");
-            var this_id = Links.getId( this_src, this_dst );
+
+    var link_ids = MetaData.getLinkDataIds();
+    for( var i = 0; i < link_ids.length; i++ ) {
+
+        var this_id = link_ids[i];
+        var link = Links.splitId( this_id );
+        var this_src = link[0];
+        var this_dst = link[1];
             
-            // if this src_id matches, then show the link
-            if ( this_src == src_id ) {
-                if ( state == true ) {
-                    Links.show( this_id );
-                } else {
-                    Links.hide( this_id );
-                }
+        // if this src_id matches, then show the link
+        if ( this_src == src_id ) {
+            var checkBoxId = this_id + ":Link";
+            if ( state == true ) {
+                Sidebar.setCheckBox( checkBoxId, true );
+                Links.show( this_id );
+            } else {
+                Sidebar.setCheckBox( checkBoxId, false );
+                Links.hide( this_id );
             }
-          }
-      }
+        }
+    } // for all links
+
   },
   hideAllLinks: function( ) {
-      if( debug )
+    if( debug )
         GLog.write( "hideAllLinks");
-      for ( xmlUrl in nodesDOM ) {
-          if( debug )
-            GLog.write( "  going through " + xmlUrl );
-          var link = nodesDOM[xmlUrl].documentElement.getElementsByTagName("link");
-          for( var i = 0; i < link.length; i++ ) {
-            var this_src = link[i].getAttribute("src");
-            var this_dst = link[i].getAttribute("dst");
-            var this_id = Links.getId( this_src, this_dst );
-            Links.hide( this_id );
-        }
+
+    var link_ids = MetaData.getLinkDataIds();
+    for( var i=0; i<link_ids.length; i++ ) {
+        var this_id = link_ids[i];
+        Links.hide( this_id );
     }
+    
   },
   focus: function( id ) {
       if( debug )
