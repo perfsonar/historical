@@ -1,5 +1,5 @@
 [%- DEFAULT
-  EVENTTYPE = "http://ggf.org/ns/nmwg/tools/owamp/2.0"
+  eventType = "http://ggf.org/ns/nmwg/tools/owamp/2.0"
 -%]
 <nmwg:message id="message1"
               type="SetupDataRequest"
@@ -21,11 +21,11 @@
     <nmwg:parameters id="params"/>
 
     <select:parameters id="select">      
-      <nmwg:parameter name="startTime">[% STARTTIME %]</nmwg:parameter>
-      <nmwg:parameter name="endTime">[% ENDTIME %]</nmwg:parameter>
+      <nmwg:parameter name="startTime">[% startTime %]</nmwg:parameter>
+      <nmwg:parameter name="endTime">[% endTime %]</nmwg:parameter>
     </select:parameters>
     
-     <nmwg:eventType>[% EVENTTYPE %]</nmwg:eventType>
+     <nmwg:eventType>[% eventType %]</nmwg:eventType>
   </nmwg:metadata>
  
   <nmwg:data id="data" metadataIdRef="meta"/>

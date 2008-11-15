@@ -4,16 +4,21 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>SLAC National Accelerator Laboratory perfSONAR Google Maps Mashup</title>
+
     <link rel="stylesheet" href="gmaps.css" type="text/css" />
 
     <script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=[% GOOGLEMAPKEY %]"></script>
 
     <script type="text/javascript" src="dragDrop.js"></script>
     <script type="text/javascript" src="checktree.js"></script>
+    <script type="text/javascript" src="extinfowindow.js"></script>
 
+
+    <script type="text/javascript" src="MetaData.js"></script>
     <script type="text/javascript" src="Markers.js"></script>  
     <script type="text/javascript" src="Links.js"></script>  
-    <script type="text/javascript" src="InfoWindow.js"></script>  
+    <script type="text/javascript" src="InfoWindow.js"></script>
+    <script type="text/javascript" src="ExtInfoWindowView.js"></script>  
     <script type="text/javascript" src="Sidebar.js"></script>  
     <script type="text/javascript" src="IO.js"></script>
     <script type="text/javascript" src="Help.js"></script>
@@ -24,12 +29,9 @@
 
     var map; 
     var tooltip;
-    var nodesDOM = new Object(); // keep the xml in memory for parsing
     var checkmenu = undefined;
     
-    var services = new Array(); // number of service for index id
-
-    var debug = 0;  // global GLog output
+    var debug = 1;  // global GLog output
 
     function frameResize() {
       //document.getElementById("side_bar").style.height = window.innerHeight - 200;
@@ -45,7 +47,7 @@
        	map.addControl(new GLargeMapControl());
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
-        map.setCenter(new GLatLng(40,0), 2);
+        map.setCenter(new GLatLng(40,-50), 3);
         map.enableScrollWheelZoom();
 
         // tooltip layer
@@ -77,6 +79,7 @@
       Links.init();
       Sidebar.init( 'side_bar' );
 
+      
       dragDrop.initElement( 'list', 'title' );
       dragDrop.initElement( 'comms', 'title' );
       dragDrop.initElement( 'help', 'title' );
@@ -84,10 +87,13 @@
       Help.init( 'help_panel' );
 
       initMap( 'map' );
-        
-      setInterval( "InfoWindow.show();", 60 * 1000 );
+      
+      // set the css for the popup info window
+      ExtInfoWindowView.init( 'info_window');
+              
+      setInterval( "ExtInfoWindowView.show();", 60 * 1000 );
 
-      IO.getGLS();
+      IO.fetchInitial();
 
       Help.map();
 
@@ -114,7 +120,7 @@
         <table>
           <tr>
             <td>Access Point: <input id="accessPoint" type="text" name="accessPoint"/></td>
-            <td><input type="submit" value="Discover" onclick="var input = document.getElementById('accessPoint').value; var accessPoint = '?mode=discover&amp;accessPoint=' + input; IO.discover( accessPoint );"/></td>
+            <td><button onclick="var input = document.getElementById('accessPoint').value; var accessPoint = '?mode=discover&amp;accessPoint=' + input; IO.discover( accessPoint );">Discover</button></td>
           </tr>
         </table>
       </div>
