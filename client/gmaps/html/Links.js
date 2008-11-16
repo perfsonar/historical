@@ -18,18 +18,13 @@ Links = {
       if ( array = /^(.*) to (.*)$/.exec(id) ) {
           array.shift();
           return array;
-      } else {
-          if( debug )
-            GLog.write( "EPIC FAIL! on '" + id + "' for " + array );
       }
-      return ( undefined, undefined );
+      return new Array();
   },
   isLink: function( id ) {
-      var array = new Array();
-      if ( array = Links.splitId( id ) ) {
-          if( array.length() == 2 ) {
-              return 1;
-          }
+      var array = Links.splitId( id );
+      if( array.length == 2 ) {
+          return 1;
       }
       return 0;
   },
@@ -57,7 +52,7 @@ Links = {
         // make single clicks the info box
         GEvent.addListener( Links.gLinks[this_id], "click", function() {
             Links.initInfoWindow( this_id );
-            ExtInfoWindowView.showTab( this_id );
+            ExtInfoWindowView.focus( this_id );
         });
         GEvent.addListener( Links.gLinks[this_id], "mouseover", function() {
             Help.link( this_id );
@@ -84,6 +79,10 @@ Links = {
       icon.image = 'image/blank.png';
       var opts = { icon:icon };
       var thisMarker = new GMarker( new GLatLng( point.lat(), point.lng() ), opts );
+      
+      if ( map.getExtInfoWindow() ) {
+          map.closeExtInfoWindow();
+      }
         thisMarker.openExtInfoWindow(
             map,
             ExtInfoWindowView.div,
@@ -92,7 +91,7 @@ Links = {
           );
           map.addOverlay( thisMarker );
           //thisMarker.hide();
-          ExtInfoWindowView.showTab( id );
+          ExtInfoWindowView.focus( id );
           map.removeOverlay( thisMarker );
     } );
     

@@ -61,6 +61,8 @@ my $endTime = undef;
 my $cf = undef,
 my $resolution = undef,
 
+my $nocache = 0;
+
 my $HELP = 0;
 my $debug = 0;
 
@@ -78,6 +80,8 @@ my $ok = GetOptions (
 
 		'cf=s'	=> \$cf,
 		'resolution=i'	=> \$resolution,
+		
+		'nocache' => \$nocache,
 		
 		'graph' => \$graph,
 		
@@ -155,6 +159,13 @@ Log::Log4perl->init( \%logging );
 
 our $logger = get_logger( 'gmaps.pl');
 
+
+# caching
+if ( $nocache ) {
+    ${gmaps::paths::discoverCache} = undef;
+    $logger->debug( "Disabling caching");
+}
+
 # start a new instance of interface
 my $client = gmaps::commandline->new();
 
@@ -222,7 +233,12 @@ if ( ! defined $service && ( defined $urn || defined $key ) ) {
 # query the specified service 
 ###
 if ( ! defined $eventType ) {
-    $eventType = gmaps::EventType2Service::autoDetermineEventType( $service );
+    my $evts = gmaps::EventType2Service::autoDetermineEventType( $service );
+    if ( scalar @$evts > 1 ) {
+        $logger->logdie( "Service '$service' provides many eventTypes: @$evts");
+    } else {
+        $eventType = shift @$evts;
+    }
 }
     
 # if no urn defined, get list of urns from service

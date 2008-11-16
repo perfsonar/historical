@@ -1,5 +1,5 @@
 [%- DEFAULT
-  EVENTTYPE = "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0"
+  eventType = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0"
 -%]
 
 <nmwg:message id="message1"
@@ -10,8 +10,8 @@
               xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/">
 
   <nmwg:metadata id="meta1">
-      <nmwg:parameters/>
-    <nmwg:eventType>[% EVENTTYPE %]</nmwg:eventType>
+   <nmwg:parameters/>
+    <nmwg:eventType>[% eventType %]</nmwg:eventType>
   </nmwg:metadata>
 
   <nmwg:data id="data1" metadataIdRef="meta1"/>

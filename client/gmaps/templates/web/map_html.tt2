@@ -13,11 +13,9 @@
     <script type="text/javascript" src="checktree.js"></script>
     <script type="text/javascript" src="extinfowindow.js"></script>
 
-
     <script type="text/javascript" src="MetaData.js"></script>
     <script type="text/javascript" src="Markers.js"></script>  
     <script type="text/javascript" src="Links.js"></script>  
-    <script type="text/javascript" src="InfoWindow.js"></script>
     <script type="text/javascript" src="ExtInfoWindowView.js"></script>  
     <script type="text/javascript" src="Sidebar.js"></script>  
     <script type="text/javascript" src="IO.js"></script>
@@ -31,7 +29,7 @@
     var tooltip;
     var checkmenu = undefined;
     
-    var debug = 1;  // global GLog output
+    var debug = 0;  // global GLog output
 
     function frameResize() {
       //document.getElementById("side_bar").style.height = window.innerHeight - 200;
@@ -48,8 +46,10 @@
         map.addControl(new GMapTypeControl());
         map.addControl(new GOverviewMapControl());        
         map.setCenter(new GLatLng(40,-50), 3);
-        map.enableScrollWheelZoom();
-
+        //map.enableScrollWheelZoom();
+        map.disableDoubleClickZoom();
+        GEvent.clearListeners( map, 'dblclick' );
+        
         // tooltip layer
         tooltip = document.createElement("div");
         tooltip.className = "tooltip";
@@ -91,7 +91,7 @@
       // set the css for the popup info window
       ExtInfoWindowView.init( 'info_window');
               
-      setInterval( "ExtInfoWindowView.show();", 60 * 1000 );
+      setInterval( "if( map.getExtInfoWindow() ) ExtInfoWindowView.focus();", 60 * 1000 );
 
       IO.fetchInitial();
 

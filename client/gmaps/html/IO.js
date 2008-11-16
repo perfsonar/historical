@@ -47,7 +47,7 @@ IO = {
 
         // add the calling node info if supplied
         if ( typeof service_node != "undefined" ) {
-            GLog.write( "Registering calling service: " + service_node + ", serviceType=" + serviceType + ", eventType=" + eventType + ", accessPoint=" + access_point );
+            //GLog.write( "Registering calling service: " + service_node + ", serviceType=" + serviceType + ", eventType=" + eventType + ", accessPoint=" + access_point );
             MetaData.registerNodeService( service_node, serviceType, eventType, access_point );
         }
 
@@ -106,6 +106,10 @@ IO = {
                 serviceCount++;
                 
                 MetaData.registerNodeService( id, this_serviceType, this_eventType, this_access_point );
+                
+                // add info about what this node has info for
+                MetaData.registerNodeServiceMetaData( service_node, eventType, access_point, this_serviceType + ' Service', id );
+                
               }
 
               // add urn's for nodes (like utilisaiton etc)
@@ -151,7 +155,8 @@ IO = {
 
               Links.add( src_id, dst_id );
               var link_id = Links.getId( src_id, dst_id );
-              Sidebar.add( src_domain, dst_domain, link_id );
+              var domain_path = Links.getId( src_domain, dst_domain );
+              Sidebar.add( src_domain, domain_path, link_id );
 
               Markers.registerType( src_id, 'src' );
               MetaData.registerNodeDomain( src_id, src_domain );
@@ -171,7 +176,8 @@ IO = {
                   MetaData.registerNodeServiceMetaData( service_node, eventType, access_point, src_id, dst_id );
 
               }
-              
+
+              Links.show( link_id );
               linkCount++;
 
             }
@@ -189,7 +195,7 @@ IO = {
 
             // refresh window
             // FIXME?
-            ExtInfoWindowView.show();
+            ExtInfoWindowView.focus();
 
             Help.discovered( uri, markerCount, linkCount, serviceCount );
 

@@ -41,22 +41,22 @@ Sidebar = {
     },
     get: function( id ) {
         // TODO: add serviceType to node gather
-        if( debug )
-  	        GLog.write( "getting checkbox state '" + id + "'" );
+//        if( debug )
+//  	        GLog.write( "getting checkbox state '" + id + "'" );
   	  return document.getElementById( id );
     },
     getCheckBoxState: function( id ) {
         var sidebar_id = 'check-' + id;
         var ret = Sidebar.get( sidebar_id ).checked;
-        if( debug )
-            GLog.write( 'state of ' + sidebar_id + " is " + ret )
+//        if( debug )
+//            GLog.write( 'state of ' + sidebar_id + " is " + ret )
         return ret;
     },
 	setCheckBox: function( id, state ) {
         var sidebar_id = 'check-' + id;
         var checkbox = Sidebar.get( sidebar_id );
-        if( debug )
-            GLog.write( "setting checkbox '" + sidebar_id + "' to " + state);
+//        if( debug )
+//            GLog.write( "setting checkbox '" + sidebar_id + "' to " + state);
         if ( state == true ) {
           checkbox.checked = true;
         } else {
@@ -113,6 +113,7 @@ Sidebar = {
                 if( debug )
                     GLog.write( "  changing marker visibiilty " + id + " to " + checkBoxState );
                 Markers.setVisibility( id, checkBoxState );
+                Links.setDomainVisibilityFromMarker( id, checkBoxState );
             } else {
                 if( debug )
                     GLog.write( "  changing link visibiilty of " + checkboxId + " to " + checkBoxState );                
@@ -157,25 +158,34 @@ Sidebar = {
             // need unique id for this level's li's
             var l2 = Sidebar.sort( Sidebar.checkmenu[i] );
             for( var y=0; y<l2.length; y++ ) {
-                var j = l2[y];
 
+                var j = l2[y]; // the str to display for this level
+                
                 var l2Id = undefined;
-                if ( 1 ) {
-                    l2Id = Links.getId( i, j ); // this kinda doesn't make sense for markers, but we just need a unique id
+                if ( Links.isLink( l2[y] ) ) {
+                    var array = Links.splitId( l2[y] ); // this kinda doesn't make sense for markers, but we just need a unique id
+                    l2Id = array[1]; // dst domain
+                } else {
+                    l2Id = j;
+                }
+                
+                // FIXME: ignore same domain tests
+                if ( l1Id == l2Id ) {
+                    continue;
                 }
                 
                 // var l2checkBoxCode = "var state = Sidebar.getCheckBoxState( '" + l2Id + "' ); Markers.setVisibility( '" + l2Id  +  "', state )";
-                var l2checkBoxCode = "Sidebar.updateChildren( '" + l2Id  + "' );";
+                var l2checkBoxCode = "Sidebar.updateChildren( '" + j  + "' );";
                 
                 // TODO: ensure there are no links within, if markers exist then change class to 'plus'
-                Sidebar.contents += '<li id="show-' + l2Id + '">' 
-                    + '<input id="check-' + l2Id + '" type="checkbox" onchange="' + l2checkBoxCode + '"/>' + j
-                    + '<span id="count-' + l2Id + '" class="count"></span>'
-                    + '<ul id="tree-' + l2Id + '">';
+                Sidebar.contents += '<li id="show-' + j + '">' 
+                    + '<input id="check-' + j + '" type="checkbox" onchange="' + l2checkBoxCode + '"/>' + l2Id
+                    + '<span id="count-' + j + '" class="count"></span>'
+                    + '<ul id="tree-' + j + '">';
 
             	for( var k = 0; k < Sidebar.checkmenu[i][j].length; k++ ) {
 
-                      var liStyle = '';
+                    var liStyle = '';
                     if ( k == Sidebar.checkmenu[i][j].length - 1 )
                     	liStyle = ' class="last"';
 
@@ -191,20 +201,25 @@ Sidebar = {
                     
                     if ( Markers.isMarker( Sidebar.checkmenu[i][j][k] ) ) {
                         // is a marker
-                        
+
                         l3Id = Sidebar.getMarkerId( j, Sidebar.checkmenu[i][j][k] );
-                        checkBoxCode = "javascript:var state = Sidebar.get( 'check-" + l3Id + "' ).checked; Markers.setVisibility( '" + j + "', state );";
-                        // TODO: open specific serviceType tab on click
-                        clickCode = "javascript:GEvent.trigger( Markers.get('" + j + "'), 'click' );"
+                        clickCode = "javascript: ExtInfoWindowView.focus( '" + j + "', '" + Sidebar.checkmenu[i][j][k] + "')"
+//                        checkBoxCode = "javascript: var state = Sidebar.get( 'check-" + l3Id + "' ).checked; Markers.setVisibility( '" + j + "', state );";
+                        checkBoxCode = "javascript: var state = Sidebar.getCheckBoxState( '" + l3Id + "' ); Markers.setVisibility( '" + j + "', state );";
                         l3checkBoxState = true;
 
                     } else {
                         // is a link
-                        
+
                         l3Id = Sidebar.getLinkId( Sidebar.checkmenu[i][j][k] );
                         clickCode = "javascript: Sidebar.setLink( '" + l3Id + "', true ); Links.focus( '" + l3Id + "' );";
                         checkBoxCode = "javascript: var state = Sidebar.getCheckBoxState( '" + l3Id + "' ); Sidebar.setLink( '" + l3Id + "', state );";
+                        l3checkBoxState = true;
+                        
                     }
+                    
+                    if ( l2Id == l3Id )
+                        continue;
 
                     var l3checkBoxText = "";
                     if ( l3checkBoxState )

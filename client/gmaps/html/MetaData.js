@@ -35,7 +35,7 @@ MetaData = {
         if ( typeof MetaData.nodeServices[node_id][type] == "undefined" ) {
             MetaData.nodeServices[node_id][type] = new Array();
         }
-        GLog.write( "MetaData.registerNodeService id=" + node_id + ', type=' + type + ", with accessPoint=" + access_point );
+        //GLog.write( "MetaData.registerNodeService id=" + node_id + ', type=' + type + ", with accessPoint=" + access_point );
         MetaData.nodeServices[node_id][type] = access_point;
     },
     getNodeServiceIds: function( ) {
@@ -62,12 +62,12 @@ MetaData = {
         var node_ids = MetaData.getNodeServiceIds();
         for( var i=0; i<node_ids.length; i++ ) {
             var node_id = node_ids[i];
-            GLog.write( "Services on node '" + node_id + "'");
+            //GLog.write( "Services on node '" + node_id + "'");
             var types = MetaData.getNodeServiceTypes( node_id );
             for( var j=0; j<types.length; j++ ) {
                 var type = types[j];
                 var type_array = MetaData.splitServiceTypeEventType( type );
-                GLog.write( "  " + type_array[1] + " (" + type_array[0] + ") at access Point=" + MetaData.getNodeServiceAccessPoint( node_id, type ) );
+                //GLog.write( "  " + type_array[1] + " (" + type_array[0] + ") at access Point=" + MetaData.getNodeServiceAccessPoint( node_id, type ) );
             }
         }
     },
@@ -95,7 +95,7 @@ MetaData = {
         if ( typeof MetaData.nodeServiceMetaData[service_node][eventType][access_point][root][first_branch][second_branch] == "undefined" ) {
             MetaData.nodeServiceMetaData[service_node][eventType][access_point][root][first_branch][second_branch] = new Array();
         }        
-        GLog.write( "MetaData.registerNodeServiceMetaData id=" + service_node + ', eventType=' + eventType + ', ap=' + access_point + ', root=' + root + ', first_branch=' + first_branch + ', second_branch=' + second_branch );
+        //GLog.write( "MetaData.registerNodeServiceMetaData id=" + service_node + ', eventType=' + eventType + ', ap=' + access_point + ', root=' + root + ', first_branch=' + first_branch + ', second_branch=' + second_branch );
         MetaData.nodeServiceMetaData[service_node][eventType][access_point][root][first_branch][second_branch] = 1;
     },
     getNodeServiceMetaDataRoot: function( service_node, eventType, access_point ) {
@@ -178,6 +178,7 @@ MetaData = {
     },
     getNodeDataUrnIds: function( node_id, type, access_point ) {
         var a = new Array();
+        //GLog.write( "node: " + node_id + ", type " + type + ", ap=" + access_point );
         for ( var i in MetaData.nodeData[node_id][type][access_point] ) {
             a.push( i );
         }
@@ -190,20 +191,20 @@ MetaData = {
         var node_ids = MetaData.getNodeDataIds();
         for ( var i=0; i<node_ids.length; i++ ) {
             var node_id = node_ids[i];
-            GLog.write( "Node id " + node_id + " contains serviceTypes:" );
+            //GLog.write( "Node id " + node_id + " contains serviceTypes:" );
             var types = MetaData.getNodeDataTypes( node_id );
             for ( var j=0; j<types.length; j++ ) {
                 var type = types[j];
                 var type_array = MetaData.splitServiceTypeEventType( type );
-                GLog.write( "  " + type_array[1] + "(" + type_array[0] + ") has accessPoints:");
+                //GLog.write( "  " + type_array[1] + "(" + type_array[0] + ") has accessPoints:");
                 var access_points = MetaData.getNodeDataAccessPoints( node_id, type );
                 for ( var k=0; k<access_points.length; k++) {
                     var access_point = access_points[k];
-                    GLog.write( "    " + access_point + " has urn:");
+                    //GLog.write( "    " + access_point + " has urn:");
                     var urns = MetaData.getLinkDataUrnIds( node_id, type, access_point );
                     for( var l=0; l<urns.length; l++ ) {
                         var urn = urns[k];
-                        GLog.write( "      id=" + urn + " " + MetaData.getNodeDataUrn( node_id, type, access_point, urn ) );
+                        //GLog.write( "      id=" + urn + " " + MetaData.getNodeDataUrn( node_id, type, access_point, urn ) );
                     }
                 }
             }
@@ -228,7 +229,7 @@ MetaData = {
         if ( typeof MetaData.linkData[link_id][type][access_point][urn_id] == "undefined" ) {
             MetaData.linkData[link_id][type][access_point][urn_id] = new Array();
         }
-         GLog.write( "MetaData.registerLinkData id=" + link_id + ', type=' + type + ', ap=' + access_point + ', urn_id=' + urn_id + ', urn=' + urn );
+        //GLog.write( "MetaData.registerLinkData id=" + link_id + ', type=' + type + ', ap=' + access_point + ', urn_id=' + urn_id + ', urn=' + urn );
         MetaData.linkData[link_id][type][access_point][urn_id] = urn;
     },
     getLinkDataIds: function() {
@@ -269,20 +270,20 @@ MetaData = {
         var link_ids = MetaData.getLinkDataIds();
         for ( var i=0; i<link_ids.length; i++ ) {
             var link_id = link_ids[i];
-            GLog.write( "Link id " + link_id + " contains types:" );
+            //GLog.write( "Link id " + link_id + " contains types:" );
             var types = MetaData.getLinkDataTypes( link_id );
             for ( var j=0; j<types.length; j++ ) {
                 var type = types[j];
                 var type_array = MetaData.splitServiceTypeEventType( type );
-                GLog.write( "|-" + type_array[1] + " (" + type_array[0] + ") has accessPoints:");
+                //GLog.write( "|-" + type_array[1] + " (" + type_array[0] + ") has accessPoints:");
                 var access_points = MetaData.getLinkDataAccessPoints( link_id, type );
                 for ( var k=0; k<access_points.length; k++ ) {
                     var access_point = access_points[k];
-                    GLog.write( "||-" + access_point + " has urns:");
+                    //GLog.write( "||-" + access_point + " has urns:");
                     var urns = MetaData.getLinkDataUrnIds( link_id, type, access_point );
                     for( var l=0; l<urns.length; l++ ) {
                         var urn_id = urns[l];
-                        GLog.write( "|||- id=" + urn_id + ", " + MetaData.getLinkDataUrn( link_id, type, access_point, urn_id ) );
+                        //GLog.write( "|||- id=" + urn_id + ", " + MetaData.getLinkDataUrn( link_id, type, access_point, urn_id ) );
                     }
                 }
             }

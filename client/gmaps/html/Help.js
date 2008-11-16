@@ -41,7 +41,7 @@ Help = {
     markerInfo: function( id ) {
         Help.set( '<p>The popup window shows all the available perfSONAR services that are available at \'' + id + '\'. These services are presented on the tabs at the top of the window.</p>'
         + '<p>Each service provide information on the details of the available data (metadata). We can query the service through its\' associated Access Point with the eventType of the data we are interested.</p>'
-        + '<p>Click on "Query Service" to discover available perfSONAR metadata at this host.</p>' );
+        + '<p>Click on a tab to discover information about the perfSONAR services and data available.</p>' );
     },
     linkInfo: function( id ) {
       Help.set( '<p>The popup window shows the real time performance using perfSONAR for \'' + id + '\'. Each available performance metric is displayed on each tab on the window.'
@@ -66,6 +66,44 @@ Help = {
     link: function( id ) {
         Help.set( "<p>There is performance data available at this link '" + id + "'.</p>"
             + '<p>Click on link to determine the types of performance metrics found.</p>' );
+    },
+    infoWindowService: function( type  ) {
+        var help = "";
+        var service = 1;
+
+        if ( type == 'Lookup Service' ) {
+            help = "<p>A Lookup Service provides a central location to find available perfSONAR services.</p>";
+        } else if ( type == "Info" ) {
+        
+        } else if ( type == 'hLS Service' ) {
+            help = "<p>A hLS provides a localised lookup services for a domain or area</p>";
+        } else if ( type == 'PingER Service' ) {
+            help = "<p>PingER Services provide ping measurements between sites; offering network performance metrics such as two-way latency and packet loss.</p>";
+        } else if ( type == 'OWAMP Service' ) {
+            help = "<p>OWAMP Services provide latency measurements between sites; offering network performance metrics such as one-way latency and packet loss.</p>";
+        } else if ( type == 'BWCTL Service' ) {
+            help = "<p>BWCTL Services provides throughput measurements between sites; offering network performance using UDP and TCP measurements.</p>";
+        } else if ( type == "Utilisation Service" ) {
+            help = "<p>Utilisation Services provide network utilisation metrics for router and switch interfaces.</p>";
+
+        } else if ( type == "PingER" ) {
+            help += "<p>PingER provides two-way latency and loss measurements for this link.</p>";
+            service = 0;
+        } else if ( type == "OWAMP" ) {
+            help += "<p>OWAMP provides one-way latency and loss measurements for this link.</p>";
+            service = 0;
+        } else if ( type == "BWCTL" ) {
+            service = 0;
+            help += "<p>BWCTL provides throughput measurements for this link.</p>";
+        }
+        
+        
+        if ( service ) {
+            help += "<p>Click on 'Query Service' to determine the registered metadata services on this " + type + ". This will send out a live request for 'metadata'.</p>";
+            help += "<p>The discovered metadata found will then be displayed on the lists at the bottom of the infoWindow.</p>";            
+        }
+        
+        Help.set( help );
     },
     map: function() {
         Help.set( '<p>Markers represent hosts that are participating with perfSONAR monitoring. A number on a marker represents the number of perfSONAR services available for query.</p>'

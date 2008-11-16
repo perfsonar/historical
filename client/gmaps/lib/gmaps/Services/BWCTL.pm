@@ -200,8 +200,24 @@ sub getMetaData
 		# don't bother if we don't have a valid port for this node
 		next unless ( $hash->{src} && $hash->{dst} );
 
-		# add own ma
 		my $urn = &utils::urn::toUrn( { 'src' => $hash->{src}, 'dst' => $hash->{dst} } );
+
+        # try to resolve to useful dns names
+        my $src_ip = undef;
+        my $dst_ip = undef;
+        my $src_dns = undef;
+        my $dst_dns = undef;
+        
+        ( $src_ip, $src_dns )  = utils::addresses::getDNS( $hash->{src} );
+        ( $dst_ip, $dst_dns )  = utils::addresses::getDNS( $hash->{dst} );
+        if ( $src_dns ) {
+            $hash->{src} = $src_dns;
+        }
+        if ( $dst_dns ) {
+            $hash->{dst} = $dst_dns;
+        }
+        
+		# add own ma
 		my @keys = ();
 		foreach my $k ( keys %$hash ) {
 			next if $k eq 'src' or $k eq 'dst' ;
@@ -216,19 +232,22 @@ sub getMetaData
 			$urn .= $keys[$i] . '=' . $hash->{$keys[$i]};
 			$urn .= ':' unless $i eq scalar @keys - 1;
 		}
-
-		# add own ma
-		$hash->{eventType} = $params->{eventType};
-		$hash->{serviceType} => gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
-
 		my $urns = ();
 		push @$urns, { urn => $urn };
         $hash->{urns} = $urns;
 
+
+		# add own ma
+		if ( ! defined $params->{eventType} ) {
+		    $params->{eventType} = 'http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0';
+	    }
+		$hash->{eventType} = $params->{eventType};
+		$hash->{serviceType} => gmaps::EventType2Service::getServiceFromEventType( $hash->{eventType} );
+
         $hash->{accessPoint} = $self->uri();
 
-		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{src} } ), undef, $hash->{src}, undef );
-		( $hash->{dstLatitude}, $hash->{dstLongitude} ) = gmaps::Location->getLatLong( &utils::urn::toUrn( { 'node' => $hash->{dst} } ), undef, $hash->{dst}, undef );
+		( $hash->{srcLatitude}, $hash->{srcLongitude} ) = gmaps::Location->getLatLong( $hash->{src}, $src_ip, undef, undef );
+		( $hash->{dstLatitude}, $hash->{dstLongitude} ) = gmaps::Location->getLatLong( $hash->{dst}, $dst_ip, undef, undef );
 
 		# add it
 		#$logger->debug( "Adding " . Data::Dumper::Dumper $hash );

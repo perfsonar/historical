@@ -51,8 +51,7 @@ Markers = {
       return ( undefined, undefined, undefined );
   },
   isMarker: function( id ) {
-      var array = new Array();
-      if ( array = /^(.*) to (.*)$/.exec(id) ) {
+      if ( Links.isLink( id ) ) {
           return 0;
       }
       return 1;
@@ -71,17 +70,21 @@ Markers = {
       
       GEvent.addListener( Markers.gMarkers[id], "click", function() {
 
+          Markers.activeMarker = id;
+          if ( map.getExtInfoWindow() ) {
+              map.closeExtInfoWindow();
+          }
           Markers.gMarkers[id].openExtInfoWindow(
               map,
               ExtInfoWindowView.div,
               '<p>loading</p>'
-            ); 
+            );
 
-        ExtInfoWindowView.showTab( id );
+        ExtInfoWindowView.focus( id );
 
-          // show only links for this marker
-          Links.hideAllLinks();
-          Links.setDomainVisibilityFromMarker( id, true );
+        // show only links for this marker
+        Links.hideAllLinks();
+        Links.setDomainVisibilityFromMarker( id, true );
           
         tooltip.style.display = "none";
                     
