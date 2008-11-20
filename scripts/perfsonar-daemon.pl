@@ -713,13 +713,6 @@ sub handleRequest {
             throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
         }
 
-        my $action = $request->getRawRequest->headers->{"soapaction"};
-        unless ( $action =~ m/^.*message\/$/ ) {
-            my $msg = "Received message with an invalid soap action type.";
-            $logger->error( $msg );
-            throw perfSONAR_PS::Error_compat( "error.common.transport", $msg );
-        }
-
         $request->parse( \%ns, \$error );
         throw perfSONAR_PS::Error_compat( "error.transport.parse_error", "Error parsing request: $error" ) if $error;
 
