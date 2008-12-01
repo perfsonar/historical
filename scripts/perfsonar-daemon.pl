@@ -245,14 +245,14 @@ if ( not defined $LOGGER_CONF or $LOGGER_CONF eq q{} ) {
 else {
     use Log::Log4perl qw(get_logger :levels);
 
-    my $output_level = $INFO;
+    my $output_level;
     if ( $DEBUGFLAG ) {
         $output_level = $DEBUG;
     }
 
     Log::Log4perl->init( $LOGGER_CONF );
     $logger = get_logger( "perfSONAR_PS" );
-    $logger->level( $output_level );
+    $logger->level( $output_level ) if $output_level;
 }
 
 if ( not defined $conf{"max_worker_lifetime"} or $conf{"max_worker_lifetime"} eq q{} ) {
