@@ -20,6 +20,7 @@
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
  # ISO - Functional Specification
    * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
+ # stable snapshot of svn trunk
  # Discussion of middle-term goals
    * Wiki
      * Migration of content is complete, if anyone feels they are missing something contact Jason - he has backup copies.
