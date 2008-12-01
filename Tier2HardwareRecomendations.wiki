@@ -3,6 +3,12 @@
 *_DRAFT_*
 
  * [Tier2HardwareRecomendations#Introduction Introduction]
+ * [Tier2HardwareRecomendations#Suggested_Hardware Suggested Hardware]
+ * [Tier2HardwareRecomendations#General_Recommendations General Recommendations]
+   * [Tier2HardwareRecomendations#Processor Processor]
+   * [Tier2HardwareRecomendations#RAM RAM]
+   * [Tier2HardwareRecomendations#Storage Storage]
+   * [Tier2HardwareRecomendations#Networking Networking]
 
 == Introduction ==
 
@@ -11,8 +17,8 @@ hardware purchases to support the deployment of the
 [http://code.google.com/p/perfsonar-ps/wiki/NPToolkit NPToolkit].  It was
 suggested to each site to purchase two of these systems:
 
- * The first will focus on Latency related tests (PingER, OWAMP)
- * The second will focus on bandwidth related tests (BWCTL)
+ * The first will focus on Latency related tests ([http://code.google.com/p/perfsonar-ps/wiki/NPToolkit#PingER_Measurement_Archive_and_Measurement_Point PingER], [http://code.google.com/p/perfsonar-ps/wiki/NPToolkit#OWAMP OWAMP])
+ * The second will focus on bandwidth related tests ([http://code.google.com/p/perfsonar-ps/wiki/NPToolkit#BWCTL BWCTL])
  
 Other monitoring such as SNMP may be accomplished on either system due to low
 overhead and passive nature.
@@ -70,7 +76,7 @@ fill.
 
 Use the appropriate networking cards for the supplied uplink.  We recommend at
 least 1G capable cards.  The Linux distribution that the NPToolkit is based 
-(Knoppix) contains many standard network card drivers.
+([http://knoppix.net/ Knoppix]) contains many standard network card drivers.
 
 = Last Updated =
 
