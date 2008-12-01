@@ -96,19 +96,19 @@ for Public servers there is no AAA applied except for webadmin accessible from l
 
 There is little of value from any monitoring system without applying results of the observations into some structured way and approaching any network performance related problem without preexisting methodology in mind. The NMF will not give you any definitive answer without analyzing step by step the matrix of available parameters. Those steps are in details outlined in [https://plone3.fnal.gov/P0/WAN/netperf/methodology/ 2]. The summary is presented below:
 
-# Definition of the problem space:
-  * End user completes a text-based template that provides basic information on the scope, characteristics on the nature of the problem, as well as specific information on the systems & applications involved.
-# Collection of system information & network path characteristics:
-  * End user provides output from provided scripts run on local system(s).
-  * End user also provides network path information using specified tool
-# Host configuration analysis:
-  * Tier-1 NOC staff analyzes host configuration(s).
-  * Recommendations for modification provided, if appropriate.
-# Network path performance analysis:
-  * Tier-1 NOC staff analyzes and evaluates network path performance characteristics.
-  * If problems are found, analysis of nature of problem (systemic versus congestion-based) is done.
-# Evaluate packet flow patterns:
-  * Tier-1 NOC staff collect packet traces from TCPdump ran on end-system and analyzes it with TCPtrace/Xplot graphical tools
+ # Definition of the problem space:
+   * End user completes a text-based template that provides basic information on the scope, characteristics on the nature of the problem, as well as specific information on the systems & applications involved.
+ # Collection of system information & network path characteristics:
+   * End user provides output from provided scripts run on local system(s).
+   * End user also provides network path information using specified tool
+ # Host configuration analysis:
+   * Tier-1 NOC staff analyzes host configuration(s).
+   * Recommendations for modification provided, if appropriate.
+ # Network path performance analysis:
+   * Tier-1 NOC staff analyzes and evaluates network path performance characteristics.
+   * If problems are found, analysis of nature of problem (systemic versus congestion-based) is done.
+ # Evaluate packet flow patterns:
+   * Tier-1 NOC staff collect packet traces from TCPdump ran on end-system and analyzes it with TCPtrace/Xplot graphical tools
 
 === Planning for the future network capacity === 
 
