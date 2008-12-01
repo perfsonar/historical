@@ -341,6 +341,9 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
      * *MAX* - A connector of member of the MAX gigapop
    * Use as many community names as necessary to properly categorize the data from the installation. 
 
+ * *Q: How do I partition a new disk or re-partition an old disk?*
+ * *A:* Please see this [NPToolkitDiskFormatting|article] for a primer on disk formatting and re-formatting using the tools on the NPToolkit.
+
 == Last Updated ==
 
 $Id$

@@ -69,10 +69,11 @@ To properly store configuration information and stored measurement data, a drive
 
  * Should be large enough to hold configuration files and measurement data
    * Minimum of a gigabyte for short term use
-   * Much larger recommended for long term deployment
+   * Much larger recommended (80G) for long term deployment
  * Should be in the _ext3_ format
    * If the disk is already formatted, the software will use existing space and _*WILL NOT*_ delete or corrupt existing data.
    * If not, there will be an option to format the disk before use.
+   * See also [NPToolkit#FAQ FAQ] for issues regarding disk formatting.
 
 The following images demonstrate the steps of this particular configuration option.
 
