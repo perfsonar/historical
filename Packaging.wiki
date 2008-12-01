@@ -1,0 +1,46 @@
+#summary An overview of the perfSONAR-PS Packaging Process
+
+= Introduction =
+
+Currently, the packaging process happens broadly as follows:
+
+  # Generate CPAN packages for all services/common libraries
+  # Generate RPM packages from those cpan packages using the cpan2rpm.pl
+
+= Creating A New CPAN Package =
+
+  # There's a "skeleton" directory in cpan, copy that to the new package name.
+    * Existing packages have a version number associated with them, but that should be changed, so ignore that, and make the directory name something like "perfSONAR_PS-DB-SQL".
+  # Create a symlink "lib" to "trunk/lib".
+  # Create a pS_libs file
+    * This file is used to generate the MANIFEST files and as part of the dependency checking
+    * You can run the "create_ps_libs.sh" in your modules directory.
+    * Once you have the pS_libs file, go through and clear out all libraries you don't use.
+  # Create a Makefile.PL
+    * There is a sample Makefile.PL included in the skeleton. For a basic CPAN module, it should be easy enough to change the Makefile.PL to correspond to the new package.
+    * To calculate the dependencies, there's a script "gen_dependencies.pl" that will output the dependencies based on the files in the pS_libs and any other files in the MANIFEST with the extension .pl or .pm This list can be added to the Makefile.PL in the appropriate way.
+    * You'll need to verify that the dependencies are correct. Things like "load" based dependencies are somewhat up in the air as to whether they should be "required". This will be on an as-needed basis.
+  # Create a MANIFEST
+    * The MANIFEST file is what is used to create the tarball for distribution.  This will include all the standard files like "MANIFEST, README, LICENSE, Makefile.PL" as well as all the files in pS_libs and any other files needed by the package. Makefile should not be included in the package.  There's a script "gen_manifest.sh" that will take the files in your module directory and those in the "pS_libs" file and generate a new MANIFEST and MANIFEST.SKIP.
+  # Adding test cases
+    * You can add test cases by including them in a directory called 't'. These will get executed in alphabetical order when a make test is done.
+  # Testing
+    * You can run "make disttest" and it will tell you if there's anything wrong with the package, though it won't tell you if you've missed things in the MANIFEST or what-have-you, so there's a bit of manual hunting to make sure that you've gotten everything in the package.
+  # Subversion
+    * Do an 'svn add' on your new directory so that all files get added to the repository.
+
+= Updating A CPAN Package = 
+
+  # Edit the "pS_libs" file and add any new files needed
+  # Re-run the "gen_dependencies.pl" script and add any updated dependencies to "Makefile.PL"
+  # Re-run the "gen_manifest.pl" script to add the new files to the MANIFEST
+  # Add any new test cases to the "t" directory
+  # Update the version number for the package if necessary
+
+= Releasing A Package = 
+  # Go through and see what depends on the modules in this package before doing a release. 
+    * Either need to do a release for all dependent packages or find the subset of packages that may be broken by changes in the modules in this package.
+  # Go through and see what the modules in this package depend on, creating new packages or updating existing packages for each module it depends on
+  # Verify that all modules expected in this package are actually included in the package
+  # Bump the version number for all modules in the package
+    * This may not be necessary if a module has not changed, but the CPAN folks may not like having multiple packages with the same module in it.
