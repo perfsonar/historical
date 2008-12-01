@@ -21,6 +21,8 @@
  # ISO - Functional Specification
    * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
  # Discussion of middle-term goals
+   * Wiki
+     * Migration of content is complete, if anyone feels they are missing something contact Jason - he has backup copies.
    * Release management
    * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
    * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
