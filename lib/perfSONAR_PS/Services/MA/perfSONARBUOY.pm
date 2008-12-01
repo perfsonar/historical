@@ -243,7 +243,7 @@ sub init {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_description"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_description"} )
         {
-            my $description = "perfSONAR_PS SNMP MA";
+            my $description = "perfSONAR_PS perfSONAR-BUOY MA";
             if ( $self->{CONF}->{site_name} ) {
                 $description .= " at " . $self->{CONF}->{site_name};
             }
@@ -257,8 +257,8 @@ sub init {
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_name"}
             and $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} )
         {
-            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "SNMP MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'SNMP MA'.");
+            $self->{CONF}->{"perfsonarbuoy"}->{"service_name"} = "perfSONAR-BUOY MA";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'perfSONAR-BUOY MA'.");
         }
 
         unless ( exists $self->{CONF}->{"perfsonarbuoy"}->{"service_type"}
@@ -1041,7 +1041,7 @@ sub registerLS {
     my $ls = q{};
 
     my @ls_array = ();
-    my @array = split( /\s+/, $self->{CONF}->{"snmp"}->{"ls_instance"} );
+    my @array = split( /\s+/, $self->{CONF}->{"perfsonarbuoy"}->{"ls_instance"} );
     foreach my $l (@array) {
         $l =~ s/(\s|\n)*//g;
         push @ls_array, $l if $l;
@@ -1393,7 +1393,7 @@ sub maMetadataKeyRequest {
         );
 
     }
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
     return;
@@ -1678,7 +1678,7 @@ sub maSetupDataRequest {
             }
         );
     }
-    if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
+    if ( $self->{CONF}->{"perfsonarbuoy"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
     return;
