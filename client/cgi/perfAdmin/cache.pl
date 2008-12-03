@@ -28,7 +28,7 @@ use Net::CIDR;
 use lib "/home/zurawski/perfSONAR-PS/lib";
 #use lib "/usr/local/perfSONAR-PS/lib";
 
-use perfSONAR_PS::Common qw( extract find );
+use perfSONAR_PS::Common qw( extract find unescapeString escapeString );
 use perfSONAR_PS::Client::gLS;
 
 my $DEBUGFLAG   = q{};
@@ -46,7 +46,7 @@ if ( $HELP ) {
 }
 
 my $parser = XML::LibXML->new();
-my $hints  = "http://www.perfsonar.net/gls.root.hints";
+my $hints  = "http://www.perfsonar.net/gls.root.hint";
 
 my @private_list = ( "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16" );
 
@@ -152,13 +152,15 @@ foreach my $h ( keys %hls ) {
         $result = $ls->queryRequestLS(
             {
                 query     => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]\n",
-                eventType => "http://ggf.org/ns/nmwg/tools/org/perfsonar/service/lookup/xquery/1.0"
+                eventType => "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/xquery/2.0"
             }
         );
     }
     
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
         print "\tEventType:\t" , $result->{eventType} , "\n" if $DEBUGFLAG;
+        $result->{response} = unescapeString( $result->{response} );
+
         my $doc = $parser->parse_string( $result->{response} ) if exists $result->{response};
 
         my $md = find( $doc->getDocumentElement, "./nmwg:store/nmwg:metadata", 0 );
@@ -263,6 +265,7 @@ foreach my $h ( keys %hls ) {
 }
 close(HLS);
 
+my %counter = ();
 foreach my $et ( keys %list ) {
     my $file = q{};
     if ( $et eq "http://ggf.org/ns/nmwg/characteristic/utilization/2.0" or $et eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" ) {
@@ -299,7 +302,12 @@ foreach my $et ( keys %list ) {
         $file = "list.phoebus";
     }
     next unless $file;
-    open( OUT, ">" . $base . "/" . $file ) or croak "can't open $base/$file.";
+
+    my $writetype = ">";
+    $writetype = ">>" if exists $counter{$file};
+    $counter{$file} = 1;
+
+    open( OUT, $writetype . $base . "/" . $file ) or croak "can't open $base/$file.";
     foreach my $host ( @{ $list{$et} } ) {
         print OUT $host->{"CONTACT"}, "|";
         print OUT $host->{"NAME"} if $host->{"NAME"};
@@ -311,6 +319,8 @@ foreach my $et ( keys %list ) {
         print $file , " - " ,$host->{"CONTACT"} , "\n" if $DEBUGFLAG;
     }
     close(OUT);
+
+
 }
 
 =head1 SEE ALSO
