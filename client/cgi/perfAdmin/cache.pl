@@ -65,8 +65,7 @@ for my $root ( @{ $gls->{ROOTS} } ) {
     my $result = $gls->getLSQueryRaw(
         {
             ls => $root,
-            xquery =>
-                "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
+            xquery => "declare namespace perfsonar=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/1.0/\";\n declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\"; \ndeclare namespace psservice=\"http://ggf.org/ns/nmwg/tools/org/perfsonar/service/1.0/\";\n/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata[./perfsonar:subject/psservice:service/psservice:serviceType[text()=\"LS\" or text()=\"hLS\" or text()=\"ls\" or text()=\"hls\"]]"
         }
     );
     if ( exists $result->{eventType} and not( $result->{eventType} =~ m/^error/ ) ) {
@@ -195,6 +194,19 @@ foreach my $h ( keys %hls ) {
                 foreach my $e ( $eventTypes->get_nodelist ) {
                     my $value = extract( $e, 0 );
                     if ( $value ) {
+ 
+                        if ( $value eq "http://ggf.org/ns/nmwg/tools/snmp/2.0" ) {
+                            $value = "http://ggf.org/ns/nmwg/characteristic/utilization/2.0";
+                        }
+                        if ( $value eq "http://ggf.org/ns/nmwg/tools/pinger/2.0/" ) {
+                            $value = "http://ggf.org/ns/nmwg/tools/pinger/2.0";
+                        }
+                        if ( $value eq "http://ggf.org/ns/nmwg/characteristics/bandwidth/acheiveable/2.0" ) {
+                            $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0";
+                        }
+                        if ( $value eq "http://ggf.org/ns/nmwg/tools/iperf/2.0" ) {
+                            $value = "http://ggf.org/ns/nmwg/characteristics/bandwidth/achieveable/2.0";
+                        }
 
 # we should be tracking things here, eliminate duplicates
                         unless ( exists $dups{$value}{$contactPoint} and $dups{$value}{$contactPoint} ) {
