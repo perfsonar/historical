@@ -30,7 +30,8 @@ use perfSONAR_PS::Common qw( extract find );
 
 my $cgi = new CGI;
 print "Content-type: text/html\n\n";
-if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
+
+if ( ( $cgi->param('key1_type') or $cgi->param('key2_type') ) and $cgi->param('url') ) {
 
     my $ma = new perfSONAR_PS::Client::MA( { instance => $cgi->param('url') } );
 
@@ -39,11 +40,22 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
     my ( $sec, $frac ) = Time::HiRes::gettimeofday;
 
     # 'in' data
-    my $subject = "  <nmwg:key id=\"key-1\">\n";
-    $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
-    $subject .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param('key1') . "</nmwg:parameter>\n";
-    $subject .= "    </nmwg:parameters>\n";
-    $subject .= "  </nmwg:key>  \n";
+    my $subject = q{};
+    if ( $cgi->param('key1_type') eq "key" ) {
+        $subject = "  <nmwg:key id=\"key-1\">\n";
+        $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
+        $subject .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param('key1_1') . "</nmwg:parameter>\n";
+        $subject .= "    </nmwg:parameters>\n";
+        $subject .= "  </nmwg:key>  \n";
+    }
+    else {
+        $subject = "  <nmwg:key id=\"key-1\">\n";
+        $subject .= "    <nmwg:parameters id=\"parameters-key-1\">\n";
+        $subject .= "      <nmwg:parameter name=\"file\">" . $cgi->param('key1_1') . "</nmwg:parameter>\n";
+        $subject .= "      <nmwg:parameter name=\"dataSource\">" . $cgi->param('key1_2') . "</nmwg:parameter>\n";
+        $subject .= "    </nmwg:parameters>\n";
+        $subject .= "  </nmwg:key>  \n";
+    }
 
     my $time;
     if ( $cgi->param('length') ) {
@@ -73,11 +85,23 @@ if ( ( $cgi->param('key1') or $cgi->param('key2') ) and $cgi->param('url') ) {
     );
 
     # 'out' data
-    my $subject2 = "  <nmwg:key id=\"key-2\">\n";
-    $subject2 .= "    <nmwg:parameters id=\"parameters-key-2\">\n";
-    $subject2 .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param('key2') . "</nmwg:parameter>\n";
-    $subject2 .= "    </nmwg:parameters>\n";
-    $subject2 .= "  </nmwg:key>  \n";
+    my $subject2 = q{};
+    if ( $cgi->param('key2_type') eq "key" ) {
+        $subject2 = "  <nmwg:key id=\"key-2\">\n";
+        $subject2 .= "    <nmwg:parameters id=\"parameters-key-2\">\n";
+        $subject2 .= "      <nmwg:parameter name=\"maKey\">" . $cgi->param('key2_1') . "</nmwg:parameter>\n";
+        $subject2 .= "    </nmwg:parameters>\n";
+        $subject2 .= "  </nmwg:key>  \n";
+    }
+    else {
+        $subject2 = "  <nmwg:key id=\"key-2\">\n";
+        $subject2 .= "    <nmwg:parameters id=\"parameters-key-2\">\n";
+        $subject2 .= "      <nmwg:parameter name=\"file\">" . $cgi->param('key2_1') . "</nmwg:parameter>\n";
+        $subject2 .= "      <nmwg:parameter name=\"dataSource\">" . $cgi->param('key2_2') . "</nmwg:parameter>\n";
+        $subject2 .= "    </nmwg:parameters>\n";
+        $subject2 .= "  </nmwg:key>  \n";
+    }
+
     my $result2 = $ma->setupDataRequest(
         {
             start                 => ( $sec - $time ),

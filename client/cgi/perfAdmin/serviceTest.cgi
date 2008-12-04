@@ -126,7 +126,18 @@ else {
             my $data          = $parser->parse_string($d);
             my $metadataIdRef = $data->getDocumentElement->getAttribute("metadataIdRef");
             my $key           = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
-            $lookup{$metadataIdRef} = $key if $key and $metadataIdRef;
+            if ( $key ) {
+                $lookup{$metadataIdRef}{"key1"} = $key if $metadataIdRef;
+                $lookup{$metadataIdRef}{"key2"} = "";
+                $lookup{$metadataIdRef}{"type"} = "key";
+            }
+            else {
+                $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 0 );
+                $lookup{$metadataIdRef}{"key1"} = $key if $key and $metadataIdRef;
+                $key = extract( find( $data->getDocumentElement, ".//nmwg:parameter[\@name=\"dataSource\"]", 1 ), 0 );
+                $lookup{$metadataIdRef}{"key2"} = $key if $key and $metadataIdRef;
+                $lookup{$metadataIdRef}{"type"} = "nonkey";
+            }
         }
 
         my %list = ();
@@ -138,19 +149,27 @@ else {
             my $name       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifName", 1 ), 0 );
             if ( $list{$host}{$name} ) {
                 if ( $dir eq "in" ) {
-                    $list{$host}{$name}->{"key1"} = $lookup{$metadataId};
+                    $list{$host}{$name}->{"key1_1"} = $lookup{$metadataId}{"key1"};
+                    $list{$host}{$name}->{"key1_2"} = $lookup{$metadataId}{"key2"};
+                    $list{$host}{$name}->{"key1_type"} = $lookup{$metadataId}{"type"};
                 }
                 else {
-                    $list{$host}{$name}->{"key2"} = $lookup{$metadataId};
+                    $list{$host}{$name}->{"key2_1"} = $lookup{$metadataId}{"key1"};
+                    $list{$host}{$name}->{"key2_2"} = $lookup{$metadataId}{"key2"};
+                    $list{$host}{$name}->{"key2_type"} = $lookup{$metadataId}{"type"};
                 }
             }
             else {
                 my %temp = ();
                 if ( $dir eq "in" ) {
-                    $temp{"key1"} = $lookup{$metadataId};
+                    $temp{"key1_1"} = $lookup{$metadataId}{"key1"};
+                    $temp{"key1_2"} = $lookup{$metadataId}{"key2"};
+                    $temp{"key1_type"} = $lookup{$metadataId}{"type"};                    
                 }
                 else {
-                    $temp{"key2"} = $lookup{$metadataId};
+                    $temp{"key2_1"} = $lookup{$metadataId}{"key1"};
+                    $temp{"key2_2"} = $lookup{$metadataId}{"key2"};
+                    $temp{"key2_type"} = $lookup{$metadataId}{"type"};
                 }
                 $temp{"hostName"}      = $host;
                 $temp{"ifName"}        = $name;
@@ -187,7 +206,7 @@ else {
         foreach my $host ( sort keys %list ) {
             foreach my $name ( sort keys %{ $list{$host} } ) {
 
-                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => $list{$host}{$name}->{"capacity"}, KEY1 => $list{$host}{$name}->{"key1"}, KEY2 => $list{$host}{$name}->{"key2"}, COUNT => $counter, SERVICE => $service };
+                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => $list{$host}{$name}->{"capacity"}, KEY1TYPE => $list{$host}{$name}->{"key1_type"}, KEY11 => $list{$host}{$name}->{"key1_1"}, KEY12 => $list{$host}{$name}->{"key1_2"}, KEY2TYPE => $list{$host}{$name}->{"key2_type"}, KEY21 => $list{$host}{$name}->{"key2_1"}, KEY22 => $list{$host}{$name}->{"key2_2"}, COUNT => $counter, SERVICE => $service };
 
                 $counter++;
             }
