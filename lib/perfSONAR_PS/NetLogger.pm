@@ -4,53 +4,64 @@ use strict;
 use warnings;
 require 5.002;
 use Time::HiRes;
-  
+use Data::UUID;
+
 our $VERSION = 0.09;
 
 # initialize Global GUID
 my $GUID = get_guid();
 
 sub format {
-  my($evnt, $data) = @_;
-  my($str) = "";
-  if ( exists $data->{'ts'} ) {
-    $str = "ts=$data->{ 'ts' } ";
-  }
-  else {
-    my $dt = date();
-    $str = "ts=$dt ";
-  }
-  $str .= "event=$evnt ";
-  foreach my $k (keys %$data) {
-    $str .= "$k=$data->{$k} ";
-  }
-  $str .= "guid=".$GUID;
-  return $str;
-};
-
+    my ( $evnt, $data ) = @_;
+    my ($str) = "";
+    if ( exists $data->{'ts'} ) {
+        $str = "ts=$data->{ 'ts' } ";
+    }
+    else {
+        my $dt = date();
+        $str = "ts=$dt ";
+    }
+    $str .= "event=$evnt ";
+    foreach my $k ( keys %$data ) {
+        $str .= "$k=$data->{$k} ";
+    }
+    $str .= "guid=" . $GUID;
+    return $str;
+}
 
 sub date {
-  my($tm, $usec) = Time::HiRes::gettimeofday();
-  my($sec,$min,$hour,$mday,$mon,$year,$wday, $yday,$isdst)=gmtime($tm);
-  return sprintf("%04d-%02d-%02dT%02d:%02d:%02d.%06dZ",$year + 1900,$mon + 1,
-                 $mday,$hour,$min,$sec,$usec);
+    my ( $tm, $usec ) = Time::HiRes::gettimeofday();
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+      gmtime($tm);
+    return sprintf(
+        "%04d-%02d-%02dT%02d:%02d:%02d.%06dZ",
+        $year + 1900,
+        $mon + 1, $mday, $hour, $min, $sec, $usec
+    );
 }
 
-sub get_guid
+sub get_guid {
+    $ug   = new Data::UUID;
+    $guid = $ug->create_str();
+
+    # if dont have Data::UUID, can do this instead
+    #  my $guid = `uuidgen`; chomp $guid;
+
+    return ($guid);
+}
+
+sub reset_guid    # reset GUID
 {
-  my $guid = `uuidgen`; chomp $guid;
-  return ($guid);
-}
+    $ug   = new Data::UUID;
+    $GUID = $ug->create_str();
 
-sub reset_guid  # reset GUID
-{
-  $GUID = `uuidgen`; chomp $GUID;
-  return;
-}
+    # if dont have Data::UUID, can do this instead
+    #  my $GUID = `uuidgen`; chomp $GUID;
 
+    return;
+}
 
 1;
-
 
 __END__
 
