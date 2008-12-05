@@ -41,8 +41,8 @@ sub date {
 }
 
 sub get_guid {
-    $ug   = new Data::UUID;
-    $guid = $ug->create_str();
+    my $ug   = new Data::UUID;
+    my $guid = $ug->create_str();
 
     # if dont have Data::UUID, can do this instead
     #  my $guid = `uuidgen`; chomp $guid;
@@ -52,7 +52,7 @@ sub get_guid {
 
 sub reset_guid    # reset GUID
 {
-    $ug   = new Data::UUID;
+    my $ug   = new Data::UUID;
     $GUID = $ug->create_str();
 
     # if dont have Data::UUID, can do this instead
