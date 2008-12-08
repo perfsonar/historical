@@ -173,8 +173,8 @@ else {
                 }
                 $temp{"hostName"}      = $host;
                 $temp{"ifName"}        = $name;
+                $temp{"ifIndex"}       = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifIndex", 1 ), 0 );
                 $temp{"ipAddress"}     = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ipAddress", 1 ), 0 );
-
                 $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:ifDescription", 1 ), 0 );
                 unless ( exists $temp{"ifDescription"} and $temp{"ifDescription"} ) {
                     $temp{"ifDescription"} = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:interface/nmwgt:description", 1 ), 0 );
@@ -206,7 +206,7 @@ else {
         foreach my $host ( sort keys %list ) {
             foreach my $name ( sort keys %{ $list{$host} } ) {
 
-                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => $list{$host}{$name}->{"capacity"}, KEY1TYPE => $list{$host}{$name}->{"key1_type"}, KEY11 => $list{$host}{$name}->{"key1_1"}, KEY12 => $list{$host}{$name}->{"key1_2"}, KEY2TYPE => $list{$host}{$name}->{"key2_type"}, KEY21 => $list{$host}{$name}->{"key2_1"}, KEY22 => $list{$host}{$name}->{"key2_2"}, COUNT => $counter, SERVICE => $service };
+                    push @interfaces, { ADDRESS => $list{$host}{$name}->{"ipAddress"}, HOST => $list{$host}{$name}->{"hostName"}, IFNAME => $list{$host}{$name}->{"ifName"}, IFINDEX => $list{$host}{$name}->{"ifIndex"}, DESC => $list{$host}{$name}->{"ifDescription"}, IFADDRESS => $list{$host}{$name}->{"ifAddress"}, CAPACITY => $list{$host}{$name}->{"capacity"}, KEY1TYPE => $list{$host}{$name}->{"key1_type"}, KEY11 => $list{$host}{$name}->{"key1_1"}, KEY12 => $list{$host}{$name}->{"key1_2"}, KEY2TYPE => $list{$host}{$name}->{"key2_type"}, KEY21 => $list{$host}{$name}->{"key2_1"}, KEY22 => $list{$host}{$name}->{"key2_2"}, COUNT => $counter, SERVICE => $service };
 
                 $counter++;
             }
