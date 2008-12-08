@@ -3192,7 +3192,10 @@ sub lsQueryRequest {
             $dbContainer = $self->{CONF}->{"gls"}->{"metadata_db_file"};
         }
 
-        # pull out items from the summary subject
+        # start to form the query here
+        my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[";
+
+        # first extract all things that are eventTypes
         my @resultServices = ();
         my $sent;
         my $l_eventTypes = find( $subject, "./nmwg:eventType", 0 );
@@ -3211,6 +3214,17 @@ sub lsQueryRequest {
             }
         }
 
+        # add what we find to the query (if we found anything).  
+        my $flag = 0;
+        my $qS = q{};
+        foreach my $et ( keys %{$sent->{"eventType"}} ) {
+            $qS .= " or" if $flag;
+            $qS .= "(./*[local-name()='metadata']/*[local-name()='eventType' and text()='".$et."'] or ./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and ( \@name='eventType' or \@name='supportedEventType' ) and \@value='".$et."'])"; 
+            $flag++;
+        }
+        $queryString .= " ( " . $qS . " ) " if $qS;
+
+        # next we do the same idea for domains
         my $l_domains = find( $subject, "./nmtb:domain", 0 );
         foreach my $d ( $l_domains->get_nodelist ) {
             my $name = extract( find( $d, "./nmtb:name", 1 ), 0 );
@@ -3218,15 +3232,16 @@ sub lsQueryRequest {
             $sent->{"domain"}->{$name} = 1;
         }
 
-        my $l_addresses = find( $subject, "./nmtb:address", 0 );
-        foreach my $address ( $l_addresses->get_nodelist ) {
-            my $ad = extract( $address, 0 );
-            next unless $ad;
-            $sent->{"address"}->{$ad} = 1;
+        $flag = 0;
+        $qS = " and ( " if $qS;
+        foreach my $d ( keys %{$sent->{"domain"}} ) {
+            $qS .= " or" if $flag;
+            $qS .= "(./*[local-name()='metadata']/*[local-name()='subject']/*[local-name()='domain']/*[local-name()='name' and text()='". $d ."'])"; 
+            $flag++;
         }
+        $queryString .= $qS . " ) " if $qS;
 
-        # pull out items from the summary parameters
-
+        # finally we do the same for keywords
         if ( $sum_parameters ) {
             my $l_keywords = find( $sum_parameters, ".//nmwg:parameter[\@name=\"keyword\"]", 0 );
             foreach my $k ( $l_keywords->get_nodelist ) {
@@ -3234,6 +3249,27 @@ sub lsQueryRequest {
                 next unless $value;
                 $sent->{"keyword"}->{$value} = 1;
             }
+        }
+        
+        $flag = 0;
+        $qS = " and ( " if $qS;
+        foreach my $k ( keys %{$sent->{"keyword"}} ) {
+            $qS .= " or" if $flag;
+            $qS .= "(./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and \@value='". $k ."'])"; 
+            $flag++;
+        }
+        $queryString .= $qS . " ) " if $qS;
+        $queryString .= "]";
+
+print "qs:\t" , $queryString , "\n";
+        
+        # this is the odd duck, we can't use it for the query, but we will use
+        #   it later on.       
+        my $l_addresses = find( $subject, "./nmtb:address", 0 );
+        foreach my $address ( $l_addresses->get_nodelist ) {
+            my $ad = extract( $address, 0 );
+            next unless $ad;
+            $sent->{"address"}->{$ad} = 1;
         }
 
         my $database = $self->prepareDatabase( { container => $dbContainer } );
@@ -3255,7 +3291,7 @@ sub lsQueryRequest {
         }
 
         my %map = ();
-        my @resultsString = $database->query( { query => "/nmwg:store[\@type=\"LSStore\"]/nmwg:data", txn => $dbTr, error => \$error } );
+        my @resultsString = $database->query( { query => $queryString, txn => $dbTr, error => \$error } );
         $errorFlag++ if $error;
 
         if ( $errorFlag ) {
@@ -3276,7 +3312,9 @@ sub lsQueryRequest {
                 throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );
             }
             else {
+
                 for my $x ( 0 .. $len ) {
+print "1 - " , $x , "\n";
                     my $parser = XML::LibXML->new();
                     my $doc    = $parser->parse_string( $resultsString[$x] );
 
@@ -3286,6 +3324,8 @@ sub lsQueryRequest {
                     $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
                 }
 
+print "2\n";
+
                 my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
                 if ( $status == 0 ) {
                     undef $dbTr;
@@ -3293,6 +3333,9 @@ sub lsQueryRequest {
                     $database->closeDB( { error => \$error } );
 
                     foreach my $id ( keys %map ) {
+
+print "3 - " , $id , "\n";
+
                         my %store = ();
                         $store{"eventType"} = 0 if exists $sent->{"eventType"};
                         $store{"address"}   = 0 if exists $sent->{"address"};
@@ -3388,6 +3431,7 @@ sub lsQueryRequest {
                     $database->closeDB( { error => \$error } );
                     throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
                 }
+
             }
         }
     }
