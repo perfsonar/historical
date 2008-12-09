@@ -3193,7 +3193,8 @@ sub lsQueryRequest {
         }
 
         # start to form the query here
-        my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data[";
+        my $queryString = "/nmwg:store[\@type=\"LSStore\"]/nmwg:data";
+        my $queryStructure;
 
         # first extract all things that are eventTypes
         my @resultServices = ();
@@ -3216,13 +3217,12 @@ sub lsQueryRequest {
 
         # add what we find to the query (if we found anything).  
         my $flag = 0;
-        my $qS = q{};
-        foreach my $et ( keys %{$sent->{"eventType"}} ) {
-            $qS .= " or" if $flag;
-            $qS .= "(./*[local-name()='metadata']/*[local-name()='eventType' and text()='".$et."'] or ./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and ( \@name='eventType' or \@name='supportedEventType' ) and \@value='".$et."'])"; 
+        my $temp = $sent->{"eventType"};
+        foreach my $et ( keys %{ $temp } ) {
+            $queryStructure->{"eventType"} .= " or" if $flag;
+            $queryStructure->{"eventType"} .= "(./*[local-name()='metadata']/*[local-name()='eventType' and text()='".$et."'] or ./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and ( \@name='eventType' or \@name='supportedEventType' ) and \@value='".$et."'])"; 
             $flag++;
         }
-        $queryString .= " ( " . $qS . " ) " if $qS;
 
         # next we do the same idea for domains
         my $l_domains = find( $subject, "./nmtb:domain", 0 );
@@ -3233,13 +3233,12 @@ sub lsQueryRequest {
         }
 
         $flag = 0;
-        $qS = " and ( " if $qS;
-        foreach my $d ( keys %{$sent->{"domain"}} ) {
-            $qS .= " or" if $flag;
-            $qS .= "(./*[local-name()='metadata']/*[local-name()='subject']/*[local-name()='domain']/*[local-name()='name' and text()='". $d ."'])"; 
+        $temp = $sent->{"domain"};
+        foreach my $d ( keys %{ $temp } ) {
+            $queryStructure->{"domain"} .= " or" if $flag;
+            $queryStructure->{"domain"} .= "(./*[local-name()='metadata']/*[local-name()='subject']/*[local-name()='domain']/*[local-name()='name' and text()='". $d ."'])"; 
             $flag++;
         }
-        $queryString .= $qS . " ) " if $qS;
 
         # finally we do the same for keywords
         if ( $sum_parameters ) {
@@ -3252,17 +3251,26 @@ sub lsQueryRequest {
         }
         
         $flag = 0;
-        $qS = " and ( " if $qS;
-        foreach my $k ( keys %{$sent->{"keyword"}} ) {
-            $qS .= " or" if $flag;
-            $qS .= "(./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and \@value='". $k ."'])"; 
+        $temp = $sent->{"keyword"};
+        foreach my $k ( keys %{ $temp } ) {
+            $queryStructure->{"keyword"} .= " or" if $flag;
+            $queryStructure->{"keyword"} .= "(./*[local-name()='metadata']/*[local-name()='parameters']/*[local-name()='parameter' and \@value='". $k ."'])"; 
             $flag++;
         }
-        $queryString .= $qS . " ) " if $qS;
-        $queryString .= "]";
-
-print "qs:\t" , $queryString , "\n";
         
+        my $first = 1;
+        my $counter = 0;
+        foreach my $type ( keys %{ $queryStructure } ) {
+            if ( $queryStructure->{$type} and $first ) {
+                $queryString .= "[";
+                $first--;
+            }
+            $queryString .= " and " if ( not $first ) and $counter and $queryStructure->{$type};
+            $queryString .= " ( " . $queryStructure->{$type} . " ) " if $queryStructure->{$type};
+            $counter++;
+        }
+        $queryString .= "]" if not $first;
+
         # this is the odd duck, we can't use it for the query, but we will use
         #   it later on.       
         my $l_addresses = find( $subject, "./nmtb:address", 0 );
@@ -3271,7 +3279,7 @@ print "qs:\t" , $queryString , "\n";
             next unless $ad;
             $sent->{"address"}->{$ad} = 1;
         }
-
+        
         my $database = $self->prepareDatabase( { container => $dbContainer } );
         unless ( $database ) {
             my $msg = "There was an error opening \"" . $self->{CONF}->{"gls"}->{"metadata_db_name"} . "/" . $dbContainer . "\": " . $error;
@@ -3312,9 +3320,7 @@ print "qs:\t" , $queryString , "\n";
                 throw perfSONAR_PS::Error_compat( "error.ls.query.summary_error", "Service has empty summary set, results to query not found." );
             }
             else {
-
                 for my $x ( 0 .. $len ) {
-print "1 - " , $x , "\n";
                     my $parser = XML::LibXML->new();
                     my $doc    = $parser->parse_string( $resultsString[$x] );
 
@@ -3324,8 +3330,6 @@ print "1 - " , $x , "\n";
                     $map{ $doc->getDocumentElement->getAttribute( "metadataIdRef" ) }{"data"}     = \@resultsString2;
                 }
 
-print "2\n";
-
                 my $status = $database->commitTransaction( { txn => $dbTr, error => \$error } );
                 if ( $status == 0 ) {
                     undef $dbTr;
@@ -3333,9 +3337,6 @@ print "2\n";
                     $database->closeDB( { error => \$error } );
 
                     foreach my $id ( keys %map ) {
-
-print "3 - " , $id , "\n";
-
                         my %store = ();
                         $store{"eventType"} = 0 if exists $sent->{"eventType"};
                         $store{"address"}   = 0 if exists $sent->{"address"};
@@ -3397,7 +3398,7 @@ print "3 - " , $id , "\n";
                                 $store{"keyword"}++ if $sent->{"keyword"}->{$value};
                             }
                         }
-
+                        
                         # we have a mactch, get the contact service.
                         my $flag = 1;
                         foreach my $key ( keys %store ) {
@@ -3431,7 +3432,6 @@ print "3 - " , $id , "\n";
                     $database->closeDB( { error => \$error } );
                     throw perfSONAR_PS::Error_compat( "error.ls.xmldb", "Database Error: \"" . $error . "\"." );
                 }
-
             }
         }
     }
