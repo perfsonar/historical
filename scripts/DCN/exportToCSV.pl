@@ -16,9 +16,17 @@ die "no LS instance provided\n" unless $LS;
 
 my $ls = new perfSONAR_PS::Client::LS( { instance => $LS } ); 
 
-my $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
-$query .= "declare namespace dcn=\"http://ggf.org/ns/nmwg/tools/dcn/2.0/\";\n";
-$query .= "/nmwg:store[\@type=\"LSStore\"]/*[local-name()='data']/*[local-name()='metadata']/dcn:subject\n";
+my $query = q{};
+if ( $LEGACY ) {
+    $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/*[local-name()='data']\n";
+}
+else {
+    $query = "declare namespace nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\";\n";
+    $query .= "declare namespace dcn=\"http://ggf.org/ns/nmwg/tools/dcn/2.0/\";\n";
+    $query .= "/nmwg:store[\@type=\"LSStore\"]/*[local-name()='data']/*[local-name()='metadata']/dcn:subject\n";
+}
+
 my $result = $ls->queryRequestLS( { query => $query, format => 1 } );
 if ( $result->{eventType} =~ m/^error/mx ) {
     die "Something went wrong ... eventType:\t" . $result->{eventType} . "\tResponse:\t" . $result->{response} , "\n";
