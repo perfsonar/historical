@@ -14,7 +14,7 @@ my $LS = shift;
 die "no LS instance provided\n" unless $LS;
 
 my $LEGACY = shift;
-die "legacy mode nod specified, use (0|1)\n" unless $LEGACY;
+die "legacy mode nod specified, use (0|1)\n" unless defined $LEGACY;
 
 my $ls = new perfSONAR_PS::Client::LS( { instance => $LS } ); 
 
