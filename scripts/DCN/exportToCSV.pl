@@ -11,8 +11,10 @@ use perfSONAR_PS::Client::LS;
 use perfSONAR_PS::Common qw( extract find );
 
 my $LS = shift;
-
 die "no LS instance provided\n" unless $LS;
+
+my $LEGACY = shift;
+die "legacy mode nod specified, use (0|1)\n" unless $LEGACY;
 
 my $ls = new perfSONAR_PS::Client::LS( { instance => $LS } ); 
 
