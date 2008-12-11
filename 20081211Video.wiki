@@ -1,0 +1,19 @@
+﻿=  December 11, 2008 Conference Call 4:00 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Issue: Release Management
+ # Release Management Czar (Cat herder): Jason Zurawski
+   
+ # Next meeting will be Dec 11, 4:00 pm Eastern Time
+
+== Where ==
+ESnet conference bridge:
+
+GDS dial-in number will be  001134982  55555
+The phone number will be 1-510-883-7860  then 55555# at the prompt.
+
+== Last Updated ==
+
+$Id$

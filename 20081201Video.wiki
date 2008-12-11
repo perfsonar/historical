@@ -2,32 +2,46 @@
 
 == Agenda/Minutes ==
 
- # Attendees:
+ # Attendees: Brian, Joe, Jason, Aaron, Rich, Jeff, Maxim
  # Team Updates
    # Internet2
+	 * Jason: gLS performance enhancements, gLS interoperability testing w/LS-MDM, and gLS GUIs to show data freshness. Also worked on GUIs for SC including wmap, circuit status as well as working on many deployments for for SC and BWC.
+     * Aaron: SCinet wan monitoring (pS status service and GUI) and other misc SCinet measurement tasks. BWC - primarily phoebus deployments and performance enhancements as well as pS-proc-scraper functionaity (can perhaps turn it into a 'generaic' MA. Currently working on UDP performance issue with KOI systems.
+     * Rich: Reported back from an OSG-NPWorkshop. Alan Roy may be someone to talk with more to get pS client tools integrated into vdt. Also reported back on LSN/JET request to develop a perfSONAR deployment plan for JET nets.
+     * Jeff: SC hangover. Reported on IRNC rumors and challenges. Beginning to help with DOE proposal. (And sorry, don't remember if I reported on anything else- I took to long to do the notes, and I'm bad about writing down what I talk about myself...)
    # IU
    # UDEL
    # Ga Tech
    # ESnet
+     * Brian: pS proposal for DOE and gLS testing.
+     * Joe: bwctl deployments.
    # SLAC
    # FNAL
+     * Maxim: Nothing this week. Working on VNOC proposal?
    # MCNC
  # SC recap
-   # How did weathermap work? Is there usable code here for other projects? Can we make it more plug-n-play for the future?
+   # How did weathermap work? Is there usable code here for other projects? Can we make it more plug-n-play for the future? *Should we start a wmap project to make these easier in the future?*
  # Deployments page - changes still needed?
+    * Yes, changes still needed. *Brian will work with Jason to develop use cases to help define what we ~really~ want to see here.*
  # KOI UDP performance issue - status?
+    * Still a problem. *Aaron will work on it.*
  # Central configuration service
    * Need to talk about how to harmonize service configuration files in functionality and syntax. And how that effects centralized configuration.
+   * *Joe will take a first cut at creating a functional specification.*
  # ISO - Functional Specification
    * Attempt to make sure functionality is clear from a user perspective, and to ensure that the disc is useful from a diagnostic perspective as well as a measurement-point perspective.
- # stable snapshot of svn trunk
+   * *Jeff, Rich and Aaron will continue to work on this.*
+ # Release Management is now needed...
+    # stable snapshot of svn trunk
+    *All: Jeff asked for volunteers to be rel-mgmt czar - email*
+    * Next call will be dedicated to release-management.
  # Discussion of middle-term goals
    * Wiki
      * Migration of content is complete, if anyone feels they are missing something contact Jason - he has backup copies.
    * Release management
    * It has been proposed that after SC, we shore up a very few pieces of missing functionality, and then concentrate on hardening and optimizing the software we have.
    * If that is the general sentiment, perhaps we can come up with the specific short list of functionality we want to deal with - and come up with ideas on what reasonable processes we can go through to harden/optimize.
- # Next meeting will be Dec 15, 2:30 pm Eastern Time
+ # Next meeting will be Dec 11, 4:00 pm Eastern Time
 
 == Where ==
 
