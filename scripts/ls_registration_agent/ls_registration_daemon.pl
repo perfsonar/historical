@@ -14,8 +14,12 @@ TBD
 
 =cut
 
+use lib "lib";
 use lib "../../lib";
 use lib "/usr/local/perfSONAR/lib";
+
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Utils::Daemon qw/daemonize setids lockPIDFile unlockPIDFile/;
@@ -255,6 +259,16 @@ sub init_site {
             }
             push @services, $service;
         }
+        elsif ( lc( $service_conf->{type} ) eq "phoebus" ) {
+            my $service = perfSONAR_PS::LSRegistrationDaemon::Phoebus->new();
+            if ( $service->init($service_conf) != 0 ) {
+
+                # complain
+                $logger->error("Error: Couldn't initialize Phoebus watcher");
+                exit(-1);
+            }
+            push @services, $service;
+        }
         elsif ( lc( $service_conf->{type} ) eq "ndt" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::NDT->new();
             if ( $service->init($service_conf) != 0 ) {
@@ -403,7 +417,7 @@ sub refresh {
         return;
     }
 
-    $self->{LOGGER}->debug( "Refreshing: " . $self->service_desc . "" );
+    $self->{LOGGER}->debug( "Refreshing: " . $self->service_desc );
 
     if ( $self->is_up ) {
         $self->{LOGGER}->debug("Service is up");
@@ -492,7 +506,7 @@ sub keepalive {
     my ($self) = @_;
 
     my $res = $self->{LS_CLIENT}->keepaliveRequestLS( key => $self->{KEY} );
-    if ( exists $res->{eventType} and $res->{eventType} ne "success.ls.keepalive" ) {
+    if ( $res->{eventType} ne "success.ls.keepalive" ) {
         $self->{STATUS} = "UNREGISTERED";
         $self->{LOGGER}->debug("Keepalive failed");
     }
@@ -571,10 +585,12 @@ sub init {
 
         my %addr_map = ();
         foreach my $addr (@tmp) {
-            my @addrs = resolve_address($addr);
-            foreach my $addr (@addrs) {
-                $addr_map{$addr} = 1;
-            }
+            $addr_map{$addr} = 1;
+
+            #            my @addrs = resolve_address($addr);
+            #            foreach my $addr (@addrs) {
+            #                $addr_map{$addr} = 1;
+            #            }
         }
 
         @addresses = keys %addr_map;
@@ -982,9 +998,7 @@ sub init {
 
     my $port = $conf->{port};
     if ( not $port and not $conf->{is_local} ) {
-        $self->{LOGGER}->error("Must specify an address or that the service is local");
-        $self->{STATUS} = "BROKEN";
-        return -1;
+        $conf->{port} = DEFAULT_PORT;
     }
     elsif ( not $port ) {
         my $npad_config;
@@ -1082,6 +1096,72 @@ sub event_type {
     return "http://ggf.org/ns/nmwg/tools/npad/1.0";
 }
 
+package perfSONAR_PS::LSRegistrationDaemon::Phoebus;
+
+use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
+
+use constant DEFAULT_PORT => 5006;
+
+sub init {
+    my ( $self, $conf ) = @_;
+
+    my $port = $conf->{port};
+    if ( not $port ) {
+        $conf->{port} = DEFAULT_PORT;
+    }
+
+    return $self->SUPER::init($conf);
+}
+
+sub get_service_addresses {
+    my ($self) = @_;
+
+    # we override the TCP_Service addresses function so that we can generate
+    # URLs.
+
+    my @addresses = ();
+
+    foreach my $addr ( @{ $self->{ADDRESSES} } ) {
+        my $uri;
+
+        $uri = "tcp://";
+        if ( $addr =~ /:/ ) {
+            $uri .= "[$addr]";
+        }
+        else {
+            $uri .= "$addr";
+        }
+
+        $uri .= ":" . $self->{PORT};
+
+        my %addr = ();
+        $addr{"value"} = $uri;
+        $addr{"type"}  = "uri";
+
+        push @addresses, \%addr;
+    }
+
+    return \@addresses;
+}
+
+sub type {
+    my ($self) = @_;
+
+    return "Phoebus Depot";
+}
+
+sub service_type {
+    my ($self) = @_;
+
+    return "phoebus";
+}
+
+sub event_type {
+    my ($self) = @_;
+
+    return "http://ggf.org/ns/nmwg/tools/phoebus/1.0";
+}
+
 #### Traceroute/Ping Services ####
 
 package perfSONAR_PS::LSRegistrationDaemon::ICMP_Service;
@@ -1171,7 +1251,7 @@ sub is_up {
             next;
         }
         else {
-            $self->{LOGGER}->debug( "Pinging: " . $addr . "" );
+            $self->{LOGGER}->debug( "Pinging: " . $addr );
             my $ping = Net::Ping->new("external");
             if ( $ping->ping( $addr, 1 ) ) {
                 return 1;
