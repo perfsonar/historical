@@ -6,7 +6,6 @@
  # Issue: Release Management
  # Release Management Czar (Cat herder): Jason Zurawski
    # See [20081211Video#Release_Management_Notes Release Management Notes] for a primer
-
    # Release TODO:
      * Gather up current documentation of practices, post to wiki
        # CPAN - Aaron
