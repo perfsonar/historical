@@ -22,6 +22,8 @@ name.  The following sections highlight the concepts we wish to save and adapt
 from this process; note that these are still in strawman form.
 
  # [20081211Video#Milestones_and_Frequency Milestones and Frequency]
+   # [20081211Video#2_x_Release_Cycle 2 x Release Cycle]
+   # [20081211Video#3_x_Release_Cycle 3 x Release Cycle]
  # [20081211Video#Release_Process Release Process]
    # [20081211Video#Dependencies Dependencies]
    # [20081211Video#Subversion Subversion]
@@ -39,7 +41,7 @@ where we are going with development, and these should be posted either publicly
 the release process and also balance the year's worth of tasks a lot easier.  The
 last meeting of the year, or the first meeting of the new year (I would prefer
 the former) should be used for roadmap re-evaluation: much like what we did this
-year).  After a release we should devote at least part of a meeting to 
+year.  After a release we should devote at least part of a meeting to 
 _lessons learned_ and _future goals_ where we can re-evaluate the roadmap.
 
 Currently we are driven to release by conference dates, for the most part we
@@ -60,7 +62,7 @@ one or two services may need a release, and this is fine.
 The frequency is debatable and does not take into consideration:
 
  * _bugfix_ releases (this is a separate issue)
- * Intra-project dependencies: Note that perfSONAR-PS now will need to synchronize activities with the performance node project(s), BWCTL, OWAMP, NDT, and possibly DCN.
+ * Intra-project dependencies: Note that perfSONAR-PS now will need to synchronize activities with the performance node project(s), BWCTL, OWAMP, NDT, Phoebus, and possibly DCN.
  
 Here are some of the options with pro's and con's for each.
 
