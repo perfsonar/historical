@@ -34,7 +34,7 @@
 == Where ==
 
 ESnet conference bridge:
- * GDS:  001134982  55555
+ * GDS:  00113498255555
  * phone: 1-510-883-7860  then 8255555# at the prompt.
 
 == Release Management Notes ==
