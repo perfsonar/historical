@@ -6,13 +6,7 @@
  # Issue: Release Management
  # Release Management Czar (Cat herder): Jason Zurawski
    # See [20081211Video#Release_Management_Notes Release Management Notes] for a primer
-    * Actions/Decisions/Open questions from discussion:
-      * *Decision*: Aim for 2 releases a year.
-      * *Everyone*: Review branch structure recommendation.
-      * *Everyone*: Review release mgmt notes, and make suggestions for changes.
-      * *Question*: How will we synchronize release schedules between dependent projects. (i.e. pS-NPToolkit)
-      * *Jason*: Add something on integration/interoperability testing to the release. (each service needs to be tested with the other services it is expected to work with - perhaps with older releases of them.)
-      * *Brian*: Include Q/A in test framework outline.
+
    # Release TODO:
      * Gather up current documentation of practices, post to wiki
        # CPAN - Aaron
@@ -36,6 +30,13 @@
        # NDT - Rich/Aaron
        # DCN - DCN Folks
        # Phoebus - Martin and Gang
+ # Actions/Decisions/Open questions from discussion:
+   * *Decision*: Aim for 2 releases a year.
+   * *Everyone*: Review branch structure recommendation.
+   * *Everyone*: Review release mgmt notes, and make suggestions for changes.
+   * *Question*: How will we synchronize release schedules between dependent projects. (i.e. pS-NPToolkit)
+   * *Jason*: Add something on integration/interoperability testing to the release. (each service needs to be tested with the other services it is expected to work with - perhaps with older releases of them.)
+   * *Brian*: Include Q/A in test framework outline.
  # Next meeting will be Dec 18, 4:00 pm Eastern Time
 
 == Where ==
