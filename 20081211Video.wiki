@@ -5,13 +5,280 @@
  # Attendees: 
  # Issue: Release Management
  # Release Management Czar (Cat herder): Jason Zurawski
-   # *More details to be filled in before the meeting* 
+   # See [20081211Video#Release_Management_Notes Release Management Notes] for a primer
  # Next meeting will be Dec 11, 4:00 pm Eastern Time
 
 == Where ==
+
 ESnet conference bridge:
  * GDS:  001134982  55555
  * phone: 1-510-883-7860  then 55555# at the prompt.
+
+== Release Management Notes ==
+
+Content based strongly on the 
+[http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] of the same
+name.  The following sections highlight the concepts we wish to save and adapt
+from this process; note that these are still in strawman form.
+
+ # [20081211Video#Milestones_and_Frequency Milestones and Frequency]
+ # [20081211Video#Release_Process Release Process]
+   # [20081211Video#Dependencies Dependencies]
+   # [20081211Video#Subversion Subversion]
+   # [20081211Video#Schedule Schedule]
+   # [20081211Video#Testing Testing]
+   # [20081211Video#Code_Review Code Review]
+   # [20081211Video#Issue_Tracker Issue Tracker]
+ # [20081211Video#Build_Targets Build Targets]
+
+=== Milestones and Frequency ===
+
+We shall maintain some _real_ project management tools such as charts to show
+where we are going with development, and these should be posted either publicly
+(here) or privately (spaces wiki?).  These milestones/roadmaps will help us with
+the release process and also balance the year's worth of tasks a lot easier.  The
+last meeting of the year, or the first meeting of the new year (I would prefer
+the former) should be used for roadmap re-evaluation: much like what we did this
+year).  After a release we should devote at least part of a meeting to 
+_lessons learned_ and _future goals_ where we can re-evaluate the roadmap.
+
+Currently we are driven to release by conference dates, for the most part we
+seem to push hard on development and release for these events:
+
+ * Prior to Joint Techs (Summer or Winter)
+ * Prior to Internet2 Member Meetings (Spring or Fall)
+ * Misc. Meetings (e.g. LHCOPN)
+ 
+I am proposing we take into consideration these dates and events as they
+happen since they are well known and a good indicator of when we will have time
+(or not have time), but we should try for regular periodic software release
+cycles of the core components on a set schedule.  This does not imply that 
+each component will be released on the schedule: we will identify targets
+prior to the start of a cycle based on development.  It is probable that only
+one or two services may need a release, and this is fine.
+
+The frequency is debatable and does not take into consideration:
+
+ * _bugfix_ releases (this is a separate issue)
+ * Intra-project dependencies: Note that perfSONAR-PS now will need to synchronize activities with the performance node project(s), BWCTL, OWAMP, NDT, and possibly DCN.
+ 
+Here are some of the options with pro's and con's for each.
+
+==== 2 x Release Cycle ====
+
+6 month release cycles aims for Q1 (Dec/Jan/Feb) and Q3 (Jun/Jul) releases.  This
+would coincide with the JTs schedule, but would be tight due to the winter
+holidays.  Sliding the window forward a month or two puts it on track for the
+Member meeting schedule which may be more palatable (e.g. Mar/Apr and Aug/Sept).
+We *should* avoid releasing in Oct/Nov at all costs due to SC.  
+
+ * Pro
+   * Less man hours on the 'paperwork' aspect of development
+   * Twice a year releases shows maturity of the project
+ * Con
+   * Less frequent could imply that the cycle itself would be busy (e.g. several services could make progress in 6 months)
+   * May indicate group dormancy (which may or may not be true)
+   * If cycle is extended due to elongated testing/bug fix phase could miss the conference deadlines
+   
+==== 3 x Release Cycle ====
+
+4 month release cycle tries to coincide with major dates:
+
+ * Dec/Jan/Feb - Winter JTs
+ * Apr/May - SMM
+ * Aug/Sep - FMM
+
+The winter holidays complicate this one as well, but by starting a little early
+in Dec we can most likely meet the end of January deadline.  I would avoid
+shifting this too much into Oct due to the always present Fall member meeting
+_big_ demo which Internet2 folks assist with as well as SC commitments.  
+
+ * Pro
+   * Mimics current activity cycles closely
+   * Shows commitment of the group to constant updates
+ * Con
+   * Approaching _too much_ time in release and not enough time in development
+   
+=== Release Process ===
+
+The [http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] contains
+lots of info, I am going to distill this into the important parts for this meeting
+and we can expound upon this at a later day for more detail.  In general most 
+Internet2 projects (BWCTL, OWAMP, NDT, performance node, Phoebus) will be following this
+same release blueprint with changes made in the obvious places based on
+technologies and manpower.  The perfSONAR-PS initial release will serve as a test
+for the others, so we expect many lessons to be learned the hard way.  There are
+a couple things we want to emphasize:
+
+ * [20081211Video#Dependencies Dependencies] - perfSONAR-PS does not sit on an island anymore, we must consider how the release process here will ripple to other projects (and reversed)
+ * [20081211Video#Subversion Subversion] - As pointed out on previous calls, it is less than optimal right now, we should fix this
+ * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we should standardize this
+ * [20081211Video#Code_Review Code Review] - This is lacking currently, and that *must* be fixed
+ * [20081211Video#Issue_Tracker Issue Tracker] - We are using this pretty well, need some better organization and need to keep up with things that are open and when to close things.
+
+==== Dependencies ====
+
+Using some sort of software, the release manager will need to plot a general and
+per-release dependency graph.  This should be shared with other release managers
+so the schedule can be adjusted as needed.  Some major dependencies:
+
+ * performance node
+   * _Should not_ release at the same time as other tools; this may be relaxed depending on forecast
+   * May assume other roles, e.g. Live CD, NOC in a can 
+ * Phoebus
+   * _Will_ depends on certain parts of perfSONAR-PS and DCN
+ * perfSONAR-PS
+   * _Should_ be complete prior to performance node release
+   * External relationship to schedules of other partners (ESnet, Fermi, SLAC, GT, IU, UDel)
+ * OWAMP
+   * _Should_ be complete prior to performance node release
+   * May run concurrent to *bwctl*, *ndt*
+ * BWCTL
+   * _Should_ be complete prior to performance node release
+   * External relationship to *thurlay*, *iperf*, *nuttcp*
+   * May run concurrent to *owamp*, *ndt*
+ * NDT
+   * _Should_ be complete prior to performance node release
+   * May run concurrent to *owamp*, *bwctl*
+   * External relationship to *web100* (although this is weak)
+   * Heavily depends on linux kernel (may trigger security releases)
+
+==== Subversion ====
+
+Our current subversion layout does not follow any rules with regards to tagging, 
+branching, or respecting the concept of a release: this is bad.  I would like
+to follow the BSD idea:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/20081211Video/branches-head.png
+
+This will imply:
+
+ * The release manager should be the one to manage the SVN tags, branches.  
+ * The naming convention should be kept sane
+ * Developer habits will need to change from staying in 'trunk' to working out of the appropriate areas
+ 
+This will be a harder change to get used to, so additional notes will be prepared to ease the transition. 
+ 
+==== Schedule ====
+ 
+The following diagram lays outs the release schedule:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/20081211Video/schedule.png
+
+Overview: 45 Day process, can be lengthened in special circumstances.
+
+ * Days < 0
+   * Release manager starts to identify targets over mailing list, conf call before release time
+   * Milestones/Roadmap updated as needed
+ * Days 1 - 15: 
+   * Announce Release Cycle Start
+   * Announce Targets
+   * Draw up Release Plan
+   * Developers: 15 days to move changes from current to stable
+   * Release manager rounds up community members for later testing (announce to relevant lists, maintain static list)
+   * End of phase is make or break for release inclusion.
+ * Days 16 - 30:
+   * Code Slush - all non critical source code moves to Stable are halted
+   * Documentation may be updated
+   * Test cases may be updated
+   * Internal testing and building
+ * Days 31 - 45:
+   * RC process begins.
+   * Target should be for ~3 RCs (every 4 days until release) but will also depend on what issues are found and how often a build is necessary.  
+   * Testing with _interested_ community members (aim for RCs 1 and 2, by 3 its too late).  
+   * Make call to extend to additional RCs if necessary
+ * Days 45+ 
+   * Release announcement
+   * Upload to various sources in various forms
+   * Adjust Issues/Wiki/Web pages as needed
+   * Adjust milestones/roadmap
+   * Lessons learned
+   * Changes in Direction
+ 
+==== Testing ====
+
+Testing involves two major areas:
+
+ * Creation/maintenance of testing tools and examples
+ * Test 'farm' to test installation and performance of tools
+
+We currently have some testing tools and some of the services have a good set
+of test cases included.  It will be a requirement that all services participate
+in the test harness at the protocol level (e.g. providing messages that test
+good and base use cases) as well as software level tests.  Lack of either will
+boot a service from a release.
+
+The test farm was an idea initially discussed more for the non perl services, 
+but the idea will still benefit perfSONAR-PS:
+
+ * Dedicated development machines either in Ann Arbor or other partner's facility
+ * Major architectures:
+   * i386
+   * x86_64
+   * SPARC
+   * ?
+ * Major flavors
+   * Debian/Ubuntu
+   * RHEL/Fedora/Scientific
+   * Solaris
+   * Free/Open/Net BSD (Free will suffice)
+
+Having individual machines for this is not cost effective, so virtual machines
+seems to be the best way.  Internet2 currently has a dedicated machine for this
+(not sure of the exact details, but beefy and probably Intel based) where it is
+possible to call up a VM and have it go 'live' in moments.  We doubt we could use
+the 'production' machine for dev purposes but a similar setup would be good.
+
+The goal would be to keep snapshots of clean OSs for instant startup where we
+can test various things.  Ideas on this are welcome.
+
+==== Code Review ====
+
+Code review also has two parts:
+
+ * Pre-review tasks the developer will do including running tidy and critic to get the major things out of the way.  
+ * Actual code review done by the entire project.
+
+Code review will be a part of *_every_* release cycle.  It will go down as such:
+
+ * Release manager will identify the files to be reviewed
+ * Release manager will divy up by either file or function (the process of dividing is really a review in and of itself) and try to give related chunks to the reviewers (e.g. *_all of pS-PS_*).  There will be overlap.
+ * Purpose of the review should be:
+   * Critique the organization/layout - this is our only way to make things better
+   * Question the use of external libs
+   * Question Algorithmic design/use - this is also very important for services like the LS/TS/IS and the general design of MAs and MPs.  
+ * Reviewers will have a finite amount of time (TBD) to complete a review.
+ * Reviews should follow some format (TBD also) and shared on the mailing list for additional comments). 
+ * Developers will have a shorter finite amount of time to fix changes.
+ * Release manager will do final review of changes.
+
+==== Issue Tracker ====
+
+Use of this so far has been good.  Some improvements:
+
+ * Keep _labels_ up to date - especially milestones (need labels), products, versions, etc.
+ * Re-classify existing bug when applicable
+ * Use the _depends on_ feature more
+ * Close out bugs when we can, don't leave open for an indefinite amount of time
+ * Watch the _assigned to_ person when bugs are opened - this can always be changed but make a good guess who this should be, when in doubt pick the release manager
+
+=== Build Targets ===
+
+The following will represent the _types_ of release we *must* have:
+
+ * RPM packages
+   * Tested on RHEL 4/5, Fedora Current 8/9/10, Scientific, CentOS
+ * Deb Packages
+   * Debian Stable/Testing, Ubuntu -2, -1 and 0
+ * FreeBSD Ports
+ * Source TAR/BZ/ZIP
+   * Mimic CPAN structure (e.g. MakeMaker)
+ 
+The following are still good, but are slipping to the *would like* category:
+
+ * CPAN - Does making it available here buy us anything?
+ 
+Additionally we will want to make an apt/yum repo available.  Developing.
 
 == Last Updated ==
 
