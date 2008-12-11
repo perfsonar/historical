@@ -14,7 +14,7 @@
      * Document New Tasks
        * Release Process (General) - Jason
        * Release Process Specific
-         # perfSONAR-PS - Jason (server as a model for others)
+         # perfSONAR-PS - Jason (serve as a model for the other projects)
          # BWCTL - Aaron/Jeff
          # OWAMP - Aaron/Jeff
          # NDT - Rich/Aaron
@@ -158,7 +158,7 @@ a couple things we want to emphasize:
    * [20081211Video#Wiki Wiki]
    * [20081211Video#Release_Documentation Release Documentation]
    * [20081211Video#Public_Relations Public Relations]
- * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we must standardize this to do the typical testing (e.g. unit) as well as bigger picture (e.g. protocol and service - black box)
+ * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we must standardize this to do the typical testing (e.g. unit) as well as bigger picture (e.g. protocol and service)
  * [20081211Video#Code_Review Code Review] - This is lacking currently, and that *must* be fixed
  * [20081211Video#Issue_Tracker Issue Tracker] - We are using this pretty well, need some better organization and need to keep up with things that are open and when to close things.
 
@@ -231,6 +231,15 @@ The actual release process then requires these actions
  * Tags are prepared from the RELEASE branch for milestones (e.g. RCs, Betas, Releases)
  * Over time, bugfixes from trunk can be applied to branches
    * New tags may be created
+
+The release _tooling_, e.g. the way it is packaged as an RPM or CPAN package is
+is currently kept in the development tree.  An idea was floated to change this:
+
+ * Maintain a separate repo just for release information on a service by service basis
+ * Remove existing _module_ information from development subversion
+ * Release mangement repo will contain release information for each service in the various formats
+ 
+This idea should be discussed.
  
 ==== Schedule ====
  
@@ -253,11 +262,13 @@ Overview: 45 Day process, can be lengthened in special circumstances.
    * Developers: start to finalize doc
    * Release manager rounds up community members for later testing (announce to relevant lists - maintain static list in a private location)
    * End of phase is make or break for release inclusion for specific products
+   * Code Review Begins
  * Days 16 - 30:
    * Code Slush - all non critical source code moves to RELEASE are halted
    * Documentation may be updated
    * Test cases may be updated
    * Internal testing and building begins
+   * Code Review continues as necessary.
  * Days 31 - 45:
    * RC process begins.
      * New Tags from RELEASE when applicable 
@@ -404,6 +415,7 @@ Code review will be a part of *_every_* release cycle.  It will go down as such:
    * Critique the organization/layout - this is our only way to make things better
    * Question the use of external libs
    * Question Algorithmic design/use - this is also very important for services like the LS/TS/IS and the general design of MAs and MPs.  
+   * Critique of documentation (also a must).  
  * Reviewers will have a finite amount of time (TBD) to complete a review.
  * Reviews should follow some format (TBD also) and shared on the mailing list for additional comments). 
  * Developers will have a shorter finite amount of time to fix changes.
