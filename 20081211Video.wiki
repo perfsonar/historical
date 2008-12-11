@@ -10,9 +10,8 @@
 
 == Where ==
 ESnet conference bridge:
-
-GDS dial-in number will be  001134982  55555
-The phone number will be 1-510-883-7860  then 55555# at the prompt.
+ * GDS:  001134982  55555
+ * phone: 1-510-883-7860  then 55555# at the prompt.
 
 == Last Updated ==
 
