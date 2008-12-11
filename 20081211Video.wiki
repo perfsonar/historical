@@ -58,6 +58,9 @@ to a permanent home after call.
      # [20081211Video#Release_Documentation Release Documentation]
      # [20081211Video#Public_Relations Public Relations]
    # [20081211Video#Testing Testing]
+     # [20081211Video#Colored_Box_Approach_To_Testing Colored Box Approach To Testing]
+     # [20081211Video#Process Process]
+     # [20081211Video#Test_Targets Test Targets]
    # [20081211Video#Code_Review Code Review]
    # [20081211Video#Issue_Tracker Issue Tracker]
  # [20081211Video#Build_Targets Build Targets]
@@ -151,10 +154,10 @@ a couple things we want to emphasize:
  * [20081211Video#Subversion Subversion] - As pointed out on previous calls, it is less than optimal right now, we will be fixing this
  * [20081211Video#Schedule Schedule] - The schedule should be well spelled out so folks know what to expect and when, the dates will change but the window of time will not
  * [20081211Video#Documentation Documentation] - Major areas must _*~always~*_ be addressed:
-   * Perl Doc
-   * Release Documentation 
-   * Wiki Documentation
-   * Web documentation
+   * [20081211Video#Perldoc Perldoc]
+   * [20081211Video#Wiki Wiki]
+   * [20081211Video#Release_Documentation Release Documentation]
+   * [20081211Video#Public_Relations Public Relations]
  * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we must standardize this to do the typical testing (e.g. unit) as well as bigger picture (e.g. protocol and service - black box)
  * [20081211Video#Code_Review Code Review] - This is lacking currently, and that *must* be fixed
  * [20081211Video#Issue_Tracker Issue Tracker] - We are using this pretty well, need some better organization and need to keep up with things that are open and when to close things.
@@ -328,19 +331,38 @@ the marketing folks to get what we want.  Target is for release date.
  
 ==== Testing ====
 
-Testing involves two major areas:
+Not a lot of emphasis thus far has gone into our testing.  We do not have the
+manpower or time to maintain a full time test team, so using some typical
+approaches in a succinct manner should get us further along to a testing goal.
+[http://en.wikipedia.org/wiki/Software_testing#Testing_methods This] page is the
+starting point for this section:
 
- * Creation/maintenance of testing tools and examples
- * Test 'farm' to test installation and performance of tools
+===== Colored Box Approach To Testing =====
 
-We currently have some testing tools and some of the services have a good set
-of test cases included.  It will be a requirement that all services participate
-in the test harness at the protocol level (e.g. providing messages that test
-good and base use cases) as well as software level tests.  Lack of either will
-boot a service from a release.
+I am avoiding using a specific major color since we will need a hybrid approach
+for the time and resources allowed.  Here are the classic choices:
 
-The test farm was an idea initially discussed more for the non perl services, 
-but the idea will still benefit perfSONAR-PS:
+ * Black Box - Test not knowing or caring how it works (just that it does).  Use of existing test harness is probable
+ * White Box - Having knowledge of what is inside, test to see it works as it should.  Use of external tools like profilers and the like 
+ * Gray Box - Hybrid of the two, you know how it works and use this to design external tests
+
+I would advocate that we create a pretty large set of black box tests for the service level (e.g. library of messages for each service) that test the common cases, the failure cases, and the corner cases (will need white box knowledge for these).  For the lower levels (functional tests) that can be expressed in the perl test language we can also take a more black than white line to testing.
+
+===== Process =====
+
+There are 3 areas we need to address
+
+ # Unit tests - written in the perl testing method for perfSONAR-PS, JUnit for the Java tools, and more manual methods for other software.  Should hit all functions.
+ # Integration testing - test that the interfaces to modules/classes are clean
+ # System Testing - Protocol level testing for the various components
+ 
+Individual documents should go into more details here.
+
+===== Test Targets =====
+
+The test farm was an idea initially discussed more for the non perl services
+(e.g. BWCTL, OWAMP are a little closer to the hardware) but the idea will still
+benefit perfSONAR-PS:
 
  * Dedicated development machines either in Ann Arbor or other partner's facility
  * Major architectures:
@@ -353,12 +375,15 @@ but the idea will still benefit perfSONAR-PS:
    * RHEL/Fedora/Scientific
    * Solaris
    * Free/Open/Net BSD (Free will suffice)
+   * ?
+ * Recent versions of each of the major flavors.
 
 Having individual machines for this is not cost effective, so virtual machines
 seems to be the best way.  Internet2 currently has a dedicated machine for this
-(not sure of the exact details, but beefy and probably Intel based) where it is
-possible to call up a VM and have it go 'live' in moments.  We doubt we could use
-the 'production' machine for dev purposes but a similar setup would be good.
+(not sure of the exact details - coming soon, but beefy and probably Intel based)
+where it is possible to call up a VM and have it go 'live' in moments.  We
+doubt we could use the 'production' machine for dev purposes but a similar
+setup would be good.
 
 The goal would be to keep snapshots of clean OSs for instant startup where we
 can test various things.  Ideas on this are welcome.
@@ -367,7 +392,8 @@ can test various things.  Ideas on this are welcome.
 
 Code review also has two parts:
 
- * Pre-review tasks the developer will do including running tidy and critic to get the major things out of the way.  
+ * Pre-review tasks the developer will do including running tidy and critic to get the major things out of the way.
+   * The idea was floated (a long time ago) to automate this via SVN hooks, we should re-evaluate this 
  * Actual code review done by the entire project.
 
 Code review will be a part of *_every_* release cycle.  It will go down as such:
@@ -388,11 +414,11 @@ Code review will be a part of *_every_* release cycle.  It will go down as such:
 Use of this so far has been good.  Some improvements:
 
  * Keep _labels_ up to date - especially milestones (need labels), products, versions, etc.
- * Re-classify existing bug when applicable
- * Use the _depends on_ feature more
+ * Re-classify existing bugs when applicable to specific release targets
+ * Use the _depends on_ feature more to link issues
  * Close out bugs when we can, don't leave open for an indefinite amount of time
  * Watch the _assigned to_ person when bugs are opened - this can always be changed but make a good guess who this should be, when in doubt pick the release manager
-
+ 
 === Build Targets ===
 
 The following will represent the _types_ of release we *must* have:
