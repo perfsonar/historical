@@ -6,6 +6,29 @@
  # Issue: Release Management
  # Release Management Czar (Cat herder): Jason Zurawski
    # See [20081211Video#Release_Management_Notes Release Management Notes] for a primer
+   # Release TODO:
+     * Gather up current documentation of practices, post to wiki
+       # CPAN - Aaron
+       # RPM - Aaron
+       # Deb - Aaron
+     * Document New Tasks
+       * Release Process (General) - Jason
+       * Release Process Specific
+         # perfSONAR-PS - Jason (server as a model for others)
+         # BWCTL - Aaron/Jeff
+         # OWAMP - Aaron/Jeff
+         # NDT - Rich/Aaron
+       * Yum Repo - TBD
+       * Apt Repo - TBD
+       * Ports - TBD
+     * Create Roadmap/Milestones - Jeff/Jason
+       # perfSONAR-PS - Group Input
+       # performance node - Larger Group Input
+       # OWAMP - Jeff/Aaron
+       # BWCTL - Jeff/Aaron
+       # NDT - Rich/Aaron
+       # DCN - DCN Folks
+       # Phoebus - Martin and Gang
  # Next meeting will be Dec 11, 4:00 pm Eastern Time
 
 == Where ==
@@ -17,9 +40,10 @@ ESnet conference bridge:
 == Release Management Notes ==
 
 Content based strongly on the 
-[http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] of the same
+[http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] process of the same
 name.  The following sections highlight the concepts we wish to save and adapt
-from this process; note that these are still in strawman form.
+from this process; note that these are still in strawman form and will be moved
+to a permanent home after call.
 
  # [20081211Video#Milestones_and_Frequency Milestones and Frequency]
    # [20081211Video#2_x_Release_Cycle 2 x Release Cycle]
@@ -28,6 +52,11 @@ from this process; note that these are still in strawman form.
    # [20081211Video#Dependencies Dependencies]
    # [20081211Video#Subversion Subversion]
    # [20081211Video#Schedule Schedule]
+   # [20081211Video#Documentation Documentation]
+     # [20081211Video#Perldoc Perldoc]
+     # [20081211Video#Wiki Wiki]
+     # [20081211Video#Release_Documentation Release Documentation]
+     # [20081211Video#Public_Relations Public Relations]
    # [20081211Video#Testing Testing]
    # [20081211Video#Code_Review Code Review]
    # [20081211Video#Issue_Tracker Issue Tracker]
@@ -35,14 +64,15 @@ from this process; note that these are still in strawman form.
 
 === Milestones and Frequency ===
 
-We shall maintain some _real_ project management tools such as charts to show
-where we are going with development, and these should be posted either publicly
-(here) or privately (spaces wiki?).  These milestones/roadmaps will help us with
-the release process and also balance the year's worth of tasks a lot easier.  The
-last meeting of the year, or the first meeting of the new year (I would prefer
-the former) should be used for roadmap re-evaluation: much like what we did this
-year.  After a release we should devote at least part of a meeting to 
-_lessons learned_ and _future goals_ where we can re-evaluate the roadmap.
+We require some _*real*_ project management tools such as charts and the like to
+show where we are going with development, and these should be posted either
+publicly (here) or privately (spaces wiki?); we will probably want versions of 
+both.  These milestones/roadmaps will help us with the release process and also
+balance the year's worth of tasks a lot easier.  The last meeting of the year,
+or the first meeting of the new year (I would prefer the former) should be used
+for roadmap re-evaluation: much like what we did this year.  After a release we
+should devote at least part of a meeting to _*lessons learned*_ and 
+_*future goals*_ where we can re-evaluate the roadmap.
 
 Currently we are driven to release by conference dates, for the most part we
 seem to push hard on development and release for these events:
@@ -64,23 +94,26 @@ The frequency is debatable and does not take into consideration:
  * _bugfix_ releases (this is a separate issue)
  * Intra-project dependencies: Note that perfSONAR-PS now will need to synchronize activities with the performance node project(s), BWCTL, OWAMP, NDT, Phoebus, and possibly DCN.
  
-Here are some of the options with pro's and con's for each.
+Here are some of the options with pro's and con's for two frequencies we should
+consider:
 
 ==== 2 x Release Cycle ====
 
 6 month release cycles aims for Q1 (Dec/Jan/Feb) and Q3 (Jun/Jul) releases.  This
 would coincide with the JTs schedule, but would be tight due to the winter
 holidays.  Sliding the window forward a month or two puts it on track for the
-Member meeting schedule which may be more palatable (e.g. Mar/Apr and Aug/Sept).
-We *should* avoid releasing in Oct/Nov at all costs due to SC.  
+Member meeting schedule which may be more palatable (e.g. Mar/Apr and Aug/Sept/Oct).
+We *should* avoid releasing in late Oct/Nov at all costs due to SC.  
 
  * Pro
-   * Less man hours on the 'paperwork' aspect of development
+   * Less man hours on the _paperwork_ aspect of development
    * Twice a year releases shows maturity of the project
+   * Ample time for testing of new additions
  * Con
    * Less frequent could imply that the cycle itself would be busy (e.g. several services could make progress in 6 months)
    * May indicate group dormancy (which may or may not be true)
    * If cycle is extended due to elongated testing/bug fix phase could miss the conference deadlines
+   * Features take a long time to surface
    
 ==== 3 x Release Cycle ====
 
@@ -88,7 +121,7 @@ We *should* avoid releasing in Oct/Nov at all costs due to SC.
 
  * Dec/Jan/Feb - Winter JTs
  * Apr/May - SMM
- * Aug/Sep - FMM
+ * Aug/Sep/Oct - FMM
 
 The winter holidays complicate this one as well, but by starting a little early
 in Dec we can most likely meet the end of January deadline.  I would avoid
@@ -98,23 +131,31 @@ _big_ demo which Internet2 folks assist with as well as SC commitments.
  * Pro
    * Mimics current activity cycles closely
    * Shows commitment of the group to constant updates
+   * New features show up sooner
  * Con
    * Approaching _too much_ time in release and not enough time in development
+   * May push internal resources of all partners
    
 === Release Process ===
 
-The [http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] contains
+The [http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] article contains
 lots of info, I am going to distill this into the important parts for this meeting
 and we can expound upon this at a later day for more detail.  In general most 
-Internet2 projects (BWCTL, OWAMP, NDT, performance node, Phoebus) will be following this
+Internet2 projects (BWCTL, OWAMP, NDT, performance node, Phoebus, DCN) will be following this
 same release blueprint with changes made in the obvious places based on
-technologies and manpower.  The perfSONAR-PS initial release will serve as a test
+technologies and manpower when applicable.  The perfSONAR-PS initial release will serve as a test
 for the others, so we expect many lessons to be learned the hard way.  There are
 a couple things we want to emphasize:
 
- * [20081211Video#Dependencies Dependencies] - perfSONAR-PS does not sit on an island anymore, we must consider how the release process here will ripple to other projects (and reversed)
- * [20081211Video#Subversion Subversion] - As pointed out on previous calls, it is less than optimal right now, we should fix this
- * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we should standardize this
+ * [20081211Video#Dependencies Dependencies] - perfSONAR-PS does not sit on an island anymore, we must consider how the release process here will ripple to other projects (and the opposite direction too)
+ * [20081211Video#Subversion Subversion] - As pointed out on previous calls, it is less than optimal right now, we will be fixing this
+ * [20081211Video#Schedule Schedule] - The schedule should be well spelled out so folks know what to expect and when, the dates will change but the window of time will not
+ * [20081211Video#Documentation Documentation] - Major areas must _*~always~*_ be addressed:
+   * Perl Doc
+   * Release Documentation 
+   * Wiki Documentation
+   * Web documentation
+ * [20081211Video#Testing Testing] - There is some emphasis placed on this, but everyone goes their own way, we must standardize this to do the typical testing (e.g. unit) as well as bigger picture (e.g. protocol and service - black box)
  * [20081211Video#Code_Review Code Review] - This is lacking currently, and that *must* be fixed
  * [20081211Video#Issue_Tracker Issue Tracker] - We are using this pretty well, need some better organization and need to keep up with things that are open and when to close things.
 
@@ -124,42 +165,69 @@ Using some sort of software, the release manager will need to plot a general and
 per-release dependency graph.  This should be shared with other release managers
 so the schedule can be adjusted as needed.  Some major dependencies:
 
- * performance node
-   * _Should not_ release at the same time as other tools; this may be relaxed depending on forecast
-   * May assume other roles, e.g. Live CD, NOC in a can 
+ * perfSONAR-PS Components
+   * _Should_ be complete prior to performance node release (e.g. the parts that are ready)
+   * _Should_ depend on relationship to schedules of other partners (ESnet, Fermi, SLAC, GT, IU, UDel)
+   * Dependence on *DCN* (when applicable)
+ * performance node (in general - will have specific flavors)
+   * _Should not_ release at the same time as other tools; this may be relaxed depending on forecast of things
+   * External relationship (weak) on *NPAD*, *Iperf*, *Web100*
  * Phoebus
-   * _Will_ depends on certain parts of perfSONAR-PS and DCN
- * perfSONAR-PS
-   * _Should_ be complete prior to performance node release
-   * External relationship to schedules of other partners (ESnet, Fermi, SLAC, GT, IU, UDel)
+   * _Should_ depend on certain parts of *perfSONAR-PS* and *DCN*
+   * _Should_ depend on needs of *UDel* and *Internet2*
  * OWAMP
    * _Should_ be complete prior to performance node release
-   * May run concurrent to *bwctl*, *ndt*
+   * _May_ run concurrent to *bwctl*, *ndt*
  * BWCTL
    * _Should_ be complete prior to performance node release
+   * _May_ run concurrent to *owamp*, *ndt*
    * External relationship to *thurlay*, *iperf*, *nuttcp*
-   * May run concurrent to *owamp*, *ndt*
  * NDT
    * _Should_ be complete prior to performance node release
-   * May run concurrent to *owamp*, *bwctl*
-   * External relationship to *web100* (although this is weak)
-   * Heavily depends on linux kernel (may trigger security releases)
+   * _May_ run concurrent to *owamp*, *bwctl*
+   * External relationship to *web100* (although this is weak), linux kernel (may trigger security releases)
+ * DCN
+   * _Should_ take into consideration Phoebus and perfSONAR-PS status (not a hard requirement)
+   * External relationship to schedules of other partners (ESnet, MAX)
+
+These will be evaluated on a case by case basis, and overlap will occur both of 
+staff and time.  
 
 ==== Subversion ====
 
 Our current subversion layout does not follow any rules with regards to tagging, 
-branching, or respecting the concept of a release: this is bad.  I would like
-to follow the BSD idea:
+branching, or respecting the concept of a release: this is bad.  The FreeBSD
+approach is nice, but still a little too much for us:
 
 http://perfsonar-ps.googlecode.com/svn/wiki/20081211Video/branches-head.png
 
-This will imply:
+Borrowing some concepts from both 
+[http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] and 
+[http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.branchmerge SVN], here is
+the proposed layout of our tree:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/20081211Video/svn.png
+
+This implies a couple of immediate changes (pre-release process)
+
+ * Clean up old branches
+ * Clean up old tags
+ * Clean up trunk of certain aspects
+   * the module substructure - more on this later
+   * doc skeleton structure
+   * remove or move misc. debris
+
+The actual release process then requires these actions
 
  * The release manager should be the one to manage the SVN tags, branches.  
- * The naming convention should be kept sane
- * Developer habits will need to change from staying in 'trunk' to working out of the appropriate areas
- 
-This will be a harder change to get used to, so additional notes will be prepared to ease the transition. 
+   * Documentation of this process is a must
+   * Adherence to the process is a must
+ * Prior to release, the Release manager prepares the RELEASE_X_Y Branch.
+   * If not done already, services involved in release must become stable ASAP in this branch, fixes done here can be merged back to trunk.
+   * The 15 Day window to slush involves still working from trunk (to prevent this from becoming un-stable), bugfixes and new functionality that makes the cut before the 15 minute window can be merged in after testing.
+ * Tags are prepared from the RELEASE branch for milestones (e.g. RCs, Betas, Releases)
+ * Over time, bugfixes from trunk can be applied to branches
+   * New tags may be created
  
 ==== Schedule ====
  
@@ -170,32 +238,93 @@ http://perfsonar-ps.googlecode.com/svn/wiki/20081211Video/schedule.png
 Overview: 45 Day process, can be lengthened in special circumstances.
 
  * Days < 0
-   * Release manager starts to identify targets over mailing list, conf call before release time
+   * Release manager starts to identify targets over mailing list
+   * conf call before release time to finalize details
    * Milestones/Roadmap updated as needed
  * Days 1 - 15: 
    * Announce Release Cycle Start
    * Announce Targets
-   * Draw up Release Plan
-   * Developers: 15 days to move changes from current to stable
-   * Release manager rounds up community members for later testing (announce to relevant lists, maintain static list)
-   * End of phase is make or break for release inclusion.
+   * Draw up Release Plan with any specifics over the general plan
+   * Release manager prepares RELEASE branch
+   * Developers: 15 days to get RELEASE stable and merge in bugfixes/improvements
+   * Developers: start to finalize doc
+   * Release manager rounds up community members for later testing (announce to relevant lists - maintain static list in a private location)
+   * End of phase is make or break for release inclusion for specific products
  * Days 16 - 30:
-   * Code Slush - all non critical source code moves to Stable are halted
+   * Code Slush - all non critical source code moves to RELEASE are halted
    * Documentation may be updated
    * Test cases may be updated
-   * Internal testing and building
+   * Internal testing and building begins
  * Days 31 - 45:
    * RC process begins.
+     * New Tags from RELEASE when applicable 
    * Target should be for ~3 RCs (every 4 days until release) but will also depend on what issues are found and how often a build is necessary.  
    * Testing with _interested_ community members (aim for RCs 1 and 2, by 3 its too late).  
    * Make call to extend to additional RCs if necessary
- * Days 45+ 
+ * Day 45
    * Release announcement
    * Upload to various sources in various forms
    * Adjust Issues/Wiki/Web pages as needed
+ * Day 46+
    * Adjust milestones/roadmap
    * Lessons learned
    * Changes in Direction
+ 
+==== Documentation ====
+ 
+Keeping up with documentation is a must, and all _levels_ of documentation
+should be addressed by the necessary parties:
+
+ # [20081211Video#Perldoc Perldoc]
+ # [20081211Video#Wiki Wiki]
+ # [20081211Video#Release_Documentation Release Documentation]
+ # [20081211Video#Public_Relations Public Relations]
+
+===== Perldoc =====
+
+ * Author: Developers
+ * Editor: Other Developers  
+
+If you aren't documenting as you develop, this will be a painful thing.  All
+perldoc must be relevant to a current release, and the code review should
+ensure this.  This includes documenting functional inputs and ouptputs as well
+as the module use, includes, and licence info.   
+ 
+Modules/Services not in accordance to this rule will be omitted from release.
+
+===== Wiki ===== 
+
+ * Author: Developers
+ * Editor: Other Developers  
+
+Take what you wrote in perldoc, and expound only a little bit more.  Include
+more examples when relevant.  Keeping this up to date is critical (e.g. it will
+be a release task).  
+
+===== Release Documentation ===== 
+
+ * Author: Developers
+ * Editor: Release Manager + Tech Writer
+
+Build this from the previous two, really only interested in a couple of formal
+things:
+
+ # INSTALL - instructions for installation
+ # README - any specific notes
+ # Changes - since the last time
+ # Other specific relevant documentation like a users guide (varies by service)
+
+Release manager and Tech writer should comb this over before the announcement
+for completeness.
+ 
+===== Public Relations ===== 
+ 
+ * Author: Release Manager, Manager
+ * Editor: Tech Writer, Marketing
+ 
+Built from the previous sections, should be the bright and shiny portion that
+talks at a high level.  Release and Project manager should coordinate this with
+the marketing folks to get what we want.  Target is for release date. 
  
 ==== Testing ====
 
