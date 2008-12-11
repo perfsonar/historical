@@ -1,0 +1,26 @@
+﻿=  December 18, 2008 Conference Call 4:00 pm EDT =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # Ga Tech
+   # ESnet
+   # SLAC
+   # FNAL
+   # MCNC
+ # Brain-storm for possible projects and goals for the next 6 months - year.
+ # Next meeting will be Jan 13, 2:30 pm Eastern Time
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
+
+== Last Updated ==
+
+$Id$

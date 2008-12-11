@@ -104,6 +104,8 @@ The frequency is debatable and does not take into consideration:
  * _bugfix_ releases (this is a separate issue)
  * Intra-project dependencies: Note that perfSONAR-PS now will need to synchronize activities with the performance node project(s), BWCTL, OWAMP, NDT, Phoebus, and possibly DCN.
  
+*Group Decision: Initially aim for 2 releases a year.*
+
 Here are some of the options with pro's and con's for two frequencies we should
 consider:
 
@@ -124,7 +126,7 @@ We *should* avoid releasing in late Oct/Nov at all costs due to SC.
    * May indicate group dormancy (which may or may not be true)
    * If cycle is extended due to elongated testing/bug fix phase could miss the conference deadlines
    * Features take a long time to surface
-   
+
 ==== 3 x Release Cycle ====
 
 4 month release cycle tries to coincide with major dates:
