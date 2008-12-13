@@ -13,6 +13,7 @@
    # FNAL
    # MCNC
  # Brain-storm for possible projects and goals for the next 6 months - year.
+ # CHEP paper status
  # Next meeting will be Jan 13, 2:30 pm Eastern Time
 
 == Where ==
