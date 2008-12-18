@@ -42,10 +42,11 @@
  # Questions regarding gLS data displays - Brian
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
      * How do we manage expectations?
+     * We will need ways to discern what data is available to write good GUIs, this issue is not just about the 'publicity' pages.
  # PAM/CHEP paper status
    # Where to resubmit PAM paper and when - Brian/Martin
    # Important Dates for CHEP - Maxim
- # Next meeting will be Jan 13, 2:30 pm Eastern Time
+ # Next meeting will be Jan 12, 2:30 pm Eastern Time
 
 == Where ==
 
