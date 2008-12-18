@@ -43,6 +43,7 @@
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
      * How do we manage expectations?
      * We will need ways to discern what data is available to write good GUIs, this issue is not just about the 'publicity' pages.
+     * (Jeff suggestion: attack this problem by creating a GUI for actually addressing a specific performance problem - that GUI will need to figure this out...)
  # PAM/CHEP paper status
    # Where to resubmit PAM paper and when - Brian/Martin
    # Important Dates for CHEP - Maxim
