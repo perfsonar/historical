@@ -41,6 +41,7 @@
      * How much of the one-off coding can be turned into 'real' stuff?
  # Questions regarding gLS data displays - Brian
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
+     * How do we manage expectations?
  # PAM/CHEP paper status
    # Where to resubmit PAM paper and when - Brian/Martin
    # Important Dates for CHEP - Maxim
