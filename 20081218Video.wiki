@@ -13,7 +13,7 @@
      * Brian: SyNAPSE proposal. Knoppix hosts are back up.
    # SLAC
    # FNAL
-     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get pS deployments.
+     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get a pS-NPToolkit deployment.
    # MCNC
  # Brain-storm for possible projects and goals for the next 6 months - year.
  # Questions regarding gLS data displays - Brian
