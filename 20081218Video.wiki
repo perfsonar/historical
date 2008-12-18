@@ -13,7 +13,11 @@
    # FNAL
    # MCNC
  # Brain-storm for possible projects and goals for the next 6 months - year.
- # CHEP paper status
+ # Questions regarding gLS data displays - Brian
+   # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
+ # PAM/CHEP paper status
+   # Where to resubmit PAM paper and when - Brian/Martin
+   # Important Dates for CHEP - Maxim
  # Next meeting will be Jan 13, 2:30 pm Eastern Time
 
 == Where ==
