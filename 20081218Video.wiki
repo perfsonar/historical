@@ -5,6 +5,9 @@
  # Attendees: 
  # Team Updates
    # Internet2
+     * Jason: pS-B to get an MDM rpm out. Working on release-management process.
+     * Aaron: rpm packaging for ls registration daemon and bwctl/owamp releases.
+     * Jeff: new AMI schema, will make version available for ESnet so we can both deploy bwctl active measurements and work together on the GUI/analysis side.
    # IU
    # UDEL
    # Ga Tech
@@ -13,9 +16,11 @@
      * Brian: SyNAPSE proposal. Knoppix hosts are back up.
    # SLAC
    # FNAL
-     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get a pS-NPToolkit deployment.
+     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get a pS-NPToolkit deployment. Attempting to run pS-NPToolkit under xen.
    # MCNC
  # Brain-storm for possible projects and goals for the next 6 months - year.
+     * Community defined measurement meshes.
+     * Community defined dashboards/analysis.
  # Questions regarding gLS data displays - Brian
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
  # PAM/CHEP paper status
