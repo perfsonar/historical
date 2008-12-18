@@ -1,24 +1,18 @@
-﻿=  December 18, 2008 Conference Call 4:00 pm EDT =
+﻿=  January 12, 2009 Conference Call 2:30 pm EST =
 
 == Agenda/Minutes ==
 
- # Attendees: Jason,Aaron,Jeff,Joe,Brian,Maxim
+ # Attendees: 
  # Team Updates
    # Internet2
-     * Jason: pS-B to get an MDM rpm out. Working on release-management process.
-     * Aaron: rpm packaging for ls registration daemon and bwctl/owamp releases.
-     * Jeff: new AMI schema, will make version available for ESnet so we can both deploy bwctl active measurements and work together on the GUI/analysis side.
    # IU
    # UDEL
    # Ga Tech
    # ESnet
-     * Joe: Lots of machine configuration stuff. Getting new 3 production pS servers on-line (gLS, hLS/SNMP-MA/topo, SNMP-MA internal).
-     * Brian: SyNAPSE proposal. Knoppix hosts are back up.
    # SLAC
    # FNAL
-     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get a pS-NPToolkit deployment. Attempting to run pS-NPToolkit under xen.
    # MCNC
- # Brain-storm for possible projects and goals for the next 6 months - year.
+ # Prioritize brain-storm goals from last meeting. (Time frame is next 6-12 mo)
      * Community defined measurement meshes.
      * Community defined dashboards/analysis.
      * ML or Spectrum gateways or RealTime alarms.
@@ -47,7 +41,7 @@
  # PAM/CHEP paper status
    # Where to resubmit PAM paper and when - Brian/Martin
    # Important Dates for CHEP - Maxim
- # Next meeting will be Jan 12, 2:30 pm Eastern Time
+ # Next meeting will be Jan 19, 2:30 pm Eastern Time
 
 == Where ==
 
