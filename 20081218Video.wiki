@@ -27,11 +27,18 @@
        * scalability
        * reliability
      * traceroute MA/MP
+       * BGP MA?
      * How do multiple meshes interact? (BCP?)
-     
-
-
+     * Focus on deployments/production
+       * GUIs
+       * How do you use these tools to actually debug problems?
+     * GUIs - easy to use, not demoware!
+     * Installation usability
+     * Need more user requirements?
+       * Need to bring users the first good data GUIs, then we can iterate with users.
+       * What specific visualizations do the users need? (First data must be there...)
  # SC
+     * How much of the one-off coding can be turned into 'real' stuff?
  # Questions regarding gLS data displays - Brian
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
  # PAM/CHEP paper status
