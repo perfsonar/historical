@@ -9,8 +9,11 @@
    # UDEL
    # Ga Tech
    # ESnet
+     * Joe: Lots of machine configuration stuff. Getting new 3 production pS servers on-line (gLS, hLS/SNMP-MA/topo, SNMP-MA internal).
+     * Brian: SyNAPSE proposal. Knoppix hosts are back up.
    # SLAC
    # FNAL
+     * Maxim: Nothing on CHEP yet. Proposal submitted. Worked with CMS@MIT to get pS deployments.
    # MCNC
  # Brain-storm for possible projects and goals for the next 6 months - year.
  # Questions regarding gLS data displays - Brian
