@@ -21,6 +21,17 @@
  # Brain-storm for possible projects and goals for the next 6 months - year.
      * Community defined measurement meshes.
      * Community defined dashboards/analysis.
+     * ML or Spectrum gateways or RealTime alarms.
+       * Persistent queries
+     * Test framework
+       * scalability
+       * reliability
+     * traceroute MA/MP
+     * How do multiple meshes interact? (BCP?)
+     
+
+
+ # SC
  # Questions regarding gLS data displays - Brian
    # Should we advertise things that are only available to certain groups (e.g. NDT servers on Interent2 backbone are not reachable to home users - do we note this?  How?)
  # PAM/CHEP paper status
