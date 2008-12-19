@@ -1,0 +1,12 @@
+doc/INSTALL
+doc/README
+doc/Changes
+doc/LICENSE
+doc/Functional_Specification.doc
+doc/Installation_Actions_Specification.doc
+doc/Interface_Specification.doc
+Makefile
+etc/owmesh.conf
+perl-perfSONAR_PS-perfSONAR-BUOY-config.spec
+MANIFEST
+

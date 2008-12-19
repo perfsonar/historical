@@ -1,0 +1,81 @@
+                   perfSONAR-BUOY Installation Instructions
+
+0) Ensure that bwctl and iperf are installed, configured (e.g. firewalls are
+   functioning properly), and running.  We are not mandiating installation of
+   these items through the RPM.  BWCTL RPMs or source packaged by Internet2 are
+   available here:
+   
+     http://e2epi.internet2.edu/bwctl/download.html
+
+   Iperf RPMs and sources are available from sourceforge or existing package
+   management solutions (e.g. yum, up2date).  
+   
+   BWCTL *must* be version 1.3rc* or newer.
+
+1) Download the RPMs:
+
+	wget -c http://www.perfsonar.net/download/services/perl-perfSONAR_PS-perfSONAR-BUOY-config-0.10-1.fc10.noarch.rpm	
+	wget -c http://www.perfsonar.net/download/services/perl-perfSONAR_PS-perfSONAR-BUOY-client-0.10-1.fc10.noarch.rpm
+	wget -c http://www.perfsonar.net/download/services/perl-perfSONAR_PS-perfSONAR-BUOY-server-0.10-1.fc10.noarch.rpm
+
+2) Import the perfSONAR-PS GPG Key used to verify the integrity of the signed
+   RPMs:
+
+	(sudo) rpm --import http://www.perfsonar.net/download/services/perfSONAR-PS_RPM-GPG-KEY
+
+3) Using yum, locally install the packages (this ensures dependencies can be
+   fetched) in this order:
+
+	(sudo) yum localinstall perl-perfSONAR_PS-perfSONAR-BUOY-config-0.10-1.fc10.noarch.rpm
+	(sudo) yum localinstall perl-perfSONAR_PS-perfSONAR-BUOY-client-0.10-1.fc10.noarch.rpm
+	(sudo) yum localinstall perl-perfSONAR_PS-perfSONAR-BUOY-server-0.10-1.fc10.noarch.rpm	
+
+4) Follow any instructions to install package dependencies
+
+5) If not started already, start MySQL:
+
+	(sudo) /etc/init.d/mysqld restart
+
+5.5) If not done already, set the MySQL Root password:
+
+	(sudo) /usr/bin/mysqladmin -u root password 'new-password'
+
+6) Edit Files (each is annotated with locations and instructions):
+
+  a) /etc/perfSONAR-BUOY/owmesh.conf
+
+     This file contains information regarding setting up periodic tests
+
+  b) /etc/perfSONAR-BUOY/pSB_MA.conf
+
+     This configuration file controls the perfSONAR web service
+
+  c) /etc/perfSONAR-BUOY/pSB_MA_logger.conf
+
+     This file controls logging
+
+7) Create the database schema:
+
+	(sudo) /usr/lib/perfsonar/services/perfSONAR-BUOY/server/bin/bwdb.pl -c /etc/perfSONAR-BUOY -i root
+
+8) Start the bwmaster process:
+
+	/etc/init.d/pSB_master.sh start
+
+9) Start the collector process:
+
+	/etc/init.d/pSB_collector.sh start
+
+10) Start the web service:
+
+	/etc/init.d/pSB.sh start
+
+11) Test the web service:
+
+    /usr/lib/perfsonar/services/perfSONAR-BUOY/client/bin/client.pl http://localhost:8085/perfSONAR_PS/services/perfSONARBUOY /usr/lib/perfsonar/services/perfSONAR-BUOY/client/etc/requests/EchoRequest.xml
+    
+    /usr/lib/perfsonar/services/perfSONAR-BUOY/client/bin/client.pl http://localhost:8085/perfSONAR_PS/services/perfSONARBUOY /usr/lib/perfsonar/services/perfSONAR-BUOY/client/etc/requests/MetadataKeyRequest.xml
+    
+    /usr/lib/perfsonar/services/perfSONAR-BUOY/client/bin/client.pl http://localhost:8085/perfSONAR_PS/services/perfSONARBUOY /usr/lib/perfsonar/services/perfSONAR-BUOY/client/etc/requests/SetupDataRequest.xml
+
+

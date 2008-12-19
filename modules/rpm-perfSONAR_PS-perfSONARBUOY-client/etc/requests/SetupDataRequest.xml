@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmwg:message xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/"
+              xmlns:nmwg="http://ggf.org/ns/nmwg/base/2.0/"
+              xmlns:select="http://ggf.org/ns/nmwg/ops/select/2.0/"
+              xmlns:nmwgt="http://ggf.org/ns/nmwg/topology/2.0/"
+              xmlns:nmtm="http://ggf.org/ns/nmwg/time/2.0/"
+              type="SetupDataRequest"
+              id="setupDataRequest1">
+  <nmwg:metadata id="meta1">
+    <iperf:subject xmlns:iperf= "http://ggf.org/ns/nmwg/tools/iperf/2.0/" id="s-in-iperf-1" />
+    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/iperf/2.0</nmwg:eventType>
+  </nmwg:metadata> 
+  <nmwg:data id="data1" metadataIdRef="meta1" />
+</nmwg:message>
