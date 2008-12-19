@@ -31,9 +31,9 @@ while ($files_left) {
 				$module = $2;
 			}
 
-			next if (not $module);
+			next unless $module;
 
-			if ($module =~ /^perfSONAR_PS/ or $module =~ /^IEPM/) {
+			if ( $module =~ /^perfSONAR_PS/ or $module =~ /^IEPM/ or $module =~ /^OWP/ ) {
 				my $module_name = "lib/".$module.".pm";
 				$module_name =~ s/::/\//g;
 				$files{$module_name} = 1;
