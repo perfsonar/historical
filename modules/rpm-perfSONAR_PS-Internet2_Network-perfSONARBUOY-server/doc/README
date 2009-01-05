@@ -1,0 +1,45 @@
+				perfSONAR-BUOY
+
+perfSONAR-BUOY is a combination of a scheduled testing framework and perfSONAR
+enabled web service capable of delivering the results of these measurements.
+Currently, perfSONAR-BUOY is capable of testing with the iperf
+(http://sourceforge.net/projects/iperf) bandwidth measurement tool used through
+the bwctl tool (http://e2epi.internet2.edu/bwctl/) to invoke, schedule, and
+otherwise control the performance measurement component.  
+
+perfSONAR-BUOY consists of the following components:
+
+ - Client
+    + bwmaster: 	A script that manages measurements between target machines
+    + client:	    A client capable of speaking to perfSONAR services; this is
+                    included to aide in debugging
+ - Server
+    + bwcollector:  A script that collects the results of the measurements from 
+                    remote machines
+    + bwdp: 	    A helper script to create the necessary database schemata in
+                    a MySQL database
+    + Web Service:	A 'perfSONAR Powered' service that is able to read the
+                    database schema and deliver the results of the scheduled
+                    measurements.
+ - Config
+    + owmesh.conf   The configuration file common to both the client and the
+                    server.
+
+More information is available on the perfSONAR-PS web site:
+
+	http://www.internet2.edu/performance/pS-PS/
+
+To join the 'perfSONAR-PS' mailing list, please visit:
+
+  https://mail.internet2.edu/wws/info/i2-perfsonar
+
+The perfSONAR-PS subversion repository is located at:
+
+  https://svn.internet2.edu/svn/perfSONAR-PS
+
+Questions and comments can be directed to the author, or the mailing list.
+Bugs, feature requests, and improvements can be directed here:
+
+  http://code.google.com/p/perfsonar-ps/issues/list
+
+Mon Jan  5 13:13:28 EST 2009

@@ -30,6 +30,12 @@
 	(sudo) yum localinstall perl-perfSONAR_PS-perfSONAR-BUOY-client-0.10-1.fc10.noarch.rpm
 	(sudo) yum localinstall perl-perfSONAR_PS-perfSONAR-BUOY-server-0.10-1.fc10.noarch.rpm	
 
+3.5) If the package manager is unable to find certain packages (a common 
+     problem with perl tools) it is recommended that an alternate RPM 
+     repository be installed.  Follow the instructions here:
+
+     	http://dag.wieers.com/rpm/FAQ.php#B2
+
 4) Follow any instructions to install package dependencies
 
 5) If not started already, start MySQL:
