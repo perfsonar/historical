@@ -21,7 +21,7 @@ Needed:
 
 
 Questions:
- * do services handle ridiculously large requests well? (error?)
+ * do services handle ridiculously large requests well? (error message? break replies into batches? report cause of timeout?)
 
 
 Special case: hLS/gLS testing
