@@ -350,11 +350,13 @@ else {
 
             my $src = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:src", 1 ), 0 );
             my $dst = extract( find( $metadata->getDocumentElement, "./*[local-name()='subject']/nmwgt:endPointPair/nmwgt:dst", 1 ), 0 );
+            my $packetsize = extract( find( $metadata->getDocumentElement, "./*[local-name()='parameters']/nmwg:parameter[\@name=\"packetSize\"]", 1 ), 0 );
 
             my %temp = ();
             $temp{"key"}      = $lookup{$metadataId};
             $temp{"src"}      = $src;
             $temp{"dst"}      = $dst;
+	    $temp{"packetsize"} = $packetsize?$packetsize:1000;  
             $list{$src}{$dst} = \%temp;
         }
 
@@ -381,7 +383,7 @@ else {
                 ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
                 my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
                                             
-                push @pairs, { SHOST => $list{$src}{$dst}->{"src"}, SADDRESS => $sip_address, DHOST => $list{$src}{$dst}->{"dst"}, DADDRESS => $dip_address, COUNT => $counter, SERVICE => $service, PRESENT => $present, STARTTIME => $p_start, ENDTIME => $p_end };
+                push @pairs, { PACKETSIZE=> list{$src}{$dst}->{"packetsize"}, SHOST => $list{$src}{$dst}->{"src"}, SADDRESS => $sip_address, DHOST => $list{$src}{$dst}->{"dst"}, DADDRESS => $dip_address, COUNT => $counter, SERVICE => $service, PRESENT => $present, STARTTIME => $p_start, ENDTIME => $p_end };
                 $counter++;
             }
         }
