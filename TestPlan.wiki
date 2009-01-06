@@ -1,0 +1,32 @@
+#summary Test Plan for perfSONAR releases
+
+= Introduction =
+
+This page describes a test plan for current and future perfSONAR releases.
+
+= Details =
+
+The following should be tested for each service:
+ * basic functionality: are expected results returned for each query type
+ * baseline performance: time for small/simple query and a typical query
+ * scalability: in terms of both number queries/sec and query result size
+
+How to do these tests:
+ * functionality and baseline performance: add sample queries to test framework and run 
+ * scalability: ??
+
+
+Needed:
+ * good way to send many requests in parallel from many hosts (planetlab?)
+
+
+Questions:
+ * do services handle ridiculously large requests well? (error?)
+
+
+Special case: hLS/gLS testing
+ * how to test scalability of gLS? update rate? number of hLS and gLSes? metadata size?
+
+
+
+ 
