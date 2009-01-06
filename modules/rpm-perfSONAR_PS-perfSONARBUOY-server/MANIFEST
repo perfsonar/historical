@@ -50,6 +50,6 @@ lib/perfSONAR_PS/Services/MA/General.pm
 lib/perfSONAR_PS/Services/MA/perfSONARBUOY.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/XML/Document.pm
-perl-perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-server.spec
+perl-perfSONAR_PS-perfSONAR-BUOY-server.spec
 scripts/pSB.sh
 scripts/pSB_collector.sh
