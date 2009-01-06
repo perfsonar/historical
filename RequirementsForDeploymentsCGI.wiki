@@ -9,10 +9,12 @@ To make this script more useful, a few things need to be added.
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
 
+Short term useful additions:
+ * add last service registration time
+ * for MAs, add last data insertion time
+ * add some indication of who can access the service( e.g.: public, R&E networks, private)
 
-include both short term and longer term requirements
+Longer term useful additions:
+ * group/select services by domain, location, etc (e.g.: ESnet services, Europe services, etc.)
+
