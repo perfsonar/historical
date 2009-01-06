@@ -3,14 +3,14 @@
 # init scripts must be located in the 'scripts' directory
 %define init_script_1 pSB_master.sh
 
-Name:           perl-perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-client
+Name:           perl-perfSONAR_PS-perfSONAR-BUOY-client
 Version:        0.10
 Release:        1%{?dist}
-Summary:        perfSONAR_PS perfSONAR-BUOY Client package for the Internet2 Network
+Summary:        perfSONAR_PS perfSONAR-BUOY Client package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-client.tar.gz
+Source0:        perfSONAR_PS-perfSONAR-BUOY-client.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Data::UUID)
@@ -36,17 +36,17 @@ Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:       perl(:MODULE_COMPAT_5.8.5)
-Requires:       perl-perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-config
+Requires:       perl-perfSONAR_PS-perfSONAR-BUOY-config
 
 %description
 perfSONAR-BUOY is a scheduled bandwidth testing framework, storage system, and querable web service.  The client program contains the component that performs scheduled tests between specified hosts.
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR-BUOY User" -d /home/perfsonarbuoy perfsonarbuoy 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-client
+%setup -q -n perfSONAR_PS-perfSONAR-BUOY-client
 
 %build
 
@@ -67,7 +67,7 @@ ln -s %{install_base}/etc/client_logger.conf $RPM_BUILD_ROOT/etc/perfSONAR-BUOY/
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,perfsonarbuoy,perfsonar,-)
+%defattr(-,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
 %config(noreplace) %{install_base}/etc/*
 %config(noreplace) /etc/perfSONAR-BUOY/*
@@ -79,12 +79,8 @@ rm -rf $RPM_BUILD_ROOT
 %post
 chmod -R 644 /opt/perfsonar/perfSONAR-BUOY/client/etc/requests/*xml
 chmod 755 /opt/perfsonar/perfSONAR-BUOY/client/etc/requests
-mkdir -p /var/run/perfSONAR-BUOY
-chown perfsonarbuoy:perfsonar /var/run/perfSONAR-BUOY
-mkdir -p /home/perfsonarbuoy
-mkdir -p /home/perfsonarbuoy/bwctl
-chown -R perfsonarbuoy:perfsonar /home/perfsonarbuoy
-chown -R perfsonarbuoy:perfsonar /etc/perfSONAR-BUOY
+mkdir -p /var/lib/perfSONAR-BUOY
+chown -R perfsonar:perfsonar /var/lib/perfSONAR-BUOY
 
 %changelog
 * Mon Jan 5 2009 zurawski@internet2.edu 0.10.1

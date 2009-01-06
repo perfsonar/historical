@@ -4,14 +4,14 @@
 %define init_script_1 pSB.sh
 %define init_script_2 pSB_collector.sh
 
-Name:           perl-perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-server
+Name:           perl-perfSONAR_PS-perfSONAR-BUOY-server
 Version:        0.10
 Release:        1%{?dist}
-Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System for the Internet2 Network
+Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-server.tar.gz
+Source0:        perfSONAR_PS-perfSONAR-BUOY-server.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Config::General)
@@ -56,17 +56,17 @@ Requires:       perl(:MODULE_COMPAT_5.8.5)
 Requires:	    perl-DBD-MySQL
 Requires:	    mysql-server
 Requires:	    libdbi-dbd-mysql
-Requires:       perl-perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-config
+Requires:       perl-perfSONAR_PS-perfSONAR-BUOY-config
 
 %description
 perfSONAR-BUOY is a scheduled bandwidth testing framework, storage system, and querable web service.  The server program contains the items required to gather, store, and deliver the periodic measurements initiated by a the related client package.  
 
 %pre
 /usr/sbin/groupadd perfsonar 2> /dev/null || :
-/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR-BUOY User" -d /home/perfsonarbuoy perfsonarbuoy 2> /dev/null || :
+/usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-server
+%setup -q -n perfSONAR_PS-perfSONAR-BUOY-server
 
 %build
 
@@ -91,7 +91,7 @@ ln -s %{install_base}/etc/pSB_MA_logger.conf $RPM_BUILD_ROOT/etc/perfSONAR-BUOY/
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,perfsonarbuoy,perfsonar,-)
+%defattr(-,perfsonar,perfsonar,-)
 %doc %{install_base}/doc/*
 %config(noreplace) %{install_base}/etc/*
 %config(noreplace) /etc/perfSONAR-BUOY/*
@@ -101,12 +101,8 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/*
 
 %post
-mkdir -p /var/run/perfSONAR-BUOY
-chown perfsonar:perfsonar /var/run/perfSONAR-BUOY
-mkdir -p /home/perfsonarbuoy
-mkdir -p /home/perfsonarbuoy/bwctl
-chown -R perfsonarbuoy:perfsonar /home/perfsonarbuoy
-chown -R perfsonarbuoy:perfsonar /etc/perfSONAR-BUOY
+mkdir -p /var/lib/perfSONAR-BUOY
+chown -R perfsonar:perfsonar /var/lib/perfSONAR-BUOY
 
 %changelog
 * Mon Jan 5 2009 zurawski@internet2.edu 0.10.1

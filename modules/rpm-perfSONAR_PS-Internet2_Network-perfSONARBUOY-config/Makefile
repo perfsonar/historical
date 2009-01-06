@@ -1,4 +1,4 @@
-PACKAGE=perfSONAR_PS-Internet2_Network-perfSONAR-BUOY-config
+PACKAGE=perfSONAR_PS-perfSONAR-BUOY-config
 ROOTPATH=/opt/perfsonar_ps/perfSONAR-BUOY-config
 
 dist:
