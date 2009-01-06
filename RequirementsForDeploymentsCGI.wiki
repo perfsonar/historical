@@ -2,8 +2,10 @@
 
 = Introduction =
 
-Add your content here.
+The current cgi script to display perfSONAR services is located 
+here: https://dc211.internet2.edu/cgi-bin/perfAdmin/directory.cgi
 
+To make this script more useful, a few things need to be added.
 
 = Details =
 
@@ -11,5 +13,6 @@ Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
 
 include both short term and longer term requirements
