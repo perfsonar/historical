@@ -383,7 +383,7 @@ else {
                 ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = gmtime($p_time);
                 my $p_end = sprintf "%04d-%02d-%02dT%02d:%02d:%02d", ( $year + 1900 ), ( $mon + 1 ), $mday, $hour, $min, $sec;
                                             
-                push @pairs, { PACKETSIZE=> list{$src}{$dst}->{"packetsize"}, SHOST => $list{$src}{$dst}->{"src"}, SADDRESS => $sip_address, DHOST => $list{$src}{$dst}->{"dst"}, DADDRESS => $dip_address, COUNT => $counter, SERVICE => $service, PRESENT => $present, STARTTIME => $p_start, ENDTIME => $p_end };
+                push @pairs, { PACKETSIZE => $list{$src}{$dst}->{"packetsize"}, SHOST => $list{$src}{$dst}->{"src"}, SADDRESS => $sip_address, DHOST => $list{$src}{$dst}->{"dst"}, DADDRESS => $dip_address, COUNT => $counter, SERVICE => $service, PRESENT => $present, STARTTIME => $p_start, ENDTIME => $p_end };
                 $counter++;
             }
         }
