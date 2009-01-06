@@ -1,8 +1,8 @@
-#summary Test Plan for perfSONAR releases
+#summary Test Plan for perfSONAR-PS releases
 
 = Introduction =
 
-This page describes a test plan for current and future perfSONAR releases.
+This page describes a test plan for current and future perfSONAR-PS releases.
 
 = Details =
 
