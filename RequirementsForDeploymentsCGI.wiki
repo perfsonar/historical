@@ -18,3 +18,5 @@ Short term useful additions:
 Longer term useful additions:
  * group/select services by domain, location, etc (e.g.: ESnet services, Europe services, etc.)
 
+Think about adding:
+ * links to pages explaining/demonstrating how to get data from a particular service
