@@ -5,7 +5,7 @@
 
 Name:           perl-perfSONAR_PS-MDM-perfSONAR-BUOY-client
 Version:        0.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        perfSONAR_PS MDM perfSONAR-BUOY Client package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
