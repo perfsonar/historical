@@ -1,4 +1,4 @@
-PACKAGE=perfSONAR_PS-perfSONAR-BUOY-server
+PACKAGE=perfSONAR_PS-MDM-perfSONAR-BUOY-server
 ROOTPATH=/opt/perfsonar_ps/perfSONAR-BUOY-server
 
 dist:

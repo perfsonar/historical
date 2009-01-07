@@ -4,14 +4,14 @@
 %define init_script_1 pSB.sh
 %define init_script_2 pSB_collector.sh
 
-Name:           perl-perfSONAR_PS-perfSONAR-BUOY-server
+Name:           perl-perfSONAR_PS-MDM-perfSONAR-BUOY-server
 Version:        0.10
-Release:        2%{?dist}
-Summary:        perfSONAR_PS perfSONAR-BUOY Measurement Archive and Collection System
+Release:        3%{?dist}
+Summary:        perfSONAR_PS MDM perfSONAR-BUOY Measurement Archive and Collection System
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-perfSONAR-BUOY-server.tar.gz
+Source0:        perfSONAR_PS-MDM-perfSONAR-BUOY-server.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 Requires:		perl(Config::General)
@@ -56,7 +56,7 @@ Requires:       perl(:MODULE_COMPAT_5.8.5)
 Requires:	    perl-DBD-MySQL
 Requires:	    mysql-server
 Requires:	    libdbi-dbd-mysql
-Requires:       perl-perfSONAR_PS-perfSONAR-BUOY-config
+Requires:       perl-perfSONAR_PS-MDM-perfSONAR-BUOY-config
 
 %description
 perfSONAR-BUOY is a scheduled bandwidth testing framework, storage system, and querable web service.  The server program contains the items required to gather, store, and deliver the periodic measurements initiated by a the related client package.  
@@ -66,7 +66,7 @@ perfSONAR-BUOY is a scheduled bandwidth testing framework, storage system, and q
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-perfSONAR-BUOY-server
+%setup -q -n perfSONAR_PS-MDM-perfSONAR-BUOY-server
 
 %build
 
@@ -111,6 +111,9 @@ chown perfsonar:perfsonar /var/log/perfSONARBUOY.log
 chown -R perfsonar:perfsonar /etc/perfSONAR-BUOY
 
 %changelog
+* Mon Jan 7 2009 zurawski@internet2.edu 0.10.3
+- Re-Branding for the MDM release
+
 * Mon Jan 5 2009 zurawski@internet2.edu 0.10.2
 - Adding Perl Deps
 

@@ -7,6 +7,5 @@ doc/Installation_Actions_Specification.doc
 doc/Interface_Specification.doc
 Makefile
 etc/owmesh.conf
-perl-perfSONAR_PS-perfSONAR-BUOY-config.spec
+perl-perfSONAR_PS-MDM-perfSONAR-BUOY-config.spec
 MANIFEST
-

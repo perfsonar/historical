@@ -1,13 +1,13 @@
 %define install_base /usr/lib/perfsonar/services/perfSONAR-BUOY/config
 
-Name:           perl-perfSONAR_PS-perfSONAR-BUOY-config
+Name:           perl-perfSONAR_PS-MDM-perfSONAR-BUOY-config
 Version:        0.10
-Release:        2%{?dist}
-Summary:        perfSONAR_PS perfSONAR-BUOY Config Package
+Release:        3%{?dist}
+Summary:        perfSONAR_PS MDM perfSONAR-BUOY Config Package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
 URL:            http://search.cpan.org/dist/perfSONAR_PS-perfSONAR-BUOY/
-Source0:        perfSONAR_PS-perfSONAR-BUOY-config.tar.gz
+Source0:        perfSONAR_PS-MDM-perfSONAR-BUOY-config.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
@@ -21,7 +21,7 @@ perfSONAR-BUOY is a scheduled bandwidth testing framework, storage system, and q
 /usr/sbin/useradd -g perfsonar -s /sbin/nologin -c "perfSONAR User" -d /tmp perfsonar 2> /dev/null || :
 
 %prep
-%setup -q -n perfSONAR_PS-perfSONAR-BUOY-config
+%setup -q -n perfSONAR_PS-MDM-perfSONAR-BUOY-config
 
 %build
 
@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 chown -R perfsonar:perfsonar /etc/perfSONAR-BUOY
 
 %changelog
+* Mon Jan 7 2009 zurawski@internet2.edu 0.10.3
+- Re-Branding for the MDM release
+
 * Mon Jan 5 2009 zurawski@internet2.edu 0.10.2
 - Adding Perl Deps
 
