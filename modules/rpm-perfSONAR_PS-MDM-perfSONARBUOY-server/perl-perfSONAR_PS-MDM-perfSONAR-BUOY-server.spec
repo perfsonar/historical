@@ -52,7 +52,7 @@ Requires:		perl(Term::ReadKey)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl(:MODULE_COMPAT_5.8.5)
+Requires:       perl
 Requires:	    perl-DBD-MySQL
 Requires:	    mysql-server
 Requires:	    libdbi-dbd-mysql

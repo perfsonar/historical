@@ -35,7 +35,7 @@ Requires:		perl(Sys::Syslog)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl(:MODULE_COMPAT_5.8.5)
+Requires:       perl
 Requires:       perl-perfSONAR_PS-MDM-perfSONAR-BUOY-config
 
 %description
