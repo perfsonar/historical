@@ -5,7 +5,7 @@
 
 Name:           perl-perfSONAR_PS-perfSONAR-BUOY-client
 Version:        0.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        perfSONAR_PS perfSONAR-BUOY Client package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -35,7 +35,7 @@ Requires:		perl(Sys::Syslog)
 Requires:		perl(Time::HiRes)
 Requires:		perl(XML::LibXML)
 #Requires:       perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-Requires:       perl(:MODULE_COMPAT_5.8.5)
+Requires:       perl
 Requires:       perl-perfSONAR_PS-perfSONAR-BUOY-config
 
 %description
@@ -83,6 +83,9 @@ mkdir -p /var/lib/perfSONAR-BUOY
 chown -R perfsonar:perfsonar /var/lib/perfSONAR-BUOY
 
 %changelog
+* Mon Jan 7 2009 zurawski@internet2.edu 0.10.2
+- Adjustments to the required perl.
+
 * Mon Jan 5 2009 zurawski@internet2.edu 0.10.1
 - Initial file specification
 
