@@ -1,23 +1,35 @@
-#summary Test Plan for perfSONAR-PS releases
 
-= Introduction =
+
+= perfSONAR-PS release Test Plans =
+
+ * [TestPlan#Introduction Introduction]
+ * [TestPlan#Current_Status Current Status]
+ * [TestPlan#Open_Issues Open Issues] 
+
+ 
+== Introduction ==
 
 This page describes a test plan for current and future perfSONAR-PS releases.
 
-= Details =
-
-The following should be tested for each service:
+There are 3 types of testing that needs to take place for each service:
  * basic functionality: are expected results returned for each query type
  * baseline performance: time for small/simple query and a typical query
- * scalability: in terms of both number queries/sec and query result size
+ * scalability: make sure that performance degragation is reasonable as number queries/sec and query result size increase
 
-How to do these tests:
- * functionality and baseline performance: add sample queries to test framework and run 
- * scalability: ??
+== Current Status ==
 
+Functionality: The current test_harness supports this, but many test queries are likely missing
 
-Needed:
- * good way to send many requests in parallel from many hosts (planetlab?)
+Baseline performance: The current test_harness supports this
+
+Scalability: no current mechanism for this
+
+== Open Issues ==
+
+We need a process to always run the test harness before releases, and make sure
+the performance results are reasonable.
+
+We need to figure out a good way to send many requests in parallel from many hosts. (possibly use planetlab for this?)
 
 
 Questions:
@@ -27,6 +39,3 @@ Questions:
 Special case: hLS/gLS testing
  * how to test scalability of gLS? update rate? number of hLS and gLSes? metadata size?
 
-
-
- 
