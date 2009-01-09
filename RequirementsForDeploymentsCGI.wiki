@@ -120,6 +120,7 @@ Over time these will devolve into sub groups by GUI type and evolve into other u
  * Use Map views where appliable instead of lists
  * Filter out the content _bad_ services may register
  * Use more up to date web tools beyond simple text (e.g. this is a _PR_ view, it should showcase things nicely)
+ * Is useful to users trying to troubleshoot their link, as described here: http://fasterdata.es.net/ts_overview.html
 
 == Technology Considerations ==   
 
