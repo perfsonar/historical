@@ -28,27 +28,37 @@ state of GUI development and lays out some goals for future development.
 
 Working under the name _perfAdmin_, the various CGI scripts are available in the
 [http://anonsvn.internet2.edu/svn/perfSONAR-PS/trunk/client/cgi/perfAdmin/ perfSONAR-PS SVN repository]
-and can be easily installed at any site.  All instances of the NPToolkit
-contain a pre-configured copy of this package as well.  
+and can be installed at any site.  All instances of the NPToolkit
+contain a pre-configured copy of this package and a part of the installation/configuration
+proceedure explicitly uses these tools.
 
-The [http://www.perfsonar.net perfSONAR web site] will always maintain a link to
-a current deployment, although the deployment location itself may change.  This
+The [http://www.perfsonar.net perfSONAR web site] will also always maintain a link to
+a current deployment snapshot, although the deployment location itself may change.  This
 link can be found here: http://www.perfsonar.net/deploy.html.  
 
 A current beta of perfAdmin is also available here in two views:
 
  * [https://dc211.internet2.edu/cgi-bin/perfAdmin/directory.cgi Directory] view
    * Useful for determining what services are available of a given type
-   * Not all types are supported currently
+   * Not all _types_ (e.g. kinds of data) are supported currently
+   * Categorized by type and layed out in a _table_ format
+   * Ability to request on-demand tests or view stored data where applicable
  * [https://dc211.internet2.edu/cgi-bin/perfAdmin/directory.cgi Tree] view
    * Useful for seeing a breakdown of services by gLS and hLS they are registered with
-   * Not all types are supported currently
+   * Not all _types_ (e.g. kinds of data) are supported currently
+   * Categorized by Information Service
+
+It is of note that each GUI is based on a back-end script that builds up 
+the list and _*caches*_ it for later use.  This drastically reduces the stress
+on the information services from repeated use of the GUIs.  
 
 The current GUIs are very _developer centric_, meaning that these were designed
 to offer the developers of the various servies a _no-nonsense_ view of the
 Information services at any given time and to validate that a given service
 has registered itself, and any information it contains, correctly.  While useful
-for developers, this does not offer much for the experienced or new user.  
+for developers, this does not offer much for the experienced or new user.  Each category
+of user will have a different idea of what is _valuable_ to see in a GUI and different
+GUIs will want to limit the exposure of certain functionalities. 
 
 == Open Issues == 
 
@@ -58,17 +68,17 @@ Discussion has identified some of the weak areas with the current approach:
    * This causes _information overload_ in some respects since everything is on a single view
    * This also causes _information blackout_ when other types of information are not represented properly
  * Technology Limited
-   * Using CGI we don't get a very _sexy_ appearance, changing to more web friendly tools may rectify this
- * Often appear _*broken*_ due to some data being old (e.g. NDT tests that don't work, data sets that do not produce graphs since they haven't been updated in a long time)
+   * Using CGI we don't get a very _sexy_ appearance; changing to more web friendly tools may rectify this
+ * Often appear _*broken*_ due to some data being old (e.g. NDT tests that don't work, data sets that do not produce graphs since they haven't been updated in a long time) or otherwise unreachable (e.g. certain R and E servers may not work from the public internet). 
  * Often only feature US services (not EU based).  This can be attributed to the US services being more widely deployed and capable of interacting with the Information Services.   
-
+ 
 It is proposed that we offer different _views_ depending on level of experience or
 interest:
 
- * High Level _availability_ - The 'type' of display can vary of course, but the general idea is to show the general deployment at a very high (e.g. CEO, PR person) view.  May not want to include data views or live tests at this level.
+ * High Level _availability_ - The 'type' of display can vary of course, but the idea is to show the general deployment at a very high (e.g. CEO, Public Relations) view.  May not want to include data views or live tests at this level.
    * Maps - Display _where_ things are located.  Could be categroized by types (or just that it is a perfSONAR capable location) or communities of users.  
    * Lists - Similar to maps, but _spreadsheet-like_ listings of deployments.  
- * Direct users - Can be similar layout to above, but more focused on the data (since they are probably intereseted in that)  
+ * Direct users - Can be similar layout to above, but more focused on the data (since they are probably interested in this particular item)  
  * Developer View - More focused on the content of a service; easy to verify that the service itself is working correctly.
 
 The current GUIs also do not offer many features beyond the data that is registered
