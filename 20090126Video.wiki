@@ -1,0 +1,13 @@
+﻿=  January 26, 2008 Conference Call 2:30 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # Issue: Release Management
+ # Next meeting will be at Jt Techs (some evening...)
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
