@@ -1,5 +1,20 @@
 ﻿=  January 12, 2009 Conference Call 2:30 pm EST =
 
+== Actions ==
+
+|| *who* || *task* ||
+|| All || review/comment on gLS GUI:  http://code.google.com/p/perfsonar-ps/wiki/RequirementsForDeploymentsCGI ||
+|| All || review/comment on testing: http://code.google.com/p/perfsonar-ps/wiki/TestPlan ||
+|| All || (at jt techs) discuss/determine development priorities ||
+|| aaron || UDP testing with back 2 back dell servers ||
+|| brian || UDP testing with FreeBSD KOI servers ||
+|| jason || wmap package ||
+|| joe/maxim || try wmap package when available and provide feedback ||
+|| aaron || look into packaging alarm/tl1 MA functionality (and see if JG is interested in trying) ||
+|| jeff || writeup highlevel roadmap strawman post jt techs ||
+|| martin || Determine 4 OGF WG status and actions we need to take ||
+|| martin/brian/maxim || Paper publishing goals/strategy ||
+
 == Agenda/Minutes ==
 
  # Attendees: Jared, John Hicks, Jason, Aaron, Maxim, Joe, Brian, Martin, Rich, Marcos
