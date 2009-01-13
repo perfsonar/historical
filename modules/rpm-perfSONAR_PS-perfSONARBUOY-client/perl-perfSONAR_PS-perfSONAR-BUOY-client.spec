@@ -5,7 +5,7 @@
 
 Name:           perl-perfSONAR_PS-perfSONAR-BUOY-client
 Version:        0.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        perfSONAR_PS perfSONAR-BUOY Client package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -83,6 +83,9 @@ mkdir -p /var/lib/perfSONAR-BUOY
 chown -R perfsonar:perfsonar /var/lib/perfSONAR-BUOY
 
 %changelog
+* Tue Jan 13 2009 zurawski@internet2.edu 0.10.3
+- Fixing bug in bwcollector.
+
 * Mon Jan 7 2009 zurawski@internet2.edu 0.10.2
 - Adjustments to the required perl.
 

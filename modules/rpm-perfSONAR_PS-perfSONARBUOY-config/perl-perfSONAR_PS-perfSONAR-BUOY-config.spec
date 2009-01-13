@@ -2,7 +2,7 @@
 
 Name:           perl-perfSONAR_PS-perfSONAR-BUOY-config
 Version:        0.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        perfSONAR_PS perfSONAR-BUOY Config Package
 License:        distributable, see LICENSE
 Group:          Development/Libraries
@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 chown -R perfsonar:perfsonar /etc/perfSONAR-BUOY
 
 %changelog
+* Tue Jan 13 2009 zurawski@internet2.edu 0.10.3
+- Fixing bug in bwcollector.
+
 * Mon Jan 7 2009 zurawski@internet2.edu 0.10.2
 - Adjustments to the required perl.
 

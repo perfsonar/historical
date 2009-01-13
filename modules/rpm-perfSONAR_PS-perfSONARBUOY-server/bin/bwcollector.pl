@@ -1,4 +1,31 @@
 #!/usr/bin/perl -w
+#
+#      $Id: bwcollector.pl 2407 2009-01-13 15:25:32Z boote $
+#
+#########################################################################
+#
+#			   Copyright (C)  2002-2008
+#	     			Internet2
+#			   All Rights Reserved
+#
+#########################################################################
+#
+#	File:		bwcollector.pl
+#
+#	Author:		Jeff W. Boote  - Internet2
+#	          Jason Zurawski - Internet2
+#
+#	Date:		Wed May 21 08:58:06 EDT 2008
+#
+#	Description:
+#
+#	Usage:
+#
+#	Environment:
+#
+#	Files:
+#
+#	Options:
 
 =pod
 
@@ -54,6 +81,14 @@ the throughput session data. It needs to determine if lost packets are due to on
 of the endpoints being down, or an actual network partition. It does this by
 also listening on a UDP socket for "uptime" reports from each node within
 the measurement "mesh".
+
+=head1 AUTHOR
+
+Jeff W. Boote <boote@internet2.edu>
+
+=head1 SEE ALSO
+
+L<powmaster.pl>, L<OWP>
 
 =cut
 
@@ -656,7 +691,7 @@ sub init_month {
         jitter      FLOAT,
         lost        BIGINT UNSIGNED,
         sent        BIGINT UNSIGNED,
-        PRIMARY KEY (ti),
+        PRIMARY KEY (ti,send_id,recv_id),
         INDEX(send_id),
         INDEX(recv_id),
         INDEX(tspec_id)
@@ -1292,48 +1327,3 @@ REQ_LOOP:
 }
 
 1;
-
-__END__
-
-=head1 SEE ALSO
-
-L<Getopt::Std>, L<Socket>, L<POSIX>, L<File::Path>, L<Digest::MD5>, L<OWP>,
-L<OWP::Syslog>, L<OWP::RawIO>, L<OWP::Archive>, L<OWP::Utils>, L<OWP::Helper>,
-L<Sys::Syslog>, L<File::Basename>, L<File::Temp>, L<Fcntl>, L<FileHandle>,
-L<IO::Socket>, L<DB_File>, L<Carp>, L<DBI>
-
-To join the 'perfSONAR-PS' mailing list, please visit:
-
-  https://mail.internet2.edu/wws/info/i2-perfsonar
-
-The perfSONAR-PS subversion repository is located at:
-
-  https://svn.internet2.edu/svn/perfSONAR-PS
-
-Questions and comments can be directed to the author, or the mailing list.  Bugs,
-feature requests, and improvements can be directed here:
-
-  http://code.google.com/p/perfsonar-ps/issues/list
-
-=head1 VERSION
-
-$Id: bwcollector.pl 2119 2008-07-22 07:10:35Z boote $
-
-=head1 AUTHOR
-
-Jeff Boote, boote@internet2.edu
-Jason Zurawski, zurawski@internet2.edu
-
-=head1 LICENSE
-
-You should have received a copy of the Internet2 Intellectual Property Framework along
-with this software.  If not, see <http://www.internet2.edu/membership/ip.html>
-
-=head1 COPYRIGHT
-
-Copyright (c) 2002-2009, Internet2
-
-All rights reserved.
-
-=cut
-
