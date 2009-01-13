@@ -51,7 +51,7 @@
      * How do we manage expectations?
      * We will need ways to discern what data is available to write good GUIs, this issue is not just about the 'publicity' pages.
      * (Jeff suggestion: attack this problem by creating a GUI for actually addressing a specific performance problem - that GUI will need to figure this out...)
-     * Action: Everyone please review RequirementsForDeploymentsCGI
+     * Action: Everyone please review [RequirementsForDeploymentsCGI]
  # PAM/CHEP paper status
    # Where to resubmit PAM paper and when - Brian/Martin
       * Brian: Need something with a results section. Previous paper can be an LBL tech report.
