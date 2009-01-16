@@ -11,18 +11,19 @@
 == Introduction ==
 
 The purpose of the perfSONAR information services is to locate performance data
-that is of interest to a specific user or group.  The data can be _interesting_
+that is of interest to specific users or groups.  The data can be _interesting_
 to these parties for any number of reasons:
 
  * The data is of a certain _*type*_: network latency between points or perhaps aggregate CPU load of a cluster
  * The data is at or near a certain location: this can be tracked via IP address or domain name
  * The data is categorized in some way: it was collected via a specific scientific experiment
 
-GUIs can offer a visual representation of this data and are more pleasing to end
-users than programmatic APIs that scientific tools may use.  It is the goal of the
-perfSONAR-PS project to provide simple and effective GUIs that appeal to different
-user types and accomplish specific goals.  This document discusses the current
-state of GUI development and lays out some goals for future development.
+GUIs can offer a visual representation of this data and are more pleasing to the
+eye than programmatic APIs that scientific tools may use to gather raw data.  It
+is the goal of the perfSONAR-PS project to provide simple and effective GUIs
+that appeal to different user types and accomplish specific goals.  This
+document discusses the current state of GUIs, and lays out some goals for
+future development.
 
 == Current Status == 
 
@@ -39,13 +40,15 @@ link can be found here: http://www.perfsonar.net/deploy.html.
 A current beta of perfAdmin is also available here in two views:
 
  * [https://dc211.internet2.edu/cgi-bin/perfAdmin/directory.cgi Directory] view
-   * Useful for determining what services are available of a given type
+   * Useful for determining what services are available of a given _type_ (e.g. NDT servers or SNMP MA instances)
    * Not all _types_ (e.g. kinds of data) are supported currently
+     * Goal is to support all types listed [http://wiki.perfsonar.net/jra1-wiki/index.php/EventType_Use_By_Service here]
    * Categorized by type and layed out in a _table_ format
-   * Ability to request on-demand tests or view stored data where applicable
+   * Ability to request on-demand tests or view stored data reporst where applicable
  * [https://dc211.internet2.edu/cgi-bin/perfAdmin/directory.cgi Tree] view
    * Useful for seeing a breakdown of services by gLS and hLS they are registered with
    * Not all _types_ (e.g. kinds of data) are supported currently
+     * Goal is to support all types listed [http://wiki.perfsonar.net/jra1-wiki/index.php/EventType_Use_By_Service here]
    * Categorized by Information Service
 
 It is of note that each GUI is based on a back-end script that builds up 
@@ -69,7 +72,7 @@ Discussion has identified some of the weak areas with the current approach:
    * This also causes _information blackout_ when other types of information are not represented properly
  * Technology Limited
    * Using CGI we don't get a very _sexy_ appearance; changing to more web friendly tools may rectify this
- * Often appear _*broken*_ due to some data being old (e.g. NDT tests that don't work, data sets that do not produce graphs since they haven't been updated in a long time) or otherwise unreachable (e.g. certain R and E servers may not work from the public internet). 
+ * Often appear _*broken*_ due to some data being old (e.g. NDT tests that don't work, data sets that do not produce graphs since they haven't been updated in a long time) or otherwise unreachable (e.g. certain  servers may not work from the public internet). 
  * Often only feature US services (not EU based).  This can be attributed to the US services being more widely deployed and capable of interacting with the Information Services.   
  
 It is proposed that we offer different _views_ depending on level of experience or
@@ -107,8 +110,8 @@ Over time these will devolve into sub groups by GUI type and evolve into other u
 
 === Developer Centric ===
 
- * Will remain similar to current offerings - focused on delivering service specific information that benefits developers when verifying a service deployement (e.g. it has registered, it has active data, etc.)
- * Should be able to categorize/sort (live?) on different fields:
+ * Will remain similar to current offerings - focused on delivering service specific information that benefits developers when verifying a service deployement (e.g. it has registered, when it registered or last updated, if it has active data, etc.)
+ * Should be able to categorize/sort (live?) on the different organizational fields:
    * Group by Country/Network Location
    * Group by _keyword_
    * Group by Data Type
