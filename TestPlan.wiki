@@ -83,7 +83,7 @@ above:
    * _*State transition tables*_ - Using automata, map the state transitions for both expected and observed results.
    * _*Use case testing*_ - Testing the software to described use cases.
    * _*Fuzz Testing*_ - using random data to find defects.  
-   * _*model-based testing*_ - Developing and refining models to test the software.
+   * _*Model-Based Testing*_ - Developing and refining models to test the software.
  * *_White box testing_* - Testing with knowledge of the internal design; this knowledge can be used to better craft test cases.  As with *_Black box testing_*, there are several sub methods:
    * _*Code coverage*_ - Testing to be sure all areas of the code can be reached by using the appropriate input sequences.
    * _*Mutation testing methods*_ - Making small modifications to source to test input sequences in different ways.
@@ -173,9 +173,9 @@ tested.  Within each section, recommendations on how to test each will be made.
      # Each test case _should_ borrow ideas from _*Equivalence partitioning*_ and _*Boundary value analysis*_ with regards to input cases.  Use of other _black box_ techniques such as _*Decision table testing*_, *Pairwise testing*_, etc. is optional and should be used at the will of the developer to test individual functions
      # Each test case _should_ borrow concepts that test _*Code coverage*_.  Use of other _White box_ techniques are optional.
    # When applicable, each test file _should_ contain hooks that time the various aspects of module and method tests.  These _should_ be recorded and _may_ be used in _Performance_ analysis.
-   # Each function and module should be compared to existing design documentation for verification purposes
+   # Each function and module _should_ be compared to existing design documentation for verification purposes
  # Static reviews of each module are required
-   # Each module must be reviewed as a part of the release process for syntactic and stylistic adherence
+   # Each module _must_ be reviewed as a part of the release process for syntactic and stylistic adherence
    # Each module _must_ contain perl documentation for each function, and the module as a whole
    # Each module _should_ contain a _code tour_ (e.g. narrative) of the source code - this can be a separate document or on the wiki
    # Each module _should_ be paired with any related design documentation
@@ -193,10 +193,10 @@ tested.  Within each section, recommendations on how to test each will be made.
 ==== System Testing ==== 
 
  # The developer of each service is responsible for providing examples of each message type a service will accept for use in the *_test_harness_*
-   # Each message should be replicated to test many possible input situations as possible; use _*Equivalence partitioning*_ and _*Boundary value analysis*_ to help with input selection
-   # Each message should be replicated to test many possible scalability related issues (e.g. result size) as possible 
+   # Each message _should_ be replicated to test many possible input situations as possible; use _*Equivalence partitioning*_ and _*Boundary value analysis*_ to help with input selection
+   # Each message _should_ be replicated to test many possible scalability related issues (e.g. result size) as possible 
  # The Release Team will perform and record the results of profiling tests with each release
-   # The developer should use these results in pre and post release testing to ensure that performance remains in an acceptable range
+   # The developer _should_ use these results in pre and post release testing to ensure that performance remains in an acceptable range
  # Each developer is responsible for maintaining documentation:
    # Installation instructions
    # FAQ documentation (web based)
@@ -204,10 +204,10 @@ tested.  Within each section, recommendations on how to test each will be made.
 
 ==== System Integration Testing ==== 
 
- # Each developer should maintain documentation on required libraries and external components
+ # Each developer _should_ maintain documentation on required libraries and external components
  # Each developer is responsible for testing a service in the context of the overall perfSONAR-PS framework pre and post release
  # The release management team is responsible for testing the services on alternative architectures and operating systems
-   # The developer should maintain a list of known issues with architectures and operating systems for use by the release management team and users.  
+   # The developer _should_ maintain a list of known issues with architectures and operating systems for use by the release management team and users.  
 
 === Appropriate Testing Times ===
 
@@ -224,8 +224,9 @@ cutting edge.
 ==== Beta Testing ==== 
 
 Beta testing is normally limited to release candidates but may also take into
-account mature _alpha_ releases. This testing should be primarily be done by 
-members of the release team and external partners (e.g. potential users).  
+account mature [TestPlan#Alpha_Testing Alpha] releases. This testing should be
+primarily be done by members of the release team and external partners (e.g.
+potential users).  
 
 Release candidates that are further along in a release may be opened to a wider
 audience of the general public in certain situations.  
@@ -239,12 +240,17 @@ performed.
 
 === Open Issues ===   
 
- * Scalability
+ * _*Scalability*_
    * For testing distributed information services (hLS/gLS/TS) - use resources like [http://www.planetlab.org PlanetLab]?
- * Performance
-   * Must track the performance results over time
+   * For testing the capability of single services (MA/hLS) under multiple simultaneous requests.
+   * For testing longevity of services (both busy and non-busy)
+ * _*Performance*_
+   * Must track the results of performance profiles over time
+     * Against similar services (e.g. other perfSONAR releases)
+     * Against previous versions of the same service
    * Large result sets
- * Functionality
+   * Large requests
+ * _*Functionality*_
    * Force 'faults' to test the error handling of functions/methods/services.
 
 == Last Updated ==
