@@ -1,41 +1,252 @@
-
-
 = perfSONAR-PS release Test Plans =
 
  * [TestPlan#Introduction Introduction]
+ * [TestPlan#Software_Testing_Principals Software Testing Principals]
+   * [TestPlan#How_to_Test How to Test]
+   * [TestPlan#What_to_Test What to Test]
+   * [TestPlan#When_to_Test When to Test]
  * [TestPlan#Current_Status Current Status]
- * [TestPlan#Open_Issues Open Issues] 
-
- 
+   * [TestPlan#Addressed_Issues Addressed Issues]
+   * [TestPlan#Open_Issues Open Issues]
+ * [TestPlan#Future_Plans Future Plans]
+   * [TestPlan#What_to_Test_and_How_to_Test_it What to Test and How to Test it]
+     * [TestPlan#Unit_Testing Unit Testing]
+     * [TestPlan#Integration_Testing Integration Testing]
+     * [TestPlan#System_Testing System Testing]
+     * [TestPlan#System_Integration_Testing System Integration Testing]
+   * [TestPlan#Appropriate_Testing_Times Appropriate Testing Times]
+     * [TestPlan#Alpha_Testing Alpha Testing]
+     * [TestPlan#Beta_Testing Beta Testing]
+     * [TestPlan#Regression_Testing Regression Testing]
+   * [TestPlan#Open_Issues Open Issues]
+       
 == Introduction ==
 
-This page describes a test plan for current and future perfSONAR-PS releases.
+The following write up discusses some general theories and practices regarding
+software testing and recommends some actions specifically within the
+perfSONAR-PS framework.  All agreed upon actions will become an integral part of
+the release management process and would have well defined boundaries and
+actors.
 
-There are 3 types of testing that needs to take place for each service:
- * basic functionality: are expected results returned for each query type
- * baseline performance: time for small/simple query and a typical query
- * scalability: make sure that performance degragation is reasonable as number queries/sec and query result size increase
+Overall the perfSONAR-PS consortium desires testing that accomplishes the
+following goals:
+
+ * *Functional Testing*
+   * _Unit Level_ - Tests expected vs observed results for each method/module
+   * _System Level_ - Tests expected vs observed results for various message types
+ * *Performance Testing*
+   * _Baseline_ - Establish metrics for acceptable operation of each service and functionality
+   * _Regression_ - Regular testing to improve the overall performance of the framework
+ * *Scalability* - Ensure that performance degradation is reasonable as number of queries and size of results vary
+
+== Software Testing Principals ==
+
+Software testing can never be used to establish overall _correctness_, rather
+it is used to perform an _empirical_ evaluation to address various known problem
+areas or otherwise verify and validate the end product.  The following
+considerations are often mentioned when dealing with software testing:
+
+ * *_Scope_* - Each functional unit (e.g. methods, modules, services) should be examined and treated in the same manner.
+ * *_Defects and failures_* - The finished product must be validated against the original requirements to locate gaps in either.  Analysis of the functional and non-functional requirements may also reveal defects.
+ * *_Compatibility_* - When explicitly noted, the new releases should match external behavior with that of older releases.  Additionally, external dependencies (e.g. libraries and/or complimentary components) should be tested for each released version suggesting specific versions where applicable.
+ * *_Input combinations and preconditions_* - Potential _normal_ as well as _abnormal_ input sequences to methods/modules/services should be identified and added to automated test routines.  It is impossible to capture all known inputs, but a reasonable subset may be easily identified.  
+ * *_Static vs. Dynamic Testing_* - Both methods should be utilized to gain the associated benefits:
+   * *_Static Testing_* - Code tours and reviews meant to examine structure and layout; generally follow the requirements and other design documents
+   * *_Dynamic Testing_* - Execution through pre-determined test cases; generally run several times to issolate flaws that may be related to temporal factors such as machine state or abnormal interactions.
+ * *_Software verification and validation_* - 
+   * *_Verification_* - Does the software match the specification?
+   * *_Validation_* - Does the software accomplish the job (if applicable, is the customer pleased)?
+ * *_Software Testers/QA Team_* - Developers (primary to a software component as well as secondary or unrelated) should make up the team of testing individuals.  Quality Assurance (QA) becomes the ongoing job of the release team.
+
+If left unchecked, any of these individual actions can grow to take up resources
+within our development group.  A careful balance of the above, within the
+confines of a release process with a limited lifetime and group of people will
+serve to check and improve the quality of the released software.  
+
+The following sections go into detail on these topics:
+
+ * [TestPlan#How_to_Test How to Test] - Known testing methodologies
+ * [TestPlan#What_to_Test What to Test] - Breaking down the various levels of granularity in a software project
+ * [TestPlan#When_to_Test When to Test] - Testing must be done at the proper time in the lifecycle of software
+
+=== How to Test ===
+
+The following represent accepted and well used testing methodologies, it is
+expected that we will adopt features of each to accomplish the goals listed
+above:
+
+ * *_Black box testing_* - Testing without knowledge of the internal structure.  There are several sub-methods in use:
+   * _*Equivalence partitioning*_ - Identifying _partitions_, e.g. ranges, for testing inputs.  This helps to narrow down the overall set of test cases.
+   * _*Boundary value analysis*_ - Similar to _*Equivalence partitioning*_, this methodology tests the boundaries of expectation to check for potential faults.  For instance if a function _expects_ a value between 0 and 1, what happens when values above, below, and inside this range are entered.
+   * _*Decision table testing*_ - Table based analysis of expected and observed results in decision structures.
+   * _*Pairwise testing*_ - Combinatorial testing method used to test various combinations of inputs.
+   * _*State transition tables*_ - Using automata, map the state transitions for both expected and observed results.
+   * _*Use case testing*_ - Testing the software to described use cases.
+   * _*Fuzz Testing*_ - using random data to find defects.  
+   * _*model-based testing*_ - Developing and refining models to test the software.
+ * *_White box testing_* - Testing with knowledge of the internal design; this knowledge can be used to better craft test cases.  As with *_Black box testing_*, there are several sub methods:
+   * _*Code coverage*_ - Testing to be sure all areas of the code can be reached by using the appropriate input sequences.
+   * _*Mutation testing methods*_ - Making small modifications to source to test input sequences in different ways.
+   * _*Fault injection methods*_ - Knowing the internal structure allows the designer to specifically create failures and test error and exception handling.
+   * _*Static testing*_ - By definition, all static testing is in this category.
+ * *_Grey Box Testing_* - A combination of the previous two methods; normally viewed as having access to the internal structure to design test cases but approaching the actual testing as a user who would not know this information.  
+ * *_Acceptance Testing_* - A combination of testing methods with a focus on QA and usability, can be performed from the point of view as a supplier or a customer.
+ * *_Non Functional Software Testing_* - A number of sub-categories exist that emphasize items that cannot be specified in design documents:
+   * *_Performance Testing_* - Use of tools to profile the performance of the software as the software scales up or down.  Comparison to previous releases or competitive products.  
+   * *_Usability Testing_* - Check if the user interface is easy to use and understand.  Can also apply to documentation, installation procedure, or upgrade paths.
+   * *_Security Testing_* - Many levels of testing possible, but overall audit to ensure the software cannot be exploited.  
+
+=== What to Test ===
+
+In practice, software testing must be done at various levels:
+
+ * *_Unit Testing_* - Tests designed for the minimal software components (e.g. methods, modules).  Normally test each in a vacuum away from other components.  
+ * *_Integration Testing_* - Attempts to expose defects in interfaces and APIs of modules or components when fitted to like pieces of software.  
+ * *_System Testing_* - Testing to specifications; takes into consideration the expected and observed behavior.
+ * *_System Integration Testing_* - Tests the software in an environment with other components external to the main development process.  
+
+=== When to Test ===
+
+An additional time based component is also relative:
+
+ * *_Alpha Testing_* - Testing performed by an independent (e.g. nonp-developers) group for recently released software (mild form of *_Acceptance Testing_*)
+ * *_Beta Testing_* - Larger releases of software to a limited audience; goal is to offer a fairly polished version of the software that still may contain defects.
+ * *_Regression Testing_* - In the process of fixing defects in software, new problems may be introduced.  This form of testing is used to mitigate this issue.
 
 == Current Status ==
 
-Functionality: The current test_harness supports this, but many test queries are likely missing
+The following represents the current state of testing in the perfSONAR Framework:
 
-Baseline performance: The current test_harness supports this
+ * Unit Testing
+   * Many of the modules contain test files written in the common language of perl tests (e.g. [http://perldoc.perl.org/Test/Simple.html Test::Simple], [http://perldoc.perl.org/Test/More.html Test::More]), many include nothing.
+     * Each test file should test the methods of the module.
+     * Some test files test the interface of the module (see _*Integration Testing*_)
+     * These tests are written by the developers in most cases (e.g. _white box_ style - testing based on knowledge of the code).  Some may contain elements of _black box_ testing when dealing with inputs
+     * These test cases are executed dynamically as a part of installation
+ * Integration Testing
+   * With the exception of several APIs, there is no integration testing present
+   * *_Unit Testing_* principals that use the perl test language may be used here.
+   * The *_test_harness_* may be modified to test interface level communication as well 
+ * System Testing
+   * The _*test_harness*_ framework was meant to test components from the outside via xml messages.  
+     * The messages are written by the developers in most cases (e.g. _white box_ style - testing based on knowledge of the code).  Some may contain elements of _black box_ testing when dealing with message construction
+     * These test cases are executed dynamically before a release or during development
+   * Profiling is performed using automated [http://search.cpan.org/~samtregar/Devel-Profiler-0.04/lib/Devel/Profiler.pm tools].
+     * Profiling addresses non-functional requirements, but to date is not a regular aspect of testing
+ * System Integration Testing
+   * Small scale testing is done when dealing with external components (e.g. versions of libraries, specific external tools such as databases).  
+   * Testing within the confines of the daemon (e.g. deploying several components at once) is tested before a release as well.  
+   * We are lacking a way to test scalability in a distributed environment
+   
+=== Addressed Issues ===   
 
-Scalability: no current mechanism for this
+ * The issue of unit testing has an acceptable solution: using the language of perl testing.  This solution *_must_* be enforced for all checked in code as a function of the release management process
+ * The *_test_harness_* is a useful tool for evaluating at the *_System Testing_* level.  This solution also *_must_* be enforced for all services.  Additional development on the robustness of this service would be useful.
+ * Use of profile tools (specifically exploring new options such as [http://search.cpan.org/~timb/Devel-NYTProf-2.07/ Devel::NYTProf]) must be executed regularly.  
+   
+=== Open Issues ===   
 
-== Open Issues ==
+ * Currently, no adequate way to address scalability of services
+   * Particularly hard problem for TS, hLS, gLS
+   * Minor Problem for MAs (will become more evident with GUI development)
+ * Enforcement of current methods is lacking (see [TestPlan#Addressed_Issues Addressed Issues])
+ * Static analysis (e.g. Code tours and reviews) is absent - will become a part of release process
+ * No real analysis on _baseline_ performance available - should test against other perfSONAR tools
+ * Design documents outlining original requirements are sparse
+ * Service documentation is sparse
+ * Documents outlining test recommendations were not present (until now!)
 
-We need a process to always run the test harness before releases, and make sure
-the performance results are reasonable.
+== Future Plans ==
 
-We need to figure out a good way to send many requests in parallel from many hosts. (possibly use planetlab for this?)
+The following represents proposed guidelines for testing in the perfSONAR-PS
+framework.  
 
+=== What to Test and How to Test it ===
 
-Questions:
- * do services handle ridiculously large requests well? (error message? break replies into batches? report cause of timeout?)
+The following sections are broken down by _size_ of the software unit to be
+tested.  Within each section, recommendations on how to test each will be made.
 
+==== Unit Testing ==== 
 
-Special case: hLS/gLS testing
- * how to test scalability of gLS? update rate? number of hLS and gLSes? metadata size?
+ # Each Module _must_ contain a test file written to use the perl test language and placed in the appropriate _t/_ location
+   # Each test file _must_ test each function _at least_ once (N.B. tests are cheap - write many)
+     # Each test case _should_ borrow ideas from _*Equivalence partitioning*_ and _*Boundary value analysis*_ with regards to input cases.  Use of other _black box_ techniques such as _*Decision table testing*_, *Pairwise testing*_, etc. is optional and should be used at the will of the developer to test individual functions
+     # Each test case _should_ borrow concepts that test _*Code coverage*_.  Use of other _White box_ techniques are optional.
+   # When applicable, each test file _should_ contain hooks that time the various aspects of module and method tests.  These _should_ be recorded and _may_ be used in _Performance_ analysis.
+   # Each function and module should be compared to existing design documentation for verification purposes
+ # Static reviews of each module are required
+   # Each module must be reviewed as a part of the release process for syntactic and stylistic adherence
+   # Each module _must_ contain perl documentation for each function, and the module as a whole
+   # Each module _should_ contain a _code tour_ (e.g. narrative) of the source code - this can be a separate document or on the wiki
+   # Each module _should_ be paired with any related design documentation
+     # Design specifications
+     # Use cases 
 
+==== Integration Testing ==== 
+
+ # Each *API* and *Module Interface* _must_ contain a way to test it: this may be written in perl test language or may feature some other way to validate the functionality (e.g. similar to *_test_harness_*.
+   # Each _must_ contain documentation on use (N.B. this can be included in module documentation, but may be better written as user level documentation)
+   # Each _should_ be tested from the _black box_ point of view; use _*Equivalence partitioning*_ and _*Boundary value analysis*_ to help with input selection
+ # Each *API* and *Module Interface* _must_ be verified against design specifications
+ # Each *API* and *Module Interface* _should_ be reviewed _statically_ for code coverage if applicable (e.g. should be covered in _*Unit Testing*_) 
+ 
+==== System Testing ==== 
+
+ # The developer of each service is responsible for providing examples of each message type a service will accept for use in the *_test_harness_*
+   # Each message should be replicated to test many possible input situations as possible; use _*Equivalence partitioning*_ and _*Boundary value analysis*_ to help with input selection
+   # Each message should be replicated to test many possible scalability related issues (e.g. result size) as possible 
+ # The Release Team will perform and record the results of profiling tests with each release
+   # The developer should use these results in pre and post release testing to ensure that performance remains in an acceptable range
+ # Each developer is responsible for maintaining documentation:
+   # Installation instructions
+   # FAQ documentation (web based)
+ # Each service _must_ be verified against design specifications
+
+==== System Integration Testing ==== 
+
+ # Each developer should maintain documentation on required libraries and external components
+ # Each developer is responsible for testing a service in the context of the overall perfSONAR-PS framework pre and post release
+ # The release management team is responsible for testing the services on alternative architectures and operating systems
+   # The developer should maintain a list of known issues with architectures and operating systems for use by the release management team and users.  
+
+=== Appropriate Testing Times ===
+
+The following sections detail when the various testing phases should be
+completed along with annotations of which individuals are responsible.
+
+==== Alpha Testing ==== 
+
+Alpha testing will be conducted in the time frame immediately after an official
+release until the next release makes beta candidates available.  This testing
+will be done mostly by developers and users who are interested in staying on the
+cutting edge. 
+
+==== Beta Testing ==== 
+
+Beta testing is normally limited to release candidates but may also take into
+account mature _alpha_ releases. This testing should be primarily be done by 
+members of the release team and external partners (e.g. potential users).  
+
+Release candidates that are further along in a release may be opened to a wider
+audience of the general public in certain situations.  
+
+==== Regression Testing ==== 
+
+This testing will normally be performed by developers outside of a release
+cycle, and by members of the release team within a cycle.  Any time a
+significant change is made to a function/module/service this testing should be
+performed.
+
+=== Open Issues ===   
+
+ * Scalability
+   * For testing distributed information services (hLS/gLS/TS) - use resources like [http://www.planetlab.org PlanetLab]?
+ * Performance
+   * Must track the performance results over time
+   * Large result sets
+ * Functionality
+   * Force 'faults' to test the error handling of functions/methods/services.
+
+== Last Updated ==
+
+$Id$
