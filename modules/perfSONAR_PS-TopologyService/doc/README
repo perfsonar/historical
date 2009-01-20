@@ -1,0 +1,41 @@
+Lookup Service Registration Daemon README File
+==============================================
+
+Description
+-----------
+
+The Topology Service allows clients to store and query for topological data.
+A summary of this data can be registered with a Lookup Service, allowing
+interested parties to locate the topology.
+
+Installation
+------------
+
+    1. Become root.
+    2. Run "scripts/install_dependencies.sh"
+    3. Run "make install"
+    4. Run "scripts/prepare_environment.sh"
+
+Configuration
+-------------
+
+    1. Edit "/opt/perfsonar_ps/topology_service/etc/daemon.conf"
+    2. Change the "external_address" variable to the IP or hostname that
+       can be used to get to the machine.
+    3. Change the "site_name" variable to your organization's name
+    4. Change the "site_location" variable to the city/state/country of the server
+    5. Set the "ls_instance" variable if you'd like to register with a specific Lookup Service
+
+Starting The Daemon
+-------------------
+  Installation from RPM:
+
+    1. Start the daemon with "/etc/init.d/topology_service start"
+
+  Installation from Tarball:
+
+    1. Start the daemon with "/opt/perfsonar_ps/topology_service/scripts/topology_service start"
+
+Copyright (c) 2004-2008, Internet2 and the University of Delaware
+
+All rights reserved.
