@@ -86,7 +86,7 @@ sub setids {
     return -1 unless $uid;
 
     # Don't do anything if we are not running as root.
-    return if ( $EFFECTIVE_USER_ID != 0 );
+    return 0 if ( $EFFECTIVE_USER_ID != 0 );
 
     # set GID first to ensure we still have permissions to.
     if ( defined($gid) ) {

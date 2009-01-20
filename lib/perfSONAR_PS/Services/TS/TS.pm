@@ -88,17 +88,26 @@ sub init {
     }
 
     if ($self->{CONF}->{"topology"}->{"enable_registration"}) {
-        if (not defined $self->{CONF}->{"topology"}->{"service_accesspoint"} or $self->{CONF}->{"topology"}->{"service_accesspoint"} eq q{}) {
-            $self->{LOGGER}->error("No access point specified for SNMP service");
-            return -1;
+        if ( not $self->{CONF}->{service_accesspoint} ) {
+            unless ( $self->{CONF}->{external_address} ) {
+                $self->{LOGGER}->error("With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address");
+                return -1;
+            }
+
+            $self->{LOGGER}->info("Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT});
+            $self->{CONF}->{"topology"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
         }
 
-        if (not defined $self->{CONF}->{"topology"}->{"ls_instance"} or $self->{CONF}->{"topology"}->{"ls_instance"} eq q{}) {
-            if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne q{}) {
-                $self->{CONF}->{"topology"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
-            } else {
-                $self->{LOGGER}->error("No LS instance specified for SNMP service");
-                return -1;
+        unless ( $self->{CONF}->{"topology"}->{"ls_instance"} ) {
+            $self->{CONF}->{"topology"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
+        }
+
+        unless ( $self->{CONF}->{"topology"}->{"ls_instance"} ) {
+            $self->{LOGGER}->warn("No LS instance specified for Topology Service. Will select one to register with.");
+
+            unless ( $self->{CONF}->{"root_hints_url"} ) {
+                $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+                $self->{LOGGER}->warn("gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\".");
             }
         }
 
@@ -114,22 +123,29 @@ sub init {
             $self->{CONF}->{"topology"}->{"ls_registration_interval"} *= 60;
         }
 
-        if(not defined $self->{CONF}->{"topology"}->{"service_description"} or
-                $self->{CONF}->{"topology"}->{"service_description"} eq q{}) {
-            $self->{CONF}->{"topology"}->{"service_description"} = "perfSONAR_PS Topology MA";
-            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS Topology MA'.");
+        unless ( $self->{CONF}->{"topology"}->{"service_description"} )
+        {
+            my $description = "perfSONAR_PS Topology Service";
+            if ( $self->{CONF}->{site_name} ) {
+                $description .= " at " . $self->{CONF}->{site_name};
+            }
+            if ( $self->{CONF}->{site_location} ) {
+                $description .= " in " . $self->{CONF}->{site_location};
+            }
+            $self->{CONF}->{"topology"}->{"service_description"} = $description;
+            $self->{LOGGER}->warn("Setting 'service_description' to '$description'.");
         }
 
         if(not defined $self->{CONF}->{"topology"}->{"service_name"} or
                 $self->{CONF}->{"topology"}->{"service_name"} eq q{}) {
-            $self->{CONF}->{"topology"}->{"service_name"} = "Topology MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'Topology MA'.");
+            $self->{CONF}->{"topology"}->{"service_name"} = "Topology Service";
+            $self->{LOGGER}->warn("Setting 'service_name' to 'Topology Service'.");
         }
 
         if(not defined $self->{CONF}->{"topology"}->{"service_type"} or
                 $self->{CONF}->{"topology"}->{"service_type"} eq q{}) {
-            $self->{CONF}->{"topology"}->{"service_type"} = "MA";
-            $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
+            $self->{CONF}->{"topology"}->{"service_type"} = "TS";
+            $self->{LOGGER}->warn("Setting 'service_type' to 'TS'.");
         }
     }
 
@@ -165,7 +181,6 @@ sub registerLS {
 
     if (not defined $self->{LS_CLIENT}) {
         my %ls_conf = (
-                LS_INSTANCE => $self->{CONF}->{"topology"}->{"ls_instance"},
                 SERVICE_TYPE => $self->{CONF}->{"topology"}->{"service_type"},
                 SERVICE_NAME => $self->{CONF}->{"topology"}->{"service_name"},
                 SERVICE_DESCRIPTION => $self->{CONF}->{"topology"}->{"service_description"},
@@ -173,8 +188,16 @@ sub registerLS {
                 LS_REGISTRATION_INTERVAL => $self->{CONF}->{"topology"}->{"registration_interval"},
                   );
 
-        my %ns = getTopologyNamespaces();
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"topology"}->{"ls_instance"}, \%ls_conf, \%ns);
+        my @hints_array = ();
+        unless ($self->{CONF}->{"topology"}->{"ls_instance"}) {
+            my @array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
+            foreach my $h (@array) {
+                $h =~ s/(\s|\n)*//g;
+                push @hints_array, $h if $h;
+            }
+        }
+
+        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS::Remote->new($self->{CONF}->{"topology"}->{"ls_instance"}, \%ls_conf, \@hints_array);
     }
 
     ($status, $res1) = $self->{CLIENT}->open;
@@ -184,16 +207,22 @@ sub registerLS {
         return -1;
     }
 
-    ($status, $res1) = $self->{CLIENT}->getSummary;
+    ($status, $res1) = $self->buildSummary;
     if ($status != 0) {
         my $msg = "Couldn't get topology summary from database: $res1";
         $self->{LOGGER}->error($msg);
         return -1;
     }
 
-    $res1 = q{};
+    my @mds = ();
+    my @md_ids = ();
 
-    my $n = $self->{LS_CLIENT}->registerDynamic($res1);
+    foreach my $info (@{ $res1 }) {
+        my ($md, $md_id) = buildLSMetadata($info->{id}, $info->{type}, $info->{prefix}, $info->{uri});
+        push @mds, $md;
+    }
+
+    my $n = $self->{LS_CLIENT}->registerDynamic(\@mds);
 
     if (defined $sleep_time) {
         ${$sleep_time} = $self->{CONF}->{"topology"}->{"ls_registration_interval"};
@@ -201,6 +230,109 @@ sub registerLS {
 
     return $n;
 }
+
+=head2 buildLSMetadata ($id, $type, $prefix, $url)
+    This function is used to build the metadata that is registered with the LS.
+    This element contains the prefix and the local name of the element to be
+    register as well as the id for that element. 
+=cut
+sub buildLSMetadata {
+    my ($id, $type, $prefix, $uri) = @_;
+    my $md = q{};
+    my $md_id = "meta".genuid();
+
+    $md .= "<nmwg:metadata id=\"$md_id\">\n";
+    $md .= "<nmwg:subject id=\"sub0\">\n";
+    if (not defined $prefix or $prefix eq q{}) {
+    $md .= " <$type xmlns=\"$uri\" id=\"$id\" />\n";
+    } else {
+    $md .= " <$prefix:$type xmlns:$prefix=\"$uri\" id=\"$id\" />\n";
+    }
+    $md .= "</nmwg:subject>\n";
+    $md .= "<nmwg:eventType>topology</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/20070809</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/all/20070809</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/query/xquery/20070809</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/add/20070809</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/update/20070809</nmwg:eventType>\n";
+    $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/topology/change/replace/20070809</nmwg:eventType>\n";
+    $md .= "</nmwg:metadata>\n";
+
+    return ($md, $md_id);
+}
+
+sub buildSummary {
+    my ($self) = @_;
+    my $logger = get_logger("perfSONAR_PS::Client::Topology::XMLDB");
+    my $error;
+    my (@domain_ids, @network_ids, @path_ids);
+
+    my ($status, $results) = $self->{CLIENT}->getAll();
+    if ($status != 0) {
+        return ($status, $results);
+    }
+
+    my @ids = ();
+
+    my $find_res;
+
+    $find_res = find($results, "./*[local-name()='domain']", 0);
+    if ($find_res) {
+        foreach my $node ($find_res->get_nodelist) {
+            my $id = $node->getAttribute("id");
+            my $uri = $node->namespaceURI();
+            my $prefix = $node->prefix;
+
+            my %info = (
+                    type => 'domain',
+                    id => $id,
+                    prefix => $prefix,
+                    uri => $uri,
+                    );
+
+            push @ids, \%info;
+        }
+    }
+
+    $find_res = find($results, "./*[local-name()='network']", 0);
+    if ($find_res) {
+        foreach my $node ($find_res->get_nodelist) {
+            my $id = $node->getAttribute("id");
+            my $uri = $node->namespaceURI();
+            my $prefix = $node->prefix;
+
+            my %info = (
+                    type => 'network',
+                    id => $id,
+                    prefix => $prefix,
+                    uri => $uri,
+                    );
+
+            push @ids, \%info;
+        }
+    }
+
+    $find_res = find($results, "./*[local-name()='path']", 0);
+    if ($find_res) {
+        foreach my $node ($find_res->get_nodelist) {
+            my $id = $node->getAttribute("id");
+            my $uri = $node->namespaceURI();
+            my $prefix = $node->prefix;
+
+            my %info = (
+                    type => 'path',
+                    id => $id,
+                    prefix => $prefix,
+                    uri => $uri,
+                    );
+
+            push @ids, \%info;
+        }
+    }
+
+    return (0, \@ids);
+}
+
 
 =head2 handleEvent
     This is the function that is called by the daemon whenever a metadata/data

@@ -590,7 +590,7 @@ sub changeTopology {
         }
     }
 
-    my $status = $self->{DATADB}->commitTransaction( { txn => $dbTr, error => \$error } );
+    $status = $self->{DATADB}->commitTransaction( { txn => $dbTr, error => \$error } );
     if ( $status != 0 ) {
         $self->{DATADB}->abortTransaction( { txn => $dbTr, error => \$error } ) if $dbTr;
         $self->{DATADB}->checkpoint( { error => \$error } );

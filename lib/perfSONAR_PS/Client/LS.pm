@@ -513,10 +513,12 @@ sub queryRequestLS {
     if ($eventType) {
         $result{"eventType"} = $eventType;
         if ( $eventType =~ m/^success/mx ) {
-            $result{"response"} = $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString;
+            my $datum = find($msg, './*[local-name()="data"]/*[local-name()="datum"]', 1);
+            $result{"response"} = $datum->toString;
         }
         elsif ( $eventType eq "http://ogf.org/ns/nmwg/tools/org/perfsonar/service/lookup/discovery/summary/2.0" ) {
-            my $data = $msg->getChildrenByLocalName("data");
+            my $data = find($msg, "./*[local-name()='data']", 0);
+
             $result{"response"} = "<nmwgr:datum xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" xmlns:nmwgr=\"http://ggf.org/ns/nmwg/result/2.0/\">";
             foreach my $d ( $data->get_nodelist ) {
                 $result{"response"} .= $d->toString;
@@ -531,7 +533,8 @@ sub queryRequestLS {
         }
     }
     else {
-        $result{"response"} = unescapeString( $msg->getChildrenByLocalName("data")->get_node(1)->getChildrenByLocalName("datum")->get_node(1)->toString );
+        my $datum = find($msg, './*[local-name()="data"]/*[local-name()="datum"]', 1);
+        $result{"response"} = unescapeString( $datum->toString );
     }
     return \%result;
 }
