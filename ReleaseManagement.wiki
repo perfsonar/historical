@@ -725,7 +725,7 @@ there are several _*marjor*_ packaging schemes that are accepted:
    * Generic and universally accepted.  
    * Does not lend itself to _single click_ installation - targeted at the intermediate user 
  * Ports (star-BSD Family)
-   * A collection of software sources arranged in a hierarchy for the *BSD family of operating systems.  Members of the hierarchy are constructed to rely on other packages when a dependency is required.  This allows an easy cascade of activity when something needs to be installed.
+   * A collection of software sources arranged in a hierarchy for the star-BSD family of operating systems.  Members of the hierarchy are constructed to rely on other packages when a dependency is required.  This allows an easy cascade of activity when something needs to be installed.
    * Same requirements as Source for the most part; additional work to _port_ the software release into this environment (e.g. special makefiles, etc.) is necessary
  * svn propset svn:keywords 'Id Revision' file.plCPAN (Comprehensive Perl Archive Network)
    * Source packaged Perl source code and documentation, constructed using Perl tools (e.g. [http://perldoc.perl.org/ExtUtils/MakeMaker.html ExtUtils::MakeMaker])
