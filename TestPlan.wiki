@@ -2,9 +2,6 @@
 
  * [TestPlan#Introduction Introduction]
  * [TestPlan#Software_Testing_Principals Software Testing Principals]
-   * [TestPlan#How_to_Test How to Test]
-   * [TestPlan#What_to_Test What to Test]
-   * [TestPlan#When_to_Test When to Test]
  * [TestPlan#Current_Status Current Status]
    * [TestPlan#Addressed_Issues Addressed Issues]
    * [TestPlan#Open_Issues Open Issues]
@@ -41,77 +38,7 @@ following goals:
 
 == Software Testing Principals ==
 
-Software testing can never be used to establish overall _correctness_, rather
-it is used to perform an _empirical_ evaluation to address various known problem
-areas or otherwise verify and validate the end product.  The following
-considerations are often mentioned when dealing with software testing:
-
- * *_Scope_* - Each functional unit (e.g. methods, modules, services) should be examined and treated in the same manner.
- * *_Defects and failures_* - The finished product must be validated against the original requirements to locate gaps in either.  Analysis of the functional and non-functional requirements may also reveal defects.
- * *_Compatibility_* - When explicitly noted, the new releases should match external behavior with that of older releases.  Additionally, external dependencies (e.g. libraries and/or complimentary components) should be tested for each released version suggesting specific versions where applicable.
- * *_Input combinations and preconditions_* - Potential _normal_ as well as _abnormal_ input sequences to methods/modules/services should be identified and added to automated test routines.  It is impossible to capture all known inputs, but a reasonable subset may be easily identified.  
- * *_Static vs. Dynamic Testing_* - Both methods should be utilized to gain the associated benefits:
-   * *_Static Testing_* - Code tours and reviews meant to examine structure and layout; generally follow the requirements and other design documents
-   * *_Dynamic Testing_* - Execution through pre-determined test cases; generally run several times to issolate flaws that may be related to temporal factors such as machine state or abnormal interactions.
- * *_Software verification and validation_* - 
-   * *_Verification_* - Does the software match the specification?
-   * *_Validation_* - Does the software accomplish the job (if applicable, is the customer pleased)?
- * *_Software Testers/QA Team_* - Developers (primary to a software component as well as secondary or unrelated) should make up the team of testing individuals.  Quality Assurance (QA) becomes the ongoing job of the release team.
-
-If left unchecked, any of these individual actions can grow to take up resources
-within our development group.  A careful balance of the above, within the
-confines of a release process with a limited lifetime and group of people will
-serve to check and improve the quality of the released software.  
-
-The following sections go into detail on these topics:
-
- * [TestPlan#How_to_Test How to Test] - Known testing methodologies
- * [TestPlan#What_to_Test What to Test] - Breaking down the various levels of granularity in a software project
- * [TestPlan#When_to_Test When to Test] - Testing must be done at the proper time in the lifecycle of software
-
-=== How to Test ===
-
-The following represent accepted and well used testing methodologies, it is
-expected that we will adopt features of each to accomplish the goals listed
-above:
-
- * *_Black box testing_* - Testing without knowledge of the internal structure.  There are several sub-methods in use:
-   * _*Equivalence partitioning*_ - Identifying _partitions_, e.g. ranges, for testing inputs.  This helps to narrow down the overall set of test cases.
-   * _*Boundary value analysis*_ - Similar to _*Equivalence partitioning*_, this methodology tests the boundaries of expectation to check for potential faults.  For instance if a function _expects_ a value between 0 and 1, what happens when values above, below, and inside this range are entered.
-   * _*Decision table testing*_ - Table based analysis of expected and observed results in decision structures.
-   * _*Pairwise testing*_ - Combinatorial testing method used to test various combinations of inputs.
-   * _*State transition tables*_ - Using automata, map the state transitions for both expected and observed results.
-   * _*Use case testing*_ - Testing the software to described use cases.
-   * _*Fuzz Testing*_ - using random data to find defects.  
-   * _*Model-Based Testing*_ - Developing and refining models to test the software.
- * *_White box testing_* - Testing with knowledge of the internal design; this knowledge can be used to better craft test cases.  As with *_Black box testing_*, there are several sub methods:
-   * _*Code coverage*_ - Testing to be sure all areas of the code can be reached by using the appropriate input sequences.
-   * _*Mutation testing methods*_ - Making small modifications to source to test input sequences in different ways.
-   * _*Fault injection methods*_ - Knowing the internal structure allows the designer to specifically create failures and test error and exception handling.
-   * _*Static testing*_ - By definition, all static testing is in this category.
- * *_Grey Box Testing_* - A combination of the previous two methods; normally viewed as having access to the internal structure to design test cases but approaching the actual testing as a user who would not know this information.  
- * *_Acceptance Testing_* - A combination of testing methods with a focus on QA and usability, can be performed from the point of view as a supplier or a customer.
- * *_Non Functional Software Testing_* - A number of sub-categories exist that emphasize items that cannot be specified in design documents:
-   * *_Performance Testing_* - Use of tools to profile the performance of the software as the software scales up or down.  Comparison to previous releases or competitive products.  
-   * *_Usability Testing_* - Check if the user interface is easy to use and understand.  Can also apply to documentation, installation procedure, or upgrade paths.
-   * *_Security Testing_* - Many levels of testing possible, but overall audit to ensure the software cannot be exploited.  
-
-=== What to Test ===
-
-In practice, software testing must be done at various levels:
-
- * *_Unit Testing_* - Tests designed for the minimal software components (e.g. methods, modules).  Normally test each in a vacuum away from other components.  
- * *_Integration Testing_* - Attempts to expose defects in interfaces and APIs of modules or components when fitted to like pieces of software.  
- * *_System Testing_* - Testing to specifications; takes into consideration the expected and observed behavior.
- * *_System Integration Testing_* - Tests the software in an environment with other components external to the main development process.  
-
-=== When to Test ===
-
-An additional time based component is also relative:
-
- * *_Alpha Testing_* - Testing performed by an independent (e.g. nonp-developers) group for recently released software (mild form of *_Acceptance Testing_*)
- * *_Beta Testing_* - Larger releases of software to a limited audience; goal is to offer a fairly polished version of the software that still may contain defects.
- * *_Regression Testing_* - In the process of fixing defects in software, new problems may be introduced.  This form of testing is used to mitigate this issue.
+A full discussion on the nature of software testing, including terminology, is available in the [http://code.google.com/p/perfsonar-ps/wiki/ReleaseManagement release mangagement] discussion.
 
 == Current Status ==
 

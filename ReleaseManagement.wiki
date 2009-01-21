@@ -1,0 +1,769 @@
+= Release Management Overview =
+
+ # [ReleaseManagement#Introduction]
+ # [ReleaseManagement#Project_Preliminaries Project preliminaries]
+ # [ReleaseManagement#Frequency Release Frequency]
+   # [ReleaseManagement#Bi_Yearly_Release_Cycle Tri Yearly Release Cycle]
+   # [ReleaseManagement#Tri_Yearly_Release_Cycle Tri Yearly Release Cycle]
+ # [ReleaseManagement#Release_Process Release Process]
+   # [ReleaseManagement#Dependencies Dependencies]
+   # [ReleaseManagement#Revision_Control Revision Control] 
+   # [ReleaseManagement#Schedule Schedule]
+     # [ReleaseManagement#Pre_Release Pre Release]
+     # [ReleaseManagement#Phase_1 Phase 2]
+     # [ReleaseManagement#Phase_2 Phase 2]
+     # [ReleaseManagement#Post_Release Post Release]
+   # [ReleaseManagement#Documentation Documentation]
+     # [ReleaseManagement#Source_Documentation Source Documentation]
+     # [ReleaseManagement#Release_Documentation Release Documentation]
+     # [ReleaseManagement#Wiki Wiki]
+     # [ReleaseManagement#Public_Relations Public Relations]
+     # [ReleaseManagement#Testing Testing]
+       # [ReleaseManagement#How_to_Test How to Test]
+       # [ReleaseManagement#What_to_Test What to Test]
+       # [ReleaseManagement#When_to_Test When to Test]
+       # [ReleaseManagement#Where_to_Test Where to Test]
+       # [ReleaseManagement#Testing_Recommendations recommendations]
+     # [ReleaseManagement#Code_Review Code Review]
+     # [ReleaseManagement#Issue_Tracker Issue Tracker]
+ # [ReleaseManagement#Released_Product Released Product]
+   # [ReleaseManagement#Limiting_Distribution Limiting Distribution]
+  
+== Introduction ==
+
+The following documentation will serve as a top level guide for the release of
+projects under the Internet2 development umbrella, specifically collaborative
+projects involving external individuals such as
+[http://www.perfsonar.net perfSONAR] and
+[http://www.internet2.edu/network/dc/ DCN].  This guide covers the major hurdles
+and plans with regards to releasing a series of software packages to meet major
+goals; emphasis is placed on team interaction and organization to serve both as
+a quality assurance mechanism and a bridge to community adoption.  This document
+is not meant to be frozen in time, and shall be updated with lessons learned as
+well as serve as a basis for more specific release documents linked below.
+
+Content based strongly upon the 
+[http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] process of
+the same name.  Decisions regarding when to depart from this document have been
+made based on:
+
+ * *Complexity* - The size of the project, generated source code, and supporting materials is staggering in comparison with our smaller projects.
+ * *Audience* - FreeBSD releases a slightly different product in many different formats.  We intend to craft the overall process to reflect this.
+ * *Manpower* - FreeBSD represents a project that is an order of magnitude (or larger) than our projects. 
+
+Distribution and modification of this document are unlimited.
+
+== Project Preliminaries ==
+
+Each project that implements the process laid out in this document should
+maintain a _*roadmap*_.  This document describes at a high level the various
+_*milestones*_ that are targeted for a given software release.  These items
+should be evaluated at least three (3) times per year as the schedule allows:
+
+ * *1st Quarter Review* - To be held at the end of beginning of the year to review progress from the previous cycle and plot out the next year's design goals, activities, and personnel involved.  
+ * *Post Release Review 1* - Held immediately after the first release of software for the year (timing subject to [ReleaseManagement#Schedule release schedule]).  This review should only concern products that were recently released, but is not limited to only these items.  Goals should be to re-evaluate any slip in the overall schedule, add additional goals since the previous review, or handle immediate requests for pending activities.  
+ * *Post Release Review N* - Similar to the previous item, but held after subsequent releases.  This may be enacted as many times as necessary or simply omitted due to the [ReleaseManagement#Schedule release schedule] and time constraints.  
+
+Keeping the goals relevant aids the priority stream of development and can give
+the entire team a good idea of where the project is headed and where time can
+be allotted for development of related and unrelated activities.  
+
+The project roadmap should be maintained by the project manager with input
+from closely related developers and any aligned working groups.  This document
+should succinctly describe the actions for several time based goals
+(e.g. both major and minor milestones) as well as estimated completion
+dates and allotted time windows for activities.  When applicable, important
+dates directly related to a release (e.g. _*code slush*_) or indirectly
+related (e.g. dates of demonstrations and conferences) should be used to steer
+the overall schedule.
+
+== Release Frequency ==
+
+Previous development and release cycles for many of the performance related
+projects has been driven by community and external activities such as conference
+dates and meetings.  While a powerful catalyst to accomplishing goals, a 
+periodic release cycle will help to maintain productivity and align development
+activities with travel and attendance to important annual events.  The following
+events will consume the time of direct staff, project members, and community leaders
+and should be used to help weigh activity cycles:
+
+ * January
+   * Joint Techs Conference
+ * February
+   * Geant Technical Workshop
+ * March
+   * DICE Activity
+   * GLIF
+ * April
+   * Internet2 Spring Member Meeting
+ * May
+ * June
+   * Geant Technical Workshop
+ * July
+   * Joint Techs Conference
+ * August
+ * September
+   * DICE/perfSONAR Developers Meeting
+   * GLIF
+ * October
+   * Internet2 Fall Member Meeting
+   * Supercomputing Staging
+ * November
+   * Supercomputing
+   * Holiday Break
+ * December
+   * Holiday Break
+
+It is recommended that performance activities aim for a six (6) month
+development cycle culminated with a release.  The timing of the release
+activities is subject to the particular product and it's relationship to other
+inter-dependent software components.  Groups are welcome to do more or less, but
+to strike a balance between release activities (a time consuming process),
+development, and external relations the bi-yearly cycle is recommended.  
+
+There are some caveats to the bi-yearly release cycles, particularly with
+ensemble projects such as perfSONAR-PS.  It is not necessary to forcefully
+release individual components when there is no need; for example the PingER
+service may have made significant progress over a six month period to add
+new functionality while the SNMP service may have only focused on bugfixes
+and released several interim versions as a result.  Sending the SNMP service
+through the release process is therefore unnecessary but possible, while PingER
+should be released regardless.  
+
+A project wide decision prior to the release will help to identify
+participating products and individuals for the next cycle.  It is probable that
+only one or two services may need a release.  In general the frequency is
+debatable on a project by project basis, and does not take into consideration:
+
+ * _Bugfix_ releases - (this is a separate issue)
+ * _Intra-project_ dependencies - Projects such as perfSONAR-PS should synchronize activities with the performance node project(s), [http://e2epi.internet2.edu/bwctl BWCTL], [http://e2epi.internet2.edu/owamp OWAMP], [http://e2epi.internet2.edu/ndt NDT], [http://damsl.cis.udel.edu/projects/phoebus Phoebus], and possibly others.
+ 
+The following discussion discusses some positive and negative features seen in
+release cycles of various size.  This discussion is meant to aide other projects
+that may question how often a release is feasible.
+
+=== Bi Yearly Release Cycle ===
+
+A six (6) month release cycles aims for releases staggered by a quarter.
+Popular examples that fit with our external engagements can be:
+
+ * Quarter 1 (Jan/Feb/Mar) and Quarter 3 (Jul/Aug/Sept)
+ * Quarter 2 (Apr/May/Jun) and Quarter 4 (Oct/Nov/Dec)
+ * Combinations of the previous two
+ 
+The six month time frame is a soft requirement: release managers and
+development teams should consider these options when scheduling.  
+
+ * *Positive Features*
+   * Less man hours on the _paperwork_ aspect of development
+   * Twice a year releases shows maturity of the project
+   * Ample time for testing of new additions
+   * Interim releases addressing software flaws will replace feature rich releases
+ * *Negative Features*
+   * Less frequent could imply that the cycle itself would be busy (e.g. several services could make progress in 6 months causing a longer testing phase)
+   * May indicate group dormancy (which may or may not be true)
+   * If cycle is extended due to elongated testing/bug fix phase could miss the conference deadlines to show off new features
+   * New Features take a long time to surface
+
+N.B. that bugfix releases are not to be included in this discussion: important security fixes can and should be released immediately.
+
+=== Tri Yearly Release Cycle ===
+
+A four (4) month release cycles aims to get more frequent releases of the
+software tested and available to the community. Younger or more active projects
+may benefit from this model, while mature development that is not focused on
+constant expansion may want to avoid.  In our own case some possible situations
+are:
+
+ * Quarter 1 (Jan/Feb/Mar) and Quarter 2/3 (May/June/July)
+ * Quarter 2 (Apr/May/Jun) and Quarter 3/4 (Aug/Sept/Oct)
+ * Other Combinations
+
+As in the previous, the caveat is that development efforts or external forces
+may force a less or greater than 4 month cycle.  Your mileage may vary.  
+
+ * *Positive Features*
+   * Mimics current activity cycles of groups closely (e.g. release for external activities which are roughly ever three to four months)
+   * Shows commitment of the group to constant updates
+   * New features show up sooner in the released software
+ * *Negative Features*
+   * Approaching _too much_ time in release and not enough time in development
+   * May push internal resources of all partners involved
+
+N.B. that bugfix releases are not to be included in this discussion: important security fixes can and should be released immediately.
+
+== Release Process ==
+
+The [http://www.freebsd.org/doc/en/articles/releng/article.html FreeBSD] article contains
+information on release management tasks, specifically:
+
+ * Release Process
+   * Code Review
+   * Code Repository Management
+ * Release Building
+   * Distribution Methods
+   * Build Tools
+ * Distribution Methods
+ * Extensibility
+ * Post Release Activities
+   * Lessons Learned
+   * Future Directions
+
+While all important, certain aspects may be streamlined for smaller projects.
+The following sections will lay out the most important aspects, and liberty will
+be taken in truncating certain items:
+
+ * [ReleaseManagement#Dependencies Dependencies] - Each project will not sit on an island, we must consider how the release process from one project will ripple to other projects.
+ * [ReleaseManagement#Revision_Control Revision Control] - An optimal strategy for managing version control systems must be used.  This includes strategies in maintaining branches and tags of code, while still allowing experimental development.  
+ * [ReleaseManagement#Schedule Schedule] - The release schedule should be well spelled out so team members know what to expect and when.
+ * [ReleaseManagement#Documentation Documentation] - Documentation is an extremely important area for both users and future developers.  Major areas to consider:
+   * [ReleaseManagement#Source_Documentation Source Documentation] - This is developer centric documentation for insertion directly into the released source code
+   * [ReleaseManagement#Release_Documentation Release Documentation] - This is installer and user centric that travels with the released code
+   * [ReleaseManagement#Wiki Wiki] - This is developer, installer, and user centric as it is publicly available and will turn up in searches for information regarding the product.
+   * [ReleaseManagement#Public_Relations Public Relations] - This is _high level_ user centric; decision makers will be the first to observe this offering before passing off to the installers and users.
+ * [ReleaseManagement#Testing Testing] - A standardized testing framework that encourages typical testing (e.g. unit) as well as bigger picture (e.g. protocol and service)
+ * [ReleaseManagement#Code_Review Code Review] - Regular peer reviews of released code to ensure quality
+ * [ReleaseManagement#Issue_Tracker Issue Tracker] - Management system to track bugs and enhancements
+
+=== Dependencies ===
+
+Using software management tools, the release manager and related project
+managers will need to plot a general and per-release dependency graph.  This
+should be shared with others so the schedule can be adjusted as needed.  Some
+major dependencies in our own case:
+
+ * *perfSONAR-PS Components*
+   * _Should_ be complete prior to any release of the *Performance Node*
+   * _Should_ depend on relationship to schedules of other partners (_ESnet_, _Fermilab_, _SLAC_, _GT_, _IU_, _UDel_)
+   * _May_ depend on *DCN* or *Phoebus* for particular components
+ * *Performance Node*
+   * _Should not_ release at the same time as other tools; this may be relaxed depending on forecast
+   * External relationship to *NPAD*, *Iperf*, *Web100*
+ * *Phoebus*
+   * _Should_ depend on certain parts of *perfSONAR-PS* and *DCN*
+   * _Should_ depend on the scheduling needs of _UDel_ and _Internet2_
+ * *OWAMP*
+   * _Should_ be complete prior to *Performance Node* release
+   * _May_ run concurrent to *bwctl*, *ndt* due to lack of strong dependencies
+ * *BWCTL*
+   * _Should_ be complete prior to *Performance Node* release
+   * _May_ run concurrent to *owamp*, *ndt* due to lack of strong dependencies
+   * External relationship to *thurlay*, *iperf*, *nuttcp*
+ * *NDT*
+   * _Should_ be complete prior to *Performance Node* release
+   * _May_ run concurrent to *owamp*, *bwctl* due to lack of strong dependencies
+   * External relationship to *web100* and the linux kernel
+ * *DCN*
+   * _Should_ take into consideration *Phoebus* and *perfSONAR-PS* status
+   * External relationship to schedules of other partners (_ESnet_, _MAX_)
+
+Each particular project will be evaluated on a case by case basis and may change
+over time.  
+
+=== Revision Control ===
+
+Revision control itself can imply the use of
+[http://subversion.tigris.org/ subversion], [http://www.nongnu.org/cvs/ CVS], or
+other tools such as [http://git.or.cz/ Git].  In general our Performance Tools
+are housed in subversion repositories; this discussion will center on this tool
+in particular.  The repository should be organized to cater to several
+important and popular trends in software adoption:
+
+ * Cutting edge software - The most _current_ software that is still usable should be available.  This can be done through a periodic process to allow this unreleased software to be acquired in a specific location (e.g. nightly builds) or simply a designated portion of the development tree.
+ * Stable version(s) - Specific versions, cut from an unstable source and made stable, that represent a specific release candidate or moment in time
+ * Experimentation in control settings - Branches from a main repo that work in vacuum until features are tested and re-integrated
+
+Borrowing strongly from the
+[http://svnbook.red-bean.com/en/1.5/svn-book.html#svn.branchmerge recommended]
+approach to organizing a repository, the following is a proposed structure for a
+revision control system that takes into consideration the above concerns:
+
+http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/svn.png
+
+Management of this structure becomes the responsibility of both the developers
+and the release manager.  The following _best practices_ can describe
+maintenance activities on the repository:
+
+ * The release manager should be the one to manage the SVN tags, branches regarding released software.
+   * Developers may still branch when necessary, but should be careful to keep branches up to date, and merge back into the trunk as needed (deleting old branches).
+ * All developers must stick to the guidelines for using subversion
+ * Prior to release, the Release manager prepares the RELEASE_X_Y Branch.
+   * If not done already, services involved in release must become stable in this branch; fixes done here can be merged back to trunk.
+   * The window_to *_code slush_* (when the code base solidifies and no changes are allowed) involves still working from trunk (to prevent this from becoming un-stable), bugfixes and new functionality that makes the cut before the 15 minute window can be merged in after testing.
+ * Tags are prepared from the RELEASE branch for milestones (e.g. RCs, Betas, Releases)
+ * Over time, bugfixes from trunk can be applied to branches
+   * New tags may be created
+
+=== Schedule ===
+
+The release schedule can vary by project, participants, and stated goals.  In 
+general there are three phases of a finite length that should be used when
+releasing software.  The following image describes this:
+ 
+http://perfsonar-ps.googlecode.com/svn/wiki/ReleaseManagement/schedule.png
+
+This particular release process is three (3) weeks long, but can be extended
+to a longer or shorter period of time as desired.  Each phase of the release
+process is market by a significant event that will effect the progress and
+re-focus the effort of the development team.  The following sections detail
+each phase of the release schedule. 
+
+==== Pre Release ====
+
+Before a release is announced there are some tasks that should be completed to
+gauge needs.  The following are recommended steps to be taken before the process
+gets going.  
+
+ # Release Manager and Project Manager review product roadmap and related external activities
+   * If feasible, a release will be announced to the larger group
+   * Potential components for release are identified internally
+   * Roadmap and milestones may be adjusted as needed without an official meeting
+ # The next available development conference call slot is allocated to talking about the release.
+   * Final say based on developer input to what can and will be released
+   * Timeframe is announced for the _*start*_, _*slush*_, _*freeze*_, and _*release*_
+   * Developers are identified that may help or be omitted from the release process
+ # Release manager makes official announcement, formalizes plan from existing documentation of the process
+
+==== Phase 1 ====
+
+Phase 1 of the release process accounts for one third (1/3) of the entire
+process. The following actions are generally involved but may be truncated or
+skipped as time allows:
+
+ # Seven (7) day cycle to software release begins
+   * Release Manager Branches source code into RELEASE branch
+   * Developers have length of phase to solidify code, collapse development branches, fix bugs, and add features.  
+   * Documentation effort should commence
+   * Release Manager begins to identify release and beta testers from the community
+   * Code Review targets are identified by Release Manager and may begin based on individual developer feedback
+   * Developers should use the testing framework liberally to ensure their product is ready.  A larger QA phase will be present later in the release.
+   
+The phase officially ends on the target date, or when all developers with a
+releasable product sign off on the state of the code.  The software repository
+then enters a _*slush*_ where only critical fixes, documentation, or code
+reviewed items may be entered.  
+
+==== Phase 2 ==== 
+
+Phase 2 accounts for the final 2/3 of the release process, although this section
+itself could be divided in half.  This phase begins when the code enters 
+_*slush*_ and is completed when the testing release candidate software yields a
+final product free of immediate defects.  The following encapsulates the
+remainder of the release process:
+ 
+ # Seven (7) days of code _*slush*_
+   * After the code enters this phase, only critical fixes, documentation, test cases, and code reviewed items will be permitted in the RELEASE branch.
+   * Documentation and Code Review becomes the primary concern of developers at this stage: reviewing the progress of others to ensure that everything is included will be necessary
+   * A QA team will be formed by the Release Manager to Test components against the testing framework
+   * The same team will also internally test the packaged Release Candidate code before involving members of the community.
+   * Code review must complete in this phase.  
+   * Testing *should* complete, but may extend past the freeze
+ # Seven (7) days of code _*freeze*
+   * Packaged versions will be created on an as needed basis for testing.  
+     * Fixes will institute the creation of a new version
+     * Tags will be maintained for these from the RELEASE branch
+   * Testing with community at large begins in a short window so feedback can be absorbed and new candidates may be created
+     * Before the end of this phase the Release Manager can decide if more testing time is needed
+ # Release Announced
+   * Software is uploaded
+   * Web pages are updated
+   * Announcements made to mailing lists
+   * Publicity (when needed) is notified
+
+==== Post Release ==== 
+
+After a release the next available conference call should be reserved to talk
+about open issues:
+
+ * Roadmap and Milestones can be discussed and adjusted
+ * Lessons learned from the previous development and release phase should be discussed
+ * Any changes in product direction can be brought up.
+ 
+The Release Manager should prepare a report and update the documentation of the
+process as necessary.  
+
+=== Documentation ===
+
+The documentation effort of the project must span the needs of several different
+classes of humans:
+
+ * Developers - Beyond our internal needs making APIs and other developer documents available is important
+ * Installers - Succinct installation instructions to accompany each software release version and type are necessary
+ * Users - User documentation regarding the use and maintenance of all software will extend the community
+ * Adopters - High level documentation meant to attract interest by centering on the message of each software release.  This particular category is important for web, poster, and technical paper presence.
+ 
+Each class of human expects a particular type of documentation that fit their
+needs, and we have several forms available:
+ 
+ # [ReleaseManagement#Source_Documentation Source Documentation] - Developers mainly, but also installers and users would be interested in consuming this documentation. 
+ # [ReleaseManagement#Release_Documentation Release Documentation] - Installers and users will encounter this documentation when interacting with the software.  It should have a more formal feel than source documentation, but still be in a technical language.  
+ # [ReleaseManagement#Wiki Wiki] - Focused for developers, but it is possible that installers and users will encounter this as well.  This documentation is informal due to the stigma of wiki software in general, and may contain a combination of the installation notes and source documentation.
+ # [ReleaseManagement#Public_Relations Public Relations] - An ongoing effort to maintain the various _glossy_ publications surrounding the software is required.  This particular medium is the public face of the software and should be the most formal and least technical.
+
+The following sections outline the audience and expectation of each type of
+documentation. Each type should be an ongoing effort to maintain, and relegated
+to the release process only. 
+
+==== Source Documentation ====
+
+ * Author: Developers
+ * Editor: Other Developers  
+ * Audience:
+   * Developers (Mainly)
+   * Installers
+   * Users
+
+There are many forms of source code documentation depending on the nature of
+the project, in particular:
+
+ * [http://search.cpan.org/~nwclark/perl-5.8.9/pod/perlpod.pod POD] and [http://search.cpan.org/~nwclark/perl-5.8.9/pod/perldoc.podPerldoc] - Plain Old Documentation for the perl programming language
+ * [http://java.sun.com/j2se/javadoc/ Javadoc] - Java documentation
+ * [http://www.stack.nl/~dimitri/doxygen/ Doxygen] - C/C++/Python tool for source documentation
+ 
+Developers *_should_* document as they develop; this may not always be the case.
+Some projects such as perfSONAR-PS have gone as far as to mandate the process
+and format in specific sets of
+[http://code.google.com/p/perfsonar-ps/wiki/CodeRules rules].  At a minimum each
+source code file should contain:
+
+ * Licence and copyright info
+ * Author (can be gleaned from source repository using metadata hooks)
+ * Last modified date (can be gleaned from source repository using metadata hooks)
+ * Version (can be gleaned from source repository using metadata hooks)
+ * Acceptable spacing, indention, line boundaries
+ 
+Additional desirable features to documentation are:
+
+ * Function names, inputs, and outputs
+   * May be produced as a part of the testing process
+ * Variable declarations
+ * API synopsis (when applicable)
+   * May be produced as a part of the testing process
+
+Software not in accordance to these rules may be omitted from a release.  A
+general rule to follow is that as a developer you are accustomed to what you
+would like to see if using some otherlibrary or script.  Document any item
+that is confusing or otherwise non-standard.  
+
+==== Release Documentation ====
+
+ * Author: Developers
+ * Editor: Release Manager and Tech Writer
+ * Audience:
+   * Installers
+   * Users
+
+This particular type of documentation travels with a specific version and
+release of software and is generally targeted at a person installing and or 
+using the software.  The tone should be technical, but geared toward the more
+inexperienced audience members.  It is expected that beyond instructions on how
+to install, maintain, and upgrade the software provisions regarding what to do
+when things fail to behave as they should are provided.  
+
+Release documentation must consist of the following items:
+
+ * Changes - list of changes since the last release
+ * LICENCE - Source code licence used for particular project
+ * README - Any information that should be read first, this can contain a table of contents to other important documentation
+ * INSTALL - detailed installation instructions for a given package.  These should be available online when applicable.  
+ 
+To ensure the audience is being addressed correctly, and the content is sound, 
+the Release manager and perhaps a Tech writer should review the finished product
+before the related release announcements.
+
+==== Wiki ====
+
+ * Author: Developers
+ * Editor: Other Developers  
+ * Audience:
+   * Developers (Mainly)
+   * Installers
+   * Users 
+
+Wiki content in general is meant to take an informal tone in delivery.  The
+contents of related wiki pages for a software release should be a combination
+of developers documents (e.g.
+[ReleaseManagement#Source_Documentation Source Documentation]) and user
+documents (e.g. 
+[ReleaseManagement#Release_Documentation Release Documentation]).  The wiki may
+suffer from lack of interest from time to time, but must be freshened before a
+release to ensure that any information that may target something antiquated is
+eliminated.  
+
+==== Public Relations ====
+
+ * Author: Release Manager, Manager
+ * Editor: Tech Writer, Marketing
+ * Audience: All
+ 
+Publication quality documents should include:
+
+ * Official web pages
+ * Posters
+ * Technical Handouts
+ * Press Releases
+
+Each of these items is normally controlled by support staff that do not directly
+deal with the technical side of the house on a daily basis, but prefer to bring
+this content up to date prior to external events.  With the exception of the
+web pages, this approach works well.
+
+It is in the best interest of the Release Manager and Project Manager to
+coordinate efforts during and at the conclusion of the release process to ensure
+that all documentation is relevant.  Failure to do so will lead to confusion in
+the user base.  
+
+=== Testing ===
+
+Software testing can never be used to establish overall _correctness_, rather
+it is used to perform an _empirical_ evaluation to address various known problem
+areas or otherwise verify and validate the end product.  The following
+considerations are often mentioned when dealing with software testing:
+
+ * *_Scope_* - Each functional unit (e.g. methods, modules, services) should be examined and treated in the same manner.
+ * *_Defects and failures_* - The finished product must be validated against the original requirements to locate gaps in either.  Analysis of the functional and non-functional requirements may also reveal defects.
+ * *_Compatibility_* - When explicitly noted, the new releases should match external behavior with that of older releases.  Additionally, external dependencies (e.g. libraries and/or complimentary components) should be tested for each released version suggesting specific versions where applicable.
+ * *_Input combinations and preconditions_* - Potential _normal_ as well as _abnormal_ input sequences to methods/modules/services should be identified and added to automated test routines.  It is impossible to capture all known inputs, but a reasonable subset may be easily identified.  
+ * *_Static vs. Dynamic Testing_* - Both methods should be utilized to gain the associated benefits:
+   * *_Static Testing_* - Code tours and reviews meant to examine structure and layout; generally follow the requirements and other design documents
+   * *_Dynamic Testing_* - Execution through pre-determined test cases; generally run several times to issolate flaws that may be related to temporal factors such as machine state or abnormal interactions.
+ * *_Software verification and validation_* - 
+   * *_Verification_* - Does the software match the specification?
+   * *_Validation_* - Does the software accomplish the job (if applicable, is the customer pleased)?
+ * *_Software Testers/QA Team_* - Developers (primary to a software component as well as secondary or unrelated) should make up the team of testing individuals.  Quality Assurance (QA) becomes the ongoing job of the release team.
+
+If left unchecked, any of these individual actions can grow to take up resources
+within our development group.  A careful balance of the above, within the
+confines of a release process with a limited lifetime and group of people will
+serve to check and improve the quality of the released software.  
+
+The following sections go into detail on these topics:
+
+ * [ReleaseManagement#How_to_Test How to Test] - Known testing methodologies
+ * [ReleaseManagement#What_to_Test What to Test] - Breaking down the various levels of granularity in a software project
+ * [ReleaseManagement#When_to_Test When to Test] - Testing must be done at the proper time in the lifecycle of software
+ * [ReleaseManagement#Where_to_Test Where to Test] - Testing on the appropriate architectures and operating systems makes the code robust
+
+We conclude with [ReleaseManagement#Testing_Recommendations recommendations] for
+testing software in our smaller environments.
+
+==== How to Test ====
+
+The following represent accepted and well used testing methodologies, it is
+expected that we will adopt features of each to accomplish the goals listed
+above:
+
+ * *_Black box testing_* - Testing without knowledge of the internal structure.  There are several sub-methods in use:
+   * _*Equivalence partitioning*_ - Identifying _partitions_, e.g. ranges, for testing inputs.  This helps to narrow down the overall set of test cases.
+   * _*Boundary value analysis*_ - Similar to _*Equivalence partitioning*_, this methodology tests the boundaries of expectation to check for potential faults.  For instance if a function _expects_ a value between 0 and 1, what happens when values above, below, and inside this range are entered.
+   * _*Decision table testing*_ - Table based analysis of expected and observed results in decision structures.
+   * _*Pairwise testing*_ - Combinatorial testing method used to test various combinations of inputs.
+   * _*State transition tables*_ - Using automata, map the state transitions for both expected and observed results.
+   * _*Use case testing*_ - Testing the software to described use cases.
+   * _*Fuzz Testing*_ - using random data to find defects.  
+   * _*Model-Based Testing*_ - Developing and refining models to test the software.
+ * *_White box testing_* - Testing with knowledge of the internal design; this knowledge can be used to better craft test cases.  As with *_Black box testing_*, there are several sub methods:
+   * _*Code coverage*_ - Testing to be sure all areas of the code can be reached by using the appropriate input sequences.
+   * _*Mutation testing methods*_ - Making small modifications to source to test input sequences in different ways.
+   * _*Fault injection methods*_ - Knowing the internal structure allows the designer to specifically create failures and test error and exception handling.
+   * _*Static testing*_ - By definition, all static testing is in this category.
+ * *_Grey Box Testing_* - A combination of the previous two methods; normally viewed as having access to the internal structure to design test cases but approaching the actual testing as a user who would not know this information.  
+ * *_Acceptance Testing_* - A combination of testing methods with a focus on QA and usability, can be performed from the point of view as a supplier or a customer.
+ * *_Non Functional Software Testing_* - A number of sub-categories exist that emphasize items that cannot be specified in design documents:
+   * *_Performance Testing_* - Use of tools to profile the performance of the software as the software scales up or down.  Comparison to previous releases or competitive products.  
+   * *_Usability Testing_* - Check if the user interface is easy to use and understand.  Can also apply to documentation, installation procedure, or upgrade paths.
+   * *_Security Testing_* - Many levels of testing possible, but overall audit to ensure the software cannot be exploited.  
+
+==== What to Test ====
+
+In practice, software testing must be done at various levels:
+
+ * *_Unit Testing_* - Tests designed for the minimal software components (e.g. methods, modules).  Normally test each in a vacuum away from other components.  
+ * *_Integration Testing_* - Attempts to expose defects in interfaces and APIs of modules or components when fitted to like pieces of software.  
+ * *_System Testing_* - Testing to specifications; takes into consideration the expected and observed behavior.
+ * *_System Integration Testing_* - Tests the software in an environment with other components external to the main development process.  
+
+==== When to Test ====
+
+An additional time based component is also relative:
+
+ * *_Alpha Testing_* - Testing performed by an independent (e.g. nonp-developers) group for recently released software (mild form of *_Acceptance Testing_*)
+ * *_Beta Testing_* - Larger releases of software to a limited audience; goal is to offer a fairly polished version of the software that still may contain defects.
+ * *_Regression Testing_* - In the process of fixing defects in software, new problems may be introduced.  This form of testing is used to mitigate this issue.
+
+==== Where to Test ====
+
+It is desirable to test software on numerous architectures and operating
+systems for compatibility and stability.  In many cases the decisions made
+regarding [ReleaseManagement#Released_Product the release] can steer the number
+of combinations to include in this decision.  
+
+Common computer architectures in use that should be considered are:
+
+ * x86
+ * x86 64 Bit
+ * SPARC
+ * PPC
+ 
+Operating systems can be numerous, but common considerations are:
+   
+ * RedHat based (RHEL, CentOS, Fedora, Scientific)
+ * Debian based (Debian, Ubuntu, Knoppix)
+ * The BSDs (Free, Open, Net)
+ * Solaris
+ * Mac OS
+ 
+These choices become increasingly hard as the included number of supported
+versions increases.  Limiting testing to a succinct number from this list should
+suffice most testing concerns.
+
+==== Testing Recommendations ====
+
+Recommendations on a group by group basis will vary, the following takes into
+account the previous section on theory and recommends some actions that any
+group may wish to implement.  The first topic of discussion is what type of
+testing should be performed.  Design paradigms normally favor _object oriented_
+approaches, thus it makes sense to attempt to perform _*Unit Testing*_,
+_*Integration Testing*_, and _*System Testing*_.  The additional step of 
+_*System Integration Testing*_ may not always be necessary, but is still
+discussed:
+
+ # Unit Testing
+   * Mandate that each _object_ (e.g. perl module, java class, etc.) have an appropriate test set written in the proper language ([http://perldoc.perl.org/Test/Simple.html Test::Simple], [http://www.junit.org/ JUnit]).
+   * Each test set should test *_all_* methods in the object, preferably several times (tests are cheap, write many)
+     * Borrow ideas from _*Equivalence partitioning*_ and _*Boundary value analysis*_ with regards to input cases
+     * Borrow concepts that test _*Code coverage*_.
+   * Use hooks (when applicable) to time the various aspects of module and method tests.  These _should_ be recorded and _may_ be used in _Performance_ analysis.
+   * Each _object_ and method _should_ be compared to existing design documentation for verification purposes
+   * Static reviews of each _object_ are required
+     * Review for syntactic and stylistic adherence
+     * Ensure all documentation for each _object_ and method is included and complete
+   * Each module _should_ be paired with any related design documentation (design specifications, use cases, etc.) 
+ # Integration Testing
+   * Each *API* or *Interface* _must_ contain a way to test it.
+     * Each _must_ contain documentation on use
+     * Each _should_ be tested (normally in *_Unit Testing_*)
+   * Each *API* or *Interface* _must_ be verified against design specifications
+   * Each *API* or *Interface* _should_ be reviewed _statically_ for code coverage if applicable (e.g. should be covered in _*Unit Testing*_) 
+ # System Testing
+   * Primary developers for a component are responsible for documentation and helping to craft external tests
+     * Borrow ideas from _*Equivalence partitioning*_ and _*Boundary value analysis*_ with regards to input cases
+     * Borrow concepts that test scalability and performance issues.
+   * The release team _should_ perform performance tests and record the results for future comparison
+   * Each developer is responsible for maintaining documentation (e.g. Installation instructions, FAQ)
+   * Each service _must_ be verified against design specifications
+ # System Integration Testing
+   * Each developer _should_ maintain documentation on required libraries and external components
+   * The release management team is responsible for testing the services on alternative architectures and operating systems
+     * The developer _should_ maintain a list of known issues with architectures and operating systems for use by the release management team and users.  
+
+The final issue of _when_ to test is also worth consideration on a group by 
+group basis.  The 3 types of tests to consider are _*Alpha*_, _*Beta*_, and 
+_*Regression*_.  The time needed to organize _*Alpha*_ testing is sometimes
+omitted in place of internal group testing during the release process.  _*Beta*_
+testing can be made equivalent to the process of _*Release Candidate*_
+generation and testing.  Finally _*Regression*_ testing can be done by
+developers primarily when they release a bugfix or new functionality outside of 
+the normal release process.
+
+=== Code Review ===
+
+Code review has two parts:
+
+ * Pre-review tasks the developer will do including running automated tools to check source code (e.g. in the case of perl there are tools that clean and suggest proper style - perltidy and perlcritic)
+   * These may be attached to the SVN commit process 
+ * Code review done by the entire project.
+
+Code review will be a part of *_every_* release cycle.  A suggested path forward
+follows:
+
+ * Release manager will identify the files to be reviewed
+ * Release manager will divide up by either file or function (the process of dividing is really a review in and of itself) and try to give related chunks to the reviewers (e.g. the entire development community should be eligible).  There _may_ be overlap as time allows.
+ * Purpose of the review should be:
+   * Critique the organization and layout
+   * Question the use of external libs
+   * Question Algorithmic design and use
+   * Critique of documentation. 
+ * Reviewers will have a finite amount of time to complete a review
+ * Reviews should follow some format and should share the results on the mailing list
+ * Developers will have a shorter finite amount of time to fix changes
+ * Release manager will do final review of changes
+
+=== Issue Tracker ===
+
+All projects should employ an issue tracking tool, examples include
+[http://www.atlassian.com/software/jira/ JIRA],
+[http://www.bugzilla.org/ Bugzilla], [http://trac.edgewall.org/ trac], or even
+[http://code.google.com Google Code].  Using this tool to track bugs is
+important; keeping the specifications of products and the status of issues up to
+date is even more important.  In general the release manger will be responsible
+for:
+
+ * Adding new components/versions for each release
+ * Nagging developers to close out issues before a release
+ * Re-categorizing issues as needed
+ * Run reports prior to and after a release
+ 
+Developers will need to:
+
+ * Check for new issues that may be assigned
+ * Close out issues that are finished
+ * Properly manage issues that are stalled or dormant
+
+== Released Product ==
+
+The culmination of all of the release activities delivers a completely polished
+and tested product.  The final decision of any project is the availability of 
+packages that support different operating systems and architectures.  A
+requirement within each project is to weigh the options of supporting
+numerous types with the time that is required to complete this goal.  In general
+there are several _*marjor*_ packaging schemes that are accepted:
+
+ * Source (GZip, BZip, ZIP)
+   * Compressed archive of source files, build tools (e.g autoconf helpers, Makefiles), and documentation
+   * Designed to build on *NIX operating environments
+   * Generic and universally accepted.  
+   * Does not lend itself to _single click_ installation - targeted at the intermediate user 
+ * Ports (*BSD Family)
+   * A collection of software sources arranged in a hierarchy for the *BSD family of operating systems.  Members of the hierarchy are constructed to rely on other packages when a dependency is required.  This allows an easy cascade of activity when something needs to be installed.
+   * Same requirements as Source for the most part; additional work to _port_ the software release into this environment (e.g. special makefiles, etc.) is necessary
+ * CPAN (Comprehensive Perl Archive Network)
+   * Source packaged Perl source code and documentation, constructed using Perl tools (e.g. [http://perldoc.perl.org/ExtUtils/MakeMaker.html ExtUtils::MakeMaker])
+   * Distributed through a network of mirrors
+   * Installable via simple command line application, CPAN, that manages package dependencies
+   * Requires additional packaging investment beyond source
+ * RPM (Redhat Package Management)
+   * Compressed package that includes all files (source, binaries, documentation) and specialized installation instructions (e.g. where to install, permissions to give the new files, etc.)
+   * Targeted at RedHat based operating systems (e.g. RHEL, CentOS, Fedora, Scientific Linux, etc.)
+   * Created via a single specification file; all instructions are entered in this one location
+   * Different OS offerings have different environments; building and releasing for each _target_ system is recommended 
+   * Using converstion tools (e.g. Alien) may convert to other packaging environments such as DEB
+   * Used in Package Manager tools such as APT, YUM, and Up2date that manage dependencies
+ * DEB (Debian Package Management)
+   * Similar to _*RPM*_, but for Debian based operating systems (e.g. Debian, Ubuntu, Knoppix, etc.)
+   * Normally paired with the APT system for managing dependencies
+ * DMG (Mac OS)
+   * Similar to _*RPM*_ and _*DEB*_, but for the Mac OS family of operating systems
+   * File is encoded similar to a drive (e.g. block encoded) and is _mounted_ and installed as such
+   * Format is very specific to this OS, and in general the OS is capable of using other formats (e.g. [http://darwinports.com/ DarwinPorts], source, deb packages, etc.)  
+ * JAR (JAVA Archive)
+   * Packaging similar to _*RPM*_, _*DEB*_, and _*DMG*_ but specifically for Java class files and associated metadata.  
+   * Integrates with other JAVA tools such as ANT for _Makefile_ like behavior.
+   * Only makes sense for JAVA software releases.
+
+=== Limiting Distribution ===
+
+A lofty goal to any released software is to make many formats available to
+please the user community.  In practice keeping up with the maintenance and
+support of multiple packages can be difficult for any project.  Most projects
+attempt to do the following:
+
+ * Release a _Source_ package (e.g. BZip/GZip) containing all source and documentation
+ * Release a _targeted_ package for a specific architecture (e.g. _RPM_ or _DEB_, perhaps _JAR_ in the case of JAVA projects)
+   * Support many _popular_ versions closely following _*sunset*_ days of the specific versions (e.g. Fedora 8 packages are supported as long as Fedora chooses to support Fedora 8, etc.)
+   * Optional: Maintain a repository that package mangers such as YUM/APT/Up2date may use
+ * Provide Instructions for users of other systems how they may use the previous two offerings despite there not being a specific package available
+
+== Last Updated ==
+
+$Id$
