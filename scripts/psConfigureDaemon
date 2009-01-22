@@ -510,6 +510,18 @@ sub config_snmp_ma {
         if ( exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cacti" ) {
             $config->{"snmp"}->{"metadata_db_external_source"} = &ask( "Enter cacti configuration file location (/path/to/file) ", "/etc/cacti/cactid.conf", $config->{"snmp"}->{"metadata_db_external_source"}, '\.conf$' );
         }
+        elsif ( exists $config->{"snmp"}->{"metadata_db_external"} and $config->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+
+            my $suggest = $ENV{CRICKET_HOME};
+            $suggest = "/home/cricket" unless $suggest;
+            $config->{"snmp"}->{"metadata_db_external_cricket_home"} = &ask( "Enter cricket home directory (/path/to/cricket) ", $suggest, $config->{"snmp"}->{"metadata_db_external_cricket_home"}, '.+' );
+            
+            $config->{"snmp"}->{"metadata_db_external_cricket_cricket"} = &ask( "Enter cricket install directory (/path/to/cricket/cricket) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket", $config->{"snmp"}->{"metadata_db_external_cricket_cricket"}, '.+' );
+
+            $config->{"snmp"}->{"metadata_db_external_cricket_data"} = &ask( "Enter cricket data directory (/path/to/cricket/data) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket-data", $config->{"snmp"}->{"metadata_db_external_cricket_data"}, '.+' );
+
+            $config->{"snmp"}->{"metadata_db_external_cricket_config"} = &ask( "Enter cricket config directory (/path/to/cricket/config) ", $config->{"snmp"}->{"metadata_db_external_cricket_home"}."/cricket-config", $config->{"snmp"}->{"metadata_db_external_cricket_config"}, '.+' );
+        }   
     }
     else {
         $config->{"snmp"}->{"metadata_db_external"}        = "none";
