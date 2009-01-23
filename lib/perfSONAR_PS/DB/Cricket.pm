@@ -82,6 +82,7 @@ sub new {
     # Finally set some other values, note that avoiding 'use' is really a pain
     #  in this case
     $Common::global::gInstallRoot ||= $self->{CRICKET_INSTALL};
+    $Common::global::gConfigRoot    = q{};
     $Common::global::gConfigRoot  ||= $self->{CRICKET_CONFIG};
     require ConfigTree::Cache;
 
@@ -139,9 +140,11 @@ sub openDB {
     foreach my $branch ( keys %{$gCT} ) {
         if ( $branch eq "DbRef" ) {
             foreach my $entry ( keys %{ $gCT->{$branch} } ) {
-                if ( $entry =~ m/^d.*(switch|router)-interfaces\//mx and not( $entry =~ m/chassis-generic/mx ) ) {
+                if ( $entry =~ m/^d:/mx and not( $entry =~ m/chassis-generic/mx ) ) {
                     my @line = split( /:/, $entry );
-                    $master{ $dataDir . $line[1] }->{ $line[4] } = $gCT->{$branch}->{$entry};
+                    if ( -f $dataDir.$line[1].".rrd" ) {
+                        $master{ $dataDir . $line[1] }->{ $line[4] } = $gCT->{$branch}->{$entry};
+                    }
                 }
             }
         }
@@ -152,41 +155,49 @@ sub openDB {
 
     $self->{STORE} .= $self->printHeader();
     my $counter = 0;
+
     foreach my $item ( keys %master ) {
 
         # we only care about the router and switch interfaces for now, the
         #   second catch ensures we have a legit interface (e.g. there is an
         #   rrd file)
-        if ( $item =~ m/(router|switch)-interfaces/mx and -f $item . ".rrd" ) {
 
-            ( my $temp = $item ) =~ s/$dataDir\/(router|switch)-interfaces\///;
-            my @address = split( /\//mx, $temp );
+        my @temp = split(/\// , $item);
+        my @address = ();
+        push @address, $temp[$#temp-1];
+        push @address, $temp[$#temp];
+            
+        # XXX jz 1/23/09 - Should use an html cleanser
+        my $okChar = '-a-zA-Z0-9_.@\s';            
+        my $des = q{};
+        my $des2 = q{};
 
-            # XXX jz 1/23/09 - Should use an html cleanser
-            ( my $des = $master{$item}->{"long-desc"} ) =~ s/<BR>/ /g;
+        if ( exists $master{$item}->{"long-desc"} and $master{$item}->{"long-desc"} ) {
+            ( $des = $master{$item}->{"long-desc"} ) =~ s/<BR>/ /g;
             $des =~ s/&/&amp;/g;
             $des =~ s/</&lt;/g;
             $des =~ s/>/&gt;/g;
             $des =~ s/'/&apos;/g;
             $des =~ s/"/&quot;/g;
-
-            my $okChar = '-a-zA-Z0-9_.@\s';
             $des =~ s/[^$okChar]/ /go;
-
-            ( my $des2 = $master{$item}->{"short-desc"} ) =~ s/<BR>/ /g;
+        }
+            
+        if ( exists $master{$item}->{"short-desc"} and $master{$item}->{"short-desc"} ) {
+            ( $des2 = $master{$item}->{"short-desc"} ) =~ s/<BR>/ /g;
             $des2 =~ s/&/&amp;/g;
             $des2 =~ s/</&lt;/g;
             $des2 =~ s/>/&gt;/g;
             $des2 =~ s/'/&apos;/g;
             $des2 =~ s/"/&quot;/g;
             $des2 =~ s/[^$okChar]/ /go;
-
-            $self->{STORE} .= $self->printInterface(
-                { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds0" } );
-            $self->{STORE} .= $self->printInterface(
-                { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds1" } );
-            $counter++;
         }
+            
+        $self->{STORE} .= $self->printInterface(
+            { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds0" } );
+        $self->{STORE} .= $self->printInterface(
+            { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds1" } );
+        $counter++;
+        
     }
     $self->{STORE} .= $self->printFooter();
     $rrd->closeDB;
@@ -220,7 +231,7 @@ Print out the interface direction
 
 sub printInterface {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { rrddb => 0, id => 1, hostName => 1, ifName => 1, ipAddress => 0, direction => 1, capacity => 1, des => 1, des2 => 0, file => 1, ds => 1 } );
+    my $parameters = validateParams( @args, { rrddb => 0, id => 1, hostName => 1, ifName => 1, ipAddress => 0, direction => 1, capacity => 1, des => 0, des2 => 0, file => 1, ds => 1 } );
 
     my $output = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $parameters->{direction} . "-" . $parameters->{id} . "\">\n";
     $output .= "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"subject-" . $parameters->{direction} . "-" . $parameters->{id} . "\">\n";
@@ -239,13 +250,21 @@ sub printInterface {
             $output .= "        <nmwgt:capacity>" . $parameters->{capacity} . "</nmwgt:capacity>\n";
         }
     }
-    $output .= "        <nmwgt:description>" . $parameters->{des} . "</nmwgt:description>\n" if $parameters->{des};
-    if ( $parameters->{des2} ) {
+
+    if ( $parameters->{des} and ( not $parameters->{des} =~ m/short-desc/ ) and ( not $parameters->{des} =~ m/long-desc/ ) ) {
+        $output .= "        <nmwgt:description>" . $parameters->{des} . "</nmwgt:description>\n";
+        if ( $parameters->{des2} and ( not $parameters->{des2} =~ m/short-desc/ ) and ( not $parameters->{des2} =~ m/long-desc/ ) ) {
+            $output .= "        <nmwgt:ifDescription>" . $parameters->{des2} . "</nmwgt:ifDescription>\n";
+        }
+        else {
+            $output .= "        <nmwgt:ifDescription>" . $parameters->{des} . "</nmwgt:ifDescription>\n";
+        }
+    }
+    elsif ( $parameters->{des2} and ( not $parameters->{des2} =~ m/short-desc/ ) and ( not $parameters->{des2} =~ m/long-desc/ ) ) {
+        $output .= "        <nmwgt:description>" . $parameters->{des2} . "</nmwgt:description>\n";
         $output .= "        <nmwgt:ifDescription>" . $parameters->{des2} . "</nmwgt:ifDescription>\n";
     }
-    else {
-        $output .= "        <nmwgt:ifDescription>" . $parameters->{des} . "</nmwgt:ifDescription>\n" if $parameters->{des};
-    }
+    
     $output .= "      </nmwgt:interface>\n";
     $output .= "    </netutil:subject>\n";
     $output .= "    <nmwg:eventType>http://ggf.org/ns/nmwg/tools/snmp/2.0</nmwg:eventType>\n";
