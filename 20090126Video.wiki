@@ -4,7 +4,24 @@
 
  # Attendees: 
  # Issue: Release Management
- # Next meeting will be at Jt Techs (some evening...)
+   * Review Documents:
+     # ReleaseManagement
+       * Does this basic approach work for people?
+     # TestPlan
+       * Suggestions/Comments/Additions
+     # RequirementsForDeploymentsCGI
+       * Suggestions/Comments/Additions
+   * Next perfSONAR-PS (not perf Node yet) Release
+     * Target Date
+     * Services Involved
+       * Key Functionalities missing?
+       * Bugfixes outstanding?
+     * People Involved
+     * Outstanding issues
+ # Next meeting will be at Jt Techs
+   * *Proposed:* Sunday, Feb 1 
+   * Informal Poll of who is available when
+ # Other topics?
 
 == Where ==
 
