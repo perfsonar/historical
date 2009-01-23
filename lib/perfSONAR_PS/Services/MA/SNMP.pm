@@ -273,11 +273,41 @@ sub init {
             # do nothing
         }
         elsif ( $self->{CONF}->{"snmp"}->{"metadata_db_external"} eq "cricket" ) {
+            # We need to check to be sure we can find cricket, this may be an env variable...
+
+            if ( ( defined $ENV{CRICKET_HOME} and -d $ENV{CRICKET_HOME} ) or ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} ) ) {
+                # try to set the other variables based on the env/first if they are not already set
+
+                unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} ) {
+                    $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} = $ENV{CRICKET_HOME};
+                    $self->{LOGGER}->error( "Setting the value of 'metadata_db_external_cricket_home' to \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} . "\"" );
+                }
+                
+                unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"} ) {
+                    $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"} = $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} . "/cricket";
+                    $self->{LOGGER}->error( "Setting the value of 'metadata_db_external_cricket_cricket' to \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"} . "\"" );
+                }
+                
+                unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"} ) {
+                    $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"} = $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} . "/cricket-data";
+                    $self->{LOGGER}->error( "Setting the value of 'metadata_db_external_cricket_data' to \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"} . "\"" );
+                }
+                
+                unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} ) {
+                    $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} = $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} . "/cricket-config";
+                    $self->{LOGGER}->error( "Setting the value of 'metadata_db_external_cricket_config' to \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} . "\"" );
+                }
+            }
+            else {
+                $self->{LOGGER}->error("Cannot find cricket; please set environmental variable CRICKET_HOME or 'metadata_db_external_cricket_home' in the configuration file.");
+                return -1;
+            }
+
             eval { 
                 load perfSONAR_PS::DB::Cricket; 
             };
             unless ($EVAL_ERROR) {
-                my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"} } );
+                my $cricket = new perfSONAR_PS::DB::Cricket( { file => $self->{CONF}->{"snmp"}->{"metadata_db_file"}, home => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"}, install => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"}, data => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"}, config => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} } );
                 $cricket->openDB();
                 $cricket->closeDB();
             }

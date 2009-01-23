@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::Cricket;
 
-use fields 'LOGGER', 'FILE', 'STORE', 'RRDTOOL';
+use fields 'LOGGER', 'FILE', 'STORE', 'RRDTOOL', 'CRICKET_HOME', 'CRICKET_INSTALL', 'CRICKET_DATA', 'CRICKET_CONFIG';
 
 use strict;
 use warnings;
@@ -11,25 +11,6 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::ParameterValidation;
-
-use lib "$ENV{CRICKET_HOME}/cricket/lib" || '/home/cricket/cricket/lib' || '/usr/local/cricket/lib';
-BEGIN {
-    my $programdir = "$ENV{CRICKET_HOME}" || '/home/cricket' || '/usr/local';
-    eval "require '$programdir/cricket/cricket-conf.pl'";
-    if (!$Common::global::gInstallRoot && -l $0) {
-        eval {
-            my $link = readlink($0);
-            my $dir = (($link =~ m:^(.*/):)[0] || "./") . ".";
-            require "$dir/cricket-conf.pl";
-        }
-    }
-    eval "require '/usr/local/etc/cricket-conf.pl'"
-        unless $Common::global::gInstallRoot;
-    $Common::global::gInstallRoot ||= $programdir;
-    $Common::global::gConfigRoot ||= "$programdir/cricket-config";
-}
-
-use ConfigTree::Cache;
 
 =head1 NAME
 
@@ -50,7 +31,7 @@ Create a new object.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validateParams( @args, { conf => 0, file => 0 } );
+    my $parameters = validateParams( @args, { conf => 0, file => 0, home => 1, install => 1, data => 1, config => 1 } );
 
     my $self = fields::new($package);
     $self->{STORE} = q{}; 
@@ -59,6 +40,34 @@ sub new {
     if ( exists $parameters->{file} and $parameters->{file} ) {
         $self->{FILE} = $parameters->{file};
     }
+
+    $self->{CRICKET_HOME} = $parameters->{home};
+    $self->{CRICKET_INSTALL} = $parameters->{install};
+    $self->{CRICKET_DATA} = $parameters->{data};
+    $self->{CRICKET_CONFIG} = $parameters->{config};
+
+    # Fake a 'use lib' (N.B. that use lib is evaluated at compile time, we
+    #  don't want that here since this is based on a configuration option
+    unshift @INC, $self->{CRICKET_INSTALL}."/lib";
+    
+    # Try To use the cricket-conf script, note that its related to the specified
+    #  directories
+    eval "require '$self->{CRICKET_INSTALL}/cricket-conf.pl'";
+    if ( !$Common::global::gInstallRoot && -l $0 ) {
+        eval {
+            my $link = readlink($0);
+            my $dir = (($link =~ m:^(.*/):)[0] || "./") . ".";
+            require "$dir/cricket-conf.pl";
+        }
+    }
+    eval "require '/home/cricket/cricket/cricket-conf.pl'" unless $Common::global::gInstallRoot;
+    
+    # Finally set some other values, note that avoiding 'use' is really a pain
+    #  in this case
+    $Common::global::gInstallRoot ||= $self->{CRICKET_INSTALL};
+    $Common::global::gConfigRoot ||= $self->{CRICKET_CONFIG};
+    require ConfigTree::Cache;
+
     return $self;
 }
 
