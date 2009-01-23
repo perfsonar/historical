@@ -140,7 +140,7 @@ sub openDB {
     foreach my $branch ( keys %{$gCT} ) {
         if ( $branch eq "DbRef" ) {
             foreach my $entry ( keys %{ $gCT->{$branch} } ) {
-                if ( $entry =~ m/^d:/mx and not( $entry =~ m/chassis-generic/mx ) ) {
+                if ( $entry =~ m/^d:/mx and not( $entry =~ m/chassis/mx ) and not( $entry =~ m/device-traffic/mx ) ) {
                     my @line = split( /:/, $entry );
                     if ( -f $dataDir.$line[1].".rrd" ) {
                         $master{ $dataDir . $line[1] }->{ $line[4] } = $gCT->{$branch}->{$entry};
