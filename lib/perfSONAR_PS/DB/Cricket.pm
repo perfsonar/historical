@@ -116,15 +116,15 @@ sub openDB {
         $gError .= "Config tree needs to be recompiled: $why";
     }
 
-    my $dataDir = "$ENV{CRICKET_HOME}/cricket-data";
+    my $dataDir = $self->{CRICKET_DATA};
 
     my %master = ();
-    foreach my $thing (keys %{$gCT}) {
-        if($thing eq "DbRef") {	
-            foreach my $thing2 (keys %{$gCT->{$thing}}) {
-                if($thing2 =~ m/^d.*(switch|router)-interfaces\// and !($thing2 =~ m/chassis-generic/)) {
-                    my @line = split(/:/, $thing2);
-                    $master{$dataDir.$line[1]}->{$line[4]} = $gCT->{$thing}->{$thing2};
+    foreach my $branch ( keys %{ $gCT } ) {
+        if( $branch eq "DbRef" ) {	
+            foreach my $entry ( keys %{ $gCT->{ $branch } } ) {
+                if( $entry =~ m/^d.*(switch|router)-interfaces\// and !( $entry =~ m/chassis-generic/ ) ) {
+                    my @line = split( /:/, $entry );
+                    $master{$dataDir.$line[1]}->{$line[4]} = $gCT->{$branch}->{$entry};
                 }
             }
         }
@@ -135,15 +135,17 @@ sub openDB {
 
     $self->{STORE} .= $self->printHeader();
     my $counter = 0;
-    foreach my $item (keys %master) {
-        if(!($item =~ m/\.sc07\.org$/)) {
-# XXX 8/4/08
-# HACK - need to address this...
-            (my $temp = $item) =~ s/$dataDir\/(router|switch)-interfaces\///;
+    foreach my $item ( keys %master ) {
+        
+        # we only care about the router and switch interfaces for now, the
+        #   second catch ensures we have a legit interface (e.g. there is an 
+        #   rrd file)
+        if ( $item =~ m/(router|switch)-interfaces/ and -f $item.".rrd" ) { 
 
+            ( my $temp = $item ) =~ s/$dataDir\/(router|switch)-interfaces\///;
             my @address = split(/\//, $temp);
 
-# Should use an html cleanser
+# XXX jz 1/23/09 - Should use an html cleanser
             (my $des = $master{$item}->{"long-desc"}) =~ s/<BR>/ /g;
             $des =~ s/&/&amp;/g;
             $des =~ s/</&lt;/g;
