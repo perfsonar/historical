@@ -16,7 +16,8 @@
     severity = 2
 
     [ControlStructures::ProhibitPostfixControls]
-    allow = if unless  #My custom configuration
+	#My custom configuration
+    allow = if unless  
     severity = 2
 
     #--------------------------------------------------------------
