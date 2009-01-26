@@ -287,7 +287,12 @@ sub printInterface {
 
     if ( exists $parameters->{rrddb} ) {
         $parameters->{rrddb}->setFile( { file => $parameters->{file} . ".rrd" } );
+
+        my $first = $parameters->{rrddb}->firstValue();
+        $output .= "        <nmwg:parameter name=\"firstTime\">" . $first . "</nmwg:parameter>\n" if $first;
+
         my $rrd_result = $parameters->{rrddb}->info();
+        $output .= "        <nmwg:parameter name=\"lastTime\">" . $rrd_result->{"last_update"} . "</nmwg:parameter>\n" if $rrd_result->{"last_update"};
         unless ( $parameters->{rrddb}->getErrorMessage ) {
             my %lookup = ();
             foreach my $rra ( sort keys %{ $rrd_result->{"rra"} } ) {
