@@ -1372,14 +1372,12 @@ sub dataInfoRetrieveMetadataData {
             next if ( not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef} );
             my $curr_md = $mds{$curr_d_mdIdRef};
 
-            my $params = find( $d, ".//nmwg:parameters", 1 );
-
 # XXX jz 1/26/09
 # For now if the store file already contains the first/last time info we are 
 #  going to return it as is.  We need to check to be sure this hasn't been
 #  updated by something external (e.g. cricket)
 
-            my $done = extract( find( $params, ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
+            my $done = extract( find( $d, ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
             if ( $done ) {
                 $parameters->{output}->addExistingXMLElement( $curr_md );
                 $parameters->{output}->addExistingXMLElement( $d );
@@ -1398,6 +1396,8 @@ sub dataInfoRetrieveMetadataData {
                 next if ( not defined $hashKey );
 
                 my $key2 = $d->cloneNode( 1 );
+                my $params = find( $key2, ".//nmwg:parameters", 1 );
+            
                 my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
                 my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
                 $rrd->openDB;
