@@ -1372,55 +1372,67 @@ sub dataInfoRetrieveMetadataData {
             next if ( not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef} );
             my $curr_md = $mds{$curr_d_mdIdRef};
 
-            my $dId  = "data." . genuid();
-            my $mdId = "metadata." . genuid();
+            my $params = find( $d, ".//nmwg:parameters", 1 );
 
-            my $md_temp = $curr_md->cloneNode( 1 );
-            $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
-            $md_temp->setAttribute( "id",            $mdId );
+# XXX jz 1/26/09
+# For now if the store file already contains the first/last time info we are 
+#  going to return it as is.  We need to check to be sure this hasn't been
+#  updated by something external (e.g. cricket)
 
-            my $hashId  = $d->getAttribute( "id" );
-            my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
-
-            next if ( not defined $hashKey );
-
-            my $key2 = $d->cloneNode( 1 );
-            my $params = find( $key2, ".//nmwg:parameters", 1 );
-
-            my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
-            my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
-            $rrd->openDB;
-            my $first = $rrd->firstValue();
-            my $last  = $rrd->lastValue();
-
-            if ( $rrd->getErrorMessage ) {
-                my $msg = "Data storage error";
-                $self->{LOGGER}->error( $msg );
-                throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+            my $done = extract( find( $params, ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
+            if ( $done ) {
+                $parameters->{output}->addExistingXMLElement( $curr_md );
+                $parameters->{output}->addExistingXMLElement( $d );
             }
             else {
-                $parameters->{output}->addExistingXMLElement( $md_temp );
+                my $dId  = "data." . genuid();
+                my $mdId = "metadata." . genuid();
 
-                my $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-                $thing->setAttribute( "name", "firstTime" );
-                $thing->appendTextNode( $first );
-                $params->addChild( $thing );
-                $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-                $thing->setAttribute( "name", "lastTime" );
-                $thing->appendTextNode( $last );
-                $params->addChild( $thing );
-                $thing = XML::LibXML::Element->new( "parameter" );
-                $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-                $thing->setAttribute( "name", "maKey" );
-                $thing->appendTextNode( $hashKey );
-                $params->addChild( $thing );
+                my $md_temp = $curr_md->cloneNode( 1 );
+                $md_temp->setAttribute( "metadataIdRef", $curr_d_mdIdRef );
+                $md_temp->setAttribute( "id",            $mdId );
 
-                $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
-                createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+                my $hashId  = $d->getAttribute( "id" );
+                my $hashKey = $self->{CONF}->{"snmp"}->{"idToHash"}->{$hashId};
+
+                next if ( not defined $hashKey );
+
+                my $key2 = $d->cloneNode( 1 );
+                my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
+                my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
+                $rrd->openDB;
+                my $first = $rrd->firstValue();
+                my $last  = $rrd->lastValue();
+
+                if ( $rrd->getErrorMessage ) {
+                    my $msg = "Data storage error";
+                    $self->{LOGGER}->error( $msg );
+                    throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+                }
+                else {
+                    $parameters->{output}->addExistingXMLElement( $md_temp );
+
+                    my $thing = XML::LibXML::Element->new( "parameter" );
+                    $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+                    $thing->setAttribute( "name", "firstTime" );
+                    $thing->appendTextNode( $first );
+                    $params->addChild( $thing );
+                    $thing = XML::LibXML::Element->new( "parameter" );
+                    $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+                    $thing->setAttribute( "name", "lastTime" );
+                    $thing->appendTextNode( $last );
+                    $params->addChild( $thing );
+                    $thing = XML::LibXML::Element->new( "parameter" );
+                    $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+                    $thing->setAttribute( "name", "maKey" );
+                    $thing->appendTextNode( $hashKey );
+                    $params->addChild( $thing );
+
+                    $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
+                    createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+                }
+                $rrd->closeDB;
             }
-            $rrd->closeDB;
         }
     }
     else {
