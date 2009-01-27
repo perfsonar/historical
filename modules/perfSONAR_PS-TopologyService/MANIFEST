@@ -18,7 +18,6 @@ lib/perfSONAR_PS/Error.pm
 lib/perfSONAR_PS/Error_compat.pm
 lib/perfSONAR_PS/EventTypeEquivalenceHandler.pm
 lib/perfSONAR_PS/Messages.pm
-lib/perfSONAR_PS/ParameterValidation.pm
 lib/perfSONAR_PS/Request.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Services/Base.pm
@@ -28,6 +27,7 @@ lib/perfSONAR_PS/Topology/Common.pm
 lib/perfSONAR_PS/Topology/ID.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/NetLogger.pm
+lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
 perl-perfSONAR_PS-TopologyService.spec
 scripts/install_dependencies.sh

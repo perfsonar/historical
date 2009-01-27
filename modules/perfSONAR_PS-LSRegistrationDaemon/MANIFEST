@@ -20,11 +20,11 @@ lib/perfSONAR_PS/LSRegistrationDaemon/Ping.pm
 lib/perfSONAR_PS/LSRegistrationDaemon/TCP_Service.pm
 lib/perfSONAR_PS/LSRegistrationDaemon/Traceroute.pm
 lib/perfSONAR_PS/Messages.pm
-lib/perfSONAR_PS/ParameterValidation.pm
 lib/perfSONAR_PS/Transport.pm
 lib/perfSONAR_PS/Utils/DNS.pm
 lib/perfSONAR_PS/Utils/Daemon.pm
 lib/perfSONAR_PS/Utils/Host.pm
+lib/perfSONAR_PS/Utils/ParameterValidation.pm
 lib/perfSONAR_PS/XML/Document.pm
 perl-perfSONAR_PS-LSRegistrationDaemon.spec
 scripts/install_dependencies.sh
