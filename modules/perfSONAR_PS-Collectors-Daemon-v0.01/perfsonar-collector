@@ -1,1 +1,0 @@
-../../scripts/perfsonar-collector.pl
