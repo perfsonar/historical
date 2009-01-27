@@ -953,7 +953,7 @@ sub metadataKeyRetrieveKey {
     my $dId     = "data." . genuid();
     my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
     unless ( $hashKey ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key format is incorrect.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -961,7 +961,7 @@ sub metadataKeyRetrieveKey {
 
     my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
     unless ( $hashId ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -976,7 +976,7 @@ sub metadataKeyRetrieveKey {
     }
 
     if ( $parameters->{metadatadb}->count( { query => $query } ) != 1 ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found in database.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -1217,7 +1217,7 @@ sub dataInfoRetrieveKey {
     my $dId     = "data." . genuid();
     my $hashKey = extract( find( $parameters->{key}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
     unless ( $hashKey ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key format is incorrect.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -1225,7 +1225,7 @@ sub dataInfoRetrieveKey {
 
     my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
     unless ( $hashId ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -1241,14 +1241,14 @@ sub dataInfoRetrieveKey {
 
     my $results = $parameters->{metadatadb}->querySet( { query => $query } );
     if ( $results->size() != 1 ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found in database.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
     }
 
     my $mdIdRef;
-    my @filters = @{ $parameters->{filters} };
+     my @filters = @{ $parameters->{filters} };
     if ( $#filters > -1 ) {
         $mdIdRef = $filters[-1][0]->getAttribute( "id" );
     }
@@ -1256,44 +1256,56 @@ sub dataInfoRetrieveKey {
         $mdIdRef = $parameters->{metadata}->getAttribute( "id" );
     }
 
-    my $key2 = $results->get_node( 1 )->cloneNode( 1 );
-    my $params = find( $key2, ".//nmwg:parameters", 1 );
+# XXX jz 1/26/09
+# For now if the store file already contains the first/last time info we are 
+#  going to return it as is.  We need to check to be sure this hasn't been
+#  updated by something external (e.g. cricket)
 
-    my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
-    my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
-    $rrd->openDB;
-    my $first = $rrd->firstValue();
-    my $last  = $rrd->lastValue();
-
-    if ( $rrd->getErrorMessage ) {
-        my $msg = "Data storage error";
-        $self->{LOGGER}->error( $msg );
-        throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+    my $done = extract( find( $results->get_node( 1 ), ".//nmwg:parameter[\@name=\"firstTime\"]", 1 ), 1 );
+    if ( $done ) {
+        createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
+        createData( $parameters->{output}, $dId, $mdId, $results->get_node( 1 )->toString, undef );
     }
     else {
-        createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
 
-        my $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-        $thing->setAttribute( "name", "firstTime" );
-        $thing->appendTextNode( $first );
-        $params->addChild( $thing );
-        $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-        $thing->setAttribute( "name", "lastTime" );
-        $thing->appendTextNode( $last );
-        $params->addChild( $thing );
-        $thing = XML::LibXML::Element->new( "parameter" );
-        $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
-        $thing->setAttribute( "name", "maKey" );
-        $thing->appendTextNode( $hashKey );
-        $params->addChild( $thing );
+        my $key2 = $results->get_node( 1 )->cloneNode( 1 );
+        my $params = find( $key2, ".//nmwg:parameters", 1 );
 
-        $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
-        createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+        my $rrd_file = extract( find( $params, ".//nmwg:parameter[\@name=\"file\"]", 1 ), 1 );
+        my $rrd = new perfSONAR_PS::DB::RRD( { path => $self->{CONF}->{"snmp"}->{"rrdtool"}, name => $rrd_file, error => 1 } );
+        $rrd->openDB;
+        my $first = $rrd->firstValue();
+        my $last  = $rrd->lastValue();
+
+        if ( $rrd->getErrorMessage ) {
+            my $msg = "Data storage error";
+            $self->{LOGGER}->error( $msg );
+            throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
+        }
+        else {
+            createMetadata( $parameters->{output}, $mdId, $mdIdRef, $parameters->{key}->toString, undef );
+
+            my $thing = XML::LibXML::Element->new( "parameter" );
+            $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+            $thing->setAttribute( "name", "firstTime" );
+            $thing->appendTextNode( $first );
+            $params->addChild( $thing );
+            $thing = XML::LibXML::Element->new( "parameter" );
+            $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+            $thing->setAttribute( "name", "lastTime" );
+            $thing->appendTextNode( $last );
+            $params->addChild( $thing );
+            $thing = XML::LibXML::Element->new( "parameter" );
+            $thing->setNamespace( "http://ggf.org/ns/nmwg/base/2.0/", "nmwg", 1 );
+            $thing->setAttribute( "name", "maKey" );
+            $thing->appendTextNode( $hashKey );
+            $params->addChild( $thing );
+
+            $self->addSelectParameters( { parameter_block => $params, filters => $parameters->{filters} } );
+            createData( $parameters->{output}, $dId, $mdId, $key2->toString, undef );
+        }
+        $rrd->closeDB;
     }
-    $rrd->closeDB;
-
     return;
 }
 
@@ -1563,7 +1575,7 @@ sub setupDataRetrieveKey {
 
     my $hashKey = extract( find( $parameters->{metadata}, ".//nmwg:parameter[\@name=\"maKey\"]", 1 ), 0 );
     unless ( $hashKey ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key format is incorrect.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -1571,7 +1583,7 @@ sub setupDataRetrieveKey {
 
     my $hashId = $self->{CONF}->{"snmp"}->{"hashToId"}->{$hashKey};
     unless ( $hashId ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
@@ -1589,7 +1601,7 @@ sub setupDataRetrieveKey {
 
     $results = $parameters->{metadatadb}->querySet( { query => $query } );
     if ( $results->size() != 1 ) {
-        my $msg = "Key error in metadata storage.";
+        my $msg = "Key error in metadata storage - key not found in database.";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage_result", $msg );
         return;
