@@ -1,6 +1,9 @@
 PACKAGE=perfSONAR_PS-TopologyService
 ROOTPATH=/opt/perfsonar_ps/topology_service
 
+default:
+	@echo No need to build the package. Just run \"make install\"
+
 dist:
 	mkdir /tmp/$(PACKAGE)
 	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)

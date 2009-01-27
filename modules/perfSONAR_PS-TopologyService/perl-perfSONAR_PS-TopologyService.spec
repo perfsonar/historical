@@ -46,8 +46,8 @@ install -D -m 755 scripts/%{init_script_1}.new $RPM_BUILD_ROOT/etc/init.d/%{init
 install -D -m 644 doc/DB_CONFIG $RPM_BUILD_ROOT/var/lib/topology_service/DB_CONFIG
 
 %post
-mkdir -p /var/log/topology_service
-chown perfsonar:perfsonar /var/log/topology_service
+mkdir -p /var/log/perfsonar
+chown perfsonar:perfsonar /var/log/perfsonar
 
 chown perfsonar:perfsonar /var/lib/topology_service
 
