@@ -1,5 +1,8 @@
 package perfSONAR_PS::LSRegistrationDaemon::ICMP_Service;
 
+use strict;
+use warnings;
+
 use Net::Ping;
 
 use perfSONAR_PS::Utils::DNS qw(reverse_dns resolve_address);
@@ -13,7 +16,7 @@ sub init {
     my ( $self, $conf ) = @_;
 
     unless ( $conf->{address} ) {
-        $self->{LOGGER}->warn("No address specified, assuming local service");
+        $self->{LOGGER}->warn( "No address specified, assuming local service" );
     }
 
     my @addresses;
@@ -30,9 +33,9 @@ sub init {
         }
 
         my %addr_map = ();
-        foreach my $addr (@tmp) {
-            my @addrs = resolve_address($addr);
-            foreach my $addr (@addrs) {
+        foreach my $addr ( @tmp ) {
+            my @addrs = resolve_address( $addr );
+            foreach my $addr ( @addrs ) {
                 $addr_map{$addr} = 1;
             }
         }
@@ -45,11 +48,11 @@ sub init {
 
     $self->{ADDRESSES} = \@addresses;
 
-    return $self->SUPER::init($conf);
+    return $self->SUPER::init( $conf );
 }
 
 sub get_service_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my @addrs = ();
 
@@ -70,13 +73,13 @@ sub get_service_addresses {
 }
 
 sub get_node_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return $self->get_service_addresses();
 }
 
 sub is_up {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     foreach my $addr ( @{ $self->{ADDRESSES} } ) {
         if ( $addr =~ /:/ ) {
@@ -84,7 +87,7 @@ sub is_up {
         }
         else {
             $self->{LOGGER}->debug( "Pinging: " . $addr );
-            my $ping = Net::Ping->new("external");
+            my $ping = Net::Ping->new( "external" );
             if ( $ping->ping( $addr, 1 ) ) {
                 return 1;
             }

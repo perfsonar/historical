@@ -1,20 +1,18 @@
 package perfSONAR_PS::LSRegistrationDaemon::NPAD;
 
+use strict;
+use warnings;
+
 use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
 
-use constant DEFAULT_PORT   => 8200;
+use constant DEFAULT_PORT => 8200;
 
 sub init {
     my ( $self, $conf ) = @_;
 
     my $res;
     if ( $conf->{config_file} ) {
-        my $bwctl_config = $conf->{config_file};
-        if ( not $bwctl_config ) {
-            $bwctl_config = DEFAULT_CONFIG;
-        }
-
-        my $res = read_npad_config($npad_config);
+        my $res = read_npad_config( $conf->{config_file} );
         if ( $res->{error} ) {
             $self->{LOGGER}->error( "Problem reading npad configuation: " . $res->{error} );
             $self->{STATUS} = "BROKEN";
@@ -33,11 +31,11 @@ sub init {
         $conf->{port} = $res->{port};
     }
 
-    return $self->SUPER::init($conf);
+    return $self->SUPER::init( $conf );
 }
 
 sub read_npad_config {
-    my ($file) = @_;
+    my ( $file ) = @_;
 
     my %conf;
 
@@ -45,12 +43,12 @@ sub read_npad_config {
 
     my $FH;
     open( $FH, "<", $file ) or return \%conf;
-    while (<$FH>) {
-        if (/key="webPort".*value="\([^"]\)"/) {
+    while ( <$FH> ) {
+        if ( /key="webPort".*value="\([^"]\)"/ ) {
             $port = $1;
         }
     }
-    close($FH);
+    close( $FH );
 
     $conf{port} = $port;
 
@@ -58,7 +56,7 @@ sub read_npad_config {
 }
 
 sub get_service_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # we override the TCP_Service addresses function so that we can generate
     # URLs.
@@ -89,19 +87,19 @@ sub get_service_addresses {
 }
 
 sub type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "NPAD Server";
 }
 
 sub service_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "npad";
 }
 
 sub event_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "http://ggf.org/ns/nmwg/tools/npad/1.0";
 }

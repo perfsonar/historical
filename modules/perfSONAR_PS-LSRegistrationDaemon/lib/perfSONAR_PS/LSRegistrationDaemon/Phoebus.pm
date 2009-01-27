@@ -1,5 +1,8 @@
 package perfSONAR_PS::LSRegistrationDaemon::Phoebus;
 
+use strict;
+use warnings;
+
 use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
 
 use constant DEFAULT_PORT => 5006;
@@ -12,11 +15,11 @@ sub init {
         $conf->{port} = DEFAULT_PORT;
     }
 
-    return $self->SUPER::init($conf);
+    return $self->SUPER::init( $conf );
 }
 
 sub get_service_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # we override the TCP_Service addresses function so that we can generate
     # URLs.
@@ -47,19 +50,19 @@ sub get_service_addresses {
 }
 
 sub type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "Phoebus Depot";
 }
 
 sub service_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "phoebus";
 }
 
 sub event_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "http://ggf.org/ns/nmwg/tools/phoebus/1.0";
 }

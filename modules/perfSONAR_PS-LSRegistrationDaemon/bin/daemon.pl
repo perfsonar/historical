@@ -65,10 +65,10 @@ $status = GetOptions(
 
 if ( not $CONFIG_FILE ) {
     print "Error: no configuration file specified\n";
-    exit(-1);
+    exit( -1 );
 }
 
-my %conf = Config::General->new($CONFIG_FILE)->getall();
+my %conf = Config::General->new( $CONFIG_FILE )->getall();
 
 if ( not $PIDFILE ) {
     $PIDFILE = $conf{"pid_file"};
@@ -78,10 +78,10 @@ if ( not $PIDFILE ) {
     $PIDFILE = "/var/run/ls_registration_daemon.pid";
 }
 
-( $status, $res ) = lockPIDFile($PIDFILE);
+( $status, $res ) = lockPIDFile( $PIDFILE );
 if ( $status != 0 ) {
     print "Error: $res\n";
-    exit(-1);
+    exit( -1 );
 }
 
 my $fileHandle = $res;
@@ -103,14 +103,14 @@ if ( not $RUNAS_USER ) {
 if ( $RUNAS_USER and $RUNAS_GROUP ) {
     if ( setids( USER => $RUNAS_USER, GROUP => $RUNAS_GROUP ) != 0 ) {
         print "Error: Couldn't drop priviledges\n";
-        exit(-1);
+        exit( -1 );
     }
 }
 elsif ( $RUNAS_USER or $RUNAS_GROUP ) {
 
     # they need to specify both the user and group
     print "Error: You need to specify both the user and group if you specify either\n";
-    exit(-1);
+    exit( -1 );
 }
 
 # Now that we've dropped privileges, create the logger. If we do it in reverse
@@ -144,14 +144,14 @@ else {
         $output_level = $DEBUG;
     }
 
-	my %logger_opts = (
-	    level  => $output_level,
-	    layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
-	);
+    my %logger_opts = (
+        level  => $output_level,
+        layout => '%d (%P) %p> %F{1}:%L %M - %m%n',
+    );
 
-	if ($LOGOUTPUT) {
-	    $logger_opts{file} = $LOGOUTPUT;
-	}
+    if ( $LOGOUTPUT ) {
+        $logger_opts{file} = $LOGOUTPUT;
+    }
 
     Log::Log4perl->init( $LOGGER_CONF );
     $logger = get_logger( "perfSONAR_PS" );
@@ -159,16 +159,16 @@ else {
 }
 
 if ( not $conf{"ls_instance"} ) {
-    $logger->warn("You did not specify which LS Registration Daemon to register with. Will select an LS registration daemon to register with");
+    $logger->warn( "You did not specify which LS Registration Daemon to register with. Will select an LS registration daemon to register with" );
 }
 
 if ( not $conf{"ls_interval"} ) {
-    $logger->info("No LS interval specified. Defaulting to 24 hours");
+    $logger->info( "No LS interval specified. Defaulting to 24 hours" );
     $conf{"ls_interval"} = 24;
 }
 
 if ( not $conf{"check_interval"} ) {
-    $logger->info("No service check interval specified. Defaulting to 5 minutes");
+    $logger->info( "No service check interval specified. Defaulting to 5 minutes" );
     $conf{"check_interval"} = 300;
 }
 
@@ -177,11 +177,11 @@ $conf{"ls_interval"} = $conf{"ls_interval"} * 60 * 60;
 
 my $site_confs = $conf{"site"};
 if ( not $site_confs ) {
-    $logger->error("No sites defined in configuration file");
-    exit(-1);
+    $logger->error( "No sites defined in configuration file" );
+    exit( -1 );
 }
 
-if ( ref($site_confs) ne "ARRAY" ) {
+if ( ref( $site_confs ) ne "ARRAY" ) {
     my @tmp = ();
     push @tmp, $site_confs;
     $site_confs = \@tmp;
@@ -189,14 +189,14 @@ if ( ref($site_confs) ne "ARRAY" ) {
 
 my @site_params = ();
 
-foreach my $site_conf (@$site_confs) {
+foreach my $site_conf ( @$site_confs ) {
     my $site_merge_conf = mergeConfig( \%conf, $site_conf );
 
-    my $services = init_site($site_merge_conf);
+    my $services = init_site( $site_merge_conf );
 
     if ( not $services ) {
         print "Couldn't initialize site. Exitting.";
-        exit(-1);
+        exit( -1 );
     }
 
     my %params = ( conf => $site_merge_conf, services => $services );
@@ -208,13 +208,13 @@ if ( not $DEBUGFLAG ) {
     ( $status, $res ) = daemonize();
     if ( $status != 0 ) {
         $logger->error( "Couldn't daemonize: " . $res );
-        exit(-1);
+        exit( -1 );
     }
 }
 
-unlockPIDFile($fileHandle);
+unlockPIDFile( $fileHandle );
 
-foreach my $params (@site_params) {
+foreach my $params ( @site_params ) {
 
     # every site will register separately
     my $pid = fork();
@@ -227,99 +227,99 @@ foreach my $params (@site_params) {
     }
 }
 
-foreach my $pid (@child_pids) {
+foreach my $pid ( @child_pids ) {
     waitpid( $pid, 0 );
 }
 
 sub init_site {
-    my ($site_conf) = @_;
+    my ( $site_conf ) = @_;
 
     my @services = ();
 
     my $services_conf = $site_conf->{service};
-    if ( ref($services_conf) ne "ARRAY" ) {
+    if ( ref( $services_conf ) ne "ARRAY" ) {
         my @tmp = ();
         push @tmp, $services_conf;
         $services_conf = \@tmp;
     }
 
-    foreach my $curr_service_conf (@$services_conf) {
+    foreach my $curr_service_conf ( @$services_conf ) {
 
         my $service_conf = mergeConfig( $site_conf, $curr_service_conf );
 
         if ( not $service_conf->{type} ) {
 
             # complain
-            $logger->error("Error: No service type specified");
-            exit(-1);
+            $logger->error( "Error: No service type specified" );
+            exit( -1 );
         }
         elsif ( lc( $service_conf->{type} ) eq "bwctl" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::BWCTL->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize bwctl watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize bwctl watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "owamp" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::OWAMP->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize owamp watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize owamp watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "ping" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::Ping->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize ping watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize ping watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "traceroute" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::Traceroute->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize traceroute watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize traceroute watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "phoebus" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::Phoebus->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize Phoebus watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize Phoebus watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "ndt" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::NDT->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize NDT watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize NDT watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
         elsif ( lc( $service_conf->{type} ) eq "npad" ) {
             my $service = perfSONAR_PS::LSRegistrationDaemon::NPAD->new();
-            if ( $service->init($service_conf) != 0 ) {
+            if ( $service->init( $service_conf ) != 0 ) {
 
                 # complain
-                $logger->error("Error: Couldn't initialize NPAD watcher");
-                exit(-1);
+                $logger->error( "Error: Couldn't initialize NPAD watcher" );
+                exit( -1 );
             }
             push @services, $service;
         }
@@ -327,7 +327,7 @@ sub init_site {
 
             # error
             $logger->error( "Error: Unknown service type: " . $conf{type} );
-            exit(-1);
+            exit( -1 );
         }
     }
 
@@ -337,8 +337,8 @@ sub init_site {
 sub handle_site {
     my ( $site_conf, $services ) = @_;
 
-    while (1) {
-        foreach my $service (@$services) {
+    while ( 1 ) {
+        foreach my $service ( @$services ) {
             $service->refresh();
         }
 
@@ -355,7 +355,7 @@ child processes.
 =cut
 
 sub killChildren {
-    foreach my $pid (@child_pids) {
+    foreach my $pid ( @child_pids ) {
         kill( "SIGINT", $pid );
     }
 
@@ -368,7 +368,7 @@ Kills all the children for the process and then exits
 
 sub signalHandler {
     killChildren;
-    exit(0);
+    exit( 0 );
 }
 
 __END__

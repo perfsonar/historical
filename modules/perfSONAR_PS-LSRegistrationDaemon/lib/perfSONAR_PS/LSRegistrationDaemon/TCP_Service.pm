@@ -1,5 +1,8 @@
 package perfSONAR_PS::LSRegistrationDaemon::TCP_Service;
 
+use strict;
+use warnings;
+
 use perfSONAR_PS::Utils::DNS qw(resolve_address);
 use perfSONAR_PS::Utils::Host qw(get_ips);
 
@@ -15,7 +18,7 @@ sub init {
     my ( $self, $conf ) = @_;
 
     unless ( $conf->{address} ) {
-        $self->{LOGGER}->warn("No address specified, assuming local service");
+        $self->{LOGGER}->warn( "No address specified, assuming local service" );
     }
 
     my @addresses;
@@ -32,7 +35,7 @@ sub init {
         }
 
         my %addr_map = ();
-        foreach my $addr (@tmp) {
+        foreach my $addr ( @tmp ) {
             $addr_map{$addr} = 1;
 
             #            my @addrs = resolve_address($addr);
@@ -53,11 +56,11 @@ sub init {
         $self->{PORT} = $conf->{port};
     }
 
-    return $self->SUPER::init($conf);
+    return $self->SUPER::init( $conf );
 }
 
 sub is_up {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     foreach my $addr ( @{ $self->{ADDRESSES} } ) {
         my $sock;
@@ -71,7 +74,7 @@ sub is_up {
             $sock = IO::Socket::INET->new( PeerAddr => $addr, PeerPort => $self->{PORT}, Proto => 'tcp', Timeout => 5 );
         }
 
-        if ($sock) {
+        if ( $sock ) {
             $sock->close;
 
             return 1;
@@ -82,7 +85,7 @@ sub is_up {
 }
 
 sub get_service_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my @addresses = ();
 
@@ -110,7 +113,7 @@ sub get_service_addresses {
 }
 
 sub get_node_addresses {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my @addrs = ();
 

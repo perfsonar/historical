@@ -1,8 +1,11 @@
 package perfSONAR_PS::LSRegistrationDaemon::BWCTL;
 
+use strict;
+use warnings;
+
 use base 'perfSONAR_PS::LSRegistrationDaemon::TCP_Service';
 
-use constant DEFAULT_PORT   => 4823;
+use constant DEFAULT_PORT => 4823;
 
 sub init {
     my ( $self, $conf ) = @_;
@@ -11,7 +14,7 @@ sub init {
     if ( $conf->{config_file} ) {
         my $bwctl_config = $conf->{config_file};
 
-        $res = read_bwctl_config($bwctl_config);
+        $res = read_bwctl_config( $bwctl_config );
         if ( $res->{error} ) {
             $self->{LOGGER}->error( "Problem reading bwctl configuation: " . $res->{error} );
             $self->{STATUS} = "BROKEN";
@@ -37,11 +40,11 @@ sub init {
         $conf->{address} = \@tmp_addrs;
     }
 
-    return $self->SUPER::init($conf);
+    return $self->SUPER::init( $conf );
 }
 
 sub read_bwctl_config {
-    my ($file) = @_;
+    my ( $file ) = @_;
 
     my %conf = ();
 
@@ -57,14 +60,14 @@ sub read_bwctl_config {
             next;
         }
 
-        if ($value) {
+        if ( $value ) {
             $conf{$key} = $value;
         }
         else {
             $conf{$key} = 1;
         }
     }
-    close($FH);
+    close( $FH );
 
     my $addr_to_parse;
 
@@ -83,7 +86,7 @@ sub read_bwctl_config {
     }
 
     my %res = ();
-    if ($addr) {
+    if ( $addr ) {
         $res{addr} = $addr;
     }
     $res{port} = $port;
@@ -92,19 +95,19 @@ sub read_bwctl_config {
 }
 
 sub type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "BWCTL Server";
 }
 
 sub service_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "bwctl";
 }
 
 sub event_type {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     return "http://ggf.org/ns/nmwg/tools/bwctl/1.0";
 }
