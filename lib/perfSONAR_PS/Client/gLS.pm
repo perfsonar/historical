@@ -27,7 +27,7 @@ use Net::Ping;
 use XML::LibXML;
 use Digest::MD5 qw(md5_hex);
 
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Client::Echo;
 use perfSONAR_PS::Client::LS;
 use perfSONAR_PS::Common qw( genuid find extract );
@@ -1191,7 +1191,7 @@ __END__
 
 L<Log::Log4perl>, L<Params::Validate>, L<English>, L<LWP::Simple>,
 L<Net::Ping>, L<XML::LibXML>, L<Digest::MD5>,
-L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::Client::Echo>,
+L<perfSONAR_PS::Utils::ParameterValidation>, L<perfSONAR_PS::Client::Echo>,
 L<perfSONAR_PS::Client::LS>, L<perfSONAR_PS::Common>
  
 To join the 'perfSONAR-PS' mailing list, please visit:

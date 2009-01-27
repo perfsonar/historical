@@ -25,7 +25,7 @@ use English qw( -no_match_vars );
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract );
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Echo;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head2 new($package { instance })
 

@@ -26,7 +26,7 @@ use perfSONAR_PS::XML::Document;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::EventTypeEquivalenceHandler;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 our $VERSION = 0.09;
 

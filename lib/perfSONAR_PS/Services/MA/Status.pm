@@ -38,7 +38,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
 use perfSONAR_PS::Topology::ID;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 our $VERSION = 0.09;
 

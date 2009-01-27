@@ -24,7 +24,7 @@ use Log::Log4perl qw(get_logger :nowarn);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 use base 'Exporter';
 
@@ -399,7 +399,7 @@ __END__
 =head1 SEE ALSO
 
 L<Exporter>, L<Log::Log4perl>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::ParameterValidation>
+L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

@@ -48,7 +48,7 @@ use perfSONAR_PS::Error_compat qw/:try/;
 use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Utils::NetLogger;
 
 my %ma_namespaces = (
@@ -2200,7 +2200,7 @@ L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
 L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>,
-L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::Utils::NetLogger>
+L<perfSONAR_PS::Utils::ParameterValidation>, L<perfSONAR_PS::Utils::NetLogger>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

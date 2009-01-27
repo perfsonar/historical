@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use Params::Validate qw(:all);
 use Data::Dumper;
 

@@ -24,7 +24,7 @@ shares.  This module IS NOT an object, and the methods can be invoked directly
 use Exporter;
 use Params::Validate qw(:all);
 use perfSONAR_PS::Common;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 our @EXPORT = ( 'createControlKey', 'createLSKey', 'createLSData', 'extractQuery' );
 
@@ -157,7 +157,7 @@ __END__
 =head1 SEE ALSO
 
 L<Exporter>, L<Params::Validate>, L<perfSONAR_PS::Common>,
-L<perfSONAR_PS::ParameterValidation>
+L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

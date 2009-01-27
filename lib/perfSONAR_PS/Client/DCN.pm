@@ -28,7 +28,7 @@ use English qw( -no_match_vars );
 use XML::LibXML;
 
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract );
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Client::LS;
 
 =head2 new($package { instance })
@@ -776,7 +776,7 @@ __END__
 =head1 SEE ALSO
 
 L<Log::Log4perl>, L<Params::Validate>, L<Digest::MD5>, L<English>,
-L<XML::LibXML>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::ParameterValidation>,
+L<XML::LibXML>, L<perfSONAR_PS::Common>, L<perfSONAR_PS::Utils::ParameterValidation>,
 L<perfSONAR_PS::Client::LS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

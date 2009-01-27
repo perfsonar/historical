@@ -25,7 +25,7 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head2 new($package, { path, name, dss, error })
 

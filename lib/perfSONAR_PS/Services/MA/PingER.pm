@@ -68,7 +68,7 @@ use perfSONAR_PS::Datatypes::Message;
 
 use perfSONAR_PS::Datatypes::PingER;
 use perfSONAR_PS::DB::SQL::PingER;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 use perfSONAR_PS::Services::Base;
 use base 'perfSONAR_PS::Services::Base';

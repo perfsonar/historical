@@ -28,7 +28,7 @@ our $VERSION = 0.09;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head2 init($self, $handler);
     This routine is called on startup for each endpoint that uses this

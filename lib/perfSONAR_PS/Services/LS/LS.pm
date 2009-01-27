@@ -55,7 +55,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Error_compat qw/:try/;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 my %ls_namespaces = (
     nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -1166,7 +1166,7 @@ __END__
 L<Log::Log4perl>, L<Time::HiRes>, L<Params::Validate>, L<Digest::MD5>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>,
-L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::ParameterValidation>
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

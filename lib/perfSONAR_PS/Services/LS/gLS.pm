@@ -66,7 +66,7 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::DB::XMLDB;
 use perfSONAR_PS::Error_compat qw/:try/;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Client::LS;
 use perfSONAR_PS::Client::gLS;
 
@@ -3637,7 +3637,7 @@ L<Net::CIDR>, L<Net::IPTrie>, L<Net::Ping>, L<LWP::Simple>, L<File::stat>,
 L<Data::Validate::IP>, L<Net::IPv6Addr>, L<Hash::Merge>,
 L<perfSONAR_PS::Services::MA::General>, L<perfSONAR_PS::Services::LS::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>, L<perfSONAR_PS::DB::XMLDB>
-L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::ParameterValidation>,
+L<perfSONAR_PS::Error_compat>, L<perfSONAR_PS::Utils::ParameterValidation>,
 L<perfSONAR_PS::Client::LS>, L<perfSONAR_PS::Client::gLS>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

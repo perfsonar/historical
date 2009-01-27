@@ -13,7 +13,7 @@ use Config::General qw(ParseConfig);
 use DBI;
 use Socket;
 
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::DB::RRD;
 
 =head1 NAME

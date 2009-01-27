@@ -1,4 +1,4 @@
-package perfSONAR_PS::ParameterValidation;
+package perfSONAR_PS::Utils::ParameterValidation;
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ use base 'Exporter';
 
 =head1 NAME
 
-perfSONAR_PS::ParameterValidation - Only use Params::Validate when the logger
+perfSONAR_PS::Utils::ParameterValidation - Only use Params::Validate when the logger
 is set to debug mode.
 
 =head1 DESCRIPTION
@@ -23,7 +23,7 @@ DEBUG.
 
 our @EXPORT = ( 'validateParams', 'validateParamsPos' );
 
-our $logger = get_logger("perfSONAR_PS::ParameterValidation");
+our $logger = get_logger("perfSONAR_PS::Utils::ParameterValidation");
 
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger :nowarn);

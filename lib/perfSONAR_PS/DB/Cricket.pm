@@ -11,7 +11,7 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use English qw( -no_match_vars );
 
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head1 NAME
 

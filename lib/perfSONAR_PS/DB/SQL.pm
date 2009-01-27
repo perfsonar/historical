@@ -27,7 +27,7 @@ use English qw( -no_match_vars );
 use Params::Validate qw(:all);
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head2 new($package, $name, $user, $pass, $schema)
 

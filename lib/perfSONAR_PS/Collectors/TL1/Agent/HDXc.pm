@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Params::Validate qw(:all);
 use Log::Log4perl qw(get_logger);
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Utils::TL1::HDXc;
 
 our $VERSION = 0.09;

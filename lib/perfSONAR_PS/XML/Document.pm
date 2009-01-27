@@ -14,7 +14,7 @@ use warnings;
 use Log::Log4perl qw(get_logger :nowarn);
 
 use Params::Validate qw(:all);
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use English qw( -no_match_vars );
 
 use IO::File;
@@ -405,7 +405,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::ParameterValidation>,
+L<Log::Log4perl>, L<Params::Validate>, L<perfSONAR_PS::Utils::ParameterValidation>,
 L<English>
 
 To join the 'perfSONAR-PS' mailing list, please visit:

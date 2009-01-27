@@ -21,7 +21,7 @@ use Log::Log4perl qw( get_logger );
 use English qw( -no_match_vars );
 
 use perfSONAR_PS::Common qw( genuid );
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Client::MA;
 use Data::Dumper;
 

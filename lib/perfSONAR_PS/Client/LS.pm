@@ -27,7 +27,7 @@ use English qw( -no_match_vars );
 use perfSONAR_PS::Common qw( genuid makeEnvelope find extract unescapeString );
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Client::Echo;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 =head2 new($package { instance })
 
@@ -806,7 +806,7 @@ __END__
 
 L<Log::Log4perl>, L<Params::Validate>, L<English>, L<perfSONAR_PS::Common>,
 L<perfSONAR_PS::Transport>, L<perfSONAR_PS::Client::Echo>,
-L<perfSONAR_PS::ParameterValidation>
+L<perfSONAR_PS::Utils::ParameterValidation>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

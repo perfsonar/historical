@@ -32,7 +32,7 @@ use perfSONAR_PS::Messages;
 use perfSONAR_PS::Topology::Common;
 use perfSONAR_PS::Client::Topology::XMLDB;
 use perfSONAR_PS::Client::LS::Remote;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 our $VERSION = 0.10;
 
