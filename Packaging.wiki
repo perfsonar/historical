@@ -1,46 +1,60 @@
 #summary An overview of the perfSONAR-PS Packaging Process
+= Packaging Overview =
+The packaging process has changed notedly from previous instances. Before, we created a single CPAN package for each perfSONAR Perl Module. There were some downsides to this approach.
 
-= Introduction =
+  # There were a large number of packages. Had we done another release with the updates tools, there would have been at least 30 packages.
+  # By default, CPAN installed all the modules into the global perl namespace. This makes it difficult to update the services independently, as new versions of the common modules might be installed, which older services might not be compatible with.
+  # It made it difficult to distribute things like documentation and configuration files, as it required code to be written to install everything beyond the perl modules and scripts
+  # It was difficult to segregate the perfSONAR_PS services from the rest of the system
 
-Currently, the packaging process happens broadly as follows:
+The new style of package is different. Each package is now installed in its own directory. This directory contains the service's configuration files, its documentation, any scripts or utilities used to interact with the service, the required perfSONAR Perl modules, and any other desired files. The directory layout for the average package will look like this:
 
-  # Generate CPAN packages for all services/common libraries
-  # Generate RPM packages from those cpan packages using the cpan2rpm.pl
+{{{
+  bin - the location of any service daemons
+  etc - the location of any configuration files
+  scripts - any utility scripts that interact with the service (e.g. the init script, a script to create a database, etc)
+  doc - the documentation
+  lib - the perfSONAR_PS modules that this package depends on
+}}}
 
-= Creating A New CPAN Package =
+= Creating a New Package =
+  # run "svn export perfSONAR_PS-Skeleton perfSONAR_PS-[Package]"
+    * This will create a directory perfSONAR-[PackageName] with some basic files in it.
+  # Edit the Makefile and change names as appropriate "SkeletonPackage" and "skeleton_package"
+    * The ROOTPATH will be the default path that your package will be installed to. It should be something like "/opt/perfsonar_ps/[package_name]".
+  # Add any daemons into bin/, symlinking them if they're common scripts in the trunk/scripts directory.
+  # Add the daemons to MANIFEST
+    * e.g. bin/daemon.pl
+  # Copy the init script to start your daemon to the scripts directory
+  # Edit the init script and make sure that all the paths make sense and are relative to a PREFIX variable.
+{{{
+       PREFIX=/opt/perfsonar_ps/skeleton
+       DAEMON=$PREFIX/bin/daemon.pl
+       CONFFILE=$PREFIX/etc/daemon.conf
+}}}
+  # Add high-level required .pm files to your MANIFEST
+    * This is only necessary if, for example, you're packaging the pSPS daemon + pSB MA, you'd need to specify "lib/perfSONAR_PS/Services/MA/perfSONARBUOY.pm".
+    * Note: you do not have to symlink the .pm files as a script will do that for you.
+  # Generate the dependencies with "perl ../package_dependencies.pl"
+    * This will symlink the modules in from their location in "lib", if the file doesn't already exist, and update the MANIFEST accordingly.
+    * It will also create a "dependencies" file containing the perl modules that are required
+  # Double-check that all the dependencies make sense
+  # Add in default configuration for your service into "etc/"
+  # Add any desired documentation into the doc/ folder
+  # Move the .spec file to a more appropriate name: perl-perfSONAR_PS-[Service].spec
+  # Edit up perl-perfSONAR_PS-ServiceName.spec
+    # Change all the references to "skeleton" and "Skeleton" to your package name
+    # set %install_base to something appropriate for that installation
+    # set %init_script_1 to your init script copied to the scripts directory
+    # if you have multiple init scripts, uncomment %init_script_2 and set to the script name. In the %install section, uncomment the lines referencing init_script_2
+    # Add the dependencies from the file "dependencies" into it.
+  # Run "perl ../package_findunpackaged.pl" and add any files to the MANIFEST
+  # Run make dist
+  # Copy the service tarball to ~/rpm/SOURCES
+    * Note: ~/rpm is your rpm build directory
 
-  # There's a "skeleton" directory in cpan, copy that to the new package name.
-    * Existing packages have a version number associated with them, but that should be changed, so ignore that, and make the directory name something like "perfSONAR_PS-DB-SQL".
-  # Create a symlink "lib" to "trunk/lib".
-  # Create a pS_libs file
-    * This file is used to generate the MANIFEST files and as part of the dependency checking
-    * You can run the "create_ps_libs.sh" in your modules directory.
-    * Once you have the pS_libs file, go through and clear out all libraries you don't use.
-  # Create a Makefile.PL
-    * There is a sample Makefile.PL included in the skeleton. For a basic CPAN module, it should be easy enough to change the Makefile.PL to correspond to the new package.
-    * To calculate the dependencies, there's a script "gen_dependencies.pl" that will output the dependencies based on the files in the pS_libs and any other files in the MANIFEST with the extension .pl or .pm This list can be added to the Makefile.PL in the appropriate way.
-    * You'll need to verify that the dependencies are correct. Things like "load" based dependencies are somewhat up in the air as to whether they should be "required". This will be on an as-needed basis.
-  # Create a MANIFEST
-    * The MANIFEST file is what is used to create the tarball for distribution.  This will include all the standard files like "MANIFEST, README, LICENSE, Makefile.PL" as well as all the files in pS_libs and any other files needed by the package. Makefile should not be included in the package.  There's a script "gen_manifest.sh" that will take the files in your module directory and those in the "pS_libs" file and generate a new MANIFEST and MANIFEST.SKIP.
-  # Adding test cases
-    * You can add test cases by including them in a directory called 't'. These will get executed in alphabetical order when a make test is done.
-  # Testing
-    * You can run "make disttest" and it will tell you if there's anything wrong with the package, though it won't tell you if you've missed things in the MANIFEST or what-have-you, so there's a bit of manual hunting to make sure that you've gotten everything in the package.
-  # Subversion
-    * Do an 'svn add' on your new directory so that all files get added to the repository.
+Building the RPM:
 
-= Updating A CPAN Package = 
-
-  # Edit the "pS_libs" file and add any new files needed
-  # Re-run the "gen_dependencies.pl" script and add any updated dependencies to "Makefile.PL"
-  # Re-run the "gen_manifest.pl" script to add the new files to the MANIFEST
-  # Add any new test cases to the "t" directory
-  # Update the version number for the package if necessary
-
-= Releasing A Package = 
-  # Go through and see what depends on the modules in this package before doing a release. 
-    * Either need to do a release for all dependent packages or find the subset of packages that may be broken by changes in the modules in this package.
-  # Go through and see what the modules in this package depend on, creating new packages or updating existing packages for each module it depends on
-  # Verify that all modules expected in this package are actually included in the package
-  # Bump the version number for all modules in the package
-    * This may not be necessary if a module has not changed, but the CPAN folks may not like having multiple packages with the same module in it.
+  # run "make dist"
+  # copy the perfSONAR_PS-[PackageName].tar.gz to your rpm SOURCES directory
+  # run "rpmbuild -ba perl-perfSONAR_PS-[PackageName].spec" to build the RPM
