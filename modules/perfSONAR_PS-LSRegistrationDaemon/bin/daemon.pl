@@ -1,1 +1,0 @@
-../../../scripts/ls_registration_agent/ls_registration_daemon.pl
