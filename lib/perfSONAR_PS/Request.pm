@@ -10,7 +10,7 @@ use XML::LibXML;
 use English qw( -no_match_vars );
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::NetLogger;
+use perfSONAR_PS::Utils::NetLogger;
 
 our $VERSION = 0.09;
 
@@ -73,7 +73,7 @@ sub parse {
 
     $logger->debug( "Parsing request: " . $self->{REQUEST}->content ); 
 
-    my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.start");
+    my $msg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.start");
     $self->{NETLOGGER}->debug( $msg );
 
     my $parser = XML::LibXML->new();
@@ -245,7 +245,7 @@ sub finish {
         delete $self->{CALL};
         $logger->debug("Closing call.");
 
-        my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.end");
+        my $msg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.Services.MA.clientRequest.end");
         $self->{NETLOGGER}->debug($msg);
 
     }

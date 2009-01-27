@@ -1,4 +1,4 @@
-package perfSONAR_PS::OSCARS;
+package perfSONAR_PS::Utils::OSCARS;
 
 use strict;
 use warnings;

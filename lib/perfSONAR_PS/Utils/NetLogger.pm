@@ -1,4 +1,4 @@
-package perfSONAR_PS::NetLogger;
+package perfSONAR_PS::Utils::NetLogger;
 
 use strict;
 use warnings;

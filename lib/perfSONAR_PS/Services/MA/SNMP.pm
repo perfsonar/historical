@@ -49,7 +49,7 @@ use perfSONAR_PS::DB::File;
 use perfSONAR_PS::DB::RRD;
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::ParameterValidation;
-use perfSONAR_PS::NetLogger;
+use perfSONAR_PS::Utils::NetLogger;
 
 my %ma_namespaces = (
     nmwg      => "http://ggf.org/ns/nmwg/base/2.0/",
@@ -679,7 +679,7 @@ sub handleEvent {
             doOutputMetadata  => 1,
         }
     );
-    my $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.handleEvent.start", { messageType => $parameters->{messageType}, } );
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.handleEvent.start", { messageType => $parameters->{messageType}, } );
     $self->{NETLOGGER}->debug( $msg );
 
     my @subjects = @{ $parameters->{subject} };
@@ -841,7 +841,7 @@ sub handleEvent {
     else {
         throw perfSONAR_PS::Error_compat( "error.ma.message_type", "Invalid Message Type" );
     }
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.handleEvent.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.handleEvent.end" );
     $self->{NETLOGGER}->debug( $msg );
     return;
 }
@@ -1475,7 +1475,7 @@ sub maSetupDataRequest {
             message_parameters => 1
         }
     );
-    my $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.SetupDataRequest.start" );
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.SetupDataRequest.start" );
     $self->{NETLOGGER}->debug( $msg );
 
     my $mdId  = q{};
@@ -1524,7 +1524,7 @@ sub maSetupDataRequest {
     if ( $self->{CONF}->{"snmp"}->{"metadata_db_type"} eq "xmldb" ) {
         $self->{METADATADB}->closeDB( { error => \$error } );
     }
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.SetupDataRequest.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.SetupDataRequest.end" );
     $self->{NETLOGGER}->debug( $msg );
     return;
 }
@@ -1663,7 +1663,7 @@ sub setupDataRetrieveMetadataData {
 
     my $mdId = q{};
     my $dId  = q{};
-    my $msg  = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start" );
+    my $msg  = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.start" );
     $self->{NETLOGGER}->debug( $msg );
 
     my $queryString = q{};
@@ -1776,7 +1776,7 @@ sub setupDataRetrieveMetadataData {
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.setupDataRetrieveMetadataData.end" );
     $self->{NETLOGGER}->debug( $msg );
     return;
 }
@@ -1803,7 +1803,7 @@ sub handleData {
         }
     );
 
-    my $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.handleData.start" );
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.handleData.start" );
     $self->{NETLOGGER}->debug( $msg );
 
     my $type = extract( find( $parameters->{data}, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"type\"]", 1 ), 0 );
@@ -1839,7 +1839,7 @@ sub handleData {
         $self->{LOGGER}->error( $msg );
         getResultCodeData( $parameters->{output}, "data." . genuid(), $parameters->{id}, $msg, 1 );
     }
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.handleData.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.handleData.end" );
     $self->{NETLOGGER}->debug( $msg );
     return;
 }
@@ -2027,7 +2027,7 @@ sub retrieveRRD {
         }
     );
 
-    my $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.setup.start" );
+    my $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.setup.start" );
     $self->{NETLOGGER}->debug( $msg );
 
     my $timeSettings = $parameters->{time_settings};
@@ -2063,15 +2063,15 @@ sub retrieveRRD {
     adjustRRDTime( { timeSettings => $timeSettings } );
     my $id = "data." . genuid();
 
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.setup.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.setup.end" );
     $self->{NETLOGGER}->debug( $msg );
 
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.getDataRRD.start", { rrdfile => $rrd_file, } );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.getDataRRD.start", { rrdfile => $rrd_file, } );
     $self->{NETLOGGER}->debug( $msg );
 
     my %rrd_result = getDataRRD( { directory => $self->{DIRECTORY}, file => $rrd_file, timeSettings => $timeSettings, rrdtool => $self->{CONF}->{"snmp"}->{"rrdtool"} } );
 
-    $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.getDataRRD.end" );
+    $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.getDataRRD.end" );
     $self->{NETLOGGER}->debug( $msg );
 
     if ( $rrd_result{ERROR} ) {
@@ -2106,7 +2106,7 @@ sub retrieveRRD {
         my $valueUnits = extract( find( $parameters->{d}, "./nmwg:key//nmwg:parameter[\@name=\"valueUnits\"]", 1 ), 0 );
 
         startData( $parameters->{output}, $id, $parameters->{mid}, undef );
-        $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.start" );
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.start" );
         $self->{NETLOGGER}->debug( $msg );
         foreach my $a ( sort( keys( %rrd_result ) ) ) {
             if ( $a < $sec ) {
@@ -2132,7 +2132,7 @@ sub retrieveRRD {
             }
         }
         endData( $parameters->{output} );
-        $msg = perfSONAR_PS::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.end" );
+        $msg = perfSONAR_PS::Utils::NetLogger::format( "org.perfSONAR.Services.MA.retrieveRRD.genXML.end" );
         $self->{NETLOGGER}->debug( $msg );
     }
     return;
@@ -2200,7 +2200,7 @@ L<Params::Validate>, L<Date::Manip>, L<perfSONAR_PS::Services::MA::General>,
 L<perfSONAR_PS::Common>, L<perfSONAR_PS::Messages>,
 L<perfSONAR_PS::Client::LS::Remote>, L<perfSONAR_PS::Error_compat>,
 L<perfSONAR_PS::DB::File>, L<perfSONAR_PS::DB::RRD>, L<perfSONAR_PS::DB::SQL>,
-L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::NetLogger>
+L<perfSONAR_PS::ParameterValidation>, L<perfSONAR_PS::Utils::NetLogger>
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

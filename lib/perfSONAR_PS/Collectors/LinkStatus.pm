@@ -19,7 +19,7 @@ use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector;
 
-use perfSONAR_PS::SNMPWalk;
+use perfSONAR_PS::Utils::SNMPWalk;
 
 use base 'perfSONAR_PS::Collectors::Base';
 
