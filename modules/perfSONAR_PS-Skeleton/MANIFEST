@@ -1,0 +1,8 @@
+MANIFEST
+Makefile
+doc/Changes
+doc/LICENSE
+doc/README
+etc/skeleton_logger.conf
+scripts/install_dependencies.sh
+scripts/prepare_environment.sh
