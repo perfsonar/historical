@@ -5,7 +5,7 @@ Data::Dumper
 Data::UUID
 Digest::MD5
 English
-Error::Simple
+Error
 Exporter
 Fcntl
 File::Basename
@@ -24,8 +24,5 @@ Sleepycat::DbXml
 Time::HiRes
 XML::LibXML
 base
-diagnostics
-fields
 lib
-strict
 warnings
