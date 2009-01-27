@@ -15,7 +15,7 @@ while(<MANIFEST>) {
 close(MANIFEST);
 
 
-open(FILES, "-|", "find .") or die("Couldn't open MANIFEST");
+open(FILES, "-|", "find . | grep -v \\.svn") or die("Couldn't open MANIFEST");
 while(<FILES>) {
 	chomp;
 	s/^\.\///;
