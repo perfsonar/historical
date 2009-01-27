@@ -24,7 +24,7 @@ sub new {
             password => 0,
             agent => 0,
             element_id => 1,
-            element_id_type => 1,
+            element_id_type => 0,
             element_type => 1,
             });
 
@@ -35,7 +35,6 @@ sub new {
     # we need to be able to generate a new tl1 agent or reuse an existing one. Not neither.
     if (not $parameters->{agent} and
              (not $parameters->{address} or
-             not $parameters->{port} or
              not $parameters->{username} or
              not $parameters->{password})
        ) {
@@ -60,9 +59,10 @@ sub new {
 
     $self->type($parameters->{type});
     $self->agent($parameters->{agent});
-    $self->element_id_type($parameters->{element_id_type});
-    $self->element_id($parameters->{element_id});
-    $self->element_type($parameters->{element_type});
+    my $res = $self->set_element({ type => $parameters->{element_type}, id => $parameters->{element_id}, id_type => $parameters->{element_id_type} });
+	if (not $res) {
+		return;
+	}
 
     return $self;
 }
@@ -248,7 +248,7 @@ sub run {
         return $self->run_sect();
     } elsif ($self->{ELEMENT_TYPE} eq "line") {
         return $self->run_line();
-    } elsif ($self->{ELEMENT_TYPE} eq "ocn") {
+    } elsif ($self->{ELEMENT_TYPE} =~ /^oc(n|[0-9]+)/) {
         return $self->run_ocn();
     }
 }
@@ -273,32 +273,79 @@ sub agent {
     return $self->{AGENT};
 }
 
-sub element_id {
-    my ($self, $element_id) = @_;
+sub set_element {
+    my ($self, @params) = @_;
 
-    if ($element_id) {
-        $self->{ELEMENT_ID} = $element_id;
+    my $parameters = validateParams(@params,
+            {
+            type => 1,
+            id => 1,
+            id_type => 0,
+            });
+
+
+    unless ($parameters->{type} eq "sect" or $parameters->{type} eq "line" or $parameters->{type} =~ /^oc(n|[0-9]+)/ or $parameters->{type} eq "crossconnect") {
+        return undef;
     }
+
+	$self->{ELEMENT_ID} = $parameters->{id};
+	$self->{ELEMENT_TYPE} = $parameters->{type};
+
+	if ($parameters->{type} eq "sect") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "aid" ) {
+				return undef;
+			}
+		}
+
+		$self->{ELEMENT_ID_TYPE} = "aid";
+	} elsif ($parameters->{type} eq "line") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "aid" or $parameters->{id_type} eq "name") {
+				return undef;
+			}
+
+			$self->{ELEMENT_ID_TYPE} = $parameters->{id_type};
+		} else {
+			$self->{ELEMENT_ID_TYPE} = "aid";
+		}
+	} elsif ($parameters->{type} =~ /^oc(n|[0-9]+)/) {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "aid" or $parameters->{id_type} eq "name") {
+				return undef;
+			}
+
+			$self->{ELEMENT_ID_TYPE} = $parameters->{id_type};
+		} else {
+			$self->{ELEMENT_ID_TYPE} = "aid";
+		}
+	} elsif ($parameters->{type} eq "crossconnect") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return undef;
+			}
+		}
+
+		$self->{ELEMENT_ID_TYPE} = "name";
+	}
+
+    return $self->{ELEMENT_ID};
+}
+
+sub element_id {
+    my ($self) = @_;
 
     return $self->{ELEMENT_ID};
 }
 
 sub element_type {
-    my ($self, $element_type) = @_;
-
-    if ($element_type and ($element_type eq "sect" or $element_type eq "line" or $element_type eq "ocn" or $element_type eq "crossconnect")) {
-        $self->{ELEMENT_TYPE} = $element_type;
-    }
-
-    return $self->{ELEMENT_TYPE};
+    my ($self) = @_;
+	
+	return $self->{ELEMENT_TYPE};
 }
 
 sub element_id_type {
-    my ($self, $element_id_type) = @_;
-
-    if ($element_id_type and ($element_id_type eq "name" or $element_id_type eq "aid")) {
-        $self->{ELEMENT_ID_TYPE} = $element_id_type;
-    }
+    my ($self) = @_;
 
     return $self->{ELEMENT_ID_TYPE};
 }

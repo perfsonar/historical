@@ -17,8 +17,7 @@ use perfSONAR_PS::Collectors::LinkStatus::Agent::Script;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::Constant;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc;
 use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::OME;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena;
-use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1;
+use perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector;
 
 use perfSONAR_PS::SNMPWalk;
 
@@ -109,6 +108,53 @@ sub init {
             }
 
             $self->{CLIENT} = perfSONAR_PS::Client::Status::SQL->new($dbi_string, $self->{CONF}->{"ma_username"}, $self->{CONF}->{"ma_password"});
+            if (not defined $self->{CLIENT}) {
+                my $msg = "Couldn't create SQL client";
+                $logger->error($msg);
+                return (-1, $msg);
+            }
+        }
+    } elsif (defined $self->{CONF}->{"db_type"}) {
+        if (lc($self->{CONF}->{"db_type"}) eq "sqlite") {
+            load perfSONAR_PS::Client::Status::SQL;
+
+            if (not defined $self->{CONF}->{"db_file"} or $self->{CONF}->{"db_file"} eq "") {
+                $logger->error("You specified a SQLite Database, but then did not specify a database file(db_file)");
+                return -1;
+            }
+
+            my $file = $self->{CONF}->{"db_file"};
+            if (defined $self->{DIRECTORY}) {
+                if (!($file =~ "^/")) {
+                    $file = $self->{DIRECTORY}."/".$file;
+                }
+            }
+
+            $self->{CLIENT} = perfSONAR_PS::Client::Status::SQL->new("DBI:SQLite:dbname=".$file, $self->{CONF}->{"db_table"});
+        } elsif (lc($self->{CONF}->{"db_type"}) eq "mysql") {
+            load perfSONAR_PS::Client::Status::SQL;
+
+            my $dbi_string = "dbi:mysql";
+
+            if (not defined $self->{CONF}->{"db_name"} or $self->{CONF}->{"db_name"} eq "") {
+                $logger->error("You specified a MySQL Database, but did not specify the database (db_name)");
+                return -1;
+            }
+
+            $dbi_string .= ":".$self->{CONF}->{"db_name"};
+
+            if (not defined $self->{CONF}->{"db_host"} or $self->{CONF}->{"db_host"} eq "") {
+                $logger->error("You specified a MySQL Database, but did not specify the database host (db_host)");
+                return -1;
+            }
+
+            $dbi_string .= ":".$self->{CONF}->{"db_host"};
+
+            if (defined $self->{CONF}->{"db_port"} and $self->{CONF}->{"db_port"} ne "") {
+                $dbi_string .= ":".$self->{CONF}->{"db_port"};
+            }
+
+            $self->{CLIENT} = perfSONAR_PS::Client::Status::SQL->new($dbi_string, $self->{CONF}->{"db_username"}, $self->{CONF}->{"db_password"});
             if (not defined $self->{CLIENT}) {
                 my $msg = "Couldn't create SQL client";
                 $logger->error($msg);
@@ -474,12 +520,8 @@ sub parseAgentElement {
         my $element_id_type = $agent->findvalue('element_id_type');
         my $element_type = $agent->findvalue('element_type');
 
-        if (not $address or not $port or not $username or not $password) {
-            $logger->info("Address: ".$address);
-            $logger->info("Port: ".$port);
-            $logger->info("Username: ".$username);
-            $logger->info("Password: ".$password);
-            my $msg = "Agent of type 'TL1/OME' is missing elements to access the host. Required: type, address, port, username, password";
+        if (not $address or not $username or not $password) {
+            my $msg = "Agent of type 'TL1/OME' is missing elements to access the host. Required: type, address, username, password";
             $logger->error($msg);
             return (-1, $msg);
         }
@@ -517,12 +559,8 @@ sub parseAgentElement {
         my $element_id_type = $agent->findvalue('element_id_type');
         my $element_type = $agent->findvalue('element_type');
 
-        if (not $address or not $port or not $username or not $password) {
-            $logger->info("Address: ".$address);
-            $logger->info("Port: ".$port);
-            $logger->info("Username: ".$username);
-            $logger->info("Password: ".$password);
-            my $msg = "Agent of type 'TL1' is missing elements to access the host. Required: type, address, port, username, password";
+        if (not $address or not $username or not $password) {
+            my $msg = "Agent of type 'TL1/OME' is missing elements to access the host. Required: type, address, username, password";
             $logger->error($msg);
             return (-1, $msg);
         }
@@ -560,12 +598,8 @@ sub parseAgentElement {
         my $element_id_type = $agent->findvalue('element_id_type');
         my $element_type = $agent->findvalue('element_type');
 
-        if (not $address or not $port or not $username or not $password) {
-            $logger->info("Address: ".$address);
-            $logger->info("Port: ".$port);
-            $logger->info("Username: ".$username);
-            $logger->info("Password: ".$password);
-            my $msg = "Agent of type 'TL1' is missing elements to access the host. Required: type, address, port, username, password";
+        if (not $address or not $username or not $password) {
+            my $msg = "Agent of type 'TL1/OME' is missing elements to access the host. Required: type, address, username, password";
             $logger->error($msg);
             return (-1, $msg);
         }
@@ -578,7 +612,7 @@ sub parseAgentElement {
             $tl1agent = $self->{TL1AGENTS}->{$key};
         }
 
-        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::Ciena->new(
+        $new_agent = perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector->new(
                         type => $status_type,
                         address => $address,
                         port => $port,

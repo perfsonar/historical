@@ -77,6 +77,9 @@ BEGIN {
 
 use lib "$libdir";
 
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
 use perfSONAR_PS::Common;
 
 my %child_pids = ();
@@ -153,6 +156,13 @@ if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
     $CONFIG_FILE = $confdir."/collector.conf";
 }
 
+# The configuration directory gets passed to the modules so that relative paths
+# defined in their configurations can be resolved.
+$confdir = dirname($CONFIG_FILE);
+if ( !( $confdir =~ /^\// ) ) {
+    $confdir = getcwd . "/" . $confdir;
+}
+
 # Read in configuration information
 my $config =  new Config::General($CONFIG_FILE);
 my %conf = $config->getall;
@@ -219,7 +229,7 @@ foreach my $collectors (@{ $conf{"collector"} }) {
             $modules_loaded{$collector_conf{"module"}} = 1;
         }
 
-        my $collector_obj = $collector_conf{"module"}->new(\%collector_conf, $dirname);
+        my $collector_obj = $collector_conf{"module"}->new(\%collector_conf, $confdir);
         if ($collector_obj->init() != 0) {
             $logger->error("Failed to initialize module ".$collector_conf{"module"});
             exit(-1);
@@ -259,7 +269,7 @@ if ($RUNAS_USER and $RUNAS_GROUP) {
 
 # Daemonize if not in debug mode. This must be done before forking off children
 # so that the children are daemonized as well.
-if(!$DEBUGFLAG) {
+unless ($DEBUGFLAG) {
 # flush the buffer
     $| = 1;
     &daemonize;

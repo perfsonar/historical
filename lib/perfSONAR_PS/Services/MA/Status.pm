@@ -207,7 +207,14 @@ sub init {
 
     if (lc($self->{CONF}->{"status"}->{"enable_e2emon_compatibility"})) {
         if ($self->{CONF}->{"status"}->{"e2emon_definitions_file"}) {
-            $self->parseCompatCircuitsFile($self->{CONF}->{"status"}->{"e2emon_definitions_file"});
+            my $file = $self->{CONF}->{"status"}->{"e2emon_definitions_file"};
+            if (defined $self->{DIRECTORY}) {
+                if ($file !~ "^/") {
+                    $file = $self->{DIRECTORY}."/".$file;
+                }
+            }
+
+            $self->parseCompatCircuitsFile($file);
         } else {
             my $msg = "No E2EMon definitions file for E2EMon compatibility";
             $self->{LOGGER}->error($msg);

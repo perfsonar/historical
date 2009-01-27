@@ -139,7 +139,7 @@ sub getLine {
     if (not $aid) {
         return $self->{LINESBYAID};
     } else {
-        $self->{LOGGER}->info("Reading information on aid '$aid': ".$self->{LINESBYAID}->{$aid}." -- ".Dumper($self->{LINESBYAID}));
+        $self->{LOGGER}->debug("Reading information on aid '$aid': ".$self->{LINESBYAID}->{$aid}." -- ".Dumper($self->{LINESBYAID}));
         return $self->{LINESBYAID}->{$aid};
     }
 }
@@ -375,20 +375,20 @@ sub readLINEs {
 
     my $stime = time;
 
-    $self->{LOGGER}->info("Sending readLin: ".$stime."\n");
+    $self->{LOGGER}->debug("Sending readLin: ".$stime."\n");
 
     my ($successStatus, $results) = $self->send_cmd("RTRV-LINE:::".$self->{CTAG}.";");
 
     my $etime = time;
 
-    $self->{LOGGER}->info("Return from readLin: ".$etime." -- ".($etime-$stime)."\n");
+    $self->{LOGGER}->debug("Return from readLin: ".$etime." -- ".($etime-$stime)."\n");
 
     $self->{LOGGER}->debug("got LINE lines\n");
 
     foreach my $line (@$results) {
         $self->{LOGGER}->debug($line."\n");
 
-        $self->{LOGGER}->info("Received line: ".$line);
+        $self->{LOGGER}->debug("Received line: ".$line);
         if ($line =~ /(\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
             next;
@@ -516,7 +516,7 @@ sub readLine_PM {
 
     my $stime = time;
 
-    $self->{LOGGER}->info("Sending readLin_PM: ".$stime."\n");
+    $self->{LOGGER}->debug("Sending readLin_PM: ".$stime."\n");
 
     if ($index) {
         (my $successStatus, $results) = $self->send_cmd("RTRV-PM-LINE:::".$self->{CTAG}."::ALL-L:INDEX=$index;");
@@ -526,7 +526,7 @@ sub readLine_PM {
 
     my $etime = time;
 
-    $self->{LOGGER}->info("Return from readLin_PM: ".$etime." -- ".($etime-$stime)."\n");
+    $self->{LOGGER}->debug("Return from readLin_PM: ".$etime." -- ".($etime-$stime)."\n");
 
     $self->{LOGGER}->debug("got LINE_PM lines\n");
 

@@ -72,6 +72,9 @@ BEGIN {
     }
 }
 
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+
 my %ns = (
     nmwg          => "http://ggf.org/ns/nmwg/base/2.0/",
     nmtm          => "http://ggf.org/ns/nmwg/time/2.0/",
@@ -163,6 +166,13 @@ if ( not $status or $HELP ) {
 
 if ( not defined $CONFIG_FILE or $CONFIG_FILE eq q{} ) {
     $CONFIG_FILE = $confdir . "/daemon.conf";
+}
+
+# The configuration directory gets passed to the modules so that relative paths
+# defined in their configurations can be resolved.
+$confdir = dirname($CONFIG_FILE);
+if ( !( $confdir =~ /^\// ) ) {
+    $confdir = getcwd . "/" . $confdir;
 }
 
 # Read in configuration information
@@ -381,7 +391,7 @@ foreach my $port ( keys %{ $conf{"port"} } ) {
                 $modules_loaded{$module} = 1;
             }
 
-            my $service = $module->new( \%endpoint_conf, $port, $fixed_endpoint, $dirname );
+            my $service = $module->new( \%endpoint_conf, $port, $fixed_endpoint, $confdir );
             if ( $service->init( $handlers{$port}->{$fixed_endpoint} ) != 0 ) {
                 $logger->error( "Failed to initialize module " . $module . " on $port:$fixed_endpoint" );
                 exit( -1 );
@@ -774,8 +784,8 @@ sub lockPIDFile {
     my ( $piddir, $pidfile ) = @_;
     croak "Can't write pidfile: $piddir/$pidfile\n" unless -w $piddir;
     $pidfile = $piddir . "/" . $pidfile;
-    sysopen( PIDFILE, $pidfile, O_RDWR | O_CREAT );
-    flock( PIDFILE, LOCK_EX );
+    sysopen( PIDFILE, $pidfile, O_RDWR | O_CREAT ) or croak("Couldn't open pidfile");
+    flock( PIDFILE, LOCK_EX ) or croak("Couldn't lock pidfile");
     my $p_id = <PIDFILE>;
     chomp( $p_id ) if ( defined $p_id );
     if ( defined $p_id and $p_id ne q{} ) {
