@@ -3,12 +3,14 @@ package perfSONAR_PS::Utils::TL1::Base;
 use warnings;
 use strict;
 
+use POSIX;
 use Net::Telnet;
 use Data::Dumper;
 
 use Params::Validate qw(:all);
+use perfSONAR_PS::ParameterValidation;
 
-use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'PROMPT', 'CTAG', 'TELNET';
+use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'LOCAL_MACHINE_TIME', 'PROMPT', 'CTAG', 'TELNET', 'MESSAGES', 'STATUS';
 
 sub new {
     my ($class) = @_;
@@ -41,12 +43,15 @@ sub initialize {
     $self->{ADDRESS} = $parameters->{address};
     $self->{PORT} = $parameters->{port};
     $self->{PROMPT} = $parameters->{prompt};
+    $self->{MESSAGES} = ();
 
     if ($parameters->{ctag}) {
         $self->{CTAG} = $parameters->{ctag};
     } else {
         $self->{CTAG} = int(rand(1000));
     }
+
+    $self->{STATUS} = "UNCONNECTED";
 
     $self->{CACHE_TIME} = 0;
     $self->{CACHE_DURATION} = $parameters->{cache_time};
@@ -140,26 +145,45 @@ sub getCacheTime {
     return $self->{CACHE_TIME};
 }
 
-sub connect {
-    my ($self) = @_;
-
-    $self->{LOGGER}->debug(Dumper($self->{ADDRESS}));
-
-    if ($self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15, Errmode => "return")) {
-        return 0;
-    }
-
-    $self->{TELNET} = undef;
-
-    return -1;
-}
-
 sub login {
     die("This method must be overriden by a subclass");
 }
 
+sub logout {
+    return;
+}
+
+sub connect {
+    my ($self, @params) = @_;
+    my $parameters = validate(@params,
+            {
+                inhibitMessages => { type => SCALAR, optional => 1, default => 1 },
+            });
+ 
+    $self->{LOGGER}->debug(Dumper($self->{ADDRESS}));
+
+    if (not $self->{TELNET} = Net::Telnet->new(Host => $self->{ADDRESS}, Port => $self->{PORT}, Timeout => 15, Errmode => "return")) {
+        $self->{TELNET} = undef;
+        return -1;
+    }
+
+    $self->{STATUS} = "LOGGING_IN";
+
+    if (not $self->login({ inhibitMessages => $parameters->{inhibitMessages} })) {
+        $self->{TELNET} = undef;
+        $self->{STATUS} = "DISCONNECTED";
+        return -1;
+    }
+
+    $self->{STATUS} = "CONNECTED";
+
+    return 0;
+}
+
 sub disconnect {
     my ($self) = @_;
+
+    $self->logout();
 
     if (not $self->{TELNET}) {
         return;
@@ -168,13 +192,20 @@ sub disconnect {
     $self->{TELNET}->close;
     $self->{TELNET} = undef;
 
+    $self->{STATUS} = "DISCONNECTED";
+
     return;
 }
 
 sub send_cmd {
-    my ($self, $cmd) = @_;
+    my ($self, $cmd, $is_connecting) = @_;
     
     if (not $self->{TELNET}) {
+        return (-1, undef);
+    }
+
+    unless ($self->{STATUS} eq "LOGGING_IN" or $self->{STATUS} eq "CONNECTED") {
+        $self->{LOGGER}->error("Invalid status: ".$self->{STATUS});
         return (-1, undef);
     }
 
@@ -182,41 +213,200 @@ sub send_cmd {
 
     my $res = $self->{TELNET}->send($cmd);
 
-	my $buf;
+    my @retLines;
+    my $successStatus;
 
-    my $successStatus = -1;
+    while(not defined $successStatus) {
+        my ($status, $lines) = $self->waitMessage({ type => "response" });
+        # connection error
+        if ($status != 0) {
+            $self->{LOGGER}->debug("connection error");
+            return (-1, undef);
+        }
 
-	while(my $line = $self->{TELNET}->getline()) {
+        # connection closed
+        if (not defined $lines) {
+            $self->{LOGGER}->debug("connection closed");
+            return (-1, undef);
+        }
+
+        @retLines = ();
+        foreach my $line (@{ $lines }) {
+
+            next if ($line =~ /$cmd/);
+
+            if ($line =~ /(\d\d\d?\d?)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
+                $self->setMachineTime("$1-$2-$3 $4:$5:$6");
+                next;
+            } elsif ($line =~ /^\s*M\s+$self->{CTAG}\s+(COMPLD|DENY)/) {
+                if ($1 eq "COMPLD") {
+                    $successStatus = 1;
+                } elsif ($1 eq "DENY") {
+                    $successStatus = 0;
+                }
+            } else {
+                push @retLines, $line;
+            }
+        }
+    }
+
+    return ($successStatus, \@retLines);
+}
+
+sub waitMessage {
+    my ($self, @args) = @_;
+    my $args = validateParams(@args, 
+            {
+                type => { type => SCALAR },
+                timeout => { type => SCALAR, optional => 1 },
+            });
+
+    my $type = $args->{type};
+
+    $self->{LOGGER}->debug("waitMessage");
+
+    my $end;
+    if ($args->{timeout}) {
+        $end = time + $args->{timeout};
+    }
+
+    if (not defined $self->{MESSAGES}->{$type}) {
+        $self->{MESSAGES}->{$type} = ();
+    }
+
+    while ($#{ $self->{MESSAGES}->{$type} } == -1) {
+        my ($status, $lines);
+
+        if ($end) {
+            my $timeout = $end - time;
+            if ($timeout <= 0) {
+                $self->{LOGGER}->debug("timeout occurred: ".($args->{timeout}));
+
+                return (1, undef);
+            }
+
+            ($status, $lines) = $self->readMessage({ timeout => $timeout });
+        } else {
+            ($status, $lines) = $self->readMessage();
+        }
+
+        if ($status == -1) {
+            return (-1, undef);
+        }
+
+        if ($status == 0 and defined $lines) {
+            $self->processMessage($lines);
+            $self->{LOGGER}->debug("Processed Message: ".Dumper($self->{MESSAGES}));
+        }
+    }
+
+    my $lines = shift(@{ $self->{MESSAGES}->{$type} });
+
+    return (0, $lines);
+}
+
+sub readMessage {
+    my ($self, @args) = @_;
+    my $args = validateParams(@args, 
+            {
+                timeout => { type => SCALAR, optional => 1 },
+            });
+ 
+    $self->{LOGGER}->debug("readMessage");
+
+    if (not $self->{TELNET}) {
+        return (-1, undef);
+    }
+
+    my ($prematch, $prompt);
+    if ($args->{timeout}) {
+        ($prematch, $prompt) = $self->{TELNET}->waitfor(
+                                                            Match => "/^".$self->{PROMPT}."/gm",
+                                                            Timeout => $args->{timeout},
+                                                            Errmode => "return",
+                                                      );
+    } else {
+        ($prematch, $prompt) = $self->{TELNET}->waitfor(
+                                                            Match => "/^".$self->{PROMPT}."/gm",
+                                                            Errmode => "return",
+                                                      );
+    }
+
+    my $retStatus;
+
+    if (not defined $prematch) {
+        my $errmsg = $self->{TELNET}->errmsg();
+        $self->{LOGGER}->debug("Error message: $errmsg");
+        if ($errmsg =~ /timed-out/) {
+            $retStatus = 1; # a timeout occurred.            
+        } elsif ($errmsg =~ /read eof/) {
+            $retStatus = 0; # connection closed.
+        } else {
+            $retStatus = -1; # an error occurred.
+        }
+
+        return ($retStatus, undef);
+    } else {
+        $self->{LOGGER}->debug("PREMATCH: ".$prematch."\n");
+
+        my @lines = split('\n', $prematch);
+        return (0, \@lines);
+    }
+}
+
+sub processMessage {
+    my ($self, $lines) = @_;
+
+    $self->{LOGGER}->debug("processMessage");
+
+    foreach my $line (@{ $lines }) {
         $self->{LOGGER}->debug("LINE: $line");
 
         if ($line =~ /(\d\d\d?\d?)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)/) {
             $self->setMachineTime("$1-$2-$3 $4:$5:$6");
-        }
-
-		next if ($line =~ /$cmd/);
-
-		$buf .= $line;
-
-		if ($line =~ /^\s*M\s+$self->{CTAG}\s+(COMPLD|DENY)/) {
-            if ($1 eq "COMPLD") {
-                $successStatus = 1;
-            } elsif ($1 eq "DENY") {
-                $successStatus = 0;
-            }
-
-			my ($prematch, $junk) = $self->{TELNET}->waitfor("/^".$self->{PROMPT}."/gm");
-
-            $self->{LOGGER}->debug("PREMATCH: $prematch\n");
-
-			$res .= $prematch;
-
             last;
-		}
-	}
+        }
+    }
 
-    my @lines = split('\n', $res);
+    my $type = $self->categorizeMessage($lines);
 
-    return ($successStatus, \@lines);
+    if (not $type) {
+        return 0;
+    }
+
+    if (not defined $self->{MESSAGES}->{$type}) {
+        $self->{MESSAGES}->{$type} = ();
+    }
+
+    push @{ $self->{MESSAGES}->{$type} }, $lines;
+
+    return 0;
+}
+
+sub categorizeMessage {
+    my ($self, $lines) = @_;
+
+    foreach my $line (@{ $lines }) {
+        if ($line =~ /REPT ALM/) {
+            $self->{LOGGER}->debug("category: alarm");
+
+            return "alarm";
+        } elsif ($line =~ /REPT EVT/) {
+            $self->{LOGGER}->debug("category: event");
+
+            return "event";
+        } elsif ($line =~ /DENY/ or $line =~ /COMPLD/) {
+            $self->{LOGGER}->debug("category: response");
+
+            return "response";
+        }
+    }
+
+    $self->{LOGGER}->debug("category: other");
+
+    # return 'undef' to delete the message
+
+    return "other";
 }
 
 sub setMachineTime {
@@ -224,26 +414,73 @@ sub setMachineTime {
 
     my ($curr_date, $curr_time) = split(" ", $time);
     my ($year, $month, $day) = split("-", $curr_date);
+    my ($hour, $minute, $second) = split(":", $curr_time);
+
+    $self->{LOGGER}->debug("Setting machine time: $year-$month-$day $hour:$minute:$second");
 
     # make sure it's in 4 digit year form
     if (length($year) == 2) {
         # I don't see why it'd ever not be +2000, but...
         if ($year < 70) {
-            $year += 2000;
-        } else {
-            $year += 1900;
+            $year += 100;
         }
+    } else {
+        $year -= 1900;
     }
 
-    $self->{MACHINE_TIME} = "$year-$month-$day $curr_time";
+    $month--;
 
-    $self->{LOGGER}->debug("NEW MACHINE TIME: ".$self->{MACHINE_TIME}."\n");
+    my $machine_ts = POSIX::mktime($second, $minute, $hour, $day, $month, $year, 0, 0);
+
+    $self->{LOCAL_MACHINE_TIME} = time;
+    $self->{MACHINE_TIME} = $machine_ts;
+
+    return;
 }
 
 sub getMachineTime {
     my ($self) = @_;
 
-    return $self->{MACHINE_TIME};
+    my $diff = time - $self->{LOCAL_MACHINE_TIME};
+    my $machine_ts = $self->{MACHINE_TIME} + $diff;
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($machine_ts);
+
+    $mon++;
+    $year += 1900;
+
+    my $readable_time = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
+
+#    $self->{LOGGER}->debug("Returning machine time: ".$readable_time."\n");
+
+    return $readable_time;
+}
+
+sub convertPMDateTime {
+	my ($self, $date, $time) = @_;
+
+	# guess the year of the interval based on the current machine time
+	my ($month, $day) = split('-', $date);
+	my ($hour, $minute) = split('-', $time);
+	my ($switch_date, $switch_time) = split(' ', $self->getMachineTime());
+
+	my ($switch_year, $switch_month, $switch_day) = split('-', $switch_date);
+	my ($switch_hour, $switch_minute, $switch_second) = split(':', $switch_time);
+
+	# Calculate the year
+	my $year;
+
+	if ($switch_month eq $month) {
+		$year = $switch_year;
+	} elsif ($switch_month ne $month) {
+		if ($switch_month == 1) {
+			$year = $switch_year - 1;
+		} else {
+			$year = $switch_year;
+		}
+	}
+
+	return sprintf "%4d-%02d-%02d %02d:%02d:%02d", $year,$month,$day,$hour,$minute,0;
 }
 
 1;

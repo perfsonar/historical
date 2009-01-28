@@ -5,10 +5,12 @@ use strict;
 
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
+use perfSONAR_PS::Utils::ParameterValidation;
 use Data::Dumper;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
-use fields 'EFLOWSBYNAME', 'CRSSBYNAME', 'ETHSBYAID', 'GTPSBYNAME', 'OCNSBYAID', 'SNCSBYNAME', 'VCGSBYNAME', 'STSSBYNAME', 'READ_CRS', 'READ_ETH', 'READ_GTP', 'READ_OCN', 'READ_SNC', 'READ_VCG', 'READ_STS', 'OCN_PMs', 'ETH_PMs', 'STS_PMs', 'EFLOW_PMs';
+use fields 'ALARMS', 'COUNTERS', 'EFLOWSBYNAME', 'CRSSBYNAME', 'ETHSBYAID', 'GTPSBYNAME', 'OCNSBYAID', 'SNCSBYNAME', 'VCGSBYNAME', 'STSSBYNAME',
+            'ALARMS_CACHE_TIME', 'EFLOWSBYNAME_CACHE_TIME', 'CRSSBYNAME_CACHE_TIME', 'ETHSBYAID_CACHE_TIME', 'GTPSBYNAME_CACHE_TIME', 'OCNSBYAID_CACHE_TIME', 'SNCSBYNAME_CACHE_TIME', 'VCGSBYNAME_CACHE_TIME', 'STSSBYNAME_CACHE_TIME';
 
 sub initialize {
     my ($self, @params) = @_;
@@ -22,734 +24,849 @@ sub initialize {
             cache_time => 1,
             });
 
-    $parameters->{"type"} = "ciena";
+    $parameters->{"type"} = "coredirector";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::CoreDirector");
     $parameters->{"prompt"} = ";" if (not $parameters->{"prompt"});
     $parameters->{"port"} = "10201" if (not $parameters->{"port"});
+
+    $self->{ALARMS_CACHE_TIME} = 0;
+    $self->{EFLOWSBYNAME_CACHE_TIME} = 0;
+    $self->{CRSSBYNAME_CACHE_TIME} = 0;
+    $self->{ETHSBYAID_CACHE_TIME} = 0;
+    $self->{GTPSBYNAME_CACHE_TIME} = 0;
+    $self->{OCNSBYAID_CACHE_TIME} = 0;
+    $self->{SNCSBYNAME_CACHE_TIME} = 0;
+    $self->{VCGSBYNAME_CACHE_TIME} = 0;
+    $self->{STSSBYNAME_CACHE_TIME} = 0;
 
     return $self->SUPER::initialize($parameters);
 }
 
 sub getVCG {
-    my ($self, $name) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_VCG}) {
-        $do_reload_stats = 1;
-        $self->{READ_VCG} = 1;
+    if ($self->{VCGSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %vcgs = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-VCG::ALL:".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got VCG Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+#"1-A-3-1:189-190,PST=OOS-AU,SST=[ALM,ACT],ALIAS=nms-oexp2.newy:FPGA2_TO_nms-oexp2.hous:FPGA2,SUPPTTP=1-A-3-1,CRCTYPE=CRC_32,SPICHANNEL=,DEGRADETHRESHOLD=2,CONCATIFTYPE=SONET,STSSIZE=STS1,TUNNELPEERTYPE=ETTP,TUNNELPEERNAME=1-A-3-1-9,MEMBERFAILCRITERIA=DLOM&LOP_P&AIS_P,GFPFCSENABLED=NO,DEFAULTJ1ENABLED=YES,LCASENABLED=NO,LCASHOLDOFFTIMER=1,LCASRSACKTIMER=2,CONFIGMONCHANNEL=1-A-3-1:189-190-CTP-189,ACTUALMONCHANNEL=,SCRAMBLINGBITENABLED=YES,FRAMINGMODE=GFP,GROUPMEM=189&&190,PROVBW=2,OPERBW=0,MAPPERBUFFERALLOCATION=AUTO,MAPPERBUFFERSAVAILABLE=56,MEMBERDETAIL={[1-A-3-1:189-190-CTP-190 190  LCAS_NA 255 NA LCAS_NA 255 NA]&[1-A-3-1:189-190-CTP-189 189  LCAS_NA 255 NA LCAS_NA 255 NA]},EFFIBASESEV=NR,VCGFAILUREBASESEV=NR"
+
+            if ($line =~ /"([^,]*),(.*PST.*)"/) {
+                my %vcg = ();
+
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    my ($variable, $value) = split("=", $pair);
+                    $variable = lc($variable);
+
+                    $vcg{$variable} = $value;
+                }
+
+                $vcg{name} = $1;
+                $vcgs{$1} = \%vcg;
+            }
+        }
+
+        $self->{VCGSBYNAME} = \%vcgs;
+        $self->{VCGSBYNAME_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $name) {
+    if (not defined $facility_name) {
         return $self->{VCGSBYNAME};
     }
 
-    return $self->{VCGSBYNAME}->{$name};
+    return $self->{VCGSBYNAME}->{$facility_name};
 }
 
 sub getSNC {
-    my ($self, $name) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_SNC}) {
-        $do_reload_stats = 1;
-        $self->{READ_SNC} = 1;
+    if ($self->{SNCSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %sncs = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-SNC-STSPC::ALL:".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got SNC Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*STATE=([^,]*).*"/) {
+                my %status = ( pst => $2, state => $3 );
+
+                $sncs{$1} = \%status;
+            }
+        }
+
+        $self->{SNCSBYNAME} = \%sncs;
+        $self->{SNCSBYNAME_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $name) {
+    if (not defined $facility_name) {
         return $self->{SNCSBYNAME};
     }
 
-    return $self->{SNCSBYNAME}->{$name};
+    return $self->{SNCSBYNAME}->{$facility_name};
 }
 
-sub getCTP {
-    my ($self, $name) = @_;
-    my $do_reload_stats = 0;
+sub getSTS {
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_STS}) {
-        $do_reload_stats = 1;
-        $self->{READ_STS} = 1;
+    if ($self->{STSSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %stss = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-STSPC:::".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got STSPC Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
+                my %status = ( pst => $2, sst => $3 );
+
+                $stss{$1} = \%status;
+            }
+        }
+
+        $self->{STSSBYNAME} = \%stss;
+        $self->{STSSBYNAME_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $name) {
+    if (not defined $facility_name) {
         return $self->{STSSBYNAME};
     }
 
-    return $self->{STSSBYNAME}->{$name};
+    return $self->{STSSBYNAME}->{$facility_name};
 }
 
 sub getETH {
-    my ($self, $aid) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_ETH}) {
-        $do_reload_stats = 1;
-        $self->{READ_ETH} = 1;
-    }
-
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $aid) {
-        return $self->{ETHSBYAID};
-    }
-
-    return $self->{ETHSBYAID}->{$aid};
+    die("Not yet implemented");
 }
 
 sub getOCN {
-    my ($self, $aid) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_OCN}) {
-        $do_reload_stats = 1;
-        $self->{READ_OCN} = 1;
+    if ($self->{OCNSBYAID_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %ocns = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-OCN::ALL:".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got OCN Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*"/) {
+                my %status = ( pst => $2 );
+
+                $ocns{$1} = \%status;
+            }
+        }
+
+        $self->{OCNSBYAID} = \%ocns;
+        $self->{OCNSBYAID_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $aid) {
+    if (not defined $facility_name) {
         return $self->{OCNSBYAID};
     }
 
-    return $self->{OCNSBYAID}->{$aid};
+    return $self->{OCNSBYAID}->{$facility_name};
 }
 
-sub getOCH {
-    return;
+sub getEFLOW {
+    my ($self, $facility_name) = @_;
+
+    if ($self->{EFLOWSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %eflows = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-EFLOW::ALL:".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got EFLOW Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+#      "1-A-3-1-9_1-A-3-1:189-190:INGRESSPORTTYPE=ETTP,INGRESSPORTNAME=1-A-3-1-9,PKTTYPE=ALL,PRIORITY=,EGRESSPORTTYPE=VCG,EGRESSPORTNAME=1-A-3-1:189-190,COSMAPPING=COS_PORT_DEFAULT,ENABLEPOLICING=NO,BWPROFILE=,TAGSTOREMOVE=REMOVE_NONE,TAGSTOADD=ADD_NONE,OUTERTAGTYPE=0x0000,OUTERVLANID=0,SECONDTAGTYPE=0x0000,SECONDVLANID=0,INHERITPRIORITY=NO,NEWPRIORITY=0,COLLECTPM=NO,SYSTEMCREATED=YES"
+            if ($line =~ /"(.+?):(([A-Z]+=[^,]*,)+[A-Z]+=[^,]*)"/) {
+                my %eflow = ();
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    my ($variable, $value) = split("=", $pair);
+
+                    $variable = lc($variable);
+
+                    $eflow{$variable} = $value;
+                }
+
+                $eflow{name} = $1;
+                $eflows{$1} = \%eflow;
+            }
+        }
+
+        $self->{EFLOWSBYNAME} = \%eflows;
+        $self->{EFLOWSBYNAME_CACHE_TIME} = time;
+    }
+
+    if (not defined $facility_name) {
+        return $self->{EFLOWSBYNAME};
+    }
+
+    return $self->{EFLOWSBYNAME}->{$facility_name};
 }
 
 sub getGTP {
-    my ($self, $name) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_GTP}) {
-        $do_reload_stats = 1;
-        $self->{READ_GTP} = 1;
+    if ($self->{GTPSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %gtps = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-GTP::ALL:".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got GTP Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
+                my %status = ( pst => $2, sst => $3 );
+
+                $gtps{$1} = \%status;
+            }
+        }
+
+        $self->{GTPSBYNAME} = \%gtps;
+        $self->{GTPSBYNAME_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $name) {
+    if (not defined $facility_name) {
         return $self->{GTPSBYNAME};
     }
 
-    return $self->{GTPSBYNAME}->{$name};
+    return $self->{GTPSBYNAME}->{$facility_name};
 }
 
 sub getCrossconnect {
-    my ($self, $name) = @_;
-    my $do_reload_stats = 0;
+    my ($self, $facility_name) = @_;
 
-    if (not $self->{READ_CRS}) {
-        $do_reload_stats = 1;
-        $self->{READ_CRS} = 1;
+    if ($self->{CRSSBYNAME_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my %crss = ();
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-CRS:::".$self->{CTAG}.";");
+
+        $self->{LOGGER}->debug("Got CRS Lines\n");
+
+        foreach my $line (@$results) {
+            $self->{LOGGER}->debug($line."\n");
+
+            if ($line =~ /NAME=([^,]*)/) {
+                my ($pst, $sst, $facility_name);
+                $facility_name = $1;
+
+                if ($line =~ /PST=([^,]*)/) {
+                    $pst = $1;
+                }
+                if ($line =~ /SST=([^,]*)/) {
+                    $sst = $1;
+                }
+
+                my %status = ( pst => $pst, sst => $sst );
+
+                $crss{$facility_name} = \%status;
+            }
+        }
+
+        $self->{CRSSBYNAME} = \%crss;
+        $self->{CRSSBYNAME_CACHE_TIME} = time;
     }
 
-    if ($self->{CACHE_TIME} + $self->{CACHE_DURATION} < time or $do_reload_stats) {
-        $self->readStats();
-    }
-
-    if (not defined $name) {
+    if (not defined $facility_name) {
         return $self->{CRSSBYNAME};
     }
 
-    return $self->{CRSSBYNAME}->{$name};
+    return $self->{CRSSBYNAME}->{$facility_name};
 }
 
 sub getSTS_PM {
-    my ($self, $aid, $type) = @_;
+    my ($self, $facility_name, $pm_type) = @_;
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-STSPC::\"$aid\":".$self->{CTAG}.";");
+    my ($successStatus, $results);
+    if (not $facility_name or $facility_name eq "ALL") {
+        ($successStatus, $results) = $self->send_cmd("RTRV-PM-STSPC::ALL:".$self->{CTAG}.";");
+    } else {
+        ($successStatus, $results) = $self->send_cmd("RTRV-PM-STSPC::\"$facility_name\":".$self->{CTAG}.";");
+    }
+
+    if ($successStatus == -1) {
+        return undef;
+    }
 
     my %pm_results = ();
 
     foreach my $line (@$results) {
-        if ($line =~ /"([^,]*),STSPC:([^,]*),([^,]*),([^,]*),([^,]),([^,]),([^,]*),.*"/) {
-            my $aid = $1;
+#    "1-A-2-1-157,STSPC:ESP,0,CMPL,NEND,RCV,15-MIN,01-28,21-45"
+        if ($line =~ /"([^,]*),STSPC:([^,]*),([^,]*),([^,]*),([^,]),([^,]),([^,]*),([^,])*,([^"])*"/) {
+            my $facility_name = $1;
             my $monitoredType = $2;
             my $monitoredValue = $3;
             my $validity = $4;
             my $location = $5;
             my $direction = $6;
             my $timeperiod = $7;
+            my $monitordate = $8;
+            my $monitortime = $9;
 
-            if (not defined $pm_results{$aid}) {
-                $pm_results{$aid} = ();
+            if (not defined $pm_results{$facility_name}) {
+                $pm_results{$facility_name} = ();
             }
 
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"location"} = $location;
-            $result{"direction"} = $direction;
-            $result{"timePeriod"} = $timeperiod;
+            my $monitoredPeriodStart = $self->convertPMDateTime($monitordate, $monitortime);
 
-            $pm_results{$aid}->{$monitoredType} = \%result;
+            my %result = (
+                facility => $facility_name,
+                facility_type => "sts",
+                type => $monitoredType,
+                value => $monitoredValue,
+                time_period => $timeperiod,
+                time_period_start => $monitoredPeriodStart,
+                measurement_time => time,
+                machine_time => $self->getMachineTime(),
+                date => $monitordate,
+                time => $monitortime,
+                validity => $validity,
+            );
+            $pm_results{$facility_name}->{$monitoredType} = \%result;
         }
     }
 
-    if ($type) {
-        return $pm_results{$type};
+    if ($pm_type) {
+        return $pm_results{$facility_name}->{$pm_type};
+    } elsif ($facility_name and $facility_name ne "ALL") {
+        return $pm_results{$facility_name};
     } else {
         return \%pm_results;
     }
 }
 
 sub getETH_PM {
-    my ($self, $aid, $type) = @_;
+    my ($self, $facility_name, $pm_type) = @_;
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-GIGE::\"$aid\":".$self->{CTAG}."::;");
-
-    my %pm_results = ();
-
-    foreach my $line (@$results) {
-        # "1-A-1-1:OVER_SIZE,0,PRTL,15-MIN,08-01,16-00"
-
-        if ($line =~ /"(.*):([^:,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
-            my $aid = $1;
-            my $monitoredType = $2;
-            my $monitoredValue = $3;
-            my $validity = $4;
-            my $timeperiod = $5;
-            my $monitordate = $6;
-            my $monitortime = $7;
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"timePeriod"} = $timeperiod;
-            $result{"date"} = $monitordate;
-            $result{"time"} = $monitortime;
-
-            $pm_results{$monitoredType} = \%result;
-        }
+    if (not $facility_name) {
+        $facility_name = "ALL";
     }
 
-    if ($type) {
-        return $pm_results{$type};
+    if (not $self->{COUNTERS}->{eth}->{$facility_name}->{CACHE_TIME} or
+            $self->{COUNTERS}->{eth}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+
+        my ($successStatus, $results);
+        if ($facility_name eq "ALL") {
+            ($successStatus, $results) = $self->send_cmd("RTRV-PM-GIGE::ALL:".$self->{CTAG}."::;");
+        } else {
+            ($successStatus, $results) = $self->send_cmd("RTRV-PM-GIGE::\"$facility_name\":".$self->{CTAG}."::;");
+        }
+
+        if ($successStatus == -1) {
+            return undef;
+        }
+
+        my %pm_results = ();
+
+        foreach my $line (@$results) {
+# "1-A-1-1:OVER_SIZE,0,PRTL,15-MIN,08-01,16-00"
+
+            if ($line =~ /"(.*):([^:,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
+                my $facility_name = $1;
+                my $monitoredType = $2;
+                my $monitoredValue = $3;
+                my $validity = $4;
+                my $timeperiod = $5;
+                my $monitordate = $6;
+                my $monitortime = $7;
+
+                my $monitoredPeriodStart = $self->convertPMDateTime($monitordate, $monitortime);
+
+                my %result = (
+                        facility => $facility_name,
+                        facility_type => "eth",
+                        type => $monitoredType,
+                        value => $monitoredValue,
+                        time_period => $timeperiod,
+                        time_period_start => $monitoredPeriodStart,
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime(),
+                        date => $monitordate,
+                        time => $monitortime,
+                        validity => $validity,
+                        );
+                if (not defined $pm_results{$facility_name}) {
+                    my %new = ();
+                    $pm_results{$facility_name} = \%new;
+                }
+
+                $pm_results{$facility_name}->{$monitoredType} = \%result;
+            }
+        }
+
+        $self->{COUNTERS}->{eth}->{$facility_name}->{CACHE_TIME} = time;
+        $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS} = \%pm_results;
     } else {
-        return \%pm_results;
+        $self->{LOGGER}->debug("Returning cached");
+    }
+
+    if ($pm_type) {
+        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+    } elsif ($facility_name ne "ALL") {
+        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS}->{$facility_name};
+    } else {
+        return $self->{COUNTERS}->{eth}->{$facility_name}->{COUNTERS};
     }
 }
 
 sub getEFLOW_PM {
-    my ($self, $name, $type) = @_;
+    my ($self, $facility_name, $pm_type) = @_;
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-EFLOW::\"$name\":".$self->{CTAG}."::;");
-
-    my %pm_results = ();
-
-    foreach my $line (@$results) {
-        # "dcs_eflow_dcs_vcg_39610_in:OUT_GREEN,7,CMPL,15-MIN,09-11,19-00"
-
-        if ($line =~ /"(.*):([^:,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
-            my $name = $1;
-            my $monitoredType = $2;
-            my $monitoredValue = $3;
-            my $validity = $4;
-            my $timeperiod = $5;
-            my $monitordate = $6;
-            my $monitortime = $7;
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"timePeriod"} = $timeperiod;
-            $result{"date"} = $monitordate;
-            $result{"time"} = $monitortime;
-
-            $pm_results{$monitoredType} = \%result;
-        }
+    if (not $facility_name) {
+        $facility_name = "ALL";
     }
 
-    if ($type) {
-        return $pm_results{$type};
+    if (not $self->{COUNTERS}->{eflow}->{$facility_name}->{CACHE_TIME} or
+            $self->{COUNTERS}->{eflow}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-PM-EFLOW::\"$facility_name\":".$self->{CTAG}."::;");
+        if ($successStatus == -1) {
+            return undef;
+        }
+
+        my %pm_results = ();
+
+        foreach my $line (@$results) {
+            # "dcs_eflow_dcs_vcg_39610_in:OUT_GREEN,7,CMPL,15-MIN,09-11,19-00"
+
+            if ($line =~ /"(.*):([^:,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
+                my $facility_name = $1;
+                my $monitoredType = $2;
+                my $monitoredValue = $3;
+                my $validity = $4;
+                my $timeperiod = $5;
+                my $monitordate = $6;
+                my $monitortime = $7;
+
+                my $monitoredPeriodStart = $self->convertPMDateTime($monitordate, $monitortime);
+
+                my %result = (
+                        facility => $facility_name,
+                        facility_type => "eflow",
+                        type => $monitoredType,
+                        value => $monitoredValue,
+                        time_period => $timeperiod,
+                        time_period_start => $monitoredPeriodStart,
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime(),
+                        date => $monitordate,
+                        time => $monitortime,
+                        validity => $validity,
+                        );
+
+                if (not defined $pm_results{$facility_name}) {
+                    my %new = ();
+                    $pm_results{$facility_name} = \%new;
+                }
+
+                $pm_results{$facility_name}->{$monitoredType} = \%result;
+            }
+        }
+    
+        $self->{COUNTERS}->{eflow}->{$facility_name}->{CACHE_TIME} = time;
+        $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS} = \%pm_results;
     } else {
-        return \%pm_results;
+        $self->{LOGGER}->debug("Returning cached");
+    }
+
+    if ($pm_type) {
+        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+    } elsif ($facility_name ne "ALL") {
+        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS}->{$facility_name};
+    } else {
+        return $self->{COUNTERS}->{eflow}->{$facility_name}->{COUNTERS};
     }
 }
 
 sub getVCG_PM {
-    my ($self, $name, $type) = @_;
+    my ($self, $facility_name, $pm_type) = @_;
 
-    $self->{LOGGER}->debug("VCG: '$name'\n");
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-VCG::\"$name\":".$self->{CTAG}."::;");
-
-    my %pm_results = ();
-
-    foreach my $line (@$results) {
-        #    "1-A-4-1:1-96:IN_PACKETS,0,CMPL,15-MIN,09-11,19-00"
-
-        if ($line =~ /"(.*):([^:,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
-            my $name = $1;
-            my $monitoredType = $2;
-            my $monitoredValue = $3;
-            my $validity = $4;
-            my $timeperiod = $5;
-            my $monitordate = $6;
-            my $monitortime = $7;
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"timePeriod"} = $timeperiod;
-            $result{"date"} = $monitordate;
-            $result{"time"} = $monitortime;
-
-            $pm_results{$monitoredType} = \%result;
-        }
+    if (not $facility_name) {
+        $facility_name = "ALL";
     }
 
-    if ($type) {
-        return $pm_results{$type};
+    $self->{LOGGER}->debug("VCG: '$facility_name'\n");
+
+    if (not $self->{COUNTERS}->{vcg}->{$facility_name}->{CACHE_TIME} or
+            $self->{COUNTERS}->{vcg}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-PM-VCG::\"$facility_name\":".$self->{CTAG}."::;");
+        if ($successStatus == -1) {
+            return undef;
+        }
+
+        my %pm_results = ();
+
+        foreach my $line (@$results) {
+            #    "1-A-4-1:1-96:IN_PACKETS,0,CMPL,15-MIN,09-11,19-00"
+            $self->{LOGGER}->debug("Checking $line");
+            if ($line =~ /"$facility_name:([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^"]*)"/) {
+                $self->{LOGGER}->debug("PM found");
+                my $monitoredType = $1;
+                my $monitoredValue = $2;
+                my $validity = $3;
+                my $timeperiod = $4;
+                my $monitordate = $5;
+                my $monitortime = $6;
+
+                my $monitoredPeriodStart = $self->convertPMDateTime($monitordate, $monitortime);
+
+                my %result = (
+                        facility => $facility_name,
+                        facility_type => "vcg",
+                        type => $monitoredType,
+                        value => $monitoredValue,
+                        time_period => $timeperiod,
+                        time_period_start => $monitoredPeriodStart,
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime(),
+                        date => $monitordate,
+                        time => $monitortime,
+                        validity => $validity,
+                        );
+
+                if (not defined $pm_results{$facility_name}) {
+                    my %new = ();
+                    $pm_results{$facility_name} = \%new;
+                }
+
+                $pm_results{$facility_name}->{$monitoredType} = \%result;
+
+                $self->{LOGGER}->debug("PM found");
+            }
+        }
+
+        $self->{COUNTERS}->{vcg}->{$facility_name}->{CACHE_TIME} = time;
+        $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS} = \%pm_results;
     } else {
-        return \%pm_results;
+        $self->{LOGGER}->debug("Returning cached");
+    }
+
+
+    if ($pm_type) {
+        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+    } elsif ($facility_name ne "ALL") {
+        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS}->{$facility_name};
+    } else {
+        return $self->{COUNTERS}->{vcg}->{$facility_name}->{COUNTERS};
     }
 }
 
 sub getOCN_PM {
-    my ($self, $aid, $type) = @_;
+    my ($self, $facility_name, $pm_type) = @_;
 
-    my %crss = ();
-
-    $self->{LOGGER}->debug("SEND_CMD: RTRV-PM-OCN\n");
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::$aid:".$self->{CTAG}."::;");
-    $self->{LOGGER}->debug("DONE CMD: RTRV-PM-OCN\n");
-
-    my %pm_results = ();
-
-    foreach my $line (@$results) {
-     #   "1-A-3-1,OC192:OPR,0,PRTL,NEND,RCV,15-MIN,05-30,01-00,LOW,LOW,LOW,LOW,0"
-
-        if ($line =~ /"([^,]*),OC([0-9]+):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
-            my $monitoredType = $3;
-            my $monitoredValue = $4;
-            my $validity = $5;
-            my $location = $6;
-            my $direction = $7;
-            my $timeperiod = $8;
-            my $monitordate = $9;
-            my $monitortime = $10;
-            my $actual = $11;
-            my $low = $12;
-            my $high = $13;
-            my $average = $14;
-            my $normalized = $15;
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"location"} = $location;
-            $result{"direction"} = $direction;
-            $result{"timePeriod"} = $timeperiod;
-            $result{"date"} = $monitordate;
-            $result{"time"} = $monitortime;
-            $result{"actual"} = $actual;
-            $result{"low"} = $low;
-            $result{"high"} = $high;
-            $result{"average"} = $average;
-            $result{"normalized"} = $normalized;
-
-            $pm_results{$monitoredType} = \%result;
-        }
+    if (not $facility_name) {
+        $facility_name = "ALL";
     }
 
-    if ($type) {
-        return $pm_results{$type};
+    if (not $self->{COUNTERS}->{ocn}->{$facility_name}->{CACHE_TIME} or
+            $self->{COUNTERS}->{ocn}->{$facility_name}->{CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+
+        my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::$facility_name:".$self->{CTAG}."::;");
+        if ($successStatus == -1) {
+            return undef;
+        }
+
+        my %pm_results = ();
+
+        foreach my $line (@$results) {
+            #   "1-A-3-1,OC192:OPR,0,PRTL,NEND,RCV,15-MIN,05-30,01-00,LOW,LOW,LOW,LOW,0"
+            if ($line =~ /"([^,]*),OC([0-9]+):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
+                my $facility_name = $1;
+                my $facility_name_type = $2;
+                my $monitoredType = $3;
+                my $monitoredValue = $4;
+                my $validity = $5;
+                my $location = $6;
+                my $direction = $7;
+                my $timeperiod = $8;
+                my $monitordate = $9;
+                my $monitortime = $10;
+                my $actual = $11;
+                my $low = $12;
+                my $high = $13;
+                my $average = $14;
+                my $normalized = $15;
+
+                my $monitoredPeriodStart = $self->convertPMDateTime($monitordate, $monitortime);
+
+                my %result = (
+                        facility => $facility_name,
+                        facility_type => "vcg",
+                        type => $monitoredType,
+                        value => $monitoredValue,
+                        time_period => $timeperiod,
+                        time_period_start => $monitoredPeriodStart,
+                        measurement_time => time,
+                        machine_time => $self->getMachineTime(),
+                        date => $monitordate,
+                        time => $monitortime,
+                        validity => $validity,
+                        actual => $actual,
+                        low => $low,
+                        high => $high,
+                        average => $average,
+                        normalized => $normalized,
+                        );
+
+                if (not defined $pm_results{$facility_name}) {
+                    my %new = ();
+                    $pm_results{$facility_name} = \%new;
+                }
+
+                $pm_results{$facility_name}->{$monitoredType} = \%result;
+            }
+        }
+
+        $self->{COUNTERS}->{ocn}->{$facility_name}->{CACHE_TIME} = time;
+        $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS} = \%pm_results;
     } else {
-        return \%pm_results;
+        $self->{LOGGER}->debug("Returning cached");
+    }
+
+
+    if ($pm_type) {
+        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name}->{$pm_type};
+    } elsif ($facility_name ne "ALL") {
+        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS}->{$facility_name};
+    } else {
+        return $self->{COUNTERS}->{ocn}->{$facility_name}->{COUNTERS};
     }
 }
 
-sub readStats {
-    my ($self) = @_;
+sub getAlarms {
+    my ($self, $alarm_to_match) = @_;
 
-    $self->connect();
-    $self->login();
+    if ($self->{ALARMS_CACHE_TIME} + $self->{CACHE_DURATION} < time) {
+        my @alarms = ();
 
-    if ($self->{READ_CRS}) {
-        $self->readCRSs();
-    }
+        $self->{LOGGER}->debug("looking up alarms");
 
-    if ($self->{READ_GTP}) {
-        $self->readGTPs();
-    }
+        my ($successStatus, $results) = $self->send_cmd("RTRV-ALM-ALL:::".$self->{CTAG}."::;");
 
-    if ($self->{READ_SNC}) {
-        $self->readSNCs();
-    }
+        $self->{LOGGER}->debug("Results: ".Dumper($results));
 
-    if ($self->{READ_STS}) {
-        $self->readSTSs();
-    }
-
-    if ($self->{READ_OCN}) {
-        $self->readOCNs();
-    }
-
-    if ($self->{READ_VCG}) {
-        $self->readVCGs();
-    }
-
-    $self->{CACHE_TIME} = time;
-
-    $self->disconnect();
-
-    $self->{LOGGER}->debug("CRS: ".Dumper($self->{CRSSBYNAME}));
-    $self->{LOGGER}->debug("ETHS: ".Dumper($self->{ETHSBYAID}));
-    $self->{LOGGER}->debug("GTPS: ".Dumper($self->{GTPSBYNAME}));
-    $self->{LOGGER}->debug("OCNS: ".Dumper($self->{OCNSBYAID}));
-    $self->{LOGGER}->debug("SNCS: ".Dumper($self->{SNCSBYNAME}));
-    $self->{LOGGER}->debug("VCGS: ".Dumper($self->{VCGSBYNAME}));
-    $self->{LOGGER}->debug("STS: ".Dumper($self->{STSSBYNAME}));
-
-    return;
-}
-
-sub readGTPs {
-    my ($self) = @_;
-
-    my %gtps = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-GTP::ALL:".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got GTP Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
-            my %status = ( pst => $2, sst => $3 );
-
-            $gtps{$1} = \%status;
+        if ($successStatus != 1) {
+            $self->{ALARMS} = undef;
+            return;
         }
-    }
 
-    $self->{GTPSBYNAME} = \%gtps;
+        #   "TimingInput_BITS_2,REF:MN,SYNCCLK,NSA,2008-08-28,15:12:03,,:\"LOS on synchronization reference as seen by TM1\","
+        #   "TimingInput_BITS_2,REF:MN,SYNCCLK,NSA,2008-08-28,15:12:11,,:\"LOS on synchronization reference as seen by TM2\","
 
-    return;
-}
+        foreach my $line (@$results) {
+            if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):(\\".*\\"),(.*)"/) {
+                my $facility = $1;
+                my $facility_type = $2;
+                my $severity = $3;
+                my $alarmType = $4;
+                my $serviceAffecting = $5;
+                my $date = $6;
+                my $time = $7;
+                my $unknown1 = $8;
+                my $unknown2 = $9;
+                my $description = $10;
+                my $unknown3 = $11;
 
-sub readSTSs {
-    my ($self) = @_;
+                $description =~ s/\\"//g;
 
-    my %stss = ();
+                my %alarm = (
+                        facility => $facility,
+                        facility_type => $facility_type,
+                        severity => $severity,
+                        alarmType => $alarmType,
+                        service_affecting => $serviceAffecting,
+                        date => $date,
+                        time => $time,
+                        description => $description,
+                        );
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-STSPC:::".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got STSPC Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
-            my %status = ( pst => $2, sst => $3 );
-
-            $stss{$1} = \%status;
-        }
-    }
-
-    $self->{STSSBYNAME} = \%stss;
-
-    return;
-}
-
-sub readVCGs {
-    my ($self) = @_;
-
-    my %vcgs = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-VCG::ALL:".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got VCG Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /"([^,]*),PST=([^,]*),.*SST=\[[a-zA-Z-]+[,a-zA-Z-]*\]/) {
-            my %status = ( pst => $2, sst => $3 );
-
-            $vcgs{$1} = \%status;
-        }
-    }
-
-    $self->{VCGSBYNAME} = \%vcgs;
-
-    return;
-}
-
-sub readSNCs {
-    my ($self) = @_;
-
-    my %sncs = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-SNC-STSPC::ALL:".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got SNC Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*STATE=([^,]*).*"/) {
-            my %status = ( pst => $2, state => $3 );
-
-            $sncs{$1} = \%status;
-        }
-    }
-
-    $self->{SNCSBYNAME} = \%sncs;
-
-    return;
-}
-
-sub readOCNs {
-    my ($self) = @_;
-
-    my %ocns = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-OCN::ALL:".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got OCN Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*"/) {
-            my %status = ( pst => $2 );
-
-            $ocns{$1} = \%status;
-        }
-    }
-
-    $self->{OCNSBYAID} = \%ocns;
-
-    return;
-}
-
-sub readCRSs {
-    my ($self) = @_;
-
-    my %crss = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-CRS:::".$self->{CTAG}.";");
-
-    $self->{LOGGER}->debug("Got CRS Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-        if ($line =~ /NAME=([^,]*)/) {
-            my ($pst, $sst, $name);
-            $name = $1;
-
-            if ($line =~ /PST=([^,]*)/) {
-                $pst = $1;
+                push @alarms, \%alarm;
             }
-            if ($line =~ /SST=([^,]*)/) {
-                $sst = $1;
+        }
+
+        $self->{ALARMS} = \@alarms;
+        $self->{ALARMS_CACHE_TIME} = time;
+    }
+
+    my @ret_alarms = ();
+
+    foreach my $alarm (@{ $self->{ALARMS} }) {
+        my $matches = 1;
+        if ($alarm_to_match) {
+            foreach my $key (keys %$alarm_to_match) {
+                if ($alarm->{$key}) {
+                    if ($alarm->{$key} ne $alarm_to_match->{$key}) {
+                        $matches = 1;
+                    }
+                }
             }
+        }
 
-            my %status = ( pst => $pst, sst => $sst );
-
-            $crss{$name} = \%status;
+        if ($matches) {
+            push @ret_alarms, $alarm;
         }
     }
 
-    $self->{CRSSBYNAME} = \%crss;
-
-    return;
+    return \@ret_alarms;
 }
 
-sub readPM_STSs {
-    my ($self) = @_;
+sub waitEvent {
+    my ($self, @args) = @_;
+    my $args = validateParams(@args, 
+            {
+                timeout => { type => SCALAR },
+            });
 
-    my %crss = ();
+    my ($status, $lines);
+    if ($args->{timeout} ) {
+        ($status, $lines) = $self->waitMessage({ type => "event", timeout => $args->{timeout} });
+    } else {
+        ($status, $lines) = $self->waitMessage({ type => "event" });
+    }
 
-#   "1-A-1-1-1&&3,STSPC:CVP,0,CMPL,NEND,RCV,15-MIN,05-30,01-15"
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-STSPC::ALL:".$self->{CTAG}.";");
+    if ($status != 0 or not defined $lines) {
+        return (-1, undef);
+    }
 
-    my %pm_results = ();
+    foreach my $line (@{ $lines }) {
+        # "EMSUser:LOGBUFR90,TC,01-28,23-00-23,,,,,:\"The Audit Log Buffer has reached 90 percent full\""
+        if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):(\\".*\\")/) {
+            my $facility = $1;
+            my $condtype = $2;
+            my $effect = $3;
+            my $date = $4;
+            my $time = $5;
+            my $unknown1 = $6;
+            my $unknown2 = $7;
+            my $unknown3 = $8;
+            my $unknown4 = $9;
+            my $unknown5 = $10;
+            my $description = $11;
 
-    $self->{LOGGER}->debug("Got STS_PM Lines\n");
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
+            $description =~ s/\\"//g;
+            $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
 
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
+            my %event = (
+                facility => $facility,
+                eventType => $condtype,
+                effect => $effect,
+                date => $date,
+                time => $time,
+#                location => $location,
+#                direction => $direction,
+#                value => $monitoredValue,
+#                threshold => $thresholdLevel,
+#                period => $timePeriod,
+                description => $description,
+                );
 
-        if ($line =~ /"([^,]*),STSPC:([^,]*),([^,]*),([^,]*),([^,]),([^,]),([^,]*),.*"/) {
-            my $aid = $1;
-            my $monitoredType = $2;
-            my $monitoredValue = $3;
-            my $validity = $4;
-            my $location = $5;
-            my $direction = $6;
-            my $timeperiod = $7;
-
-            if (not defined $pm_results{$aid}) {
-                $pm_results{$aid} = ();
-            }
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"location"} = $location;
-            $result{"direction"} = $direction;
-            $result{"timePeriod"} = $timeperiod;
-
-            $pm_results{$aid}->{$monitoredType} = \%result;
+            return (0, \%event);
         }
     }
 
-    $self->{STS_PMs} = \%pm_results;
-
-    return;
+    return (-1, undef);
 }
 
-sub readPM_ETHs {
-    my ($self) = @_;
+sub waitAlarm {
+    my ($self, @args) = @_;
+    my $args = validateParams(@args, 
+            {
+                timeout => { type => SCALAR },
+            });
 
-    my %crss = ();
+    my ($status, $lines);
+    if ($args->{timeout} ) {
+        ($status, $lines) = $self->waitMessage({ type => "alarm", timeout => $args->{timeout} });
+    } else {
+        ($status, $lines) = $self->waitMessage({ type => "alarm" });
+    }
 
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-GIGE::ALL:".$self->{CTAG}.";");
+    if ($status != 0 or not defined $lines) {
+        return (-1, undef);
+    }
 
-    my %pm_results = ();
+    foreach my $line (@$lines) {
+        if ($line =~ /"([^,]*),([^:]*):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^:]*):(\\".*\\"),(.*)"/) {
+            my $facility = $1;
+            my $facility_type = $2;
+            my $severity = $3;
+            my $alarmType = $4;
+            my $serviceAffecting = $5;
+            my $date = $6;
+            my $time = $7;
+            my $unknown1 = $8;
+            my $unknown2 = $9;
+            my $description = $10;
+            my $unknown3 = $11;
 
-    $self->{LOGGER}->debug("Got ETH_PM Lines\n");
+            $description =~ s/\\"//g;
 
-#   "1-A-1-1:OVER_SIZE,0,PRTL,15-MIN,08-01,16-00"
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
+            my %alarm = (
+                    facility => $facility,
+                    facility_type => $facility_type,
+                    severity => $severity,
+                    alarmType => $alarmType,
+                    service_affecting => $serviceAffecting,
+                    date => $date,
+                    time => $time,
+                    description => $description,
+                    );
 
-        if ($line =~ /"([^:]*):([^,]*),([^,]*),([^,]*),([^,]*).*"/) {
-            my $aid = $1;
-            my $monitoredType = $2;
-            my $monitoredValue = $3;
-            my $validity = $4;
-            my $timeperiod = $5;
-
-            if (not defined $pm_results{$aid}) {
-                $pm_results{$aid} = ();
-            }
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"timePeriod"} = $timeperiod;
-
-            $pm_results{$aid}->{$monitoredType} = \%result;
+            return (0, \%alarm);
         }
     }
 
-    $self->{ETH_PMs} = \%pm_results;
-
-    return;
-}
-
-sub readOCN_PMs {
-    my ($self) = @_;
-
-    my %crss = ();
-
-    my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::ALL:".$self->{CTAG}."::;");
-
-    my %pm_results = ();
-
-    $self->{LOGGER}->debug("Got OCN_PM Lines\n");
-
-    foreach my $line (@$results) {
-        $self->{LOGGER}->debug($line."\n");
-
-     #   "1-A-3-1,OC192:OPR,0,PRTL,NEND,RCV,15-MIN,05-30,01-00,LOW,LOW,LOW,LOW,0"
-
-        if ($line =~ /"([^,]*),OC([0-9]+):([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*)"/) {
-            my $aid = $1;
-            my $monitoredType = $3;
-            my $monitoredValue = $4;
-            my $validity = $5;
-            my $location = $6;
-            my $direction = $7;
-            my $timeperiod = $8;
-            my $monitordate = $9;
-            my $monitortime = $10;
-            my $actual = $11;
-            my $low = $12;
-            my $high = $13;
-            my $average = $14;
-            my $normalized = $15;
-
-            if (not defined $pm_results{$aid}) {
-                $pm_results{$aid} = ();
-            }
-
-            my %result = ();
-            $result{"type"} = $monitoredType;
-            $result{"value"} = $monitoredValue;
-            $result{"validity"} = $validity;
-            $result{"location"} = $location;
-            $result{"direction"} = $direction;
-            $result{"timePeriod"} = $timeperiod;
-            $result{"date"} = $monitordate;
-            $result{"time"} = $monitortime;
-            $result{"actual"} = $actual;
-            $result{"low"} = $low;
-            $result{"high"} = $high;
-            $result{"average"} = $average;
-            $result{"normalized"} = $normalized;
-
-            $pm_results{$aid}->{$monitoredType} = \%result;
-        }
-    }
-
-    $self->{OCN_PMs} = \%pm_results;
-
-    return;
+    return (-1, undef);
 }
 
 sub login {
-    my ($self) = @_;
-
+    my ($self, @params) = @_;
+    my $parameters = validate(@params,
+            {
+                inhibitMessages => { type => SCALAR, optional => 1, default => 1 },
+            });
+ 
     my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::".$self->{PASSWORD}.";");
 
     if ($status != 1) {
-        return -1;
+        return 0;
     }
 
-    $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
+    if ($parameters->{inhibitMessages}) {
+        $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
+    }
 
-    return 0;
+    return 1;
 }
 
-sub disconnect {
+sub logout {
   my ($self) = @_;
 
   $self->send_cmd("CANC-USER::".$self->{USERNAME}.":".$self->{CTAG}.";");
-
-  return $self->SUPER::disconnect();
 }
 
 1;

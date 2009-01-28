@@ -25,31 +25,13 @@ sub initialize {
 
     $parameters->{"type"} = "hdxc";
     $parameters->{"logger"} = get_logger("perfSONAR_PS::Collectors::LinkStatus::Agent::TL1::HDXc");
-    $parameters->{"prompt"} = ";" if (not $parameters->{prompt});
+    $parameters->{"prompt"} = "TL1 Engine>" if (not $parameters->{prompt});
     $parameters->{"port"} = "23" if (not $parameters->{port});
 
     $self->{READ_LINE_PM} = ();
     $self->{READ_SECT_PM} = ();
 
     return $self->SUPER::initialize($parameters);
-}
-
-sub getVCG {
-    my ($self, $name) = @_;
-
-    return;
-}
-
-sub getSNC {
-    my ($self, $name) = @_;
-
-    return;
-}
-
-sub getETH {
-    my ($self, $aid) = @_;
-
-    return;
 }
 
 sub getOCN {
@@ -70,16 +52,6 @@ sub getOCN {
     }
 
     return $self->{OCNSBYAID}->{$aid};
-}
-
-sub getOCH {
-    return;
-}
-
-sub getGTP {
-    my ($self, $name) = @_;
-
-    return;
 }
 
 sub getSect {
@@ -164,33 +136,11 @@ sub getCrossconnect {
     return $self->{CRSSBYNAME}->{$name};
 }
 
-sub getETH_PM {
-    my ($self, $aid, $type) = @_;
-
-    return;
-}
-
-sub getSTS_PM {
-    my ($self, $aid, $type) = @_;
-
-    return;
-}
-
-sub getOCN_PM {
-    my ($self, $aid, $type) = @_;
-
-    return;
-}
-
 sub getLine_PM {
-    my $self = shift;
-    my %args = @_;
+    my ($self, $aid, $pm_type) = @_;
     my $do_reload_stats = 0;
 
-    my $index = $args{'index'};
-    my $name = $args{'variable_name'};
-    my $aid= $args{'aid'};
-
+    my $index = 0;
     if (not $index) {
         $index = 0;
     }
@@ -208,22 +158,18 @@ sub getLine_PM {
         return $self->{LINE_PMS}->{$index};
     }
 
-    if (not $name) {
-        return $self->{LINE_PMS}->{$index}->{$aid};
+    if (not $pm_type) {
+        return $self->{LINE_PMS}->{$index}->{$pm_type};
     }
 
-    return $self->{LINE_PMS}->{$index}->{$aid}->{$name};
+    return $self->{LINE_PMS}->{$index}->{$aid}->{$pm_type};
 }
 
 sub getSect_PM {
-    my $self = shift;
-    my %args = @_;
+    my ($self, $aid, $pm_type) = @_;
     my $do_reload_stats = 0;
 
-    my $index = $args{'index'};
-    my $name = $args{'variable_name'};
-    my $aid= $args{'aid'};
-
+    my $index = 0;
     if (not $index) {
         $index = 0;
     }
@@ -241,11 +187,11 @@ sub getSect_PM {
         return $self->{SECT_PMS}->{$index};
     }
 
-    if (not $name) {
+    if (not $pm_type) {
         return $self->{SECT_PMS}->{$index}->{$aid};
     }
 
-    return $self->{SECT_PMS}->{$index}->{$aid}->{$name};
+    return $self->{SECT_PMS}->{$index}->{$aid}->{$pm_type};
 }
 
 sub getAlarms {
@@ -289,9 +235,6 @@ sub getAlarms {
 
 sub readStats {
     my ($self) = @_;
-
-    $self->connect();
-    $self->login();
 
     if ($self->{READ_CRS}) {
         $self->readCRSs();
@@ -696,12 +639,12 @@ sub login {
     my ($status, $lines) = $self->send_cmd("ACT-USER::".$self->{USERNAME}.":".$self->{CTAG}."::".$self->{PASSWORD}.";");
 
     if ($status != 1) {
-        return -1;
+        return 0;
     }
 
     $self->send_cmd("INH-MSG-ALL:::".$self->{CTAG}.";");
 
-    return 0;
+    return 1;
 }
 
 1;
