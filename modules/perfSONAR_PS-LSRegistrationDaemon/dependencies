@@ -1,4 +1,5 @@
 Config::General
+Digest::MD5
 English
 Exporter
 Fcntl
@@ -8,6 +9,7 @@ IO::File
 IO::Socket
 IO::Socket::INET
 IO::Socket::INET6
+LWP::Simple
 LWP::UserAgent
 Log::Log4perl
 Net::DNS

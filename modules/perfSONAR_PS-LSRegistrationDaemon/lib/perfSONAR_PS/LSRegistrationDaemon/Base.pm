@@ -8,7 +8,7 @@ use Socket6;
 use Log::Log4perl qw/get_logger/;
 
 use perfSONAR_PS::Utils::DNS qw(reverse_dns);
-use perfSONAR_PS::Client::LS;
+use perfSONAR_PS::Client::LS::Remote;
 
 use fields 'CONF', 'STATUS', 'LOGGER', 'KEY', 'NEXT_REFRESH', 'LS_CLIENT';
 
@@ -29,10 +29,10 @@ sub init {
     $self->{STATUS} = "UNREGISTERED";
 
     if ( $conf->{ls_instance} ) {
-        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS::Remote->new( { instance => $conf->{ls_instance} } );
+        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS->new({ instance => $conf->{ls_instance} });
     }
     else {
-        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS::Remote->new();
+        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS->new();
     }
 
     return 0;

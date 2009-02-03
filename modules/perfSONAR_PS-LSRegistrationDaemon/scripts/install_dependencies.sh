@@ -8,6 +8,7 @@ fi
 $MAKEROOT cpan base
 $MAKEROOT cpan Config::General
 $MAKEROOT cpan constant
+$MAKEROOT cpan Digest::MD5
 $MAKEROOT cpan English
 $MAKEROOT cpan Exporter
 $MAKEROOT cpan Fcntl
@@ -20,6 +21,7 @@ $MAKEROOT cpan IO::Socket::INET
 $MAKEROOT cpan IO::Socket::INET6
 $MAKEROOT cpan lib
 $MAKEROOT cpan Log::Log4perl
+$MAKEROOT cpan LWP::Simple
 $MAKEROOT cpan LWP::UserAgent
 $MAKEROOT cpan NetAddr::IP
 $MAKEROOT cpan Net::DNS

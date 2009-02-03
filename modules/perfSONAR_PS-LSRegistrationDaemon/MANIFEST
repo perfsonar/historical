@@ -8,6 +8,8 @@ etc/ls_registration_daemon-logger.conf
 etc/ls_registration_daemon.conf
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
+lib/perfSONAR_PS/Client/LS/Remote.pm
+lib/perfSONAR_PS/Client/gLS.pm
 lib/perfSONAR_PS/Common.pm
 lib/perfSONAR_PS/LSRegistrationDaemon/BWCTL.pm
 lib/perfSONAR_PS/LSRegistrationDaemon/Base.pm
