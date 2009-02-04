@@ -1,6 +1,6 @@
 package perfSONAR_PS::DB::Cricket;
 
-use fields 'LOGGER', 'FILE', 'STORE', 'RRDTOOL', 'CRICKET_HOME', 'CRICKET_INSTALL', 'CRICKET_DATA', 'CRICKET_CONFIG';
+use fields 'LOGGER', 'FILE', 'STORE', 'RRDTOOL', 'CRICKET_HOME', 'CRICKET_INSTALL', 'CRICKET_DATA', 'CRICKET_CONFIG', 'CRICKET_HINTS';
 
 use strict;
 use warnings;
@@ -32,7 +32,7 @@ Create a new object.
 
 sub new {
     my ( $package, @args ) = @_;
-    my $parameters = validateParams( @args, { conf => 0, file => 0, home => 1, install => 1, data => 1, config => 1 } );
+    my $parameters = validateParams( @args, { conf => 0, file => 0, home => 1, install => 1, data => 1, config => 1, hints => 0 } );
 
     my $self = fields::new( $package );
     $self->{STORE}   = q{};
@@ -46,6 +46,22 @@ sub new {
     $self->{CRICKET_INSTALL} = $parameters->{install};
     $self->{CRICKET_DATA}    = $parameters->{data};
     $self->{CRICKET_CONFIG}  = $parameters->{config};
+    if ( exists $parameters->{hints} and $parameters->{hints} ) {
+        open( HINTS, $parameters->{hints} );
+        my @hints = <HINTS>;
+        close( HINTS );
+        $self->{CRICKET_HINTS} = ();
+        foreach my $h ( @hints ) {
+            my @line = split(/:/, $h);
+            my $counter = -1;
+            foreach my $l ( @line ) {
+                $counter++;
+                next if $counter < 2;
+                $l =~ s/(\n|\s)+//;
+                push @{ $self->{CRICKET_HINTS}{$line[0]}{$line[1]} }, $l;
+            }
+        }
+    }
 
     # Fake a 'use lib' (N.B. that use lib is evaluated at compile time, we
     #  don't want that here since this is based on a configuration option
@@ -158,14 +174,19 @@ sub openDB {
 
     foreach my $item ( keys %master ) {
 
-        # we only care about the router and switch interfaces for now, the
-        #   second catch ensures we have a legit interface (e.g. there is an
-        #   rrd file)
-
         my @temp = split(/\// , $item);
         my @address = ();
         push @address, $temp[$#temp-1];
         push @address, $temp[$#temp];
+
+        if ( not ( $temp[$#temp-1] =~ m/.*\.\w+\.\w+$/ ) ) {
+            @address = ();
+            push @address, $temp[$#temp];
+            push @address, $temp[$#temp];
+            if ( not ( $temp[$#temp] =~ m/.*\.\w+\.\w+$/ ) ) {
+                next;
+            }            
+        }
             
         # XXX jz 1/23/09 - Should use an html cleanser
         my $okChar = '-a-zA-Z0-9_.@\s';            
@@ -191,13 +212,21 @@ sub openDB {
             $des2 =~ s/"/&quot;/g;
             $des2 =~ s/[^$okChar]/ /go;
         }
-            
-        $self->{STORE} .= $self->printInterface(
-            { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds0" } );
-        $self->{STORE} .= $self->printInterface(
-            { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds1" } );
+
+        if ( exists $self->{CRICKET_HINTS} and exists $self->{CRICKET_HINTS}{$temp[$#temp-1]}{"ds"} ) {
+            my $dsc = 0;
+            foreach my $ds ( @{ $self->{CRICKET_HINTS}{$temp[$#temp-1]}{"ds"} } ) {
+                $master{$item}->{"interface-name"} = $ds."_".$dsc;
+                $self->{STORE} .= $self->printInterface( { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter."-".$dsc, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, capacity => $master{$item}->{"rrd-max"}, des => $des." - ".$ds, des2 => $des2." - ".$ds, file => $item, ds => "ds".$dsc, direction => $ds } );
+                $dsc++;
+            }
+        }
+        else {
+            $self->{STORE} .= $self->printInterface( { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "in", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds0" } );
+            $self->{STORE} .= $self->printInterface( { ipAddress => $master{$item}->{"ip"}, rrddb => $rrd, id => $counter, hostName => $address[0], ifName => $master{$item}->{"interface-name"}, direction => "out", capacity => $master{$item}->{"rrd-max"}, des => $des, des2 => $des2, file => $item, ds => "ds1" } );
+        }
         $counter++;
-        
+                    
     }
     $self->{STORE} .= $self->printFooter();
     $rrd->closeDB;
@@ -231,7 +260,7 @@ Print out the interface direction
 
 sub printInterface {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams( @args, { rrddb => 0, id => 1, hostName => 1, ifName => 1, ipAddress => 0, direction => 1, capacity => 1, des => 0, des2 => 0, file => 1, ds => 1 } );
+    my $parameters = validateParams( @args, { rrddb => 0, id => 1, hostName => 1, ifName => 1, ipAddress => 0, direction => 0, capacity => 1, des => 0, des2 => 0, file => 1, ds => 1 } );
 
     my $output = "  <nmwg:metadata xmlns:nmwg=\"http://ggf.org/ns/nmwg/base/2.0/\" id=\"metadata-" . $parameters->{direction} . "-" . $parameters->{id} . "\">\n";
     $output .= "    <netutil:subject xmlns:netutil=\"http://ggf.org/ns/nmwg/characteristic/utilization/2.0/\" id=\"subject-" . $parameters->{direction} . "-" . $parameters->{id} . "\">\n";

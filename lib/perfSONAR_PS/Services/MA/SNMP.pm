@@ -299,6 +299,10 @@ sub init {
                     $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} = $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"} . "/cricket-config";
                     $self->{LOGGER}->error( "Setting the value of 'metadata_db_external_cricket_config' to \"" . $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"} . "\"" );
                 }
+
+                unless ( exists $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"} and $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"} ) {
+                    $self->{LOGGER}->info( "Cricket 'metadata_db_external_cricket_hints' not specified, skipping." );
+                }                
             }
             else {
                 $self->{LOGGER}->error( "Cannot find cricket; please set environmental variable CRICKET_HOME or 'metadata_db_external_cricket_home' in the configuration file." );
@@ -313,7 +317,8 @@ sub init {
                         home    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_home"},
                         install => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_cricket"},
                         data    => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_data"},
-                        config  => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"}
+                        config  => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_config"},
+                        hints   => $self->{CONF}->{"snmp"}->{"metadata_db_external_cricket_hints"}
                     }
                 );
                 $cricket->openDB();
