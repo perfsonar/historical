@@ -106,7 +106,7 @@ sub buildLinkRequest {
 }
 
 sub buildUpdateRequest {
-    my ($link_id, $time, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
+    my ($link_id, $time, $oper_value, $admin_value, $do_update) = @_;
     my $request = "";
 
     $request .= "<nmwg:message type=\"MeasurementArchiveStoreRequest\"\n";
@@ -117,7 +117,6 @@ sub buildUpdateRequest {
     $request .= "  </nmwg:subject>\n";
     $request .= "  <nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
     $request .= "  <nmwg:parameters>\n";
-    $request .= "    <nmwg:parameter name=\"knowledge\">$knowledge_level</nmwg:parameter>\n";
     if ($do_update != 0) {
         $request .= "    <nmwg:parameter name=\"update\">yes</nmwg:parameter>\n";
     }
@@ -202,11 +201,10 @@ sub parseResponse {
         my $start_time_type = $link->getAttribute("startTimeType");
         my $end_time = $link->getAttribute("endTime");
         my $end_time_type = $link->getAttribute("endTimeType");
-        my $knowledge = $link->getAttribute("knowledge");
         my $operStatus = findvalue($link, "./ifevt:stateOper");
         my $adminStatus = findvalue($link, "./ifevt:stateAdmin");
 
-        if (not defined $knowledge or not defined $operStatus or not defined $adminStatus or $adminStatus eq "" or $operStatus eq "" or $knowledge eq "") {
+        if (not defined $operStatus or not defined $adminStatus or $adminStatus eq "" or $operStatus eq "") {
             my $msg = "Response from server contains incomplete link status: ".$link->toString;
             return (-1, $msg);
         }
@@ -234,9 +232,9 @@ sub parseResponse {
         my $new_link;
 
         if (not defined $start_time) {
-            $new_link = new perfSONAR_PS::Status::Link($link_id, $knowledge, $time, $time, $operStatus, $adminStatus);
+            $new_link = new perfSONAR_PS::Status::Link($link_id, $time, $time, $operStatus, $adminStatus);
         } else {
-            $new_link = new perfSONAR_PS::Status::Link($link_id, $knowledge, $start_time, $end_time, $operStatus, $adminStatus);
+            $new_link = new perfSONAR_PS::Status::Link($link_id, $start_time, $end_time, $operStatus, $adminStatus);
         }
 
         if (not defined $links->{$link_id}) {
@@ -280,7 +278,7 @@ sub getLinkStatus {
 }
 
 sub updateLinkStatus {
-    my($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) = @_;
+    my($self, $time, $link_id, $oper_value, $admin_value, $do_update) = @_;
     my $prev_end_time;
 
     $oper_value = lc($oper_value);
@@ -294,7 +292,7 @@ sub updateLinkStatus {
         return (-1, "Invalid administrative state: $admin_value");
     }
 
-    my ($request, $mdids) = buildUpdateRequest($link_id, $time, $knowledge_level, $oper_value, $admin_value, $do_update);
+    my ($request, $mdids) = buildUpdateRequest($link_id, $time, $oper_value, $admin_value, $do_update);
 
     my ($host, $port, $endpoint) = &perfSONAR_PS::Transport::splitURI( $self->{URI_STRING} );
     if (not defined $host and not defined $port and not defined $endpoint) {
@@ -482,16 +480,14 @@ programs that can interface via the MA server or directly with the database.
     perfSONAR_PS::Status::Link structures containing a the status of the
     specified link at a certain point in time.
 
-=head2 updateLinkStatus($self, $time, $link_id, $knowledge_level, $oper_value, $admin_value, $do_update) 
+=head2 updateLinkStatus($self, $time, $link_id, $oper_value, $admin_value, $do_update) 
 
     The updateLinkStatus function adds a new data point for the specified link.
     $time is a unix timestamp corresponding to when the measurement occured. $link_id is the link to
-    update. $knowledge_level says whether or not this measurement can tell us
-    everything about a given link ("full") or whether the information only
-    corresponds to one side of the link("partial"). $oper_value is the current
-    operational status and $admin_value is the current administrative status.
-    $do_update is currently unused in this context, meaning that all intervals
-    added have cover the second that the measurement occurred.
+    update. $oper_value is the current operational status and $admin_value is
+    the current administrative status.  $do_update is currently unused in this
+    context, meaning that all intervals added have cover the second that the
+    measurement occurred.
 
 =head1 SEE ALSO
 

@@ -11,7 +11,7 @@ use Data::Dumper;
 
 our $VERSION = 0.09;
 
-use fields 'AGENT', 'TYPE', 'LOGGER', 'ELEMENT_TYPE', 'ELEMENT_ID', 'ELEMENT_ID_TYPE';
+use fields 'AGENT', 'TYPE', 'LOGGER', 'FACILITY_TYPE', 'FACILITY_NAME', 'FACILITY_NAME_TYPE';
 
 sub new {
     my ($class, @params) = @_;
@@ -24,9 +24,9 @@ sub new {
             username => 0,
             password => 0,
             agent => 0,
-            element_id => 1,
-            element_id_type => 0,
-            element_type => 1,
+            facility_name => 1,
+            facility_name_type => 0,
+            facility_type => 1,
             });
 
     my $self = fields::new($class);
@@ -54,14 +54,15 @@ sub new {
                     password => $parameters->{password},
                     address => $parameters->{address},
                     port => $parameters->{port},
-                    cache_time => 300
+                    cache_time => 30
                 );
     }
 
     $self->type($parameters->{type});
     $self->agent($parameters->{agent});
-    my $res = $self->set_element({ type => $parameters->{element_type}, id => $parameters->{element_id}, id_type => $parameters->{element_id_type} });
+    my $res = $self->set_element({ type => $parameters->{facility_type}, id => $parameters->{facility_name}, id_type => $parameters->{facility_name_type} });
 	if (not $res) {
+		$self->{LOGGER}->error("Invalid element type: ".$parameters->{facility_type});
 		return;
 	}
 
@@ -98,7 +99,7 @@ sub run_eth {
 	"oos-maanr" => "down",
     );
 
-    $status = $self->{AGENT}->getETH($self->{ELEMENT_ID});
+    $status = $self->{AGENT}->getETH($self->{FACILITY_NAME});
     $time = $self->{AGENT}->getCacheTime();
 
     $self->{LOGGER}->debug(Dumper($status));
@@ -148,7 +149,7 @@ sub run_ocn {
 	"oos-maanr" => "down",
     );
 
-    $status = $self->{AGENT}->getOCN($self->{ELEMENT_ID});
+    $status = $self->{AGENT}->getOCN($self->{FACILITY_NAME});
     $time = $self->{AGENT}->getCacheTime();
 
     $self->{LOGGER}->debug("PST: '".$status->{pst}."'");
@@ -168,9 +169,9 @@ sub run_ocn {
 sub run {
     my ($self) = @_;
 
-    if ($self->{ELEMENT_TYPE} =~ /^eth/) {
+    if ($self->{FACILITY_TYPE} =~ /^eth/) {
         return $self->run_eth();
-    } elsif ($self->{ELEMENT_TYPE} =~ /^oc(n|[0-9]+)/) {
+    } elsif ($self->{FACILITY_TYPE} =~ /^oc(n|[0-9]+)/) {
         return $self->run_ocn();
     }
 }
@@ -213,8 +214,8 @@ sub set_element {
 		return;
     }
 
-	$self->{ELEMENT_ID} = $parameters->{id};
-	$self->{ELEMENT_TYPE} = $parameters->{type};
+	$self->{FACILITY_NAME} = $parameters->{id};
+	$self->{FACILITY_TYPE} = $parameters->{type};
 
 	if ($parameters->{type} =~ /^oc(n|[0-9]+)/) {
 		if ($parameters->{id_type}) {
@@ -222,7 +223,7 @@ sub set_element {
 				return undef;
 			}
 		}
-		$self->{ELEMENT_ID_TYPE} = "aid";
+		$self->{FACILITY_NAME_TYPE} = "aid";
 	} elsif ($parameters->{type} =~ /^eth/) {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid") {
@@ -230,26 +231,26 @@ sub set_element {
 			}
 		}
 
-		$self->{ELEMENT_ID_TYPE} = "aid";
+		$self->{FACILITY_NAME_TYPE} = "aid";
 	}
 
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_id {
+sub facility_name {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_type {
+sub facility_type {
     my ($self) = @_;
 	
-	return $self->{ELEMENT_TYPE};
+	return $self->{FACILITY_TYPE};
 }
 
-sub element_id_type {
+sub facility_name_type {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID_TYPE};
+    return $self->{FACILITY_NAME_TYPE};
 }

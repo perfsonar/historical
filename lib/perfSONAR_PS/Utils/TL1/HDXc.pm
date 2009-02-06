@@ -614,7 +614,7 @@ sub readAlarms {
                 facility => $facility,
                 facility_type => $facility_type,
                 severity => $severity,
-                alarmType => $alarmType,
+                alarm_type => $alarmType,
                 description => $description,
                 serviceAffecting => $serviceAffecting,
                 date => $date,

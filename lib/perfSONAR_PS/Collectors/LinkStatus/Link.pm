@@ -8,19 +8,15 @@ use perfSONAR_PS::Collectors::LinkStatus::Status;
 
 our $VERSION = 0.09;
 
-use fields 'IDS', 'KNOWLEDGE', 'AGENTS', 'TIME_PRIORITIES', 'TIME_SOURCE';
+use fields 'IDS', 'AGENTS', 'TIME_PRIORITIES', 'TIME_SOURCE';
 
 sub new {
-    my ($class, $link_ids, $knowledge, $agents) = @_;
+    my ($class, $link_ids, $agents) = @_;
 
     my $self = fields::new($class);
 
     if (defined $link_ids and $link_ids ne "") {
         $self->{IDS} = $link_ids;
-    }
-
-    if (defined $knowledge and $knowledge ne "") {
-        $self->{KNOWLEDGE} = $knowledge;
     }
 
     if (defined $agents and $agents ne "") {
@@ -34,14 +30,6 @@ sub setIDs {
     my ($self, $ids) = @_;
 
     $self->{IDS} = $ids;
-
-    return;
-}
-
-sub setKnowledge {
-    my ($self, $knowledge) = @_;
-
-    $self->{KNOWLEDGE} = $knowledge;
 
     return;
 }
@@ -90,12 +78,6 @@ sub getIDs {
     my ($self) = @_;
 
     return $self->{IDS};
-}
-
-sub getKnowledge {
-    my ($self) = @_;
-
-    return $self->{KNOWLEDGE};
 }
 
 sub getAgents {
@@ -188,7 +170,7 @@ a certain range of time.
 
 =head1 API
 
-=head2 new ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status)
+=head2 new ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status)
 
     Creates a new instance of a link object with the specified values (None of
             which is required, they can all be set later).
@@ -196,10 +178,6 @@ a certain range of time.
 =head2 setID ($self, $id)
 
     Sets the identifier for this link.
-
-=head2 setKnowledge ($self, $knowledge)
-
-    Sets the knowledge level for the information about this link.
 
 =head2 setStartTime ($self, $starttime)
 
@@ -220,10 +198,6 @@ a certain range of time.
 =head2 getID ($self)
 
     Gets the identifier for this link
-
-=head2 getKnowledge ($self)
-
-    Gets the knowledge level for the information about this link.
 
 =head2 getStartTime ($self)
 

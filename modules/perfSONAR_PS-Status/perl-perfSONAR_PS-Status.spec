@@ -77,12 +77,12 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p /var/log/perfsonar
 chown perfsonar:perfsonar /var/log/perfsonar
 
-mkdir -p /var/lib/perfsonar_status
-chown perfsonar:perfsonar /var/lib/perfsonar_status
+mkdir -p /var/lib/perfsonar
+chown perfsonar:perfsonar /var/lib/perfsonar
 
-if [ ! -f /var/lib/perfsonar_status/status.db ]; then
-	%{install_base}/scripts/psCreateStatusDB --type sqlite --file /var/lib/perfsonar_status/status.db
-	chown perfsonar:perfsonar /var/lib/perfsonar_status/status.db
+if [ ! -f /var/lib/perfsonar/status.db ]; then
+	%{install_base}/scripts/psCreateStatusDB --type sqlite --file /var/lib/perfsonar/status.db
+	chown perfsonar:perfsonar /var/lib/perfsonar/status.db
 fi
 
 %changelog

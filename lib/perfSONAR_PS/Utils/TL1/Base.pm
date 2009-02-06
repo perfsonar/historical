@@ -8,7 +8,7 @@ use Net::Telnet;
 use Data::Dumper;
 
 use Params::Validate qw(:all);
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 use fields 'USERNAME', 'PASSWORD', 'TYPE', 'ADDRESS', 'PORT', 'CACHE_DURATION', 'CACHE_TIME', 'LOGGER', 'MACHINE_TIME', 'LOCAL_MACHINE_TIME', 'PROMPT', 'CTAG', 'TELNET', 'MESSAGES', 'STATUS';
 
@@ -263,7 +263,7 @@ sub waitMessage {
 
     my $type = $args->{type};
 
-    $self->{LOGGER}->debug("waitMessage");
+    $self->{LOGGER}->debug("waitMessage: ".$type);
 
     my $end;
     if ($args->{timeout}) {
@@ -291,6 +291,7 @@ sub waitMessage {
         }
 
         if ($status == -1) {
+            $self->{LOGGER}->debug("readMessage returned -1");
             return (-1, undef);
         }
 
@@ -315,6 +316,7 @@ sub readMessage {
     $self->{LOGGER}->debug("readMessage");
 
     if (not $self->{TELNET}) {
+        $self->{LOGGER}->debug("readMessage: no TELNET");
         return (-1, undef);
     }
 
@@ -340,8 +342,10 @@ sub readMessage {
         if ($errmsg =~ /timed-out/) {
             $retStatus = 1; # a timeout occurred.            
         } elsif ($errmsg =~ /read eof/) {
+            $self->{LOGGER}->debug("readMessage: read eof");
             $retStatus = 0; # connection closed.
         } else {
+            $self->{LOGGER}->debug("readMessage: other error: ".$errmsg);
             $retStatus = -1; # an error occurred.
         }
 
@@ -481,6 +485,26 @@ sub convertPMDateTime {
 	}
 
 	return sprintf "%4d-%02d-%02d %02d:%02d:%02d", $year,$month,$day,$hour,$minute,0;
+}
+
+sub convertTimeStringToTimestamp {
+	my ($self, $time_str) = @_;
+
+	# guess the year of the interval based on the current machine time
+	my ($date, $time) = split(' ', $time_str);
+
+	my ($year, $month, $day) = split('-', $date);
+	my ($hour, $minute, $second) = split(':', $time);
+
+    return POSIX::mktime($second, $minute, $hour, $day, $month - 1, $year - 1900, 0, 0);
+}
+
+sub convertMachineTSToLocalTS {
+    my ($self, $machine_timestamp) = @_;
+
+    my $diff = $self->{MACHINE_TIME} - $self->{LOCAL_MACHINE_TIME};
+
+    return $machine_timestamp + $diff;
 }
 
 1;

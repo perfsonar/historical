@@ -4,26 +4,24 @@ use Getopt::Long;
 use DBI;
 
 my $sqlite_create_table =<<EOQ
-create table link_status (
-  link_id varchar(255) not null,
-  link_knowledge varchar(32) not null,
+create table TABLENAME (
+  element_id varchar(255) not null,
   start_time integer not null,
   end_time integer not null,
   oper_status varchar(32) not null,
   admin_status varchar(32) not null,
- unique (link_id, start_time, end_time));
+ unique (element_id, start_time, end_time));
 EOQ
 ;
 
 my $mysql_create_table =<<EOQ
-create table link_status (
-  link_id varchar(255) not null,
-  link_knowledge varchar(32) not null,
+create table TABLENAME (
+  element_id varchar(255) not null,
   start_time bigint not null,
   end_time bigint not null,
   oper_status varchar(32) not null,
   admin_status varchar(32) not null,
-  unique(link_id, start_time, end_time)
+  unique(element_id, start_time, end_time)
 );
 EOQ
 ;
@@ -56,7 +54,7 @@ if (not $DB_TYPE) {
 sub usage {
 	print "$0: Initialize a Link Status database\n";
 	print "  --type: The database type: 'sqlite' or 'mysql'\n";
-	print "  --table: The table to write to. defaults to 'link_status'\n";
+	print "  --table: The table to write to. defaults to 'ps_status'\n";
 	print "  If SQLite is chosen, you can use these arguments\n";
 	print "  --file: The database file to use\n";
 	print "  If MySQL is chosen, you can use these arguments\n";
@@ -76,11 +74,19 @@ if ($DB_TYPE ne "sqlite" and $DB_TYPE ne "mysql") {
 }
 
 if (not $DB_TABLE) {
-	$DB_TABLE = 'link_status';
+	$DB_TABLE = 'ps_status';
 }
 
 if ($DB_TYPE eq "sqlite") {
+	if (not $DB_FILE) {
+		print "Need to specify a database file\n";
+		usage();
+		exit(-1);
+	}
+
 	my $dbi_string = "DBI:SQLite:dbname=".$DB_FILE;
+
+	$sqlite_create_table =~ s/TABLENAME/$DB_TABLE/gm;
 
 	my $dbh = DBI->connect($dbi_string);
 	my $sth = $dbh->prepare($sqlite_create_table);
@@ -93,6 +99,8 @@ if ($DB_TYPE eq "sqlite") {
 		usage();
 		exit(-1);
 	}
+
+	$mysql_create_table =~ s/TABLENAME/$DB_TABLE/gm;
 
 	$dbi_string .= ":database=".$DB_NAME;
 

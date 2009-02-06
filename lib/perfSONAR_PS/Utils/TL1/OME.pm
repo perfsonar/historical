@@ -6,7 +6,7 @@ use strict;
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
-use perfSONAR_PS::ParameterValidation;
+use perfSONAR_PS::Utils::ParameterValidation;
 
 use base 'perfSONAR_PS::Utils::TL1::Base';
 use fields 'ETHSBYAID', 'OCNSBYAID', 'OCNSBYNAME', 'READ_ETH', 'READ_OCN', 'READ_PM', 'PMS', 'READ_ALARMS', 'ALARMS';
@@ -196,7 +196,7 @@ sub getEvent {
     return (-1, undef);
 }
 
-sub getAlarm {
+sub waitAlarm {
     my ($self, @args) = @_;
     my $args = validateParams(@args, 
             {
@@ -236,18 +236,23 @@ sub getAlarm {
             $description =~ s/\\"//g;
             $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
 
+            my $timestamp = $self->convertTimeStringToTimestamp($self->convertPMDateTime($date, $time));
+
             my %alarm = (
                 facility => $facility,
                 facility_type => $facility_type,
                 severity => $severity,
-                alarmType => $alarmType,
+                alarm_type => $alarmType,
+                alarm_time => $timestamp,
+                alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
                 description => $description,
-                serviceAffecting => $serviceAffecting,
+                service_affecting => $serviceAffecting,
+                measurement_time => time,
                 date => $date,
                 time => $time,
                 location => $location,
                 direction => $direction,
-                alarmId => $alarmId,
+                alarm_id => $alarmId,
                 year => $year,
                 mode => $mode,
                 );
@@ -360,7 +365,6 @@ sub readStats {
     }
 
     $self->{CACHE_TIME} = time;
-    $self->disconnect();
 
     return;
 }
@@ -552,18 +556,23 @@ sub readAlarms {
             $description =~ s/\\"//g;
             $self->{LOGGER}->debug("DESCRIPTION: '$description'\n");
 
+            my $timestamp = $self->convertTimeStringToTimestamp($self->convertPMDateTime($date, $time));
+
             my %alarm = (
                 facility => $facility,
                 facility_type => $facility_type,
                 severity => $severity,
-                alarmType => $alarmType,
+                alarm_type => $alarmType,
+                alarm_time => $timestamp,
+                alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
                 description => $description,
-                serviceAffecting => $serviceAffecting,
+                service_affecting => $serviceAffecting,
+                measurement_time => time,
                 date => $date,
                 time => $time,
                 location => $location,
                 direction => $direction,
-                alarmId => $alarmId,
+                alarm_id => $alarmId,
                 year => $year,
                 mode => $mode,
             );

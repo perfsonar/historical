@@ -10,7 +10,7 @@ use perfSONAR_PS::Utils::TL1::HDXc;
 
 our $VERSION = 0.09;
 
-use fields 'AGENT', 'TYPE', 'LOGGER', 'ELEMENT_TYPE', 'ELEMENT_ID', 'ELEMENT_ID_TYPE';
+use fields 'AGENT', 'TYPE', 'LOGGER', 'FACILITY_TYPE', 'FACILITY_NAME', 'FACILITY_NAME_TYPE';
 
 sub new {
     my ($class, @params) = @_;
@@ -23,9 +23,9 @@ sub new {
             username => 0,
             password => 0,
             agent => 0,
-            element_id => 1,
-            element_id_type => 0,
-            element_type => 1,
+            facility_name => 1,
+            facility_name_type => 0,
+            facility_type => 1,
             });
 
     my $self = fields::new($class);
@@ -53,14 +53,15 @@ sub new {
                     password => $parameters->{password},
                     address => $parameters->{address},
                     port => $parameters->{port},
-                    cache_time => 300
+                    cache_time => 30
                 );
     }
 
     $self->type($parameters->{type});
     $self->agent($parameters->{agent});
-    my $res = $self->set_element({ type => $parameters->{element_type}, id => $parameters->{element_id}, id_type => $parameters->{element_id_type} });
+    my $res = $self->set_element({ type => $parameters->{facility_type}, id => $parameters->{facility_name}, id_type => $parameters->{facility_name_type} });
 	if (not $res) {
+		$self->{LOGGER}->error("Invalid element type");
 		return;
 	}
 
@@ -71,10 +72,10 @@ sub run_line {
     my ($self) = @_;
     my ($status, $time);
 
-    if ($self->{ELEMENT_ID_TYPE} eq "name") {
-        $status = $self->{AGENT}->getLineByName($self->{ELEMENT_ID});
+    if ($self->{FACILITY_NAME_TYPE} eq "name") {
+        $status = $self->{AGENT}->getLineByName($self->{FACILITY_NAME});
     } else {
-        $status = $self->{AGENT}->getLine($self->{ELEMENT_ID});
+        $status = $self->{AGENT}->getLine($self->{FACILITY_NAME});
     }
 
     $time = $self->{AGENT}->getCacheTime();
@@ -96,7 +97,7 @@ sub run_sect {
     my ($self) = @_;
     my ($status, $time);
 
-    $status = $self->{AGENT}->getSect($self->{ELEMENT_ID});
+    $status = $self->{AGENT}->getSect($self->{FACILITY_NAME});
 
     $time = $self->{AGENT}->getCacheTime();
 
@@ -155,10 +156,10 @@ sub run_ocn {
     my ($self) = @_;
     my ($status, $time);
 
-    if ($self->{ELEMENT_ID_TYPE} eq "name") {
-        $status = $self->{AGENT}->getOCNByName($self->{ELEMENT_ID});
+    if ($self->{FACILITY_NAME_TYPE} eq "name") {
+        $status = $self->{AGENT}->getOCNByName($self->{FACILITY_NAME});
     } else {
-        $status = $self->{AGENT}->getOCN($self->{ELEMENT_ID});
+        $status = $self->{AGENT}->getOCN($self->{FACILITY_NAME});
     }
 
     $time = $self->{AGENT}->getCacheTime();
@@ -216,7 +217,7 @@ sub run_ocn {
 
 sub run_crossconnect {
     my ($self) = @_;
-    my $status = $self->{AGENT}->getCrossconnect($self->{ELEMENT_ID});
+    my $status = $self->{AGENT}->getCrossconnect($self->{FACILITY_NAME});
     my $time = $self->{AGENT}->getCacheTime();
 
     # <sst> is LPBK, TS, CLPBK, ACTIVE, SWITCHED, BRIDGED, or ROLL (for connection management commands and reports) 
@@ -242,13 +243,13 @@ sub run_crossconnect {
 sub run {
     my ($self) = @_;
 
-    if ($self->{ELEMENT_TYPE} eq "crossconnect") {
+    if ($self->{FACILITY_TYPE} eq "crossconnect") {
         return $self->run_crossconnect();
-    } elsif ($self->{ELEMENT_TYPE} eq "sect") {
+    } elsif ($self->{FACILITY_TYPE} eq "sect") {
         return $self->run_sect();
-    } elsif ($self->{ELEMENT_TYPE} eq "line") {
+    } elsif ($self->{FACILITY_TYPE} eq "line") {
         return $self->run_line();
-    } elsif ($self->{ELEMENT_TYPE} =~ /^oc(n|[0-9]+)/) {
+    } elsif ($self->{FACILITY_TYPE} =~ /^oc(n|[0-9]+)/) {
         return $self->run_ocn();
     }
 }
@@ -288,8 +289,8 @@ sub set_element {
         return undef;
     }
 
-	$self->{ELEMENT_ID} = $parameters->{id};
-	$self->{ELEMENT_TYPE} = $parameters->{type};
+	$self->{FACILITY_NAME} = $parameters->{id};
+	$self->{FACILITY_TYPE} = $parameters->{type};
 
 	if ($parameters->{type} eq "sect") {
 		if ($parameters->{id_type}) {
@@ -298,16 +299,16 @@ sub set_element {
 			}
 		}
 
-		$self->{ELEMENT_ID_TYPE} = "aid";
+		$self->{FACILITY_NAME_TYPE} = "aid";
 	} elsif ($parameters->{type} eq "line") {
 		if ($parameters->{id_type}) {
 			unless ($parameters->{id_type} eq "aid" or $parameters->{id_type} eq "name") {
 				return undef;
 			}
 
-			$self->{ELEMENT_ID_TYPE} = $parameters->{id_type};
+			$self->{FACILITY_NAME_TYPE} = $parameters->{id_type};
 		} else {
-			$self->{ELEMENT_ID_TYPE} = "aid";
+			$self->{FACILITY_NAME_TYPE} = "aid";
 		}
 	} elsif ($parameters->{type} =~ /^oc(n|[0-9]+)/) {
 		if ($parameters->{id_type}) {
@@ -315,9 +316,9 @@ sub set_element {
 				return undef;
 			}
 
-			$self->{ELEMENT_ID_TYPE} = $parameters->{id_type};
+			$self->{FACILITY_NAME_TYPE} = $parameters->{id_type};
 		} else {
-			$self->{ELEMENT_ID_TYPE} = "aid";
+			$self->{FACILITY_NAME_TYPE} = "aid";
 		}
 	} elsif ($parameters->{type} eq "crossconnect") {
 		if ($parameters->{id_type}) {
@@ -326,26 +327,26 @@ sub set_element {
 			}
 		}
 
-		$self->{ELEMENT_ID_TYPE} = "name";
+		$self->{FACILITY_NAME_TYPE} = "name";
 	}
 
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_id {
+sub facility_name {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_type {
+sub facility_type {
     my ($self) = @_;
 	
-	return $self->{ELEMENT_TYPE};
+	return $self->{FACILITY_TYPE};
 }
 
-sub element_id_type {
+sub facility_name_type {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID_TYPE};
+    return $self->{FACILITY_NAME_TYPE};
 }

@@ -49,6 +49,9 @@ sub getVCG {
         my %vcgs = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-VCG::ALL:".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got VCG Lines\n");
 
@@ -62,6 +65,8 @@ sub getVCG {
 
                 my @pairs = split(",", $2);
                 foreach my $pair (@pairs) {
+                    next if (not $pair);
+
                     my ($variable, $value) = split("=", $pair);
                     $variable = lc($variable);
 
@@ -91,16 +96,32 @@ sub getSNC {
         my %sncs = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-SNC-STSPC::ALL:".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got SNC Lines\n");
 
         foreach my $line (@$results) {
             $self->{LOGGER}->debug($line."\n");
 
-            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*STATE=([^,]*).*"/) {
-                my %status = ( pst => $2, state => $3 );
+#            "T3_1-A-4-1_S190,TYPE=PERM,FROMENDPOINT=T3_1-A-4-1_S190,TOENDPOINT=1-A-5-1-191,RMNODE=CHAR,LEP=GTP_NAMETYPE,EPTYPE=ORIGINATING,ALIAS=T3_1-A-4-1_S190,DTLEXCL=NO,REGROOM=NO,,SDHSE=NO,MESHRST=NO,,BCKOP=0,,TRVRT=0,PST=IS-NR,STATE=TERM_WORKING_CONNECTED,RATE=1,PEERSNC=,PEERORIGIN=,SNCLINETYPE=PROTECT,,,,,,VALIDSIGNALWASDETECTED=NO,REMOTEPATHPROTECTION=SNC_RMT_PATH_PROTECTION_HIGH_ORDER,MAXADMINWEIGHT=0"
 
-                $sncs{$1} = \%status;
+            if ($line =~ /"([^,]*),(.*PST.*)"/) {
+                my %snc = ();
+
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    next if (not $pair);
+
+                    my ($variable, $value) = split("=", $pair);
+                    $variable = lc($variable);
+
+                    $snc{$variable} = $value;
+                }
+
+                $snc{name} = $1;
+                $sncs{$1} = \%snc;
             }
         }
 
@@ -122,16 +143,32 @@ sub getSTS {
         my %stss = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-STSPC:::".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got STSPC Lines\n");
 
         foreach my $line (@$results) {
             $self->{LOGGER}->debug($line."\n");
 
-            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
-                my %status = ( pst => $2, sst => $3 );
+#  "1-A-4-1-192,NAME=1-A-4-1:192-CTP-192,STSTYPE=1,ALIAS=1-A-4-1:192-CTP-192,GTPNAME=,STARTCHAN=192,SUPCK=CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192,SUPTP=1-A-4-1,CRSCONN=CHIC_CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192_1,SUPCPK=1-A-4-1,EXPTRC=,TRC=,TRCYN=YES,RCVTRC=1-A-5-1:1921c0,FMTPTRC=16_BYTE,INJ=NO,LOPI=NO,RFIIA=NO,SDI=YES,SFI=YES,SDTH=6,SFTH=3,PST=IS-NR,SST=ALM,DIAG=NONE,PLOADTYPE=AU3,PATHPROTSTATE=UNPROTECTED,TIMPI=YES,UNEQPI=YES"
 
-                $stss{$1} = \%status;
+            if ($line =~ /"([^,]*),(.*PST.*)"/) {
+                my %sts = ();
+
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    next if (not $pair);
+
+                    my ($variable, $value) = split("=", $pair);
+                    $variable = lc($variable);
+
+                    $sts{$variable} = $value;
+                }
+
+                $sts{name} = $1;
+                $stss{$1} = \%sts;
             }
         }
 
@@ -149,7 +186,42 @@ sub getSTS {
 sub getETH {
     my ($self, $facility_name) = @_;
 
-    die("Not yet implemented");
+    if (not defined $facility_name) {
+        return;
+    }
+
+    my ($successStatus, $results) = $self->send_cmd("RTRV-GIGE::$facility_name:".$self->{CTAG}.";");
+    if ($successStatus == -1) {
+        return;
+    }
+
+    $self->{LOGGER}->debug("Got GigE Lines\n");
+
+    my %eths = ();
+    foreach my $line (@$results) {
+        $self->{LOGGER}->debug($line."\n");
+
+#   "1-A-4-1-1,ALIAS=manlan-switch:Te12/4,,ETHERPHY=10GBASE_R,TUNNELPEERTYPE=VCG,TUNNELPEERNAME=1-A-4-1:1-192,,,,,,RMTLASERSHUTDOWN=IDLE,RMTLASERSHUTDOWNDELAY=3,LOCK=IDLE,LOSIA=CR,ERFIIA=NR,LAGMEMBERSHIP=,DFLTVLANID=1,DFLTCOS=CLASS_OF_SVC_2,COSCFG=SystemDefault,RECEIVECONDITION=NORMAL,PST=IS-NR,SST=[ALM,BUSY]"
+
+        if ($line =~ /"([^,]*),(.*PST=.*)"/) {
+            my %eth = ();
+
+            my @pairs = split(",", $2);
+            foreach my $pair (@pairs) {
+                next if (not $pair);
+
+                my ($variable, $value) = split("=", $pair);
+                $variable = lc($variable);
+
+                $eth{$variable} = $value;
+            }
+
+            $eth{name} = $1;
+            $eths{$1} = \%eth;
+        }
+    }
+
+    return $eths{$facility_name};
 }
 
 sub getOCN {
@@ -159,16 +231,32 @@ sub getOCN {
         my %ocns = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-OCN::ALL:".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got OCN Lines\n");
 
         foreach my $line (@$results) {
             $self->{LOGGER}->debug($line."\n");
+#   "1-A-3-1,ITYPE=SONET,RCVTRC=,TRC=,EXPTRC=,FMTSTRC=16_BYTE,ETRC=NO,DCC=NO,UCC=NO,LDCC=YES,XDCC=NO,ISCCMD=Unprotected,,,,PST=OOS-AUMA,SST=ALM,FERFNC=YES,AISIA=YES,LOFIA=NO,LOSIA=NO,SDIA=NO,SFIA=NO,TIMSIA=YES,OPTINHIBITLOWFAIL15MINTCA=NO,,,,,OPRINHIBITHIGHFAIL15MINTCA=NO,,,,,,,LOSDT=100,SDT=7,SDTC=8,SFT=4,SFTC=5,TSTMD=NONE,RATE=OC192,LMTYPE=LM2,FSSM=NO,TSSM=PRS,RSSM=NONE,TIMESLOTMAP=,NOACTP=0,UTILIZATION=0/192,PTYPE=None,LTYPE=Unprotected,PPPADMIN=LOCKED,PPPLINESTATE=PPP_NEGOTIATING,PPPPROTSTATE=NOT_INSERVICE,HDLCXSUM=16_BIT,CONFIGRATE=OC192,TRSCT=NO,SDCCTRNSP=NO,LDCCTRNSP=NO,DROPSIDE=NO,KBYTERESIL=NO,OSIENABLE=NO,,OSILAPDMODE=NETWORK,,OSILAPDPST=NULL,OSILAPDSST=NULL,OSRPLAPD=YES,MAXAPBSTS=,LWPCENABLED=YES,,TXCIRCID=,TXCIRCDESC=,RXCIRCID=,RXCIRCDESC=,SIGNALST=LOS,AU4ONLY=NO,LDCCRATE=576,ALS=NO,MAPPING=AU3,PAUSEOFFWM=,PAUSEONWM=,,,OSPFHELLO=,OSPFDEAD=,OSPFMTU=,OSPFCOST="
 
-            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*).*"/) {
-                my %status = ( pst => $2 );
+            if ($line =~ /"([^,]*),(.*PST=.*)"/) {
+                my %ocn = ();
 
-                $ocns{$1} = \%status;
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    next if (not $pair);
+
+                    my ($variable, $value) = split("=", $pair);
+                    $variable = lc($variable);
+
+                    $ocn{$variable} = $value;
+                }
+
+                $ocn{name} = $1;
+                $ocns{$1} = \%ocn;
+
             }
         }
 
@@ -190,6 +278,9 @@ sub getEFLOW {
         my %eflows = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-EFLOW::ALL:".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got EFLOW Lines\n");
 
@@ -201,6 +292,8 @@ sub getEFLOW {
                 my %eflow = ();
                 my @pairs = split(",", $2);
                 foreach my $pair (@pairs) {
+                    next if (not $pair);
+
                     my ($variable, $value) = split("=", $pair);
 
                     $variable = lc($variable);
@@ -231,16 +324,32 @@ sub getGTP {
         my %gtps = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-GTP::ALL:".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got GTP Lines\n");
 
         foreach my $line (@$results) {
             $self->{LOGGER}->debug($line."\n");
 
-            if ($line =~ /"([^,]*),.*[^A-Z]PST=([^,]*),.*SST=([^,]*).*"/) {
-                my %status = ( pst => $2, sst => $3 );
+#    "CHIC_CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192_002-,LBL=CHIC_CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192_002-,OWN=,CIRC=CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192,XCONN=CHIC_CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192_1,PST=IS-NR,SST=ALM,CTP=CHIC_CHIC:1-A-4-1:192_TO_INDI:1-A-5-1:192_002-1,RATE=1"
 
-                $gtps{$1} = \%status;
+            if ($line =~ /"([^,]*),(.*PST=.*)"/) {
+                my %gtp = ();
+
+                my @pairs = split(",", $2);
+                foreach my $pair (@pairs) {
+                    next if (not $pair);
+
+                    my ($variable, $value) = split("=", $pair);
+                    $variable = lc($variable);
+
+                    $gtp{$variable} = $value;
+                }
+
+                $gtp{name} = $1;
+                $gtps{$1} = \%gtp;
             }
         }
 
@@ -262,26 +371,41 @@ sub getCrossconnect {
         my %crss = ();
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-CRS:::".$self->{CTAG}.";");
+        if ($successStatus == -1) {
+            return;
+        }
 
         $self->{LOGGER}->debug("Got CRS Lines\n");
 
+#     "FROMENDPOINT=JACK_I2:STS-1-1v:JACK:KANS:0001_002-,TOENDPOINT=JACK_I2:STS-1-1v:JACK:KANS:0001_009-:NAME=JACK_I2:STS-1-1v:JACK:KANS:0001_13,FROMTYPE=GTP,TOTYPE=GTP,ALIAS=,SIZE=1,USRC=NO,CKTID=I2:STS-1-1v:JACK:KANS:0001,PRIOR=1023,CONNSTND=SONET,PREEMPTING=NO,PREEMPTABLE=NO::PST=IS-NR,"
         foreach my $line (@$results) {
             $self->{LOGGER}->debug($line."\n");
 
             if ($line =~ /NAME=([^,]*)/) {
-                my ($pst, $sst, $facility_name);
-                $facility_name = $1;
+                my %crs = ();
 
+                $crs{name} = $1;
+
+                if ($line =~ /FROMENDPOINT=([^,]*)/) {
+                    $crs{fromendpoint} = $1;
+                }
+                if ($line =~ /FROMTYPE=([^,]*)/) {
+                    $crs{fromtype} = $1;
+                }
+                if ($line =~ /TOENDPOINT=(.*):NAME=/) {
+                    $crs{toendpoint} = $1;
+                }
+                if ($line =~ /TOTYPE=([^,]*)/) {
+                    $crs{totype} = $1;
+                }
+                if ($line =~ /CKTID=([^,]*)/) {
+                    $crs{cktid} = $1;
+                }
                 if ($line =~ /PST=([^,]*)/) {
-                    $pst = $1;
-                }
-                if ($line =~ /SST=([^,]*)/) {
-                    $sst = $1;
+                    $crs{pst} = $1;
                 }
 
-                my %status = ( pst => $pst, sst => $sst );
-
-                $crss{$facility_name} = \%status;
+                $crss{$crs{name}} = \%crs;
             }
         }
 
@@ -307,7 +431,7 @@ sub getSTS_PM {
     }
 
     if ($successStatus == -1) {
-        return undef;
+        return;
     }
 
     my %pm_results = ();
@@ -375,7 +499,7 @@ sub getETH_PM {
         }
 
         if ($successStatus == -1) {
-            return undef;
+            return;
         }
 
         my %pm_results = ();
@@ -396,7 +520,7 @@ sub getETH_PM {
 
                 my %result = (
                         facility => $facility_name,
-                        facility_type => "eth",
+                        facility_type => "gige",
                         type => $monitoredType,
                         value => $monitoredValue,
                         time_period => $timeperiod,
@@ -443,7 +567,7 @@ sub getEFLOW_PM {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-EFLOW::\"$facility_name\":".$self->{CTAG}."::;");
         if ($successStatus == -1) {
-            return undef;
+            return;
         }
 
         my %pm_results = ();
@@ -514,7 +638,7 @@ sub getVCG_PM {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-VCG::\"$facility_name\":".$self->{CTAG}."::;");
         if ($successStatus == -1) {
-            return undef;
+            return;
         }
 
         my %pm_results = ();
@@ -586,7 +710,7 @@ sub getOCN_PM {
 
         my ($successStatus, $results) = $self->send_cmd("RTRV-PM-OCN::$facility_name:".$self->{CTAG}."::;");
         if ($successStatus == -1) {
-            return undef;
+            return;
         }
 
         my %pm_results = ();
@@ -614,7 +738,7 @@ sub getOCN_PM {
 
                 my %result = (
                         facility => $facility_name,
-                        facility_type => "vcg",
+                        facility_type => "oc".$facility_name_type,
                         type => $monitoredType,
                         value => $monitoredValue,
                         time_period => $timeperiod,
@@ -692,15 +816,20 @@ sub getAlarms {
 
                 $description =~ s/\\"//g;
 
+                my $timestamp = $self->convertTimeStringToTimestamp($date." ".$time);
+
                 my %alarm = (
                         facility => $facility,
                         facility_type => $facility_type,
                         severity => $severity,
-                        alarmType => $alarmType,
+                        alarm_type => $alarmType,
+                        alarm_time => $timestamp,
+                        alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
+                        description => $description,
                         service_affecting => $serviceAffecting,
+                        measurement_time => time,
                         date => $date,
                         time => $time,
-                        description => $description,
                         );
 
                 push @alarms, \%alarm;
@@ -774,6 +903,8 @@ sub waitEvent {
                 facility => $facility,
                 eventType => $condtype,
                 effect => $effect,
+                event_time => $self->convertPMDateTime($date, $time),
+                measurement_time => time,
                 date => $date,
                 time => $time,
 #                location => $location,
@@ -806,7 +937,7 @@ sub waitAlarm {
     }
 
     if ($status != 0 or not defined $lines) {
-        return (-1, undef);
+        return ($status, undef);
     }
 
     foreach my $line (@$lines) {
@@ -825,15 +956,20 @@ sub waitAlarm {
 
             $description =~ s/\\"//g;
 
+            my $timestamp = $self->convertTimeStringToTimestamp($date." ".$time);
+
             my %alarm = (
                     facility => $facility,
                     facility_type => $facility_type,
                     severity => $severity,
-                    alarmType => $alarmType,
+                    alarm_type => $alarmType,
+                    alarm_time => $timestamp,
+                    alarm_time_local => $self->convertMachineTSToLocalTS($timestamp),
+                    description => $description,
                     service_affecting => $serviceAffecting,
+                    measurement_time => time,
                     date => $date,
                     time => $time,
-                    description => $description,
                     );
 
             return (0, \%alarm);

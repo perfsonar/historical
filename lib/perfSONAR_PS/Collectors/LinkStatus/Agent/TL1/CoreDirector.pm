@@ -10,7 +10,15 @@ use Data::Dumper;
 
 our $VERSION = 0.09;
 
-use fields 'AGENT', 'TYPE', 'LOGGER', 'ELEMENT_TYPE', 'ELEMENT_ID', 'ELEMENT_ID_TYPE';
+use fields 'AGENT', 'TYPE', 'LOGGER', 'FACILITY_TYPE', 'FACILITY_NAME', 'FACILITY_NAME_TYPE';
+
+my %state_mapping = (
+		"is-anr" => "degraded",
+		"is-nr" => "up",
+		"oos-au" => "down",
+		"oos-auma" => "down",
+		"oos-ma" => "down",
+		);
 
 sub new {
     my ($class, @params) = @_;
@@ -23,9 +31,9 @@ sub new {
             username => 0,
             password => 0,
             agent => 0,
-            element_id => 1,
-            element_id_type => 0,
-            element_type => 1,
+            facility_name => 1,
+            facility_name_type => 0,
+            facility_type => 1,
             });
 
     my $self = fields::new($class);
@@ -53,13 +61,13 @@ sub new {
                     password => $parameters->{password},
                     address => $parameters->{address},
                     port => $parameters->{port},
-                    cache_time => 300
+                    cache_time => 30
                 );
     }
 
     $self->type($parameters->{type});
     $self->agent($parameters->{agent});
-    my $res = $self->set_element({ type => $parameters->{element_type}, id => $parameters->{element_id}, id_type => $parameters->{element_id_type} });
+    my $res = $self->set_element({ type => $parameters->{facility_type}, id => $parameters->{facility_name}, id_type => $parameters->{facility_name_type} });
 	if (not $res) {
 		return;
 	}
@@ -68,191 +76,233 @@ sub new {
     return $self;
 }
 
-sub runVCG {
-    my ($self) = @_;
-    my $status = $self->{AGENT}->getVCG($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
+=head2
+	Locates the cross-connect named (either alias or cktid) and returns its
+	current status mapped to one of up, down or degraded.
+=cut
+sub checkCrossconnect {
+	my ($self, $name) = @_;
 
-    print "VCGRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
+	my $crss = $self->{AGENT}->getCrossconnect();
+	foreach my $crs_key (keys %$crss) {
+		my $crs = $crss->{$crs_key};
 
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+		if ($crs->{cktid} eq $self->{FACILITY_NAME} or $crs->{name} eq $self->{FACILITY_NAME}) {
+			my $oper_status;
 
-    my $oper_status;
+			unless ($crs->{pst} and $state_mapping{lc($crs->{pst})}) {
+				$oper_status = "unknown";
+			} else {
+				$oper_status = $state_mapping{lc($crs->{pst})};
+			}
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
-        $oper_status = "unknown";
-    } else {
-        $oper_status = $mapping{lc($status->{pst})};
-    }
+			return(0, time, $oper_status);
+		}
+	}
 
-    return(0, $time, $oper_status);
+	my $msg = "Couldn't find requested cross-connect";
+	$self->{LOGGER}->error($msg);
+	return (-1, $msg);
 }
 
-sub runCTP {
-    my ($self, $name) = @_;
-    my $status = $self->{AGENT}->getCTP($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
+# Checks a EFLOW (used for VLANs) by seeing if it's constituent pieces are up/down.
+sub checkEFLOW {
+	my ($self, $id, $id_type) = @_;
 
-    print "CTPRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
+	my ($name, $port, $vlan);
 
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+	if ($id_type eq "vlan") {
+		($port, $vlan) = split("|", $id);
+	} else {
+		$name = $id;
+	}
 
-    my $oper_status;
+	my $eflows = $self->{AGENT}->getEFLOW();
+	if (not $eflows) {
+		my $msg = "Couldn't lookup requested eflow";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
-        $oper_status = "unknown";
-    } else {
-        $oper_status = $mapping{lc($status->{pst})};
-    }
+	foreach my $eflow_key (keys %$eflows) {
+		my $eflow = $eflows->{$eflow_key};
 
-    return(0, $time, $oper_status);
+		# skip the invalid eflows
+		next unless (not $vlan or ($eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} eq $vlan));
+
+		next unless (not $port or ($eflow->{ingressportname} eq $port or $eflow->{egressportname} eq $port));
+
+		next unless (not $name or $eflow_key eq $name);
+
+		my $oper_status = "up";
+
+		foreach my $type ("ingressport", "egressport") {
+			my ($status, $time, $new_oper_status);
+
+			if ($eflow->{$type."type"} eq "VCG") {
+				($status, $time, $new_oper_status) = $self->{AGENT}->checkVCG($eflow->{$type."name"});
+			} elsif ($eflow->{$type."type"} eq "ETTP") {
+				($status, $time, $new_oper_status) = $self->{AGENT}->checkGIGE($eflow->{$type."name"});
+			} else {
+				return (0, time, "unknown");
+			}
+
+			if ($status == -1) {
+				return (0, time, "unknown");
+			}
+
+			if ($new_oper_status eq "unknown" or $new_oper_status eq "down") {
+				return (0, time, $new_oper_status);
+			}
+
+			if ($new_oper_status eq "degraded") {
+				$oper_status = "degraded";
+			}
+		}
+
+		return (0, time, $oper_status);
+	}
+
+	my $msg = "Couldn't find requested eflow, assuming it's down";
+	$self->{LOGGER}->warn($msg);
+	return (0, time, "down");
 }
 
-sub runSNC {
-    my ($self, $name) = @_;
-    my $status = $self->{AGENT}->getSNC($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
+sub checkVCG {
+    my ($self, $vcg_name) = @_;
 
-    print "SNCRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
+    my $vcgs = $self->{AGENT}->getVCG();
+	if (not $vcgs) {
+		my $msg = "Couldn't look up VCG";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
 
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+	foreach my $vcg_id (keys %$vcgs) {
+		my $vcg = $vcgs->{$vcg_id};
 
-    my $oper_status;
+		if ($vcg_name eq $vcg_id or $vcg->{alias} eq $vcg_name) {
+			my $oper_status;
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
-        $oper_status = "unknown";
-    } else {
-        $oper_status = $mapping{lc($status->{pst})};
-    }
+			unless ($vcg->{pst} and $state_mapping{lc($vcg->{pst})}) {
+				$oper_status = "unknown";
+			} else {
+				$oper_status = $state_mapping{lc($vcg->{pst})};
+			}
 
-    return(0, $time, $oper_status);
+			return(0, time, $oper_status);
+		}
+	}
+
+	my $msg = "Couldn't find requested VCG";
+	$self->{LOGGER}->error($msg);
+	return (-1, $msg);
 }
 
-sub runETH {
+sub checkGIGE {
+    my ($self, $eth_name) = @_;
+
+    my $eths = $self->{AGENT}->getGIGE();
+	if (not $eths) {
+		my $msg = "Couldn't look up Ethernet Port";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
+
+	foreach my $eth_id (keys %$eths) {
+		my $eth = $eths->{$eth_id};
+
+		if ($eth_name eq $eth_id or $eths->{$eth_id}->{alias} eq $eth_name) {
+			my $oper_status;
+
+			unless ($eth->{pst} and $state_mapping{lc($eth->{pst})}) {
+				$oper_status = "unknown";
+			} else {
+				$oper_status = $state_mapping{lc($eth->{pst})};
+			}
+
+			return(0, time, $oper_status);
+		}
+	}
+
+	my $msg = "Couldn't find requested VCG";
+	$self->{LOGGER}->error($msg);
+	return (-1, $msg);
+}
+
+sub checkOptical {
     my ($self, $aid) = @_;
-}
+    my $optical = $self->{AGENT}->getOCN($aid);
 
-sub runOCN {
-    my ($self, $aid) = @_;
-    my $status = $self->{AGENT}->getOCN($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
-
-    print "OCNRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
-
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+	if (not $optical) {
+		my $msg = "Couldn't look up Optical Port";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
 
     my $oper_status;
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
+    unless ($optical->{pst} and $state_mapping{lc($optical->{pst})}) {
         $oper_status = "unknown";
     } else {
-        $oper_status = $mapping{lc($status->{pst})};
+        $oper_status = $state_mapping{lc($optical->{pst})};
     }
 
-    return(0, $time, $oper_status);
+    return(0, time, $oper_status);
 
 }
 
-sub runGTP {
+sub checkSNC {
     my ($self, $name) = @_;
-    my $status = $self->{AGENT}->getGTP($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
-
-    print "GTPRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
-
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+    my $status = $self->{AGENT}->getSNC($self->{FACILITY_NAME});
 
     my $oper_status;
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
+    unless ($status->{pst} and $state_mapping{lc($status->{pst})}) {
         $oper_status = "unknown";
     } else {
-        $oper_status = $mapping{lc($status->{pst})};
+        $oper_status = $state_mapping{lc($status->{pst})};
     }
 
-    return(0, $time, $oper_status);
+    return(0, time, $oper_status);
 }
 
-sub runCrossconnect {
+sub checkGTP {
     my ($self, $name) = @_;
-    my $status = $self->{AGENT}->getCrossconnect($self->{ELEMENT_ID});
-    my $time = $self->{AGENT}->getCacheTime();
-
-    print "CRSRES(".$self->{ELEMENT_ID}."): ".Dumper($status);
-    print "-PST: '".lc($status->{pst})."'\n";
-
-    my %mapping = (
-        "is-anr" => "degraded",
-        "is-nr" => "up",
-        "oos-au" => "down",
-        "oos-auma" => "down",
-        "oos-ma" => "down",
-    );
+    my $status = $self->{AGENT}->getGTP($self->{FACILITY_NAME});
 
     my $oper_status;
 
-    unless ($status->{pst} and $mapping{lc($status->{pst})}) {
+    unless ($status->{pst} and $state_mapping{lc($status->{pst})}) {
         $oper_status = "unknown";
     } else {
-        $oper_status = $mapping{lc($status->{pst})};
+        $oper_status = $state_mapping{lc($status->{pst})};
     }
 
-    return(0, $time, $oper_status);
+    return(0, time, $oper_status);
 }
-
 
 sub run {
     my ($self) = @_;
 
-    $self->{LOGGER}->debug("Running status collector on ".$self->{ELEMENT_TYPE}."/".$self->{ELEMENT_ID});
+    $self->{LOGGER}->debug("Running status collector on ".$self->{FACILITY_TYPE}."/".$self->{FACILITY_NAME});
 
-    if ($self->{ELEMENT_TYPE} eq "crossconnect") {
-        return $self->runCrossconnect();
-    } elsif ($self->{ELEMENT_TYPE} eq "vcg") {
-        return $self->runVCG();
-    } elsif ($self->{ELEMENT_TYPE} eq "snc") {
-        return $self->runSNC();
-    } elsif ($self->{ELEMENT_TYPE} =~ /^oc(n|[0-9]+)/) {
-        return $self->runOCN();
-    } elsif ($self->{ELEMENT_TYPE} eq "gtp") {
-        return $self->runGTP();
-    } elsif ($self->{ELEMENT_TYPE} eq "ctp") {
-        return $self->runCTP();
+    if ($self->{FACILITY_TYPE} eq "crossconnect") {
+        return $self->checkCrossconnect($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} eq "vcg") {
+        return $self->checkVCG($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} eq "vlan") {
+        return $self->checkEFLOW($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} eq "eflow") {
+        return $self->checkEFLOW($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} =~ /^oc(n|[0-9]+)/) {
+        return $self->checkOptical($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+	} elsif ($self->{FACILITY_TYPE} =~ /gige/) {
+        return $self->checkGIGE($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} eq "snc") {
+        return $self->checkSNC($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
+    } elsif ($self->{FACILITY_TYPE} eq "gtp") {
+        return $self->checkGTP($self->{FACILITY_NAME}, $self->{FACILITY_NAME_TYPE});
     }
 }
 
@@ -289,96 +339,100 @@ sub set_element {
 	$parameters->{type} = lc($parameters->{type});
 	$parameters->{id_type} = lc($parameters->{id_type}) if ($parameters->{id_type});
 
-    unless ($parameters->{type} =~ /^eth/ or $parameters->{type} eq "vcg" or $parameters->{type} eq "snc" or $parameters->{type} eq "gtp" or $parameters->{type} =~ /^oc(n|[0-9]+)/ or $parameters->{type} eq "ctp" or $parameters->{type} eq "crossconnect") {
+	if ($parameters->{type} eq "gtp") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} eq "eflow") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} eq "crossconnect") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} eq "snc") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} eq "vcg") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name" ) {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} =~ /^oc(n|[0-9]+)/) {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "aid") {
+				return;
+			}
+		}
+		$self->{FACILITY_NAME_TYPE} = "aid";
+	} elsif ($parameters->{type} =~ /^(eth|gige)/) {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "aid") {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "aid";
+	} elsif ($parameters->{type} eq "eflow") {
+		if ($parameters->{id_type}) {
+			unless ($parameters->{id_type} eq "name") {
+				return;
+			}
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "name";
+	} elsif ($parameters->{type} eq "vlan") {
+		unless ($parameters->{id} =~ /|/) {
+			return;
+		}
+
+		$self->{FACILITY_NAME_TYPE} = "logical";
+	} else {
 		$self->{LOGGER}->error("Unknown element type: '".$parameters->{type}."'");
 		return;
     }
 
-	$self->{ELEMENT_ID} = $parameters->{id};
-	$self->{ELEMENT_TYPE} = $parameters->{type};
+	$self->{FACILITY_NAME} = $parameters->{id};
+	$self->{FACILITY_TYPE} = $parameters->{type};
 
-	if ($parameters->{type} eq "gtp") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} eq "eflow") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} eq "crossconnect") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} eq "snc") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} eq "vcg") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} eq "sts") {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "name" ) {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "name";
-	} elsif ($parameters->{type} =~ /oc(n|[0-9]+)/) {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "aid") {
-				return undef;
-			}
-		}
-		$self->{ELEMENT_ID_TYPE} = "aid";
-	} elsif ($parameters->{type} =~ /eth/) {
-		if ($parameters->{id_type}) {
-			unless ($parameters->{id_type} eq "aid") {
-				return undef;
-			}
-		}
-
-		$self->{ELEMENT_ID_TYPE} = "aid";
-	}
-
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_id {
+sub facility_name {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID};
+    return $self->{FACILITY_NAME};
 }
 
-sub element_type {
+sub facility_type {
     my ($self) = @_;
 	
-	return $self->{ELEMENT_TYPE};
+	return $self->{FACILITY_TYPE};
 }
 
-sub element_id_type {
+sub facility_name_type {
     my ($self) = @_;
 
-    return $self->{ELEMENT_ID_TYPE};
+    return $self->{FACILITY_NAME_TYPE};
 }

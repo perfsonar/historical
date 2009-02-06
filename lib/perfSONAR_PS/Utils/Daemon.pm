@@ -159,11 +159,11 @@ sub lockPIDFile {
     if ( defined $p_id and $p_id ne q{} ) {
         my $PSVIEW;
 
-        open( $PSVIEW, "-|", "ps -p " . $p_id ) or return ( -1, "Open failed for pid: $p_id\n" );
+        open( $PSVIEW, "-|", "ps -p " . $p_id ) or return ( -1, "Open failed for pid: $p_id" );
         my @output = <$PSVIEW>;
         close($PSVIEW);
         unless ($CHILD_ERROR) {
-            return ( -1, "Application is already running on pid: $p_id\n" );
+            return ( -1, "Application is already running on pid: $p_id" );
         }
     }
 

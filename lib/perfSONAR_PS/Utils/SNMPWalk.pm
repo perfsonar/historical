@@ -8,7 +8,7 @@
 
 # ============================================================================
 
-package perfSONAR_PS::SNMPWalk;
+package perfSONAR_PS::Utils::SNMPWalk;
 
 use Net::SNMP qw(:snmp DEBUG_ALL);
 use Exporter;

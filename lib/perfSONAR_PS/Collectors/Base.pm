@@ -4,14 +4,16 @@ use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 
-use fields 'CONF', 'DIRECTORY';
+use fields 'CONF', 'DIRECTORY', 'LOGGER';
 
 our $VERSION = 0.09;
 
 sub new {
-    my ($self, $conf, $directory) = @_;
+    my ($class, $conf, $directory) = @_;
 
-    $self = fields::new($self) unless ref $self;
+    my $self = fields::new($class);
+
+    $self->{LOGGER} = get_logger($class);
 
     if (defined $conf and $conf ne "") {
         $self->{CONF} = \%{$conf};
