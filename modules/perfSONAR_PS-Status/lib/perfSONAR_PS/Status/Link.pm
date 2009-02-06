@@ -5,10 +5,10 @@ use warnings;
 
 our $VERSION = 0.09;
 
-use fields 'ID', 'KNOWLEDGE', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
+use fields 'ID', 'START_TIME', 'END_TIME', 'OPER_STATUS', 'ADMIN_STATUS';
 
 sub new {
-    my ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status) = @_;
+    my ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status) = @_;
 
     my $self = fields::new($package);
 
@@ -16,9 +16,6 @@ sub new {
         $self->{ID} = $link_id;
     }
 
-    if (defined $knowledge and $knowledge ne "") {
-        $self->{KNOWLEDGE} = $knowledge;
-    }
     if (defined $start_time and $start_time ne "") {
         $self->{START_TIME} = $start_time;
     }
@@ -39,14 +36,6 @@ sub setID {
     my ($self, $id) = @_;
 
     $self->{ID} = $id;
-
-    return;
-}
-
-sub setKnowledge {
-    my ($self, $knowledge) = @_;
-
-    $self->{KNOWLEDGE} = $knowledge;
 
     return;
 }
@@ -87,12 +76,6 @@ sub getID {
     my ($self) = @_;
 
     return $self->{ID};
-}
-
-sub getKnowledge {
-    my ($self) = @_;
-
-    return $self->{KNOWLEDGE};
 }
 
 sub getStartTime {
@@ -138,7 +121,7 @@ a certain range of time.
 
 =head1 API
 
-=head2 new ($package, $link_id, $knowledge, $start_time, $end_time, $oper_status, $admin_status)
+=head2 new ($package, $link_id, $start_time, $end_time, $oper_status, $admin_status)
 
 Creates a new instance of a link object with the specified values (None of
 which is required, they can all be set later).
@@ -146,10 +129,6 @@ which is required, they can all be set later).
 =head2 setID ($self, $id)
 
 Sets the identifier for this link.
-
-=head2 setKnowledge ($self, $knowledge)
-
-Sets the knowledge level for the information about this link.
 
 =head2 setStartTime ($self, $starttime)
 
@@ -170,10 +149,6 @@ Sets the administrative status of this link over the range of time specified
 =head2 getID ($self)
 
 Gets the identifier for this link
-
-=head2 getKnowledge ($self)
-
-Gets the knowledge level for the information about this link.
 
 =head2 getStartTime ($self)
 
