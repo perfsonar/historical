@@ -205,6 +205,8 @@ IperfDatum =
         element iperf:datum {
                 attribute value { xsd:float } &
                 attribute valueUnits { xsd:string }? &        
+                attribute throughput { xsd:string }? &
+                attribute jitter { xsd:string }? &
                 attribute numBytes { xsd:int }? &
                 attribute numBytesUnits { xsd:string }? &
                 attribute interval { xsd:string }? &                 
