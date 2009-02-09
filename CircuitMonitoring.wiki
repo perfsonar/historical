@@ -198,7 +198,7 @@ identifier, but the elements are now fleshed out some.
 </link>
 }}}
 
-Virtual Elements
+== Virtual Elements ==
 
 During circuit creation, the domain might create virtual elements that
 correspond to just that subsegment of a port or link that is traversed by the
