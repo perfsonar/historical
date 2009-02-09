@@ -1,6 +1,7 @@
 Carp
 Config::General
 Cwd
+DBD::SQLite
 DBI
 Data::Dumper
 Data::UUID
@@ -10,7 +11,6 @@ Error
 Exporter
 Fcntl
 File::Basename
-FindBin
 Getopt::Long
 HTTP::Daemon
 IO::File
@@ -26,5 +26,3 @@ Params::Validate
 Time::HiRes
 XML::LibXML
 base
-lib
-warnings
