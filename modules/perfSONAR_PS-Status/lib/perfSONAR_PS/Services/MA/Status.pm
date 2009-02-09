@@ -1681,7 +1681,8 @@ sub parseCompatCircuitsFile {
     }
 
     # Grab the set of links
-    $find_res = find( $conf, "./*[local-name()='circuit']", 0 );
+    foreach my $type ("links", "circuit") {
+    $find_res = find( $conf, "./*[local-name()='$type']", 0 );
     if ( $find_res ) {
         foreach my $link ( $find_res->get_nodelist ) {
             my $global_name = findvalue( $link, "globalName" );
@@ -1805,6 +1806,7 @@ sub parseCompatCircuitsFile {
                 $links{$local_name} = \%new_link;
             }
         }
+    }
     }
 
     return ( 0, $domain, \%links, \%nodes );
