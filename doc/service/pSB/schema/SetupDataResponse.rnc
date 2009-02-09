@@ -207,6 +207,7 @@ IperfDatum =
                 attribute valueUnits { xsd:string }? &        
                 attribute throughput { xsd:string }? &
                 attribute jitter { xsd:string }? &
+                attribute loss { xsd:string }? &
                 attribute numBytes { xsd:int }? &
                 attribute numBytesUnits { xsd:string }? &
                 attribute interval { xsd:string }? &                 
