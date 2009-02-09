@@ -1,156 +1,391 @@
-#summary A brief proposal for a different style monitoring interface
+= High-Level Overview =
 
-=Overall Architecture=
-In the DICE DCN model, each domain is responsible for the allocation of its segment of the circuit. The interdomain aspect of the model is responsible for coordinating the creation of the full end-to-end circuit. The idea behind our proposed circuit monitoring model is to use a similar domain/interdomain model to enable interested parties to monitor the status of these dynamically created circuits.
+Each circuit has a circuit descriptor containing pointers to each domain's
+segment of the circuit. Each domain then publishes a descriptor of its
+segment of the circuit. This segment descriptor can be as detailed as the
+domain is willing to provide to end users. The segment descriptors will contain
+pointers to the hardware elements traversed by their segment of the circuit.
 
-In the model, as the circuit is being provisioned, a circuit descriptor would be built up. This descriptor would contain identifiers for each segment of the circuit. Each segment would correspond to a domain that the circuit is passing over. Each domain would have a measurement archive that, when given the identifier for the segment passing over that domain, would return the status of that segment. The domain would place a mapping into a lookup service enabling clients to locate the measurement archive able to give the status of that domain's segment when given the segment identifier. Interested clients could then look up the status of the whole circuit by looking up the status of each domain-specific segment of the circuit.
+The monitoring infrastructure can be relatively static or relatively dynamic,
+depending on the specifics of the domain. A domain whose monitoring is
+relatively static, might deploy monitoring software that constantly monitors
+only the high-level hardware (e.g. the whole port instead of just a single
+vlan). The descriptors that that domain would construct would then include
+pointers to this monitoring data.
 
-Each domain would be able to implement its status monitoring in whichever way worked most effectively for it. There would be three capabilities required of each domain. It would need to be able to add its identifier to the circuit descriptor as the descriptor was being constructed. It would need to have a service able to respond to the identifiers it has added to the descriptors with the status of those circuits. Lastly, the domain would need to register the identifiers it has generated into a lookup service.
+A dynamic monitoring domain might have infrastructure allowing it to
+selectively monitor the portion of the hardware that a circuit traverses. As
+part of the circuit creation process, the domain would have its monitoring
+infrastructure start monitoring the individual pieces of the circuit. They
+would then construct their circuit descriptor with pointers to that data
+instead of the statically configured instances.
 
-=End-To-End Circuit Description=
-Each end-to-end circuit would have a circuit descriptor describing the domain-specific segments that make up the circuit. Each domain would be able to return the status for its portion of the path (all the links in the domain used by the circuit along with the its view of the circuit ingress/egress points).
+The client lookup phase would then proceed as follows. The client would have an
+identifier for a given circuit. It would do a search in the lookup service to
+find the topology service that had the circuit descriptor for that circuit.
+Once found, the client could use the Lookup Service to look up the Topology
+Services contain the descriptors for each of the domain segments. With that
+information in hand, it could then consult the Lookup Service to find out what
+monitoring data is available about each piece of each circuit segment. It could
+then contact the various Measurement Archives containing data about the
+circuit. To speed up recurring requests, the client could cache the address for
+each measurement archive.
 
-An example circuit descriptor:
+
+= The Overall Topology Architecture =
+
+As part of the circuit creation process, a circuit descriptor is created that
+describes, from a very high level, the path that the circuit is taking.
+
 {{{
-<!-- MultiDomain Circuit Descriptor -->
-<link id="urn:ogf:network:domain=es.net:link=Circuit_Name">
-   <name>Common Name For The Circuit</name>
-   <capacity>1000000000</capacity>
-   <!-- we might need project information or something else in here. Maybe
-       source and destination? What kinds of things might people want
-       to lookup a circuit with? -->
-   <relation type="over">
-       <bidirectionalPath>
-           <path direction="upstream">
-               <hop id="esnet">
-                   <linkIdRef>urn:ogf:network:domain=es.net:link=Circuit_Name_segment</linkIdRef>
-                   <nextHop>internet2</nextHop>
-               </hop>
-               <hop id="internet2">
-                   <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:link=Circuit_Name_segment</linkIdRef>
-                   <nextHop>geant</nextHop>
-               </hop>
-               <hop id="geant">
-                   <linkIdRef>urn:ogf:network:domain=geant.eu:link=Circuit_Name_segment</linkIdRef>
-               </hop>
-            </path>
+<link id="urn:nml:internet2.edu:gri123456">
+  <!-- Name of the Circuit. Specified as GRI, but could be a human-readable one -->
+  <name>gri123456</name>
 
-            <path direction="downstream" />
-        </bidirectionalPath>
-   </relation>
+  <!-- Human-Readable Description of the Circuit -->
+  <description>Phoebus Circuit</description>
+
+  <!-- Capacity of the circuit in bps. --> 
+  <capacity>1000000000</capacity>  <!-- 1Gbps -->
+
+  <!-- Period when the circuit will be active for -->
+  <lifetime>
+     <start>1234177754</start>
+     <end>1234567890</end>
+  </lifetime>
+
+  <relation type="over">
+      <bidirectionalPath>
+          <path direction="downstream">
+              <hop id="internet2">
+                  <linkIdRef>urn:nml:internet2.edu:gri123456_segment</linkIdRef>
+                  <nextHop>esnet</nextHop>
+              </hop>
+              <hop id="esnet">
+                  <linkIdRef>urn:nml:es.net:gri123456_segment</linkIdRef>
+              </hop>
+          </path>
+          <path direction="upstream" />
+      </bidirectionalPath>
+  </relation>
 </link>
 }}}
 
-Each "hop" element in the descriptor contains a [URN|URNs] identifier for each domain's segment.
+During the circuit creation process, each domain SHOULD setup their monitoring
+services to respond to requests for the ID specified for their domain. For
+example, the status MA for Internet2 could be setup to respond to requests for
+"urn:nml:internet2.edu:gri123456_segment", and have it return the up/down
+status of the circuit. This would, obviously, only make sense for the monitored
+properties that span the entire circuit like up/down status, packets/s,
+bytes/s, etc. The monitored data SHOULD correspond to just those
+counters/status for the circuit.
 
-=High-Level Client Interactions=
+However, a domain can also choose to provide clients with more information.
+They could create a descriptor for their segment of the circuit. The level of
+detail provided would be up to the individual domain. They would then register
+this descriptor with a Topology Service. Interested clients could then use the
+segment identifier given in the circuit descriptor to look up the segment
+descriptor.
 
-(Steps 1 and 2 may be unnecessary if the client already has a copy of the descriptor)
-1. lookup in an LS which TS has a circuit descriptor for the circuit of interest
-2. Obtain the circuit descriptor from that TS
-3. For each hop in the descriptor, lookup in an LS which MA has status information on that segment of the path
-4. Connect to each status service and download the status for that segment of the path.
-5. Display nicely
-
-{{{
-<!-- Get the status of ESnet's path segment -->
-<metadata>
-   <subject>
-       <link id="urn:ogf:network:domain=es.net:path=Circuit_Name" />
-   </subject>
-
-   <eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</eventType>
-</metadata>
-
-<data>
-   <ifevt:datum timeValue="2832937892" timeType="unix">
-       <ifevt:operStatus>up</ifevt:operStatus>
-       <ifevt:adminStatus>normaloperation</ifevt:adminStatus>
-   </ifevt:datum>
-</data>
-}}}
-
-=On Circuit Create=
-
-When a new circuit is created, someone in each domain (preferably it'd be automatic) would update their status checking to check on their segment of the circuit and store that information into a measurement archive along with the identifier in the circuit descriptor for that segment.
-
-=Identifier Selection=
-There are two ways to create the segment identifiers for each domain. In one case, each domain could create its own identifier for its segment of the path and pass it back with the IDC. The other option would be to piggyback on the globally-unique aspect of the circuit. In this case, each domain's identifier would simply be "urn:ogf:network:domain=$domain_name:path=$global_circuit_identifier" for the circuit identified by "urn:ogf:network:path=$global_circuit_identifier". The latter has the advantage of making it easy to calculate the identifiers for circuit segments while the former gives more flexibility to each domain.
-
-=Compatibility Issues with E2EMon=
-
-E2EMon has alot of extra information that would need to be replicated in order to ensure compatibility.
-
-==Domain name==
-E2EMon describes each segment by its domain name. A compatible client would need to include the E2EMon domain name in its responses. To do the mapping, one might consult the TS containing the domain information. Another alternative would be to simply pull out the domain id "es.net", "internet2.edu", etc. and that is the domain though domain may need to be only numbers and letters. Lastly, a name attribute could be added to the hop element which would include the E2EMon domain name for that domain.
+An example is provided in Figure 2 that looks similar to the circuit identifier
+given above in so far as its a path with element identifiers in each hop.
+Unlike the circuit descriptor, this segment descriptor contains hops for each
+port and link. The port and link ids in this descriptor might correspond to
+physical elements OR they might reference virtual elements created during
+circuit creation. Internet2 could configure its monitoring services to return
+information for each identifier inside its segment descriptor.
 
 {{{
-   <hop id="0" name="INTERNET2>
-      <linkIdRef>urn:ogf:network:domain=dcn.internet2.edu:path=Some_Circuit_segment</linkIdRef>
-   </hop>
+<link id="urn:nml:internet2.edu:gri123456_segment">
+  <relation type="over">
+      <bidirectionalPath>
+          <path direction="downstream">
+              <hop id="0">
+                  <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+                  <nextHop>1</nextHop>
+              </hop>
+              <hop id="1">
+                  <portIdRef>urn:nml:internet2.edu:port_packrat_eth1</portIdRef>
+                  <nextHop>2</nextHop>
+              </hop>
+              <hop id="2">
+                  <linkIdRef>urn:nml:internet2.edu:link_packrat_newy</portIdRef>
+                  <nextHop>3</nextHop>
+              </hop>
+              <hop id="3">
+                  <portIdRef>urn:nml:internet2.edu:port_newy_1-A-4-1</portIdRef>
+                  <nextHop>4</nextHop>
+              </hop>
+	      <!-- there's a psuedo-"link" between these two hops, the
+		   cross-connect. It's ommitted here for brevity, but could be
+		   added in for completeness. -->
+              <hop id="4">
+                  <portIdRef>urn:nml:internet2.edu:port_newy_1-A-4-5</portIdRef>
+              </hop>
+          </path>
+
+          <path direction="upstream" />
+      </bidirectionalPath>
+  </relation>
+</link>
 }}}
 
-==Nodes and Links==
-The architecture of the above consists of circuits and circuit segments. The E2EMon architecture is based around the concept of links and nodes. We would need to emulate these node and link elements to provide compatibility. The links internal to the domain will be easy to emulate since we can just create a fake link spanning the circuit segment. The nodes and interdomain links will be more difficult as they need to be agreed upon by neighboring domains. We could try autogenerating the node and link names based on the path segments being connected. e.g. the esnet's esnet-internet2 connector node might be named "NODE-$CIRCUIT_NAME-ESNET-INTERNET2" and internet2's esnet-internet2 connector node might be named "NODE-$CIRCUIT_NAME-INTERNET2-ESNET". Similarly, for link names, it'd be "LINK-$CIRCUIT_NAME-ESNET-INTERNET2". Cumbersome, but easily generatable.
+If Internet2 wished to make even more information available to a client, it
+could create descriptors of each of the elements and register those into a
+Topology Service. Its other option would be to include those descriptors in
+place of the identifiers. Even if it were to include them, the domain should
+register them into the Topology Service. An example of this form is available
+in Figure 3. Here, the path is identical to what it was in the previous segment
+identifier, but the elements are now fleshed out some.
 
-==One shot request==
-E2EMon grabs the entire set of circuits from a domain. The approach above does not mandate that all circuits for a domain appear in the same measurement archive (though it's likely they'll all be there) so we may need to collect all the segments to construct the domain state.
-
-==Segments where the SQLMA L2 Status MA or similar is being used==
-The above assumes that all domains have a Status service capable of responding to the above messages. However, most domains that have something deployed now are using the SQLMA. It might be useful to describe segments in the circuit descriptor as using the E2EMon-style MA so that we can grab that information. I'm not sure the best way to describe that though.
-
-=Benefits=
-
-  * Lookups can be done in parallel. Currently, E2EMon grabs the entire state of the world and tries to figure out what's going on.
-  * Domains don't need to know about the names of elements in other domains. Each domain would simply keep track of its knowledge of the circuit.
-  * You can lookup the path segments in the lookup service to find their constituent parts (if available). Like below:
-
-=Gathering Further Circuit Information=
-
-If a client wants to drill down to find more specifically which link is down:
-
-  # Take each segment of the path and lookup in an LS which TS contains the definition for that segment
-  # Download from the TS, that segment of the path
-  # Lookup in the LS which Status service contains information on each link in the segment
-  # Obtain the information about each link from the status service.
-
-The above information may not be available, however, depending on the privacy
-settings and configuration of the domain (e.g. they may not support perfsonar
-beyond a simple "up/down" on the circuits passing over them).
-
-Examples:
-
-Original circuit:
 {{{
-    <path direction="upstream">
-        ...
-       <hop id="internet2">
-          <linkIdRef>urn:ogf:network:domain=internet2.edu:path=oscars_idc1234"</linkIdRef>
-       </hop>
-        ...
-    </path>
+<link id="urn:nml:internet2.edu:gri123456_segment">
+  <relation type="over">
+      <bidirectionalPath>
+          <path direction="downstream">
+              <hop id="0">
+                  <port id="urn:nml:internet2.edu:port_packrat_eth0">
+			<name>eth0</name>
+			<address type="ipv4">207.75.164.10</address>
+			<description>Commodity connection</description>
+                  </port>
+                  <nextHop>1</nextHop>
+              </hop>
+              <hop id="1">
+                  <port id="urn:nml:internet2.edu:port_packrat_eth1">
+			<name>eth1</name>
+			<address type="ipv4">207.75.164.8</address>
+			<description>Connection to NEWY Switch</description>
+                  </port>
+
+                  <nextHop>2</nextHop>
+              </hop>
+              <hop id="2">
+                  <link id="urn:nml:internet2.edu:link_packrat_newy">
+			<name>PACKRAT_NEWY-1</name>
+			<capacity>1000000000</capacity>
+			<description>Link connecting Packrat to the NEWY Router</description>
+		  </link>
+                  <nextHop>3</nextHop>
+              </hop>
+              <hop id="3">
+                  <port id="urn:nml:internet2.edu:port_newy_1-A-4-1">
+			<relation type="management">
+				<address type="dns">mss.newy32aoa.net.internet2.edu</address>
+			</relation>
+			<name>1-A-4-1</name>
+			<description>Connection to Packrat</description>
+                  </port>
+                  <nextHop>4</nextHop>
+              </hop>
+	      <!-- there's a psuedo-"link" between these two hops, the
+		   cross-connect. It's ommitted here for brevity, but could be
+		   added in for completeness. -->
+              <hop id="4">
+                  <port id="urn:nml:internet2.edu:port_newy_1-A-4-5">
+			<relation type="management">
+				<address type="dns">mss.newy32aoa.net.internet2.edu</address>
+			</relation>
+			<name>1-A-4-5</name>
+			<description>Connection to ESnet</description>
+                  </port>
+              </hop>
+          </path>
+
+          <path direction="upstream" />
+      </bidirectionalPath>
+  </relation>
+</link>
 }}}
 
-"Resolved" circuit:
+Virtual Elements
+
+During circuit creation, the domain might create virtual elements that
+correspond to just that subsegment of a port or link that is traversed by the
+circuit. These elements SHOULD be "over" physical hardware. If the domain makes
+status, counters or other information available corresponding to these
+elements, they SHOULD correspond to just those portions used by the circuit.
+
 {{{
-    <path direction="upstream">
-        ...
-        <hop id="internet2_1">
-            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node1:port=eth0:link=link1</linkIdRef>
-            <nextHop>internet2_2</nextHop>
-        </hop>
-        <hop id="internet2_2">
-            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node2:port=eth1:link=link1</linkIdRef>
-            <nextHop>internet2_3</nextHop>
-        </hop>
-        <hop id="internet2_3">
-            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node3:port=eth1:link=link1</linkIdRef>
-            <nextHop>internet2_4</nextHop>
-        </hop>
-        <hop id="internet2_4">
-            <linkIdRef>urn:ogf:network:domain=internet2.edu:node=node4:port=eth5:link=link1</linkIdRef>
+<layer2:link id="urn:nml:internet2.edu:gri123456_segment_0">
+  <vlan>3000</vlan>
 
-        </hop>
-        ...
-    </path>
+  <relation type="over">
+      <linkIdRef>urn:nml:internet2.edu:link_packrat_to_CHIC</linkIdRef>
+  </relation>
+
+  <relation type="upstreamPort">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0.3000</portIdRef>
+  </relation>
+  <relation type="downstreamPort">
+      <portIdRef>urn:nml:internet2.edu:port_NEWY_eth3.3000</portIdRef>
+  </relation>
+</layer2:link>
+
+<layer2:port id="urn:nml:internet2.edu:port_packrat_eth0.3000">
+  <name>eth0.3000</name>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:port_eth0</portIdRef>
+  </relation>
+
+  <relation type="child">
+      <linkIdRef>urn:nml:internet2.edu:link_WASH_TO_NEWY</linkIdRef>
+  </relation>
+
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer2:port>
 }}}
+
+The domain can provide even more information, if desired, by adding their
+static hardware definitions into a Topology Service. This hardware should also
+be monitored so that users can query the element's state independent of any
+circuits traversing it.
+
+{{{
+<link id="urn:nml:internet2.edu:link_packrat_to_CHIC">
+  <relation type="parent">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+  </relation>
+  <name>The Link From Washington D.C. to New York</name>
+</link>
+
+<layer2:port id="urn:nml:internet2.edu:port_packrat_eth0">
+  <name>eth0</name>
+  <address type="mac">00:11:43:34:E0:23</address>
+  <relation type="under">
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+
+  <relation type="child">
+      <linkIdRef>urn:nml:internet2.edu:link_WASH_TO_NEWY</linkIdRef>
+  </relation>
+</layer2:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_207.75.164.10">
+  <address type="ipv4">207.75.164.10</address>
+  <relation type="sibling">
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+  </relation>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:node_packrat_eth0</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+  <address type="ipv6">2001:468:1420:0:211:43ff:fe34:e023</address>
+  <relation type="sibling">
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+  </relation>
+  <relation type="over">
+      <portIdRef>urn:nml:internet2.edu:node_packrat_eth0</portIdRef>
+  </relation>
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<layer3:port id="urn:nml:internet2.edu:port_packrat_lo">
+  <name>lo</name>
+  <address type="ipv4">127.0.0.1</address>
+
+  <relation type="parent">
+      <nodeIdRef>urn:nml:internet2.edu:node_packrat</nodeIdRef>
+  </relation>
+</layer3:port>
+
+<base:node id="urn:nml:internet2.edu:node_packrat">
+  <name>packrat</name>
+
+  <relation type="child">
+      <portIdRef>urn:nml:internet2.edu:port_207.75.164.10</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_2001:468:1420:0:211:43ff:fe34:e023">
+      <portIdRef>urn:nml:internet2.edu:port_packrat_eth0</portIdRef>
+      <portIdRef>urn:nml:internet2.edu:port_packrat_lo</portIdRef>
+  </relation>
+</base:node>
+
+}}}
+
+
+= How Status Is Obtained =
+
+The interested client starts off with the Circuit Descriptor. The client looks
+up any desired status or monitored values (if applicable) using the
+domain-specific segment IDs. If the desired information is not available, or
+the client desires greater granularity. It
+can look up the Circuit Segment Descriptor for each of the domains by
+consulting the Lookup Service to find the relevant Topology Service for each
+domain. If this information is not available, the client is done. If the
+topological information is available, the client repeats the lookup, checking
+if there is the desired monitored information about the desired circuit links.
+If the information about a given element is not available, but there is an
+"over" field pointing to a lower layer segment, it can (in parallel), start
+checking the lower levels for status information. The client can determine the
+level of granularity he will be getting by checking the "sibling" relation. If
+a given level has multiple siblings, he can assume that the information found
+at the level below will be less granular than any information he can get about
+the elements at this level.
+
+
+
+= Roadmap from Where We Are Today To The Above =
+
+== Step 1 ==
+
+Start off with the highest level of granularity. There are no Segment
+Descriptors, each domain makes available information for their circuit segment.
+The domain SHOULD provide status information.
+
+A gui would be written to either find or take a circuit descriptor and
+lookup status or other information. A domain that does not provide status
+information will be listed as "unknown". Due to the time required to perform
+these lookups and find this information, this gui would need to cache this
+information. It would likely be best if it were a web frontend like E2EMon so
+that the user doesn't have substantial lag when they click a link.
+
+== Step 2 ==
+
+Either each domain deploys its own TS or a central one could be provided by
+Internet2. Each domain could register a segment descriptor for their segment.
+The depth of these circuits would be as detailed as that domain wanted to be.
+If a domain did not register the sement descriptor, it would simply be viewed
+as opaque by the gui.
+
+The gui would be modified to lookup the segment descriptors in the TS. It
+would then allow users to click on segments that have a corresponding segment
+descriptor. The user would be taken to a page containing status.
+
+== Step 3 ==
+
+Software would be written (or reused) to collect and make available any
+available counters. This would include TL1 or SNMP.
+
+The gui would be modified to collect this information when available.
+
+== Step 4 ==
+
+The above software would be deployed on the various domains, and configured.
+
+== Step 5 ==
+
+An agent would be written that would listen to OSCARS NB events. This agent
+would construct the segment descriptors for a given domain, and an end-to-end
+segment descriptor using the naming convention used in the above examples.
+
+Initially, it would only work with predefined physical hardware that is always
+being monitored.
+
+== Step 6 ==
+
+The agent and monitoring software so that the agent could signal the monitoring
+software to start collecting information about a given circuit's virtual links.
+It would then make a circuit descriptor consisting of these virtual links.
