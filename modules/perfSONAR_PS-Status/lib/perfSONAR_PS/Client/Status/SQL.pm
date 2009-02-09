@@ -125,7 +125,7 @@ sub getAll {
 	foreach my $element_ref (@{ $elements }) {
 		my @element = @{ $element_ref };
 
-		my $states = $self->{DATADB}->query({ query => "select start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element[0]."\' order by end_time" });
+		my $states = $self->{DATADB}->query({ query => "select start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element[0]."\' order by start_time" });
 		if ($states == -1) {
 			$logger->error("Couldn't grab information for element ".$element[0]);
 			return (-1, "Couldn't grab information for element ".$element[0]);
@@ -167,84 +167,28 @@ sub getUniqueIDs {
 	return (0, \@element_ids);
 }
 
-sub getLinkHistory {
-	my ($self, $element_ids, $time) = @_;
+sub getElementStatus {
+	my ($self, $element_ids, $start_time, $end_time) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 
 	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
-
-	my $query = "select element_id, start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE};
-	my $i = 0;
-	foreach my $element_id (@{ $element_ids }) {
-		if ($i == 0) {
-			$query .= " where (element_id=\'".$element_id."\'";
-		} else {
-			$query .= " or element_id=\'".$element_id."\'";
-		}
-		$i++;
-	}
-	$query .= ")";
-
-	if (defined $time and $time ne "") {
-		$query .= " and end_time => $time and start_time <= $time";
-	}
-
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
-
-	my $states = $self->{DATADB}->query( { query => $query });
-	if ($states == -1) {
-		$logger->error("Couldn't grab element history information");
-		return (-1, "Couldn't grab element history information");
-	}
-
-	my %elements = ();
-
-	foreach my $state_ref (@{ $states }) {
-		my @state = @{ $state_ref };
-
-		my $new_element = new perfSONAR_PS::Status::Link($state[0], $state[1], $state[2], $state[3], $state[4]);
-		if (not defined $elements{$state[0]}) {
-			$elements{$state[0]} = ();
-		}
-
-		push @{ $elements{$state[0]} }, $new_element;
-	}
-
-	return (0, \%elements);
-}
-
-sub getLinkStatus {
-	my ($self, $element_ids, $time) = @_;
-	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
-
-	return (-1, "Database is not open") if ($self->{DB_OPEN} == 0);
-
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
 
 	my %elements;
-
-    if ($time) {
-        $logger->debug("Time: ".$time->getStartTime()."-".$time->getEndTime());
-    }
 
 	foreach my $element_id (@{ $element_ids }) {
 		my $query;
 
-		if (not defined $time) {
-		$query = "select start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element_id."\' order by end_time desc limit 1";
-		} else {
-		$query = "select start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element_id."\' and start_time <= \'".$time->getEndTime()."\' and end_time >= \'".$time->getStartTime()."\'";
-		}
+		$query = "select start_time, end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element_id."\'";
+
+        if ($end_time) {
+            $query .= " and start_time <= \'".$end_time."\'";
+        }
+
+        if ($start_time) {
+            $query .= "and end_time >= \'".$start_time."\'";
+        }
+
+        $query .= " order by start_time";
 
 		my $states = $self->{DATADB}->query({ query => $query });
 		if ($states == -1) {
@@ -256,15 +200,8 @@ sub getLinkStatus {
 			my @state = @{ $state_ref };
 			my $new_element;
 
-			if (defined $time) {
-				if ($state[0] < $time->getStartTime()) {
-					$state[0] = $time->getStartTime();
-				}
-
-				if ($state[1] > $time->getEndTime()) {
-					$state[1] = $time->getEndTime();
-				}
-			}
+            $state[0] = $start_time if ($state[0] < $start_time);
+            $state[1] = $end_time if ($state[1] > $end_time);
 
 			$new_element = new perfSONAR_PS::Status::Link($element_id, $state[0], $state[1], $state[2], $state[3]);
 
@@ -300,58 +237,41 @@ sub updateLinkStatus {
 
 	return (-1, "Database is Read-Only") if ($self->{READ_ONLY} == 1);
 
-	my $status = $self->{DATADB}->openDB;
-	if ($status == -1) {
-		my $msg = "Couldn't open status database";
-		$logger->error($msg);
-		return (-1, $msg);
-	}
+    my $query = "select end_time, oper_status, admin_status from ".$self->{DB_TABLE}." where element_id=\'".$element_id."\' order by end_time limit 1";
+
+    my $states = $self->{DATADB}->query({ query => $query });
+    if ($states == -1) {
+        $logger->error("Couldn't grab information for node ".$element_id);
+        return (-1, "Couldn't grab information for node ".$element_id);
+    }
+
+    if (scalar(@$states) == 0) {
+        my $msg = "No previous value for $element_id to update";
+        $logger->error($msg);
+        return (-1, $msg);
+    }
+
+    $prev_end_time = $states->[0]->[0];
+
+    if ($prev_end_time >= $time) {
+        my $msg = "Update in the past for $element_id: most recent data was obtained for ".$prev_end_time;
+        $logger->error($msg);
+        return (-1, $msg);
+    }
+
+    if ($do_update) {
+        if ($states->[0]->[1] ne $oper_value) {
+            my $msg = "Oper value differs for $element_id";
+            $logger->warn($msg);
+            $do_update = 0;
+        } elsif ($states->[0]->[2] ne $oper_value) {
+            my $msg = "Admin value differs for $element_id";
+            $logger->warn($msg);
+            $do_update = 0;
+        }
+    }
 
 	if ($do_update) {
-		my @tmp_array = ( $element_id );
-
-		my ($status, $res) = $self->getLinkStatus(\@tmp_array, undef);
-
-		if ($status != 0) {
-			my $msg = "No previous value for $element_id to update";
-			$logger->error($msg);
-			return (-1, $msg);
-		}
-
-		my $element = pop(@{ $res->{$element_id} });
-
-        if (defined $element and $element->getEndTime > $time) {
-			my $msg = "Update in the past for $element_id: most recent data was obtained for ".$element->getEndTime;
-			$logger->error($msg);
-			return (-1, $msg);
-        }
-
-		if (not defined $element or $element->getOperStatus ne $oper_value or $element->getAdminStatus ne $admin_value) {
-			$logger->debug("Something changed on element $element_id");
-			$do_update = 0;
-		} else {
-			$prev_end_time = $element->getEndTime;
-		}
-	} else {
-		$do_update = 0;
-
-		my @tmp_array = ( $element_id );
-        my $time_elm = perfSONAR_PS::Time->new("point", $time);
-
-		my ($status, $res) = $self->getLinkStatus(\@tmp_array, $time_elm);
-        if ($status != 0) {
-			return (-1, $res);
-        }
-
-        if (defined $res->{$element_id} and defined $res->{$element_id}->[0]) {
-            my $state = $res->{$element_id}->[0];
-			my $msg = "Already have information on $element_id at $time";
-			$logger->error($msg);
-			return (-1, $msg);
-        }
-	}
-
-	if ($do_update != 0) {
 		$logger->debug("Updating $element_id");
 
 		my %updateValues = (
@@ -366,7 +286,6 @@ sub updateLinkStatus {
 		if ($self->{DATADB}->update({ table => $self->{DB_TABLE}, wherevalues => \%where, updatevalues => \%updateValues }) == -1) {
 			my $msg = "Couldn't update element status for element $element_id";
 			$logger->error($msg);
-			$self->{DATADB}->closeDB;
 			return (-1, $msg);
 		}
 	} else {
@@ -382,12 +301,9 @@ sub updateLinkStatus {
 			my $msg = "Couldn't update element status for element $element_id";
 
 			$logger->error($msg);
-			$self->{DATADB}->closeDB;
 			return (-1, $msg);
 		}
 	}
-
-	$self->{DATADB}->closeDB;
 
 	return (0, "");
 }
@@ -450,7 +366,7 @@ on the object for the specific database.
 		push @elements, $id;
 	}
 
-	($status, $res) = $status_client->getLinkStatus(\@elements, "");
+	($status, $res) = $status_client->getElementStatus(\@elements, "");
 	if ($status != 0) {
 		print "Problem obtaining most recent element status: $res\n";
 		exit(-1);
@@ -534,9 +450,9 @@ results as a hash with the key being the element id. Each element of the hash is
 an array of perfSONAR_PS::Status::Link structures containing a the status
 of the specified element at a certain point in time.
 
-=head2 getLinkStatus($self, $element_ids, $time)
+=head2 getElementStatus($self, $element_ids, $time)
 
-The getLinkStatus function returns the element status at the specified time. The
+The getElementStatus function returns the element status at the specified time. The
 $element_ids parameter is a reference to an array of element ids. $time is the time
 at which you'd like to know each element's status. $time is a perfSONAR_PS::Time
 element. If $time is an undefined, it returns the most recent information it

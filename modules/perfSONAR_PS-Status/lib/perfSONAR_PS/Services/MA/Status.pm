@@ -12,43 +12,45 @@ This module, in conjunction with other parts of the perfSONAR-PS framework,
 handles specific messages from interested actors in search of link status data.
 
 There are two major message types that this service can act upon:
- - MetadataKeyRequest             - Given some metadata about a specific measurement, 
-                                      request a re-playable 'key' to faster access
-                                      underlying data.
  - SetupDataRequest               - Given either metadata or a key regarding a specific
                                       measurement, retrieve data values.
- - MeasurementArchiveStoreRequest - Given some metadata or a key and some link
-                                      status information, updates status
-                                      information about a given link.
+ - MetadataKeyRequest     - Given some metadata about a specific measurement, 
+                            request a re-playable 'key' to faster access
+                            underlying data.
+
+The module is capable of handling link status data in an E2EMon compatible
+fashion, as well as allowing for moving away from the E2EMon-style.
 =cut
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'CLIENT', 'LOGGER', 'DOMAIN', 'CIRCUITS', 'NODES'; 
+use fields 'LS_CLIENT', 'DB_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
 
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
+use English qw( -no_match_vars );
 
-use perfSONAR_PS::Time;
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::Client::Status::SQL;
-use perfSONAR_PS::Topology::ID;
 use perfSONAR_PS::Utils::ParameterValidation;
+use perfSONAR_PS::Services::MA::General;
 
 our $VERSION = 0.09;
 
+# Any of the XPath queries used in this module will use one of the following namespaces.
 my %status_namespaces = (
-    nmwg => "http://ggf.org/ns/nmwg/base/2.0/",
-    select=>"http://ggf.org/ns/nmwg/ops/select/2.0/",
-    nmtopo=>"http://ogf.org/schema/network/topology/base/20070828/",
-    topoid=>"http://ogf.org/schema/network/topology/id/20070828/",
-    ifevt=>"http://ggf.org/ns/nmwg/event/status/base/2.0/",
-    nmtl2=>"http://ggf.org/ns/nmwg/topology/l2/3.0/",
+    nmwg   => "http://ggf.org/ns/nmwg/base/2.0/",
+    select => "http://ggf.org/ns/nmwg/ops/select/2.0/",
+    nmtopo => "http://ogf.org/schema/network/topology/base/20070828/",
+    topoid => "http://ogf.org/schema/network/topology/id/20070828/",
+    ifevt  => "http://ggf.org/ns/nmwg/event/status/base/2.0/",
+    nmtl2  => "http://ggf.org/ns/nmwg/topology/l2/3.0/",
+    nmwgtopo3 => "http://ggf.org/ns/nmwg/topology/base/3.0/",
 );
 
 =head1 API
@@ -63,174 +65,269 @@ relied upon by internal aspects of the perfSONAR-PS framework.
     handler loads the appropriate message types and eventTypes for this module.
     Any other 'pre-startup' tasks should be placed in this function.
 =cut
-sub init {
-    my ($self, $handler) = @_;
-    
-    $self->{LOGGER} = get_logger("perfSONAR_PS::Services::MA::Status");
 
-    if (not defined $self->{CONF}->{"status"}->{"enable_registration"} or $self->{CONF}->{"status"}->{"enable_registration"} eq q{}) {
-        $self->{LOGGER}->warn("Disabling LS registration");
+sub init {
+    my ( $self, $handler ) = @_;
+
+    $self->{LOGGER} = get_logger( "perfSONAR_PS::Services::MA::Status" );
+
+    # Create an XPath Context that will be used for XPath queries in this module.
+    $self->{XPATH_CONTEXT} = XML::LibXML::XPathContext->new();
+    foreach my $prefix ( keys %status_namespaces ) {
+        $self->{XPATH_CONTEXT}->registerNs( $prefix, $status_namespaces{$prefix} );
+    }
+
+    unless ( $self->{CONF}->{"root_hints_url"} ) {
+        $self->{CONF}->{"root_hints_url"} = "http://www.perfsonar.net/gls.root.hints";
+        $self->{LOGGER}->warn( "gLS Hints file not set, using default at \"http://www.perfsonar.net/gls.root.hints\"." );
+    }
+
+    unless ( defined $self->{CONF}->{"status"}->{"enable_registration"} ) {
+        $self->{LOGGER}->warn( "Disabling LS registration" );
         $self->{CONF}->{"status"}->{"enable_registration"} = 0;
     }
 
-    if ($self->{CONF}->{"status"}->{"enable_registration"}) {
-        if (not defined $self->{CONF}->{"status"}->{"service_accesspoint"} or $self->{CONF}->{"status"}->{"service_accesspoint"} eq q{}) {
-            $self->{LOGGER}->error("No access point specified for SNMP service");
-            return -1;
+    if ( $self->{CONF}->{"status"}->{"enable_registration"} ) {
+        unless ( exists $self->{CONF}->{"status"}->{"ls_instance"}
+            and $self->{CONF}->{"status"}->{"ls_instance"} )
+        {
+            if ( defined $self->{CONF}->{"ls_instance"}
+                and $self->{CONF}->{"ls_instance"} )
+            {
+                $self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
+            }
+            else {
+                $self->{LOGGER}->warn( "No LS instance specified for SNMP service" );
+            }
         }
 
-        if (not defined $self->{CONF}->{"status"}->{"ls_instance"} or $self->{CONF}->{"status"}->{"ls_instance"} eq q{}) {
-            if (defined $self->{CONF}->{"ls_instance"} and $self->{CONF}->{"ls_instance"} ne q{}) {
-                $self->{CONF}->{"status"}->{"ls_instance"} = $self->{CONF}->{"ls_instance"};
-            } else {
-                $self->{LOGGER}->error("No LS instance specified for SNMP service");
+        unless ( exists $self->{CONF}->{"status"}->{"ls_registration_interval"}
+            and $self->{CONF}->{"status"}->{"ls_registration_interval"} )
+        {
+            if ( defined $self->{CONF}->{"ls_registration_interval"}
+                and $self->{CONF}->{"ls_registration_interval"} )
+            {
+                $self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
+            }
+            else {
+                $self->{LOGGER}->warn( "Setting registration interval to 4 hours" );
+                $self->{CONF}->{"status"}->{"ls_registration_interval"} = 14400;
+            }
+        }
+
+        if ( not $self->{CONF}->{"status"}->{"service_accesspoint"} ) {
+            unless ( $self->{CONF}->{external_address} ) {
+                $self->{LOGGER}->error( "With LS registration enabled, you need to specify either the service accessPoint for the service or the external_address" );
                 return -1;
             }
+            $self->{LOGGER}->info( "Setting service access point to http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT} );
+            $self->{CONF}->{"status"}->{"service_accesspoint"} = "http://" . $self->{CONF}->{external_address} . ":" . $self->{PORT} . $self->{ENDPOINT};
         }
 
-        if (not defined $self->{CONF}->{"status"}->{"ls_registration_interval"} or $self->{CONF}->{"status"}->{"ls_registration_interval"} eq q{}) {
-            if (defined $self->{CONF}->{"ls_registration_interval"} and $self->{CONF}->{"ls_registration_interval"} ne q{}) {
-                $self->{CONF}->{"status"}->{"ls_registration_interval"} = $self->{CONF}->{"ls_registration_interval"};
-            } else {
-                $self->{LOGGER}->warn("Setting registration interval to 30 minutes");
-                $self->{CONF}->{"status"}->{"ls_registration_interval"} = 1800;
+        unless ( exists $self->{CONF}->{"status"}->{"service_description"}
+            and $self->{CONF}->{"status"}->{"service_description"} )
+        {
+            my $description = "perfSONAR_PS SNMP MA";
+            if ( $self->{CONF}->{site_name} ) {
+                $description .= " at " . $self->{CONF}->{site_name};
             }
-        } else {
-            # turn the registration interval from minutes to seconds
-            $self->{CONF}->{"status"}->{"ls_registration_interval"} *= 60;
+            if ( $self->{CONF}->{site_location} ) {
+                $description .= " in " . $self->{CONF}->{site_location};
+            }
+            $self->{CONF}->{"status"}->{"service_description"} = $description;
+            $self->{LOGGER}->warn( "Setting 'service_description' to '$description'." );
         }
 
-        $self->{LOGGER}->debug("Registration interval: ".  $self->{CONF}->{"status"}->{"ls_registration_interval"});
-
-        if(not defined $self->{CONF}->{"status"}->{"service_description"} or
-                $self->{CONF}->{"status"}->{"service_description"} eq q{}) {
-            $self->{CONF}->{"status"}->{"service_description"} = "perfSONAR_PS Status MA";
-            $self->{LOGGER}->warn("Setting 'service_description' to 'perfSONAR_PS Status MA'.");
+        unless ( exists $self->{CONF}->{"status"}->{"service_name"}
+            and $self->{CONF}->{"status"}->{"service_name"} )
+        {
+            $self->{CONF}->{"status"}->{"service_name"} = "SNMP MA";
+            $self->{LOGGER}->warn( "Setting 'service_name' to 'SNMP MA'." );
         }
 
-        if(not defined $self->{CONF}->{"status"}->{"service_name"} or
-                $self->{CONF}->{"status"}->{"service_name"} eq q{}) {
-            $self->{CONF}->{"status"}->{"service_name"} = "Status MA";
-            $self->{LOGGER}->warn("Setting 'service_name' to 'Status MA'.");
-        }
-
-        if(not defined $self->{CONF}->{"status"}->{"service_type"} or
-                $self->{CONF}->{"status"}->{"service_type"} eq q{}) {
+        unless ( exists $self->{CONF}->{"status"}->{"service_type"}
+            and $self->{CONF}->{"status"}->{"service_type"} )
+        {
             $self->{CONF}->{"status"}->{"service_type"} = "MA";
-            $self->{LOGGER}->warn("Setting 'service_type' to 'MA'.");
+            $self->{LOGGER}->warn( "Setting 'service_type' to 'MA'." );
         }
 
         my %ls_conf = (
-                SERVICE_TYPE => $self->{CONF}->{"status"}->{"service_type"},
-                SERVICE_NAME => $self->{CONF}->{"status"}->{"service_name"},
-                SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
-                SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
-                  );
+            SERVICE_TYPE        => $self->{CONF}->{"status"}->{"service_type"},
+            SERVICE_NAME        => $self->{CONF}->{"status"}->{"service_name"},
+            SERVICE_DESCRIPTION => $self->{CONF}->{"status"}->{"service_description"},
+            SERVICE_ACCESSPOINT => $self->{CONF}->{"status"}->{"service_accesspoint"},
+        );
 
-        $self->{LS_CLIENT} = new perfSONAR_PS::Client::LS::Remote($self->{CONF}->{"status"}->{"ls_instance"}, \%ls_conf, \%status_namespaces);
+        my @ls_array = ();
+        my @array = split( /\s+/, $self->{CONF}->{"status"}->{"ls_instance"} );
+        foreach my $l ( @array ) {
+            $l =~ s/(\s|\n)*//g;
+            push @ls_array, $l if $l;
+        }
+        @array = split( /\s+/, $self->{CONF}->{"ls_instance"} );
+        foreach my $l ( @array ) {
+            $l =~ s/(\s|\n)*//g;
+            push @ls_array, $l if $l;
+        }
+
+        my @hints_array = ();
+        @array = split( /\s+/, $self->{CONF}->{"root_hints_url"} );
+        foreach my $h ( @array ) {
+            $h =~ s/(\s|\n)*//g;
+            push @hints_array, $h if $h;
+        }
+
+        $self->{LS_CLIENT} = perfSONAR_PS::Client::LS::Remote->new( \@ls_array, \%ls_conf, \@hints_array );
     }
 
-    if (not defined $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq q{}) {
-        $self->{LOGGER}->error("No database type specified");
+    if ( not defined $self->{CONF}->{"status"}->{"db_type"} or $self->{CONF}->{"status"}->{"db_type"} eq q{} ) {
+        $self->{LOGGER}->error( "No database type specified" );
         return -1;
     }
 
-    if (lc($self->{CONF}->{"status"}->{"db_type"}) eq "sqlite") {
-        if (not defined $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq q{}) {
-            $self->{LOGGER}->error("You specified a SQLite Database, but then did not specify a database file(db_file)");
+    if ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "sqlite" ) {
+        if ( not defined $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq q{} ) {
+            $self->{LOGGER}->error( "You specified a SQLite Database, but then did not specify a database file(db_file)" );
             return -1;
         }
 
         my $file = $self->{CONF}->{"status"}->{"db_file"};
-        if (defined $self->{DIRECTORY}) {
-            if (!($file =~ "^/")) {
-                $file = $self->{DIRECTORY}."/".$file;
+        if ( defined $self->{DIRECTORY} ) {
+            if ( !( $file =~ "^/" ) ) {
+                $file = $self->{DIRECTORY} . "/" . $file;
             }
         }
 
         my $read_only = 0;
 
-        if (defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1) {
+        if ( defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1 ) {
             $read_only = 1;
         }
 
-        $self->{CLIENT} = new perfSONAR_PS::Client::Status::SQL("DBI:SQLite:dbname=".$file, q{}, q{}, $self->{CONF}->{"status"}->{"db_table"}, $read_only);
-        if (not defined $self->{CLIENT}) {
+        $self->{DB_CLIENT} = new perfSONAR_PS::Client::Status::SQL( "DBI:SQLite:dbname=" . $file, q{}, q{}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
+        if ( not defined $self->{DB_CLIENT} ) {
             my $msg = "No database to dump";
-            $self->{LOGGER}->error($msg);
+            $self->{LOGGER}->error( $msg );
             return -1;
         }
-    } elsif (lc($self->{CONF}->{"status"}->{"db_type"}) eq "mysql") {
+    }
+    elsif ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "mysql" ) {
         my $dbi_string = "dbi:mysql";
 
-        if (not defined $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq q{}) {
-            $self->{LOGGER}->error("You specified a MySQL Database, but did not specify the database (db_name)");
+        if ( not defined $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq q{} ) {
+            $self->{LOGGER}->error( "You specified a MySQL Database, but did not specify the database (db_name)" );
             return -1;
         }
 
-        $dbi_string .= ":".$self->{CONF}->{"status"}->{"db_name"};
+        $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_name"};
 
-        if (not defined $self->{CONF}->{"status"}->{"db_host"} or $self->{CONF}->{"status"}->{"db_host"} eq q{}) {
-            $self->{LOGGER}->error("You specified a MySQL Database, but did not specify the database host (db_host)");
+        if ( not defined $self->{CONF}->{"status"}->{"db_host"} or $self->{CONF}->{"status"}->{"db_host"} eq q{} ) {
+            $self->{LOGGER}->error( "You specified a MySQL Database, but did not specify the database host (db_host)" );
             return -1;
         }
 
-        $dbi_string .= ":".$self->{CONF}->{"status"}->{"db_host"};
+        $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_host"};
 
-        if (defined $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne q{}) {
-            $dbi_string .= ":".$self->{CONF}->{"status"}->{"db_port"};
+        if ( defined $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne q{} ) {
+            $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_port"};
         }
 
         my $read_only = 0;
 
-        if (defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1) {
+        if ( defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1 ) {
             $read_only = 1;
         }
 
-        $self->{CLIENT} = new perfSONAR_PS::Client::Status::SQL($dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only);
-        if (not defined $self->{CLIENT}) {
+        $self->{DB_CLIENT} = new perfSONAR_PS::Client::Status::SQL( $dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
+        if ( not defined $self->{DB_CLIENT} ) {
             my $msg = "Couldn't create SQL client";
-            $self->{LOGGER}->error($msg);
+            $self->{LOGGER}->error( $msg );
             return -1;
         }
-    } else {
-        $self->{LOGGER}->error("Invalid database type specified");
+    }
+    else {
+        $self->{LOGGER}->error( "Invalid database type specified" );
         return -1;
     }
 
-    my ($status, $res) = $self->{CLIENT}->open;
-    if ($status != 0) {
+    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
         my $msg = "Couldn't open newly created client: $res";
-        $self->{LOGGER}->error($msg);
+        $self->{LOGGER}->error( $msg );
         return -1;
     }
 
-    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_compatibility"})) {
-        if ($self->{CONF}->{"status"}->{"e2emon_definitions_file"}) {
+    if ( lc( $self->{CONF}->{"status"}->{"enable_e2emon_compatibility"} ) ) {
+        if ( $self->{CONF}->{"status"}->{"e2emon_definitions_file"} ) {
             my $file = $self->{CONF}->{"status"}->{"e2emon_definitions_file"};
-            if (defined $self->{DIRECTORY}) {
-                if ($file !~ "^/") {
-                    $file = $self->{DIRECTORY}."/".$file;
+            if ( defined $self->{DIRECTORY} ) {
+                if ( $file !~ "^/" ) {
+                    $file = $self->{DIRECTORY} . "/" . $file;
                 }
             }
 
-            $self->parseCompatCircuitsFile($file);
-        } else {
+            my ( $status, $domain, $links, $nodes, $dom, $link_mappings );
+
+            ( $status, $domain, $links, $nodes ) = $self->parseCompatCircuitsFile( $file );
+            if ( $status != 0 ) {
+                my $msg = "Error parsing E2EMon definitions";
+                $self->{LOGGER}->error( $msg );
+                return -1;
+            }
+
+            ( $status, $dom, $link_mappings ) = $self->constructE2EMonMetadataDB( $links, $nodes );
+            if ( $status != 0 ) {
+                my $msg = "Error parsing E2EMon definitions";
+                $self->{LOGGER}->error( $msg );
+                return -1;
+            }
+
+            $self->{DOMAIN}            = $domain;
+            $self->{LINKS}             = $links;
+            $self->{NODES}             = $nodes;
+            $self->{E2EMON_MAPPING}    = $link_mappings;
+            $self->{E2EMON_METADATADB} = $dom;
+        }
+        else {
             my $msg = "No E2EMon definitions file for E2EMon compatibility";
-            $self->{LOGGER}->error($msg);
+            $self->{LOGGER}->error( $msg );
             return -1;
         }
     }
 
-    $self->{CLIENT}->close;
+    if ( not $self->{CONF}->{"status"}->{"metadata_db_type"} ) {
+        $self->{LOGGER}->warn( "No Metadata DB specified, providing direct access" );
 
-    $handler->registerEventHandler("MetadataKeyRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-    $handler->registerEventHandler("SetupDataRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-    $handler->registerEventHandler("MeasurementArchiveStoreRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self);
-
-    if (lc($self->{CONF}->{"status"}->{"enable_e2emon_compatibility"})) {
-        $handler->registerEventHandler("SetupDataRequest", "Path.Status", $self);
+        # ignore
     }
+    elsif ( $self->{CONF}->{"status"}->{"metadata_db_type"} eq "file" ) {
+        my $file = $self->{CONF}->{"status"}->{"metadata_db_file"};
+        if ( defined $self->{DIRECTORY} ) {
+            if ( $file !~ "^/" ) {
+                $file = $self->{DIRECTORY} . "/" . $file;
+            }
+        }
+
+        my $error;
+        $self->{METADATADB} = perfSONAR_PS::DB::File->new( { file => $file } );
+        $self->{METADATADB}->openDB( { error => \$error } );
+        unless ( $self->{METADATADB} ) {
+            $self->{LOGGER}->error( "Couldn't initialize store file: $error" );
+            return -1;
+        }
+    }
+
+    $self->{DB_CLIENT}->close;
+
+    $handler->registerEventHandler( "SetupDataRequest",   "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self );
+    $handler->registerEventHandler( "MetadataKeyRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self );
+
+    # E2EMon Compatible
+    $handler->registerEventHandler( "SetupDataRequest",   "http://ggf.org/ns/nmwg/topology/l2/3.0/link/status", $self );
+    $handler->registerEventHandler( "SetupDataRequest",   "Path.Status",                                        $self );
+    $handler->registerEventHandler( "MetadataKeyRequest", "http://ggf.org/ns/nmwg/topology/l2/3.0/link/status", $self );
+    $handler->registerEventHandler( "MetadataKeyRequest", "Path.Status",                                        $self );
 
     return 0;
 }
@@ -241,50 +338,88 @@ sub init {
     or no, depending on user preference) to let other parts of the framework know
     if LS registration is required.
 =cut
-sub needLS {
-    my ($self) = @_;
 
-    return ($self->{CONF}->{"status"}->{"enable_registration"});
+sub needLS {
+    my ( $self ) = @_;
+
+    return ( $self->{CONF}->{"status"}->{"enable_registration"} );
 }
 
 =head2 registerLS($self $sleep_time)
     Given the service information (specified in configuration) and the contents
-    of our backend database, we can contact the specified LS and register
-    ourselves. The $sleep_time ref can be set to specify how long before the
+    of our metadata database, this function contacts the specified LS, and register
+    the metadata. The $sleep_time ref can be set to specify how long before the
     perfSONAR-PS daemon should call the function again.
 =cut
-sub registerLS {
-    my ($self, $sleep_time) = @_;
-    my ($status, $res);
 
-    ($status, $res) = $self->{CLIENT}->open;
-    if ($status != 0) {
-        my $msg = "Couldn't open from database: $res";
-        $self->{LOGGER}->error($msg);
-        return -1;
+sub registerLS {
+    my ( $self, $sleep_time ) = @_;
+
+    my @mds = ();
+    my $ret_mds;
+
+    $ret_mds = $self->getMetadata_compat();
+    if ( $ret_mds ) {
+        foreach my $md ( @$ret_mds ) {
+            push @mds, $md;
+        }
     }
 
-    ($status, $res) = $self->{CLIENT}->getUniqueIDs;
-    if ($status != 0) {
+    $ret_mds = $self->getMetadata_topoid();
+    if ( $ret_mds ) {
+        foreach my $md ( @$ret_mds ) {
+            push @mds, $md;
+        }
+    }
+
+    $ret_mds = $self->getMetadata();
+    if ( $ret_mds ) {
+        foreach my $md ( @$ret_mds ) {
+            push @mds, $md;
+        }
+    }
+
+    my $n = $self->{LS_CLIENT}->registerDynamic( \@mds );
+
+    if ( defined $sleep_time ) {
+        ${$sleep_time} = $self->{CONF}->{"status"}->{"ls_registration_interval"};
+    }
+
+    return $n;
+}
+
+=head2 getMetadata_topoid ($self)
+
+Retrieves the topology identifiers from the backend database and constructs
+metadata for each of them. It then returns the values as an array of strings.
+
+=cut
+
+sub getMetadata_topoid {
+    my ( $self ) = @_;
+    my ( $status, $res );
+
+    ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
+    }
+
+    ( $status, $res ) = $self->{DB_CLIENT}->getUniqueIDs;
+    if ( $status != 0 ) {
         my $msg = "Couldn't get identifiers from database: $res";
-        $self->{LOGGER}->error($msg);
-        return -1;
+        $self->{LOGGER}->error( $msg );
+        return;
     }
 
     my @mds = ();
-    my $i = 0;
-    foreach my $id (@{ $res }) {
+    my $i   = 0;
+    foreach my $id ( @{$res} ) {
         my $md = q{};
 
         $md .= "<nmwg:metadata id=\"meta$i\">\n";
-        $md .= "<nmwg:subject id=\"sub$i\">\n";
-        my @ids = idSplit($id, 0, 0);
-        if ($ids[0] == 0) {
-        $md .= " <nmtopo:".$ids[1]." xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($id)."\" />\n";
-        } else {
-        $md .= " <nmtopo:link xmlns:nmtopo=\"http://ogf.org/schema/network/topology/base/20070828/\" id=\"".escapeString($id)."\" />\n";
-        }
-        $md .= "</nmwg:subject>\n";
+        $md .= "<topoid:subject id=\"sub$i\">" . escapeString( $id ) . "</topoid:subject>\n";
         $md .= "<nmwg:eventType>Link.Status</nmwg:eventType>\n";
         $md .= "<nmwg:eventType>http://ggf.org/ns/nmwg/characteristic/link/status/20070809</nmwg:eventType>\n";
         $md .= "</nmwg:metadata>\n";
@@ -292,1000 +427,1298 @@ sub registerLS {
         $i++;
     }
 
-    $res = q{};
+    return \@mds;
+}
 
-    my $n = $self->{LS_CLIENT}->registerDynamic(\@mds);
+=head2 getMetadata_compat ($self)
 
-    if (defined $sleep_time) {
-        ${$sleep_time} = $self->{CONF}->{"status"}->{"ls_registration_interval"};
+Builds and returns the E2EMon-compatible metadata as a set of strings, each
+containing its own metadata.
+
+=cut
+
+sub getMetadata_compat {
+    my ( $self ) = @_;
+
+    return () if ( not $self->{E2EMON_METADATADB} );
+
+    my @mds = ();
+
+    my %output_endpoints = ();
+
+    foreach my $link_name ( keys %{ $self->{LINKS} } ) {
+        my $link = $self->{LINKS}->{$link_name};
+
+        foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
+
+            # Skip if it's an external host
+            next if ( not defined $self->{NODES}->{ $endpoint->{name} } );
+
+            # Skip if we've already output the node
+            next if ( defined $output_endpoints{ $endpoint->{name} } );
+
+            my $output = perfSONAR_PS::XML::Document->new();
+
+            startMetadata( $output, "metadata." . genuid(), q{}, undef );
+            $output->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-" . $endpoint->{name} } );
+            $self->outputCompatNodeElement( $output, $self->{NODES}->{ $endpoint->{name} } );
+            $output->endElement( "subject" );
+            endMetadata( $output );
+
+            push @mds, $output->getValue;
+
+            $output_endpoints{ $endpoint->{name} } = 1;
+        }
+
+        my $output = perfSONAR_PS::XML::Document->new();
+        startMetadata( $output, "metadata." . genuid(), q{}, undef );
+        $output->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub." . genuid() } );
+        $self->outputCompatLinkElement( $output, $link );
+        $output->endElement( "subject" );
+        endMetadata( $output );
+
+        push @mds, $output->getValue;
     }
 
-    return $n;
+    return \@mds;
 }
+
+=head2 getMetadata ($self)
+
+Retrieves the metadata from the Metadata Database.
+
+=cut
+
+sub getMetadata {
+    my ( $self ) = @_;
+
+    return () if ( not $self->{METADATADB} );
+
+    my ( $status, $res );
+    my $ls = q{};
+
+    my $error = q{};
+    my @resultsString = $self->{METADATADB}->query( { query => "/nmwg:store/nmwg:metadata", error => \$error } );
+    if ( $#resultsString == -1 ) {
+        $self->{LOGGER}->error( "No data to register with LS" );
+        return -1;
+    }
+
+    return \@resultsString;
+}
+
+=head2 handleEvent ( $self, { output => 1, messageId => 1, messageType => 1, messageParameters => 1, eventType => 1, subject => 1, filterChain => 1, data => 1, rawRequest => 1, doOutputMetadata  => 1 } )
+
+The main function called by the daemon whenever there is new request. It
+multiplexes between the functions for the E2EMon-compatible requests, and those
+for other requests.
+
+=cut
 
 sub handleEvent {
-    my ($self, @args) = @_;
-    my $parameters = validateParams(@args,
-            {
-                output => 1,
-                messageId => 1,
-                messageType => 1,
-                messageParameters => 1,
-                eventType => 1,
-                subject => 1,
-                filterChain => 1,
-                data => 1,
-                rawRequest => 1,
-                doOutputMetadata => 1,
-            });
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output            => 1,
+            messageId         => 1,
+            messageType       => 1,
+            messageParameters => 1,
+            eventType         => 1,
+            subject           => 1,
+            filterChain       => 1,
+            data              => 1,
+            rawRequest        => 1,
+            doOutputMetadata  => 1,
+        }
+    );
 
     my $eventType = $parameters->{"eventType"};
 
-    if ($eventType eq "Path.Status") {
-        $self->handleCompatPathStatus(@args);
-    } else {
-        $self->handleNonCompatEvent(@args);
+    if ( $eventType eq "Path.Status" or $eventType = "http://ggf.org/ns/nmwg/topology/l2/3.0/link/status" ) {
+        $self->handleCompatEvent( @args );
     }
+    else {
+        $self->handleNormalEvent( @args );
+    }
+
+    return;
 }
 
-=head2 handleEvent($self, { output, messageId, messageType, messageParameters, eventType, subject, filterChain, data, rawRequest, doOutputMetadata })
+=head2 handleNormalEvent ( $self, { output => 1, messageId => 1, messageType => 1, messageParameters => 1, eventType => 1, subject => 1, filterChain => 1, data => 1, rawRequest => 1, doOutputMetadata  => 1 } )
 
     This function is called by the daemon whenever there is a metadata/data
-    pair for this instance to handle. This function calls the subject parsing
-    routines that are common to all requests, then calls the filter chaining
-    parsing routines which are common to all requests and then passes the
-    results onto the specific function depending on the request.
+    pair for this instance to handle. This function resolves the select filter
+    chain, and then checks which type of "subject" it has. It can be one of a
+    key, a topological identifier subject or a "normal" subject. The function
+    then dispatches the request to the appropriate function.
 =cut
-sub handleNonCompatEvent {
-    my ($self, @args) = @_;
-    my $parameters = validateParams(@args,
-            {
-                output => 1,
-                messageId => 1,
-                messageType => 1,
-                messageParameters => 1,
-                eventType => 1,
-                subject => 1,
-                filterChain => 1,
-                data => 1,
-                rawRequest => 1,
-                doOutputMetadata => 1,
-            });
 
-    my $output = $parameters->{"output"};
-    my $messageId = $parameters->{"messageId"};
-    my $messageType = $parameters->{"messageType"};
+sub handleNormalEvent {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output            => 1,
+            messageId         => 1,
+            messageType       => 1,
+            messageParameters => 1,
+            eventType         => 1,
+            subject           => 1,
+            filterChain       => 1,
+            data              => 1,
+            rawRequest        => 1,
+            doOutputMetadata  => 1,
+        }
+    );
+
+    my $output             = $parameters->{"output"};
+    my $messageId          = $parameters->{"messageId"};
+    my $messageType        = $parameters->{"messageType"};
     my $message_parameters = $parameters->{"messageParameters"};
-    my $eventType = $parameters->{"eventType"};
-    my $d = $parameters->{"data"};
-    my $raw_request = $parameters->{"rawRequest"};
-    my @subjects = @{ $parameters->{"subject"} };
-    my $doOutputMetadata = $parameters->{doOutputMetadata};
+    my $eventType          = $parameters->{"eventType"};
+    my $d                  = $parameters->{"data"};
+    my $raw_request        = $parameters->{"rawRequest"};
+    my @subjects           = @{ $parameters->{"subject"} };
+    my $doOutputMetadata   = $parameters->{doOutputMetadata};
 
     my $md = $subjects[0];
 
-    my ($status, $res) = $self->{CLIENT}->open;
-    if ($status != 0) {
-        my $msg = "Couldn't open connection to database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
-    }
-
-    my ($ids, $selectTime, $responseType, $was_key)  = $self->parseSubject($md);
-
     my $metadataId;
     my @filters = @{ $parameters->{filterChain} };
-    $selectTime = $self->resolveSelectChain($md, $parameters->{filterChain}, $selectTime);
-    if ($#filters > -1) {
-        $metadataId = $filters[-1][0]->getAttribute("id");
-    } else {
-        $metadataId = $md->getAttribute("id");
+    my ( $startTime, $endTime ) = $self->resolveSelectChain( $parameters->{filterChain} );
+    if ( $#filters > -1 ) {
+        $metadataId = $filters[-1][0]->getAttribute( "id" );
+    }
+    else {
+        $metadataId = $md->getAttribute( "id" );
     }
 
-    if ($messageType eq "SetupDataRequest") {
-        $self->handleLinkStatusRequest($output, $metadataId, $ids, $selectTime, $responseType, $was_key);
-    } elsif ($messageType eq "MetadataKeyRequest") {
-        $self->handleMetadataKeyRequest($output, $metadataId, $ids, $selectTime, $responseType, $was_key);
-    } elsif ($messageType eq "MeasurementArchiveStoreRequest") {
-        if ($#filters > -1) {
-            throw perfSONAR_PS::Error_compat("error.ma.select", "Can't have a store with select parameters");
-        }
-
-        my @ids = @{ $ids };
-        if ($#ids > 0) {
-            throw perfSONAR_PS::Error_compat("error.ma.subject", "Can't have a store with multiple subject elements");
-        }
-
-        my $do_update = findvalue($md, './nmwg:parameters/nmwg:parameter[@name="update"]');
-        if (defined $do_update and $do_update ne q{}) {
-            if (lc($do_update) eq "yes") {
-                $do_update = 1;
-            } elsif (lc($do_update) eq "no") {
-                $do_update = 0;
-            } else {
-                throw perfSONAR_PS::Error_compat("error.ma.parameters", "Update parameter must be either 'yes' or 'no'");
+    my $nmwg_key       = $self->xPathFind( $md, "./nmwg:key",       1 );
+    my $topoid_subject = $self->xPathFind( $md, "./topoid:subject", 1 );
+    if ( $nmwg_key ) {
+        ${$doOutputMetadata} = 1;
+        $self->handleRequest_Key(
+            {
+                output        => $output,
+                key           => $nmwg_key,
+                metadata_id   => $metadataId,
+                message_type  => $messageType,
+                start_time    => $startTime,
+                end_time      => $endTime,
+                event_type    => $eventType,
+                output_ranges => 1,
             }
-        } else {
-            $do_update = 0;
-        }
-
-        $self->handleStoreRequest($output, $metadataId, $ids[0], $responseType, $do_update, $d);
+        );
     }
-
-    $self->{CLIENT}->close;
+    elsif ( $topoid_subject ) {
+        ${$doOutputMetadata} = 1;
+        $self->handleRequest_Topoid(
+            {
+                output       => $output,
+                metadata     => $md,
+                metadata_id  => $metadataId,
+                message_type => $messageType,
+                start_time   => $startTime,
+                end_time     => $endTime,
+                event_type   => $eventType,
+            }
+        );
+    }
+    else {
+        ${$doOutputMetadata} = 0;
+        $self->handleRequest_Metadata(
+            {
+                output       => $output,
+                metadata     => $md,
+                metadata_id  => $metadataId,
+                message_type => $messageType,
+                start_time   => $startTime,
+                end_time     => $endTime,
+                event_type   => $eventType,
+            }
+        );
+    }
 
     return;
 }
 
-=head2 parseSubject  ($self, $subject_md)
-    There are five possible subject types that are acceptable depending on the
-    context: an nmwg key, a topoid subject, an nmwg subject with the old style
-    link IDs in them (deprecated). This function calls the relevant parsing
-    function depending on the content of the subject metadata.
+=head2 handleRequest_Metadata ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
+    This function handles requests that comes in with a subject metadata. It
+    then matches the given metadata against the metadata database, and then
+    outputs each matching metadata and then either outputs the key directly in
+    the case of a MetadataKeyRequest or calls a function to handle querying and
+    outputting the data.
 =cut
-sub parseSubject {
-    my ($self, $subject_md) = @_;
 
-    my $key;
-    my $time;
-
-    # look for any time parameters specified in the key
-    my $nmwg_key = find($subject_md, "./*[local-name()='key' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    my $nmwg_subj = find($subject_md, "./*[local-name()='subject' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    my $topoid_subj = find($subject_md, './topoid:subject', 1);
-
-    if (($nmwg_key and $nmwg_subj) or ($topoid_subj and $nmwg_subj) or ($nmwg_key and $topoid_subj)) {
-        my $msg = "Ambiguous subject";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    if ($nmwg_key) {
-        my ($link_id, $time, $responseType) = $self->parseKey($nmwg_key);
-
-        my @tmp = ( "$link_id" );
-        return (\@tmp, $time, $responseType, 1);
-    }
-
-    if ($topoid_subj) {
-        # check for a link expression
-        my $ids = $self->lookupIDs($topoid_subj->textContent);
-
-        return ($ids, undef, "topoid", 0);
-    }
-
-    if ($nmwg_subj) {
-        # we've got the nmwg subject
-        my $link_id = findvalue($nmwg_subj, './*[local-name()=\'link\']/@id');
-        if ($link_id) {
-            my @tmp = ( "$link_id" );
-            return (\@tmp, $time, "linkid", 0);
+sub handleRequest_Metadata {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output       => 1,
+            metadata     => 1,
+            metadata_id  => 1,
+            message_type => 1,
+            start_time   => 1,
+            end_time     => 1,
+            event_type   => 1,
         }
-    }
+    );
 
-    throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid subject type");
-}
+    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+    my $d_query = "/nmwg:store/nmwg:data";
 
-=head2 parseKey ($self, $key)
-    Parses the nmwg keys that we generate and hand off to the users.
-=cut
-sub parseKey {
-    my ($self, $key) = @_;
-
-    my $key_params = find($key, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    if (not $key_params) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $link_id = findvalue($key_params, "./nmwg:parameter[\@name=\"maKey\"]");
-    $self->{LOGGER}->error("LINK ID: '$link_id'");
-
-    if (not $link_id) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    if (idIsAmbiguous($link_id)) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $responseFormat = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"responseFormat\"]");
-    if (not $responseFormat or ($responseFormat ne "topoid" and $responseFormat ne "linkid")) {
-        my $msg = "Invalid key";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.subject", $msg);
-    }
-
-    my $time = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
-    my $startTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"startTime\"]");
-    my $endTime = findvalue($key_params, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"endTime\"]");
-
-    $link_id = unescapeString($link_id);
-
-    unless (defined $time or defined $startTime or defined $endTime) {
-        return ($link_id, undef, $responseFormat);
-    }
-
-    if (defined $time and (defined $startTime or defined $endTime)) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    if (defined $time) {
-        return ($link_id, perfSONAR_PS::Time->new("point", $time), $responseFormat);
-    }
-
-    if (not defined $startTime) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    if (not defined $endTime) {
-        throw perfSONAR_PS::Error_compat("error.ma.subject", "Invalid key");
-    } 
-
-    return ($link_id, perfSONAR_PS::Time->new("range", $startTime, $endTime), $responseFormat);
-}
-
-=head2 lookupIDs ($self, $topo_exp)
-    Takes a topology id expression and matches it with the identifiers in the
-    SQL backend.
-=cut
-sub lookupIDs {
-    my ($self, $topo_exp) = @_;
-
-    my $ids;
-
-    $self->{LOGGER}->debug("lookupIDs: '".$topo_exp."'");
-
-    # now we have to look up all the values it could be
-    my ($status, $res) = $self->{CLIENT}->getUniqueIDs;
-    if ($status != 0) {
-        my $msg = "Couldn't get element information from database: $res";
-        $self->{LOGGER}->error($msg);
+    unless ( $self->{METADATADB} ) {
+        my $msg = "Database returned 0 results for search";
+        $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    $ids = idMatch($res, $topo_exp);
+    my $md_results = $self->{METADATADB}->querySet( { query => $md_query } );
+    my $d_results  = $self->{METADATADB}->querySet( { query => $d_query } );
 
-    if (not defined $ids) {
-        my $msg = "No circuits or paths match expression: $topo_exp";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    my %mds = ();
+    foreach my $md ( $md_results->get_nodelist ) {
+        my $curr_md_id = $md->getAttribute( "id" );
+        next if not $curr_md_id;
+        $mds{$curr_md_id} = $md;
     }
 
-    return $ids;
-}
-
-=head2 resolveSelectChain ($self, $subject_md, $filterChain, $selectTime)
-    This function takes the filter chain and tries to resolve it down to a
-    single point in or range of time. It takes the subject metadata since some
-    of the protocol options would take parameters from there, the filter chain
-    itself and a $selectTime that is undef in all cases other than keys. In the
-    case of a key, it may correspond to a specific time range and in that case,
-    $selectTime will have a perfSONAR_PS::Time element with the time
-    point/range for the key.
-=cut
-sub resolveSelectChain {
-    my ($self, $subject_md, $filterChain, $selectTime) = @_;
-
-    my ($time, $startTime, $endTime);
-    my @filters = @{ $filterChain };
-
-    if ($selectTime) {
-        if ($selectTime->getType eq "point") {
-            $startTime = $selectTime->getTime;
-            $endTime = $selectTime->getTime;
-        } else {
-            $startTime = $selectTime->getStartTime;
-            $endTime = $selectTime->getEndTime;
-        }
-    }
-
-    my $now_flag = 0;
-
-    # look for any time parameters specified in the parameters of the subject (DEPRECATED)
-    my $parameters = find($subject_md, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"nmwg"}."']", 1);
-    if (defined $parameters) {
-        my $curr_time = findvalue($parameters, "./*[local-name()='parameter' and namespace-uri()='".$status_namespaces{"nmwg"}."' and \@name=\"time\"]");
-        if (lc($curr_time) eq "now") {
-            if ($startTime or $endTime) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: 'now' used with a time range");
-            }
-
-            $now_flag = 1;
-        } else {
-            if ($startTime and $endTime and ($curr_time < $startTime or $curr_time > $endTime)) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: time specified is out of range previously specified");
-            } else {
-                $startTime = $curr_time;
-                $endTime = $curr_time;
-            }
-        }
-    }
-
-    # got through the filters and load any parameters with an eye toward
-    # producing data as though it had gone through a set of filters.
-    foreach my $filter_arr (@filters) {
-        my @filter_set = @{ $filter_arr };
-        my $filter = $filter_set[0];
-
-        my $select_parameters = find($filter, "./*[local-name()='parameters' and namespace-uri()='".$status_namespaces{"select"}."']", 1);
-        
-        next if (not defined $select_parameters);
-    
-        my $curr_time = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"time\"]");
-        my $curr_startTime = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"startTime\"]");
-        my $curr_endTime = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"endTime\"]");
-        my $curr_duration = findvalue($select_parameters, "./*[local-name()='parameter' and \@name=\"duration\"]");
-
-        $self->{LOGGER}->debug("Time: $curr_time") if ($curr_time);
-        $self->{LOGGER}->debug("Start Time: $curr_startTime") if ($curr_startTime);
-        $self->{LOGGER}->debug("End Time: $curr_endTime") if ($curr_endTime);
-        $self->{LOGGER}->debug("Duration: $curr_duration") if ($curr_duration);
-
-        if ($curr_time) {
-            if (lc($curr_time) eq "now") {
-                if ($startTime or $endTime) {
-                    throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: 'now' used with a time range");
-                }
-
-                $now_flag = 1;
-            } else {
-                if (($startTime and $curr_time < $startTime) or ($endTime and $curr_time > $endTime)) {
-                    throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: time specified is out of range previously specified");
-                } else {
-                    $startTime = $curr_time;
-                    $endTime = $curr_time;
-                }
-            }
-        } elsif ($curr_startTime) {
-            if ($now_flag) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: 'now' used with a time range");
-            }
-
-            unless ($curr_endTime or $curr_duration) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: startTime but not endTime or duration specified");
-            }
-
-            if ($curr_endTime and $curr_duration) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: both endTime and duration specified");
-            }
-
-            if (not defined $startTime or $curr_startTime >= $startTime) {
-                $startTime = $curr_startTime;
-            }
-
-            if ($curr_duration) {
-                $curr_endTime = $curr_startTime + $curr_duration;
-            }
-
-            if (not defined $endTime or $curr_endTime < $endTime) {
-                $endTime = $curr_endTime;
-            }
-        }
-
-        if ($startTime and $endTime and $startTime > $endTime) {
-                throw perfSONAR_PS::Error_compat("error.ma.select", "Ambiguous select parameters: startTime > endTime");
-        }
-    }
-
-    if (not defined $startTime and not defined $endTime) {
+    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
         return;
     }
 
-    $self->{LOGGER}->debug("Start Time: $startTime End Time: $endTime");
+    foreach my $d ( $d_results->get_nodelist ) {
+        my $curr_d_mdIdRef = $d->getAttribute( "metadataIdRef" );
 
-    if ($startTime == $endTime) {
-        return perfSONAR_PS::Time->new("point", $startTime);
-    } else {
-        return perfSONAR_PS::Time->new("range", $startTime, $endTime);
-    }
-}
+        next if ( not $curr_d_mdIdRef or not exists $mds{$curr_d_mdIdRef} );
 
-=head2 handleStoreRequest ($self, $output, $metadataId, $id, $responseType, $do_update, $data)
-    This function handles a store request. It pulls the updated information to
-    store from the data element, making sure that all the relevant data is
-    there.  After that, it updates the link or circuit state in the database
-    and then adds a metadata/data pair to show that the store request was
-    handled properly.
-=cut
-sub handleStoreRequest {
-    my ($self, $output, $metadataId, $id, $responseType, $do_update, $d) = @_;
+        my $curr_md = $mds{$curr_d_mdIdRef};
 
-    my $time = findvalue($d, './ifevt:datum/@timeValue');
-    my $time_type = findvalue($d, './ifevt:datum/@timeType');
-    my $adminState = findvalue($d, './ifevt:datum/ifevt:stateAdmin');
-    my $operState = findvalue($d, './ifevt:datum/ifevt:stateOper');
+        my $new_md_id = "metadata." . genuid();
 
-    my ($status, $res);
+        my $md_temp = $curr_md->cloneNode( 1 );
+        $md_temp->setAttribute( "metadataIdRef", $parameters->{metadata_id} );
+        $md_temp->setAttribute( "id",            $new_md_id );
 
-    if (not defined $time or $time eq q{} or not defined $time_type or $time_type eq q{} or not defined $adminState or $adminState eq q{} or not defined $operState or $operState eq q{}) {
-        my $msg = "Data block is missing:";
-        $msg .= " 'time'" if (not defined $time or $time eq q{});
-        $msg .= " 'time type'" if (not defined $time_type or $time_type eq q{});
-        $msg .= " 'administrative state'" if (not defined $adminState or $adminState eq q{});
-        $msg .= " 'operational state'" if (not defined $operState or $operState eq q{});
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.incomplete_data", $msg);
-    }
+        $parameters->{output}->addExistingXMLElement( $md_temp );
 
-    if ($time_type ne "unix") {
-        my $msg = "Time type must be 'unix'";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.ma.query.invalid_timestamp_type", $msg);
-    }
-
-    ($status, $res) = $self->{CLIENT}->updateLinkStatus($time, $d, $operState, $adminState, $do_update);
-    if ($status != 0) {
-        my $msg = "Database update failed: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.update", $msg);
-    }
-
-    my $mdID = "metadata.".genuid();
-    getResultCodeMetadata($output, $mdID, $metadataId, "success.ma.added");
-    getResultCodeData($output, "data.".genuid(), $mdID, "new data element successfully added", 1);
-
-    return;
-}
-
-=head2 handleLinkStatusRequest ($self, $output, $metadataId, $ids, $time, $responseType, $was_key)
-    This function handles a link status request. First, it checks whether the
-    history of a link or circuit should be retrieved or the just the specified
-    point/range, calling the appropriate function for each. Next, it must
-    output the data. Key requests never have the specific element output,
-    just the key. Since the daemon will handle outputting the key for us, we
-    can safely not output the metadata in that case. In all other cases, we
-    must output the appropriate information. Thus, we check whether the
-    incoming request was a key, if so we do nothing, if not, we output the
-    appropriate MD depending on the format of the incoming response. Once we've
-    done that, we go through and output the resulting status.
-=cut
-sub handleLinkStatusRequest {
-    my ($self, $output, $metadataId, $ids, $time, $responseType, $was_key) = @_;
-    my ($status, $res);
-
-    if (defined $time and $time->getType() eq "point" and $time->getTime() == -1) {
-        ($status, $res) = $self->{CLIENT}->getLinkHistory($ids);
-    } else {
-        ($status, $res) = $self->{CLIENT}->getLinkStatus($ids, $time);
-    }
-
-    if ($status != 0) {
-        my $msg = "Couldn't get information about elements from database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
-    }
-
-    foreach my $id (@{ $ids }) {
-        my $mdID;
-        if ($was_key) {
-            $mdID = $metadataId;
-        } else {
-            $mdID  = $self->outputMetadata($output, $id, $metadataId, $responseType);
+        my @elements = ();
+        my $find_res = $self->xPathFind( $d, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"element_id\"]", 0 );
+        foreach my $id_ref ( $find_res->get_nodelist ) {
+            my $id = $id_ref->textContent;
+            push @elements, $id;
         }
 
-        my $data_content = q{};
+        if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+#            $self->{LOGGER}->debug( "Output: " . Dumper( \@elements ) );
 
-        if (defined $res->{$id}) {
-            foreach my $link (@{ $res->{$id} }) {
-                if (not defined $time or ($time->getType() eq "point" and $time->getTime() != -1)) {
-                    $data_content .= $self->writeoutLinkState($link);
-                } else {
-                    $data_content .= $self->writeoutLinkState_range($link);
-                }
-            }
+            # need to output the data
+            startData( $parameters->{output}, "data." . genuid(), $new_md_id );
+            $self->outputKey( { output => $parameters->{output}, elements => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, event_type => $parameters->{event_type} } );
+            endData( $parameters->{output} );
         }
-        createData($output, "data.".genuid(), $mdID, $data_content, undef);
-    }
-
-    return;
-}
-
-=head2 handleMetadataKeyRequest ($self, $output, $metadataId, $ids, $time, $responseType, $was_key)
-    This function takes the relevant ids and generates output containing
-    the keys associated with those ids. The function is almost identical
-    to the handleLinkStatusRequest in its output. It just outputs the key for
-    an element instead its associated data.
-=cut
-sub handleMetadataKeyRequest {
-    my ($self, $output, $metadataId, $ids, $time, $responseType, $was_key) = @_;
-
-    my $i = genuid();
-    foreach my $id (@{ $ids }) {
-        my $mdID;
-        if ($was_key) {
-            $mdID = $metadataId;
-        } else {
-            $mdID  = $self->outputMetadata($output, $id, $metadataId, $responseType);
+        else {
+            $self->handleData( { output => $parameters->{output}, ids => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, output_ranges => 1 } );
         }
-
-        my $dID = "data$i";
-        startData($output, $dID, $mdID, undef);
-            $self->createKey($output, $id, $time, $responseType);
-        endData($output);
     }
+
+    $self->{DB_CLIENT}->close;
 
     return;
 }
 
-=head2 outputMetadata ($self, $output, $id, $parentMdId, $responseType)
-    There are 3 different formats that the metadata in a response can take. The
-    'linkid' format is deprecated and kept around for existing software out
-    there. However, there is another formats available: topoid.
-    Topoid outputs a topoid subject containing the identifier.
+=head2 handleRequest_Topoid ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
+    This function handles requests that comes in with a topology id subject
+    metadata. It then queries the database to see if that identifier exists,
+    and then returns that identifier.  If so, it outputs the key in the case of
+    a MetadataKeyRequest or calls a function to handle querying and outputting
+    the data.
 =cut
-sub outputMetadata {
-    my ($self, $output, $id, $parentMdId, $responseType) = @_;
 
-    if ($responseType eq "linkid") {
-        return $self->outputLinkIDMetadata($output, $id, $parentMdId);
-    } elsif ($responseType eq "topoid") {
-        return $self->outputTopoIDMetadata($output, $id, $parentMdId);
+sub handleRequest_Topoid {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output       => 1,
+            metadata     => 1,
+            metadata_id  => 1,
+            message_type => 1,
+            start_time   => 1,
+            end_time     => 1,
+            event_type   => 1,
+        }
+    );
+
+    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
     }
-}
 
-=head2 outputLinkIDMetadata ($self, $output, $id, $parentMdId)
-    Outputs a metadata containing the specified link id in the format expected
-    by legacy pS-PS Status MA applications.
-=cut
-sub outputLinkIDMetadata {
-    my ($self, $output, $id, $parentMdId) = @_;
+    my $topo_id = $self->xPathFindValue( $parameters->{metadata}, "./topoid:subject" );
+    $topo_id =~ s/^\s*//g;
+    $topo_id =~ s/\s*$//g;
 
-    my $md_content = q{};
-    $md_content .= "<nmwg:subject id=\"sub0\">\n";
-    $md_content .= "  <nmtopo:link xmlns:nmtopo=\"".$status_namespaces{"nmtopo"}."\" id=\"".escapeString($id)."\" />\n";
-    $md_content .= "</nmwg:subject>\n";
+    ( $status, $res ) = $self->{DB_CLIENT}->getUniqueIDs;
+    if ( $status != 0 ) {
+        my $msg = "Error querying database for identifier";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
 
-    my $mdID = "metadata.".genuid();
+    my $valid;
 
-    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
+    foreach my $id ( @$res ) {
+        if ( $id eq $topo_id ) {
+            $valid = 1;
+        }
+    }
 
-    return $mdID;
-}
+    if ( not $valid ) {
+        my $msg = "Database returned 0 results for search";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
 
-=head2 outputTopoIDMetadata ($self, $output, $id, $parentMdId)
-    Outputs a metadata containing the specified id in the new topoid
-    format.
-=cut
-sub outputTopoIDMetadata {
-    my ($self, $output, $id, $parentMdId) = @_;
+    my @elements = ( $topo_id );
 
-    my $md_content = "<topoid:subject xmlns:topoid=\"".$status_namespaces{"topoid"}."\">".escapeString($id)."</topoid:subject>";
+    if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
 
-    my $mdID = "metadata.".genuid();
+        # need to output the key
+        startData( $parameters->{output}, "data." . genuid(), $parameters->{metadata_id} );
+        $self->outputKey( { output => $parameters->{output}, elements => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, event_type => $parameters->{event_type} } );
+        endData( $parameters->{output} );
+    }
+    else {
+        $self->handleData( { output => $parameters->{output}, metadata_id => $parameters->{metadata_id}, ids => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, output_ranges => 1 } );
+    }
 
-    createMetadata($output, $mdID, $parentMdId, $md_content, undef);
-
-    return $mdID;
-}
-
-=head2 createKey ($self, $output, $link_id, $time, $responseType)
-    Outputs a key with the relevant time, responseFormat and link id so that a
-    client can simply return that key and get the information associated with it.
-=cut
-sub createKey {
-    my ($self, $output, $link_id, $time, $responseType) = @_;
-
-    $output->startElement({ prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} });
-        startParameters($output, "params.0");
-            addParameter($output, "maKey", escapeString($link_id));
-            addParameter($output, "eventType", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809");
-            addParameter($output, "responseFormat", $responseType);
-            if ($time) {
-                if ($time->getType eq "range") {
-                    addParameter($output, "startTime", $time->getStartTime);
-                    addParameter($output, "endTime", $time->getEndTime);
-                } elsif ($time->getType eq "point") { 
-                    addParameter($output, "time", $time->getTime);
-                }
-            }
-        endParameters($output);
-    $output->endElement("key");
+    $self->{DB_CLIENT}->close;
 
     return;
 }
 
-=head2 writeoutLinkState_range ($self, $link)
-    Writes out the specified perfSONAR_PS::Status::Link element in a format
-    backwards compatible with the ifevt standard. It adds four attributes
-    to the standard ifevt datum: startTime, startTimeType, endTime and
-    endTimeType. These added attributes give the range during which the link
-    had the specified state.
+=head2 handleRequest_Key ($self, { output=> 1, key => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1, output_metadata => 1 })
+    This function handles requests that comes in with a key. It parses the key 
+    and then either outputs a new key directly in the case of a
+    MetadataKeyRequest or calls a function to handle querying and outputting
+    the data for a SetupDataRequest.
 =cut
-sub writeoutLinkState_range {
-    my ($self, $link) = @_;
 
-    return q{} if (not defined $link);
+sub handleRequest_Key {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output        => 1,
+            key           => 1,
+            metadata_id   => 1,
+            message_type  => 1,
+            start_time    => 1,
+            end_time      => 1,
+            event_type    => 1,
+            output_ranges => 1,
+        }
+    );
 
-    my $localContent = q{};
-
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\"\n";
-    $localContent .= "    startTime=\"".$link->getStartTime."\" startTimeType=\"unix\" endTime=\"".$link->getEndTime."\" endTimeType=\"unix\">\n";
-    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
-    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
-    $localContent .= "</ifevt:datum>\n";
-
-    return $localContent;
-}
-
-=head2 writeoutLinkState_range ($self, $link)
-    Writes out the specified perfSONAR_PS::Status::Link element in a format
-    compatible with the ifevt standard.
-=cut
-sub writeoutLinkState {
-    my ($self, $link, $time) = @_;
-
-    return q{} if (not defined $link);
-
-    my $localContent = q{};
-
-    if (not defined $time or $time eq q{}) {
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"".$link->getEndTime."\">\n";
-    } else {
-    $localContent .= "<ifevt:datum xmlns:ifevt=\"http://ggf.org/ns/nmwg/event/status/base/2.0/\" timeType=\"unix\" timeValue=\"$time\">\n";
+    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
     }
-    $localContent .= "    <ifevt:stateOper>".$link->getOperStatus."</ifevt:stateOper>\n";
-    $localContent .= "    <ifevt:stateAdmin>".$link->getAdminStatus."</ifevt:stateAdmin>\n";
-    $localContent .= "</ifevt:datum>\n";
 
-    return $localContent;
+    my ( $elements, $start_time, $end_time ) = $self->parseKey( $parameters->{key} );
+
+    if ( not $start_time ) {
+        $start_time = $parameters->{start_time};
+    }
+
+    if ( $parameters->{start_time} and $start_time < $parameters->{start_time} ) {
+        $start_time = $parameters->{start_time};
+    }
+
+    if ( not $end_time ) {
+        $end_time = $parameters->{end_time};
+    }
+
+    if ( $parameters->{end_time} and $end_time > $parameters->{end_time} ) {
+        $start_time = $parameters->{start_time};
+    }
+
+    if ( $start_time and $end_time and $start_time > $end_time ) {
+        throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: time requested is out of key's range" );
+    }
+
+    if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+
+        # need to output the data
+        startData( $parameters->{output}, "data." . genuid(), $parameters->{metadata_id} );
+        $self->outputKey( { output => $parameters->{output}, elements => $elements, start_time => $start_time, end_time => $end_time, event_type => $parameters->{event_type} } );
+        endData( $parameters->{output} );
+    }
+    else {
+        $self->handleData( { output => $parameters->{output}, metadata_id => $parameters->{metadata_id}, ids => $elements, start_time => $start_time, end_time => $end_time, output_ranges => $parameters->{output_ranges} } );
+    }
+
+    $self->{DB_CLIENT}->close;
+
+    return;
 }
 
-sub handleCompatPathStatus {
-    my ($self, @args) = @_;
-    my $parameters = validateParams(@args,
-            {
-                output => 1,
-                messageId => 1,
-                messageType => 1,
-                messageParameters => 1,
-                eventType => 1,
-                subject => 1,
-                filterChain => 1,
-                data => 1,
-                rawRequest => 1,
-                doOutputMetadata => 1,
-            });
+=head2 handleNormalEvent ( $self, { output => 1, messageId => 1, messageType => 1, messageParameters => 1, eventType => 1, subject => 1, filterChain => 1, data => 1, rawRequest => 1, doOutputMetadata  => 1 } )
 
-    my $output = $parameters->{"output"};
-    my $messageId = $parameters->{"messageId"};
-    my $messageType = $parameters->{"messageType"};
+    This function is called whenever there is an E2EMon metadata/data pair for
+    this instance to handle. This function resolves the select filter chain,
+    and then checks which type of "subject" it has, either a key or a "normal"
+    subject. The function then dispatches the request to the appropriate
+    function.
+=cut
+
+sub handleCompatEvent {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output            => 1,
+            messageId         => 1,
+            messageType       => 1,
+            messageParameters => 1,
+            eventType         => 1,
+            subject           => 1,
+            filterChain       => 1,
+            data              => 1,
+            rawRequest        => 1,
+            doOutputMetadata  => 1,
+        }
+    );
+
+    my $output             = $parameters->{"output"};
+    my $messageId          = $parameters->{"messageId"};
+    my $messageType        = $parameters->{"messageType"};
     my $message_parameters = $parameters->{"messageParameters"};
-    my $eventType = $parameters->{"eventType"};
-    my $d = $parameters->{"data"};
-    my $raw_request = $parameters->{"rawRequest"};
-    my @subjects = @{ $parameters->{"subject"} };
-    my $doOutputMetadata = $parameters->{doOutputMetadata};
+    my $eventType          = $parameters->{"eventType"};
+    my $d                  = $parameters->{"data"};
+    my $raw_request        = $parameters->{"rawRequest"};
+    my @subjects           = @{ $parameters->{"subject"} };
+    my $doOutputMetadata   = $parameters->{doOutputMetadata};
 
-    # Dsiable metadata outputting
-    ${ $doOutputMetadata } = 0;
+    my $md = $subjects[0];
 
-    my ($status, $res) = $self->{CLIENT}->open;
-    if ($status != 0) {
-        my $msg = "Couldn't open connection to database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.open", $msg);
+    my $metadataId;
+    my @filters = @{ $parameters->{filterChain} };
+    my ( $startTime, $endTime ) = $self->resolveSelectChain( $parameters->{filterChain} );
+    if ( $#filters > -1 ) {
+        $metadataId = $filters[-1][0]->getAttribute( "id" );
+    }
+    else {
+        $metadataId = $md->getAttribute( "id" );
     }
 
-    my %sublink_ids = ();
-    foreach my $circuit_name (keys %{ $self->{CIRCUITS} }) {
-        my $circuit = $self->{CIRCUITS}->{$circuit_name};
-        foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
-            $sublink_ids{$sublink_id} = 1;
+    my $nmwg_key = $self->xPathFind( $md, "./nmwg:key", 1 );
+    if ( $nmwg_key ) {
+        ${$doOutputMetadata} = 1;
+        $self->handleRequest_Key(
+            {
+                output        => $output,
+                key           => $nmwg_key,
+                metadata_id   => $metadataId,
+                message_type  => $messageType,
+                start_time    => $startTime,
+                end_time      => $endTime,
+                event_type    => $eventType,
+                output_ranges => 0,
+            }
+        );
+    }
+    else {
+        ${$doOutputMetadata} = 0;
+        $self->handleCompatRequest_Metadata(
+            {
+                output       => $output,
+                metadata     => $md,
+                metadata_id  => $metadataId,
+                message_type => $messageType,
+                start_time   => $startTime,
+                end_time     => $endTime,
+                event_type   => $eventType,
+            }
+        );
+    }
+
+    return;
+}
+
+=head2 handleCompatRequest_Metadata ($self, { output=> 1, metadata => 1, metadata_id => 1, message_type => 1, start_time => 1, end_time => 1 })
+    This function handles E2EMon requests that comes in with a subject
+    metadata. It then matches the given metadata against the metadata database,
+    and then outputs each matching link and node and then either outputs the
+    key directly in the case of a MetadataKeyRequest or calls a function to
+    handle querying and outputting the data.
+=cut
+
+sub handleCompatRequest_Metadata {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output       => 1,
+            metadata     => 1,
+            metadata_id  => 1,
+            message_type => 1,
+            start_time   => 1,
+            end_time     => 1,
+            event_type   => 1,
+        }
+    );
+
+    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+
+    $self->{LOGGER}->debug( "Query: " . $md_query );
+
+    unless ( $self->{E2EMON_METADATADB} ) {
+        my $msg = "Database returned 0 results for search";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+
+    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
+    }
+
+    my $md_results = $self->xPathFind( $self->{E2EMON_METADATADB}, $md_query, 0 );
+    if ( $md_results->size() == 0 ) {
+        my $msg = "Database returned 0 results for search";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+
+    startParameters( $parameters->{output}, "params.0" );
+    addParameter( $parameters->{output}, "DomainName", $self->{DOMAIN} );
+    endParameters( $parameters->{output} );
+
+    my %output_endpoints = ();
+    my %mds              = ();
+    foreach my $md ( $md_results->get_nodelist ) {
+        my $curr_md_id = $md->getAttribute( "id" );
+
+        next if ( not $self->{E2EMON_MAPPING}->{$curr_md_id} );
+        my $link = $self->{LINKS}->{ $self->{E2EMON_MAPPING}->{$curr_md_id} };
+        next if ( not $link );
+
+        foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
+
+            # Skip if it's an external host
+            next if ( not defined $self->{NODES}->{ $endpoint->{name} } );
+
+            # Skip if we've already output the node
+            next if ( defined $output_endpoints{ $endpoint->{name} } );
+
+            startMetadata( $parameters->{output}, "metadata." . genuid(), q{}, undef );
+            $parameters->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-" . $endpoint->{name} } );
+            $self->outputCompatNodeElement( $parameters->{output}, $self->{NODES}->{ $endpoint->{name} } );
+            $parameters->{output}->endElement( "subject" );
+            endMetadata( $parameters->{output} );
+
+            $output_endpoints{ $endpoint->{name} } = 1;
+        }
+
+        my $mdId = "metadata." . genuid();
+
+        startMetadata( $parameters->{output}, $mdId, q{}, undef );
+        $parameters->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub." . genuid() } );
+        $self->outputCompatLinkElement( $parameters->{output}, $link );
+        $parameters->{output}->endElement( "subject" );
+        endMetadata( $parameters->{output} );
+
+        if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+
+            # need to output the data
+            #$self->{LOGGER}->debug( "Output: " . Dumper( $link->{"subelements"} ) );
+
+            startData( $parameters->{output}, "data." . genuid(), $mdId );
+            $self->outputKey(
+                {
+                    output     => $parameters->{output},
+                    elements   => $link->{"subelements"},
+                    start_time => $parameters->{start_time},
+                    end_time   => $parameters->{end_time},
+                    event_type => $parameters->{event_type}
+                }
+            );
+            endData( $parameters->{output} );
+        }
+        else {
+            #$self->{LOGGER}->debug( "Link to handle: " . Dumper( $link ) );
+
+            $self->handleData(
+                {
+                    output        => $parameters->{output},
+                    metadata_id   => $mdId,
+                    ids           => $link->{"subelements"},
+                    start_time    => $parameters->{start_time},
+                    end_time      => $parameters->{end_time},
+                    output_ranges => 0,
+                }
+            );
         }
     }
 
-    my @ids = keys %sublink_ids;
-    
-    ($status, $res) = $self->{CLIENT}->getLinkStatus(\@ids, undef);
-    if ($status != 0) {
-        my $msg = "Couldn't get information about elements from database: $res";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat("error.common.storage.fetch", $msg);
+    $self->{DB_CLIENT}->close;
+
+    return;
+}
+
+=head2 resolveSelectChain ($self, $filterChain)
+    This function takes the filter chain and tries to resolve it down to a
+    single time period. It only searches for chains with "startTime", "endTime"
+    or a specific time. This specific time can be "now" in which case the
+    returned startTime and endTime are 'undef'.
+=cut
+
+sub resolveSelectChain {
+    my ( $self, $filterChain ) = @_;
+
+    my ( $startTime, $endTime );
+
+    my @filters = @{$filterChain};
+
+    my $now_flag = 0;
+
+    # got through the filters and load any parameters with an eye toward
+    # producing data as though it had gone through a set of filters.
+    foreach my $filter_arr ( @filters ) {
+        my @filter_set = @{$filter_arr};
+        my $filter     = $filter_set[0];
+
+        my $select_parameters = $self->xPathFind( $filter, './select:parameters', 1 );
+
+        if ( not $select_parameters ) {
+            $self->{LOGGER}->debug( "Didn't find any select parameters" );
+            next;
+        }
+
+        my $curr_time      = $self->xPathFindValue( $select_parameters, './select:parameter[@name="time"]' );
+        my $curr_startTime = $self->xPathFindValue( $select_parameters, './select:parameter[@name="startTime"]' );
+        my $curr_endTime   = $self->xPathFindValue( $select_parameters, './select:parameter[@name="endTime"]' );
+
+        if ( $curr_time ) {
+            if ( lc( $curr_time ) eq "now" ) {
+                if ( $startTime or $endTime ) {
+                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+                }
+
+                $now_flag = 1;
+            }
+            else {
+                if ( ( $startTime and $curr_time < $startTime ) or ( $endTime and $curr_time > $endTime ) ) {
+                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: time specified is out of range previously specified" );
+                }
+                else {
+                    $startTime = $curr_time;
+                    $endTime   = $curr_time;
+                }
+            }
+        }
+
+        if ( $curr_startTime ) {
+            if ( $now_flag ) {
+                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+            }
+
+            if ( not $startTime or $curr_startTime >= $startTime ) {
+                $startTime = $curr_startTime;
+            }
+
+        }
+
+        if ( $curr_endTime ) {
+            if ( $now_flag ) {
+                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+            }
+
+            if ( not $endTime or $curr_endTime < $endTime ) {
+                $endTime = $curr_endTime;
+            }
+        }
     }
 
-    my $link_status = $res;
+    if ( $startTime and $endTime and $startTime > $endTime ) {
+        throw perfSONAR_PS::Error_compat( "error.ma.select", "Invalid select parameters: startTime > endTime" );
+    }
+
+    if ( $startTime ) {
+        $self->{LOGGER}->debug( "Resolved Filters: Start Time: $startTime" );
+    }
+    if ( $endTime ) {
+        $self->{LOGGER}->debug( "Resolved Filters: End Time: $endTime" );
+    }
+
+    return ( $startTime, $endTime );
+}
+
+=head2 parseKey ($self, $key)
+    Parses the nmwg keys that are generated and handed off to the users. The
+    "eventType" is added so that the daemon knows which module to dispatch the
+    key to.
+=cut
+
+sub parseKey {
+    my ( $self, $key ) = @_;
+
+    my $key_params = $self->xPathFind( $key, "./nmwg:parameters", 1 );
+    if ( not $key_params ) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.subject", $msg );
+    }
+
+    my $find_res = $self->xPathFind( $key_params, './nmwg:parameter[@name="maKey"]', 0 );
+    if ( not $find_res ) {
+        my $msg = "Invalid key";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.subject", $msg );
+    }
+
+    my @elements = ();
+    foreach my $element_ref ( $find_res->get_nodelist ) {
+        my $element = $element_ref->textContent;
+        push @elements, unescapeString( $element );
+    }
+
+    my $startTime = $self->xPathFindValue( $key_params, './nmwg:parameter[@name="startTime"]' );
+    my $endTime   = $self->xPathFindValue( $key_params, './nmwg:parameter[@name="endTime"]' );
+
+    $self->{LOGGER}->debug( "Parsed Key: Start: " . $startTime . " End: " . $endTime . " Elements: " . join( ',', @elements ) );
+
+    return ( \@elements, $startTime, $endTime );
+}
+
+=head2 createKey ($self, { output => 1, elements => 1, start_time => 0, end_time => 0, event_type => 0 })
+    Outputs a key to the specified XML output module with the specified
+    elements, start time, end time and event type.
+=cut
+
+sub outputKey {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output     => 1,
+            elements   => 1,
+            start_time => 0,
+            end_time   => 0,
+            event_type => 0,
+        }
+    );
+
+    $parameters->{output}->startElement( { prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} } );
+    startParameters( $parameters->{output}, "params.0" );
+    foreach my $element ( @{ $parameters->{elements} } ) {
+        addParameter( $parameters->{output}, "maKey", escapeString( $element ) );
+    }
+    addParameter( $parameters->{output}, "eventType", $parameters->{event_type} );
+    addParameter( $parameters->{output}, "startTime", $parameters->{start_time} ) if ( $parameters->{start_time} );
+    addParameter( $parameters->{output}, "endTime",   $parameters->{end_time} ) if ( $parameters->{end_time} );
+    endParameters( $parameters->{output} );
+    $parameters->{output}->endElement( "key" );
+
+    return;
+}
+
+=head2 handleData ( $self, { output => 1, metadata_id => 1, ids => 1, data_id => 0, start_time => 0, end_time => 0, output_ranges => 0, } )
+    Queries the backend database for the specified elemenets. The data returned
+    comes back as time ranges.  It then calls a function to return only those
+    ranges where data exists for all the elements. It then goes through those
+    common ranges and calculates the status of the combined element. It then
+    outputs that data to the specified XML output object. The output_ranges
+    parameter is used to ameliorate a difference between the ranged data that
+    the database contains, and the single point values E2EMon expects. If
+    ranges are not being output, it will output a single datum for the final
+    time for a period.
+=cut
+
+sub handleData {
+    my ( $self, @args ) = @_;
+    my $parameters = validateParams(
+        @args,
+        {
+            output        => 1,
+            metadata_id   => 1,
+            ids           => 1,
+            data_id       => 0,
+            start_time    => 0,
+            end_time      => 0,
+            output_ranges => 0,
+        }
+    );
+
+    my $is_now;
+    unless ( $parameters->{start_time} or $parameters->{end_time} ) {
+        $parameters->{end_time}   = time;
+        $parameters->{start_time} = $parameters->{end_time} - $self->{CONF}->{status}->{max_recent_age};
+        $self->{LOGGER}->debug( "Setting 'now' to " . $parameters->{start_time} . "-" . $parameters->{end_time} );
+
+        $is_now = 1;
+    }
+
+    if ( not $parameters->{data_id} ) {
+        $parameters->{data_id} = "data." . genuid();
+    }
+
+    my ( $status, $res ) = $self->{DB_CLIENT}->getElementStatus( $parameters->{ids}, $parameters->{start_time}, $parameters->{end_time} );
+    if ( $status != 0 ) {
+        my $msg = "Couldn't get information about elements from database: $res";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
+    }
+
+    my $elements = $res;
 
     my $curr_time = time;
 
-    # Fill in any missing links
-    foreach my $circuit_name (keys %{ $self->{CIRCUITS} }) {
-        my $circuit = $self->{CIRCUITS}->{$circuit_name};
+#    $self->{LOGGER}->debug( "Elements: " . Dumper( $res ) );
 
-        foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
-            if (not $link_status->{$sublink_id}) {
-                my $msg = "Have no information about segment $sublink_id";
-                $self->{LOGGER}->warn($msg);
+    foreach my $id ( @{ $parameters->{ids} } ) {
+        if ( not $elements->{$id} ) {
+            my $msg = "Couldn't get information about element $id from database. Assuming unknown";
 
-                my $link = perfSONAR_PS::Status::Link->new($sublink_id, "full", $curr_time, $curr_time, "unknown", "unknown");
+            my $new_element = perfSONAR_PS::Status::Link->new( $id, $parameters->{start_time}, $parameters->{end_time}, "unknown", "unknown" );
 
-                $link_status->{$sublink_id} = [ $link ];
-            }
+            $elements->{$id} = [$new_element];
         }
     }
 
-    my %circuit_status = ();
+    my @periods       = ();
+    my @data_elements = ();
 
-    foreach my $circuit_name (keys %{ $self->{CIRCUITS} }) {
-        my $circuit = $self->{CIRCUITS}->{$circuit_name};
-
-        my @data_points = ();
-
-        my $circuit_admin_value = "unknown";
-        my $circuit_oper_value = "unknown";
-        my $circuit_time;
-
-        foreach my $sublink_id (@{ $circuit->{"sublinks"} }) {
-            foreach my $link_status (@{ $res->{$sublink_id} }) {
-                my $oper_value = $link_status->getOperStatus;
-                my $admin_value = $link_status->getAdminStatus;
-                my $end_time = $link_status->getEndTime;
-
-                $circuit_time = $end_time if (not defined $circuit_time or $end_time > $circuit_time);
-
-                if ($circuit_oper_value eq "down" or $oper_value eq "down")  {
-                    $circuit_oper_value = "down";
-                } elsif ($circuit_oper_value eq "degraded" or $oper_value eq "degraded")  {
-                    $circuit_oper_value = "degraded";
-                } elsif ($circuit_oper_value eq "up" or $oper_value eq "up")  {
-                    $circuit_oper_value = "up";
-                } else {
-                    $circuit_oper_value = "unknown";
-                }
-
-                if ($circuit_admin_value eq "maintenance" or $admin_value eq "maintenance") {
-                    $circuit_admin_value = "maintenance";
-                } elsif ($circuit_admin_value eq "troubleshooting" or $admin_value eq "troubleshooting") {
-                    $circuit_admin_value = "troubleshooting";
-                } elsif ($circuit_admin_value eq "underrepair" or $admin_value eq "underrepair") {
-                    $circuit_admin_value = "underrepair";
-                } elsif ($circuit_admin_value eq "normaloperation" or $admin_value eq "normaloperation") {
-                    $circuit_admin_value = "normaloperation";
-                } else {
-                    $circuit_admin_value = "unknown";
-                }
-            }
+    # Find the periods where there's data from all elements.
+    foreach my $id ( @{ $parameters->{ids} } ) {
+        my $first;
+        if ( scalar( @periods ) == 0 ) {
+            $first = 1;
         }
 
-        if (defined $self->{CONF}->{"status"}->{"max_recent_age"} and $self->{CONF}->{"status"}->{"max_recent_age"} ne q{}) {
-            my $curr_time = time;
+        my @curr_periods = ();
 
-            if ($curr_time - $circuit_time > $self->{CONF}->{"status"}->{"max_recent_age"}) {
-                $self->{LOGGER}->debug("Old link time: $circuit_time Current Time: ".$curr_time.": ".($curr_time - $circuit_time));
-                $circuit_time = $curr_time;
-                $circuit_oper_value = "unknown";
-                $circuit_admin_value = "unknown";
-            }
-        } else {
-            $circuit_time = time;
+        foreach my $element_history ( @{ $elements->{$id} } ) {
+            my %info = ();
+            $info{start}        = $element_history->getStartTime;
+            $info{end}          = $element_history->getEndTime;
+            $info{oper_status}  = [ $element_history->getOperStatus ];
+            $info{admin_status} = [ $element_history->getAdminStatus ];
+
+            push @curr_periods, \%info;
         }
 
-        $circuit_status{$circuit_name} = perfSONAR_PS::Status::Link->new(q{}, q{}, $circuit_time, $circuit_time, $circuit_oper_value, $circuit_admin_value);
+        if ( $first ) {
+            @periods = @curr_periods;
+            $first   = 0;
+#            $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
+            next;
+        }
+
+        @periods = $self->find_overlap( \@curr_periods, \@periods );
+#        $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
     }
 
-    startParameters($output, "params.0");
-     addParameter($output, "DomainName", $self->{DOMAIN});
-    endParameters($output);
-    $self->outputCompatResults($output, \%circuit_status, undef);
+    if ( $is_now ) {
 
-    $self->{CLIENT}->close;
+        # get rid of everything except the last period
+        my $last_period = $periods[-1];
+        my @tmp         = ();
+        push @tmp, $last_period;
+        @periods = @tmp;
+    }
+
+#    $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
+
+    startData( $parameters->{output}, $parameters->{data_id}, $parameters->{metadata_id}, undef );
+    foreach my $period ( @periods ) {
+        my $period_oper_status  = "unknown";
+        my $period_admin_status = "unknown";
+
+        foreach my $oper_value ( @{ $period->{oper_status} } ) {
+            if ( $period_oper_status eq "down" or $oper_value eq "down" ) {
+                $period_oper_status = "down";
+            }
+            elsif ( $period_oper_status eq "degraded" or $oper_value eq "degraded" ) {
+                $period_oper_status = "degraded";
+            }
+            elsif ( $period_oper_status eq "up" or $oper_value eq "up" ) {
+                $period_oper_status = "up";
+            }
+            else {
+                $period_oper_status = "unknown";
+            }
+        }
+
+        foreach my $admin_value ( @{ $period->{admin_status} } ) {
+            if ( $period_admin_status eq "maintenance" or $admin_value eq "maintenance" ) {
+                $period_admin_status = "maintenance";
+            }
+            elsif ( $period_admin_status eq "troubleshooting" or $admin_value eq "troubleshooting" ) {
+                $period_admin_status = "troubleshooting";
+            }
+            elsif ( $period_admin_status eq "underrepair" or $admin_value eq "underrepair" ) {
+                $period_admin_status = "underrepair";
+            }
+            elsif ( $period_admin_status eq "normaloperation" or $admin_value eq "normaloperation" ) {
+                $period_admin_status = "normaloperation";
+            }
+            else {
+                $period_admin_status = "unknown";
+            }
+        }
+
+#        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
+
+        # if we can output the range, just output one datum with the range
+        if ( $parameters->{output_ranges} ) {
+            my %attrs = ();
+            $attrs{"timeType"}       = "unix";
+            $attrs{"timeValue"}      = $period->{end};
+            $attrs{"startTimeType"}  = "unix";
+            $attrs{"startTimeValue"} = $period->{start};
+            $attrs{"endTimeType"}    = "unix";
+            $attrs{"endTimeValue"}   = $period->{end};
+
+            $parameters->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
+            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
+            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
+            $parameters->{output}->endElement( "datum" );
+        }
+        else {
+            my %attrs = ();
+
+            #            $attrs{"timeType"} = "unix";
+            #            $attrs{"timeValue"} = $period->{start};
+            #            $parameters->{output}->startElement(prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs);
+            #              $parameters->{output}->createElement(prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status);
+            #              $parameters->{output}->createElement(prefix => "ifevt", tag => "stateOper", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status);
+            #            $parameters->{output}->endElement("datum");
+
+            $attrs{"timeType"}  = "unix";
+            $attrs{"timeValue"} = $period->{end};
+            $parameters->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
+            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
+            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
+            $parameters->{output}->endElement( "datum" );
+        }
+    }
+    endData( $parameters->{output} );
 
     return;
 }
 
-sub outputCompatResults {
-    my ($self, $output, $circuit_status, $time) = @_;
+=head2 find_overlap ( $self, $array1, $array2 ) 
+    This function takes two arrays containing hashes with elements
+    "start_time", "end_time", "oper_status" and "admin_status". The arrays must be
+    sorted. The function will then go through and construct a new set of time
+    periods corresponding to the overlap between the two arrays. The returned
+    array will have a hash for each time period, and this hash will have the
+    combined oper_status and admin_status for both arrays.
+=cut
 
-    my %output_endpoints = ();
-    my $i = 0;
+sub find_overlap {
+    my ( $self, $array1, $array2 ) = @_;
 
-    foreach my $circuit_name (keys %{ $self->{CIRCUITS} }) {
-        my $circuit = $self->{CIRCUITS}->{$circuit_name};
-        foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-            # Skip if it's an external host
-            next if (not defined $self->{NODES}->{$endpoint->{name}});
-
-            # Skip if we've already output the node
-            next if (defined $output_endpoints{$endpoint->{name}});
-
-            startMetadata($output, "metadata.".genuid(), q{}, undef);
-             $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-".$endpoint->{name} });
-              $self->outputCompatNodeElement($output, $self->{NODES}->{$endpoint->{name}});
-             $output->endElement("subject");
-            endMetadata($output);
-
-            $output_endpoints{$endpoint->{name}} = 1;
-        }
-
-        my $mdid = "metadata.".genuid();
-
-        startMetadata($output, $mdid, q{}, undef);
-         $output->startElement(prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub$i" });
-          $self->outputCompatCircuitElement($output, $circuit);
-         $output->endElement("subject");
-        endMetadata($output);
-
-        my $datum = $circuit_status->{$circuit_name};
-
-        my %attrs = ();
-        $attrs{"timeType"} = "unix";
-        $attrs{"timeValue"} = $datum->getEndTime();
-
-        startData($output, "data.$i", $mdid, undef);
-          $output->startElement(prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs);
-            $output->createElement(prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $datum->getAdminStatus);
-            $output->createElement(prefix => "ifevt", tag => "stateOper", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $datum->getOperStatus);
-          $output->endElement("datum");
-        endData($output);
-
-        $i++;
+    if ( scalar( @$array1 ) == 0 or scalar( @$array2 ) == 0 ) {
+        return ();
     }
 
-    return;
+    my ( $i, $j );
+
+    $i = 0;
+    $j = 0;
+
+    my @ret_periods = ();
+
+    while ( $i < scalar( @$array1 ) and $j < scalar( @$array2 ) ) {
+        my $curr_range1 = $array1->[$i];
+        my $curr_range2 = $array2->[$j];
+
+        # one of the ranges is completely outside the other, so skip them completely
+        if ( $curr_range1->{end} < $curr_range2->{start} ) {
+            $i++;
+            next;
+        }
+        if ( $curr_range2->{end} < $curr_range1->{start} ) {
+            $j++;
+            next;
+        }
+
+        my $starts_first = ( $curr_range1->{start} < $curr_range2->{start} ) ? $curr_range1 : $curr_range2;
+        my $starts_last  = ( $curr_range1->{start} < $curr_range2->{start} ) ? $curr_range2 : $curr_range1;
+        my $ends_first   = ( $curr_range1->{end} < $curr_range2->{end} )     ? $curr_range1 : $curr_range2;
+        my $ends_last    = ( $curr_range1->{end} < $curr_range2->{end} )     ? $curr_range2 : $curr_range1;
+
+        # slice away the non-overlapping beginning
+        $starts_first->{start} = $starts_last->{start};
+
+        my %new_period = ();
+        $new_period{start}        = $starts_last->{start};
+        $new_period{end}          = $ends_first->{end};
+        $new_period{oper_status}  = ();
+        $new_period{admin_status} = ();
+        foreach my $array ( $curr_range1, $curr_range2 ) {
+            foreach my $status_type ( "oper", "admin" ) {
+                foreach my $status ( @{ $array->{ $status_type . "_status" } } ) {
+                    push @{ $new_period{ $status_type . "_status" } }, $status;
+                }
+            }
+        }
+
+        push @ret_periods, \%new_period;
+
+        $ends_last->{start} = $new_period{end} + 1;
+
+        $i++ if ( $ends_first == $curr_range1 );
+        $j++ if ( $ends_first == $curr_range2 );
+    }
+
+    return @ret_periods;
 }
+
+=head2 outputCompatNodeElement ( $self, $output, $node )
+    Outputs the specified node to the specified XML Output Object in the E2EMon
+    compatible format.
+=cut
 
 sub outputCompatNodeElement {
-    my ($self, $output, $node) = @_;
+    my ( $self, $output, $node ) = @_;
 
-    $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $node->{"name"} });
-      $output->createElement(prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint");
-      $output->createElement(prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"});
-    if (defined $node->{"city"} and $node->{"city"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"});
+    $output->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { id => $node->{"name"} } );
+    $output->createElement( prefix => "nmwgtopo3", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => "TopologyPoint" );
+    $output->createElement( prefix => "nmwgtopo3", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { type => "logical" }, content => $node->{"name"} );
+    if ( defined $node->{"city"} and $node->{"city"} ne q{} ) {
+        $output->createElement( prefix => "nmwgtopo3", tag => "city", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"city"} );
     }
-    if (defined $node->{"country"} and $node->{"country"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"});
+    if ( defined $node->{"country"} and $node->{"country"} ne q{} ) {
+        $output->createElement( prefix => "nmwgtopo3", tag => "country", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"country"} );
     }
-    if (defined $node->{"latitude"} and $node->{"latitude"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"});
+    if ( defined $node->{"latitude"} and $node->{"latitude"} ne q{} ) {
+        $output->createElement( prefix => "nmwgtopo3", tag => "latitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"latitude"} );
     }
-    if (defined $node->{"longitude"} and $node->{"longitude"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"});
+    if ( defined $node->{"longitude"} and $node->{"longitude"} ne q{} ) {
+        $output->createElement( prefix => "nmwgtopo3", tag => "longitude", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $node->{"longitude"} );
     }
-    if (defined $node->{"institution"} and $node->{"institution"} ne q{}) {
-        $output->createElement(prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", , content => $node->{"institution"});
+    if ( defined $node->{"institution"} and $node->{"institution"} ne q{} ) {
+        $output->createElement( prefix => "nmwgtopo3", tag => "institution", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/",, content => $node->{"institution"} );
     }
-    $output->endElement("node");
+    $output->endElement( "node" );
+
+    return;
+}
+
+=head2 outputCompatLinkElement ( $self, $output, $link )
+    Outputs the specified link to the specified XML Output Object in the E2EMon
+    compatible format.
+=cut
+
+sub outputCompatLinkElement {
+    my ( $self, $output, $link ) = @_;
+
+    $output->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
+    $output->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
+    $output->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
+    $output->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
+    foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
+        $output->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );
+        $output->createElement( prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"} );
+        $output->endElement( "node" );
+    }
+    $output->endElement( "link" );
 
     return;
 }
 
-sub outputCompatCircuitElement {
-    my ($self, $output, $circuit) = @_;
+=head2 constructE2EMonMetadataDB ( $self, $links, $nodes )
+    Takes the links and nodes produced by parseCompatCircuitsFile, and
+    constructs the E2EMon Metadata DB file. Due to how the E2EMon protocol
+    allows for querying the database, this metadata database does not look like
+    what is returned when you query for the entire database. It does not have
+    any nodes at the top-level, only links. Each link, instead of having the
+    pointers to the nodes as in the response metadata, has the node element
+    inside it.
+=cut
 
-    $output->startElement(prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/");
-      $output->createElement(prefix => "nmtl2", tag => "name", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"name"});
-      $output->createElement(prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $circuit->{"globalName"});
-      $output->createElement(prefix => "nmtl2", tag => "type", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content => $circuit->{"type"});
-      foreach my $endpoint (@{ $circuit->{"endpoints"} }) {
-      $output->startElement(prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} });
-      $output->createElement(prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"});
-      $output->endElement("node");
-      }
-#      startParameters($output, "params.0");
-#        addParameter($output, "supportedEventType", "Path.Status");
-#      endParameters($output);
-    $output->endElement("link");
+sub constructE2EMonMetadataDB {
+    my ( $self, $links, $nodes ) = @_;
 
-    return;
+    my %link_mappings = ();
+
+    my $comparison_metadatadb = perfSONAR_PS::XML::Document->new();
+
+    $comparison_metadatadb->startElement( prefix => "nmwg", tag => "store", namespace => "http://ggf.org/ns/nmwg/base/2.0/" );
+    foreach my $link_name ( keys %$links ) {
+        my $link = $links->{$link_name};
+        my $mdId = "metadata." . genuid();
+        $link_mappings{$mdId} = $link_name;
+
+        startMetadata( $comparison_metadatadb, $mdId, q{}, undef );
+        $comparison_metadatadb->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub." . genuid() } );
+        $comparison_metadatadb->startElement( prefix => "nmtl2", tag => "link", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/" );
+        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "name",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"name"} );
+        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "globalName", namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", attributes => { type => "logical" }, content => $link->{"globalName"} );
+        $comparison_metadatadb->createElement( prefix => "nmtl2", tag => "type",       namespace => "http://ggf.org/ns/nmwg/topology/l2/3.0/", content    => $link->{"type"} );
+        foreach my $endpoint ( @{ $link->{"endpoints"} } ) {
+            if ( not $nodes->{ $endpoint->{"name"} } ) {
+                $comparison_metadatadb->startElement( prefix => "nmwgtopo3", tag => "node", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", attributes => { nodeIdRef => $endpoint->{"name"} } );
+                $comparison_metadatadb->createElement( prefix => "nmwgtopo3", tag => "role", namespace => "http://ggf.org/ns/nmwg/topology/base/3.0/", content => $endpoint->{"type"} );
+                $comparison_metadatadb->endElement( "node" );
+            }
+            else {
+                $self->outputCompatNodeElement( $comparison_metadatadb, $nodes->{ $endpoint->{"name"} } );
+            }
+        }
+        $comparison_metadatadb->endElement( "link" );
+        $comparison_metadatadb->endElement( "subject" );
+        $comparison_metadatadb->createElement( prefix => "nmwg", tag => "eventType", namespace => "http://ggf.org/ns/nmwg/base/2.0/", content => "Path.Status" );
+        $comparison_metadatadb->createElement( prefix => "nmwg", tag => "eventType", namespace => "http://ggf.org/ns/nmwg/base/2.0/", content => "http://ggf.org/ns/nmwg/topology/l2/3.0/link/status" );
+        endMetadata( $comparison_metadatadb );
+    }
+    $comparison_metadatadb->endElement( "store" );
+
+    my $parser      = XML::LibXML->new();
+    my $compare_dom = q{};
+    eval { $compare_dom = $parser->parse_string( $comparison_metadatadb->getValue ); };
+    if ( $EVAL_ERROR ) {
+        my $msg = escapeString( "Parse failed: " . $EVAL_ERROR );
+
+        $self->{LOGGER}->error( $msg );
+        return ( -1, undef, undef );
+    }
+
+    return ( 0, $compare_dom, \%link_mappings );
 }
+
+=head2 parseCompatCircuitsFile ( $self, $file)
+    Parses the E2EMon circuits file and returns the domain as a string, and the
+    links and nodes as hashes.
+=cut
 
 sub parseCompatCircuitsFile {
-    my ($self, $file) = @_;
+    my ( $self, $file ) = @_;
 
     my %nodes = ();
-    my %circuits = ();
+    my %links = ();
 
     my $parser = XML::LibXML->new();
     my $doc;
-    eval {
-        $doc = $parser->parse_file($file);
-    };
-    if ($@ or not defined $doc) {
-        my $msg = "Couldn't parse circuits file $file: $@";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+    eval { $doc = $parser->parse_file( $file ); };
+    if ( $@ or not defined $doc ) {
+        my $msg = "Couldn't parse links file $file: $@";
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
     }
 
     my $conf = $doc->documentElement;
 
     # Grab the domain field
-    my $domain = findvalue($conf, "domain");
-    if (not defined $domain) {
+    my $domain = findvalue( $conf, "domain" );
+    if ( not defined $domain ) {
         my $msg = "No domain specified in configuration";
-        $self->{LOGGER}->error($msg);
-        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+        $self->{LOGGER}->error( $msg );
+        return ( -1, $msg );
     }
-
-    $self->{DOMAIN} = $domain;
 
     # Grab the set of nodes
     my $find_res;
-    $find_res = find($conf, "./*[local-name()='node']", 0);
-    if ($find_res) {
-        foreach my $endpoint ($find_res->get_nodelist) {
-            my $node_name = $endpoint->getAttribute("name");
-            my $city = findvalue($endpoint, "city");
-            my $country = findvalue($endpoint, "country");
-            my $longitude = findvalue($endpoint, "longitude");
-            my $institution = findvalue($endpoint, "institution");
-            my $latitude = findvalue($endpoint, "latitude");
+    $find_res = find( $conf, "./*[local-name()='node']", 0 );
+    if ( $find_res ) {
+        foreach my $endpoint ( $find_res->get_nodelist ) {
+            my $node_name   = $endpoint->getAttribute( "name" );
+            my $city        = findvalue( $endpoint, "city" );
+            my $country     = findvalue( $endpoint, "country" );
+            my $longitude   = findvalue( $endpoint, "longitude" );
+            my $institution = findvalue( $endpoint, "institution" );
+            my $latitude    = findvalue( $endpoint, "latitude" );
 
-            if ($node_name !~ /-/) {
-                $node_name = $domain."-".$node_name;
+            if ( $node_name !~ /-/ ) {
+                $node_name = $domain . "-" . $node_name;
             }
 
-            if (not defined $node_name or $node_name eq q{}) {
+            if ( not defined $node_name or $node_name eq q{} ) {
                 my $msg = "Node needs to have a name";
-                $self->{LOGGER}->error($msg);
-                throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
             }
 
             $node_name =~ s/[^a-zA-Z0-9_-]//g;
-            $node_name = uc($node_name);
+            $node_name = uc( $node_name );
 
-            if (defined $nodes{$node_name}) {
+            if ( defined $nodes{$node_name} ) {
                 my $msg = "Multiple endpoints have the name \"$node_name\"";
-                $self->{LOGGER}->error($msg);
-                throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
             }
 
-            $self->{LOGGER}->debug("Found '$node_name'");
+            $self->{LOGGER}->debug( "Found '$node_name'" );
 
-            my %tmp = ();
+            my %tmp      = ();
             my $new_node = \%tmp;
 
-            $new_node->{"name"} = $node_name if (defined $node_name and $node_name ne q{});
-            $new_node->{"city"} = $city if (defined $city and $city ne q{});
-            $new_node->{"country"} = $country if (defined $country and $country ne q{});
-            $new_node->{"longitude"} = $longitude if (defined $longitude and $longitude ne q{});
-            $new_node->{"latitude"} = $latitude if (defined $latitude and $latitude ne q{});
-            $new_node->{"institution"} = $institution if (defined $institution and $institution ne q{});
+            $new_node->{"name"}        = $node_name   if ( defined $node_name   and $node_name   ne q{} );
+            $new_node->{"city"}        = $city        if ( defined $city        and $city        ne q{} );
+            $new_node->{"country"}     = $country     if ( defined $country     and $country     ne q{} );
+            $new_node->{"longitude"}   = $longitude   if ( defined $longitude   and $longitude   ne q{} );
+            $new_node->{"latitude"}    = $latitude    if ( defined $latitude    and $latitude    ne q{} );
+            $new_node->{"institution"} = $institution if ( defined $institution and $institution ne q{} );
 
             $nodes{$node_name} = $new_node;
         }
     }
 
-    $self->{NODES} = \%nodes;
-
     # Grab the set of links
-    $find_res = find($conf, "./*[local-name()='circuit']", 0);
-    if ($find_res) {
-        foreach my $link ($find_res->get_nodelist) {
-            my $global_name = findvalue($link, "globalName");
-            my $local_name = findvalue($link, "localName");
+    $find_res = find( $conf, "./*[local-name()='circuit']", 0 );
+    if ( $find_res ) {
+        foreach my $link ( $find_res->get_nodelist ) {
+            my $global_name = findvalue( $link, "globalName" );
+            my $local_name  = findvalue( $link, "localName" );
             my $link_type;
 
-            if (not defined $global_name or $global_name eq q{}) {
+            if ( not defined $global_name or $global_name eq q{} ) {
                 my $msg = "Circuit has no global name";
-                $self->{LOGGER}->error($msg);
-                throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
             }
 
-            if (not defined $local_name or $local_name eq q{}) {
+            if ( not defined $local_name or $local_name eq q{} ) {
                 $local_name = $global_name;
             }
 
-            my %sublinks = ();
+            my %subelements = ();
 
-            $find_res = find($link, "./*[local-name()='segmentID']", 0);
-            if ($find_res) {
-                foreach my $topo_id ($find_res->get_nodelist) {
+            $find_res = find( $link, "./*[local-name()='elementID']", 0 );
+            if ( $find_res ) {
+                foreach my $topo_id ( $find_res->get_nodelist ) {
                     my $id = $topo_id->textContent;
 
-                    if (defined $sublinks{$id}) {
+                    if ( defined $subelements{$id} ) {
                         my $msg = "Segment $id appears multiple times in link $global_name";
-                        $self->{LOGGER}->error($msg);
-                        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                        $self->{LOGGER}->error( $msg );
+                        return ( -1, $msg );
                     }
 
-                    $sublinks{$id} = q{};
+                    $subelements{$id} = q{};
                 }
+            }
+
+            if ( scalar( keys %subelements ) == 0 ) {
+                my $msg = "No elements for link $global_name";
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
             }
 
             my @endpoints = ();
@@ -1294,43 +1727,45 @@ sub parseCompatCircuitsFile {
 
             my $prev_domain;
 
-            $find_res = find($link, "./*[local-name()='endpoint']", 0);
-            if ($find_res) {
-                foreach my $endpoint ($find_res->get_nodelist) {
-                    my $node_type = $endpoint->getAttribute("type");
-                    my $node_name = $endpoint->getAttribute("name");
+            $find_res = find( $link, "./*[local-name()='endpoint']", 0 );
+            if ( $find_res ) {
+                foreach my $endpoint ( $find_res->get_nodelist ) {
+                    my $node_type = $endpoint->getAttribute( "type" );
+                    my $node_name = $endpoint->getAttribute( "name" );
 
-                    if (not defined $node_type or $node_type eq q{}) {
+                    if ( not defined $node_type or $node_type eq q{} ) {
                         my $msg = "Node with unspecified type found";
-                        $self->{LOGGER}->error($msg);
-                        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                        $self->{LOGGER}->error( $msg );
+                        return ( -1, $msg );
                     }
 
-                    if (not defined $node_name or $node_name eq q{}) {
+                    if ( not defined $node_name or $node_name eq q{} ) {
                         my $msg = "Endpint needs to specify a node name";
-                        $self->{LOGGER}->error($msg);
-                        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                        $self->{LOGGER}->error( $msg );
+                        return ( -1, $msg );
                     }
 
-                    if ($node_name !~ /-/) {
-                        $node_name = $self->{DOMAIN}."-".$node_name;
+                    if ( $node_name !~ /-/ ) {
+                        $node_name = $domain . "-" . $node_name;
                     }
 
                     $node_name =~ s/[^a-zA-Z0-9_-]//g;
-                    $node_name = uc($node_name);
+                    $node_name = uc( $node_name );
 
-                    if (lc($node_type) ne "demarcpoint" and lc($node_type) ne "endpoint") {
+                    if ( lc( $node_type ) ne "demarcpoint" and lc( $node_type ) ne "endpoint" ) {
                         my $msg = "Node found with invalid type $node_type. Must be \"DemarcPoint\" or \"EndPoint\"";
-                        $self->{LOGGER}->error($msg);
-                        throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                        $self->{LOGGER}->error( $msg );
+                        return ( -1, $msg );
                     }
 
-                    my ($domain, @junk) = split(/-/, $node_name);
-                    if (not defined $prev_domain) {
+                    my ( $domain, @junk ) = split( /-/, $node_name );
+                    if ( not defined $prev_domain ) {
                         $prev_domain = $domain;
-                    } elsif ($domain eq $prev_domain) {
+                    }
+                    elsif ( $domain eq $prev_domain ) {
                         $link_type = "DOMAIN_Link";
-                    } else {
+                    }
+                    else {
                         $link_type = "ID_Link";
                     }
 
@@ -1345,45 +1780,86 @@ sub parseCompatCircuitsFile {
                 }
             }
 
-            if ($num_endpoints != 2) {
+            if ( $num_endpoints != 2 ) {
                 my $msg = "Invalid number of endpoints, $num_endpoints, must be 2";
-                $self->{LOGGER}->error($msg);
-                throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
             }
 
-            my @sublinks = keys %sublinks;
+            my @subelements = keys %subelements;
 
             my %new_link = ();
 
-            $new_link{"globalName"} = $global_name;
-            $new_link{"name"} = $local_name;
-            $new_link{"sublinks"} = \@sublinks;
-            $new_link{"endpoints"} = \@endpoints;
-            $new_link{"type"} = $link_type;
+            $new_link{"globalName"}  = $global_name;
+            $new_link{"name"}        = $local_name;
+            $new_link{"subelements"} = \@subelements;
+            $new_link{"endpoints"}   = \@endpoints;
+            $new_link{"type"}        = $link_type;
 
-            if (defined $circuits{$local_name}) {
+            if ( defined $links{$local_name} ) {
                 my $msg = "Error: existing link of name $local_name";
-                $self->{LOGGER}->error($msg);
-                throw perfSONAR_PS::Error_compat ("error.configuration", $msg);
-            } else {
-                $circuits{$local_name} = \%new_link;
+                $self->{LOGGER}->error( $msg );
+                return ( -1, $msg );
+            }
+            else {
+                $links{$local_name} = \%new_link;
             }
         }
     }
 
-    $self->{CIRCUITS} = \%circuits;
+    return ( 0, $domain, \%links, \%nodes );
+}
 
-    return;
+=head2 xPathFind ($self, $node, $query, $return_first)
+    Does the find for this module. It uses the XPath context containing all the
+    namespaces that this module knows about. This context is created when the
+    module is initialized. If the "$return_first" is set to true, it returns
+    the first node of the list.
+=cut
+
+sub xPathFind {
+    my ( $self, $node, $query, $return_first ) = @_;
+    my $res;
+
+    eval { $res = $self->{XPATH_CONTEXT}->find( $query, $node ); };
+    if ( $EVAL_ERROR ) {
+        $self->{LOGGER}->error( "Error finding value($query): $@" );
+        return;
+    }
+
+    if ( defined $return_first and $return_first == 1 ) {
+        return $res->get_node( 1 );
+    }
+
+    return $res;
+}
+
+=head2 xPathFindValue ($self, $node, $query)
+    This function is analogous to the xPathFind function above. Unlike the
+    above, this function returns the text content of the nodes found.
+=cut
+
+sub xPathFindValue {
+    my ( $self, $node, $xpath ) = @_;
+
+    my $found_node;
+
+    $found_node = $self->xPathFind( $node, $xpath, 1 );
+
+    return if ( not defined $found_node );
+
+    return $found_node->textContent;
 }
 
 1;
 
 __END__
+
 =head1 SEE ALSO
 
-L<perfSONAR_PS::Services::Base>, L<perfSONAR_PS::Time>, L<perfSONAR_PS::Client::LS::Remote>,
-L<perfSONAR_PS::Client::Status::SQL>, L<perfSONAR_PS::Topology::ID>
-
+L<perfSONAR_PS::Common>,L<perfSONAR_PS::Messages>,L<perfSONAR_PS::Client::LS::Remote>,
+L<perfSONAR_PS::Client::Status::SQL>,L<perfSONAR_PS::Utils::ParameterValidation>,
+L<perfSONAR_PS::Services::MA::General>,
 
 To join the 'perfSONAR-PS' mailing list, please visit:
 

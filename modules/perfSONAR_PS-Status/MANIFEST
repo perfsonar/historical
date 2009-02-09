@@ -14,7 +14,6 @@ etc/service_logger.conf
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
-lib/perfSONAR_PS/Client/Status/MA.pm
 lib/perfSONAR_PS/Client/Status/SQL.pm
 lib/perfSONAR_PS/Client/gLS.pm
 lib/perfSONAR_PS/Collectors/Base.pm
@@ -38,6 +37,7 @@ lib/perfSONAR_PS/Request.pm
 lib/perfSONAR_PS/RequestHandler.pm
 lib/perfSONAR_PS/Services/Base.pm
 lib/perfSONAR_PS/Services/Echo.pm
+lib/perfSONAR_PS/Services/MA/General.pm
 lib/perfSONAR_PS/Services/MA/Status.pm
 lib/perfSONAR_PS/Status/Common.pm
 lib/perfSONAR_PS/Status/Link.pm
