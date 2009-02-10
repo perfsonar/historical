@@ -134,11 +134,6 @@ if ( !( $confdir =~ /^\// ) ) {
 my $config =  new Config::General($CONFIG_FILE);
 my %conf = $config->getall;
 
-if (!defined $conf{"collection_interval"} or $conf{"collection_interval"} eq "") {
-    $logger->warn("Setting default collection interval at 5 minutes");
-    $conf{"collection_interval"} = 300;
-}
-
 my $pidfile;
 
 if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
@@ -161,8 +156,6 @@ if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
     $pidfile = lockPIDFile($PIDDIR."/".$PIDFILE);
 }
 
-$logger->debug("Starting '".$$."'");
-
 # Check if the daemon should run as a specific user/group and then switch to
 # that user/group.
 if (not $RUNAS_GROUP) {
@@ -179,12 +172,25 @@ if (not $RUNAS_USER) {
 
 if ($RUNAS_USER and $RUNAS_GROUP) {
     if (setids(USER => $RUNAS_USER, GROUP => $RUNAS_GROUP) != 0) {
-        $logger->error("Couldn't drop priviledges");
+        print "Error: Couldn't drop priviledges\n";
         exit(-1);
     }
 } elsif ($RUNAS_USER or $RUNAS_GROUP) {
     # they need to specify both the user and group
-    $logger->error("You need to specify both the user and group if you specify either");
+    print "You need to specify both the user and group if you specify either\n";
+    exit(-1);
+}
+
+($status, $res) = perfSONAR_PS::Collectors::Status->create_workers({ conf => \%conf, directory_offset => $confdir });
+if ($status != 0) {
+    $logger->error("Couldn't allocate status checkers: $res");
+    exit(-1);
+}
+
+my $measurement_workers = $res;
+
+if (scalar(@{ $measurement_workers }) == 0) {
+    $logger->error("No elements to measure");
     exit(-1);
 }
 
@@ -201,14 +207,6 @@ $0 = "perfsonar-status-collector.pl ($$)";
 if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
     unlockPIDFile($pidfile);
 }
-
-my ($status, $res) = perfSONAR_PS::Collectors::Status->create_workers({ conf => \%conf, directory_offset => $confdir });
-if ($status != 0) {
-    $logger->error("Couldn't allocate status checkers: $res");
-    exit(-1);
-}
-
-my $measurement_workers = $res;
 
 foreach my $worker (@$measurement_workers) {
 	my $pid = fork();

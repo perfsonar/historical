@@ -14,7 +14,6 @@ etc/service_logger.conf
 lib/perfSONAR_PS/Client/Echo.pm
 lib/perfSONAR_PS/Client/LS.pm
 lib/perfSONAR_PS/Client/LS/Remote.pm
-lib/perfSONAR_PS/Client/Status/SQL.pm
 lib/perfSONAR_PS/Client/gLS.pm
 lib/perfSONAR_PS/Collectors/Base.pm
 lib/perfSONAR_PS/Collectors/Status.pm

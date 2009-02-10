@@ -491,9 +491,9 @@ sub run {
 
 				my ($id, $admin_status);
 				if ($self->{ETHERNET_FACILITIES}->{$port->{name}}) {
-                    $id = $self->{ETHERNET_FACILITIES}->{$name}->{id} if ($self->{ETHERNET_FACILITIES}->{$name}->{id});
-                    $admin_status = $self->{ETHERNET_FACILITIES}->{$name}->{admin_status} if ($self->{ETHERNET_FACILITIES}->{$name}->{admin_status});
-                    $oper_status = $self->{ETHERNET_FACILITIES}->{$name}->{oper_status} if ($self->{ETHERNET_FACILITIES}->{$name}->{oper_status});
+                    $id = $self->{ETHERNET_FACILITIES}->{$port->{name}}->{id} if ($self->{ETHERNET_FACILITIES}->{$port->{name}}->{id});
+                    $admin_status = $self->{ETHERNET_FACILITIES}->{$port->{name}}->{admin_status} if ($self->{ETHERNET_FACILITIES}->{$port->{name}}->{admin_status});
+                    $oper_status = $self->{ETHERNET_FACILITIES}->{$port->{name}}->{oper_status} if ($self->{ETHERNET_FACILITIES}->{$port->{name}}->{oper_status});
 				}
 	
 				my %facility = (

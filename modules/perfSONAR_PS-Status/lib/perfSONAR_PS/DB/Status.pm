@@ -1,4 +1,4 @@
-package perfSONAR_PS::Client::Status::SQL;
+package perfSONAR_PS::DB::Status;
 
 use strict;
 use warnings;
@@ -6,6 +6,7 @@ use Log::Log4perl qw(get_logger);
 use perfSONAR_PS::DB::SQL;
 use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Status::Common;
+use Data::Dumper;
 
 our $VERSION = 0.09;
 
@@ -217,7 +218,7 @@ sub getElementStatus {
 	return (0, \%elements);
 }
 
-sub updateLinkStatus {
+sub updateStatus {
 	my($self, $time, $element_id, $oper_value, $admin_value, $do_update) = @_;
 	my $logger = get_logger("perfSONAR_PS::Client::Status::SQL");
 	my $prev_end_time;
@@ -245,30 +246,31 @@ sub updateLinkStatus {
         return (-1, "Couldn't grab information for node ".$element_id);
     }
 
-    if (scalar(@$states) == 0) {
-        my $msg = "No previous value for $element_id to update";
-        $logger->error($msg);
-        return (-1, $msg);
-    }
+    $logger->debug("Size of: ".scalar(@$states)." -- ".Dumper($states));
 
-    $prev_end_time = $states->[0]->[0];
+    if (scalar(@$states) > 0) {
+        $prev_end_time = $states->[0]->[0];
 
-    if ($prev_end_time >= $time) {
-        my $msg = "Update in the past for $element_id: most recent data was obtained for ".$prev_end_time;
-        $logger->error($msg);
-        return (-1, $msg);
-    }
-
-    if ($do_update) {
-        if ($states->[0]->[1] ne $oper_value) {
-            my $msg = "Oper value differs for $element_id";
-            $logger->warn($msg);
-            $do_update = 0;
-        } elsif ($states->[0]->[2] ne $oper_value) {
-            my $msg = "Admin value differs for $element_id";
-            $logger->warn($msg);
-            $do_update = 0;
+        if ($prev_end_time >= $time) {
+            my $msg = "Update in the past for $element_id: most recent data was obtained for ".$prev_end_time;
+            $logger->error($msg);
+            return (-1, $msg);
         }
+
+        if ($do_update) {
+            if ($states->[0]->[1] ne $oper_value) {
+                my $msg = "Oper value differs for $element_id";
+                $logger->warn($msg);
+                $do_update = 0;
+            } elsif ($states->[0]->[2] ne $admin_value) {
+                my $msg = "Admin value differs for $element_id";
+                $logger->warn($msg);
+                $do_update = 0;
+            }
+        }
+    }
+    else {
+        $do_update = 0;
     }
 
 	if ($do_update) {
@@ -461,9 +463,9 @@ element id. Each element of the hash is an array of perfSONAR_PS::Status::Link
 structures containing a the status of the specified element at a certain point in
 time.
 
-=head2 updateLinkStatus($self, $time, $element_id, $oper_value, $admin_value, $do_update) 
+=head2 updateStatus($self, $time, $element_id, $oper_value, $admin_value, $do_update) 
 
-The updateLinkStatus function adds a new data point for the specified element.
+The updateStatus function adds a new data point for the specified element.
 $time is a unix timestamp corresponding to when the measurement occured.
 $element_id is the element to update. $oper_value is the current operational status
 and $admin_value is the current administrative status.  $do_update tells

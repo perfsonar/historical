@@ -32,11 +32,12 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
 use English qw( -no_match_vars );
+#use XML::LibXML::XPathContext;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
-use perfSONAR_PS::Client::Status::SQL;
+use perfSONAR_PS::DB::Status;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
 
@@ -205,7 +206,7 @@ sub init {
             $read_only = 1;
         }
 
-        $self->{DB_CLIENT} = new perfSONAR_PS::Client::Status::SQL( "DBI:SQLite:dbname=" . $file, q{}, q{}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
+        $self->{DB_CLIENT} = perfSONAR_PS::DB::Status->new( "DBI:SQLite:dbname=" . $file, q{}, q{}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
         if ( not defined $self->{DB_CLIENT} ) {
             my $msg = "No database to dump";
             $self->{LOGGER}->error( $msg );
@@ -239,7 +240,7 @@ sub init {
             $read_only = 1;
         }
 
-        $self->{DB_CLIENT} = new perfSONAR_PS::Client::Status::SQL( $dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
+        $self->{DB_CLIENT} = perfSONAR_PS::DB::Status->new( $dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
         if ( not defined $self->{DB_CLIENT} ) {
             my $msg = "Couldn't create SQL client";
             $self->{LOGGER}->error( $msg );
@@ -1860,7 +1861,7 @@ __END__
 =head1 SEE ALSO
 
 L<perfSONAR_PS::Common>,L<perfSONAR_PS::Messages>,L<perfSONAR_PS::Client::LS::Remote>,
-L<perfSONAR_PS::Client::Status::SQL>,L<perfSONAR_PS::Utils::ParameterValidation>,
+L<perfSONAR_PS::DB::Status>,L<perfSONAR_PS::Utils::ParameterValidation>,
 L<perfSONAR_PS::Services::MA::General>,
 
 To join the 'perfSONAR-PS' mailing list, please visit:
