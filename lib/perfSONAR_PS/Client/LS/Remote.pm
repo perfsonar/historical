@@ -604,15 +604,15 @@ sub __register {
             if ( exists $lsHash{$ls} or ( not $success ) ) {            
                 my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ls );
                 unless ( $host and $port and $endpoint ) {
-                    $self->{LOGGER}->error("URI conversion error.");
-                    return -1;
+                    $self->{LOGGER}->error( "URI conversion error for LS \"" . $ls . "\"." );
+		    next;
                 }
 
                 my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
     
                 unless ( $self->callLS( $sender, $doc->getValue() ) == 0 ) {
                     $self->{LOGGER}->error("Unable to register data with LS \"".$ls."\".");
-                    return -1;
+		    next;
                 }
                 $success++;
             }
