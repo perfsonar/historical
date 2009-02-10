@@ -1681,7 +1681,7 @@ sub parseCompatCircuitsFile {
     }
 
     # Grab the set of links
-    foreach my $type ("links", "circuit") {
+    foreach my $type ("link", "circuit") {
     $find_res = find( $conf, "./*[local-name()='$type']", 0 );
     if ( $find_res ) {
         foreach my $link ( $find_res->get_nodelist ) {
@@ -1767,7 +1767,7 @@ sub parseCompatCircuitsFile {
                         $link_type = "DOMAIN_Link";
                     }
                     else {
-                        $link_type = "ID_Link";
+                        $link_type = "ID_LinkPartialInfo";
                     }
 
                     my %new_endpoint = ();
