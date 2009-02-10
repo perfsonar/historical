@@ -40,7 +40,7 @@ Requires:        perl(Net::Telnet)
 Requires:        perl(POSIX)
 Requires:        perl(Params::Validate)
 Requires:        perl(Time::HiRes)
-Requires:        perl(XML::LibXML)
+Requires:        perl(XML::LibXML) >= 1.61
 Requires:        perl(base)
 Requires:        perl(warnings)
 Requires:        perl
