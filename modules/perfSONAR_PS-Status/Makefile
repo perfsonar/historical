@@ -10,6 +10,12 @@ dist:
 	tar czf $(PACKAGE).tar.gz -C /tmp $(PACKAGE)
 	rm -rf /tmp/$(PACKAGE)
 
+upgrade:
+	mkdir /tmp/$(PACKAGE)
+	tar ch --exclude=etc/* -T MANIFEST | tar x -C /tmp/$(PACKAGE)
+	tar czf $(PACKAGE)-upgrade.tar.gz -C /tmp $(PACKAGE)
+	rm -rf /tmp/$(PACKAGE)
+
 install:
 	mkdir -p ${ROOTPATH}
 	tar ch --exclude=etc/* --exclude=*spec --exclude=MANIFEST --exclude=Makefile -T MANIFEST | tar x -C ${ROOTPATH}

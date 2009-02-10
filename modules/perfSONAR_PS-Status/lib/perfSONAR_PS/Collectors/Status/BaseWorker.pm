@@ -27,36 +27,35 @@ use fields 'LOGGER', 'DB_CLIENT';
     Minimal setup routine. Instantiates the class and sets up the logging. The
     actual setting of attributes is done using the "init" function.
 =cut
+
 sub new {
-    my ($class) = @_;
+    my ( $class ) = @_;
 
-    my $self = fields::new($class);
+    my $self = fields::new( $class );
 
-    $self->{LOGGER} = get_logger($class);
+    $self->{LOGGER} = get_logger( $class );
 
     return $self;
 }
 
 sub init {
-	my ($self, @args) = @_;
-	my $args = validateParams(@args, {
-                                        database_client => 1,
-                                     });
+    my ( $self, @args ) = @_;
+    my $args = validateParams( @args, { database_client => 1, } );
 
     $self->{DB_CLIENT} = $args->{database_client};
 
     return 0;
-
 
 }
 
 =head2 type ($self, $type)
     Gets/sets the status type of this agent: admin or oper.
 =cut
-sub run {
-    my ($self) = @_;
 
-    die("Class must be overridden");
+sub run {
+    my ( $self ) = @_;
+
+    die( "Class must be overridden" );
 }
 
 1;
