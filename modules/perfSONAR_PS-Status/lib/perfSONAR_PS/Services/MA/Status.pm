@@ -32,7 +32,6 @@ use Log::Log4perl qw(get_logger);
 use Params::Validate qw(:all);
 use Data::Dumper;
 use English qw( -no_match_vars );
-#use XML::LibXML::XPathContext;
 
 use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;

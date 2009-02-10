@@ -185,6 +185,8 @@ sub disconnect {
 
     $self->logout();
 
+    $self->{MESSAGES} = ();
+
     if (not $self->{TELNET}) {
         return;
     }
@@ -385,6 +387,14 @@ sub processMessage {
     push @{ $self->{MESSAGES}->{$type} }, $lines;
 
     return 0;
+}
+
+sub clearMessages {
+    my ($self) = @_;
+
+    $self->{MESSAGES} = ();
+
+    return;
 }
 
 sub categorizeMessage {
