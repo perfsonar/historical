@@ -1001,4 +1001,4 @@ The NB section:
 
 == Last Updated ==
 
-$Id: LSRegistration.wiki 178 2008-08-28 18:58:19Z jwzurawski $
+$Id$
