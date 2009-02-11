@@ -118,7 +118,7 @@ The release manager will:
 perfSONAR-PS will be released as:
 
  * Source packages (e.g. similar to what CPAN requires using [http://perldoc.perl.org/ExtUtils/MakeMaker.html Make::Maker])
- * [CreatingRPMs RPM Packages]
+ * [CreatingPackages RPM Packages]
 
 An associated [YumRepository Yum repository] will be available with all releases of perfSONAR-PS software in addition to the source packages. This tool will enable easier installation and usage within the performance monitoring community.
 
