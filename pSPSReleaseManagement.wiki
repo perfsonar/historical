@@ -38,15 +38,15 @@ The following are recommendations and deviations from the release process [Relea
 
 perfSONAR-PS has dependencies on the following software components in Internet2 and related partners:
 
- * OWAMP
+ * _*OWAMP*_
    * Used by the perfSONAR-BUOY product.  In the event perfSONAR-BUOY is not being released this restraint can be relaxed. 
- * BWCTL
+ * _*BWCTL*_
    * Used by the perfSONAR-BUOY product.  In the event perfSONAR-BUOY is not being released this restraint can be relaxed. 
- * DCN
+ * _*DCN*_
    * The OSCARS MA, TL1 Collection, and Status services may be effected by a DCN release.  Each of these can coordinate with the DCN development team prior to a release to ensure compatibility.
- * Phobeus
+ * _*Phobeus*_
    * Phoebus will begin to use perfSONAR-based host monitoring as well as network measurements.  This is not a hard requirement, but prior to a release the Phoebus development team must be consulted.  
- * Performance Node
+ * _*Performance Node*_
    * This software will normally be released *after* perfSONAR-PS to take full advantage of all new features and bugfixes
 
 Prior to a release cycle each of these should be weighed to gauge the importance they may hold in a new product vs. a previously tested release.

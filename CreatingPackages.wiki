@@ -64,9 +64,9 @@ Read each section first before proceeding.  These instructions are based on a sk
 
 The file paths in _*all*_ files need to be the standard perfSONAR-PS ones listed below, or if this is a special case, whatever the decided upon paths are.
 
-  * _Package Locations:_ All packages should be installed in _*/opt/perfsonar_ps/[service name]*_. The service name should be in all lower-case.
-  * _Log File Locations:_ All log files should be in _*/var/log/perfsonar/[service name]*_. The service name should be the same as above.
-  * _Data File Locations:_ All data files should be in _*/var/lib/perfsonar/[service name]*_. The service name should be the same as above.
+  * _Package Locations:_ All packages should be installed in _*/opt/perfsonar_ps/SERVICE_NAME*_. The service name should be in all lower-case.
+  * _Log File Locations:_ All log files should be in _*/var/log/perfsonar/SERVICE_NAME*_. The service name should be the same as above.
+  * _Data File Locations:_ All data files should be in _*/var/lib/perfsonar/SERVICE_NAME*_. The service name should be the same as above.
 
 === Finalizing the Package === 
 
