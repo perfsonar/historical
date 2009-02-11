@@ -2,6 +2,7 @@
 
  # [ReleaseManagement#Introduction Introduction]
  # [ReleaseManagement#Project_Preliminaries Project preliminaries]
+   # [ReleaseManagement#Project_Pages Project Pages]
  # [ReleaseManagement#Frequency Release Frequency]
    # [ReleaseManagement#Bi_Yearly_Release_Cycle Bi Yearly Release Cycle]
    # [ReleaseManagement#Tri_Yearly_Release_Cycle Tri Yearly Release Cycle]
@@ -76,6 +77,18 @@ dates and allotted time windows for activities.  When applicable, important
 dates directly related to a release (e.g. _*code slush*_) or indirectly
 related (e.g. dates of demonstrations and conferences) should be used to steer
 the overall schedule.
+
+=== Project Pages ===
+
+Each sub project will maintain a seperate page with specifics related to the release process as well as notes and lessons learned over time.
+
+ * [pSPSReleaseManagement perfSONAR-PS]
+ * OWAMP
+ * BWCTL
+ * NDT
+ * Performance Node
+ * DCN
+ * Phoebus
 
 == Release Frequency ==
 
@@ -727,7 +740,7 @@ there are several _*marjor*_ packaging schemes that are accepted:
  * Ports (star-BSD Family)
    * A collection of software sources arranged in a hierarchy for the star-BSD family of operating systems.  Members of the hierarchy are constructed to rely on other packages when a dependency is required.  This allows an easy cascade of activity when something needs to be installed.
    * Same requirements as Source for the most part; additional work to _port_ the software release into this environment (e.g. special makefiles, etc.) is necessary
- * svn propset svn:keywords 'Id Revision' file.plCPAN (Comprehensive Perl Archive Network)
+ * CPAN (Comprehensive Perl Archive Network)
    * Source packaged Perl source code and documentation, constructed using Perl tools (e.g. [http://perldoc.perl.org/ExtUtils/MakeMaker.html ExtUtils::MakeMaker])
    * Distributed through a network of mirrors
    * Installable via simple command line application, CPAN, that manages package dependencies
