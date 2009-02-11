@@ -18,7 +18,7 @@
    # FNAL
    # MCNC
  # ISO - Naming
-   [http://perfsonar-ps.googlecode.com/svn/wiki/perfnodelabel.png CD Cover Image]
+   [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png CD Cover Image]
      * There was concern that the new name did not convey the perfSONAR connection. Jeff will work on this with Internet2 marketing types.
  # ISO - Status (Outstanding bugs, etc)
      * Seem to have a good handle on outstanding bugs.
