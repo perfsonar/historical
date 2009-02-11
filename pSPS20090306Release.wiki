@@ -102,8 +102,13 @@ Developers are responsible for testing their code:
 
  * Jason
    * Release Tasks
+     * Update Release Documentation - <font color=red>_*IN PROGRESS -2/11*_</font>
      * Update Issue Tracker - _*PENDING*_
      * Re-organize and Branch SVN - _*PENDING*_
+     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - _*PENDING*_
+     * Alert Techwriter/Publication Crew of pending release - _*PENDING*_
+     * Review Code Reviews - _*PENDING*_
+     * Review Doc Reviews - _*PENDING*_
    * Development
      * LS - _*PENDING*_
      * SNMP - _*PENDING*_
