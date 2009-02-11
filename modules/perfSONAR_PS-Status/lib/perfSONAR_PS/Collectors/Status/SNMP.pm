@@ -32,7 +32,9 @@ sub init {
     my $args = validateParams(
         @args,
         {
-            database_client      => 1,
+            data_client          => 1,
+            facilities_client      => 1,
+            topology_id_client      => 1,
             polling_interval     => 0,
             address              => 1,
             port                 => 0,
@@ -44,7 +46,7 @@ sub init {
         }
     );
 
-    my $n = $self->SUPER::init( { database_client => $args->{database_client} } );
+    my $n = $self->SUPER::init( { facilities_client => $args->{facilities_client}, data_client => $args->{data_client}, topology_id_client => $args->{topology_id_client} } );
     if ( $n == -1 ) {
         return -1;
     }
@@ -103,10 +105,30 @@ sub run {
     my $prev_update_successful;
     while ( 1 ) {
         if ( $self->{NEXT_RUNTIME} ) {
+            $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+            $self->{FACILITIES_CLIENT}->closeDB;
+            $self->{DATA_CLIENT}->closeDB;
+
             sleep( $self->{NEXT_RUNTIME} - time );
         }
 
-        my ( $status, $res ) = $self->{DB_CLIENT}->open;
+        my ( $status, $res );
+
+        ( $status, $res ) = $self->{FACILITIES_CLIENT}->openDB;
+        if ( $status != 0 ) {
+            my $msg = "Couldn't open database client: $res";
+            $self->{LOGGER}->error( $msg );
+            next;
+        }
+
+        ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+        if ( $status != 0 ) {
+            my $msg = "Couldn't open database client: $res";
+            $self->{LOGGER}->error( $msg );
+            next;
+        }
+
+        ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
         if ( $status != 0 ) {
             my $msg = "Couldn't open database client: $res";
             $self->{LOGGER}->error( $msg );
@@ -232,24 +254,45 @@ sub run {
                 $id =~ s/\%facility\%/$ifName/g;
             }
 
+            my $key;
+
+            my $facilities = $self->{FACILITIES_CLIENT}->query_facilities({ host => $self->{ADDRESS}, host_type => "SNMP", facility => $ifName, facility_type => "interface" });
+            if ($facilities) {
+                foreach my $facility_ref (@$facilities) {
+                    $key = $facility_ref->{key};
+                }
+            }
+
+            if (not $key) {
+                my $facilities = $self->{FACILITIES_CLIENT}->add_facility({ host => $self->{ADDRESS}, host_type => "SNMP", facility => $ifName, facility_type => "interface" });
+                if ($facilities) {
+                    foreach my $facility_ref (@$facilities) {
+                        $key = $facility_ref->{key};
+                    }
+                }
+            }
+
+			($status, $res) = $self->{TOPOLOGY_ID_CLIENT}->add_topology_id({ topology_id => $id, element_id => $key });
+			if ($status != 0) {
+				$self->{LOGGER}->warn("Couldn't add topology id to metadata: $res");
+			}
+
             my $do_update;
 
-            if ( $prev_update_successful && $prev_update_successful->{$ifName} ) {
+            if ( $prev_update_successful && $prev_update_successful->{$key} ) {
                 $self->{LOGGER}->debug( "Doing update" );
                 $do_update = 1;
             }
 
-            my ( $status, $res ) = $self->{DB_CLIENT}->updateStatus( $curr_time, $id, $ifOperStatuses{$ifName}, $ifAdminStatuses{$ifName}, $do_update );
+            my ( $status, $res ) = $self->{DATA_CLIENT}->update_status( { id => $key, time => $curr_time, oper_status => $ifOperStatuses{$ifName}, admin_status => $ifAdminStatuses{$ifName}, do_update => $do_update } );
             if ( $status != 0 ) {
                 $self->{LOGGER}->error( "Couldn't store status for element $id: $res" );
-                $new_update_successful{$ifName} = 0;
+                $new_update_successful{$key} = 0;
             }
             else {
-                $new_update_successful{$ifName} = 1;
+                $new_update_successful{$key} = 1;
             }
         }
-
-        $self->{DB_CLIENT}->close;
 
         $prev_update_successful = \%new_update_successful;
     }

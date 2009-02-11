@@ -8,8 +8,11 @@ use English qw( -no_match_vars );
 use Data::Dumper;
 
 use perfSONAR_PS::Common;
-use perfSONAR_PS::DB::Status;
 use perfSONAR_PS::Utils::ParameterValidation;
+
+use perfSONAR_PS::DB::Status;
+use perfSONAR_PS::DB::Facilities;
+use perfSONAR_PS::DB::TopologyID;
 
 use perfSONAR_PS::Collectors::Status::SNMP;
 use perfSONAR_PS::Collectors::Status::CoreDirector;
@@ -66,6 +69,8 @@ sub create_database_client {
         return ( -1, $msg );
     }
 
+	my ($dbistring, $username, $password, $prefix);
+
     if ( lc( $config->{"db_type"} ) eq "sqlite" ) {
 
         unless ( $config->{"db_file"} ) {
@@ -80,14 +85,7 @@ sub create_database_client {
             }
         }
 
-        my $database_client = perfSONAR_PS::DB::Status->new( "DBI:SQLite:dbname=" . $file, undef, undef, $config->{"db_table"} );
-
-        if ( not $database_client ) {
-            my $msg = "Problem creating database client";
-            return ( -1, $msg );
-        }
-
-        return ( 0, $database_client );
+		$dbistring = "DBI:SQLite:dbname=" . $file;
     }
     elsif ( lc( $config->{"db_type"} ) eq "mysql" ) {
         my $dbi_string = "dbi:mysql";
@@ -109,19 +107,33 @@ sub create_database_client {
         if ( $config->{"db_port"} ) {
             $dbi_string .= ":" . $config->{"db_port"};
         }
-
-        my $database_client = perfSONAR_PS::DB::Status->new( $dbi_string, $config->{"db_username"}, $config->{"db_password"}, $config->{"db_table"} );
-        if ( not $database_client ) {
-            my $msg = "Problem creating database client";
-            return ( -1, $msg );
-        }
-
-        return ( 0, $database_client );
     }
     else {
         my $msg = "Unknown database type: " . $config->{db_type};
         return ( -1, $msg );
     }
+
+	$prefix = $config->{db_prefix};
+
+	my $facilities_client = perfSONAR_PS::DB::Facilities->new();
+	unless ($facilities_client->init({ dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix })) {
+		my $msg = "Problem creating database client";
+		return ( -1, $msg );
+	}
+
+	my $topology_id_client = perfSONAR_PS::DB::TopologyID->new();
+	unless ($topology_id_client->init({ dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix })) {
+		my $msg = "Problem creating database client";
+		return ( -1, $msg );
+	}
+
+	my $data_client = perfSONAR_PS::DB::Status->new();
+	unless ($data_client->init({ dbistring => $dbistring, username => $username, password => $password, table_prefix => $prefix})) {
+		my $msg = "Problem creating database client";
+		return ( -1, $msg );
+	}
+
+	return ( 0, $facilities_client, $data_client, $topology_id_client );
 }
 
 sub create_switch_worker {
@@ -167,12 +179,14 @@ sub create_switch_worker_snmp {
 
     }
 
-    my ( $status, $res ) = create_database_client( $config, $directory_offset );
+    my ( $status, $res1, $res2, $res3 ) = create_database_client( $config, $directory_offset );
     if ( $status != 0 ) {
-        return ( $status, $res );
+        return ( $status, $res1 );
     }
 
-    my $database_client = $res;
+    my $facilities_client = $res1;
+    my $data_client = $res2;
+    my $topology_id_client = $res3;
 
     my $address              = $config->{address};
     my $port                 = $config->{port};
@@ -200,9 +214,11 @@ sub create_switch_worker_snmp {
     }
 
     my $worker = perfSONAR_PS::Collectors::Status::SNMP->new();
-    ( $status, $res ) = $worker->init(
+    ( $status, $res1 ) = $worker->init(
         {
-            database_client      => $database_client,
+            facilities_client      => $facilities_client,
+            topology_id_client      => $topology_id_client,
+            data_client      => $data_client,
             address              => $address,
             port                 => $port,
             community            => $community,
@@ -214,7 +230,7 @@ sub create_switch_worker_snmp {
         }
     );
     if ( $status != 0 ) {
-        return ( -1, $res );
+        return ( -1, $res1 );
     }
 
     return ( 0, $worker );
@@ -238,12 +254,14 @@ sub create_switch_worker_coredirector {
         return ( -1, $msg );
     }
 
-    my ( $status, $res ) = create_database_client( $config, $directory_offset );
+    my ( $status, $res1, $res2, $res3 ) = create_database_client( $config, $directory_offset );
     if ( $status != 0 ) {
-        return ( $status, $res );
+        return ( $status, $res1 );
     }
 
-    my $database_client = $res;
+    my $facilities_client = $res1;
+    my $data_client = $res2;
+    my $topology_id_client = $res3;
 
     my $address  = $config->{address};
     my $port     = $config->{port};
@@ -282,9 +300,11 @@ sub create_switch_worker_coredirector {
     }
 
     my $worker = perfSONAR_PS::Collectors::Status::CoreDirector->new();
-    ( $status, $res ) = $worker->init(
+    ( $status, $res1 ) = $worker->init(
         {
-            database_client => $database_client,
+            facilities_client      => $facilities_client,
+            topology_id_client      => $topology_id_client,
+            data_client      => $data_client,
 
             address  => $address,
             port     => $port,
@@ -305,7 +325,7 @@ sub create_switch_worker_coredirector {
         }
     );
     if ( $status != 0 ) {
-        return ( -1, $res );
+        return ( -1, $res1 );
     }
 
     return ( 0, $worker );

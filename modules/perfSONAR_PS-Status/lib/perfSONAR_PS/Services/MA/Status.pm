@@ -24,7 +24,7 @@ fashion, as well as allowing for moving away from the E2EMon-style.
 
 use base 'perfSONAR_PS::Services::Base';
 
-use fields 'LS_CLIENT', 'DB_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
+use fields 'LS_CLIENT', 'DATA_CLIENT', 'TOPOLOGY_ID_CLIENT', 'LOGGER', 'DOMAIN', 'LINKS', 'NODES', 'METADATADB', 'E2EMON_METADATADB', 'E2EMON_MAPPING', 'XPATH_CONTEXT';
 
 use strict;
 use warnings;
@@ -37,6 +37,8 @@ use perfSONAR_PS::Common;
 use perfSONAR_PS::Messages;
 use perfSONAR_PS::Client::LS::Remote;
 use perfSONAR_PS::DB::Status;
+use perfSONAR_PS::DB::TopologyID;
+use perfSONAR_PS::Status::Link;
 use perfSONAR_PS::Utils::ParameterValidation;
 use perfSONAR_PS::Services::MA::General;
 
@@ -186,6 +188,11 @@ sub init {
         return -1;
     }
 
+    my ($dbi_string, $username, $password, $table_prefix);
+    $username = $self->{CONF}->{"status"}->{"db_username"};
+    $password = $self->{CONF}->{"status"}->{"db_password"};
+    $table_prefix = $self->{CONF}->{"status"}->{"db_prefix"};
+
     if ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "sqlite" ) {
         if ( not defined $self->{CONF}->{"status"}->{"db_file"} or $self->{CONF}->{"status"}->{"db_file"} eq q{} ) {
             $self->{LOGGER}->error( "You specified a SQLite Database, but then did not specify a database file(db_file)" );
@@ -199,21 +206,10 @@ sub init {
             }
         }
 
-        my $read_only = 0;
-
-        if ( defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1 ) {
-            $read_only = 1;
-        }
-
-        $self->{DB_CLIENT} = perfSONAR_PS::DB::Status->new( "DBI:SQLite:dbname=" . $file, q{}, q{}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
-        if ( not defined $self->{DB_CLIENT} ) {
-            my $msg = "No database to dump";
-            $self->{LOGGER}->error( $msg );
-            return -1;
-        }
+        $dbi_string = "DBI:SQLite:dbname=" . $file;
     }
     elsif ( lc( $self->{CONF}->{"status"}->{"db_type"} ) eq "mysql" ) {
-        my $dbi_string = "dbi:mysql";
+        $dbi_string = "dbi:mysql";
 
         if ( not defined $self->{CONF}->{"status"}->{"db_name"} or $self->{CONF}->{"status"}->{"db_name"} eq q{} ) {
             $self->{LOGGER}->error( "You specified a MySQL Database, but did not specify the database (db_name)" );
@@ -232,31 +228,45 @@ sub init {
         if ( defined $self->{CONF}->{"status"}->{"db_port"} and $self->{CONF}->{"status"}->{"db_port"} ne q{} ) {
             $dbi_string .= ":" . $self->{CONF}->{"status"}->{"db_port"};
         }
-
-        my $read_only = 0;
-
-        if ( defined $self->{CONF}->{"status"}->{"read_only"} and $self->{CONF}->{"status"}->{"read_only"} == 1 ) {
-            $read_only = 1;
-        }
-
-        $self->{DB_CLIENT} = perfSONAR_PS::DB::Status->new( $dbi_string, $self->{CONF}->{"status"}->{"db_username"}, $self->{CONF}->{"status"}->{"db_password"}, $self->{CONF}->{"status"}->{"db_table"}, $read_only );
-        if ( not defined $self->{DB_CLIENT} ) {
-            my $msg = "Couldn't create SQL client";
-            $self->{LOGGER}->error( $msg );
-            return -1;
-        }
     }
     else {
         $self->{LOGGER}->error( "Invalid database type specified" );
         return -1;
     }
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+	my $topology_id_client = perfSONAR_PS::DB::TopologyID->new();
+	unless ($topology_id_client->init({ dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix })) {
+		my $msg = "Problem creating database client";
+        $self->{LOGGER}->error($msg);
+		return -1;
+	}
+
+	my $data_client = perfSONAR_PS::DB::Status->new();
+	unless ($data_client->init({ dbistring => $dbi_string, username => $username, password => $password, table_prefix => $table_prefix})) {
+		my $msg = "Problem creating database client";
+        $self->{LOGGER}->error($msg);
+		return -1;
+	}
+
+    my ($status, $res);
+
+    $self->{TOPOLOGY_ID_CLIENT} = $topology_id_client;
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open newly created client: $res";
         $self->{LOGGER}->error( $msg );
         return -1;
     }
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+
+    $self->{DATA_CLIENT} = $data_client;
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open newly created client: $res";
+        $self->{LOGGER}->error( $msg );
+        return -1;
+    }
+    $self->{DATA_CLIENT}->closeDB;
 
     if ( lc( $self->{CONF}->{"status"}->{"enable_e2emon_compatibility"} ) ) {
         if ( $self->{CONF}->{"status"}->{"e2emon_definitions_file"} ) {
@@ -317,8 +327,6 @@ sub init {
             return -1;
         }
     }
-
-    $self->{DB_CLIENT}->close;
 
     $handler->registerEventHandler( "SetupDataRequest",   "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self );
     $handler->registerEventHandler( "MetadataKeyRequest", "http://ggf.org/ns/nmwg/characteristic/link/status/20070809", $self );
@@ -399,14 +407,14 @@ sub getMetadata_topoid {
     my ( $self ) = @_;
     my ( $status, $res );
 
-    ( $status, $res ) = $self->{DB_CLIENT}->open;
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
         return;
     }
 
-    ( $status, $res ) = $self->{DB_CLIENT}->getUniqueIDs;
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ });
     if ( $status != 0 ) {
         my $msg = "Couldn't get identifiers from database: $res";
         $self->{LOGGER}->error( $msg );
@@ -415,7 +423,9 @@ sub getMetadata_topoid {
 
     my @mds = ();
     my $i   = 0;
-    foreach my $id ( @{$res} ) {
+    foreach my $id_info ( @{$res} ) {
+        my $id = $id_info->{topology_id};
+
         my $md = q{};
 
         $md .= "<nmwg:metadata id=\"meta$i\">\n";
@@ -426,6 +436,8 @@ sub getMetadata_topoid {
         push @mds, $md;
         $i++;
     }
+
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     return \@mds;
 }
@@ -517,7 +529,7 @@ for other requests.
 
 sub handleEvent {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output            => 1,
@@ -533,7 +545,7 @@ sub handleEvent {
         }
     );
 
-    my $eventType = $parameters->{"eventType"};
+    my $eventType = $args->{"eventType"};
 
     if ( $eventType eq "Path.Status" or $eventType = "http://ggf.org/ns/nmwg/topology/l2/3.0/link/status" ) {
         $self->handleCompatEvent( @args );
@@ -556,7 +568,7 @@ sub handleEvent {
 
 sub handleNormalEvent {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output            => 1,
@@ -572,21 +584,21 @@ sub handleNormalEvent {
         }
     );
 
-    my $output             = $parameters->{"output"};
-    my $messageId          = $parameters->{"messageId"};
-    my $messageType        = $parameters->{"messageType"};
-    my $message_parameters = $parameters->{"messageParameters"};
-    my $eventType          = $parameters->{"eventType"};
-    my $d                  = $parameters->{"data"};
-    my $raw_request        = $parameters->{"rawRequest"};
-    my @subjects           = @{ $parameters->{"subject"} };
-    my $doOutputMetadata   = $parameters->{doOutputMetadata};
+    my $output             = $args->{"output"};
+    my $messageId          = $args->{"messageId"};
+    my $messageType        = $args->{"messageType"};
+    my $message_args = $args->{"messageParameters"};
+    my $eventType          = $args->{"eventType"};
+    my $d                  = $args->{"data"};
+    my $raw_request        = $args->{"rawRequest"};
+    my @subjects           = @{ $args->{"subject"} };
+    my $doOutputMetadata   = $args->{doOutputMetadata};
 
     my $md = $subjects[0];
 
     my $metadataId;
-    my @filters = @{ $parameters->{filterChain} };
-    my ( $startTime, $endTime ) = $self->resolveSelectChain( $parameters->{filterChain} );
+    my @filters = @{ $args->{filterChain} };
+    my ( $startTime, $endTime ) = $self->resolveSelectChain( $args->{filterChain} );
     if ( $#filters > -1 ) {
         $metadataId = $filters[-1][0]->getAttribute( "id" );
     }
@@ -653,7 +665,7 @@ sub handleNormalEvent {
 
 sub handleRequest_Metadata {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output       => 1,
@@ -666,7 +678,7 @@ sub handleRequest_Metadata {
         }
     );
 
-    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $args->{metadata} } ) . "]";
     my $d_query = "/nmwg:store/nmwg:data";
 
     unless ( $self->{METADATADB} ) {
@@ -685,7 +697,16 @@ sub handleRequest_Metadata {
         $mds{$curr_md_id} = $md;
     }
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    my ( $status, $res);
+
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
+    }
+
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
@@ -702,32 +723,33 @@ sub handleRequest_Metadata {
         my $new_md_id = "metadata." . genuid();
 
         my $md_temp = $curr_md->cloneNode( 1 );
-        $md_temp->setAttribute( "metadataIdRef", $parameters->{metadata_id} );
+        $md_temp->setAttribute( "metadataIdRef", $args->{metadata_id} );
         $md_temp->setAttribute( "id",            $new_md_id );
 
-        $parameters->{output}->addExistingXMLElement( $md_temp );
+        $args->{output}->addExistingXMLElement( $md_temp );
 
         my @elements = ();
-        my $find_res = $self->xPathFind( $d, "./nmwg:key/nmwg:parameters/nmwg:parameter[\@name=\"element_id\"]", 0 );
+        my $find_res = $self->xPathFind( $d, "./nmwg:key/nmwg:args/nmwg:parameter[\@name=\"element_id\"]", 0 );
         foreach my $id_ref ( $find_res->get_nodelist ) {
             my $id = $id_ref->textContent;
             push @elements, $id;
         }
 
-        if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+        if ( $args->{message_type} eq "MetadataKeyRequest" ) {
 #            $self->{LOGGER}->debug( "Output: " . Dumper( \@elements ) );
 
             # need to output the data
-            startData( $parameters->{output}, "data." . genuid(), $new_md_id );
-            $self->outputKey( { output => $parameters->{output}, elements => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, event_type => $parameters->{event_type} } );
-            endData( $parameters->{output} );
+            startData( $args->{output}, "data." . genuid(), $new_md_id );
+            $self->outputKey( { output => $args->{output}, elements => \@elements, start_time => $args->{start_time}, end_time => $args->{end_time}, event_type => $args->{event_type} } );
+            endData( $args->{output} );
         }
         else {
-            $self->handleData( { output => $parameters->{output}, ids => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, output_ranges => 1 } );
+            $self->handleData( { output => $args->{output}, ids => \@elements, start_time => $args->{start_time}, end_time => $args->{end_time}, output_ranges => 1 } );
         }
     }
 
-    $self->{DB_CLIENT}->close;
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+    $self->{DATA_CLIENT}->closeDB;
 
     return;
 }
@@ -742,7 +764,7 @@ sub handleRequest_Metadata {
 
 sub handleRequest_Topoid {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output       => 1,
@@ -755,52 +777,63 @@ sub handleRequest_Topoid {
         }
     );
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    my ( $status, $res );
+
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
         return;
     }
 
-    my $topo_id = $self->xPathFindValue( $parameters->{metadata}, "./topoid:subject" );
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
+    }
+
+
+    my $topo_id = $self->xPathFindValue( $args->{metadata}, "./topoid:subject" );
     $topo_id =~ s/^\s*//g;
     $topo_id =~ s/\s*$//g;
+    $topo_id = unescapeString($topo_id);
 
-    ( $status, $res ) = $self->{DB_CLIENT}->getUniqueIDs;
+    if (not $topo_id) {
+        my $msg = "Database returned 0 results for search";
+        $self->{LOGGER}->error( $msg );
+        throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
+    }
+
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ topology_id => $topo_id });
     if ( $status != 0 ) {
         my $msg = "Error querying database for identifier";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    my $valid;
-
-    foreach my $id ( @$res ) {
-        if ( $id eq $topo_id ) {
-            $valid = 1;
-        }
-    }
-
-    if ( not $valid ) {
+    if ( scalar(@{ $res }) == 0) {
         my $msg = "Database returned 0 results for search";
         $self->{LOGGER}->error( $msg );
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    my @elements = ( $topo_id );
+    my $key = $res->[0]->{key};
 
-    if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+    my @elements = ( $key );
 
+    if ( $args->{message_type} eq "MetadataKeyRequest" ) {
         # need to output the key
-        startData( $parameters->{output}, "data." . genuid(), $parameters->{metadata_id} );
-        $self->outputKey( { output => $parameters->{output}, elements => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, event_type => $parameters->{event_type} } );
-        endData( $parameters->{output} );
+        startData( $args->{output}, "data." . genuid(), $args->{metadata_id} );
+        $self->outputKey( { output => $args->{output}, elements => \@elements, start_time => $args->{start_time}, end_time => $args->{end_time}, event_type => $args->{event_type} } );
+        endData( $args->{output} );
     }
     else {
-        $self->handleData( { output => $parameters->{output}, metadata_id => $parameters->{metadata_id}, ids => \@elements, start_time => $parameters->{start_time}, end_time => $parameters->{end_time}, output_ranges => 1 } );
+        $self->handleData( { output => $args->{output}, metadata_id => $args->{metadata_id}, ids => \@elements, start_time => $args->{start_time}, end_time => $args->{end_time}, output_ranges => 1 } );
     }
 
-    $self->{DB_CLIENT}->close;
+    $self->{DATA_CLIENT}->closeDB;
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     return;
 }
@@ -814,7 +847,7 @@ sub handleRequest_Topoid {
 
 sub handleRequest_Key {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output        => 1,
@@ -828,47 +861,58 @@ sub handleRequest_Key {
         }
     );
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    my ( $status, $res );
+
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
         return;
     }
 
-    my ( $elements, $start_time, $end_time ) = $self->parseKey( $parameters->{key} );
-
-    if ( not $start_time ) {
-        $start_time = $parameters->{start_time};
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
     }
 
-    if ( $parameters->{start_time} and $start_time < $parameters->{start_time} ) {
-        $start_time = $parameters->{start_time};
+
+    my ( $elements, $start_time, $end_time ) = $self->parseKey( $args->{key} );
+
+    if ( not $start_time ) {
+        $start_time = $args->{start_time};
+    }
+
+    if ( $args->{start_time} and $start_time < $args->{start_time} ) {
+        $start_time = $args->{start_time};
     }
 
     if ( not $end_time ) {
-        $end_time = $parameters->{end_time};
+        $end_time = $args->{end_time};
     }
 
-    if ( $parameters->{end_time} and $end_time > $parameters->{end_time} ) {
-        $start_time = $parameters->{start_time};
+    if ( $args->{end_time} and $end_time > $args->{end_time} ) {
+        $start_time = $args->{start_time};
     }
 
     if ( $start_time and $end_time and $start_time > $end_time ) {
-        throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: time requested is out of key's range" );
+        throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select args: time requested is out of key's range" );
     }
 
-    if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+    if ( $args->{message_type} eq "MetadataKeyRequest" ) {
 
         # need to output the data
-        startData( $parameters->{output}, "data." . genuid(), $parameters->{metadata_id} );
-        $self->outputKey( { output => $parameters->{output}, elements => $elements, start_time => $start_time, end_time => $end_time, event_type => $parameters->{event_type} } );
-        endData( $parameters->{output} );
+        startData( $args->{output}, "data." . genuid(), $args->{metadata_id} );
+        $self->outputKey( { output => $args->{output}, elements => $elements, start_time => $start_time, end_time => $end_time, event_type => $args->{event_type} } );
+        endData( $args->{output} );
     }
     else {
-        $self->handleData( { output => $parameters->{output}, metadata_id => $parameters->{metadata_id}, ids => $elements, start_time => $start_time, end_time => $end_time, output_ranges => $parameters->{output_ranges} } );
+        $self->handleData( { output => $args->{output}, metadata_id => $args->{metadata_id}, ids => $elements, start_time => $start_time, end_time => $end_time, output_ranges => $args->{output_ranges} } );
     }
 
-    $self->{DB_CLIENT}->close;
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+    $self->{DATA_CLIENT}->closeDB;
 
     return;
 }
@@ -884,7 +928,7 @@ sub handleRequest_Key {
 
 sub handleCompatEvent {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output            => 1,
@@ -900,21 +944,21 @@ sub handleCompatEvent {
         }
     );
 
-    my $output             = $parameters->{"output"};
-    my $messageId          = $parameters->{"messageId"};
-    my $messageType        = $parameters->{"messageType"};
-    my $message_parameters = $parameters->{"messageParameters"};
-    my $eventType          = $parameters->{"eventType"};
-    my $d                  = $parameters->{"data"};
-    my $raw_request        = $parameters->{"rawRequest"};
-    my @subjects           = @{ $parameters->{"subject"} };
-    my $doOutputMetadata   = $parameters->{doOutputMetadata};
+    my $output             = $args->{"output"};
+    my $messageId          = $args->{"messageId"};
+    my $messageType        = $args->{"messageType"};
+    my $message_args = $args->{"messageParameters"};
+    my $eventType          = $args->{"eventType"};
+    my $d                  = $args->{"data"};
+    my $raw_request        = $args->{"rawRequest"};
+    my @subjects           = @{ $args->{"subject"} };
+    my $doOutputMetadata   = $args->{doOutputMetadata};
 
     my $md = $subjects[0];
 
     my $metadataId;
-    my @filters = @{ $parameters->{filterChain} };
-    my ( $startTime, $endTime ) = $self->resolveSelectChain( $parameters->{filterChain} );
+    my @filters = @{ $args->{filterChain} };
+    my ( $startTime, $endTime ) = $self->resolveSelectChain( $args->{filterChain} );
     if ( $#filters > -1 ) {
         $metadataId = $filters[-1][0]->getAttribute( "id" );
     }
@@ -966,7 +1010,7 @@ sub handleCompatEvent {
 
 sub handleCompatRequest_Metadata {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output       => 1,
@@ -979,7 +1023,7 @@ sub handleCompatRequest_Metadata {
         }
     );
 
-    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $parameters->{metadata} } ) . "]";
+    my $md_query = "/nmwg:store/nmwg:metadata[" . getMetadataXQuery( { node => $args->{metadata} } ) . "]";
 
     $self->{LOGGER}->debug( "Query: " . $md_query );
 
@@ -989,7 +1033,16 @@ sub handleCompatRequest_Metadata {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->open;
+    my ( $status, $res );
+
+    ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
+    if ( $status != 0 ) {
+        my $msg = "Couldn't open from database: $res";
+        $self->{LOGGER}->error( $msg );
+        return;
+    }
+
+    ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
     if ( $status != 0 ) {
         my $msg = "Couldn't open from database: $res";
         $self->{LOGGER}->error( $msg );
@@ -1003,9 +1056,9 @@ sub handleCompatRequest_Metadata {
         throw perfSONAR_PS::Error_compat( "error.ma.storage", $msg );
     }
 
-    startParameters( $parameters->{output}, "params.0" );
-    addParameter( $parameters->{output}, "DomainName", $self->{DOMAIN} );
-    endParameters( $parameters->{output} );
+    startParameters( $args->{output}, "params.0" );
+    addParameter( $args->{output}, "DomainName", $self->{DOMAIN} );
+    endParameters( $args->{output} );
 
     my %output_endpoints = ();
     my %mds              = ();
@@ -1024,57 +1077,66 @@ sub handleCompatRequest_Metadata {
             # Skip if we've already output the node
             next if ( defined $output_endpoints{ $endpoint->{name} } );
 
-            startMetadata( $parameters->{output}, "metadata." . genuid(), q{}, undef );
-            $parameters->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-" . $endpoint->{name} } );
-            $self->outputCompatNodeElement( $parameters->{output}, $self->{NODES}->{ $endpoint->{name} } );
-            $parameters->{output}->endElement( "subject" );
-            endMetadata( $parameters->{output} );
+            startMetadata( $args->{output}, "metadata." . genuid(), q{}, undef );
+            $args->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub-" . $endpoint->{name} } );
+            $self->outputCompatNodeElement( $args->{output}, $self->{NODES}->{ $endpoint->{name} } );
+            $args->{output}->endElement( "subject" );
+            endMetadata( $args->{output} );
 
             $output_endpoints{ $endpoint->{name} } = 1;
         }
 
         my $mdId = "metadata." . genuid();
 
-        startMetadata( $parameters->{output}, $mdId, q{}, undef );
-        $parameters->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub." . genuid() } );
-        $self->outputCompatLinkElement( $parameters->{output}, $link );
-        $parameters->{output}->endElement( "subject" );
-        endMetadata( $parameters->{output} );
+        startMetadata( $args->{output}, $mdId, q{}, undef );
+        $args->{output}->startElement( prefix => "nmwg", tag => "subject", namespace => "http://ggf.org/ns/nmwg/base/2.0/", attributes => { id => "sub." . genuid() } );
+        $self->outputCompatLinkElement( $args->{output}, $link );
+        $args->{output}->endElement( "subject" );
+        endMetadata( $args->{output} );
 
-        if ( $parameters->{message_type} eq "MetadataKeyRequest" ) {
+        if ( $args->{message_type} eq "MetadataKeyRequest" ) {
+            ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ });
+            if ( $status != 0 ) {
+                my $msg = "Couldn't get identifiers from database: $res";
+                $self->{LOGGER}->error( $msg );
+                return;
+            }
+
+            my $resolved_elements = $self->resolve_topology_ids($link->{subelements});
 
             # need to output the data
             #$self->{LOGGER}->debug( "Output: " . Dumper( $link->{"subelements"} ) );
 
-            startData( $parameters->{output}, "data." . genuid(), $mdId );
+            startData( $args->{output}, "data." . genuid(), $mdId );
             $self->outputKey(
-                {
-                    output     => $parameters->{output},
-                    elements   => $link->{"subelements"},
-                    start_time => $parameters->{start_time},
-                    end_time   => $parameters->{end_time},
-                    event_type => $parameters->{event_type}
-                }
-            );
-            endData( $parameters->{output} );
+                    {
+                    output     => $args->{output},
+                    elements   => $resolved_elements,
+                    start_time => $args->{start_time},
+                    end_time   => $args->{end_time},
+                    event_type => $args->{event_type}
+                    }
+                    );
+            endData( $args->{output} );
         }
         else {
             #$self->{LOGGER}->debug( "Link to handle: " . Dumper( $link ) );
 
             $self->handleData(
                 {
-                    output        => $parameters->{output},
+                    output        => $args->{output},
                     metadata_id   => $mdId,
                     ids           => $link->{"subelements"},
-                    start_time    => $parameters->{start_time},
-                    end_time      => $parameters->{end_time},
+                    start_time    => $args->{start_time},
+                    end_time      => $args->{end_time},
                     output_ranges => 0,
                 }
             );
         }
     }
 
-    $self->{DB_CLIENT}->close;
+    $self->{DATA_CLIENT}->closeDB;
+    $self->{TOPOLOGY_ID_CLIENT}->closeDB;
 
     return;
 }
@@ -1095,34 +1157,34 @@ sub resolveSelectChain {
 
     my $now_flag = 0;
 
-    # got through the filters and load any parameters with an eye toward
+    # got through the filters and load any args with an eye toward
     # producing data as though it had gone through a set of filters.
     foreach my $filter_arr ( @filters ) {
         my @filter_set = @{$filter_arr};
         my $filter     = $filter_set[0];
 
-        my $select_parameters = $self->xPathFind( $filter, './select:parameters', 1 );
+        my $select_args = $self->xPathFind( $filter, './select:args', 1 );
 
-        if ( not $select_parameters ) {
-            $self->{LOGGER}->debug( "Didn't find any select parameters" );
+        if ( not $select_args ) {
+            $self->{LOGGER}->debug( "Didn't find any select args" );
             next;
         }
 
-        my $curr_time      = $self->xPathFindValue( $select_parameters, './select:parameter[@name="time"]' );
-        my $curr_startTime = $self->xPathFindValue( $select_parameters, './select:parameter[@name="startTime"]' );
-        my $curr_endTime   = $self->xPathFindValue( $select_parameters, './select:parameter[@name="endTime"]' );
+        my $curr_time      = $self->xPathFindValue( $select_args, './select:parameter[@name="time"]' );
+        my $curr_startTime = $self->xPathFindValue( $select_args, './select:parameter[@name="startTime"]' );
+        my $curr_endTime   = $self->xPathFindValue( $select_args, './select:parameter[@name="endTime"]' );
 
         if ( $curr_time ) {
             if ( lc( $curr_time ) eq "now" ) {
                 if ( $startTime or $endTime ) {
-                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select args: 'now' used with a time range" );
                 }
 
                 $now_flag = 1;
             }
             else {
                 if ( ( $startTime and $curr_time < $startTime ) or ( $endTime and $curr_time > $endTime ) ) {
-                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: time specified is out of range previously specified" );
+                    throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select args: time specified is out of range previously specified" );
                 }
                 else {
                     $startTime = $curr_time;
@@ -1133,7 +1195,7 @@ sub resolveSelectChain {
 
         if ( $curr_startTime ) {
             if ( $now_flag ) {
-                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select args: 'now' used with a time range" );
             }
 
             if ( not $startTime or $curr_startTime >= $startTime ) {
@@ -1144,7 +1206,7 @@ sub resolveSelectChain {
 
         if ( $curr_endTime ) {
             if ( $now_flag ) {
-                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select parameters: 'now' used with a time range" );
+                throw perfSONAR_PS::Error_compat( "error.ma.select", "Ambiguous select args: 'now' used with a time range" );
             }
 
             if ( not $endTime or $curr_endTime < $endTime ) {
@@ -1154,7 +1216,7 @@ sub resolveSelectChain {
     }
 
     if ( $startTime and $endTime and $startTime > $endTime ) {
-        throw perfSONAR_PS::Error_compat( "error.ma.select", "Invalid select parameters: startTime > endTime" );
+        throw perfSONAR_PS::Error_compat( "error.ma.select", "Invalid select args: startTime > endTime" );
     }
 
     if ( $startTime ) {
@@ -1176,7 +1238,7 @@ sub resolveSelectChain {
 sub parseKey {
     my ( $self, $key ) = @_;
 
-    my $key_params = $self->xPathFind( $key, "./nmwg:parameters", 1 );
+    my $key_params = $self->xPathFind( $key, "./nmwg:args", 1 );
     if ( not $key_params ) {
         my $msg = "Invalid key";
         $self->{LOGGER}->error( $msg );
@@ -1211,7 +1273,7 @@ sub parseKey {
 
 sub outputKey {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output     => 1,
@@ -1222,16 +1284,16 @@ sub outputKey {
         }
     );
 
-    $parameters->{output}->startElement( { prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} } );
-    startParameters( $parameters->{output}, "params.0" );
-    foreach my $element ( @{ $parameters->{elements} } ) {
-        addParameter( $parameters->{output}, "maKey", escapeString( $element ) );
+    $args->{output}->startElement( { prefix => "nmwg", tag => "key", namespace => $status_namespaces{"nmwg"} } );
+    startParameters( $args->{output}, "params.0" );
+    foreach my $element ( @{ $args->{elements} } ) {
+        addParameter( $args->{output}, "maKey", escapeString( $element ) );
     }
-    addParameter( $parameters->{output}, "eventType", $parameters->{event_type} );
-    addParameter( $parameters->{output}, "startTime", $parameters->{start_time} ) if ( $parameters->{start_time} );
-    addParameter( $parameters->{output}, "endTime",   $parameters->{end_time} ) if ( $parameters->{end_time} );
-    endParameters( $parameters->{output} );
-    $parameters->{output}->endElement( "key" );
+    addParameter( $args->{output}, "eventType", $args->{event_type} );
+    addParameter( $args->{output}, "startTime", $args->{start_time} ) if ( $args->{start_time} );
+    addParameter( $args->{output}, "endTime",   $args->{end_time} ) if ( $args->{end_time} );
+    endParameters( $args->{output} );
+    $args->{output}->endElement( "key" );
 
     return;
 }
@@ -1250,7 +1312,7 @@ sub outputKey {
 
 sub handleData {
     my ( $self, @args ) = @_;
-    my $parameters = validateParams(
+    my $args = validateParams(
         @args,
         {
             output        => 1,
@@ -1264,38 +1326,43 @@ sub handleData {
     );
 
     my $is_now;
-    unless ( $parameters->{start_time} or $parameters->{end_time} ) {
-        $parameters->{end_time}   = time;
-        $parameters->{start_time} = $parameters->{end_time} - $self->{CONF}->{status}->{max_recent_age};
-        $self->{LOGGER}->debug( "Setting 'now' to " . $parameters->{start_time} . "-" . $parameters->{end_time} );
+    unless ( $args->{start_time} or $args->{end_time} ) {
+        $args->{end_time}   = time;
+        $args->{start_time} = $args->{end_time} - $self->{CONF}->{status}->{max_recent_age};
+        $self->{LOGGER}->debug( "Setting 'now' to " . $args->{start_time} . "-" . $args->{end_time} );
 
         $is_now = 1;
     }
 
-    if ( not $parameters->{data_id} ) {
-        $parameters->{data_id} = "data." . genuid();
+    if ( not $args->{data_id} ) {
+        $args->{data_id} = "data." . genuid();
     }
 
-    my ( $status, $res ) = $self->{DB_CLIENT}->getElementStatus( $parameters->{ids}, $parameters->{start_time}, $parameters->{end_time} );
-    if ( $status != 0 ) {
-        my $msg = "Couldn't get information about elements from database: $res";
-        $self->{LOGGER}->error( $msg );
-        throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
-    }
+    my %elements = ();
 
-    my $elements = $res;
+    my $resolved_elements = $self->resolve_topology_ids($args->{ids});
+    foreach my $element (@{ $resolved_elements} ) {
+        if ($element =~ /^urn:/) {
+            # we couldn't resolve the link, so make it unknown.
+            my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
+            $elements{$element} = [$new_element];
+        } else {
+            my ( $status, $res ) = $self->{DATA_CLIENT}->get_element_status( element_ids => [ $element] , start_time => $args->{start_time}, end_time => $args->{end_time} );
+            if ( $status != 0 ) {
+                my $msg = "Couldn't get information about elements from database: $res";
+                $self->{LOGGER}->error( $msg );
+                throw perfSONAR_PS::Error_compat( "error.common.storage.fetch", $msg );
+            }
 
-    my $curr_time = time;
+            if ($res->{$element}) {
+                $elements{$element} = $res->{$element};
+            } else {
+                my $msg = "Couldn't get information about element $element from database. Assuming unknown";
 
-#    $self->{LOGGER}->debug( "Elements: " . Dumper( $res ) );
+                my $new_element = perfSONAR_PS::Status::Link->new( $element, $args->{start_time}, $args->{end_time}, "unknown", "unknown" );
 
-    foreach my $id ( @{ $parameters->{ids} } ) {
-        if ( not $elements->{$id} ) {
-            my $msg = "Couldn't get information about element $id from database. Assuming unknown";
-
-            my $new_element = perfSONAR_PS::Status::Link->new( $id, $parameters->{start_time}, $parameters->{end_time}, "unknown", "unknown" );
-
-            $elements->{$id} = [$new_element];
+                $elements{$element} = [$new_element];
+            }
         }
     }
 
@@ -1303,7 +1370,7 @@ sub handleData {
     my @data_elements = ();
 
     # Find the periods where there's data from all elements.
-    foreach my $id ( @{ $parameters->{ids} } ) {
+    foreach my $id ( @{ $args->{ids} } ) {
         my $first;
         if ( scalar( @periods ) == 0 ) {
             $first = 1;
@@ -1311,7 +1378,7 @@ sub handleData {
 
         my @curr_periods = ();
 
-        foreach my $element_history ( @{ $elements->{$id} } ) {
+        foreach my $element_history ( @{ $elements{$id} } ) {
             my %info = ();
             $info{start}        = $element_history->getStartTime;
             $info{end}          = $element_history->getEndTime;
@@ -1343,7 +1410,7 @@ sub handleData {
 
 #    $self->{LOGGER}->debug( "Periods: " . Dumper( \@periods ) );
 
-    startData( $parameters->{output}, $parameters->{data_id}, $parameters->{metadata_id}, undef );
+    startData( $args->{output}, $args->{data_id}, $args->{metadata_id}, undef );
     foreach my $period ( @periods ) {
         my $period_oper_status  = "unknown";
         my $period_admin_status = "unknown";
@@ -1384,7 +1451,7 @@ sub handleData {
 #        $self->{LOGGER}->debug( "Period: " . Dumper( $period ) );
 
         # if we can output the range, just output one datum with the range
-        if ( $parameters->{output_ranges} ) {
+        if ( $args->{output_ranges} ) {
             my %attrs = ();
             $attrs{"timeType"}       = "unix";
             $attrs{"timeValue"}      = $period->{end};
@@ -1393,30 +1460,30 @@ sub handleData {
             $attrs{"endTimeType"}    = "unix";
             $attrs{"endTimeValue"}   = $period->{end};
 
-            $parameters->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
-            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
-            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
-            $parameters->{output}->endElement( "datum" );
+            $args->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
+            $args->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
+            $args->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
+            $args->{output}->endElement( "datum" );
         }
         else {
             my %attrs = ();
 
             #            $attrs{"timeType"} = "unix";
             #            $attrs{"timeValue"} = $period->{start};
-            #            $parameters->{output}->startElement(prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs);
-            #              $parameters->{output}->createElement(prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status);
-            #              $parameters->{output}->createElement(prefix => "ifevt", tag => "stateOper", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status);
-            #            $parameters->{output}->endElement("datum");
+            #            $args->{output}->startElement(prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs);
+            #              $args->{output}->createElement(prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status);
+            #              $args->{output}->createElement(prefix => "ifevt", tag => "stateOper", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status);
+            #            $args->{output}->endElement("datum");
 
             $attrs{"timeType"}  = "unix";
             $attrs{"timeValue"} = $period->{end};
-            $parameters->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
-            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
-            $parameters->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
-            $parameters->{output}->endElement( "datum" );
+            $args->{output}->startElement( prefix => "ifevt", tag => "datum", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", attributes => \%attrs );
+            $args->{output}->createElement( prefix => "ifevt", tag => "stateAdmin", namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_admin_status );
+            $args->{output}->createElement( prefix => "ifevt", tag => "stateOper",  namespace => "http://ggf.org/ns/nmwg/event/status/base/2.0/", content => $period_oper_status );
+            $args->{output}->endElement( "datum" );
         }
     }
-    endData( $parameters->{output} );
+    endData( $args->{output} );
 
     return;
 }
@@ -1789,11 +1856,21 @@ sub parseCompatCircuitsFile {
 
             my @subelements = keys %subelements;
 
+            my $resolved_elements;
+
+            my ($status, $res) = $self->{TOPOLOGY_ID_CLIENT}->openDB();
+            if ($status != 0) {
+                $resolved_elements = \@subelements;
+            } else {
+                $resolved_elements = $self->resolve_topology_ids(\@subelements);
+            }
+            $self->{TOPOLOGY_ID_CLIENT}->closeDB();
+
             my %new_link = ();
 
             $new_link{"globalName"}  = $global_name;
             $new_link{"name"}        = $local_name;
-            $new_link{"subelements"} = \@subelements;
+            $new_link{"subelements"} = $resolved_elements;
             $new_link{"endpoints"}   = \@endpoints;
             $new_link{"type"}        = $link_type;
 
@@ -1809,7 +1886,31 @@ sub parseCompatCircuitsFile {
     }
     }
 
+    $self->{LOGGER}->debug("Links: ".Dumper(\%links));
+
     return ( 0, $domain, \%links, \%nodes );
+}
+
+sub resolve_topology_ids {
+    my ($self, $ids) = @_;
+
+    my @resolved = ();
+
+    foreach my $id (@{ $ids }) {
+        if ($id !~ /^urn:nml/) {
+            push @resolved, $id;
+            next;
+        }
+
+        my ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->query_topology_ids({ topology_id => $id });
+        if ( $status != 0 or scalar(@{ $res }) == 0) {
+            push @resolved, $id;
+        } else {
+            push @resolved, $res->[0]->{key};
+        }
+    }
+
+    return \@resolved;
 }
 
 =head2 xPathFind ($self, $node, $query, $return_first)

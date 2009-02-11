@@ -29,7 +29,9 @@ sub init {
     my $args = validateParams(
         @params,
         {
-            database_client          => 1,
+            data_client          => 1,
+            facilities_client      => 1,
+            topology_id_client      => 1,
             polling_interval         => 0,
             address                  => 1,
             port                     => 0,
@@ -47,7 +49,7 @@ sub init {
         }
     );
 
-    my $n = $self->SUPER::init( { database_client => $args->{database_client} } );
+    my $n = $self->SUPER::init( { facilities_client => $args->{facilities_client}, data_client => $args->{data_client}, topology_id_client => $args->{topology_id_client} } );
     if ( $n == -1 ) {
         return -1;
     }
@@ -152,8 +154,6 @@ sub init {
         my $msg = "Performing generic facilities check, but invalid identifier pattern specified";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
-
-        # ERROR
     }
 
     return 0;
@@ -165,15 +165,33 @@ sub run {
     my $prev_update_successful;
 
     while ( 1 ) {
-        my $msg;
-
         if ( $self->{NEXT_RUNTIME} ) {
+			$self->{TOPOLOGY_ID_CLIENT}->closeDB;
+			$self->{FACILITIES_CLIENT}->closeDB;
+			$self->{DATA_CLIENT}->closeDB;
+
             sleep( $self->{NEXT_RUNTIME} - time );
         }
 
         $self->{NEXT_RUNTIME} = time + $self->{POLLING_INTERVAL};
 
-        my ( $status, $res ) = $self->{DB_CLIENT}->open;
+		my ($status, $res);
+
+        ( $status, $res ) = $self->{FACILITIES_CLIENT}->openDB;
+        if ( $status != 0 ) {
+            my $msg = "Couldn't open database client: $res";
+            $self->{LOGGER}->error( $msg );
+            next;
+        }
+
+        ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->openDB;
+        if ( $status != 0 ) {
+            my $msg = "Couldn't open database client: $res";
+            $self->{LOGGER}->error( $msg );
+            next;
+        }
+
+        ( $status, $res ) = $self->{DATA_CLIENT}->openDB;
         if ( $status != 0 ) {
             my $msg = "Couldn't open database client: $res";
             $self->{LOGGER}->error( $msg );
@@ -181,7 +199,6 @@ sub run {
         }
 
         if ( $self->{AGENT}->connect( { inhibitMessages => 1 } ) == -1 ) {
-            $self->{DB_CLIENT}->close;
             $self->{LOGGER}->error( "Could not connect to host" );
             next;
         }
@@ -235,6 +252,7 @@ sub run {
                         my %facility = (
                             id           => $id,
                             name         => $name,
+                            type         => "crossconnect",
                             oper_status  => $oper_status,
                             admin_status => $admin_status,
                         );
@@ -273,6 +291,7 @@ sub run {
                 my %facility = (
                     id           => $id,
                     name         => $name,
+					type         => "vcg",
                     oper_status  => $oper_status,
                     admin_status => $admin_status,
                 );
@@ -314,6 +333,7 @@ sub run {
                     my %facility = (
                         id           => $id,
                         name         => $name,
+						type         => "optical",
                         oper_status  => $oper_status,
                         admin_status => $admin_status,
                     );
@@ -385,6 +405,7 @@ sub run {
                 my %facility = (
                     id           => $id,
                     name         => $name,
+					type         => "eflow",
                     oper_status  => $oper_status,
                     admin_status => $admin_status,
                 );
@@ -518,6 +539,7 @@ sub run {
                 my %facility = (
                     id           => $id,
                     name         => $port->{name},
+					type         => "ethernet",
                     oper_status  => $oper_status,
                     admin_status => $admin_status,
                 );
@@ -539,31 +561,60 @@ sub run {
                 $id =~ s/\%facility\%/$facility->{name}/g;
             }
 
-            my $do_update;
-
-            if ( $prev_update_successful && $prev_update_successful->{$id} ) {
-                $self->{LOGGER}->debug( "Doing update" );
-                $do_update = 1;
-            }
-
             my $admin_status = $facility->{admin_status};
             if ( not $admin_status ) {
                 $admin_status = $self->{DEFAULT_ADMIN_STATUS};
             }
 
-            my ( $status, $res ) = $self->{DB_CLIENT}->updateStatus( $curr_time, $id, $facility->{oper_status}, $admin_status, $do_update );
+			my $key;
+
+			my ($status, $res) = $self->{FACILITIES_CLIENT}->query_facilities({ host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} });
+			if ($status != 0) {
+				next;
+			}
+
+			foreach my $facility_ref (@$res) {
+				$key = $facility_ref->{key};
+            }
+
+            if (not $key) {
+                my ($status, $res) = $self->{FACILITIES_CLIENT}->add_facility({ host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} });
+				if ($status != 0) {
+					next;
+				}
+
+				foreach my $facility_ref (@$res) {
+					$key = $facility_ref->{key};
+                }
+				if (not $key) {
+					$self->{LOGGER}->error("Couldn't add facility");
+					next;
+				}
+            }
+
+			($status, $res) = $self->{TOPOLOGY_ID_CLIENT}->add_topology_id({ topology_id => $id, element_id => $key });
+			if ($status != 0) {
+				$self->{LOGGER}->warn("Couldn't add topology id to metadata: $res");
+			}
+
+            my $do_update;
+
+            if ( $prev_update_successful && $prev_update_successful->{$key} ) {
+                $self->{LOGGER}->debug( "Doing update" );
+                $do_update = 1;
+            }
+
+            ( $status, $res ) = $self->{DATA_CLIENT}->update_status( { element_id => $key, time => $curr_time, oper_status => $facility->{oper_status}, admin_status => $admin_status, do_update => $do_update } );
             if ( $status != 0 ) {
                 $self->{LOGGER}->error( "Couldn't store status for element $id: $res" );
-                $new_update_successful{$id} = 0;
+                $new_update_successful{$key} = 0;
             }
             else {
-                $new_update_successful{$id} = 1;
+                $new_update_successful{$key} = 1;
             }
         }
 
         $prev_update_successful = \%new_update_successful;
-
-        $self->{DB_CLIENT}->close;
 
         $self->{AGENT}->disconnect();
     }

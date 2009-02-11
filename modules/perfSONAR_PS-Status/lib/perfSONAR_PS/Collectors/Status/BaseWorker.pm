@@ -21,7 +21,7 @@ use perfSONAR_PS::Utils::ParameterValidation;
 
 our $VERSION = 0.09;
 
-use fields 'LOGGER', 'DB_CLIENT';
+use fields 'LOGGER', 'DATA_CLIENT', 'FACILITIES_CLIENT', 'TOPOLOGY_ID_CLIENT';
 
 =head2 new 
     Minimal setup routine. Instantiates the class and sets up the logging. The
@@ -40,9 +40,11 @@ sub new {
 
 sub init {
     my ( $self, @args ) = @_;
-    my $args = validateParams( @args, { database_client => 1, } );
+    my $args = validateParams( @args, { facilities_client => 1, topology_id_client => 0, data_client => 1} );
 
-    $self->{DB_CLIENT} = $args->{database_client};
+    $self->{TOPOLOGY_ID_CLIENT} = $args->{topology_id_client};
+    $self->{FACILITIES_CLIENT} = $args->{facilities_client};
+    $self->{DATA_CLIENT} = $args->{data_client};
 
     return 0;
 

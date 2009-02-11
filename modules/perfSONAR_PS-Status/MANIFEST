@@ -21,6 +21,8 @@ lib/perfSONAR_PS/Collectors/Status/BaseWorker.pm
 lib/perfSONAR_PS/Collectors/Status/CoreDirector.pm
 lib/perfSONAR_PS/Collectors/Status/SNMP.pm
 lib/perfSONAR_PS/Common.pm
+lib/perfSONAR_PS/DB/Elements.pm
+lib/perfSONAR_PS/DB/Facilities.pm
 lib/perfSONAR_PS/DB/File.pm
 lib/perfSONAR_PS/DB/SQL.pm
 lib/perfSONAR_PS/DB/Status.pm
