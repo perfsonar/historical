@@ -1,4 +1,4 @@
-= Creating RPM: A HowTo for perfSONAR-PS Developers  =
+= Creating RPM: A How-To for perfSONAR-PS Developers  =
 
  # [CreatingRPMs#Introduction Introduction]
  # [CreatingRPMs#Instructions Instructions]
@@ -20,17 +20,17 @@ Read each section first before proceeding.  These instructions are based on a sk
 
  # The perfSONAR-PS subversion contains an RPM _skeleton_ to help all developers get started.  It can be find in _*trunk/modules/perfSONAR_PS-Skeleton/*_
  # The contents are as follows:
-   * MANIFEST - List of all files in this package
-   * Makefile - Build instructions used to create the tar.gz package that the RPM is created from.  This can and will also be used to generate the source distribution.
-   * bin/ - Scripts and executables - treat this much like _*/usr/local/bin*_ or similar on the final installed system
-   * doc/ - Documentation related to the released package
-     * Changes - Change log for the service
-     * LICENSE - File containing license information
-     * README - Installation instructions or other notes
-   * etc/ - Configuration files, templates, or other non-executable additions to this package
-   * lib/ - Library files (modules)
-   * perl-perfSONAR_PS-Skeleton.spec - Instructions for building the RPM
-   * scripts/ - Normally used for init.d scripts or other automated _helper_ aspects of the packaged service.
+   * _*MANIFEST*_ - List of all files in this package
+   * _*Makefile*_ - Build instructions used to create the tar.gz package that the RPM is created from.  This can and will also be used to generate the source distribution.
+   * _*bin/*_ - Scripts and executables - treat this much like _*/usr/local/bin*_ or similar on the final installed system
+   * _*doc/*_ - Documentation related to the released package
+     * _*Changes*_ - Change log for the service
+     * _*LICENSE*_ - File containing license information
+     * _*README*_ - Installation instructions or other notes
+   * _*etc/*_ - Configuration files, templates, or other non-executable additions to this package
+   * _*lib/*_ - Library files (modules)
+   * _*perl-perfSONAR_PS-Skeleton.spec*_ - Instructions for building the RPM
+   * _*scripts/*_ - Normally used for init.d scripts or other automated _helper_ aspects of the packaged service.
  # Using this as a starting point, rename _*perfSONAR_PS-Skeleton*_ to _*perfSONAR_PS-SERVICE_NAME*_ (e.g. _*perfSONAR_PS-LSRegistrationDaemon*_)
  # Edit the _*Makefile*_ and change references of _*skeleton*_ and _*Skeleton*_ as necessary
  
@@ -46,7 +46,7 @@ Read each section first before proceeding.  These instructions are based on a sk
    * _*lib*_ - Library information; these are identified in the previous step for the service but additional libs may be added
    * _*scripts*_ - Helper scripts for service operation, init.d scripts or other tools useful for service installation and operation should go here.
  # After placing (or linking) content into these directories be sure to update the *_MANIFEST_* file to include all necessary packaged files.  RPM packaging may fail if the scripts are not identified here.
- # Check to be sure all files in the _*MANIFEST*_ and _dependencies_* are valid.  Add anything that may be missing. 
+ # Check to be sure all files in the _*MANIFEST*_ and *_dependencies_* are valid.  Add anything that may be missing. 
 
 === RPM Final Contents  === 
 
