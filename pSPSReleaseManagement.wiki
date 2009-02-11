@@ -1,10 +1,128 @@
 = perfSONAR-PS Release Management  =
 
  # [pSPSReleaseManagement#Introduction Introduction]
+ # [pSPSReleaseManagement#Frequency Release Frequency]
+   # [pSPSReleaseManagement#March_9_2009 v0.10 Release]
+ # [pSPSReleaseManagement#Release_Process Release Process]
+   # [pSPSReleaseManagement#Dependencies Dependencies]
+   # [pSPSReleaseManagement#Revision_Control Revision Control] 
+   # [pSPSReleaseManagement#Schedule Schedule]
+   # [pSPSReleaseManagement#Documentation Documentation]
+   # [pSPSReleaseManagement#Testing Testing]
+   # [pSPSReleaseManagement#Code_Review Code Review]
+   # [pSPSReleaseManagement#Issue_Tracker Issue Tracker]
+ # [pSPSReleaseManagement#Released_Product Released Product]
 
 == Introduction ==
 
-a
+The perfSONAR-PS release process is based heavily on the [ReleaseManagement generic] process.  This page recommends actions for the perfSONAR-PS group only.  Content subject to change, so please review frequently.
+
+== Release Frequency ==
+
+perfSONAR-PS will be released on a bi-yearly basis to coincide with major activities of group members.  We are currently aiming to release:
+
+ * Late Winter - February/March
+ * Late Summer - August/September
+
+These suggestions were based on group feedback from the [20081211Video December 11th Call], dates may be shifted based on priorities of the released software or group members.
+
+=== v0.10 Release ===
+
+For more information regarding this release, please see the information [pSPS20090306Release page].
+
+== Release Process ==
+
+The following are recommendations and deviations from the release process [ReleaseManagement#Release_Process recomendations].  These are not set in stone and may be relaxed depending on requirements for a given attempt.  Many are subject to availability of resources (time and manpower).  
+
+=== Dependencies ===
+
+perfSONAR-PS has dependencies on the following software components in Internet2 and related partners:
+
+ * OWAMP
+   * Used by the perfSONAR-BUOY product.  In the event perfSONAR-BUOY is not being released this restraint can be relaxed. 
+ * BWCTL
+   * Used by the perfSONAR-BUOY product.  In the event perfSONAR-BUOY is not being released this restraint can be relaxed. 
+ * DCN
+   * The OSCARS MA, TL1 Collection, and Status services may be effected by a DCN release.  Each of these can coordinate with the DCN development team prior to a release to ensure compatibility.
+ * Phobeus
+   * Phoebus will begin to use perfSONAR-based host monitoring as well as network measurements.  This is not a hard requirement, but prior to a release the Phoebus development team must be consulted.  
+ * Performance Node
+   * This software will normally be released *after* perfSONAR-PS to take full advantage of all new features and bugfixes
+
+Prior to a release cycle each of these should be weighed to gauge the importance they may hold in a new product vs. a previously tested release.
+
+=== Revision Control ===
+
+perfSONAR-PS will continue to use subversion.  As [ReleaseManagement#Revision_Control recommended], the release manager will be in charge of SVN wrangling with regards to:
+
+ * Creating the release branch
+ * Creating tags for candidates
+ * Deleting unused tags and branches when necessary
+ 
+Developers are reminded to work in the appropriate area and merge changes back to trunk promptly.  
+
+=== Schedule ===
+
+See the original [ReleaseManagement#Schedule recommendations].  The schedule allows for a 3 week window, and may be relaxed or tightened on the discretion of the release team.
+
+=== Documentation ===
+
+Developers should focus on documentation for the perfSONAR-PS project in the following order:
+
+ * Perldoc for all modules and scripts
+ * Installation and usage documentation (included in packaging)
+ * Wiki pages to describe Installation and usage
+ * Wiki pages for API use or other examples that may be helpful for users and other developers
+ 
+The release team should be sure to:
+
+ * Provide the technical writing and communications staff updates for the static web pages
+ * Ensure the web pages are addressed within a week of the official release
+
+All documentation will be reviewed prior to the release for completeness and correctness.  
+
+=== Testing ===
+
+All perfSONAR-PS modules and applicable scripts must provide:
+
+ * Perl tests at the *_unit_* level
+   * These should be written in the typical language of perl tests
+   * Test each method several times for a given module/script/api
+   * Use automated means when possible to generate databases/files/external relationships
+ * Request and Response messages for use in the perl testing framework
+   * Each request/response pair should test for an external aspect of the service in question
+   * The response should be treated as the _expected_ value, in the absence of a response please provide commentary on what the response should contain
+   * Tests should attempt to test both the errors and expected behaviours of the system from the outside.  
+
+=== Code Review ===
+
+Before release each service must go through a code review from a developer or developers. This scope of this code review will be determined prior to each release, but general considerations are:
+
+ * Soundness of design
+ * Conformity to the [CodeRules rules of the code]
+ * Documentation completeness/sensibility
+ * Use of external modules/libraries
+ * Construction of adequate test cases
+ * Final [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] evaluation
+
+=== Issue Tracker ===
+
+The release manager will:
+
+ * Enter new tags to the issue tracker prior to a release
+ * Re-classify all bugs as necessary
+ * Annoy the developers to fix/close bugs before and after each release
+
+== Released Product ==
+
+perfSONAR-PS will be released as:
+
+ * Source packages (e.g. similar to what CPAN requires using [http://perldoc.perl.org/ExtUtils/MakeMaker.html Make::Maker])
+ * [CreatingRPMs RPM Packages]
+
+An associated [YumRepository Yum repository] will be available with all releases of perfSONAR-PS software in addition to the source packages. This tool will enable easier installation and usage within the performance monitoring community.
+
+Special consideration to other types of released packages (FreeBSD ports, Debian packages) will be considered but rarely supported by the core perfSONAR-PS developers.  
 
 == Last Updated ==
 
