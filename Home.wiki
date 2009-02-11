@@ -25,18 +25,21 @@ http://anonsvn.internet2.edu/svn/perfSONAR-PS.
 
 == For developers ==
 
+ * perfSONAR-PS is entering into a [pSPS20090306Release release phase].  
  * Take a [CodeTour tour] of the services, installation procedures, and source code.
  * Please adhere to the [CodeRules coding guidelines].
 
-== Mailing List ==
+== Mailing Lists ==
 
-Mailing list information can be retrieved from:
-
-https://mail.internet2.edu/wws/info/i2-perfsonar
-
-== Legacy Wiki ==
-
-[https://wiki.internet2.edu/confluence/display/PSPS/Home perfSONAR-PS]
+|| *List* || *Audience* ||
+|| https://mail.internet2.edu/wws/info/i2-perfsonar || perfSONAR-PS Developers Only ||
+|| https://mail.internet2.edu/wws/info/perfsonar-dev || perfSONAR Developers (International) || 
+|| https://mail.internet2.edu/wws/info/perfsonar-user || perfSONAR Users Group ||
+|| https://mail.internet2.edu/wws/info/performance-node-users || Performance Node Users ||  
+|| https://mail.internet2.edu/wws/info/performance-node-announce || Performance Node Announce (Low Volume) || 
+|| https://mail.internet2.edu/wws/info/bwctl-users || BWCTL Users || 
+|| https://mail.internet2.edu/wws/info/ndt-users || NDT Users || 
+|| https://mail.internet2.edu/wws/info/owamp-users || OWAMP Users || 
 
 == Last Updated ==
 
