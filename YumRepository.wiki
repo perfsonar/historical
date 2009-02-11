@@ -1,10 +1,72 @@
 = Yum Repository Information  =
 
  # [YumRepository#Introduction Introduction]
+ # [YumRepository#Get_A_Base_Server Get A Base Server]
+ # [YumRepository#Create_Repo Create Repo]
+ # [YumRepository#Other_Considerations Other Considerations]
+   # [YumRepository#SVN_as_Repo_Backing_Store SVN as Repo Backing Store]
+   # [YumRepository#Mirrors Mirrors]
+   # [YumRepository#Contributions_From_Others Contributions From Others]
+ # [YumRepository#Sources Sources]
 
 == Introduction ==
 
-TBD
+The following are some notes on the creation and support of a yum repository for perfSONAR-PS software and Performance Node _kickstart_ locations.
+
+== Get A Base Server ==
+
+ * Ask TSG for a vhost - preferably _software.internet2.edu_.
+   * 20g ish (more?) of space
+   * normal main memory
+   * normal connectivity
+   * normal CPU
+ * Partition out the space for different groups
+   * perfSONAR-PS
+   * Performance Node
+   * Others?
+ 
+== Create Repo ==
+ 
+ * Get Machine
+ * Make directories for each _type_
+   * Flavors
+   * Architectures
+ * Upload files
+   * Find pre-req software when applicable
+ * Generate Metadata
+ * make _repo package_ to install yum files that contain repo config info
+ * Test the _*yum install TOOL*_ way of doing things
+ * Publicize/Document the yum package 
+ 
+== Other Considerations ==
+
+Things to think about.
+
+=== SVN as Repo Backing Store ===
+
+ * Allows us to hand out _accounts_ to people outside of Internet2 to add content
+ * Built in backups
+ * Can reverse course on a bad upload
+ * RPMs in SVN may not be space efficient
+ * Would need to constantly rebuild metadata for repo (does that get stored in SVN too?)
+
+=== Mirrors ===
+
+We would like others (Regionals/Campuses) to act as mirrors for our content - solution we pick should allow this.
+
+=== Contributions From Others ===
+
+Want to store software packaged by others that will end up on the Performance Node (and perfSONAR-PS contributions).  How to manage:
+
+ * Release Manager(s) take care of repo uploads/rebuilds - loads release team (not aways, but occasionally). 
+ * Hand out shell accounts - requires lots of supervision
+ * SVN as backing store - will this be flexible enough?  Easy to manage?
+
+Look at how larger orgs handle this. 
+ 
+== Sources ==
+
+http://www.howtoforge.com/creating_a_local_yum_repository_centos
 
 == Last Updated ==
 

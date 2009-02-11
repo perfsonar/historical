@@ -102,11 +102,8 @@ Developers are responsible for testing their code:
 
  * Jason
    * Release Tasks
-     * Update Release Documentation - <font color=red>_*IN PROGRESS -2/11*_</font>
+     * Update Release Documentation - <font color=red>_*IN PROGRESS - 2/11*_</font>
      * Update Issue Tracker - _*PENDING*_
-     * Re-organize and Branch SVN - _*PENDING*_
-     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - _*PENDING*_
-     * Alert Techwriter/Publication Crew of pending release - _*PENDING*_
      * Review Code Reviews - _*PENDING*_
      * Review Doc Reviews - _*PENDING*_
    * Development
@@ -124,6 +121,8 @@ Developers are responsible for testing their code:
      * PingER - _*PENDING*_
      * LS Registartion Daemon - _*PENDING*_
  * Aaron
+   * Release Tasks
+     * Re-organize and Branch SVN - _*PENDING*_
    * Development
      * Status - _*PENDING*_
      * Topology - _*PENDING*_
@@ -137,6 +136,9 @@ Developers are responsible for testing their code:
    * Documentation Review
      * SNMP - _*PENDING*_
  * Jeff
+   * Release Tasks
+     * Contract a new CD image for NPToolkit, dated image [http://perfsonar-ps.googlecode.com/svn/wiki/NPToolkit/perfnodelabel.png here] - _*PENDING*_
+     * Alert Techwriter/Publication Crew of pending release - _*PENDING*_
    * Development
      * pSB - _*PENDING*_
    * Documentation
