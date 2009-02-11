@@ -1,9 +1,170 @@
 = perfSONAR-PS v0.10 Release  =
 
- # [pSPS20090306Release#Introduction]
+ # [pSPS20090306Release#Introduction Introduction]
+ # [pSPS20090306Release#Release_Team Release Team]
+ # [pSPS20090306Release#Services_Released_and_Parties_Involved Services Released and Parties Involved]
+ # [pSPS20090306Release#Specifics Specifics]
+   # [pSPS20090306Release#Code_Reviews Code Reviews]
+   # [pSPS20090306Release#Documentation_Reviews Documentation Reviews]
+   # [pSPS20090306Release#Testing Testing]
+ # [pSPS20090306Release#Open_Tasks Open Tasks]
+ # [pSPS20090306Release#Lessons_Learned Lessons Learned]
 
 == Introduction ==
 
+This page outlines details regarding the perfSONAR-PS release that began on February 16, 2008 and ended on March 6 2009 in the release of v0.10 of perfSONAR-PS.
+
+== Release Team ==
+
+ * Jason - Lead
+ * Aaron
+ * Maxim
+ * Jeff
+ * Brian
+ * Joe
+ * ...
+
+== Services Released and Parties Involved ==
+
+|| *Service* || *Developer* || *Code Reviewer* || *Documentation Reviewer* ||
+|| Lookup Service || Jason || Jeff || Joe ||
+|| SNMP Measurement Archive || Jason || Brian || Aaron ||
+|| Status Measurement Archive || Aaron || Jason || Maxim ||
+|| perfSONAR-BUOY || Jason || Maxim || Brian ||
+|| PingER || Maxim || Aaron || Jason ||
+|| LS Registration Daemon || Aaron || Joe || Jason ||
+|| Topology Service || Aaron || Jason || Jeff ||
+
+== Specifics ==
+
+The following outline some exceptions to the overall release process.
+
+=== Code Reviews ===
+
+The code _review_ can be a lot more in depth than just reading in suggesting.  Any _*small*_ corrections can be done directly to the code base to save time in the process.  Reviewers are encouraged to run [http://perltidy.sourceforge.net/ perltidy] and [http://search.cpan.org/dist/Perl-Critic/bin/perlcritic perlcritic] at the end of the review.  
+
+Things to think about as you review:
+
+ * Perldoc:
+   * Is there a footer on each script/module?
+     * License info
+     * Contact Info
+     * Related libraries
+     * API use (where applicable)
+   * Is there a header on each script/module?
+     * Are the names and information correct?
+   * Does each method have a function header
+     * Does it describe inputs and outputs as well as expected behaviour
+ * Library Use - Examine each external library dependency
+   * Is it necessary to use the library (e.g. does the use justify including the dependency)
+   * Could the library be ommited (provide suggestions how)
+ * Code Structure
+   * See the [CodeRules rules of the code]
+ * Design decisions
+   * Question why things are organized/designed they way they are in a constructive fashion.  Developers will be happy to hear the commentary
+ * Function/Module Size
+   * Make constructive comments regarding excessively large or small modules and functions.  Note that ware trying to make a sound object oriented piece of software.
+ * Test Cases
+   * Ensure test cases for unit testing are appropriate in both structure and quantity
+   * Ensure test cases for test harness are appropriate in both structure and quantity
+
+=== Documentation Reviews ===
+
+Documentation review is a review of included and posted documentation for errors and omissions.  It may help to physically install the software when following installation instructions, etc.
+
+Thinks to think about as you review:
+
+ * Is the documentation complete:
+   * Same in the package as on the web
+   * Contains references to legitimate sources. 
+   * Does not contain blank sections
+   * Addresses all functionality
+ * Is it Understandable
+ * Free of spelling/grammar errors
+ * Up to date versus previous releases
+ * Appropriate to the audience that will be the primary reader
+
+=== Testing ===
+
+Developers are responsible for testing their code:
+
+ * Designing and running unit tests
+   * Address all modules
+   * Address all methods
+   * Test methods for multiple inputs (good and bad)
+   * Generate supporting materials (databases, etc.)
+   * Frequently run these tests after bugfixes and development
+ * Designing and running the test harness to simulate black box activity
+   * Design and provide numerous messages and expected responses
+   * Frequently run these tests after bugfixes and development
+
+== Open Tasks ==
+
+ * Jason
+   * Release Tasks
+     * Update Issue Tracker - _*PENDING*_
+     * Re-organize and Branch SVN - _*PENDING*_
+   * Development
+     * LS - _*PENDING*_
+     * SNMP - _*PENDING*_
+     * pSB - _*PENDING*_
+   * Documentation
+     * LS - _*PENDING*_
+     * SNMP - _*PENDING*_
+     * PSB - _*PENDING*_
+   * Code Review
+     * Status  - _*PENDING*_
+     * Topology - _*PENDING*_
+   * Documentation Review
+     * PingER - _*PENDING*_
+     * LS Registartion Daemon - _*PENDING*_
+ * Aaron
+   * Development
+     * Status - _*PENDING*_
+     * Topology - _*PENDING*_
+     * LS Registration Daemon - _*PENDING*_
+   * Documentation
+     * Status - _*PENDING*_
+     * Topology - _*PENDING*_
+     * LS Registration Daemon - _*PENDING*_
+   * Code Review
+     * PingER - _*PENDING*_
+   * Documentation Review
+     * SNMP - _*PENDING*_
+ * Jeff
+   * Development
+     * pSB - _*PENDING*_
+   * Documentation
+     * pSB - _*PENDING*_
+   * Code Review
+     * LS - _*PENDING*_
+   * Documentation Review
+     * Topology - _*PENDING*_
+ * Maxim
+   * Development
+     * PingER - _*PENDING*_
+   * Documentation
+     * PingER - _*PENDING*_
+   * Code Review
+     * pSB - _*PENDING*_
+   * Documentation Review
+     * Status - _*PENDING*_
+ * Joe
+   * Code Review
+     * LS Registration Daemon - _*PENDING*_
+   * Documentation Review
+     * LS - _*PENDING*_
+ * Brian
+   * Code Review
+     * SNMP - _*PENDING*_
+   * Documentation Review
+     * pSB - _*PENDING*_
+   
+== Lessons Learned ==
+   
+_*Pending*_
+   
 == Last Updated ==
 
 $Id$
+
