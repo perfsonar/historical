@@ -1,0 +1,95 @@
+= Current Tool Options =
+
+  * configure backing store
+  * configure site settings (location, admin, etc)
+  * enable/disable services
+  * set root/knoppix account passwords
+  * manage users
+  * configure bwctl
+  * configure ntp
+  * configure owamp
+  * set a static IP
+  * set the timezone
+  * modify advertised external interface
+  * configure pinger tests
+  * configure perfSONAR-BUOY tests
+  * configure SNMP monitoring
+
+= Current Zero-Conf Booting =
+
+The current Knoppix instance allows for one to do zero configuration and boot
+into a usable system. There are a few caveats with this approach, however.
+
+Once issue is that the system won't register with any of its daemons with the
+global lookup service. This could be changed with the caveat that the gLS would
+end up with entries like "BWCTL Server". The downside to this approach is that,
+due to the size of the hLS database, it would effectively mandate 512M RAM
+for running the disk.
+
+The other issue is that the knoppix user cannot become root, impeding the
+ability to reconfiguration without a reboot. This could be worked around in one
+of two ways, either let knoppix become root without typing a password or let
+knoppix run the configuration utility without a password. Either approach has
+security issues that go along with it. This issue may be obviated by the move
+to Fedora, but I'd have to look further into it.
+
+The default configuration for the system is:
+
+Timezone: UTC
+NTP: 4 Internet2 servers, 2 ESnet servers, all in the US
+BWCTL: Allows for clients to request TCP tests of up to 60 seconds, but no UDP tests.
+OWAMP: Allows for clients to have up to 500M of disk space and 1Mbps bandwidth. If a user hasn't configured a backing store, that 500M limit may be far too high.
+Networking: obtained via DHCP
+
+= Migrating To A Web-based Configuration =
+
+To support a web interface, all of the CLI tools will need to be rewritten. To
+allow both CLI and Web-based configuration would necessitate writing a modular
+configuration backend to interact with the various configuration files and
+tools. This is somethign that may be necessary no matter what depending on
+security concerns.
+
+There are some security concerns with the web-based configuration as well.
+Currently, the www-data user has the ability to write the configuration files
+for perfSONAR-BUOY and PingER, and restart perfSONAR-BUOY, PingER and the SNMP
+MA. The options that can currently be configured, like specifying the backing
+store, changing the root password or disabling SSH, would mean that we would
+either have to give www-data far reaching capabilities that we should probably
+think through. 
+
+For an incremental approach, we could limit the web-based configuration
+options to our tools of interest like ntp, bwctl and owamp, the static IP and
+the advertised interface configuration files. This could be done by making all
+those files group-owned and writable by the www-data user. The www-data user
+would also have access to initiate a reboot and/or restart those services. If
+people wanted to add new users or change the root/user passwords, they could
+login to the machine and do it via the CLI.
+
+Once we have an idea of how the web server will modify the configuration files,
+it should be be pretty straight-forward to write web interfaces to do the
+configuration. I can't imagine it taking more than a couple hours per
+configuration option.
+
+= Proposed Path Forward =
+For the next Knoppix release, we can put together rudimentary web configuration
+GUIs for the following configurables.
+
+  # NTP
+  # BWCTL 
+  # OWAMP
+  # Enabled Services (removing Apache/SSH from the option list).
+  # Site settings (Admin, Keywords, etc).
+    * This web GUI will be a bit more involved as it has to write out NDT and NPAD http files
+    * It will also necessitate restarting the LS, and all services that register with it or rebooting
+  # Static vs. Dynamic IP
+    * This will likely necessitate either restarting the machine or giving the apache user the ability to restart networking along with restarting everything like in the "site settings" are modified
+  # External interface
+    * This will necessitate restarting all the services like for "site settings"
+
+For the first Fedora-based release, most of the above guis should be easy to transition over, as is.
+
+For the next Fedora-based release, the whole slew of configuration GUIs should
+be cleaned up, both from a style standpoint and a code modularity standpoint.
+We should also talk to a number of them, and ask, overall, how they use the
+tools, and see if there's a better way we can structure the admin and GUI web
+pages.
