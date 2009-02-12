@@ -71,6 +71,7 @@ configuration. I can't imagine it taking more than a couple hours per
 configuration option.
 
 = Proposed Path Forward =
+== Next Release ==
 For the next Knoppix release, we can put together rudimentary web configuration
 GUIs for the following configurables.
 
@@ -86,8 +87,10 @@ GUIs for the following configurables.
   # External interface
     * This will necessitate restarting all the services like for "site settings"
 
+== First Fedora Release ==
 For the first Fedora-based release, most of the above guis should be easy to transition over, as is.
 
+== First Fedora Release ==
 For the next Fedora-based release, the whole slew of configuration GUIs should
 be cleaned up, both from a style standpoint and a code modularity standpoint.
 We should also talk to a number of them, and ask, overall, how they use the
