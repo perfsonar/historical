@@ -258,39 +258,42 @@ sub init {
         }
     }
 
-    if ( $#{ $self->{HINTS} } > -1 ) {
-        my $gls    = perfSONAR_PS::Client::gLS->new( { url    => $self->{HINTS} } );
-        my $result = $gls->getLSDiscoverRaw(         { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"]/*[local-name()=\"accessPoint\"]" } );
-        if ( $result and $result->{eventType} =~ m/^success/ ) {
-            my $parser = XML::LibXML->new();
-            my %temp2  = ();
-            my $ping   = Net::Ping->new();
-            $ping->hires();
-            if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
-                next unless exists $result->{response} and $result->{response};
-                my $doc = $parser->parse_string( $result->{response} );
-                my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
-                foreach my $a ( $ap->get_nodelist ) {
-                    my $value = extract( $a, 0 );
-                    if ($value) {
-                        my $echo_service = perfSONAR_PS::Client::Echo->new($value);
-                        my ( $status, $res ) = $echo_service->ping();
-                        next unless $status > -1;
+    # XXX JZ - 2/11
+    # Turning this off for now
 
-                        my $value2 = $value;
-                        $value2 =~ s/^http:\/\///;
-                        my ($unt_host) = $value2 =~ /^(.+):/;
-                        my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
-                        $temp2{$duration} = $value if ( ( $ret or $duration ) and ( not $temp{$value} ) );
-                    }
-                }
-            }
-            $ping->close();
-            foreach my $time ( sort keys %temp2 ) {
-                push @{ $self->{LS_ORDER} }, $temp2{$time};
-            }
-        }
-    }
+#    if ( $#{ $self->{HINTS} } > -1 ) {
+#        my $gls    = perfSONAR_PS::Client::gLS->new( { url    => $self->{HINTS} } );
+#        my $result = $gls->getLSDiscoverRaw(         { xquery => "/nmwg:store[\@type=\"LSStore\"]/nmwg:metadata/*[local-name()=\"subject\"]/*[local-name()=\"service\"]/*[local-name()=\"accessPoint\"]" } );
+#        if ( $result and $result->{eventType} =~ m/^success/ ) {
+#            my $parser = XML::LibXML->new();
+#            my %temp2  = ();
+#            my $ping   = Net::Ping->new();
+#            $ping->hires();
+#            if ( exists $result->{eventType} and $result->{eventType} ne "error.ls.query.empty_results" ) {
+#                next unless exists $result->{response} and $result->{response};
+#                my $doc = $parser->parse_string( $result->{response} );
+#                my $ap = find( $doc->getDocumentElement, ".//psservice:accessPoint", 0 );
+#                foreach my $a ( $ap->get_nodelist ) {
+#                    my $value = extract( $a, 0 );
+#                    if ($value) {
+#                        my $echo_service = perfSONAR_PS::Client::Echo->new($value);
+#                        my ( $status, $res ) = $echo_service->ping();
+#                        next unless $status > -1;
+
+#                        my $value2 = $value;
+#                        $value2 =~ s/^http:\/\///;
+#                        my ($unt_host) = $value2 =~ /^(.+):/;
+#                        my ( $ret, $duration, $ip ) = $ping->ping($unt_host);
+#                        $temp2{$duration} = $value if ( ( $ret or $duration ) and ( not $temp{$value} ) );
+#                    }
+#                }
+#            }
+#            $ping->close();
+#            foreach my $time ( sort keys %temp2 ) {
+#                push @{ $self->{LS_ORDER} }, $temp2{$time};
+#            }
+#        }
+#    }
 
     if ( $self->{LS_ORDER}->[0] ) {
         $self->{LS}    = $self->{LS_ORDER}->[0];
@@ -605,14 +608,14 @@ sub __register {
                 my ( $host, $port, $endpoint ) = &perfSONAR_PS::Transport::splitURI( $ls );
                 unless ( $host and $port and $endpoint ) {
                     $self->{LOGGER}->error( "URI conversion error for LS \"" . $ls . "\"." );
-		    next;
+                    next;
                 }
 
                 my $sender = new perfSONAR_PS::Transport( $host, $port, $endpoint );
     
                 unless ( $self->callLS( $sender, $doc->getValue() ) == 0 ) {
                     $self->{LOGGER}->error("Unable to register data with LS \"".$ls."\".");
-		    next;
+                    next;
                 }
                 $success++;
             }
