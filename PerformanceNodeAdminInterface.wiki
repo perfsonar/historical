@@ -35,11 +35,11 @@ to Fedora, but I'd have to look further into it.
 
 The default configuration for the system is:
 
-Timezone: UTC
-NTP: 4 Internet2 servers, 2 ESnet servers, all in the US
-BWCTL: Allows for clients to request TCP tests of up to 60 seconds, but no UDP tests.
-OWAMP: Allows for clients to have up to 500M of disk space and 1Mbps bandwidth. If a user hasn't configured a backing store, that 500M limit may be far too high.
-Networking: obtained via DHCP
+  * Timezone: UTC
+  * NTP: 4 Internet2 servers, 2 ESnet servers, all in the US
+  * BWCTL: Allows for clients to request TCP tests of up to 60 seconds, but no UDP tests.
+  * OWAMP: Allows for clients to have up to 500M of disk space and 1Mbps bandwidth. If a user hasn't configured a backing store, that 500M limit may be far too high.
+  * Networking: obtained via DHCP
 
 = Migrating To A Web-based Configuration =
 
