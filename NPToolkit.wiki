@@ -344,6 +344,14 @@ Version 2.3.11 of this software comes pre-loaded, but does not need to be _start
  * *Q: How do I partition a new disk or re-partition an old disk?*
  * *A:* Please see this [NPToolkitDiskFormatting|article] for a primer on disk formatting and re-formatting using the tools on the NPToolkit.
 
+ * *Q: I see an expired certificate error when I visit the HTTPS pages, what should I do?*
+ * *A:* Older versions of the NPToolkit contained an expired, _self signed_ certificate that was originally created by Knoppix.  We have updated this cert on new releases, but there are some steps that can be taken to address the problem.  
+   * Instruct browsers viewing the disk to accept the cert, regardless of its status.
+   * Update the cert by hand:
+     {{{
+     openssl req $@ -new -x509 -days 365 -nodes -out /etc/apache2/apache.pem -keyout /etc/apache2/apache.pem 
+     }}}
+
 == Last Updated ==
 
 $Id$
