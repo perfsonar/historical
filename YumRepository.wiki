@@ -1,9 +1,10 @@
-= Yum Repository Information  =
+= Yum and APT Repository Information  =
 
  # [YumRepository#Introduction Introduction]
  # [YumRepository#Get_A_Base_Server Get A Base Server]
  # [YumRepository#Create_Repo Create Repo]
  # [YumRepository#Other_Considerations Other Considerations]
+   # [YumRepository#Flavors_and_Achitectures Flavors and Achitectures]
    # [YumRepository#SVN_as_Repo_Backing_Store SVN as Repo Backing Store]
    # [YumRepository#Mirrors Mirrors]
    # [YumRepository#Contributions_From_Others Contributions From Others]
@@ -11,11 +12,11 @@
 
 == Introduction ==
 
-The following are some notes on the creation and support of a yum repository for perfSONAR-PS software and Performance Node _kickstart_ locations.
+The following are some notes on the creation and support of package repositories (e.g. Yum based and APT based) for perfSONAR-PS software and Performance Node _kickstart_ locations.
 
 == Get A Base Server ==
 
- * Ask TSG for a vhost - preferably _software.internet2.edu_.
+ * Currently asking TSG for a vhost - preferably _software.internet2.edu_.
    * 20g ish (more?) of space
    * normal main memory
    * normal connectivity
@@ -26,21 +27,158 @@ The following are some notes on the creation and support of a yum repository for
    * Others?
  
 == Create Repo ==
- 
- * Get Machine
- * Make directories for each _type_
-   * Flavors
-   * Architectures
- * Upload files
-   * Find pre-req software when applicable
- * Generate Metadata
- * make _repo package_ to install yum files that contain repo config info
- * Test the _*yum install TOOL*_ way of doing things
- * Publicize/Document the yum package 
- 
+
+Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
+
+ * Go to web hosted directory:
+   {{{
+     zurawski@latrobe:~$ cd /var/www/default
+   }}}
+ * Create architecture directories:
+   {{{
+     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms
+     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/x86_64
+     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/ppc
+     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/i386
+    }}}
+ * In each _arch_ directory, make a directory for the RPMS:
+   {{{
+     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/x86_64/main/RPMS
+     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/ppc/main/RPMS
+     zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/i386/main/RPMS
+   }}}
+ * Create directory for _source_ RPMS:
+   {{{
+     zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/SRPMS
+   }}}
+ * Populate *SRPMS* and *RPMS* directories for a given architecture (e.g. I will show _i386_ only):
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms
+     /var/www/default/rpms
+     /var/www/default/rpms/x86_64
+     /var/www/default/rpms/x86_64/main
+     /var/www/default/rpms/x86_64/main/RPMS
+     /var/www/default/rpms/i386
+     /var/www/default/rpms/i386/main
+     /var/www/default/rpms/i386/main/RPMS
+     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
+     /var/www/default/rpms/ppc
+     /var/www/default/rpms/ppc/main
+     /var/www/default/rpms/ppc/main/RPMS
+     /var/www/default/rpms/SRPMS
+     /var/www/default/rpms/SRPMS/I2util-1.1-1.src.rpm
+     /var/www/default/rpms/SRPMS/bwctl-1.3-1.src.rpm
+     /var/www/default/rpms/SRPMS/owamp-3.1-2.src.rpm
+   }}}
+ * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
+ * Run _*createrepo*_:
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# createrepo -o /var/www/default/rpms/i386/main/ /var/www/default/rpms/i386/main/RPMS/
+     5/5 - owamp-client-3.1-1.i386.rpm                                               
+     Saving Primary metadata
+     Saving file lists metadata
+     Saving other metadata
+   }}}
+ * Contents after creating Yum repo:
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms/i386
+     /var/www/default/rpms/i386
+     /var/www/default/rpms/i386/main
+     /var/www/default/rpms/i386/main/repodata
+     /var/www/default/rpms/i386/main/repodata/primary.xml.gz
+     /var/www/default/rpms/i386/main/repodata/other.xml.gz
+     /var/www/default/rpms/i386/main/repodata/repomd.xml
+     /var/www/default/rpms/i386/main/repodata/filelists.xml.gz
+     /var/www/default/rpms/i386/main/RPMS
+     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
+   }}}
+ * Before creating the APT repo, a slight change to the directory structure is needed for the APT tool to recognize the content.  This can be done with symbolic links:
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/SRPMS SRPMS.main
+     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/i386/main/RPMS i386/RPMS.main
+     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/ppc/main/RPMS ppc/RPMS.main
+     zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/x86_64/main/RPMS x86_64/RPMS.main
+     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms
+     /var/www/default/rpms
+     /var/www/default/rpms/SRPMS.main
+     /var/www/default/rpms/x86_64
+     /var/www/default/rpms/x86_64/RPMS.main
+     /var/www/default/rpms/x86_64/main
+     /var/www/default/rpms/x86_64/main/RPMS
+     /var/www/default/rpms/i386
+     /var/www/default/rpms/i386/RPMS.main
+     /var/www/default/rpms/i386/main
+     /var/www/default/rpms/i386/main/repodata
+     /var/www/default/rpms/i386/main/repodata/primary.xml.gz
+     /var/www/default/rpms/i386/main/repodata/other.xml.gz
+     /var/www/default/rpms/i386/main/repodata/repomd.xml
+     /var/www/default/rpms/i386/main/repodata/filelists.xml.gz
+     /var/www/default/rpms/i386/main/RPMS
+     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
+     /var/www/default/rpms/ppc
+     /var/www/default/rpms/ppc/RPMS.main
+     /var/www/default/rpms/ppc/main
+     /var/www/default/rpms/ppc/main/RPMS
+     /var/www/default/rpms/SRPMS
+     /var/www/default/rpms/SRPMS/I2util-1.1-1.src.rpm
+     /var/www/default/rpms/SRPMS/bwctl-1.3-1.src.rpm
+     /var/www/default/rpms/SRPMS/owamp-3.1-2.src.rpm
+   }}}
+ * Run _*genbasedir*_:
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# genbasedir /var/www/default/rpms/i386Creating base directory... done
+     Components: main
+     Processing pkglists... main [done]
+     Processing srclists... main [done]
+     Updating component releases... main [done]
+     Creating global release file... [done]
+     Appending MD5Sum... main [done]
+   }}}
+ * Contents after creating APT repo:
+   {{{
+     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms/i386
+     /var/www/default/rpms/i386
+     /var/www/default/rpms/i386/base
+     /var/www/default/rpms/i386/base/pkglist.main
+     /var/www/default/rpms/i386/base/srclist.main.bz2
+     /var/www/default/rpms/i386/base/release
+     /var/www/default/rpms/i386/base/srclist.main
+     /var/www/default/rpms/i386/base/release.main
+     /var/www/default/rpms/i386/base/pkglist.main.bz2
+     /var/www/default/rpms/i386/RPMS.main
+     /var/www/default/rpms/i386/main
+     /var/www/default/rpms/i386/main/repodata
+     /var/www/default/rpms/i386/main/repodata/primary.xml.gz
+     /var/www/default/rpms/i386/main/repodata/other.xml.gz
+     /var/www/default/rpms/i386/main/repodata/repomd.xml
+     /var/www/default/rpms/i386/main/repodata/filelists.xml.gz
+     /var/www/default/rpms/i386/main/RPMS
+     /var/www/default/rpms/i386/main/RPMS/I2util-1.1-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-server-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/bwctl-client-1.3-1.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
+     /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
+   }}}  
+
 == Other Considerations ==
 
 Things to think about.
+
+=== Flavors and Achitectures ===
+
+Above example assumed _generic_ architecture (_i386_) and no flavor (e.g. Fedora, CentOS, RHEL).  This is the approach we should take, as long as we ensure the build RPMs work on the major flavors and versions.
 
 === SVN as Repo Backing Store ===
 
@@ -64,10 +202,6 @@ Want to store software packaged by others that will end up on the Performance No
 
 Look at how larger orgs handle this. 
  
-== Sources ==
-
-http://www.howtoforge.com/creating_a_local_yum_repository_centos
-
 == Last Updated ==
 
 $Id$
