@@ -1,3 +1,102 @@
+= Configuring perfSONAR performance nodes =
+
+The first portion of this document describes the interface. The second
+portion provides more details on exactly what currently exists and
+how we transition from the current setup to the described interface.
+
+== Interface description ==
+
+For the initial booting of the system:
+
+When the disc is put in, the default behavior will be for the system to boot
+from the disc. There will be a CLI prompt asking the user if they want
+to enable configuration for the performance node. If they do not
+answer in [60] seconds, the system will boot into Zero-Config mode
+(described below).
+
+If the user answers the prompt, then they are prompted for an admin
+passwd for the web-admin GUI. They are also prompted to provide IP
+address information (also given the option to DHCP). After this information
+is entered, the system finishes the boot process. At the end of the boot
+process, the system should print out the URL for accessing the
+admin interface. This will be a well-defined URL on the host, so if the
+user already knows the host name it will not be important. But will be
+useful for someone setting up a diagnotic host on a random network.
+This will put the system in Pre-Config mode (described below).
+
+Eventually, Pre-Config mode should be possible using a specfic
+kickstart file that indicates the admin passwd so that physical
+access to the box is not required. However, the admin passwd should
+not be codified on an iso in any way.
+
+The user can now access the the web GUI and activate additional
+tools if they want. For example, they could enter organization/admin
+identifying information including 'keywords'. This would make it possible
+to register the host with the IS infrastructure. The 'enable' page for
+publicizing the host could be pre-populated with data retrieved from
+WHOIS using the IP address.
+
+They could also activate regularly scheduled tests. Dependencies among
+tools should be minimized, however the following dependencies do exist:
+
+1) Nothing should be registered to the IS infrastructure unless the
+user enables this in a 'publish existence' page.
+
+2) If publishing is enabled, all active diagnostic tools should be registered
+as available. (Eventually we might allow selective publishing, but for now
+if it is active, lets publish it.)
+
+3) MAs should be published IFF they have data.
+
+4) Regularly scheduled tests should be configurable without enabling publishing.
+This should enable the web CGI scripts for viewing the data locally on the
+system.
+
+After configuring as much, or as little as the user wants through the
+HTTPS admin interface the host is now in Full Config mode.
+
+Remote-Configuration is something we want to enable in the future. Instead
+of specifying an admin passwd to enter Pre-Config mode, the user would
+be prompted to specify a configuration server. (Alternatively, as mentioned
+before a specific kickstart file could be used to specify this information.
+It might even be reasonable for a specific community to encode this information
+directly into a community targetted ISO.) The host would then contact the
+remote server to fetch configuration information for configuring all services.
+
+=== Zero-Config mode ===
+
+Disc is simply put in and the host is ignored. The IP Address is set by DHCP.
+A host that has had no configuration will not register with the Information
+Services in any way. It is assumed to be a temporary diagnostic host.
+owamp/bwctl/ndt/npad will all function but no regular tests will be
+initiated from this host and no data will be collected on it. Therefore,
+no IS or pS MA services will be started.
+
+Zero-Config mode will present a login prompt on the CLI when completely booted
+up. An expert user can login as root and manually configure the system. The
+steps for doing this can be as complex as necessary, and only very
+limited support for this mode should be offered in general.
+
+=== Pre-Config mode ===
+
+Identical to Zero-Config mode except that the user has specified an
+admin passwd and therefore enabled HTTPS to start, and enabled the
+web admin GUI.
+
+Host should behave exactly like the Zero-Config host until/unless additional
+configuration information is entered via the web GUI.
+
+=== Rebooting ===
+
+A Zero-Config mode host has had no information saved to disk, so it behaves
+identically on reboot.
+
+A Pre-Config and Configured host should present a prompt to allow the user
+to reset the configuration information. It should be possible to do 3 things
+with the CLI in this case: 1) modify the admin passwd, 2) modify the IP
+address, 3) Reset host - completely reformat.
+
+= Plan Forward =
 = Current Tool Options =
 
   * configure backing store
@@ -15,7 +114,7 @@
   * configure perfSONAR-BUOY tests
   * configure SNMP monitoring
 
-= Current Zero-Conf Booting =
+= Current Zero-Config Booting =
 
 The current Knoppix instance allows for one to do zero configuration and boot
 into a usable system. There are a few caveats with this approach, however.
