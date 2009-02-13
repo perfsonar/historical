@@ -3,6 +3,13 @@
  # [YumRepository#Introduction Introduction]
  # [YumRepository#Get_A_Base_Server Get A Base Server]
  # [YumRepository#Create_Repo Create Repo]
+ # [YumRepository#Create_Repo_Package Create Repo Package]
+   # [YumRepository#Makefile Makefile]
+   # [YumRepository#Spec_File Spec File]
+   # [YumRepository#Yum_Mirrors Yum Mirrors]
+   # [YumRepository#Yum_Repo Yum Repo]
+   # [YumRepository#APT_List APT List]
+   # [YumRepository#GPG_Key GPG Key]
  # [YumRepository#Other_Considerations Other Considerations]
    # [YumRepository#Flavors_and_Achitectures Flavors and Achitectures]
    # [YumRepository#SVN_as_Repo_Backing_Store SVN as Repo Backing Store]
@@ -41,7 +48,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
      zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/ppc
      zurawski@latrobe:/var/www/default# mkdir /var/www/default/rpms/i386
     }}}
- * In each _arch_ directory, make a directory for the RPMS:
+ * In each _arch_ directory, make a directory for the _repo name_ (in our case I am just going to call it _main_), and a directory for the RPMS:
    {{{
      zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/x86_64/main/RPMS
      zurawski@latrobe:/var/www/default# mkdir -p /var/www/default/rpms/ppc/main/RPMS
@@ -77,7 +84,8 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
  * If not already installed, install packages for _*createrepo*_, and _*genbasedir*_.  These packages have tools designed to make Yum and APT repos.
  * Run _*createrepo*_:
    {{{
-     zurawski@latrobe:/var/www/default/rpms# createrepo -o /var/www/default/rpms/i386/main/ /var/www/default/rpms/i386/main/RPMS/
+     zurawski@latrobe:/var/www/default/rpms# cd /var/www/default/rpms/i386/main
+     zurawski@latrobe:/var/www/default/rpms# createrepo -p .
      5/5 - owamp-client-3.1-1.i386.rpm                                               
      Saving Primary metadata
      Saving file lists metadata
@@ -85,7 +93,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
    }}}
  * Contents after creating Yum repo:
    {{{
-     zurawski@latrobe:/var/www/default/rpms# find /var/www/default/rpms/i386
+     zurawski@latrobe:/var/www/default/rpms/i386/main# find /var/www/default/rpms/i386
      /var/www/default/rpms/i386
      /var/www/default/rpms/i386/main
      /var/www/default/rpms/i386/main/repodata
@@ -102,6 +110,7 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
    }}}
  * Before creating the APT repo, a slight change to the directory structure is needed for the APT tool to recognize the content.  This can be done with symbolic links:
    {{{
+     zurawski@latrobe:/var/www/default/rpms/i386/main# cd /var/www/default/rpms
      zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/SRPMS SRPMS.main
      zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/i386/main/RPMS i386/RPMS.main
      zurawski@latrobe:/var/www/default/rpms# ln -s /var/www/default/rpms/ppc/main/RPMS ppc/RPMS.main
@@ -138,7 +147,8 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
    }}}
  * Run _*genbasedir*_:
    {{{
-     zurawski@latrobe:/var/www/default/rpms# genbasedir /var/www/default/rpms/i386Creating base directory... done
+     zurawski@latrobe:/var/www/default/rpms# genbasedir /var/www/default/rpms/i386
+     Creating base directory... done
      Components: main
      Processing pkglists... main [done]
      Processing srclists... main [done]
@@ -171,6 +181,173 @@ Process already stared on _http://dc211.internet2.edu/rpms_.  Basic setup:
      /var/www/default/rpms/i386/main/RPMS/owamp-server-3.1-2.i386.rpm
      /var/www/default/rpms/i386/main/RPMS/owamp-client-3.1-1.i386.rpm
    }}}  
+
+== Create Repo Package ==
+
+The following package was created and coverted into an RPM to allow for easy installation and configration of Yum and APT systems.  The package contains repository information as well as the GPG key used to sign the tools.  The package is build using the _*rpmbuild*_ package.
+
+{{{
+[zurawski@fedora ~]$ mkdir Internet2-repo
+[zurawski@fedora ~]$ cd Internet2-repo
+[zurawski@fedora Internet2-repo]$ find ~/Internet2-repo/
+/home/zurawski/Internet2-repo/
+/home/zurawski/Internet2-repo/doc
+/home/zurawski/Internet2-repo/doc/LICENSE
+/home/zurawski/Internet2-repo/Internet2-repo.spec
+/home/zurawski/Internet2-repo/Makefile
+/home/zurawski/Internet2-repo/etc
+/home/zurawski/Internet2-repo/etc/mirrors-Internet2
+/home/zurawski/Internet2-repo/etc/RPM-GPG-KEY-Internet2
+/home/zurawski/Internet2-repo/etc/Internet2.repo
+/home/zurawski/Internet2-repo/etc/Internet2.list
+/home/zurawski/Internet2-repo/MANIFEST
+}}}
+
+=== Makefile ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat Makefile 
+PACKAGE=Internet2-repo
+
+dist:
+	mkdir /tmp/$(PACKAGE)
+	tar ch -T MANIFEST | tar x -C /tmp/$(PACKAGE)
+	tar czf $(PACKAGE).tar.gz -C /tmp $(PACKAGE)
+	rm -rf /tmp/$(PACKAGE)
+}}}
+
+=== Spec File ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat Internet2-repo.spec 
+# $Id$
+
+Summary:    Internet2 Repository file and package configuration
+Name:       Internet2-repo
+Version:    0.1
+Release:    1
+License:    distributable, see http://www.internet2.edu/membership/ip.html
+Group:      System Environment/Base
+URL:        http://software.internet2.edu
+Source0:    Internet2-repo.tar.gz
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:  noarch
+
+%description
+Internt2 software release file. This package contains apt and yum configuration for the Internet2 RPM Repository, as well as the public GPG keys used to sign them.
+
+%prep
+%setup -q -n Internet2-repo
+
+%build
+
+%install
+%{__rm} -rf $RPM_BUILD_ROOT
+%{__mkdir} -p $RPM_BUILD_ROOT/etc/apt/sources.list.d
+%{__cp} etc/Internet2.list $RPM_BUILD_ROOT/etc/apt/sources.list.d
+%{__mkdir} -p $RPM_BUILD_ROOT/etc/yum.repos.d
+%{__cp} etc/Internet2.repo $RPM_BUILD_ROOT/etc/yum.repos.d
+%{__cp} etc/mirrors-Internet2 $RPM_BUILD_ROOT/etc/yum.repos.d
+%{__mkdir} -p $RPM_BUILD_ROOT/etc/pki/rpm-gpg
+%{__cp} etc/RPM-GPG-KEY-Internet2 $RPM_BUILD_ROOT/etc/pki/rpm-gpg
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files
+%defattr(-, root, root, 0755)
+%if %{!?_without_rpmpubkey:1}0
+%pubkey etc/RPM-GPG-KEY-Internet2
+%endif
+%dir /etc/apt/
+%dir /etc/apt/sources.list.d/
+%config(noreplace) /etc/apt/sources.list.d/Internet2.list
+%dir /etc/yum.repos.d/
+%config(noreplace) /etc/yum.repos.d/Internet2.repo
+%config /etc/yum.repos.d/mirrors-Internet2
+%dir /etc/pki/rpm-gpg/
+/etc/pki/rpm-gpg/RPM-GPG-KEY-Internet2
+
+%post
+%if %{!?_without_rpmpubkey:1}0
+rpm -q gpg-pubkey-9d7b9686-4947b567 &>/dev/null || rpm --import $RPM_BUILD_ROOT/etc/pki/rpm-gpg/RPM-GPG-KEY-Internet2 || :
+%endif
+
+%changelog
+* Thu Feb 12 2009 Jason Zurawski <zurawski@internet2.edu> - 0.0.1-1
+- Initial package.
+}}}
+
+=== Yum Mirrors ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat etc/mirrors-Internet2 
+http://dc211.internet2.edu/rpms/$ARCH/main/
+#http://software.internet2.edu/rpm/$ARCH/main/
+}}}
+
+=== Yum Repo ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat etc/Internet2.repo 
+# Name: Internet2 RPM Repository
+# URL: http://software.internet2.edu
+[Internet2]
+name = Internet2 RPM Repository - software.internet2.edu - main
+#baseurl = http://dc211.internet2.edu/rpms/$basearch/main
+mirrorlist = http://dc211.internet2.edu/rpms/mirrors-Internet2
+#mirrorlist = file:///etc/yum.repos.d/mirrors-Internet2
+enabled = 1
+protect = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Internet2
+gpgcheck = 1
+}}}
+
+=== APT List ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat etc/Internet2.list 
+# Name: Internet2 RPM Repository
+# URL: http://software.internet2.edu/
+#rpm http://dc211.internet2.edu/rpms/$(ARCH) main
+repomd http://dc211.internet2.edu/rpms/$(ARCH)/main
+}}}
+
+=== GPG Key ===
+
+{{{
+[zurawski@fedora Internet2-repo]$ cat etc/RPM-GPG-KEY-Internet2 
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.2.6 (GNU/Linux)
+
+mQGiBElHtWcRBADvQFJ/EgTaQhB8zQH2o2vRQYBcjy6PnhYNkvJOoma5aB9IZkIB
+EgDi/UBEKJOJ/UeWnUJ6lvGwAa+IVKUUty6n+wj2FbuRPKcpknuGN8iPsI5ZuAqI
+zrs88vwOjXWfM9+QZRDdn6kfx7t9uW6+lWftFHOJyTUqEyygjjYCtdCiqwCgyeCQ
+yfc7gmTnJa6boWX0KSLgWKcEAJ7etqg0cVkG3RLYl0qB1oVuhNBxEtjJk0Jq9QFa
+y973RC/YkBq78NAyoRzdJFUggPMRVZuW+SdzSu7b4AftgvXMmBVBkM2YBV3XXjKL
+nMOsrw1sfiHd33F7BnqL8jN22Ju/RXUVwNJuitJT507HxqnaNI/RlbVHWRNAq5Ho
++AwZA/47iid1/Shatw/K4/m/BZko6tsgWj5ModUWb+175m3XVlT+N5LHKwhaiHBw
+UD5GdoxeSIiljmnPVuetCUSzxhD/HJBw5mn7+Y5Sv+sAp3GWjUXlgZDfOSvQS9dL
+AfjcZ902BWgp82U4USMxS3xdn2uvVGwwGhyosCblSjsRt86FM7QpcGVyZlNPTkFS
+LVBTIDxpMi1wZXJmc29uYXJAaW50ZXJuZXQyLmVkdT6IXgQTEQIAHgUCSUe1ZwIb
+AwYLCQgHAwIDFQIDAxYCAQIeAQIXgAAKCRCGjd8snXuWhhmKAJ0ReUYatFTFJ8mR
+CEt/zBlspzvJnwCgycblmRVTXoe80m/sIk37318mOgi5Ag0ESUe1fhAIAMqwP0xP
+SChEdeA46RFc6xiHJpyO3f8We9WNgbW9pgAMQ1SdpHysZGWHAeV/V6pnpzN0A6wa
+NUd2mQH7c5J54uXlh8PqRDv2xX/4REoZPCcpnv8isHb/bTrwPV+jDEyEBH3DRfxJ
+ApQ0w6dP4L8to39GZ4PZIBZoNzqbzTMuJlDAoVXBB1hZ8+kpRBV9vPMcqRr1ZsfA
+UM1t7CSk8BBP7wdCiQ+aaV1g6e01ctqmt+nj2qiwluFMaZL6pX6uspiDxIhwI+cD
+4r/ainlIIEIRLebTUG3755gSMs2b5w5CpRNPR3wz1s0SVthxER77IFGpZvbbFNB4
+98SfiNMlC+rc//cAAwUH/1IVBB1zZRExTw6u62cgw1CtaxYD7+7cMFQYKcobf1Ut
+bU5XQmRx6yZ0pGXxiiE/Cac4OBce+T2OMte3BJ3N9WOTfdJks+TT+qrkUO9K9lK5
+DHAcIrjAcRoNjSq4yIca3yfQi+q52WVP4vGaBRxQ3LZGlsww0AyWrT5EI/evP68M
+DBUyZitjHS+YPZUXGRepMpT+nNQi1RRN/XTW77GxpwGyRIEOdz9jnNalivf4R8eH
+mjNE4DMez7myLZd9On96er+pHiA29PXPFU0QtytCqskgdKdK7zAFykqVrDY7/5SL
+ABaWGLHo3GWzK8YDkgcvs65F846kGsO0IIgNPua8aFSISQQYEQIACQUCSUe1fgIb
+DAAKCRCGjd8snXuWhgemAJ43wKRIIJ79KetakZ/HIrKKQDO8WwCdHrO31Xbxok8f
+aeEuX+OFqn9csEs=
+=gqA9
+-----END PGP PUBLIC KEY BLOCK-----
+}}}
 
 == Other Considerations ==
 
