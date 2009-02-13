@@ -9,4 +9,3 @@ enabled = 1
 protect = 0
 gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Internet2
 gpgcheck = 1
-
