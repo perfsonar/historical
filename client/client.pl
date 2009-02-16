@@ -24,7 +24,7 @@ use lib "$libdir";
 
 use perfSONAR_PS::Transport;
 use perfSONAR_PS::Common qw( readXML );
-use perfSONAR_PS::NetLogger;
+use perfSONAR_PS::Utils::NetLogger;
 
 our $DEBUGFLAG;
 our %opts = ();
@@ -111,13 +111,13 @@ my $envelope = &perfSONAR_PS::Common::makeEnvelope($xml);
 my $error;
 
 # Send/receive to the server, store the response for later processing
-my $msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.client.sendReceive.start",
+my $msg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.client.sendReceive.start",
 	{host=>$host, port=>$port, endpoint=>$endpoint,});
 $logger->debug($msg);
 
 my $responseContent = $sender->sendReceive($envelope, "", \$error);
 
-$msg = perfSONAR_PS::NetLogger::format("org.perfSONAR.client.sendReceive.end",);
+$msg = perfSONAR_PS::Utils::NetLogger::format("org.perfSONAR.client.sendReceive.end",);
 $logger->debug($msg);
 
 if ($error ne "") {
