@@ -33,7 +33,6 @@ our $VERSION = 0.09;
 
 sub handleCollector($);
 sub managePID($$);
-sub killChildren();
 sub signalHandler();
 sub handleRequest($$$);
 
@@ -123,12 +122,13 @@ if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
     $CONFIG_FILE = $confdir."/collector.conf";
 }
 
+unless ($CONFIG_FILE =~ /^\//) {
+    $CONFIG_FILE = getcwd . "/" . $CONFIG_FILE;
+}
+
 # The configuration directory gets passed to the modules so that relative paths
 # defined in their configurations can be resolved.
 $confdir = dirname($CONFIG_FILE);
-if ( !( $confdir =~ /^\// ) ) {
-    $confdir = getcwd . "/" . $confdir;
-}
 
 # Read in configuration information
 my $config =  new Config::General($CONFIG_FILE);
@@ -181,16 +181,11 @@ if ($RUNAS_USER and $RUNAS_GROUP) {
     exit(-1);
 }
 
-($status, $res) = perfSONAR_PS::Collectors::Status->create_workers({ conf => \%conf, directory_offset => $confdir });
+my $worker = perfSONAR_PS::Collectors::Status->new();
+
+($status, $res) = $worker->init({ conf => \%conf, directory_offset => $confdir });
 if ($status != 0) {
-    $logger->error("Couldn't allocate status checkers: $res");
-    exit(-1);
-}
-
-my $measurement_workers = $res;
-
-if (scalar(@{ $measurement_workers }) == 0) {
-    $logger->error("No elements to measure");
+    $logger->error("Couldn't allocate status collector: $res");
     exit(-1);
 }
 
@@ -208,36 +203,13 @@ if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
     unlockPIDFile($pidfile);
 }
 
-foreach my $worker (@$measurement_workers) {
-	my $pid = fork();
-	if ($pid == 0) {
-		$worker->run();
-		exit(0);
-	}
-
-	$child_pids{$pid} = 1;
-}
-
-foreach my $pid (keys %child_pids) {
-    waitpid($pid, 0);
-}
-
-=head2 killChildren
-Kills all the children for this process off. It uses global variables
-because this function is used by the signal handler to kill off all
-child processes.
-=cut
-sub killChildren() {
-    foreach my $pid (keys %child_pids) {
-        kill("SIGINT", $pid);
-    }
-}
+$worker->run();
 
 =head2 signalHandler
 Kills all the children for the process and then exits
 =cut
 sub signalHandler() {
-    killChildren();
+    $worker->exit();
     exit(0);
 }
 

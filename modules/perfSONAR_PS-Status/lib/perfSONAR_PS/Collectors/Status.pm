@@ -3,7 +3,9 @@ package perfSONAR_PS::Collectors::Status;
 use warnings;
 use strict;
 
+use POSIX ":sys_wait_h";
 use English qw( -no_match_vars );
+use Log::Log4perl qw(get_logger :levels);
 
 use Data::Dumper;
 
@@ -20,8 +22,105 @@ use perfSONAR_PS::Collectors::Status::CoreDirector;
 #use perfSONAR_PS::Collectors::Status::OME;
 #use perfSONAR_PS::Collectors::Status::HDXc;
 
+use fields 'CHILDREN', 'WORKERS', 'CONF', 'DIRECTORY', 'LOGGER';
+
+our $VERSION = 0.09;
+
+sub new {
+    my ($class, $conf, $directory) = @_;
+
+    my $self = fields::new($class);
+
+    $self->{LOGGER} = get_logger($class);
+    $self->{CHILDREN} = ();
+    $self->{WORKERS} = ();
+
+    return $self;
+}
+
+sub init {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            conf             => 1,
+            directory_offset => 0,
+        }
+    );
+
+	my ($status, $res)  = $self->create_workers({ conf => $args->{conf}, directory_offset => $args->{directory_offset} });
+	if ($status != 0) {
+		return ($status, $res);
+	}
+
+	if (scalar(@{ $res }) == 0) {
+		my $msg = "No elements to measure";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
+
+	$self->{CONF} = $args->{conf};
+	$self->{DIRECTORY} = $args->{directory_offset};
+	$self->{WORKERS} = $res;
+
+	return (0, "");
+}
+
+sub run {
+    my ( $self, @args ) = @_;
+    my $args = validateParams(
+        @args,
+        {
+            conf             => 1,
+            directory_offset => 0,
+        }
+    );
+
+	foreach my $worker (@{ $self->{WORKERS} }) {
+		my $pid = fork();
+		if ($pid == 0) {
+			$worker->run();
+			exit(0);
+		}
+
+		$self->{CHILDREN}->{$pid} = $worker;
+	}
+
+	foreach my $pid (keys %{ $self->{CHILDREN} }) {
+		waitpid($pid, 0);
+	}
+}
+
+=head2 exit
+	Kills all the children for this process off. 
+=cut
+sub exit {
+    my ( $self, @args ) = @_;
+    my $args = validateParams( @args, { });
+
+	foreach my $pid (keys %{ $self->{CHILDREN} }) {
+		kill("SIGINT", $pid);
+	}
+
+	sleep(1);
+
+	my $pid;
+	while(($pid = waitpid(-1,WNOHANG)) > 0) {
+		delete($self->{CHILDREN}->{$pid}) if ($self->{CHILDREN}->{$pid});
+	}
+
+	# If children are still around.
+	if ($pid != -1) {
+		foreach my $pid (keys %{ $self->{CHILDREN} }) {
+			kill("SIGTERM", $pid);
+		}
+	}
+
+	exit(0);
+}
+
 sub create_workers {
-    my ( $class, @args ) = @_;
+    my ( $self, @args ) = @_;
     my $args = validateParams(
         @args,
         {
