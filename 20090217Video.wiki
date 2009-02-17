@@ -8,6 +8,7 @@
    * See [pSPS20090306Release] for details
    * See [YumRepository] for details on the Yum/APT repository
  # ...
+ # New 'type' for SNMP MA. A couple of issues need to be discussed. -blt
  # Next meeting will Feb 23. 
  # Other topics?
 
