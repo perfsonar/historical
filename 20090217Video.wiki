@@ -3,12 +3,23 @@
 == Agenda/Minutes ==
 
  # Attendees: 
+ # Team Updates
+   # Internet2
+   # IU
+   # UDEL
+   # ESNet
+   # FNAL
  # perfSONAR-PS v0.10 Release
    * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
    * See [pSPS20090306Release] for details
    * See [YumRepository] for details on the Yum/APT repository
  # ...
  # New 'type' for SNMP MA. A couple of issues need to be discussed. -blt
+ # CHEP
+ # LHC/Atlas deployments
+ # GUI followup
+   # wmap still on the list
+   # gLS related GUIs under development
  # Next meeting will Feb 23. 
  # Other topics?
 
