@@ -1,0 +1,27 @@
+=  February 3 2009 Meeting =
+
+== Where ==
+
+Winter Joint Techs 2009, College Station, TX
+
+== When ==
+
+ February 3, 2009  - 6 to ? Central
+
+== Attendees ==
+
+ # Jason (Internet2)
+ # Aaron (Internet2)
+ # Eric (Internet2)
+ # Jeff (Internet2)
+ # Martin (UDel)
+ # Joe (ESnet)
+ # Brian (ESnet)
+ # Andy Lake (Internet2)
+ # Tom Lehman (ISI East)
+
+== Agenda/Minutes ==
+
+...
+
+

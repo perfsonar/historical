@@ -1,0 +1,18 @@
+=  February 17, 2009 Conference Call 2:00 pm EST =
+
+== Agenda/Minutes ==
+
+ # Attendees: 
+ # perfSONAR-PS v0.10 Release
+   * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
+   * See [pSPS20090306Release] for details
+   * See [YumRepository] for details on the Yum/APT repository
+ # ...
+ # Next meeting will Feb 23. 
+ # Other topics?
+
+== Where ==
+
+ESnet conference bridge:
+ * GDS:  00113498255555
+ * phone: 1-510-883-7860  then 8255555# at the prompt.
