@@ -2,9 +2,10 @@
 
 == Agenda/Minutes ==
 
- # Attendees: 
+ # Attendees: Joe, Maxim, Rich, Aaron, Jason, Jeff, Matt
  # Team Updates
    # Internet2
+      * Aaron: Worked on UDP testing. Loss happens even by just starting mysql, without even using it.
    # IU
    # UDEL
    # ESNet
@@ -15,11 +16,14 @@
    * See [YumRepository] for details on the Yum/APT repository
  # ...
  # New 'type' for SNMP MA. A couple of issues need to be discussed. -blt
+ # UDP testing, do we want to support high levels? If so, do we switch what
+services are run where?
  # CHEP
  # LHC/Atlas deployments
  # GUI followup
    # wmap still on the list
    # gLS related GUIs under development
+ # GSoC
  # Next meeting will Feb 23. 
  # Other topics?
 
