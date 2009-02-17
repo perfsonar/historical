@@ -54,6 +54,27 @@ sub closeDB {
 	return $self->{DB_CLIENT}->closeDB;
 }
 
+sub check_element_key {
+	my ($self, @args) = @_;
+	my $args = validateParams( @args, { key => 1 } );
+
+	my $elements_table = $self->{ELEMENTS_TABLE};
+
+	my $query = "select id from ".$elements_table." where id=".$args->{key};
+	my $ids = $self->{DB_CLIENT}->query({ query => $query });
+	if ($ids == -1) {
+		my $msg = "An error occurred while getting new element identifier";
+		$self->{LOGGER}->error($msg);
+		return (-1, $msg);
+	}
+
+	if (scalar(@{ $ids }) == 0) {
+		return 0;
+	}
+
+	return 1;
+}
+
 sub get_new_element_key {
 	my ($self, @args) = @_;
 	my $args = validateParams( @args, { } );

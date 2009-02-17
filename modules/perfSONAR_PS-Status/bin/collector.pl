@@ -28,13 +28,11 @@ use Cwd;
 use Config::General;
 use Module::Load;
 use Data::Dumper;
+use English '-no_match_vars';
 
 our $VERSION = 0.09;
 
-sub handleCollector($);
-sub managePID($$);
-sub signalHandler();
-sub handleRequest($$$);
+sub signalHandler;
 
 my $confdir;
 
@@ -80,13 +78,13 @@ $status = GetOptions (
         'help' => \$HELP);
 
 if( not $status or $HELP) {
-    print "$0: starts the collector daemon.\n";
-    print "\t$0 [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --ignorepid]\n";
+    print "$PROGRAM_NAME: starts the collector daemon.\n";
+    print "\t$PROGRAM_NAME [--verbose --help --config=config.file --piddir=/path/to/pid/dir --pidfile=filename.pid --logger=logger/filename.conf --ignorepid]\n";
     exit(1);
 }
 
 my $logger;
-if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
+if (not $LOGGER_CONF) {
     use Log::Log4perl qw(:easy);
 
     my $output_level = $INFO;
@@ -118,7 +116,7 @@ if (!defined $LOGGER_CONF or $LOGGER_CONF eq "") {
     $logger->level($output_level);
 }
 
-if (!defined $CONFIG_FILE or $CONFIG_FILE eq "") {
+unless ($CONFIG_FILE) {
     $CONFIG_FILE = $confdir."/collector.conf";
 }
 
@@ -136,8 +134,8 @@ my %conf = $config->getall;
 
 my $pidfile;
 
-if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
-    if (!defined $PIDDIR or $PIDDIR eq "") {
+unless ($IGNORE_PID) {
+    unless ($PIDDIR) {
         if (defined $conf{"pid_dir"} and $conf{"pid_dir"} ne "") {
             $PIDDIR = $conf{"pid_dir"};
         } else {
@@ -145,11 +143,11 @@ if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
         }
     }
 
-    if (!defined $PIDFILE or $PIDFILE eq "") {
+    unless ($PIDFILE) {
         if (defined $conf{"pid_file"} and $conf{"pid_file"} ne "") {
             $PIDFILE = $conf{"pid_file"};
         } else {
-            $PIDFILE = "ps.pid";
+            $PIDFILE = "ps_collector.pid";
         }
     }
 
@@ -191,15 +189,15 @@ if ($status != 0) {
 
 # Daemonize if not in debug mode. This must be done before forking off children
 # so that the children are daemonized as well.
-if(!$DEBUGFLAG) {
+unless ($DEBUGFLAG) {
 # flush the buffer
-    $| = 1;
+    $OUTPUT_AUTOFLUSH = 1;
     &daemonize;
 }
 
-$0 = "perfsonar-status-collector.pl ($$)";
+$PROGRAM_NAME = "perfsonar-status-collector.pl ($PID)";
 
-if (!defined $IGNORE_PID or $IGNORE_PID eq "") {
+unless ($IGNORE_PID) {
     unlockPIDFile($pidfile);
 }
 
@@ -208,8 +206,9 @@ $worker->run();
 =head2 signalHandler
 Kills all the children for the process and then exits
 =cut
-sub signalHandler() {
-    $worker->exit();
+sub signalHandler {
+    print "Exiting...\n";
+    $worker->quit();
     exit(0);
 }
 

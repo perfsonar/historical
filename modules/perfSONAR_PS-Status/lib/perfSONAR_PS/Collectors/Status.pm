@@ -68,17 +68,14 @@ sub init {
 
 sub run {
     my ( $self, @args ) = @_;
-    my $args = validateParams(
-        @args,
-        {
-            conf             => 1,
-            directory_offset => 0,
-        }
-    );
+    my $args = validateParams(@args, { });
 
 	foreach my $worker (@{ $self->{WORKERS} }) {
 		my $pid = fork();
 		if ($pid == 0) {
+			$SIG{INT} = 'DEFAULT';
+			$SIG{TERM} = 'DEFAULT';
+
 			$worker->run();
 			exit(0);
 		}
@@ -89,12 +86,14 @@ sub run {
 	foreach my $pid (keys %{ $self->{CHILDREN} }) {
 		waitpid($pid, 0);
 	}
+
+	return;
 }
 
 =head2 exit
 	Kills all the children for this process off. 
 =cut
-sub exit {
+sub quit {
     my ( $self, @args ) = @_;
     my $args = validateParams( @args, { });
 

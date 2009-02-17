@@ -29,9 +29,9 @@ sub init {
     my $args = validateParams(
         @params,
         {
-            data_client          => 1,
-            facilities_client      => 1,
-            topology_id_client      => 1,
+            data_client              => 1,
+            facilities_client        => 1,
+            topology_id_client       => 1,
             polling_interval         => 0,
             address                  => 1,
             port                     => 0,
@@ -123,16 +123,15 @@ sub init {
                 $self->{CROSSCONNECT_FACILTIES}->{ $facility->{name} } = $facility;
             }
             elsif ( $facility->{type} eq "vlan" ) {
-                if ( $facility->{name} !~ /(.*)\.([A-Z]+)_(egress|ingress)$/ ) {
-                    my $msg = "VLAN facilities must be named like '[ethernet_port].[vlan_number]_(egress|ingress)' or '[vcg_name].[vlan_number]_(egress|ingress)'";
+                if ( $facility->{name} !~ /(.*)\.([A-Z]+)$/ ) {
+                    my $msg = "VLAN facilities must be named like '[ethernet_port].[vlan_number]'";
                     $self->{LOGGER}->error( $msg );
                     return ( -1, $msg );
                 }
 
-                if ( $facility->{name} =~ /(.*)\.([A-Z]+)_(egress|ingress)$/ ) {
+                if ( $facility->{name} =~ /(.*)\.([A-Z]+)$/ ) {
                     $facility->{port}      = $1;
                     $facility->{vlan}      = $2;
-                    $facility->{direction} = $3;
 
                     push @{ $self->{VLAN_FACILITIES} }, $facility;
                 }
@@ -166,16 +165,16 @@ sub run {
 
     while ( 1 ) {
         if ( $self->{NEXT_RUNTIME} ) {
-			$self->{TOPOLOGY_ID_CLIENT}->closeDB;
-			$self->{FACILITIES_CLIENT}->closeDB;
-			$self->{DATA_CLIENT}->closeDB;
+            $self->{TOPOLOGY_ID_CLIENT}->closeDB;
+            $self->{FACILITIES_CLIENT}->closeDB;
+            $self->{DATA_CLIENT}->closeDB;
 
             sleep( $self->{NEXT_RUNTIME} - time );
         }
 
         $self->{NEXT_RUNTIME} = time + $self->{POLLING_INTERVAL};
 
-		my ($status, $res);
+        my ( $status, $res );
 
         ( $status, $res ) = $self->{FACILITIES_CLIENT}->openDB;
         if ( $status != 0 ) {
@@ -207,313 +206,329 @@ sub run {
 
         my @facilities_to_update = ();
 
-        if ( $self->{CHECK_ALL_CROSSCONNECTS} or scalar( keys %{ $self->{CROSSCONNECT_FACILTIES} } ) > 0 ) {
+		if ( $self->{CHECK_ALL_CROSSCONNECTS} or scalar( keys %{ $self->{CROSSCONNECT_FACILTIES} } ) > 0 ) {
 
-            # we grab all the cross-connects and then pare down the data set to just those of interest
-            my $crss = $self->{AGENT}->getCrossconnect();
-            my @facility_names;
-            if ( $self->{CHECK_ALL_CROSSCONNECTS} ) {
-                foreach my $crs_key ( keys %{$crss} ) {
-                    my $crs = $crss->{$crs_key};
+			# we grab all the cross-connects and then pare down the data set to just those of interest
+			my $crss;
+			($status, $crss) = $self->{AGENT}->getCrossconnect();
+			if ($status == -1) {
+				my @facility_names;
+				if ( $self->{CHECK_ALL_CROSSCONNECTS} ) {
+					foreach my $crs_key ( keys %{$crss} ) {
+						my $crs = $crss->{$crs_key};
 
-                    if ( $crs->{cktid} ) {
-                        push @facility_names, $crs->{cktid};
-                    }
-                    else {
-                        push @facility_names, $crs->{name};
-                    }
+						if ( $crs->{cktid} ) {
+							push @facility_names, $crs->{cktid};
+						}
+						else {
+							push @facility_names, $crs->{name};
+						}
+					}
+				}
+				else {
+					@facility_names = keys %{ $self->{CROSSCONNECT_FACILTIES} };
+				}
+
+				foreach my $name ( @facility_names ) {
+					foreach my $crs_key ( keys %$crss ) {
+						my $crs = $crss->{$crs_key};
+
+						if ( $crs->{cktid} eq $name or $crs->{name} eq $name ) {
+							my $oper_status;
+
+							unless ( $crs->{pst} and $state_mapping{ lc( $crs->{pst} ) } ) {
+								$oper_status = "unknown";
+							}
+							else {
+								$oper_status = $state_mapping{ lc( $crs->{pst} ) };
+							}
+
+							my ( $id, $admin_status );
+							if ( $self->{CROSSCONNECT_FACILTIES}->{$name} ) {
+								$id           = $self->{CROSSCONNECT_FACILTIES}->{$name}->{id}           if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{id} );
+								$admin_status = $self->{CROSSCONNECT_FACILTIES}->{$name}->{admin_status} if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{admin_status} );
+								$oper_status  = $self->{CROSSCONNECT_FACILTIES}->{$name}->{oper_status}  if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{oper_status} );
+							}
+
+							my %facility = (
+									id           => $id,
+									name         => $name,
+									type         => "crossconnect",
+									oper_status  => $oper_status,
+									admin_status => $admin_status,
+									);
+
+							push @facilities_to_update, \%facility;
+
+							last;
+						}
+					}
+				}
+			}
+		}
+
+		if ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
+			my $vcgs;
+			($status, $vcgs) = $self->{AGENT}->getVCG();
+			if ($status == -1) {
+				my @facility_names;
+				if ( $self->{CHECK_ALL_VCGS} ) {
+					@facility_names = keys %{$vcgs};
+				}
+				else {
+					@facility_names = keys %{ $self->{VCG_FACILITIES} };
+				}
+
+				foreach my $name ( @facility_names ) {
+					my ( $status, $oper_status ) = $self->checkVCG( $name );
+					next if ( $status != 0 );
+
+					my ( $id, $admin_status );
+					if ( $self->{VCG_FACILITIES}->{$name} ) {
+						$id           = $self->{VCG_FACILITIES}->{$name}->{id}           if ( $self->{VCG_FACILITIES}->{$name}->{id} );
+						$admin_status = $self->{VCG_FACILITIES}->{$name}->{admin_status} if ( $self->{VCG_FACILITIES}->{$name}->{admin_status} );
+						$oper_status  = $self->{VCG_FACILITIES}->{$name}->{oper_status}  if ( $self->{VCG_FACILITIES}->{$name}->{oper_status} );
+					}
+
+					my %facility = (
+							id           => $id,
+							name         => $name,
+							type         => "vcg",
+							oper_status  => $oper_status,
+							admin_status => $admin_status,
+							);
+
+					push @facilities_to_update, \%facility;
+				}
+			}
+		}
+
+		if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
+			my $opticals;
+
+			($status, $opticals) = $self->{AGENT}->getOCN();
+			if ($status == -1) {
+				my @facility_names;
+				if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
+					@facility_names = keys %{$opticals};
+				}
+				else {
+					@facility_names = keys %{ $self->{OPTICAL_FACILITIES} };
+				}
+
+				foreach my $name ( @facility_names ) {
+					if ( $opticals->{$name} ) {
+						my $oper_status;
+
+						unless ( $opticals->{$name}->{pst} and $state_mapping{ lc( $opticals->{$name}->{pst} ) } ) {
+							$oper_status = "unknown";
+						}
+						else {
+							$oper_status = $state_mapping{ lc( $opticals->{$name}->{pst} ) };
+						}
+
+						my ( $id, $admin_status );
+						if ( $self->{OPTICAL_FACILITIES}->{$name} ) {
+							$id           = $self->{OPTICAL_FACILITIES}->{$name}->{id}           if ( $self->{OPTICAL_FACILITIES}->{$name}->{id} );
+							$admin_status = $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} );
+							$oper_status  = $self->{OPTICAL_FACILITIES}->{$name}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{$name}->{oper_status} );
+						}
+
+						my %facility = (
+								id           => $id,
+								name         => $name,
+								type         => "optical",
+								oper_status  => $oper_status,
+								admin_status => $admin_status,
+								);
+
+						push @facilities_to_update, \%facility;
+					}
+				}
+			}
+		}
+
+		if ( $self->{CHECK_ALL_EFLOWS} or scalar( keys %{ $self->{EFLOW_FACILITIES} } ) > 0 ) {
+			my $eflows;
+
+			# we grab all the eflows and then pare down the data set to just those of interest
+			($status, $eflows) = $self->{AGENT}->getEFLOW();
+			if ($status == -1) {
+				my @facility_names;
+				if ( $self->{CHECK_ALL_EFLOWS} ) {
+					@facility_names = keys %{$eflows};
+				}
+				else {
+					@facility_names = keys %{ $self->{EFLOW_FACILITIES} };
+				}
+
+				# An eflow doesn't have status of its own, so you have to check
+				# both the ingress port and egress port of the eflow to get "its"
+				# status.
+				foreach my $name ( @facility_names ) {
+
+					next if ( not $eflows->{$name} );
+
+					my $eflow = $eflows->{$name};
+
+					my $oper_status = "up";
+
+					foreach my $type ( "ingressport", "egressport" ) {
+						my ( $status, $new_oper_status );
+
+						if ( $eflow->{ $type . "type" } eq "VCG" ) {
+							( $status, $new_oper_status ) = $self->checkVCG( $eflow->{ $type . "name" } );
+						}
+						elsif ( $eflow->{ $type . "type" } eq "ETTP" ) {
+							( $status, $new_oper_status ) = $self->checkETH( $eflow->{ $type . "name" } );
+						}
+						else {
+							$oper_status = "unknown";
+							last;
+						}
+
+						if ( $status == -1 ) {
+							$oper_status = "unknown";
+							last;
+						}
+
+						if ( $new_oper_status eq "unknown" or $new_oper_status eq "down" ) {
+							$oper_status = $new_oper_status;
+							last;
+						}
+
+						if ( $new_oper_status eq "degraded" ) {
+							$oper_status = "degraded";
+						}
+					}
+
+					my ( $id, $admin_status );
+					if ( $self->{EFLOW_FACILITIES}->{$name} ) {
+						$id           = $self->{EFLOW_FACILITIES}->{$name}->{id}           if ( $self->{EFLOW_FACILITIES}->{$name}->{id} );
+						$admin_status = $self->{EFLOW_FACILITIES}->{$name}->{admin_status} if ( $self->{EFLOW_FACILITIES}->{$name}->{admin_status} );
+						$oper_status  = $self->{EFLOW_FACILITIES}->{$name}->{oper_status}  if ( $self->{EFLOW_FACILITIES}->{$name}->{oper_status} );
+					}
+
+					my %facility = (
+							id           => $id,
+							name         => $name,
+							type         => "eflow",
+							oper_status  => $oper_status,
+							admin_status => $admin_status,
+							);
+
+					push @facilities_to_update, \%facility;
+				}
+			}
+		}
+
+        if ($self->{CHECK_ALL_VLANS} or scalar(keys %{ $self->{VLAN_FACILITIES} }) > 0) {
+        
+        	# we grab all the cross-connects and then pare down the data set to just those of interest
+        	my $eflows = $self->{AGENT}->getEFLOW();
+
+			my %vlan_elements = ();
+
+        	foreach my $eflow_key (keys %{ $eflows }) {
+        		my $eflow = $eflows->{$eflow_key};
+
+				next unless ($eflow->{"outervlanidrange"}); # we only care about actual vlans
+
+				my $vlan_number = $eflow->{"outervlanidrange"};
+
+				my $vlan_name;
+				if ($eflow->{ingressporttype} eq "ETTP") {
+					$vlan_name = $eflow->{ingressportname}.".".$vlan_number;
+				}
+				elsif ($eflow->{egressporttype} eq "ETTP") {
+					$vlan_name = $eflow->{egressportname}.".".$vlan_number;
+				}
+				else {
+					next;
+				}
+
+        		next unless ($self->{CHECK_ALL_VLANS} or $self->{VLAN_FACILITIES}->{$vlan_name});
+
+				$vlan_elements{$vlan_name} = () unless ($vlan_elements{$vlan_name});
+
+				push @{ $vlan_elements{$vlan_name} }, $eflow;
+        	}
+
+        	# An eflow doesn't have status of its own, so you have to check
+        	# both the ingress port and egress port of the eflow to get "its"
+        	# status.
+			foreach my $vlan_name (keys %vlan_elements) {
+
+				my $oper_status = "up";
+				foreach my $eflow (@{ $vlan_elements{$vlan_name} }) {
+					foreach my $type ("ingressport", "egressport") {
+						my ($status, $time, $new_oper_status);
+
+						if ($eflow->{$type."type"} eq "VCG") {
+							($status, $new_oper_status) = $self->checkVCG($eflow->{$type."name"});
+						} elsif ($eflow->{$type."type"} eq "ETTP") {
+							($status, $new_oper_status) = $self->checkETH($eflow->{$type."name"});
+						} else {
+							$oper_status = "unknown";
+							last;
+						}
+
+						if ($status == -1) {
+							$oper_status = "unknown";
+							last;
+						}
+
+						if ($new_oper_status eq "unknown" or $new_oper_status eq "down") {
+							$oper_status = $new_oper_status;
+							last;
+						}
+
+						if ($new_oper_status eq "degraded") {
+							$oper_status = "degraded";
+						}
+					}
+
+					last if ($oper_status eq "unknown" or $oper_status eq "down");
+				}
+
+				my ($id, $admin_status);
+				
+                if ( $self->{VLAN_FACILITIES}->{ $vlan_name } ) {
+                    $id           = $self->{VLAN_FACILITIES}->{ $vlan_name }->{id}           if ( $self->{VLAN_FACILITIES}->{ $vlan_name }->{id} );
+                    $admin_status = $self->{VLAN_FACILITIES}->{ $vlan_name }->{admin_status} if ( $self->{VLAN_FACILITIES}->{ $vlan_name }->{admin_status} );
+                    $oper_status  = $self->{VLAN_FACILITIES}->{ $vlan_name }->{oper_status}  if ( $self->{VLAN_FACILITIES}->{ $vlan_name }->{oper_status} );
                 }
-            }
-            else {
-                @facility_names = keys %{ $self->{CROSSCONNECT_FACILTIES} };
-            }
 
-            foreach my $name ( @facility_names ) {
-                foreach my $crs_key ( keys %$crss ) {
-                    my $crs = $crss->{$crs_key};
+				my %facility = (
+						id => $id,
+						name => $vlan_name,
+						type         => "vlan",
+						oper_status => $oper_status,
+						admin_status => $admin_status,
+						);
 
-                    if ( $crs->{cktid} eq $name or $crs->{name} eq $name ) {
-                        my $oper_status;
+				$self->{LOGGER}->debug("Adding $vlan_name to facilities list");
 
-                        unless ( $crs->{pst} and $state_mapping{ lc( $crs->{pst} ) } ) {
-                            $oper_status = "unknown";
-                        }
-                        else {
-                            $oper_status = $state_mapping{ lc( $crs->{pst} ) };
-                        }
-
-                        my ( $id, $admin_status );
-                        if ( $self->{CROSSCONNECT_FACILTIES}->{$name} ) {
-                            $id           = $self->{CROSSCONNECT_FACILTIES}->{$name}->{id}           if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{id} );
-                            $admin_status = $self->{CROSSCONNECT_FACILTIES}->{$name}->{admin_status} if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{admin_status} );
-                            $oper_status  = $self->{CROSSCONNECT_FACILTIES}->{$name}->{oper_status}  if ( $self->{CROSSCONNECT_FACILTIES}->{$name}->{oper_status} );
-                        }
-
-                        my %facility = (
-                            id           => $id,
-                            name         => $name,
-                            type         => "crossconnect",
-                            oper_status  => $oper_status,
-                            admin_status => $admin_status,
-                        );
-
-                        push @facilities_to_update, \%facility;
-
-                        last;
-                    }
-                }
-            }
-        }
-
-        if ( $self->{CHECK_ALL_VCGS} or scalar( keys %{ $self->{VCG_FACILITIES} } ) > 0 ) {
-
-            # we grab all the cross-connects and then pare down the data set to just those of interest
-            my $opticals = $self->{AGENT}->getVCG();
-            my @facility_names;
-            if ( $self->{CHECK_ALL_VCGS} ) {
-                @facility_names = keys %{$opticals};
-            }
-            else {
-                @facility_names = keys %{ $self->{VCG_FACILITIES} };
-            }
-
-            foreach my $name ( @facility_names ) {
-                my ( $status, $oper_status ) = $self->checkVCG( $name );
-                next if ( $status != 0 );
-
-                my ( $id, $admin_status );
-                if ( $self->{VCG_FACILITIES}->{$name} ) {
-                    $id           = $self->{VCG_FACILITIES}->{$name}->{id}           if ( $self->{VCG_FACILITIES}->{$name}->{id} );
-                    $admin_status = $self->{VCG_FACILITIES}->{$name}->{admin_status} if ( $self->{VCG_FACILITIES}->{$name}->{admin_status} );
-                    $oper_status  = $self->{VCG_FACILITIES}->{$name}->{oper_status}  if ( $self->{VCG_FACILITIES}->{$name}->{oper_status} );
-                }
-
-                my %facility = (
-                    id           => $id,
-                    name         => $name,
-					type         => "vcg",
-                    oper_status  => $oper_status,
-                    admin_status => $admin_status,
-                );
-
-                push @facilities_to_update, \%facility;
-            }
-        }
-
-        if ( $self->{CHECK_ALL_OPTICAL_PORTS} or scalar( keys %{ $self->{OPTICAL_FACILITIES} } ) > 0 ) {
-
-            # we grab all the cross-connects and then pare down the data set to just those of interest
-            my $opticals = $self->{AGENT}->getOCN();
-            my @facility_names;
-            if ( $self->{CHECK_ALL_OPTICAL_PORTS} ) {
-                @facility_names = keys %{$opticals};
-            }
-            else {
-                @facility_names = keys %{ $self->{OPTICAL_FACILITIES} };
-            }
-
-            foreach my $name ( @facility_names ) {
-                if ( $opticals->{$name} ) {
-                    my $oper_status;
-
-                    unless ( $opticals->{$name}->{pst} and $state_mapping{ lc( $opticals->{$name}->{pst} ) } ) {
-                        $oper_status = "unknown";
-                    }
-                    else {
-                        $oper_status = $state_mapping{ lc( $opticals->{$name}->{pst} ) };
-                    }
-
-                    my ( $id, $admin_status );
-                    if ( $self->{OPTICAL_FACILITIES}->{$name} ) {
-                        $id           = $self->{OPTICAL_FACILITIES}->{$name}->{id}           if ( $self->{OPTICAL_FACILITIES}->{$name}->{id} );
-                        $admin_status = $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} if ( $self->{OPTICAL_FACILITIES}->{$name}->{admin_status} );
-                        $oper_status  = $self->{OPTICAL_FACILITIES}->{$name}->{oper_status}  if ( $self->{OPTICAL_FACILITIES}->{$name}->{oper_status} );
-                    }
-
-                    my %facility = (
-                        id           => $id,
-                        name         => $name,
-						type         => "optical",
-                        oper_status  => $oper_status,
-                        admin_status => $admin_status,
-                    );
-
-                    push @facilities_to_update, \%facility;
-                }
-            }
-        }
-
-        if ( $self->{CHECK_ALL_EFLOWS} or scalar( keys %{ $self->{EFLOW_FACILITIES} } ) > 0 ) {
-
-            # we grab all the eflows and then pare down the data set to just those of interest
-            my $eflows = $self->{AGENT}->getEFLOW();
-            my @facility_names;
-            if ( $self->{CHECK_ALL_EFLOWS} ) {
-                @facility_names = keys %{$eflows};
-            }
-            else {
-                @facility_names = keys %{ $self->{EFLOW_FACILITIES} };
-            }
-
-            # An eflow doesn't have status of its own, so you have to check
-            # both the ingress port and egress port of the eflow to get "its"
-            # status.
-            foreach my $name ( @facility_names ) {
-
-                next if ( not $eflows->{$name} );
-
-                my $eflow = $eflows->{$name};
-
-                my $oper_status = "up";
-
-                foreach my $type ( "ingressport", "egressport" ) {
-                    my ( $status, $new_oper_status );
-
-                    if ( $eflow->{ $type . "type" } eq "VCG" ) {
-                        ( $status, $new_oper_status ) = $self->checkVCG( $eflow->{ $type . "name" } );
-                    }
-                    elsif ( $eflow->{ $type . "type" } eq "ETTP" ) {
-                        ( $status, $new_oper_status ) = $self->checkETH( $eflow->{ $type . "name" } );
-                    }
-                    else {
-                        $oper_status = "unknown";
-                        last;
-                    }
-
-                    if ( $status == -1 ) {
-                        $oper_status = "unknown";
-                        last;
-                    }
-
-                    if ( $new_oper_status eq "unknown" or $new_oper_status eq "down" ) {
-                        $oper_status = $new_oper_status;
-                        last;
-                    }
-
-                    if ( $new_oper_status eq "degraded" ) {
-                        $oper_status = "degraded";
-                    }
-                }
-
-                my ( $id, $admin_status );
-                if ( $self->{EFLOW_FACILITIES}->{$name} ) {
-                    $id           = $self->{EFLOW_FACILITIES}->{$name}->{id}           if ( $self->{EFLOW_FACILITIES}->{$name}->{id} );
-                    $admin_status = $self->{EFLOW_FACILITIES}->{$name}->{admin_status} if ( $self->{EFLOW_FACILITIES}->{$name}->{admin_status} );
-                    $oper_status  = $self->{EFLOW_FACILITIES}->{$name}->{oper_status}  if ( $self->{EFLOW_FACILITIES}->{$name}->{oper_status} );
-                }
-
-                my %facility = (
-                    id           => $id,
-                    name         => $name,
-					type         => "eflow",
-                    oper_status  => $oper_status,
-                    admin_status => $admin_status,
-                );
-
-                push @facilities_to_update, \%facility;
-            }
-        }
-
-        #		if ($self->{CHECK_ALL_VLANS} or scalar(keys %{ $self->{VLAN_FACILITIES} }) > 0) {
-        #
-        #			# we grab all the cross-connects and then pare down the data set to just those of interest
-        #			my $eflows = $self->{AGENT}->getEFLOW();
-        #
-        #			my @eflows_to_check;
-        #			foreach my $eflow_key (keys %{ $eflows }) {
-        #				my $eflow = $eflows->{$eflow_key};
-        #				if ($self->{CHECK_ALL_VLANS}) {
-        #					push @eflows_to_check, $eflow;
-        #				} else {
-        #					next unless ($eflow->{"outervlanidrange"}); # we only care about actual vlans
-        #
-        #					foreach my $vlan (@{ $self->{VLAN_FACILITIES} }) {
-        #						my $port = $vlan->{port};
-        #						my $vlan = $vlan->{vlan};
-        #						my $direction = $vlan->{direction};
-        #
-        #						next unless ($eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} eq $vlan);
-        #
-        #						next unless ($eflow->{$direction."portname"} eq $port);
-        #
-        #						push @eflows_to_check, $eflow;
-        #					}
-        #				}
-        #			}
-        #
-        #			# An eflow doesn't have status of its own, so you have to check
-        #			# both the ingress port and egress port of the eflow to get "its"
-        #			# status.
-        #			foreach my $eflow (@eflows_to_check) {
-        #
-        #				my $oper_status = "up";
-        #
-        #				foreach my $type ("ingressport", "egressport") {
-        #					my ($status, $time, $new_oper_status);
-        #
-        #					if ($eflow->{$type."type"} eq "VCG") {
-        #						($status, $time, $new_oper_status) = $self->{AGENT}->checkVCG($eflow->{$type."name"});
-        #					} elsif ($eflow->{$type."type"} eq "ETTP") {
-        #						($status, $time, $new_oper_status) = $self->{AGENT}->checkETH($eflow->{$type."name"});
-        #					} else {
-        #						$oper_status = "unknown";
-        #						last;
-        #					}
-        #
-        #					if ($status == -1) {
-        #						$oper_status = "unknown";
-        #						last;
-        #					}
-        #
-        #					if ($new_oper_status eq "unknown" or $new_oper_status eq "down") {
-        #						$oper_status = $new_oper_status;
-        #						last;
-        #					}
-        #
-        #					if ($new_oper_status eq "degraded") {
-        #						$oper_status = "degraded";
-        #					}
-        #				}
-        #
-        #				my ($id, $admin_status);
-##
-        #				foreach my $vlan (@{ $self->{VLAN_FACILITIES} }) {
-        #					my $port = $vlan->{port};
-        #					my $vlan = $vlan->{vlan};
-        #					my $direction = $vlan->{direction};
-        #
-        #					next unless ($eflow->{"outervlanidrange"} and $eflow->{"outervlanidrange"} eq $vlan);
-        #
-        #					next unless (not $port or ($eflow->{ingressportname} eq $port or $eflow->{egressportname} eq $port));
-        #
-        #					$id = $vlan->{id};
-        #					$admin_status = $vlan->{admin_status};
-        #					last;
-        #				}
-        #
-        #				my %facility = (
-        #						id => $id,
-        #						name => $name,
-        #						oper_status => $oper_status,
-        #						admin_status => $admin_status,
-        #						);
-        #
-        #				push @facilities_to_update, \%facility;
-        #			}
-        #		}
+				push @facilities_to_update, \%facility;
+			}
+		}
 
         if ( $self->{CHECK_ALL_ETHERNET_PORTS} or scalar( keys %{ $self->{ETHERNET_FACILITIES} } ) > 0 ) {
             my @ports_to_check = ();
             if ( $self->{CHECK_ALL_ETHERNET_PORTS} ) {
-                my $ports = $self->{AGENT}->getETH();
-                foreach my $ethernet_key ( keys %{$ports} ) {
-                    push @ports_to_check, $ports->{$ethernet_key};
-                }
+				my $ports;
+                ($status, $ports) = $self->{AGENT}->getETH();
+				if ($status == -1) {
+	                foreach my $ethernet_key ( keys %{$ports} ) {
+	                    push @ports_to_check, $ports->{$ethernet_key};
+	                }
+				}
             }
             else {
                 foreach my $ethernet_aid ( keys %{ $self->{ETHERNET_FACILITIES} } ) {
-                    my $port = $self->{AGENT}->getETH( $ethernet_aid );
-                    if ( $port ) {
+					my $port;
+                    ($status, $port) = $self->{AGENT}->getETH( $ethernet_aid );
+                    if ( $status == -1 && $port ) {
                         push @ports_to_check, $port;
                     }
                 }
@@ -539,7 +554,7 @@ sub run {
                 my %facility = (
                     id           => $id,
                     name         => $port->{name},
-					type         => "ethernet",
+                    type         => "ethernet",
                     oper_status  => $oper_status,
                     admin_status => $admin_status,
                 );
@@ -566,36 +581,36 @@ sub run {
                 $admin_status = $self->{DEFAULT_ADMIN_STATUS};
             }
 
-			my $key;
+            my $key;
 
-			my ($status, $res) = $self->{FACILITIES_CLIENT}->query_facilities({ host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} });
-			if ($status != 0) {
-				next;
-			}
-
-			foreach my $facility_ref (@$res) {
-				$key = $facility_ref->{key};
+            my ( $status, $res ) = $self->{FACILITIES_CLIENT}->query_facilities( { host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} } );
+            if ( $status != 0 ) {
+                next;
             }
 
-            if (not $key) {
-                my ($status, $res) = $self->{FACILITIES_CLIENT}->add_facility({ host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} });
-				if ($status != 0) {
-					next;
-				}
+            foreach my $facility_ref ( @$res ) {
+                $key = $facility_ref->{key};
+            }
 
-				foreach my $facility_ref (@$res) {
-					$key = $facility_ref->{key};
+            if ( not $key ) {
+                my ( $status, $res ) = $self->{FACILITIES_CLIENT}->add_facility( { host => $self->{AGENT}->getAddress, host_type => "coredirector", facility => $facility->{name}, facility_type => $facility->{type} } );
+                if ( $status != 0 ) {
+                    next;
                 }
-				if (not $key) {
-					$self->{LOGGER}->error("Couldn't add facility");
-					next;
-				}
+
+                foreach my $facility_ref ( @$res ) {
+                    $key = $facility_ref->{key};
+                }
+                if ( not $key ) {
+                    $self->{LOGGER}->error( "Couldn't add facility" );
+                    next;
+                }
             }
 
-			($status, $res) = $self->{TOPOLOGY_ID_CLIENT}->add_topology_id({ topology_id => $id, element_id => $key });
-			if ($status != 0) {
-				$self->{LOGGER}->warn("Couldn't add topology id to metadata: $res");
-			}
+            ( $status, $res ) = $self->{TOPOLOGY_ID_CLIENT}->add_topology_id( { topology_id => $id, element_id => $key } );
+            if ( $status != 0 ) {
+                $self->{LOGGER}->warn( "Couldn't add topology id to metadata: $res" );
+            }
 
             my $do_update;
 
@@ -619,14 +634,15 @@ sub run {
         $self->{AGENT}->disconnect();
     }
 
-	return;
+    return;
 }
 
 sub checkVCG {
     my ( $self, $vcg_name ) = @_;
 
-    my $vcgs = $self->{AGENT}->getVCG();
-    if ( not $vcgs ) {
+	my ($status, $vcgs);
+    ($status, $vcgs) = $self->{AGENT}->getVCG();
+    if ( $status == -1 or not $vcgs ) {
         my $msg = "Couldn't look up VCG";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
@@ -657,8 +673,9 @@ sub checkVCG {
 sub checkETH {
     my ( $self, $eth_aid ) = @_;
 
-    my $port = $self->{AGENT}->getETH( $eth_aid );
-    if ( not $port ) {
+	my ($status, $port);
+    ($status, $port) = $self->{AGENT}->getETH( $eth_aid );
+    if ( $status == -1 or not $port ) {
         my $msg = "Couldn't look up Ethernet Port";
         $self->{LOGGER}->error( $msg );
         return ( -1, $msg );
