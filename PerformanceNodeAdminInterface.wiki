@@ -29,7 +29,7 @@ kickstart file that indicates the admin passwd so that physical
 access to the box is not required. However, the admin passwd should
 not be codified on an iso in any way.
 
-The user can now access the the web GUI and activate additional
+The user can now access the web GUI and activate additional
 tools if they want. For example, they could enter organization/admin
 identifying information including 'keywords'. This would make it possible
 to register the host with the IS infrastructure. The 'enable' page for
@@ -46,7 +46,7 @@ user enables this in a 'publish existence' page.
 as available. (Eventually we might allow selective publishing, but for now
 if it is active, lets publish it.)
 
-3) MAs should be published IFF they have data.
+3) MAs should be published IFF they should have data. (i.e. only if the system is configured to do regular tests, or has an archive of old test data)
 
 4) Regularly scheduled tests should be configurable without enabling publishing.
 This should enable the web CGI scripts for viewing the data locally on the
@@ -58,9 +58,9 @@ HTTPS admin interface the host is now in Full Config mode.
 Remote-Configuration is something we want to enable in the future. Instead
 of specifying an admin passwd to enter Pre-Config mode, the user would
 be prompted to specify a configuration server. (Alternatively, as mentioned
-before a specific kickstart file could be used to specify this information.
+before a specific kick-start file could be used to specify this information.
 It might even be reasonable for a specific community to encode this information
-directly into a community targetted ISO.) The host would then contact the
+directly into a community targeted ISO.) The host would then contact the
 remote server to fetch configuration information for configuring all services.
 
 === Zero-Config mode ===
