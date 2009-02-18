@@ -2,22 +2,30 @@
 
 == Agenda/Minutes ==
 
- # Attendees: Joe, Maxim, Rich, Aaron, Jason, Jeff, Matt
+ # Attendees: Joe, Maxim, Rich, Aaron, Jason, Jeff, Matt, Brian, Martin
  # Team Updates
    # Internet2
-      * Aaron: Worked on UDP testing. Loss happens even by just starting mysql, without even using it.
+      * Aaron: Worked on UDP testing. Loss happens even by just starting mysql, without even using it. (second thing)
+      * Jason: bwctl GUIs. LS issue. Release Docs. USAtlas GUIs - sent strawman. Only cares about USAtlas, doesn't want to have to dig. CGI script for SCinet data. Yum/apt repo work (w/PSU & MCNC).
+      * Rich: JETnet grid of potential services and tools.
+      * Jeff: teleprescence deployment plan, dice-aa.
    # IU
    # UDEL
+      * Martin: Working on perfSONAR proposal for GENI Spiral II effort. NML will spin up more, Freek is new co-chair. LSN talk Feb 10, went well.
    # ESNet
+      * Joe: Trying to get status-ma working again.
+      * Brian: Getting bwctlds working on ESnet hosts. hLS registration problems.
    # FNAL
+      * Maxim: KOI box install. 
  # perfSONAR-PS v0.10 Release
    * Goal is to get all services out by March 6 (Date Negotiable - Must factor in time to release NPToolkit after)
    * See [pSPS20090306Release] for details
    * See [YumRepository] for details on the Yum/APT repository
- # ...
  # New 'type' for SNMP MA. A couple of issues need to be discussed. -blt
+   * 
  # UDP testing, do we want to support high levels? If so, do we switch what
 services are run where?
+   * Brian asked "why"? A long discussion boiled down to the decision not to automatically run UDP tests, and not to automatically enable UDP testing. But, if UDP testing is enabled, to limit it to something around 75 Mbps. (This is fast enough to look for many problems, and slow enough to not be a problem with other things running on the host. It is roughly a factor of 10 less than where we saw most problems.)
  # CHEP
  # LHC/Atlas deployments
  # GUI followup
