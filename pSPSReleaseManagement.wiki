@@ -28,7 +28,7 @@ These suggestions were based on group feedback from the [20081211Video December 
 
 === v0.10 Release ===
 
-For more information regarding this release, please see the information [pSPS20090306Release page].
+For more information regarding this release, please see the information [pSPS20090327Release page].
 
 == Release Process ==
 
