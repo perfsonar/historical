@@ -49,7 +49,7 @@ of unavailable performance-nodes, or insufficient network performance.
         * Asthetically pleasing so the device can set in the conference room.
         * Local network needs to support DHCP, or the installer needs enough savy to do limited configuration of the perf-node.
 
-    * Hardware will need to be tested in a similar conference room environment to ensure clock-drift issues can be accounted for on the specific hardware chosen. (This is hopefully not a problem, but our systems to date have been deployed in temperature controlled environments, so it would be good to test it ourselves before deploying out to remote sites.) We will want to run tests of a couple days to see the effects of ventalation cycles.
+    * Hardware will need to be tested in a similar conference room environment to ensure clock-drift issues can be accounted for on the specific hardware chosen. (This is hopefully not a problem, but our systems to date have been deployed in temperature controlled environments, so it would be good to test it ourselves before deploying out to remote sites.) We will want to run tests for several days to see the effects of ventalation cycles. We can likely deal with issues using statistical analysis, but we must test in advance to do that.
 
     * Different hardware will use different system drivers. The specific hardware chosen for this application will need to be tested and the knoppix ISO may need to have different drivers installed on it.
 
@@ -59,7 +59,6 @@ of unavailable performance-nodes, or insufficient network performance.
     The amount of resources this will require is highly dependent on the amount of coverage required. (weekends? nights?) I don't believe this would be too onerous for an existing operations group.
 
     * Maintenance of a centralized configuration for the full mesh that is automatically polled from the performance nodes in this group on a regular basis.
-        * If IP addresses change, this configuration will need to be modified.
     * Mainenance of good NTP servers for each performance-node.
     * Diagnosing problems detected by the latency data.
         * May be network, could be end host related (hardware problems, etc...).
@@ -71,41 +70,17 @@ which groups I think are best positioned for the specific parts.
 
     * Hardware:
         N + 2 hosts. (N == number of CTP sites to be supported)
-
-        We will want to purchase at least 2 hosts immediately so we can test
-with them. TDD can outline general requirements/desired features. TSG is
-likely best positioned to know what hardware is likely to fulfill those
-requirements. (wild guess at $750 per system - perhaps more to make it look nice and still perform well.)
+        We will want to purchase at least 2 hosts immediately so we can test with them. TDD can outline general requirements/desired features. TSG is likely best positioned to know what hardware is likely to fulfill those requirements. (wild guess at $750 per system - perhaps more to make it look nice and still perform well.)
 
     * Integration:
-
-        OS updates for the knoppix system along with testing the resulting
-knoppix on the specific hardware. (TDD/TSG combination - TDD to put out
-new knoppix discs to test, TSG for testing and aiding in identifying
-required drivers.)
+        OS updates for the knoppix system along with testing the resulting knoppix on the specific hardware. (TDD/TSG combination - TDD to put out new knoppix discs to test, TSG for testing and aiding in identifying required drivers.)
 
     * Software Development:
-
-        TDD is best leveraged for this. However, an incremental development
-effort is likely required given the short time frame. First priority would
-be to get the software developed that needs to go on the performance-nodes
-themselves. Specifically, anything that needs to be developed to synchronize
-the configurations and any changes that need to be done to support the
-slightly different dataset.
-
-With this much complete, the systems could begin deploying while the
-remaining software development issues are addressed. Specifically, the
-database modifications and the first iterations of a web GUI and
-Nagios plugins.
+        TDD is best leveraged for this. However, an incremental development effort is likely required given the short time frame. First priority would be to get the software developed that needs to go on the performance-nodes themselves. Specifically, anything that needs to be developed to synchronize the configurations and any changes that need to be done to support the slightly different dataset.
+With this much complete, the systems could begin deploying while the remaining software development issues are addressed. Specifically, the database modifications and the first iterations of a web GUI and Nagios plugins.
 
     * Operational:
-
-   The tasks here are outlined above in the on-going operational
-responsibilities. It is unclear to me if we should try and run this
-in-house initially for a 'pilot', or if we should immediately try
-to work with a regional to support this. But, it is clear to me that
-TDD does not have the right staff or support structure in place to
-do this even for a pilot.
+        The tasks here are outlined above in the on-going operational responsibilities. It is unclear to me if we should try and run this in-house initially for a 'pilot', or if we should immediately try to work with a regional to support this. But, it is clear to me that TDD does not have the right staff or support structure in place to do this even for a pilot.
 
 == Proposed Timeline ==
 
@@ -113,6 +88,7 @@ do this even for a pilot.
 all people involved. If this is not the case, then we will need to scale back
 in either scope or timeframe. These are very aggressive estimates.
 
+{{{
 2/23        Project Start
 2/23-3/2    Defining/ordering hardware
 3/2-3/13    Test hardware in AA
@@ -125,3 +101,4 @@ in either scope or timeframe. These are very aggressive estimates.
 4/13-4/24   Iterative development/testing of GUI/nagios alerts
             (No database mods during this time, only presentation changes.)
 4/27        Ready to show community
+}}}
